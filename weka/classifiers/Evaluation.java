@@ -25,6 +25,8 @@ package weka.classifiers;
 import java.util.*;
 import java.io.*;
 import weka.classifiers.xml.XMLClassifier;
+import weka.classifiers.evaluation.NominalPrediction;
+import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.*;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
@@ -126,7 +128,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.59 $
+ * @version  $Revision: 1.60 $
  */
 public class Evaluation implements Summarizable {
 
@@ -237,6 +239,9 @@ public class Evaluation implements Summarizable {
 
   /** Total entropy of scheme predictions */
   protected double m_SumSchemeEntropy;
+     
+  /** The list of predictions that have been generated (for computing AUC) */
+  private FastVector m_Predictions;
 
   /**
    * Initializes all the counters for the evaluation.
@@ -286,6 +291,26 @@ public class Evaluation implements Summarizable {
     m_ClassPriors = new double [m_NumClasses];
     setPriors(data);
     m_MarginCounts = new double [k_MarginResolution + 1];
+  }
+
+  /**
+   * Returns the area under ROC for those predictions that have been collected
+   * in the evaluateClassifier(Classifier, Instances) method. Returns 
+   * Instance.missingValue() if the area is not available.
+   *
+   * @param classIndex the index of the class to consider as "positive"
+   * @return the area under the ROC curve or not a number
+   */
+  public double areaUnderROC(int classIndex) {
+
+    // Check if any predictions have been collected
+    if (m_Predictions == null) {
+      return Instance.missingValue();
+    } else {
+      ThresholdCurve tc = new ThresholdCurve();
+      Instances result = tc.getCurve(m_Predictions, classIndex);
+      return tc.getROCArea(result);
+    }
   }
 
   /**
@@ -1016,11 +1041,49 @@ public class Evaluation implements Summarizable {
 
     double predictions[] = new double[data.numInstances()];
 
+    // Need to be able to collect predictions if appropriate (for AUC)
+
     for (int i = 0; i < data.numInstances(); i++) {
-      predictions[i] = evaluateModelOnce((Classifier)classifier, 
-                                data.instance(i));
+      predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier, 
+							    data.instance(i));
     }
     return predictions;
+  }
+
+  /**
+   * Evaluates the classifier on a single instance and records the
+   * prediction (if the class is nominal).
+   *
+   * @param classifier machine learning classifier
+   * @param instance the test instance to be classified
+   * @return the prediction made by the clasifier
+   * @exception Exception if model could not be evaluated 
+   * successfully or the data contains string attributes
+   */
+  public double evaluateModelOnceAndRecordPrediction(Classifier classifier,
+						     Instance instance) throws Exception {
+
+    Instance classMissing = (Instance)instance.copy();
+    double pred = 0;
+    classMissing.setDataset(instance.dataset());
+    classMissing.setClassMissing();
+    if (m_ClassIsNominal) {
+      if (m_Predictions == null) {
+	m_Predictions = new FastVector();
+      }
+      double [] dist = classifier.distributionForInstance(classMissing);
+      pred = Utils.maxIndex(dist);
+      if (dist[(int)pred] <= 0) {
+	pred = Instance.missingValue();
+      }
+      updateStatsForClassifier(dist, instance);
+      m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist, 
+						     instance.weight()));
+    } else {
+      pred = classifier.classifyInstance(classMissing);
+      updateStatsForPredictor(pred, instance);
+    }
+    return pred;
   }
 
   /**
@@ -1096,6 +1159,17 @@ public class Evaluation implements Summarizable {
     }
   }
 
+  /**
+   * Returns the predictions that have been collected.
+   *
+   * @return a reference to the FastVector containing the predictions
+   * that have been collected. This should be null if no predictions
+   * have been collected (e.g. if the class is numeric).
+   */
+  public FastVector predictions() {
+
+    return m_Predictions;
+  }
 
   /**
    * Wraps a static classifier in enough source to test using the weka
@@ -1785,7 +1859,7 @@ public class Evaluation implements Summarizable {
     StringBuffer text = new StringBuffer(title 
 					 + "\nTP Rate   FP Rate"
                                          + "   Precision   Recall"
-                                         + "  F-Measure   Class\n");
+                                         + "  F-Measure   ROC Area  Class\n");
     for(int i = 0; i < m_NumClasses; i++) {
       text.append(Utils.doubleToString(truePositiveRate(i), 7, 3))
         .append("   ");
@@ -1797,6 +1871,14 @@ public class Evaluation implements Summarizable {
         .append("   ");
       text.append(Utils.doubleToString(fMeasure(i), 7, 3))
         .append("    ");
+      double rocVal = areaUnderROC(i);
+      if (Instance.isMissingValue(rocVal)) {
+	text.append("  ?    ")
+	  .append("    ");
+      } else {
+	text.append(Utils.doubleToString(rocVal, 7, 3))
+	  .append("    ");
+      }
       text.append(m_ClassNames[i]).append('\n');
     }
     return text.toString();

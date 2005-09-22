@@ -51,7 +51,7 @@ import weka.classifiers.rules.ZeroR;
  * Add the prediction and target columns to the result file for each fold.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -91,7 +91,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   private static final int RESULT_SIZE = 25;
 
   /** The number of IR statistics */
-  private static final int NUM_IR_STATISTICS = 11;
+  private static final int NUM_IR_STATISTICS = 12;
   
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
@@ -101,7 +101,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
 
   /** Attribute index of instance identifier (default -1) */
   private int m_attID = -1;
-  
+
   /**
    * No args constructor.
    */
@@ -445,6 +445,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     // Timing stats
     resultTypes[current++] = doub;
@@ -531,6 +532,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "IR_precision";
     resultNames[current++] = "IR_recall";
     resultNames[current++] = "F_measure";
+    resultNames[current++] = "Area_under_ROC";
 
     // Timing stats
     resultNames[current++] = "Time_training";
@@ -635,6 +637,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.precision(m_IRclass));
     result[current++] = new Double(eval.recall(m_IRclass));
     result[current++] = new Double(eval.fMeasure(m_IRclass));
+    result[current++] = new Double(eval.areaUnderROC(m_IRclass));
 
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
