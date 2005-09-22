@@ -29,6 +29,8 @@ import java.util.*;
 /** LAGDHillClimber implements LAGD Hill Climbing using Local Search 
  *  for learning Bayesian Networks.
  * 
+ * @author Manuel Neubach
+ * @version $Revision: 1.3 $
  */
 public class LAGDHillClimber extends HillClimber {
 

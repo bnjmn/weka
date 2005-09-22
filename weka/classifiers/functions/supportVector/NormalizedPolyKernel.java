@@ -29,7 +29,8 @@ import weka.core.*;
  * K(x,y) = <x,y>/sqrt(<x,x><y,y>) where <x,y> = PolyKernel(x,y)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $$ */
+ * @version $Revision: 1.3 $
+ */
 public class NormalizedPolyKernel extends PolyKernel {
 
 

@@ -43,6 +43,11 @@ import java.util.TreeMap;
  * Time: 1:23:38 PM <br/>
  * $ Revision 1.4 $ <br/>
  * </p>
+ *
+ * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
+ * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
+ * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
+ * @version $Revision: 1.2 $
  */
 public class SequentialDatabase implements Database, Serializable {
 

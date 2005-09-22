@@ -48,6 +48,7 @@ import java.util.*;
  * @author Ioannis N. Athanasiadis
  * @email: ionathan@iti.gr, alias: ionathan@ieee.org
  * @version 5.0
+ * @version $Revision: 1.4 $
  *
  * <p> This classifier is described in the following papers:
  * <p> I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas and V. Petridis

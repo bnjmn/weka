@@ -34,6 +34,9 @@ import java.io.*;
  * will not require explicit storage, so rearrange your nominal attribute
  * value orderings if necessary. Missing values will be stored
  * explicitly.
+ *
+ * @author Eibe Frank
+ * @version $Revision: 1.16 $
  */
 public class SparseInstance extends Instance {
 

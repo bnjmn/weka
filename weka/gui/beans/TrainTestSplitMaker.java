@@ -41,7 +41,7 @@ import java.awt.*;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.6 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer

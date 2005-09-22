@@ -30,7 +30,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $$
+ * @version $Revision: 1.3 $
  */
 public class PolyKernel extends CachedKernel {
 

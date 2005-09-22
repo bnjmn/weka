@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Describe interface <code>TextListener</code> here.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.3 $
  */
 public interface GraphListener extends EventListener {
 

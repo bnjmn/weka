@@ -36,6 +36,7 @@ import java.util.ArrayList;
  * of a rule.
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
+ * @version $Revision: 1.5 $
  */
 
 public abstract class LiteralSet implements Serializable, Cloneable {

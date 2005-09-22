@@ -31,7 +31,8 @@ import java.io.*;
  * to ensure a correct behaviour of SMOreg.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $$ */
+ * @version $Revision: 1.3 $
+ */
 public  abstract class Kernel implements Serializable {
 
   /** The dataset */

@@ -32,7 +32,7 @@ import weka.gui.PropertySheetPanel;
  * GUI Customizer for the strip chart bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 public class StripChartCustomizer extends JPanel
   implements Customizer {

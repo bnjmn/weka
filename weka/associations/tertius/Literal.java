@@ -28,6 +28,11 @@ package weka.associations.tertius;
 import java.io.Serializable;
 import weka.core.Instance;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.3 $
+ */
 public abstract class Literal implements Serializable {
 
   private Predicate m_predicate;

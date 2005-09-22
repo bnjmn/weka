@@ -57,7 +57,7 @@ import java.awt.GridBagConstraints;
  * vertices present in each level.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version 1.0 - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.4 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  *
  */
 public class HierarchicalBCEngine implements GraphConstants, LayoutEngine {

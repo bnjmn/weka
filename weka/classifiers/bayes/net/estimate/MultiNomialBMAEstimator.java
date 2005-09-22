@@ -9,6 +9,9 @@ import weka.core.Statistics;
 import weka.estimators.Estimator;
 import weka.classifiers.bayes.net.search.local.K2;
 
+/**
+ * @version $Revision: 1.4 $
+ */
 public class MultiNomialBMAEstimator extends BayesNetEstimator {
 
     protected boolean m_bUseK2Prior = true;

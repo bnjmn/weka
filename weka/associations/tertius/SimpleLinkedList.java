@@ -29,6 +29,11 @@ import java.util.Iterator;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
+/**
+ * @author Peter A. Flach
+ * @author Nicolas Lachiche
+ * @version $Revision: 1.3 $
+ */
 public class SimpleLinkedList implements Serializable {
 
   public class LinkedListIterator implements Serializable {

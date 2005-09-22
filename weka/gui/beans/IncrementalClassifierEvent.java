@@ -31,7 +31,7 @@ import java.util.EventObject;
  * Class encapsulating an incrementally built classifier and current instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version 1.0
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see EventObject
  */

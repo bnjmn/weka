@@ -40,6 +40,10 @@ import java.awt.event.MouseMotionAdapter;
  * Time: 10:28:19 AM <br/>
  * $ Revision 1.4 $ <br/>
  * </p>
+ *
+ * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
+ * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
+ * @version $Revision: 1.2 $
  */
 public class GraphPanel extends JComponent {
 
