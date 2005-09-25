@@ -67,7 +67,7 @@ import weka.core.SingleIndex;
  * excluded values. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RemoveWithValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -215,7 +215,7 @@ public class RemoveWithValues extends Filter
    */
   public String [] getOptions() {
 
-    String [] options = new String [8];
+    String [] options = new String [9];
     int current = 0;
 
     options[current++] = "-S"; options[current++] = "" + getSplitPoint();
@@ -226,6 +226,9 @@ public class RemoveWithValues extends Filter
     }
     if (getInvertSelection()) {
       options[current++] = "-V";
+    }
+    if (getMatchMissingValues()) {
+      options[current++] = "-M";
     }
     if (getModifyHeader()) {
       options[current++] = "-H";
