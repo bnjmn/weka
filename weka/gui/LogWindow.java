@@ -64,7 +64,7 @@ import javax.swing.text.Style;
  * Frame that shows the output from stdout and stderr.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LogWindow 
   extends JFrame
@@ -472,9 +472,9 @@ public class LogWindow
     m_Output.addCaretListener(this);
     m_Output.setDocument(outputOld.getDocument());
     m_Output.setCaretPosition(m_Output.getDocument().getLength());
-    m_Output.setToolTipText(
-          "stdout = " + colorToString(COLOR_STDOUT) + ", "
-        + "stderr = " + colorToString(COLOR_STDERR));
+    //m_Output.setToolTipText(
+    //      "stdout = " + colorToString(COLOR_STDOUT) + ", "
+    //    + "stderr = " + colorToString(COLOR_STDERR));
     parent.add(m_Output);
     parent.remove(outputOld);
   }
