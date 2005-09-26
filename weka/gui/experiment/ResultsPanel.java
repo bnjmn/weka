@@ -87,7 +87,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28.2.2 $
+ * @version $Revision: 1.28.2.3 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -169,7 +169,8 @@ public class ResultsPanel extends JPanel {
   protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
 
   /** Lets the user edit the test significance */
-  protected JTextField m_SigTex = new JTextField("0.05");
+  protected JTextField m_SigTex = new JTextField(
+      "" + ExperimenterDefaults.getSignificance());
 
   /** Lets the user select whether standard deviations are to be output
       or not */
@@ -231,10 +232,10 @@ public class ResultsPanel extends JPanel {
   protected boolean m_csvOutput = false;
   
   /** the number of digits after the period (= precision) for printing the mean */
-  protected int m_MeanPrec = 2;
+  protected int m_MeanPrec = ExperimenterDefaults.getMeanPrecision();
   
   /** the number of digits after the period (= precision) for printing the std. deviation */
-  protected int m_StdDevPrec = 2;
+  protected int m_StdDevPrec = ExperimenterDefaults.getStdDevPrecision();
 
   /**
    * Creates the results panel with no initial experiment.
@@ -328,6 +329,7 @@ public class ResultsPanel extends JPanel {
       });
 
     m_ShowStdDevs.setEnabled(false);
+    m_ShowStdDevs.setSelected(ExperimenterDefaults.getShowStdDevs());
     m_OutputFormatButton.setEnabled(false);
     m_OutputFormatButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -781,6 +783,7 @@ public class ResultsPanel extends JPanel {
     int datasetCol = -1;
     String selectedList = "";
     String selectedListDataset = "";
+    boolean comparisonFieldSet = false; 
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
       if (name.toLowerCase().startsWith("key_", 0)) {
@@ -805,17 +808,25 @@ public class ResultsPanel extends JPanel {
 		 name.toLowerCase().equals("key_scheme_version_id")) {
 	m_ResultKeyList.addSelectionInterval(i, i);
 	selectedList += "," + (i + 1);
-      } else if (name.toLowerCase().indexOf("percent_correct") != -1) {
+      } else if (name.toLowerCase().indexOf(ExperimenterDefaults.getComparisonField()) != -1) {
 	m_CompareCombo.setSelectedIndex(i);
+	comparisonFieldSet = true;
 	//	break;
       } else if ((name.toLowerCase().indexOf("root_relative_squared_error") != -1) &&
-		 (m_CompareCombo.getSelectedIndex() < 0)) {
+          (!comparisonFieldSet)) {
 	m_CompareCombo.setSelectedIndex(i);
+	comparisonFieldSet = true;
       }
     }
     m_DatasetKeyBut.setEnabled(true);
     m_ResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
+
+    // override row/column attributes
+    if (ExperimenterDefaults.getRow().length() != 0)
+      selectedListDataset = ExperimenterDefaults.getRow();
+    if (ExperimenterDefaults.getColumn().length() != 0)
+      selectedList = ExperimenterDefaults.getColumn();
     
     Range generatorRange = new Range();
     if (selectedList.length() != 0) {
@@ -898,7 +909,7 @@ public class ResultsPanel extends JPanel {
     if (sigStr.length() != 0) {
       m_TTester.setSignificanceLevel((new Double(sigStr)).doubleValue());
     } else {
-      m_TTester.setSignificanceLevel(0.05);
+      m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
     }
 
     // Carry out the test chosen and biff the results to the output area
