@@ -46,7 +46,7 @@ import java.sql.DatabaseMetaData;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DatabaseConnection implements Serializable {
 
@@ -460,24 +460,4 @@ public class DatabaseConnection implements Serializable {
     }
     return tableExists;
   }
-  
-
-  /**
-   * Inserts a + if the double is in scientific notation.
-   * MySQL doesn't understand the number otherwise.
-   */
-  private String safeDoubleToString(Double number) {
-
-    String orig = number.toString();
-
-    int pos = orig.indexOf('E');
-    if ((pos == -1) || (orig.charAt(pos + 1) == '-')) {
-      return orig;
-    } else {
-      StringBuffer buff = new StringBuffer(orig);
-      buff.insert(pos + 1, '+');
-      return new String(buff);
-    }
-  }
-
 }
