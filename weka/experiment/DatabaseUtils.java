@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.2 $
+ * @version $Revision: 1.18.2.3 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -724,6 +724,9 @@ public class DatabaseUtils implements Serializable {
    * MySQL doesn't understand the number otherwise.
    */
   private String safeDoubleToString(Double number) {
+    // NaN is treated as NULL
+    if (number.isNaN())
+      return "NULL";
 
     String orig = number.toString();
 
