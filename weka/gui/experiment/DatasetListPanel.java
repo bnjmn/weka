@@ -62,7 +62,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -89,7 +89,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   protected File m_UserDir = new File(System.getProperty("user.dir"));
 
   /** The file chooser component */
-  protected JFileChooser m_FileChooser = new JFileChooser(m_UserDir);
+  protected JFileChooser m_FileChooser = new
+    JFileChooser(ExperimenterDefaults.getInitialDatasetsDirectory());
 
   
   /**
@@ -118,7 +119,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
     m_AddBut.addActionListener(this);
-    m_relativeCheck.setSelected(false);
+    m_relativeCheck.setSelected(ExperimenterDefaults.getUseRelativePaths());
     m_relativeCheck.setToolTipText("Store file paths relative to "
 				   +"the start directory");
     setLayout(new BorderLayout());
