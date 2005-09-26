@@ -92,7 +92,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -226,7 +226,8 @@ public class ResultsPanel extends JPanel {
   protected JComboBox m_SortCombo = new JComboBox(m_SortModel);
 
   /** Lets the user edit the test significance */
-  protected JTextField m_SigTex = new JTextField("0.05");
+  protected JTextField m_SigTex = new JTextField(
+      "" + ExperimenterDefaults.getSignificance());
 
   /** Lets the user select whether standard deviations are to be output
       or not */
@@ -288,6 +289,21 @@ public class ResultsPanel extends JPanel {
    * Creates the results panel with no initial experiment.
    */
   public ResultsPanel() {
+
+    // defaults
+    m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
+    m_TTester.setShowStdDevs(ExperimenterDefaults.getShowStdDevs());
+    try {
+      m_ResultMatrix = (ResultMatrix) Class.forName(
+          ExperimenterDefaults.getOutputFormat()).newInstance();
+    }
+    catch (Exception e) {
+      m_ResultMatrix = new ResultMatrixPlainText();
+    }
+    m_ResultMatrix.setShowStdDev(ExperimenterDefaults.getShowStdDevs());
+    m_ResultMatrix.setMeanPrec(ExperimenterDefaults.getMeanPrecision());
+    m_ResultMatrix.setStdDevPrec(ExperimenterDefaults.getStdDevPrecision());
+    m_ResultMatrix.setRemoveFilterName(ExperimenterDefaults.getRemoveFilterClassnames());
 
     // Create/Configure/Connect components
     
@@ -381,6 +397,7 @@ public class ResultsPanel extends JPanel {
       });
 
     m_ShowStdDevs.setEnabled(false);
+    m_ShowStdDevs.setSelected(ExperimenterDefaults.getShowStdDevs());
     m_OutputFormatButton.setEnabled(false);
     m_OutputFormatButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -459,6 +476,7 @@ public class ResultsPanel extends JPanel {
 	  setTester();
 	}
       });
+    setSelectedItem(m_TesterClasses, ExperimenterDefaults.getTester());
     
     y++;
     gbC = new GridBagConstraints();
@@ -946,7 +964,7 @@ public class ResultsPanel extends JPanel {
 		 name.toLowerCase().equals("key_scheme_version_id")) {
 	m_ResultKeyList.addSelectionInterval(i, i);
 	selectedList += "," + (i + 1);
-      } else if (name.toLowerCase().indexOf("percent_correct") != -1) {
+      } else if (name.toLowerCase().indexOf(ExperimenterDefaults.getComparisonField()) != -1) {
 	m_CompareCombo.setSelectedIndex(i);
 	comparisonFieldSet = true;
 	//	break;
@@ -961,6 +979,14 @@ public class ResultsPanel extends JPanel {
     m_ResultKeyBut.setEnabled(true);
     m_CompareCombo.setEnabled(true);
     m_SortCombo.setEnabled(true);
+    if (ExperimenterDefaults.getSorting().length() != 0)
+      setSelectedItem(m_SortCombo, ExperimenterDefaults.getSorting());
+
+    // override row/column attributes
+    if (ExperimenterDefaults.getRow().length() != 0)
+      selectedListDataset = ExperimenterDefaults.getRow();
+    if (ExperimenterDefaults.getColumn().length() != 0)
+      selectedList = ExperimenterDefaults.getColumn();
     
     Range generatorRange = new Range();
     if (selectedList.length() != 0) {
@@ -987,6 +1013,24 @@ public class ResultsPanel extends JPanel {
     m_SigTex.setEnabled(true);
 
     setTTester();
+  }
+
+  /**
+   * Sets the selected item of an combobox, since using setSelectedItem(...)
+   * doesn't work, if one checks object references!
+   *
+   * @param cb      the combobox to set the item for
+   * @param item    the item to set active
+   */
+  protected void setSelectedItem(JComboBox cb, String item) {
+    int       i;
+
+    for (i = 0; i < cb.getItemCount(); i++) {
+      if (cb.getItemAt(i).toString().equals(item)) {
+        cb.setSelectedIndex(i);
+        break;
+      }
+    }
   }
 
   /**
@@ -1043,7 +1087,7 @@ public class ResultsPanel extends JPanel {
     if (sigStr.length() != 0) {
       m_TTester.setSignificanceLevel((new Double(sigStr)).doubleValue());
     } else {
-      m_TTester.setSignificanceLevel(0.05);
+      m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
     }
 
     // Carry out the test chosen and biff the results to the output area

@@ -98,7 +98,7 @@ import javax.swing.event.DocumentEvent;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -282,6 +282,42 @@ public class SimpleSetupPanel extends JPanel {
 	  newExp.setPropertyArray(new Classifier[0]);
 	  newExp.setUsePropertyIterator(true);
 	  setExperiment(newExp);
+
+          // defaults
+          if (ExperimenterDefaults.getUseClassification())
+            m_ExpClassificationRBut.setSelected(true);
+          else
+            m_ExpRegressionRBut.setSelected(true);
+          
+          setSelectedItem(
+              m_ResultsDestinationCBox, ExperimenterDefaults.getDestination());
+          destinationTypeChanged();
+          
+          setSelectedItem(
+              m_ExperimentTypeCBox, ExperimenterDefaults.getExperimentType());
+          
+          m_numRepetitions = ExperimenterDefaults.getRepetitions();
+          m_NumberOfRepetitionsTField.setText(
+              "" + m_numRepetitions);
+          
+          if (ExperimenterDefaults.getExperimentType().equals(
+                TYPE_CROSSVALIDATION_TEXT)) {
+            m_numFolds = ExperimenterDefaults.getFolds();
+            m_ExperimentParameterTField.setText(
+                "" + m_numFolds);
+          }
+          else {
+            m_trainPercent = ExperimenterDefaults.getTrainPercentage();
+            m_ExperimentParameterTField.setText(
+                "" + m_trainPercent);
+          }
+          
+          if (ExperimenterDefaults.getDatasetsFirst())
+            m_OrderDatasetsFirstRBut.setSelected(true);
+          else
+            m_OrderAlgorithmsFirstRBut.setSelected(true);
+
+          expTypeChanged();
 	}
       });
     m_SaveBut.setEnabled(false);
@@ -301,7 +337,12 @@ public class SimpleSetupPanel extends JPanel {
     if (KOML.isPresent())
        m_FileChooser.addChoosableFileFilter(m_KOMLFilter);
     m_FileChooser.addChoosableFileFilter(m_XMLFilter);
-    m_FileChooser.setFileFilter(m_ExpFilter);
+    if (ExperimenterDefaults.getExtension().equals(".xml"))
+      m_FileChooser.setFileFilter(m_XMLFilter);
+    else if (KOML.isPresent() && ExperimenterDefaults.getExtension().equals(KOML.FILE_EXTENSION))
+      m_FileChooser.setFileFilter(m_KOMLFilter);
+    else
+      m_FileChooser.setFileFilter(m_ExpFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_DestFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
@@ -539,6 +580,24 @@ public class SimpleSetupPanel extends JPanel {
     add(top, BorderLayout.NORTH);
     add(schemes, BorderLayout.CENTER);
     add(notes, BorderLayout.SOUTH);
+  }
+  
+  /**
+   * Sets the selected item of an combobox, since using setSelectedItem(...)
+   * doesn't work, if one checks object references!
+   *
+   * @param cb      the combobox to set the item for
+   * @param item    the item to set active
+   */
+  protected void setSelectedItem(JComboBox cb, String item) {
+    int       i;
+
+    for (i = 0; i < cb.getItemCount(); i++) {
+      if (cb.getItemAt(i).toString().equals(item)) {
+        cb.setSelectedIndex(i);
+        break;
+      }
+    }
   }
   
   /**
