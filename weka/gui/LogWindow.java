@@ -64,7 +64,7 @@ import javax.swing.text.Style;
  * Frame that shows the output from stdout and stderr.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LogWindow 
   extends JFrame
@@ -139,28 +139,28 @@ public class LogWindow
     /**
      * flushes the printstream
      */
-    public void flush() {
+    public synchronized void flush() {
       // ignored
     }
 
     /**
      * prints the given int
      */
-    public void print(int x) {
+    public synchronized void print(int x) {
       print(new Integer(x).toString());
     }
 
     /**
      * prints the given boolean 
      */
-    public void print(boolean x) {
+    public synchronized void print(boolean x) {
       print(new Boolean(x).toString());
     }
 
     /**
      * prints the given string 
      */
-    public void print(String x) {
+    public synchronized void print(String x) {
       StyledDocument      doc;
       int                 size;
       int                 maxSize;
@@ -186,7 +186,7 @@ public class LogWindow
     /**
      * prints the given object
      */
-    public void print(Object x) {
+    public synchronized void print(Object x) {
       String                  line;
       Throwable               t;
       StackTraceElement[]     trace;
@@ -207,14 +207,14 @@ public class LogWindow
     /**
      * prints a new line
      */
-    public void println() {
+    public synchronized void println() {
       print("\n");
     }
 
     /**
      * prints the given int
      */
-    public void println(int x) {
+    public synchronized void println(int x) {
       print(x);
       println();
     }
@@ -222,7 +222,7 @@ public class LogWindow
     /**
      * prints the given boolean
      */
-    public void println(boolean x) {
+    public synchronized void println(boolean x) {
       print(x);
       println();
     }
@@ -230,7 +230,7 @@ public class LogWindow
     /**
      * prints the given string
      */
-    public void println(String x) {
+    public synchronized void println(String x) {
       print(x);
       println();
     }
@@ -238,7 +238,7 @@ public class LogWindow
     /**
      * prints the given object (for Throwables we print the stack trace)
      */
-    public void println(Object x) {
+    public synchronized void println(Object x) {
       print(x);
       println();
     }
