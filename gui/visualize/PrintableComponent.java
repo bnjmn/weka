@@ -24,15 +24,21 @@ package weka.gui.visualize;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 import weka.core.RTSI;
+import weka.core.Utils;
 import weka.gui.ExtensionFileFilter;
 
 /** 
@@ -45,7 +51,7 @@ import weka.gui.ExtensionFileFilter;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PrintableComponent implements PrintableHandler {
   /** the parent component of this print dialog */
@@ -66,6 +72,35 @@ public class PrintableComponent implements PrintableHandler {
   /** whether to print some debug information */
   private static final boolean DEBUG = false;
   
+  /** whether the user was already asked about the tooltip behavior */
+  protected static boolean m_ToolTipUserAsked = false;
+
+  /** the property name for showing the tooltip */
+  protected final static String PROPERTY_SHOW = "PrintableComponentToolTipShow";
+
+  /** the property name whether the user was already asked */
+  protected final static String PROPERTY_USERASKED = "PrintableComponentToolTipUserAsked";
+  
+  /** whether to display the tooltip or not */
+  protected static boolean m_ShowToolTip = true;
+  static {
+    try {
+      m_ShowToolTip = Boolean.valueOf(
+          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(
+            PROPERTY_SHOW, 
+            "true")).booleanValue();
+      m_ToolTipUserAsked = Boolean.valueOf(
+          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(
+            PROPERTY_USERASKED, 
+            "false")).booleanValue();
+    }
+    catch (Exception e) {
+      // ignore exception
+      m_ToolTipUserAsked = false;
+      m_ShowToolTip      = true;
+    }
+  }
+  
   /** output if we're in debug mode */
   static {
     if (DEBUG)
@@ -82,7 +117,7 @@ public class PrintableComponent implements PrintableHandler {
     
     m_Component = component;
     getComponent().addMouseListener(new PrintMouseListener(this));
-    getComponent().setToolTipText("Click left mouse button while holding <alt> and <shift> to display a save dialog.");
+    getComponent().setToolTipText(getToolTipText(this));
     initFileChooser();
   }
   
@@ -91,6 +126,91 @@ public class PrintableComponent implements PrintableHandler {
    */
   public JComponent getComponent() {
     return m_Component;
+  }
+
+  /**
+   * Returns a tooltip only if the user wants it. If retrieved for the first,
+   * a dialog pops up and asks the user whether the tooltip should always
+   * appear or not. The weka/gui/visualize/Visualize.props is then written
+   * in the user's home directory.
+   *
+   * @param component the PrintableComponent to ask for
+   * @return null if the user doesn't want the tooltip, otherwise the text
+   */
+  public static String getToolTipText(PrintableComponent component) {
+    String        result;
+    int           retVal;
+    Properties    props;
+    String        name;
+    Enumeration   names;
+    String        filename;
+
+    // ask user whether the tooltip should be shown
+    if (!m_ToolTipUserAsked) {
+      m_ToolTipUserAsked = true;
+      
+      retVal = JOptionPane.showConfirmDialog(
+          component.getComponent(),
+            "Some panels enable the user to save the content as JPEG or EPS.\n"
+          + "In order to see which panels support this, a tooltip can be "
+          + "displayed. Enable tooltip?",
+          "ToolTip for Panels...",
+          JOptionPane.YES_NO_OPTION);
+
+      m_ShowToolTip = (retVal == JOptionPane.YES_OPTION);
+
+      // save props file
+      VisualizeUtils.VISUALIZE_PROPERTIES.setProperty(
+               PROPERTY_SHOW, "" + m_ShowToolTip);
+      VisualizeUtils.VISUALIZE_PROPERTIES.setProperty(
+               PROPERTY_USERASKED, "" + m_ToolTipUserAsked);
+      try {
+        // NOTE: properties that got inherited from another props file don't
+        //       get saved. I.e., one could overwrite the existing props
+        //       file with an (nearly) empty one.
+        //       => transfer all properties into a new one
+        props = new Properties();
+        names = VisualizeUtils.VISUALIZE_PROPERTIES.propertyNames();
+        while (names.hasMoreElements()) {
+          name = names.nextElement().toString();
+          props.setProperty(
+              name,  
+              VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(name, ""));
+        }
+        filename = System.getProperty("user.home") + "/Visualize.props";
+        props.store(
+            new BufferedOutputStream(new FileOutputStream(filename)), null);
+
+        // inform user about location of props file and name of property
+        JOptionPane.showMessageDialog(
+            component.getComponent(), 
+            "You can still manually enable or disable the ToolTip via the following property\n"
+            + "    " + PROPERTY_SHOW + "\n"
+            + "in the following file\n"
+            + "    " + filename);
+      }
+      catch (Exception e) {
+        JOptionPane.showMessageDialog(
+            component.getComponent(), 
+              "Error saving the props file!\n"
+            + e.getMessage() + "\n\n"
+            + "Note:\n"
+            + "If you want to disable these messages from popping up, place a file\n"
+            + "called 'Visualize.props' either in your home directory or in the directory\n"
+            + "you're starting Weka from and add the following lines:\n"
+            + "    " + PROPERTY_USERASKED + "=true\n"
+            + "    " + PROPERTY_SHOW + "=" + m_ShowToolTip,
+            "Error...",
+            JOptionPane.ERROR_MESSAGE);
+      }
+    }
+    
+    if (m_ShowToolTip)
+      result = "Click left mouse button while holding <alt> and <shift> to display a save dialog.";
+    else
+      result = null;
+
+    return result;
   }
   
   /**
