@@ -268,6 +268,12 @@ public class DataNearBalancedND extends RandomizableSingleClassifierEnhancer {
       throw new UnsupportedClassTypeException("DataNearBalancedND: class must " +
 					      "be nominal!");
     }
+
+    data.deleteWithMissingClass();
+
+    if (data.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
+    }
     
     Random random = data.getRandomNumberGenerator(m_Seed);
 	

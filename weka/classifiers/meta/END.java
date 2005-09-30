@@ -72,7 +72,7 @@ import weka.core.UnsupportedClassTypeException;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class END extends RandomizableIteratedSingleClassifierEnhancer {
   
@@ -124,6 +124,12 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer {
     // Check for non-nominal classes
     if (!data.classAttribute().isNominal()) {
       throw new UnsupportedClassTypeException("END: class must be nominal!");
+    }
+
+    data.deleteWithMissingClass();
+
+    if (data.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
     }
     
     if (!(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ND) && 
