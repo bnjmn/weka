@@ -51,7 +51,7 @@ import weka.gui.ExtensionFileFilter;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 public class PrintableComponent implements PrintableHandler {
   /** the parent component of this print dialog */
@@ -144,6 +144,10 @@ public class PrintableComponent implements PrintableHandler {
     String        name;
     Enumeration   names;
     String        filename;
+
+    // ToolTip is disabled for the moment...
+    if (true)
+      return null;
 
     // ask user whether the tooltip should be shown
     if (!m_ToolTipUserAsked) {
