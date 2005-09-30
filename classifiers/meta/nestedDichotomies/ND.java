@@ -277,6 +277,12 @@ public class ND extends RandomizableSingleClassifierEnhancer {
       throw new UnsupportedClassTypeException("ND: class must be nominal!");
     }
 
+    data.deleteWithMissingClass();
+
+    if (data.numInstances() == 0) {
+      throw new Exception("No instances in training file!");
+    }
+
     Random random = data.getRandomNumberGenerator(m_Seed);
 
     if (!m_hashtablegiven) {
