@@ -76,7 +76,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.5 $
+ * @version $Revision: 1.1.2.6 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -250,6 +250,37 @@ public class GenericPropertiesCreator {
   protected boolean isValidClassname(String classname) {
     return (classname.indexOf("$") == -1);
   }
+
+  /**
+   * Checks whether the classname is a valid one for the given key.
+   * A hack that prevents, e.g., the ResultProducers to be listed in the
+   * ResultListeners (even though they implement the ResultListener
+   * interface, they're not supposed to be listed there).
+   *
+   * @param key         the property key
+   * @param classname   the classname to check
+   * @return            whether the classname is a valid one
+   */
+  protected boolean isValidClassname(String key, String classname) {
+    boolean       result;
+    Class         cls;
+
+    result = true;
+
+    // remove ResultProducers from ResultListener list
+    if (key.equals(weka.experiment.ResultListener.class.getName())) {
+      try {
+        cls = Class.forName(classname);
+        if (RTSI.hasInterface(weka.experiment.ResultProducer.class, cls))
+          result = false;
+      }
+      catch (Exception e) {
+        // we can ignore this exception
+      }
+    }
+
+    return result;
+  }
   
   /**
    * fills in all the classes (based on the packages in the input properties 
@@ -279,6 +310,9 @@ public class GenericPropertiesCreator {
         for (i = 0; i < classes.size(); i++) {
           // skip non-public classes
           if (!isValidClassname(classes.get(i).toString()))
+            continue;
+          // some classes should not be listed for some keys
+          if (!isValidClassname(key, classes.get(i).toString()))
             continue;
           if (!value.equals(""))
             value += ",";
