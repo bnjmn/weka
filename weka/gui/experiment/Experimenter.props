@@ -2,7 +2,7 @@
 # "simple" indicates that this property is only available for simple
 # experiments.
 #
-# $Revision: 1.1 $
+# $Revision: 1.2 $
 
 # the default extension in the file-dialog
 # possible values: 
@@ -53,11 +53,11 @@ UseRelativePaths=false
 #   Paired T-Tester
 Tester=Paired T-Tester (corrected)
 
-# the row selection (1-based index/indices)
-Row=1
+# the row selection
+Row=Key_Dataset
 
-# the column selection (1-based index/indices)
-Column=3,4,5
+# the column selection
+Column=Key_Scheme,Key_Scheme_options,Key_Scheme_version_ID
 
 # the default comparison field (lower case!)
 # see ComboBox in Experimenter
