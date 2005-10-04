@@ -37,7 +37,7 @@ import java.util.Properties;
  * the props file <code>weka.gui.experiment.Experimenter.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see #PROPERTY_FILE
  */
 public class ExperimenterDefaults
@@ -165,19 +165,17 @@ public class ExperimenterDefaults
   }
 
   /**
-   * the comma-separated list of attribute indices that identify a row
-   * (indices are 1-based)
+   * the comma-separated list of attribute names that identify a row
    */
   public final static String getRow() {
-    return get("Row", "1");
+    return get("Row", "Key_Dataset");
   }
 
   /**
-   * the comma-separated list of attribute indices that identify a column
-   * (indices are 1-based)
+   * the comma-separated list of attribute names that identify a column
    */
   public final static String getColumn() {
-    return get("Column", "3,4,5");
+    return get("Column", "Key_Scheme,Key_Scheme_options,Key_Scheme_version_ID");
   }
 
   /**

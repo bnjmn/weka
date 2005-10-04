@@ -29,22 +29,18 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
 import weka.gui.DatabaseConnectionDialog;
 import weka.experiment.Experiment;
-import weka.experiment.InstancesResultListener;
 import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
 import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.PairedTTester;
 import weka.experiment.ResultMatrix;
 import weka.experiment.ResultMatrixPlainText;
 import weka.experiment.Tester;
 import weka.experiment.InstanceQuery;
-import weka.core.Utils;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Range;
 import weka.core.RTSI;
 import weka.core.Instance;
-import weka.core.converters.Loader;
 import weka.core.converters.CSVLoader;
 
 import java.io.Reader;
@@ -58,6 +54,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.JPanel;
@@ -68,7 +65,6 @@ import javax.swing.JTextArea;
 import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.JFileChooser;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
@@ -92,7 +88,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -211,7 +207,7 @@ public class ResultsPanel extends JPanel {
   protected JButton m_TestsButton = new JButton("Select");
 
   /** Lets the user select which schemes are compared to base */
-  protected JButton m_DisplayedButton = new JButton("Columns");
+  protected JButton m_DisplayedButton = new JButton("Select");
 
   /** Holds the list of schemes to base the test against */
   protected JList m_TestsList = new JList(m_TestsModel);
@@ -914,6 +910,52 @@ public class ResultsPanel extends JPanel {
       }
     }  
   }
+  
+  /**
+   * Returns a vector with column names of the dataset, listed in "list". If
+   * a column cannot be found or the list is empty the ones from the default 
+   * list are returned. 
+   * 
+   * @param list           comma-separated list of attribute names
+   * @param defaultList    the default list of attribute names
+   * @param inst           the instances to get the attribute names from
+   * @return               a vector containing attribute names
+   */
+  protected Vector determineColumnNames(String list, String defaultList, Instances inst) {
+    Vector              result;
+    Vector              atts;
+    StringTokenizer     tok;
+    int                 i;
+    String              item;
+    
+    // get attribute names
+    atts = new Vector();
+    for (i = 0; i < inst.numAttributes(); i++)
+      atts.add(inst.attribute(i).name().toLowerCase());
+
+    // process list
+    result = new Vector();
+    tok = new StringTokenizer(list, ",");
+    while (tok.hasMoreTokens()) {
+      item = tok.nextToken().toLowerCase();
+      if (atts.contains(item)) {
+        result.add(item);
+      }
+      else {
+        result.clear();
+        break;
+      }
+    }
+    
+    // do we have to return defaults?
+    if (result.size() == 0) {
+      tok = new StringTokenizer(defaultList, ",");
+      while (tok.hasMoreTokens())
+        result.add(tok.nextToken().toLowerCase());
+    }
+    
+    return result;
+  }
 
   /**
    * Sets up the panel with a new set of instances, attempting
@@ -927,6 +969,12 @@ public class ResultsPanel extends JPanel {
     m_TTester.setInstances(m_Instances);
     m_FromLab.setText("Got " + m_Instances.numInstances() + " results");
     
+    // setup row and column names
+    Vector rows = determineColumnNames(
+        ExperimenterDefaults.getRow(), "Key_Dataset", m_Instances);
+    Vector cols = determineColumnNames(
+        ExperimenterDefaults.getColumn(), "Key_Scheme,Key_Scheme_options,Key_Scheme_version_ID", m_Instances);
+    
     // Do other stuff
     m_DatasetKeyModel.removeAllElements();
     m_ResultKeyModel.removeAllElements();
@@ -934,7 +982,6 @@ public class ResultsPanel extends JPanel {
     m_SortModel.removeAllElements();
     m_SortModel.addElement("<default>");
     m_TTester.setSortColumn(-1);
-    int datasetCol = -1;
     String selectedList = "";
     String selectedListDataset = "";
     boolean comparisonFieldSet = false; 
@@ -952,16 +999,14 @@ public class ResultsPanel extends JPanel {
 	  m_SortModel.addElement(name);
       }
 
-      if (name.toLowerCase().equals("key_dataset")) {
+      if (rows.contains(name.toLowerCase())) {
 	m_DatasetKeyList.addSelectionInterval(i, i);
 	selectedListDataset += "," + (i + 1);
       } else if (name.toLowerCase().equals("key_run")) {
 	m_TTester.setRunColumn(i);
       } else if (name.toLowerCase().equals("key_fold")) {
 	m_TTester.setFoldColumn(i);
-      } else if (name.toLowerCase().equals("key_scheme") ||
-		 name.toLowerCase().equals("key_scheme_options") ||
-		 name.toLowerCase().equals("key_scheme_version_id")) {
+      } else if (cols.contains(name.toLowerCase())) {
 	m_ResultKeyList.addSelectionInterval(i, i);
 	selectedList += "," + (i + 1);
       } else if (name.toLowerCase().indexOf(ExperimenterDefaults.getComparisonField()) != -1) {
@@ -982,12 +1027,6 @@ public class ResultsPanel extends JPanel {
     if (ExperimenterDefaults.getSorting().length() != 0)
       setSelectedItem(m_SortCombo, ExperimenterDefaults.getSorting());
 
-    // override row/column attributes
-    if (ExperimenterDefaults.getRow().length() != 0)
-      selectedListDataset = ExperimenterDefaults.getRow();
-    if (ExperimenterDefaults.getColumn().length() != 0)
-      selectedList = ExperimenterDefaults.getColumn();
-    
     Range generatorRange = new Range();
     if (selectedList.length() != 0) {
       try {
