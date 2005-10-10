@@ -2,7 +2,7 @@
 
 \usepackage{epsfig}
 
-\title{\epsfig{file=coa-hor.eps,width=6cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-0}
+\title{\epsfig{file=coa-hor.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-1}
 \author{Richard Kirkby\\Eibe Frank}
 
 \setcounter{secnumdepth}{1}
@@ -28,7 +28,7 @@
 \section{Launching WEKA}
 
 The WEKA GUI Chooser window is used to launch WEKA's graphical
-environments. At the bottom of the window are four buttons:
+environments. At the bottom of the window are six buttons:
 
 \begin{enumerate}
 \item \textbf{Simple CLI}.  Provides a simple command-line interface
@@ -42,6 +42,12 @@ between learning schemes.
 \item \textbf{Knowledge Flow}.  This environment supports essentially
 the same functions as the Explorer but with a drag-and-drop
 interface. One advantage is that it supports incremental learning.
+\item \textbf{ArffViewer}.  Displays ARFF files in a tabular format, 
+supports sorting and basic handling of attributes.
+\item \textbf{Log}.  Everything that is printed to \texttt{stdout} or 
+\texttt{stderr} will appear in the Log Window. It is useful for environments 
+that normally don't start WEKA from a terminal and therefore miss details 
+on error messages, e.g., Microsoft Windows.
 \end{enumerate}
 
 If you launch WEKA from a terminal window, some text begins scrolling in the
@@ -50,8 +56,8 @@ help in tracking down the cause.
 
 This User Manual focuses on using the Explorer but does not explain
 the individual data preprocessing tools and learning algorithms in
-Weka. For more information on the various filters and learning methods
-in Weka, see the book {\em Data Mining} (Witten and Frank, 2005).
+WEKA. For more information on the various filters and learning methods
+in WEKA, see the book {\em Data Mining} (Witten and Frank, 2005).
 
 \section{The WEKA Explorer}
 
@@ -122,24 +128,26 @@ wrong!  In that case you should restart the WEKA explorer.
 
 \section{Preprocessing}
 
-\subsection{Opening files}
+\subsection{Loading Data}
 
-The first three buttons at the top of the preprocess section enable
+The first four buttons at the top of the preprocess section enable
 you to load data into WEKA:
 
 \begin{enumerate}
 \item \textbf{Open file...}.
 Brings up a dialog box allowing you to browse for the data file on the local
-filesystem.
+file system.
 \item \textbf{Open URL...}.
 Asks for a Uniform Resource Locator address for where the data is stored.
 \item \textbf{Open DB...}.  Reads data from a database. (Note that to
 make this work you might have to edit the file in
 weka/experiment/DatabaseUtils.props.)
+\item \textbf{Generate...}.  Enables you to generate artificial data
+from a variety of DataGenerators.
 \end{enumerate}
 \noindent
 Using the \textbf{Open file...} button you can read files in a variety
-of formats: Weka's ARFF format, CSV format, C4.5 format, or serialized
+of formats: WEKA's ARFF format, CSV format, C4.5 format, or serialized
 Instances format. ARFF files typically have a {\em .arff\/}
 extension, CSV files a {\em .csv\/} extension, C4.5 files a {\em
 .data\/} and {\em .names\/} extension, and serialized Instances
@@ -165,7 +173,7 @@ The number of attributes (features) in the data.
 \subsection{Working With Attributes}
 
 Below the \textbf{Current relation} box is a box titled \textbf{Attributes}.
-There are three buttons, and beneath them is a list of the attributes in the
+There are four buttons, and beneath them is a list of the attributes in the
 current relation. The list has three columns:
 
 \begin{enumerate}
@@ -205,16 +213,16 @@ for the attribute along with the number of instances that have that
 value.  If the attribute is numeric, the list gives four statistics
 describing the distribution of values in the data---the minimum,
 maximum, mean and standard deviation.  And below these statistics
-there is a colored histogram, color-coded according to the attribute
+there is a coloured histogram, colour-coded according to the attribute
 chosen as the {\it Class} using the box above the histogram. (This box
 will bring up a drop-down list of available selections when clicked.)
 Note that only nominal {\it Class} attributes will result in a
-color-coding.  Finally, after pressing the \textbf{Visualize All}
+colour-coding.  Finally, after pressing the \textbf{Visualize All}
 button, histograms for all the attributes in the data are shown in a
-separate witting.
+separate window.
 
 Returning to the attribute list, to begin with all the tick boxes are unticked.
-They can be toggled on/off by clicking on them individually.  The three buttons
+They can be toggled on/off by clicking on them individually.  The four buttons
 above can also be used to change the selection:
 
 \begin{enumerate}
@@ -224,6 +232,9 @@ All boxes are ticked.
 All boxes are cleared (unticked).
 \item \textbf{Invert}.
 Boxes that are ticked become unticked and {\em vice versa\/}.
+\item \textbf{Pattern}.
+Enables the user to select attributes based on a Perl 5 Regular Expression. E.g., 
+\texttt{.*\_id} selects all attributes which name ends with \texttt{\_id}.
 \end{enumerate}
 
 Once the desired attributes have been selected, they can be removed by
@@ -238,7 +249,7 @@ The preprocess section allows filters to be defined that transform the
 data in various ways.  The \textbf{Filter} box is used to set up the
 filters that are required.  At the left of the \textbf{Filter} box is
 a \textbf{Choose} button. By clicking this button it is possible to
-select one of the filters in Weka. Once a filter has been selected,
+select one of the filters in WEKA. Once a filter has been selected,
 its name and options are shown in the field next to the
 \textbf{Choose} button. Clicking on this box brings up a
 GenericObjectEditor dialog box.
@@ -388,8 +399,11 @@ that has been output.
 \subsection{The Classifier Output Text}
 
 The text in the \textbf{Classifier output} area has scroll bars allowing you to
-browse the results.  Of course, you can also resize the Explorer window to get
-a larger display area.  The output is split into several sections:
+browse the results. Clicking with the left mouse button into the text area, 
+while holding \texttt{Alt} and \texttt{Shift}, brings up a dialog that enables 
+you to save the displayed output in a variety of formats (currently, JPEG and EPS). 
+Of course, you can also resize the Explorer window to get a larger display area.  
+The output is split into several sections:
 
 \begin{enumerate}
 \item \textbf{Run information}.
@@ -414,8 +428,8 @@ is the column.
 
 After training several classifiers, the result list will contain several
 entries.  Left-clicking the entries flicks back and forth between the various
-results that have been generated.  Right-clicking an entry invokes a menu
-containing these items:
+results that have been generated. Pressing \texttt{Delete} removes a selected 
+entry from the results. Right-clicking an entry invokes a menu containing these items:
 
 \begin{enumerate}
 \item \textbf{View in main window}.
@@ -454,11 +468,11 @@ highest probability predicted for the other classes. For example, boosting
 algorithms may achieve better performance on test data by increasing the
 margins on the training data. 
 \item \textbf{Visualize threshold curve}.
-Generates a plot illustrating the tradeoffs in prediction that are obtained by
+Generates a plot illustrating the trade-offs in prediction that are obtained by
 varying the threshold value between classes. For example, with the default
 threshold value of 0.5, the predicted probability of `positive' must be greater
 than 0.5 for the instance to be predicted as `positive'. The plot can be used
-to visualize the precision/recall tradeoff, for ROC curve analysis (true
+to visualize the precision/recall trade-off, for ROC curve analysis (true
 positive rate {\em vs} false positive rate), and for other types of curves. 
 \item \textbf{Visualize cost curve}.
 Generates a plot that gives an explicit representation of the expected cost, as
@@ -578,16 +592,16 @@ current relation.
 \subsection{The scatter plot matrix}
 
 When you select the {\em Visualize} panel, it shows a scatter plot
-matrix for all the attributes, color coded according to the currently
+matrix for all the attributes, colour coded according to the currently
 selected class. It is possible to change the size of each individual
 2D plot and the point size, and to randomly jitter the data (to
 uncover obscured points). It also possible to change the attribute
-used to color the plots, to select only a subset of attributes for
+used to colour the plots, to select only a subset of attributes for
 inclusion in the scatter plot matrix, and to sub sample the data. Note
 that changes will only come into effect once the \textbf{Update}
 button has been pressed.
 
-\subsection{Selectin an individual 2D scatter plot}
+\subsection{Selecting an individual 2D scatter plot}
  
 When you click on a cell in the scatter plot matrix, this will bring
 up a separate window with a visualization of the scatter plot you
