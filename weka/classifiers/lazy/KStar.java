@@ -14,7 +14,7 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/**
+/*
  *    KS.java
  *    Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).
  *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
@@ -25,13 +25,9 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.lazy.kstar.*;
-import weka.classifiers.lazy.IB1;
-import java.io.*;
 import java.util.*;
 import weka.core.*;
 import weka.classifiers.*;
-
-//import java.text.NumberFormat;
 
 /**
  * K* is an instance-based classifier, that is the class of a test
@@ -50,7 +46,7 @@ import weka.classifiers.*;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision 1.0 $
+ * @version $Revision: 1.3 $
  */
 
 public class KStar extends Classifier
@@ -211,7 +207,7 @@ public class KStar extends Classifier
       double sum = Utils.sum(classProbability);
       if (sum <= 0.0)
 	for (int i=0; i<classProbability.length; i++)
-	  classProbability[i] = 1/m_NumClasses;
+	  classProbability[i] = (double) 1/ (double) m_NumClasses;
       else Utils.normalize(classProbability, sum);
       return classProbability;
     }
