@@ -26,13 +26,18 @@ package weka.classifiers.bayes.net.search.ci;
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+
 import java.io.FileReader;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** ICSSearchAlgorithm implements Conditional Independence based search
  * algorithm for Bayes Network structure learning.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */ 
 public class ICSSearchAlgorithm extends CISearchAlgorithm {
 
@@ -460,6 +465,66 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 
 	} // CalcArcDirections
 
+	/**
+	 * Returns an enumeration describing the available options.
+	 *
+	 * @return an enumeration of all the available options.
+	 */
+	public Enumeration listOptions() {
+	  Vector result = new Vector();
+	  
+	  result.addElement(new Option(
+                "\tWhen determining whether an edge exists a search is performed "
+              + "\tfor a set Z that separates the nodes. MaxCardinality determines "
+              + "\tthe maximum size of the set Z. This greatly influences the "
+              + "\tlength of the search. (default  2)",
+	      "cardinality", 1, "-cardinality <num>"));
+	  
+	  Enumeration en = super.listOptions();
+	  while (en.hasMoreElements())
+	    result.addElement(en.nextElement());
+	  
+	  return result.elements();
+	} // listOption
+	
+	/**
+	 * Parses a given list of options. Valid options are:<p>
+	 * @param options the list of options as an array of strings
+	 * @exception Exception if an option is not supported
+	 */
+	public void setOptions(String[] options) throws Exception {
+	  String        tmpStr;
+	  
+	  tmpStr = Utils.getOption("cardinality", options);
+	  if (tmpStr.length() != 0)
+	    setMaxCardinality(Integer.parseInt(tmpStr));
+	  else
+            setMaxCardinality(2);
+            
+          super.setOptions(options);
+	} // setOptions
+	
+	/**
+	 * Gets the current settings of the Classifier.
+	 *
+	 * @return an array of strings suitable for passing to setOptions
+	 */
+	public String[] getOptions() {
+	  Vector        result;
+	  String[]      options;
+	  int           i;
+	  
+	  result  = new Vector();
+	  options = super.getOptions();
+	  for (i = 0; i < options.length; i++)
+	    result.add(options[i]);
+	  
+	  result.add("-cardinality");
+	  result.add("" + getMaxCardinality());
+	  
+	  return (String[]) result.toArray(new String[result.size()]);
+	} // getOptions
+	
 
 	/**
 	 * @return a string to describe the MaxCardinality option.
