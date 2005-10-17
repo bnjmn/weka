@@ -17,16 +17,21 @@
 package weka.classifiers.bayes.net.estimate;
 
 import weka.classifiers.bayes.BayesNet;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Attribute;
+import weka.core.Option;
 import weka.core.Utils;
 import weka.core.Statistics;
 import weka.estimators.Estimator;
 import weka.classifiers.bayes.net.search.local.K2;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MultiNomialBMAEstimator extends BayesNetEstimator {
 
@@ -37,6 +42,7 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
      * Net using the network structure.
      */
     public void estimateCPTs(BayesNet bayesNet) throws Exception {
+        initCPTs(bayesNet);
         
         // sanity check to see if nodes have not more than one parent
         for (int iAttribute = 0; iAttribute < bayesNet.m_Instances.numAttributes(); iAttribute++) {
@@ -50,11 +56,12 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
         while (instances.numInstances() > 0) {
             instances.delete(0);
         }
-        for (int iAttribute = instances.numAttributes(); iAttribute >= 0; iAttribute--) {
+        for (int iAttribute = instances.numAttributes() - 1; iAttribute >= 0; iAttribute--) {
             if (iAttribute != instances.classIndex()) {
-                Attribute a = new Attribute(instances.attribute(iAttribute).name());
-                a.addStringValue("0");
-                a.addStringValue("1");
+                FastVector values = new FastVector();
+                values.addElement("0");
+                values.addElement("1");
+                Attribute a = new Attribute(instances.attribute(iAttribute).name(), (FastVector) values);
                 instances.deleteAttributeAt(iAttribute);
                 instances.insertAttributeAt(a,iAttribute);
             }
@@ -259,4 +266,61 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
         return fProbs;
     } // distributionForInstance
 
+    /**
+     * Returns an enumeration describing the available options
+     * 
+     * @return an enumeration of all the available options
+     */
+    public Enumeration listOptions() {
+        Vector newVector = new Vector(1);
+
+        newVector.addElement(new Option(
+            "\tWhether to use K2 prior.\n", 
+            "k2", 0, "-k2"));
+
+        Enumeration enu = super.listOptions();
+        while (enu.hasMoreElements()) {
+                newVector.addElement(enu.nextElement());
+        }
+
+        return newVector.elements();
+    } // listOptions
+
+    /**
+     * Parses a given list of options. Valid options are:<p>
+     * 
+     * @param options the list of options as an array of strings
+     * @exception Exception if an option is not supported
+     */
+    public void setOptions(String[] options) throws Exception {
+        setUseK2Prior(Utils.getFlag("k2", options));
+
+        super.setOptions(options);
+    } // setOptions
+
+    /**
+     * Gets the current settings of the classifier.
+     * 
+     * @return an array of strings suitable for passing to setOptions
+     */
+    public String[] getOptions() {
+        String[] superOptions = super.getOptions();
+        String[] options = new String[1 + superOptions.length];
+        int current = 0;
+
+        if (isUseK2Prior())
+          options[current++] = "-k2";
+
+        // insert options from parent class
+        for (int iOption = 0; iOption < superOptions.length; iOption++) {
+                options[current++] = superOptions[iOption];
+        }
+
+        // Fill up rest with empty strings, not nulls!
+        while (current < options.length) {
+                options[current++] = "";
+        }
+
+        return options;
+    } // getOptions
 } // class MultiNomialBMAEstimator
