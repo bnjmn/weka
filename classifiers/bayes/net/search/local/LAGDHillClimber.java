@@ -30,7 +30,7 @@ import java.util.*;
  *  for learning Bayesian Networks.
  * 
  * @author Manuel Neubach
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LAGDHillClimber extends HillClimber {
 
@@ -316,20 +316,11 @@ public class LAGDHillClimber extends HillClimber {
 		String[] options = new String[9 + superOptions.length];
 		int current = 0;
 
-		if (m_nMaxNrOfParents != 10000) {
-		  options[current++] = "-P";
-		  options[current++] = "" + m_nMaxNrOfParents;
-		} 
-
-		if (getNrOfLookAheadSteps() != 10000) {
-		  options[current++] = "-L";
-		  options[current++] = "" + m_nNrOfLookAheadSteps;
-		}
-
-		if (getNrOfGoodOperations() != 10000) {
-		  options[current++] = "-G";
-		  options[current++] = "" + m_nNrOfGoodOperations;
-		}
+		options[current++] = "-L";
+		options[current++] = "" + m_nNrOfLookAheadSteps;
+		
+		options[current++] = "-G";
+		options[current++] = "" + m_nNrOfGoodOperations;
 
 		// insert options from parent class
 		for (int iOption = 0; iOption < superOptions.length; iOption++) {
