@@ -39,7 +39,7 @@ import weka.core.Utils;
  * Works with nominal variables and no missing values only.
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class K2 extends GlobalScoreSearchAlgorithm {
 	/** Holds flag to indicate ordering should be random **/
@@ -233,10 +233,8 @@ public class K2 extends GlobalScoreSearchAlgorithm {
 		String[] superOptions = super.getOptions();
 		String[] options = new String[4 + superOptions.length];
 		int current = 0;
- 	    if (m_nMaxNrOfParents != 10000) {
-		  options[current++] = "-P";
-		  options[current++] = "" + m_nMaxNrOfParents;
-	   } 
+		options[current++] = "-P";
+		options[current++] = "" + m_nMaxNrOfParents;
 	    if (!m_bInitAsNaiveBayes) {
 		  options[current++] = "-N";
 	    } 

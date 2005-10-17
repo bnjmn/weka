@@ -32,7 +32,7 @@ import java.io.Serializable;
  * for learning Bayesian network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.4 $
+ * Version: $Revision: 1.4.2.1 $
  */
 public class HillClimber extends GlobalScoreSearchAlgorithm {
 
@@ -348,10 +348,8 @@ public class HillClimber extends GlobalScoreSearchAlgorithm {
 		  options[current++] = "-N";
 		} 
 
-		if (m_nMaxNrOfParents != 10000) {
-		  options[current++] = "-P";
-		  options[current++] = "" + m_nMaxNrOfParents;
-		} 
+		options[current++] = "-P";
+		options[current++] = "" + m_nMaxNrOfParents;
 
 		// insert options from parent class
 		for (int iOption = 0; iOption < superOptions.length; iOption++) {
