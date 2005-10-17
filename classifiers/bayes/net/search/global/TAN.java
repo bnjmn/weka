@@ -35,7 +35,7 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class TAN extends GlobalScoreSearchAlgorithm {
@@ -169,7 +169,7 @@ public class TAN extends GlobalScoreSearchAlgorithm {
 	 * @return an array of strings suitable for passing to setOptions
 	 */
 	public String [] getOptions() {
-		return new String[0];
+		return super.getOptions();
 	} // getOptions
 
 	/**
