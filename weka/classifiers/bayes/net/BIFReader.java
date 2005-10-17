@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 
@@ -54,8 +54,9 @@ public class BIFReader extends BayesNet {
 	public BIFReader processFile(String sFile) throws Exception {
 		m_sFile = sFile;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setValidating(false);
+        factory.setValidating(true);
         Document doc = factory.newDocumentBuilder().parse(new File(sFile));
+        doc.normalize();
 
         buildInstances(doc, sFile);
         buildStructure(doc);
@@ -161,6 +162,28 @@ public class BIFReader extends BayesNet {
     	}
     	throw new Exception("Could not find node [[" + sNodeName + "]]");
     } // getNode
+
+    /**
+     * Returns all TEXT children of the given node in one string. Between
+     * the node values new lines are inserted.
+     */
+    public String getContent(Element node) {
+      NodeList       list;
+      Node           item;
+      int            i;
+      String         result;
+      
+      result = "";
+      list   = node.getChildNodes();
+      
+      for (i = 0; i < list.getLength(); i++) {
+         item = list.item(i);
+         if (item.getNodeType() == Node.TEXT_NODE)
+            result += "\n" + item.getNodeValue();
+      }
+         
+      return result;
+    }
 
 
 	/** buildInstances parses the BIF document and creates a Bayes Net with its 
@@ -279,7 +302,7 @@ public class BIFReader extends BayesNet {
 			FastVector list = selectElements(node, "FOR");
 			if (list.size() > 0) {
 				Node forNode = (Node) list.elementAt(0);
-				if (forNode.toString().equals("<FOR>" + sName + "</FOR>")) {
+				if (getContent((Element) forNode).trim().equals(sName)) {
 					return (Element) node;
 				}
 			}
@@ -296,9 +319,7 @@ public class BIFReader extends BayesNet {
 	String getTable(Node definition) throws Exception {
 		//NodeList nodelist = selectNodeList(definition, "TABLE/text()");
 		FastVector nodelist = selectElements(definition, "TABLE");
-		String sTable = ((Node)nodelist.elementAt(0)).toString();
-		sTable = sTable.replaceFirst("<TABLE>","");
-		sTable = sTable.replaceFirst("</TABLE>","");
+		String sTable = getContent((Element) nodelist.elementAt(0));
 		sTable = sTable.replaceAll("\\n"," ");
 		return sTable;
 	} // getTable
