@@ -32,7 +32,7 @@ import java.util.*;
  * in BIFF format.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class FromFile extends SearchAlgorithm {
 	/** name of file to read structure from **/
@@ -82,10 +82,15 @@ public class FromFile extends SearchAlgorithm {
 	 * @return an enumeration of all the available options.
 	 */
 	public Enumeration listOptions() {
-	  Vector newVector = new Vector(0);
+	  Vector newVector = new Vector();
 
 	  newVector.addElement(new Option("\tName of file containing network structure in BIF format\n", 
 					 "B", 1, "-B <BIF File>"));
+
+          Enumeration en = super.listOptions();
+          while (en.hasMoreElements())
+            newVector.addElement(en.nextElement());
+          
 	  return newVector.elements();
 	}
 
@@ -99,7 +104,9 @@ public class FromFile extends SearchAlgorithm {
 	 * @exception Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
-     setBIFFile( Utils.getOption('B', options));
+	  setBIFFile( Utils.getOption('B', options));
+          
+          super.setOptions(options);
 	}
 
 	/**
@@ -108,10 +115,18 @@ public class FromFile extends SearchAlgorithm {
 	 * @return an array of strings suitable for passing to setOptions
 	 */
 	public String [] getOptions() {
-	  String [] options  = new String [2];
+          String[] superOptions = super.getOptions();
+	  String [] options  = new String [2 + superOptions.length];
 	  int current = 0;
-	  options[current++] = "-B";
+
+          options[current++] = "-B";
 	  options[current++] = "" + getBIFFile();
+
+          // insert options from parent class
+          for (int iOption = 0; iOption < superOptions.length; iOption++) {
+                  options[current++] = superOptions[iOption];
+          }
+
 	  // Fill up rest with empty strings, not nulls!
 	  while (current < options.length) {
 		options[current++] = "";
