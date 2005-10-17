@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * score based of conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	
@@ -341,14 +341,29 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 		return new SelectedTag(m_nCVType, TAGS_CV_TYPE);
 	} // getCVType
 
+  public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
+    super.setMarkovBlanketClassifier(bMarkovBlanketClassifier);
+  }
+
+  public boolean getMarkovBlanketClassifier() {
+    return super.getMarkovBlanketClassifier();
+  }
+
 	/**
 	 * Returns an enumeration describing the available options
 	 * 
 	 * @return an enumeration of all the available options
 	 */
 	public Enumeration listOptions() {
-		Vector newVector = new Vector(2);
+		Vector newVector = new Vector();
 
+    newVector.addElement(new Option(
+            "\tApplies a Markov Blanket correction to the network structure, "
+          + "\tafter a network structure is learned. This ensures that all "
+          + "\tnodes in the network are part of the Markov blanket of the "
+          + "\tclassifier node.\n",
+          "mbc", 0, "-mbc"));
+      
 		newVector.addElement(
 			new Option(
 				"\tScore type (LOO-CV,k-Fold-CV,Cumulative-CV)\n",
@@ -375,6 +390,8 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	 */
 	public void setOptions(String[] options) throws Exception {
 
+    setMarkovBlanketClassifier(Utils.getFlag("mbc", options));
+
 		String sScore = Utils.getOption('S', options);
 
 		if (sScore.compareTo("LOO-CV") == 0) {
@@ -397,8 +414,11 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	 */
 	public String[] getOptions() {
 		String[] superOptions = super.getOptions();
-		String[] options = new String[3 + superOptions.length];
+		String[] options = new String[4 + superOptions.length];
 		int current = 0;
+
+    if (getMarkovBlanketClassifier())
+      options[current++] = "-mbc";
 
 		options[current++] = "-S";
 
@@ -417,6 +437,11 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 		if (getUseProb()) {
 		  options[current++] = "-Q";
 		}
+
+                // insert options from parent class
+                for (int iOption = 0; iOption < superOptions.length; iOption++) {
+                        options[current++] = superOptions[iOption];
+                }
 
 		// Fill up rest with empty strings, not nulls!
 		while (current < options.length) {
@@ -453,5 +478,12 @@ public class GlobalScoreSearchAlgorithm extends SearchAlgorithm {
 	  return "This Bayes Network learning algorithm uses cross validation to estimate " +
 	  "classification accuracy.";
 	} // globalInfo
+
+  /**
+   * @return a string to describe the MarkovBlanketClassifier option.
+   */
+  public String markovBlanketClassifierTipText() {
+    return super.markovBlanketClassifierTipText();
+  }
 
 } // class CVSearchAlgorithm
