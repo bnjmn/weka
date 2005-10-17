@@ -36,7 +36,7 @@ import weka.core.OptionHandler;
  * and should not be used by itself.
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
@@ -216,7 +216,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @return an enumeration of all the available options.
      */
     public Enumeration listOptions() {
-        return new Vector(0).elements();
+      return new Vector(0).elements();
     } // listOption
 
     /**
@@ -233,7 +233,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-        return new String[0];
+      return new String[0];
     } // getOptions
 
     public String toString() {
@@ -313,10 +313,11 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
     } // doMarkovBlanketCorrection
 
-    public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
+    protected void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
         m_bMarkovBlanketClassifier = bMarkovBlanketClassifier;
     }
-    public boolean getMarkovBlanketClassifier() {
+
+    protected boolean getMarkovBlanketClassifier() {
         return m_bMarkovBlanketClassifier;
     }
 
@@ -346,7 +347,7 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
      * @return a string to describe the MarkovBlanketClassifier option.
      */
-    public String markovBlanketClassifierTipText() {
+    protected String markovBlanketClassifierTipText() {
         return "When set to true (default is false), after a network structure is learned"
             + " a Markov Blanket correction is applied to the network structure. This ensures"
             + " that all nodes in the network are part of the Markov blanket of the classifier"
