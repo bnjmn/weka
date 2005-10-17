@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 
@@ -519,14 +519,29 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 		return new SelectedTag(m_nScoreType, TAGS_SCORE_TYPE);
 	}
 
+  public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
+    super.setMarkovBlanketClassifier(bMarkovBlanketClassifier);
+  }
+
+  public boolean getMarkovBlanketClassifier() {
+    return super.getMarkovBlanketClassifier();
+  }
+
 	/**
 	 * Returns an enumeration describing the available options
 	 * 
 	 * @return an enumeration of all the available options
 	 */
 	public Enumeration listOptions() {
-		Vector newVector = new Vector(1);
+		Vector newVector = new Vector();
 
+    newVector.addElement(new Option(
+            "\tApplies a Markov Blanket correction to the network structure, "
+          + "\tafter a network structure is learned. This ensures that all "
+          + "\tnodes in the network are part of the Markov blanket of the "
+          + "\tclassifier node.\n",
+          "mbc", 0, "-mbc"));
+      
 		newVector.addElement(
 			new Option(
 				"\tScore type (BAYES, BDeu, MDL, ENTROPY and AIC)\n",
@@ -538,6 +553,8 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 	} // listOptions
 
 	public void setOptions(String[] options) throws Exception {
+
+    setMarkovBlanketClassifier(Utils.getFlag("mbc", options));
 
 		String sScore = Utils.getOption('S', options);
 
@@ -559,8 +576,12 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 	} // setOptions
 
 	public String[] getOptions() {
-		String[] options = new String[2];
+                String[] superOptions = super.getOptions();
+		String[] options = new String[3 + superOptions.length];
 		int current = 0;
+
+    if (getMarkovBlanketClassifier())
+      options[current++] = "-mbc";
 
 		options[current++] = "-S";
 
@@ -588,6 +609,11 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 				break;
 		}
 
+                // insert options from parent class
+                for (int iOption = 0; iOption < superOptions.length; iOption++) {
+                        options[current++] = superOptions[iOption];
+                }
+
 		// Fill up rest with empty strings, not nulls!
 		while (current < options.length) {
 			options[current++] = "";
@@ -604,4 +630,11 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 			+ " network structure. It can be one of Bayes, BDeu, Minimum Description Length (MDL),"
 			+ " Akaike Information Criterion (AIC), and Entropy.";
 	}
+
+  /**
+   * @return a string to describe the MarkovBlanketClassifier option.
+   */
+  public String markovBlanketClassifierTipText() {
+    return super.markovBlanketClassifierTipText();
+  }
 } // class ScoreBasedSearchAlgorithm
