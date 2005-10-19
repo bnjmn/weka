@@ -28,7 +28,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.StringTokenizer;
@@ -78,7 +77,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
 */
 
 public class Matrix 
@@ -88,14 +87,14 @@ public class Matrix
    * Array for internal storage of elements.
    * @serial internal array storage.
    */
-  private double[][] A;
+  protected double[][] A;
 
   /** 
    * Row and column dimensions.
    * @serial row dimension.
    * @serial column dimension.
    */
-  private int m, n;
+  protected int m, n;
 
   /** 
    * Construct an m-by-n matrix of zeros. 
