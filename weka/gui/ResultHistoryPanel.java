@@ -62,7 +62,7 @@ import weka.gui.visualize.PrintableComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -210,10 +210,11 @@ public class ResultHistoryPanel extends JPanel {
   public void removeResult(String name) {
 
     StringBuffer buff = (StringBuffer) m_Results.get(name);
-    JTextComponent currentText = (JTextComponent) m_FramedOutput.get(name);
     if (buff != null) {
       m_Results.remove(name);
       m_Model.removeElement(name);
+      m_Objs.remove(name);
+      System.gc();
     } 
   }
 
