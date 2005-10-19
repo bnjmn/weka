@@ -21,6 +21,10 @@
 
 package weka.classifiers.functions.pace;
 
+import weka.core.matrix.DoubleVector;
+import weka.core.matrix.FlexibleDecimalFormat;
+import weka.core.matrix.IntVector;
+
 
 /** Class for handling discrete functions. <p>
  * 
@@ -28,7 +32,7 @@ package weka.classifiers.functions.pace;
  * set of points. <p>
  * 
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ */
+ * @version $Revision: 1.2 $ */
 
 public class  DiscreteFunction {
     
