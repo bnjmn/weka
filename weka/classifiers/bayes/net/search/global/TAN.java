@@ -35,7 +35,7 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class TAN extends GlobalScoreSearchAlgorithm {
@@ -52,13 +52,6 @@ public class TAN extends GlobalScoreSearchAlgorithm {
 		m_nMaxNrOfParents = 2;
 		super.buildStructure(bayesNet, instances);
 		int      nNrOfAtts = instances.numAttributes();
-
-		// initialize as naive Bayes network
-		for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
-			if (iAttribute != instances.classIndex()) {
-				bayesNet.getParentSet(iAttribute).addParent(instances.classIndex(), instances);
-			}
-		}
 
 		// TAN greedy search (not restricted by ordering like K2)
 		// 1. find strongest link
