@@ -94,3 +94,7 @@ weka.datagenerators.ClusterDefinition=\
  weka.datagenerators,\
  weka.datagenerators.clusterers
 
+# List of stemmers
+weka.core.stemmers.Stemmer=\
+ weka.core.stemmers
+

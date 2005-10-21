@@ -289,4 +289,11 @@ weka.datagenerators.DataGenerator=\
 # Lists the Cluster definitions
 weka.datagenerators.ClusterDefinition=\
   weka.datagenerators.clusterers.SubspaceClusterDefinition
+
+# Lists the Stemmer algorithms
+weka.core.stemmers.Stemmer=\
+ weka.core.stemmers.IteratedLovinsStemmer,\
+ weka.core.stemmers.LovinsStemmer,\
+ weka.core.stemmers.NullStemmer,\
+ weka.core.stemmers.SnowballStemmer
    
