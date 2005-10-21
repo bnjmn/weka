@@ -28,11 +28,22 @@ import java.util.*;
  * An iterated version of the Lovins stemmer.
  * 
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 
   extends LovinsStemmer {
+
+  /**
+   * Returns a string describing the stemmer
+   * @return a description suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return 
+        "An iterated version of the Lovins stemmer. It stems the word (in "
+      + "case it's longer than 2 characters) until it no further changes.";
+  }
 
   /**
    * Iterated stemming of the given word.
