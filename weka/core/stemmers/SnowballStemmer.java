@@ -22,7 +22,10 @@
 
 package weka.core.stemmers;
 
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.RTSI;
+import weka.core.Utils;
 
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -34,10 +37,10 @@ import java.util.Vector;
  * CLASSPATH to be available.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.1 $
+ * @version   $Revision: 1.2 $
  */
 public class SnowballStemmer 
-  implements Stemmer {
+  implements Stemmer, OptionHandler {
   
   /** the package name for snowball */
   public final static String PACKAGE = "org.tartarus.snowball";
@@ -58,13 +61,13 @@ public class SnowballStemmer
   protected Object m_Stemmer;
 
   /** the stem method */
-  protected Method m_StemMethod;
+  protected transient Method m_StemMethod;
 
   /** the setCurrent method */
-  protected Method m_SetCurrentMethod;
+  protected transient Method m_SetCurrentMethod;
 
   /** the getCurrent method */
-  protected Method m_GetCurrentMethod;
+  protected transient Method m_GetCurrentMethod;
    
   /** check for Snowball statically (needs only to be done once) */
   static {
@@ -101,6 +104,69 @@ public class SnowballStemmer
     catch (Exception e) {
       m_Present = false;
     }
+  }
+
+  /**
+   * Returns a string describing the stemmer
+   * @return a description suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return 
+        "A wrapper class for the Snowball stemmers. Only available if the "
+      + "Snowball classes are in the classpath.\n"
+      + "For more information visit these web sites:\n"
+      + "  http://www.cs.waikato.ac.nz/~ml/weka/stemmers/\n"
+      + "  http://snowball.tartarus.org/\n";
+  }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector        result;
+    
+    result = new Vector();
+    
+    result.addElement(new Option(
+        "\tThe name of the snowball stemmer.\n"
+        + "\t(default 'porter')",
+        "S", 1, "-S <name>"));
+    
+    return result.elements();
+  }
+  
+  /**
+   * parses the options.
+   */
+  public void setOptions(String[] options) throws Exception {
+    String      tmpStr;
+    
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0)
+      setStemmer(tmpStr);
+    else
+      setStemmer("porter");
+  }
+  
+  /**
+   * Gets the current settings of the classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector        result;
+    
+    result  = new Vector();
+    
+    if (getStemmer() != null) {
+      result.add("-S");
+      result.add("" + getStemmer());
+    }
+    
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -207,6 +273,16 @@ public class SnowballStemmer
   }
 
   /**
+   * Returns the tip text for this property.
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String stemmerTipText() {
+    return "The Snowball stemmer to use, ie, the Snowball stemmer classname without the ending 'Stemmer'; Eg, 'porter' for the 'porterStemmer' class.";
+  }
+
+  /**
    * Returns the word in its stemmed form.
    *
    * @param word      the unstemmed word
@@ -241,6 +317,18 @@ public class SnowballStemmer
     }
       
     return result;
+  }
+
+  /**
+   * returns a string representation of the the stemmer
+   */
+  public String toString() {
+    String      result;
+
+    result  = getClass().getName();
+    result += " " + Utils.joinOptions(getOptions());
+
+    return result.trim();
   }
 
   /**
