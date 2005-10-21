@@ -55,7 +55,7 @@ import weka.core.converters.DatabaseSaver;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SaverCustomizer extends JPanel implements Customizer, CustomizerCloseRequester {
 
@@ -100,6 +100,9 @@ public class SaverCustomizer extends JPanel implements Customizer, CustomizerClo
     java.beans.PropertyEditorManager
       .registerEditor(java.io.File.class,
 		      weka.gui.FileEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.stemmers.Stemmer.class,
+		      GenericObjectEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 

@@ -95,7 +95,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.54 $
+ * @version $Revision: 1.55 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -224,6 +224,9 @@ public class PreprocessPanel extends JPanel {
      java.beans.PropertyEditorManager
        .registerEditor(weka.core.converters.Saver.class,
 		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.stemmers.Stemmer.class,
+		      GenericObjectEditor.class);
   }
   
   /**
