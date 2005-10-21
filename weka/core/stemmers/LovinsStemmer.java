@@ -22,7 +22,9 @@
 
 package weka.core.stemmers;
 
-import java.util.*;
+import weka.core.Utils;
+
+import java.util.HashMap;
 
 /**
  * A stemmer based on the Lovins stemmer, described here: <p/>
@@ -34,7 +36,7 @@ import java.util.*;
  *
  * 
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class LovinsStemmer 
@@ -918,30 +920,22 @@ public class LovinsStemmer
   }
 
   /**
-   * Stems text coming into stdin and writes it to stdout.
+   * returns a string representation of the the stemmer
    */
-  public static void main(String[] ops) {
+  public String toString() {
+    return getClass().getName();
+  }
 
-    LovinsStemmer ls = new LovinsStemmer();
-
+  /**
+   * Runs the stemmer with the given options
+   *
+   * @param args      the options
+   */
+  public static void main(String[] args) {
     try {
-      int num;
-      StringBuffer wordBuffer = new StringBuffer();
-      while ((num = System.in.read()) != -1) {
-        char c = (char)num;
-        if (((num >= (int)'A') && (num <= (int)'Z')) ||
-            ((num >= (int)'a') && (num <= (int)'z'))) {
-          wordBuffer.append(c);
-        } else {
-          if (wordBuffer.length() > 0) {
-            System.out.print(ls.stem(wordBuffer.toString().
-                  toLowerCase()));
-            wordBuffer = new StringBuffer();
-          }
-          System.out.print(c);
-        }
-      }
-    } catch (Exception e) {
+      Stemming.useStemmer(new LovinsStemmer(), args);
+    }
+    catch (Exception e) {
       e.printStackTrace();
     }
   }
