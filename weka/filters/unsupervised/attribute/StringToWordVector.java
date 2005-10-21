@@ -49,6 +49,8 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.stemmers.NullStemmer;
+import weka.core.stemmers.Stemmer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -61,7 +63,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -130,7 +132,9 @@ public class StringToWordVector extends Filter
   
   /** True if tokens that are on a stoplist are to be ignored. */
   private boolean m_useStoplist;  
-  
+
+  /** the stemming algorithm */
+  private Stemmer m_Stemmer = new NullStemmer();
   
   /**
    * Returns an enumeration describing the available options
@@ -139,7 +143,7 @@ public class StringToWordVector extends Filter
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector();
 
     newVector.addElement(new Option(
 				    "\tOutput word counts rather than boolean word presence.\n",
@@ -190,7 +194,9 @@ public class StringToWordVector extends Filter
     newVector.addElement(new Option(
 				    "\tIgnore words that are in the stoplist.",
 				    "S", 0, "-S"));
-        
+    newVector.addElement(new Option(
+				    "\tThe stemmering algorihtm (classname plus parameters) to use.",
+				    "stemmer", 1, "-stemmer <spec>"));
 
     return newVector.elements();
   }
@@ -241,6 +247,9 @@ public class StringToWordVector extends Filter
    * are normalized to average length of the documents specified in input 
    * format. <p>
    *
+   * -stemmer &lt;spec&gt; <br/>
+   * The stemming algorihtm (classname plus options) to use. <p/>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -280,6 +289,21 @@ public class StringToWordVector extends Filter
     
     setUseStoplist(Utils.getFlag('S', options));
     
+    String stemmerString = Utils.getOption("stemmer", options);
+    if (stemmerString.length() == 0) {
+      setStemmer(null);
+    }
+    else {
+      String[] stemmerSpec = Utils.splitOptions(stemmerString);
+      if (stemmerSpec.length == 0)
+        throw new Exception("Invalid stemmer specification string");
+      String stemmerName = stemmerSpec[0];
+      stemmerSpec[0] = "";
+      Stemmer stemmer = (Stemmer) Class.forName(stemmerName).newInstance();
+      if (stemmer instanceof OptionHandler)
+        ((OptionHandler) stemmer).setOptions(stemmerSpec);
+      setStemmer(stemmer);
+    }
   }
 
   /**
@@ -289,7 +313,7 @@ public class StringToWordVector extends Filter
    */
   public String [] getOptions() {
 
-    String [] options = new String [16];
+    String [] options = new String [18];
     int current = 0;
 
     options[current++] = "-D"; 
@@ -330,6 +354,15 @@ public class StringToWordVector extends Filter
     
     if(this.getUseStoplist())
         options[current++] = "-S";
+    
+    if (getStemmer() != null) {
+      options[current++] = "-stemmer";
+      String spec = getStemmer().getClass().getName();
+      if (getStemmer() instanceof OptionHandler)
+        spec += " " + Utils.joinOptions(
+                          ((OptionHandler) getStemmer()).getOptions());
+      options[current++] = spec.trim();
+    }
     
     while (current < options.length) {
       options[current++] = "";
@@ -842,6 +875,39 @@ public class StringToWordVector extends Filter
   public String useStoplistTipText() {
       return "Ignores all the words that are on the stoplist, if set to true.";
   } 
+
+  /**
+   * the stemming algorithm to use, null means no stemming at all (i.e., the
+   * NullStemmer is used)
+   *
+   * @param value     the configured stemming algorithm, or null
+   * @see             NullStemmer
+   */
+  public void setStemmer(Stemmer value) {
+    if (value != null)
+      m_Stemmer = value;
+    else
+      m_Stemmer = new NullStemmer();
+  }
+
+  /**
+   * Returns the current stemming algorithm, null if none is used.
+   *
+   * @return          the current stemming algorithm, null if none set
+   */
+  public Stemmer getStemmer() {
+    return m_Stemmer;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String stemmerTipText() {
+    return "The stemming algorithm to use on the words.";
+  }
   
   private static void sortArray(int [] array) {
       
@@ -940,6 +1006,8 @@ public class StringToWordVector extends Filter
             
             if(this.m_lowerCaseTokens==true)
                 word = word.toLowerCase();
+            
+            word = m_Stemmer.stem(word);
             
             if(this.m_useStoplist==true)
                 if(weka.core.Stopwords.isStopword(word))
@@ -1143,6 +1211,7 @@ public class StringToWordVector extends Filter
           String word = (String)st.nextElement(); 
           if(this.m_lowerCaseTokens==true)
               word = word.toLowerCase();
+          word = m_Stemmer.stem(word);
           Integer index = (Integer) m_Dictionary.get(word);
           if (index != null) {
             if (m_OutputCounts) { // Separate if here rather than two lines down to avoid hashtable lookup
@@ -1308,6 +1377,7 @@ public class StringToWordVector extends Filter
           String word = (String)st.nextElement(); 
           if(this.m_lowerCaseTokens==true)
               word = word.toLowerCase();
+          word = m_Stemmer.stem(word);
           Integer index = (Integer) m_Dictionary.get(word);
           if (index != null) {
             if (m_OutputCounts) { // Separate if here rather than two lines down to avoid hashtable lookup
