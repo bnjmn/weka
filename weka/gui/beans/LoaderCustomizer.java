@@ -45,7 +45,7 @@ import weka.core.converters.FileSourcedConverter;
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class LoaderCustomizer extends JPanel
   implements Customizer, CustomizerCloseRequester {
@@ -88,6 +88,9 @@ public class LoaderCustomizer extends JPanel
     java.beans.PropertyEditorManager
       .registerEditor(java.io.File.class,
 		      weka.gui.FileEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.stemmers.Stemmer.class,
+		      GenericObjectEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 

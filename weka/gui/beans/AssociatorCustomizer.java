@@ -39,7 +39,7 @@ import weka.associations.Associator;
  * GUI customizer for the associator wrapper bean
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AssociatorCustomizer extends JPanel
   implements Customizer {
@@ -78,6 +78,9 @@ public class AssociatorCustomizer extends JPanel
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,
 		      weka.gui.CostMatrixEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.stemmers.Stemmer.class,
+		      GenericObjectEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 

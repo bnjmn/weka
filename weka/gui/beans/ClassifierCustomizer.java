@@ -39,7 +39,7 @@ import weka.classifiers.Classifier;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ClassifierCustomizer extends JPanel
   implements Customizer {
@@ -75,6 +75,9 @@ public class ClassifierCustomizer extends JPanel
     java.beans.PropertyEditorManager
       .registerEditor(weka.classifiers.CostMatrix.class,
 		      weka.gui.CostMatrixEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.stemmers.Stemmer.class,
+		      GenericObjectEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 

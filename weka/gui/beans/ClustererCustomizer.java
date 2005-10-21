@@ -39,7 +39,7 @@ import weka.clusterers.Clusterer;
  * GUI customizer for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClustererCustomizer extends JPanel implements Customizer {
 
@@ -65,6 +65,9 @@ public class ClustererCustomizer extends JPanel implements Customizer {
     java.beans.PropertyEditorManager
       .registerEditor(weka.clusterers.Clusterer.class,
 		      weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager
+      .registerEditor(weka.core.stemmers.Stemmer.class,
+		      GenericObjectEditor.class);
   }
 
   private PropertyChangeSupport m_pcSupport = 
