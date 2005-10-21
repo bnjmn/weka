@@ -27,10 +27,20 @@ package weka.core.stemmers;
  * Only as dummy stemmer used.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.1 $
+ * @version   $Revision: 1.2 $
  */
 public class NullStemmer 
   implements Stemmer {
+
+  /**
+   * Returns a string describing the stemmer
+   * @return a description suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return 
+        "A dummy stemmer that performs no stemming at all.";
+  }
   
   /**
    * Returns the word as it is.

@@ -34,7 +34,7 @@ import java.util.*;
  *
  * 
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class LovinsStemmer 
@@ -371,6 +371,20 @@ public class LovinsStemmer
     m_l1.put("o", "A");
     m_l1.put("s", "W");
     m_l1.put("y", "B");	
+  }
+
+  /**
+   * Returns a string describing the stemmer
+   * @return a description suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return 
+        "A stemmer based on the Lovins stemmer, described here:\n "
+      + "The following archives contain implementations of the Lovins stemmer "
+      + "as described in \"Development of a Stemming Algorithm\" by Julie "
+      + "Beth Lovins (published in \"Mechanical translation and computational "
+      + "linguistics\", 11:22-31, 1968)";
   }
 
   /**
