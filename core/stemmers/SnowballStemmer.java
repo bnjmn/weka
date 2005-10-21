@@ -37,7 +37,7 @@ import java.util.Vector;
  * CLASSPATH to be available.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.2 $
+ * @version   $Revision: 1.3 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -131,8 +131,9 @@ public class SnowballStemmer
     result = new Vector();
     
     result.addElement(new Option(
-        "\tThe name of the snowball stemmer.\n"
-        + "\t(default 'porter')",
+        "\tThe name of the snowball stemmer (default 'porter').\n"
+        + "\tavailable stemmers:\n" 
+        + getStemmerList(65, "\t   "),
         "S", 1, "-S <name>"));
     
     return result.elements();
@@ -225,6 +226,40 @@ public class SnowballStemmer
   }
 
   /**
+   * generates a comma list of the available stemmers
+   * 
+   * @param lineLength    the max line length, before a linefeed is inserted
+   *                      (0 is unlimited)
+   * @param indention     the indention of a line
+   * @return              the generated list
+   */
+  private static String getStemmerList(int lineLength, String indention) {
+    String        result;
+    Enumeration   enm;
+    String        name;
+    String        line;
+    
+    result = "";
+    line   = "";
+    enm    = listStemmers();
+    while (enm.hasMoreElements()) {
+      name = enm.nextElement().toString();
+      if (line.length() > 0)
+        line += ", ";
+      if ( (lineLength > 0) && (line.length() + name.length() > lineLength) ) {
+        result += indention + line + "\n";
+        line    = "";
+      }
+      line += name;
+    }
+
+    if (line.length() > 0)
+      result += indention + line + "\n";
+    
+    return result;
+  }
+
+  /**
    * returns the name of the current stemmer, null if none is set
    */
   public String getStemmer() {
@@ -279,7 +314,7 @@ public class SnowballStemmer
    * displaying in the explorer/experimenter gui
    */
   public String stemmerTipText() {
-    return "The Snowball stemmer to use, ie, the Snowball stemmer classname without the ending 'Stemmer'; Eg, 'porter' for the 'porterStemmer' class.";
+    return "The Snowball stemmer to use, available: " + getStemmerList(0, "");
   }
 
   /**
@@ -332,30 +367,16 @@ public class SnowballStemmer
   }
 
   /**
-   * for testing only
+   * Runs the stemmer with the given options
+   *
+   * @param args      the options
    */
   public static void main(String[] args) {
-    SnowballStemmer   s;
-    String            word;
-    Enumeration       enm;
-    String            name;
-    
-    s   = new SnowballStemmer();
-    enm = SnowballStemmer.listStemmers();
-    
-    while (enm.hasMoreElements()) {
-      name = enm.nextElement().toString();
-      System.out.println("\nStemmer: " + name);
-      s.setStemmer(name);
-      
-      word = "shoes";
-      System.out.println("- " + word + " -> " + s.stem(word));
-      
-      word = "houses";
-      System.out.println("- " + word + " -> " + s.stem(word));
-      
-      word = "programmed";
-      System.out.println("- " + word + " -> " + s.stem(word));
+    try {
+      Stemming.useStemmer(new SnowballStemmer(), args);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

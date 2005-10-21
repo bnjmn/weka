@@ -27,7 +27,7 @@ package weka.core.stemmers;
  * Only as dummy stemmer used.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.2 $
+ * @version   $Revision: 1.3 $
  */
 public class NullStemmer 
   implements Stemmer {
@@ -53,21 +53,23 @@ public class NullStemmer
   }
 
   /**
-   * for testing only
+   * returns a string representation of the the stemmer
+   */
+  public String toString() {
+    return getClass().getName();
+  }
+
+  /**
+   * Runs the stemmer with the given options
+   *
+   * @param args      the options
    */
   public static void main(String[] args) {
-    Stemmer     s;
-    String      word;
-    
-    s = new NullStemmer();
-    
-    word = "shoes";
-    System.out.println(word + " -> " + s.stem(word));
-    
-    word = "houses";
-    System.out.println(word + " -> " + s.stem(word));
-    
-    word = "programmed";
-    System.out.println(word + " -> " + s.stem(word));
+    try {
+      Stemming.useStemmer(new NullStemmer(), args);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 }

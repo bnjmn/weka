@@ -22,13 +22,11 @@
 
 package weka.core.stemmers;
 
-import java.util.*;
-
 /**
  * An iterated version of the Lovins stemmer.
  * 
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 
@@ -63,30 +61,15 @@ public class IteratedLovinsStemmer
   }
 
   /**
-   * Stems text coming into stdin and writes it to stdout.
+   * Runs the stemmer with the given options
+   *
+   * @param args      the options
    */
-  public static void main(String[] ops) {
-
-    IteratedLovinsStemmer ls = new IteratedLovinsStemmer();
-
+  public static void main(String[] args) {
     try {
-      int num;
-      StringBuffer wordBuffer = new StringBuffer();
-      while ((num = System.in.read()) != -1) {
-        char c = (char)num;
-        if (((num >= (int)'A') && (num <= (int)'Z')) ||
-            ((num >= (int)'a') && (num <= (int)'z'))) {
-          wordBuffer.append(c);
-        } else {
-          if (wordBuffer.length() > 0) {
-            System.out.print(ls.stem(wordBuffer.toString().
-                  toLowerCase()));
-            wordBuffer = new StringBuffer();
-          }
-          System.out.print(c);
-        }
-      }
-    } catch (Exception e) {
+      Stemming.useStemmer(new IteratedLovinsStemmer(), args);
+    }
+    catch (Exception e) {
       e.printStackTrace();
     }
   }
