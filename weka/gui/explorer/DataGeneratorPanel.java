@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A panel for generating artificial data via DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DataGeneratorPanel
   extends JPanel {
@@ -59,15 +59,7 @@ public class DataGeneratorPanel
 
   /** register the classes */
   static {
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.datagenerators.DataGenerator.class,
-		      GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.datagenerators.ClusterDefinition.class,
-		      GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.datagenerators.ClusterDefinition[].class,
-		      GenericArrayEditor.class);
+     GenericObjectEditor.registerEditors();
   }
   
   /**

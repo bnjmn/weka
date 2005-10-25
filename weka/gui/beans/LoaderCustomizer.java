@@ -45,52 +45,13 @@ import weka.core.converters.FileSourcedConverter;
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LoaderCustomizer extends JPanel
   implements Customizer, CustomizerCloseRequester {
 
   static {
-
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.converters.Loader.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASEvaluation.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(Object [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.NearestNeighbourSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.DistanceFunction.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.CostMatrix.class,
-		      weka.gui.CostMatrixEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(java.io.File.class,
-		      weka.gui.FileEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.stemmers.Stemmer.class,
-		      GenericObjectEditor.class);
+     GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 
