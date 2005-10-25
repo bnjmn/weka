@@ -105,7 +105,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p/>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 
 /*
@@ -509,6 +509,7 @@ public class CheckClassifier implements OptionHandler {
     accepts.addElement("nominal");
     accepts.addElement("numeric");
     accepts.addElement("string");
+    accepts.addElement("not in classpath");
     int numTrain = getNumInstances(), numTest = getNumInstances(), 
         numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
