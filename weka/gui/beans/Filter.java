@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Filter extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
@@ -152,13 +152,21 @@ public class Filter extends JPanel
 				      indexOf('.')+1, 
 				      filterName.length());
     if (loadImages) {
-      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
-		       BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
-	useDefaultVisual();
+      if (m_Filter instanceof Visible) {
+        m_visual = ((Visible) m_Filter).getVisual();
+      } else {
+        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+filterName+".gif",
+                                BeanVisual.ICON_PATH+filterName+"_animated.gif")) {
+          useDefaultVisual();
+        }
       }
     }
     m_visual.setText(filterName.substring(filterName.lastIndexOf('.')+1,
 					  filterName.length()));
+
+    if (m_Filter instanceof LogWriter && m_log != null) {
+      ((LogWriter) m_Filter).setLog(m_log);
+    }
 
     if (!(m_Filter instanceof StreamableFilter) &&
 	(m_listenees.containsKey("instance"))) {
@@ -682,6 +690,10 @@ public class Filter extends JPanel
 						  Object source) {
     if (connectionAllowed(eventName)) {
       m_listenees.put(eventName, source);
+      if (m_Filter instanceof ConnectionNotificationConsumer) {
+        ((ConnectionNotificationConsumer) m_Filter).
+          connectionNotification(eventName, source);
+      }
     }
   }
 
@@ -695,6 +707,10 @@ public class Filter extends JPanel
    */
   public synchronized void disconnectionNotification(String eventName,
 						     Object source) {
+    if (m_Filter instanceof ConnectionNotificationConsumer) {
+      ((ConnectionNotificationConsumer) m_Filter).
+        disconnectionNotification(eventName, source);
+    }
     m_listenees.remove(eventName);
   }
 
@@ -744,6 +760,10 @@ public class Filter extends JPanel
    */
   public void setLog(Logger logger) {
     m_log = logger;
+
+    if (m_Filter != null && m_Filter instanceof LogWriter) {
+      ((LogWriter) m_Filter).setLog(m_log);
+    }
   }
 
   /**
