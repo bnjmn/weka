@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -250,10 +250,14 @@ public class Loader extends AbstractDataSource
 				      lastIndexOf('.')+1, 
 				      loaderName.length());
     if (loadImages) {
+      if (m_Loader instanceof Visible) {
+        m_visual = ((Visible) m_Loader).getVisual();
+      } else {
 
-      if (!m_visual.loadIcons(BeanVisual.ICON_PATH+loaderName+".gif",
-			    BeanVisual.ICON_PATH+loaderName+"_animated.gif")) {
-	useDefaultVisual();
+        if (!m_visual.loadIcons(BeanVisual.ICON_PATH+loaderName+".gif",
+                                BeanVisual.ICON_PATH+loaderName+"_animated.gif")) {
+          useDefaultVisual();
+        }
       }
     }
     m_visual.setText(loaderName);
