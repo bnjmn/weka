@@ -53,7 +53,7 @@ import weka.gui.Logger;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.3 $
+ * @version $Revision: 1.16.2.4 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -663,8 +663,21 @@ public class Classifier extends JPanel
    * Use the default visual appearance for this bean
    */
   public void useDefaultVisual() {
-    m_visual.loadIcons(BeanVisual.ICON_PATH+"DefaultClassifier.gif",
-		       BeanVisual.ICON_PATH+"DefaultClassifier_animated.gif");
+    // try to get a default for this package of classifiers
+    String name = m_Classifier.getClass().toString();
+    String packageName = name.substring(0, name.lastIndexOf('.'));
+    packageName = 
+      packageName.substring(packageName.lastIndexOf('.')+1,
+                            packageName.length());
+    if (!m_visual.loadIcons(BeanVisual.ICON_PATH+"Default_"+packageName
+                            +"Classifier.gif",
+                            BeanVisual.ICON_PATH+"Default_"+packageName
+                            +"Classifier_animated.gif")) {
+      m_visual.loadIcons(BeanVisual.
+                         ICON_PATH+"DefaultClassifier.gif",
+                         BeanVisual.
+                         ICON_PATH+"DefaultClassifier_animated.gif");
+    }
   }
 
   /**
