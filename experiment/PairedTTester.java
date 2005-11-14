@@ -78,7 +78,7 @@ import weka.core.Option;
  * Produce comparison tables with only the significances <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class PairedTTester implements OptionHandler, Tester {
 
@@ -1048,15 +1048,13 @@ public class PairedTTester implements OptionHandler, Tester {
   public void setOptions(String[] options) throws Exception {
 
     setShowStdDevs(Utils.getFlag('V', options));
-    if (Utils.getFlag('L', options));
+    if (Utils.getFlag('L', options))
       setResultMatrix(new ResultMatrixLatex());
-    if (Utils.getFlag("csv", options));
+    if (Utils.getFlag("csv", options))
       setResultMatrix(new ResultMatrixCSV());
-    if (Utils.getFlag("html", options));
+    if (Utils.getFlag("html", options))
       setResultMatrix(new ResultMatrixHTML());
-    if (Utils.getFlag("significance", options));
-      setResultMatrix(new ResultMatrixSignificance());
-    if (Utils.getFlag("significance", options));
+    if (Utils.getFlag("significance", options))
       setResultMatrix(new ResultMatrixSignificance());
 
     String datasetList = Utils.getOption('D', options);
