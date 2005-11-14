@@ -39,7 +39,7 @@ import java.util.Enumeration;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PairedCorrectedTTester extends PairedTTester {
 
@@ -119,12 +119,14 @@ public class PairedCorrectedTTester extends PairedTTester {
       Instance current1 = (Instance) dataset1.elementAt(k);
       Instance current2 = (Instance) dataset2.elementAt(k);
       if (current1.isMissing(comparisonColumn)) {
-	throw new Exception("Instance has missing value in comparison "
-			    + "column!\n" + current1);
+	System.err.println("Instance has missing value in comparison "
+			   + "column!\n" + current1);
+	continue;
       }
       if (current2.isMissing(comparisonColumn)) {
-	throw new Exception("Instance has missing value in comparison "
-			    + "column!\n" + current2);
+	System.err.println("Instance has missing value in comparison "
+			   + "column!\n" + current2);
+	continue;
       }
       if (current1.value(m_RunColumn) != current2.value(m_RunColumn)) {
 	System.err.println("Run numbers do not match!\n"

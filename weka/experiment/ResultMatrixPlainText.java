@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class ResultMatrixPlainText extends ResultMatrix {
@@ -174,7 +174,7 @@ public class ResultMatrixPlainText extends ResultMatrix {
         
         if (n == 0) {
           line += padString(cells[i][n], getRowNameWidth());
-          line += padString("(" + Utils.doubleToString(getCount(i-1), 0) + ")", 
+          line += padString("(" + Utils.doubleToString(getCount(getDisplayRow(i-1)), 0) + ")", 
                         getCountWidth(), true);
         }
         else {
