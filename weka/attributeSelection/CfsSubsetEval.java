@@ -41,10 +41,10 @@ import  weka.filters.Filter;
  * Treat missing values as a seperate value. <p>
  * 
  * -L <br>
- * Include locally predictive attributes. <p>
+ * Don't include locally predictive attributes. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class CfsSubsetEval
   extends SubsetEvaluator
@@ -105,7 +105,7 @@ public class CfsSubsetEval
     Vector newVector = new Vector(3);
     newVector.addElement(new Option("\tTreat missing values as a seperate" 
 				    + "\n\tvalue.", "M", 0, "-M"));
-    newVector.addElement(new Option("\tInclude locally predictive attributes" 
+    newVector.addElement(new Option("\tDon't include locally predictive attributes" 
 				    + ".", "L", 0, "-L"));
     return  newVector.elements();
   }
@@ -120,7 +120,7 @@ public class CfsSubsetEval
    * Treat missing values as a seperate value. <p>
    * 
    * -L <br>
-   * Include locally predictive attributes. <p>
+   * Don't include locally predictive attributes. <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -131,7 +131,7 @@ public class CfsSubsetEval
     String optionString;
     resetOptions();
     setMissingSeperate(Utils.getFlag('M', options));
-    setLocallyPredictive(Utils.getFlag('L', options));
+    setLocallyPredictive(!Utils.getFlag('L', options));
   }
 
   /**
@@ -209,7 +209,7 @@ public class CfsSubsetEval
       options[current++] = "-M";
     }
 
-    if (getLocallyPredictive()) {
+    if (!getLocallyPredictive()) {
       options[current++] = "-L";
     }
 
@@ -1023,7 +1023,7 @@ public class CfsSubsetEval
   protected void resetOptions () {
     m_trainInstances = null;
     m_missingSeperate = false;
-    m_locallyPredictive = false;
+    m_locallyPredictive = true;
     m_c_Threshold = 0.0;
   }
 
