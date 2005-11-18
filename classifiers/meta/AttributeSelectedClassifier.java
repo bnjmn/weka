@@ -56,7 +56,7 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class AttributeSelectedClassifier extends SingleClassifierEnhancer
   implements OptionHandler, Drawable, AdditionalMeasureProducer,
@@ -342,13 +342,28 @@ public class AttributeSelectedClassifier extends SingleClassifierEnhancer
     }
 
     Instances resampledData = null;
-    if (!(m_Evaluator instanceof WeightedInstancesHandler) || 
-        !(m_Classifier instanceof WeightedInstancesHandler)) {
-      Random r = new Random(1);
-      for (int i = 0; i < 10; i++) {
-        r.nextDouble();
+    // check to see if training data has all equal weights
+    double weight = newData.instance(0).weight();
+    boolean ok = false;
+    for (int i = 1; i < newData.numInstances(); i++) {
+      if (newData.instance(i).weight() != weight) {
+        ok = true;
+        break;
       }
-      resampledData = newData.resampleWithWeights(r);
+    }
+    
+    if (ok) {
+      if (!(m_Evaluator instanceof WeightedInstancesHandler) || 
+          !(m_Classifier instanceof WeightedInstancesHandler)) {
+        Random r = new Random(1);
+        for (int i = 0; i < 10; i++) {
+          r.nextDouble();
+        }
+        resampledData = newData.resampleWithWeights(r);
+      }
+    } else {
+      // all equal weights in the training data so just use as is
+      resampledData = newData;
     }
 
     m_AttributeSelection = new AttributeSelection();
