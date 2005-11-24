@@ -34,7 +34,7 @@ import javax.swing.event.TableModelListener;
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class ArffTableSorter extends TableSorter implements Undoable {
@@ -143,14 +143,21 @@ public class ArffTableSorter extends TableSorter implements Undoable {
    * deletes the instance at the given index
    */
   public void deleteInstanceAt(int rowIndex) {
-    ((ArffTableModel) model).deleteInstanceAt(rowIndex);
+    ((ArffTableModel) model).deleteInstanceAt(indexes[rowIndex]);
   }
   
   /**
    * deletes the instances at the given positions
    */
   public void deleteInstances(int[] rowIndices) {
-    ((ArffTableModel) model).deleteInstances(rowIndices);
+    int[]               realIndices;
+    int                 i;
+    
+    realIndices = new int[rowIndices.length];
+    for (i = 0; i < rowIndices.length; i++)
+      realIndices[i] = indexes[rowIndices[i]];
+   
+    ((ArffTableModel) model).deleteInstances(realIndices);
   }
   
   /**
