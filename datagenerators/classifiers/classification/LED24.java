@@ -75,7 +75,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class LED24
@@ -370,7 +370,7 @@ public class LED24
    */
   public static void main(String[] args) {
     try {
-      DataGenerator.makeData(new Agrawal(), args);
+      DataGenerator.makeData(new LED24(), args);
     } 
     catch (Exception e) {
       e.printStackTrace();
