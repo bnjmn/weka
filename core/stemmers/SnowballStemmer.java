@@ -24,7 +24,7 @@ package weka.core.stemmers;
 
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.RTSI;
+import weka.core.ClassDiscovery;
 import weka.core.Utils;
 
 import java.lang.reflect.Method;
@@ -37,7 +37,7 @@ import java.util.Vector;
  * CLASSPATH to be available.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.3 $
+ * @version   $Revision: 1.4 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -203,7 +203,7 @@ public class SnowballStemmer
     if (!m_Present)
       return;
 
-    classnames = RTSI.find(PACKAGE_EXT, SNOWBALL_PROGRAM);
+    classnames = ClassDiscovery.find(SNOWBALL_PROGRAM, PACKAGE_EXT);
     for (i = 0; i < classnames.size(); i++)
       m_Stemmers.add(getStemmerName(classnames.get(i).toString()));
   }

@@ -89,13 +89,13 @@ import javax.swing.tree.TreeSelectionModel;
  * @see #USE_DYNAMIC
  * @see GenericPropertiesCreator
  * @see GenericPropertiesCreator#CREATOR_FILE
- * @see weka.core.RTSI
+ * @see weka.core.ClassDiscovery
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.46 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   

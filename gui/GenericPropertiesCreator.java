@@ -29,7 +29,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import weka.core.RTSI;
+import weka.core.ClassDiscovery;
 import weka.core.Utils;
 
 /**
@@ -65,18 +65,13 @@ import weka.core.Utils;
  * structure (e.g. a release directory and a developer directory with additional
  * classes). <br>
  * <br>
- * Code used and adapted from the following JavaWorld Tips:
- * <ul>
- *    <li><a href="http://www.javaworld.com/javaworld/javatips/jw-javatip113.html" target="_blank">Tip 113 </a>: Identify subclasses at runtime</li>
- *    <li><a href="http://www.javaworld.com/javaworld/javatips/jw-javatip105.html" target="_blank">Tip 105 </a>: Mastering the classpath with JWhich</li>
- * </ul>
  * 
  * @see #CREATOR_FILE
  * @see #PROPERTY_FILE
  * @see GenericObjectEditor
- * @see weka.core.RTSI
+ * @see weka.core.ClassDiscovery
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -271,7 +266,7 @@ public class GenericPropertiesCreator {
     if (key.equals(weka.experiment.ResultListener.class.getName())) {
       try {
         cls = Class.forName(classname);
-        if (RTSI.hasInterface(weka.experiment.ResultProducer.class, cls))
+        if (ClassDiscovery.hasInterface(weka.experiment.ResultProducer.class, cls))
           result = false;
       }
       catch (Exception e) {
@@ -306,7 +301,7 @@ public class GenericPropertiesCreator {
       // get classes for all packages
       while (tok.hasMoreTokens()) {
         pkg     = tok.nextToken().trim();
-        classes = RTSI.find(pkg, Class.forName(key));
+        classes = ClassDiscovery.find(Class.forName(key), pkg);
         for (i = 0; i < classes.size(); i++) {
           // skip non-public classes
           if (!isValidClassname(classes.get(i).toString()))

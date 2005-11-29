@@ -39,7 +39,7 @@ import weka.experiment.InstanceQuery;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Range;
-import weka.core.RTSI;
+import weka.core.ClassDiscovery;
 import weka.core.Instance;
 import weka.core.converters.CSVLoader;
 
@@ -88,7 +88,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -150,11 +150,11 @@ public class ResultsPanel extends JPanel {
   /** determine all classes implementing the Tester interface (in the same
    * package!)
    * @see Tester
-   * @see RTSI */
+   * @see ClassDiscovery */
   static {
-    Vector classes = RTSI.find(
-                      Tester.class.getPackage().getName(), 
-                      Tester.class.getName());
+    Vector classes = ClassDiscovery.find(
+                      Tester.class.getName(),
+                      Tester.class.getPackage().getName());
 
     // set names and classes
     m_Testers            = new Vector();
