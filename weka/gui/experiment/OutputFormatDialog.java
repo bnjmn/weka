@@ -40,7 +40,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import weka.core.RTSI;
+import weka.core.ClassDiscovery;
 import weka.experiment.ResultMatrix;
 import weka.experiment.ResultMatrixPlainText;
 
@@ -48,7 +48,7 @@ import weka.experiment.ResultMatrixPlainText;
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class OutputFormatDialog extends JDialog {
   /** Signifies an OK property selection */
@@ -69,11 +69,11 @@ public class OutputFormatDialog extends JDialog {
   /** determine all classes inheriting from the ResultMatrix (in the same
    * package!)
    * @see ResultMatrix
-   * @see RTSI */
+   * @see ClassDiscovery */
   static {
-    Vector classes = RTSI.find(
-                      ResultMatrix.class.getPackage().getName(), 
-                      ResultMatrix.class.getName());
+    Vector classes = ClassDiscovery.find(
+                      ResultMatrix.class.getName(),
+                      ResultMatrix.class.getPackage().getName());
 
     // set names and classes
     m_OutputFormatClasses = new Vector();

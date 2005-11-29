@@ -24,7 +24,7 @@
 package weka.gui.experiment;
 
 import weka.core.Instances;
-import weka.core.RTSI;
+import weka.core.ClassDiscovery;
 import weka.experiment.Experiment;
 
 import weka.gui.ExtensionFileFilter;
@@ -62,7 +62,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -316,8 +316,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	      getFilesRecursively(selected[i], files);
     
 	      // sort the result
-	      RTSI r = new RTSI();
-	      Collections.sort(files, r.new StringCompare());
+	      Collections.sort(files, new ClassDiscovery().new StringCompare());
 
 	      for (int j = 0; j < files.size(); j++) {
 		File temp = (File)files.elementAt(j);
@@ -349,8 +348,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
     
 	    // sort the result
-	    RTSI r = new RTSI();
-	    Collections.sort(files, r.new StringCompare());
+	    Collections.sort(files, new ClassDiscovery().new StringCompare());
 
 	    for (int j = 0; j < files.size(); j++) {
 	      File temp = (File)files.elementAt(j);
