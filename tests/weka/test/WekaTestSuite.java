@@ -22,7 +22,7 @@
 
 package weka.test;
 
-import weka.core.RTSI;
+import weka.core.ClassDiscovery;
 import weka.gui.GenericPropertiesCreator;
 
 import java.lang.reflect.Method;
@@ -39,7 +39,7 @@ import junit.framework.TestSuite;
  * automatic generation of a series of tests.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     GenericPropertiesCreator
  * @see     RTSI
  */
@@ -73,7 +73,7 @@ public class WekaTestSuite
     result = new Vector();
 
     for (i = 0; i < packages.size(); i++) {
-      names = RTSI.find((String) packages.get(i), superclass);
+      names = ClassDiscovery.find(superclass, (String) packages.get(i));
       for (n = 0; n < names.size(); n++) {
         // skip non-public classes
         if (isValidClassname((String) names.get(n)))
