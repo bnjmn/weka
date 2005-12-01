@@ -39,9 +39,9 @@ import junit.framework.TestSuite;
  * automatic generation of a series of tests.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see     GenericPropertiesCreator
- * @see     RTSI
+ * @see     ClassDiscovery
  */
 public class WekaTestSuite
   extends TestSuite {
