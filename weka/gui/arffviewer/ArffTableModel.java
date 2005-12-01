@@ -55,7 +55,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 public class ArffTableModel implements TableModel, Undoable {
@@ -689,7 +689,6 @@ public class ArffTableModel implements TableModel, Undoable {
    * undoes the last action
    */
   public void undo() {
-    ArffTableSorter       model;
     File                  tempFile;
     Instances             inst;
     ObjectInputStream     ooi;
@@ -724,7 +723,6 @@ public class ArffTableModel implements TableModel, Undoable {
    * @see #setUndoEnabled(boolean)
    */
   public void addUndoPoint() {
-    ArffTableSorter       model;
     File                  tempFile;
     ObjectOutputStream    oos;
 

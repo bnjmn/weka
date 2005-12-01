@@ -36,7 +36,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class ArffTableCellRenderer extends DefaultTableCellRenderer {
@@ -87,7 +87,7 @@ public class ArffTableCellRenderer extends DefaultTableCellRenderer {
   public Component getTableCellRendererComponent(
       JTable table, Object value, boolean isSelected, 
       boolean hasFocus, int row, int column ) {
-    ArffTableSorter            model;
+    ArffSortedTableModel            model;
     Component                  result;
     String                     searchString;
     boolean                    found;
@@ -105,8 +105,8 @@ public class ArffTableCellRenderer extends DefaultTableCellRenderer {
     else
       found = false;
     
-    if (table.getModel() instanceof ArffTableSorter) {
-      model = (ArffTableSorter) table.getModel();
+    if (table.getModel() instanceof ArffSortedTableModel) {
+      model = (ArffSortedTableModel) table.getModel();
       // normal cell
       if (row >= 0) {
         if (model.isMissingAt(row, column)) {
