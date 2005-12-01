@@ -62,7 +62,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -108,6 +108,7 @@ public class ArffViewerMainPanel
   protected JMenu                 menuView;
   protected JMenuItem             menuViewAttributes;
   protected JMenuItem             menuViewValues;
+  protected JMenuItem             menuViewOptimalColWidths;
   
   protected FileChooser           fileChooser;
   protected ExtensionFileFilter   arffFilter;
@@ -233,8 +234,12 @@ public class ArffViewerMainPanel
     menuViewValues   = new JMenuItem("Values...", ComponentHelper.getImageIcon("properties.gif"));
     menuViewValues.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK + KeyEvent.SHIFT_MASK));
     menuViewValues.addActionListener(this);
+    menuViewOptimalColWidths = new JMenuItem("Optimal column width (all)", ComponentHelper.getImageIcon("resize.gif"));
+    menuViewOptimalColWidths.addActionListener(this);
     menuView.add(menuViewAttributes);
     menuView.add(menuViewValues);
+    menuView.addSeparator();
+    menuView.add(menuViewOptimalColWidths);
     menuBar.add(menuView);
     
     // tabbed pane
@@ -353,6 +358,7 @@ public class ArffViewerMainPanel
     // View
     menuViewAttributes.setEnabled(fileOpen);
     menuViewValues.setEnabled(fileOpen);
+    menuViewOptimalColWidths.setEnabled(fileOpen);
   }
   
   /**
@@ -803,7 +809,7 @@ public class ArffViewerMainPanel
    * displays all the attributes, returns the selected item or NULL if canceled
    */
   public String showAttributes() {
-    ArffTableSorter     model;
+    ArffSortedTableModel     model;
     ListSelectorDialog  dialog;
     int                 i;
     JList               list;
@@ -818,7 +824,7 @@ public class ArffViewerMainPanel
     result = dialog.showDialog();
     
     if (result == ListSelectorDialog.APPROVE_OPTION) {
-      model = (ArffTableSorter) getCurrentPanel().getTable().getModel();
+      model = (ArffSortedTableModel) getCurrentPanel().getTable().getModel();
       name  = list.getSelectedValue().toString();
       i     = model.getAttributeColumn(name);
       JTableHelper.scrollToVisible(getCurrentPanel().getTable(), 0, i);
@@ -835,7 +841,7 @@ public class ArffViewerMainPanel
    */
   public void showValues() {
     String                attribute;
-    ArffTableSorter       model;
+    ArffSortedTableModel       model;
     ArffTable             table;
     HashSet               values;
     Vector                items;
@@ -850,7 +856,7 @@ public class ArffViewerMainPanel
       return;
     
     table  = (ArffTable) getCurrentPanel().getTable();
-    model  = (ArffTableSorter) table.getModel();
+    model  = (ArffSortedTableModel) table.getModel();
     
     // get column index
     col    = -1;
@@ -878,6 +884,16 @@ public class ArffViewerMainPanel
     
     dialog = new ListSelectorDialog(parent, new JList(items));
     dialog.showDialog();
+  }
+  
+  /**
+   * sets the optimal column width for all columns
+   */
+  public void setOptimalColWidths() {
+    if (!isPanelSelected())
+      return;
+    
+    getCurrentPanel().setOptimalColWidths();
   }
   
   /**
@@ -928,6 +944,8 @@ public class ArffViewerMainPanel
       showAttributes();
     else if (o == menuViewValues)
       showValues();
+    else if (o == menuViewOptimalColWidths)
+      setOptimalColWidths();
     
     updateMenu();
   }
