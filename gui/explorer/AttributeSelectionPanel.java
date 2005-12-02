@@ -23,81 +23,67 @@
 
 package weka.gui.explorer;
 
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Attribute;
-import weka.core.Utils;
-import weka.core.Range;
-import weka.core.FastVector;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeTransformer;
-import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.Ranker;
 import weka.attributeSelection.AttributeEvaluator;
-import weka.filters.Filter;
-import weka.gui.Logger;
-import weka.gui.TaskLogger;
-import weka.gui.SysErrLog;
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.AttributeTransformer;
+import weka.attributeSelection.Ranker;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
-import weka.gui.SetInstancesPanel;
 import weka.gui.SaveBuffer;
-import weka.gui.FileEditor;
-import weka.gui.visualize.*;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.visualize.MatrixPanel;
 
-import java.util.Random;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedWriter;
-import java.io.PrintWriter;
+import java.io.FileWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
 
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JButton;
 import javax.swing.BorderFactory;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
-import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import java.awt.Point;
-import java.awt.Dimension;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenu;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /** 
  * This panel allows the user to select and configure an attribute
@@ -110,7 +96,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -795,7 +781,8 @@ public class AttributeSelectionPanel extends JPanel {
 
   /**
    * Popup a visualize panel for viewing transformed data
-   * @param sp the Instances to display
+   * 
+   * @param ti          the Instances to display
    */
   protected void visualizeTransformedData(Instances ti) {
     if (ti != null) {
@@ -815,6 +802,41 @@ public class AttributeSelectionPanel extends JPanel {
 	});
 
       jf.setVisible(true);
+    }
+  }
+
+  /**
+   * Popup a SaveDialog for saving the transformed data
+   * 
+   * @param ti          the Instances to display
+   */
+  protected void saveTransformedData(Instances ti) {
+    JFileChooser        fc;
+    int                 retVal;
+    BufferedWriter      writer;
+    ExtensionFileFilter filter;
+
+    fc     = new JFileChooser();
+    filter = new ExtensionFileFilter(".arff", "ARFF data files");
+    fc.setFileFilter(filter);
+    retVal = fc.showSaveDialog(this);
+
+    if (retVal == JFileChooser.APPROVE_OPTION) {
+      try {
+        writer = new BufferedWriter(new FileWriter(fc.getSelectedFile()));
+        writer.write(ti.toString());
+        writer.flush();
+        writer.close();
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+        m_Log.logMessage("Problem saving data: " + e.getMessage());
+        JOptionPane.showMessageDialog(
+            this, 
+            "Problem saving data:\n" + e.getMessage(), 
+            "Error", 
+            JOptionPane.ERROR_MESSAGE);
+      }
     }
   }
 
@@ -909,6 +931,22 @@ public class AttributeSelectionPanel extends JPanel {
      
     if (visTrans != null) {
       resultListMenu.add(visTrans);
+    }
+    
+    JMenuItem saveTrans = null;
+    if (ti != null) {
+      if (ti.relationName().startsWith("AT:"))
+        saveTrans = new JMenuItem("Save transformed data...");
+      else
+        saveTrans = new JMenuItem("Save reduced data...");
+    }
+    if (saveTrans != null) {
+      saveTrans.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            saveTransformedData(ti);
+          }
+      });
+      resultListMenu.add(saveTrans);
     }
     
     resultListMenu.show(m_History.getList(), x, y);
