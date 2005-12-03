@@ -76,7 +76,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.RTSI
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.6 $
+ * @version $Revision: 1.1.2.7 $
  */
 public class GenericPropertiesCreator {
   /** whether to output some debug information */
@@ -305,8 +305,16 @@ public class GenericPropertiesCreator {
       value = "";
       // get classes for all packages
       while (tok.hasMoreTokens()) {
-        pkg     = tok.nextToken().trim();
-        classes = RTSI.find(pkg, Class.forName(key));
+        pkg = tok.nextToken().trim();
+        
+        try {
+          classes = RTSI.find(pkg, Class.forName(key));
+        }
+        catch (Exception e) {
+          System.out.println("Problem with '" + key + "': " + e);
+          classes = new Vector();
+        }
+        
         for (i = 0; i < classes.size(); i++) {
           // skip non-public classes
           if (!isValidClassname(classes.get(i).toString()))
