@@ -79,7 +79,7 @@ import java.lang.reflect.Method;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.35.2.2 $
+ * @version  $Revision: 1.35.2.3 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -106,9 +106,6 @@ public class AttributeSelection implements Serializable {
 
   /** seed used to randomly shuffle instances for cross validation */
   private int m_seed;
-
-  /** cutoff value by which to select attributes for ranked results */
-  private double m_threshold;
 
   /** number of attributes requested from ranked results */
   private int m_numToSelect;
@@ -220,14 +217,6 @@ public class AttributeSelection implements Serializable {
   }
 
   /**
-   * set the threshold by which to select features from a ranked list
-   * @param t the threshold
-   */
-  public void setThreshold (double t) {
-    m_threshold = t;
-  }
-
-  /**
    * get a description of the attribute selection
    * @return a String describing the results of attribute selection
    */
@@ -289,7 +278,6 @@ public class AttributeSelection implements Serializable {
     setRanking(false);
     setXval(false);
     setSeed(1);
-    //    m_threshold = -Double.MAX_VALUE;
     setEvaluator(new CfsSubsetEval());
     setSearch(new GreedyStepwise());
     m_selectionResults = new StringBuffer();
