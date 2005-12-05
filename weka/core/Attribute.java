@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -327,7 +327,7 @@ public class Attribute implements Copyable, Serializable {
 			       + " storing uncompressed.");
 	  }
 	}
-	if (m_Values.indexOf(store) >= 0) {
+	if (m_Hashtable.containsKey(store)) {
 	  throw new IllegalArgumentException("A nominal attribute (" +
 					     attributeName + ") cannot"
 					     + " have duplicate labels (" + store + ").");
