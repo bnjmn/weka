@@ -37,7 +37,7 @@ import java.util.Properties;
  * the props file <code>weka.gui.experiment.Experimenter.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see #PROPERTY_FILE
  */
 public class ExperimenterDefaults
@@ -204,6 +204,13 @@ public class ExperimenterDefaults
    */
   public final static boolean getShowStdDevs() {
     return Boolean.valueOf(get("ShowStdDev", "false")).booleanValue();
+  }
+
+  /**
+   * returns whether the Average is shown by default
+   */
+  public final static boolean getShowAverage() {
+    return Boolean.valueOf(get("ShowAverage", "false")).booleanValue();
   }
 
   /**

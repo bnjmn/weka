@@ -2,7 +2,7 @@
 # "simple" indicates that this property is only available for simple
 # experiments.
 #
-# $Revision: 1.2 $
+# $Revision: 1.3 $
 
 # the default extension in the file-dialog
 # possible values: 
@@ -71,6 +71,9 @@ Sorting=
 
 # whether stddevs are displayed by default
 ShowStdDev=false
+
+# whether the Average is displayed by default
+ShowAverage=false
 
 # the default precision for the mean
 MeanPrecision=2

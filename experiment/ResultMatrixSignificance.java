@@ -32,7 +32,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class ResultMatrixSignificance extends ResultMatrix {
@@ -93,6 +93,7 @@ public class ResultMatrixSignificance extends ResultMatrix {
     int                 nameWidth;
     String              line;
     String              colStr;
+    int                 rows;
 
     result = new StringBuffer();
     cells  = toArray();
@@ -102,7 +103,12 @@ public class ResultMatrixSignificance extends ResultMatrix {
     for (i = 0; i < cells.length - 1; i++)
       cells[i][0] = padString(cells[i][0], nameWidth);
     
-    for (i = 0; i < cells.length - 1; i++) {
+    // determine number of displayed rows
+    rows = cells.length - 1;
+    if (getShowAverage())
+      rows--;
+    
+    for (i = 0; i < rows; i++) {
       line   = "";
       colStr = "";
 

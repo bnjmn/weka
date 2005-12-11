@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class ResultMatrixPlainText extends ResultMatrix {
@@ -156,6 +156,8 @@ public class ResultMatrixPlainText extends ResultMatrix {
     j = 0;
     k = 0;
     for (i = 1; i < cells.length - 1; i++) {
+      if (isAverage(i))
+        body.append(padString("", maxLength).replaceAll(".", "-") + "\n");
       line = "";
       
       for (n = 0; n < cells[0].length; n++) {
@@ -174,8 +176,12 @@ public class ResultMatrixPlainText extends ResultMatrix {
         
         if (n == 0) {
           line += padString(cells[i][n], getRowNameWidth());
-          line += padString("(" + Utils.doubleToString(getCount(getDisplayRow(i-1)), 0) + ")", 
-                        getCountWidth(), true);
+          if (!isAverage(i))
+            line += padString("(" +
+                Utils.doubleToString(getCount(getDisplayRow(i-1)), 0) + ")",
+                getCountWidth(), true);
+          else
+            line += padString("", getCountWidth(), true);
         }
         else {
           // additional space before means

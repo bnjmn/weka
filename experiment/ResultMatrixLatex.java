@@ -31,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class ResultMatrixLatex extends ResultMatrix {
@@ -175,6 +175,8 @@ public class ResultMatrixLatex extends ResultMatrix {
 
     // output data (w/o wins/ties/losses)
     for (i = 1; i < cells.length - 1; i++) {
+      if (isAverage(i))
+        result.append("\\hline\n");
       for (n = 0; n < cells[0].length; n++) {
         if (n == 0) {
           result.append(padString(cells[i][n], getRowNameWidth()));
