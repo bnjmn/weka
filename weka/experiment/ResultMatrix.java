@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -109,6 +109,9 @@ public abstract class ResultMatrix implements Serializable {
 
   /** whether std. deviations are printed as well */
   protected boolean m_ShowStdDev;
+
+  /** whether the average for each column should be printed */
+  protected boolean m_ShowAverage;
   
   /** whether the names or numbers are output as column declarations */
   protected boolean m_PrintColNames;
@@ -217,6 +220,7 @@ public abstract class ResultMatrix implements Serializable {
     m_MeanPrec          = matrix.m_MeanPrec;
     m_StdDevPrec        = matrix.m_StdDevPrec;
     m_ShowStdDev        = matrix.m_ShowStdDev;
+    m_ShowAverage       = matrix.m_ShowAverage;
     m_PrintColNames     = matrix.m_PrintColNames;
     m_PrintRowNames     = matrix.m_PrintRowNames;
     m_EnumerateColNames = matrix.m_EnumerateColNames;
@@ -290,6 +294,7 @@ public abstract class ResultMatrix implements Serializable {
     m_MeanPrec          = 2;
     m_StdDevPrec        = 2;
     m_ShowStdDev        = false;
+    m_ShowAverage       = false;
     m_PrintColNames     = true;
     m_PrintRowNames     = true;
     m_EnumerateColNames = true;
@@ -472,6 +477,20 @@ public abstract class ResultMatrix implements Serializable {
    */
   public boolean getShowStdDev() {
     return m_ShowStdDev;
+  }
+
+  /**
+   * sets whether to display the average per column or not
+   */
+  public void setShowAverage(boolean show) {
+    m_ShowAverage = show;
+  }
+
+  /**
+   * returns whether average per column is displayed or not
+   */
+  public boolean getShowAverage() {
+    return m_ShowAverage;
   }
 
   /**
@@ -771,6 +790,33 @@ public abstract class ResultMatrix implements Serializable {
       return m_Mean[row][col];
     else
       return 0;
+  }
+
+  /**
+   * returns the average of the mean at the given position, if the position is
+   * valid, otherwise 0
+   */
+  public double getAverage(int col) {
+    int       i;
+    double    avg;
+    int       count;
+
+    if ( (col >= 0) && (col < getColCount()) ) {
+      avg   = 0;
+      count = 0;
+
+      for (i = 0; i < getRowCount(); i++) {
+        if (!Double.isNaN(getMean(col, i))) {
+          avg += getMean(col, i);
+          count++;
+        }
+      }
+      
+      return avg / (double) count;
+    }
+    else {
+      return 0;
+    }
   }
 
   /**
@@ -1111,6 +1157,8 @@ public abstract class ResultMatrix implements Serializable {
 
     // determine visible cols/rows
     rows = getVisibleRowCount();
+    if (getShowAverage())
+      rows++;
     cols = getVisibleColCount();
     if (getShowStdDev())
       cols = cols*3;   // mean + stddev + sign.
@@ -1208,6 +1256,33 @@ public abstract class ResultMatrix implements Serializable {
       y++;
     }
 
+    // the average
+    if (getShowAverage()) {
+      y = result.length - 2;
+      x = 0;
+      result[y][0] = "Average";
+      x++;
+      for (ii = 0; ii < getColCount(); ii++) {
+        i = getDisplayCol(ii);
+        if (getColHidden(i))
+          continue;
+
+        // mean-average
+        result[y][x] = doubleToString(getAverage(i), getMeanPrec());
+        x++;
+
+        // std dev.
+        if (getShowStdDev()) {
+          result[y][x] = "";
+          x++;
+        }
+
+        // significance
+        result[y][x] = "";
+        x++;
+      }
+    }
+
     // wins/ties/losses
     y = result.length - 1;
     x = 0;
@@ -1289,6 +1364,17 @@ public abstract class ResultMatrix implements Serializable {
       else
         return (index % 2 == 0);
     }
+  }
+
+  /**
+   * returns true if the row index (in the array produced by toArray(boolean))
+   * contains the average row
+   */
+  protected boolean isAverage(int rowIndex) {
+    if (getShowAverage())
+      return (getVisibleRowCount() + 1 == rowIndex);
+    else
+      return false;
   }
 
   /**

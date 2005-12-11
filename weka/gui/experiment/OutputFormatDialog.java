@@ -48,7 +48,7 @@ import weka.experiment.ResultMatrixPlainText;
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class OutputFormatDialog extends JDialog {
   /** Signifies an OK property selection */
@@ -103,6 +103,9 @@ public class OutputFormatDialog extends JDialog {
   /** the spinner to choose the precision for the std. deviation from */
   protected JSpinner m_StdDevPrecSpinner = new JSpinner();
 
+  /** the checkbox for outputting the average */
+  protected JCheckBox m_ShowAverageCheckBox = new JCheckBox("");
+
   /** the checkbox for the removing of filter classnames */
   protected JCheckBox m_RemoveFilterNameCheckBox = new JCheckBox("");
   
@@ -115,11 +118,15 @@ public class OutputFormatDialog extends JDialog {
   /** the number of digits after the period (= precision) for printing the mean */
   protected int m_MeanPrec = 2;
   
-  /** the number of digits after the period (= precision) for printing the std. deviation */
+  /** the number of digits after the period (= precision) for printing the std.
+   * deviation */
   protected int m_StdDevPrec = 2;
 
   /** whether to remove the filter names from the names */
   protected boolean m_RemoveFilterName = false;
+
+  /** whether to show the average too */
+  protected boolean m_ShowAverage = false;
 
   /**
    * initializes the dialog with the given parent frame
@@ -141,7 +148,7 @@ public class OutputFormatDialog extends JDialog {
     
     getContentPane().setLayout(new BorderLayout());
     
-    panel = new JPanel(new GridLayout(4, 2));
+    panel = new JPanel(new GridLayout(5, 2));
     getContentPane().add(panel, BorderLayout.CENTER);
     
     // Precision
@@ -173,6 +180,13 @@ public class OutputFormatDialog extends JDialog {
 	  getData();
 	}
       });
+
+    // Average
+    label = new JLabel("Show Average");
+    label.setDisplayedMnemonic('A');
+    label.setLabelFor(m_ShowAverageCheckBox);
+    panel.add(label);
+    panel.add(m_ShowAverageCheckBox);
 
     // Remove filter classname
     label = new JLabel("Remove filter classnames");
@@ -216,6 +230,9 @@ public class OutputFormatDialog extends JDialog {
     m_MeanPrecSpinner.setValue(new Integer(m_MeanPrec));
     m_StdDevPrecSpinner.setValue(new Integer(m_StdDevPrec));
 
+    // average
+    m_ShowAverageCheckBox.setSelected(m_ShowAverage);
+
     // filter names
     m_RemoveFilterNameCheckBox.setSelected(m_RemoveFilterName);
     
@@ -235,6 +252,9 @@ public class OutputFormatDialog extends JDialog {
     // Precision
     m_MeanPrec   = Integer.parseInt(m_MeanPrecSpinner.getValue().toString());
     m_StdDevPrec = Integer.parseInt(m_StdDevPrecSpinner.getValue().toString());
+
+    // average
+    m_ShowAverage = m_ShowAverageCheckBox.isSelected();
 
     // filter names
     m_RemoveFilterName = m_RemoveFilterNameCheckBox.isSelected();
@@ -304,6 +324,20 @@ public class OutputFormatDialog extends JDialog {
    */
   public boolean getRemoveFilterName() {
     return m_RemoveFilterName;
+  }
+
+  /**
+   * sets whether the average for each column is displayed
+   */
+  public void setShowAverage(boolean show) {
+    m_ShowAverage = show;
+  }
+
+  /**
+   * returns whether the average for each column is displayed
+   */
+  public boolean getShowAverage() {
+    return m_ShowAverage;
   }
 
   /**

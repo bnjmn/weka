@@ -88,7 +88,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -300,6 +300,7 @@ public class ResultsPanel extends JPanel {
     m_ResultMatrix.setMeanPrec(ExperimenterDefaults.getMeanPrecision());
     m_ResultMatrix.setStdDevPrec(ExperimenterDefaults.getStdDevPrecision());
     m_ResultMatrix.setRemoveFilterName(ExperimenterDefaults.getRemoveFilterClassnames());
+    m_ResultMatrix.setShowAverage(ExperimenterDefaults.getShowAverage());
 
     // Create/Configure/Connect components
     
@@ -1248,6 +1249,7 @@ public class ResultsPanel extends JPanel {
     dialog.setMeanPrec(m_ResultMatrix.getMeanPrec());
     dialog.setStdDevPrec(m_ResultMatrix.getStdDevPrec());
     dialog.setRemoveFilterName(m_ResultMatrix.getRemoveFilterName());
+    dialog.setShowAverage(m_ResultMatrix.getShowAverage());
     
     if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
       try {
@@ -1260,6 +1262,7 @@ public class ResultsPanel extends JPanel {
       m_ResultMatrix.setMeanPrec(dialog.getMeanPrec());
       m_ResultMatrix.setStdDevPrec(dialog.getStdDevPrec());
       m_ResultMatrix.setRemoveFilterName(dialog.getRemoveFilterName());
+      m_ResultMatrix.setShowAverage(dialog.getShowAverage());
     }
   }
 
