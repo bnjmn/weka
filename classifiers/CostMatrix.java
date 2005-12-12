@@ -34,7 +34,7 @@ import java.util.Random;
  * an instance of class j as class i.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CostMatrix extends Matrix {
 
@@ -204,7 +204,7 @@ public class CostMatrix extends Matrix {
 
     for (int x=0; x<size(); x++)
       for (int y=0; y<size(); y++) 
-	costs[x] += classProbs[y] * getElement(x, y);
+	costs[x] += classProbs[y] * getElement(y, x);
 
     return costs;
   }
