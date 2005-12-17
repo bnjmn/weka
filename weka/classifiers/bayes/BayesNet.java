@@ -26,7 +26,6 @@ import weka.core.*;
 import weka.estimators.*;
 import weka.filters.supervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.gui.GenericObjectEditor;
 import weka.classifiers.*;
 import weka.classifiers.bayes.net.*;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
@@ -45,17 +44,9 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
-
-    static {
-        try {
-           GenericObjectEditor.registerEditors();
-        } catch (Throwable t) {
-            // ignore
-        }
-    }
 
     /**
      * The parent sets.
