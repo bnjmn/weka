@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.44.2.2 $
+ * @version $Revision: 1.44.2.3 $
  */
 public final class Utils {
 
@@ -964,7 +964,7 @@ public final class Utils {
   }
 
   /**
-   * Tests if a is smaller than b.
+   * Tests if a is greater than b.
    *
    * @param a a double
    * @param b a double 
