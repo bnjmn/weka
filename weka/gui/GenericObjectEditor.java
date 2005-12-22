@@ -95,7 +95,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -627,6 +627,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     java.beans.PropertyEditorManager.registerEditor(
         weka.core.converters.Saver.class,
         weka.gui.GenericObjectEditor.class);
+    
+    // estimators
+    java.beans.PropertyEditorManager.registerEditor(
+	weka.estimators.Estimator.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.estimators.Estimator[].class, 
+        weka.gui.GenericArrayEditor.class);
     
     // filters
     java.beans.PropertyEditorManager.registerEditor(
