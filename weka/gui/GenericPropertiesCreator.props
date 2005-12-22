@@ -26,6 +26,7 @@ weka.classifiers.Classifier=\
 
 # Lists the Filters-Packages I want to choose from
 weka.filters.Filter= \
+ weka.filters, \
  weka.filters.supervised.attribute, \
  weka.filters.supervised.instance, \
  weka.filters.unsupervised.attribute, \
@@ -97,4 +98,8 @@ weka.datagenerators.ClusterDefinition=\
 # List of stemmers
 weka.core.stemmers.Stemmer=\
  weka.core.stemmers
+
+# Lists the Estimator-Packages I want to choose from
+weka.estimators.Estimator= \
+ weka.estimators
 
