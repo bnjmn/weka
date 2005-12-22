@@ -72,7 +72,7 @@ import javax.swing.JOptionPane;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -100,6 +100,12 @@ public class GenericArrayEditor extends JPanel
 
   /** Click this to edit the selected array value */
   private JButton m_EditBut = new JButton("Edit");
+
+  /** Click this to move the selected array value(s) one up */
+  private JButton m_UpBut = new JButton("Up");
+
+  /** Click this to move the selected array value(s) one down */
+  private JButton m_DownBut = new JButton("Down");
 
   /** Click to add the current object configuration to the array */
   private JButton m_AddBut = new JButton("Add");
@@ -143,6 +149,12 @@ public class GenericArrayEditor extends JPanel
           m_ElementList.setSelectedValue(m_Editor.getValue(), false);
 	  m_Support.firePropertyChange("", null, null);
         }
+      } else if (e.getSource() == m_UpBut) {
+        JListHelper.moveUp(m_ElementList);
+	m_Support.firePropertyChange("", null, null);
+      } else if (e.getSource() == m_DownBut) {
+        JListHelper.moveDown(m_ElementList);
+	m_Support.firePropertyChange("", null, null);
       } else if (e.getSource() == m_AddBut) {
 	int selected = m_ElementList.getSelectedIndex();
 	Object addObj = m_ElementEditor.getValue();
@@ -178,11 +190,15 @@ public class GenericArrayEditor extends JPanel
 	  if (m_ElementList.getSelectedIndex() != -1) {
 	    m_DeleteBut.setEnabled(true);
 	    m_EditBut.setEnabled(m_ElementList.getSelectedIndices().length == 1);
+	    m_UpBut.setEnabled(JListHelper.canMoveUp(m_ElementList));
+	    m_DownBut.setEnabled(JListHelper.canMoveDown(m_ElementList));
 	  }
           // disable delete/edit button
           else {
 	    m_DeleteBut.setEnabled(false);
 	    m_EditBut.setEnabled(false);
+	    m_UpBut.setEnabled(false);
+	    m_DownBut.setEnabled(false);
           }
 	}
       }
@@ -218,12 +234,16 @@ public class GenericArrayEditor extends JPanel
     add(m_Label, BorderLayout.CENTER);
     m_DeleteBut.addActionListener(m_InnerActionListener);
     m_EditBut.addActionListener(m_InnerActionListener);
+    m_UpBut.addActionListener(m_InnerActionListener);
+    m_DownBut.addActionListener(m_InnerActionListener);
     m_AddBut.addActionListener(m_InnerActionListener);
     m_ElementList.addListSelectionListener(m_InnerSelectionListener);
     m_ElementList.addMouseListener(m_InnerMouseListener);
     m_AddBut.setToolTipText("Add the current item to the list");
     m_DeleteBut.setToolTipText("Delete the selected list item");
     m_EditBut.setToolTipText("Edit the selected list item");
+    m_UpBut.setToolTipText("Move the selected item(s) one up");
+    m_DownBut.setToolTipText("Move the selected item(s) one down");
   }
 
   /** This class handles the creation of list cell renderers from the 
@@ -374,6 +394,8 @@ public class GenericArrayEditor extends JPanel
 	  m_DeleteBut.setEnabled(false);
 	  m_EditBut.setEnabled(false);
 	}
+	m_UpBut.setEnabled(JListHelper.canMoveDown(m_ElementList));
+	m_DownBut.setEnabled(JListHelper.canMoveDown(m_ElementList));
 
         //have already set the value above in the editor
 	//try {
@@ -394,9 +416,11 @@ public class GenericArrayEditor extends JPanel
 	  add(panel, BorderLayout.NORTH);
 	  add(new JScrollPane(m_ElementList), BorderLayout.CENTER);
           JPanel panel2 = new JPanel();
-          panel2.setLayout(new GridLayout(1, 2));
+          panel2.setLayout(new GridLayout(1, 4));
           panel2.add(m_DeleteBut);
           panel2.add(m_EditBut);
+          panel2.add(m_UpBut);
+          panel2.add(m_DownBut);
           add(panel2, BorderLayout.SOUTH);
 	  m_ElementEditor
 	    .addPropertyChangeListener(new PropertyChangeListener() {

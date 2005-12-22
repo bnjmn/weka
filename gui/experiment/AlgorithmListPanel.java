@@ -30,6 +30,7 @@ import weka.classifiers.Classifier;
 
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
+import weka.gui.JListHelper;
 import weka.gui.PropertyDialog;
 
 import weka.classifiers.xml.XMLClassifier;
@@ -79,7 +80,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -126,6 +127,12 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   
   /** Click to edit the save the options from selected algorithm */
   protected JButton m_SaveOptionsBut = new JButton("Save options...");
+  
+  /** Click to move the selected algorithm(s) one up */
+  protected JButton m_UpBut = new JButton("Up");
+  
+  /** Click to move the selected algorithm(s) one down */
+  protected JButton m_DownBut = new JButton("Down");
   
   /** The file chooser for selecting experiments */
   protected JFileChooser m_FileChooser =
@@ -211,6 +218,10 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     m_LoadOptionsBut.addActionListener(this);
     m_SaveOptionsBut.setEnabled(false);
     m_SaveOptionsBut.addActionListener(this);
+    m_UpBut.setEnabled(false);
+    m_UpBut.addActionListener(this);
+    m_DownBut.setEnabled(false);
+    m_DownBut.addActionListener(this);
     
     m_List.addListSelectionListener(new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
@@ -255,6 +266,12 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
     constraints.gridwidth=1;constraints.gridheight=1;
     bottomLab.add(m_SaveOptionsBut,constraints);
+    constraints.gridx=2;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    bottomLab.add(m_UpBut,constraints);
+    constraints.gridx=3;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    bottomLab.add(m_DownBut,constraints);
 
     add(topLab, BorderLayout.NORTH);
     add(new JScrollPane(m_List), BorderLayout.CENTER);
@@ -283,6 +300,8 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     m_DeleteBut.setEnabled((m_AlgorithmListModel.size() > 0));
     m_LoadOptionsBut.setEnabled((m_AlgorithmListModel.size() > 0));
     m_SaveOptionsBut.setEnabled((m_AlgorithmListModel.size() > 0));
+    m_UpBut.setEnabled(JListHelper.canMoveUp(m_List));
+    m_DownBut.setEnabled(JListHelper.canMoveDown(m_List));
   }
 
   /**
@@ -313,6 +332,8 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
       m_EditBut.setEnabled(m_List.getSelectedIndices().length == 1);
       m_LoadOptionsBut.setEnabled(m_List.getSelectedIndices().length == 1);
       m_SaveOptionsBut.setEnabled(m_List.getSelectedIndices().length == 1);
+      m_UpBut.setEnabled(JListHelper.canMoveUp(m_List));
+      m_DownBut.setEnabled(JListHelper.canMoveDown(m_List));
     }
   }
 
@@ -365,6 +386,8 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
         m_DeleteBut.setEnabled(false);
         m_LoadOptionsBut.setEnabled(false);
         m_SaveOptionsBut.setEnabled(false);
+        m_UpBut.setEnabled(false);
+        m_DownBut.setEnabled(false);
       }
 
       Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
@@ -405,9 +428,12 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
           }
         }
       }
+    } 
+    else if (e.getSource() == m_UpBut) {
+      JListHelper.moveUp(m_List);
     }
-    else if (e.getSource() == m_List) {
-      System.out.println("yep!");
+    else if (e.getSource() == m_DownBut) {
+      JListHelper.moveDown(m_List);
     }
   }
 
