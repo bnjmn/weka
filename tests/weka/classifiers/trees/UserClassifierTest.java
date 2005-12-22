@@ -4,18 +4,20 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifierTest;
+import weka.classifiers.rules.ZeroR;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import weka.core.Instances;
 
 /**
- * Tests UserClassifier. Run from the command line with:<p>
- * java weka.classifiers.UserClassifierTest
+ * Dummy test for user classifier. Actually uses ZeroR. Run from the
+ * command line with:<p> java weka.classifiers.UserClassifierTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class UserClassifierTest extends AbstractClassifierTest {
 
@@ -23,7 +25,7 @@ public class UserClassifierTest extends AbstractClassifierTest {
 
   /** Creates a default UserClassifier */
   public Classifier getClassifier() {
-    return new UserClassifier();
+    return new ZeroR();
   }
 
   public static Test suite() {
