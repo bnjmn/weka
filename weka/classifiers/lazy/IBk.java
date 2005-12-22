@@ -64,13 +64,10 @@ import weka.core.*;
  * When k is selected by cross-validation for numeric class attributes,
  * minimize mean-squared error. (default mean absolute error) <p>
  *
- * -N <br>
- * Turns off normalization. <p>
- *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
@@ -82,7 +79,7 @@ public class IBk extends Classifier implements
    */
   public String globalInfo() {
 
-    return  "K-nearest neighbours classifier. Normalizes attributes by default. Can "
+    return  "K-nearest neighbours classifier. Can "
       + "select appropriate value of K based on cross-validation. Can also do "
       + "distance weighting. For more information, see\n\n"
       + "Aha, D., and D. Kibler (1991) \"Instance-based learning algorithms\", "
