@@ -31,6 +31,8 @@ import weka.core.Attribute;
 import weka.core.Utils;
 import weka.core.Drawable;
 import weka.core.SerializedObject;
+import weka.core.ClassDiscovery;
+import weka.core.Version;
 import weka.associations.CARuleMiner;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -55,6 +57,7 @@ import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.Plot2D;
+import weka.gui.visualize.plugins.VisualizePlugin;
 import weka.gui.ExtensionFileFilter;
 
 import weka.gui.treevisualizer.*;
@@ -64,6 +67,7 @@ import weka.gui.graphvisualizer.BIFFormatException;
 
 import java.util.Random;
 import java.util.Date;
+import java.util.Vector;
 import java.text.SimpleDateFormat;
 import java.awt.FlowLayout;
 import java.awt.BorderLayout;
@@ -137,7 +141,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.85 $
+ * @version $Revision: 1.86 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1675,6 +1679,41 @@ public class ClassifierPanel extends JPanel {
       visCost.setEnabled(false);
     }
     resultListMenu.add(visCost);
+    
+    JMenu visPlugins = new JMenu("Plugins");
+    Vector pluginsVector = ClassDiscovery.find(VisualizePlugin.class, "weka.gui.visualize.plugins");
+    boolean availablePlugins = false;
+    for (int i=0; i<pluginsVector.size(); i++) {
+      String className = (String)(pluginsVector.elementAt(i));
+      try {
+        if (className.matches(".*\\.VisualizePlugin"))
+          continue;
+        VisualizePlugin plugin = (VisualizePlugin)(Class.forName(className).newInstance());
+        if (plugin==null)
+          continue;
+        availablePlugins = true;
+        JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
+        Version version = new Version();
+        if (pluginMenuItem != null) {
+          if (version.compareTo(plugin.getMinVersion()) < 0)
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
+          if (version.compareTo(plugin.getMaxVersion()) >= 0)
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+          visPlugins.add(pluginMenuItem);
+        }
+      }
+      catch (ClassNotFoundException cnfe) {
+        //System.out.println("Visualize plugin ClassNotFoundException " + cnfe.getMessage());
+      }
+      catch (InstantiationException ie) {
+        //System.out.println("Visualize plugin InstantiationException " + ie.getMessage());
+      }
+      catch (IllegalAccessException iae) {
+        //System.out.println("Visualize plugin IllegalAccessException " + iae.getMessage());
+      }
+    }
+    if (availablePlugins)
+      resultListMenu.add(visPlugins);
 
     resultListMenu.show(m_History.getList(), x, y);
   }
