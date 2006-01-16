@@ -23,8 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -85,10 +83,15 @@ import weka.core.UnsupportedClassTypeException;
  * 1 for evaluation using hold-out set, and 2 for evaluation on the
  * training data (default 1).<p>
  *
+ * -M num <br/>
+ * measure used for evaluation.<br/>
+ * FMEASURE=1, ACCURACY=2, TRUE_POS=3, TRUE_NEG=4, TP_RATE=5, PRECISION=6, RECALL=7<br/>
+ * (default is FMEASURE).
+ *
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.33 $ 
  */
 public class ThresholdSelector extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler, Drawable {
@@ -125,6 +128,24 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
     new Tag(OPTIMIZE_POS_NAME, "Class value named: \"yes\", \"pos(itive)\",\"1\"")
   };
 
+  public static final int FMEASURE  = 1;
+  public static final int ACCURACY  = 2;
+  public static final int TRUE_POS  = 3;
+  public static final int TRUE_NEG  = 4;
+  public static final int TP_RATE   = 5;
+  public static final int PRECISION = 6;
+  public static final int RECALL    = 7;
+  
+  public static final Tag[] TAGS_MEASURE = {
+    new Tag(FMEASURE,  "FMEASURE"),
+    new Tag(ACCURACY,  "ACCURACY"),
+    new Tag(TRUE_POS,  "TRUE_POS"),
+    new Tag(TRUE_NEG,  "TRUE_NEG"), 
+    new Tag(TP_RATE,   "TP_RATE"),   
+    new Tag(PRECISION, "PRECISION"), 
+    new Tag(RECALL,    "RECALL")
+  };
+
   /** The upper threshold used as the basis of correction */
   protected double m_HighThreshold = 1;
 
@@ -151,6 +172,9 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 
   /** The range correction mode */
   protected int m_RangeMode = RANGE_NONE;
+
+  /** evaluation measure used for determining threshold **/
+  int m_nMeasure = FMEASURE;
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
@@ -215,6 +239,23 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
     }
   }
 
+    /** set measure used for determining threshold
+     * @param newMeasure: Tag representing measure to be used
+     **/
+    public void setMeasure(SelectedTag newMeasure) {
+	if (newMeasure.getTags() == TAGS_MEASURE) {
+	    m_nMeasure = newMeasure.getSelectedTag().getID();
+	}
+    }
+
+    /** get measure used for determining threshold 
+     * @return Tag representing measure used
+     **/
+    public SelectedTag getMeasure() {
+	return new SelectedTag(m_nMeasure, TAGS_MEASURE);
+    }
+
+
   /**
    * Finds the best threshold, this implementation searches for the
    * highest FMeasure. If no FMeasure higher than MIN_VALUE is found,
@@ -226,39 +267,82 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 
     Instances curve = (new ThresholdCurve()).getCurve(predictions, m_DesignatedClass);
 
-    //System.err.println(curve);
     double low = 1.0;
     double high = 0.0;
+
+    //System.err.println(curve);
     if (curve.numInstances() > 0) {
-      Instance maxFM = curve.instance(0);
-      int indexFM = curve.attribute(ThresholdCurve.FMEASURE_NAME).index();
+      Instance maxInst = curve.instance(0);
+      double maxValue = 0; 
+      int index1 = 0;
+      int index2 = 0;
+      switch (m_nMeasure) {
+        case FMEASURE:
+          index1 = curve.attribute(ThresholdCurve.FMEASURE_NAME).index();
+          maxValue = maxInst.value(index1);
+          break;
+        case TRUE_POS:
+          index1 = curve.attribute(ThresholdCurve.TRUE_POS_NAME).index();
+          maxValue = maxInst.value(index1);
+          break;
+        case TRUE_NEG:
+          index1 = curve.attribute(ThresholdCurve.TRUE_NEG_NAME).index();
+          maxValue = maxInst.value(index1);
+          break;
+        case TP_RATE:
+          index1 = curve.attribute(ThresholdCurve.TP_RATE_NAME).index();
+          maxValue = maxInst.value(index1);
+          break;
+        case PRECISION:
+          index1 = curve.attribute(ThresholdCurve.PRECISION_NAME).index();
+          maxValue = maxInst.value(index1);
+          break;
+        case RECALL:
+          index1 = curve.attribute(ThresholdCurve.RECALL_NAME).index();
+          maxValue = maxInst.value(index1);
+          break;
+        case ACCURACY:
+          index1 = curve.attribute(ThresholdCurve.TRUE_POS_NAME).index();
+          index2 = curve.attribute(ThresholdCurve.TRUE_NEG_NAME).index();
+          maxValue = maxInst.value(index1) + maxInst.value(index2);
+          break;
+      }
       int indexThreshold = curve.attribute(ThresholdCurve.THRESHOLD_NAME).index();
       for (int i = 1; i < curve.numInstances(); i++) {
         Instance current = curve.instance(i);
-        if (current.value(indexFM) > maxFM.value(indexFM)) {
-          maxFM = current;
-        }
-        if (m_RangeMode == RANGE_BOUNDS) {
-          double thresh = current.value(indexThreshold);
-          if (thresh < low) {
-            low = thresh;
-          }
-          if (thresh > high) {
-            high = thresh;
-          }
-        }
+        double currentValue = 0;
+        if (m_nMeasure ==  ACCURACY) {
+          currentValue= current.value(index1) + current.value(index2);
+	  } else {
+	      currentValue= current.value(index1);
+	  }
+
+	  if (currentValue> maxValue) {
+	      maxInst = current;
+	      maxValue = currentValue;
+	  }
+	  if (m_RangeMode == RANGE_BOUNDS) {
+	      double thresh = current.value(indexThreshold);
+	      if (thresh < low) {
+		  low = thresh;
+	      }
+	      if (thresh > high) {
+		  high = thresh;
+	      }
+	  }
       }
-      if (maxFM.value(indexFM) > MIN_VALUE) {
-        m_BestThreshold = maxFM.value(indexThreshold);
-        m_BestValue = maxFM.value(indexFM);
+      if (maxValue > MIN_VALUE) {
+        m_BestThreshold = maxInst.value(indexThreshold);
+        m_BestValue = maxValue;
         //System.err.println("maxFM: " + maxFM);
       }
       if (m_RangeMode == RANGE_BOUNDS) {
-        m_LowThreshold = low;
-        m_HighThreshold = high;
+	  m_LowThreshold = low;
+	  m_HighThreshold = high;
         //System.err.println("Threshold range: " + low + " - " + high);
       }
     }
+
   }
 
   /**
@@ -268,27 +352,30 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(4);
+    Vector newVector = new Vector(5);
 
     newVector.addElement(new Option(
-              "\tThe class for which threshold is determined. Valid values are:\n" +
-              "\t1, 2 (for first and second classes, respectively), 3 (for whichever\n" +
-              "\tclass is least frequent), and 4 (for whichever class value is most\n" +
-              "\tfrequent), and 5 (for the first class named any of \"yes\",\"pos(itive)\"\n" +
-              "\t\"1\", or method 3 if no matches). (default 5).",
-	      "C", 1, "-C <integer>"));
+        "\tThe class for which threshold is determined. Valid values are:\n" +
+        "\t1, 2 (for first and second classes, respectively), 3 (for whichever\n" +
+        "\tclass is least frequent), and 4 (for whichever class value is most\n" +
+        "\tfrequent), and 5 (for the first class named any of \"yes\",\"pos(itive)\"\n" +
+        "\t\"1\", or method 3 if no matches). (default 5).",
+        "C", 1, "-C <integer>"));
+    
     newVector.addElement(new Option(
 	      "\tNumber of folds used for cross validation. If just a\n" +
 	      "\thold-out set is used, this determines the size of the hold-out set\n" +
 	      "\t(default 3).",
 	      "X", 1, "-X <number of folds>"));
+    
     newVector.addElement(new Option(
-	      "\tSets whether confidence range correction is applied. This\n" +
-              "\tcan be used to ensure the confidences range from 0 to 1.\n" +
-              "\tUse 0 for no range correction, 1 for correction based on\n" +
-              "\tthe min/max values seen during threshold selection\n"+
-              "\t(default 0).",
-	      "R", 1, "-R <integer>"));
+        "\tSets whether confidence range correction is applied. This\n" +
+        "\tcan be used to ensure the confidences range from 0 to 1.\n" +
+        "\tUse 0 for no range correction, 1 for correction based on\n" +
+        "\tthe min/max values seen during threshold selection\n"+
+        "\t(default 0).",
+        "R", 1, "-R <integer>"));
+    
     newVector.addElement(new Option(
 	      "\tSets the evaluation mode. Use 0 for\n" +
 	      "\tevaluation using cross-validation,\n" +
@@ -297,6 +384,11 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 	      "\ttraining data (default 1).",
 	      "E", 1, "-E <integer>"));
 
+    newVector.addElement(new Option(
+	      "\tMeasure used for evaluation (default is FMEASURE).\n"
+        + "\tFMEASURE=1, ACCURACY=2, TRUE_POS=3, TRUE_NEG=4, TP_RATE=5,\n" 
+        + "\tPRECISION=6, RECALL=7\n",
+	      "M", 1, "-M <num>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -338,6 +430,11 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    * 1 for evaluation using hold-out set, and 2 for evaluation on the
    * training data (default 1).<p>
    *
+   * -M num <br/>
+   * measure used for evaluation.<br/>
+   * FMEASURE=1, ACCURACY=2, TRUE_POS=3, TRUE_NEG=4, TP_RATE=5, PRECISION=6, RECALL=7<br/>
+   * (default is FMEASURE).
+   *
    * Options after -- are passed to the designated sub-classifier. <p>
    *
    * @param options the list of options as an array of strings
@@ -369,6 +466,13 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
       setRangeCorrection(new SelectedTag(RANGE_NONE, TAGS_RANGE));
     }
 
+    String measureString = Utils.getOption('M', options);
+    if (measureString.length() != 0) {
+      setMeasure(new SelectedTag(Integer.parseInt(measureString), TAGS_MEASURE));
+    } else {
+      setMeasure(new SelectedTag(FMEASURE, TAGS_MEASURE));
+    }
+
     String foldsString = Utils.getOption('X', options);
     if (foldsString.length() != 0) {
       setNumXValFolds(Integer.parseInt(foldsString));
@@ -387,7 +491,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 8];
+    String [] options = new String [superOptions.length + 10];
 
     int current = 0;
 
@@ -395,6 +499,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
     options[current++] = "-R"; options[current++] = "" + m_RangeMode;
+    options[current++] = "-M"; options[current++] = "" + m_nMeasure;
 
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
@@ -764,6 +869,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
       result += "Expanding range [" + m_LowThreshold + "," + m_HighThreshold
         + "] to [0, 1]\n";
     }
+    result += "Measure: " + getMeasure().getSelectedTag().getReadable() + "\n";
     result += m_Classifier.toString();
     return result;
   }
