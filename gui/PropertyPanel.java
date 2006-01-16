@@ -23,27 +23,37 @@
 
 package weka.gui;
 
-import java.awt.Dimension;
-import java.awt.Insets;
-import java.awt.SystemColor;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-import java.beans.PropertyEditor;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.BorderFactory;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 
-import java.beans.PropertyChangeListener;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyEditor;
+
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 /** 
  * Support for drawing a property value in a component.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PropertyPanel extends JPanel {
 
@@ -93,14 +103,45 @@ public class PropertyPanel extends JPanel {
   protected void createDefaultPanel() {
 
     setBorder(BorderFactory.createEtchedBorder());
-    setToolTipText("Click to edit properties for this object");
+    setToolTipText("Left-click to edit properties for this object, right-click for menu");
     setOpaque(true);
+    final Component comp = this;
     addMouseListener(new MouseAdapter() {
-	public void mouseClicked(MouseEvent evt) {
+      public void mouseClicked(MouseEvent evt) {
+        if (evt.getClickCount() == 1) {
+          if (evt.getButton() == MouseEvent.BUTTON1) {
+            showPropertyDialog();
+          }
+          else if (evt.getButton() == MouseEvent.BUTTON3) {
+            if (m_Editor.getValue() != null) {
+              JPopupMenu menu = new JPopupMenu();
+              
+              JMenuItem item = new JMenuItem("Show properties...");
+              item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                  showPropertyDialog();
+                }
+              });
+              menu.add(item);
 
-	  showPropertyDialog();
-	}
-      });
+              item = new JMenuItem("Copy to clipboard");
+              item.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                  String str = m_Editor.getValue().getClass().getName();
+                  if (m_Editor.getValue() instanceof OptionHandler)
+                    str += " " + Utils.joinOptions(((OptionHandler) m_Editor.getValue()).getOptions());
+                  StringSelection selection = new StringSelection(str.trim());
+                  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                  clipboard.setContents(selection, selection);
+                }
+              });
+              menu.add(item);
+              menu.show(comp, evt.getX(), evt.getY());
+            }
+          }
+        }
+      }
+    });
     Dimension newPref = getPreferredSize();
     newPref.height = getFontMetrics(getFont()).getHeight() * 5 / 4;
     newPref.width = newPref.height * 5;
