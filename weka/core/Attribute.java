@@ -74,7 +74,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class Attribute implements Copyable, Serializable {
 
@@ -762,7 +762,7 @@ public class Attribute implements Copyable, Serializable {
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  Attribute(String attributeName, Instances header,
+  public Attribute(String attributeName, Instances header,
 	    int index) {
 
     this(attributeName, header);
