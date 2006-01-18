@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.21.2.2 $
+ * @version $Revision: 1.21.2.3 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -389,33 +389,36 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     public void setOptions(String[] options) throws Exception {
         m_bUseADTree = !(Utils.getFlag('D', options));
 
-        String sAlpha = Utils.getOption('A', options);
-
         String sBIFFile = Utils.getOption('B', options);
         if (sBIFFile != null && !sBIFFile.equals("")) {
             setBIFFile(sBIFFile);
         }
 
         String searchAlgorithmName = Utils.getOption('Q', options);
-        if (searchAlgorithmName.length() == 0) {
-            throw new Exception("A searchAlgorithmName must be specified with" + " the -Q option.");
+        if (searchAlgorithmName.length() != 0) {
+          setSearchAlgorithm(
+              (SearchAlgorithm) Utils.forName(
+                  SearchAlgorithm.class,
+                  searchAlgorithmName,
+                  partitionOptions(options)));
         }
-        setSearchAlgorithm(
-            (SearchAlgorithm) Utils.forName(
-                SearchAlgorithm.class,
-                searchAlgorithmName,
-                partitionOptions(options)));
+        else {
+          setSearchAlgorithm(new K2());
+        }
 
 
         String estimatorName = Utils.getOption('E', options);
-        if (estimatorName.length() == 0) {
-            throw new Exception("A estimatorName must be specified with" + " the -E option.");
+        if (estimatorName.length() != 0) {
+          setEstimator(
+              (BayesNetEstimator) Utils.forName(
+                  BayesNetEstimator.class,
+                  estimatorName,
+                  Utils.partitionOptions(options)));
         }
-        setEstimator(
-            (BayesNetEstimator) Utils.forName(
-                BayesNetEstimator.class,
-                estimatorName,
-                Utils.partitionOptions(options)));
+        else {
+          setEstimator(new SimpleEstimator());
+        }
+        
         Utils.checkForRemainingOptions(options);
     } // setOptions
 
