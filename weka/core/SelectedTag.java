@@ -29,7 +29,7 @@ package weka.core;
  * associating names with the alternative behaviours.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SelectedTag {
   
@@ -53,6 +53,25 @@ public class SelectedTag {
 	m_Selected = i;
 	m_Tags = tags;
 	return;
+      }
+    }
+    throw new IllegalArgumentException("Selected tag is not valid");
+  }
+  
+  /**
+   * Creates a new <code>SelectedTag</code> instance.
+   *
+   * @param tagText the text of the selected tag (case-insensitive).
+   * @param tags an array containing the possible valid Tags.
+   * @exception IllegalArgumentException if the selected tag isn't in the array
+   * of valid values.
+   */
+  public SelectedTag(String tagText, Tag [] tags) {
+    for (int i = 0; i < tags.length; i++) {
+      if (tags[i].getReadable().equalsIgnoreCase(tagText)) {
+        m_Selected = i;
+        m_Tags = tags;
+        return;
       }
     }
     throw new IllegalArgumentException("Selected tag is not valid");
