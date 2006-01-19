@@ -83,15 +83,13 @@ import weka.core.UnsupportedClassTypeException;
  * 1 for evaluation using hold-out set, and 2 for evaluation on the
  * training data (default 1).<p>
  *
- * -M num <br/>
- * measure used for evaluation.<br/>
- * FMEASURE=1, ACCURACY=2, TRUE_POS=3, TRUE_NEG=4, TP_RATE=5, PRECISION=6, RECALL=7<br/>
- * (default is FMEASURE).
+ * -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL] <br/>
+ * measure used for evaluation. (default is FMEASURE). <p/>
  *
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.34 $ 
  */
 public class ThresholdSelector extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler, Drawable {
@@ -385,10 +383,8 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 	      "E", 1, "-E <integer>"));
 
     newVector.addElement(new Option(
-	      "\tMeasure used for evaluation (default is FMEASURE).\n"
-        + "\tFMEASURE=1, ACCURACY=2, TRUE_POS=3, TRUE_NEG=4, TP_RATE=5,\n" 
-        + "\tPRECISION=6, RECALL=7\n",
-	      "M", 1, "-M <num>"));
+	      "\tMeasure used for evaluation (default is FMEASURE).\n",
+	      "M", 1, "-M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -430,10 +426,8 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    * 1 for evaluation using hold-out set, and 2 for evaluation on the
    * training data (default 1).<p>
    *
-   * -M num <br/>
-   * measure used for evaluation.<br/>
-   * FMEASURE=1, ACCURACY=2, TRUE_POS=3, TRUE_NEG=4, TP_RATE=5, PRECISION=6, RECALL=7<br/>
-   * (default is FMEASURE).
+   * -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL] <br/>
+   * measure used for evaluation. (default is FMEASURE). <p/>
    *
    * Options after -- are passed to the designated sub-classifier. <p>
    *
@@ -468,7 +462,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 
     String measureString = Utils.getOption('M', options);
     if (measureString.length() != 0) {
-      setMeasure(new SelectedTag(Integer.parseInt(measureString), TAGS_MEASURE));
+      setMeasure(new SelectedTag(measureString, TAGS_MEASURE));
     } else {
       setMeasure(new SelectedTag(FMEASURE, TAGS_MEASURE));
     }
@@ -499,7 +493,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
     options[current++] = "-R"; options[current++] = "" + m_RangeMode;
-    options[current++] = "-M"; options[current++] = "" + m_nMeasure;
+    options[current++] = "-M"; options[current++] = "" + getMeasure().getSelectedTag().getReadable();
 
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
