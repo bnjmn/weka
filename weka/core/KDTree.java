@@ -60,7 +60,7 @@ import java.lang.Math;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class KDTree extends NearestNeighbourSearch implements OptionHandler, Serializable {
 
@@ -91,8 +91,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   private int[] m_InstList;
   
   /** The euclidean distance function to use */
-  private EuclideanDistance m_EuclideanDistance;
-  { // to make sure we have only one object of EuclideanDistance 
+  private EuclideanDistance m_EuclideanDistance; { // to make sure we have only one object of EuclideanDistance
   if(m_DistanceFunction instanceof EuclideanDistance)
     m_EuclideanDistance = (EuclideanDistance) m_DistanceFunction;
   else
@@ -215,9 +214,9 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * @param end the end index of the instances in the index list
      * @exception thrown if instance couldn't be retrieved
      */
-    private void makeKDTreeNode(int [] num, 
-		     	        int start,
-			        int end) throws Exception {
+    private void makeKDTreeNode(int [] num, int start, int end) 
+      throws Exception {
+
       num[0]++;
       m_NodeNumber =  num[0];
       m_Start = start;
@@ -237,15 +236,15 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       }
 
       // prepare local instance list to work with
-      int [] instList = new int[numInst];
-      int index = 0;
-      for (int i = start; i <= end; i++) {
-	instList[index++] = m_InstList[i];
-      }
+      //int [] instList = new int[numInst];
+      //int index = 0;
+      //for (int i = start; i <= end; i++) {
+      //instList[index++] = m_InstList[i];
+      //}
 
       // set ranges and split parameter
       if (m_NodeRanges == null)
-	m_NodeRanges = m_EuclideanDistance.initializeRanges(instList);
+        m_NodeRanges = m_EuclideanDistance.initializeRanges(m_InstList, start, end);
 
       // set outer ranges
       if (m_Universe == null) {
@@ -253,7 +252,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       }
 
       
-      m_SplitDim = widestDim(m_NormalizeNodeWidth);
+      m_SplitDim = widestDim(m_NormalizeNodeWidth, m_Instances.classIndex());
       if (m_SplitDim >= 0) {
 	m_SplitValue = splitValue(m_SplitDim);
 	// set relative width
@@ -280,8 +279,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       int numLeft = 0;
       boolean [] left = new boolean[numInst];
       if (!makeALeaf) {
-	numLeft = checkSplitInstances(left, instList,
-				      m_SplitDim, m_SplitValue);
+        numLeft = checkSplitInstances(left, start, end, m_SplitDim, m_SplitValue);
       
 	// if one of the sides would be empty, make a leaf
 	// which means, do nothing
@@ -305,7 +303,8 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	int [] rightInstList = new int[numInst - numLeft];
 	int startLeft = start;
 	int startRight = start + numLeft;
-	splitInstances(left, instList, startLeft, startRight);
+        //splitInstances(left, instList, startLeft, startRight);
+        splitInstances(left, start, end, startLeft);
 
 	/*
 	for (int i = 0; i < m_InstList.length; i++) { 
@@ -350,7 +349,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * @param normalize if true normalization is used
      * @return attribute index that has widest range
      */
-    private int widestDim(boolean normalize) {
+    private int widestDim(boolean normalize, int classIdx) {
       
       double widest = 0.0;
       int w = -1;
@@ -358,6 +357,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	for (int i = 0; i < m_NodeRanges.length; i++) {
 	  double newWidest = m_NodeRanges[i][R_WIDTH] / m_Universe[i][R_WIDTH];
 	  if (newWidest > widest) {
+            if(i == classIdx) continue;
 	    widest = newWidest;
 	    w = i;
 	  }
@@ -366,6 +366,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       else {
 	for (int i = 0; i < m_NodeRanges.length; i++) {
 	  if (m_NodeRanges[i][R_WIDTH] > widest) {
+            if(i == classIdx) continue;
 	    widest = m_NodeRanges[i][R_WIDTH];
 	    w = i;
 	  }
@@ -444,8 +445,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	  //split leaf
 	  int [] num = new int[1];
 	  num[0] = m_NodeNumber;
-	  this.makeKDTreeNode(num, m_NodeRanges, m_Start,
-			      m_End);
+          this.makeKDTreeNode(num, m_NodeRanges, m_Start, m_End);
         }
 	success = true;
       }
@@ -676,8 +676,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	if ((inside[i]) 
 	    
 	    // 2. take all points with same distance to the rect. as the owner 
-	    || (distance[i] == distance[ownerIndex]))
-	  {
+            || (distance[i] == distance[ownerIndex])) {
 	    
 	    // add competitor to owners list
 	    owners[index++] = candidates[i];
@@ -864,8 +863,8 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	  Instance trainInstance = m_Instances.instance(m_InstList[index]);
 
 	  if (target != trainInstance) { // for hold-one-out cross-validation
-            if(print==true)
-              OOPS("K: "+i);
+            //if(print==true)
+            //  OOPS("K: "+i);
             dist = m_EuclideanDistance.distance(target, trainInstance, Double.MAX_VALUE, print);
 	    m_NearestList[i] = currIndex;
 	    m_DistanceList[i] = dist;
@@ -912,8 +911,8 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	Instance trainInstance = m_Instances.instance(currIndex);
 	if (target != trainInstance) { // for hold-one-out cross-validation
           
-          if(print==true)
-            OOPS("K: "+m_NearestListLength);
+          //if(print==true)
+          //  OOPS("K: "+m_NearestListLength);
           dist = m_EuclideanDistance.distance(target, trainInstance, m_MaxMinDist, print);
 	  
           // is instance one of the nearest?
@@ -1205,22 +1204,22 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * @param splitValue value at which the node is split
    * @return number of instances that belong to the left
    */
-  private int checkSplitInstances(boolean [] left,
-				  int [] instList,
-				  int splitDim, double splitValue) {  
+  private int checkSplitInstances(boolean [] left, //int [] instList,
+      int startIdx, int endIdx,
+      int splitDim, double splitValue) {
 
     // length of left should be same as length of instList
     int numLeft = 0;
-    for (int i = 0; i < instList.length; i++) {
+    for (int i = startIdx, j = 0; i <= endIdx; i++, j++) {
       // value <= splitValue
       if (m_EuclideanDistance.valueIsSmallerEqual(
-	     m_Instances.instance(instList[i]), 
-	     splitDim,
-             splitValue)) {
-	left[i] = true;
+            m_Instances.instance(m_InstList[i]),
+            splitDim,
+            splitValue)) {
+        left[j] = true;
         numLeft++;
       } else {
-	left[i] = false;
+        left[j] = false;
       }
     }
     return numLeft;
@@ -1234,16 +1233,19 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * @param iLeft index to the left 
    * @param iRight index to the right 
    */
-  private void splitInstances(boolean [] left,
-			      int [] instList, 
-			      int iLeft,
-			      int iRight) {
-
-    for (int i = 0; i < instList.length; i++) {
-      if (left[i]) {
-	m_InstList[iLeft++] =  instList[i];
-      } else {
-	m_InstList[iRight++] = instList[i];
+  private void splitInstances(boolean [] left,  int startIdx, int endIdx,
+                              int startLeft) {
+    int tmp;
+    //shuffling indices in the left node to the left of the array and those in 
+    //right node to the right side of the array (see makeKDTreeNode() for 
+    //referred startLeft, numLeft and startRight variables).
+    //After for loop starting from startLeft, numLeft indices will be on left
+    //and the rest will be on right starting from startRight 
+    for (int i = startIdx, j = 0; i <= endIdx; i++, j++) {
+      if (left[j]) { 
+        tmp = m_InstList[startLeft];
+        m_InstList[startLeft++] = m_InstList[i]; //instList[i];
+        m_InstList[i] = tmp;
       }
     }
   }
@@ -1400,11 +1402,8 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * @param maxDist the distance to the nearest neighbor so far
    * @param nearest the index of the nearest neighbor (second return value)
    */ //redundant no longer needed
-  public int findKNearestNeighbour(Instance target,
-                                   int kNN,
-                                   int [] nearestList,
-                                   double [] distanceList) 
-    throws Exception {
+  public int findKNearestNeighbour(Instance target, int kNN, int [] nearestList,
+                                   double [] distanceList) throws Exception {
     m_kNN = kNN;
     m_NearestList = nearestList;
     m_DistanceList = distanceList;
@@ -1554,7 +1553,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   public Enumeration listOptions() {
 
     Vector newVector = new Vector();
-    System.err.println("Before: "+newVector.toString());
     newVector.addElement(new Option("\tSet minimal width of a box\n"+
                                     "\t(default = 1.0E-2).",
 				    "W", 0,"-W <value>"));
@@ -1564,8 +1562,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     newVector.addElement(new Option("\tNormalizing will be done\n"+
                                     "\t(Select dimension for split, with "+
                                     "normalising to universe).", "N", 0,"-N"));
-    System.err.println("After: "+newVector.toString());
-     return newVector.elements();
+    return newVector.elements();
   }
 
   /**
@@ -1632,6 +1629,13 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 			   +"<dataset> [<dataset> <dataset>...]");
 	System.exit(1);
       }
+      Instances insts = new Instances(new java.io.FileReader(args[0]));
+      KDTree tree = new KDTree();
+      DistanceFunction df = new EuclideanDistance();
+      df.setInstances(insts);
+      tree.setInstances(insts);
+      tree.setDistanceFunction(df);
+      System.out.println(tree.toString());
     }catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());

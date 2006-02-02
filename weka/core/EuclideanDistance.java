@@ -16,7 +16,7 @@
 
 /*
  *    EuclideanDistance.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 1999-2005 University of Waikato
  *
  */
 
@@ -39,7 +39,7 @@ import java.io.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class EuclideanDistance implements DistanceFunction, Cloneable, 
 					  Serializable {
@@ -433,9 +433,9 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
   /**
    * Index in ranges for MIN and MAX and WIDTH
    */
-  protected static final int R_MIN = 0;
-  protected static final int R_MAX = 1;
-  protected static final int R_WIDTH = 2;
+  public static final int R_MIN = 0;
+  public static final int R_MAX = 1;
+  public static final int R_WIDTH = 2;
   
   /**
    * Initializes the ranges using all instances of the dataset.
@@ -494,6 +494,43 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
       updateRangesFirst(m_Data.instance(instList[0]), numAtt, ranges);
       // update ranges, starting from the second
       for (int i = 1; i < instList.length; i++) {
+        updateRanges(m_Data.instance(instList[i]), numAtt, ranges);
+      }
+    }
+    return ranges;
+  }
+  
+ /**
+  * Initializes the ranges of a subset of the instances of this dataset.
+  * Therefore m_Ranges is not set.
+  * The caller of this method should ensure that the supplied start and end 
+  * indices are valid (start &lt;= end, end&lt;instList.length etc) and
+  * correct.
+  *
+  * @param instList list of indexes of the instances
+  * @param startIdx start index of the subset of instances in the indices array
+  * @param endIdx end index of the subset of instances in the indices array
+  * @return the ranges
+  */  //being used in other classes (KDTree and XMeans)
+  public double [][] initializeRanges(int[] instList, int startIdx, int endIdx) 
+      throws Exception {
+    
+    if(m_Data == null) {
+      throw new Exception("No instances supplied.");
+    }
+    
+    int numAtt = m_Data.numAttributes();
+    double [][] ranges = new double [numAtt][3];
+    
+    if (m_Data.numInstances() <= 0) {
+      initializeRangesEmpty(numAtt, ranges);
+      return ranges;
+    }
+    else {
+      // initialize ranges using the first instance
+      updateRangesFirst(m_Data.instance(instList[startIdx]), numAtt, ranges);
+      // update ranges, starting from the second
+      for (int i = startIdx+1; i <= endIdx; i++) {
         updateRanges(m_Data.instance(instList[i]), numAtt, ranges);
       }
     }
