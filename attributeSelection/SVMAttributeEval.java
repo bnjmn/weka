@@ -37,34 +37,39 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  * using a one-vs-all method and then "dealing" from the top of 
  * each pile to give a final ranking.<p>
  *
+ * For more information see: <br/>
+ * Guyon, I., Weston, J., Barnhill, S., &amp; Vapnik, V. (2002).  Gene
+ * selection for cancer classification using support vector machines. Machine
+ * Learning, 46, 389-422 <p/>
+ *
  * Valid options are: <p>
  *
- * -X <constant rate of elimination> <br>
+ * -X constant rate of elimination <br>
  * Specify constant rate at which attributes are eliminated per invocation
  * of the support vector machine. Default = 1.<p>
  * 
- * -Y <percent rate of elimination> <br>
+ * -Y percent rate of elimination <br>
  * Specify the percentage rate at which attributes are eliminated per invocation
  * of the support vector machine. This setting trumps the constant rate setting. 
  * Default = 0 (percentage rate ignored).<p>
  *
- * -Z <threshold for percent elimination> <br>
+ * -Z threshold for percent elimination <br>
  * Specify the threshold below which the percentage elimination method
  * reverts to the constant elimination method.<p>
  *
- * -C <complexity parameter> <br>
+ * -C complexity parameter <br>
  * Specify the value of C - the complexity parameter to be passed on
  * to the support vector machine. <p>
  * 
- * -P <episilon> <br>
+ * -P episilon <br>
  * Sets the epsilon for round-off error. (default 1.0e-25)<p>
  *
- * -T <tolerance> <br>
+ * -T tolerance <br>
  * Sets the tolerance parameter. (default 1.0e-10)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class SVMAttributeEval extends AttributeEvaluator
   implements OptionHandler {
@@ -102,7 +107,11 @@ public class SVMAttributeEval extends AttributeEvaluator
    */
   public String globalInfo() {
     return "SVMAttributeEval :\n\nEvaluates the worth of an attribute by "
-      + "using an SVM classifier.\n";
+      + "using an SVM classifier.\n\n"
+      + "For more information see:\n"
+      + "Guyon, I., Weston, J., Barnhill, S., & Vapnik, V. (2002). "
+      + "Gene selection for cancer classification using support "
+      + "vector machines. Machine Learning, 46, 389-422";
   }
 
   /**
@@ -192,35 +201,36 @@ public class SVMAttributeEval extends AttributeEvaluator
   }
 
   /**
-   * Parses a given list of options
+   * Parses a given list of options. <p/>
    *
    * Valid options are: <p>
    *
-   * -X <constant rate of elimination> <br>
+   * -X constant rate of elimination <br>
    * Specify constant rate at which attributes are eliminated per invocation
    * of the support vector machine. Default = 1.<p>
    * 
-   * -Y <percent rate of elimination> <br>
-   * Specify the percentage rate at which attributes are eliminated per invocation
-   * of the support vector machine. This setting trumps the constant rate setting. 
-   * Default = 0 (percentage rate ignored).<p>
+   * -Y percent rate of elimination <br>
+   * Specify the percentage rate at which attributes are eliminated per
+   * invocation of the support vector machine. This setting trumps the constant
+   * rate setting.  Default = 0 (percentage rate ignored).<p>
    *
-   * -Z <threshold for percent elimination> <br>
+   * -Z threshold for percent elimination <br>
    * Specify the threshold below which the percentage elimination method
    * reverts to the constant elimination method.<p>
    *
-   * -C <complexity parameter> <br>
+   * -C complexity parameter <br>
    * Specify the value of C - the complexity parameter to be passed on
    * to the support vector machine. <p>
    * 
-   * -P <episilon> <br>
+   * -P episilon <br>
    * Sets the epsilon for round-off error. (default 1.0e-25)<p>
    *
-   * -T <tolerance> <br>
+   * -T tolerance <br>
    * Sets the tolerance parameter. (default 1.0e-10)<p>
    *
-   * -N <0|1|2> <br>
-   * Whether the SVM should 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
+   * -N 0|1|2 <br>
+   * Whether the SVM should 0=normalize/1=standardize/2=neither. (default
+   * 0=normalize)<p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an error occurs
