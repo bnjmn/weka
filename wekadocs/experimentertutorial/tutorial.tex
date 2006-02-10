@@ -3,9 +3,16 @@
 \usepackage{epsfig}
 
 \title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Experimenter Tutorial\\for Version 3-5-2}
-\author{Peter Reutemann}
+\author{David Scuse\\Peter Reutemann}
 
 \setcounter{secnumdepth}{1}
+
+% hyphenation stuff
+\hyphenation{Generic-Object-Editor}
+\hyphenation{Result-Producer}
+\hyphenation{Cross-Validation-Result-Producer}
+\hyphenation{Random-Split-Result-Producer}
+\hyphenation{Database-Result-Listener}
 
 \begin{document}
 
@@ -17,7 +24,7 @@
 \center
 \vspace{8cm}
 
-\copyright 2002-2005 University of Waikato
+\copyright 2002-2005 David Scuse and University of Waikato
 
 \end{titlepage}
 
@@ -32,7 +39,7 @@
 
 The Weka Experiment Environment enables the user to create, run, modify, and analyse experiments in a more convenient manner than is possible when processing the schemes individually. For example, the user can create an experiment that runs several schemes against a series of datasets and then analyse the results to determine if one of the schemes is (statistically) better than the other schemes.
 
-The Experiment Environment can be run from the command line using the Simple CLI. For example, the following commands could be typed into the CLI to run the OneR scheme on the Iris dataset using a basic train and test process. (Note that the commands would be typed on one line into the CLI.)
+The Experiment Environment can be run from the command line using the Simple CLI. For example, the following commands could be typed into the CLI to run the \texttt{OneR} scheme on the Iris dataset using a basic train and test process. (Note that the commands would be typed on one line into the CLI.)
 
 \begin{verbatim}
 java weka.experiment.Experiment -r -T data/iris.arff
@@ -44,7 +51,7 @@ java weka.experiment.Experiment -r -T data/iris.arff
 
 While commands can be typed directly into the CLI, this technique is not particularly convenient and the experiments are not easy to modify.
 
-The Experimenter comes in two flavors, either with a simple interface that provides most of the functionality one needs for experiments, or with an interface with full access to the Experimenter's capabilities. You can choose between those two with the \textit{Experiment Configuration Mode} radio buttons:
+The Experimenter comes in two flavours, either with a simple interface that provides most of the functionality one needs for experiments, or with an interface with full access to the Experimenter's capabilities. You can choose between those two with the \textit{Experiment Configuration Mode} radio buttons:
 
 \begin{itemize}
 	\item Simple
@@ -53,7 +60,7 @@ The Experimenter comes in two flavors, either with a simple interface that provi
 
 Both setups allow you to setup \textit{standard} experiments, that are run locally on a single machine, or remote experiments, which are distributed between several hosts. The distribution of experiments cuts down the time the experiments will take until completion, but on the other hand the setup takes more time.
 
-The next section covers the \textit{standard} experiments (both, simple and advanced), followed by the \textit{remote} experiments and finally the \textit{analyzing} of the results.
+The next section covers the \textit{standard} experiments (both, simple and advanced), followed by the \textit{remote} experiments and finally the \textit{analysing} of the results.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Standard Experiments %
@@ -87,7 +94,7 @@ By default, an ARFF file is the destination for the results output. But you can 
    \item JDBC database 
 \end{itemize}
 
-ARFF file and JDBC database are discussed in detail in the following sections. CSV is similar to ARFF, but instead of being analyzed within the Experimenter, it can be used to be loaded in an external spreadsheet application.
+ARFF file and JDBC database are discussed in detail in the following sections. CSV is similar to ARFF, but it can be used to be loaded in an external spreadsheet application.
 
 
 \subsubsection*{ARFF file}
@@ -106,7 +113,7 @@ Click on \textit{Save} and the name will appear in the edit field next to \texti
 \end{center}
 
 
-The advantage of ARFF files: they can be created without any additional classes besides the ones from Weka. The drawback is the lack of reuptake of an interrupted experiment, e.g., due to an error or the addition of data set or algorithms. Especially with time-consuming experiments, this behavior can be annoying.
+The advantage of ARFF or CSV files is that they can be created without any additional classes besides the ones from Weka. The drawback is the lack of the ability to resume an experiment that was interrupted, e.g., due to an error or the addition of dataset or algorithms. Especially with time-consuming experiments, this behavior can be annoying.
 
 
 \subsubsection*{JDBC database}
@@ -122,14 +129,14 @@ After changing \textit{ARFF file} to \textit{JDBC database} click on \textit{Use
 
 After supplying the necessary data and clicking on \textit{OK}, the URL in the main window will be updated.
 
-\textit{Note:} at this point, the database connection is not tested; this is done, when the experiment is started.
+\textit{Note:} at this point, the database connection is not tested; this is done when the experiment is started.
 
 \begin{center}
 	\epsfig{file=images/simple_saveoutput_JDBC2.eps,width=10cm}
 \end{center}
 
 
-The advantage of a JDBC database is the possible reuptake of an interrupted or extended experiment. Instead of re-running all the other algorithm/dataset combinations again, only the missing ones are computed.
+The advantage of a JDBC database is the possibility to resume an interrupted or extended experiment. Instead of re-running all the other algorithm/dataset combinations again, only the missing ones are computed.
 
 
 \subsubsection{Experiment type}
@@ -141,7 +148,8 @@ The user can choose between the following three different types
       performs stratified cross-validation with the given number of folds 
 
    \item \textbf{Train/Test Percentage Split (data randomized)} \\
-      splits a dataset according to the percentage into a train and a test file (one cannot specify explicit training and test files in the Experimenter), after the order of the data has been randomized 
+      splits a dataset according to the given percentage into a train and a test file (one cannot specify explicit training and test files in the Experimenter), after the order of the data has been randomized and
+      stratified
 
 	
 	\begin{center}
@@ -150,7 +158,7 @@ The user can choose between the following three different types
 	
 
     \item \textbf{Train/Test Percentage Split (order preserved)} \\
-      since it is not possible to specify an explicit train/test files pair, one can \textit{abuse} this type to \textit{un-merge} previously merged train and test file into the two original files (one only needs to find out the correct percentage) 
+      because it is impossible to specify an explicit train/test files pair, one can \textit{abuse} this type to \textit{un-merge} previously merged train and test file into the two original files (one only needs to find out the correct percentage) 
 
 	
 	\begin{center}
@@ -159,14 +167,14 @@ The user can choose between the following three different types
 	
 \end{itemize}
 
-Additionally, one can choose between \textit{classification} and \textit{regression}, depending on the datasets and classifiers one uses. For decision trees like J48 (Weka's implementation of Quinlan's C4.5) and the iris dataset, \textit{classification} is necessary, for a numeric classifier like M5P, on the other hand, \textit{regression}. \textit{classification} is selected by default.
+Additionally, one can choose between \textit{Classification} and \textit{Regression}, depending on the datasets and classifiers one uses. For decision trees like \texttt{J48} (Weka's implementation of Quinlan's C4.5 \cite{quinlan}) and the iris dataset, \textit{Classification} is necessary, for a numeric classifier like \texttt{M5P}, on the other hand, \textit{Regression}. \textit{Classification} is selected by default.
 
-\textit{Note:} if the percentage splits are used, one has to make sure that the corrected paired T-Tester still produces sensible results with the given ratio (Y. Bengio, C. Nadeau: \textit{Inference for the Generalization Error}, 1999).
+\textit{Note:} if the percentage splits are used, one has to make sure that the corrected paired \textit{T-Tester} still produces sensible results with the given ratio \cite{bengio}.
 
 
 \subsubsection{Datasets}
 
-One can add dataset files either with an absolute path of with an relative one. The latter makes it often easier to experiments on different machines, hence one should check \textit{Use relative paths}, before clicking on \textit{Add new...}.
+One can add dataset files either with an absolute path or with a relative one. The latter makes it often easier to experiments on different machines, hence one should check \textit{Use relative paths}, before clicking on \textit{Add new...}.
 
 \begin{center}
 	\epsfig{file=images/simple_adddataset1.eps,width=7cm}
@@ -180,7 +188,7 @@ In this example, open the \textit{data} directory and choose the \textit{iris.ar
 \end{center}
 
 
-After clicking \textit{Open} the file will be displayed in the datasets list. If one selects a directory and hits \textit{Open}, then all ARFF files will added recursively. Files can be deleted from the list by selecting them and then clicking on \textit{Delete selected}.
+After clicking \textit{Open} the file will be displayed in the datasets list. If one selects a directory and hits \textit{Open}, then all ARFF files will be added recursively. Files can be deleted from the list by selecting them and then clicking on \textit{Delete selected}.
 
 \begin{center}
 	\epsfig{file=images/simple_adddataset3.eps,width=10cm}
@@ -191,30 +199,30 @@ After clicking \textit{Open} the file will be displayed in the datasets list. If
 
 \begin{itemize}
    \item \textbf{Number of repetitions} \\
-      In order to get statistically meaningful results, the default iteration number is 10. In case of 10-fold cross-validation this means 100 calls of one classifier with training data and tested against test data. 
+      In order to get statistically meaningful results, the default number of iterations is 10. In case of 10-fold cross-validation this means 100 calls of one classifier with training data and tested against test data. 
 
    \item \textbf{Data sets first/Algorithms first} \\
-      As soon as one has more than one dataset and algorithm, it can be useful to switch from datasets being iterated first to algorithms. This is the case, if one stores the results in a database and wants to check out the results for all the datasets for one algorithm. 
+      As soon as one has more than one dataset and algorithm, it can be useful to switch from datasets being iterated over first to algorithms. This is the case, if one stores the results in a database and wants to complete the results for all the datasets for one algorithm as early as possible. 
 \end{itemize}
 
 
 \subsubsection{Algorithms}
 
-New algorithms can be added via the \textit{Add new...} button. The first time opening this dialog, \texttt{ZeroR} is presented, otherwise the one that was selected last.
+New algorithms can be added via the \textit{Add new...} button. Opening this dialog for the first time, \texttt{ZeroR} is presented, otherwise the one that was selected last.
 
 \begin{center}
 	\epsfig{file=images/simple_addalgorithm1.eps,width=6cm}
 \end{center}
 
 
-With the \textit{Choose} button one can open the GenericObjectEditor and choose another classifier.
+With the \textit{Choose} button one can open the \textit{GenericObjectEditor} and choose another classifier.
 
 \begin{center}
 	\epsfig{file=images/simple_addalgorithm2.eps,width=6cm}
 \end{center}
 
 
-Additional algorithms can be added again with the \textit{Add new...} button, e.g. the J48 decision tree.
+Additional algorithms can be added again with the \textit{Add new...} button, e.g., the \texttt{J48} decision tree.
 
 \begin{center}
 	\epsfig{file=images/simple_addalgorithm3.eps,width=6cm}
@@ -228,7 +236,7 @@ After setting the classifier parameters, one clicks on \textit{OK} to add it to 
 \end{center}
 
 
-With the \textit{Load options...} and \textit{Save options...} buttons one can load and save the setup of a selected classifier from and to XML. This is especially useful for highly configured classifiers (e.g., nested meta-classifiers), where the manual setup takes quite some time, and which are used more often.
+With the \textit{Load options...} and \textit{Save options...} buttons one can load and save the setup of a selected classifier from and to XML. This is especially useful for highly configured classifiers (e.g., nested meta-classifiers), where the manual setup takes quite some time, and which are used often.
 
 
 \subsubsection{Saving the setup}
@@ -240,14 +248,14 @@ For future re-use, one can save the current setup of the experiment to a file by
 \end{center}
 
 
-By default, the format of the experiment files is the binary format the Java serialization offers. The drawback of this format is the possible incompatibility between different versions of Weka. A more robust alternative to the binary format is the XML format.
+By default, the format of the experiment files is the binary format that Java serialization offers. The drawback of this format is the possible incompatibility between different versions of Weka. A more robust alternative to the binary format is the XML format.
 
 Previously saved experiments can be loaded again via the \textit{Open...} button.
 
 
 \subsubsection{Running an Experiment}
 
-To run the current experiment, click the Run tab at the top of the Experiment Environment window. The current experiment performs 10 runs of 10-fold stratified cross-validation on the Iris dataset using the \texttt{ZeroR} and \texttt{J48} scheme.
+To run the current experiment, click the \textit{Run} tab at the top of the Experiment Environment window. The current experiment performs 10 runs of 10-fold stratified cross-validation on the Iris dataset using the \texttt{ZeroR} and \texttt{J48} scheme.
 
 \begin{center}
 	\epsfig{file=images/runexperiment1.eps,width=10cm}
@@ -261,7 +269,7 @@ Click \textit{Start} to run the experiment.
 \end{center}
 
 
-If the experiment was defined correctly, the 3 messages shown above will be displayed in the Log panel. The results of the experiment are saved to the dataset \textit{Experiment1.arff}. 
+If the experiment was defined correctly, the 3 messages shown above will be displayed in the \textit{Log} panel. The results of the experiment are saved to the dataset \textit{Experiment1.arff}. 
 
 %%%%%%%%%%%%
 % Advanced %
@@ -272,12 +280,12 @@ If the experiment was defined correctly, the 3 messages shown above will be disp
 
 \subsubsection{Defining an Experiment}
 
-When the Experimenter is started, the Setup window is displayed. Click \textit{New} to initialize an experiment. This causes default parameters to be defined for the experiment.
+When the Experimenter is started in \textit{Advanced} mode, the \textit{Setup} panel is displayed. Click \textit{New} to initialize an experiment. This causes default parameters to be defined for the experiment.
 \begin{center}
 	\epsfig{file=images/advanced_new.eps,width=10cm}
 \end{center}
 
-To define the dataset to be processed by a scheme, first select \textit{Use relative paths} in the Datasets panel of the Setup window and then click on \textit{Add new...} to open a dialog window.
+To define the dataset to be processed by a scheme, first select \textit{Use relative paths} in the \textit{Datasets} panel of the \textit{Setup} tab and then click on \textit{Add new...} to open a dialog window.
 \begin{center}
 	\epsfig{file=images/advanced_adddataset1.eps,width=7cm}
 \end{center}
@@ -291,13 +299,13 @@ Double click on the \textit{data} folder to view the available datasets or navig
 	\epsfig{file=images/advanced_adddataset3.eps,width=10cm}
 \end{center}
 
-The dataset name is now displayed in the Datasets panel of the Setup window.
+The dataset name is now displayed in the \textit{Datasets} panel of the \textit{Setup} tab.
 
 
 
 \subsubsection*{Saving the Results of the Experiment}
 
-To identify a dataset to which the results are to be sent, click on the \textit{InstancesResultListener} entry in the Destination panel. The output file parameter is near the bottom of the window, beside the text \textit{outputFile}. Click on this parameter to display a file selection window.
+To identify a dataset to which the results are to be sent, click on the \textit{InstancesResultListener} entry in the \textit{Destination} panel. The output file parameter is near the bottom of the window, beside the text \textit{outputFile}. Click on this parameter to display a file selection window.
 \begin{center}
 	\epsfig{file=images/advanced_saveoutput1.eps,width=6cm}
 \end{center}
@@ -306,12 +314,12 @@ To identify a dataset to which the results are to be sent, click on the \textit{
 	\epsfig{file=images/advanced_saveoutput2.eps,width=7cm}
 \end{center}
 
-Type the name of the output file, click \textit{Select}, and then click close (x). The file name is displayed in the outputFile panel. Click on \textit{OK} to close the window.
+Type the name of the output file, click \textit{Select}, and then click close (x). The file name is displayed in the \textit{outputFile} panel. Click on \textit{OK} to close the window.
 \begin{center}
 	\epsfig{file=images/advanced_saveoutput3.eps,width=6cm}
 \end{center}
 
-The dataset name is displayed in the Destination panel of the Setup window.
+The dataset name is displayed in the \textit{Destination} panel of the \textit{Setup} tab.
 \begin{center}
 	\epsfig{file=images/advanced_saveoutput4.eps,width=10cm}
 \end{center}
@@ -320,29 +328,29 @@ The dataset name is displayed in the Destination panel of the Setup window.
 
 \subsubsection*{Saving the Experiment Definition}
 
-The experiment definition can be saved at any time. Select \textit{Save...} at the top of the Setup window. Type the dataset name with the extension \textit{exp} (or select the dataset name if the experiment definition dataset already exists) for binary files or choose \textit{Experiment configuration files (*.xml)} from the file types combobox (the XML files are robust in regards to version changes).
+The experiment definition can be saved at any time. Select \textit{Save...} at the top of the \textit{Setup} tab. Type the dataset name with the extension \textit{exp} (or select the dataset name if the experiment definition dataset already exists) for binary files or choose \textit{Experiment configuration files (*.xml)} from the file types combobox (the XML files are robust with respect to version changes).
 \begin{center}
 	\epsfig{file=images/advanced_save.eps,width=7cm}
 \end{center}
 
 
-The experiment can be restored by selecting Open in the Setup window and then selecting \textit{Experiment1.exp} in the dialog window.
+The experiment can be restored by selecting \textit{Open} in the \textit{Setup} tab and then selecting \textit{Experiment1.exp} in the dialog window.
 
 
 
 \subsubsection{Running an Experiment}
 
-To run the current experiment, click the Run tab at the top of the Experiment Environment window. The current experiment performs 10 randomized train and test runs on the Iris dataset, using 66\% of the patterns for training and 34\% for testing, and using the ZeroR scheme.
+To run the current experiment, click the \textit{Run} tab at the top of the Experiment Environment window. The current experiment performs 10 randomized train and test runs on the Iris dataset, using 66\% of the patterns for training and 34\% for testing, and using the \texttt{ZeroR} scheme.
 \begin{center}
 	\epsfig{file=images/runexperiment1.eps,width=10cm}
 \end{center}
 
-Click Start to run the experiment.
+Click \textit{Start} to run the experiment.
 \begin{center}
 	\epsfig{file=images/runexperiment2.eps,width=10cm}
 \end{center}
 
-If the experiment was defined correctly, the 3 messages shown above will be displayed in the Log panel. The results of the experiment are saved to the dataset \textit{Experiment1.arff}. The first couple of lines in this dataset are shown below.
+If the experiment was defined correctly, the 3 messages shown above will be displayed in the \textit{Log} panel. The results of the experiment are saved to the dataset \textit{Experiment1.arff}. The first few lines in this dataset are shown below.
 
 \begin{verbatim}
  @relation InstanceResultListener
@@ -410,34 +418,34 @@ If the experiment was defined correctly, the 3 messages shown above will be disp
 
 \subsubsection*{Changing the Classifier}
 
-The parameters of an experiment can be changed by clicking on the ResultGenerator panel.
+The parameters of an experiment can be changed by clicking on the \textit{Result generator} panel.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters1.eps,width=6cm}
 \end{center}
 
-The RandomSplitResultProducer performs repeated train/test runs. The number of patterns (expressed as a percentage) used for training is given in the trainPercent box. (The number of runs is specified in the Runs parameter in the Setup window.)
+The \textit{RandomSplitResultProducer} performs repeated train/test runs. The number of instances (expressed as a percentage) used for training is given in the \textit{trainPercent} box. (The number of runs is specified in the \textit{Runs} panel in the \textit{Setup} tab.)
 
-A small help file can be displayed by clicking \textit{More} in the About panel.
+A small help file can be displayed by clicking \textit{More} in the \textit{About} panel.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters2.eps,width=6cm}
 \end{center}
 
-Click on the splitEvaluator entry to display the SplitEvaluator properties.
+Click on the \textit{splitEvaluator} entry to display the \textit{SplitEvaluator} properties.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters3.eps,width=6cm}
 \end{center}
 
-Click on the classifier entry (ZeroR) to display the scheme properties.
+Click on the classifier entry (\texttt{ZeroR}) to display the scheme properties.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters4.eps,width=6cm}
 \end{center}
 
-This scheme has no modifiable properties (besides debug mode on/off) but most other schemes do have properties that can be modified by the user. Click on the Choose button to select a different scheme. The window below shows the parameters available for the J48 decision-tree scheme. If desired, modify the parameters and then click OK to close the window.
+This scheme has no modifiable properties (besides \textit{debug} mode on/off) but most other schemes do have properties that can be modified by the user. Click on the \textit{Choose} button to select a different scheme. The window below shows the parameters available for the \texttt{J48} decision-tree scheme. If desired, modify the parameters and then click \textit{OK} to close the window.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters5.eps,width=6cm}
 \end{center}
 
-The name of the new scheme is displayed in the Result generator panel.
+The name of the new scheme is displayed in the \textit{Result generator} panel.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters6.eps,width=10cm}
 \end{center}
@@ -445,7 +453,7 @@ The name of the new scheme is displayed in the Result generator panel.
 
 \subsubsection*{Adding Additional Schemes}
 
-Additional Schemes can be added in the Generator properties panel. To begin, change the dropdown list entry from \textit{Disabled} to \textit{Enabled} in the Generator properties panel.
+Additional schemes can be added in the \textit{Generator properties} panel. To begin, change the drop-down list entry from \textit{Disabled} to \textit{Enabled} in the \textit{Generator properties} panel.
 \begin{center}
 	\epsfig{file=images/advanced_additionalschemes1.eps,width=10cm}
 \end{center}
@@ -455,22 +463,22 @@ Click \textit{Select property} and expand \textit{splitEvaluator} so that the \t
 	\epsfig{file=images/advanced_additionalschemes2.eps,width=3.5cm}
 \end{center}
 
-The scheme name is displayed in the Generator properties panel.
+The scheme name is displayed in the \textit{Generator properties} panel.
 \begin{center}
 	\epsfig{file=images/advanced_additionalschemes3.eps,width=10cm}
 \end{center}
 
-To add another scheme, click on the \textit{Choose} button to display the GenericObjectEditor window.
+To add another scheme, click on the \textit{Choose} button to display the \textit{GenericObjectEditor} window.
 \begin{center}
 	\epsfig{file=images/advanced_additionalschemes4.eps,width=10cm}
 \end{center}
 
-To change to a decision-tree scheme, select J48 (in subgroup \textit{trees}).
+To change to a decision-tree scheme, select \texttt{J48} (in subgroup \textit{trees}).
 \begin{center}
 	\epsfig{file=images/advanced_additionalschemes5.eps,width=6cm}
 \end{center}
 
-The new scheme is added to the Generator properties panel. Click \textit{Add} to add the new scheme.
+The new scheme is added to the \textit{Generator properties} panel. Click \textit{Add} to add the new scheme.
 \begin{center}
 	\epsfig{file=images/advanced_additionalschemes6.eps,width=10cm}
 \end{center}
@@ -482,17 +490,17 @@ To add additional schemes, repeat this process. To remove a scheme, select the s
 
 \subsubsection*{Adding Additional Datasets}
 
-The scheme(s) may be run on any number of datasets at a time. Additional datasets are added by clicking \textit{Add new...} in the Datasets panel. Datasets are deleted from the experiment by selecting the dataset and then clicking \textit{Delete Selected}.
+The scheme(s) may be run on any number of datasets at a time. Additional datasets are added by clicking \textit{Add new...} in the \textit{Datasets} panel. Datasets are deleted from the experiment by selecting the dataset and then clicking \textit{Delete Selected}.
 
 
 \subsubsection*{Raw Output}
 
-The output generated by a scheme can be saved to a file and then examined at a later time. Open the Result Producer window by clicking on the Result Generator panel in the Setup window.
+The raw output generated by a scheme during an experiment can be saved to a file and then examined at a later time. Open the \textit{ResultProducer} window by clicking on the \textit{Result generator} panel in the \textit{Setup} tab.
 \begin{center}
 	\epsfig{file=images/advanced_rawoutput1.eps,width=6cm}
 \end{center}
 
-Click on \textit{rawOutput} and select the True entry from the drop-down list. By default, the output is sent to the file \textit{splitEvaluatorOut.zip}. The output file can be changed by clicking on the \textit{outputFile} panel in the window. Now when the experiment is run, the result of each processing run is archived, as shown below.
+Click on \textit{rawOutput} and select the \textit{True} entry from the drop-down list. By default, the output is sent to the zip file \textit{splitEvaluatorOut.zip}. The output file can be changed by clicking on the \textit{outputFile} panel in the window. Now when the experiment is run, the result of each processing run is archived, as shown below.
 \begin{center}
 	\epsfig{file=images/advanced_rawoutput2.eps,width=10cm}
 \end{center}
@@ -534,22 +542,22 @@ measureNumRules : 3.0
 
 \subsubsection*{Cross-Validation Result Producer}
 
-To change from random train and test experiments to cross-validation experiments, click on the Result generator entry. At the top of the window, click on the drop-down list and select CrossValidationResultProducer. The window now contains parameters specific to cross validation such as the number of partitions/folds. The experiment performs 10-fold cross-validation instead of train and test.
+To change from random train and test experiments to cross-validation experiments, click on the \textit{Result generator} entry. At the top of the window, click on the drop-down list and select \textit{CrossValidationResultProducer}. The window now contains parameters specific to cross-validation such as the number of partitions/folds. The experiment performs 10-fold cross-validation instead of train and test in the given example.
 \begin{center}
 	\epsfig{file=images/advanced_cvresultproducer1.eps,width=6cm}
 \end{center}
 
-The result generator panel now indicates that cross validation will be performed. Click on \textit{More} to generate a brief description of the cross-validation result producer.
+The \textit{Result generator} panel now indicates that cross-validation will be performed. Click on \textit{More} to generate a brief description of the \textit{CrossValidationResultProducer}.
 \begin{center}
 	\epsfig{file=images/advanced_cvresultproducer2.eps,width=6cm}
 \end{center}
 
-As with the Random Split Result Producer, multiple schemes can be run during cross validation by adding them to the Generator properties panel.
+As with the \textit{RandomSplitResultProducer}, multiple schemes can be run during cross validation by adding them to the \textit{Generator properties} panel.
 \begin{center}
 	\epsfig{file=images/advanced_cvresultproducer3.eps,width=10cm}
 \end{center}
 
-The number of runs is set to 1 in the Setup window.
+The number of runs is set to 1 in the \textit{Setup} tab in this example, so that only one run of cross-validation for each scheme and dataset is executed.
 
 When this experiment is analysed, the following results are generated. Note that there are 30 (1 run times 10 folds times 3 schemes) result lines processed.
 \begin{center}
@@ -559,7 +567,7 @@ When this experiment is analysed, the following results are generated. Note that
 
 \subsubsection*{Averaging Result Producer}
 
-An alternative to the CrossValidation Result Producer is the Averaging Result Producer. This result producer takes the average of a set of runs (which are typically cross-validation runs). This result producer is identified by clicking the Result Generator panel and then choosing the AveragingResultProducer from the GenericObjectEditor.
+An alternative to the \textit{CrossValidationResultProducer} is the \textit{AveragingResultProducer}. This result producer takes the average of a set of runs (which are typically cross-validation runs). This result producer is identified by clicking the \textit{Result generator} panel and then choosing the \textit{AveragingResultProducer} from the \textit{GenericObjectEditor}.
 \begin{center}
 	\epsfig{file=images/advanced_averagingresultproducer1.eps,width=6cm}
 \end{center}
@@ -574,7 +582,7 @@ Clicking the \textit{resultProducer} panel brings up the following window.
 	\epsfig{file=images/advanced_averagingresultproducer3.eps,width=6cm}
 \end{center}
 
-As with the other Result Producers, additional schemes can be defined. When the AveragingResultProducer is used, the classifier property is located deeper in the Generator properties hierarchy.
+As with the other ResultProducers, additional schemes can be defined. When the \textit{AveragingResultProducer} is used, the classifier property is located deeper in the \textit{Generator properties} hierarchy.
 \begin{center}
 	\epsfig{file=images/advanced_averagingresultproducer4.eps,width=3.5cm}
 \end{center}
@@ -583,50 +591,11 @@ As with the other Result Producers, additional schemes can be defined. When the 
 	\epsfig{file=images/advanced_averagingresultproducer5.eps,width=10cm}
 \end{center}
 
-In this experiment, the ZeroR, OneR, and J48 schemes are run 10 times with 10-fold cross validation. Each run of 10 cross-validation folds is then averaged, producing one result line for each run (instead of one result line for each fold as in the previous example using the crossvalidation result producer) for a total of 30 result lines. If the raw output is saved, all 300 results are sent to the archive.
+In this experiment, the \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48} schemes are run 10 times with 10-fold cross validation. Each set of 10 cross-validation folds is then averaged, producing one result line for each run (instead of one result line for each fold as in the previous example using the \textit{CrossValidationResultProducer}) for a total of 30 result lines. If the raw output is saved, all 300 results are sent to the archive.
 \begin{center}
 	\epsfig{file=images/advanced_averagingresultproducer6.eps,width=10cm}
 \end{center}
 
-It should be noted that while the results generated by the averaging result producer are slightly worse than those generated by the cross-validation result producer, the standard deviations are significantly smaller with the averaging result producer (as can be seen below).
-
-Cross-validation Results
-
-\begin{verbatim}
-Tester:     weka.experiment.PairedCorrectedTTester
-Analysing:  Percent_correct
-Datasets:   1
-Resultsets: 3
-Confidence: 0.05 (two tailed)
-Sorted by:  -
-Date:       21/12/05 16:53
-
-Dataset                   (1) rules.ZeroR  | (2) rules.OneR  (3) trees.J48 '
-------------------------------------------------------------------------------
-iris                      (10)   33.33(0.00) |   94.00(4.92) v   96.00(5.62) v
-------------------------------------------------------------------------------
-                                     (v/ /*) |         (1/0/0)         (1/0/0)
-\end{verbatim}
-
-
-Averaging Result Producer Results
-
-\begin{verbatim}
-Tester:     weka.experiment.PairedCorrectedTTester
-Analysing:  Percent_correct
-Datasets:   1
-Resultsets: 3
-Confidence: 0.05 (two tailed)
-Sorted by:  -
-Date:       21/12/05 16:52
-
-Dataset                   (1) rules.ZeroR  | (2) rules.OneR  (3) trees.J48 '
-------------------------------------------------------------------------------
-iris                      (10)   33.33(0.00) |   93.53(1.00) v   94.73(0.80) v
-------------------------------------------------------------------------------
-                                     (v/ /*) |         (1/0/0)         (1/0/0)
-
-\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%
 % Remote Experiments %
@@ -635,6 +604,8 @@ iris                      (10)   33.33(0.00) |   93.53(1.00) v   94.73(0.80) v
 \newpage
 \section{Remote Experiments}
 
+Remote experiments enable you to distribute the computing load across multiple computers.
+
 \subsection{Preparation}
 
 To run a remote experiment you will need:
@@ -642,22 +613,23 @@ To run a remote experiment you will need:
 \begin{itemize}
    \item A database server
    \item A number of computers to run remote engines on
-   \item To edit remote engine policy file to allow class loading from your home directory
+   \item To edit the remote engine policy file included in the Weka distribution to allow class loading from your home directory
    \item An invocation of the Experimenter on a machine somewhere (any will do)
-   \item This remote experiment description uses the HSQLDB (http://hsqldb.sourceforge.net/) database and this requires editing its DatabaseUtils.props file 
 \end{itemize}
 
-Note: for the following examples, we assume a user called johndoe with this setup:
+For the following examples, we assume a user called \textit{johndoe} with this setup:
 
 \begin{itemize}
-   \item home directory located at \texttt{/home/johndoe} 
-	\item the jar archive for HSQLDB is located here: \texttt{/home/johndoe/hsqldb.jar} 
+	\item Access to a set of computers running a flavour of Unix (pathnames need to be changed for Windows)
+   \item The home directory is located at \texttt{/home/johndoe} 
+   \item This remote experiment description uses the HSQLDB \cite{hsql} database, which requires editing the \textit{DatabaseUtils.props} file 
+	\item The jar archive for HSQLDB is located here: \texttt{/home/johndoe/hsqldb.jar} 
 \end{itemize}
 
 
 \subsection{Database Server Setup}
 
-To set up the database server, choose or create a directory to run the database server from, and start server with:
+To set up the database server, choose or create a directory to run the database server from, and start the server with:
 
 \begin{verbatim}
 java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname xdb
@@ -667,7 +639,7 @@ java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname x
 \subsection{Remote Engine Setup}
 
 \begin{itemize}
-   \item First, set up directory for scripts and policy files: 
+   \item First, set up a directory for scripts and policy files: 
 
 		\begin{verbatim}
 /home/johndoe/remote_engine
@@ -675,27 +647,27 @@ java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname x
 
    \item Next, copy the \texttt{remoteEngine.jar} (from the Weka distribution; or build it from the sources with \texttt{ant remotejar}) to the \texttt{/home/johndoe/remote\_engine} directory 
 
-   \item Create a script, called \texttt{/home/johndoe/remote\_engine/startRemoteEngine}, with the following content (don't forget to make it executable with chmod): 
+   \item Create a script, called \texttt{/home/johndoe/remote\_engine/startRemoteEngine}, with the following content (don't forget to make it executable with \textit{chmod}, if you're using a flavour of Unix): 
 		\begin{verbatim}
 /path/to/your/jdk/bin/java -Xmx256m \
 -classpath /home/johndoe/hsqldb.jar:remoteEngine.jar \
 -Djava.security.policy=remote_engine.policy weka.experiment.RemoteEngine &
 		\end{verbatim}
 
-   \item Now we will start the remote engines (note that the same version of java must be used for the experimenter and remote engines) :
+   \item Now we will start the remote engines (note that the same version of Java must be used for the experimenter and remote engines) :
    	\begin{itemize}
-         \item Edit the \texttt{remote\_engine.policy} file in \texttt{/home/johndoe/remote\_engine} add the lines
+         \item Edit the \texttt{remote\_engine.policy} file in \texttt{/home/johndoe/remote\_engine} by adding the lines
 				\begin{verbatim}
             permission java.io.FilePermission
             "/home/johndoe/-", "read";
             \end{verbatim}
 
-            \textbf{Note:} In case the datasets are not located in the user's home then another file permission entry will be needed in the policy file.
+            \textit{Note:} In case the datasets are not located in the user's home then another file permission entry will be needed in the policy file.
          \item For each machine you want to run an engine on:
          	\begin{itemize}
          		\item \texttt{ssh} to the machine
-               \item cd to \texttt{/home/johndoe/remote\_engine}
-               \item run \texttt{/home/johndoe/startRemoteEngine} (for more memory use, modify the \texttt{-Xmx} option in the \texttt{startRemoteEngine} script) 
+               \item \textit{cd} to \texttt{/home/johndoe/remote\_engine}
+               \item Run \texttt{/home/johndoe/startRemoteEngine} (to enable the remote engines to use more memory, modify the \texttt{-Xmx} option in the \texttt{startRemoteEngine} script) 
             \end{itemize}
       \end{itemize}
 \end{itemize}
@@ -703,11 +675,11 @@ java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname x
 
 \subsection{Configuring the Experimenter}
 
-Now we will run the experimenter:
+Now we will run the Experimenter:
 
 \begin{itemize}
    \item Create a directory for the experiment
-   \item Copy the \texttt{DatabaseUtils.props.hsql} file to this directory and rename it to \texttt{DatabaseUtils.props} - a copy comes with your Weka distribution in \texttt{weka/experiment}
+   \item Copy the \textit{DatabaseUtils.props.hsql} file to this directory and rename it to \textit{DatabaseUtils.props} - a copy comes with your Weka distribution in \texttt{weka/experiment}
    \item Edit this file and change the "\texttt{jdbcURL=jdbc:hsqldb:hsql://servername}" entry to include the name of the machine that is running your database server (e.g., \texttt{jdbcURL=jdbc:hsqldb:hsql://dodo.company.com})
    \item Now start the experimenter (inside this directory): 
 		\begin{verbatim}
@@ -720,27 +692,25 @@ Now we will run the experimenter:
 Now we will configure the experiment:
 
 \begin{itemize}
-   \item First of all select the advanced mode in the set-up panel
-   \item Now choose the \texttt{DatabaseResultListener} in the \textbf{Destination} panel. Configure this result producer and supply the value \textbf{sa} for the username
-   \item From the result generator panel choose either the \texttt{CrossValidationResultProducer} or the \texttt{RandomSplitResultProducer} (these are the most commonly used) and then configure the remaining standard experiment details (e.g., datasets and classifiers)
-   \item Now enable the \textbf{Distribute Experiment} panel by checking the tick box
-   \item Click on the hosts button and enter the names of the machines that you started remote engines on
+   \item First of all select the \textit{Advanced} mode in the \textit{Setup} panel
+   \item Now choose the \textit{DatabaseResultListener} in the \textit{Destination} panel. Configure this result producer and supply the value \textbf{sa} for the username
+   \item From the \textit{Result generator} panel choose either the \textit{CrossValidationResultProducer} or the \textit{RandomSplitResultProducer} (these are the most commonly used ones) and then configure the remaining experiment details (e.g., datasets and classifiers)
+   \item Now enable the \textit{Distribute Experiment} panel by checking the tick box
+   \item Click on the \textit{Hosts} button and enter the names of the machines that you started remote engines on
    \item You can choose to distribute by run or dataset (try to get a balance)
-   \item Note: it is trickier to run regression methods under the advanced mode
    \item Save your experiment configuration
-   \item Now start your experiment as per normal
-   \item Check your results in the Analyse panel from either the Database or Experiment buttons 
+   \item Now start your experiment as you would do normally
+   \item Check your results in the \textit{Analyse} panel bu clicking either the \textit{Database} or \textit{Experiment} buttons 
 \end{itemize}
 
 
 \subsection{Troubleshooting}
 
 \begin{itemize}
-   \item DON'T FORGET THE TRAILING SLASH - in the experimenter java startup option: 
+   \item DON'T FORGET THE TRAILING SLASH - when you provide the Java startup option for the Experimenter: 
 		\begin{verbatim}
-    -Djava.rmi.server.codebase=file:/home/<path to your weka classes>/ 
+    -Djava.rmi.server.codebase=file:/home/<path to your weka classes>/ \end{verbatim}
     without it, you will get security access exceptions. 
-    	\end{verbatim}
 
    \item If you get an error at the start of an experiment that looks a bit like this: 
 
@@ -748,13 +718,13 @@ Now we will configure the experiment:
 
     \texttt{01:13:19: dataset :vineyard.arff RemoteExperiment \\ (//blabla.company.com/RemoteEngine) (sub)experiment (datataset vineyard.arff) failed : java.sql.SQLException: Table already exists: EXPERIMENT\_INDEX in statement [CREATE TABLE Experiment\_index ( Experiment\_type LONGVARCHAR, Experiment\_setup LONGVARCHAR, Result\_table INT )]. Scheduling for execution on another host.} 
 
-    then do not panic - this happens because the multiple remote machines are trying to create the same table and are temporarily locked out - this will resolve itself so just leave your experiment running - in fact, it is a sign that the experiment is working! 
+    then do not panic - this happens because multiple remote machines are trying to create the same table and are temporarily locked out - this will resolve itself so just leave your experiment running - in fact, it is a sign that the experiment is working! 
 
-   \item If you serialized an experiment and then modify your \texttt{DatabaseUtils.props} file due to an error (e.g., a missing type-mapping), the Experimenter will use the \texttt{DatabaseUtils.props} you had \textit{at the time you serialized the experiment}. Keep in mind that the serialization process also serializes the DatabaseUtils class and therefore stored your props-file! This is another reason for storing your experiments as XML and not in a properietary binary format the Java serialization produces. 
+   \item If you serialized an experiment and then modify your \textit{DatabaseUtils.props} file due to an error (e.g., a missing type-mapping), the Experimenter will use the \textit{DatabaseUtils.props} you had \textit{at the time you serialized the experiment}. Keep in mind that the serialization process also serializes the \textit{DatabaseUtils} class and therefore stored your props-file! This is another reason for storing your experiments as XML and not in a properietary binary format the Java serialization produces. 
 
-   \item Using a corrupt or incomplete \texttt{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the User button alongside the database URL. If in doubt copy a clean \texttt{DatabaseUtils.props} from CVS. 
+   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the User button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from CVS. 
 
-   \item If you get \texttt{NullPointerException at java.util.Hashtable.get()} in the Remote Engine do not be alarmed. This will have no effect on the experiment results. 
+   \item If you get \texttt{NullPointerException at java.util.Hashtable.get()} in the Remote Engine do not be alarmed. This will have no effect on the results of your experiment. 
 \end{itemize}
     
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -762,23 +732,23 @@ Now we will configure the experiment:
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Analyzing Results}
+\section{Analysing Results}
 
 \subsection{Setup}
 
-Weka includes an experiment analyzer that can be used to analyse the results of experiments that were sent to an Instances Result Listener. The experiment shown below uses 3 schemes, ZeroR, OneR, and J48, to classify the Iris data in an experiment using 10 train and test runs, with 66\% of the data used for training and 34\% used for testing.
+Weka includes an experiment analyser that can be used to analyse the results of experiments that were sent to an \textit{InstancesResultListener}. The experiment shown below uses 3 schemes, \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48}, to classify the Iris data in an experiment using 10 train and test runs, with 66\% of the data used for training and 34\% used for testing.
 \begin{center}
 	\epsfig{file=images/analyser01.eps,width=10cm}
 \end{center}
 
-After the experiment setup is complete, run the experiment. Then, to analyze the results, select the Analyse tab at the top of the Experiment Environment window. Note that the results must be in arff format, as generated by the Instances Result Listener.
+After the experiment setup is complete, run the experiment. Then, to analyse the results, select the \textit{Analyse} tab at the top of the Experiment Environment window.
 
-Click on \textit{Experiment} to analyze the results of the current experiment.
+Click on \textit{Experiment} to analyse the results of the current experiment.
 \begin{center}
 	\epsfig{file=images/analyser02.eps,width=10cm}
 \end{center}
 
-The number of result lines available (\textit{Got 30 results}) is shown in the Source panel. This experiment consisted of 10 runs, for 3 schemes, for 1 dataset, for a total of 30 result lines. Results can also be loaded from an earlier experiment file by clicking File and loading the appropriate .arff results file. Similarly, results sent to a database (using the Database Result Listener) can be loaded from the database.
+The number of result lines available (\textit{Got 30 results}) is shown in the \textit{Source} panel. This experiment consisted of 10 runs, for 3 schemes, for 1 dataset, for a total of 30 result lines. Results can also be loaded from an earlier experiment file by clicking \textit{File} and loading the appropriate \textit{.arff} results file. Similarly, results sent to a database (using the \textit{DatabaseResultListener}) can be loaded from the database.
 
 Select the \textit{Percent\_correct} attribute from the \textit{Comparison field} and click \textit{Perform} test to generate a comparison of the 3 schemes.
 \begin{center}
@@ -787,21 +757,20 @@ Select the \textit{Percent\_correct} attribute from the \textit{Comparison field
 
 The schemes used in the experiment are shown in the columns and the datasets used are shown in the rows.
 
-The percentage correct for each of the 3 schemes is shown in each dataset row: 33.33\% for ZeroR, 94.31\% for OneR, and 94.90\% for J48. The annotation v or * indicates that a specific result is statistically better (v) or worse (*) than the baseline scheme (in this case, ZeroR) at the significance level specified (currently 0.05). The results of both OneR and J48 are statistically better than the baseline established by ZeroR. At the bottom of each column after the first column is a count (xx/ yy/ zz) of the number of times that the scheme was better than (xx), the same as (yy), or worse than (zz) the baseline scheme on the datasets used in the experiment. In this example, there was only one dataset and OneR was better than ZeroR once and never equivalent to or worse than ZeroR (1/0/0); J48 was also better than ZeroR on the dataset.
+The percentage correct for each of the 3 schemes is shown in each dataset row: 33.33\% for \texttt{ZeroR}, 94.31\% for \texttt{OneR}, and 94.90\% for \texttt{J48}. The annotation v or * indicates that a specific result is statistically better (v) or worse (*) than the baseline scheme (in this case, \texttt{ZeroR}) at the significance level specified (currently 0.05). The results of both \texttt{OneR} and \texttt{J48} are statistically better than the baseline established by \texttt{ZeroR}. At the bottom of each column after the first column is a count (xx/ yy/ zz) of the number of times that the scheme was better than (xx), the same as (yy), or worse than (zz), the baseline scheme on the datasets used in the experiment. In this example, there was only one dataset and \texttt{OneR} was better than \texttt{ZeroR} once and never equivalent to or worse than \texttt{ZeroR} (1/0/0); \texttt{J48} was also better than \texttt{ZeroR} on the dataset.
 
-The value \textit{(10)} at the beginning of the \textit{iris} row defines the number of runs of the experiment.
+The standard deviation of the attribute being evaluated can be generated by selecting the \textit{Show std. deviations} check box and hitting \textit{Perform test} again. The value \textit{(10)} at the beginning of the \textit{iris} row represents the number of estimates that are used to calculate the standard deviation (the number of runs in this case).
 
-The standard deviation of the attribute being evaluated can be generated by selecting the \textit{Show std. deviations} check box.
 \begin{center}
 	\epsfig{file=images/analyser04.eps,width=10cm}
 \end{center}
 
-Selecting \textit{Number\_correct} as the comparison field and clicking \textit{Perform test} generates the average number correct (out of a maximum of 50 test patterns - 33\% of 150 patterns in the Iris dataset).
+Selecting \textit{Number\_correct} as the comparison field and clicking \textit{Perform test} generates the average number correct (out of 50 test patterns - 33\% of 150 patterns in the Iris dataset).
 \begin{center}
 	\epsfig{file=images/analyser05.eps,width=10cm}
 \end{center}
 
-Clicking on the button for the \textit{Output format} leads to dialog that lets you choose the precision for the \textit{mean} and the \textit{std. deviations}, as well as the format of the output. With the \textit{Remove filter classnames} checkbox one can remove the filter name and options from processed datasets.
+Clicking on the button for the \textit{Output format} leads to a dialog that lets you choose the precision for the \textit{mean} and the \textit{std. deviations}, as well as the format of the output. With the \textit{Remove filter classnames} checkbox one can remove the filter name and options from processed datasets (filter names in Weka can be quite lengthy).
 
 The following formats are supported:
 
@@ -821,12 +790,12 @@ The following formats are supported:
 
 \subsection{Saving the Results}
 
-The information displayed in the Test output panel is controlled by the currently-selected entry in the Result list panel. Clicking on an entry causes the results corresponding to that entry to be displayed.
+The information displayed in the \textit{Test output} panel is controlled by the currently-selected entry in the \textit{Result list} panel. Clicking on an entry causes the results corresponding to that entry to be displayed.
 \begin{center}
 	\epsfig{file=images/analyser06.eps,width=6cm}
 \end{center}
 
-The results shown in the Test output panel can be saved to a file by clicking \textit{Save output}. Only one set of results can be saved at a time but Weka permits the user to save all results to the same dataset by saving them one at a time and using the Append option instead of the Overwrite option for the second and subsequent saves.
+The results shown in the \textit{Test output} panel can be saved to a file by clicking \textit{Save output}. Only one set of results can be saved at a time but Weka permits the user to save all results to the same dataset by saving them one at a time and using the \textit{Append} option instead of the \textit{Overwrite} option for the second and subsequent saves.
 \begin{center}
 	\epsfig{file=images/analyser07.eps,width=10cm}
 \end{center}
@@ -834,12 +803,12 @@ The results shown in the Test output panel can be saved to a file by clicking \t
 
 \subsection{Changing the Baseline Scheme}
 
-The baseline scheme can be changed by clicking \textit{Select base...} and then selecting the desired scheme. Selecting the OneR scheme causes the other schemes to be compared individually with the OneR scheme.
+The baseline scheme can be changed by clicking \textit{Select base...} and then selecting the desired scheme. Selecting the \texttt{OneR} scheme causes the other schemes to be compared individually with the \texttt{OneR} scheme.
 \begin{center}
 	\epsfig{file=images/analyser08.eps,width=5cm}
 \end{center}
 
-If the test is performed on the Percent\_correct field with OneR as the base scheme, the system indicates that there is no statistical difference between the results for OneR and J48. There is however a statistically significant difference between OneR and ZeroR.
+If the test is performed on the \textit{Percent\_correct} field with \texttt{OneR} as the base scheme, the system indicates that there is no statistical difference between the results for \texttt{OneR} and \texttt{J48}. There is however a statistically significant difference between \texttt{OneR} and \texttt{ZeroR}.
 \begin{center}
 	\epsfig{file=images/analyser09.eps,width=10cm}
 \end{center}
@@ -847,34 +816,37 @@ If the test is performed on the Percent\_correct field with OneR as the base sch
 
 \subsection{Statistical Significance}
 
-The term \textit{statistical significance} used in the previous section refers to the result of a pair-wise comparison of schemes using a t-test. For more information on the \textit{t-test}, consult the Weka text (Data Mining by I. Witten and E. Frank) or an introductory statistics text. As the significance level is decreased, the confidence in the conclusion increases.
+The term \textit{statistical significance} used in the previous section refers to the result of a pair-wise comparison of schemes using either a standard \textit{T-Test} or the corrected resampled \textit{T-Test} \cite{bengio}. The latter test is the default, because the standard \textit{T-Test} can generate too many significant differences due to dependencies in the estimates (in particular when anything other than one run of an x-fold cross-validation is used). For more information on the \textit{T-Test}, consult the Weka book \cite{witten} or an introductory statistics text. As the significance level is decreased, the confidence in the conclusion increases.
 
-In the current experiment, there is not a statistically significant difference between the OneR and J48 schemes.
+In the current experiment, there is not a statistically significant difference between the \texttt{OneR} and \texttt{J48} schemes.
 
 
 \subsection{Summary Test}
 
-Selecting Summary from Test base and performing a test causes the following information to be generated.
+Selecting \textit{Summary} from \textit{Test base} and performing a test causes the following information to be generated.
 \begin{center}
 	\epsfig{file=images/analyser10.eps,width=10cm}
 \end{center}
 
-In this experiment, the first row (- 1 1) indicates that column \textit{b} (OneR) is better than row \textit{a} (ZeroR) and that column \textit{c} (J48) is also better than row \textit{a}. The remaining entries are 0 because there is no significant difference between OneR and J48 on the dataset that was used in the experiment.
+In this experiment, the first row (- 1 1) indicates that column \textit{b} (\texttt{OneR}) is better than row \textit{a} (\texttt{ZeroR}) and that column \textit{c} (\texttt{J48}) is also better than row \textit{a}. The number in brackets represents the number of significant wins for the column with regard to the row. A $0$ means that the scheme in the corresponding column did not score a single (significant) win with regard to the scheme in the row.
 
 
 \subsection{Ranking Test}
 
-Selecting Ranking from Test base causes the following information to be generated.
+Selecting \textit{Ranking} from \textit{Test base} causes the following information to be generated.
 \begin{center}
 	\epsfig{file=images/analyser11.eps,width=10cm}
 \end{center}
 
-The ranking test ranks the schemes according to the total wins (>) and losses (<) against the other schemes. The first column (>-<) is the difference between the number of wins and the number of losses. 
+The ranking test ranks the schemes according to the total number of significant wins ($>$) and losses ($<$) against the other schemes. The first column ($>-<$) is the difference between the number of wins and the number of losses. This difference is used to generate the ranking.
 
-\newpage
-\section*{References}
-
-Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
+\begin{thebibliography}{999}
+	\bibitem{witten} Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
 learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
+	\bibitem{bengio} Bengio, Y. and Nadeau, C. (1999) \textit{Inference for the Generalization Error}.
+	\bibitem{quinlan} Ross Quinlan (1993). \textit{C4.5: Programs for Machine Learning}, Morgan Kaufmann Publishers, San Mateo, CA.
+	\bibitem{hsql} HSQLDB \texttt{http://hsqldb.sourceforge.net/}
+\end{thebibliography}
+
 \end{document}
