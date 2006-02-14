@@ -68,7 +68,7 @@ import weka.gui.visualize.PrintableComponent;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.3 $
+ * @version $Revision: 1.18.2.4 $
  */
 
 public class AttributeVisualizationPanel extends PrintablePanel {
@@ -428,7 +428,8 @@ public class AttributeVisualizationPanel extends PrintablePanel {
           }
           
           for(int k=0; k<m_data.numInstances(); k++) {
-            histCounts[(int)m_data.instance(k).value(m_attribIndex)]++;
+            if(!m_data.instance(k).isMissing(m_attribIndex))
+              histCounts[(int)m_data.instance(k).value(m_attribIndex)]++;
           }
           m_threadRun=false;
           m_histBarCounts = histCounts;
@@ -613,6 +614,10 @@ public class AttributeVisualizationPanel extends PrintablePanel {
           for(int k=0; k<m_data.numInstances(); k++) {
             int t=0; //This holds the interval to which the current attribute's
                     //value of this particular instance k belongs to.
+            
+            if(m_data.instance(k).isMissing(m_attribIndex)) 
+              continue; //ignore missing values
+            
             try {
               //1. see footnote at the end of this file
               t =(int) Math.ceil((float)(
