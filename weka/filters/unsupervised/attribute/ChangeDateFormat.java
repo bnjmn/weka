@@ -57,7 +57,7 @@ import weka.filters.UnsupervisedFilter;
  * The output date format (default corresponds to ISO-8601 format).<p>
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ChangeDateFormat extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -192,7 +192,7 @@ public class ChangeDateFormat extends Filter
     options[current++] = "-C";
     options[current++] = "" + getAttributeIndex();
     options[current++] = "-F"; 
-    options[current++] = "" + getDateFormat();
+    options[current++] = "" + getDateFormat().toPattern();
     while (current < options.length) {
       options[current++] = "";
     }
@@ -249,9 +249,9 @@ public class ChangeDateFormat extends Filter
    *
    * @return the output date format.
    */
-  public String getDateFormat() {
+  public SimpleDateFormat getDateFormat() {
 
-    return m_DateFormat.toPattern();
+    return m_DateFormat;
   }
 
 
@@ -289,7 +289,7 @@ public class ChangeDateFormat extends Filter
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if (j == m_AttIndex.getIndex()) {
-	newAtts.addElement(new Attribute(att.name(), getDateFormat()));  
+	newAtts.addElement(new Attribute(att.name(), getDateFormat().toPattern()));  
       } else {
 	newAtts.addElement(att.copy()); 
       }
