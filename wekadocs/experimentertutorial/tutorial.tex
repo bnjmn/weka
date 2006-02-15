@@ -174,7 +174,7 @@ Additionally, one can choose between \textit{Classification} and \textit{Regress
 
 \subsubsection{Datasets}
 
-One can add dataset files either with an absolute path or with a relative one. The latter makes it often easier to experiments on different machines, hence one should check \textit{Use relative paths}, before clicking on \textit{Add new...}.
+One can add dataset files either with an absolute path or with a relative one. The latter makes it often easier to run experiments on different machines, hence one should check \textit{Use relative paths}, before clicking on \textit{Add new...}.
 
 \begin{center}
 	\epsfig{file=images/simple_adddataset1.eps,width=7cm}
@@ -280,7 +280,7 @@ If the experiment was defined correctly, the 3 messages shown above will be disp
 
 \subsubsection{Defining an Experiment}
 
-When the Experimenter is started in \textit{Advanced} mode, the \textit{Setup} panel is displayed. Click \textit{New} to initialize an experiment. This causes default parameters to be defined for the experiment.
+When the Experimenter is started in \textit{Advanced} mode, the \textit{Setup} tab is displayed. Click \textit{New} to initialize an experiment. This causes default parameters to be defined for the experiment.
 \begin{center}
 	\epsfig{file=images/advanced_new.eps,width=10cm}
 \end{center}
@@ -552,7 +552,7 @@ The \textit{Result generator} panel now indicates that cross-validation will be 
 	\epsfig{file=images/advanced_cvresultproducer2.eps,width=6cm}
 \end{center}
 
-As with the \textit{RandomSplitResultProducer}, multiple schemes can be run during cross validation by adding them to the \textit{Generator properties} panel.
+As with the \textit{RandomSplitResultProducer}, multiple schemes can be run during cross-validation by adding them to the \textit{Generator properties} panel.
 \begin{center}
 	\epsfig{file=images/advanced_cvresultproducer3.eps,width=10cm}
 \end{center}
@@ -591,7 +591,7 @@ As with the other ResultProducers, additional schemes can be defined. When the \
 	\epsfig{file=images/advanced_averagingresultproducer5.eps,width=10cm}
 \end{center}
 
-In this experiment, the \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48} schemes are run 10 times with 10-fold cross validation. Each set of 10 cross-validation folds is then averaged, producing one result line for each run (instead of one result line for each fold as in the previous example using the \textit{CrossValidationResultProducer}) for a total of 30 result lines. If the raw output is saved, all 300 results are sent to the archive.
+In this experiment, the \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48} schemes are run 10 times with 10-fold cross-validation. Each set of 10 cross-validation folds is then averaged, producing one result line for each run (instead of one result line for each fold as in the previous example using the \textit{CrossValidationResultProducer}) for a total of 30 result lines. If the raw output is saved, all 300 results are sent to the archive.
 \begin{center}
 	\epsfig{file=images/advanced_averagingresultproducer6.eps,width=10cm}
 \end{center}
@@ -654,7 +654,7 @@ java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname x
 -Djava.security.policy=remote_engine.policy weka.experiment.RemoteEngine &
 		\end{verbatim}
 
-   \item Now we will start the remote engines (note that the same version of Java must be used for the experimenter and remote engines) :
+   \item Now we will start the remote engines (note that the same version of Java must be used for the Experimenter and remote engines) :
    	\begin{itemize}
          \item Edit the \texttt{remote\_engine.policy} file in \texttt{/home/johndoe/remote\_engine} by adding the lines
 				\begin{verbatim}
@@ -692,7 +692,7 @@ Now we will run the Experimenter:
 Now we will configure the experiment:
 
 \begin{itemize}
-   \item First of all select the \textit{Advanced} mode in the \textit{Setup} panel
+   \item First of all select the \textit{Advanced} mode in the \textit{Setup} tab
    \item Now choose the \textit{DatabaseResultListener} in the \textit{Destination} panel. Configure this result producer and supply the value \textbf{sa} for the username
    \item From the \textit{Result generator} panel choose either the \textit{CrossValidationResultProducer} or the \textit{RandomSplitResultProducer} (these are the most commonly used ones) and then configure the remaining experiment details (e.g., datasets and classifiers)
    \item Now enable the \textit{Distribute Experiment} panel by checking the tick box
@@ -700,7 +700,7 @@ Now we will configure the experiment:
    \item You can choose to distribute by run or dataset (try to get a balance)
    \item Save your experiment configuration
    \item Now start your experiment as you would do normally
-   \item Check your results in the \textit{Analyse} panel bu clicking either the \textit{Database} or \textit{Experiment} buttons 
+   \item Check your results in the \textit{Analyse} tab by clicking either the \textit{Database} or \textit{Experiment} buttons 
 \end{itemize}
 
 
@@ -722,7 +722,7 @@ Now we will configure the experiment:
 
    \item If you serialized an experiment and then modify your \textit{DatabaseUtils.props} file due to an error (e.g., a missing type-mapping), the Experimenter will use the \textit{DatabaseUtils.props} you had \textit{at the time you serialized the experiment}. Keep in mind that the serialization process also serializes the \textit{DatabaseUtils} class and therefore stored your props-file! This is another reason for storing your experiments as XML and not in a properietary binary format the Java serialization produces. 
 
-   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the User button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from CVS. 
+   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the ''User'' button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from CVS. 
 
    \item If you get \texttt{NullPointerException at java.util.Hashtable.get()} in the Remote Engine do not be alarmed. This will have no effect on the results of your experiment. 
 \end{itemize}
