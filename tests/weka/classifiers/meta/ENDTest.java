@@ -28,11 +28,11 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Tests Dagging. Run from the command line with:<p/>
- * java weka.classifiers.meta.Dagging
+ * Tests END. Run from the command line with:<p/>
+ * java weka.classifiers.meta.END
  *
  * @author eibe
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ENDTest 
   extends AbstractClassifierTest {
@@ -41,7 +41,7 @@ public class ENDTest
     super(name);  
   }
 
-  /** Creates a default Dagging */
+  /** Creates a default END */
   public Classifier getClassifier() {
     return new END();
   }
