@@ -22,10 +22,29 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.trees.j48.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
+import weka.classifiers.trees.j48.BinC45ModelSelection;
+import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.C45PruneableClassifierTree;
+import weka.classifiers.trees.j48.ClassifierTree;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.classifiers.trees.j48.PruneableClassifierTree;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Matchable;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Summarizable;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for generating an unpruned or a pruned C4.5 decision tree.
@@ -68,7 +87,7 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class J48 extends Classifier implements OptionHandler, 
   Drawable, Matchable, Sourcable, WeightedInstancesHandler, Summarizable,
@@ -122,6 +141,29 @@ public class J48 extends Classifier implements OptionHandler,
       + "information, see\n\n"
       + "Ross Quinlan (1993). \"C4.5: Programs for Machine Learning\", "
       + "Morgan Kaufmann Publishers, San Mateo, CA.\n\n";
+  }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities      result;
+    
+    try {
+      if (!m_reducedErrorPruning)
+        result = new C45PruneableClassifierTree(null, !m_unpruned, m_CF, m_subtreeRaising, !m_noCleanup).getCapabilities();
+      else
+        result = new PruneableClassifierTree(null, !m_unpruned, m_numFolds, !m_noCleanup, m_Seed).getCapabilities();
+    }
+    catch (Exception e) {
+      result = new Capabilities(this);
+    }
+    
+    result.setOwner(this);
+    
+    return result;
   }
   
   /**
