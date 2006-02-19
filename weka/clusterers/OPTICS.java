@@ -30,7 +30,14 @@ import weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI.SERObject;
 import weka.clusterers.forOPTICSAndDBScan.Utils.EpsilonRange_ListElement;
 import weka.clusterers.forOPTICSAndDBScan.Utils.UpdateQueue;
 import weka.clusterers.forOPTICSAndDBScan.Utils.UpdateQueueElement;
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -39,7 +46,12 @@ import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * <p>
@@ -57,10 +69,12 @@ import java.util.*;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class OPTICS extends Clusterer implements OptionHandler {
 
+    static final long serialVersionUID = 274552680222105221L;
+  
     /**
      * Specifies the radius for a range-query
      */
@@ -122,16 +136,33 @@ public class OPTICS extends Clusterer implements OptionHandler {
     // *****************************************************************************************************************
 
     /**
+     * Returns default capabilities of the clusterer.
+     *
+     * @return      the capabilities of this clusterer
+     */
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+
+      // attributes
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capability.DATE_ATTRIBUTES);
+      result.enable(Capability.MISSING_VALUES);
+
+      return result;
+    }
+
+    /**
      * Generate Clustering via OPTICS
      * @param instances The instances that need to be clustered
      * @throws java.lang.Exception If clustering was not successful
      */
     public void buildClusterer(Instances instances) throws Exception {
+        // can clusterer handle the data?
+        getCapabilities().testWithFail(instances);
+
         resultVector = new FastVector();
         long time_1 = System.currentTimeMillis();
-        if (instances.checkForStringAttributes()) {
-            throw new Exception("Can't handle string attributes!");
-        }
 
         numberOfGeneratedClusters = 0;
 

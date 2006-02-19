@@ -22,11 +22,20 @@
 
 package  weka.clusterers;
 
-import  java.io.*;
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import  weka.estimators.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.estimators.DiscreteEstimator;
+import weka.estimators.Estimator;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Simple EM (expectation maximisation) class. <p>
@@ -71,13 +80,15 @@ import  weka.estimators.*;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class EM
   extends DensityBasedClusterer
   implements NumberOfClustersRequestable,
 	     OptionHandler, WeightedInstancesHandler {
 
+  static final long serialVersionUID = 8348181483812829475L;
+  
   /** hold the discrete estimators for each cluster */
   private Estimator m_model[][];
 
@@ -946,6 +957,16 @@ public class EM
       }
     }
   }
+
+  /**
+   * Returns default capabilities of the clusterer (i.e., the ones of 
+   * SimpleKMeans).
+   *
+   * @return      the capabilities of this clusterer
+   */
+  public Capabilities getCapabilities() {
+    return new SimpleKMeans().getCapabilities();
+  }
   
   /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
@@ -957,10 +978,10 @@ public class EM
    */
   public void buildClusterer (Instances data)
     throws Exception {
-    if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
-    }
     
+    // can clusterer handle the data?
+    getCapabilities().testWithFail(data);
+
     m_replaceMissing = new ReplaceMissingValues();
     Instances instances = new Instances(data);
     instances.setClassIndex(-1);

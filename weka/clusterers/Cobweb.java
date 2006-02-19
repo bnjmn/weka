@@ -22,12 +22,24 @@
 
 package weka.clusterers;
 
-import java.io.*;
-import java.util.*; 
-import weka.core.*; 
+import weka.core.AttributeStats;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.experiment.Stats;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
-import weka.experiment.Stats;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class implementing the Cobweb and Classit clustering algorithms.<p><p>
@@ -47,13 +59,15 @@ import weka.experiment.Stats;
  * Cutoff. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
  */
 public class Cobweb extends Clusterer implements OptionHandler, Drawable {
 
+  static final long serialVersionUID = 928406656495092318L;
+  
   /**
    * Inner class handling node operations for Cobweb.
    *
@@ -627,7 +641,6 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
       Instances tempInst = tempNode.m_clusterInstances;
       tempNode = null;
 
-      StringBuffer instBuff = new StringBuffer();
       Add af = new Add();
       af.setAttributeName("Cluster");
       String labels = "";
@@ -725,6 +738,23 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
   protected boolean m_saveInstances = false;
 
   /**
+   * Returns default capabilities of the clusterer.
+   *
+   * @return      the capabilities of this clusterer
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    return result;
+  }
+
+  /**
    * Builds the clusterer.
    *
    * @param data the training instances.
@@ -736,10 +766,9 @@ public class Cobweb extends Clusterer implements OptionHandler, Drawable {
     m_numberSplits = 0;
     m_numberMerges = 0;
 
-    if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
-    
+    // can clusterer handle the data?
+    getCapabilities().testWithFail(data);
+
     // randomize the instances
     data = new Instances(data);
     data.randomize(new Random(42));

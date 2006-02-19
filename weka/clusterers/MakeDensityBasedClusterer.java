@@ -22,9 +22,16 @@
 
 package weka.clusterers;
 
-import weka.core.*;
-import weka.estimators.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.estimators.DiscreteEstimator;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -37,13 +44,15 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
 	     OptionHandler, 
 	     WeightedInstancesHandler {
 
+  static final long serialVersionUID = -5643302427972186631L;
+  
   /** holds training instances header information */
   private Instances m_theInstances;
   /** prior probabilities for the fitted clusters */
@@ -96,6 +105,19 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 
     ((NumberOfClustersRequestable)m_wrappedClusterer).setNumClusters(n);
   }
+
+  /**
+   * Returns default capabilities of the clusterer (i.e., of the wrapper
+   * clusterer).
+   *
+   * @return      the capabilities of this clusterer
+   */
+  public Capabilities getCapabilities() {
+    if (m_wrappedClusterer != null)
+      return m_wrappedClusterer.getCapabilities();
+    else
+      return super.getCapabilities();
+  }
   
   /**
    * Builds a clusterer for a set of instances.
@@ -104,6 +126,9 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
    * @exception Exception if the clusterer hasn't been set or something goes wrong
    */  
   public void buildClusterer(Instances data) throws Exception {
+    // can clusterer handle the data?
+    getCapabilities().testWithFail(data);
+
     m_replaceMissing = new ReplaceMissingValues();
     m_replaceMissing.setInputFormat(data);
     data = weka.filters.Filter.useFilter(data, m_replaceMissing);
