@@ -22,21 +22,16 @@
 
 package weka.classifiers.meta;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Option;
-import weka.core.Utils;
-import weka.core.Randomizable;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.Random;
 
 /**
  * This meta classifier creates a number of disjoint, stratified folds out
@@ -73,11 +68,13 @@ import java.util.Random;
  *
  * @author Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see       Vote
  */
 public class Dagging
   extends RandomizableSingleClassifierEnhancer {
+  
+  static final long serialVersionUID = 4560165876570074309L;
 
   /** the number of folds to use to split the training data */
   protected int m_NumFolds = 10;
@@ -288,16 +285,13 @@ public class Dagging
     Instances           train;
     double              chunkSize;
     
-    // Delete instances with missing class
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-
-    // Check for empty datasets
-    if (data.numInstances() == 0)
-      throw new IllegalArgumentException(
-        this.getClass().getName().replaceAll(".*\\.", "") 
-        + ": zero training instances or all instances have missing class!");
-
+    
     m_Vote    = new Vote();
     base      = new Classifier[getNumFolds()];
     chunkSize = (double) data.numInstances() / (double) getNumFolds();

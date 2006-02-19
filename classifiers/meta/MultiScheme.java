@@ -22,10 +22,18 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableMultipleClassifiersCombiner;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 
 /**
@@ -52,10 +60,12 @@ import weka.core.*;
  * (default 0, is to use error on the training data instead)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
 
+  static final long serialVersionUID = 5710744346128957520L;
+  
   /** The classifier that had the best performance on training data. */
   protected Classifier m_Classifier;
  
@@ -320,8 +330,14 @@ public class MultiScheme extends RandomizableMultipleClassifiersCombiner {
     if (m_Classifiers.length == 0) {
       throw new Exception("No base classifiers have been set!");
     }
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
+    
     Random random = new Random(m_Seed);
     newData.randomize(random);
     if (newData.classAttribute().isNominal() && (m_NumXValFolds > 1)) {
