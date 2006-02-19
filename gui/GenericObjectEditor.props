@@ -70,6 +70,19 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
  weka.classifiers.meta.Vote,\
+ weka.classifiers.mi.MDD,\
+ weka.classifiers.mi.MIBoost,\
+ weka.classifiers.mi.MIDD,\
+ weka.classifiers.mi.MIEMDD,\
+ weka.classifiers.mi.MILR,\
+ weka.classifiers.mi.MINND,\
+ weka.classifiers.mi.MIOptimalBall,\
+ weka.classifiers.mi.MISMO,\
+ weka.classifiers.mi.MISVM,\
+ weka.classifiers.mi.MIWrapper,\
+ weka.classifiers.mi.SimpleMI,\
+ weka.classifiers.mi.TLD,\
+ weka.classifiers.mi.TLDSimple,\
  weka.classifiers.misc.FLR,\
  weka.classifiers.misc.HyperPipes,\
  weka.classifiers.misc.VFI,\
