@@ -22,15 +22,19 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-
-import weka.core.*;
-import weka.estimators.*;
-import weka.filters.unsupervised.attribute.Discretize;
+import weka.classifiers.Evaluation;
+import weka.classifiers.SingleClassifierEnhancer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Discretize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for a regression scheme that employs any distribution
@@ -49,9 +53,11 @@ import weka.filters.Filter;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class RegressionByDiscretization extends SingleClassifierEnhancer {
+  
+  static final long serialVersionUID = 5066426153134050375L;
   
   /** The discretization filter. */
   protected Discretize m_Discretizer = new Discretize();
@@ -93,6 +99,22 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -100,10 +122,13 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (!instances.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException ("Class attribute has to be numeric");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     // Discretize the training data
     m_Discretizer.setIgnoreClass(true);
     m_Discretizer.setAttributeIndices("" + (instances.classIndex() + 1));
@@ -288,7 +313,6 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
   public String toString() {
 
     StringBuffer text = new StringBuffer();
-    int attIndex;
 
     text.append("Regression by discretization");
     if (m_ClassMeans == null) {
