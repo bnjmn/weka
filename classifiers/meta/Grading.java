@@ -22,12 +22,15 @@
 
 package weka.classifiers.meta;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
+import weka.classifiers.Evaluation;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.util.Random;
 
 /**
  * Implements Grading. For more information, see<p>
@@ -57,10 +60,12 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class Grading extends Stacking {
 
+  static final long serialVersionUID = 5207837947890081170L;
+  
   /** The meta classifiers, one for each base classifier. */
   protected Classifier [] m_MetaClassifiers = new Classifier[0];
 
@@ -132,7 +137,7 @@ public class Grading extends Stacking {
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    double maxConf, maxPreds;
+    double maxPreds;
     int numPreds=0;
     int numClassifiers=m_Classifiers.length;
     int idxPreds;
