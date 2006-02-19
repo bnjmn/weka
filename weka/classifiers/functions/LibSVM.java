@@ -25,13 +25,14 @@ package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 
@@ -56,7 +57,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 /*
@@ -1142,6 +1143,29 @@ public class LibSVM
     
     return v;
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
   
   /**
    * builds the classifier
@@ -1155,14 +1179,12 @@ public class LibSVM
     if (!isPresent())
       throw new Exception("libsvm classes not in CLASSPATH!");
 
-    if (insts.checkForStringAttributes())
-      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
+
+    // remove instances with missing class
     insts = new Instances(insts);
     insts.deleteWithMissingClass();
-
-    if (insts.numInstances() == 0)
-      throw new IllegalArgumentException("No train instances without missing class value!");
     
     if (getNormalize()) {
       m_Filter = new Normalize();
