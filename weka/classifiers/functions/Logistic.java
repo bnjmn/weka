@@ -22,12 +22,24 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.*;
-import java.util.*;
-import java.io.*;
-import weka.core.*;
-import weka.filters.*;
-import weka.filters.unsupervised.attribute.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Optimization;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.RemoveUseless;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Second implementation for building and using a multinomial logistic
@@ -81,9 +93,11 @@ import weka.filters.unsupervised.attribute.*;
  * (default -1, iterates until convergence).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ */
+ * @version $Revision: 1.33 $ */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
+  
+  static final long serialVersionUID = 3932117032546553727L;
   
   /** The coefficients (optimized parameters) of the model */
   protected double [][] m_Par;
@@ -428,6 +442,27 @@ public class Logistic extends Classifier
       return grad;
     }
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
     
   /**
    * Builds the classifier
@@ -437,18 +472,13 @@ public class Logistic extends Classifier
    * @exception Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances train) throws Exception {
-    if (train.classAttribute().type() != Attribute.NOMINAL) {
-      throw new UnsupportedClassTypeException("Class attribute must be nominal.");
-    }
-    if (train.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(train);
+
+    // remove instances with missing class
     train = new Instances(train);
     train.deleteWithMissingClass();
-    if (train.numInstances() == 0) {
-      throw new IllegalArgumentException("No train instances without missing class value!");
-    }
-
+    
     // Replace missing values	
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(train);

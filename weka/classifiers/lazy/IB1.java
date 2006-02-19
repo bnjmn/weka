@@ -25,9 +25,13 @@ package weka.classifiers.lazy;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
 
 
 /**
@@ -43,10 +47,12 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class IB1 extends Classifier implements UpdateableClassifier {
 
+  static final long serialVersionUID = -6152184127304895851L;
+  
   /** The training instances used for classification. */
   private Instances m_Train;
 
@@ -73,6 +79,30 @@ public class IB1 extends Classifier implements UpdateableClassifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -80,15 +110,14 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    */
   public void buildClassifier(Instances instances) throws Exception {
     
-    if (instances.classAttribute().isNumeric()) {
-       throw new Exception("IB1: Class is numeric!");
-    }
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("IB1: Cannot handle string attributes!");
-    }
-    // Throw away training instances with missing class
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     m_Train = new Instances(instances, 0, instances.numInstances());
-    m_Train.deleteWithMissingClass();
 
     m_MinArray = new double [m_Train.numAttributes()];
     m_MaxArray = new double [m_Train.numAttributes()];

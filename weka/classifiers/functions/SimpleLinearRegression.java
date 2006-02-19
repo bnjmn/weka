@@ -22,8 +22,15 @@
 
 package weka.classifiers.functions;
 
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 
 /**
  * Class for learning a simple linear regression model.
@@ -31,11 +38,13 @@ import weka.classifiers.*;
  * Missing values are not allowed. Can only deal with numeric attributes.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SimpleLinearRegression extends Classifier 
   implements WeightedInstancesHandler {
 
+  static final long serialVersionUID = 1679336022895414137L;
+  
   /** The chosen attribute */
   private Attribute m_attribute;
 
@@ -80,6 +89,27 @@ public class SimpleLinearRegression extends Classifier
       return m_intercept + m_slope * inst.value(m_attribute.index());
     }
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
   
   /**
    * Builds a simple linear regression model given the supplied training data.
@@ -89,16 +119,13 @@ public class SimpleLinearRegression extends Classifier
    */
   public void buildClassifier(Instances insts) throws Exception {
 
-    if (!insts.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
-    }
-    if (insts.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
-    if (insts.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
 
+    // remove instances with missing class
+    insts = new Instances(insts);
+    insts.deleteWithMissingClass();
+    
     // Compute mean of target value
     double yMean = insts.meanOrMode(insts.classIndex());
 
@@ -110,9 +137,6 @@ public class SimpleLinearRegression extends Classifier
     double chosenIntercept = Double.NaN;
     for (int i = 0; i < insts.numAttributes(); i++) {
       if (i != insts.classIndex()) {
-	if (!insts.attribute(i).isNumeric()) {
-	  throw new Exception("SimpleLinearRegression: Only numeric attributes!");
-	}
 	m_attribute = insts.attribute(i);
 	
 	// Compute slope and intercept

@@ -24,12 +24,23 @@ package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Matrix;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for using linear regression for prediction. Uses the Akaike 
@@ -53,10 +64,12 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
+  
+  static final long serialVersionUID = -3364580862046573747L;
 
   /** Array for storing coefficients of linear regression. */
   private double[] m_Coefficients;
@@ -144,6 +157,28 @@ public class LinearRegression extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds a regression model for the given data.
    *
    * @param data the training data to be used for generating the
@@ -153,15 +188,12 @@ public class LinearRegression extends Classifier implements OptionHandler,
   public void buildClassifier(Instances data) throws Exception {
   
     if (!m_checksTurnedOff) {
-      if (!data.classAttribute().isNumeric()) {
-	throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
-      }
-      if (data.numInstances() == 0) {
-	throw new Exception("No instances in training file!");
-      }
-      if (data.checkForStringAttributes()) {
-	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-      }
+      // can classifier handle the data?
+      getCapabilities().testWithFail(data);
+
+      // remove instances with missing class
+      data = new Instances(data);
+      data.deleteWithMissingClass();
     }
 
     // Preprocess instances

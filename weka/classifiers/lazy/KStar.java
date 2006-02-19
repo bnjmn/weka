@@ -24,10 +24,26 @@
 
 package weka.classifiers.lazy;
 
-import weka.classifiers.lazy.kstar.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.lazy.kstar.KStarCache;
+import weka.classifiers.lazy.kstar.KStarConstants;
+import weka.classifiers.lazy.kstar.KStarNominalAttribute;
+import weka.classifiers.lazy.kstar.KStarNumericAttribute;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * K* is an instance-based classifier, that is the class of a test
@@ -46,12 +62,14 @@ import weka.classifiers.*;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class KStar extends Classifier
   implements KStarConstants, UpdateableClassifier {
 
+  static final long serialVersionUID = 332458330800479083L;
+  
   /** The training instances used for classification. */
   protected Instances m_Train; 
 
@@ -118,6 +136,32 @@ public class KStar extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -126,13 +170,15 @@ public class KStar extends Classifier
   public void buildClassifier(Instances instances) throws Exception {
     String debug = "(KStar.buildClassifier) ";
 
-    if (instances.classIndex() < 0)
-      throw new Exception ("No class attribute assigned to instances");
-    if (instances.checkForStringAttributes())
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     m_Train = new Instances(instances, 0, instances.numInstances());
-    // Throw away training instances with missing class
-    m_Train.deleteWithMissingClass();
+
     // initializes class attributes ** java-speaking! :-) **
     init_m_Attributes();
   }
@@ -145,6 +191,7 @@ public class KStar extends Classifier
    */
   public void updateClassifier(Instance instance) throws Exception {
     String debug = "(KStar.updateClassifier) ";
+
     if (m_Train.equalHeaders(instance.dataset()) == false)
       throw new Exception("Incompatible instance types");
     if ( instance.classIsMissing() )

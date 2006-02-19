@@ -21,9 +21,13 @@
 
 package weka.classifiers.bayes;
 
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 
 /**
  * Class for contructing Hidden Naive Bayes classification model
@@ -37,7 +41,7 @@ import weka.classifiers.*;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 /**
@@ -46,6 +50,8 @@ import weka.classifiers.*;
 
 public class HNB  extends Classifier {
 
+  static final long serialVersionUID = -4503874444306113214L;
+  
   /** The number of each class value occurs in the dataset */
   private double [] m_ClassCounts;
 
@@ -94,6 +100,24 @@ public class HNB  extends Classifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data
@@ -101,28 +125,13 @@ public class HNB  extends Classifier {
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    // judge dataset
-    // class
-    if (instances.classIndex() == -1)
-      throw new UnassignedClassException("No class attribute set!");
-    if (!instances.classAttribute().isNominal())
-      throw new UnsupportedClassTypeException("Handles only nominal classes!");
-    // attributes
-    Enumeration enumInsts,enumAtts;
-    enumAtts = instances.enumerateAttributes();
-    while (enumAtts.hasMoreElements()) {
-      Attribute attribute = (Attribute) enumAtts.nextElement();
-      if (attribute.type()!= Attribute.NOMINAL){
-        throw new UnsupportedAttributeTypeException("Handles nominal variables only.");
-      }
-      enumInsts = instances.enumerateInstances();
-      while (enumInsts.hasMoreElements()) {
-        if (((Instance) enumInsts.nextElement()).isMissing(attribute)) {
-          throw new NoSupportForMissingValuesException("Can't handle missing values.");
-        }
-      }
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     // reset variable
     m_NumClasses = instances.numClasses();
     m_ClassIndex = instances.classIndex();

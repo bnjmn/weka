@@ -22,14 +22,20 @@
 
 package weka.classifiers.lazy;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.trees.DecisionStump;
-import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.UpdateableClassifier;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.LinearNN;
+import weka.core.NearestNeighbourSearch;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Locally-weighted learning. Uses an instance-based algorithm to
@@ -71,11 +77,12 @@ import weka.core.*;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class LWL extends SingleClassifierEnhancer
   implements UpdateableClassifier, WeightedInstancesHandler {
 
+  static final long serialVersionUID = 1979797405383665815L;
 
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -357,6 +364,24 @@ public class LWL extends SingleClassifierEnhancer
   public void setNearestNeighbourSearchAlgorithm(NearestNeighbourSearch nearestNeighbourSearchAlgorithm) {
     m_NNSearch = nearestNeighbourSearchAlgorithm;
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities      result;
+    
+    if (m_Classifier != null)
+      result = m_Classifier.getCapabilities();
+    else
+      result = super.getCapabilities();
+    
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
   
   /**
    * Generates the classifier.
@@ -371,18 +396,14 @@ public class LWL extends SingleClassifierEnhancer
 					 + "WeightedInstancesHandler!");
     }
 
-    if (instances.classIndex() < 0) {
-      throw new Exception("No class attribute assigned to instances");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string "+
-                                                  "attributes!");
-    }
-
-    // Throw away training instances with missing class
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     m_Train = new Instances(instances, 0, instances.numInstances());
-    m_Train.deleteWithMissingClass();
 
     m_NNSearch.setInstances(m_Train);
   }

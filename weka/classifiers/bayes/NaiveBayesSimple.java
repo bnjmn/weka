@@ -24,9 +24,14 @@ package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
 
 /**
  * Class for building and using a simple Naive Bayes classifier.
@@ -37,9 +42,11 @@ import weka.core.*;
  * Classification and Scene Analysis</i>. Wiley, New York.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
 */
 public class NaiveBayesSimple extends Classifier {
+  
+  static final long serialVersionUID = -1478242251770381214L;
 
   /** All the counts for nominal attributes. */
   protected double [][][] m_Counts;
@@ -73,6 +80,27 @@ public class NaiveBayesSimple extends Classifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -83,12 +111,12 @@ public class NaiveBayesSimple extends Classifier {
     int attIndex = 0;
     double sum;
     
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    if (instances.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Naive Bayes: Class is numeric!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
     
     m_Instances = new Instances(instances, 0);
     

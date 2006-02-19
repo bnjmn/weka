@@ -24,11 +24,22 @@ package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.UpdateableClassifier;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.estimators.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.estimators.DiscreteEstimator;
+import weka.estimators.Estimator;
+import weka.estimators.KernelEstimator;
+import weka.estimators.NormalEstimator;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for a Naive Bayes classifier using estimator classes. Numeric 
@@ -58,11 +69,13 @@ import weka.estimators.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class NaiveBayes extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
 
+  static final long serialVersionUID = 5995231201785697655L;
+  
   /** The attribute estimators. */
   protected Estimator [][] m_Distributions;
   
@@ -120,6 +133,29 @@ public class NaiveBayes extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -128,17 +164,15 @@ public class NaiveBayes extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    if (instances.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Naive Bayes: Class is numeric!");
-    }
-    m_NumClasses = instances.numClasses();
-    if (m_NumClasses < 0) {
-      throw new Exception ("Dataset has no class attribute");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
+    m_NumClasses = instances.numClasses();
+    
     // Copy the instances
     m_Instances = new Instances(instances);
 
