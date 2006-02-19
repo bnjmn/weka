@@ -23,13 +23,14 @@
 package weka.classifiers.trees.j48;
 
 import weka.core.*;
+import weka.core.Capabilities.Capability;
 
 /**
  * Class for handling a tree structure that can
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class C45PruneableClassifierTree extends ClassifierTree{
@@ -70,19 +71,43 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   }
 
   /**
+   * Returns default capabilities of the classifier tree.
+   *
+   * @return      the capabilities of this classifier tree
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Method for building a pruneable classifier tree.
    *
    * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
-   if (data.classAttribute().isNumeric())
-     throw new UnsupportedClassTypeException("Class is numeric!");
-   if (data.checkForStringAttributes()) {
-     throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-   }
-   data = new Instances(data);
-   data.deleteWithMissingClass();
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
    buildTree(data, m_subtreeRaising);
    collapse();
    if (m_pruneTheTree) {
