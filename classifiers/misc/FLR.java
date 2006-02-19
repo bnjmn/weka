@@ -22,10 +22,24 @@
 
 package weka.classifiers.misc;
 
-import weka.classifiers.*;
-import weka.core.*;
-import java.io.*;
-import java.util.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.AttributeStats;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Summarizable;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * <p>Fuzzy Lattice Reasoning Classifier</p>
@@ -48,7 +62,7 @@ import java.util.*;
  * @author Ioannis N. Athanasiadis
  * @email: ionathan@iti.gr, alias: ionathan@ieee.org
  * @version 5.0
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  *
  * <p> This classifier is described in the following papers:
  * <p> I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas and V. Petridis
@@ -67,6 +81,8 @@ public class FLR
     extends Classifier
     implements Serializable, Summarizable, AdditionalMeasureProducer {
 
+  static final long serialVersionUID = 3337906540579569626L;
+  
   public static final float EPSILON = 0.000001f;
   private Vector learnedCode; // the RuleSet: a vector keeping the learned Fuzzy Lattices
   private double m_Rhoa = 0.5; // a double keeping the vignilance parameter rhoa
@@ -78,27 +94,42 @@ public class FLR
 
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds the FLR Classifier
    *
    * @param data the training dataset (Instances)
        * @exception Exception if the training dataset is not supported or is erroneous
    */
   public void buildClassifier(Instances data) throws Exception {
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
 
     // Exceptions statements
-    if (data.checkForStringAttributes())
-      throw new Exception("Can't handle string attributes!");
-
-    if (data.classAttribute().isNumeric())
-      throw new Exception("Class is numeric!");
-
-    if (data.numInstances() == 0 || data.numAttributes() == 0 || data.numAttributes()==1)
-      throw new Exception("Training dataset is empty!");
-
     for (int i = 0; i < data.numAttributes(); i++) {
       if (i != data.classIndex()) {
-        if (data.attribute(i).isNominal())
-          throw new Exception("Can't handle nominal Attributes");
         AttributeStats stats = data.attributeStats(i);
         if(data.numInstances()==stats.missingCount ||
            Double.isNaN(stats.numericStats.min) ||
@@ -107,10 +138,6 @@ public class FLR
               data.attribute(i).toString());
       } //fi
     } //for
-
-    if (data.numClasses() < 0) {
-      throw new Exception("Dataset has no class attribute!");
-    }
 
     if (!m_BoundsFile.canRead()) {
       setBounds(data);
@@ -655,7 +682,6 @@ public class FLR
       int i = 0;
       int k = 0;
       String temp = "";
-      Vector v = new Vector();
       int s = 0;
       do {
         String character = rule.substring(s, s + 1);
