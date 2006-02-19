@@ -4,38 +4,39 @@
 
 package weka.classifiers.functions;
 
-import java.util.Random;
+import weka.classifiers.AbstractClassifierTest;
+import weka.classifiers.CheckClassifier;
+import weka.classifiers.Classifier;
+
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SelectedTag;
-import weka.classifiers.evaluation.NominalPrediction;
-import weka.classifiers.*;
 
 /**
  * Tests PaceRegression. Run from the command line with:<p>
  * java weka.classifiers.nn.PaceRegressionTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class PaceRegressionTest extends AbstractClassifierTest {
+public class PaceRegressionTest 
+  extends AbstractClassifierTest {
 
-
-  public PaceRegressionTest(String name) { super(name);  }
+  public PaceRegressionTest(String name) { 
+    super(name);  
+  }
 
   /**
-   * Called by JUnit before each test method. This implementation creates
-   * the default classifier to test and loads a test set of Instances.
-   *
-   * @exception Exception if an error occurs reading the example instances.
+   * configures the CheckClassifier instance used throughout the tests
+   * 
+   * @return	the fully configured CheckClassifier instance used for testing
    */
-  protected void setUp() throws Exception {
-    super.setUp();
-    m_Tester.setNumInstances(40);
+  protected CheckClassifier getTester() {
+    CheckClassifier 	result;
+    
+    result = super.getTester();
+    result.setNumInstances(60);
+    
+    return result;
   }
 
   /** Creates a default ThresholdSelector */

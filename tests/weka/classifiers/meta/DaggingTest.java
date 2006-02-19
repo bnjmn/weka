@@ -24,7 +24,6 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -32,13 +31,25 @@ import junit.framework.TestSuite;
  * java weka.classifiers.meta.Dagging
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DaggingTest 
   extends AbstractClassifierTest {
 
   public DaggingTest(String name) { 
     super(name);  
+  }
+  
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default classifier to test and loads a test set of Instances.
+   *
+   * @exception Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+    
+    m_Tester.setNumInstances(40);
   }
 
   /** Creates a default Dagging */
