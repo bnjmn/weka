@@ -22,10 +22,24 @@
 
 package weka.classifiers.rules;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.ContingencyTables;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * This class implements a single conjunctive rule learner that can predict
@@ -51,12 +65,14 @@ import weka.classifiers.*;
  * of the pruning data is used for regression. <p>
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 
 public class ConjunctiveRule extends Classifier 
   implements OptionHandler, WeightedInstancesHandler{
     
+  static final long serialVersionUID = -5938309903225087198L;
+  
   /** The number of folds to split data into Grow and Prune for REP*/
   private int m_Folds = 3;
     
@@ -903,6 +919,29 @@ public class ConjunctiveRule extends Classifier
 
   public void setNumAntds(int n){  m_NumAntds = n; }
   public int getNumAntds(){ return m_NumAntds; }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
     
   /**
    * Builds a single rule learner with REP dealing with nominal classes or
@@ -915,18 +954,13 @@ public class ConjunctiveRule extends Classifier
    * @exception Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
-    if (instances.checkForStringAttributes())
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-	 
-    Instances data = new Instances(instances);
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
-    if(data.numInstances() == 0)
-	throw new Exception("No training data!");
+    // remove instances with missing class
+    Instances data = new Instances(instances);
     data.deleteWithMissingClass();
     
-    if(data.numInstances() == 0)
-	throw new Exception("Not training data without missing class values.");
-
     if(data.numInstances() < m_Folds)
       throw new Exception("Not enough data for REP.");
 
