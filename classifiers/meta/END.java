@@ -22,21 +22,17 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.meta.nestedDichotomies.*;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Random;
-import java.util.Hashtable;
-
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Option;
-import weka.core.Utils;
 import weka.core.Randomizable;
-import weka.core.UnsupportedClassTypeException;
+import weka.core.Utils;
+
+import java.util.Hashtable;
+import java.util.Random;
 
 /**
  * Class for creating an ensemble of nested dichotomies to tackle
@@ -72,9 +68,11 @@ import weka.core.UnsupportedClassTypeException;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class END extends RandomizableIteratedSingleClassifierEnhancer {
+  
+  static final long serialVersionUID = -4143242362912214956L;
   
   /**
    * The hashtable containing the classifiers for the END.
@@ -111,6 +109,20 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer {
       + "Eibe Frank and Stefan Kramer (2004). Ensembles of Nested Dichotomies for Multi-class Problems. "
       + "Proceedings of the International Conference on Machine Learning, Banff. Morgan Kaufmann.";
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // instances
+    result.setMinimumNumberInstances(1);  // at least 1 for the RandomNumberGenerator!
+    
+    return result;
+  }
   
   /**
    * Builds the committee of randomizable classifiers.
@@ -121,16 +133,12 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer {
    */
   public void buildClassifier(Instances data) throws Exception {
     
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("END: class must be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
+    // remove instances with missing class
+    data = new Instances(data);
     data.deleteWithMissingClass();
-
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
     
     if (!(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ND) && 
 	!(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ClassBalancedND) &&  

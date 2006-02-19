@@ -22,12 +22,16 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
-import java.util.*;
-import weka.core.*;
-import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.SingleClassifierEnhancer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.MakeIndicator;
 
 /**
  * Class for doing classification using regression methods. For more
@@ -45,10 +49,12 @@ import weka.filters.Filter;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
 */
 public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
+  static final long serialVersionUID = 4500023123618669859L;
+  
   /** The classifiers. (One for each class.) */
   private Classifier[] m_Classifiers;
 
@@ -87,6 +93,21 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Builds the classifiers.
    *
    * @param insts the training data.
@@ -96,10 +117,13 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
     Instances newInsts;
 
-    if (insts.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("ClassificationViaRegression can't "
-					      + "handle a numeric class!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
+
+    // remove instances with missing class
+    insts = new Instances(insts);
+    insts.deleteWithMissingClass();
+    
     m_Classifiers = Classifier.makeCopies(m_Classifier, insts.numClasses());
     m_ClassFilters = new MakeIndicator[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {

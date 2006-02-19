@@ -22,12 +22,27 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.filters.Filter;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /**
@@ -80,10 +95,12 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
+  static final long serialVersionUID = 1205317833344726855L;
+  
   /* Specify possible sources of the cost matrix */
   public static final int MATRIX_ON_DEMAND = 1;
   public static final int MATRIX_SUPPLIED = 2;
@@ -448,6 +465,21 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Builds the model of the base learner.
    *
    * @param data the training data
@@ -455,9 +487,13 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Class attribute must be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     if (m_MatrixSource == MATRIX_ON_DEMAND) {
       String costName = data.relationName() + CostMatrix.FILE_EXTENSION;
       File costFile = new File(getOnDemandDirectory(), costName);
