@@ -22,18 +22,35 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.Logistic;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Standardize;
+import weka.classifiers.functions.supportVector.Kernel;
+import weka.classifiers.functions.supportVector.NormalizedPolyKernel;
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.classifiers.functions.supportVector.RBFKernel;
+import weka.classifiers.functions.supportVector.SMOset;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.SelectedTag;
+import weka.core.SerializedObject;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import java.util.*;
-import java.io.*;
-import weka.core.*;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Standardize;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Implements John C. Platt's sequential minimal optimization
@@ -114,9 +131,11 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.55 $ */
+ * @version $Revision: 1.56 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
+  static final long serialVersionUID = -6585883636378691736L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -152,7 +171,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   /**
    * Class for building a binary support vector machine.
    */
-  protected class BinarySMO implements Serializable {
+  public class BinarySMO implements Serializable {
     
     /** The Lagrange multipliers. */
     protected double[] m_alpha;
@@ -492,7 +511,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      * @param inst the instance 
      * @return the output of the SVM for the given instance
      */
-    protected double SVMOutput(int index, Instance inst) throws Exception {
+    public double SVMOutput(int index, Instance inst) throws Exception {
       
       double result = 0;
       
@@ -649,11 +668,10 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
      */
     protected boolean examineExample(int i2) throws Exception {
     
-      double y2, alph2, F2;
+      double y2, F2;
       int i1 = -1;
     
       y2 = m_class[i2];
-      alph2 = m_alpha[i2];
       if (m_I0.contains(i2)) {
 	F2 = m_errors[i2];
       } else {
@@ -712,7 +730,7 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     protected boolean takeStep(int i1, int i2, double F2) throws Exception {
 
       double alph1, alph2, y1, y2, F1, s, L, H, k11, k12, k22, eta,
-	a1, a2, f1, f2, v1, v2, Lobj, Hobj, b1, b2, bOld;
+	a1, a2, f1, f2, v1, v2, Lobj, Hobj;
       double C1 = m_C * m_data.instance(i1).weight();
       double C2 = m_C * m_data.instance(i2).weight();
 
@@ -1070,6 +1088,27 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Method for building the classifier. Implements a one-against-one
    * wrapper for multi-class problems.
    *
@@ -1079,34 +1118,26 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   public void buildClassifier(Instances insts) throws Exception {
 
     if (!m_checksTurnedOff) {
-      if (insts.checkForStringAttributes()) {
-	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-      }
-      if (insts.classAttribute().isNumeric()) {
-	throw new UnsupportedClassTypeException("SMO can't handle a numeric class! Use"
-						+ "SMOreg for performing regression.");
-      }
+      // can classifier handle the data?
+      getCapabilities().testWithFail(insts);
+
+      // remove instances with missing class
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
-      if (insts.numInstances() == 0) {
-	throw new Exception("No training instances without a missing class!");
-      }
-
       
       /* Removes all the instances with weight equal to 0.
-	 MUST be done since condition (8) of Keerthi's paper 
-	 is made with the assertion Ci > 0 (See equation (3a). */
+       MUST be done since condition (8) of Keerthi's paper 
+       is made with the assertion Ci > 0 (See equation (3a). */
       Instances data = new Instances(insts, insts.numInstances());
       for(int i = 0; i < insts.numInstances(); i++){
-	if(insts.instance(i).weight() > 0)
-	  data.add(insts.instance(i));
+        if(insts.instance(i).weight() > 0)
+          data.add(insts.instance(i));
       }
       if (data.numInstances() == 0) {
-	throw new Exception("No training instances left after removing " + 
-			    "instance with either a weight null or a missing class!");
+        throw new Exception("No training instances left after removing " + 
+        "instances with weight 0!");
       }
       insts = data;
-      
     }
 
     m_onlyNumeric = true;
@@ -2069,7 +2100,6 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
   public String toString() {
     
     StringBuffer text = new StringBuffer();
-    int printed = 0;
     
     if ((m_classAttribute == null)) {
       return "SMO: No model built yet.";
