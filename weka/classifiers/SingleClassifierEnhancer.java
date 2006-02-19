@@ -22,20 +22,21 @@
 
 package weka.classifiers;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
+import weka.core.Capabilities;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Option;
-import java.util.Vector;
+
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to meta
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 
@@ -156,6 +157,24 @@ public abstract class SingleClassifierEnhancer extends Classifier {
    */
   public String classifierTipText() {
     return "The base classifier to be used.";
+  }
+
+  /**
+   * Returns default capabilities of the base classifier.
+   *
+   * @return      the capabilities of the base classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities        result;
+
+    if (getClassifier() != null)
+      result = getClassifier().getCapabilities();
+    else
+      result = new Capabilities(this);
+    
+    result.setOwner(this);
+    
+    return result;
   }
 
   /**
