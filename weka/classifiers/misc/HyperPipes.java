@@ -22,15 +22,17 @@
 
 package weka.classifiers.misc;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Utils;
 import weka.core.UnsupportedAttributeTypeException;
-import weka.core.UnsupportedClassTypeException;
-import java.io.*;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
 
 /**
  * Class implementing a HyperPipe classifier. For each category a
@@ -44,10 +46,12 @@ import java.io.*;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */ 
 public class HyperPipes extends Classifier {
 
+  static final long serialVersionUID = -7527596632268975274L;
+  
   /** The index of the class attribute */
   protected int m_ClassIndex;
 
@@ -188,6 +192,30 @@ public class HyperPipes extends Classifier {
 
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -195,13 +223,13 @@ public class HyperPipes extends Classifier {
    */
   public void buildClassifier(Instances instances) throws Exception {
     
-    if (instances.classIndex() == -1) {
-      throw new Exception("No class attribute assigned");
-    }
-    if (!instances.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("HyperPipes: class attribute needs to be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     m_ClassIndex = instances.classIndex();
     m_Instances = new Instances(instances, 0); // Copy the structure for ref
 

@@ -23,14 +23,13 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
 import weka.core.AttributeStats;
+import weka.core.Capabilities;
+import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -39,8 +38,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
-import weka.core.Drawable;
-import weka.core.UnsupportedClassTypeException;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for selecting a threshold on a probability output by a
@@ -89,11 +91,13 @@ import weka.core.UnsupportedClassTypeException;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
  */
 public class ThresholdSelector extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler, Drawable {
 
+  static final long serialVersionUID = -1795038053239867444L;
+  
   /* Type of correction applied to threshold range */ 
   public static final int RANGE_NONE = 0;
   public static final int RANGE_BOUNDS = 1;
@@ -506,6 +510,21 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.BINARY_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -514,12 +533,13 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
   public void buildClassifier(Instances instances) 
     throws Exception {
 
-    if (instances.numClasses() > 2) {
-      throw new UnsupportedClassTypeException("Only works for two-class datasets!");
-    }
-    if (!instances.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Class attribute must be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     AttributeStats stats = instances.attributeStats(instances.classIndex());
     m_BestThreshold = 0.5;
     m_BestValue = MIN_VALUE;
