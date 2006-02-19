@@ -25,9 +25,22 @@ package weka.classifiers.lazy;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.LinearNN;
+import weka.core.NearestNeighbourSearch;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /**
@@ -67,11 +80,13 @@ import weka.core.*;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class IBk extends Classifier implements
   OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
 
+  static final long serialVersionUID = -3080186098777067172L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -368,6 +383,32 @@ public class IBk extends Classifier implements
 
     return m_Train.numInstances();
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
   
   /**
    * Generates the classifier.
@@ -377,22 +418,16 @@ public class IBk extends Classifier implements
    */
   public void buildClassifier(Instances instances) throws Exception {
 
-    if (instances.classIndex() < 0) {
-      throw new Exception ("No class attribute assigned to instances");
-    }
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    try {
-      m_NumClasses = instances.numClasses();
-      m_ClassType = instances.classAttribute().type();
-    } catch (Exception ex) {
-      throw new Error("This should never be reached");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
-    // Throw away training instances with missing class
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
+    m_NumClasses = instances.numClasses();
+    m_ClassType = instances.classAttribute().type();
     m_Train = new Instances(instances, 0, instances.numInstances());
-    m_Train.deleteWithMissingClass();
 
     // Throw away initial instances until within the specified window size
     if ((m_WindowSize > 0) && (instances.numInstances() > m_WindowSize)) {

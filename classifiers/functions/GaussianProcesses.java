@@ -22,19 +22,31 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.IntervalEstimator;
 import weka.classifiers.Evaluation;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Standardize;
+import weka.classifiers.IntervalEstimator;
+import weka.classifiers.functions.supportVector.Kernel;
+import weka.classifiers.functions.supportVector.NormalizedPolyKernel;
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.classifiers.functions.supportVector.RBFKernel;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Statistics;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.core.matrix.*;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Standardize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for using Gaussian Processes for prediction. <p>
@@ -48,11 +60,13 @@ import weka.core.matrix.*;
  * http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  */
 public class GaussianProcesses extends Classifier implements OptionHandler, IntervalEstimator {
 
+  static final long serialVersionUID = -8620066949967678545L;
+  
   /** Only numeric attributes in the dataset? */
   protected boolean m_onlyNumeric;
 
@@ -142,6 +156,28 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Method for building the classifier. 
    *
    * @param insts the set of training instances
@@ -150,19 +186,13 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
   public void buildClassifier(Instances insts) throws Exception {
 
     /* check the set of training instances */
-
     if (!m_checksTurnedOff) {
-      if (insts.checkForStringAttributes()) {
-	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-      }
-      if (insts.classAttribute().isNominal()) {
-	throw new UnsupportedClassTypeException("This implementation of Gaussian Processes can't handle a nominal class!");
-      }
+      // can classifier handle the data?
+      getCapabilities().testWithFail(insts);
+
+      // remove instances with missing class
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
-      if (insts.numInstances() == 0) {
-	throw new Exception("No training instances without a missing class!");
-      }
     }
       
     m_onlyNumeric = true;

@@ -22,18 +22,23 @@
  */
 package weka.classifiers.functions;
 
-import java.util.Enumeration;
-import java.util.Vector;
-import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.Logistic;
-import weka.classifiers.functions.LinearRegression;
-import weka.filters.unsupervised.attribute.ClusterMembership;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Standardize;
-import weka.clusterers.SimpleKMeans;
 import weka.clusterers.MakeDensityBasedClusterer;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.ClusterMembership;
+import weka.filters.unsupervised.attribute.Standardize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class that implements a normalized Gaussian radial basis function
@@ -67,10 +72,12 @@ import weka.clusterers.MakeDensityBasedClusterer;
   *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
+  static final long serialVersionUID = -3669814959712675720L;
+  
   /** The logistic regression for classification problems */
   private Logistic m_logistic;
 
@@ -117,6 +124,23 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier, i.e.,  and "or" of
+   * Logistic and LinearRegression.
+   *
+   * @return      the capabilities of this classifier
+   * @see         Logistic
+   * @see         LinearRegression
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = new Logistic().getCapabilities();
+    result.or(new LinearRegression().getCapabilities());
+    Capabilities classes = result.getClassCapabilities();
+    result.and(new SimpleKMeans().getCapabilities());
+    result.or(classes);
+    return result;
+  }
+
+  /**
    * Builds the classifier
    *
    * @param instances the training data
@@ -124,11 +148,12 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
-    if (instances.numInstances() == 0) {
-      throw new Exception("No training instances without a missing class!");
-    }
     
     m_standardize = new Standardize();
     m_standardize.setInputFormat(instances);

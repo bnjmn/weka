@@ -22,17 +22,31 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.functions.supportVector.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.filters.unsupervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Standardize;
+import weka.classifiers.functions.supportVector.Kernel;
+import weka.classifiers.functions.supportVector.NormalizedPolyKernel;
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.classifiers.functions.supportVector.RBFKernel;
+import weka.classifiers.functions.supportVector.SMOset;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import java.util.*;
-import java.io.*;
-import weka.core.*;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Standardize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Implements Alex J.Smola and Bernhard Scholkopf sequential minimal optimization
@@ -58,11 +72,12 @@ import weka.core.*;
  *
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SMOreg extends Classifier implements OptionHandler, 
   WeightedInstancesHandler {
     
+  static final long serialVersionUID = 5783729368717679645L;
 
   /** Feature-space normalization? */
   protected boolean m_featureSpaceNormalization = false;
@@ -194,6 +209,28 @@ public class SMOreg extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Method for building the classifier. 
    *
    * @param insts the set of training instances
@@ -204,31 +241,24 @@ public class SMOreg extends Classifier implements OptionHandler,
     /* check the set of training instances */
 
     if (!m_checksTurnedOff) {
-      if (insts.checkForStringAttributes()) {
-	throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-      }
-      if (insts.classAttribute().isNominal()) {
-	throw new UnsupportedClassTypeException("SMOreg can't handle a nominal class! "
-						+ "Use SMO for performing "
-						+ "classification.");
-      }
+      // can classifier handle the data?
+      getCapabilities().testWithFail(insts);
+
+      // remove instances with missing class
       insts = new Instances(insts);
       insts.deleteWithMissingClass();
-      if (insts.numInstances() == 0) {
-	throw new Exception("No training instances without a missing class!");
-      }
 	
       /* Removes all the instances with weight equal to 0.
-	 MUST be done since condition (6) of Shevade's paper 
-	 is made with the assertion Ci > 0 (See equation (1a). */
+       MUST be done since condition (6) of Shevade's paper 
+       is made with the assertion Ci > 0 (See equation (1a). */
       Instances data = new Instances(insts, insts.numInstances());
       for(int i = 0; i < insts.numInstances(); i++){
-	if(insts.instance(i).weight() > 0)
-	  data.add(insts.instance(i));
+        if(insts.instance(i).weight() > 0)
+          data.add(insts.instance(i));
       }
       if (data.numInstances() == 0) {
-	throw new Exception("No training instances left after removing " + 
-			    "instance with either a weight null or a missing class!");
+        throw new Exception("No training instances left after removing " + 
+        "instances with weight 0!");
       }
       insts = data;
     }

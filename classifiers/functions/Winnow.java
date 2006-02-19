@@ -21,12 +21,22 @@
  */
 package weka.classifiers.functions;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.UpdateableClassifier;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
-import weka.classifiers.*;
-import weka.core.*;
-import java.util.*;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  *
@@ -67,9 +77,11 @@ import java.util.*;
  * Random seed to shuffle the input. (default 1), -1 == no shuffling<p>
  *
  * @author J. Lindgren (jtlindgr<at>cs.helsinki.fi)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class Winnow extends Classifier implements UpdateableClassifier {
+  
+  static final long serialVersionUID = 3543770107994321324L;
   
   /** Use the balanced variant? **/
   protected boolean m_Balanced;
@@ -228,33 +240,43 @@ public class Winnow extends Classifier implements UpdateableClassifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.BINARY_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Builds the classifier
    *
    * @exception Exception if something goes wrong during building
    */
   public void buildClassifier(Instances insts) throws Exception {
 
-    if (insts.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
-    if (insts.numClasses() > 2) {
-      throw new Exception("Can only handle two-class datasets!");
-    }
-    if (insts.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
-    }
-    Enumeration enu = insts.enumerateAttributes();
-    while (enu.hasMoreElements()) {
-      Attribute attr = (Attribute) enu.nextElement();
-      if (!attr.isNominal()) {
-        throw new UnsupportedAttributeTypeException("Winnow: only nominal attributes, "
-						    + "please.");
-      }
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
 
+    // remove instances with missing class
+    insts = new Instances(insts);
+    insts.deleteWithMissingClass();
+    
     // Filter data
     m_Train = new Instances(insts);
-    m_Train.deleteWithMissingClass();
     
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(m_Train);

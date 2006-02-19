@@ -22,13 +22,24 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.trees.lmt.LogisticBase;
-import weka.core.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
-import java.util.*;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for building a logistic regression model using LogitBoost.
@@ -52,15 +63,14 @@ import java.util.*;
  * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class SimpleLogistic extends Classifier 
   implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
 
-  //format of serial: 1**date## (** = algorithm id, ##= version)
-  //static final long serialVersionUID = 1110506200300L;
-    
+    static final long serialVersionUID = 7397710626304705059L;
+  
     /**The actual logistic regression model */
     protected LogisticBase m_boostedModel;
     
@@ -108,25 +118,39 @@ public class SimpleLogistic extends Classifier
     }
 
     /**
+     * Returns default capabilities of the classifier.
+     *
+     * @return      the capabilities of this classifier
+     */
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+
+      // attributes
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capability.DATE_ATTRIBUTES);
+      result.enable(Capability.MISSING_VALUES);
+
+      // class
+      result.enable(Capability.NOMINAL_CLASS);
+      result.enable(Capability.MISSING_CLASS_VALUES);
+      
+      return result;
+    }
+
+    /**
      * Builds the logistic regression using LogitBoost.
      * @param data the training data
      * @exception Exception if something goes wrong 
      */
     public void buildClassifier(Instances data) throws Exception {
 
-	if (data.classAttribute().type() != Attribute.NOMINAL) {
-	    throw new UnsupportedClassTypeException("Class attribute must be nominal.");
-	}
-	if (data.checkForStringAttributes()) {
-	    throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-	}
+      // can classifier handle the data?
+      getCapabilities().testWithFail(data);
 
-	data = new Instances(data);
-	data.deleteWithMissingClass();
-
-	if (data.numInstances() == 0) {
-	  throw new Exception("No instances without missing class values in training file!");
-	}
+      // remove instances with missing class
+      data = new Instances(data);
+      data.deleteWithMissingClass();
 
 	//replace missing values
 	m_ReplaceMissingValues = new ReplaceMissingValues();

@@ -25,11 +25,20 @@ package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
-import weka.core.*;
-import java.util.*;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Implements the voted perceptron algorithm by Freund and
@@ -56,9 +65,11 @@ import java.util.*;
  * The maximum number of alterations allowed. (default 10000) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
 */
 public class VotedPerceptron extends Classifier implements OptionHandler {
+  
+  static final long serialVersionUID = -1072429260104568698L;
   
   /** The maximum number of alterations to the perceptron */
   private int m_MaxK = 10000;
@@ -200,25 +211,45 @@ public class VotedPerceptron extends Classifier implements OptionHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.BINARY_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Builds the ensemble of perceptrons.
    *
    * @exception Exception if something goes wrong during building
    */
   public void buildClassifier(Instances insts) throws Exception {
  
-    if (insts.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    if (insts.numClasses() > 2) {
-      throw new Exception("Can only handle two-class datasets!");
-    }
-    if (insts.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Can't handle a numeric class!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
 
+    // remove instances with missing class
+    insts = new Instances(insts);
+    insts.deleteWithMissingClass();
+    
     // Filter data
     m_Train = new Instances(insts);
-    m_Train.deleteWithMissingClass();
     m_ReplaceMissingValues = new ReplaceMissingValues();
     m_ReplaceMissingValues.setInputFormat(m_Train);
     m_Train = Filter.useFilter(m_Train, m_ReplaceMissingValues);
