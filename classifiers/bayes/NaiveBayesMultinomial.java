@@ -22,10 +22,12 @@
 
 package weka.classifiers.bayes;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.classifiers.Classifier;
 
 /**
@@ -36,7 +38,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 
 /**
@@ -50,6 +52,8 @@ import weka.classifiers.Classifier;
 public class NaiveBayesMultinomial extends Classifier 
   implements WeightedInstancesHandler {
     
+  static final long serialVersionUID = 5932177440181257085L;
+  
   /*
     probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
     The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
@@ -83,6 +87,25 @@ public class NaiveBayesMultinomial extends Classifier
       +"Andrew Mccallum, Kamal Nigam (1998) A Comparison of Event Models for Naive "
       +"Bayes Text Classification";
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
   /**
    * Generates the classifier.
    *
@@ -91,6 +114,13 @@ public class NaiveBayesMultinomial extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception 
   {
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     headerInfo = new Instances(instances, 0);
     numClasses = instances.numClasses();
     numAttributes = instances.numAttributes();
@@ -106,18 +136,6 @@ public class NaiveBayesMultinomial extends Classifier
 	probOfWordGivenClass[c] = new double[numAttributes];
 	for(int att = 0; att<numAttributes; att++)
 	  {
-	    /*
-	      check all attributes (except the class attribute) are numeric and 
-	      that the class attribute in nominal
-	    */
-	    if(instances.classIndex() == att)
-	      {
-		if(!instances.attribute(att).isNominal())
-		  throw new Exception("The class attribute is required to be nominal. This is currently not the case!");
-	      }
-	    else
-	      if(!instances.attribute(att).isNumeric())
-		throw new Exception(("Attribute " + instances.attribute(att).name() + " is not numeric! NaiveBayesMultinomial1 requires that all attributes (except the class attribute) are numeric."));
 	    probOfWordGivenClass[c][att] = 1;
 	  }
       }

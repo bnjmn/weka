@@ -22,6 +22,7 @@
 
 package weka.classifiers.bayes;
 
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Instance;
 import weka.core.Utils;
@@ -29,6 +30,7 @@ import weka.core.WeightedInstancesHandler;
 import weka.core.OptionHandler;
 import weka.core.Option;
 import weka.core.FastVector;
+import weka.core.Capabilities.Capability;
 import weka.classifiers.Classifier;
 
 
@@ -51,12 +53,14 @@ import weka.classifiers.Classifier;
  * (default 1.0).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler {
     
+    static final long serialVersionUID = 7246302925903086397L;
+  
     /**
       Weight of words for each class. The weight is actually the
       log of the probability of a word (w) given a class (c) 
@@ -141,6 +145,8 @@ public class ComplementNaiveBayes extends Classifier
         String val = Utils.getOption('S', options);
         if(val.length()!=0)
           setSmoothingParameter(Double.parseDouble(val));
+        else
+          setSmoothingParameter(1.0);
     }
     
     /**
@@ -207,6 +213,25 @@ public class ComplementNaiveBayes extends Classifier
                 "weka.filters.unsupervised.StringToWordVector.";
     }
     
+
+    /**
+     * Returns default capabilities of the classifier.
+     *
+     * @return      the capabilities of this classifier
+     */
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+
+      // attributes
+      result.enable(Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capability.MISSING_VALUES);
+
+      // class
+      result.enable(Capability.NOMINAL_CLASS);
+      result.enable(Capability.MISSING_CLASS_VALUES);
+      
+      return result;
+    }
     
     /**
      * Generates the classifier.
@@ -216,28 +241,15 @@ public class ComplementNaiveBayes extends Classifier
      */
     public void buildClassifier(Instances instances) throws Exception {
 
+      // can classifier handle the data?
+      getCapabilities().testWithFail(instances);
+
+      // remove instances with missing class
+      instances = new Instances(instances);
+      instances.deleteWithMissingClass();
+      
         numClasses = instances.numClasses();
 	int numAttributes = instances.numAttributes();
-        
-        //First check that all attributes (except the class attribute) are 
-        //numeric and that the class attribute in nominal
-	for(int c = 0; c<numClasses; c++) {
-            for(int idx = 0; idx<numAttributes; idx++) {
-                if(instances.classIndex() == idx) {
-                    if(!instances.attribute(idx).isNominal())
-                        throw new Exception("ComplementNaiveBayes cannot "+
-                                          "handle non-nominal class attribute");
-                }
-                else
-                    if(!instances.attribute(idx).isNumeric())
-                        throw new Exception("Attribute "+
-                                            instances.attribute(idx).name()+ 
-                                            " is not numeric! "+
-                                            "ComplementNaiveBayes requires "+
-                                            "that all attributes (except the "+
-                                            "class attribute) are numeric.");
-            }
-        }
         
         header = new Instances(instances, 0);
 	double [][] ocrnceOfWordInClass = new double[numClasses][numAttributes];        

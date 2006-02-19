@@ -30,6 +30,8 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.instance.RemoveRange;
 import weka.filters.Filter;
 import weka.core.*;
+import weka.core.Capabilities.Capability;
+
 import java.io.*;
 import java.util.*;
 
@@ -41,9 +43,11 @@ import java.util.*;
  * Peter J. Rousseeuw, Annick M. Leroy. c1987
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LeastMedSq extends Classifier implements OptionHandler {
+  
+  static final long serialVersionUID = 4288954049987652970L;
   
   private double[] m_Residuals;
   
@@ -101,6 +105,28 @@ public class LeastMedSq extends Classifier implements OptionHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Build lms regression
    *
    * @param data training data
@@ -108,16 +134,13 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    */
   public void buildClassifier(Instances data)throws Exception{
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-
-    if (!data.classAttribute().isNumeric())
-      throw new UnsupportedClassTypeException("Class attribute has to be numeric for regression!");
-    if (data.numInstances() == 0)
-      throw new Exception("No instances in training file!");
-    if (data.checkForStringAttributes())
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-
+    
     cleanUpData(data);
 
     getSamples();
