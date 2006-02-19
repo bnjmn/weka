@@ -22,14 +22,27 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.trees.lmt.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
-import weka.classifiers.trees.j48.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.classifiers.trees.lmt.LMTNode;
+import weka.classifiers.trees.lmt.ResidualModelSelection;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for "logistic model tree" classifier.
@@ -59,16 +72,15 @@ import weka.filters.supervised.attribute.NominalToBinary;
  *
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 
 public class LMT extends Classifier implements OptionHandler, AdditionalMeasureProducer,
 					       Drawable{
     
-  //format of serial: 1**date## (** = algorithm id, ##= version)
-  //static final long serialVersionUID = 1010506200300L;
-    
+  static final long serialVersionUID = -1113212459618104943L;
+  
   /** Filter to replace missing values*/
   protected ReplaceMissingValues m_replaceMissing;
     
@@ -107,6 +119,27 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   }    
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds the classifier.
    *
    * @exception Exception if classifier can't be built successfully
@@ -114,18 +147,13 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
     
   public void buildClassifier(Instances data) throws Exception{
 	
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Nominal class, please.");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
+    // remove instances with missing class
     Instances filteredData = new Instances(data);
     filteredData.deleteWithMissingClass();
-
-    if (filteredData.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
-
+    
     //replace missing values
     m_replaceMissing = new ReplaceMissingValues();
     m_replaceMissing.setInputFormat(filteredData);	

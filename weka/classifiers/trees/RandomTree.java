@@ -22,9 +22,23 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.*;
-import weka.core.*;
-import java.util.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.ContingencyTables;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Randomizable;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for constructing a tree that considers K random features at each node.
@@ -32,11 +46,13 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
 
+  static final long serialVersionUID = 8934314652175299374L;
+  
   /** The subtrees appended to this tree. */ 
   protected RandomTree[] m_Successors;
     
@@ -277,6 +293,27 @@ public class RandomTree extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds classifier.
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -285,29 +322,13 @@ public class RandomTree extends Classifier
     if (m_KValue > data.numAttributes()-1) m_KValue = data.numAttributes()-1;
     if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
 
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("RandomTree: Nominal class, please.");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
-    // Delete instances with missing class
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-
-    if (data.numInstances() == 0) {
-      throw new IllegalArgumentException("RandomTree: zero training instances or all " +
-					 "instances have missing class!");
-    }
-
-    if (data.numAttributes() == 1) {
-      throw new IllegalArgumentException("RandomTree: Attribute missing. Need at least " +
-					 "one attribute other than class attribute!");
-    }
-
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-
+    
     Instances train = data;
 
     // Create array of sorted indices and weights
