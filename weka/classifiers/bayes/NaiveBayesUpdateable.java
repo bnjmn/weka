@@ -46,10 +46,12 @@ import weka.classifiers.Evaluation;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
+  
+  static final long serialVersionUID = -5354015843807192221L;
  
   /**
    * Returns a string describing this classifier
