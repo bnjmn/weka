@@ -24,19 +24,27 @@ package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
 
 /**
  * Class for building and using a 0-R classifier. Predicts the mean
  * (for a numeric class) or the mode (for a nominal class).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ZeroR extends Classifier implements WeightedInstancesHandler {
 
+  static final long serialVersionUID = 48055541465867954L;
+  
   /** The class value 0R predicts. */
   private double m_ClassValue;
 
@@ -57,31 +65,62 @@ public class ZeroR extends Classifier implements WeightedInstancesHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
    * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     double sumOfWeights = 0;
 
     m_Class = instances.classAttribute();
     m_ClassValue = 0;
     switch (instances.classAttribute().type()) {
-    case Attribute.NUMERIC:
-      m_Counts = null;
-      break;
-    case Attribute.NOMINAL:
-      m_Counts = new double [instances.numClasses()];
-      for (int i = 0; i < m_Counts.length; i++) {
-	m_Counts[i] = 1;
-      }
-      sumOfWeights = instances.numClasses();
-      break;
-    default:
-      throw new Exception("ZeroR can only handle nominal and numeric class"
-			  + " attributes.");
+      case Attribute.NUMERIC:
+        m_Counts = null;
+        break;
+      case Attribute.NOMINAL:
+        m_Counts = new double [instances.numClasses()];
+        for (int i = 0; i < m_Counts.length; i++) {
+          m_Counts[i] = 1;
+        }
+        sumOfWeights = instances.numClasses();
+        break;
     }
     Enumeration enu = instances.enumerateInstances();
     while (enu.hasMoreElements()) {

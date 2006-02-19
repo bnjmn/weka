@@ -22,10 +22,25 @@
 
 package weka.classifiers.rules;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.UnsupportedClassTypeException;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * The implementation of a RIpple-DOwn Rule learner.
@@ -50,12 +65,14 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 
 public class Ridor extends Classifier
   implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
 
+  static final long serialVersionUID = -7261533075088314436L;
+  
   /** The number of folds to split data into Grow and Prune for IREP */
   private int m_Folds = 3;
     
@@ -1124,6 +1141,27 @@ public class Ridor extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds a ripple-down manner rule learner.
    *
    * @param data the training data
@@ -1131,24 +1169,16 @@ public class Ridor extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
     Instances data = new Instances(instances);
-    if (data.checkForStringAttributes())
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-	
-    if(Utils.eq(data.sumOfWeights(),0))
-      throw new Exception("No training data.");
-	
     data.deleteWithMissingClass();
-	
-    if(Utils.eq(data.sumOfWeights(),0))
-      throw new Exception("The class labels of all the training data are missing.");	
-	
+    
     int numCl = data.numClasses();
     m_Root = new Ridor_node();
     m_Class = instances.classAttribute();     // The original class label
-	
-    if(!m_Class.isNominal())
-      throw new UnsupportedClassTypeException("Only nominal class, please.");
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();

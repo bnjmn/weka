@@ -22,14 +22,24 @@
 
 package weka.classifiers.rules;
 
-import weka.classifiers.rules.part.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.part.MakeDecList;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
-import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Summarizable;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for generating a PART decision list. For more information, see<p>
@@ -66,11 +76,13 @@ import weka.classifiers.*;
  * The seed for reduced-error pruning. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PART extends Classifier implements OptionHandler,
   WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
 
+  static final long serialVersionUID = 8121455039782598361L;
+  
   /** The decision list */
   private MakeDecList m_root;
 
@@ -113,6 +125,24 @@ public class PART extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities      result;
+
+    if (m_unpruned) 
+      result = new MakeDecList(null, m_minNumObj).getCapabilities();
+    else if (m_reducedErrorPruning) 
+      result = new MakeDecList(null, m_numFolds, m_minNumObj, m_Seed).getCapabilities();
+    else
+      result = new MakeDecList(null, m_CF, m_minNumObj).getCapabilities();
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @exception Exception if classifier can't be built successfully
@@ -120,6 +150,13 @@ public class PART extends Classifier implements OptionHandler,
   public void buildClassifier(Instances instances) 
        throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     ModelSelection modSelection;	 
 
     if (m_binarySplits)

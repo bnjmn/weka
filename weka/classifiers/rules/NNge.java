@@ -25,9 +25,17 @@ package weka.classifiers.rules;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Vector;
 
 
 /**
@@ -57,10 +65,12 @@ import weka.core.*;
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NNge extends Classifier implements UpdateableClassifier, OptionHandler {
 
+  static final long serialVersionUID = 4084742275553788972L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -654,6 +664,30 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
 
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates a classifier. Must initialize all fields of the classifier
    * that are not being set via options (ie. multiple calls of buildClassifier
    * must always lead to the same result). Must not change the dataset
@@ -665,18 +699,13 @@ public class NNge extends Classifier implements UpdateableClassifier, OptionHand
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    /* check the data */
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    if (!data.attribute(data.classIndex()).isNominal()) {
-      throw new UnsupportedAttributeTypeException("Class type must be nominal!");
-    }	
-
-    // Make a copy of the instances
+    // remove instances with missing class
     data = new Instances(data);
-
+    data.deleteWithMissingClass();
+    
     /* initialize the classifier */
 
     m_Train = new Instances(data, 0);
