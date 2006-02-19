@@ -45,12 +45,14 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.Sourcable;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for boosting a classifier using the MultiBoosting method.<BR>
@@ -100,10 +102,12 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 `*/
 public class MultiBoostAB extends AdaBoostM1 {
 
+  static final long serialVersionUID = -6681619178187935148L;
+  
   /** The number of sub-committees to use */
   protected int m_NumSubCmtys = 3;
 
