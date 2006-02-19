@@ -22,11 +22,20 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.classifiers.Sourcable;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for boosting a classifier using Freund &amp; Schapire's Adaboost 
@@ -63,11 +72,13 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
 
+  static final long serialVersionUID = -7378107808933117974L;
+  
   /** Max num iterations tried to find classifier with non-zero error. */ 
   private static int MAX_NUM_RESAMPLING_ITERATIONS = 10;
   
@@ -314,6 +325,24 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    if (super.getCapabilities().handles(Capability.NOMINAL_CLASS))
+      result.enable(Capability.NOMINAL_CLASS);
+    if (super.getCapabilities().handles(Capability.BINARY_CLASS))
+      result.enable(Capability.BINARY_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Boosting method.
    *
    * @param data the training data to be used for generating the
@@ -325,14 +354,13 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     super.buildClassifier(data);
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-    if (data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("AdaBoostM1: can't handle a numeric class!");
-    }
-    if (data.numInstances() == 0) {
-      throw new Exception("No train instances without class missing!");
-    }
+    
     m_NumClasses = data.numClasses();
     if ((!m_UseResampling) && 
 	(m_Classifier instanceof WeightedInstancesHandler)) {
@@ -357,9 +385,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     Evaluation evaluation;
     int numInstances = data.numInstances();
     Random randomInstance = new Random(m_Seed);
-    double[] probabilities;
     int resamplingIterations = 0;
-    int k, l;
 
     // Initialize data
     m_Betas = new double [m_Classifiers.length];
@@ -468,7 +494,6 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     Instances trainData, training;
     double epsilon, reweight, beta = 0;
-    double oldSumOfWeights, newSumOfWeights;
     Evaluation evaluation;
     int numInstances = data.numInstances();
 
