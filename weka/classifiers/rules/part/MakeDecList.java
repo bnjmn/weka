@@ -23,18 +23,25 @@
 package weka.classifiers.rules.part;
 
 import weka.classifiers.trees.j48.ModelSelection;
-import java.util.*;
-import java.io.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-public class MakeDecList implements Serializable {
+public class MakeDecList implements Serializable, CapabilitiesHandler {
 
   /** Vector storing the rules. */
   private Vector theRules;
@@ -100,11 +107,39 @@ public class MakeDecList implements Serializable {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = new Capabilities(this);
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds dec list.
    *
    * @exception Exception if dec list can't be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
+    
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
     
     ClassifierDecList currentRule;
     double currentWeight;
@@ -112,17 +147,7 @@ public class MakeDecList implements Serializable {
       newPruneData;
     int numRules = 0;
     
-    if (data.classAttribute().isNumeric())
-      throw new UnsupportedClassTypeException("Class is numeric!");
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    
     theRules = new Vector();
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    if (data.numInstances() == 0)
-      throw new Exception("No training instances/Only instances with missing class!");
     if ((reducedErrorPruning) && !(unpruned)){ 
       Random random = new Random(m_seed);
       data.randomize(random);
