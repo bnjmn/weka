@@ -21,17 +21,36 @@
  */
 package weka.classifiers.bayes;
 
-import java.util.*;
-import weka.core.*;
-import weka.estimators.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.net.ADNode;
+import weka.classifiers.bayes.net.BIFReader;
+import weka.classifiers.bayes.net.ParentSet;
+import weka.classifiers.bayes.net.estimate.BayesNetEstimator;
+import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
+import weka.classifiers.bayes.net.estimate.SimpleEstimator;
+import weka.classifiers.bayes.net.search.SearchAlgorithm;
+import weka.classifiers.bayes.net.search.local.K2;
+import weka.classifiers.bayes.net.search.local.LocalScoreSearchAlgorithm;
+import weka.classifiers.bayes.net.search.local.Scoreable;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.estimators.Estimator;
+import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.classifiers.*;
-import weka.classifiers.bayes.net.*;
-import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
-import weka.classifiers.bayes.net.search.*;
-import weka.classifiers.bayes.net.search.local.*;
-import weka.classifiers.bayes.net.estimate.*;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Base class for a Bayes Network classifier. Provides datastructures (network structure,
@@ -44,10 +63,12 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
+    static final long serialVersionUID = 746037443258775954L;
+  
     /**
      * The parent sets.
      */
@@ -104,6 +125,29 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     BayesNetEstimator m_BayesNetEstimator = new SimpleEstimator();
 
     /**
+     * Returns default capabilities of the classifier.
+     *
+     * @return      the capabilities of this classifier
+     */
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+
+      // attributes
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capability.MISSING_VALUES);
+
+      // class
+      result.enable(Capability.NOMINAL_CLASS);
+      result.enable(Capability.MISSING_CLASS_VALUES);
+
+      // instances
+      result.setMinimumNumberInstances(0);
+      
+      return result;
+    }
+
+    /**
      * Generates the classifier.
      * 
      * @param instances set of instances serving as training data
@@ -112,11 +156,13 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      */
     public void buildClassifier(Instances instances) throws Exception {
 
-        // Check that class is nominal
-        if (!instances.classAttribute().isNominal()) {
-            throw new UnsupportedClassTypeException("BayesNet: nominal class, please.");
-        }
+      // can classifier handle the data?
+      getCapabilities().testWithFail(instances);
 
+      // remove instances with missing class
+      instances = new Instances(instances);
+      instances.deleteWithMissingClass();
+      
 		// ensure we have a data set with discrete variables only and with no missing values
 		instances = normalizeDataSet(instances);
 
@@ -161,13 +207,6 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 		Enumeration enu = instances.enumerateAttributes();		
 		while (enu.hasMoreElements()) {
 			Attribute attribute = (Attribute) enu.nextElement();
-			if (attribute.type() == Attribute.STRING) {
-				throw new UnsupportedAttributeTypeException("BayesNet does not handle string variables, only nominal and continuous.");
-			}
-			if (attribute.type() == Attribute.DATE) {
-				throw new UnsupportedAttributeTypeException("BayesNet does not handle date variables, only nominal and continuous.");
-			}
-		
 			if (attribute.type() != Attribute.NOMINAL) {
 				m_nNonDiscreteAttribute = attribute.index();
 				bHasNonNominal = true;
@@ -186,14 +225,14 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 			System.err.println("Warning: discretizing data set");
 			m_DiscretizeFilter = new Discretize();
 			m_DiscretizeFilter.setInputFormat(instances);
-			instances = m_DiscretizeFilter.useFilter(instances, m_DiscretizeFilter);
+			instances = Filter.useFilter(instances, m_DiscretizeFilter);
 		}
 
 		if (bHasMissingValues) {
 			System.err.println("Warning: filling in missing values in data set");
 			m_MissingValuesFilter = new ReplaceMissingValues();
 			m_MissingValuesFilter.setInputFormat(instances);
-			instances = m_MissingValuesFilter.useFilter(instances, m_MissingValuesFilter);
+			instances = Filter.useFilter(instances, m_MissingValuesFilter);
 		}
 		return instances;
 	} // normalizeDataSet
@@ -220,7 +259,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 					System.err.println("Warning: Found missing value in test set, filling in values.");
 					m_MissingValuesFilter = new ReplaceMissingValues();
 					m_MissingValuesFilter.setInputFormat(m_Instances);
-					m_MissingValuesFilter.useFilter(m_Instances, m_MissingValuesFilter);
+					Filter.useFilter(m_Instances, m_MissingValuesFilter);
 					m_MissingValuesFilter.input(instance);
 					instance = m_MissingValuesFilter.output();
 					iAttribute = m_Instances.numAttributes();
