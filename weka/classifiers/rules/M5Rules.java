@@ -18,10 +18,7 @@
  */
 package weka.classifiers.rules;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.trees.m5.*;
+import weka.classifiers.trees.m5.M5Base;
 
 /**
  * Generates a decision list for regression problems using 
@@ -48,10 +45,12 @@ import weka.classifiers.trees.m5.*;
  * Turns pruning off. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class M5Rules extends M5Base {
     
+  static final long serialVersionUID = -1746114858746563180L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
