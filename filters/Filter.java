@@ -35,6 +35,7 @@ import java.util.Enumeration;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.StringLocator;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Queue;
@@ -68,7 +69,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public abstract class Filter implements Serializable {
 
@@ -82,9 +83,6 @@ public abstract class Filter implements Serializable {
    *
    */
 
-  /** Debugging mode */
-  private boolean m_Debug = false;
-
   /** The output format for instances */
   private Instances m_OutputFormat = null;
 
@@ -92,10 +90,10 @@ public abstract class Filter implements Serializable {
   private Queue m_OutputQueue = null;
 
   /** Indices of string attributes in the output format */
-  private int [] m_OutputStringAtts = null;
+  protected StringLocator m_OutputStringAtts = null;
 
   /** Indices of string attributes in the input format */
-  private int [] m_InputStringAtts = null;
+  protected StringLocator m_InputStringAtts = null;
 
   /** The input format for instances */
   private Instances m_InputFormat = null;
@@ -114,9 +112,9 @@ public abstract class Filter implements Serializable {
 
     if (outputFormat != null) {
       m_OutputFormat = outputFormat.stringFreeStructure();
-      m_OutputStringAtts = getStringIndices(m_OutputFormat);
+      m_OutputStringAtts = new StringLocator(m_OutputFormat);
 
-      // Rename the attribute
+      // Rename the relation
       String relationName = outputFormat.relationName() 
         + "-" + this.getClass().getName();
       if (this instanceof OptionHandler) {
@@ -174,7 +172,8 @@ public abstract class Filter implements Serializable {
   protected void push(Instance instance) {
 
     if (instance != null) {
-      copyStringValues(instance, m_OutputFormat, m_OutputStringAtts);
+      if (instance.dataset() != null)
+	StringLocator.copyStringValues(instance, m_OutputFormat, m_OutputStringAtts);
       instance.setDataset(m_OutputFormat);
       m_OutputQueue.push(instance);
     }
@@ -199,7 +198,7 @@ public abstract class Filter implements Serializable {
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      copyStringValues(instance, m_InputFormat, m_InputStringAtts);
+      StringLocator.copyStringValues(instance, m_InputFormat, m_InputStringAtts);
       m_InputFormat.add(instance);
     }
   }
@@ -213,7 +212,7 @@ public abstract class Filter implements Serializable {
    */
   protected int [] getInputStringIndex() {
 
-    return m_InputStringAtts;
+    return m_InputStringAtts.getAttributeIndices();
   }
 
   /**
@@ -224,33 +223,8 @@ public abstract class Filter implements Serializable {
    * output dataset.
    */
   protected int [] getOutputStringIndex() {
-
-    return m_OutputStringAtts;
-  }
-
-  /**
-   * Copies string values contained in the instance copied to a new
-   * dataset. The Instance must already be assigned to a dataset. This
-   * dataset and the destination dataset must have the same structure.
-   *
-   * @param instance the Instance containing the string values to copy.
-   * @param destDataset the destination set of Instances
-   * @param strAtts an array containing the indices of any string attributes
-   * in the dataset.  
-   */
-  private void copyStringValues(Instance inst, Instances destDataset, 
-                                int []strAtts) {
-
-    if (strAtts.length == 0) {
-      return;
-    }
-    if (inst.dataset() == null) {
-      throw new IllegalArgumentException("Instance has no dataset assigned!!");
-    } else if (inst.dataset().numAttributes() != destDataset.numAttributes()) {
-      throw new IllegalArgumentException("Src and Dest differ in # of attributes!!");
-    } 
-    copyStringValues(inst, true, inst.dataset(), strAtts,
-                     destDataset, strAtts);
+    
+    return m_OutputStringAtts.getAttributeIndices();
   }
 
   /**
@@ -271,12 +245,14 @@ public abstract class Filter implements Serializable {
    * references are valid (after any position mapping if needed)
    * @param destDataset the dataset for which the current instance string
    * references need to be inserted (after any position mapping if needed)
+   * @deprecated should now be done via the weka.core.StringLocator
+   * @see weka.core.StringLocator
    */
   protected void copyStringValues(Instance instance, boolean instSrcCompat,
                                   Instances srcDataset, Instances destDataset) {
 
-    copyStringValues(instance, instSrcCompat, srcDataset, m_InputStringAtts,
-                     destDataset, m_OutputStringAtts);
+    copyStringValues(instance, instSrcCompat, srcDataset, m_InputStringAtts.getAttributeIndices(),
+                     destDataset, m_OutputStringAtts.getAttributeIndices());
   }
 
   /**
@@ -302,6 +278,8 @@ public abstract class Filter implements Serializable {
    * references need to be inserted (after any position mapping if needed)
    * @param destStrAtts an array containing the indices of string attributes
    * in the destination datset.
+   * @deprecated should now be done via the weka.core.StringLocator
+   * @see weka.core.StringLocator
    */
   protected void copyStringValues(Instance instance, boolean instSrcCompat,
                                   Instances srcDataset, int []srcStrAtts,
@@ -334,7 +312,7 @@ public abstract class Filter implements Serializable {
    */
   protected void flushInput() {
 
-    if (m_InputStringAtts.length > 0) {
+    if (m_InputStringAtts.getAttributeIndices().length > 0) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
@@ -366,7 +344,7 @@ public abstract class Filter implements Serializable {
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = instanceInfo.stringFreeStructure();
-    m_InputStringAtts = getStringIndices(instanceInfo);
+    m_InputStringAtts = new StringLocator(instanceInfo);
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
@@ -473,7 +451,7 @@ public abstract class Filter implements Serializable {
     Instance result = (Instance)m_OutputQueue.pop();
     // Clear out references to old strings occasionally
     if (m_OutputQueue.empty() && m_NewBatch) {
-      if (m_OutputStringAtts.length > 0) {
+      if (m_OutputStringAtts.getAttributeIndices().length > 0) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
     }
