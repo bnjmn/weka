@@ -22,20 +22,20 @@
 
 package weka.classifiers;
 
-import weka.classifiers.Classifier;
+import weka.core.Capabilities;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Option;
-import weka.core.Instances;
-import java.util.Vector;
+
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
   
@@ -181,5 +181,29 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
     Classifier c = getClassifier(index);
     return c.getClass().getName() + " "
       + Utils.joinOptions(((OptionHandler)c).getOptions());
+  }
+
+  /**
+   * Returns combined capabilities of the base classifiers, i.e., the
+   * capabilities all of them have in common.
+   *
+   * @return      the capabilities of the base classifiers
+   */
+  public Capabilities getCapabilities() {
+    Capabilities      result;
+    int               i;
+    
+    if (getClassifiers().length == 0) {
+      result = new Capabilities(this);
+    }
+    else {
+      result = (Capabilities) getClassifier(0).getCapabilities().clone();
+      for (i = 1; i < getClassifiers().length; i++)
+        result.and(getClassifier(i).getCapabilities());
+    }
+
+    result.setOwner(this);
+
+    return result;
   }
 }
