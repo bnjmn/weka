@@ -38,7 +38,7 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see StringCompare
  */
 public class ClassDiscovery {
@@ -395,23 +395,33 @@ public class ClassDiscovery {
    * For testing only. Takes two arguments:
    * <ol>
    *    <li>classname</li>
-   *    <li>packagename</li>
+   *    <li>packagename(s) [comma-separated list]</li>
    * </ol>
    * Prints the classes it found.
    */
   public static void main(String[] args) {
-    Vector      list;
-    int         i;
+    Vector      	list;
+    Vector 		packages;
+    int         	i;
+    StringTokenizer	tok;
     
     if (args.length != 2) {
       System.out.println(
           "\nUsage: " + ClassDiscovery.class.getName() 
-          + " <classname> <packagename>\n");
+          + " <classname> <packagename(s)>\n");
       System.exit(1);
     }
 
+    // packages
+    packages = new Vector();
+    tok = new StringTokenizer(args[1], ",");
+    while (tok.hasMoreTokens())
+      packages.add(tok.nextToken());
+    
     // search
-    list = ClassDiscovery.find(args[0], args[1]);
+    list = ClassDiscovery.find(
+		args[0], 
+		(String[]) packages.toArray(new String[packages.size()]));
 
     // print result, if any
     System.out.println(
