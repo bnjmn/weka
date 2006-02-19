@@ -23,16 +23,18 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
+import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.filters.unsupervised.attribute.Remove;
+
+import java.util.Random;
 
 /**
  * Implements StackingC (more efficient version of stacking). For more information, see<p>
@@ -62,9 +64,11 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class StackingC extends Stacking implements OptionHandler {
+  
+  static final long serialVersionUID = -6717545616603725198L;
   
   /** The meta classifiers (one for each class, like in ClassificationViaRegression) */
   protected Classifier [] m_MetaClassifiers = null;
