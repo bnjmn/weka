@@ -43,9 +43,16 @@ package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Statistics;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Lazy Bayesian Rules implement a lazy learning approach to lessening the
@@ -63,10 +70,12 @@ import weka.core.*;
  * Zijian Zheng &amp; G. Webb, (2000). <i>Lazy Learning of Bayesian Rules.</i> Machine Learning, 41(1): 53-84.<BR>
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LBR extends Classifier {
 
+  static final long serialVersionUID = 5648559277738985156L;
+  
   /**
    * Class for handling instances and the associated attributes. <p>
    * Enables a set of indexes to a given dataset to be created and used
@@ -621,6 +630,28 @@ public class LBR extends Classifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+
+    return result;
+  }
+
+  /**
    * For lazy learning, building classifier is only to prepare their inputs
    * until classification time.
    *
@@ -634,27 +665,15 @@ public class LBR extends Classifier {
     forCnt = 0;
     whileCnt = 0;
     
-    if (instances.classAttribute().isNumeric()) {
-      throw new Exception("LBR: Class is numeric!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
     
-    // LBR requires nominal attibutes
-    if (instances.checkForStringAttributes())
-      throw new Exception("Can't handle string attributes!");
-
     m_numAtts = instances.numAttributes();
-    for (attIndex = 0; attIndex < m_numAtts; attIndex++) {
-      Attribute attribute = (Attribute) instances.attribute(attIndex);
-      if (attribute.isNumeric()) {
-        throw new Exception("Can't handle numeric attributes!  Discretize the dataset prior to using Lazy Bayesian Rules or use the Filtered Classifier");
-      }
-    }
-
     m_numClasses = instances.numClasses();
-    if (m_numClasses < 0) {
-      throw new Exception ("Dataset has no class attribute");
-    }
-
     m_numInsts = instances.numInstances();
 
     // Reserve space
@@ -720,21 +739,16 @@ public class LBR extends Classifier {
   public double[] distributionForInstance(Instance testInstance)
   throws Exception {
     
-    int AIndex, attIndex;
     int inst;
     int subAttrIndex = 0;
     int subInstIndex = 0;
     int tempInstIndex = 0;
-    int tempAttrIndex = 0;
     int attributeBest;
-    Instance instance;
     int subLocalErrors = 0;
-    Instance tempInstance;
     int tempErrorsBest = 0;
     boolean [] tempErrorFlagBest = null;
     int [] tempD_subsetBestInsts = null;
     int [] tempD_subsetBestAtts = null;
-    Indexes tempD_subsetBest = null;
     Indexes subInstances = new Indexes(m_numInsts, m_numAtts, true, m_Instances.classIndex());
     
     boolean [] subLocalErrorFlags = new  boolean [(int)subInstances.getNumInstances()+1];
@@ -937,7 +951,6 @@ public class LBR extends Classifier {
     int inst;
     int errors = 0;
     int instIndex;
-    Instance instance;
     
     instanceIndex.setSequentialDataset(true);
     int tempInstanceClassValue;
@@ -985,7 +998,7 @@ public class LBR extends Classifier {
       if (max > 0) {
         tempClassValue = maxIndex;
       } else {
-        tempClassValue = (int)tempInstance.missingValue();
+        tempClassValue = (int)Instance.missingValue();
       }
       // ###### END LOCAL CLASSIFY INSTANCE ###########
       
@@ -1026,7 +1039,7 @@ public class LBR extends Classifier {
    */
   public void localNaiveBayes(Indexes instanceIndex) throws Exception {
     int attIndex = 0;
-    int i, v, AIndex;
+    int i, AIndex;
     int attVal = 0;
     int classVal = 0;
     Instance instance;
