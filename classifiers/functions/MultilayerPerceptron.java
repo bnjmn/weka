@@ -21,16 +21,51 @@
 
 package weka.classifiers.functions;
 
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-
-import weka.classifiers.functions.neural.*;
-import weka.classifiers.*;
-import weka.core.*;
-import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.neural.LinearUnit;
+import weka.classifiers.functions.neural.NeuralConnection;
+import weka.classifiers.functions.neural.NeuralNode;
+import weka.classifiers.functions.neural.SigmoidUnit;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 
 /** 
  * A Classifier that uses backpropagation to classify instances.
@@ -41,10 +76,12 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MultilayerPerceptron extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
+  
+  static final long serialVersionUID = 572250905027665169L;
   
   /**
    * Main method for testing this class.
@@ -328,20 +365,19 @@ public class MultilayerPerceptron extends Classifier
 	    if (!m_stopped) {
 	      return;
 	    }
-	    if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK && 
+	    if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK && 
 		!e.isAltDown()) {
 	      Graphics g = NodePanel.this.getGraphics();
 	      int x = e.getX();
 	      int y = e.getY();
 	      int w = NodePanel.this.getWidth();
 	      int h = NodePanel.this.getHeight();
-	      int u = 0;
 	      FastVector tmp = new FastVector(4);
 	      for (int noa = 0; noa < m_numAttributes; noa++) {
 		if (m_inputs[noa].onUnit(g, x, y, w, h)) {
 		  tmp.addElement(m_inputs[noa]);
 		  selection(tmp, 
-			    (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+			    (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			    , true);
 		  return;
 		}
@@ -350,7 +386,7 @@ public class MultilayerPerceptron extends Classifier
 		if (m_outputs[noa].onUnit(g, x, y, w, h)) {
 		  tmp.addElement(m_outputs[noa]);
 		  selection(tmp,
-			    (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+			    (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			    , true);
 		  return;
 		}
@@ -359,7 +395,7 @@ public class MultilayerPerceptron extends Classifier
 		if (m_neuralNodes[noa].onUnit(g, x, y, w, h)) {
 		  tmp.addElement(m_neuralNodes[noa]);
 		  selection(tmp,
-			    (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+			    (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			    , true);
 		  return;
 		}
@@ -372,7 +408,7 @@ public class MultilayerPerceptron extends Classifier
 	      temp.setY((double)e.getY() / h);
 	      tmp.addElement(temp);
 	      addNode(temp);
-	      selection(tmp, (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+	      selection(tmp, (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			, true);
 	    }
 	    else {
@@ -382,13 +418,12 @@ public class MultilayerPerceptron extends Classifier
 	      int y = e.getY();
 	      int w = NodePanel.this.getWidth();
 	      int h = NodePanel.this.getHeight();
-	      int u = 0;
 	      FastVector tmp = new FastVector(4);
 	      for (int noa = 0; noa < m_numAttributes; noa++) {
 		if (m_inputs[noa].onUnit(g, x, y, w, h)) {
 		  tmp.addElement(m_inputs[noa]);
 		  selection(tmp, 
-			    (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+			    (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			    , false);
 		  return;
 		}
@@ -399,7 +434,7 @@ public class MultilayerPerceptron extends Classifier
 		if (m_outputs[noa].onUnit(g, x, y, w, h)) {
 		  tmp.addElement(m_outputs[noa]);
 		  selection(tmp,
-			    (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+			    (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			    , false);
 		  return;
 		}
@@ -408,12 +443,12 @@ public class MultilayerPerceptron extends Classifier
 		if (m_neuralNodes[noa].onUnit(g, x, y, w, h)) {
 		  tmp.addElement(m_neuralNodes[noa]);
 		  selection(tmp,
-			    (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+			    (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			    , false);
 		  return;
 		}
 	      }
-	      selection(null, (e.getModifiers() & e.CTRL_MASK) == e.CTRL_MASK
+	      selection(null, (e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK
 			, false);
 	    }
 	  }
@@ -555,7 +590,7 @@ public class MultilayerPerceptron extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   class ControlPanel extends JPanel {
     
@@ -1561,6 +1596,29 @@ public class MultilayerPerceptron extends Classifier
       }
     }
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
   
   /**
    * Call this function to build and train a neural network for the training
@@ -1570,13 +1628,13 @@ public class MultilayerPerceptron extends Classifier
    */
   public void buildClassifier(Instances i) throws Exception {
 
-    if (i.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(i);
 
-    if (i.numInstances() == 0) {
-      throw new IllegalArgumentException("No training instances.");
-    }
+    // remove instances with missing class
+    i = new Instances(i);
+    i.deleteWithMissingClass();
+    
     m_epoch = 0;
     m_error = 0;
     m_instances = null;
@@ -1598,11 +1656,6 @@ public class MultilayerPerceptron extends Classifier
     m_stopped = true;
     m_accepted = false;    
     m_instances = new Instances(i);
-    m_instances.deleteWithMissingClass();
-    if (m_instances.numInstances() == 0) {
-      m_instances = null;
-      throw new IllegalArgumentException("All class values missing.");
-    }
     m_random = new Random(m_randomSeed);
     m_instances.randomize(m_random);
 
