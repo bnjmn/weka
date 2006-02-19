@@ -22,14 +22,18 @@
 
 package weka.classifiers.trees.lmt;
 
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
-import weka.classifiers.trees.j48.*;
+import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SimpleLinearRegression;
+import weka.classifiers.trees.j48.ClassifierSplitModel;
+import weka.classifiers.trees.j48.ModelSelection;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Vector;
 
 /** Auxiliary class for list of LMTNodes*/
 class CompareNode implements Comparator{    
@@ -45,10 +49,12 @@ class CompareNode implements Comparator{
  * 
  * 
  * @author Niels Landwehr 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
-public class LMTNode extends LogisticBase {    
+public class LMTNode extends LogisticBase {   
+  
+    static final long serialVersionUID = 1862737145870398755L;
     
     /** Total number of training instances. */
     protected double m_totalInstanceWeight;

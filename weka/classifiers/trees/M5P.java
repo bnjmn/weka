@@ -18,10 +18,14 @@
  */
 package weka.classifiers.trees;
 
-import weka.classifiers.trees.m5.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.trees.m5.M5Base;
+import weka.classifiers.trees.m5.Rule;
+import weka.core.Drawable;
+import weka.core.Option;
+import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * M5P. Implements routines for generating M5 model trees.<p/>
@@ -46,12 +50,14 @@ import weka.core.*;
  * Use unsmoothed predictions. <p>
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class M5P extends M5Base 
   implements Drawable {
 
+  static final long serialVersionUID = -6118439039768244417L;
+  
   /**
    * Creates a new <code>M5P</code> instance.
    */

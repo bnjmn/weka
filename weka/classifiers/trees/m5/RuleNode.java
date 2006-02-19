@@ -18,22 +18,26 @@
  */
 package weka.classifiers.trees.m5;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
-import weka.filters.unsupervised.attribute.Remove;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 /**
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class RuleNode extends Classifier {
 
+  static final long serialVersionUID = 1979807611124337144L;
+  
   /**
    * instances reaching this node
    */

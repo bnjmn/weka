@@ -22,10 +22,14 @@
 
 package weka.classifiers.trees.lmt;
 
-import weka.core.*;
-import weka.classifiers.*;
-import weka.classifiers.functions.*;
-import weka.filters.Filter;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.functions.SimpleLinearRegression;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 
 /**
  * Base/helper class for building logistic regression models with the LogitBoost algorithm.
@@ -33,11 +37,13 @@ import weka.filters.Filter;
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
  * @author Niels Landwehr
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class LogisticBase extends Classifier implements WeightedInstancesHandler{
 
+    static final long serialVersionUID = 168765678097825064L;
+  
     /** Header-only version of the numeric version of the training data*/
     protected Instances m_numericDataHeader;
     /** 
