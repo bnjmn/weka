@@ -24,6 +24,8 @@ package  weka.clusterers;
 
 import  java.util.*;
 import  java.io.*;
+
+import weka.classifiers.Evaluation;
 import  weka.core.*;
 import  weka.filters.Filter;
 import  weka.filters.unsupervised.attribute.Remove;
@@ -61,10 +63,12 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.27 $
+ * @version  $Revision: 1.28 $
  */
 public class ClusterEvaluation implements Serializable {
 
+  static final long serialVersionUID = -830188327319128005L;
+  
   /** the instances to cluster */
   private Instances m_trainInstances;
   
@@ -1031,6 +1035,49 @@ public class ClusterEvaluation implements Serializable {
     return  optionsText.toString();
   }
 
+  /**
+   * Tests whether the current evaluation object is equal to another
+   * evaluation object
+   *
+   * @param obj the object to compare against
+   * @return true if the two objects are equal
+   */
+  public boolean equals(Object obj) {
+    if ((obj == null) || !(obj.getClass().equals(this.getClass())))
+      return false;
+    
+    ClusterEvaluation cmp = (ClusterEvaluation) obj;
+    
+    if ((m_classToCluster != null) != (cmp.m_classToCluster != null)) return false;
+    if (m_classToCluster != null) {
+      for (int i = 0; i < m_classToCluster.length; i++) {
+        if (m_classToCluster[i] != cmp.m_classToCluster[i])
+  	return false;
+      }
+    }
+    
+    if ((m_clusterAssignments != null) != (cmp.m_clusterAssignments != null)) return false;
+    if (m_clusterAssignments != null) {
+      for (int i = 0; i < m_clusterAssignments.length; i++) {
+        if (m_clusterAssignments[i] != cmp.m_clusterAssignments[i])
+  	return false;
+      }
+    }
+
+    if (Double.isNaN(m_logL) != Double.isNaN(cmp.m_logL)) return false;
+    if (!Double.isNaN(m_logL)) {
+      if (m_logL != cmp.m_logL) return false;
+    }
+    
+    if (m_numClusters != cmp.m_numClusters) return false;
+    
+    // TODO: better comparison? via members?
+    String clusteringResults1 = m_clusteringResults.toString().replaceAll("Elapsed time.*", "");
+    String clusteringResults2 = cmp.m_clusteringResults.toString().replaceAll("Elapsed time.*", "");
+    if (!clusteringResults1.equals(clusteringResults2)) return false;
+    
+    return true;
+  }
 
   /**
    * Main method for testing this class.
