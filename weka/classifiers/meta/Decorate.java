@@ -21,10 +21,20 @@
  */
 
 package weka.classifiers.meta;
-import weka.classifiers.*;
-import java.util.*;
-import weka.core.*;
-import weka.experiment.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.UnsupportedClassTypeException;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * DECORATE is a meta-learner for building diverse ensembles of
@@ -68,9 +78,11 @@ import weka.experiment.*;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 public class Decorate extends RandomizableIteratedSingleClassifierEnhancer {
       
+    static final long serialVersionUID = -6020193348750269931L;
+  
     /** Vector of classifiers that make up the committee/ensemble. */
     protected Vector m_Committee = null;
     
@@ -289,24 +301,41 @@ public class Decorate extends RandomizableIteratedSingleClassifierEnhancer {
     }
 
     /**
+     * Returns default capabilities of the classifier.
+     *
+     * @return      the capabilities of this classifier
+     */
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+
+      // class
+      result.disableAllClasses();
+      result.enable(Capability.NOMINAL_CLASS);
+
+      // instances
+      result.setMinimumNumberInstances(m_DesiredSize);
+
+      return result;
+    }
+
+    /**
      * Build Decorate classifier
      *
      * @param data the training data to be used for generating the classifier
      * @exception Exception if the classifier could not be built successfully
      */
     public void buildClassifier(Instances data) throws Exception {
-	if(m_Classifier == null) {
-	    throw new Exception("A base classifier has not been specified!");
-	}
-	if(data.checkForStringAttributes()) {
-	    throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-	}
-	if(data.classAttribute().isNumeric()) {
-	    throw new UnsupportedClassTypeException("Decorate can't handle a numeric class!");
-	}
-	if(m_NumIterations < m_DesiredSize)
-	    throw new Exception("Max number of iterations must be >= desired ensemble size!");
-	
+      if(m_Classifier == null) {
+        throw new Exception("A base classifier has not been specified!");
+      }
+      
+      // can classifier handle the data?
+      getCapabilities().testWithFail(data);
+      
+      // remove instances with missing class
+      data = new Instances(data);
+      data.deleteWithMissingClass();
+  
 	//initialize random number generator
 	if(m_Seed==-1) m_Random = new Random();
 	else m_Random = new Random(m_Seed);
@@ -314,7 +343,6 @@ public class Decorate extends RandomizableIteratedSingleClassifierEnhancer {
 	int i = 1;//current committee size
 	int numTrials = 1;//number of Decorate iterations 
 	Instances divData = new Instances(data);//local copy of data - diversity data
-	divData.deleteWithMissingClass();
 	Instances artData = null;//artificial data
 
 	//compute number of artficial instances to add at each iteration

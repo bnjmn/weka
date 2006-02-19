@@ -24,27 +24,29 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.rules.ZeroR;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.AttributeStats;
+import weka.core.Capabilities;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
-import weka.core.FastVector;
-import weka.core.Range;
-import weka.core.UnsupportedClassTypeException;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
-import weka.filters.Filter;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for handling multi-class datasets with 2-class distribution
@@ -69,11 +71,13 @@ import weka.filters.Filter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler {
 
+  static final long serialVersionUID = -3879602011542849141L;
+  
   /** The classifiers. */
   private Classifier [] m_Classifiers;
 
@@ -262,7 +266,20 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
     }
   }
 
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
 
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
 
   /**
    * Builds the classifiers.
@@ -274,11 +291,13 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
 
     Instances newInsts;
 
-    // Check for non-nominal classes
-    if (!insts.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("MultiClassClassifier: class should " +
-					      "be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
+
+    // remove instances with missing class
+    insts = new Instances(insts);
+    insts.deleteWithMissingClass();
+    
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
     }

@@ -26,15 +26,8 @@ import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.rules.ZeroR;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import weka.core.Capabilities;
+import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -43,9 +36,16 @@ import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Drawable;
-import weka.core.UnsupportedClassTypeException;
-import weka.filters.Filter;
+import weka.core.Capabilities.Capability;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * This metaclassifier makes its base classifier cost-sensitive. Two methods
@@ -82,11 +82,13 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhancer
   implements OptionHandler, Drawable {
 
+  static final long serialVersionUID = -720658209263002404L;
+  
   /* Specify possible sources of the cost matrix */
   public static final int MATRIX_ON_DEMAND = 1;
   public static final int MATRIX_SUPPLIED = 2;
@@ -448,7 +450,21 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
     m_CostMatrix = newCostMatrix;
     m_MatrixSource = MATRIX_SUPPLIED;
   }
-  
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
 
   /**
    * Builds the model of the base learner.
@@ -458,11 +474,15 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
    */
   public void buildClassifier(Instances data) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
-    }
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Class attribute must be nominal!");
     }
     if (m_MatrixSource == MATRIX_ON_DEMAND) {
       String costName = data.relationName() + CostMatrix.FILE_EXTENSION;

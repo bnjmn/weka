@@ -22,11 +22,24 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Summarizable;
+import weka.core.Utils;
+
+import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for performing parameter selection by cross-validation for any
@@ -63,12 +76,14 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.31 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
 
-  /*
+  static final long serialVersionUID = -6529603380876641265L;
+  
+  /**
    * A data structure to hold values associated with a single
    * cross-validation search parameter
    */
@@ -437,6 +452,19 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    result.setMinimumNumberInstances(m_NumFolds);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -444,16 +472,13 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
     Instances trainData = new Instances(instances);
     trainData.deleteWithMissingClass();
-    if (trainData.numInstances() == 0) {
-      throw new IllegalArgumentException("No training instances without " +
-					 "missing class.");
-    }
-    if (trainData.numInstances() < m_NumFolds) {
-      throw new IllegalArgumentException("Number of training instances " +
-					 "smaller than number of folds.");
-    }
+    
     if (!(m_Classifier instanceof OptionHandler)) {
       throw new IllegalArgumentException("Base classifier should be OptionHandler.");
     }

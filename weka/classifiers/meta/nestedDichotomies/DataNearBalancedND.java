@@ -21,29 +21,22 @@
  */
 package weka.classifiers.meta.nestedDichotomies;
 
-import weka.core.Range;
-import weka.core.Instances;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
+import weka.classifiers.meta.FilteredClassifier;
+import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Range;
 import weka.core.Utils;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.Randomizable;
-import weka.core.UnsupportedClassTypeException;
-
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.Evaluation;
-import weka.classifiers.meta.FilteredClassifier;
-
-import java.util.Random;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.*;
 import java.util.Hashtable;
+import java.util.Random;
 
 
 /**
@@ -66,6 +59,8 @@ import java.util.Hashtable;
  */
 public class DataNearBalancedND extends RandomizableSingleClassifierEnhancer {
 
+  static final long serialVersionUID = 5117477294209496368L;
+  
   /** The filtered classifier in which the base classifier is wrapped. */
   protected FilteredClassifier m_FilteredClassifier;
     
@@ -255,6 +250,25 @@ public class DataNearBalancedND extends RandomizableSingleClassifierEnhancer {
                                                   instsNumAllClasses);
     }
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(1);
+    
+    return result;
+  }
     
   /**
    * Builds tree recursively.
@@ -263,17 +277,12 @@ public class DataNearBalancedND extends RandomizableSingleClassifierEnhancer {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("DataNearBalancedND: class must " +
-					      "be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
+    // remove instances with missing class
+    data = new Instances(data);
     data.deleteWithMissingClass();
-
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
     
     Random random = data.getRandomNumberGenerator(m_Seed);
 	
