@@ -39,7 +39,7 @@ import weka.estimators.*;
  * for details on XML BIF.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 
@@ -47,6 +47,8 @@ public class BIFReader extends BayesNet {
     private int [] m_nPositionX;
     private int [] m_nPositionY;
     private int [] m_order;
+    
+    static final long serialVersionUID = -8358864680379881429L;
 
 	/** processFile reads a BIFXML file and initializes a Bayes Net
 	 * @param sFile: name of the file to parse
