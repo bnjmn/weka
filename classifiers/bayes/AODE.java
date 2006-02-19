@@ -23,12 +23,20 @@
 
 package weka.classifiers.bayes;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * AODE achieves highly accurate classification by averaging over all
@@ -62,11 +70,13 @@ import weka.classifiers.UpdateableClassifier;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class AODE extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier {
     
+  static final long serialVersionUID = 9197439980415113523L;
+  
   /**
    * 3D array (m_NumClasses * m_TotalAttValues * m_TotalAttValues)
    * of attribute counts, i.e., the number of times an attribute value occurs
@@ -156,6 +166,28 @@ public class AODE extends Classifier
       +"Further papers are available at\n"
       +"  http://www.csse.monash.edu.au/~webb/.";
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
  
   /**
    * Generates the classifier.
@@ -166,33 +198,19 @@ public class AODE extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    m_Instances = new Instances(instances);
+    m_Instances.deleteWithMissingClass();
+
     // reset variable for this fold
     m_SumInstances = 0;
-    
-    m_NumClasses = instances.numClasses();
-    if(instances.classAttribute().isNumeric()) {
-       throw new Exception("AODE: Class is numeric!");
-    }
-    if(m_NumClasses < 2) {
-       throw new Exception ("Dataset has no class attribute");
-    }
-    if(instances.checkForStringAttributes()) {
-       throw new Exception("AODE: String attributes are not allowed.");
-    }
-
     m_ClassIndex = instances.classIndex();
-    m_NumAttributes = instances.numAttributes();
-    for(int att = 0; att < m_NumAttributes; att++) {
-       Attribute attribute = (Attribute)instances.attribute(att);
-       if(!attribute.isNominal()) {
-          throw new Exception("Attributes must be nominal.  " +
-                              "Discretize dataset with FilteredClassifer.");
-       }
-    }
-
-    // copy the instances
-    m_Instances = instances;
     m_NumInstances = m_Instances.numInstances();
+    m_NumAttributes = m_Instances.numAttributes();
+    m_NumClasses = m_Instances.numClasses();
  
     // allocate space for attribute reference arrays
     m_StartAttIndex = new int[m_NumAttributes];
@@ -429,7 +447,6 @@ public class AODE extends Classifier
   public double NBconditionalProb(Instance instance, int classVal) {
     
     double prob;
-    int attIndex;
     double [][] pointer;
 
     // calculate the prior probability
