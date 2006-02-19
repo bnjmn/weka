@@ -24,9 +24,14 @@ package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
 
 /**
  * Class for building and using a PRISM rule set for classifcation.  
@@ -38,10 +43,12 @@ import weka.core.*;
  * Studies. Vol.27, No.4, pp.349-370.<p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
 */
 public class Prism extends Classifier {
 
+  static final long serialVersionUID = 1310258880025902106L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -259,6 +266,24 @@ public class Prism extends Classifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param data the data to be used
@@ -267,36 +292,19 @@ public class Prism extends Classifier {
   public void buildClassifier(Instances data) throws Exception {
 
     int cl; // possible value of theClass
-    Instances E, ruleE, emptyDataset;
+    Instances E, ruleE;
     PrismRule rule = null;
     Test test = null, oldTest = null;
     int bestCorrect, bestCovers, attUsed;
+    Enumeration enumAtt;
 
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    if (data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Prism can't handle a numeric class!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     data = new Instances(data);
-    Enumeration enumAtt = data.enumerateAttributes();
-    while (enumAtt.hasMoreElements()) {
-      Attribute attr = (Attribute) enumAtt.nextElement();
-      if (!attr.isNominal()) {
-	throw new UnsupportedAttributeTypeException("Prism can only deal with nominal attributes!");
-      }
-      Enumeration enu = data.enumerateInstances();
-      while (enu.hasMoreElements()) {
-	if (((Instance) enu.nextElement()).isMissing(attr)) {
-	  throw new NoSupportForMissingValuesException("Prism can't handle attributes with missing values!");
-	}
-      }
-    }
-    data.deleteWithMissingClass(); // delete all instances with a missing class
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances with a class value!");
-    }
-
+    data.deleteWithMissingClass();
+    
     for (cl = 0; cl < data.numClasses(); cl++) { // for each class cl
       E = data; // initialize E to the instance set
       while (contains(E, cl)) { // while E contains examples in class cl
