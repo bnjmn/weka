@@ -22,16 +22,17 @@ package weka.classifiers.bayes;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
+import weka.classifiers.CheckClassifier.PostProcessor;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
  * Tests ComplementNaiveBayes. Run from the command line with:<p/>
- * java weka.classifiers.bayes.ComplementNaiveBayes
+ * java weka.classifiers.bayes.ComplementNaiveBayesTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ComplementNaiveBayesTest 
   extends AbstractClassifierTest {
@@ -43,6 +44,16 @@ public class ComplementNaiveBayesTest
   /** Creates a default ComplementNaiveBayes */
   public Classifier getClassifier() {
     return new ComplementNaiveBayes();
+  }
+
+  /**
+   * returns a custom PostProcessor for the CheckClassifier datasets..
+   * 
+   * @return		a custom PostProcessor
+   * @see AbsPostProcessor
+   */
+  protected PostProcessor getPostProcessor() {
+    return new AbsPostProcessor();
   }
 
   public static Test suite() {
