@@ -34,7 +34,7 @@ import java.io.Serializable;
  * of floating-point values.
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AlgVector implements Cloneable, Serializable {
 
@@ -83,6 +83,9 @@ public class AlgVector implements Cloneable, Serializable {
     if (len > 0) {
       m_Elements = new double[len];
       initialize(random);
+    }
+    else {
+      m_Elements = new double[len];
     }
   }
 
