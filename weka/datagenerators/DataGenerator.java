@@ -65,7 +65,7 @@ import java.util.Vector;
  *  <p/>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable {
@@ -520,7 +520,8 @@ public abstract class DataGenerator
    * @param newSeed the new random number seed.
    */
   public void setSeed(int newSeed) { 
-    m_Seed = newSeed; 
+    m_Seed   = newSeed; 
+    m_Random = new Random(newSeed);
   }
   
   /**
