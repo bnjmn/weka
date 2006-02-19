@@ -22,20 +22,16 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.trees.RandomTree;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Random;
-
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.Option;
-import weka.core.Utils;
 import weka.core.Randomizable;
-import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Random;
 
 /**
  * Class for creating a committee of random classifiers. The base
@@ -57,11 +53,13 @@ import weka.core.UnsupportedAttributeTypeException;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler {
     
+  static final long serialVersionUID = -9204394360557300092L;
+  
   /**
    * Constructor.
    */
@@ -100,11 +98,13 @@ public class RandomCommittee extends RandomizableIteratedSingleClassifierEnhance
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (data.numInstances() == 0) {
-      throw new IllegalArgumentException("RandomTree: zero training instances or all " +
-					 "instances have missing class!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     if (!(m_Classifier instanceof Randomizable)) {
       throw new IllegalArgumentException("Base learner must implement Randomizable!");
     }
