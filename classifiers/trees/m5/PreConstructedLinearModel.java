@@ -18,9 +18,12 @@
  */
 package weka.classifiers.trees.m5;
 
-import java.io.Serializable;
-import weka.core.*;
 import weka.classifiers.Classifier;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.io.Serializable;
 
 /**
  * This class encapsulates a linear regression function. It is a classifier
@@ -30,9 +33,11 @@ import weka.classifiers.Classifier;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PreConstructedLinearModel extends Classifier implements Serializable {
+  
+  static final long serialVersionUID = 2030974097051713247L;
   
   // The coefficients
   private double [] m_coefficients;
