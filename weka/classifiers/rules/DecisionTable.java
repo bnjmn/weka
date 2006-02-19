@@ -25,12 +25,25 @@ package weka.classifiers.rules;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
-import weka.classifiers.lazy.IB1;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+
+import java.io.Serializable;
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for building and using a simple decision table majority classifier.
@@ -57,11 +70,13 @@ import weka.filters.unsupervised.attribute.Remove;
  * Prints the decision table. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.31 $ 
  */
 public class DecisionTable extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, 
 	     AdditionalMeasureProducer {
+  
+  static final long serialVersionUID = 2788557078165701326L;
   
   /** The hashtable used to hold training instances */
   private Hashtable m_entries;
@@ -255,9 +270,6 @@ public class DecisionTable extends Classifier
     
     /** True for an index if the corresponding attribute value is missing. */
     private boolean [] missing;
-
-    /** The values */
-    private String [] values;
 
     /** The key */
     private int key;
@@ -643,10 +655,8 @@ public class DecisionTable extends Classifier
     throws Exception {
 
     int i;
-    Instances newInstances;
     int [] fs = new int [num_atts];
     double acc = 0.0;
-    double [][] evalArray;
     double [] instA = new double [num_atts];
     int classI = m_theInstances.classIndex();
     
@@ -728,8 +738,6 @@ public class DecisionTable extends Classifier
    */
   private String printSub(BitSet sub) {
 
-    int i;
-
     String s="";
     for (int jj=0;jj<m_numAttributes;jj++) {
       if (sub.get(jj)) {
@@ -744,8 +752,7 @@ public class DecisionTable extends Classifier
    */
   private void best_first() throws Exception {
 
-    int i,j,classI,count=0,fc,tree_count=0;
-    int evals=0;
+    int i,j,classI,count=0,fc;
     BitSet best_group, temp_group;
     int [] stale;
     double [] best_merit;
@@ -1103,6 +1110,29 @@ public class DecisionTable extends Classifier
     }
     return options;
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
   
   /**
    * Generates the classifier.
@@ -1112,17 +1142,14 @@ public class DecisionTable extends Classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    int i;
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
-    m_rr = new Random(1);
+    // remove instances with missing class
     m_theInstances = new Instances(data);
     m_theInstances.deleteWithMissingClass();
-    if (m_theInstances.numInstances() == 0) {
-      throw new Exception("No training instances without missing class!");
-    }
-    if (m_theInstances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
+    
+    m_rr = new Random(1);
 
     if (m_theInstances.classAttribute().isNumeric()) {
       m_disTransform = new weka.filters.unsupervised.attribute.Discretize();
@@ -1172,7 +1199,7 @@ public class DecisionTable extends Classifier
     m_entries = new Hashtable((int)(m_theInstances.numInstances() * 1.5));
     
     // insert instances into the hash table
-    for (i=0;i<m_numInstances;i++) {
+    for (int i = 0; i < m_numInstances; i++) {
       Instance inst = m_theInstances.instance(i);
       insertIntoTable(inst, null);
     }

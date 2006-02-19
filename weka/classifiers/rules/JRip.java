@@ -21,30 +21,27 @@
 
 package weka.classifiers.rules;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Copyable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.ClassOrder;
+
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
-import java.io.Serializable;
-
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.Copyable;
-import weka.core.WeightedInstancesHandler;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.UnsupportedClassTypeException;
-
-import weka.filters.supervised.attribute.ClassOrder;
-import weka.filters.Filter;
-
-import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
 
 /**
  * This class implements a propositional rule learner, Repeated Incremental
@@ -134,13 +131,15 @@ import weka.classifiers.Classifier;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class JRip extends Classifier 
   implements OptionHandler, 
 	     AdditionalMeasureProducer, 
 	     WeightedInstancesHandler{    
 
+  static final long serialVersionUID = -6589312996832147161L;
+  
   /** The limit of description length surplus in ruleset generation */
   private static double MAX_DL_SURPLUS = 64.0;
     
@@ -1107,7 +1106,6 @@ public class JRip extends Classifier
       double tn = 0.0; // True negative if useWhole
       for(int x=0; x<size; x++){
 	Antd antd=(Antd)m_Antds.elementAt(x);
-	Attribute attr= antd.getAttr();
 	Instances newData = data;
 	data = new Instances(newData, 0); // Make data empty
 		
@@ -1174,6 +1172,30 @@ public class JRip extends Classifier
       return text.toString();
     }
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+   
+    // instances
+    result.setMinimumNumberInstances(m_Folds);
+    
+    return result;
+  }
     
   /**
    * Builds Ripper in the order of class frequencies.  For each class
@@ -1184,14 +1206,12 @@ public class JRip extends Classifier
    */
   public void buildClassifier(Instances instances) throws Exception {
      
-    if(instances.numInstances() == 0)
-      throw new Exception(" No instances with a class value!");
-    
-    if (instances.checkForStringAttributes()) 
-      throw new UnsupportedAttributeTypeException(" Cannot handle string attributes!");
-    
-    if (!instances.classAttribute().isNominal()) 
-      throw new UnsupportedClassTypeException(" Only nominal class, please.");
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
     
     m_Random = instances.getRandomNumberGenerator(m_Seed); 
     m_Total = RuleStats.numAllConditions(instances);
@@ -1207,13 +1227,6 @@ public class JRip extends Classifier
 	
     if(data == null)
       throw new Exception(" Unable to randomize the class orders.");
-	
-    data.deleteWithMissingClass();
-    if(data.numInstances() == 0)
-      throw new Exception(" No instances with a class value!");
-    
-    if(data.numInstances() < m_Folds)
-	throw new Exception(" Not enough data for REP.");
     
     m_Class = data.classAttribute();	
     m_Ruleset = new FastVector();
