@@ -25,7 +25,13 @@ package weka.clusterers;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
 import weka.clusterers.forOPTICSAndDBScan.Databases.Database;
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -53,10 +59,12 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DBScan extends Clusterer implements OptionHandler {
 
+    static final long serialVersionUID = -1666498248451219728L;
+  
     /**
      * Specifies the radius for a range-query
      */
@@ -109,6 +117,23 @@ public class DBScan extends Clusterer implements OptionHandler {
      */
     private double elapsedTime;
 
+    /**
+     * Returns default capabilities of the clusterer.
+     *
+     * @return      the capabilities of this clusterer
+     */
+    public Capabilities getCapabilities() {
+      Capabilities result = super.getCapabilities();
+
+      // attributes
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capability.DATE_ATTRIBUTES);
+      result.enable(Capability.MISSING_VALUES);
+
+      return result;
+    }
+
     // *****************************************************************************************************************
     // constructors
     // *****************************************************************************************************************
@@ -123,10 +148,10 @@ public class DBScan extends Clusterer implements OptionHandler {
      * @throws java.lang.Exception If clustering was not successful
      */
     public void buildClusterer(Instances instances) throws Exception {
+        // can clusterer handle the data?
+        getCapabilities().testWithFail(instances);
+
         long time_1 = System.currentTimeMillis();
-        if (instances.checkForStringAttributes()) {
-            throw new Exception("Can't handle string attributes!");
-        }
 
         numberOfGeneratedClusters = 0;
         clusterID = 0;

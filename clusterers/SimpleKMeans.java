@@ -21,13 +21,23 @@
  */
 package weka.clusterers;
 
-import  java.io.*;
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.Filter;
-import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.experiment.Stats;
 import weka.classifiers.rules.DecisionTable;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Simple k means clustering class.
@@ -42,7 +52,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -50,6 +60,8 @@ public class SimpleKMeans extends Clusterer
   implements NumberOfClustersRequestable,
 	     OptionHandler, WeightedInstancesHandler {
 
+  static final long serialVersionUID = -3235809600124455376L;
+  
   /**
    * replace missing values in training instances
    */
@@ -114,6 +126,22 @@ public class SimpleKMeans extends Clusterer
   }
 
   /**
+   * Returns default capabilities of the clusterer.
+   *
+   * @return      the capabilities of this clusterer
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    return result;
+  }
+
+  /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
@@ -123,10 +151,10 @@ public class SimpleKMeans extends Clusterer
    */
   public void buildClusterer(Instances data) throws Exception {
 
+    // can clusterer handle the data?
+    getCapabilities().testWithFail(data);
+
     m_Iterations = 0;
-    if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
-    }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     Instances instances = new Instances(data);

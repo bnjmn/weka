@@ -23,11 +23,20 @@
  */
 package weka.clusterers;
 
-import  java.io.*;
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.Filter;
-import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Implements the "Farthest First Traversal Algorithm" by 
@@ -49,7 +58,7 @@ import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * Specify random number seed. <p>
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -58,6 +67,8 @@ import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
 //       cleanup, like deleting m_instances 
 public class FarthestFirst extends Clusterer implements OptionHandler {
 
+  static final long serialVersionUID = 7499838100631329509L;
+  
   /**
    * training instances, not necessary to keep, 
    * could be replaced by m_ClusterCentroids where needed for header info
@@ -104,6 +115,23 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
   }
 
   /**
+   * Returns default capabilities of the clusterer.
+   *
+   * @return      the capabilities of this clusterer
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    return result;
+  }
+
+  /**
    * Generates a clusterer. Has to initialize all fields of the clusterer
    * that are not being set via options.
    *
@@ -113,10 +141,10 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    */
   public void buildClusterer(Instances data) throws Exception {
 
+    // can clusterer handle the data?
+    getCapabilities().testWithFail(data);
+
     //long start = System.currentTimeMillis();
-    if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
-    }
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
