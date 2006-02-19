@@ -55,10 +55,10 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.61 $ 
+ * @version $Revision: 1.62 $ 
  */
 public class Instances implements Serializable {
- 
+  
   /** The filename extension that should be used for arff files */
   public static String FILE_EXTENSION = ".arff";
 
@@ -175,7 +175,10 @@ public class Instances implements Serializable {
     // they can't be modified.
     m_ClassIndex = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
-    m_Attributes = dataset.m_Attributes;
+    // Attribute-FastVector needs to be copied due to RELATIONAL attributes!
+    m_Attributes = new FastVector(dataset.numAttributes());
+    for (int i = 0; i < dataset.numAttributes(); i++)
+      m_Attributes.addElement(dataset.attribute(i).copy());
     m_Instances = new FastVector(capacity);
   }
 
@@ -298,20 +301,30 @@ public class Instances implements Serializable {
   }
 
   /**
+   * Checks for attributes of the given type in the dataset
+   *
+   * @param attType  the attribute type to look for
+   * @return         true if attributes of the given type are present
+   */
+  public boolean checkForAttributeType(int attType) {
+    
+    int i = 0;
+    
+    while (i < m_Attributes.size()) {
+      if (attribute(i++).type() == attType) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Checks for string attributes in the dataset
    *
    * @return true if string attributes are present, false otherwise
    */
   public /*@pure@*/ boolean checkForStringAttributes() {
-
-    int i = 0;
-   
-    while (i < m_Attributes.size()) {
-      if (attribute(i++).isString()) {
-	return true;
-      }
-    }
-    return false;
+    return checkForAttributeType(Attribute.STRING);
   }
 
   /**
@@ -434,22 +447,35 @@ public class Instances implements Serializable {
   }
 
   /**
+   * Deletes all attributes of the given type in the dataset. A deep copy of 
+   * the attribute information is performed before an attribute is deleted.
+   *
+   * @param attType the attribute type to delete
+   * @throws IllegalArgumentException if attribute couldn't be 
+   * successfully deleted (probably because it is the class attribute).
+   * @see #deleteStringAttribute(int)
+   */
+  public void deleteAttributeType(int attType) {
+    int i = 0;
+    while (i < m_Attributes.size()) {
+      if (attribute(i).type() == attType) {
+        deleteAttributeAt(i);
+      } else {
+        i++;
+      }
+    }
+  }
+
+  /**
    * Deletes all string attributes in the dataset. A deep copy of the attribute
    * information is performed before an attribute is deleted.
    *
    * @exception IllegalArgumentException if string attribute couldn't be 
    * successfully deleted (probably because it is the class attribute).
+   * @see #deleteAttributeType(int)
    */
   public void deleteStringAttributes() {
-
-    int i = 0;
-    while (i < m_Attributes.size()) {
-      if (attribute(i).isString()) {
-	deleteAttributeAt(i);
-      } else {
-	i++;
-      }
-    }
+    deleteAttributeType(Attribute.STRING);
   }
 
   /**
@@ -2233,12 +2259,10 @@ public class Instances implements Serializable {
   //@ requires argv[0] != null;
   public static void test(String [] argv) {
 
-    Instances instances, secondInstances, train, test, transformed, empty;
-    Instance instance;
+    Instances instances, secondInstances, train, test, empty;
     Random random = new Random(2);
     Reader reader;
     int start, num;
-    double newWeight;
     FastVector testAtts, testVals;
     int i,j;
     
