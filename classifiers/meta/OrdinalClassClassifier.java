@@ -22,15 +22,19 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
-import java.io.Serializable;
-import weka.core.*;
-import weka.filters.unsupervised.attribute.MakeIndicator;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import java.util.BitSet;
+import weka.filters.unsupervised.attribute.MakeIndicator;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -52,17 +56,17 @@ import java.util.Vector;
  * @version $Revision 1.0 $
  * @see OptionHandler
  */
-public class OrdinalClassClassifier extends SingleClassifierEnhancer 
-implements OptionHandler {
+public class OrdinalClassClassifier 
+  extends SingleClassifierEnhancer 
+  implements OptionHandler {
+  
+  static final long serialVersionUID = -3461971774059603636L;
 
   /** The classifiers. (One for each class.) */
   private Classifier [] m_Classifiers;
 
   /** The filters used to transform the class. */
   private MakeIndicator[] m_ClassFilters;
-
-  /** Internal copy of the class attribute for output purposes */
-  private Attribute m_ClassAttribute;
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
@@ -96,6 +100,21 @@ implements OptionHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Builds the classifiers.
    *
    * @param insts the training data.
@@ -105,10 +124,12 @@ implements OptionHandler {
 
     Instances newInsts;
 
-    if (!insts.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("OrdinalClassClassifier: class should " +
-					      "be declared nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(insts);
+
+    // remove instances with missing class
+    insts = new Instances(insts);
+    insts.deleteWithMissingClass();
     
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
@@ -137,7 +158,6 @@ implements OptionHandler {
 	m_Classifiers[i].buildClassifier(newInsts);
       }
     }
-    m_ClassAttribute = insts.classAttribute();
   }
   
   /**

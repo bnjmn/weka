@@ -22,11 +22,23 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Implements stacking. For more information, see<p>
@@ -52,10 +64,12 @@ import weka.core.*;
  * classifiers. (required) <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
+  static final long serialVersionUID = 5134738557155845452L;
+  
   /** The meta classifier */
   protected Classifier m_MetaClassifier = new ZeroR();
  
@@ -248,6 +262,33 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities        result;
+
+    if (getMetaClassifier() != null)
+      result = getMetaClassifier().getCapabilities();
+    else
+      result = new Capabilities(this);
+
+    result.setOwner(this);
+    
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+
+    // instances
+    result.setMinimumNumberInstances(1);
+    
+    return result;
+  }
+
+  /**
    * Buildclassifier selects a classifier from the set of classifiers
    * by minimising error on the training data.
    *
@@ -260,18 +301,15 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     if (m_MetaClassifier == null) {
       throw new IllegalArgumentException("No meta classifier has been set");
     }
-    if (!(data.classAttribute().isNominal() ||
-	  data.classAttribute().isNumeric())) {
-      throw new UnsupportedClassTypeException("Class attribute has to be nominal " +
-					      "or numeric!");
-    }
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     Instances newData = new Instances(data);
     m_BaseFormat = new Instances(data, 0);
     newData.deleteWithMissingClass();
-    if (newData.numInstances() == 0) {
-      throw new IllegalArgumentException("No training instances without missing " +
-					 "class!");
-    }
+    
     Random random = new Random(m_Seed);
     newData.randomize(random);
     if (newData.classAttribute().isNominal()) {
@@ -360,8 +398,6 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
     FastVector attributes = new FastVector();
     Instances metaFormat;
-    Attribute attribute;
-    int i = 0;
 
     for (int k = 0; k < m_Classifiers.length; k++) {
       Classifier classifier = (Classifier) getClassifier(k);
