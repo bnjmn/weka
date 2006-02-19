@@ -22,29 +22,38 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.Classifier;
-import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
-import weka.classifiers.rules.ZeroR;
-import weka.classifiers.lazy.IB1;
-import java.awt.event.*;
-import java.io.*;
-import javax.swing.*;
-import weka.gui.treevisualizer.*;
-import weka.core.*;
-import weka.filters.unsupervised.attribute.Remove;
+import weka.classifiers.functions.LinearRegression;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
-import weka.classifiers.trees.j48.*;
-import weka.gui.visualize.*;
-/*import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.VisualizePanelListener;
-import weka.gui.visualize.VisualizePanelEvent; */
+import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyDialog;
+import weka.gui.treevisualizer.PlaceNode1;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeDisplayEvent;
+import weka.gui.treevisualizer.TreeDisplayListener;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizePanelEvent;
+import weka.gui.visualize.VisualizePanelListener;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.Serializable;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 
 
 /**
@@ -60,11 +69,12 @@ import java.beans.PropertyChangeSupport;
  * 00MW-etal-Interactive-ML.ps</a>. <p>
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class UserClassifier extends Classifier implements Drawable,
 TreeDisplayListener, VisualizePanelListener {
   
+  static final long serialVersionUID = 6483901103562809843L;
 
   /** I am not sure if these are strictly adhered to in visualizepanel
    * so I am making them private to avoid confusion, (note that they will
@@ -86,10 +96,6 @@ TreeDisplayListener, VisualizePanelListener {
   private TreeClass m_top, m_focus;
   /** The next number that can be used as a unique id for a node. */
   private int m_nextId;
-  /** These two frames aren't used anymore. */
-  private transient JFrame m_treeFrame;
-  private transient JFrame m_visFrame;
-  
   /** The tabbed window for the tree and instances view. */
   private transient JTabbedPane m_reps;
   /** The window. */
@@ -162,10 +168,10 @@ TreeDisplayListener, VisualizePanelListener {
       if (m_iView == null || m_tView == null) {
 	//throw exception
       }
-      if (e.getCommand() == e.NO_COMMAND) {
+      if (e.getCommand() == TreeDisplayEvent.NO_COMMAND) {
 	//do nothing
       }
-      else if (e.getCommand() == e.ADD_CHILDREN) {
+      else if (e.getCommand() == TreeDisplayEvent.ADD_CHILDREN) {
 	//highlight the particular node and reset the vis panel
 	if (m_top == null) {
 	  //this shouldn't happen , someone elses code would 
@@ -196,7 +202,7 @@ TreeDisplayListener, VisualizePanelListener {
 	  //m_iView.setSIndex(2);
 	}
       }
-      else if (e.getCommand() == e.REMOVE_CHILDREN) {
+      else if (e.getCommand() == TreeDisplayEvent.REMOVE_CHILDREN) {
 	/*if (m_iView == null)
 	  {
 	  m_iView = new VisualizePanel(this);
@@ -227,7 +233,7 @@ TreeDisplayListener, VisualizePanelListener {
 	//tree_frame.getContentPane().doLayout();
 	m_tView.setHighlight(m_focus.m_identity);
       }
-      else if (e.getCommand() == e.CLASSIFY_CHILD) {
+      else if (e.getCommand() == TreeDisplayEvent.CLASSIFY_CHILD) {
 	/*if (m_iView == null)
 	  {
 	  m_iView = new VisualizePanel(this);
@@ -271,7 +277,7 @@ TreeDisplayListener, VisualizePanelListener {
 	TreeClass source = m_top.getNode(e.getID());
 	m_iView.setExtInstances(source.m_training);
 	}*/
-      else if (e.getCommand() == e.ACCEPT) {
+      else if (e.getCommand() == TreeDisplayEvent.ACCEPT) {
 	
 	int well = JOptionPane.showConfirmDialog(m_mainWin, 
 						 "Are You Sure...\n"
@@ -442,12 +448,47 @@ TreeDisplayListener, VisualizePanelListener {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Call this function to build a decision tree for the training
    * data provided.
    * @param i The training data.
    * @exception Exception if can't build classification properly.
    */
   public void buildClassifier(Instances i) throws Exception {
+    // can classifier handle the data?
+    getCapabilities().testWithFail(i);
+
+    // remove instances with missing class
+    i = new Instances(i);
+    i.deleteWithMissingClass();
+    
     //construct a visualizer
     //construct a tree displayer and feed both then do nothing
     //note that I will display at the bottom of each split how many 
@@ -893,14 +934,14 @@ TreeDisplayListener, VisualizePanelListener {
 	tmp = (FastVector)m_ranges.elementAt(noa);
 	
 	if (((Double)tmp.elementAt(0)).intValue() 
-	    == VLINE && !i.isMissingValue(x)) {
+	    == VLINE && !Instance.isMissingValue(x)) {
 	  
 	}
 	else if (((Double)tmp.elementAt(0)).intValue() 
-		 == HLINE && !i.isMissingValue(y)) {
+		 == HLINE && !Instance.isMissingValue(y)) {
 	  
 	}
-	else if (i.isMissingValue(x) || i.isMissingValue(y)) {
+	else if (Instance.isMissingValue(x) || Instance.isMissingValue(y)) {
 	  //System.out.println("miss");
 	  //then go down both branches using their weights
 	  rt = m_set1.calcClassType(i);
