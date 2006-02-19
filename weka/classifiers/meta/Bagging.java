@@ -22,21 +22,19 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Random;
-
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.core.AdditionalMeasureProducer;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.WeightedInstancesHandler;
-import weka.core.AdditionalMeasureProducer;
 import weka.core.Option;
-import weka.core.Utils;
 import weka.core.Randomizable;
-import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for bagging a classifier. For more information, see<p>
@@ -67,11 +65,13 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
 
+  static final long serialVersionUID = -505879962237199703L;
+  
   /** The size of each bag sample, as a percentage of the training size */
   protected int m_BagSizePercent = 100;
 
@@ -365,6 +365,13 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
    */
   public void buildClassifier(Instances data) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     super.buildClassifier(data);
 
     if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {

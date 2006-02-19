@@ -23,19 +23,17 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
 import weka.classifiers.SingleClassifierEnhancer;
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
-import weka.core.Attribute;
-import weka.core.Drawable;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for running an arbitrary classifier on data that has been passed
@@ -52,10 +50,12 @@ import weka.core.Drawable;
  * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 
+  static final long serialVersionUID = -4523450618538717400L;
+  
   /** The filter */
   protected Filter m_Filter = new weka.filters.supervised.attribute.AttributeSelection();
 
@@ -249,6 +249,14 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
     if (m_Classifier == null) {
       throw new Exception("No base classifiers have been set!");
     }
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     /*
     String fname = m_Filter.getClass().getName();
     fname = fname.substring(fname.lastIndexOf('.') + 1);

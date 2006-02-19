@@ -22,16 +22,23 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Classifier;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.Evaluation;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.J48;
 import weka.classifiers.SingleClassifierEnhancer;
-import java.io.*;
-import java.util.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 
-import weka.core.*;
-import weka.attributeSelection.*;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for running an arbitrary classifier on data that has been reduced
@@ -56,12 +63,14 @@ import weka.attributeSelection.*;
  * (required). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class AttributeSelectedClassifier extends SingleClassifierEnhancer
   implements OptionHandler, Drawable, AdditionalMeasureProducer,
              WeightedInstancesHandler {
 
+  static final long serialVersionUID = -5951805453487947577L;
+  
   /** The attribute selection object */
   protected AttributeSelection m_AttributeSelection = null;
 
@@ -329,8 +338,13 @@ public class AttributeSelectedClassifier extends SingleClassifierEnhancer
       throw new Exception("No search method has been set!");
     }
    
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
+    
     if (newData.numInstances() == 0) {
       m_Classifier.buildClassifier(newData);
       return;
