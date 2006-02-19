@@ -37,7 +37,7 @@ import java.util.Vector;
  * SimpleStreamFilter.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     SimpleBatchFilter 
  * @see     SimpleStreamFilter 
  */
@@ -145,6 +145,31 @@ public abstract class SimpleFilter
     m_FirstBatchDone = false;
   }
 
+  /**
+   * Returns true if the a new batch was started, either a new instance of the 
+   * filter was created or the batchFinished() method got called.
+   * 
+   * @return true if a new batch has been initiated
+   * @see #m_NewBatch .
+   * @see #batchFinished()
+   */
+  public boolean isNewBatch() {
+    return m_NewBatch;
+  }
+  
+  /**
+   * Returns true if the first batch of instances got processed. Necessary for
+   * supervised filters, which "learn" from the first batch and then shouldn't
+   * get updated with subsequent calls of batchFinished().
+   * 
+   * @return true if the first batch has been processed
+   * @see #m_FirstBatchDone
+   * @see #batchFinished()
+   */
+  public boolean isFirstBatchDone() {
+    return m_FirstBatchDone;
+  }
+  
   /**
    * returns true if the output format is immediately available after the
    * input format has been set and not only after all the data has been
