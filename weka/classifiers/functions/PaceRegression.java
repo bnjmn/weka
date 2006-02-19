@@ -20,14 +20,29 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.functions.pace.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.functions.pace.ChisqMixture;
+import weka.classifiers.functions.pace.MixtureDistribution;
+import weka.classifiers.functions.pace.NormalMixture;
+import weka.classifiers.functions.pace.PaceMatrix;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.NoSupportForMissingValuesException;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.WekaException;
+import weka.core.Capabilities.Capability;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.IntVector;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for building pace regression linear models and using them for
@@ -81,10 +96,12 @@ import weka.core.matrix.IntVector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 public class PaceRegression extends Classifier implements OptionHandler,
 					       WeightedInstancesHandler {
 
+  static final long serialVersionUID = 7230266976059115435L;
+  
   /** The model used */
   Instances m_Model = null;
 
@@ -152,6 +169,26 @@ public class PaceRegression extends Classifier implements OptionHandler,
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.BINARY_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds a pace regression model for the given data.
    *
    * @param data the training data to be used for generating the
@@ -160,29 +197,14 @@ public class PaceRegression extends Classifier implements OptionHandler,
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    //  Checks on data model and instances
-    if (!data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Class attribute has to be numeric"+
-					      " for pace regression!");
-    }
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
-    if (checkForNonBinary(data)) {
-      throw new UnsupportedAttributeTypeException("Can only deal with numeric and binary attributes!");
-    }
-    // check for missing data and throw exception if some are found
-    if (checkForMissing(data)) {
-      throw new NoSupportForMissingValuesException("Can't handle missing values!");
-    }
-    // n - k should be >= 20
-    if (data.numInstances() - data.numAttributes() < 20) {
-      throw new IllegalArgumentException("Not enough instances. Ratio of number of instances (n) to number of "
-                          + "attributes (k) is too small (n - k < 20).");
-    }
+    // can classifier handle the data?
+    Capabilities cap = getCapabilities();
+    cap.setMinimumNumberInstances(20 + data.numAttributes());
+    cap.testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
     
     /*
      * initialize the following
@@ -280,24 +302,6 @@ public class PaceRegression extends Classifier implements OptionHandler,
   }
 
   /**
-   * Checks if instances have a missing value.
-   * @param data the data set
-   * @return true if missing value is present in data set
-   */
-  public boolean checkForMissing(Instances data) {
-
-    for (int i = 0; i < data.numInstances(); i++) {
-      Instance inst = data.instance(i);
-      for (int j = 0; j < data.numAttributes(); j++) {
-	if (inst.isMissing(j)) {
-	  return true;
-	}
-      }
-    }
-    return false;
-  }
-
-  /**
    * Checks if an instance has a missing value.
    * @param instance the instance
    * @return true if missing value is present
@@ -310,22 +314,6 @@ public class PaceRegression extends Classifier implements OptionHandler,
 	  return true;
 	}
       }
-    }
-    return false;
-  }
-
-  /**
-   * Checks if any of the nominal attributes is non-binary.
-   * @param data the data set
-   * @return true if non binary attribute is present
-   */
-  public boolean checkForNonBinary(Instances data) {
-
-    for (int i = 0; i < data.numAttributes(); i++) {
-      if (data.attribute(i).isNominal()) {
-	if (data.attribute(i).numValues() != 2)
-	  return true;
-      }           
     }
     return false;
   }
