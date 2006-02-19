@@ -24,12 +24,20 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.trees.DecisionStump;
+import weka.classifiers.IteratedSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Meta classifier that enhances the performance of a regression base
@@ -61,18 +69,15 @@ import weka.classifiers.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class AdditiveRegression extends IteratedSingleClassifierEnhancer 
   implements OptionHandler,
 	     AdditionalMeasureProducer,
 	     WeightedInstancesHandler {
 
-  /**
-   * Class index.
-   */
-  private int m_classIndex;
-
+  static final long serialVersionUID = -2368937577670527151L;
+  
   /**
    * Shrinkage (Learning rate). Default = no shrinkage.
    */
@@ -232,6 +237,22 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Build the classifier on the supplied data
    *
    * @param data the training data
@@ -241,12 +262,12 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
 
     super.buildClassifier(data);
 
-    if (data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Class must be numeric!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-    m_classIndex = newData.classIndex();
 
     double sum = 0;
     double temp_sum = 0;
