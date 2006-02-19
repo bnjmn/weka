@@ -24,9 +24,18 @@ package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for building and using a 1R classifier. For more information, see<p>
@@ -41,10 +50,12 @@ import weka.core.*;
  * Specify the minimum number of objects in a bucket (default: 6). <p>
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
 */
 public class OneR extends Classifier implements OptionHandler {
     
+  static final long serialVersionUID = -2459427002147861445L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -176,6 +187,27 @@ public class OneR extends Classifier implements OptionHandler {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances the instances to be used for building the classifier
@@ -186,20 +218,12 @@ public class OneR extends Classifier implements OptionHandler {
     
     boolean noRule = true;
 
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
-    if (instances.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("Can't handle numeric class!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
     Instances data = new Instances(instances);
-
-    // new dataset without missing class values
     data.deleteWithMissingClass();
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances with a class value!");
-    }
 
     // for each attribute ...
     Enumeration enu = instances.enumerateAttributes();
