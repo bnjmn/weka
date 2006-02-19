@@ -22,17 +22,17 @@
 
 package weka.classifiers.misc;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.Classifier;
-import weka.core.Attribute;
+import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.OptionHandler;
 import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.UnsupportedClassTypeException;
-import java.io.*;
+import weka.core.Capabilities.Capability;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -109,11 +109,13 @@ import java.util.Vector;
  * Set exponential bias towards confident intervals. default = 1.0 <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class VFI extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
 
+  static final long serialVersionUID = 8081692166331321866L;
+  
   /** The index of the class attribute */
   protected int m_ClassIndex;
 
@@ -280,6 +282,31 @@ public class VFI extends Classifier
   
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -291,12 +318,10 @@ public class VFI extends Classifier
       TINY = 0.0;
     }
 
-    if (instances.classIndex() == -1) {
-      throw new Exception("No class attribute assigned");
-    }
-    if (!instances.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("VFI: class attribute needs to be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
 
@@ -469,7 +494,6 @@ public class VFI extends Classifier
     throws Exception {
     double [] dist = new double[m_NumClasses];
     double [] temp = new double[m_NumClasses];
-    double totalWeight = 0.0;
     double weight = 1.0;
 
 
