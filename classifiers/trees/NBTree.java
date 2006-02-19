@@ -22,10 +22,20 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.trees.j48.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.trees.j48.NBTreeClassifierTree;
+import weka.classifiers.trees.j48.NBTreeModelSelection;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Summarizable;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for generating a Naive Bayes tree (decision tree with
@@ -38,12 +48,14 @@ import weka.classifiers.*;
  * Conference on Knowledge Discovery and Data Mining</i>.</p>
  *
  * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NBTree extends Classifier 
   implements WeightedInstancesHandler, Drawable, Summarizable,
 	     AdditionalMeasureProducer {
 
+  static final long serialVersionUID = -4716005707058256086L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -61,6 +73,15 @@ public class NBTree extends Classifier
 
   /** The root of the tree */
   private NBTreeClassifierTree m_root;
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    return new NBTreeClassifierTree(null).getCapabilities();
+  }
 
   /**
    * Generates the classifier.
