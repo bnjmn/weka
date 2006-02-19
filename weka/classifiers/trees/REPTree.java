@@ -22,11 +22,27 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
 import weka.classifiers.rules.ZeroR;
-import weka.core.*;
-import java.util.*;
-import java.io.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.ContingencyTables;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Fast decision tree learner. Builds a decision/regression tree using
@@ -57,12 +73,14 @@ import java.io.*;
  * Maximum tree depth (default -1, no maximum). <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class REPTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Drawable, 
 	     AdditionalMeasureProducer, Sourcable {
 
+  static final long serialVersionUID = -8562443428621539458L;
+  
   /** ZeroR model that is used if no attributes are present. */
   protected ZeroR m_zeroR;
 
@@ -247,7 +265,6 @@ public class REPTree extends Classifier
 	result[1] = new StringBuffer("");
       } else {
 	StringBuffer text = new StringBuffer("");
-	String nextIndent = "      ";
 	StringBuffer atEnd = new StringBuffer("");
 
 	text.append("  static double N")
@@ -1533,30 +1550,41 @@ public class REPTree extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds classifier.
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    Random random = new Random(m_Seed);
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal() && !data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("REPTree: nominal or numeric class!");
-    }
-
-    // Delete instances with missing class
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
-
-    // Check for empty datasets
-    if (data.numInstances() == 0) {
-      throw new IllegalArgumentException("REPTree: zero training instances or all " +
-					 "instances have missing class!");
-    }
-
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
+    
+    Random random = new Random(m_Seed);
 
     m_zeroR = null;
     if (data.numAttributes() == 1) {

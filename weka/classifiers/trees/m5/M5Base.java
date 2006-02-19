@@ -18,13 +18,23 @@
  */
 package weka.classifiers.trees.m5;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.supervised.attribute.NominalToBinary;
+import weka.classifiers.Classifier;
+import weka.classifiers.functions.LinearRegression;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * M5Base. Implements base routines
@@ -51,7 +61,7 @@ import weka.filters.Filter;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public abstract class M5Base extends Classifier 
   implements OptionHandler,
@@ -61,21 +71,6 @@ public abstract class M5Base extends Classifier
    * the instances covered by the tree/rules
    */
   private Instances		     m_instances;
-
-  /**
-   * the class index
-   */
-  private int			     m_classIndex;
-
-  /**
-   * the number of attributes
-   */
-  private int			     m_numAttributes;
-
-  /**
-   * the number of instances in the dataset
-   */
-  private int			     m_numInstances;
 
   /**
    * the rule set
@@ -321,6 +316,15 @@ public abstract class M5Base extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier, i.e., of LinearRegression.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    return new LinearRegression().getCapabilities();
+  }
+
+  /**
    * Generates the classifier.
    * 
    * @param data set of instances serving as training data
@@ -328,37 +332,31 @@ public abstract class M5Base extends Classifier
    * successfully
    */
   public void buildClassifier(Instances data) throws Exception {
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    } 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     m_instances = new Instances(data);
+
     m_replaceMissing = new ReplaceMissingValues();
-
-    m_instances.deleteWithMissingClass();
     m_replaceMissing.setInputFormat(m_instances);
-
     m_instances = Filter.useFilter(m_instances, m_replaceMissing);
+
     m_nominalToBinary = new NominalToBinary();
-
     m_nominalToBinary.setInputFormat(m_instances);
-
     m_instances = Filter.useFilter(m_instances, m_nominalToBinary);
 
-    // 
     m_instances.randomize(new Random(1));
 
-    m_classIndex = m_instances.classIndex();
-    m_numAttributes = m_instances.numAttributes();
-    m_numInstances = m_instances.numInstances();
     m_ruleSet = new FastVector();
 
     Rule tempRule;
 
     if (m_generateRules) {
       Instances tempInst = m_instances;
-      double sum = 0;
-      double temp_sum = 0;
      
       do {
 	tempRule = new Rule();

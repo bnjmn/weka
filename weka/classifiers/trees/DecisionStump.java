@@ -25,9 +25,14 @@ package weka.classifiers.trees;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.ContingencyTables;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 
 /**
  * Class for building and using a decision stump. Usually used in conjunction
@@ -38,11 +43,13 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class DecisionStump extends Classifier 
   implements WeightedInstancesHandler, Sourcable {
 
+  static final long serialVersionUID = 1618384535950391L;
+  
   /** The attribute used for classification. */
   private int m_AttIndex;
 
@@ -69,6 +76,29 @@ public class DecisionStump extends Classifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
@@ -77,27 +107,19 @@ public class DecisionStump extends Classifier
   public void buildClassifier(Instances instances) throws Exception {
     
     double bestVal = Double.MAX_VALUE, currVal;
-    double bestPoint = -Double.MAX_VALUE, sum;
+    double bestPoint = -Double.MAX_VALUE;
     int bestAtt = -1, numClasses;
 
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
+    
     double[][] bestDist = new double[3][instances.numClasses()];
 
     m_Instances = new Instances(instances);
-    m_Instances.deleteWithMissingClass();
-
-    if (m_Instances.numInstances() == 0) {
-      throw new IllegalArgumentException("No instances without missing " +
-					 "class values in training file!");
-    }
-
-    if (instances.numAttributes() == 1) {
-      throw new IllegalArgumentException("Attribute missing. Need at least one " +
-					 "attribute other than class attribute!");
-    }
 
     if (m_Instances.classAttribute().isNominal()) {
       numClasses = m_Instances.numClasses();
