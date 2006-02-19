@@ -22,13 +22,19 @@
 
 package weka.gui;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.ClassDiscovery;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.gui.CheckBoxList.CheckBoxListModel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -55,6 +61,7 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -95,7 +102,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.48 $
+ * @version $Revision: 1.49 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -128,7 +135,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   protected static Properties EDITOR_PROPERTIES;
 
   /** The tree node of the current object so we can re-select it for the user */
-  protected DefaultMutableTreeNode m_treeNodeOfCurrentObject;
+  protected GOETreeNode m_treeNodeOfCurrentObject;
 
   /** The property panel created for the objects */
   protected PropertyPanel m_ObjectPropertyPanel;
@@ -141,6 +148,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   
   /** whether the Weka Editors were already registered */
   protected static boolean m_EditorsRegistered;
+
+  /** for filtering the tree based on the Capabilities of the leaves */
+  protected Capabilities m_CapabilitiesFilter = null;
   
   /** 
    * Loads the configuration property file (USE_DYNAMIC is FALSE) or determines
@@ -191,16 +201,286 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
+   * A specialized TreeNode for supporting filtering via Capabilities
+   */
+  public class GOETreeNode
+    extends DefaultMutableTreeNode {
+    
+    /** the Capabilities object to use for filtering */
+    protected Capabilities m_Capabilities = null;
+    
+    /**
+     * Creates a tree node that has no parent and no children, but which 
+     * allows children.
+     */
+    public GOETreeNode() {
+      super();
+    }
+    
+    /**
+     * Creates a tree node with no parent, no children, but which allows 
+     * children, and initializes it with the specified user object.
+     * 
+     * @param userObject	an Object provided by the user that constitutes 
+     * 				the node's data
+     */
+    public GOETreeNode(Object userObject) {
+      super(userObject);
+    }
+    
+    /**
+     * Creates a tree node with no parent, no children, initialized with the 
+     * specified user object, and that allows children only if specified.
+
+     * @param userObject	an Object provided by the user that constitutes 
+     * 				the node's data
+     * @param allowsChildren	if true, the node is allowed to have child nodes 
+     * 				-- otherwise, it is always a leaf node
+     */
+    public GOETreeNode(Object userObject, boolean allowsChildren) {
+      super(userObject, allowsChildren);
+    }
+    
+    /**
+     * generates if necessary a Capabilities object for the given leaf
+     */
+    protected void initCapabilities() {
+      String 	classname;
+      Class	cls;
+      Object	obj;
+      
+      if (m_Capabilities != null)
+	return;
+      if (!isLeaf())
+	return;
+      
+      classname = getClassnameFromPath(new TreePath(getPath()));
+      try {
+	cls = Class.forName(classname);
+	if (!ClassDiscovery.hasInterface(CapabilitiesHandler.class, cls))
+	  return;
+	
+	obj = cls.newInstance();
+	m_Capabilities = ((CapabilitiesHandler) obj).getCapabilities();
+      }
+      catch (Exception e) {
+	// ignore it
+      }
+    }
+    
+    /**
+     * returns a string representation of this treenode
+     */
+    public String toString() {
+      String	result;
+      
+      result = super.toString();
+      
+      if (m_CapabilitiesFilter != null) {
+	initCapabilities();
+	if (m_Capabilities != null) {
+	  if (!m_Capabilities.supports(m_CapabilitiesFilter))
+	    result = "<html><font color=\"red\">" + result + "</font></i><html>";
+	}
+      }
+      
+      return result;
+    }
+  }
+  
+  /**
+   * A dialog for selecting Capabilities to look for in the GOE tree.
+   */
+  public class CapabilitiesFilterDialog 
+    extends JDialog {
+    
+    /** the dialog itself */
+    protected JDialog m_Self;
+    
+    /** the popup to display again */
+    protected JPopupMenu m_Popup = null;
+    
+    /** the capabilities used for initializing the dialog */
+    protected Capabilities m_Capabilities = new Capabilities(null);
+
+    /** the label, listing the name of the superclass */
+    protected JLabel m_InfoLabel = new JLabel();
+    
+    /** the list with all the capabilities */
+    protected CheckBoxList m_List = new CheckBoxList();
+    
+    /** the OK button */
+    protected JButton m_OkButton = new JButton("OK");
+    
+    /** the Cancel button */
+    protected JButton m_CancelButton = new JButton("Cancel");
+    
+    /**
+     * creates a dialog to choose Capabilities from
+     */
+    public CapabilitiesFilterDialog() {
+      super();
+
+      m_Self = this;
+      
+      initGUI();
+    }
+    
+    /**
+     * sets up the GUI
+     */
+    protected void initGUI() {
+      JPanel			panel;
+      CheckBoxListModel		model;
+
+      setTitle("Filtering Capabilities...");
+      setLayout(new BorderLayout());
+      
+      panel = new JPanel(new BorderLayout());
+      panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      getContentPane().add(panel, BorderLayout.NORTH);
+      m_InfoLabel.setText(
+	    "<html>"
+	  + m_ClassType.getName().replaceAll(".*\\.", "") + "s"
+	  + " have to support <i>at least</i> the following capabilities<br>"
+	  + "(the ones highlighted <font color=\"red\">red</font> don't meet these requirements):"
+	  + "</html>");
+      panel.add(m_InfoLabel, BorderLayout.CENTER);
+      
+      // list
+      getContentPane().add(new JScrollPane(m_List), BorderLayout.CENTER);
+      model = (CheckBoxListModel) m_List.getModel();
+      for (Capability cap: Capability.values())
+	model.addElement(cap);
+      
+      // buttons
+      panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+      getContentPane().add(panel, BorderLayout.SOUTH);
+      
+      m_OkButton.setMnemonic('O');
+      m_OkButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          updateCapabilities();
+          if (m_CapabilitiesFilter == null)
+            m_CapabilitiesFilter = new Capabilities(null);
+          m_CapabilitiesFilter.assign(m_Capabilities);
+          m_Self.setVisible(false);
+          showPopup();
+        }
+      });
+      panel.add(m_OkButton);
+      
+      m_CancelButton.setMnemonic('C');
+      m_CancelButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          m_Self.setVisible(false);
+          showPopup();
+        }
+      });
+      panel.add(m_CancelButton);
+      pack();
+    }
+
+    /**
+     * transfers the Capabilities object to the JList
+     * 
+     * @see #m_Capabilities
+     * @see #m_List
+     */
+    protected void updateList() {
+      CheckBoxListModel		model;
+      
+      model = (CheckBoxListModel) m_List.getModel();
+
+      for (Capability cap: Capability.values())
+	model.setChecked(model.indexOf(cap), m_Capabilities.handles(cap));
+    }
+    
+    /**
+     * transfers the selected Capabilities from the JList to the 
+     * Capabilities object
+     * 
+     * @see #m_Capabilities
+     * @see #m_List
+     */
+    protected void updateCapabilities() {
+      CheckBoxListModel		model;
+      
+      model = (CheckBoxListModel) m_List.getModel();
+
+      for (Capability cap: Capability.values()) {
+	if (model.getChecked(model.indexOf(cap)))
+          m_Capabilities.enable(cap);
+      }
+    }
+    
+    /**
+     * sets the initial capabilities
+     */
+    public void setCapabilities(Capabilities value) {
+      if (value != null)
+	m_Capabilities.assign(value);
+      else
+	m_Capabilities = new Capabilities(null);
+      
+      updateList();
+    }
+    
+    /**
+     * returns the currently selected capabilities
+     */
+    public Capabilities getCapabilities() {
+      return m_Capabilities;
+    }
+    
+    /**
+     * sets the JPopupMenu to display again after closing the dialog
+     */
+    public void setPopup(JPopupMenu value) {
+      m_Popup = value;
+    }
+    
+    /**
+     * returns the currently set JPopupMenu
+     */
+    public JPopupMenu getPopup() {
+      return m_Popup;
+    }
+    
+    /**
+     * if a JPopupMenu is set, it is displayed again. Displaying this dialog
+     * closes any JPopupMenu automatically.
+     */
+    public void showPopup() {
+      if (getPopup() != null)
+	getPopup().setVisible(true);
+    }
+  }
+  
+  /**
    * Creates a popup menu containing a tree that is aware
    * of the screen dimensions.
    */
-  public class JTreePopupMenu extends JPopupMenu {
+  public class JTreePopupMenu 
+    extends JPopupMenu {
 
+    /** the popup itself */
+    private JPopupMenu m_Self;
+    
     /** The tree */
-    JTree m_tree;
+    private JTree m_tree;
 
     /** The scroller */
-    JScrollPane m_scroller;
+    private JScrollPane m_scroller;
+
+    /** The filter button in case of CapabilitiesHandlers */
+    private JButton m_FilterButton = new JButton("Filter...");
+
+    /** The remove filter button in case of CapabilitiesHandlers */
+    private JButton m_RemoveFilterButton = new JButton("Remove filter");
+    
+    /** The button for closing the popup again */
+    private JButton m_CloseButton = new JButton("Close");
     
     /**
      * Constructs a new popup menu.
@@ -209,6 +489,52 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      */
     public JTreePopupMenu(JTree tree) {
 
+      m_Self = this;
+      
+      setLayout(new BorderLayout());
+      JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+      add(panel, BorderLayout.SOUTH);
+      
+      if (ClassDiscovery.hasInterface(CapabilitiesHandler.class, m_ClassType)) {
+	// filter
+	m_FilterButton.setMnemonic('F');
+	m_FilterButton.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == m_FilterButton) {
+              CapabilitiesFilterDialog dialog = new CapabilitiesFilterDialog();
+              dialog.setCapabilities(m_CapabilitiesFilter);
+              dialog.setPopup(m_Self);
+              dialog.setVisible(true);
+              repaint();
+            }
+          }
+	});
+	panel.add(m_FilterButton);
+	
+	// remove
+	m_RemoveFilterButton.setMnemonic('R');
+	m_RemoveFilterButton.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            if (e.getSource() == m_RemoveFilterButton) {
+              m_CapabilitiesFilter = null;
+              repaint();
+            }
+          }
+	});
+	panel.add(m_RemoveFilterButton);
+      }
+
+      // close
+      m_CloseButton.setMnemonic('C');
+      m_CloseButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (e.getSource() == m_CloseButton) {
+            m_Self.setVisible(false);
+          }
+        }
+      });
+      panel.add(m_CloseButton);
+      
       m_tree = tree;
       
       JPanel treeView = new JPanel();
@@ -1156,6 +1482,29 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
+   * creates a classname from the given path
+   * 
+   * @param path	the path to generate the classname from
+   * @return		the generated classname
+   */
+  protected String getClassnameFromPath(TreePath path) {
+    StringBuffer classname = new StringBuffer();
+    
+    // recreate class name from path
+    int start = 0;
+    if (m_ObjectNames.size() > 1)
+      start = 1;
+
+    for (int i = start; i < path.getPathCount(); i++) {
+      if (i>start) classname.append(".");
+      classname.append(
+	  (String) ((GOETreeNode) path.getPathComponent(i)).getUserObject());
+    }
+    
+    return classname.toString();
+  }
+  
+  /**
    * Returns a popup menu that allows the user to change
    * the class of object.
    *
@@ -1180,29 +1529,13 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     // respond when the user chooses a class
     tree.addTreeSelectionListener(new TreeSelectionListener() {
 	public void valueChanged(TreeSelectionEvent e) {
-	  DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-	    tree.getLastSelectedPathComponent();
+	  GOETreeNode node = (GOETreeNode) tree.getLastSelectedPathComponent();
 	  
-	  if (node == null) return;
-	  
-	  Object nodeInfo = node.getUserObject();
+	  if (node == null) 
+	    return;
 	  
 	  if (node.isLeaf()) {
-	    TreePath selectedPath = tree.getSelectionPath();
-	    StringBuffer classSelected = new StringBuffer();
-	    // recreate class name from path
-	    int start = 0;
-	    if (m_ObjectNames.size() > 1)
-	      start = 1;
-	    for (int i=start; i<selectedPath.getPathCount(); i++) {
-              
-	      if (i>start) classSelected.append(".");
-	      classSelected.append((String)
-				   ((DefaultMutableTreeNode)
-				    selectedPath.getPathComponent(i))
-				   .getUserObject());
-	    }
-	    classSelected(classSelected.toString());
+	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
 	    popup.setVisible(false);
 	  }
 	}
@@ -1218,12 +1551,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return a JTree representation of the hierarchy
    */
   protected JTree createTree(Hashtable hpps) {
-    DefaultMutableTreeNode  superRoot;
+    GOETreeNode             superRoot;
     Enumeration             enm;
     HierarchyPropertyParser hpp;
     
     if (hpps.size() > 1)
-      superRoot = new DefaultMutableTreeNode("root");
+      superRoot = new GOETreeNode("root");
     else
       superRoot = null;
 
@@ -1231,8 +1564,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     while (enm.hasMoreElements()) {
       hpp = (HierarchyPropertyParser) enm.nextElement();
       hpp.goToRoot();
-      DefaultMutableTreeNode root =
-        new DefaultMutableTreeNode(hpp.getValue());
+      GOETreeNode root = new GOETreeNode(hpp.getValue());
       addChildrenToTree(root, hpp);
       
       if (superRoot == null)
@@ -1254,14 +1586,13 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @param tree the root of the tree to add children to
    * @param hpp the hierarchy of objects to mirror in the tree
    */
-  protected void addChildrenToTree(DefaultMutableTreeNode tree,
+  protected void addChildrenToTree(GOETreeNode tree,
 				   HierarchyPropertyParser hpp) {
 
     try {
       for (int i=0; i<hpp.numChildren(); i++) {
 	hpp.goToChild(i);
-	DefaultMutableTreeNode child =
-	  new DefaultMutableTreeNode(hpp.getValue());
+	GOETreeNode child = new GOETreeNode(hpp.getValue());
 	if ((m_Object != null) &&
 	    m_Object.getClass().getName().equals(hpp.fullValue())) {
 	  m_treeNodeOfCurrentObject = child;
@@ -1310,6 +1641,32 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	ex.printStackTrace();
       }
     }
+  }
+  
+  /**
+   * Sets the capabilities to use for filtering.
+   * 
+   * @param value	the object to get the filter capabilities from
+   */
+  public void setCapabilitiesFilter(Capabilities value) {
+    m_CapabilitiesFilter = new Capabilities(null);
+    m_CapabilitiesFilter.assign(value);
+  }
+  
+  /**
+   * Returns the current Capabilities filter, can be null.
+   * 
+   * @return		the current Capabiliities used for filtering
+   */
+  public Capabilities getCapabilitiesFilter() {
+    return m_CapabilitiesFilter;
+  }
+  
+  /**
+   * Removes the current Capabilities filter.
+   */
+  public void removeCapabilitiesFilter() {
+    m_CapabilitiesFilter = null;
   }
 
   /**
