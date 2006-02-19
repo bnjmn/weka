@@ -22,15 +22,19 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.*;
-import java.util.*;
+import weka.core.Capabilities;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Random;
 
 /**
  * Class for handling a tree structure that can
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PruneableClassifierTree extends ClassifierTree{
 
@@ -69,6 +73,30 @@ public class PruneableClassifierTree extends ClassifierTree{
   }
 
   /**
+   * Returns default capabilities of the classifier tree.
+   *
+   * @return      the capabilities of this classifier tree
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Method for building a pruneable classifier tree.
    *
    * @exception Exception if tree can't be built successfully
@@ -76,12 +104,14 @@ public class PruneableClassifierTree extends ClassifierTree{
   public void buildClassifier(Instances data) 
        throws Exception {
 
-   if (data.classAttribute().isNumeric())
-      throw new Exception("Class is numeric!");
-   
-   data = new Instances(data);
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
    Random random = new Random(m_seed);
-   data.deleteWithMissingClass();
    data.stratify(numSets);
    buildTree(data.trainCV(numSets, numSets - 1, random),
 	     data.testCV(numSets, numSets - 1), false);
