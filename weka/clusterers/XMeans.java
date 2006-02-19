@@ -22,22 +22,27 @@
 
 package weka.clusterers;
 
-import java.io.*;
-import java.util.*;
-
 import weka.core.AlgVector;
-import weka.core.AttributeStats;
-import weka.core.KDTree;
+import weka.core.Capabilities;
 import weka.core.EuclideanDistance;
-import weka.core.Instances;
 import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.Utils;
+import weka.core.Instances;
+import weka.core.KDTree;
 import weka.core.Option;
 import weka.core.OptionHandler;
-
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * XMeans clustering class.
@@ -52,66 +57,68 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *
  * Valid options are:<p>
  *
- * -I <max iterations> <br>
+ * -I max iterations <br>
  * Maximum number of iterations in the overall loop (default = 1). <p>
  * 
- * -M <max iterations> <br>
+ * -M max iterations <br>
  * Maximum number of iterations in the kMeans loop in <br>
  * the Improve-Parameter part (default = 1000).<p>
  *
- * -J <max iterations> <br>
+ * -J max iterations <br>
  * Maximum number of iterations in the kMeans loop for the splitted <br>
  * centroids in the Improve-Structure part (default = 1000).<p>
  *
- * -L <minimal number of clusters> <br>
+ * -L minimal number of clusters <br>
  * Specify the number of clusters to start with.<p>
  *
- * -H <maximal number of clusters> <br>
+ * -H <maximal number of clusters <br>
  * Specify the maximal number of clusters.<p>
  *
- * -B <value> <br>
+ * -B value <br>
  * Distance value between true and false of binary attributes and <br>
  * "same" and "different" of nominal attributes (default = 1.0).<p>
  *
- * -K <kdtree class><br>
+ * -K kdtree class<br>
  * KDTrees class and its options (can only use the same distance function
  * as XMeans).<p>
  *
- * -C <cutoff factor> <br>
+ * -C cutoff factor <br>
  * If none of the children are better, percentage of the best splits<br>
  * to be taken.<p>
  * 
- * -D <distance function class>
+ * -D distance function class
  * Distance function class to be used (default = Euclidean distance)
  * 
- * -N <file name> <br>
+ * -N file name <br>
  * Input starting cluster centers from file (ARFF-format). <p>
  *
- * -O <file name> <br>
+ * -O file name <br>
  * Output cluster centers to file (ARFF-format). <p>
  *
- * -S <seed> <br>
+ * -S seed <br>
  * Specify random number seed. <p>
  *
- * -U <debuglevel> <br>
+ * -U debuglevel <br>
  * Set debuglevel. <p>
  *
- * -Y <file name> <br>
+ * -Y file name <br>
  * Used for debugging: Input random vektors from file. <p>
  *
  * major TODOS:
  *
  * make BIC-Score replaceable by other scores
  *
- * @author Gabi Schmidberger <gabi@cs.waikato.ac.nz)
+ * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @author Malcolm Ware <mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
+ * @version $Revision: 1.10 $
  * @see Clusterer
  * @see OptionHandler
  */
 public class XMeans extends Clusterer implements OptionHandler {
 
+  static final long serialVersionUID = -7941793078404132616L;
+  
   //private AlgVector algv; // TODO just a trick
 
   /* training instances */
@@ -264,19 +271,36 @@ public class XMeans extends Clusterer implements OptionHandler {
       ", as described in D. Pelleg and A. Moore's paper 'X-means: Extending" +
       " K-means with Efficient Estimation of the Number of Clusters'.";
   }
+
+  /**
+   * Returns default capabilities of the clusterer.
+   *
+   * @return      the capabilities of this clusterer
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    return result;
+  }
  
   /**
    * Generates the X-Means clusterer. 
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the clusterer has not been 
+   * @throws Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
 
-    if (data.checkForStringAttributes()) {
-      throw  new Exception("Can't handle string attributes!");
-    }
+    // can clusterer handle the data?
+    getCapabilities().testWithFail(data);
+
     // replace missing values
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
@@ -347,10 +371,6 @@ public class XMeans extends Clusterer implements OptionHandler {
   
     // loop counter of main loop
     m_IterationCount = 0;
-
-    // is true for the beginning of first loop, 
-    // might false because ass. is already done in the following loops
-    boolean firstAssignment = true;
 
     /**
      * "finished" does get true as soon as:
@@ -460,7 +480,6 @@ public class XMeans extends Clusterer implements OptionHandler {
 	Instance currCenter = m_ClusterCenters.instance(i);
 	int [] currInstList = instOfCent[i];
 	int currNumInst = instOfCent[i].length;
-	double currMLE = m_Mle[i];
 	
 	// not enough instances; than continue with next
 	if (currNumInst <= 2) {
@@ -1104,7 +1123,7 @@ public class XMeans extends Clusterer implements OptionHandler {
    * @param variance variance of the cluster 
    * @param model data model valid
    * @return a pair of new centers
-   * @exception something in AlgVector goes wrong
+   * @throws something in AlgVector goes wrong
    */
   private Instances splitCenter(Random random,
 			        Instance center,
@@ -1407,7 +1426,7 @@ throws Exception{
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an integer
    * if the class is enumerated, otherwise the predicted value
-   * @exception if instance could not be classified
+   * @throws if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
@@ -1510,7 +1529,7 @@ throws Exception{
   /**
    * Sets the maximum number of iterations to perform.
    * @param i the number of iterations
-   * @exception Exception if i is less than 1
+   * @throws Exception if i is less than 1
    */
   public void setMaxIterations(int i) throws Exception {
     if (i < 0) 
@@ -1825,9 +1844,8 @@ throws Exception{
   /**
    * Parses a given list of options.
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   *
-   **/
+   * @throws Exception if an option is not supported
+   */
   public void setOptions(String[] options)
     throws Exception {
 
