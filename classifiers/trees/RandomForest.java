@@ -22,10 +22,21 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.meta.Bagging;
-import weka.core.*;
-import java.util.*;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Randomizable;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for constructing random forests.
@@ -47,11 +58,13 @@ import java.util.*;
  * Random number seed (default 1). <p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RandomForest extends Classifier 
   implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
 
+  static final long serialVersionUID = 4216839470751428698L;
+  
   /** Number of trees in forest. */
   protected int m_numTrees = 10;
 
@@ -280,6 +293,15 @@ public class RandomForest extends Classifier
   }  
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    return new RandomTree().getCapabilities();
+  }
+
+  /**
    * Builds a classifier for a set of instances.
    *
    * @param instances the instances to train the classifier with
@@ -287,6 +309,13 @@ public class RandomForest extends Classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     m_bagger = new Bagging();
     RandomTree rTree = new RandomTree();
 

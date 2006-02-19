@@ -22,11 +22,33 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.trees.adtree.*;
-import weka.classifiers.*;
-import weka.core.*;
-import java.io.*;
-import java.util.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.IterativeClassifier;
+import weka.classifiers.trees.adtree.PredictionNode;
+import weka.classifiers.trees.adtree.ReferenceInstances;
+import weka.classifiers.trees.adtree.Splitter;
+import weka.classifiers.trees.adtree.TwoWayNominalSplit;
+import weka.classifiers.trees.adtree.TwoWayNumericSplit;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.SerializedObject;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for generating an alternating decision tree. The basic algorithm is based on:<p>
@@ -55,7 +77,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ADTree
   extends Classifier implements OptionHandler, Drawable,
@@ -64,6 +86,8 @@ public class ADTree
 				IterativeClassifier
 {
 
+  static final long serialVersionUID = -1532264837167690683L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -167,26 +191,11 @@ public class ADTree
     m_examplesCounted = 0;
     m_lastAddedSplitNum = 0;
 
-    // make sure training data is suitable
-    if (instances.classIndex() < 0) {
-      throw new UnassignedClassException("ADTree: Needs a class to be assigned");
-    }
-    if (instances.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("ADTree: Can't handle string attributes");
-    }
-    if (!instances.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("ADTree: Class must be nominal");
-    }
-    if (instances.numClasses() != 2) {
-      throw new UnsupportedClassTypeException("ADTree: Must be a two-class problem");
-    }
-
     // prepare the random generator
     m_random = new Random(m_randomSeed);
 
     // create training set
     m_trainInstances = new Instances(instances);
-    m_trainInstances.deleteWithMissingClass();
 
     // create positive/negative subsets
     m_posTrainInstances = new ReferenceInstances(m_trainInstances,
@@ -1288,12 +1297,40 @@ public class ADTree
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.BINARY_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Builds a classifier for a set of instances.
    *
    * @param instances the instances to train the classifier with
    * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances instances) throws Exception {
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
+
+    // remove instances with missing class
+    instances = new Instances(instances);
+    instances.deleteWithMissingClass();
 
     // set up the tree
     initClassifier(instances);

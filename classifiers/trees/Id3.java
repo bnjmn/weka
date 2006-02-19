@@ -22,10 +22,17 @@
 
 package weka.classifiers.trees;
 
-import weka.classifiers.*;
-import weka.core.*;
-import java.io.*;
-import java.util.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.NoSupportForMissingValuesException;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
 
 /**
  * Class implementing an Id3 decision tree classifier. For more
@@ -35,10 +42,12 @@ import java.util.*;
  * trees</i>. Machine Learning. Vol.1, No.1, pp. 81-106.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class Id3 extends Classifier {
 
+  static final long serialVersionUID = -2693678647096322561L;
+  
   /** The node's successors. */ 
   private Id3[] m_Successors;
 
@@ -69,6 +78,27 @@ public class Id3 extends Classifier {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /**
    * Builds Id3 decision tree classifier.
    *
    * @param data the training data
@@ -76,25 +106,13 @@ public class Id3 extends Classifier {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Id3: nominal class, please.");
-    }
-    Enumeration enumAtt = data.enumerateAttributes();
-    while (enumAtt.hasMoreElements()) {
-      if (!((Attribute) enumAtt.nextElement()).isNominal()) {
-        throw new UnsupportedAttributeTypeException("Id3: only nominal " +
-                                                    "attributes, please.");
-      }
-    }
-    Enumeration enu = data.enumerateInstances();
-    while (enu.hasMoreElements()) {
-      if (((Instance) enu.nextElement()).hasMissingValue()) {
-        throw new NoSupportForMissingValuesException("Id3: no missing values, "
-                                                     + "please.");
-      }
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     data = new Instances(data);
-    data.deleteWithMissingClass(); 
+    data.deleteWithMissingClass();
+    
     makeTree(data);
   }
 
