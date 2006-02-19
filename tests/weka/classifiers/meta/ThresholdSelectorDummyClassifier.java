@@ -20,6 +20,8 @@
 
 package weka.classifiers.meta;
 
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.classifiers.Classifier;
@@ -29,7 +31,7 @@ import weka.classifiers.Classifier;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see ThresholdSelectorTest
  */
 
@@ -43,6 +45,25 @@ public class ThresholdSelectorDummyClassifier
     m_Preds = new double[preds.length];
     for (int i = 0; i < preds.length; i++)
       m_Preds[i] = preds[i];
+  }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attribute
+    result.enableAllAttributes();
+    result.disable(Capability.STRING_ATTRIBUTES);
+    result.disable(Capability.RELATIONAL_ATTRIBUTES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
   }
 
   public void buildClassifier(Instances train) { 
