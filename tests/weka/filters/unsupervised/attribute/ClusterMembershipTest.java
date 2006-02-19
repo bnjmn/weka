@@ -20,14 +20,11 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Attribute;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -35,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.ClusterMembershipTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClusterMembershipTest 
   extends AbstractFilterTest {
@@ -51,8 +48,9 @@ public class ClusterMembershipTest
     // remove attributes that are not nominal/numeric
     int i = 0;
     while (i < m_Instances.numAttributes()) {
-      if (    !m_Instances.attribute(i).isNominal()
-           && !m_Instances.attribute(i).isNumeric() )
+      if (   (    !m_Instances.attribute(i).isNominal()
+               && !m_Instances.attribute(i).isNumeric() )
+          || m_Instances.attribute(i).isDate() )
         m_Instances.deleteAttributeAt(i);
       else
         i++;
