@@ -21,16 +21,15 @@
 
 package weka.classifiers.rules;
 
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
-import java.io.Serializable;
-
-import weka.core.FastVector;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.Utils;
 
 /**
  * This class implements the statistics functions used in the 
@@ -44,7 +43,7 @@ import weka.core.Utils;
  * an object of this class. <p>
  *  
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RuleStats implements Serializable {
 
