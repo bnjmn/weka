@@ -22,18 +22,24 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.*;
-import weka.classifiers.*;
-import java.io.*;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Drawable;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
 
 /**
  * Class for handling a tree structure used for
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
-public class ClassifierTree implements Drawable, Serializable {
+public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandler {
 
   /** The model selection method. */  
   protected ModelSelection m_toSelectModel;     
@@ -93,17 +99,28 @@ public class ClassifierTree implements Drawable, Serializable {
   }
 
   /**
+   * Returns default capabilities of the classifier tree.
+   *
+   * @return      the capabilities of this classifier tree
+   */
+  public Capabilities getCapabilities() {
+    return new Capabilities(this);
+  }
+
+  /**
    * Method for building a classifier tree.
    *
    * @exception Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
+    
     buildTree(data, false);
   }
 
