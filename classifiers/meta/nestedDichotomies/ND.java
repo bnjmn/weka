@@ -22,30 +22,23 @@
 
 package weka.classifiers.meta.nestedDichotomies;
 
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.Randomizable;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
+import weka.classifiers.meta.FilteredClassifier;
+import weka.classifiers.rules.ZeroR;
+import weka.core.Capabilities;
 import weka.core.FastVector;
-import weka.core.UnsupportedClassTypeException;
-
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
 
-import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.meta.FilteredClassifier;
-import weka.classifiers.rules.ZeroR;
-
-import java.util.Random;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.Enumeration;
 import java.io.Serializable;
+import java.util.Hashtable;
+import java.util.Random;
 
 /**
  * Class that represents and builds a random system of
@@ -66,6 +59,8 @@ import java.io.Serializable;
  * @author Lin Dong
  */
 public class ND extends RandomizableSingleClassifierEnhancer {
+  
+  static final long serialVersionUID = -6355893369855683820L;
   
   protected class NDTree implements Serializable {
     
@@ -268,21 +263,36 @@ public class ND extends RandomizableSingleClassifierEnhancer {
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(1);
+    
+    return result;
+  }
+
+  /**
    * Builds the classifier.
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // Check for non-nominal classes
-    if (!data.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("ND: class must be nominal!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
+    // remove instances with missing class
+    data = new Instances(data);
     data.deleteWithMissingClass();
-
-    if (data.numInstances() == 0) {
-      throw new Exception("No instances in training file!");
-    }
-
+    
     Random random = data.getRandomNumberGenerator(m_Seed);
 
     if (!m_hashtablegiven) {
@@ -390,7 +400,6 @@ public class ND extends RandomizableSingleClassifierEnhancer {
 
     double[] newDist = new double[inst.numClasses()];
     if (node.m_left == null) {
-      int[] indices = node.getIndices();
       newDist[node.getIndices()[0]] = 1.0;
       return newDist;
     } else {

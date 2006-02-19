@@ -22,11 +22,22 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
-import weka.classifiers.trees.DecisionStump;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.classifiers.Sourcable;
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for performing additive logistic regression..
@@ -80,11 +91,13 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.34 $ 
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler {
 
+  static final long serialVersionUID = -3905660358715833753L;
+  
   /** Array for storing the generated base classifiers. 
    Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
   protected Classifier [][] m_Classifiers;
@@ -546,17 +559,28 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Builds the boosted classifier
    */
   public void buildClassifier(Instances data) throws Exception {
 
     m_RandomInstance = new Random(m_Seed);
-    Instances boostData, trainData;
     int classIndex = data.classIndex();
 
-    if (data.classAttribute().isNumeric()) {
-      throw new UnsupportedClassTypeException("LogitBoost can't handle a numeric class!");
-    }
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
@@ -565,20 +589,21 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 	!m_UseResampling) {
       m_UseResampling = true;
     }
-    if (data.checkForStringAttributes()) {
-      throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
-    }
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
     if (m_Debug) {
       System.err.println("Creating copy of the training data");
     }
 
-    m_NumClasses = data.numClasses();
-    m_ClassAttribute = data.classAttribute();
-
-    // Create a copy of the data 
+    // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
     
+    m_NumClasses = data.numClasses();
+    m_ClassAttribute = data.classAttribute();
+
     // Create the base classifiers
     if (m_Debug) {
       System.err.println("Creating base classifiers");
