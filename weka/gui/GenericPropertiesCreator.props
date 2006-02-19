@@ -20,6 +20,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.lazy,\
  weka.classifiers.meta,\
  weka.classifiers.meta.nestedDichotomies,\
+ weka.classifiers.mi,\
  weka.classifiers.misc,\
  weka.classifiers.trees,\
  weka.classifiers.rules
