@@ -25,6 +25,8 @@ package weka.classifiers.meta;
 import weka.classifiers.*;
 import weka.classifiers.rules.ZeroR;
 import weka.core.*;
+import weka.core.Capabilities.Capability;
+
 import java.util.*;
 import java.io.Serializable;
 
@@ -62,10 +64,12 @@ import java.io.Serializable;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnhancer
   implements UpdateableClassifier {
+  
+  static final long serialVersionUID = 908598343772170052L;
 
   /** The pruning types */
   public static final int PRUNETYPE_NONE = 0;
@@ -503,6 +507,24 @@ public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnha
     }
   }
 
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NOMINAL_CLASS);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
  /**
    * Builds the classifier.
    *
@@ -516,9 +538,13 @@ public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnha
     Instances boostData;
     int classIndex = data.classIndex();
 
-    if (data.classAttribute().isNumeric()) {
-      throw new Exception("RacedIncrementalLogitBoost can't handle a numeric class!");
-    }
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    
     if (m_Classifier == null) {
       throw new Exception("A base classifier has not been specified!");
     }
@@ -527,16 +553,12 @@ public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnha
 	!m_UseResampling) {
       m_UseResampling = true;
     }
-    if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
 
     m_NumClasses = data.numClasses();
     m_ClassAttribute = data.classAttribute();
 
     // Create a copy of the data with the class transformed into numeric
     boostData = new Instances(data);
-    boostData.deleteWithMissingClass();
 
     // Temporarily unset the class index
     boostData.setClassIndex(-1);
@@ -545,7 +567,6 @@ public class RacedIncrementalLogitBoost extends RandomizableSingleClassifierEnha
     boostData.setClassIndex(classIndex);
     m_NumericClassData = new Instances(boostData, 0);
 
-    data = new Instances(data);
     data.randomize(m_RandomInstance);
 
     // create the committees
