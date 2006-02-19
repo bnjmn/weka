@@ -22,11 +22,10 @@
 
 package weka.classifiers.meta;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
+import weka.classifiers.Evaluation;
+import weka.classifiers.MultipleClassifiersCombiner;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Class for combining classifiers using unweighted average of
@@ -42,11 +41,13 @@ import weka.classifiers.rules.ZeroR;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Vote extends MultipleClassifiersCombiner {
     
+  static final long serialVersionUID = -637891196294399624L;
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -69,9 +70,13 @@ public class Vote extends MultipleClassifiersCombiner {
    */
   public void buildClassifier(Instances data) throws Exception {
 
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
+    // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
-
+    
     for (int i = 0; i < m_Classifiers.length; i++) {
       getClassifier(i).buildClassifier(data);
     }
