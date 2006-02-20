@@ -38,7 +38,7 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see StringCompare
  */
 public class ClassDiscovery {
@@ -110,8 +110,8 @@ public class ClassDiscovery {
       if (!result) {
         currentclass = currentclass.getSuperclass();
         
-        // topmost class reached?
-        if (currentclass.equals(Object.class))
+        // topmost class reached or no superclass?
+        if ( (currentclass == null) || (currentclass.equals(Object.class)) )
           break;
       }
     } 
