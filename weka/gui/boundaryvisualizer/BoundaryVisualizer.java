@@ -33,11 +33,25 @@ import javax.swing.JTextField;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
+import javax.swing.BoxLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.util.Vector;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.gui.visualize.ClassPanel;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
+import weka.gui.ExtensionFileFilter;
+import java.awt.Dimension;
 
 /**
  * BoundaryVisualizer. Allows the visualization of classifier decision
@@ -62,7 +76,7 @@ import weka.gui.visualize.ClassPanel;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @since 1.0
  * @see JPanel 
  */
@@ -209,6 +223,8 @@ public class BoundaryVisualizer extends JPanel {
       }
     }
   }
+  
+  protected static int windowCount = 0; //the number of visualizer windows we have open.
 
   // the training instances
   private Instances m_trainingInstances;
@@ -230,7 +246,7 @@ public class BoundaryVisualizer extends JPanel {
   protected JComboBox m_yAttBox = new JComboBox();
 
   protected Dimension COMBO_SIZE = 
-    new Dimension(m_plotAreaWidth / 2,
+    new Dimension((int)(m_plotAreaWidth * 0.75),
 		  m_classAttBox.getPreferredSize().height);
 
   protected JButton m_startBut = new JButton("Start");
@@ -275,6 +291,24 @@ public class BoundaryVisualizer extends JPanel {
   private JTextField m_kernelBandwidthText = 
     new JTextField(""+3+"  ");
 
+  //jimmy
+  protected GenericObjectEditor m_classifierEditor = new GenericObjectEditor(); //the widget to select the classifier
+  protected PropertyPanel m_ClassifierPanel = new PropertyPanel(m_classifierEditor);
+  /** The file chooser for selecting arff files */
+  protected JFileChooser m_FileChooser 
+    = new JFileChooser(new File(System.getProperty("user.dir")));
+  protected ExtensionFileFilter m_arffFileFilter = 
+    new ExtensionFileFilter(Instances.FILE_EXTENSION,
+			    "Arff data files");
+  protected JLabel dataFileLabel = new JLabel(); //stores the name of the data file (currently stores relation name rather than filename)
+  protected JPanel m_addRemovePointsPanel = new JPanel(); //a panel which contains the controls to add and remove points
+  protected JComboBox classValueSelector = new JComboBox(); //a widget to select the class attribute.
+  protected JRadioButton m_addPointsButton = new JRadioButton(); //when this is selected, clicking on the BoundaryPanel will add points.
+  protected JRadioButton m_removePointsButton = new JRadioButton(); //when this is selected, clicking on the BoundaryPanel will remove points.
+  protected ButtonGroup m_addRemovePointsButtonGroup = new ButtonGroup();
+  protected JButton removeAllButton = new JButton ("Remove all"); //button to remove all points
+  protected JButton chooseButton = new JButton("Open File"); //button to choose a data file
+
 
   /**
    * Creates a new <code>BoundaryVisualizer</code> instance.
@@ -287,10 +321,19 @@ public class BoundaryVisualizer extends JPanel {
     m_classAttBox.setMaximumSize(COMBO_SIZE);
     m_classAttBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-	m_classPanel.setCindex(m_classAttBox.getSelectedIndex());
+        if (m_classAttBox.getItemCount() != 0)
+	{
+		try { 
+			m_classPanel.setCindex(m_classAttBox.getSelectedIndex());
+			plotTrainingData();
+		} catch (Exception ex) {}
+		
+		//set up the add points selector combo box. -jimmy
+		setUpClassValueSelectorCB();
+	}
       }
       });
-				    
+	    
 
     m_xAttBox.setMinimumSize(COMBO_SIZE);
     m_xAttBox.setPreferredSize(COMBO_SIZE);
@@ -310,6 +353,52 @@ public class BoundaryVisualizer extends JPanel {
 
     m_controlPanel = new JPanel();
     m_controlPanel.setLayout(new BorderLayout());
+    
+    //jimmy
+    JPanel dataChooseHolder = new JPanel(new BorderLayout());
+    dataChooseHolder.setBorder(BorderFactory.createTitledBorder("Dataset"));
+    dataChooseHolder.add(dataFileLabel, BorderLayout.WEST);
+    
+    m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+    m_FileChooser.addChoosableFileFilter(m_arffFileFilter);
+    chooseButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+		setInstancesFromFileQ();
+		int classIndex = m_classAttBox.getSelectedIndex();
+		if (m_trainingInstances != null && m_classifier != null && (m_trainingInstances.attribute(classIndex).isNominal())) {
+			m_startBut.setEnabled(true);
+		}
+		
+		plotTrainingData();
+	} catch (Exception ex) {
+		ex.printStackTrace(System.out);
+		System.err.println("exception");
+	}
+	
+      }
+    });
+    dataChooseHolder.add(chooseButton, BorderLayout.EAST);
+    
+    JPanel classifierHolder = new JPanel();
+    classifierHolder.setBorder(BorderFactory.createTitledBorder("Classifier"));
+    classifierHolder.setLayout(new BorderLayout());
+    m_classifierEditor.setClassType(weka.classifiers.Classifier.class);
+    
+    m_classifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
+    	public void propertyChange(PropertyChangeEvent evt) {
+		m_classifier = (Classifier)m_classifierEditor.getValue();
+		try {
+			int classIndex = m_classAttBox.getSelectedIndex();
+			if (m_trainingInstances != null && m_classifier != null && (m_trainingInstances.attribute(classIndex).isNominal())) {
+				m_startBut.setEnabled(true);
+			}
+		} catch (Exception ex) {};
+	}
+    });
+    classifierHolder.add(m_ClassifierPanel, BorderLayout.CENTER);
+    
+        
 
     JPanel cHolder = new JPanel();
     cHolder.setBorder(BorderFactory.createTitledBorder("Class Attribute"));
@@ -324,8 +413,9 @@ public class BoundaryVisualizer extends JPanel {
 
     JPanel colOne = new JPanel();
     colOne.setLayout(new BorderLayout());
-    colOne.add(cHolder, BorderLayout.NORTH);
-    colOne.add(vAttHolder, BorderLayout.CENTER);
+    colOne.add(dataChooseHolder, BorderLayout.NORTH); //jimmy
+    colOne.add(cHolder, BorderLayout.CENTER);
+    //colOne.add(vAttHolder, BorderLayout.SOUTH);
 
     JPanel tempPanel = new JPanel();
     tempPanel.setBorder(BorderFactory.
@@ -349,7 +439,9 @@ public class BoundaryVisualizer extends JPanel {
     ksP.add(m_kernelBandwidthText, BorderLayout.WEST);
     tempPanel.add(ksP);
     
-    colTwo.add(tempPanel, BorderLayout.NORTH);
+    colTwo.add(classifierHolder,BorderLayout.NORTH);//jimmy
+    //colTwo.add(tempPanel, BorderLayout.CENTER);
+    colTwo.add(vAttHolder, BorderLayout.CENTER);
 
     JPanel startPanel = new JPanel();
     startPanel.setBorder(BorderFactory.
@@ -358,16 +450,70 @@ public class BoundaryVisualizer extends JPanel {
     startPanel.add(m_startBut, BorderLayout.CENTER);
     startPanel.add(m_plotTrainingData, BorderLayout.WEST);
 
-    colTwo.add(startPanel, BorderLayout.SOUTH);
+    //colTwo.add(startPanel, BorderLayout.SOUTH);
 
     m_controlPanel.add(colOne, BorderLayout.WEST);
     m_controlPanel.add(colTwo, BorderLayout.CENTER);
     JPanel classHolder = new JPanel();
+    classHolder.setLayout(new BorderLayout()); //jimmy
     classHolder.setBorder(BorderFactory.createTitledBorder("Class color"));
-    classHolder.add(m_classPanel);
+    classHolder.add(m_classPanel, BorderLayout.CENTER);
     m_controlPanel.add(classHolder, BorderLayout.SOUTH);
 
     add(m_controlPanel, BorderLayout.NORTH);
+    
+    //classHolder.add(newWindowButton, BorderLayout.EAST);
+   
+    // set up the add-remove points widgets
+    m_addRemovePointsPanel.setBorder(BorderFactory.createTitledBorder("Add / remove data points"));
+    m_addRemovePointsPanel.setLayout(new GridBagLayout());
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.weightx = 1.0;
+    constraints.weighty = 1.0;
+    constraints.gridx = 0;
+    constraints.gridy = 0;
+    constraints.fill = GridBagConstraints.BOTH;
+    m_addRemovePointsPanel.add(m_addPointsButton);
+    constraints.gridx = 1;
+    m_addRemovePointsPanel.add(new JLabel("Add points"), constraints);
+    constraints.gridx = 2;
+    m_addRemovePointsPanel.add(classValueSelector);
+    constraints.gridx = 0;
+    constraints.gridy = 1;
+    m_addRemovePointsPanel.add(m_removePointsButton, constraints);
+    constraints.gridx = 1;
+    m_addRemovePointsPanel.add(new JLabel("Remove points"),constraints);
+    
+    
+    	removeAllButton.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if (m_trainingInstances != null)
+			{
+				if (m_startBut.getText().equals("Stop")) //we are plotting
+					return;
+				m_boundaryPanel.removeAllInstances();
+				computeBounds();
+				m_xAxisPanel.repaint(0,0,0,m_xAxisPanel.getWidth(), m_xAxisPanel.getHeight());
+				m_yAxisPanel.repaint(0,0,0,m_yAxisPanel.getWidth(), m_yAxisPanel.getHeight());
+	
+				try {m_boundaryPanel.plotTrainingData(); } catch (Exception ex) {}
+			}
+		}	
+	});
+    constraints.gridx = 2;
+    m_addRemovePointsPanel.add(removeAllButton, constraints);
+    
+//     m_addRemovePointsPanel.add(addPointsFrame, BorderLayout.NORTH);
+//     m_addRemovePointsPanel.add(removePointsFrame, BorderLayout.CENTER);
+    //m_addRemovePointsPanel.add(removeAllButton, BorderLayout.SOUTH);
+    
+    
+    m_addRemovePointsButtonGroup.add(m_addPointsButton);
+    m_addRemovePointsButtonGroup.add(m_removePointsButton);
+    m_addPointsButton.setSelected(true);
+        
+    //classHolder.add(m_addRemovePointsPanel, BorderLayout.SOUTH);
+    
 
     m_boundaryPanel = new BoundaryPanel(m_plotAreaWidth, m_plotAreaHeight);
     m_numberOfSamplesFromEachRegion = m_boundaryPanel.getNumSamplesPerRegion();
@@ -379,64 +525,81 @@ public class BoundaryVisualizer extends JPanel {
     m_kernelBandwidth = m_dataGenerator.getKernelBandwidth();
     m_kernelBandwidthText.setText(""+m_kernelBandwidth+"  ");
     m_boundaryPanel.setDataGenerator(m_dataGenerator);
-    add(m_boundaryPanel, BorderLayout.CENTER);
+    
+     
+    JPanel gfxPanel = new JPanel();
+    gfxPanel.setLayout(new BorderLayout());
+    gfxPanel.setBorder(BorderFactory.createEtchedBorder());
+    //add(gfxPanel, BorderLayout.CENTER);
+        
+   // gfxPanel.add(m_addRemovePointsPanel, BorderLayout.NORTH);
+    gfxPanel.add(m_boundaryPanel, BorderLayout.CENTER);
+    m_xAxisPanel = new AxisPanel(false);
+    gfxPanel.add(m_xAxisPanel, BorderLayout.SOUTH);
+    m_yAxisPanel = new AxisPanel(true);
+    gfxPanel.add(m_yAxisPanel, BorderLayout.WEST);
+    
+    JPanel containerPanel = new JPanel();
+    containerPanel.setLayout(new BorderLayout());
+    containerPanel.add(gfxPanel, BorderLayout.CENTER);
+    add(containerPanel, BorderLayout.CENTER);
+    
+    JPanel rightHandToolsPanel = new JPanel(); //this panel contains the widgets to the right of the BoundaryPanel.
+    rightHandToolsPanel.setLayout(new BoxLayout(rightHandToolsPanel, BoxLayout.PAGE_AXIS));
+    rightHandToolsPanel.add(m_addRemovePointsPanel);
+    
+    JButton newWindowButton = new JButton("Open a new window"); //the button for spawning a new window for the program.
+    //newWindowButton.setMaximumSize(new Dimension(100, 100));
+    //newWindowButton.setPreferredSize(new Dimension(120, m_addRemovePointsPanel.getHeight()));
+    newWindowButton.addActionListener(new ActionListener() {
+    	public void actionPerformed(ActionEvent e) {
+		try {
+			Instances newTrainingData = null;
+			Classifier newClassifier = null;
+			if (m_trainingInstances != null)
+				newTrainingData = new Instances(m_trainingInstances);
+			if (m_classifier != null)
+				newClassifier = Classifier.makeCopy(m_classifier);
+			createNewVisualizerWindow(newClassifier, newTrainingData);
+		} catch (Exception ex) {  ex.printStackTrace();}
+	}
+    });
+    JPanel newWindowHolder = new JPanel();
+    newWindowHolder.add(newWindowButton);
+    rightHandToolsPanel.add(newWindowHolder);
+    rightHandToolsPanel.add(tempPanel);
+    rightHandToolsPanel.add(startPanel);
+    
+    containerPanel.add(rightHandToolsPanel, BorderLayout.EAST);
+        
+    /*add(m_boundaryPanel, BorderLayout.CENTER);
 
     m_xAxisPanel = new AxisPanel(false);
     add(m_xAxisPanel, BorderLayout.SOUTH);
     m_yAxisPanel = new AxisPanel(true);
-    add(m_yAxisPanel, BorderLayout.WEST);
+    add(m_yAxisPanel, BorderLayout.WEST);*/
 
     m_startBut.setEnabled(false);
     m_startBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  if (m_startBut.getText().equals("Start")) {
 	    if (m_trainingInstances != null && m_classifier != null) {
-	      try {
-		int tempSamples = m_numberOfSamplesFromEachRegion;
 		try {
-		  tempSamples = 
-		    Integer.parseInt(m_regionSamplesText.getText().trim());
+			
+			int BPSuccessCode = setUpBoundaryPanel(); //set up the boundary panel, find out if it was successful or not.
+			
+			if (BPSuccessCode == 1)
+				JOptionPane.showMessageDialog(null,"Error: Kernel Bandwidth can't be less than zero!");
+			else if (BPSuccessCode == 2) {
+				JOptionPane.showMessageDialog(null,"Error: Kernel Bandwidth must be less than the number of training instances!");
+			} else {
+				m_boundaryPanel.start();
+				m_startBut.setText("Stop");
+				setControlEnabledStatus(false);
+			}
 		} catch (Exception ex) {
-		  m_regionSamplesText.setText(""+tempSamples);
+			ex.printStackTrace();
 		}
-		m_numberOfSamplesFromEachRegion = tempSamples;
-		m_boundaryPanel.
-		  setNumSamplesPerRegion(tempSamples);
-
-		tempSamples = m_generatorSamplesBase;
-		try {
-		  tempSamples = 
-		    Integer.parseInt(m_generatorSamplesText.getText().trim());
-		} catch (Exception ex) {
-		  m_generatorSamplesText.setText(""+tempSamples);
-		}
-		m_generatorSamplesBase = tempSamples;
-		m_boundaryPanel.setGeneratorSamplesBase((double)tempSamples);
-
-		tempSamples = m_kernelBandwidth;
-		try {
-		  tempSamples = 
-		    Integer.parseInt(m_kernelBandwidthText.getText().trim());
-		} catch (Exception ex) {
-		  m_kernelBandwidthText.setText(""+tempSamples);
-		}
-		m_kernelBandwidth = tempSamples;
-		m_dataGenerator.setKernelBandwidth(tempSamples);
-
-		m_trainingInstances.
-		  setClassIndex(m_classAttBox.getSelectedIndex());
-		m_boundaryPanel.setClassifier(m_classifier);
-		m_boundaryPanel.setTrainingData(m_trainingInstances);
-		m_boundaryPanel.setXAttribute(m_xIndex);
-		m_boundaryPanel.setYAttribute(m_yIndex);
-		m_boundaryPanel.
-		  setPlotTrainingData(m_plotTrainingData.isSelected());
-		m_boundaryPanel.start();
-		m_startBut.setText("Stop");
-		setControlEnabledStatus(false);
-	      } catch (Exception ex) {
-		ex.printStackTrace();
-	      }
 	    }
 	  } else {
 	    m_boundaryPanel.stopPlotting();
@@ -467,10 +630,50 @@ public class BoundaryVisualizer extends JPanel {
 	  } catch (Exception ex) {}
 
 	  m_boundaryPanel.replot();
+	  
 	}
       });
+      
+    //set up a mouse listener for the boundary panel.
+    m_boundaryPanel.addMouseListener(new MouseAdapter() {
+    	public void mouseClicked(MouseEvent e) {
+// 		System.err.println("boundary panel mouseClick " + e.getX() + " " + e.getY());
+		if (m_trainingInstances != null) {
+			if (m_startBut.getText().equals("Stop")) //we are plotting
+				return;
+		
+			if (m_addPointsButton.isSelected()) {//we are in add mode
+				double classVal = 0;
+				boolean validInput = true;
+				if (m_trainingInstances.attribute(m_classAttBox.getSelectedIndex()).isNominal()) //class is nominal
+					classVal = (double)classValueSelector.getSelectedIndex();
+				else {
+					String indexStr = "";
+					try {					
+						indexStr = (String)classValueSelector.getSelectedItem();
+						classVal = Double.parseDouble(indexStr);
+					} catch (Exception ex) {
+						if (indexStr == null) indexStr = "";
+						JOptionPane.showMessageDialog(null,"Error adding a point: \"" + indexStr + "\""
+							+ " is not a valid class value.");
+						validInput = false;
+					}
+				}
+				//System.err.println("classVal is " + classVal);
+				if (validInput)
+					m_boundaryPanel.addTrainingInstanceFromMouseLocation(e.getX(), e.getY(), m_classAttBox.getSelectedIndex(), classVal);
+			}
+			else { //remove mode
+				m_boundaryPanel.removeTrainingInstanceFromMouseLocation(e.getX(), e.getY());
+			}
+			try{ plotTrainingData(); } catch (Exception ex) {} //jimmy
+			m_xAxisPanel.repaint(0,0,0,m_xAxisPanel.getWidth(), m_xAxisPanel.getHeight());
+    			m_yAxisPanel.repaint(0,0,0,m_yAxisPanel.getWidth(), m_yAxisPanel.getHeight());
+		}
+	}
+    });
   }
-
+  
   /**
    * Set the enabled status of the controls
    *
@@ -484,6 +687,12 @@ public class BoundaryVisualizer extends JPanel {
     m_generatorSamplesText.setEnabled(status);
     m_kernelBandwidthText.setEnabled(status);
     m_plotTrainingData.setEnabled(status);
+    removeAllButton.setEnabled(status);
+    classValueSelector.setEnabled(status);
+    m_addPointsButton.setEnabled(status);
+    m_removePointsButton.setEnabled(status);
+    m_FileChooser.setEnabled(status);
+    chooseButton.setEnabled(status);
   }
 
   /**
@@ -495,9 +704,27 @@ public class BoundaryVisualizer extends JPanel {
   public void setClassifier(Classifier newClassifier) throws Exception {
 
     m_classifier = newClassifier;
+    
+    try {
+	int classIndex = m_classAttBox.getSelectedIndex();
+	
+	if ((m_classifier != null) && (m_trainingInstances != null) &&
+		(m_trainingInstances.attribute(classIndex).isNominal())) {
+		m_startBut.setEnabled(true);
+	}
+	else
+		m_startBut.setEnabled(false);
+    } catch (Exception e) {}
+    
   }
-
+  
+  /** Sets up the bounds on our x and y axes to fit the dataset.
+      Also repaints the x and y axes.
+  */
   private void computeBounds() {
+  
+    m_boundaryPanel.computeMinMaxAtts(); //delegate to the BoundaryPanel
+  
     String xName = (String)m_xAttBox.getSelectedItem();
     if (xName == null) {
       return;
@@ -518,36 +745,14 @@ public class BoundaryVisualizer extends JPanel {
 	m_yIndex = i;
       }
     }
-
-    if (m_xIndex != -1 && m_yIndex != -1) {
-      // find the min and max values
-      m_minX = Double.MAX_VALUE;
-      m_minY = Double.MAX_VALUE;
-      m_maxX = Double.MIN_VALUE;
-      m_maxY = Double.MIN_VALUE;
-
-      for (int i = 0; i < m_trainingInstances.numInstances(); i++) {
-	Instance inst = m_trainingInstances.instance(i);
-	if (!inst.isMissing(m_xIndex)) {
-	  double value = inst.value(m_xIndex);
-	  if (value < m_minX) {
-	    m_minX = value;
-	  }
-	  if (value > m_maxX) {
-	    m_maxX = value;
-	  }
-	}
-	if (!inst.isMissing(m_yIndex)) {
-	  double value = inst.value(m_yIndex);
-	  if (value < m_minY) {
-	    m_minY = value;
-	  }
-	  if (value > m_maxY) {
-	    m_maxY = value;
-	  }
-	}
-      }
-    }
+    
+    m_minX = m_boundaryPanel.getMinXBound();
+    m_minY = m_boundaryPanel.getMinYBound();
+    m_maxX = m_boundaryPanel.getMaxXBound();
+    m_maxY = m_boundaryPanel.getMaxYBound();
+    //System.err.println("setting bounds to " + m_minX + " " + m_minY + " " + m_maxX + " " + m_maxY);
+    m_xAxisPanel.repaint(0,0,0,m_xAxisPanel.getWidth(), m_xAxisPanel.getHeight());
+    m_yAxisPanel.repaint(0,0,0,m_yAxisPanel.getWidth(), m_yAxisPanel.getHeight());
   }
 
   /**
@@ -565,6 +770,12 @@ public class BoundaryVisualizer extends JPanel {
    * @param inst the instances to use
    */
   public void setInstances(Instances inst) throws Exception {
+    if (inst == null) {
+    	m_trainingInstances = inst;
+    	m_classPanel.setInstances(m_trainingInstances);
+	return;
+    }  
+    
     if (inst.numAttributes() < 3) {
       throw new Exception("Not enough attributes in the data to visualize!");
     }
@@ -594,6 +805,9 @@ public class BoundaryVisualizer extends JPanel {
     if (xAttNames.size() > 1) {
       m_yAttBox.setSelectedIndex(1);
     }
+    
+    if (classAttNames.length > 0)
+    	m_classAttBox.setSelectedIndex(classAttNames.length - 1); //select last attribute as class by default.  -jimmy
 
     m_classAttBox.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
@@ -613,6 +827,7 @@ public class BoundaryVisualizer extends JPanel {
 	    }
 	    computeBounds();
 	    repaint();
+	    try{ plotTrainingData(); } catch (Exception ex) {} //jimmy
 	  }
 	}
       });
@@ -629,12 +844,38 @@ public class BoundaryVisualizer extends JPanel {
 	    }
 	    computeBounds();
 	    repaint();
+	    try{ plotTrainingData(); } catch (Exception ex) {}
 	  }
 	}
       });
+      
+    //set up the add points selector combo box
+    setUpClassValueSelectorCB();
+    
+    configureForClassAttribute();
+    
+          
     computeBounds();
     revalidate();
     repaint();
+  }
+  
+  /** Set up the combo box that chooses which class values to use when adding data points.
+  */
+  private void setUpClassValueSelectorCB() {
+    classValueSelector.removeAllItems();
+    int classAttribute = m_classAttBox.getSelectedIndex();
+    //System.err.println(m_trainingInstances.numClasses() + " classes");
+    m_trainingInstances.setClassIndex(classAttribute);
+    if (m_trainingInstances.attribute(classAttribute).isNominal()) {
+    	classValueSelector.setEditable(false);
+    	for (int i = 0; i < /*m_trainingInstances.numDistinctValues(classAttribute)*/m_trainingInstances.numClasses(); i++)
+    		classValueSelector.insertItemAt(m_trainingInstances.attribute(classAttribute).value(i) , i);
+	classValueSelector.setSelectedIndex(0);
+    }
+    else {
+    	classValueSelector.setEditable(true);
+    }
   }
   
   /**
@@ -644,21 +885,186 @@ public class BoundaryVisualizer extends JPanel {
     int classIndex = m_classAttBox.getSelectedIndex();
     if (classIndex >= 0) {
       // see if this is a nominal attribute
-      if (!m_trainingInstances.attribute(classIndex).isNominal()) {
+      if (!m_trainingInstances.attribute(classIndex).isNominal() || m_classifier == null) {
 	m_startBut.setEnabled(false);
       } else {
 	m_startBut.setEnabled(true);
-	// set up class colours
+      }
+      // set up class colours
 	FastVector colors = new FastVector();
-	for (int i = 0; i < 
-	       m_trainingInstances.attribute(classIndex).numValues(); i++) {
-	  colors.addElement(BoundaryPanel.
-		    DEFAULT_COLORS[i % BoundaryPanel.DEFAULT_COLORS.length]);
-	  m_classPanel.setColours(colors);	  
-	  m_boundaryPanel.setColors(colors);
+	if (!m_trainingInstances.attribute(m_classAttBox.getSelectedIndex()).isNominal()) //this if by jimmy
+	{
+		for (int i = 0; i < BoundaryPanel.DEFAULT_COLORS.length; i++)
+			colors.addElement(BoundaryPanel.DEFAULT_COLORS[i]);
+	}
+	else {
+		for (int i = 0; i < 
+		m_trainingInstances.attribute(classIndex).numValues(); i++) {
+			colors.addElement(BoundaryPanel.
+				DEFAULT_COLORS[i % BoundaryPanel.DEFAULT_COLORS.length]);
+// 			m_classPanel.setColours(colors);	  
+// 			m_boundaryPanel.setColors(colors);
+		}
+	}
+	m_classPanel.setColours(colors); //jimmy
+	m_boundaryPanel.setColors(colors);
+   }
+  }
+  
+    
+  /**
+   * Queries the user for a file to load instances from, then loads the
+   * instances in a background process. This is done in the IO
+   * thread, and an error message is popped up if the IO thread is busy.
+   */
+  public void setInstancesFromFileQ() {
+    
+//     if (m_IOThread == null) {
+      int returnVal = m_FileChooser.showOpenDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File selected = m_FileChooser.getSelectedFile();
+	
+	try
+	{
+	java.io.Reader r = new java.io.BufferedReader(
+				new java.io.FileReader(selected));
+	Instances i = new Instances(r);
+	setInstances(i);
+	
+	//dataFileLabel.setText(selected.getName());
+	dataFileLabel.setText(i.relationName());
+	} catch (Exception e)
+	{
+		JOptionPane.showMessageDialog(this,"Can't load at this time,\n"
+				    + "currently busy with other IO",
+				    "Load Instances",
+				    JOptionPane.WARNING_MESSAGE);
+		    e.printStackTrace();
+	
 	}
       }
-    }
+  }
+  
+  /** Sets up the BoundaryPanel object so that it is ready for plotting.
+   *	@returns an error code:
+   *		0 - SUCCESS
+   *		1 - ERROR - Kernel bandwidth < 0
+   *		2 - ERROR - Kernel bandwidth >= number of training instances.
+   */
+  public int setUpBoundaryPanel() throws Exception {
+  	int returner = 0; //OK code.
+  	int tempSamples = m_numberOfSamplesFromEachRegion;
+		try {
+		  tempSamples = 
+		    Integer.parseInt(m_regionSamplesText.getText().trim());
+		} catch (Exception ex) {
+		  m_regionSamplesText.setText(""+tempSamples);
+		}
+		m_numberOfSamplesFromEachRegion = tempSamples;
+		m_boundaryPanel.
+		  setNumSamplesPerRegion(tempSamples);
+
+		tempSamples = m_generatorSamplesBase;
+		try {
+		  tempSamples = 
+		    Integer.parseInt(m_generatorSamplesText.getText().trim());
+		} catch (Exception ex) {
+		  m_generatorSamplesText.setText(""+tempSamples);
+		}
+		m_generatorSamplesBase = tempSamples;
+		m_boundaryPanel.setGeneratorSamplesBase((double)tempSamples);
+
+		tempSamples = m_kernelBandwidth;
+		try {
+		  tempSamples = 
+		    Integer.parseInt(m_kernelBandwidthText.getText().trim());
+		} catch (Exception ex) {
+		  m_kernelBandwidthText.setText(""+tempSamples);
+		}
+		m_kernelBandwidth = tempSamples;
+		m_dataGenerator.setKernelBandwidth(tempSamples);
+		
+		if (m_kernelBandwidth < 0)	returner = 1;
+		if (m_kernelBandwidth >= m_trainingInstances.numInstances())	returner = 2;
+
+		m_trainingInstances.
+		  setClassIndex(m_classAttBox.getSelectedIndex());
+		m_boundaryPanel.setClassifier(m_classifier);
+		m_boundaryPanel.setTrainingData(m_trainingInstances);
+		m_boundaryPanel.setXAttribute(m_xIndex);
+		m_boundaryPanel.setYAttribute(m_yIndex);
+		m_boundaryPanel.
+		  setPlotTrainingData(m_plotTrainingData.isSelected());
+
+	return returner;
+  }
+  
+  /** Plots the training data on-screen.  Also does all of the setup required 
+   *  for this to work.
+  */
+  public void plotTrainingData() throws Exception {
+  	m_boundaryPanel.initialize();
+ 	setUpBoundaryPanel();
+	computeBounds();
+	m_boundaryPanel.plotTrainingData();
+  }
+  
+  /** Stops the plotting thread.
+  */
+  public void stopPlotting() {
+  	m_boundaryPanel.stopPlotting();
+  }
+  
+  /** Creates a new GUI window with all of the BoundaryVisualizer trappings,
+   *  @param classifier The classifier to use in the new window.  May be null.
+   *  @param instances  The dataset to visualize on in the new window.  May be null.
+   */
+  public static void createNewVisualizerWindow(Classifier classifier, Instances instances) throws Exception {
+      windowCount++;
+  
+      final javax.swing.JFrame jf = 
+	new javax.swing.JFrame("Weka classification boundary visualizer");
+      jf.getContentPane().setLayout(new BorderLayout());
+      final BoundaryVisualizer bv = new BoundaryVisualizer();
+      jf.getContentPane().add(bv, BorderLayout.CENTER);
+      jf.setSize(bv.getMinimumSize());
+      jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	  public void windowClosing(java.awt.event.WindowEvent e) {
+	    windowCount--;
+	    bv.stopPlotting();
+	    jf.dispose();
+	    if (windowCount == 0) {
+		System.exit(0);
+	    }
+	  }
+	});
+
+      jf.pack();
+      jf.setVisible(true);
+      jf.setResizable(false);
+      Dimension t = jf.getSize();
+      
+      if (classifier == null)
+      	bv.setClassifier(null);
+      else {
+	bv.setClassifier(classifier);
+	bv.m_classifierEditor.setValue(classifier);
+      }
+      
+      if (instances == null)
+      	bv.setInstances(null);
+      else
+      {
+	bv.setInstances(instances);
+	
+	try{
+		bv.dataFileLabel.setText(instances.relationName());
+		bv.plotTrainingData();
+		bv.m_classPanel.setCindex(bv.m_classAttBox.getSelectedIndex());
+		bv.repaint(0,0,0,bv.getWidth(), bv.getHeight());
+	} catch (Exception ex) {}
+      }
+  
   }
 
   /**
@@ -669,43 +1075,27 @@ public class BoundaryVisualizer extends JPanel {
   public static void main(String [] args) {
 
     try {
-      if (args.length < 2) {
-	System.err.println("Usage : BoundaryPanel <dataset> <classifier "
-			   +"[classifier options]>");
-	System.exit(1);
-      }
-      final javax.swing.JFrame jf = 
-	new javax.swing.JFrame("Weka classification boundary visualizer");
-      jf.getContentPane().setLayout(new BorderLayout());
-      BoundaryVisualizer bv = new BoundaryVisualizer();
-      jf.getContentPane().add(bv, BorderLayout.CENTER);
-      jf.setSize(bv.getMinimumSize());
-      jf.addWindowListener(new java.awt.event.WindowAdapter() {
-	  public void windowClosing(java.awt.event.WindowEvent e) {
-	    jf.dispose();
-	    System.exit(0);
-	  }
-	});
-
-      jf.pack();
-      jf.setVisible(true);
-      jf.setResizable(false);
-      Dimension t = jf.getSize();
-
-      System.err.println("Loading instances from : "+args[0]);
-      java.io.Reader r = new java.io.BufferedReader(
-			 new java.io.FileReader(args[0]));
-      Instances i = new Instances(r);
-      bv.setInstances(i);
-      String [] argsR = null;
-      if (args.length > 2) {
-	argsR = new String [args.length-2];
-	for (int j = 2; j < args.length; j++) {
-	  argsR[j-2] = args[j];
+    	if (args.length < 2) {
+		createNewVisualizerWindow(null, null);
 	}
-      }
-      Classifier c = Classifier.forName(args[1], argsR);
-      bv.setClassifier(c);
+	else {
+		String [] argsR = null;
+		if (args.length > 2) {
+			argsR = new String [args.length-2];
+			for (int j = 2; j < args.length; j++) {
+			argsR[j-2] = args[j];
+			}
+		}
+		Classifier c = Classifier.forName(args[1], argsR);
+		
+		System.err.println("Loading instances from : "+args[0]);
+		java.io.Reader r = new java.io.BufferedReader(
+					new java.io.FileReader(args[0]));
+		Instances i = new Instances(r);
+	
+		createNewVisualizerWindow(c, i);
+	}
+      
     } catch (Exception ex) {
       ex.printStackTrace();
     }
