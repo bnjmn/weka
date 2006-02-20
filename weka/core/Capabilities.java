@@ -33,7 +33,7 @@ import java.util.Vector;
  * ensures that new features have to be enabled explicitly.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -106,6 +106,8 @@ public class Capabilities
     for (Capability cap: Capability.values()) {
       if (c.handles(cap))
         enable(cap);
+      else
+	disable(cap);
     }
 
     setMinimumNumberInstances(c.getMinimumNumberInstances());
