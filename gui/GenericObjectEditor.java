@@ -102,7 +102,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -411,6 +411,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       for (Capability cap: Capability.values()) {
 	if (model.getChecked(model.indexOf(cap)))
           m_Capabilities.enable(cap);
+	else
+	  m_Capabilities.disable(cap);
       }
     }
     
