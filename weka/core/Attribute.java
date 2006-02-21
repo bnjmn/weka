@@ -37,21 +37,27 @@ import java.io.IOException;
  * Class for handling an attribute. Once an attribute has been created,
  * it can't be changed. <p>
  *
- * Three attribute types are supported:
+ * The following attribute types are supported:
  * <ul>
- *    <li> numeric: <ul>
+ *    <li> numeric: <br/>
  *         This type of attribute represents a floating-point number.
- *    </ul>
- *    <li> nominal: <ul>
+ *    </li>
+ *    <li> nominal: <br/>
  *         This type of attribute represents a fixed set of nominal values.
- *    </ul>
- *    <li> string: <ul>
+ *    </li>
+ *    <li> string: <br/>
  *         This type of attribute represents a dynamically expanding set of
- *         nominal values. String attributes are not used by the learning
- *         schemes in Weka. They can be used, for example,  to store an 
- *         identifier with each instance in a dataset.
- *    </ul>
+ *         nominal values. Usually used in text classification.
+ *    </li>
+ *    <li> date: <br/>
+ *         This type of attribute represents a date, internally represented as 
+ *         floating-point number storing the milliseconds since January 1, 
+ *         1970, 00:00:00 GMT. The string representation of the date must be
+ *         <a href="http://www.iso.org/iso/en/prods-services/popstds/datesandtime.html" target="_blank">
+ *         ISO-8601</a> compliant, the default is <code>yyyy-MM-dd'T'HH:mm:ss</code>.
+ *    </li>
  * </ul>
+ * 
  * Typical usage (code from the main() method of this class): <p>
  *
  * <code>
@@ -74,7 +80,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32.2.2 $
+ * @version $Revision: 1.32.2.3 $
  */
 public class Attribute implements Copyable, Serializable {
 
