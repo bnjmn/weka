@@ -88,7 +88,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class ResultsPanel extends JPanel {
 
@@ -755,9 +755,9 @@ public class ResultsPanel extends JPanel {
       username=dbd.getUsername();
       passwd=dbd.getPassword();
       m_InstanceQuery.setDatabaseURL(dbaseURL);
-      
       m_InstanceQuery.setUsername(username);
       m_InstanceQuery.setPassword(passwd);
+      m_InstanceQuery.setDebug(dbd.getDebug());
       
       m_InstanceQuery.connectToDatabase();
       if (!m_InstanceQuery.experimentIndexExists()) {
