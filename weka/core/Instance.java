@@ -26,12 +26,12 @@ import java.util.*;
 import java.io.*;
 
 /**
- * Class for handling an instance. All values (numeric, nominal, or
- * string) are internally stored as floating-point numbers. If an
- * attribute is nominal (or a string), the stored value is the index
- * of the corresponding nominal (or string) value in the attribute's
- * definition. We have chosen this approach in favor of a more elegant
- * object-oriented approach because it is much faster. <p>
+ * Class for handling an instance. All values (numeric, date, nominal, string
+ * or relational) are internally stored as floating-point numbers. If an
+ * attribute is nominal (or a string or relational), the stored value is the
+ * index of the corresponding nominal (or string or relational) value in the
+ * attribute's definition. We have chosen this approach in favor of a more
+ * elegant object-oriented approach because it is much faster. <p>
  *
  * Typical usage (code from the main() method of this class): <p>
  *
@@ -62,7 +62,7 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class Instance implements Copyable, Serializable {
   
