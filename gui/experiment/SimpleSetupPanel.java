@@ -98,7 +98,7 @@ import javax.swing.event.DocumentEvent;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class SimpleSetupPanel extends JPanel {
 
@@ -1243,7 +1243,7 @@ public class SimpleSetupPanel extends JPanel {
     ((DatabaseResultListener)m_Exp.getResultListener()).setUsername(dbd.getUsername());
     ((DatabaseResultListener)m_Exp.getResultListener()).setPassword(dbd.getPassword());
     ((DatabaseResultListener)m_Exp.getResultListener()).setDatabaseURL(dbd.getURL());
-   
+    ((DatabaseResultListener)m_Exp.getResultListener()).setDebug(dbd.getDebug());
   }
   /**
    * Lets user browse for a destination file..
