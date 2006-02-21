@@ -24,13 +24,21 @@
 package weka.experiment;
 
 
-import java.io.*;
-import java.math.*;
-import java.net.InetAddress;
-import java.sql.*;
-import java.util.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.util.Date;
-import weka.core.*;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Convert the results of a database query into instances. The jdbc
@@ -44,10 +52,30 @@ import weka.core.*;
  * jdbcURL=jdbc:idb=experiments.prp
  * </pre></code><p>
  *
- * Command line use just outputs the instances to System.out.
+ * Command line use just outputs the instances to System.out. <p/>
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * -Q &lt;query&gt; <br/>
+ *  SQL query to execute. <p/>
+ * 
+ * -S <br/>
+ *  Return sparse rather than normal instances. <p/>
+ * 
+ * -U &lt;username&gt; <br/>
+ *  The username to use for connecting. <p/>
+ * 
+ * -P &lt;password&gt; <br/>
+ *  The password to use for connecting. <p/>
+ * 
+ * -D <br/>
+ *  Enables debug output. <p/>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class InstanceQuery extends DatabaseUtils implements OptionHandler {
 
@@ -60,7 +88,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
   /**
    * Sets up the database drivers
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public InstanceQuery() throws Exception {
 
@@ -90,28 +118,38 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
          new Option("\tThe password to use for connecting.", 
                     "P", 1, "-P <password>"));
      
+     result.addElement(
+         new Option("\tEnables debug output.", 
+                    "D", 0, "-D"));
+     
      return result.elements();
    }
 
   /**
    * Parses a given list of options.
    *
-   * Valid options are:<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * -Q query<br>
-   * The query to execute.<p>
+   * -Q &lt;query&gt; <br/>
+   *  SQL query to execute. <p/>
    * 
-   * -S <br>
-   * Return a set of sparse instances rather than normal instances.<p>
+   * -S <br/>
+   *  Return sparse rather than normal instances. <p/>
    * 
-   * -U username <br>
-   * The username to connect with.<p>
+   * -U &lt;username&gt; <br/>
+   *  The username to use for connecting. <p/>
    * 
-   * -P password <br>
-   * The password to connect with.<p>
+   * -P &lt;password&gt; <br/>
+   *  The password to use for connecting. <p/>
+   * 
+   * -D <br/>
+   *  Enables debug output. <p/>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions (String[] options)
     throws Exception {
@@ -131,6 +169,8 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     tmpStr = Utils.getOption('P',options);
     if (tmpStr.length() != 0)
       setPassword(tmpStr);
+
+    setDebug(Utils.getFlag('D',options));
   }
 
   /**
@@ -208,6 +248,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
       options.add(getPassword());
     }
 
+    if (getDebug())
+      options.add("-D");
+
     return (String[]) options.toArray(new String[options.size()]);
   }
 
@@ -216,7 +259,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    * to convert a table into a set of instances
    *
    * @return the instances contained in the result of the query
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public Instances retrieveInstances() throws Exception {
     return retrieveInstances(m_Query);
@@ -228,26 +271,30 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    * @param query the query to convert to instances
    * @return the instances contained in the result of the query, NULL if the
    *         SQL query doesn't return a ResultSet, e.g., DELETE/INSERT/UPDATE
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public Instances retrieveInstances(String query) throws Exception {
 
-    System.err.println("Executing query: " + query);
+    if (m_Debug) 
+      System.err.println("Executing query: " + query);
     connectToDatabase();
     if (execute(query) == false) {
       if (m_PreparedStatement.getUpdateCount() == -1) {
         throw new Exception("Query didn't produce results");
       }
       else {
-        System.err.println(m_PreparedStatement.getUpdateCount() 
-            + " rows affected.");
+        if (m_Debug) 
+          System.err.println(m_PreparedStatement.getUpdateCount() 
+              + " rows affected.");
         return null;
       }
     }
     ResultSet rs = getResultSet();
-    System.err.println("Getting metadata...");
+    if (m_Debug) 
+      System.err.println("Getting metadata...");
     ResultSetMetaData md = rs.getMetaData();
-    System.err.println("Completed getting metadata...");
+    if (m_Debug) 
+      System.err.println("Completed getting metadata...");
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
@@ -314,13 +361,16 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     }
 
     // Step through the tuples
-    System.err.println("Creating instances...");
+    if (m_Debug) 
+      System.err.println("Creating instances...");
     FastVector instances = new FastVector();
     int rowCount = 0;
     while(rs.next()) {
       if (rowCount % 100 == 0) {
-	System.err.print("read " + rowCount + " instances \r");
-	System.err.flush();
+        if (m_Debug)  {
+	  System.err.print("read " + rowCount + " instances \r");
+	  System.err.flush();
+        }
       }
       double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
@@ -431,7 +481,8 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     //disconnectFromDatabase();  (perhaps other queries might be made)
     
     // Create the header and add the instances to the dataset
-    System.err.println("Creating header...");
+    if (m_Debug) 
+      System.err.println("Creating header...");
     FastVector attribInfo = new FastVector();
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
