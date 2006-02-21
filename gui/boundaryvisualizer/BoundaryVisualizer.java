@@ -76,7 +76,7 @@ import java.awt.Dimension;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @since 1.0
  * @see JPanel 
  */
@@ -368,9 +368,10 @@ public class BoundaryVisualizer extends JPanel {
 		int classIndex = m_classAttBox.getSelectedIndex();
 		if (m_trainingInstances != null && m_classifier != null && (m_trainingInstances.attribute(classIndex).isNominal())) {
 			m_startBut.setEnabled(true);
+			plotTrainingData();
 		}
 		
-		plotTrainingData();
+		
 	} catch (Exception ex) {
 		ex.printStackTrace(System.out);
 		System.err.println("exception");
