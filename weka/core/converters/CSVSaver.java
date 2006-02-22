@@ -50,7 +50,7 @@ import weka.core.Option;
  * 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Saver
  */
 public class CSVSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
@@ -173,6 +173,8 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
               }
               m_incrementalCounter = 0;
               resetStructure();
+              outW = null;
+              resetWriter();
           }
       }
   }  
@@ -220,6 +222,9 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
+      outW = null;
+      resetWriter();
+      setWriteMode(CANCEL);
       
   }
 
@@ -267,3 +272,4 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
 }
   
   
+

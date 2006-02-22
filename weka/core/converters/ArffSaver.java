@@ -50,7 +50,7 @@ import weka.core.Option;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Saver
  */
 public class ArffSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
@@ -163,6 +163,8 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
               }
               m_incrementalCounter = 0;
               resetStructure();
+              outW = null;
+              resetWriter();
           }
       }
   }
@@ -188,6 +190,9 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
+      outW = null;
+      resetWriter();
+      setWriteMode(CANCEL);
   }
 
   /**
@@ -232,3 +237,4 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
 }
   
   
+
