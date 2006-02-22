@@ -51,7 +51,7 @@ import weka.core.Option;
  * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Saver
  */
 public class SerializedInstancesSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
@@ -158,6 +158,9 @@ public class SerializedInstancesSaver extends AbstractFileSaver implements Batch
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
+      outW = null;
+      resetWriter();
+      setWriteMode(CANCEL);
   }
 
   /**
@@ -192,3 +195,4 @@ public class SerializedInstancesSaver extends AbstractFileSaver implements Batch
 }
   
   
+

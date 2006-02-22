@@ -57,7 +57,7 @@ import weka.core.FastVector;
  * The index of the class attribute. first and last are valid as well (default: last). <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Saver
  */
 public class C45Saver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, OptionHandler {
@@ -230,6 +230,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
               setFileExtension(".names");
               m_incrementalCounter = 0;
               resetStructure();
+              outW = null;
+              resetWriter();
           }
       }
   }
@@ -333,6 +335,9 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
       outW.close();
       setFileExtension(".names");
       setWriteMode(WAIT);
+      outW = null;
+      resetWriter();
+      setWriteMode(CANCEL);
   }
   
   
@@ -506,3 +511,4 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
 }
   
   
+
