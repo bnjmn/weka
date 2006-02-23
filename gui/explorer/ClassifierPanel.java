@@ -141,7 +141,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.86 $
+ * @version $Revision: 1.87 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -1781,7 +1781,7 @@ public class ClassifierPanel extends JPanel {
       String plotName = sp.getName(); 
 	final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
-	jf.setSize(500,400);
+	jf.setSize(600,400);
 	jf.getContentPane().setLayout(new BorderLayout());
 
 	jf.getContentPane().add(sp, BorderLayout.CENTER);
