@@ -22,64 +22,50 @@
 
 package weka.gui.visualize;
 
-import weka.gui.*;
-import weka.classifiers.*;
-import weka.core.Instances;
-import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Utils;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
 
-import java.util.Random;
-import java.io.File;
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-
-import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Font;
-import java.awt.event.InputEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.Dimension;
-
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.BorderFactory;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.JColorChooser;
-import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JViewport;
-import javax.swing.JSlider;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-
 import java.awt.Color;
-import java.awt.FontMetrics;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Writer;
+import java.util.Random;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 
 /** 
  * This panel allows the user to visualize a dataset (and if provided) a
@@ -100,7 +86,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class VisualizePanel extends PrintablePanel {
 
@@ -122,12 +108,6 @@ public class VisualizePanel extends PrintablePanel {
     protected int m_yIndex=0;
     protected int m_cIndex=0;
     protected int m_sIndex=0;
- 
-    /** Axis padding */
-    private final int m_axisPad = 5;
-
-    /** Tick size */
-    private final int m_tickSize = 5;
 
     /**the offsets of the axes once label metrics are calculated */
     private int m_XaxisStart=0;
@@ -147,7 +127,6 @@ public class VisualizePanel extends PrintablePanel {
     /** contains the position of the mouse (used for rubberbanding). */
     private Dimension m_newMousePos;
 
-    //////
     /** Constructor */
     public PlotPanel() {
       this.setBackground(m_plot2D.getBackground());
@@ -163,7 +142,7 @@ public class VisualizePanel extends PrintablePanel {
       this.addMouseListener(new MouseAdapter() {
 	  ///////      
 	  public void mousePressed(MouseEvent e) {
-	    if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
+	    if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK) {
 	      //
 	      if (m_sIndex == 0) {
 		//do nothing it will get dealt to in the clicked method
@@ -197,14 +176,14 @@ public class VisualizePanel extends PrintablePanel {
 	    
 	    if ((m_sIndex == 2 || m_sIndex == 3) && 
 		(m_createShape || 
-		 (e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK)) {
+		 (e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK)) {
 	      if (m_createShape) {
 		//then it has been started already.
 
 		Graphics g = m_plot2D.getGraphics();
 		g.setColor(Color.black);
 		g.setXORMode(Color.white);
-		if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK &&
+		if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK &&
                     !e.isAltDown()) {
 		  m_shapePoints.addElement(new 
 		    Double(m_plot2D.convertToAttribX(e.getX())));
@@ -379,7 +358,7 @@ public class VisualizePanel extends PrintablePanel {
 		g.dispose();
 		//repaint();
 	      }
-	      else if ((e.getModifiers() & e.BUTTON1_MASK) == e.BUTTON1_MASK) {
+	      else if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) == MouseEvent.BUTTON1_MASK) {
 		//then this is the first point
 		m_createShape = true;
 		m_shapePoints = new FastVector(17);
@@ -759,6 +738,7 @@ public class VisualizePanel extends PrintablePanel {
      * that they land on the screen
      * @param x1 The x coord.
      * @param y1 The y coord.
+     * @return true if the point would land on the screen
      */
     private boolean checkPoints(double x1, double y1) {
       if (x1 < 0 || x1 > this.getSize().width || y1 < 0 
@@ -1080,7 +1060,7 @@ public class VisualizePanel extends PrintablePanel {
 	    m_attrib.setInstances(newPlot.m_plotInstances);
 	    m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
 	    GridBagConstraints constraints = new GridBagConstraints();
-	    constraints.fill = constraints.BOTH;
+	    constraints.fill = GridBagConstraints.BOTH;
 	    constraints.insets = new Insets(0, 0, 0, 0);
 	    constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
 	    constraints.gridwidth=1;constraints.gridheight=1;
@@ -1133,7 +1113,7 @@ public class VisualizePanel extends PrintablePanel {
       }
 
       GridBagConstraints constraints = new GridBagConstraints();
-      constraints.fill = constraints.BOTH;
+      constraints.fill = GridBagConstraints.BOTH;
       constraints.insets = new Insets(0, 0, 0, 0);
       constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
       constraints.gridwidth=1;constraints.gridheight=1;
@@ -1145,6 +1125,9 @@ public class VisualizePanel extends PrintablePanel {
 
     /**
      * Reset the visualize panel's buttons and the plot panels instances
+     * 
+     * @param inst	the data
+     * @param cIndex	the color index
      */
     private void plotReset(Instances inst, int cIndex) {
       if (m_splitListener == null) {
@@ -1595,6 +1578,9 @@ public class VisualizePanel extends PrintablePanel {
   /** Button for the user to remove all splits. */
   protected JButton m_cancel = new JButton("Clear");
 
+  /** Button for the user to open the visualized set of instances */
+  protected JButton m_openBut = new JButton("Open");
+
   /** Button for the user to save the visualized set of instances */
   protected JButton m_saveBut = new JButton("Save");
 
@@ -1671,7 +1657,11 @@ public class VisualizePanel extends PrintablePanel {
     m_Log = newLog;
   }
 
-  /** This constructor allows a VisualizePanelListener to be set. */
+  /** 
+   * This constructor allows a VisualizePanelListener to be set. 
+   * 
+   * @param ls		the listener to use
+   */
   public VisualizePanel(VisualizePanelListener ls) {
     this();
     m_splitListener = ls;
@@ -1679,6 +1669,8 @@ public class VisualizePanel extends PrintablePanel {
 
   /**
    * Set the properties for the VisualizePanel
+   * 
+   * @param relationName	the name of the relation, can be null
    */
   private void setProperties(String relationName) {
     if (VisualizeUtils.VISUALIZE_PROPERTIES != null) {
@@ -1877,6 +1869,13 @@ public class VisualizePanel extends PrintablePanel {
 	}
       });
 
+    m_openBut.setToolTipText("Loads previously saved instances from a file");
+    m_openBut.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  openVisibleInstances();
+	}
+      });
+    
     m_saveBut.setEnabled(false);
     m_saveBut.setToolTipText("Save the visible instances to a file");
     m_saveBut.addActionListener(new ActionListener() {
@@ -1915,8 +1914,8 @@ public class VisualizePanel extends PrintablePanel {
 
    
     JPanel mbts = new JPanel();
-    mbts.setLayout(new GridLayout(1,3));
-    mbts.add(m_submit); mbts.add(m_cancel); mbts.add(m_saveBut);
+    mbts.setLayout(new GridLayout(1,4));
+    mbts.add(m_submit); mbts.add(m_cancel); mbts.add(m_openBut); mbts.add(m_saveBut);
 
     constraints.gridx=0;constraints.gridy=2;constraints.weightx=5;
     constraints.gridwidth=2;constraints.gridheight=1;
@@ -1944,7 +1943,7 @@ public class VisualizePanel extends PrintablePanel {
     m_plotSurround.setBorder(BorderFactory.createTitledBorder("Plot"));
     m_plotSurround.setLayout(gb2);
 
-    constraints.fill = constraints.BOTH;
+    constraints.fill = GridBagConstraints.BOTH;
     constraints.insets = new Insets(0, 0, 0, 10);
     constraints.gridx=0;constraints.gridy=0;constraints.weightx=3;
     constraints.gridwidth=4;constraints.gridheight=1;constraints.weighty=5;
@@ -1970,6 +1969,62 @@ public class VisualizePanel extends PrintablePanel {
 
     m_ShapeCombo.setModel(new DefaultComboBoxModel(SNames));
     m_ShapeCombo.setEnabled(true);
+  }
+
+  /**
+   * displays the previously saved instances
+   * 
+   * @param insts	the instances to display
+   * @throws Exception	if display is not possible
+   */
+  protected void openVisibleInstances(Instances insts) throws Exception {
+    PlotData2D tempd = new PlotData2D(insts);
+    tempd.setPlotName(insts.relationName());
+    tempd.addInstanceNumberAttribute();
+    m_plot.m_plot2D.removeAllPlots();
+    addPlot(tempd);
+    
+    // modify title
+    Component parent = getParent();
+    while (parent != null) {
+      if (parent instanceof JFrame) {
+	((JFrame) parent).setTitle(
+	    "Weka Classifier Visualize: " 
+	    + insts.relationName() 
+	    + " (display only)");
+	break;
+      }
+      else {
+	parent = parent.getParent();
+      }
+    }
+  }
+  
+  /**
+   * Loads previously saved instances from a file
+   */
+  protected void openVisibleInstances() {
+    try {
+      int returnVal = m_FileChooser.showOpenDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+	File sFile = m_FileChooser.getSelectedFile();
+	if (!sFile.getName().toLowerCase().
+	    endsWith(Instances.FILE_EXTENSION)) {
+	  sFile = new File(sFile.getParent(), sFile.getName() + Instances.FILE_EXTENSION);
+	}
+	File selected = sFile;
+	Instances insts = new Instances(new BufferedReader(new FileReader(selected)));
+	openVisibleInstances(insts);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      m_plot.m_plot2D.removeAllPlots();
+      JOptionPane.showMessageDialog(
+	  this, 
+	  ex.getMessage(), 
+	  "Error loading file...", 
+	  JOptionPane.ERROR_MESSAGE);
+    }
   }
 
   /**
@@ -2188,6 +2243,11 @@ public class VisualizePanel extends PrintablePanel {
     } 
   }
 
+  /**
+   * initializes the comboboxes based on the data
+   * 
+   * @param inst	the data to base the combobox-setup on
+   */
   public void setUpComboBoxes(Instances inst) {
     setProperties(inst.relationName());
     int prefX = -1;
@@ -2199,7 +2259,6 @@ public class VisualizePanel extends PrintablePanel {
     String [] XNames = new String [inst.numAttributes()];
     String [] YNames = new String [inst.numAttributes()];
     String [] CNames = new String [inst.numAttributes()];
-    String [] SNames = new String [4];
     for (int i = 0; i < XNames.length; i++) {
       String type = "";
       switch (inst.attribute(i).type()) {
@@ -2296,6 +2355,8 @@ public class VisualizePanel extends PrintablePanel {
 
   /**
    * Main method for testing this class
+   * 
+   * @param args	the commandline parameters
    */
   public static void main(String [] args) {
     try {
