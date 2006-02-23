@@ -27,7 +27,7 @@ import java.io.Serializable;
 /**
  * Part of ADTree implementation. See ADNode.java for more details.
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class VaryNode implements Serializable {
 	/** index of the node varied **/
@@ -113,3 +113,4 @@ public class VaryNode implements Serializable {
         } // print
 
 } // class VaryNode
+
