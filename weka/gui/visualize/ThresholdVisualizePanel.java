@@ -48,7 +48,7 @@ import javax.swing.border.TitledBorder;
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ThresholdVisualizePanel 
   extends VisualizePanel {
@@ -59,6 +59,17 @@ public class ThresholdVisualizePanel
   /** Original border text */
   private String m_savePanelBorderText;
 
+  /**
+   * default constructor
+   */
+  public ThresholdVisualizePanel() {
+    super();
+
+    // Save the current border text
+    TitledBorder tb=(TitledBorder) m_plotSurround.getBorder();
+    m_savePanelBorderText = tb.getTitle();
+  }
+  
   /**
    * Set the string with ROC area
    * @param str ROC area string to add to border
@@ -95,10 +106,6 @@ public class ThresholdVisualizePanel
 	}
     });
 
-    // Save the current border text
-    TitledBorder tb=(TitledBorder) m_plotSurround.getBorder();
-    m_savePanelBorderText = tb.getTitle();
-
     // Just in case the default is ROC
     setBorderText();
   }
@@ -117,6 +124,22 @@ public class ThresholdVisualizePanel
         m_plotSurround.setBorder((BorderFactory.createTitledBorder(m_savePanelBorderText+" "+m_ROCString)));
     } else
         m_plotSurround.setBorder((BorderFactory.createTitledBorder(m_savePanelBorderText))); 
+  }
+
+  /**
+   * displays the previously saved instances
+   * 
+   * @param insts	the instances to display
+   * @throws Exception	if display is not possible
+   */
+  protected void openVisibleInstances(Instances insts) throws Exception {
+    super.openVisibleInstances(insts);
+
+    setROCString(
+	"(Area under ROC = " 
+	+ Utils.doubleToString(ThresholdCurve.getROCArea(insts), 4) + ")");
+    
+    setBorderText();
   }
   
   /**
