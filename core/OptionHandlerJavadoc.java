@@ -45,7 +45,7 @@ import java.util.Vector;
  *  The directory above the package hierarchy of the class. <p/>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */
@@ -131,6 +131,8 @@ public class OptionHandlerJavadoc
   
   /**
    * sets whether to add the "Valid options are..." prolog
+   * 
+   * @param value	true if the prolog is to be added
    */
   public void setProlog(boolean value) {
     m_Prolog = value;
@@ -138,6 +140,8 @@ public class OptionHandlerJavadoc
   
   /**
    * whether "Valid options are..." prolog is included in the Javadoc
+   * 
+   * @return		true if the prolog is printed
    */
   public boolean getProlog() {
     return m_Prolog;
@@ -154,6 +158,7 @@ public class OptionHandlerJavadoc
     String		result;
     Class		cls;
     OptionHandler	handler;
+    String		optionStr;
     
     result = "";
     
@@ -171,10 +176,10 @@ public class OptionHandlerJavadoc
       Enumeration enm = handler.listOptions();
       while (enm.hasMoreElements()) {
 	Option option = (Option) enm.nextElement();
-	result +=   toHTML(option.synopsis()) 
-	          + " <br/>\n" 
-	          + toHTML(option.description().replaceAll("\\t", " ")) 
-	          + " <p/>\n\n";
+	optionStr =   toHTML(option.synopsis()) 
+                    + "\n" 
+                    + toHTML(option.description().replaceAll("\\t", " "));
+	result += "<pre> " + optionStr.replaceAll("<br/>", "") + "\n</pre>\n\n";
       }
       
       // stars?
