@@ -32,7 +32,7 @@ import java.io.Serializable;
  * for learning Bayesian network.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.5 $
+ * Version: $Revision: 1.6 $
  */
 public class HillClimber extends GlobalScoreSearchAlgorithm {
 
@@ -404,7 +404,8 @@ public class HillClimber extends GlobalScoreSearchAlgorithm {
 	public String globalInfo() {
 	  return "This Bayes Network learning algorithm uses a hill climbing algorithm " +
 	  "adding, deleting and reversing arcs. The search is not restricted by an order " +
-	  "on the variables (unlike K2). The difference with B and B2 is that this hill " +	  "climber also considers arrows part of the naive Bayes structure for deletion.";
+	  "on the variables (unlike K2). The difference with B and B2 is that this hill " +	  
+          "climber also considers arrows part of the naive Bayes structure for deletion.";
 	} // globalInfo
 
 	/**
