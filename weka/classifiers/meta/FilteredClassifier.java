@@ -50,7 +50,7 @@ import java.util.Vector;
  * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 
@@ -250,9 +250,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
       throw new Exception("No base classifiers have been set!");
     }
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();
@@ -266,6 +263,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
     m_Filter.setInputFormat(data);
     data = Filter.useFilter(data, m_Filter);
     //t.stop();
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
+
     m_FilteredInstances = data.stringFreeStructure();
     m_Classifier.buildClassifier(data);
   }
