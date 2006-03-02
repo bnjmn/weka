@@ -22,54 +22,73 @@
 
 package weka.associations;
 
-import java.io.Reader;
-import java.io.FileReader;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+
 import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TreeSet;
-import java.lang.Math;
-import weka.core.Instances;
-import weka.core.FastVector;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.Utils;
-import weka.core.UnassignedClassException;
-import weka.associations.Associator;
-import weka.associations.PriorEstimation;
-import weka.associations.RuleGeneration;
 
 /**
- * Class implementing the predictive apriori algorithm to mine association rules. 
- * It searches with an increasing support threshold for the best <i>n<\i> rules 
- * concerning a support-based corrected confidence value. 
+ <!-- globalinfo-start -->
+ * Class implementing the predictive apriori algorithm to mine association rules.<br/>
+ * It searches with an increasing support threshold for the best 'n' rules concerning a support-based corrected confidence value.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Tobias Scheffer: Finding Association Rules That Trade Support Optimally against Confidence. In: 5th European Conference on Principles of Data Mining and Knowledge Discovery, 424-435, 2001.The implementation follows the paper expect for adding a rule to the output of the 'n' best rules. A rule is added if:<br/>
+ * the expected predictive accuracy of this rule is among the 'n' best and it is not subsumed by a rule with at least the same expected predictive accuracy (out of an unpublished manuscript from T. Scheffer).
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Reference: T. Scheffer (2001). <i>Finding Association Rules That Trade Support 
- * Optimally against Confidence</i>. Proc of the 5th European Conf.
- * on Principles and Practice of Knowledge Discovery in Databases (PKDD'01),
- * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Scheffer2001,
+ *    author = {Tobias Scheffer},
+ *    booktitle = {5th European Conference on Principles of Data Mining and Knowledge Discovery},
+ *    pages = {424-435},
+ *    publisher = {Springer},
+ *    title = {Finding Association Rules That Trade Support Optimally against Confidence},
+ *    year = {2001}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * The implementation follows the paper expect for adding a rule to the output of the
- * <i>n<\i> best rules. A rule is added if:
- * the expected predictive accuracy of this rule is among the <i>n<\i> best and it is 
- * not subsumed by a rule with at least the same expected predictive accuracy
- * (out of an unpublished manuscript from T. Scheffer). 
- *
- * Valid option is:<p>
- *   
- * -N required number of rules <br>
- * The required number of rules (default: 100). <p>
- *
- * -A <br>
- * If set class association rules are mined. <p>
- *
- * -c class index for class association rule mining <br>
- * Sets the class attribute (default last). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;required number of rules output&gt;
+ *  The required number of rules. (default = 100)</pre>
+ * 
+ * <pre> -A
+ *  If set class association rules are mined. (default = no)</pre>
+ * 
+ * <pre> -c &lt;the class index&gt;
+ *  The class index. (default = last)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 
-public class PredictiveApriori extends Associator implements OptionHandler, CARuleMiner {
+public class PredictiveApriori 
+  extends Associator 
+  implements OptionHandler, CARuleMiner, TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 8109088846865075341L;
   
   /** The minimum support. */
   protected int m_premiseCount;
@@ -129,7 +148,40 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Finds association rules sorted by predictive accuracy.";
+    return 
+        "Class implementing the predictive apriori algorithm to mine "
+      + "association rules.\n"
+      + "It searches with an increasing support threshold for the best 'n' "
+      + "rules concerning a support-based corrected confidence value.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
+      + "The implementation follows the paper expect for adding a rule to the "
+      + "output of the 'n' best rules. A rule is added if:\n"
+      + "the expected predictive accuracy of this rule is among the 'n' best "
+      + "and it is not subsumed by a rule with at least the same expected "
+      + "predictive accuracy (out of an unpublished manuscript from T. "
+      + "Scheffer).";
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Tobias Scheffer");
+    result.setValue(Field.TITLE, "Finding Association Rules That Trade Support Optimally against Confidence");
+    result.setValue(Field.BOOKTITLE, "5th European Conference on Principles of Data Mining and Knowledge Discovery");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.PAGES, "424-435");
+    result.setValue(Field.PUBLISHER, "Springer");
+    
+    return result;
   }
 
   /**
@@ -166,7 +218,7 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
    * these all association rules.
    *
    * @param instances the instances to be used for generating the associations
-   * @exception Exception if rules can't be built successfully
+   * @throws Exception if rules can't be built successfully
    */
   public void buildAssociations(Instances instances) throws Exception {
       
@@ -234,7 +286,6 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
             m_allTheRules[0].insertElementAt((ItemSet)((RuleItem)m_best.last()).premise(),k);
             m_allTheRules[1].insertElementAt((ItemSet)((RuleItem)m_best.last()).consequence(),k);
             m_allTheRules[2].insertElementAt(new Double(((RuleItem)m_best.last()).accuracy()),k);
-            boolean remove = m_best.remove(m_best.last());
             k++;
             exactNumber--;
         }
@@ -260,7 +311,6 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
         m_allTheRules[0].insertElementAt((ItemSet)((RuleItem)m_best.last()).premise(),k);
         m_allTheRules[1].insertElementAt((ItemSet)((RuleItem)m_best.last()).consequence(),k);
         m_allTheRules[2].insertElementAt(new Double(((RuleItem)m_best.last()).accuracy()),k);
-        boolean remove = m_best.remove(m_best.last());
         k++;
         exactNumber--;
     }
@@ -270,7 +320,7 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
      * Method that mines the n best class association rules.
      * @return an sorted array of FastVector (depending on the expected predictive accuracy) containing the rules and metric information
      * @param data the instances for which class association rules should be mined
-     * @exception Exception if rules can't be built successfully
+     * @throws Exception if rules can't be built successfully
      */
     public FastVector[] mineCARs(Instances data) throws Exception{
 	 
@@ -367,19 +417,24 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
 
  
 /**
-   * Parses a given list of options. Valid option is:<p>
-   *   
-   * -N required number of rules <br>
-   * The required number of rules (default: 10). <p>
+   * Parses a given list of options. <p/>
    * 
-   * -A <br>
-   * If set class association rules are mined. <p>
-   *
-   * -c class index for class association rule mining <br>
-   * Sets the class attribute (default last). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;required number of rules output&gt;
+   *  The required number of rules. (default = 100)</pre>
+   * 
+   * <pre> -A
+   *  If set class association rules are mined. (default = no)</pre>
+   * 
+   * <pre> -c &lt;the class index&gt;
+   *  The class index. (default = last)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported 
+   * @throws Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -417,6 +472,8 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
 
   /**
    * Outputs the association rules.
+   * 
+   * @return a string representation of the model
    */
   public String toString() {
 
@@ -503,7 +560,7 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
 
     /**
    * Sets class association rule mining
-   * @param irue if class association rules are mined, false otherwise
+   * @param flag if class association rules are mined, false otherwise
    */  
   public void setCar(boolean flag){
       
@@ -543,8 +600,8 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
   /** 
    * Method that finds all large itemsets for the given set of instances.
    *
-   * @param the instances to be used
-   * @exception Exception if an attribute is numeric
+   * @param index the instances to be used
+   * @throws Exception if an attribute is numeric
    */
   private void findLargeItemSets(int index) throws Exception {
     
@@ -586,11 +643,10 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
   /** 
    * Method that finds all association rules.
    *
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
   private void findRulesQuickly() throws Exception {
 
-    FastVector[] rules;
     RuleGeneration currentItemSet;
     
     // Build rules
@@ -614,10 +670,10 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
   }
   
   
-    /**
+  /**
    * Method that finds all large itemsets for class association rule mining for the given set of instances.
    * @param index the size of the large item sets
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
   private void findLargeCarItemSets(int index) throws Exception {
     
@@ -652,14 +708,12 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
     }
   } 
   
-    /** 
+  /** 
    * Method that finds all class association rules.
    *
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
   private void findCaRulesQuickly() throws Exception {
-
-    FastVector[] rules;
     
     CaRuleGeneration currentLItemSet;
     // Build rules
@@ -683,9 +737,11 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
 
 
   /**
-   * Main method for testing this class.
+   * Main method.
+   * 
+   * @param args the commandline parameters
    */
-  public static void main(String[] options) {
+  public static void main(String[] args) {
 
     String trainFileString;
     StringBuffer text = new StringBuffer();
@@ -702,10 +758,10 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
 	text.append(option.synopsis()+'\n');
 	text.append(option.description()+'\n');
       }
-      trainFileString = Utils.getOption('t', options);
+      trainFileString = Utils.getOption('t', args);
       if (trainFileString.length() == 0) 
 	throw new Exception("No training file given!");
-      apriori.setOptions(options);
+      apriori.setOptions(args);
       reader = new BufferedReader(new FileReader(trainFileString));
       if(!apriori.getCar())
         apriori.buildAssociations(new Instances(reader));
@@ -719,6 +775,3 @@ public class PredictiveApriori extends Associator implements OptionHandler, CARu
   }
   
 }
-
-
-
