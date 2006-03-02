@@ -33,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class Javadoc 
   implements OptionHandler {
@@ -279,15 +279,23 @@ public abstract class Javadoc
     resultBuf = new StringBuffer();
     while (content.length() > 0) {
       if (content.indexOf(m_StartTag[index]) > -1) {
-	part      = content.substring(0, content.indexOf(m_StartTag[index]));
-	indention = part.length() - part.lastIndexOf("\n") - 1;
-	part      = part.substring(0, part.length() - indention);
-	resultBuf.append(part);
-	resultBuf.append(indent(m_StartTag[index], indention, " ") + "\n");
-	resultBuf.append(indent(generateJavadoc(index), indention, " "));
-	resultBuf.append(indent(m_EndTag[index], indention, " "));
-	content = content.substring(content.indexOf(m_EndTag[index]));
-	content = content.substring(m_EndTag[index].length());
+	part = content.substring(0, content.indexOf(m_StartTag[index]));
+	// is it a Java constant? -> skip
+	if (part.endsWith("\"")) {
+	  resultBuf.append(part);
+	  resultBuf.append(m_StartTag[index]);
+	  content = content.substring(part.length() + m_StartTag[index].length());
+	}
+	else {
+	  indention = part.length() - part.lastIndexOf("\n") - 1;
+	  part      = part.substring(0, part.length() - indention);
+	  resultBuf.append(part);
+	  resultBuf.append(indent(m_StartTag[index], indention, " ") + "\n");
+	  resultBuf.append(indent(generateJavadoc(index), indention, " "));
+	  resultBuf.append(indent(m_EndTag[index], indention, " "));
+	  content = content.substring(content.indexOf(m_EndTag[index]));
+	  content = content.substring(m_EndTag[index].length());
+	}
       }
       else {
 	resultBuf.append(content);
