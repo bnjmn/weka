@@ -22,74 +22,118 @@
 
 package weka.associations;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import java.lang.Math;
+import weka.core.AttributeStats;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Reader;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 /**
- * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum
- * support until it finds the required number of rules with the given minimum 
- * confidence. <p>
+ <!-- globalinfo-start -->
+ * Class implementing an Apriori-type algorithm. Iteratively reduces the minimum support until it finds the required number of rules with the given minimum confidence.<br/>
+ * The algorithm has an option to mine class association rules. It is adapted as explained in the second reference.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * R. Agrawal, R. Srikant: Fast Algorithms for Mining Association Rules in Large Databases. In: 20th International Conference on Very Large Data Bases, 478-499, 1994.<br/>
+ * <br/>
+ * Bing Liu, Wynne Hsu, Yiming Ma: Integrating Classification and Association Rule Mining. In: Fourth International Conference on Knowledge Discovery and Data Mining, 80-86, 1998.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Reference: R. Agrawal, R. Srikant (1994). <i>Fast algorithms for
- * mining association rules in large databases </i>. Proc
- * International Conference on Very Large Databases,
- * pp. 478-499. Santiage, Chile: Morgan Kaufmann, Los Altos, CA. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Agrawal1994,
+ *    author = {R. Agrawal and R. Srikant},
+ *    booktitle = {20th International Conference on Very Large Data Bases},
+ *    pages = {478-499},
+ *    publisher = {Morgan Kaufmann, Los Altos, CA},
+ *    title = {Fast Algorithms for Mining Association Rules in Large Databases},
+ *    year = {1994}
+ * }
+ * 
+ * &#64;incproceedings{Liu1998,
+ *    author = {Bing Liu and Wynne Hsu and Yiming Ma},
+ *    booktitle = {Fourth International Conference on Knowledge Discovery and Data Mining},
+ *    pages = {80-86},
+ *    publisher = {AAAI Press},
+ *    title = {Integrating Classification and Association Rule Mining},
+ *    year = {1998}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * The algorithm has an option to mine class association rules. It is adapted as explained in:
- *
- * Reference: B. Liu, W. Hsu, Y. Ma (1998) <i>Integrating 
- * Classification and Association Rule Mining </i>. Proc
- * of the 4th Int. Conf. on Knowledge Discovery and Data Mining,
- * pp. 80-86. The AAAI Press. <p>
- *
- * Valid options are:<p>
- *   
- * -N required number of rules <br>
- * The required number of rules (default: 10). <p>
- *
- * -T type of metric by which to sort rules <br>
- * 0 = confidence | 1 = lift | 2 = leverage | 3 = Conviction. <p>
- *
- * -C minimum confidence of a rule <br>
- * The minimum confidence of a rule (default: 0.9). <p>
- *
- * -D delta for minimum support <br>
- * The delta by which the minimum support is decreased in
- * each iteration (default: 0.05). <p>
- *
- * -U upper bound for minimum support <br>
- * The upper bound for minimum support. Don't explicitly look for 
- * rules with more than this level of support. <p>
- *
- * -M lower bound for minimum support <br>
- * The lower bound for the minimum support (default = 0.1). <p>
- *
- * -S significance level <br>
- * If used, rules are tested for significance at
- * the given level. Slower (default = no significance testing). <p>
- *
- * -R <br>
- * If set then columns that contain all missing values are removed from
- * the data.
- *
- * -I <br>
- * If set the itemsets found are also output (default = no). <p>
- *
- * -A <br>
- * If set class association rules are mined. <p>
- *
- * -c class index for class association rule mining <br>
- * Sets the class attribute (default last). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;required number of rules output&gt;
+ *  The required number of rules. (default = 10)</pre>
+ * 
+ * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
+ *  The metric type by which to rank rules. (default = confidence)</pre>
+ * 
+ * <pre> -C &lt;minimum metric score of a rule&gt;
+ *  The minimum confidence of a rule. (default = 0.9)</pre>
+ * 
+ * <pre> -D &lt;delta for minimum support&gt;
+ *  The delta by which the minimum support is decreased in
+ *  each iteration. (default = 0.05)</pre>
+ * 
+ * <pre> -U &lt;upper bound for minimum support&gt;
+ *  Upper bound for minimum support. (default = 1.0)</pre>
+ * 
+ * <pre> -M &lt;lower bound for minimum support&gt;
+ *  The lower bound for the minimum support. (default = 0.1)</pre>
+ * 
+ * <pre> -S &lt;significance level&gt;
+ *  If used, rules are tested for significance at
+ *  the given level. Slower. (default = no significance testing)</pre>
+ * 
+ * <pre> -I
+ *  If set the itemsets found are also output. (default = no)</pre>
+ * 
+ * <pre> -R
+ *  Remove columns that contain all missing values (default = no)</pre>
+ * 
+ * <pre> -V
+ *  Report progress iteratively. (default = no)</pre>
+ * 
+ * <pre> -A
+ *  If set class association rules are mined. (default = no)</pre>
+ * 
+ * <pre> -c &lt;the class index&gt;
+ *  The class index. (default = last)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ */
-public class Apriori extends Associator implements OptionHandler, CARuleMiner {
+ * @version $Revision: 1.20 $
+ */
+public class Apriori 
+  extends Associator 
+  implements OptionHandler, CARuleMiner, TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 3277498842319212687L;
   
   /** The minimum support. */
   protected double m_minSupport;
@@ -100,11 +144,15 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   /** The lower bound for the minimum support. */
   protected double m_lowerBoundMinSupport;
 
-  /** Metric types. */
+  /** Metric type: Confidence */
   protected static final int CONFIDENCE = 0;
+  /** Metric type: Lift */
   protected static final int LIFT = 1;
+  /** Metric type: Leverage */
   protected static final int LEVERAGE = 2;
+  /** Metric type: Conviction */
   protected static final int CONVICTION = 3;
+  /** Metric types. */
   public static final Tag [] TAGS_SELECTION = {
     new Tag(CONFIDENCE, "Confidence"),
     new Tag(LIFT, "Lift"),
@@ -146,6 +194,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   /** Output itemsets found? */
   protected boolean m_outputItemSets;
 
+  /** Remove columns with all missing values */
   protected boolean m_removeMissingCols;
 
   /** Report progress iteratively */
@@ -166,7 +215,44 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Finds association rules.";
+    return 
+        "Class implementing an Apriori-type algorithm. Iteratively reduces "
+      + "the minimum support until it finds the required number of rules with "
+      + "the given minimum confidence.\n"
+      + "The algorithm has an option to mine class association rules. It is "
+      + "adapted as explained in the second reference.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+  
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "R. Agrawal and R. Srikant");
+    result.setValue(Field.TITLE, "Fast Algorithms for Mining Association Rules in Large Databases");
+    result.setValue(Field.BOOKTITLE, "20th International Conference on Very Large Data Bases");
+    result.setValue(Field.YEAR, "1994");
+    result.setValue(Field.PAGES, "478-499");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann, Los Altos, CA");
+
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Bing Liu and Wynne Hsu and Yiming Ma");
+    additional.setValue(Field.TITLE, "Integrating Classification and Association Rule Mining");
+    additional.setValue(Field.BOOKTITLE, "Fourth International Conference on Knowledge Discovery and Data Mining");
+    additional.setValue(Field.YEAR, "1998");
+    additional.setValue(Field.PAGES, "80-86");
+    additional.setValue(Field.PUBLISHER, "AAAI Press");
+    
+    return result;
   }
 
   /**
@@ -201,9 +287,11 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
    * Removes columns that are all missing from the data
    * @param instances the instances
    * @return a new set of instances with all missing columns removed
+   * @throws Exception if something goes wrong
    */
   protected Instances removeMissingColumns(Instances instances) 
     throws Exception {
+    
     int numInstances = instances.numInstances();
     StringBuffer deleteString = new StringBuffer();
     int removeCount = 0;
@@ -258,7 +346,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
    * these all association rules with a minimum confidence.
    *
    * @param instances the instances to be used for generating the associations
-   * @exception Exception if rules can't be built successfully
+   * @throws Exception if rules can't be built successfully
    */
   public void buildAssociations(Instances instances) throws Exception {
 
@@ -432,7 +520,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
      * with a minimum confidence.
      * @return an sorted array of FastVector (confidence depended) containing the rules and metric information
      * @param data the instances for which class association rules should be mined
-     * @exception Exception if rules can't be built successfully
+     * @throws Exception if rules can't be built successfully
      */
     public FastVector[] mineCARs(Instances data) throws Exception{
 	 
@@ -523,50 +611,53 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
-   *   
-   * -N required number of rules <br>
-   * The required number of rules (default: 10). <p>
-   *
-   * -T type of metric by which to sort rules <br>
-   * 0 = confidence | 1 = lift | 2 = leverage | 3 = Conviction. <p>
-   *
-   * -C minimum metric score of a rule <br>
-   * The minimum confidence of a rule (default: 0.9). <p>
-   *
-   * -D delta for minimum support <br>
-   * The delta by which the minimum support is decreased in
-   * each iteration (default: 0.05).
-   *
-   * -U upper bound for minimum support <br>
-   * The upper bound for minimum support. Don't explicitly look for 
-   * rules with more than this level of support. <p>
-   *
-   * -M lower bound for minimum support <br>
-   * The lower bound for the minimum support (default = 0.1). <p>
-   *
-   * -S significance level <br>
-   * If used, rules are tested for significance at
-   * the given level. Slower (default = no significance testing). <p>
-   *
-   * -I <br>
-   * If set the itemsets found are also output (default = no). <p>
-   *
-   * -V <br>
-   * If set then progress is reported iteratively during execution. <p>
-   *
-   * -R <br>
-   * If set then columns that contain all missing values are removed from
-   * the data. <p>
-   *
-   * -A <br>
-   * If set class association rules are mined.<p>
-   *
-   * -c class index for class association rule mining <br>
-   * Sets the class attribute (default last). <p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;required number of rules output&gt;
+   *  The required number of rules. (default = 10)</pre>
+   * 
+   * <pre> -T &lt;0=confidence | 1=lift | 2=leverage | 3=Conviction&gt;
+   *  The metric type by which to rank rules. (default = confidence)</pre>
+   * 
+   * <pre> -C &lt;minimum metric score of a rule&gt;
+   *  The minimum confidence of a rule. (default = 0.9)</pre>
+   * 
+   * <pre> -D &lt;delta for minimum support&gt;
+   *  The delta by which the minimum support is decreased in
+   *  each iteration. (default = 0.05)</pre>
+   * 
+   * <pre> -U &lt;upper bound for minimum support&gt;
+   *  Upper bound for minimum support. (default = 1.0)</pre>
+   * 
+   * <pre> -M &lt;lower bound for minimum support&gt;
+   *  The lower bound for the minimum support. (default = 0.1)</pre>
+   * 
+   * <pre> -S &lt;significance level&gt;
+   *  If used, rules are tested for significance at
+   *  the given level. Slower. (default = no significance testing)</pre>
+   * 
+   * <pre> -I
+   *  If set the itemsets found are also output. (default = no)</pre>
+   * 
+   * <pre> -R
+   *  Remove columns that contain all missing values (default = no)</pre>
+   * 
+   * <pre> -V
+   *  Report progress iteratively. (default = no)</pre>
+   * 
+   * <pre> -A
+   *  If set class association rules are mined. (default = no)</pre>
+   * 
+   * <pre> -c &lt;the class index&gt;
+   *  The class index. (default = last)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported 
+   * @throws Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -633,8 +724,8 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
     options[current++] = "-T"; options[current++] = "" + m_metricType;
     options[current++] = "-C"; options[current++] = "" + m_minMetric;
     options[current++] = "-D"; options[current++] = "" + m_delta;
-    options[current++] = "-U"; options[current++] = ""+m_upperBoundMinSupport;
-    options[current++] = "-M"; options[current++] = ""+m_lowerBoundMinSupport;
+    options[current++] = "-U"; options[current++] = "" + m_upperBoundMinSupport;
+    options[current++] = "-M"; options[current++] = "" + m_lowerBoundMinSupport;
     options[current++] = "-S"; options[current++] = "" + m_significanceLevel;
     options[current++] = "-A"; options[current++] = "" + m_car;
     options[current++] = "-c"; options[current++] = "" + m_classIndex;
@@ -647,6 +738,8 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
 
   /**
    * Outputs the size of all the generated sets of itemsets and the rules.
+   * 
+   * @return a string representation of the model
    */
   public String toString() {
 
@@ -854,7 +947,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   }
      /**
    * Sets class association rule mining
-   * @param irue if class association rules are mined, false otherwise
+   * @param flag if class association rules are mined, false otherwise
    */  
   public void setCar(boolean flag){
       
@@ -1087,7 +1180,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   /** 
    * Method that finds all large itemsets for the given set of instances.
    *
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
   private void findLargeItemSets() throws Exception {
     
@@ -1124,7 +1217,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   /** 
    * Method that finds all association rules and performs significance test.
    *
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
   private void findRulesBruteForce() throws Exception {
 
@@ -1157,7 +1250,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
   /** 
    * Method that finds all association rules.
    *
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
   private void findRulesQuickly() throws Exception {
 
@@ -1183,7 +1276,7 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
       /**
      *
      * Method that finds all large itemsets for class association rules for the given set of instances.
-     * @exception Exception if an attribute is numeric
+     * @throws Exception if an attribute is numeric
      */
     private void findLargeCarItemSets() throws Exception {
 	
@@ -1231,10 +1324,10 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
 
    
 
-    /** 
+  /** 
    * Method that finds all class association rules.
    *
-   * @exception Exception if an attribute is numeric
+   * @throws Exception if an attribute is numeric
    */
    private void findCarRulesQuickly() throws Exception {
 
@@ -1256,11 +1349,12 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
     }
   }
 
-
   /**
-   * Main method for testing this class.
+   * Main method.
+   * 
+   * @param args the commandline options
    */
-  public static void main(String[] options) {
+  public static void main(String[] args) {
 
     String trainFileString;
     StringBuffer text = new StringBuffer();
@@ -1277,10 +1371,10 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
 	text.append(option.synopsis()+'\n');
 	text.append(option.description()+'\n');
       }
-      trainFileString = Utils.getOption('t', options);
+      trainFileString = Utils.getOption('t', args);
       if (trainFileString.length() == 0) 
 	throw new Exception("No training file given!");
-      apriori.setOptions(options);
+      apriori.setOptions(args);
       reader = new BufferedReader(new FileReader(trainFileString));
       apriori.buildAssociations(new Instances(reader));
       System.out.println(apriori);
@@ -1290,6 +1384,3 @@ public class Apriori extends Associator implements OptionHandler, CARuleMiner {
     }
   }
 }
-
-
-

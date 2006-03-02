@@ -24,102 +24,136 @@
 
 package weka.associations;
 
-import weka.associations.tertius.*;
-import weka.core.Instances;
+import weka.associations.tertius.AttributeValueLiteral;
+import weka.associations.tertius.IndividualInstances;
+import weka.associations.tertius.IndividualLiteral;
+import weka.associations.tertius.Literal;
+import weka.associations.tertius.Predicate;
+import weka.associations.tertius.Rule;
+import weka.associations.tertius.SimpleLinkedList;
 import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.SelectedTag;
-import weka.core.OptionHandler;
+import weka.core.Instances;
 import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.associations.Associator;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Date;
+
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.io.File;
 import java.text.SimpleDateFormat;
-import java.awt.Frame;
-import java.awt.TextField;
-import java.awt.Font;
-import java.awt.Button;
-import java.awt.Label;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * Class implementing a Tertius-type algorithm. <p>
+ <!-- globalinfo-start -->
+ * Finds rules according to confirmation measure (Tertius-type algorithm).<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * P. A. Flach, N. Lachiche (1999). Confirmation-Guided Discovery of first-order rules with Tertius. Machine Learning. Vol.42, pp. 61-95.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * References: P. A. Flach, N. Lachiche (1999). <i>Confirmation-Guided 
- * Discovery of first-order rules with Tertius</i>. 
- * Machine Learning, 42, 61-95. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Flach1999,
+ *    author = {P. A. Flach and N. Lachiche},
+ *    journal = {Machine Learning},
+ *    pages = {pp. 61-95},
+ *    title = {Confirmation-Guided Discovery of first-order rules with Tertius},
+ *    volume = {Vol.42},
+ *    year = {1999}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * Valid options are:<p>
- *
- * -K number of values in result <br>
- * Set maximum number of confirmation  values in the result. (default: 10) <p>
- *
- * -F frequency threshold <br>
- * Set frequency threshold for pruning. (default: 0) <p>
- *
- * -C confirmation threshold <br>
- * Set confirmation threshold. (default: 0) <p>
- *
- * -N noise threshold <br>
- * Set noise threshold : maximum frequency of counter-examples.
- * 0 gives only satisfied rules. (default: 1) <p>
- *
- * -R <br>
- * Allow attributes to be repeated in a same rule. <p>
- *
- * -L number of literals <br>
- * Set maximum number of literals in a rule. (default: 4) <p>
- *
- * -G 0=no negation | 1=body | 2=head | 3=body and head <br>
- * Set the negations in the rule. (default: 0) <p>
- *
- * -S <br>
- * Consider only classification rules. <p>
- *
- * -c class index <br>
- * Set index of class attribute. (default: last). <p>
- *
- * -H <br>
- * Consider only horn clauses. <p>
- *
- * -E <br>
- * Keep equivalent rules. <p>
- *
- * -M <br>
- * Keep same clauses. <p>
- *
- * -T <br>
- * Keep subsumed rules. <p>
- *
- * -I 0=always match | 1=never match | 2=significant <br>
- * Set the way to handle missing values. (default: 0) <p>
- *
- * -O <br>
- * Use ROC analysis. <p>
- *
- * -p name of file <br>
- * Set the file containing the parts of the individual for individual-based 
- * learning. <p>
- *
- * -P 0=no output | 1=on stdout | 2=in separate window <br>
- * Set output of current values. (default: 0) <p>
+ * <pre> -K &lt;number of values in result&gt;
+ *  Set maximum number of confirmation  values in the result. (default: 10)</pre>
+ * 
+ * <pre> -F &lt;frequency threshold&gt;
+ *  Set frequency threshold for pruning. (default: 0)</pre>
+ * 
+ * <pre> -C &lt;confirmation threshold&gt;
+ *  Set confirmation threshold. (default: 0)</pre>
+ * 
+ * <pre> -N &lt;noise threshold&gt;
+ *  Set noise threshold : maximum frequency of counter-examples.
+ *  0 gives only satisfied rules. (default: 1)</pre>
+ * 
+ * <pre> -R
+ *  Allow attributes to be repeated in a same rule.</pre>
+ * 
+ * <pre> -L &lt;number of literals&gt;
+ *  Set maximum number of literals in a rule. (default: 4)</pre>
+ * 
+ * <pre> -G &lt;0=no negation | 1=body | 2=head | 3=body and head&gt;
+ *  Set the negations in the rule. (default: 0)</pre>
+ * 
+ * <pre> -S
+ *  Consider only classification rules.</pre>
+ * 
+ * <pre> -c &lt;class index&gt;
+ *  Set index of class attribute. (default: last).</pre>
+ * 
+ * <pre> -H
+ *  Consider only horn clauses.</pre>
+ * 
+ * <pre> -E
+ *  Keep equivalent rules.</pre>
+ * 
+ * <pre> -M
+ *  Keep same clauses.</pre>
+ * 
+ * <pre> -T
+ *  Keep subsumed rules.</pre>
+ * 
+ * <pre> -I &lt;0=always match | 1=never match | 2=significant&gt;
+ *  Set the way to handle missing values. (default: 0)</pre>
+ * 
+ * <pre> -O
+ *  Use ROC analysis. </pre>
+ * 
+ * <pre> -p &lt;name of file&gt;
+ *  Set the file containing the parts of the individual for individual-based learning.</pre>
+ * 
+ * <pre> -P &lt;0=no output | 1=on stdout | 2=in separate window&gt;
+ *  Set output of current values. (default: 0)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
-public class Tertius extends Associator implements OptionHandler, Runnable {
+public class Tertius 
+  extends Associator 
+  implements OptionHandler, Runnable, TechnicalInformationHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 5556726848380738179L;
+  
   /** The results. */
   private SimpleLinkedList m_results;
 
@@ -143,9 +177,12 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
 
   /** Status of the search. */
   private int m_status;
+  /** Status of the search: normal */
   private static final int NORMAL = 0;
-  private static final int MEMORY = 1; // memory problem
-  private static final int STOP = 2; // user interruption
+  /** Status of the search: memory problem */
+  private static final int MEMORY = 1;
+  /** Status of the search: user interruption */
+  private static final int STOP = 2;
   
   /* Pruning options. */
 
@@ -169,11 +206,15 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
   /** Number of literals in a rule. */
   private int m_numLiterals;
 
-  /** Types of negation. */
+  /** Type of negation: none */
   private static final int NONE = 0;
+  /** Type of negation: body */
   private static final int BODY = 1;
+  /** Type of negation: head */
   private static final int HEAD = 2;
+  /** Type of negation: all */
   private static final int ALL = 3;
+  /** Types of negation. */
   private static final Tag [] TAGS_NEGATION = {
     new Tag(NONE, "None"),
     new Tag(BODY, "Body"),
@@ -204,10 +245,13 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
   /** Perform subsumption test ? */
   private boolean m_subsumption;
 
+  /** Way of handling missing values: min counterinstances */
+  public static final int EXPLICIT = 0;
+  /** Way of handling missing values: max counterinstances */
+  public static final int IMPLICIT = 1;
+  /** Way of handling missing values: missing as a particular value */
+  public static final int SIGNIFICANT = 2;
   /** Ways of handling missing values.  */
-  public static final int EXPLICIT = 0; // min counterinstances
-  public static final int IMPLICIT = 1; // max counterinstances
-  public static final int SIGNIFICANT = 2; // missing as a particular value
   private static final Tag [] TAGS_MISSING = {
     new Tag(EXPLICIT, "Matches all"),
     new Tag(IMPLICIT, "Matches none"),
@@ -226,10 +270,13 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
   /** Part instances for individual-based learning. */
   private Instances m_parts;
 
-  /* Types of values output. */ 
+  /** Type of values output: No */ 
   private static final int NO = 0;
+  /** Type of values output: stdout */ 
   private static final int OUT = 1;
+  /** Type of values output: Window */ 
   private static final int WINDOW = 2;
+  /** Types of values output. */ 
   private static final Tag [] TAGS_VALUES = {
     new Tag(NO, "No"),
     new Tag(OUT, "stdout"),
@@ -254,10 +301,33 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
    * displaying in the explorer/experimenter gui.
    */
   public String globalInfo() {
-
-    return "Finds rules according to confirmation measure.";
+    return 
+        "Finds rules according to confirmation measure (Tertius-type "
+      + "algorithm).\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "P. A. Flach and N. Lachiche");
+    result.setValue(Field.YEAR, "1999");
+    result.setValue(Field.TITLE, "Confirmation-Guided Discovery of first-order rules with Tertius");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.42");
+    result.setValue(Field.PAGES, "pp. 61-95");
+    
+    return result;
+  }
 
   /**
    * Resets the options to the default values.
@@ -378,10 +448,67 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
   }
   
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -K &lt;number of values in result&gt;
+   *  Set maximum number of confirmation  values in the result. (default: 10)</pre>
+   * 
+   * <pre> -F &lt;frequency threshold&gt;
+   *  Set frequency threshold for pruning. (default: 0)</pre>
+   * 
+   * <pre> -C &lt;confirmation threshold&gt;
+   *  Set confirmation threshold. (default: 0)</pre>
+   * 
+   * <pre> -N &lt;noise threshold&gt;
+   *  Set noise threshold : maximum frequency of counter-examples.
+   *  0 gives only satisfied rules. (default: 1)</pre>
+   * 
+   * <pre> -R
+   *  Allow attributes to be repeated in a same rule.</pre>
+   * 
+   * <pre> -L &lt;number of literals&gt;
+   *  Set maximum number of literals in a rule. (default: 4)</pre>
+   * 
+   * <pre> -G &lt;0=no negation | 1=body | 2=head | 3=body and head&gt;
+   *  Set the negations in the rule. (default: 0)</pre>
+   * 
+   * <pre> -S
+   *  Consider only classification rules.</pre>
+   * 
+   * <pre> -c &lt;class index&gt;
+   *  Set index of class attribute. (default: last).</pre>
+   * 
+   * <pre> -H
+   *  Consider only horn clauses.</pre>
+   * 
+   * <pre> -E
+   *  Keep equivalent rules.</pre>
+   * 
+   * <pre> -M
+   *  Keep same clauses.</pre>
+   * 
+   * <pre> -T
+   *  Keep subsumed rules.</pre>
+   * 
+   * <pre> -I &lt;0=always match | 1=never match | 2=significant&gt;
+   *  Set the way to handle missing values. (default: 0)</pre>
+   * 
+   * <pre> -O
+   *  Use ROC analysis. </pre>
+   * 
+   * <pre> -p &lt;name of file&gt;
+   *  Set the file containing the parts of the individual for individual-based learning.</pre>
+   * 
+   * <pre> -P &lt;0=no output | 1=on stdout | 2=in separate window&gt;
+   *  Set output of current values. (default: 0)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options The list of options as an array of strings.
-   * @exception Exception if an option is not supported.
+   * @throws Exception if an option is not supported.
    */
   public void setOptions(String [] options) throws Exception {
     
@@ -647,7 +774,7 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
    *
    * @param v  Value to assign to confirmationValues.
    */
-  public void setConfirmationValues(int v) throws Exception {
+  public void setConfirmationValues(int v) {
 
     m_best = v;
   }
@@ -1132,6 +1259,7 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
    * Set the value of partFile.
    *
    * @param v  Value to assign to partFile.
+   * @throws Exception if file cannot be opened
    */
   public void disabled_setPartFile(File v) throws Exception {
 
@@ -1188,7 +1316,7 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
    * @param attr The attribute this predicate corresponds to.
    * @param isClass Saying if the attribute is the class attribute.
    * @return The corresponding Predicate.
-   * @exception Exception if the predicate could not be build 
+   * @throws Exception if the predicate could not be build 
    * (the attribute is numeric).
    */
   private Predicate buildPredicate(Instances instances,
@@ -1287,10 +1415,10 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
     return predicate;
   }
    
-  /*
+  /**
    * Build the predicates to use in the rules.
    *
-   * @exception If the predicates could not be built 
+   * @throws If the predicates could not be built 
    * (numeric attribute).
    */
   private ArrayList buildPredicates() throws Exception {
@@ -1578,7 +1706,7 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
    * confirmation.
    *
    * @param instances The instances to be used for generating the rules.
-   * @exception Exception if rules can't be built successfully.
+   * @throws Exception if rules can't be built successfully.
    */
   public void buildAssociations(Instances instances) throws Exception {
 
@@ -1833,9 +1961,11 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
   }
 
   /**
-   * Main method for testing this class.
+   * Main method.
+   * 
+   * @param args the commandline parameters
    */
-  public static void main(String [] options) {
+  public static void main(String [] args) {
 
     String trainFileString;
     Reader reader;
@@ -1856,7 +1986,7 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
       }
 
       /* Training file. */
-      trainFileString = Utils.getOption('t', options);
+      trainFileString = Utils.getOption('t', args);
       if (trainFileString.length() == 0) {
 	throw new Exception("No training file given!");
       }
@@ -1869,8 +1999,8 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
       instances = new Instances(reader);
 
       /* Tertius options. */
-      tertius.setOptions(options);
-      Utils.checkForRemainingOptions(options);
+      tertius.setOptions(args);
+      Utils.checkForRemainingOptions(args);
 
       /* Build the rules and output the results. */
       tertius.buildAssociations(instances);
@@ -1881,8 +2011,3 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
     }
   }
 }
-
-
-
-
-
