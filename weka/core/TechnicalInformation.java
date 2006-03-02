@@ -35,7 +35,8 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
+ * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
 
@@ -253,6 +254,9 @@ public class TechnicalInformation {
   /** stores all the values associated with the fields (FIELD - String) */
   protected Hashtable m_Values = new Hashtable();
 
+  /** additional technical informations */
+  protected Vector m_Additional = new Vector();
+  
   /**
    * Initializes the information with the given type
    * 
@@ -320,9 +324,10 @@ public class TechnicalInformation {
 	  if (parts.length == 1)
 	    result = parts[0];
 	  else
-	    result = parts[1];
+	    result = parts[parts.length - 1];
 	}
 	result += getValue(Field.YEAR);
+	result = result.replaceAll(" ", "");
       }
     }
     
@@ -389,6 +394,52 @@ public class TechnicalInformation {
   }
   
   /**
+   * returns true if there are further technical informations stored in this
+   * 
+   * @return true if there are further technical informations available
+   */
+  public boolean hasAdditional() {
+    return (m_Additional.size() > 0);
+  }
+  
+  /**
+   * returns an enumeration of all the additional technical informations (if
+   * there are any)
+   * 
+   * @return an enumeration over all additional technical informations
+   */
+  public Enumeration additional() {
+    return m_Additional.elements();
+  }
+  
+  /**
+   * adds the given information to the list of additional technical 
+   * informations
+   * 
+   * @param value the information to add
+   */
+  public void add(TechnicalInformation value) {
+    if (value == this)
+      throw new IllegalArgumentException("Can't add object to itself!");
+    m_Additional.add(value);
+  }
+  /**
+   * Adds an empty technical information with the given type to the list
+   * of additional informations and returns the instance.
+   * 
+   * @param type	the type of the new information to add
+   * @return 		the generated information
+   */
+  public TechnicalInformation add(Type type) {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(type);
+    add(result);
+    
+    return result;
+  }
+  
+  /**
    * Returns a plain-text string representing this technical information.
    * Note: it only returns a string based on some fields. At least AUTHOR,
    * YEAR and TITLE are necessary.
@@ -399,6 +450,7 @@ public class TechnicalInformation {
     String	result;
     String[]	authors;
     int		i;
+    Enumeration	enm;
     
     result  = "";
     authors = getAuthors();
@@ -412,7 +464,7 @@ public class TechnicalInformation {
       }
       result += " (" + getValue(Field.YEAR) + ").";
       result += " " + getValue(Field.TITLE) + ".";
-      result += getValue(Field.PUBLISHER);
+      result += " " + getValue(Field.PUBLISHER);
       if (exists(Field.ADDRESS))
 	result += ", " + getValue(Field.ADDRESS);
       result += ".";
@@ -442,6 +494,10 @@ public class TechnicalInformation {
       }
       
       // other than JOURNAL???
+
+      // URL
+      if (exists(Field.URL))
+	result += " URL " + getValue(Field.URL) + ".";
     }
     // CONFERENCE/INPROCEEDINGS
     else if ( (getType() == Type.CONFERENCE) || (getType() == Type.INPROCEEDINGS) ) {
@@ -459,6 +515,25 @@ public class TechnicalInformation {
 	
       result += ", " + getValue(Field.YEAR) + ".";
     }
+    // INCOLLECTION
+    else if (getType() == Type.INCOLLECTION) {
+      for (i = 0; i < authors.length; i++) {
+	if (i > 0)
+	  result += ", ";
+	result += authors[i];
+      }
+      result += ": " + getValue(Field.TITLE) + ".";
+      result += " In ";
+      if (exists(Field.EDITOR))
+	result += getValue(Field.EDITOR) + ", editors, ";
+      result += getValue(Field.BOOKTITLE);
+      
+      if (exists(Field.ADDRESS))
+	result += ", " + getValue(Field.ADDRESS);
+      result += ", " + getValue(Field.PAGES);
+	
+      result += ", " + getValue(Field.YEAR) + ".";
+    }
     // default
     else {
       for (i = 0; i < authors.length; i++) {
@@ -468,6 +543,16 @@ public class TechnicalInformation {
       }
       result += " (" + getValue(Field.YEAR) + ").";
       result += " " + getValue(Field.TITLE) + ".";
+      if (exists(Field.ADDRESS))
+	result += " " + getValue(Field.ADDRESS) + ".";
+      if (exists(Field.URL))
+	result += " URL " + getValue(Field.URL) + ".";
+    }
+    
+    // additional informations?
+    enm = additional();
+    while (enm.hasMoreElements()) {
+      result += "\n\n" + enm.nextElement().toString();
     }
     
     return result;
@@ -506,76 +591,107 @@ public class TechnicalInformation {
     
     result += "\n}";
     
+    // additional informations?
+    enm = additional();
+    while (enm.hasMoreElements()) {
+      result += "\n\n" + ((TechnicalInformation) enm.nextElement()).toBibTex();
+    }
+    
     return result;
   }
   
   /**
-   * Only for testing.
+   * Prints some examples of technical informations if there are no 
+   * commandline options given. Otherwise the information of a given 
+   * TechnicalInformationHandler can be printed. <p/>
    * 
-   * @param args 	Parameters can be the type and the fields associated
-   * 			with values. If none provided, default ones are used.
+   * Valid options are: <p/>
+   * 
+   * -W classname <br/>
+   *  The classname of the TechnicalInformationHandler to print the 
+   *  information for <p/>
+   *  
+   * -bibtex <br/>
+   *  Print the information in BibTeX format <p/>
+   *  
+   * -plaintext <br/>
+   *  Print the information in plain text format <p/>
+   * 
+   * @param args 	the commandline options
    * @throws Exception	if the option parsing fails
    */
   public static void main(String[] args) throws Exception {
     TechnicalInformation	info;
+    TechnicalInformation	additional;
     String			tmpStr;
+    Class			cls;
+    TechnicalInformationHandler	handler;
     
     // example from command line
     if (args.length != 0) {
-      // type
       info = null;
-      for (Type t: Type.values()) {
-	if (Utils.getFlag(t.toString(), args)) {
-	  info = new TechnicalInformation(t);
-	  break;
-	}
+      
+      tmpStr = Utils.getOption('W', args);
+      if (tmpStr.length() != 0) {
+	cls     = Class.forName(tmpStr);
+	handler = (TechnicalInformationHandler) cls.newInstance();
+	info    = handler.getTechnicalInformation();
+      }
+      else {
+	throw new IllegalArgumentException("A classname has to be provided with the -W option!");
       }
       
-      // fields
-      for (Field f: Field.values()) {
-        tmpStr = Utils.getOption(f.toString(), args);
-        if (tmpStr.length() != 0)
-  	info.setValue(f, tmpStr);
-      }
+      if (Utils.getFlag("bibtex", args))
+        System.out.println("\n" + handler.getClass().getName() + ":\n" + info.toBibTex());
+
+      if (Utils.getFlag("plaintext", args))
+        System.out.println("\n" + handler.getClass().getName() + ":\n" + info.toString());
+    }
+    else {
+      // first example
+      info = new TechnicalInformation(Type.BOOK);
+      info.setValue(Field.AUTHOR, "Ross Quinlan");
+      info.setValue(Field.YEAR, "1993");
+      info.setValue(Field.TITLE, "C4.5: Programs for Machine Learning");
+      info.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
+      info.setValue(Field.ADDRESS, "San Mateo, CA");
+      additional = info;
+      
+      System.out.println("\ntoString():\n" + info.toString());
+      System.out.println("\ntoBibTex():\n" + info.toBibTex());
+      
+      // second example
+      info = new TechnicalInformation(Type.INPROCEEDINGS);
+      info.setValue(Field.AUTHOR, "Freund, Y. and Mason, L.");
+      info.setValue(Field.YEAR, "1999");
+      info.setValue(Field.TITLE, "The alternating decision tree learning algorithm");
+      info.setValue(Field.BOOKTITLE, "Proceeding of the Sixteenth International Conference on Machine Learning");
+      info.setValue(Field.ADDRESS, "Bled, Slovenia");
+      info.setValue(Field.PAGES, "124-133");
+      
+      System.out.println("\ntoString():\n" + info.toString());
+      System.out.println("\ntoBibTex():\n" + info.toBibTex());
+      
+      // third example
+      info = new TechnicalInformation(Type.ARTICLE);
+      info.setValue(Field.AUTHOR, "R. Quinlan");
+      info.setValue(Field.YEAR, "1986");
+      info.setValue(Field.TITLE, "Induction of decision trees");
+      info.setValue(Field.JOURNAL, "Machine Learning");
+      info.setValue(Field.VOLUME, "Vol.1");
+      info.setValue(Field.NUMBER, "No.1");
+      info.setValue(Field.PAGES, "pp. 81-106");
+      
+      additional = new TechnicalInformation(Type.BOOK);
+      additional.setValue(Field.AUTHOR, "Ross Quinlan");
+      additional.setValue(Field.YEAR, "1993");
+      additional.setValue(Field.TITLE, "C4.5: Programs for Machine Learning");
+      additional.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
+      additional.setValue(Field.ADDRESS, "San Mateo, CA");
+      info.add(additional);
       
       System.out.println("\ntoString():\n" + info.toString());
       System.out.println("\ntoBibTex():\n" + info.toBibTex());
     }
-
-    // first example
-    info = new TechnicalInformation(Type.BOOK);
-    info.setValue(Field.AUTHOR, "Ross Quinlan");
-    info.setValue(Field.YEAR, "1993");
-    info.setValue(Field.TITLE, "C4.5: Programs for Machine Learning");
-    info.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
-    info.setValue(Field.ADDRESS, "San Mateo, CA");
-    
-    System.out.println("\ntoString():\n" + info.toString());
-    System.out.println("\ntoBibTex():\n" + info.toBibTex());
-
-    // second example
-    info = new TechnicalInformation(Type.INPROCEEDINGS);
-    info.setValue(Field.AUTHOR, "Freund, Y. and Mason, L.");
-    info.setValue(Field.YEAR, "1999");
-    info.setValue(Field.TITLE, "The alternating decision tree learning algorithm");
-    info.setValue(Field.BOOKTITLE, "Proceeding of the Sixteenth International Conference on Machine Learning");
-    info.setValue(Field.ADDRESS, "Bled, Slovenia");
-    info.setValue(Field.PAGES, "124-133");
-
-    System.out.println("\ntoString():\n" + info.toString());
-    System.out.println("\ntoBibTex():\n" + info.toBibTex());
-    
-    // third example
-    info = new TechnicalInformation(Type.ARTICLE);
-    info.setValue(Field.AUTHOR, "R. Quinlan");
-    info.setValue(Field.YEAR, "1986");
-    info.setValue(Field.TITLE, "Induction of decision trees");
-    info.setValue(Field.JOURNAL, "Machine Learning");
-    info.setValue(Field.VOLUME, "Vol.1");
-    info.setValue(Field.NUMBER, "No.1");
-    info.setValue(Field.PAGES, "pp. 81-106");
-
-    System.out.println("\ntoString():\n" + info.toString());
-    System.out.println("\ntoBibTex():\n" + info.toBibTex());
   }
 }
