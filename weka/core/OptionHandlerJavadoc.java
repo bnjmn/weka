@@ -30,22 +30,25 @@ import java.util.Vector;
  * the OPTIONS_STARTTAG and OPTIONS_ENDTAG (the indention is determined via
  * the OPTIONS_STARTTAG). <p/>
  * 
+ <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -W &lt;classname&gt; <br/>
- *  The option handler to retrieve the options from. <p/>
+ * <pre> -W &lt;classname&gt;
+ *  The class to load.</pre>
  * 
- * -nostars <br/>
- *  Suppresses the '*' in the Javadoc. <p/>
+ * <pre> -nostars
+ *  Suppresses the '*' in the Javadoc.</pre>
  * 
- * -noprolog <br/>
- *  Suppresses the 'Valid options are...' prolog in the Javadoc. <p/>
+ * <pre> -dir &lt;dir&gt;
+ *  The directory above the package hierarchy of the class.</pre>
  * 
- * -dir &lt;dir&gt; <br/>
- *  The directory above the package hierarchy of the class. <p/>
+ * <pre> -noprolog
+ *  Suppresses the 'Valid options are...' prolog in the Javadoc.</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */
@@ -179,7 +182,7 @@ public class OptionHandlerJavadoc
 	optionStr =   toHTML(option.synopsis()) 
                     + "\n" 
                     + toHTML(option.description().replaceAll("\\t", " "));
-	result += "<pre> " + optionStr.replaceAll("<br/>", "") + "\n</pre>\n\n";
+	result += "<pre> " + optionStr.replaceAll("<br/>", "") + "</pre>\n\n";
       }
       
       // stars?
