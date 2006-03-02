@@ -52,7 +52,7 @@ import weka.core.Drawable;
  * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20.2.1 $
+ * @version $Revision: 1.20.2.2 $
  */
 public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 
@@ -69,11 +69,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
    */
   public String globalInfo() {
     return   "Class for running an arbitrary classifier on data that has been passed "
-      + "through an arbitrary filter, providing the only way to access \"supervised\" "
-      + "filters in the Explorer. Like the classifier, the structure of the filter "
+      + "through an arbitrary filter. Like the classifier, the structure of the filter "
       + "is based exclusively on the training data and test instances will be processed "
-      + "by the filter without changing its structure.";
-
+      + "by the filter without changing their structure.";
   }
 
   /**
