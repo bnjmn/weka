@@ -39,67 +39,87 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Generates cubic shaped clusters in subspaces. <p/>
+ <!-- globalinfo-start -->
+ * A data generator that produces data points in hyperrectangular subspace clusters.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Percentage of noise can be added. <p/>
- *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- *  Number of attributes - dependent on the cluster definitions. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -C "-A attrlist, -D from1,to1,from2,to2... -N minnum..maxnum" <br/>
- *  for randomly distributed instances in a cluster, specifies one cluster,
- *  can be used multiple times. <br/>
- *    -A attrlist <br/>
- *  Specifies attributes by their indices <br/>
- *    -D  from1,to1,from2,to2,... <br/>
- *  Gives the ranges for each attribute <br/>
- *    -N minnum..maxnum <br/>
- * <p/>
- * -C "-U attrlist, -D from1,to1,from2,to2... -N minnum..maxnum" <br/>
- *  for uniformly distributed instances in a cluster, specifies one cluster, 
- *  can be used multiple times.<br/>
- *    -U attrlist<br/>
- *  Specifies attributes by their indices <br/>
- *    -D  from1,to1,from2,to2,... <br/>
- *  Gives the ranges for each attribute <br/>
- *    -N minnum..maxnum <br/>
- * <p/>
- * -C "-G attrlist, -D mean1,stddev1,mean2,stddev2... -N minnum..maxnum" <br/>
- *  for gaussian distributed instances in a cluster, specifies one cluster, 
- *  can be used multiple times.<br/>
- *    -U attrlist<br/>
- *  Specifies attributes by their indices <br/>
- *    -D  mean1,stddev1,mean2,stddev2,... <br/>
- *  Gives the ranges for each attribute <br/>
- *    -N minnum..maxnum <br/>
- * <p/>
- * -P num <br/>
- * Noise rate in percent. Can be between 0% and 30%. <br/>
- * (Remark: The original algorithm only allows noise up to 10%.) <p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -a &lt;num&gt;
+ *  The number of attributes (default 1).</pre>
+ * 
+ * <pre> -c
+ *  Class Flag, if set, the cluster is listed in extra attribute.</pre>
+ * 
+ * <pre> -b &lt;range&gt;
+ *  The indices for boolean attributes.</pre>
+ * 
+ * <pre> -m &lt;range&gt;
+ *  The indices for nominal attributes.</pre>
+ * 
+ * <pre> -P &lt;num&gt;
+ *  The noise rate in percent (default 0.0).
+ *  Can be between 0% and 30%. (Remark: The original 
+ *  algorithm only allows noise up to 10%.)</pre>
+ * 
+ * <pre> -C &lt;cluster-definition&gt;
+ *  A cluster definition of class 'SubspaceClusterDefinition'
+ *  (definition needs to be quoted to be recognized as 
+ *  a single argument).</pre>
+ * 
+ * <pre> 
+ * Options specific to weka.datagenerators.clusterers.SubspaceClusterDefinition:
+ * </pre>
+ * 
+ * <pre> -A &lt;range&gt;
+ *  Generates randomly distributed instances in the cluster.</pre>
+ * 
+ * <pre> -U &lt;range&gt;
+ *  Generates uniformly distributed instances in the cluster.</pre>
+ * 
+ * <pre> -G &lt;range&gt;
+ *  Generates gaussian distributed instances in the cluster.</pre>
+ * 
+ * <pre> -D &lt;num&gt;,&lt;num&gt;
+ *  The attribute min/max (-A and -U) or mean/stddev (-G) for
+ *  the cluster.</pre>
+ * 
+ * <pre> -N &lt;num&gt;..&lt;num&gt;
+ *  The range of number of instances per cluster (default 1..50).</pre>
+ * 
+ * <pre> -I
+ *  Uses integer instead of continuous values (default continuous).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class SubspaceCluster 
   extends ClusterGenerator {
 
+  /** for serialization */
+  static final long serialVersionUID = -3454999858505621128L;
+  
   /** noise rate in percent (option P,  between 0 and 30)*/ 
   protected double m_NoiseRate;
 
@@ -109,13 +129,17 @@ public class SubspaceCluster
   /** if nominal, store number of values */
   protected int[] m_numValues;
 
-  /** store global min and max values */
+  /** store global min values */
   protected double[] m_globalMinValue;
+
+  /** store global max values */
   protected double[] m_globalMaxValue;
 
-  /** different cluster types */
+  /** cluster type: uniform/random */
   public static final int UNIFORM_RANDOM = 0;  
+  /** cluster type: total uniform */
   public static final int TOTAL_UNIFORM = 1;
+  /** cluster type: gaussian */
   public static final int GAUSSIAN = 2;
   /** the tags for the cluster types */
   public static final Tag[] TAGS_CLUSTERTYPE = {
@@ -124,8 +148,9 @@ public class SubspaceCluster
     new Tag(GAUSSIAN,       "gaussian")
   };
 
-  /** different cluster subtypes */
+  /** cluster subtype: continuous */
   public static final int CONTINUOUS = 0;
+  /** cluster subtype: integer */
   public static final int INTEGER = 1;
   /** the tags for the cluster types */
   public static final Tag[] TAGS_CLUSTERSUBTYPE = {
@@ -164,12 +189,22 @@ public class SubspaceCluster
 
     result.addElement(new Option(
           "\tThe noise rate in percent (default " 
-          + defaultNoiseRate() + ").",
+          + defaultNoiseRate() + ").\n"
+          + "\tCan be between 0% and 30%. (Remark: The original \n"
+          + "\talgorithm only allows noise up to 10%.)",
           "P", 1, "-P <num>"));
 
     result.addElement(new Option(
-          "\tA cluster definition; supported options follow.",
+          "\tA cluster definition of class '" 
+	  + SubspaceClusterDefinition.class.getName().replaceAll(".*\\.", "") + "'\n"
+	  + "\t(definition needs to be quoted to be recognized as \n"
+	  + "\ta single argument).",
           "C", 1, "-C <cluster-definition>"));
+
+    result.addElement(new Option(
+	      "", "", 0, 
+	      "\nOptions specific to " 
+	      + SubspaceClusterDefinition.class.getName() + ":"));
 
     result.addAll(
         enumToVector(new SubspaceClusterDefinition(this).listOptions()));
@@ -180,10 +215,74 @@ public class SubspaceCluster
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -a &lt;num&gt;
+   *  The number of attributes (default 1).</pre>
+   * 
+   * <pre> -c
+   *  Class Flag, if set, the cluster is listed in extra attribute.</pre>
+   * 
+   * <pre> -b &lt;range&gt;
+   *  The indices for boolean attributes.</pre>
+   * 
+   * <pre> -m &lt;range&gt;
+   *  The indices for nominal attributes.</pre>
+   * 
+   * <pre> -P &lt;num&gt;
+   *  The noise rate in percent (default 0.0).
+   *  Can be between 0% and 30%. (Remark: The original 
+   *  algorithm only allows noise up to 10%.)</pre>
+   * 
+   * <pre> -C &lt;cluster-definition&gt;
+   *  A cluster definition of class 'SubspaceClusterDefinition'
+   *  (definition needs to be quoted to be recognized as 
+   *  a single argument).</pre>
+   * 
+   * <pre> 
+   * Options specific to weka.datagenerators.clusterers.SubspaceClusterDefinition:
+   * </pre>
+   * 
+   * <pre> -A &lt;range&gt;
+   *  Generates randomly distributed instances in the cluster.</pre>
+   * 
+   * <pre> -U &lt;range&gt;
+   *  Generates uniformly distributed instances in the cluster.</pre>
+   * 
+   * <pre> -G &lt;range&gt;
+   *  Generates gaussian distributed instances in the cluster.</pre>
+   * 
+   * <pre> -D &lt;num&gt;,&lt;num&gt;
+   *  The attribute min/max (-A and -U) or mean/stddev (-G) for
+   *  the cluster.</pre>
+   * 
+   * <pre> -N &lt;num&gt;..&lt;num&gt;
+   *  The range of number of instances per cluster (default 1..50).</pre>
+   * 
+   * <pre> -I
+   *  Uses integer instead of continuous values (default continuous).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String                      tmpStr;
@@ -255,7 +354,9 @@ public class SubspaceCluster
   }
 
   /**
-   * returns the current cluster definition, if necessary initializes them
+   * returns the current cluster definitions, if necessary initializes them
+   * 
+   * @return the current cluster definitions
    */
   protected ClusterDefinition[] getClusters() {
     if ( (m_Clusters == null) || (m_Clusters.length == 0) ) {
@@ -270,6 +371,8 @@ public class SubspaceCluster
 
   /**
    * returns the default number of attributes
+   * 
+   * @return the default number of attributes
    */
   protected int defaultNumAttributes() {
     return 1;
@@ -296,6 +399,8 @@ public class SubspaceCluster
 
   /**
    * returns the default noise rate
+   * 
+   * @return the default noise rate
    */
   protected double defaultNoiseRate() {
     return 0.0;
@@ -331,6 +436,8 @@ public class SubspaceCluster
 
   /**
    * returns the currently set clusters
+   * 
+   * @return the currently set clusters
    */
   public ClusterDefinition[] getClusterDefinitions() {
     return getClusters();
@@ -338,6 +445,9 @@ public class SubspaceCluster
 
   /**
    * sets the clusters to use
+   * 
+   * @param value the clusters do use
+   * @throws Exception if clusters are not the correct class
    */
   public void setClusterDefinitions(ClusterDefinition[] value) 
     throws Exception {
@@ -429,7 +539,7 @@ public class SubspaceCluster
    * Initializes the format for the dataset produced. 
    *
    * @return the output data format
-   * @exception Exception data format could not be defined 
+   * @throws Exception data format could not be defined 
    */
 
   public Instances defineDataFormat() throws Exception {
@@ -518,6 +628,8 @@ public class SubspaceCluster
 
   /**
    * returns array that stores the number of values for a nominal attribute.
+   * 
+   * @return the array that stores the number of values for a nominal attribute
    */
   public int[] getNumValues() {
     return m_numValues;
@@ -526,7 +638,7 @@ public class SubspaceCluster
   /**
    * Generate an example of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @throws Exception if format not defined or generating <br/>
    * examples one by one is not possible, because voting is chosen
    */
 
@@ -537,7 +649,7 @@ public class SubspaceCluster
   /**
    * Generate all examples of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined 
+   * @throws Exception if format not defined 
    */
 
   public Instances generateExamples() throws Exception {
@@ -585,9 +697,12 @@ public class SubspaceCluster
 
   /**
    * Generate an example of the dataset. 
-   * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
-   * examples one by one is not possible, because voting is chosen
+   * 
+   * @param format the dataset format
+   * @param randomG the random number generator to use
+   * @param cl the cluster definition
+   * @param cName the class value
+   * @return the generated instance
    */
   private Instance generateExample(
       Instances format, Random randomG, SubspaceClusterDefinition cl, 
@@ -645,9 +760,11 @@ public class SubspaceCluster
 
   /**
    * Generate examples for a uniform cluster dataset. 
-   * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
-   * examples one by one is not possible, because voting is chosen
+   * 
+   * @param format the dataset format
+   * @param numInstances the number of instances to generator
+   * @param cl the cluster definition
+   * @param cName the class value
    */
   private void generateUniformExamples(
       Instances format, int numInstances, SubspaceClusterDefinition cl, 
@@ -687,9 +804,11 @@ public class SubspaceCluster
 
   /**
    * Generate examples for a uniform cluster dataset. 
-   * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
-   * examples one by one is not possible, because voting is chosen
+   * 
+   * @param format the dataset format
+   * @param numInstances the number of instances to generator
+   * @param cl the cluster definition
+   * @param cName the class value
    */
   private void generateUniformIntegerExamples(
       Instances format, int numInstances, SubspaceClusterDefinition cl, 
@@ -767,9 +886,12 @@ public class SubspaceCluster
 
   /**
    * Generate examples for a uniform cluster dataset. 
-   * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
-   * examples one by one is not possible, because voting is chosen
+   * 
+   * @param format the dataset format
+   * @param numInstances the number of instances to generate
+   * @param random the random number generator
+   * @param cl the cluster definition
+   * @param cName the class value
    */
   private void generateGaussianExamples(
       Instances format, int numInstances, Random random, 
@@ -811,7 +933,7 @@ public class SubspaceCluster
    * the generation process
    *
    * @return string with additional information about generated dataset
-   * @exception Exception no input structure has been defined
+   * @throws Exception no input structure has been defined
    */
   public String generateFinished() throws Exception {
     return "";

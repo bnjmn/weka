@@ -64,19 +64,33 @@ import java.io.Serializable;
  * <br/>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  **/
 
 public class Test 
   implements Serializable {
 
+  /** for serialization */
+  static final long serialVersionUID = -8890645875887157782L;
+  
+  /** the attribute index */
   int m_AttIndex;
+  
+  /** the split */
   double m_Split;
+  
+  /** whether to negate the test */
   boolean m_Not;
+  
+  /** the dataset */
   Instances m_Dataset;
 	
   /** 
    * Constructor 
+   * 
+   * @param i the attribute index
+   * @param s the split
+   * @param dataset the dataset
    */
   public Test(int i, double s, Instances dataset) { 
     m_AttIndex = i; 
@@ -88,6 +102,11 @@ public class Test
 
   /** 
    * Constructor 
+   * 
+   * @param i the attribute index
+   * @param s the split
+   * @param dataset the dataset
+   * @param n whether to negate the test
    */
   public Test(int i, double s, Instances dataset, boolean n) {
     m_AttIndex = i;
@@ -112,7 +131,6 @@ public class Test
    * @return true if the instance satisfies the test, false otherwise
    * @throws Exception if something goes wrong
    */   
-
   public boolean passesTest(Instance inst) throws Exception {
     if (inst.isMissing(m_AttIndex)) return false; // missing values fail
 	

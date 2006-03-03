@@ -34,13 +34,13 @@ import java.util.Enumeration;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public abstract class ClusterDefinition
   implements Serializable, OptionHandler {
 
-  // the parent of the cluster
+  /** the parent of the cluster */
   protected ClusterGenerator m_Parent;
 
   /**
@@ -68,6 +68,8 @@ public abstract class ClusterDefinition
 
   /**
    * sets the default values
+   * 
+   * @throws Exception if setting of defaults fails
    */
   protected abstract void setDefaults() throws Exception;
 
@@ -94,7 +96,7 @@ public abstract class ClusterDefinition
    * For list of valid options see class description.<p/>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public abstract void setOptions(String[] options) throws Exception;
 
@@ -107,6 +109,8 @@ public abstract class ClusterDefinition
 
   /**
    * returns the parent datagenerator this cluster belongs to
+   * 
+   * @return the parent this cluster belongs to
    */
   public ClusterGenerator getParent() {
     return m_Parent;
@@ -122,6 +126,8 @@ public abstract class ClusterDefinition
 
   /**
    * returns a string representation of the cluster
+   * 
+   * @return the cluster definition as string
    */
   public String toString() {
     return this.getClass().getName() + ": " + Utils.joinOptions(getOptions());

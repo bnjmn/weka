@@ -27,6 +27,10 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.datagenerators.DataGenerator;
 import weka.datagenerators.ClassificationGenerator;
@@ -36,54 +40,77 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * This generator produces data for a display with 7 LEDs. The original output
- * consists of 10 concepts and 7 boolean attributes. Here, in addition to the 7
- * necessary boolean attributes, 17 other, irrelevant boolean attributes with
- * random values are added to make it harder. By default 10 percent of noise
- * are added to the data. <p/>
- *
- * More information can be found here: <br/>
- * Breiman,L., Friedman,J.H., Olshen,R.A., &amp; Stone,C.J. (1984).
- * Classification and Regression Trees.  Wadsworth International Group:
- * Belmont, California.  (see pages 43-49). <p/>
+ <!-- globalinfo-start -->
+ * This generator produces data for a display with 7 LEDs. The original output consists of 10 concepts and 7 boolean attributes. Here, in addition to the 7 necessary boolean attributes, 17 other, irrelevant boolean attributes with random values are added to make it harder. By default 10 percent of noise are added to the data.<br/>
+ * <br/>
+ * More information can be found here:<br/>
+ * L. Breiman J.H. Friedman R.A. Olshen, C.J. Stone (1984). Classification and Regression Trees. Belmont, California. URL http://www.ics.uci.edu/~mlearn/databases/led-display-creator/.
+ * <p/>
+ <!-- globalinfo-end -->
  *
  * Link: <br/>
  * <a href="http://www.ics.uci.edu/~mlearn/databases/led-display-creator/">http://www.ics.uci.edu/~mlearn/databases/led-display-creator/</a> <p/>
  * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inbook{Olshen1984,
+ *    address = {Belmont, California},
+ *    author = {L. Breiman J.H. Friedman R.A. Olshen and C.J. Stone},
+ *    pages = {43-49},
+ *    publisher = {Wadsworth International Group},
+ *    title = {Classification and Regression Trees},
+ *    year = {1984},
+ *    ISBN = {0412048418},
+ *    URL = {http://www.ics.uci.edu/~mlearn/databases/led-display-creator/}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
- *
- * -n num <br/>
- *  Number of examples. <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -N num <br/>
- *  the noise percentage. <p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -n &lt;num&gt;
+ *  The number of examples to generate (default 100)</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  The noise percentage. (default 10.0)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class LED24
-  extends ClassificationGenerator {
+  extends ClassificationGenerator
+  implements TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -7880209100415868737L;  
   
   /** the noise rate */
   protected double m_NoisePercent;
   
+  /** the 7-bit LEDs */
   protected static final int m_originalInstances[][] = {
     { 1, 1, 1, 0, 1, 1, 1 }, { 0, 0, 1, 0, 0, 1, 0 },
     { 1, 0, 1, 1, 1, 0, 1 }, { 1, 0, 1, 1, 0, 1, 1 },
@@ -91,6 +118,7 @@ public class LED24
     { 1, 1, 0, 1, 1, 1, 1 }, { 1, 0, 1, 0, 0, 1, 0 },
     { 1, 1, 1, 1, 1, 1, 1 }, { 1, 1, 1, 1, 0, 1, 1 } };
 
+  /** used for generating the output, i.e., the additional noise attributes */
   protected int m_numIrrelevantAttributes = 17;
 
   /**
@@ -117,12 +145,30 @@ public class LED24
        + "By default 10 percent of noise are added to the data.\n"
        + "\n"
        + "More information can be found here:\n"
-       + "Breiman,L., Friedman,J.H., Olshen,R.A., & Stone,C.J. (1984). "
-       + "Classification and Regression Trees. Wadsworth International Group: "
-       + "Belmont, California. (see pages 43-49).\n"
-       + "\n"
-       + "Link:\n"
-       + "http://www.ics.uci.edu/~mlearn/databases/led-display-creator/";
+       + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INBOOK);
+    result.setValue(Field.AUTHOR, "L. Breiman J.H. Friedman R.A. Olshen and C.J. Stone");
+    result.setValue(Field.YEAR, "1984");
+    result.setValue(Field.TITLE, "Classification and Regression Trees");
+    result.setValue(Field.PUBLISHER, "Wadsworth International Group");
+    result.setValue(Field.ADDRESS, "Belmont, California");
+    result.setValue(Field.PAGES, "43-49");
+    result.setValue(Field.ISBN, "0412048418");
+    result.setValue(Field.URL, "http://www.ics.uci.edu/~mlearn/databases/led-display-creator/");
+    
+    return result;
   }
 
  /**
@@ -144,7 +190,32 @@ public class LED24
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -n &lt;num&gt;
+   *  The number of examples to generate (default 100)</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  The noise percentage. (default 10.0)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -184,6 +255,8 @@ public class LED24
 
   /**
    * returns the default noise percentage
+   * 
+   * @return the default noise percentage
    */
   protected double defaultNoisePercent() {
     return 10;
@@ -345,7 +418,6 @@ public class LED24
    * as ARFF file type, next after the options.
    * 
    * @return string contains info about the generated rules
-   * @throws Exception if the generating of the documentation fails
    */
   public String generateStart () {
     return "";

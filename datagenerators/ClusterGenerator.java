@@ -33,24 +33,6 @@ import java.util.Vector;
 /** 
  * Abstract class for cluster data generators. <p/>
  *
- * Valid options are: <p/>
- *
- * -r string <br/>
- * Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- * Number of attributes. <p/>
- *
- * -k num <br/>
- * Number of clusters. <p/>
- *
- * -c <br/>
- * Class Flag. If set, cluster is listed in extra class attribute.<p/>
- *
- * -o filename<br/>
- * writes the generated dataset to the given file using ARFF-Format.
- * (default = stdout). <p/>
- *
  * Example usage as the main of a datagenerator called RandomGenerator:
  * <pre>
  * public static void main(String[] args) {
@@ -67,7 +49,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class ClusterGenerator 
   extends DataGenerator {
@@ -125,7 +107,7 @@ public abstract class ClusterGenerator
    * Sets the options.
    *
    * @param options the options 
-   * @exception Exception if invalid option
+   * @throws Exception if invalid option
    */
   public void setOptions(String[] options) throws Exception { 
     String        tmpStr;
@@ -190,6 +172,8 @@ public abstract class ClusterGenerator
 
   /**
    * returns the default number of attributes
+   * 
+   * @return the default number of attributes
    */
   protected int defaultNumAttributes() {
     return 10;
@@ -256,7 +240,7 @@ public abstract class ClusterGenerator
    * the string will typically come from a user, attributes are indexed from
    * 1. <br/>
    * eg: first-3,5,6-last
-   * @exception IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setBooleanIndices(String rangeList) {
     m_booleanCols.setRanges(rangeList);
@@ -272,6 +256,8 @@ public abstract class ClusterGenerator
 
   /**
    * returns the range of boolean attributes.
+   * 
+   * @return the range of boolean attributes
    */
   public Range getBooleanCols() {
     if (m_booleanCols == null)
@@ -296,7 +282,7 @@ public abstract class ClusterGenerator
    * the string will typically come from a user, attributes are indexed from
    * 1. <br/>
    * eg: first-3,5,6-last
-   * @exception IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setNominalIndices(String rangeList) {
     m_nominalCols.setRanges(rangeList);
@@ -311,7 +297,9 @@ public abstract class ClusterGenerator
   }
 
   /**
-   * returns the range of nominal attributes.
+   * returns the range of nominal attributes
+   * 
+   * @return the range of nominal attributes
    */
   public Range getNominalCols() {
     if (m_nominalCols == null)
@@ -332,6 +320,8 @@ public abstract class ClusterGenerator
 
   /**
    * check if attribute types are not contradicting
+   * 
+   * @return empty string if no problem, otherwise error message
    */
   protected String checkIndices() {
     for (int i = 1; i < getNumAttributes() + 1; i++) {

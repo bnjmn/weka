@@ -27,14 +27,12 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Randomizable;
-import weka.core.Tee;
 import weka.core.Utils;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.lang.Exception;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -45,27 +43,8 @@ import java.util.Vector;
  * Abstract superclass for data generators that generate data for 
  * classifiers and clusterers.
  *
- * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- *  Number of attributes. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format, if
- *  not specified, then to stdout. <p/>
- * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable {
@@ -339,6 +318,8 @@ public abstract class DataGenerator
 
   /**
    * returns a relation name based on the options
+   * 
+   * @return a relation name based on the options
    */
   protected String defaultRelationName() {
     StringBuffer    result;
@@ -401,6 +382,8 @@ public abstract class DataGenerator
 
   /**
    * returns the default number of actual examples
+   * 
+   * @return the default number of actual examples
    */
   protected int defaultNumExamplesAct() {
     return 0;
@@ -500,6 +483,8 @@ public abstract class DataGenerator
 
   /**
    * returns the default seed
+   * 
+   * @return the default seed
    */
   protected int defaultSeed() {
     return 1;
@@ -597,6 +582,7 @@ public abstract class DataGenerator
    * checks, whether the given option is in the blacklist of options not to
    * be output by makeOptionString
    * @param option      the option to check
+   * @return true if the option is on the blacklist
    * @see #makeOptionString(DataGenerator)
    */
   protected static boolean isOnBlacklist(String option) {
@@ -605,6 +591,9 @@ public abstract class DataGenerator
 
   /**
    * removes all the options from the options array that are blacklisted
+   * 
+   * @param options the options to remove from the blacklist
+   * @return the processed options array
    */
   protected String[] removeBlacklist(String[] options) {
     Enumeration     enm;
@@ -640,6 +629,9 @@ public abstract class DataGenerator
 
   /**
    * returns all the options in a string
+   * 
+   * @param generator the DataGenerator to return all the options for
+   * @return the assembled option string
    */
   protected static String makeOptionString(DataGenerator generator) {
     StringBuffer    result;

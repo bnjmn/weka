@@ -33,7 +33,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class ClassificationGenerator 
   extends DataGenerator {
@@ -70,7 +70,7 @@ public abstract class ClassificationGenerator
    * Sets the options.
    *
    * @param options the options 
-   * @exception Exception if invalid option
+   * @throws Exception if invalid option
    */
   public void setOptions(String[] options) throws Exception { 
     String        tmpStr;
@@ -107,6 +107,8 @@ public abstract class ClassificationGenerator
 
   /**
    * returns the default number of examples
+   * 
+   * @return the default number of examples
    */
   protected int defaultNumExamples() {
     return 100;

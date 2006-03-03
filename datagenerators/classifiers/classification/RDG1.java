@@ -38,113 +38,135 @@ import java.util.Random;
 import java.util.Vector;
 
 /** 
- * Class to generate data randomly by producing a decision list.
- * The decision list consists of rules.
- * Instances are generated randomly one by one. If decision list fails
- * to classify the current instance, a new rule according to this current
- * instance is generated and added to the decision list.<p/>
+ <!-- globalinfo-start -->
+ * A data generator that produces data randomly by producing a decision list.<br/>
+ * The decision list consists of rules.<br/>
+ * Instances are generated randomly one by one. If decision list fails to classify the current instance, a new rule according to this current instance is generated and added to the decision list.<br/>
+ * <br/>
+ * The option -V switches on voting, which means that at the end of the generation all instances are reclassified to the class value that is supported by the most rules.<br/>
+ * <br/>
+ * This data generator can generate 'boolean' attributes (= nominal with the values {true, false}) and numeric attributes. The rules can be 'A' or 'NOT A' for boolean values and 'B &lt; random_value' or 'B &gt;= random_value' for numeric values.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * The option -V switches on voting, which means that at the end
- * of the generation all instances are
- * reclassified to the class value that is supported by the most rules.<p/>
- *
- * This data generator can generate 'boolean' attributes (= nominal with
- * the values {true, false}) and numeric attributes. The rules can be
- * 'A' or 'NOT A' for boolean values and 'B &lt; random_value' or
- * 'B &gt;= random_value' for numeric values.<p/> 
- *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- *  Number of attributes. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
- *
- * -c num <br/>
- *  Number of classes - NOT used in this generator. <p/>
- *
- * -n num <br/>
- *  Number of examples. <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -R num <br/>
- * The maximum number of attributes chosen to form a rule.<p/>
- *
- * -M num <br/>
- * The minimum number of attributes chosen to form a rule.<p/>
- *
- * -I num <br/>
- * The number of irrelevant attributes.<p/>
- *
- * -N num <br/>
- * The number of numeric attributes.<p/>
- *
- * -V <br/>
- * Flag to use voting. <p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -n &lt;num&gt;
+ *  The number of examples to generate (default 100)</pre>
+ * 
+ * <pre> -a &lt;num&gt;
+ *  The number of attributes (default 10).</pre>
+ * 
+ * <pre> -c &lt;num&gt;
+ *  The number of classes (default 2)</pre>
+ * 
+ * <pre> -R &lt;num&gt;
+ *  maximum size for rules (default 10) </pre>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  minimum size for rules (default 1) </pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  number of irrelevant attributes (default 0)</pre>
+ * 
+ * <pre> -N
+ *  number of numeric attributes (default 0)</pre>
+ * 
+ * <pre> -V
+ *  switch on voting (default is no voting)</pre>
+ * 
+ <!-- options-end -->
  *
  * Following an example of a generated dataset: <br/>
+ * <pre>
+ * %
+ * % weka.datagenerators.RDG1 -r expl -a 2 -c 3 -n 4 -N 1 -I 0 -M 2 -R 10 -S 2
+ * %
+ * relation expl
  *
- * %<br/>
- * % weka.datagenerators.RDG1 -r expl -a 2 -c 3 -n 4 -N 1 -I 0 -M 2 -R 10 -S 2<br/>
- * %<br/>
- * relation expl<br/>
- *<br/>
- * attribute a0 {false,true}<br/>
- * attribute a1 numeric<br/>
- * attribute class {c0,c1,c2}<br/>
- *<br/>
- * data<br/>
- *<br/>
- * true,0.496823,c0<br/>
- * false,0.743158,c1<br/>
- * false,0.408285,c1<br/>
- * false,0.993687,c2<br/>
- * %<br/>
- * % Number of attributes chosen as irrelevant = 0<br/>
- * %<br/>
- * % DECISIONLIST (number of rules = 3):<br/>
- * % RULE 0:   c0 := a1 &lt; 0.986, a0<br/>
- * % RULE 1:   c1 := a1 &lt; 0.95, not(a0)<br/>
- * % RULE 2:   c2 := not(a0), a1 &gt;= 0.562<br/>
- *<p/>
+ * attribute a0 {false,true}
+ * attribute a1 numeric
+ * attribute class {c0,c1,c2}
+ *
+ * data
+ *
+ * true,0.496823,c0
+ * false,0.743158,c1
+ * false,0.408285,c1
+ * false,0.993687,c2
+ * %
+ * % Number of attributes chosen as irrelevant = 0
+ * %
+ * % DECISIONLIST (number of rules = 3):
+ * % RULE 0:   c0 := a1 &lt; 0.986, a0
+ * % RULE 1:   c1 := a1 &lt; 0.95, not(a0)
+ * % RULE 2:   c2 := not(a0), a1 &gt;= 0.562
+ * </pre>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class RDG1 
   extends ClassificationGenerator {
 
-  /*
+  /** for serialization */
+  static final long serialVersionUID = 7751005204635320414L;  
+  
+  /**
    * class to represent decisionlist
    */
   private class RuleList 
     implements Serializable {
 
+    /** for serialization */
+    static final long serialVersionUID = 2830125413361938177L;
+    
     /** rule list */
     private FastVector m_RuleList = null;
     
     /** class */
     double m_ClassValue = 0.0;
 
+    /**
+     * returns the class value
+     * 
+     * @return the class value
+     */
     public double getClassValue() { 
       return m_ClassValue; 
     }
     
+    /**
+     * sets the class value
+     * 
+     * @param newClassValue the new classvalue
+     */
     public void setClassValue(double newClassValue) {
       m_ClassValue = newClassValue;
     }
     
+    /**
+     * adds the given test to the list
+     * 
+     * @param newTest the test to add
+     */
     private void addTest (Test newTest) { 
       if (m_RuleList == null)
 	m_RuleList = new FastVector();
@@ -152,6 +174,13 @@ public class RDG1
       m_RuleList.addElement(newTest);
     }
     
+    /**
+     * classifies the given example
+     * 
+     * @param example the instance to classify
+     * @return the classification
+     * @throws Exception if classification fails
+     */
     private double classifyInstance (Instance example) throws Exception {
       boolean passedAllTests = true;
       for (Enumeration e = m_RuleList.elements(); 
@@ -163,6 +192,11 @@ public class RDG1
       else return -1.0;
     }
     
+    /**
+     * returns a string representation of the rule list
+     * 
+     * @return the rule list as string
+     */
     public String toString () {
       StringBuffer str = new StringBuffer();
       str = str.append("  c" + (int) m_ClassValue + " := ");
@@ -204,8 +238,8 @@ public class RDG1
    /** decision list */
   private FastVector m_DecisionList = null;
 
-  /** array defines which attributes are irrelevant, with: */
-  /* true = attribute is irrelevant; false = attribute is not irrelevant*/
+  /** array defines which attributes are irrelevant, with:
+   * true = attribute is irrelevant; false = attribute is not irrelevant*/
   boolean[] m_AttList_Irr;
 
   /**
@@ -229,9 +263,19 @@ public class RDG1
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "A data generator that produces data randomly "
-           + "with \'boolean\' (nominal with values {false,true}) and "
-           + "numeric attributes by producing a decisionlist.";
+    return
+        "A data generator that produces data randomly by producing a decision list.\n"
+      + "The decision list consists of rules.\n"
+      + "Instances are generated randomly one by one. If decision list fails "
+      + "to classify the current instance, a new rule according to this current "
+      + "instance is generated and added to the decision list.\n\n"
+      + "The option -V switches on voting, which means that at the end "
+      + "of the generation all instances are "
+      + "reclassified to the class value that is supported by the most rules.\n\n"
+      + "This data generator can generate 'boolean' attributes (= nominal with "
+      + "the values {true, false}) and numeric attributes. The rules can be "
+      + "'A' or 'NOT A' for boolean values and 'B < random_value' or "
+      + "'B >= random_value' for numeric values.";
   }
 
  /**
@@ -281,10 +325,53 @@ public class RDG1
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -n &lt;num&gt;
+   *  The number of examples to generate (default 100)</pre>
+   * 
+   * <pre> -a &lt;num&gt;
+   *  The number of attributes (default 10).</pre>
+   * 
+   * <pre> -c &lt;num&gt;
+   *  The number of classes (default 2)</pre>
+   * 
+   * <pre> -R &lt;num&gt;
+   *  maximum size for rules (default 10) </pre>
+   * 
+   * <pre> -M &lt;num&gt;
+   *  minimum size for rules (default 1) </pre>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  number of irrelevant attributes (default 0)</pre>
+   * 
+   * <pre> -N
+   *  number of numeric attributes (default 0)</pre>
+   * 
+   * <pre> -V
+   *  switch on voting (default is no voting)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String      tmpStr;
@@ -374,6 +461,8 @@ public class RDG1
 
   /**
    * returns the default number of attributes
+   * 
+   * @return the default number of attributes
    */
   protected int defaultNumAttributes() {
     return 10;
@@ -407,6 +496,8 @@ public class RDG1
 
   /**
    * returns the default number of classes
+   * 
+   * @return the default number of classes
    */
   protected int defaultNumClasses() {
     return 2;
@@ -440,6 +531,8 @@ public class RDG1
 
   /**
    * returns the default max size of rules
+   * 
+   * @return the default max size of rules
    */
   protected int defaultMaxRuleSize() {
     return 10;
@@ -475,6 +568,8 @@ public class RDG1
 
   /**
    * returns the default min size of rules
+   * 
+   * @return the default min size of rules
    */
   protected int defaultMinRuleSize() {
     return 1;
@@ -510,6 +605,8 @@ public class RDG1
 
   /**
    * returns the default number of irrelevant attributes
+   * 
+   * @return the default number of irrelevant attributes
    */
   protected int defaultNumIrrelevant() {
     return 0;
@@ -545,6 +642,8 @@ public class RDG1
 
   /**
    * returns the default number of numeric attributes
+   * 
+   * @return the default number of numeric attributes
    */
   protected int defaultNumNumeric() {
     return 0;
@@ -649,7 +748,7 @@ public class RDG1
    * Initializes the format for the dataset produced. 
    *
    * @return the output data format
-   * @exception Exception data format could not be defined 
+   * @throws Exception data format could not be defined 
    */
   public Instances defineDataFormat() throws Exception {
     Instances dataset;
@@ -669,7 +768,7 @@ public class RDG1
   /**
    * Generate an example of the dataset dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @throws Exception if format not defined or generating <br/>
    * examples one by one is not possible, because voting is chosen
    */
   public Instance generateExample() throws Exception {
@@ -690,7 +789,7 @@ public class RDG1
   /**
    * Generate all examples of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @throws Exception if format not defined or generating <br/>
    * examples one by one is not possible, because voting is chosen
    */
   public Instances generateExamples() throws Exception {
@@ -711,8 +810,11 @@ public class RDG1
 
   /**
    * Generate all examples of the dataset. 
+   * @param num the number of examples to generate
+   * @param random the random number generator to use
+   * @param format the dataset format
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @throws Exception if format not defined or generating <br/>
    * examples one by one is not possible, because voting is chosen
    */
   public Instances generateExamples(int num, 
@@ -745,6 +847,8 @@ public class RDG1
    * and classifies the new example
    * @param random random number generator
    * @param example example used to update decision list 
+   * @return the classified example
+   * @throws Exception if dataset format not defined
    */
   private Instance updateDecisionList(Random random, Instance example)
    throws Exception {
@@ -791,7 +895,9 @@ public class RDG1
    * and classifies the new example.
    *
    * @param random random number generator
-   * @param example 
+   * @param example the instance to classify
+   * @return a list of tests
+   * @throws Exception if dataset format not defined
    */
   private FastVector generateTestList(Random random, Instance example) 
    throws Exception {
@@ -827,7 +933,9 @@ public class RDG1
    * and binds it to the datasets.
    *
    * @param random random number generator
-   * @param dataset dataset the example gets bind to
+   * @param format dataset the example gets bind to
+   * @return the generated example
+   * @throws Exception if attribute type not supported
    */
   private Instance generateExample(Random random, Instances format) 
     throws Exception {     
@@ -856,7 +964,9 @@ public class RDG1
  /**
    * Tries to classify an example. 
    * 
-   * @param example
+   * @param example the example to classify
+   * @return true if it could be classified
+   * @throws Exception if something goes wrong
    */
   private boolean classifyExample(Instance example) throws Exception {
     double classValue = -1.0;  
@@ -884,6 +994,7 @@ public class RDG1
    * 
    * @param example example to be reclassified
    * @return instance with new class value
+   * @throws Exception if classification fails
    */
   private Instance votedReclassifyExample(Instance example) throws Exception {
     int classVotes[] = new int [getNumClasses()]; 
@@ -915,6 +1026,7 @@ public class RDG1
    * Returns a dataset header.
    * @param random random number generator
    * @return dataset header
+   * @throws Exception if something goes wrong
    */
   private Instances defineDataset(Random random) throws Exception {
 
@@ -964,7 +1076,7 @@ public class RDG1
    * Number of attributes to be set as irrelevant is either set
    * with a preceeding call of setNumIrrelevant() or is per default 0.
    *
-   * @param random
+   * @param random the random number generator to use
    * @return list of boolean values with one value for each attribute,
    * and each value set true or false according to if the corresponding
    * attribute was defined irrelevant or not
@@ -994,7 +1106,7 @@ public class RDG1
 
  /**
    * Chooses randomly the attributes that get datatyp numeric.
-   * @param random
+   * @param random the random number generator to use
    * @return list of integer values, with one value for each attribute,
    * and each value set to Attribut.NOMINAL or Attribut.NUMERIC
    */
@@ -1025,7 +1137,6 @@ public class RDG1
    * as ARFF file type, next after the options.
    * 
    * @return string contains info about the generated rules
-   * @exception Exception if the generating of the documentation fails
    */
   public String generateStart () {
     return "";
@@ -1039,7 +1150,7 @@ public class RDG1
    * end of the data generation process. 
    *
    * @return string with additional information about generated dataset
-   * @exception Exception no input structure has been defined
+   * @throws Exception no input structure has been defined
    */
   public String generateFinished() throws Exception {
 
@@ -1071,8 +1182,9 @@ public class RDG1
    * For each instance the class value that satisfies the most rules
    * is choosen as new class value.
    *
-   * @param dataset
+   * @param dataset the dataset to work on
    * @return the changed instances
+   * @throws Exception if something goes wrong
    */
   private Instances voteDataset(Instances dataset) throws Exception {
     for (int i = 0; i < dataset.numInstances(); i++) {
