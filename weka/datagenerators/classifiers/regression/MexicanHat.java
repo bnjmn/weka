@@ -36,51 +36,59 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * A regression generator that uses the following simple function:<br/>
- *    <code>y = sin|x| / |x|</code><br/>
- * In addition to this simple function, the amplitude can be changed and
- * gaussian noise can be added.
+ <!-- globalinfo-start -->
+ * A data generator for the simple 'Mexian Hat' function:<br/>
+ *    y = sin|x| / |x|<br/>
+ * In addition to this simple function, the amplitude can be changed and gaussian noise can be added.
  * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
- *
- * -n num <br/>
- *  Number of examples. <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -A num <br/>
- *  the amplitude multiplier. <p/>
- *
- * -R num..num <br/>
- *  the range the x is randomly drawn from. <p/>
- *
- * -N num <br/>
- *  the rate of gaussian noise to add to the data (0 &lt;= num &lt; 1).
- *  <p/>
- *
- * -V num <br/>
- *  the variance of the gaussian noise.<p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -n &lt;num&gt;
+ *  The number of examples to generate (default 100)</pre>
+ * 
+ * <pre> -A &lt;num&gt;
+ *  The amplitude multiplier (default 1.0).</pre>
+ * 
+ * <pre> -R &lt;num&gt;..&lt;num&gt;
+ *  The range x is randomly drawn from (default -10.0..10.0).</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  The noise rate (default 0.0).</pre>
+ * 
+ * <pre> -V &lt;num&gt;
+ *  The noise variance (default 1.0).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class MexicanHat
   extends RegressionGenerator {
 
+  /** for serialization */
+  static final long serialVersionUID = 4577016375261512975L;
+  
   /** the amplitude of y */
   protected double m_Amplitude;
 
@@ -121,7 +129,9 @@ public class MexicanHat
   public String globalInfo() {
     return 
         "A data generator for the simple 'Mexian Hat' function:\n"
-        + "   y = sin|x| / |x|";
+        + "   y = sin|x| / |x|\n"
+        + "In addition to this simple function, the amplitude can be changed and "
+        + "gaussian noise can be added.";
   }
 
   /**
@@ -158,7 +168,41 @@ public class MexicanHat
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -n &lt;num&gt;
+   *  The number of examples to generate (default 100)</pre>
+   * 
+   * <pre> -A &lt;num&gt;
+   *  The amplitude multiplier (default 1.0).</pre>
+   * 
+   * <pre> -R &lt;num&gt;..&lt;num&gt;
+   *  The range x is randomly drawn from (default -10.0..10.0).</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  The noise rate (default 0.0).</pre>
+   * 
+   * <pre> -V &lt;num&gt;
+   *  The noise variance (default 1.0).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -225,6 +269,8 @@ public class MexicanHat
 
   /**
    * returns the default amplitude
+   * 
+   * @return the default amplitude
    */
   protected double defaultAmplitude() {
     return 1.0;
@@ -297,6 +343,8 @@ public class MexicanHat
 
   /**
    * returns the default min range
+   * 
+   * @return the default min range
    */
   protected double defaultMinRange() {
     return -10;
@@ -332,6 +380,8 @@ public class MexicanHat
 
   /**
    * returns the default max range
+   * 
+   * @return the default max range
    */
   protected double defaultMaxRange() {
     return 10;
@@ -367,6 +417,8 @@ public class MexicanHat
 
   /**
    * returns the default gaussian noise rate
+   * 
+   * @return the default gaussian noise rate
    */
   protected double defaultNoiseRate() {
     return 0.0;
@@ -402,6 +454,8 @@ public class MexicanHat
 
   /**
    * returns the default variance of the noise rate
+   * 
+   * @return the default variance of the noise rate
    */
   protected double defaultNoiseVariance() {
     return 1.0;
@@ -558,7 +612,6 @@ public class MexicanHat
    * as ARFF file type, next after the options.
    * 
    * @return string contains info about the generated rules
-   * @throws Exception if the generating of the documentation fails
    */
   public String generateStart () {
     return "";
@@ -591,4 +644,3 @@ public class MexicanHat
     }
   }
 }
-

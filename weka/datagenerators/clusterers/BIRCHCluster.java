@@ -29,6 +29,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.datagenerators.ClusterGenerator;
 import weka.datagenerators.DataGenerator;
@@ -39,96 +43,116 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Cluster data generator designed for the BIRCH System
+ <!-- globalinfo-start -->
+ * Cluster data generator designed for the BIRCH System<br/>
+ * <br/>
+ * Dataset is generated with instances in K clusters.<br/>
+ * Instances are 2-d data points.<br/>
+ * Each cluster is characterized by the number of data points in itits radius and its center. The location of the cluster centers isdetermined by the pattern parameter. Three patterns are currentlysupported grid, sine and random.<br/>
+ * <br/>
+ * For more information refer to:<br/>
+ * <br/>
+ * Tian Zhang, Raghu Ramakrishnan, Miron Livny: BIRCH: An Efficient Data Clustering Method for Very Large Databases. In: ACM SIGMOD International Conference on Management of Data, 103-114, 1996.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Dataset is generated with instances in K clusters.
- * Instances are 2-d data points.
- * Each cluster is characterized by the number of data points in it
- * its radius and its center. The location of the cluster centers is
- * determined by the pattern parameter. Three patterns are currently
- * supported grid, sine and random.
- * todo:
- *
- * (out of: BIRCH: An Efficient Data Clustering Method for Very Large
- * Databases; T. Zhang, R. Ramkrishnan, M. Livny; 1996 ACM)
- *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Zhang1996,
+ *    author = {Tian Zhang and Raghu Ramakrishnan and Miron Livny},
+ *    booktitle = {ACM SIGMOD International Conference on Management of Data},
+ *    pages = {103-114},
+ *    publisher = {ACM Press},
+ *    title = {BIRCH: An Efficient Data Clustering Method for Very Large Databases},
+ *    year = {1996}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  * 
- * Class to generate data randomly by producing a decision list.
- * The decision list consists of rules.
- * Instances are generated randomly one by one. If decision list fails
- * to classify the current instance, a new rule according to this current
- * instance is generated and added to the decision list.<p/>
- *
- * The option -V switches on voting, which means that at the end
- * of the generation all instances are
- * reclassified to the class value that is supported by the most rules.<p/>
- *
- * This data generator can generate 'boolean' attributes (= nominal with
- * the values {true, false}) and numeric attributes. The rules can be
- * 'A' or 'NOT A' for boolean values and 'B &lt; random_value' or
- * 'B &gt;= random_value' for numeric values.<p/> 
- *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- * Number of attributes. <p/>
- *
- * -o filename<br/>
- * writes the generated dataset to the given file using ARFF-Format.
- * (default = stdout). <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -G <br/>
- * The pattern for instance generation is grid.<br/>
- * This flag cannot be used at the same time as flag I.
- * The pattern is random, if neither flag G nor flag I is set.<p/>
- *
- * -I <br/>
- * The pattern for instance generation is sine.<br/>
- * This flag cannot be used at the same time as flag G.
- * The pattern is random, if neither flag G nor flag I is set.<p/>
- *
- * -N num .. num <br/>
- * The range of the number of instances in each cluster.<br/>
- * Lower number must be between 0 and 2500, upper number must be between
- * 50 and 2500.<p/>
- *
- * -R num .. num <br/>
- * The range of the radius of the clusters.<br/>
- * Lower number must be between 0 and SQRT(2), upper number must be between<br/>
- * SQRT(2) and SQRT(32).<p/>
- *
- * -M num <br/>
- * Distance multiplier, only used if pattern is grid. <p/>
- *
- * -C num <br/>
- * Number of cycles, only used if pattern is sine. <p/>
- *
- * -O <br/>
- * Flag for input order is ordered. If flag is not set then input
- * order is randomized. RANDOMIZED is currently not implemented, therefore
- * is the input order always ordered. <p/>
- *
- * -P num<br/>
- * Noise rate in percent. Can be between 0% and 30%.<br/>
- * (Remark: The original algorithm only allows noise up to 10%.)<p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -a &lt;num&gt;
+ *  The number of attributes (default 10).</pre>
+ * 
+ * <pre> -c
+ *  Class Flag, if set, the cluster is listed in extra attribute.</pre>
+ * 
+ * <pre> -b &lt;range&gt;
+ *  The indices for boolean attributes.</pre>
+ * 
+ * <pre> -m &lt;range&gt;
+ *  The indices for nominal attributes.</pre>
+ * 
+ * <pre> -k &lt;num&gt;
+ *  The number of clusters (default 4)</pre>
+ * 
+ * <pre> -G
+ *  Set pattern to grid (default is random).
+ *  This flag cannot be used at the same time as flag I.
+ *  The pattern is random, if neither flag G nor flag I is set.</pre>
+ * 
+ * <pre> -I
+ *  Set pattern to sine (default is random). This flag cannot be used at the same time as flag I.
+ *  The pattern is random, if neither flag G nor flag I is set.</pre>
+ * 
+ * <pre> -N &lt;num&gt;..&lt;num&gt;
+ *  The range of number of instances per cluster (default 1..50).
+ *  Lower number must be between 0 and 2500,
+ *  upper number must be between 50 and 2500.</pre>
+ * 
+ * <pre> -R &lt;num&gt;..&lt;num&gt;
+ *  The range of radius per cluster (default 0.1..1.4142135623730951).
+ *  Lower number must be between 0 and SQRT(2), 
+ *  upper number must be between SQRT(2) and SQRT(32).</pre>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  The distance multiplier (default 4.0).</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The number of cycles (default 4).</pre>
+ * 
+ * <pre> -O
+ *  Flag for input order is ORDERED. If flag is not set then 
+ *  input order is RANDOMIZED. RANDOMIZED is currently not 
+ *  implemented, therefore is the input order always ORDERED.</pre>
+ * 
+ * <pre> -P &lt;num&gt;
+ *  The noise rate in percent (default 0.0).
+ *  Can be between 0% and 30%. (Remark: The original 
+ *  algorithm only allows noise up to 10%.)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class BIRCHCluster 
-  extends ClusterGenerator {
+  extends ClusterGenerator
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = -334820527230755027L;
+  
   /** Number of Clusters the dataset should have */
   protected int m_NumClusters;
 
@@ -198,14 +222,17 @@ public class BIRCHCluster
   private class Cluster 
     implements Serializable {
 
-    // number of instances for this cluster
+    /** for serialization */
+    static final long serialVersionUID = -8336901069823498140L;    
+    
+    /** number of instances for this cluster */
     private int m_InstNum;
 
-    // radius of cluster
-    //   variance is radius ** 2 / 2
+    /** radius of cluster
+     *   variance is radius ** 2 / 2 */
     private double m_Radius;
 
-    // center of cluster = array of Double values
+    /** center of cluster = array of Double values */
     private double[] m_Center;
 
     /**
@@ -213,7 +240,7 @@ public class BIRCHCluster
      *
      * @param instNum the number of instances
      * @param radius radius of the cluster
-     * @param center 
+     * @param random the random number generator to use 
      */
     private Cluster(int instNum, double radius, Random random) {
       m_InstNum = instNum;
@@ -246,26 +273,58 @@ public class BIRCHCluster
       
     }
    
+    /**
+     * returns the number of instances
+     * 
+     * @return the number of instances
+     */
     private int getInstNum() { 
       return m_InstNum; 
     }
     
+    /**
+     * returns the radius
+     * 
+     * @return the radius
+     */
     private double getRadius() { 
       return m_Radius; 
     }
     
+    /**
+     * returns the variance
+     * 
+     * @return the variance
+     */
     private double getVariance() { 
       return Math.pow(m_Radius, 2.0) / 2.0; 
     }
     
+    /**
+     * returns the standard deviation
+     * 
+     * @return the standard deviation
+     */
     private double getStdDev() { 
       return (m_Radius / Math.pow(2.0, 0.5)); 
     }
     
+    /**
+     * returns the centers
+     * 
+     * @return the centers
+     */
     private double[] getCenter() { 
       return m_Center; 
     }
     
+    /**
+     * returns the center value for a given dimension
+     * 
+     * @param dimension the dimension to return the center for
+     * @return the center value for the given dimension
+     * @throws Exception if dimension invalid
+     */
     private double getCenterValue(int dimension) throws Exception {
       if (dimension >= m_Center.length)
 	throw new Exception("Current system has only " +
@@ -281,14 +340,17 @@ public class BIRCHCluster
   private class GridVector 
     implements Serializable {
 
-    // array of integer
+    /** for serialization */
+    static final long serialVersionUID = -1900309948991039522L;
+    
+    /** array of integer */
     private int[] m_GridVector;
 
-    //  one higher then the highest possible integer value
-    //  in any of the integers in the gridvector
+    /**  one higher then the highest possible integer value
+     *  in any of the integers in the gridvector */
     private int m_Base;
 
-    // size of vector
+    /** size of vector */
     private int m_Size;
 
     /**
@@ -378,10 +440,36 @@ public class BIRCHCluster
    */
   public String globalInfo() {
     return 
-        "A data generator that produces data points in clusters.\n"
-      + "For more information refer to:\n"
-      + "BIRCH: An Efficient Data Clustering Method for Very Large "
-      + "Databases; T. Zhang, R. Ramkrishnan, M. Livny; 1996 ACM)";
+        "Cluster data generator designed for the BIRCH System\n\n"
+      + "Dataset is generated with instances in K clusters.\n"
+      + "Instances are 2-d data points.\n"
+      + "Each cluster is characterized by the number of data points in it"
+      + "its radius and its center. The location of the cluster centers is"
+      + "determined by the pattern parameter. Three patterns are currently"
+      + "supported grid, sine and random.\n\n"
+      + "For more information refer to:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Tian Zhang and Raghu Ramakrishnan and Miron Livny");
+    result.setValue(Field.TITLE, "BIRCH: An Efficient Data Clustering Method for Very Large Databases");
+    result.setValue(Field.BOOKTITLE, "ACM SIGMOD International Conference on Management of Data");
+    result.setValue(Field.YEAR, "1996");
+    result.setValue(Field.PAGES, "103-114");
+    result.setValue(Field.PUBLISHER, "ACM Press");
+    
+    return result;
   }
 
   /**
@@ -398,21 +486,29 @@ public class BIRCHCluster
           "k", 1, "-k <num>"));
 
     result.addElement(new Option(
-          "\tSet pattern to grid (default is random).",
+          "\tSet pattern to grid (default is random).\n"
+	  + "\tThis flag cannot be used at the same time as flag I.\n"
+	  + "\tThe pattern is random, if neither flag G nor flag I is set.",
           "G", 0, "-G"));
 
     result.addElement(new Option(
-          "\tSet pattern to sine (default is random).",
+          "\tSet pattern to sine (default is random).\n"
+	  + "\tThis flag cannot be used at the same time as flag I.\n"
+	  + "\tThe pattern is random, if neither flag G nor flag I is set.",
           "I", 0, "-I"));
 
     result.addElement(new Option(
           "\tThe range of number of instances per cluster (default "
-          + defaultMinInstNum() + ".." + defaultMaxInstNum() + ").",
+          + defaultMinInstNum() + ".." + defaultMaxInstNum() + ").\n"
+          + "\tLower number must be between 0 and 2500,\n"
+          + "\tupper number must be between 50 and 2500.",
           "N", 1, "-N <num>..<num>"));
 
     result.addElement(new Option(
           "\tThe range of radius per cluster (default "
-          + defaultMinRadius() + ".." + defaultMaxRadius() + ").",
+          + defaultMinRadius() + ".." + defaultMaxRadius() + ").\n"
+          + "\tLower number must be between 0 and SQRT(2), \n"
+          + "\tupper number must be between SQRT(2) and SQRT(32).",
           "R", 1, "-R <num>..<num>"));
 
     result.addElement(new Option(
@@ -426,12 +522,16 @@ public class BIRCHCluster
           "C", 1, "-C <num>"));
 
     result.addElement(new Option(
-          "\tSet input order to ordered (default is randomized).",
-          "O", 1, "-O"));
+  	  "\tFlag for input order is ORDERED. If flag is not set then \n"
+	  + "\tinput order is RANDOMIZED. RANDOMIZED is currently not \n"
+	  + "\timplemented, therefore is the input order always ORDERED.",
+          "O", 0, "-O"));
 
     result.addElement(new Option(
           "\tThe noise rate in percent (default " 
-          + defaultNoiseRate() + ").",
+          + defaultNoiseRate() + ").\n"
+          + "\tCan be between 0% and 30%. (Remark: The original \n"
+          + "\talgorithm only allows noise up to 10%.)",
           "P", 1, "-P <num>"));
 
     return result.elements();
@@ -440,10 +540,79 @@ public class BIRCHCluster
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -a &lt;num&gt;
+   *  The number of attributes (default 10).</pre>
+   * 
+   * <pre> -c
+   *  Class Flag, if set, the cluster is listed in extra attribute.</pre>
+   * 
+   * <pre> -b &lt;range&gt;
+   *  The indices for boolean attributes.</pre>
+   * 
+   * <pre> -m &lt;range&gt;
+   *  The indices for nominal attributes.</pre>
+   * 
+   * <pre> -k &lt;num&gt;
+   *  The number of clusters (default 4)</pre>
+   * 
+   * <pre> -G
+   *  Set pattern to grid (default is random).
+   *  This flag cannot be used at the same time as flag I.
+   *  The pattern is random, if neither flag G nor flag I is set.</pre>
+   * 
+   * <pre> -I
+   *  Set pattern to sine (default is random). This flag cannot be used at the same time as flag I.
+   *  The pattern is random, if neither flag G nor flag I is set.</pre>
+   * 
+   * <pre> -N &lt;num&gt;..&lt;num&gt;
+   *  The range of number of instances per cluster (default 1..50).
+   *  Lower number must be between 0 and 2500,
+   *  upper number must be between 50 and 2500.</pre>
+   * 
+   * <pre> -R &lt;num&gt;..&lt;num&gt;
+   *  The range of radius per cluster (default 0.1..1.4142135623730951).
+   *  Lower number must be between 0 and SQRT(2), 
+   *  upper number must be between SQRT(2) and SQRT(32).</pre>
+   * 
+   * <pre> -M &lt;num&gt;
+   *  The distance multiplier (default 4.0).</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The number of cycles (default 4).</pre>
+   * 
+   * <pre> -O
+   *  Flag for input order is ORDERED. If flag is not set then 
+   *  input order is RANDOMIZED. RANDOMIZED is currently not 
+   *  implemented, therefore is the input order always ORDERED.</pre>
+   * 
+   * <pre> -P &lt;num&gt;
+   *  The noise rate in percent (default 0.0).
+   *  Can be between 0% and 30%. (Remark: The original 
+   *  algorithm only allows noise up to 10%.)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String        tmpStr;
@@ -539,7 +708,7 @@ public class BIRCHCluster
     if (m_Pattern == GRID) {
       result.add("-G");
       
-      result.add("-D"); 
+      result.add("-M"); 
       result.add("" + getDistMult());
     }
 
@@ -561,6 +730,8 @@ public class BIRCHCluster
 
   /**
    * returns the default number of clusters
+   * 
+   * @return the default number of clusters
    */
   protected int defaultNumClusters() {
     return 4;
@@ -631,6 +802,8 @@ public class BIRCHCluster
 
   /**
    * returns the default min number of instances
+   * 
+   * @return the default min number of instances
    */
   protected int defaultMinInstNum() {
     return 1;
@@ -666,6 +839,8 @@ public class BIRCHCluster
 
   /**
    * returns the default max number of instances
+   * 
+   * @return the default max number of instances
    */
   protected int defaultMaxInstNum() {
     return 50;
@@ -738,6 +913,8 @@ public class BIRCHCluster
 
   /**
    * returns the default min radius
+   * 
+   * @return the default min radius
    */
   protected double defaultMinRadius() {
     return 0.1;
@@ -773,6 +950,8 @@ public class BIRCHCluster
 
   /**
    * returns the default max radius
+   * 
+   * @return the default max radius
    */
   protected double defaultMaxRadius() {
     return Math.sqrt(2.0);
@@ -808,6 +987,8 @@ public class BIRCHCluster
 
   /**
    * returns the default pattern
+   * 
+   * @return the default pattern
    */
   protected SelectedTag defaultPattern() {
     return new SelectedTag(RANDOM, TAGS_PATTERN);
@@ -844,6 +1025,8 @@ public class BIRCHCluster
 
   /**
    * returns the default distance multiplier
+   * 
+   * @return the default distance multiplier
    */
   protected double defaultDistMult() {
     return 4.0;
@@ -879,6 +1062,8 @@ public class BIRCHCluster
 
   /**
    * returns the default number of cycles
+   * 
+   * @return the default number of cycles
    */
   protected int defaultNumCycles() {
     return 4;
@@ -914,6 +1099,8 @@ public class BIRCHCluster
 
   /**
    * returns the default input order
+   * 
+   * @return the default input order
    */
   protected SelectedTag defaultInputOrder() {
     return new SelectedTag(ORDERED, TAGS_INPUTORDER);  // TODO: the only one that is currently implemented, normally RANDOMIZED
@@ -959,6 +1146,8 @@ public class BIRCHCluster
 
   /**
    * returns the default noise rate
+   * 
+   * @return the default noise rate
    */
   protected double defaultNoiseRate() {
     return 0.0;
@@ -1005,7 +1194,7 @@ public class BIRCHCluster
    * Initializes the format for the dataset produced. 
    *
    * @return the output data format
-   * @exception Exception data format could not be defined 
+   * @throws Exception data format could not be defined 
    */
 
   public Instances defineDataFormat() throws Exception {
@@ -1049,7 +1238,7 @@ public class BIRCHCluster
   /**
    * Generate an example of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
+   * @throws Exception if format not defined or generating <br/>
    * examples one by one is not possible, because voting is chosen
    */
 
@@ -1061,7 +1250,7 @@ public class BIRCHCluster
   /**
    * Generate all examples of the dataset. 
    * @return the instance generated
-   * @exception Exception if format not defined 
+   * @throws Exception if format not defined 
    */
 
   public Instances generateExamples() throws Exception {
@@ -1080,10 +1269,12 @@ public class BIRCHCluster
 
   /**
    * Generate all examples of the dataset. 
+   * 
+   * @param random the random number generator to use
+   * @param format the dataset format
    * @return the instance generated
-   * @exception Exception if format not defined
+   * @throws Exception if format not defined
    */
-
   public Instances generateExamples(Random random,
 				    Instances format) throws Exception {
     Instance example = null;
@@ -1117,16 +1308,20 @@ public class BIRCHCluster
 
   /**
    * Generate an example of the dataset. 
+   * 
+   * @param format the dataset format
+   * @param randomG the random number generator
+   * @param stdDev the standard deviation to use
+   * @param center the centers
+   * @param cName the class value
    * @return the instance generated
-   * @exception Exception if format not defined or generating <br/>
    * examples one by one is not possible, because voting is chosen
    */
   private Instance generateInstance (Instances format,
 				     Random randomG,
 				     double stdDev,
 				     double[] center,
-				     String cName
-				     ) {
+				     String cName) {
     Instance example;
     int numAtts = getNumAttributes();
     if (getClassFlag()) 
@@ -1148,6 +1343,8 @@ public class BIRCHCluster
    * Defines the clusters 
    *
    * @param random random number generator
+   * @return the cluster definitions
+   * @throws Exception if defining fails
    */
   private FastVector defineClusters(Random random)
    throws Exception {
@@ -1162,6 +1359,8 @@ public class BIRCHCluster
    * Defines the clusters if pattern is GRID
    *
    * @param random random number generator
+   * @return the defined clusters for GRID
+   * @throws Exception if something goes wrong
    */
   private FastVector defineClustersGRID(Random random)
     throws Exception {
@@ -1182,8 +1381,9 @@ public class BIRCHCluster
     // compute gridwidth
     m_GridWidth = ((m_MaxRadius + m_MinRadius) / 2) * m_DistMult;
 
-    System.out.println("GridSize= " + m_GridSize);
-    System.out.println("GridWidth= " + m_GridWidth);
+    //System.out.println("GridSize= " + m_GridSize);
+    //System.out.println("GridWidth= " + m_GridWidth);
+    
     // initialize gridvector with zeros
     GridVector gv = new GridVector(getNumAttributes(), m_GridSize);
 
@@ -1205,6 +1405,8 @@ public class BIRCHCluster
    * Defines the clusters if pattern is RANDOM
    *
    * @param random random number generator
+   * @return the cluster definitions
+   * @throws Exception if something goes wrong
    */
   private FastVector defineClustersRANDOM(Random random)
     throws Exception {
@@ -1233,7 +1435,7 @@ public class BIRCHCluster
    * the generation process
    *
    * @return string with additional information about generated dataset
-   * @exception Exception no input structure has been defined
+   * @throws Exception no input structure has been defined
    */
   public String generateFinished() throws Exception {
     return "";

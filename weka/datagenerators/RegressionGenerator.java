@@ -32,21 +32,6 @@ import java.util.Vector;
 /** 
  * Abstract class for data generators for regression classifiers. <p/>
  *
- * General options are: <p/>
- *
- * -r string <br/>
- * Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- * Number of attributes. <p/>
- *
- * -n num <br/>
- * Number of examples. <p/>
- *
- * -o filename<br/>
- * writes the generated dataset to the given file using ARFF-Format.
- * (default = stdout). <p/>
- * 
  * Example usage as the main of a datagenerator called RandomGenerator:
  * <pre>
  * public static void main(String[] args) {
@@ -61,7 +46,7 @@ import java.util.Vector;
  * </pre>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class RegressionGenerator 
   extends DataGenerator {
@@ -98,7 +83,7 @@ public abstract class RegressionGenerator
    * Sets the options.
    *
    * @param options the options 
-   * @exception Exception if invalid option
+   * @throws Exception if invalid option
    */
   public void setOptions(String[] options) throws Exception { 
     String        tmpStr;
@@ -135,6 +120,8 @@ public abstract class RegressionGenerator
 
   /**
    * returns the default number of examples
+   * 
+   * @return the default number of examples
    */
   protected int defaultNumExamples() {
     return 100;

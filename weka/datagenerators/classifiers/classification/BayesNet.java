@@ -22,58 +22,63 @@
 
 package weka.datagenerators.classifiers.classification;
 
-import weka.core.Attribute;
-import weka.core.FastVector;
+import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
-import weka.classifiers.bayes.net.BayesNetGenerator;
-import weka.datagenerators.DataGenerator;
 import weka.datagenerators.ClassificationGenerator;
+import weka.datagenerators.DataGenerator;
 
 import java.util.Enumeration;
-import java.util.Random;
 import java.util.Vector;
 
 /**
- * Generates random instances based on a bayes network. <p/>
+ <!-- globalinfo-start -->
+ * Generates random instances based on a Bayes network.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -a num <br/>
- *  Number of attributes. <p/>
- *
- * -n num <br/>
- *  Number of examples. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -A num <br/>
- *  the number of arcs in the network. <p/>
- *
- * -C num <br/>
- *  the cardinality of the attributes and the class. <p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -n &lt;num&gt;
+ *  The number of examples to generate (default 100)</pre>
+ * 
+ * <pre> -A &lt;num&gt;
+ *  The number of arcs to use. (default 20)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The cardinality of the attributes and the class. (default 2)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see BayesNetGenerator
  */
 
 public class BayesNet
   extends ClassificationGenerator {
+  
+  /** for serialization */
+  static final long serialVersionUID = -796118162379901512L;
   
   /** the bayesian net generator, that produces the actual data */
   protected BayesNetGenerator m_Generator;
@@ -124,7 +129,35 @@ public class BayesNet
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -n &lt;num&gt;
+   *  The number of examples to generate (default 100)</pre>
+   * 
+   * <pre> -A &lt;num&gt;
+   *  The number of arcs to use. (default 20)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The cardinality of the attributes and the class. (default 2)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -202,6 +235,9 @@ public class BayesNet
 
   /**
    * sets the given options of the BayesNetGenerator
+   * 
+   * @param generator the generator to set the options for
+   * @param options the options to set
    */
   protected void setGeneratorOptions(
       BayesNetGenerator generator, Vector options) {
@@ -217,6 +253,8 @@ public class BayesNet
 
   /**
    * returns the actual datagenerator
+   * 
+   * @return the actual datagenerator
    */
   protected BayesNetGenerator getGenerator() {
     if (m_Generator == null)
@@ -227,6 +265,8 @@ public class BayesNet
 
   /**
    * sets the given options of the BayesNetGenerator
+   * 
+   * @param options the options to set
    */
   protected void setGeneratorOptions(Vector options) {
     setGeneratorOptions(getGenerator(), options);
@@ -278,6 +318,8 @@ public class BayesNet
 
   /**
    * returns the default number of attributes
+   * 
+   * @return the default number of attributes
    */
   protected int defaultNumAttributes() {
     return 10;
@@ -323,6 +365,8 @@ public class BayesNet
 
   /**
    * returns the default cardinality
+   * 
+   * @return the default cardinality
    */
   protected int defaultCardinality() {
     return 2;
@@ -368,6 +412,8 @@ public class BayesNet
 
   /**
    * returns the default number of arcs
+   * 
+   * @return the default number of arcs
    */
   protected int defaultNumArcs() {
     return 20;
@@ -530,7 +576,6 @@ public class BayesNet
    * as ARFF file type, next after the options.
    * 
    * @return string contains info about the generated rules
-   * @throws Exception if the generating of the documentation fails
    */
   public String generateStart () {
     return "";
@@ -563,4 +608,3 @@ public class BayesNet
     }
   }
 }
-

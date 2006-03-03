@@ -29,6 +29,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.datagenerators.DataGenerator;
 import weka.datagenerators.ClassificationGenerator;
@@ -38,70 +42,103 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * This generator generates a people database and is based on the paper by
- * Agrawal et al.: <p/>
- * R. Agrawal, T. Imielinski and A. Swami. "Database Mining: A Performance
- * Perspective". IEEE Transactions on Knowledge and Data Engineering, Special
- * issue on Learning and Discovery in Knowledge-Based Databases, Vol. 5, No. 6,
- * pages 914-925, December 1993.<p/>
- *
+ <!-- globalinfo-start -->
+ * Generates a people database and is based on the paper by Agrawal et al.:<br/>
+ * R. Agrawal, T. Imielinski, A. Swami (1993). Database Mining: A Performance Perspective. IEEE Transactions on Knowledge and Data Engineering. Vol.5, No.6, pp. 914-925.<br/>
+ * <br/>
  * Links:<br/>
- * <ul>
- *   <li>
- *     <a href="http://www.almaden.ibm.com/software/quest/Publications/ByDate.html">http://www.almaden.ibm.com/software/quest/Publications/ByDate.html</a>
- *   </li>
- *   <li>
- *     <a href="http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf">http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf</a> 
- *   </li>
- * </ul>
- * 
- * 
+ *  - http://www.almaden.ibm.com/software/quest/Publications/ByDate.html<br/>
+ *  - http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf
  * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Agrawal1993,
+ *    author = {R. Agrawal and T. Imielinski and A. Swami},
+ *    journal = {IEEE Transactions on Knowledge and Data Engineering},
+ *    note = {Special issue on Learning and Discovery in Knowledge-Based Databases},
+ *    number = {No.6},
+ *    pages = {pp. 914-925},
+ *    title = {Database Mining: A Performance Perspective},
+ *    volume = {Vol.5},
+ *    year = {1993}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -d <br/>
- *  enables debugging information to be output on the console. <p/>
- *
- * -r string <br/>
- *  Name of the relation of the generated dataset. <p/>
- *
- * -o filename<br/>
- *  writes the generated dataset to the given file using ARFF-Format.
- *  (default = stdout). <p/>
- *
- * -n num <br/>
- *  Number of examples. <p/>
  * 
- * -S num <br/>
- *  the seed value for initializing the random number generator.
- *  <p/>
- *
- * -F num <br/>
- *  the function to use for generating the data (see paper). <p/>
- *
- * -B <br/>
- *  whether to balance the class. <p/>
- *
- * -P num <br/>
- *  perturbation fraction. <p/>
+ * <pre> -h
+ *  Prints this help.</pre>
+ * 
+ * <pre> -o &lt;file&gt;
+ *  The name of the output file, otherwise the generated data is
+ *  printed to stdout.</pre>
+ * 
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
+ * 
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
+ * 
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
+ * 
+ * <pre> -n &lt;num&gt;
+ *  The number of examples to generate (default 100)</pre>
+ * 
+ * <pre> -F &lt;num&gt;
+ *  The function to use for generating the data. (default weka.core.SelectedTag&#64;1975b59)</pre>
+ * 
+ * <pre> -B
+ *  Whether to balance the class.</pre>
+ * 
+ * <pre> -P &lt;num&gt;
+ *  The perturbation factor. (default 0.05)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class Agrawal
-  extends ClassificationGenerator {
+  extends ClassificationGenerator
+  implements TechnicalInformationHandler {
   
+  /** for serialization */
+  static final long serialVersionUID = 2254651939636143025L;
+  
+  /**
+   * the interface for the class functions
+   */
   protected interface ClassFunction {
+    /**
+     * returns a class value based on the given inputs
+     * @param salary the salary
+     * @param commission the commission
+     * @param age the age
+     * @param elevel the education level
+     * @param car 
+     * @param zipcode the zip code
+     * @param hvalue
+     * @param hyears
+     * @param loan
+     */
     public long determineClass(double salary, double commission, int age,
         int elevel, int car, int zipcode, double hvalue, int hyears,
         double loan);
   }
 
-  // built in functions are based on the paper (page 924),
-  // which turn out to be functions pred20 thru pred29 in the public c code
+  /** 
+   * built in functions are based on the paper (page 924),
+   * which turn out to be functions pred20 thru pred29 in the public c code
+   */
   protected static ClassFunction[] builtInFunctions = {
     // function 1
     new ClassFunction() {
@@ -370,15 +407,34 @@ public class Agrawal
     return 
          "Generates a people database and is based on the paper by Agrawal "
        + "et al.:\n"
-       + "R. Agrawal, T. Imielinski and A. Swami. \"Database Mining: A "
-       + "Performance Perspective\". IEEE Transactions on Knowledge and Data "
-       + "Engineering, Special issue on Learning and Discovery in "
-       + "Knowledge-Based Databases, Vol. 5, No. 6, pages 914-925, December "
-       + "1993.\n"
+       + getTechnicalInformation().toString() + "\n"
        + "\n"
        + "Links:\n"
        + " - http://www.almaden.ibm.com/software/quest/Publications/ByDate.html\n"
        + " - http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf";
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "R. Agrawal and T. Imielinski and A. Swami");
+    result.setValue(Field.YEAR, "1993");
+    result.setValue(Field.TITLE, "Database Mining: A Performance Perspective");
+    result.setValue(Field.JOURNAL, "IEEE Transactions on Knowledge and Data Engineering");
+    result.setValue(Field.VOLUME, "Vol.5");
+    result.setValue(Field.NUMBER, "No.6");
+    result.setValue(Field.PAGES, "pp. 914-925");
+    result.setValue(Field.NOTE, "Special issue on Learning and Discovery in Knowledge-Based Databases");
+    
+    return result;
   }
 
  /**
@@ -409,7 +465,38 @@ public class Agrawal
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -h
+   *  Prints this help.</pre>
+   * 
+   * <pre> -o &lt;file&gt;
+   *  The name of the output file, otherwise the generated data is
+   *  printed to stdout.</pre>
+   * 
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
+   * 
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
+   * 
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
+   * 
+   * <pre> -n &lt;num&gt;
+   *  The number of examples to generate (default 100)</pre>
+   * 
+   * <pre> -F &lt;num&gt;
+   *  The function to use for generating the data. (default weka.core.SelectedTag&#64;1ee3914)</pre>
+   * 
+   * <pre> -B
+   *  Whether to balance the class.</pre>
+   * 
+   * <pre> -P &lt;num&gt;
+   *  The perturbation factor. (default 0.05)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -463,6 +550,8 @@ public class Agrawal
 
   /**
    * returns the default function
+   * 
+   * @return the default function
    */
   protected SelectedTag defaultFunction() {
     return new SelectedTag(FUNCTION_1, FUNCTION_TAGS);
@@ -500,6 +589,8 @@ public class Agrawal
 
   /**
    * returns the default for balancing the class
+   * 
+   * @return the default for balancing the class
    */
   protected boolean defaultBalanceClass() {
     return false;
@@ -535,6 +626,8 @@ public class Agrawal
 
   /**
    * returns the default perturbation fraction
+   * 
+   * @return the default perturbation fraction
    */
   protected double defaultPerturbationFraction() {
     return 0.05;
@@ -649,6 +742,11 @@ public class Agrawal
 
   /**
    * perturbs the given value
+   * 
+   * @param val the value to perturb
+   * @param min the minimum
+   * @param max the maximum
+   * @return the perturbed value
    */
   protected double perturbValue(double val, double min, double max) {
     return perturbValue(val, max - min, min, max);
@@ -656,6 +754,12 @@ public class Agrawal
 
   /**
    * perturbs the given value
+   * 
+   * @param val the value to perturb
+   * @param range the range for the perturbation
+   * @param min the minimum
+   * @param max the maximum
+   * @return the perturbed value
    */
   protected double perturbValue(double val, double range, 
       double min, double max) {
@@ -802,7 +906,6 @@ public class Agrawal
    * as ARFF file type, next after the options.
    * 
    * @return string contains info about the generated rules
-   * @throws Exception if the generating of the documentation fails
    */
   public String generateStart () {
     return "";

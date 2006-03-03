@@ -35,50 +35,83 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
- * Represents a single cluster for the SubspaceCluster datagenerator.
+ <!-- globalinfo-start -->
+ * A single cluster for the SubspaceCluster datagenerator
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -A &lt;range&gt;
+ *  Generates randomly distributed instances in the cluster.</pre>
+ * 
+ * <pre> -U &lt;range&gt;
+ *  Generates uniformly distributed instances in the cluster.</pre>
+ * 
+ * <pre> -G &lt;range&gt;
+ *  Generates gaussian distributed instances in the cluster.</pre>
+ * 
+ * <pre> -D &lt;num&gt;,&lt;num&gt;
+ *  The attribute min/max (-A and -U) or mean/stddev (-G) for
+ *  the cluster.</pre>
+ * 
+ * <pre> -N &lt;num&gt;..&lt;num&gt;
+ *  The range of number of instances per cluster (default 1..50).</pre>
+ * 
+ * <pre> -I
+ *  Uses integer instead of continuous values (default continuous).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see SubspaceCluster
  */
-
 public class SubspaceClusterDefinition 
   extends ClusterDefinition {
 
-  // cluster type
+  /** for serialization */
+  static final long serialVersionUID = 3135678125044007231L;
+  
+  /** cluster type */
   protected int m_clustertype = SubspaceCluster.UNIFORM_RANDOM;
 
-  // cluster subtypes
+  /** cluster subtypes */
   protected int m_clustersubtype = SubspaceCluster.CONTINUOUS;
 
-  // number of attributes the cluster is defined for
+  /** number of attributes the cluster is defined for */
   protected int m_numClusterAttributes;
 
-  // number of instances for this cluster
+  /** number of instances for this cluster */
   protected int m_numInstances;
 
-  // minimal number of instances for this cluster
+  /** minimal number of instances for this cluster */
   protected int m_MinInstNum;
 
-  // maximal number of instances for this cluster
+  /** maximal number of instances for this cluster */
   protected int m_MaxInstNum;
 
   /** range of atttributes */
   protected Range m_AttrIndexRange;
 
-  // attributes of this cluster
+  /** attributes of this cluster */
   protected boolean[] m_attributes;
 
-  // global indices of the attributes of the cluster
+  /** global indices of the attributes of the cluster */
   protected int[] m_attrIndices;
 
-  // ranges of each attribute; not used if gaussian
+  /** ranges of each attribute (min); not used if gaussian */
   protected double[] m_minValue;
+
+  /** ranges of each attribute (max); not used if gaussian */
   protected double[] m_maxValue;
 
-  // mean and standarddev; only used if gaussian
+  /** mean ; only used if gaussian */
   protected double[] m_meanValue;
+  
+  /** standarddev; only used if gaussian */
   protected double[] m_stddevValue;
 
   /**
@@ -99,6 +132,8 @@ public class SubspaceClusterDefinition
 
   /**
    * sets the default values
+   * 
+   * @throws Exception if setting of defaults fails
    */
   protected void setDefaults() throws Exception {
     setClusterType(defaultClusterType());
@@ -106,9 +141,20 @@ public class SubspaceClusterDefinition
     setMinInstNum(defaultMinInstNum());
     setMaxInstNum(defaultMaxInstNum());
     setAttrIndexRange(defaultAttrIndexRange());
+    m_numClusterAttributes = 1;
     setValuesList(defaultValuesList());
   }
 
+  
+  /**
+   * Returns a string describing this data generator.
+   *
+   * @return a description of the data generator suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "A single cluster for the SubspaceCluster datagenerator";
+  }
   /**
    * Returns an enumeration describing the available options.
    *
@@ -149,10 +195,32 @@ public class SubspaceClusterDefinition
   /**
    * Parses a list of options for this object. <p/>
    *
-   * For list of valid options see class description.<p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -A &lt;range&gt;
+   *  Generates randomly distributed instances in the cluster.</pre>
+   * 
+   * <pre> -U &lt;range&gt;
+   *  Generates uniformly distributed instances in the cluster.</pre>
+   * 
+   * <pre> -G &lt;range&gt;
+   *  Generates gaussian distributed instances in the cluster.</pre>
+   * 
+   * <pre> -D &lt;num&gt;,&lt;num&gt;
+   *  The attribute min/max (-A and -U) or mean/stddev (-G) for
+   *  the cluster.</pre>
+   * 
+   * <pre> -N &lt;num&gt;..&lt;num&gt;
+   *  The range of number of instances per cluster (default 1..50).</pre>
+   * 
+   * <pre> -I
+   *  Uses integer instead of continuous values (default continuous).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String        tmpStr;
@@ -266,6 +334,8 @@ public class SubspaceClusterDefinition
 
   /**
    * Make a string from the attribues list.
+   * 
+   * @return the attributes as string
    */
   public String attributesToString() {
     StringBuffer text = new StringBuffer();
@@ -290,6 +360,8 @@ public class SubspaceClusterDefinition
 
   /**
    * Make a string from the cluster features.
+   * 
+   * @return the cluster features as string
    */
   public String toString() {
     StringBuffer text = new StringBuffer();
@@ -309,6 +381,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the default attribute index range
+   * 
+   * @return the default attribute index range
    */
   protected String defaultAttrIndexRange() {
     return "1";
@@ -356,6 +430,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the attribute range(s).
+   * 
+   * @return the attribute range(s).
    */
   public String getAttrIndexRange() {
     return m_AttrIndexRange.getRanges();
@@ -396,6 +472,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the default cluster type
+   * 
+   * @return the default cluster type
    */
   protected SelectedTag defaultClusterType() {
     return new SelectedTag(
@@ -434,6 +512,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the default cluster sub type
+   * 
+   * @return the default cluster sub type
    */
   protected SelectedTag defaultClusterSubType() {
     return new SelectedTag(
@@ -473,6 +553,8 @@ public class SubspaceClusterDefinition
 
   /** 
    * checks, whether cluster type is random
+   * 
+   * @return true if cluster type is random
    */
   public boolean isRandom() {
     return (m_clustertype == SubspaceCluster.UNIFORM_RANDOM);
@@ -480,6 +562,8 @@ public class SubspaceClusterDefinition
 
   /** 
    * checks, whether cluster type is uniform
+   * 
+   * @return true if cluster type is uniform
    */
   public boolean isUniform() {
     return (m_clustertype == SubspaceCluster.TOTAL_UNIFORM);
@@ -487,6 +571,8 @@ public class SubspaceClusterDefinition
 
   /** 
    * checks, whether cluster type is gaussian
+   * 
+   * @return true if cluster type is gaussian
    */
   public boolean isGaussian() {
     return (m_clustertype == SubspaceCluster.GAUSSIAN);
@@ -494,6 +580,8 @@ public class SubspaceClusterDefinition
 
   /** 
    * checks, whether cluster sub type is continuous
+   * 
+   * @return true if cluster sub type is continuous
    */
   public boolean isContinuous() {
     return (m_clustertype == SubspaceCluster.CONTINUOUS);
@@ -501,6 +589,8 @@ public class SubspaceClusterDefinition
 
   /** 
    * checks, whether cluster sub type is integer
+   * 
+   * @return true if cluster sub type is integer
    */
   public boolean isInteger() {
     return (m_clustertype == SubspaceCluster.INTEGER);
@@ -550,6 +640,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the default min number of instances
+   * 
+   * @return the default min number of instances
    */
   protected int defaultMinInstNum() {
     return 1;
@@ -585,6 +677,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the default max number of instances
+   * 
+   * @return the default max number of instances
    */
   protected int defaultMaxInstNum() {
     return 50;
@@ -633,6 +727,8 @@ public class SubspaceClusterDefinition
 
   /**
    * returns the default values list
+   * 
+   * @return the default values list
    */
   protected String defaultValuesList() {
     return "1,10";
@@ -643,7 +739,7 @@ public class SubspaceClusterDefinition
    *
    * @param fromToList the string containing the upper and lower boundary for
    * instances per cluster separated by ..
-   * @exception if values are not correct in number or value
+   * @throws if values are not correct in number or value
    */
   public void setValuesList(String fromToList) throws Exception {
     m_minValue = new double [m_numClusterAttributes];
@@ -725,7 +821,7 @@ public class SubspaceClusterDefinition
    *
    * @param meanstddev the string containing the upper and lower boundary for
    * instances per cluster separated by ..
-   * @exception if values are not correct in number or value
+   * @throws if values are not correct in number or value
    */
   public void setMeanStddev(String meanstddev) throws Exception {
     m_meanValue   = new double [m_numClusterAttributes];
@@ -770,7 +866,7 @@ public class SubspaceClusterDefinition
    * @param first the "from's"
    * @param second the "to's"
    * @param optionLetter the option, from which the list came
-   * @exception if values are not correct in number or value
+   * @throws if values are not correct in number or value
    */
   public void setValuesList(String fromToList, double[] first, double[] second, 
       String optionLetter) throws Exception {
