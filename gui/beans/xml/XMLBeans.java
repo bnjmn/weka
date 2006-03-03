@@ -57,7 +57,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -268,6 +268,8 @@ public class XMLBeans
   /**
    * generates internally a new XML document and clears also the IgnoreList and
    * the mappings for the Read/Write-Methods
+   * 
+   * @throws Exception if something goes wrong
    */
   public void clear() throws Exception {
     super.clear();
@@ -371,7 +373,7 @@ public class XMLBeans
   /**
    * traverses over all BeanInstances (or MetaBeans) and stores them in a vector 
    * (recurses into MetaBeans, since the sub-BeanInstances are not visible)
-   * @param beaninsts       the BeanInstances/MetaBeans to traverse
+   * @param list       the BeanInstances/MetaBeans to traverse
    */
   protected void addBeanInstances(Vector list) {
     int             i;
@@ -405,8 +407,6 @@ public class XMLBeans
    * @throws Exception if post-processing fails
    */
   protected Object writePreProcess(Object o) throws Exception {
-    int           i;
-    
     o = super.writePreProcess(o);
     
     // gather all BeanInstances, also the ones in MetaBeans
@@ -467,7 +467,7 @@ public class XMLBeans
    * BeanInstances and reads the IDs for the BeanInstances, s.t. the correct
    * references can be set again
    * 
-   * @param o the object to perform some additional processing on
+   * @param document the document to pre-process
    * @return the processed object
    * @throws Exception if post-processing fails
    * @see #m_BeanInstances
@@ -547,7 +547,12 @@ public class XMLBeans
   
   /**
    * generates a connection based on the given parameters
-   * @param  
+   * @param sourcePos the source position in the m_BeanInstances vector
+   * @param targetPos the target position in the m_BeanInstances vector
+   * @param event the name of the event, i.e., the connection
+   * @param hidden true if the connection is hidden
+   * @return the generated BeanConnection
+   * @throws Exception if something goes wrong
    */
   protected BeanConnection createBeanConnection(int sourcePos, int targetPos, String event, boolean hidden) throws Exception {
     BeanConnection          result;
@@ -586,6 +591,7 @@ public class XMLBeans
    * the reference to the actual BeanConnection set.
    * @param deserialized    the deserialized knowledgeflow
    * @param key             the key of the hashtable to rebuild all connections for
+   * @throws Exception if something goes wrong
    */
   protected void rebuildBeanConnections(Vector deserialized, Object key) throws Exception {
     int                     i;
@@ -594,8 +600,6 @@ public class XMLBeans
     int                     targetPos;
     String                  event;
     boolean                 hidden;
-    BeanInstance            instSource;
-    BeanInstance            instTarget;
     Vector                  conns;
     BeanConnection          conn;
     StringTokenizer         tok;
@@ -734,9 +738,9 @@ public class XMLBeans
   /**
    * adds the given connection-relation for the specified MetaBean (or null in 
    * case of regular connections)
-   * @param meta      the MetaBean (or null for regular connections) to add
-   *                  the relationship for
-   * @param relation  the connection relation to add
+   * @param meta        the MetaBean (or null for regular connections) to add
+   *                    the relationship for
+   * @param connection  the connection relation to add
    */
   protected void addBeanConnectionRelation(MetaBean meta, String connection) {
     Vector      relations;
@@ -789,7 +793,6 @@ public class XMLBeans
   /**
    * builds the Color from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -869,7 +872,6 @@ public class XMLBeans
   /**
    * builds the Dimension from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -947,7 +949,6 @@ public class XMLBeans
   /**
    * builds the Font from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1027,7 +1028,6 @@ public class XMLBeans
   /**
    * builds the Point from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1102,7 +1102,6 @@ public class XMLBeans
   /**
    * builds the ColorUIResource from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1172,7 +1171,6 @@ public class XMLBeans
   /**
    * builds the FontUIResource from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1246,7 +1244,6 @@ public class XMLBeans
   /**
    * builds the BeanInstance from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1263,7 +1260,6 @@ public class XMLBeans
     Object          bean;
     BeanVisual      visual;
     BeanInstance    beaninst;
-    Point           coords;
 
     // for debugging only
     if (DEBUG)
@@ -1386,7 +1382,6 @@ public class XMLBeans
   /**
    * builds the BeanConnection from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1495,7 +1490,6 @@ public class XMLBeans
     
     Element                 node;
     weka.gui.beans.Saver    saver;
-    File                    file;
 
     // for debugging only
     if (DEBUG)
@@ -1566,7 +1560,6 @@ public class XMLBeans
   /**
    * builds the Loader from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1670,7 +1663,6 @@ public class XMLBeans
   /**
    * builds the Saver from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1748,7 +1740,6 @@ public class XMLBeans
   /**
    * builds the BeanVisual from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -1877,7 +1868,6 @@ public class XMLBeans
   /**
    * builds the MetaBean from the given DOM node.
    * 
-   * @param parent the parent object to get the properties for
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
