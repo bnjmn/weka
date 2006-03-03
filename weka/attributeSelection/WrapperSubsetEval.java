@@ -20,49 +20,102 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
-import  weka.classifiers.*;
-import  weka.classifiers.rules.ZeroR;
-import  weka.filters.unsupervised.attribute.Remove;
-import  weka.filters.Filter;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
- * Wrapper attribute subset evaluator. <p>
- * For more information see: <br>
+ <!-- globalinfo-start -->
+ * WrapperSubsetEval:<br/>
+ * <br/>
+ * Evaluates attribute sets by using a learning scheme. Cross validation is used to estimate the accuracy of the learning scheme for a set of attributes.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection. Artificial Intelligence. Vol.97, Nos.1-2, pp. 273-324.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Kohavi1997,
+ *    author = {Ron Kohavi and George H. John},
+ *    journal = {Artificial Intelligence},
+ *    note = {Special issue on relevance},
+ *    number = {Nos.1-2},
+ *    pages = {pp. 273-324},
+ *    title = {Wrappers for feature subset selection},
+ *    volume = {Vol.97},
+ *    year = {1997},
+ *    ISSN = {0004-3702}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * Kohavi, R., John G., Wrappers for Feature Subset Selection. 
- * In <i>Artificial Intelligence journal</i>, special issue on relevance, 
- * Vol. 97, Nos 1-2, pp.273-324. <p>
- *
- * Valid options are:<p>
- *
- * -B <base learner> <br>
- * Class name of base learner to use for accuracy estimation.
- * Place any classifier options last on the command line following a
- * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
- *
- * -F <num> <br>
- * Number of cross validation folds to use for estimating accuracy.
- * <default=5> <p>
- *
- * -T <num> <br>
- * Threshold by which to execute another cross validation (standard deviation
- * ---expressed as a percentage of the mean). <p>
- *
- * -R <seed> <br>
- * Seed for cross validation accuracy estimation.
- * (default = 1) <p>
+ * <pre> -B &lt;base learner&gt;
+ *  class name of base learner to use for
+ *  accuracy estimation. Place any
+ *  classifier options LAST on the
+ *  command line following a "--".
+ *  eg. -B weka.classifiers.bayes.NaiveBayes ... -- -K</pre>
+ * 
+ * <pre> -F &lt;num&gt;
+ *  number of cross validation folds to use
+ *  for estimating accuracy.
+ *  (default=5)</pre>
+ * 
+ * <pre> -R &lt;seed&gt;
+ *  Seed for cross validation accuracy 
+ *  estimation.
+ *  (default = 1)</pre>
+ * 
+ * <pre> -T &lt;num&gt;
+ *  threshold by which to execute another cross validation
+ *  (standard deviation---expressed as a percentage of the mean).
+ *  (default=0.01(1%))</pre>
+ * 
+ * <pre> 
+ * Options specific to scheme weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
-  implements OptionHandler
-{
+  implements OptionHandler, TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -4573057658746728675L;
 
   /** training instances */
   private Instances m_trainInstances;
@@ -95,7 +148,33 @@ public class WrapperSubsetEval
     return "WrapperSubsetEval:\n\n"
       +"Evaluates attribute sets by using a learning scheme. Cross "
       +"validation is used to estimate the accuracy of the learning "
-      +"scheme for a set of attributes.\n";
+      +"scheme for a set of attributes.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Ron Kohavi and George H. John");
+    result.setValue(Field.YEAR, "1997");
+    result.setValue(Field.TITLE, "Wrappers for feature subset selection");
+    result.setValue(Field.JOURNAL, "Artificial Intelligence");
+    result.setValue(Field.VOLUME, "Vol.97");
+    result.setValue(Field.NUMBER, "Nos.1-2");
+    result.setValue(Field.PAGES, "pp. 273-324");
+    result.setValue(Field.NOTE, "Special issue on relevance");
+    result.setValue(Field.ISSN, "0004-3702");
+    
+    return result;
   }
 
   /**
@@ -133,8 +212,7 @@ public class WrapperSubsetEval
 
     if ((m_BaseClassifier != null) && 
 	(m_BaseClassifier instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0, "\nOptions specific to" 
-				      + "scheme " 
+      newVector.addElement(new Option("", "", 0, "\nOptions specific to scheme " 
 				      + m_BaseClassifier.getClass().getName() 
 				      + ":"));
       Enumeration enu = ((OptionHandler)m_BaseClassifier).listOptions();
@@ -149,31 +227,46 @@ public class WrapperSubsetEval
 
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are:<p>
-   *
-   * -B <base learner> <br>
-   * Class name of base learner to use for accuracy estimation.
-   * Place any classifier options last on the command line following a
-   * "--". Eg  -B weka.classifiers.bayes.NaiveBayes ... -- -K <p>
-   *
-   * -F <num> <br>
-   * Number of cross validation folds to use for estimating accuracy.
-   * <default=5> <p>
-   *
-   * -T <num> <br>
-   * Threshold by which to execute another cross validation (standard deviation
-   * ---expressed as a percentage of the mean). <p>
-   *
-   * -R <seed> <br>
-   * Seed for cross validation accuracy estimation.
-   * (default = 1) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B &lt;base learner&gt;
+   *  class name of base learner to use for
+   *  accuracy estimation. Place any
+   *  classifier options LAST on the
+   *  command line following a "--".
+   *  eg. -B weka.classifiers.bayes.NaiveBayes ... -- -K</pre>
+   * 
+   * <pre> -F &lt;num&gt;
+   *  number of cross validation folds to use
+   *  for estimating accuracy.
+   *  (default=5)</pre>
+   * 
+   * <pre> -R &lt;seed&gt;
+   *  Seed for cross validation accuracy 
+   *  estimation.
+   *  (default = 1)</pre>
+   * 
+   * <pre> -T &lt;num&gt;
+   *  threshold by which to execute another cross validation
+   *  (standard deviation---expressed as a percentage of the mean).
+   *  (default=0.01(1%))</pre>
+   * 
+   * <pre> 
+   * Options specific to scheme weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   *
-   **/
+   * @throws Exception if an option is not supported
+   */
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -380,7 +473,7 @@ public class WrapperSubsetEval
    * evaluator that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
+   * @throws Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -401,13 +494,13 @@ public class WrapperSubsetEval
    *
    * @param subset a bitset representing the attribute subset to be 
    * evaluated 
-   * @exception Exception if the subset could not be evaluated
+   * @return the error rate
+   * @throws Exception if the subset could not be evaluated
    */
   public double evaluateSubset (BitSet subset)
     throws Exception {
     double errorRate = 0;
     double[] repError = new double[5];
-    boolean ok = true;
     int numAttributes = 0;
     int i, j;
     Random Rnd = new Random(m_seed);
@@ -562,4 +655,3 @@ public class WrapperSubsetEval
   }
 
 }
-

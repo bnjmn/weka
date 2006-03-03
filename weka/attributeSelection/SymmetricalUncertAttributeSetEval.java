@@ -23,10 +23,11 @@
  *      December 27, 2004
  *
  *    FCBF algorithm is a feature selection method based on Symmetrical Uncertainty Measurement for 
- *    relevance redundancy analysis. The details of FCBF algorithm are in L. Yu and H. Liu.
- *    Feature selection for high-dimensional data: a fast correlation-based filter 
- *    solution. In Proceedings of the twentieth International Conference on Machine Learning, 
- *    pages 856--863, 2003.
+ *    relevance redundancy analysis. The details of FCBF algorithm are in:
+ *
+ <!-- technical-plaintext-start -->
+ * Lei Yu, Huan Liu: Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution. In: Proceedings of the Twentieth International Conference on Machine Learning, 856-863, 2003.
+ <!-- technical-plaintext-end -->
  *    
  *    
  *    
@@ -54,29 +55,71 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.supervised.attribute.Discretize;
-import  weka.filters.Filter;
+import weka.core.ContingencyTables;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * Class for Evaluating attribute sets by measuring symmetrical
- * uncertainty with respect to the class.
+ <!-- globalinfo-start -->
+ * SymmetricalUncertAttributeSetEval :<br/>
+ * <br/>
+ * Evaluates the worth of a set attributes by measuring the symmetrical uncertainty with respect to another set of attributes. <br/>
+ * <br/>
+ *  SymmU(AttributeSet2, AttributeSet1) = 2 * (H(AttributeSet2) - H(AttributeSet1 | AttributeSet2)) / H(AttributeSet2) + H(AttributeSet1).<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Lei Yu, Huan Liu: Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution. In: Proceedings of the Twentieth International Conference on Machine Learning, 856-863, 2003.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Yu2003,
+ *    author = {Lei Yu and Huan Liu},
+ *    booktitle = {Proceedings of the Twentieth International Conference on Machine Learning},
+ *    pages = {856-863},
+ *    publisher = {AAAI Press},
+ *    title = {Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * -M <br>
- * Treat missing values as a seperate value. <br>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M
+ *  treat missing values as a seperate value.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SymmetricalUncertAttributeSetEval
   extends AttributeSetEvaluator
-  implements OptionHandler
-{
+  implements OptionHandler, TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 8351377335495873202L;
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -102,10 +145,33 @@ public class SymmetricalUncertAttributeSetEval
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "GainRatioAttributeSetEval :\n\nEvaluates the worth of a set attributes "
+    return "SymmetricalUncertAttributeSetEval :\n\nEvaluates the worth of a set attributes "
       +"by measuring the symmetrical uncertainty with respect to another set of attributes. "
       +"\n\n SymmU(AttributeSet2, AttributeSet1) = 2 * (H(AttributeSet2) - H(AttributeSet1 | AttributeSet2)) "
-      +"/ H(AttributeSet2) + H(AttributeSet1).\n";
+      +"/ H(AttributeSet2) + H(AttributeSet1).\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Lei Yu and Huan Liu");
+    result.setValue(Field.TITLE, "Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution");
+    result.setValue(Field.BOOKTITLE, "Proceedings of the Twentieth International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.PAGES, "856-863");
+    result.setValue(Field.PUBLISHER, "AAAI Press");
+    
+    return result;
   }
 
   /**
@@ -129,14 +195,19 @@ public class SymmetricalUncertAttributeSetEval
 
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * -M <br>
-   * Treat missing values as a seperate value. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M
+   *  treat missing values as a seperate value.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   **/
+   * @throws Exception if an option is not supported
+   */
   public void setOptions (String[] options)
     throws Exception {
     resetOptions();
@@ -199,7 +270,7 @@ public class SymmetricalUncertAttributeSetEval
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data
-   * @exception Exception if the evaluator has not been
+   * @throws Exception if the evaluator has not been
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -237,13 +308,13 @@ public class SymmetricalUncertAttributeSetEval
    * uncertainty between it and the class.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @exception Exception if the attribute could not be evaluated
+   * @return the uncertainty
+   * @throws Exception if the attribute could not be evaluated
    */
-
   public double evaluateAttribute (int attribute)
     throws Exception {
     int i, j, ii, jj;
-    int nnj, nni, ni, nj;
+    int ni, nj;
     double sum = 0.0;
     ni = m_trainInstances.attribute(attribute).numValues() + 1;
     nj = m_numClasses + 1;
@@ -381,17 +452,17 @@ public class SymmetricalUncertAttributeSetEval
   /**
    * calculate symmetrical uncertainty between sets of attributes
    *
-   * @param attributes: the indexes of the attributes
-   * @param classAttributes: the indexes of the attributes whose combination will
+   * @param attributes the indexes of the attributes
+   * @param classAttributes the indexes of the attributes whose combination will
    *                         be used as class label
-   * @exception Exception if the attribute could not be evaluated
+   * @return the uncertainty
+   * @throws Exception if the attribute could not be evaluated
    */
-
   public double evaluateAttribute (int[] attributes, int[] classAttributes)
     throws Exception {
 
     int i, j;     //variable for looping.
-    int p, q;     //variable for looping.
+    int p;     //variable for looping.
     int ii, jj;   //specifying the position in the contingency table.
     int nnj, nni; //counting base for attributes[].
     int ni, nj;   //the nubmer of rows and columns in the ContingencyTables.
@@ -650,4 +721,3 @@ public class SymmetricalUncertAttributeSetEval
   }
 
 }
-

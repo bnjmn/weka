@@ -20,59 +20,118 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
- * Class for Evaluating attributes individually using ReliefF. <p>
+ <!-- globalinfo-start -->
+ * ReliefFAttributeEval :<br/>
+ * <br/>
+ * Evaluates the worth of an attribute by repeatedly sampling an instance and considering the value of the given attribute for the nearest instance of the same and different class. Can operate on both discrete and continuous class data.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Kenji Kira, Larry A. Rendell: A Practical Approach to Feature Selection. In: Ninth International Workshop on Machine Learning, 249-256, 1992.<br/>
+ * <br/>
+ * Igor Kononenko: Estimating Attributes: Analysis and Extensions of RELIEF. In: European Conference on Machine Learning, 171-182, 1994.<br/>
+ * <br/>
+ * Marko Robnik-Sikonja, Igor Kononenko: An adaptation of Relief for attribute estimation in regression. In: Fourteenth International Conference on Machine Learning, 296-304, 1997.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information see: <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Kira1992,
+ *    author = {Kenji Kira and Larry A. Rendell},
+ *    booktitle = {Ninth International Workshop on Machine Learning},
+ *    editor = {Derek H. Sleeman and Peter Edwards},
+ *    pages = {249-256},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {A Practical Approach to Feature Selection},
+ *    year = {1992}
+ * }
+ * 
+ * &#64;incproceedings{Kononenko1994,
+ *    author = {Igor Kononenko},
+ *    booktitle = {European Conference on Machine Learning},
+ *    editor = {Francesco Bergadano and Luc De Raedt},
+ *    pages = {171-182},
+ *    publisher = {Springer},
+ *    title = {Estimating Attributes: Analysis and Extensions of RELIEF},
+ *    year = {1994}
+ * }
+ * 
+ * &#64;incproceedings{Robnik-Sikonja1997,
+ *    author = {Marko Robnik-Sikonja and Igor Kononenko},
+ *    booktitle = {Fourteenth International Conference on Machine Learning},
+ *    editor = {Douglas H. Fisher},
+ *    pages = {296-304},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {An adaptation of Relief for attribute estimation in regression},
+ *    year = {1997}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Kira, K. and Rendell, L. A. (1992). A practical approach to feature
- * selection. In D. Sleeman and P. Edwards, editors, <i>Proceedings of
- * the International Conference on Machine Learning,</i> pages 249-256.
- * Morgan Kaufmann. <p>
- *
- * Kononenko, I. (1994). Estimating attributes: analysis and extensions of
- * Relief. In De Raedt, L. and Bergadano, F., editors, <i> Machine Learning:
- * ECML-94, </i> pages 171-182. Springer Verlag. <p>
- *
- * Marko Robnik Sikonja, Igor Kononenko: An adaptation of Relief for attribute
- * estimation on regression. In D.Fisher (ed.): <i> Machine Learning, 
- * Proceedings of 14th International Conference on Machine Learning ICML'97, 
- * </i> Nashville, TN, 1997. <p>
- *
- *
- * Valid options are:
- *
- * -M <number of instances> <br>
- * Specify the number of instances to sample when estimating attributes. <br>
- * If not specified then all instances will be used. <p>
- *
- * -D <seed> <br>
- * Seed for randomly sampling instances. <p>
- *
- * -K <number of neighbours> <br>
- * Number of nearest neighbours to use for estimating attributes. <br>
- * (Default is 10). <p>
- *
- * -W <br>
- * Weight nearest neighbours by distance. <p>
- *
- * -A <sigma> <br>
- * Specify sigma value (used in an exp function to control how quickly <br>
- * weights decrease for more distant instances). Use in conjunction with <br>
- * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;num instances&gt;
+ *  Specify the number of instances to
+ *  sample when estimating attributes.
+ *  If not specified, then all instances
+ *  will be used.</pre>
+ * 
+ * <pre> -D &lt;seed&gt;
+ *  Seed for randomly sampling instances.
+ *  (Default = 1)</pre>
+ * 
+ * <pre> -K &lt;number of neighbours&gt;
+ *  Number of nearest neighbours (k) used
+ *  to estimate attribute relevances
+ *  (Default = 10).</pre>
+ * 
+ * <pre> -W
+ *  Weight nearest neighbours by distance
+ * </pre>
+ * 
+ * <pre> -A &lt;num&gt;
+ *  Specify sigma value (used in an exp
+ *  function to control how quickly
+ *  weights for more distant instances
+ *  decrease. Use in conjunction with -W.
+ *  Sensible value=1/5 to 1/10 of the
+ *  number of nearest neighbours.
+ *  (Default = 2)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
-  implements OptionHandler
-{
+  implements OptionHandler, TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8422186665795839379L;
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -160,6 +219,13 @@ public class ReliefFAttributeEval
   private boolean m_weightByDistance;
 
   /**
+   * Constructor
+   */
+  public ReliefFAttributeEval () {
+    resetOptions();
+  }
+
+  /**
    * Returns a string describing this attribute evaluator
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
@@ -168,16 +234,51 @@ public class ReliefFAttributeEval
     return "ReliefFAttributeEval :\n\nEvaluates the worth of an attribute by "
       +"repeatedly sampling an instance and considering the value of the "
       +"given attribute for the nearest instance of the same and different "
-      +"class. Can operate on both discrete and continuous class data.\n";
+      +"class. Can operate on both discrete and continuous class data.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
-   * Constructor
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
    */
-  public ReliefFAttributeEval () {
-    resetOptions();
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Kenji Kira and Larry A. Rendell");
+    result.setValue(Field.TITLE, "A Practical Approach to Feature Selection");
+    result.setValue(Field.BOOKTITLE, "Ninth International Workshop on Machine Learning");
+    result.setValue(Field.EDITOR, "Derek H. Sleeman and Peter Edwards");
+    result.setValue(Field.YEAR, "1992");
+    result.setValue(Field.PAGES, "249-256");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Igor Kononenko");
+    additional.setValue(Field.TITLE, "Estimating Attributes: Analysis and Extensions of RELIEF");
+    additional.setValue(Field.BOOKTITLE, "European Conference on Machine Learning");
+    additional.setValue(Field.EDITOR, "Francesco Bergadano and Luc De Raedt");
+    additional.setValue(Field.YEAR, "1994");
+    additional.setValue(Field.PAGES, "171-182");
+    additional.setValue(Field.PUBLISHER, "Springer");
+    
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Marko Robnik-Sikonja and Igor Kononenko");
+    additional.setValue(Field.TITLE, "An adaptation of Relief for attribute estimation in regression");
+    additional.setValue(Field.BOOKTITLE, "Fourteenth International Conference on Machine Learning");
+    additional.setValue(Field.EDITOR, "Douglas H. Fisher");
+    additional.setValue(Field.YEAR, "1997");
+    additional.setValue(Field.PAGES, "296-304");
+    additional.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    
+    return result;
   }
-
 
   /**
    * Returns an enumeration describing the available options.
@@ -216,33 +317,44 @@ public class ReliefFAttributeEval
 
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are: <p>
-   *
-   * -M <number of instances> <br>
-   * Specify the number of instances to sample when estimating attributes. <br>
-   * If not specified then all instances will be used. <p>
-   *
-   * -D <seed> <br>
-   * Seed for randomly sampling instances. <p>
-   *
-   * -K <number of neighbours> <br>
-   * Number of nearest neighbours to use for estimating attributes. <br>
-   * (Default is 10). <p>
-   *
-   * -W <br>
-   * Weight nearest neighbours by distance. <p>
-   *
-   * -A <sigma> <br>
-   * Specify sigma value (used in an exp function to control how quickly <br>
-   * weights decrease for more distant instances). Use in conjunction with <br>
-   * -W. Sensible values = 1/5 to 1/10 the number of nearest neighbours. <br>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M &lt;num instances&gt;
+   *  Specify the number of instances to
+   *  sample when estimating attributes.
+   *  If not specified, then all instances
+   *  will be used.</pre>
+   * 
+   * <pre> -D &lt;seed&gt;
+   *  Seed for randomly sampling instances.
+   *  (Default = 1)</pre>
+   * 
+   * <pre> -K &lt;number of neighbours&gt;
+   *  Number of nearest neighbours (k) used
+   *  to estimate attribute relevances
+   *  (Default = 10).</pre>
+   * 
+   * <pre> -W
+   *  Weight nearest neighbours by distance
+   * </pre>
+   * 
+   * <pre> -A &lt;num&gt;
+   *  Specify sigma value (used in an exp
+   *  function to control how quickly
+   *  weights for more distant instances
+   *  decrease. Use in conjunction with -W.
+   *  Sensible value=1/5 to 1/10 of the
+   *  number of nearest neighbours.
+   *  (Default = 2)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   *
-   **/
+   * @throws Exception if an option is not supported
+   */
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -290,7 +402,7 @@ public class ReliefFAttributeEval
    * Sets the sigma value.
    *
    * @param s the value of sigma (> 0)
-   * @exception Exception if s is not positive
+   * @throws Exception if s is not positive
    */
   public void setSigma (int s)
     throws Exception {
@@ -498,7 +610,7 @@ public class ReliefFAttributeEval
    * Initializes a ReliefF attribute evaluator. 
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
+   * @throws Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -638,7 +750,7 @@ public class ReliefFAttributeEval
    * The actual work is done by buildEvaluator which evaluates all features.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @exception Exception if the attribute could not be evaluated
+   * @throws Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
@@ -664,6 +776,7 @@ public class ReliefFAttributeEval
    *
    * @param x the value to be normalized
    * @param i the attribute's index
+   * @return the normalized value
    */
   private double norm (double x, int i) {
     if (Double.isNaN(m_minArray[i]) || 
@@ -760,8 +873,8 @@ public class ReliefFAttributeEval
   /**
    * Calculates the distance between two instances
    *
-   * @param test the first instance
-   * @param train the second instance
+   * @param first the first instance
+   * @param second the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
   private double distance(Instance first, Instance second) {  
@@ -939,8 +1052,7 @@ public class ReliefFAttributeEval
   private void updateWeightsDiscreteClass (int instNum) {
     int i, j, k;
     int cl;
-    double cc = m_numInstances;
-    double temp, temp_diff, w_norm = 1.0;
+    double temp_diff, w_norm = 1.0;
     double[] tempDistClass;
     int[] tempSortedClass = null;
     double distNormClass = 1.0;
@@ -1058,7 +1170,7 @@ public class ReliefFAttributeEval
     for (k = 0; k < m_numClasses; k++) {
       if (k != cl) // already done cl
 	{
-	  for (j = 0, temp = 0.0; j < m_stored[k]; j++) {
+	  for (j = 0; j < m_stored[k]; j++) {
 	    Instance cmp;
 	    cmp = (m_weightByDistance) 
 	      ? m_trainInstances.
@@ -1204,4 +1316,3 @@ public class ReliefFAttributeEval
     }
   }
 }
-

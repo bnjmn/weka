@@ -22,25 +22,43 @@
 
 package  weka.attributeSelection;
 
-import  java.util.*;
-import  java.math.BigInteger;
-import  weka.core.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 
+import java.math.BigInteger;
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Class for performing an exhaustive search. <p>
+ <!-- globalinfo-start -->
+ * ExhaustiveSearch : <br/>
+ * <br/>
+ * Performs an exhaustive search through the space of attribute subsets starting from the empty set of attrubutes. Reports the best subset found.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are: <p>
- *
- * -V <br>
- * Verbose output. Output new best subsets as the search progresses. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -V
+ *  Output subsets as the search progresses.
+ *  (default = false).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class ExhaustiveSearch extends ASSearch 
+public class ExhaustiveSearch 
+  extends ASSearch 
   implements OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 5741842861142379712L;
+  
   /** the best feature set found during the search */
   private BitSet m_bestGroup;
 
@@ -95,20 +113,24 @@ public class ExhaustiveSearch extends ASSearch
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are: <p>
-   *
-   * -V <br>
-   * Verbose output. Output new best subsets as the search progresses. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -V
+   *  Output subsets as the search progresses.
+   *  (default = false).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
     throws Exception {
-    String optionString;
+
     resetOptions();
 
     setVerbose(Utils.getFlag('V',options));
@@ -179,16 +201,15 @@ public class ExhaustiveSearch extends ASSearch
   /**
    * Searches the attribute subset space using an exhaustive search.
    *
-   * @param ASEvaluator the attribute evaluator to guide the search
+   * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @exception Exception if the search can't be completed
+   * @throws Exception if the search can't be completed
    */
    public int[] search (ASEvaluation ASEval, Instances data)
      throws Exception {
      double best_merit;
      double tempMerit;
-     int setSize;
      boolean done = false;
      int sizeOfBest;
      int tempSize;

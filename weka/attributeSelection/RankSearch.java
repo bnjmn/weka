@@ -20,26 +20,61 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Class for evaluating a attribute ranking (given by a specified
- * evaluator) using a specified subset evaluator. <p>
+ <!-- globalinfo-start -->
+ * RankSearch : <br/>
+ * <br/>
+ * Uses an attribute/subset evaluator to rank all attributes. If a subset evaluator is specified, then a forward selection search is used to generate a ranked list. From the ranked list of attributes, subsets of increasing size are evaluated, ie. The best attribute, the best attribute plus the next best attribute, etc.... The best attribute set is reported. RankSearch is linear in the number of attributes if a simple attribute evaluator is used such as GainRatioAttributeEval.<br/>
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are: <p>
- *
- * -A <attribute/subset evaluator> <br>
- * Specify the attribute/subset evaluator to be used for generating the 
- * ranking. If a subset evaluator is specified then a forward selection
- * search is used to produce a ranked list of attributes.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -A &lt;attribute evaluator&gt;
+ *  class name of attribute evaluator to
+ *  use for ranking. Place any
+ *  evaluator options LAST on the
+ *  command line following a "--".
+ *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M</pre>
+ * 
+ * <pre> -S &lt;step size&gt;
+ *  number of attributes to be added from the
+ *  ranking in each iteration (default = 1).</pre>
+ * 
+ * <pre> -R &lt;start point&gt;
+ *  point in the ranking to start evaluating from. 
+ *  (default = 0, ie. the head of the ranking).</pre>
+ * 
+ * <pre> 
+ * Options specific to evaluator weka.attributeSelection.GainRatioAttributeEval:
+ * </pre>
+ * 
+ * <pre> -M
+ *  treat missing values as a seperate value.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class RankSearch extends ASSearch implements OptionHandler {
+public class RankSearch 
+  extends ASSearch 
+  implements OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -7992268736874353755L;
 
   /** does the data have a class */
   private boolean m_hasClass;
@@ -91,6 +126,9 @@ public class RankSearch extends ASSearch implements OptionHandler {
       +"such as GainRatioAttributeEval.\n";
   }
 
+  /**
+   * Constructor
+   */
   public RankSearch () {
     resetOptions();
   }
@@ -199,7 +237,7 @@ public class RankSearch extends ASSearch implements OptionHandler {
 
     if ((m_ASEval != null) && 
 	(m_ASEval instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0, "\nOptions specific to" 
+      newVector.addElement(new Option("", "", 0, "\nOptions specific to " 
 				      + "evaluator " 
 				      + m_ASEval.getClass().getName() 
 				      + ":"));
@@ -215,16 +253,38 @@ public class RankSearch extends ASSearch implements OptionHandler {
 
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are:<p>
-   *
-   * -A <attribute evaluator> <br>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -A &lt;attribute evaluator&gt;
+   *  class name of attribute evaluator to
+   *  use for ranking. Place any
+   *  evaluator options LAST on the
+   *  command line following a "--".
+   *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M</pre>
+   * 
+   * <pre> -S &lt;step size&gt;
+   *  number of attributes to be added from the
+   *  ranking in each iteration (default = 1).</pre>
+   * 
+   * <pre> -R &lt;start point&gt;
+   *  point in the ranking to start evaluating from. 
+   *  (default = 0, ie. the head of the ranking).</pre>
+   * 
+   * <pre> 
+   * Options specific to evaluator weka.attributeSelection.GainRatioAttributeEval:
+   * </pre>
+   * 
+   * <pre> -M
+   *  treat missing values as a seperate value.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   *
-   **/
+   * @throws Exception if an option is not supported
+   */
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -300,10 +360,10 @@ public class RankSearch extends ASSearch implements OptionHandler {
    * Ranks attributes using the specified attribute evaluator and then
    * searches the ranking using the supplied subset evaluator.
    *
-   * @param ASEvaluator the subset evaluator to guide the search
+   * @param ASEval the subset evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @exception Exception if the search can't be completed
+   * @throws Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
