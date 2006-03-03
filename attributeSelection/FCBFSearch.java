@@ -23,10 +23,11 @@
  *      December 27, 2004
  *
  *    FCBF algorithm is a feature selection method based on Symmetrical Uncertainty Measurement for 
- *    relevance redundancy analysis. The details of FCBF algorithm are in L. Yu and H. Liu.
- *    Feature selection for high-dimensional data: a fast correlation-based filter 
- *    solution. In Proceedings of the twentieth International Conference on Machine Learning, 
- *    pages 856--863, 2003.
+ *    relevance redundancy analysis. The details of FCBF algorithm are in:
+ *
+ <!-- technical-plaintext-start -->
+ * Lei Yu, Huan Liu: Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution. In: Proceedings of the Twentieth International Conference on Machine Learning, 856-863, 2003.
+ <!-- technical-plaintext-end -->
  *    
  *    
  *    CONTACT INFORMATION
@@ -54,29 +55,79 @@
  */
 
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * Class for ranking the attributes evaluated by an AttributeSetEvaluator
+ <!-- globalinfo-start -->
+ * FCBF : <br/>
+ * <br/>
+ * Feature selection method based on correlation measureand relevance&amp;redundancy analysis. Use in conjunction with an attribute set evaluator (SymmetricalUncertAttributeEval).<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Lei Yu, Huan Liu: Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution. In: Proceedings of the Twentieth International Conference on Machine Learning, 856-863, 2003.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are: <p>
- *
- * -P <start set> <br>
- * Specify a starting set of attributes. Eg 1,4,7-9. <p>
- *
- * -T <threshold> <br>
- * Specify a threshold by which the AttributeSelection module can. <br>
- * discard attributes. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Yu2003,
+ *    author = {Lei Yu and Huan Liu},
+ *    booktitle = {Proceedings of the Twentieth International Conference on Machine Learning},
+ *    pages = {856-863},
+ *    publisher = {AAAI Press},
+ *    title = {Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D &lt;create dataset&gt;
+ *  Specify Whether the selector generate a new dataset.</pre>
+ * 
+ * <pre> -P &lt;start set&gt;
+ *  Specify a starting set of attributes.
+ *  Eg. 1,3,5-7. 
+ * Any starting attributes specified are 
+ * ignored during the ranking.</pre>
+ * 
+ * <pre> -T &lt;threshold&gt;
+ *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+ * 
+ * <pre> -N &lt;num to select&gt;
+ *  Specify number of attributes to select</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class FCBFSearch extends ASSearch
-  implements RankedOutputSearch, StartSetHandler, OptionHandler {
+public class FCBFSearch 
+  extends ASSearch
+  implements RankedOutputSearch, StartSetHandler, OptionHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 8209699587428369942L;
+  
   /** Holds the starting set as an array of attributes */
   private int[] m_starting;
 
@@ -131,10 +182,33 @@ public class FCBFSearch extends ASSearch
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "FCBF : \n\nFeature selection method based on correlation measure"
-      +"and relevance&redundancy analysis. "
-      +"Use in conjunction with an attribute set evaluator (SymmetricalUncertAttributeEval, "
-      +").\n";
+    return 
+        "FCBF : \n\nFeature selection method based on correlation measure"
+      + "and relevance&redundancy analysis. "
+      + "Use in conjunction with an attribute set evaluator (SymmetricalUncertAttributeEval).\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Lei Yu and Huan Liu");
+    result.setValue(Field.TITLE, "Feature Selection for High-Dimensional Data: A Fast Correlation-Based Filter Solution");
+    result.setValue(Field.BOOKTITLE, "Proceedings of the Twentieth International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.PAGES, "856-863");
+    result.setValue(Field.PUBLISHER, "AAAI Press");
+    
+    return result;
   }
 
   /**
@@ -299,7 +373,7 @@ public class FCBFSearch extends ASSearch
    * in its toString() method.
    * @param startSet a string containing a list of attributes (and or ranges),
    * eg. 1,2,6,10-15.
-   * @exception Exception if start set can't be set.
+   * @throws Exception if start set can't be set.
    */
   public void setStartSet (String startSet) throws Exception {
     m_startRange.setRanges(startSet);
@@ -347,23 +421,30 @@ public class FCBFSearch extends ASSearch
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are: <p>
-   *
-   * -P <start set> <br>
-   * Specify a starting set of attributes. Eg 1,4,7-9. <p>
-   *
-   * -T <threshold> <br>
-   * Specify a threshold by which the AttributeSelection module can <br>
-   * discard attributes. <p>
-   *
-   * -N <number to retain> <br>
-   * Specify the number of attributes to retain. Overides any threshold. <br>
-   * <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D &lt;create dataset&gt;
+   *  Specify Whether the selector generate a new dataset.</pre>
+   * 
+   * <pre> -P &lt;start set&gt;
+   *  Specify a starting set of attributes.
+   *  Eg. 1,3,5-7. 
+   * Any starting attributes specified are 
+   * ignored during the ranking.</pre>
+   * 
+   * <pre> -T &lt;threshold&gt;
+   *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+   * 
+   * <pre> -N &lt;num to select&gt;
+   *  Specify number of attributes to select</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
@@ -467,10 +548,10 @@ public class FCBFSearch extends ASSearch
    * evaluate each attribute not included in the startSet and then sorts
    * them to produce a ranked list of attributes.
    *
-   * @param ASEvaluator the attribute evaluator to guide the search
+   * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @exception Exception if the search can't be completed
+   * @throws Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
@@ -569,7 +650,7 @@ public class FCBFSearch extends ASSearch
    * Sorts the evaluated attribute list
    *
    * @return an array of sorted (highest eval to lowest) attribute indexes
-   * @exception Exception of sorting can't be done.
+   * @throws Exception of sorting can't be done.
    */
   public double[][] rankedAttributes ()
     throws Exception {
@@ -778,4 +859,3 @@ public class FCBFSearch extends ASSearch
     }
   }
 }
-

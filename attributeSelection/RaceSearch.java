@@ -20,62 +20,130 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Statistics;
+import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.experiment.PairedStats;
 import weka.experiment.Stats;
 
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 /** 
- * Class for performing a racing search. <p>
+ <!-- globalinfo-start -->
+ * Races the cross validation error of competing attribute subsets. Use in conjuction with a ClassifierSubsetEval. RaceSearch has four modes:<br/>
+ * <br/>
+ * forward selection races all single attribute additions to a base set (initially  no attributes), selects the winner to become the new base set and then iterates until there is no improvement over the base set. <br/>
+ * <br/>
+ * Backward elimination is similar but the initial base set has all attributes included and races all single attribute deletions. <br/>
+ * <br/>
+ * Schemata search is a bit different. Each iteration a series of races are run in parallel. Each race in a set determines whether a particular attribute should be included or not---ie the race is between the attribute being "in" or "out". The other attributes for this race are included or excluded randomly at each point in the evaluation. As soon as one race has a clear winner (ie it has been decided whether a particular attribute should be inor not) then the next set of races begins, using the result of the winning race from the previous iteration as new base set.<br/>
+ * <br/>
+ * Rank race first ranks the attributes using an attribute evaluator and then races the ranking. The race includes no attributes, the top ranked attribute, the top two attributes, the top three attributes, etc.<br/>
+ * <br/>
+ * It is also possible to generate a raked list of attributes through the forward racing process. If generateRanking is set to true then a complete forward race will be run---that is, racing continues until all attributes have been selected. The order that they are added in determines a complete ranking of all the attributes.<br/>
+ * <br/>
+ * Racing uses paired and unpaired t-tests on cross-validation errors of competing subsets. When there is a significant difference between the means of the errors of two competing subsets then the poorer of the two can be eliminated from the race. Similarly, if there is no significant difference between the mean errors of two competing subsets and they are within some threshold of each other, then one can be eliminated from the race.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Andrew W. Moore, Mary S. Lee: Efficient Algorithms for Minimizing Cross Validation Error. In: Eleventh International Conference on Machine Learning, 190-198, 1994.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information see: <br>
- * Moore, A. W. and Lee, M. S. (1994). Efficient algorithms for minimising
- * cross validation error. Proceedings of the Eleventh International
- * Conference on Machine Learning. pp 190--198. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Moore1994,
+ *    author = {Andrew W. Moore and Mary S. Lee},
+ *    booktitle = {Eleventh International Conference on Machine Learning},
+ *    pages = {190-198},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Efficient Algorithms for Minimizing Cross Validation Error},
+ *    year = {1994}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -R <race type><br>
- * 0 = forward, 1 = backward, 2 = schemata, 3 = rank. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -L <significance level> <br>
- * significance level to use for t-tests. <p>
- *
- * -T <threshold> <br>
- * threshold for considering mean errors of two subsets the same <p>
- *
- * -F <xval type> <br>
- * 0 = 10 fold, 1 = leave-one-out (selected automatically for schemata race
- * <p>
- *
- * -A <attribute evaluator> <br>
- * the attribute evaluator to use when doing a rank search <p>
- *
- * -Q <br>
- * produce a ranked list of attributes. Selecting this option forces
- * the race type to be forward. Racing continues until *all* attributes
- * have been selected, thus producing a ranked list of attributes. <p>
- *
- * -N <number to retain> <br>
- * Specify the number of attributes to retain. Overides any threshold. 
- * Use in conjunction with -Q. <p>
+ * <pre> -R &lt;0 = forward | 1 = backward race | 2 = schemata | 3 = rank&gt;
+ *  Type of race to perform.
+ *  (default = 0).</pre>
  * 
- * -J <threshold> <br>
- * Specify a threshold by which the AttributeSelection module can discard
- * attributes. Use in conjunction with -Q. <p>
- *
- * -Z <br>
- * Turn on verbose output for monitoring the search <p>
+ * <pre> -L &lt;significance&gt;
+ *  Significance level for comaparisons
+ *  (default = 0.001(forward/backward/rank)/0.01(schemata)).</pre>
+ * 
+ * <pre> -T &lt;threshold&gt;
+ *  Threshold for error comparison.
+ *  (default = 0.001).</pre>
+ * 
+ * <pre> -A &lt;attribute evaluator&gt;
+ *  Attribute ranker to use if doing a 
+ *  rank search. Place any
+ *  evaluator options LAST on the
+ *  command line following a "--".
+ *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.
+ *  (default = GainRatioAttributeEval)</pre>
+ * 
+ * <pre> -F &lt;0 = 10 fold | 1 = leave-one-out&gt;
+ *  Folds for cross validation
+ *  (default = 0 (1 if schemata race)</pre>
+ * 
+ * <pre> -Q
+ *  Generate a ranked list of attributes.
+ *  Forces the search to be forward
+ * . and races until all attributes have
+ *  selected, thus producing a ranking.</pre>
+ * 
+ * <pre> -N &lt;num to select&gt;
+ *  Specify number of attributes to retain from 
+ *  the ranking. Overides -T. Use in conjunction with -Q</pre>
+ * 
+ * <pre> -T &lt;threshold&gt;
+ *  Specify a theshold by which attributes
+ *  may be discarded from the ranking.
+ *  Use in conjuction with -Q</pre>
+ * 
+ * <pre> -Z
+ *  Verbose output for monitoring the search.</pre>
+ * 
+ * <pre> 
+ * Options specific to evaluator weka.attributeSelection.GainRatioAttributeEval:
+ * </pre>
+ * 
+ * <pre> -M
+ *  treat missing values as a seperate value.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
-public class RaceSearch extends ASSearch implements RankedOutputSearch, 
-						    OptionHandler {
+public class RaceSearch 
+  extends ASSearch 
+  implements RankedOutputSearch, OptionHandler, TechnicalInformationHandler {
 
-  /* the training instances */
+  /** for serialization */
+  static final long serialVersionUID = 4015453851212985720L;
+
+  /** the training instances */
   private Instances m_Instances = null;
 
   /** search types */
@@ -201,7 +269,30 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
       +"competing subsets then the poorer of the two can be eliminated from "
       +"the race. Similarly, if there is no significant difference between "
       +"the mean errors of two competing subsets and they are within some "
-      +"threshold of each other, then one can be eliminated from the race. ";
+      +"threshold of each other, then one can be eliminated from the race.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Andrew W. Moore and Mary S. Lee");
+    result.setValue(Field.TITLE, "Efficient Algorithms for Minimizing Cross Validation Error");
+    result.setValue(Field.BOOKTITLE, "Eleventh International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "1994");
+    result.setValue(Field.PAGES, "190-198");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    
+    return result;
   }
 
   /**
@@ -559,44 +650,64 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are:<p>
-   *
-   * -R <race type><br>
-   * 0 = forward, 1 = backward, 2 = schemata, 3 = rank. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * -L <significance level> <br>
-   * significance level to use for t-tests. <p>
-   *
-   * -T <threshold> <br>
-   * threshold for considering mean errors of two subsets the same <p>
-   *
-   * -F <xval type> <br>
-   * 0 = 10 fold, 1 = leave-one-out (selected automatically for schemata race
-   * <p>
-   *
-   * -A <attribute evaluator> <br>
-   * the attribute evaluator to use when doing a rank search <p>
-   *
-   * -Q <br>
-   * produce a ranked list of attributes. Selecting this option forces
-   * the race type to be forward. Racing continues until *all* attributes
-   * have been selected, thus producing a ranked list of attributes. <p>
-   *
-   * -N <number to retain> <br>
-   * Specify the number of attributes to retain. Overides any threshold. 
-   * Use in conjunction with -Q. <p>
+   * <pre> -R &lt;0 = forward | 1 = backward race | 2 = schemata | 3 = rank&gt;
+   *  Type of race to perform.
+   *  (default = 0).</pre>
    * 
-   * -J <threshold> <br>
-   * Specify a threshold by which the AttributeSelection module can discard
-   * attributes. Use in conjunction with -Q. <p>
-   *
-   * -Z <br>
-   * Turn on verbose output for monitoring the search <p>
+   * <pre> -L &lt;significance&gt;
+   *  Significance level for comaparisons
+   *  (default = 0.001(forward/backward/rank)/0.01(schemata)).</pre>
+   * 
+   * <pre> -T &lt;threshold&gt;
+   *  Threshold for error comparison.
+   *  (default = 0.001).</pre>
+   * 
+   * <pre> -A &lt;attribute evaluator&gt;
+   *  Attribute ranker to use if doing a 
+   *  rank search. Place any
+   *  evaluator options LAST on the
+   *  command line following a "--".
+   *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.
+   *  (default = GainRatioAttributeEval)</pre>
+   * 
+   * <pre> -F &lt;0 = 10 fold | 1 = leave-one-out&gt;
+   *  Folds for cross validation
+   *  (default = 0 (1 if schemata race)</pre>
+   * 
+   * <pre> -Q
+   *  Generate a ranked list of attributes.
+   *  Forces the search to be forward
+   * . and races until all attributes have
+   *  selected, thus producing a ranking.</pre>
+   * 
+   * <pre> -N &lt;num to select&gt;
+   *  Specify number of attributes to retain from 
+   *  the ranking. Overides -T. Use in conjunction with -Q</pre>
+   * 
+   * <pre> -T &lt;threshold&gt;
+   *  Specify a theshold by which attributes
+   *  may be discarded from the ranking.
+   *  Use in conjuction with -Q</pre>
+   * 
+   * <pre> -Z
+   *  Verbose output for monitoring the search.</pre>
+   * 
+   * <pre> 
+   * Options specific to evaluator weka.attributeSelection.GainRatioAttributeEval:
+   * </pre>
+   * 
+   * <pre> -M
+   *  treat missing values as a seperate value.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    *
    **/
   public void setOptions (String[] options)
@@ -704,10 +815,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * Searches the attribute subset space by racing cross validation
    * errors of competing subsets
    *
-   * @param ASEvaluator the attribute evaluator to guide the search
+   * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @exception Exception if the search can't be completed
+   * @throws Exception if the search can't be completed
    */
   public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
@@ -1051,8 +1162,10 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     return attributeList(base);
   }
 
-  // t-test for unequal sample sizes and same variance. Returns probability
-  // that observed difference in means is due to chance.
+  /** 
+   * t-test for unequal sample sizes and same variance. Returns probability
+   * that observed difference in means is due to chance.
+   */
   private double ttest(Stats c1, Stats c2) throws Exception {
     double n1 = c1.count; double n2 = c2.count;
     double v1 = c1.stdDev * c1.stdDev;
@@ -1090,7 +1203,6 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 
     int numCompetitors = m_numAttribs-1;
     char [][] raceSets = new char [numCompetitors+1][m_numAttribs];
-    int winner;
     
     if (m_ASEval instanceof AttributeEvaluator) {
       // generate the attribute ranking first
@@ -1137,11 +1249,11 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * @param data the instances to estimate accuracy over
    * @param random a random number generator
    * @return an array of selected attribute indices.
+   * @throws Exception if something goes wrong
    */
   private int [] hillclimbRace(Instances data, Random random) throws Exception {
     double baseSetError;
     char [] baseSet = new char [m_numAttribs];
-    int rankCount = 0;
 
     for (int i=0;i<m_numAttribs;i++) {
       if (i != m_classIndex) {
@@ -1157,7 +1269,6 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 
     int numCompetitors = m_numAttribs-1;
     char [][] raceSets = new char [numCompetitors+1][m_numAttribs];
-    int winner;
 
     raceSets[0] = (char [])baseSet.clone();
     int count = 1;
@@ -1292,7 +1403,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * base set generated from the previous race
    * @param random a random number generator
    * @return the index of the winning subset
-   * @exception Exception if an error occurs during cross validation
+   * @throws Exception if an error occurs during cross validation
    */
   private double [] raceSubsets(char [][]raceSets, Instances data,
 				boolean baseSetIncluded, Random random) 
@@ -1342,8 +1453,6 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     // if there is one set left in the race then we need to continue to
     // evaluate it for the remaining instances in order to get an
     // accurate error estimate
-    Stats clearWinner = null;
-    int foldSize=1;
     processedCount = 0;
     race: for (int i=0;i<m_numFolds;i++) {
 
@@ -1351,7 +1460,6 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
       // learning scheme.
       trainCV = data.trainCV(m_numFolds, i, new Random (1));
       testCV = data.testCV(m_numFolds, i);
-      foldSize = testCV.numInstances();
       
       // loop over the surviving attribute sets building classifiers for this
       // training set
@@ -1577,6 +1685,11 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     return retInfo;
   }
 
+  /**
+   * Returns a string represenation
+   * 
+   * @return a string representation
+   */
   public String toString() {
     StringBuffer text = new StringBuffer();
     
@@ -1654,4 +1767,3 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     m_numFolds = 10;
   }
 }
-

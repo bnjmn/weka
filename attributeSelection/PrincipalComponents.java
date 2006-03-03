@@ -22,33 +22,61 @@
 
 package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import  weka.filters.unsupervised.attribute.Normalize;
-import  weka.filters.unsupervised.attribute.NominalToBinary;
-import  weka.filters.unsupervised.attribute.Remove;
-import  weka.filters.Filter;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Matrix;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SparseInstance;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * Class for performing principal components analysis/transformation. <p>
+ <!-- globalinfo-start -->
+ * Performs a principal components analysis and transformation of the data. Use in conjunction with a Ranker search. Dimensionality reduction is accomplished by choosing enough eigenvectors to account for some percentage of the variance in the original data---default 0.95 (95%). Attribute noise can be filtered by transforming to the PC space, eliminating some of the worst eigenvectors, and then transforming back to the original space.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- * -N <br>
- * Don't normalize the input data. <p>
- *
- * -R <variance> <br>
- * Retain enough pcs to account for this proportion of the variance. <p>
- *
- * -T <br>
- * Transform through the PC space and back to the original space. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Don't normalize input data.</pre>
+ * 
+ * <pre> -R
+ *  Retain enough PC attributes to account 
+ *  for this proportion of variance in the original data. (default = 0.95)</pre>
+ * 
+ * <pre> -O
+ *  Transform through the PC space and 
+ *  back to the original space.</pre>
+ * 
+ * <pre> -A
+ *  Maximum number of attributes to include in 
+ * transformed attribute names. (-1 = include all)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
-public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
+public class PrincipalComponents 
+  extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 3310137541055815078L;
   
   /** The data to transform analyse/transform */
   private Instances m_trainInstances;
@@ -161,24 +189,30 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * Valid options are:<p>
-   * -N <br>
-   * Don't normalize the input data. <p>
-   *
-   * -R <variance> <br>
-   * Retain enough pcs to account for this proportion of the variance. <p>
-   *
-   * -T <br>
-   * Transform through the PC space and back to the original space. <p>
-   *
-   * -A <max>
-   * The maximum number of attributes to include in transformed attribute names.
-   * (-1 = include all attributes)
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Don't normalize input data.</pre>
+   * 
+   * <pre> -R
+   *  Retain enough PC attributes to account 
+   *  for this proportion of variance in the original data. (default = 0.95)</pre>
+   * 
+   * <pre> -O
+   *  Transform through the PC space and 
+   *  back to the original space.</pre>
+   * 
+   * <pre> -A
+   *  Maximum number of attributes to include in 
+   * transformed attribute names. (-1 = include all)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions (String[] options)
     throws Exception {
@@ -342,7 +376,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   /**
    * Initializes principal components and performs the analysis
    * @param data the instances to analyse/transform
-   * @exception Exception if analysis fails
+   * @throws Exception if analysis fails
    */
   public void buildEvaluator(Instances data) throws Exception {
     buildAttributeConstructor(data);
@@ -470,7 +504,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * determine the structure of the transformed data without actually
    * having to get all the transformed data through getTransformedData().
    * @return the header of the transformed data.
-   * @exception Exception if the header of the transformed data can't
+   * @throws Exception if the header of the transformed data can't
    * be determined.
    */
   public Instances transformedHeader() throws Exception {
@@ -487,7 +521,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   /**
    * Gets the transformed training data.
    * @return the transformed training data
-   * @exception Exception if transformed data can't be returned
+   * @throws Exception if transformed data can't be returned
    */
   public Instances transformedData() throws Exception {
     if (m_eigenvalues == null) {
@@ -516,7 +550,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * to the original space.
    * @param att the attribute to be evaluated
    * @return the merit of a transformed attribute
-   * @exception Exception if attribute can't be evaluated
+   * @throws Exception if attribute can't be evaluated
    */
   public double evaluateAttribute(int att) throws Exception {
     if (m_eigenvalues == null) {
@@ -690,7 +724,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * to the original space if requested.
    * @param instance an instance in the original (unormalized) format
    * @return a transformed instance
-   * @exception Exception if instance cant be transformed
+   * @throws Exception if instance cant be transformed
    */
   public Instance convertInstance(Instance instance) throws Exception {
 
@@ -791,7 +825,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   /**
    * Set the format for the transformed data
    * @return a set of empty Instances (header only) in the new format
-   * @exception Exception if the output format can't be set
+   * @throws Exception if the output format can't be set
    */
   private Instances setOutputFormat() throws Exception {
     if (m_eigenvalues == null) {
@@ -872,5 +906,3 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   }
   
 }
-
-

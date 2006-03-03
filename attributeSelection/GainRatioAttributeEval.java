@@ -20,29 +20,48 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.supervised.attribute.Discretize;
-import  weka.filters.Filter;
+import weka.core.ContingencyTables;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Class for Evaluating attributes individually by measuring gain ratio 
- * with respect to the class. <p>
+ <!-- globalinfo-start -->
+ * GainRatioAttributeEval :<br/>
+ * <br/>
+ * Evaluates the worth of an attribute by measuring the gain ratio with respect to the class.<br/>
+ * <br/>
+ * GainR(Class, Attribute) = (H(Class) - H(Class | Attribute)) / H(Attribute).<br/>
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -M <br>
- * Treat missing values as a seperate value. <br>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M
+ *  treat missing values as a seperate value.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class GainRatioAttributeEval
   extends AttributeEvaluator
-  implements OptionHandler
-{
+  implements OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8504656625598579926L;
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -95,13 +114,18 @@ public class GainRatioAttributeEval
 
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -M <br>
-   * Treat missing values as a seperate value. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M
+   *  treat missing values as a seperate value.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    **/
   public void setOptions (String[] options)
     throws Exception {
@@ -165,7 +189,7 @@ public class GainRatioAttributeEval
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
+   * @throws Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -205,12 +229,13 @@ public class GainRatioAttributeEval
    * of the class given the attribute.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @exception Exception if the attribute could not be evaluated
+   * @return the gain ratio
+   * @throws Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
     int i, j, ii, jj;
-    int nnj, nni, ni, nj;
+    int ni, nj;
     double sum = 0.0;
     ni = m_trainInstances.attribute(attribute).numValues() + 1;
     nj = m_numClasses + 1;
@@ -366,11 +391,8 @@ public class GainRatioAttributeEval
   }
 
 
-  // ============
-  // Test method.
-  // ============
   /**
-   * Main method for testing this class.
+   * Main method.
    *
    * @param args the options
    * -t training file
@@ -387,4 +409,3 @@ public class GainRatioAttributeEval
   }
 
 }
-

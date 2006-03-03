@@ -20,37 +20,56 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
-import  weka.classifiers.*;
-import  weka.filters.unsupervised.attribute.Remove;
-import  weka.filters.Filter;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
- * Class for Evaluating attributes individually by using the OneR
- * classifier. <p>
+ <!-- globalinfo-start -->
+ * OneRAttributeEval :<br/>
+ * <br/>
+ * Evaluates the worth of an attribute by using the OneR classifier.<br/>
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * -S <seed> <br>
- * Set the seed for cross validation (default = 1). <p>
- *
- * -F <folds> <br>
- * Set the number of folds for cross validation (default = 10). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -B <minimum bucket size> <br>
- * Set the minimum number of objects per bucket (passed on to
- * OneR, default = 6). <p>
- *
- * -D <br>
- * Use the training data to evaluate attributes rather than cross validation. <p>
+ * <pre> -S &lt;seed&gt;
+ *  Random number seed for cross validation (default = 1)</pre>
+ * 
+ * <pre> -F &lt;folds&gt;
+ *  Number of folds for cross validation (default = 10)</pre>
+ * 
+ * <pre> -D
+ *  Use training data for evaluation rather than cross validaton</pre>
+ * 
+ * <pre> -B &lt;minimum bucket size&gt;
+ *  Minimum number of objects in a bucket (passed on to OneR, default = 6)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class OneRAttributeEval
-  extends AttributeEvaluator implements OptionHandler
-{
+  extends AttributeEvaluator 
+  implements OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 4386514823886856980L;
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -234,23 +253,27 @@ public class OneRAttributeEval
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -S <seed> <br>
-   * Set the seed for cross validation (default = 1). <p>
-   *
-   * -F <folds> <br>
-   * Set the number of folds for cross validation (default = 10). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * -B <minimum bucket size> <br>
-   * Set the minimum number of objects per bucket (passed on to
-   * OneR, default = 6). <p>
-   *
-   * -D <br>
-   * Use the training data to evaluate attributes rather than cross validation. <p>
+   * <pre> -S &lt;seed&gt;
+   *  Random number seed for cross validation (default = 1)</pre>
+   * 
+   * <pre> -F &lt;folds&gt;
+   *  Number of folds for cross validation (default = 10)</pre>
+   * 
+   * <pre> -D
+   *  Use training data for evaluation rather than cross validaton</pre>
+   * 
+   * <pre> -B &lt;minimum bucket size&gt;
+   *  Minimum number of objects in a bucket (passed on to OneR, default = 6)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String [] options) throws Exception {
     String temp = Utils.getOption('S', options);
@@ -273,7 +296,12 @@ public class OneRAttributeEval
     Utils.checkForRemainingOptions(options);
   }
 
-  public String []  getOptions() {
+  /**
+   * returns the current setup.
+   * 
+   * @return the options of the current setup
+   */
+  public String[] getOptions() {
     String [] options = new String [7];
     int current = 0;
     
@@ -307,7 +335,7 @@ public class OneRAttributeEval
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
+   * @throws Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -345,7 +373,7 @@ public class OneRAttributeEval
    * of information gained about the class given the attribute.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @exception Exception if the attribute could not be evaluated
+   * @throws Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
@@ -426,4 +454,3 @@ public class OneRAttributeEval
   }
 
 }
-

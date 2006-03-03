@@ -20,29 +20,48 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.supervised.attribute.Discretize;
-import  weka.filters.Filter;
+import weka.core.ContingencyTables;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Class for Evaluating attributes individually by measuring symmetrical 
- * uncertainty with respect to the class.
+ <!-- globalinfo-start -->
+ * SymmetricalUncertAttributeEval :<br/>
+ * <br/>
+ * Evaluates the worth of an attribute by measuring the symmetrical uncertainty with respect to the class. <br/>
+ * <br/>
+ *  SymmU(Class, Attribute) = 2 * (H(Class) - H(Class | Attribute)) / H(Class) + H(Attribute).<br/>
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -M <br>
- * Treat missing values as a seperate value. <br>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M
+ *  treat missing values as a seperate value.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class SymmetricalUncertAttributeEval
   extends AttributeEvaluator
-  implements OptionHandler
-{
+  implements OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8096505776132296416L;
 
   /** The training instances */
   private Instances m_trainInstances;
@@ -68,7 +87,7 @@ public class SymmetricalUncertAttributeEval
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "GainRatioAttributeEval :\n\nEvaluates the worth of an attribute "
+    return "SymmetricalUncertAttributeEval :\n\nEvaluates the worth of an attribute "
       +"by measuring the symmetrical uncertainty with respect to the class. "
       +"\n\n SymmU(Class, Attribute) = 2 * (H(Class) - H(Class | Attribute)) "
       +"/ H(Class) + H(Attribute).\n";
@@ -95,13 +114,18 @@ public class SymmetricalUncertAttributeEval
 
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
    *
-   * -M <br>
-   * Treat missing values as a seperate value. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M
+   *  treat missing values as a seperate value.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    **/
   public void setOptions (String[] options)
     throws Exception {
@@ -165,7 +189,7 @@ public class SymmetricalUncertAttributeEval
    * Discretizes all attributes that are numeric.
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
+   * @throws Exception if the evaluator has not been 
    * generated successfully
    */
   public void buildEvaluator (Instances data)
@@ -204,7 +228,8 @@ public class SymmetricalUncertAttributeEval
    * uncertainty between it and the class.
    *
    * @param attribute the index of the attribute to be evaluated
-   * @exception Exception if the attribute could not be evaluated
+   * @return the uncertainty
+   * @throws Exception if the attribute could not be evaluated
    */
   public double evaluateAttribute (int attribute)
     throws Exception {
@@ -387,4 +412,3 @@ public class SymmetricalUncertAttributeEval
   }
 
 }
-
