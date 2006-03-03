@@ -46,7 +46,9 @@ import java.util.TreeSet;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Tobias Scheffer: Finding Association Rules That Trade Support Optimally against Confidence. In: 5th European Conference on Principles of Data Mining and Knowledge Discovery, 424-435, 2001.The implementation follows the paper expect for adding a rule to the output of the 'n' best rules. A rule is added if:<br/>
+ * Tobias Scheffer: Finding Association Rules That Trade Support Optimally against Confidence. In: 5th European Conference on Principles of Data Mining and Knowledge Discovery, 424-435, 2001.<br/>
+ * <br/>
+ * The implementation follows the paper expect for adding a rule to the output of the 'n' best rules. A rule is added if:<br/>
  * the expected predictive accuracy of this rule is among the 'n' best and it is not subsumed by a rule with at least the same expected predictive accuracy (out of an unpublished manuscript from T. Scheffer).
  * <p/>
  <!-- globalinfo-end -->
@@ -81,7 +83,7 @@ import java.util.TreeSet;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 
 public class PredictiveApriori 
   extends Associator 
