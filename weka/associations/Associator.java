@@ -22,20 +22,23 @@
 
 package weka.associations;
 
-import java.io.Serializable;
-import weka.core.Instance;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /** 
  * Abstract scheme for learning associations. All schemes for learning
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
-public abstract class Associator implements Cloneable, Serializable {
+public abstract class Associator 
+  implements Cloneable, Serializable, CapabilitiesHandler {
  
   /**
    * Generates an associator. Must initialize all fields of the associator
@@ -99,5 +102,15 @@ public abstract class Associator implements Cloneable, Serializable {
     }
     return associators;
   }
-}
 
+  /** 
+   * Returns the Capabilities of this associator. Derived associators have to
+   * override this method to enable capabilities.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    return new Capabilities(this);
+  }
+}
