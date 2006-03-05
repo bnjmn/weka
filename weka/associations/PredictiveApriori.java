@@ -22,11 +22,13 @@
 
 package weka.associations;
 
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
+import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
@@ -83,7 +85,7 @@ import java.util.TreeSet;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ */
+ * @version $Revision: 1.6 $ */
 
 public class PredictiveApriori 
   extends Associator 
@@ -214,6 +216,25 @@ public class PredictiveApriori
     
    
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
   
   /**
    * Method that generates all large itemsets with a minimum support, and from
@@ -226,24 +247,22 @@ public class PredictiveApriori
       
     int temp = m_premiseCount, exactNumber = m_numRules-5; 
 
-    if(instances == null)
-      throw new Exception("No instances."); 
-    if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
     m_premiseCount = 1;
     m_best = new TreeSet();
     m_bestChanged = false;
     m_expectation = 0;
     m_count = 1;
     m_instances = instances;
-    if(m_classIndex == -1)
-        m_instances.setClassIndex(m_instances.numAttributes()-1);     
+
+    if (m_classIndex == -1)
+      m_instances.setClassIndex(m_instances.numAttributes()-1);     
+    else if (m_classIndex < m_instances.numAttributes() && m_classIndex >= 0)
+      m_instances.setClassIndex(m_classIndex);
     else
-        if(m_classIndex < m_instances.numAttributes() && m_classIndex >= 0)
-            m_instances.setClassIndex(m_classIndex);
-        else
-            throw new Exception("Invalid class index.");
+      throw new Exception("Invalid class index.");
+    
+    // can associator handle the data?
+    getCapabilities().testWithFail(m_instances);
     
     //prior estimation
     m_priorEstimator = new PriorEstimation(m_instances,m_numRandRules,m_numIntervals,m_car);

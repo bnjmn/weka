@@ -23,6 +23,7 @@
 package weka.associations;
 
 import weka.core.AttributeStats;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
@@ -30,6 +31,7 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
+import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
@@ -126,7 +128,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Apriori 
   extends Associator 
@@ -342,6 +344,25 @@ public class Apriori
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Method that generates all large itemsets with a minimum support, and from
    * these all association rules with a minimum confidence.
    *
@@ -355,25 +376,22 @@ public class Apriori
     FastVector[] sortedRuleSet;
     int necSupport=0;
 
-    if(instances == null)
-      throw new Exception("No instances.");
-    if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
-
     if (m_removeMissingCols) {
       instances = removeMissingColumns(instances);
     }
     if(m_car && m_metricType != CONFIDENCE)
       throw new Exception("For CAR-Mining metric type has to be confidence!");
     
-    if(m_classIndex == -1)
-        instances.setClassIndex(instances.numAttributes()-1);     
+    if (m_classIndex == -1)
+      instances.setClassIndex(instances.numAttributes()-1);     
+    else if (m_classIndex < instances.numAttributes() && m_classIndex >= 0)
+      instances.setClassIndex(m_classIndex);
     else
-        if(m_classIndex < instances.numAttributes() && m_classIndex >= 0)
-            instances.setClassIndex(m_classIndex);
-        else
-            throw new Exception("Invalid class index.");
+      throw new Exception("Invalid class index.");
+
+    // can associator handle the data?
+    getCapabilities().testWithFail(instances);
+
     m_cycles = 0;
     if(m_car){
         //m_instances does not contain the class attribute
