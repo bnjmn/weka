@@ -32,12 +32,14 @@ import weka.associations.tertius.Predicate;
 import weka.associations.tertius.Rule;
 import weka.associations.tertius.SimpleLinkedList;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
+import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
@@ -144,7 +146,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Tertius 
@@ -1700,6 +1702,25 @@ public class Tertius
     /* Print the new current values. */
     printValues();
   }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
   
   /**
    * Method that launches the search to find the rules with the highest 
@@ -1723,17 +1744,16 @@ public class Tertius
     m_explored = 0;
     m_status = NORMAL;
 
-    /* Set class index. */
-    if (m_classIndex == 0) {
-      m_instances.setClassIndex(instances.numAttributes() - 1);
-    } else if ((m_classIndex > instances.numAttributes())
-	       || (m_classIndex < 0)) {
-      throw new Exception("Class index has to be between zero "
-			  + "and the number of attributes!");
-    } else {
-      m_instances.setClassIndex(m_classIndex - 1);
-    }
-
+    if (m_classIndex == -1)
+      m_instances.setClassIndex(m_instances.numAttributes()-1);     
+    else if (m_classIndex < m_instances.numAttributes() && m_classIndex >= 0)
+      m_instances.setClassIndex(m_classIndex);
+    else
+      throw new Exception("Invalid class index.");
+    
+    // can associator handle the data?
+    getCapabilities().testWithFail(m_instances);
+    
     /* Initialization of the window for current values. */
     if (m_printValues == WINDOW) {
       m_valuesText = new TextField(37);
