@@ -33,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class Javadoc 
   implements OptionHandler {
@@ -252,6 +252,51 @@ public abstract class Javadoc
     
     return result;
   }
+
+  /**
+   * determines the base string of the given indention string, whether it's
+   * either only spaces (one space will be retured) or mixed mode (tabs and 
+   * spaces, in that case the same string will be returned)
+   * 
+   * @param str		the string to analyze
+   * @return 		the indention string
+   */
+  protected String getIndentionString(String str) {
+    String	result;
+    
+    // only spaces?
+    if (str.replaceAll(" ", "").length() == 0)
+      result = " ";
+    // only tabs?
+    else if (str.replaceAll("\t", "").length() == 0)
+      result = "\t";
+    else
+      result = str;
+      
+    return result;
+  }
+  
+  /**
+   * determines the number of indention strings that have to be inserted to
+   * generated the given indention string.
+   * 
+   * @param str 	the string to analyze
+   * @return		the number of base indention strings to insert
+   */
+  protected int getIndentionLength(String str) {
+    int		result;
+    
+    // only spaces?
+    if (str.replaceAll(" ", "").length() == 0)
+      result = str.length();
+    // only tabs?
+    else if (str.replaceAll("\t", "").length() == 0)
+      result = str.length();
+    else
+      result = 1;
+    
+    return result;
+  }
   
   /**
    * generates and returns the Javadoc for the specified start/end tag pair
@@ -263,8 +308,10 @@ public abstract class Javadoc
    */
   protected String updateJavadoc(String content, int index) throws Exception {
     StringBuffer	resultBuf;
-    int			indention;
+    int			indentionLen;
+    String		indentionStr;
     String		part;
+    String		tmpStr;
 
     // start and end tag?
     if (    (content.indexOf(m_StartTag[index]) == -1)
@@ -287,12 +334,14 @@ public abstract class Javadoc
 	  content = content.substring(part.length() + m_StartTag[index].length());
 	}
 	else {
-	  indention = part.length() - part.lastIndexOf("\n") - 1;
-	  part      = part.substring(0, part.length() - indention);
+	  tmpStr       = part.substring(part.lastIndexOf("\n") + 1);
+	  indentionLen = getIndentionLength(tmpStr);
+	  indentionStr = getIndentionString(tmpStr);
+	  part         = part.substring(0, part.lastIndexOf("\n") + 1);
 	  resultBuf.append(part);
-	  resultBuf.append(indent(m_StartTag[index], indention, " ") + "\n");
-	  resultBuf.append(indent(generateJavadoc(index), indention, " "));
-	  resultBuf.append(indent(m_EndTag[index], indention, " "));
+	  resultBuf.append(indent(m_StartTag[index], indentionLen, indentionStr) + "\n");
+	  resultBuf.append(indent(generateJavadoc(index), indentionLen, indentionStr));
+	  resultBuf.append(indent(m_EndTag[index], indentionLen, indentionStr));
 	  content = content.substring(content.indexOf(m_EndTag[index]));
 	  content = content.substring(m_EndTag[index].length());
 	}
