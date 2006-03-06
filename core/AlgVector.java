@@ -23,23 +23,19 @@
 package weka.core;
 
 import java.util.Random;
-//import java.io.Writer;
-//import java.io.Reader;
-//import java.io.LineNumberReader;
 import java.io.Serializable;
-//import java.util.StringTokenizer;
 
 /**
  * Class for performing operations on an algebraic vector
  * of floating-point values.
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class AlgVector implements Cloneable, Serializable {
+public class AlgVector 
+  implements Cloneable, Serializable {
 
-  /**
-   * The values of the matrix */
+  /** The values of the matrix */
   protected double [] m_Elements;
 
   /**
@@ -84,9 +80,6 @@ public class AlgVector implements Cloneable, Serializable {
       m_Elements = new double[len];
       initialize(random);
     }
-    else {
-      m_Elements = new double[len];
-    }
   }
 
   /**
@@ -126,26 +119,6 @@ public class AlgVector implements Cloneable, Serializable {
       }
     
     return v;
-  }
-
-  /**
-   * Writes out a matrix.
-   *
-   * @param w the output Writer
-   * @exception Exception if an error occurs
-   *
-  public void write(Writer w) throws Exception {
-
-    w.write("% Rows\tColumns\n");
-    w.write("" + numRows() + "\t" + numColumns() + "\n");
-    w.write("% Matrix elements\n");
-    for(int i = 0; i < numRows(); i++) {
-      for(int j = 0; j < numColumns(); j++) {
-	w.write("" + m_Elements[i][j] + "\t");
-      }
-      w.write("\n");
-    }
-    w.flush();
   }
 
   /**
@@ -239,21 +212,25 @@ public class AlgVector implements Cloneable, Serializable {
   public Instance getAsInstance(Instances model, Random random) 
     throws Exception {
 
-    Instance newInst = new Instance(model.numAttributes());
-    newInst.setDataset(model);
+    Instance newInst = null;
 
-    for (int i = 0, j = 0; i < model.numAttributes(); i++) {
-      if (model.attribute(i).isNumeric()) {
-	if (j >= m_Elements.length)
-	  throw new Exception("Datatypes are not compatible."); 
-	newInst.setValue(i, m_Elements[j++]);
-      }
-      if (model.attribute(i).isNominal()) {
-        int newVal = (int) 
-	  (random.nextDouble() * (double) (model.attribute(i).numValues()));
-	if (newVal == (int) model.attribute(i).numValues())
-          newVal -= 1;
-	newInst.setValue(i, newVal);
+    if (m_Elements != null) {
+      newInst = new Instance(model.numAttributes());
+      newInst.setDataset(model);
+      
+      for (int i = 0, j = 0; i < model.numAttributes(); i++) {
+	if (model.attribute(i).isNumeric()) {
+	  if (j >= m_Elements.length)
+	    throw new Exception("Datatypes are not compatible."); 
+	  newInst.setValue(i, m_Elements[j++]);
+	}
+	if (model.attribute(i).isNominal()) {
+	  int newVal = (int) 
+	    (random.nextDouble() * (double) (model.attribute(i).numValues()));
+	  if (newVal == (int) model.attribute(i).numValues())
+	    newVal -= 1;
+	  newInst.setValue(i, newVal);
+	}
       }
     }
     return newInst;
@@ -283,16 +260,19 @@ public class AlgVector implements Cloneable, Serializable {
    */
   public final AlgVector add(AlgVector other) {
   
-    int n = m_Elements.length;
-    AlgVector b;
-    try {
-      b = (AlgVector)clone();
-    } catch (CloneNotSupportedException ex) {
-      b = new AlgVector(n);
-    }
+    AlgVector b = null;
+
+    if (m_Elements != null) {
+      int n = m_Elements.length;
+       try {
+	b = (AlgVector)clone();
+      } catch (CloneNotSupportedException ex) {
+	b = new AlgVector(n);
+      }
     
-    for(int i = 0; i < n; i++) {
-      b.m_Elements[i] = m_Elements[i] + other.m_Elements[i];
+      for(int i = 0; i < n; i++) {
+	b.m_Elements[i] = m_Elements[i] + other.m_Elements[i];
+      }
     }
     
     return b;
@@ -319,7 +299,6 @@ public class AlgVector implements Cloneable, Serializable {
     
     return b;
   }
-  
  
   /**
    * Returns the inner (or dot) product of two vectors
@@ -329,12 +308,15 @@ public class AlgVector implements Cloneable, Serializable {
    */
   public final double dotMultiply(AlgVector b) {
    
-    int n = m_Elements.length;
-    int bn = b.m_Elements.length;
     double sum = 0.0;
-
-    for(int i = 0; i < n; i++) {
-      sum += m_Elements[i] * b.m_Elements[i];
+ 
+    if (m_Elements != null) {
+      int n = m_Elements.length;
+      int bn = b.m_Elements.length;
+      
+      for(int i = 0; i < n; i++) {
+	sum += m_Elements[i] * b.m_Elements[i];
+      }
     }
     
     return sum;
@@ -347,10 +329,12 @@ public class AlgVector implements Cloneable, Serializable {
    */
   public final void scalarMultiply(double s) {
    
-    int n = m_Elements.length;
-
-    for(int i = 0; i < n; i++) {
-      m_Elements[i] = s * m_Elements[i];
+    if (m_Elements != null) {
+      int n = m_Elements.length;
+      
+      for(int i = 0; i < n; i++) {
+	m_Elements[i] = s * m_Elements[i];
+      }
     }
   }
 
@@ -374,13 +358,16 @@ public class AlgVector implements Cloneable, Serializable {
    */
   public double norm() {
    
-    int n = m_Elements.length;
-    double sum = 0.0;
-    
-    for(int i = 0; i < n; i++) {
-      sum += m_Elements[i] * m_Elements[i];
-    }
+    if (m_Elements != null) {
+      int n = m_Elements.length;
+      double sum = 0.0;
+      
+      for(int i = 0; i < n; i++) {
+	sum += m_Elements[i] * m_Elements[i];
+      }
     return Math.pow(sum, 0.5);
+    }
+    else return 0.0;
   }
 
   /**
@@ -392,8 +379,6 @@ public class AlgVector implements Cloneable, Serializable {
     double len = this.norm();
     this.scalarMultiply(1 / len);
   }
-
-
 
   /**
    * Main method for testing this class.
@@ -411,6 +396,4 @@ public class AlgVector implements Cloneable, Serializable {
     }
   }
 }
-
-
 
