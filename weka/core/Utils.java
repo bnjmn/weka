@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.49 $
+ * @version $Revision: 1.50 $
  */
 public final class Utils {
 
@@ -1186,6 +1186,24 @@ public final class Utils {
 
     return result;
   } 
+
+  /**
+   * Returns the log-odds for a given probabilitiy.
+   *
+   * @param prob the probabilitiy
+   *
+   * @return the log-odds after the probability has been mapped to
+   * [Utils.SMALL, 1-Utils.SMALL]
+   */
+  public static /*@pure@*/ double probToLogOdds(double prob) {
+
+    if ((prob > 1) || (prob < 0)) {
+      throw new IllegalArgumentException("probToLogOdds: probability must " +
+				     "be in [0,1]");
+    }
+    double p = SMALL + (1.0 - 2 * SMALL) * prob;
+    return Math.log(p / (1 - p));
+  }
 
   /**
    * Rounds a double to the next nearest integer value. The JDK version
