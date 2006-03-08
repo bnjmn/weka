@@ -27,7 +27,6 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
-import weka.core.AttributeStats;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -49,33 +48,59 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for handling multi-class datasets with 2-class distribution
- * classifiers.<p>
+ <!-- globalinfo-start -->
+ * A metaclassifier for handling multi-class datasets with 2-class classifiers. This classifier is also capable of applying error correcting output codes for increased accuracy.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -M num <br>
- * Sets the method to use. Valid values are 0 (1-against-all),
- * 1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0) <p>
- *
- * -R num <br>
- * Sets the multiplier when using random codes. (default 2.0)<p>
- *
- * -W classname <br>
- * Specify the full class name of a classifier as the basis for 
- * the multi-class classifier (required).<p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  Sets the method to use. Valid values are 0 (1-against-all),
+ *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
+ * </pre>
+ * 
+ * <pre> -R &lt;num&gt;
+ *  Sets the multiplier when using random codes. (default 2.0)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.functions.Logistic)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.functions.Logistic:
+ * </pre>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -R &lt;ridge&gt;
+ *  Set the ridge in the log-likelihood.</pre>
+ * 
+ * <pre> -M &lt;number&gt;
+ *  Set the maximum number of iterations (default -1, until convergence).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
-public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer 
+public class MultiClassClassifier 
+  extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -3879602011542849141L;
   
   /** The classifiers. */
@@ -102,11 +127,15 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
   /** The multiclass method to use */
   private int m_Method = METHOD_1_AGAINST_ALL;
 
-  /** The error correction modes */
+  /** 1-against-all */
   public static final int METHOD_1_AGAINST_ALL    = 0;
+  /** random correction code */
   public static final int METHOD_ERROR_RANDOM     = 1;
+  /** exhaustive correction code */
   public static final int METHOD_ERROR_EXHAUSTIVE = 2;
+  /** 1-against-1 */
   public static final int METHOD_1_AGAINST_1      = 3;
+  /** The error correction modes */
   public static final Tag [] TAGS_METHOD = {
     new Tag(METHOD_1_AGAINST_ALL, "1-against-all"),
     new Tag(METHOD_ERROR_RANDOM, "Random correction code"),
@@ -124,15 +153,23 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
     return "weka.classifiers.functions.Logistic";
   }
 
-  /** Interface for the code constructors */
-  private abstract class Code implements Serializable {
+  /** 
+   * Interface for the code constructors 
+   */
+  private abstract class Code 
+    implements Serializable {
 
+    /** for serialization */
+    static final long serialVersionUID = 418095077487120846L;
+    
     /**
      * Subclasses must allocate and fill these. 
      * First dimension is number of codes.
@@ -140,7 +177,10 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
      */
     protected boolean [][]m_Codebits;
 
-    /** Returns the number of codes. */
+    /** 
+     * Returns the number of codes. 
+     * @return the number of codes
+     */
     public int size() {
       return m_Codebits.length;
     }
@@ -148,6 +188,9 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
     /** 
      * Returns the indices of the values set to true for this code, 
      * using 1-based indexing (for input to Range).
+     * 
+     * @param which the index
+     * @return the 1-based indices
      */
     public String getIndices(int which) {
       StringBuffer sb = new StringBuffer();
@@ -162,7 +205,10 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
       return sb.toString();
     }
 
-    /** Returns a human-readable representation of the codes. */
+    /** 
+     * Returns a human-readable representation of the codes. 
+     * @return a string representation of the codes
+     */
     public String toString() {
       StringBuffer sb = new StringBuffer();
       for(int i = 0; i < m_Codebits[0].length; i++) {
@@ -175,8 +221,20 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
     }
   }
 
-  /** Constructs a code with no error correction */
-  private class StandardCode extends Code {
+  /** 
+   * Constructs a code with no error correction 
+   */
+  private class StandardCode 
+    extends Code {
+    
+    /** for serialization */
+    static final long serialVersionUID = 3707829689461467358L;
+    
+    /**
+     * constructor
+     * 
+     * @param numClasses the number of classes
+     */
     public StandardCode(int numClasses) {
       m_Codebits = new boolean[numClasses][numClasses];
       for (int i = 0; i < numClasses; i++) {
@@ -186,9 +244,25 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
     }
   }
 
-  /** Constructs a random code assignment */
-  private class RandomCode extends Code {
+  /** 
+   * Constructs a random code assignment 
+   */
+  private class RandomCode 
+    extends Code {
+
+    /** for serialization */
+    static final long serialVersionUID = 4413410540703926563L;
+    
+    /** random number generator */
     Random r = null;
+   
+    /**
+     * constructor
+     * 
+     * @param numClasses the number of classes
+     * @param numCodes the number of codes
+     * @param data the data to use
+     */
     public RandomCode(int numClasses, int numCodes, Instances data) {
       r = data.getRandomNumberGenerator(m_Seed);
       numCodes = Math.max(2, numCodes); // Need at least two classes
@@ -230,6 +304,9 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
       return true;
     }
 
+    /**
+     * randomizes
+     */
     private void randomize() {
       for (int i = 0; i < m_Codebits.length; i++) {
         for (int j = 0; j < m_Codebits[i].length; j++) {
@@ -240,7 +317,7 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
     }
   }
 
-  /**
+  /*
    * TODO: Constructs codes as per:
    * Bose, R.C., Ray Chaudhuri (1960), On a class of error-correcting
    * binary group codes, Information and Control, 3, 68-79.
@@ -249,7 +326,17 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
   //private class BCHCode extends Code {...}
 
   /** Constructs an exhaustive code assignment */
-  private class ExhaustiveCode extends Code {
+  private class ExhaustiveCode 
+    extends Code {
+
+    /** for serialization */
+    static final long serialVersionUID = 8090991039670804047L;
+    
+    /**
+     * constructor
+     * 
+     * @param numClasses the number of classes
+     */
     public ExhaustiveCode(int numClasses) {
       int width = (int)Math.pow(2, numClasses - 1) - 1;
       m_Codebits = new boolean[width][numClasses];
@@ -276,6 +363,7 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     
     return result;
@@ -285,7 +373,7 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
    * Builds the classifiers.
    *
    * @param insts the training data.
-   * @exception Exception if a classifier can't be built
+   * @throws Exception if a classifier can't be built
    */
   public void buildClassifier(Instances insts) throws Exception {
 
@@ -338,7 +426,6 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
 	classFilter.setModifyHeader(true);
 	classFilter.setInvertSelection(true);
 	classFilter.setNominalIndicesArr((int[])pairs.elementAt(i));
-	int[] pair = (int[])pairs.elementAt(i);
 	Instances tempInstances = new Instances(insts, 0);
 	tempInstances.setClassIndex(-1);
 	classFilter.setInputFormat(tempInstances);
@@ -385,7 +472,6 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
       numClassifiers = code.size();
       m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new MakeIndicator[numClassifiers];
-      AttributeStats classStats = insts.attributeStats(insts.classIndex());
       for (int i = 0; i < m_Classifiers.length; i++) {
 	m_ClassFilters[i] = new MakeIndicator();
 	MakeIndicator classFilter = (MakeIndicator) m_ClassFilters[i];
@@ -406,7 +492,9 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
    * Returns the probability for the second "class" predicted
    * by each base classifier.
    *
-   * @exception Exception if the predictions can't be computed successfully
+   * @param inst the instance to get the prediction for
+   * @return the individual predictions
+   * @throws Exception if the predictions can't be computed successfully
    */
   public double[] individualPredictions(Instance inst) throws Exception {
     
@@ -438,7 +526,9 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
   /**
    * Returns the distribution for an instance.
    *
-   * @exception Exception if the distribution can't be computed successfully
+   * @param inst the instance to get the distribution for
+   * @return the distribution
+   * @throws Exception if the distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
     
@@ -489,6 +579,8 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
 
   /**
    * Prints the classifiers.
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -530,7 +622,6 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
   public Enumeration listOptions()  {
 
     Vector vec = new Vector(3);
-    Object c;
     
     vec.addElement(new Option(
        "\tSets the method to use. Valid values are 0 (1-against-all),\n"
@@ -548,24 +639,48 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -M num <br>
-   * Sets the method to use. Valid values are 0 (1-against-all),
-   * 1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0) <p>
-   *
-   * -R num <br>
-   * Sets the multiplier when using random codes. (default 2.0)<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a learner as the basis for 
-   * the multiclassclassifier (required).<p>
-   *
-   * -S seed <br>
-   * Random number seed (default 1).<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M &lt;num&gt;
+   *  Sets the method to use. Valid values are 0 (1-against-all),
+   *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
+   * </pre>
+   * 
+   * <pre> -R &lt;num&gt;
+   *  Sets the multiplier when using random codes. (default 2.0)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.functions.Logistic)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.functions.Logistic:
+   * </pre>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -R &lt;ridge&gt;
+   *  Set the ridge in the log-likelihood.</pre>
+   * 
+   * <pre> -M &lt;number&gt;
+   *  Set the maximum number of iterations (default -1, until convergence).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
   
@@ -711,4 +826,3 @@ public class MultiClassClassifier extends RandomizableSingleClassifierEnhancer
     }
   }
 }
-
