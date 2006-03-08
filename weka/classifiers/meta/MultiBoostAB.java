@@ -28,9 +28,10 @@
  *    representative cross-section of UCI data sets. It offers the
  *    further advantage over AdaBoost of suiting parallel execution.
  *    
- *    For more info refer to : G. Webb, (2000). <i>MultiBoosting: A
- *    Technique for Combining Boosting and Wagging.</i> Machine
- *    Learning, 40(2): 159-196.  
+ *    For more info refer to :
+ <!-- technical-plaintext-start -->
+ * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40, No.2.
+ <!-- technical-plaintext-end -->
  *
  *    Originally based on AdaBoostM1.java
  *    
@@ -48,6 +49,10 @@ package weka.classifiers.meta;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -55,57 +60,85 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for boosting a classifier using the MultiBoosting method.<BR>
- * MultiBoosting is an extension to the highly successful AdaBoost
- * technique for forming decision committees. MultiBoosting can be
- * viewed as combining AdaBoost with wagging. It is able to harness
- * both AdaBoost's high bias and variance reduction with wagging's
- * superior variance reduction. Using C4.5 as the base learning
- * algorithm, Multi-boosting is demonstrated to produce decision
- * committees with lower error than either AdaBoost or wagging
- * significantly more often than the reverse over a large
- * representative cross-section of UCI data sets. It offers the
- * further advantage over AdaBoost of suiting parallel execution.<BR>
- * For more information, see<p>
+ <!-- globalinfo-start -->
+ * Class for boosting a classifier using the MultiBoosting method.<br/>
+ * <br/>
+ * MultiBoosting is an extension to the highly successful AdaBoost technique for forming decision committees. MultiBoosting can be viewed as combining AdaBoost with wagging. It is able to harness both AdaBoost's high bias and variance reduction with wagging's superior variance reduction. Using C4.5 as the base learning algorithm, Multi-boosting is demonstrated to produce decision committees with lower error than either AdaBoost or wagging significantly more often than the reverse over a large representative cross-section of UCI data sets. It offers the further advantage over AdaBoost of suiting parallel execution.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40, No.2.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Geoffrey I. Webb (2000). <i>MultiBoosting: A Technique for
- * Combining Boosting and Wagging</i>.  Machine Learning, 40(2):
- * 159-196, Kluwer Academic Publishers, Boston<BR><BR>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Webb2000,
+ *    address = {Boston},
+ *    author = {Geoffrey I. Webb},
+ *    journal = {Machine Learning},
+ *    number = {No.2},
+ *    publisher = {Kluwer Academic Publishers},
+ *    title = {MultiBoosting: A Technique for Combining Boosting and Wagging},
+ *    volume = {Vol.40},
+ *    year = {2000}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -D <br>
- * Turn on debugging output.<p>
- *
- * -W classname <br>
- * Specify the full class name of a classifier as the basis for
- * boosting (required).<p>
- *
- * -I num <br>
- * Set the number of boost iterations (default 10). <p>
- *
- * -P num <br>
- * Set the percentage of weight mass used to build classifiers
- * (default 100). <p>
- *
- * -Q <br>
- * Use resampling instead of reweighting.<p>
- *
- * -S seed <br>
- * Random number seed for resampling (default 1). <p>
- *
- * -C subcommittees <br>
- * Number of sub-committees. (Default 3), <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  Number of sub-committees. (Default 10)</pre>
+ * 
+ * <pre> -P &lt;num&gt;
+ *  Percentage of weight mass to base training on.
+ *  (default 100, reduce to around 90 speed up)</pre>
+ * 
+ * <pre> -Q
+ *  Use resampling for boosting.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  Number of iterations.
+ *  (default 10)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.DecisionStump:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
-`*/
-public class MultiBoostAB extends AdaBoostM1 {
+ * @version $Revision: 1.10 $ 
+ */
+public class MultiBoostAB 
+  extends AdaBoostM1
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -6681619178187935148L;
   
   /** The number of sub-committees to use */
@@ -131,11 +164,32 @@ public class MultiBoostAB extends AdaBoostM1 {
       + "committees with lower error than either AdaBoost or wagging "
       + "significantly more often than the reverse over a large "
       + "representative cross-section of UCI data sets. It offers the "
-      + "further advantage over AdaBoost of suiting parallel execution. "
+      + "further advantage over AdaBoost of suiting parallel execution.\n\n"
       + "For more information, see\n\n"
-      + "Geoffrey I. Webb (2000). \"MultiBoosting: A Technique for "
-      + "Combining Boosting and Wagging\".  Machine Learning, 40(2): "
-      + "159-196, Kluwer Academic Publishers, Boston";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Geoffrey I. Webb");
+    result.setValue(Field.YEAR, "2000");
+    result.setValue(Field.TITLE, "MultiBoosting: A Technique for Combining Boosting and Wagging");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.40");
+    result.setValue(Field.NUMBER, "No.2");
+    result.setValue(Field.PUBLISHER, "Kluwer Academic Publishers");
+    result.setValue(Field.ADDRESS, "Boston");
+    
+    return result;
   }
 
   /**
@@ -158,35 +212,51 @@ public class MultiBoostAB extends AdaBoostM1 {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a classifier as the basis for
-   * boosting (required).<p>
-   *
-   * -I num <br>
-   * Set the number of boost iterations (default 10). <p>
-   *
-   * -P num <br>
-   * Set the percentage of weight mass used to build classifiers
-   * (default 100). <p>
-   *
-   * -Q <br>
-   * Use resampling instead of reweighting.<p>
-   *
-   * -S seed <br>
-   * Random number seed for resampling (default 1).<p>
-   *
-   * -C subcommittees <br>
-   * Number of sub-committees. (Default 3), <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  Number of sub-committees. (Default 10)</pre>
+   * 
+   * <pre> -P &lt;num&gt;
+   *  Percentage of weight mass to base training on.
+   *  (default 100, reduce to around 90 speed up)</pre>
+   * 
+   * <pre> -Q
+   *  Use resampling for boosting.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  Number of iterations.
+   *  (default 10)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.DecisionStump:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -227,7 +297,7 @@ public class MultiBoostAB extends AdaBoostM1 {
   /**
    * Set the number of sub committees to use
    *
-   * @param seed the seed for resampling
+   * @param subc the number of sub committees
    */
   public void setNumSubCmtys(int subc) {
 
@@ -246,6 +316,9 @@ public class MultiBoostAB extends AdaBoostM1 {
 
   /**
    * Method for building this classifier.
+   * 
+   * @param training the data to train with
+   * @throws Exception if the training fails
    */
   public void buildClassifier(Instances training) throws Exception {
 
@@ -258,6 +331,10 @@ public class MultiBoostAB extends AdaBoostM1 {
 
   /**
    * Sets the weights for the next iteration.
+   * 
+   * @param training the data to train with
+   * @param reweight the reweighting factor
+   * @throws Exception in case of an error
    */
   protected void setWeights(Instances training, double reweight) 
     throws Exception {

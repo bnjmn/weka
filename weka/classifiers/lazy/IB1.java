@@ -28,29 +28,59 @@ import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 
-
 /**
- * IB1-type classifier. Uses a simple distance measure to find the training
- * instance closest to the given test instance, and predicts the same class
- * as this training instance. If multiple instances are
- * the same (smallest) distance to the test instance, the first one found is
- * used.  For more information, see <p>
+ <!-- globalinfo-start -->
+ * Nearest-neighbour classifier. Uses normalized Euclidean distance to find the training instance closest to the given test instance, and predicts the same class as this training instance. If multiple instances have the same (smallest) distance to the test instance, the first one found is used.<br/>
+ * <br/>
+ * For more information, see <br/>
+ * <br/>
+ * D. Aha, D. Kibler (1991). Instance-based learning algorithms. Machine Learning. Vol.6, pp. 37-66.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
- * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Aha1991,
+ *    author = {D. Aha and D. Kibler},
+ *    journal = {Machine Learning},
+ *    pages = {pp. 37-66},
+ *    title = {Instance-based learning algorithms},
+ *    volume = {Vol.6},
+ *    year = {1991}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class IB1 extends Classifier implements UpdateableClassifier {
+public class IB1 
+  extends Classifier 
+  implements UpdateableClassifier, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -6152184127304895851L;
   
   /** The training instances used for classification. */
@@ -73,9 +103,30 @@ public class IB1 extends Classifier implements UpdateableClassifier {
       + "find the training instance closest to the given test instance, and predicts "
       + "the same class as this training instance. If multiple instances have "
       + "the same (smallest) distance to the test instance, the first one found is "
-      + "used.  For more information, see \n\n"
-      + "Aha, D., and D. Kibler (1991) \"Instance-based learning algorithms\", "
-      + "Machine Learning, vol.6, pp. 37-66.";
+      + "used.\n\n"
+      + "For more information, see \n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "D. Aha and D. Kibler");
+    result.setValue(Field.YEAR, "1991");
+    result.setValue(Field.TITLE, "Instance-based learning algorithms");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.6");
+    result.setValue(Field.PAGES, "pp. 37-66");
+    
+    return result;
   }
 
   /**
@@ -106,7 +157,7 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     
@@ -134,7 +185,7 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    * Updates the classifier.
    *
    * @param instance the instance to be put into the classifier
-   * @exception Exception if the instance could not be included successfully
+   * @throws Exception if the instance could not be included successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
   
@@ -153,7 +204,7 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    *
    * @param instance the instance to be classified
    * @return the predicted class for the instance 
-   * @exception Exception if the instance can't be classified
+   * @throws Exception if the instance can't be classified
    */
   public double classifyInstance(Instance instance) throws Exception {
     
@@ -241,6 +292,7 @@ public class IB1 extends Classifier implements UpdateableClassifier {
    *
    * @param x the value to be normalized
    * @param i the attribute's index
+   * @return the normalized value
    */
   private double norm(double x,int i) {
 
@@ -293,7 +345,3 @@ public class IB1 extends Classifier implements UpdateableClassifier {
     }
   }
 }
-
-
-
-

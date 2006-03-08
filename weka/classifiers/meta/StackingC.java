@@ -29,6 +29,10 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
@@ -37,61 +41,76 @@ import weka.filters.unsupervised.attribute.Remove;
 import java.util.Random;
 
 /**
- * Implements StackingC (more efficient version of stacking). For more information, see<p>
+ <!-- globalinfo-start -->
+ * Implements StackingC (more efficient version of stacking).<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * A.K. Seewald: How to Make Stacking Better and Faster While Also Taking Care of an Unknown Weakness. In: Nineteenth International Conference on Machine Learning, 554-561, 2002.<br/>
+ * <br/>
+ * Note: requires meta classifier to be a numeric prediction scheme.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- *  Seewald A.K.: <i>How to Make Stacking Better and Faster While Also Taking Care
- *  of an Unknown Weakness</i>, in Sammut C., Hoffmann A. (eds.), Proceedings of the
- *  Nineteenth International Conference on Machine Learning (ICML 2002), Morgan
- *  Kaufmann Publishers, pp.554-561, 2002.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Seewald2002,
+ *    author = {A.K. Seewald},
+ *    booktitle = {Nineteenth International Conference on Machine Learning},
+ *    editor = {C. Sammut and A. Hoffmann},
+ *    pages = {554-561},
+ *    publisher = {Morgan Kaufmann Publishers},
+ *    title = {How to Make Stacking Better and Faster While Also Taking Care of an Unknown Weakness},
+ *    year = {2002}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -X num_folds <br>
- * The number of folds for the cross-validation (default 10).<p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
- *
- * -B classifierstring <br>
- * Classifierstring should contain the full class name of a base scheme
- * followed by options to the classifier.
- * (required, option should be used once for each classifier).<p>
- *
- * -M classifierstring <br>
- * Classifierstring for the meta classifier. Same format as for base
- * classifiers. Has to be a numeric prediction scheme, defaults to Linear
- * Regression as in the original paper.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;scheme specification&gt;
+ *  Full name of meta classifier, followed by options.
+ *  Must be a numeric prediction scheme. Default: Linear Regression.</pre>
+ * 
+ * <pre> -X &lt;number of folds&gt;
+ *  Sets the number of cross-validation folds.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -B &lt;classifier specification&gt;
+ *  Full class name of classifier to include, followed
+ *  by scheme options. May be specified multiple times.
+ *  (default: "weka.classifiers.rules.ZeroR")</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
-public class StackingC extends Stacking implements OptionHandler {
+public class StackingC 
+  extends Stacking 
+  implements OptionHandler, TechnicalInformationHandler {
   
+  /** for serialization */
   static final long serialVersionUID = -6717545616603725198L;
   
   /** The meta classifiers (one for each class, like in ClassificationViaRegression) */
   protected Classifier [] m_MetaClassifiers = null;
   
-  /** Filters to transform metaData */
+  /** Filter to transform metaData - Remove */
   protected Remove m_attrFilter = null;
+  /** Filter to transform metaData - MakeIndicator */
   protected MakeIndicator m_makeIndicatorFilter = null;
-      
-  /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-
-    return  "Implements StackingC (more efficient version of stacking). For more "
-      + "information, see\n\n"
-      + "Seewald A.K.: \"How to Make Stacking Better and Faster While Also Taking Care "
-      + "of an Unknown Weakness\", in Sammut C., Hoffmann A. (eds.), Proceedings of the "
-      + "Nineteenth International Conference on Machine Learning (ICML 2002), Morgan "
-      + "Kaufmann Publishers, pp.554-561, 2002.\n\n" 
-      + "Note: requires meta classifier to be a numeric prediction scheme.";
-  }
 
   /**
    * The constructor.
@@ -102,9 +121,46 @@ public class StackingC extends Stacking implements OptionHandler {
       setAttributeSelectionMethod(new 
 	weka.core.SelectedTag(1, LinearRegression.TAGS_SELECTION));
   }  
+      
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Implements StackingC (more efficient version of stacking).\n\n"
+      + "For more information, see\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
+      + "Note: requires meta classifier to be a numeric prediction scheme.";
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "A.K. Seewald");
+    result.setValue(Field.TITLE, "How to Make Stacking Better and Faster While Also Taking Care of an Unknown Weakness");
+    result.setValue(Field.BOOKTITLE, "Nineteenth International Conference on Machine Learning");
+    result.setValue(Field.EDITOR, "C. Sammut and A. Hoffmann");
+    result.setValue(Field.YEAR, "2002");
+    result.setValue(Field.PAGES, "554-561");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
+    
+    return result;
+  }
 
   /**
    * String describing option for setting meta classifier
+   * 
+   * @return string describing the option
    */
   protected String metaOption() {
 
@@ -114,6 +170,9 @@ public class StackingC extends Stacking implements OptionHandler {
 
   /**
    * Process options setting meta classifier.
+   * 
+   * @param options the meta options to parse
+   * @throws Exception if parsing fails
    */
   protected void processMetaOptions(String[] options) throws Exception {
 
@@ -132,6 +191,10 @@ public class StackingC extends Stacking implements OptionHandler {
 
   /**
    * Method that builds meta level.
+   * 
+   * @param newData the data to work with
+   * @param random the random number generator to use for cross-validation
+   * @throws Exception if generation fails
    */
   protected void generateMetaLevel(Instances newData, Random random) 
     throws Exception {
@@ -186,7 +249,8 @@ public class StackingC extends Stacking implements OptionHandler {
    * Classifies a given instance using the stacked classifier.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the distribution
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
@@ -229,6 +293,8 @@ public class StackingC extends Stacking implements OptionHandler {
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -263,5 +329,3 @@ public class StackingC extends Stacking implements OptionHandler {
     }
   }
 }
-
-

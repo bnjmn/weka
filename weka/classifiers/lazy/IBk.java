@@ -35,6 +35,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -42,64 +46,77 @@ import weka.core.Capabilities.Capability;
 import java.util.Enumeration;
 import java.util.Vector;
 
-
 /**
- * <i>K</i>-nearest neighbours classifier. For more information, see <p>
+ <!-- globalinfo-start -->
+ * K-nearest neighbours classifier. Can select appropriate value of K based on cross-validation. Can also do distance weighting.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * D. Aha, D. Kibler (1991). Instance-based learning algorithms. Machine Learning. Vol.6, pp. 37-66.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Aha, D., and D. Kibler (1991) "Instance-based learning algorithms",
- * <i>Machine Learning</i>, vol.6, pp. 37-66.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Aha1991,
+ *    author = {D. Aha and D. Kibler},
+ *    journal = {Machine Learning},
+ *    pages = {pp. 37-66},
+ *    title = {Instance-based learning algorithms},
+ *    volume = {Vol.6},
+ *    year = {1991}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -K num <br>
- * Set the number of nearest neighbors to use in prediction
- * (default 1) <p>
- *
- * -W num <br>
- * Set a fixed window size for incremental train/testing. As
- * new training instances are added, oldest instances are removed
- * to maintain the number of training instances at this size.
- * (default no window) <p>
- *
- * -I <br>
- * Neighbors will be weighted by the inverse of their distance
- * when voting. (default equal weighting) <p>
- *
- * -F <br>
- * Neighbors will be weighted by their similarity when voting.
- * (default equal weighting) <p>
- *
- * -X <br>
- * Select the number of neighbors to use by hold-one-out cross
- * validation, with an upper limit given by the -K option. <p>
- *
- * -E <br>
- * When k is selected by cross-validation for numeric class attributes,
- * minimize mean-squared error. (default mean absolute error) <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -I
+ *  Weight neighbours by the inverse of their distance
+ *  (use when k &gt; 1)</pre>
+ * 
+ * <pre> -F
+ *  Weight neighbours by 1 - their distance
+ *  (use when k &gt; 1)</pre>
+ * 
+ * <pre> -K &lt;number of neighbors&gt;
+ *  Number of nearest neighbours (k) used in classification.
+ *  (Default = 1)</pre>
+ * 
+ * <pre> -E
+ *  Minimise mean squared error rather than mean absolute
+ *  error when using -X option with numeric prediction.</pre>
+ * 
+ * <pre> -W &lt;window size&gt;
+ *  Maximum number of training instances maintained.
+ *  Training instances are dropped FIFO. (Default = no window)</pre>
+ * 
+ * <pre> -X
+ *  Select the number of nearest neighbours between 1
+ *  and the k value specified using hold-one-out evaluation
+ *  on the training data (use when k &gt; 1)</pre>
+ * 
+ * <pre> -A
+ *  The nearest neighbour search algorithm to use (default: LinearNN).
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
-public class IBk extends Classifier implements
-  OptionHandler, UpdateableClassifier, WeightedInstancesHandler {
+public class IBk 
+  extends Classifier 
+  implements OptionHandler, UpdateableClassifier, WeightedInstancesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialiation */
   static final long serialVersionUID = -3080186098777067172L;
-  
-  /**
-   * Returns a string describing classifier
-   * @return a description suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String globalInfo() {
-
-    return  "K-nearest neighbours classifier. Can "
-      + "select appropriate value of K based on cross-validation. Can also do "
-      + "distance weighting. For more information, see\n\n"
-      + "Aha, D., and D. Kibler (1991) \"Instance-based learning algorithms\", "
-      + "Machine Learning, vol.6, pp. 37-66.";
-  }
 
   /** The training instances used for classification. */
   protected Instances m_Train;
@@ -145,16 +162,20 @@ public class IBk extends Classifier implements
    */
   protected boolean m_MeanSquared;
 
-  /* Define possible instance weighting methods */
+  /** no weighting */
   public static final int WEIGHT_NONE = 1;
+  /** weight by 1/distance */
   public static final int WEIGHT_INVERSE = 2;
+  /** weight by 1-distance */
   public static final int WEIGHT_SIMILARITY = 4;
+  /** possible instance weighting methods */
   public static final Tag [] TAGS_WEIGHTING = {
     new Tag(WEIGHT_NONE, "No distance weighting"),
     new Tag(WEIGHT_INVERSE, "Weight by 1/distance"),
     new Tag(WEIGHT_SIMILARITY, "Weight by 1-distance")
   };
   
+  /** for nearest-neighbor search */
   protected NearestNeighbourSearch m_NNSearch = new LinearNN();
 
   /** The number of attributes the contribute to a prediction */
@@ -180,6 +201,41 @@ public class IBk extends Classifier implements
   public IBk() {
 
     init();
+  }
+  
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "K-nearest neighbours classifier. Can "
+      + "select appropriate value of K based on cross-validation. Can also do "
+      + "distance weighting.\n\n"
+      + "For more information, see\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "D. Aha and D. Kibler");
+    result.setValue(Field.YEAR, "1991");
+    result.setValue(Field.TITLE, "Instance-based learning algorithms");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.6");
+    result.setValue(Field.PAGES, "pp. 37-66");
+    
+    return result;
   }
 
   /**
@@ -275,7 +331,7 @@ public class IBk extends Classifier implements
    * Sets the distance weighting method used. Values other than
    * WEIGHT_NONE, WEIGHT_INVERSE, or WEIGHT_SIMILARITY will be ignored.
    *
-   * @param newDistanceWeighting the distance weighting method to use
+   * @param newMethod the distance weighting method to use
    */
   public void setDistanceWeighting(SelectedTag newMethod) {
     
@@ -378,6 +434,8 @@ public class IBk extends Classifier implements
    
   /**
    * Get the number of training instances the classifier is currently using
+   * 
+   * @return the number of training instances the classifier is currently using
    */
   public int getNumTraining() {
 
@@ -414,7 +472,7 @@ public class IBk extends Classifier implements
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -454,7 +512,7 @@ public class IBk extends Classifier implements
    * Adds the supplied instance to the training set
    *
    * @param instance the instance to add
-   * @exception Exception if instance could not be incorporated
+   * @throws Exception if instance could not be incorporated
    * successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
@@ -486,7 +544,7 @@ public class IBk extends Classifier implements
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if an error occurred during the prediction
+   * @throws Exception if an error occurred during the prediction
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
 
@@ -572,36 +630,44 @@ public class IBk extends Classifier implements
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -K num <br>
-   * Set the number of nearest neighbors to use in prediction
-   * (default 1) <p>
-   *
-   * -W num <br>
-   * Set a fixed window size for incremental train/testing. As
-   * new training instances are added, oldest instances are removed
-   * to maintain the number of training instances at this size.
-   * (default no window) <p>
-   *
-   * -I <br>
-   * Neighbors will be weighted by the inverse of their distance
-   * when voting. (default equal weighting) <p>
-   *
-   * -F <br>
-   * Neighbors will be weighted by their similarity when voting.
-   * (default equal weighting) <p>
-   *
-   * -X <br>
-   * Select the number of neighbors to use by hold-one-out cross
-   * validation, with an upper limit given by the -K option. <p>
-   *
-   * -E <br>
-   * When k is selected by cross-validation for numeric class attributes,
-   * minimize mean-squared error. (default mean absolute error) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -I
+   *  Weight neighbours by the inverse of their distance
+   *  (use when k &gt; 1)</pre>
+   * 
+   * <pre> -F
+   *  Weight neighbours by 1 - their distance
+   *  (use when k &gt; 1)</pre>
+   * 
+   * <pre> -K &lt;number of neighbors&gt;
+   *  Number of nearest neighbours (k) used in classification.
+   *  (Default = 1)</pre>
+   * 
+   * <pre> -E
+   *  Minimise mean squared error rather than mean absolute
+   *  error when using -X option with numeric prediction.</pre>
+   * 
+   * <pre> -W &lt;window size&gt;
+   *  Maximum number of training instances maintained.
+   *  Training instances are dropped FIFO. (Default = no window)</pre>
+   * 
+   * <pre> -X
+   *  Select the number of nearest neighbours between 1
+   *  and the k value specified using hold-one-out evaluation
+   *  on the training data (use when k &gt; 1)</pre>
+   * 
+   * <pre> -A
+   *  The nearest neighbour search algorithm to use (default: LinearNN).
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -732,8 +798,10 @@ public class IBk extends Classifier implements
   /**
    * Turn the list of nearest neighbors into a probability distribution
    *
-   * @param neighborlist the list of nearest neighboring instances
+   * @param neighbours the list of nearest neighboring instances
+   * @param distances the distances of the neighbors
    * @return the probability distribution
+   * @throws Exception if computation goes wrong or has no class attribute
    */
   protected double [] makeDistribution(Instances neighbours, double[] distances)
     throws Exception {
@@ -945,6 +1013,4 @@ public class IBk extends Classifier implements
       System.err.println(e.getMessage());
     }
   }
-  
-  
 }

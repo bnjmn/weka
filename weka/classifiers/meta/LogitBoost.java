@@ -31,6 +31,10 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -40,62 +44,93 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for performing additive logistic regression..
- * This class performs classification using a regression scheme as the 
- * base learner, and can handle multi-class problems.  For more
- * information, see<p>
+ <!-- globalinfo-start -->
+ * Class for performing additive logistic regression. <br/>
+ * This class performs classification using a regression scheme as the base learner, and can handle multi-class problems.  For more information, see<br/>
+ * <br/>
+ * J. Friedman, T. Hastie, R. Tibshirani (1998). Additive Logistic Regression: a Statistical View of Boosting. Stanford University. URL http://www-stat.stanford.edu/~jhf/ftp/boost.ps.<br/>
+ * <br/>
+ * Can do efficient internal cross-validation to determine appropriate number of iterations.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;techreport{Friedman1998,
+ *    address = {Stanford University},
+ *    author = {J. Friedman and T. Hastie and R. Tibshirani},
+ *    title = {Additive Logistic Regression: a Statistical View of Boosting},
+ *    year = {1998},
+ *    URL = {http://www-stat.stanford.edu/~jhf/ftp/boost.ps}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * Friedman, J., T. Hastie and R. Tibshirani (1998) <i>Additive Logistic
- * Regression: a Statistical View of Boosting</i> 
- * <a href="http://www-stat.stanford.edu/~jhf/ftp/boost.ps">download 
- * postscript</a>. <p>
- *
- * Valid options are:<p>
- *
- * -D <br>
- * Turn on debugging output.<p>
- *
- * -W classname <br>
- * Specify the full class name of a weak learner as the basis for 
- * boosting (required).<p>
- *
- * -I num <br>
- * Set the number of boost iterations (default 10). <p>
- *
- * -Q <br>
- * Use resampling instead of reweighting.<p>
- *
- * -S seed <br>
- * Random number seed for resampling (default 1).<p>
- *
- * -P num <br>
- * Set the percentage of weight mass used to build classifiers
- * (default 100). <p>
- *
- * -F num <br>
- * Set number of folds for the internal cross-validation
- * (default 0 -- no cross-validation). <p>
- *
- * -R num <br>
- * Set number of runs for the internal cross-validation
- * (default 1). <p>
- *
- * -L num <br> 
- * Set the threshold for the improvement of the
- * average loglikelihood (default -Double.MAX_VALUE). <p>
- *
- * -H num <br> 
- * Set the value of the shrinkage parameter (default 1). <p>
+ * <pre> -Q
+ *  Use resampling instead of reweighting for boosting.</pre>
+ * 
+ * <pre> -P &lt;percent&gt;
+ *  Percentage of weight mass to base training on.
+ *  (default 100, reduce to around 90 speed up)</pre>
+ * 
+ * <pre> -F &lt;num&gt;
+ *  Number of folds for internal cross-validation.
+ *  (default 0 -- no cross-validation)</pre>
+ * 
+ * <pre> -R &lt;num&gt;
+ *  Number of runs for internal cross-validation.
+ *  (default 1)</pre>
+ * 
+ * <pre> -L &lt;num&gt;
+ *  Threshold on the improvement of the likelihood.
+ *  (default -Double.MAX_VALUE)</pre>
+ * 
+ * <pre> -H &lt;num&gt;
+ *  Shrinkage parameter.
+ *  (default 1)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  Number of iterations.
+ *  (default 10)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.DecisionStump:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated learner.<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
  */
-public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
-  implements Sourcable, WeightedInstancesHandler {
+public class LogitBoost 
+  extends RandomizableIteratedSingleClassifierEnhancer
+  implements Sourcable, WeightedInstancesHandler, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -3905660358715833753L;
   
   /** Array for storing the generated base classifiers. 
@@ -149,13 +184,11 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
    */
   public String globalInfo() {
 
-    return "Class for performing additive logistic regression. "
+    return "Class for performing additive logistic regression. \n"
       + "This class performs classification using a regression scheme as the "
       + "base learner, and can handle multi-class problems.  For more "
       + "information, see\n\n"
-      + "Friedman, J., T. Hastie and R. Tibshirani (1998) \"Additive Logistic "
-      + "Regression: a Statistical View of Boosting\". Technical report. " 
-      + "Stanford University.\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
       + "Can do efficient internal cross-validation to determine "
       + "appropriate number of iterations.";
   }
@@ -169,7 +202,29 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.TECHREPORT);
+    result.setValue(Field.AUTHOR, "J. Friedman and T. Hastie and R. Tibshirani");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.TITLE, "Additive Logistic Regression: a Statistical View of Boosting");
+    result.setValue(Field.ADDRESS, "Stanford University");
+    result.setValue(Field.URL, "http://www-stat.stanford.edu/~jhf/ftp/boost.ps");
+    
+    return result;
+  }
+
+  /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -228,7 +283,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     Vector newVector = new Vector(6);
 
     newVector.addElement(new Option(
-	      "\tUse resampling for boosting.",
+	      "\tUse resampling instead of reweighting for boosting.",
 	      "Q", 0, "-Q"));
     newVector.addElement(new Option(
 	      "\tPercentage of weight mass to base training on.\n"
@@ -260,47 +315,64 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
 
   /**
-   * Parses a given list of options. Valid options are:<p>
-   *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a weak learner as the basis for 
-   * boosting (required).<p>
-   *
-   * -I num <br>
-   * Set the number of boost iterations (default 10). <p>
-   *
-   * -Q <br>
-   * Use resampling instead of reweighting.<p>
-   *
-   * -S seed <br>
-   * Random number seed for resampling (default 1).<p>
-   *
-   * -P num <br>
-   * Set the percentage of weight mass used to build classifiers
-   * (default 100). <p>
-   *
-   * -F num <br>
-   * Set number of folds for the internal cross-validation
-   * (default 0 -- no cross-validation). <p>
-   *
-   * -R num <br>
-   * Set number of runs for the internal cross-validation
-   * (default 1. <p>
-   *
-   * -L num <br> 
-   * Set the threshold for the improvement of the
-   * average loglikelihood (default -Double.MAX_VALUE). <p>
-   *
-   * -H num <br> 
-   * Set the value of the shrinkage parameter (default 1). <p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -Q
+   *  Use resampling instead of reweighting for boosting.</pre>
+   * 
+   * <pre> -P &lt;percent&gt;
+   *  Percentage of weight mass to base training on.
+   *  (default 100, reduce to around 90 speed up)</pre>
+   * 
+   * <pre> -F &lt;num&gt;
+   *  Number of folds for internal cross-validation.
+   *  (default 0 -- no cross-validation)</pre>
+   * 
+   * <pre> -R &lt;num&gt;
+   *  Number of runs for internal cross-validation.
+   *  (default 1)</pre>
+   * 
+   * <pre> -L &lt;num&gt;
+   *  Threshold on the improvement of the likelihood.
+   *  (default -Double.MAX_VALUE)</pre>
+   * 
+   * <pre> -H &lt;num&gt;
+   *  Shrinkage parameter.
+   *  (default 1)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  Number of iterations.
+   *  (default 10)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.DecisionStump:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated learner.<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -511,7 +583,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Set resampling mode
    *
-   * @param resampling true if resampling should be done
+   * @param r true if resampling should be done
    */
   public void setUseResampling(boolean r) {
     
@@ -541,7 +613,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Set weight thresholding
    *
-   * @param thresholding the percentage of weight mass used for training
+   * @param threshold the percentage of weight mass used for training
    */
   public void setWeightThreshold(int threshold) {
 
@@ -568,6 +640,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     
     return result;
@@ -575,6 +648,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Builds the boosted classifier
+   * 
+   * @param data the data to train the classifier with
+   * @throws Exception if building fails, e.g., can't handle data
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -727,6 +803,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Gets the intial class probabilities.
+   * 
+   * @param numInstances the number of instances
+   * @return the initial class probabilities
    */
   private double[][] initialProbs(int numInstances) {
 
@@ -742,6 +821,10 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Computes loglikelihood given class values
    * and estimated probablities.
+   * 
+   * @param trainYs class values
+   * @param probs estimated probabilities
+   * @return the computed loglikelihood
    */
   private double logLikelihood(double[][] trainYs, double[][] probs) {
 
@@ -758,6 +841,13 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Performs one boosting iteration.
+   * 
+   * @param trainYs class values
+   * @param trainFs F scores
+   * @param probs probabilities
+   * @param data the data to run the iteration on
+   * @param origSumOfWeights the original sum of weights
+   * @throws Exception in case base classifiers run into problems
    */
   private void performIteration(double[][] trainYs,
 				double[][] trainFs,
@@ -858,6 +948,8 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Returns the array of classifiers that have been built.
+   * 
+   * @return the built classifiers
    */
   public Classifier[][] classifiers() {
 
@@ -873,6 +965,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Computes probabilities from F scores
+   * 
+   * @param Fs the F scores
+   * @return the computed probabilities
    */
   private double[] probs(double[] Fs) {
 
@@ -897,7 +992,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double [] distributionForInstance(Instance instance) 
@@ -926,8 +1021,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Returns the boosted model as Java source code.
    *
+   * @param className the classname in the generated code
    * @return the tree as Java source code
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public String toSource(String className) throws Exception {
 
@@ -1038,6 +1134,3 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     }
   }
 }
-
-
-  

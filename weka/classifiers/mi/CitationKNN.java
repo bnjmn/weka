@@ -29,6 +29,10 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -36,32 +40,53 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 /**
+ <!-- globalinfo-start -->
+ * Modified version of the Citation kNN multi instance classifier.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Jun Wang, Zucker, Jean-Daniel: Solving Multiple-Instance Problem: A Lazy Learning Approach. In: 17th International Conference on Machine Learning, 1119-1125, 2000.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Modified version of the Citation kNN multi instance classifier. <p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Wang2000,
+ *    author = {Jun Wang and Zucker and Jean-Daniel},
+ *    booktitle = {17th International Conference on Machine Learning},
+ *    editor = {Pat Langley},
+ *    pages = {1119-1125},
+ *    title = {Solving Multiple-Instance Problem: A Lazy Learning Approach},
+ *    year = {2000}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  * 
- * For more information see: <br/>
- * Jun Wang and Jean-Daniel Zucker (2000). <i>Solving the multiple-instance 
- * problem: a lazy learning approach.</i> <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * Valid options are:<p/>
- *
- * -R references <br/>
- * Number of References.<p/>
- *
- * -C citers <br/>
- * Number of Citers.<p/>
- *
- * -H rank <br/>
- * Rank of the Hausdorff distance.<p/>
+ * <pre> -R &lt;number of references&gt;
+ *  Number of Nearest References (default 1)</pre>
+ * 
+ * <pre> -C &lt;number of citers&gt;
+ *  Number of Nearest Citers (default 1)</pre>
+ * 
+ * <pre> -H &lt;rank&gt;
+ *  Rank of the Hausdorff Distance (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
-
 public class CitationKNN 
   extends Classifier 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -8435377743874094852L;
   
   /** The index of the class attribute */
@@ -117,12 +142,10 @@ public class CitationKNN
   /** Normalization of the euclidean distance */
   private double[] m_Diffs;
 
-  /** */
   private double[] m_Min;
 
   private double m_MinNorm = 0.95;
 
-  /** */
   private double[] m_Max;
 
   private double m_MaxNorm = 1.05;
@@ -136,9 +159,29 @@ public class CitationKNN
   public String globalInfo() {
     return 
         "Modified version of the Citation kNN multi instance classifier.\n\n"
-      + "For more information see:\n"
-      + "Jun Wang and Jean-Daniel Zucker (2000). Solving the multiple-instance "
-      + "problem: a lazy learning approach.";
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Jun Wang and Zucker and Jean-Daniel");
+    result.setValue(Field.TITLE, "Solving Multiple-Instance Problem: A Lazy Learning Approach");
+    result.setValue(Field.BOOKTITLE, "17th International Conference on Machine Learning");
+    result.setValue(Field.EDITOR, "Pat Langley");
+    result.setValue(Field.YEAR, "2000");
+    result.setValue(Field.PAGES, "1119-1125");
+    
+    return result;
   }
 
   /** 
@@ -183,7 +226,7 @@ public class CitationKNN
 
   /**
    * Sets the rank associated to the Hausdorff distance
-   * @param kRanked the rank of the Hausdorff distance
+   * @param hDRank the rank of the Hausdorff distance
    */
   public void setHDRank(int hDRank){
     m_HDRank = hDRank;
@@ -353,6 +396,8 @@ public class CitationKNN
   /**
    * generates all the variables associated to the citation
    * classifier
+   * 
+   * @throws Exception if generation fails
    */
   public void buildCNN() throws Exception {
 
@@ -482,8 +527,8 @@ public class CitationKNN
   /**
    * Build the list of nearest k neighbors to the given test instance.
    * @param bag the bag to search for neighbors of
-   * @param kNN
-   * @param bags
+   * @param kNN the number of nearest neighbors
+   * @param bags the data
    * @return a list of neighbors
    */
   protected NeighborList findNeighbors(Instance bag, int kNN, Instances bags){
@@ -603,7 +648,7 @@ public class CitationKNN
   /**
    * Computes the distribution for a given exemplar
    *
-   * @param exmp the exemplar for which distribution is computed
+   * @param bag the exemplar for which distribution is computed
    * @return the distribution
    * @throws Exception if the distribution can't be computed successfully
    */
@@ -626,6 +671,8 @@ public class CitationKNN
 
   /** 
    * Updates the normalization of each attribute.
+   * 
+   * @param bag the exemplar to update the normalization for
    */
   public void updateNormalization(Instance bag){
     int i, k;
@@ -652,9 +699,9 @@ public class CitationKNN
   }
 
   /**
-   * Wether the instances of two exemplars are or not equal
-   * @param exemplar1
-   * @param exemplar2
+   * Wether the instances of two exemplars are or  are not equal
+   * @param exemplar1 first exemplar
+   * @param exemplar2 second exemplar
    * @return if the instances of the exemplars are equal or not
    */
   public boolean equalExemplars(Instance exemplar1, Instance exemplar2){
@@ -680,9 +727,10 @@ public class CitationKNN
    * Turn the references and citers list into a probability distribution
    *
    * @return the probability distribution
+   * @throws Exception if computation of distribution fails
    */
-  protected double[] makeDistribution()
-    throws Exception{
+  protected double[] makeDistribution() throws Exception {
+    
     double total = 0;
     double[] distribution = new double[m_TrainBags.numClasses()];
     boolean debug = false;
@@ -743,7 +791,21 @@ public class CitationKNN
   /**
    * Sets the OptionHandler's options using the given list. All options
    * will be set (or reset) during this call (i.e. incremental setting
-   * of options is not possible).
+   * of options is not possible). <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R &lt;number of references&gt;
+   *  Number of Nearest References (default 1)</pre>
+   * 
+   * <pre> -C &lt;number of citers&gt;
+   *  Number of Nearest Citers (default 1)</pre>
+   * 
+   * <pre> -H &lt;rank&gt;
+   *  Rank of the Hausdorff Distance (default 1)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -774,7 +836,7 @@ public class CitationKNN
    *
    * @return the list of current option settings as an array of strings
    */
-  public String[] getOptions(){
+  public String[] getOptions() {
     Vector        result;
     
     result = new Vector();
@@ -815,11 +877,15 @@ public class CitationKNN
   //########################################################################
   //########################################################################
 
-  /*
+  /**
    * A class for storing data about a neighboring instance
    */
-  private class NeighborNode implements Serializable {
+  private class NeighborNode 
+    implements Serializable {
 
+    /** for serialization */
+    static final long serialVersionUID = -3947320761906511289L;
+    
     /** The neighbor bag */
     private Instance mBag;
 
@@ -829,13 +895,15 @@ public class CitationKNN
     /** A link to the next neighbor instance */
     private NeighborNode mNext;
 
-    /** */
+    /** the position in the bag */
     private int mBagPosition;    
+    
     /**
      * Create a new neighbor node.
      *
      * @param distance the distance to the neighbor
      * @param bag the bag instance
+     * @param position the position in the bag
      * @param next the next neighbor node
      */
     public NeighborNode(double distance, Instance bag, int position, NeighborNode next){
@@ -849,20 +917,27 @@ public class CitationKNN
      * Create a new neighbor node that doesn't link to any other nodes.
      *
      * @param distance the distance to the neighbor
-     * @param instance the neighbor instance
+     * @param bag the neighbor instance
+     * @param position the position in the bag
      */
     public NeighborNode(double distance, Instance bag, int position) {
       this(distance, bag, position, null);
     }
   }
+  
   //##################################################
-  /*
+  /**
    * A class for a linked list to store the nearest k neighbours
    * to an instance. We use a list so that we can take care of
    * cases where multiple neighbours are the same distance away.
    * i.e. the minimum length of the list is k.
    */
-  private class NeighborList implements Serializable {
+  private class NeighborList 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = 3432555644456217394L;
+    
     /** The first node in the list */
     private NeighborNode mFirst;
     /** The last node in the list */
@@ -908,7 +983,8 @@ public class CitationKNN
      * sorted by distance.
      *
      * @param distance the distance to the instance
-     * @param instance the neighboring instance
+     * @param bag the neighboring instance
+     * @param position the position in the bag
      */
     public void insertSorted(double distance, Instance bag, int position) {
 
@@ -1011,4 +1087,3 @@ public class CitationKNN
     }
   }
 }
-

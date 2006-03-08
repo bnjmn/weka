@@ -32,6 +32,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -46,30 +50,49 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * 
- * This classifier is try to find a suitable ball in the multiple-instance
- * space, with a certain data point in the instance space as a ball center.
- * The possible ball center is a certain instance in a positive bag.  The
- * possible radius are those which can achieve the highest classification
- * accuracy.  The model select the maximum radius as the radius of the optimal
- * ball. <p/>
+ <!-- globalinfo-start -->
+ * This classifier tries to find a suitable ball in the multiple-instance space, with a certain data point in the instance space as a ball center. The possible ball center is a certain instance in a positive bag. The possible radiuses are those which can achieve the highest classification accuracy. The model selects the maximum radius as the radius of the optimal ball.<br/>
+ * <br/>
+ * For more information about this algorithm, see:<br/>
+ * <br/>
+ * Peter Auer, Ronald Ortner: A Boosting Approach to Multiple Instance Learning. In: 15th European Conference on Machine Learning, 63-74, 2004.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information about this algorithm, see<p/>
- *
- * Peter Auer and Ronald Ortner (2004). <i>A Boosting Approach to Multiple
- * Instance Learning</i>. ECML 2004, LNAI 3201, pp. 63-74, 2004<p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Auer2004,
+ *    author = {Peter Auer and Ronald Ortner},
+ *    booktitle = {15th European Conference on Machine Learning},
+ *    note = {LNAI 3201},
+ *    pages = {63-74},
+ *    publisher = {Springer},
+ *    title = {A Boosting Approach to Multiple Instance Learning},
+ *    year = {2004}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  * 
- * Valid options are:<p/>
- * -N 0|1|2 <br/>
- * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Whether to 0=normalize/1=standardize/2=neither. 
+ *  (default 0=normalize)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MIOptimalBall 
   extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, MultiInstanceCapabilitiesHandler {  
+  implements OptionHandler, WeightedInstancesHandler, 
+             MultiInstanceCapabilitiesHandler, TechnicalInformationHandler {  
 
+  /** for serialization */
   static final long serialVersionUID = -6465750129576777254L;
   
   /** center of the optimal ball */
@@ -87,10 +110,13 @@ public class MIOptimalBall
   /** Whether to normalize/standardize/neither */
   protected int m_filterType = FILTER_NORMALIZE;
 
-  /** The filter to apply to the training data */
+  /** Normalize training data */
   public static final int FILTER_NORMALIZE = 0;
+  /** Standardize training data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** No normalization/standardization */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -111,15 +137,36 @@ public class MIOptimalBall
    */
   public String globalInfo() {
     return
-         "This classifier is try to find a suitable ball in the "
+         "This classifier tries to find a suitable ball in the "
        + "multiple-instance space, with a certain data point in the instance "
        + "space as a ball center. The possible ball center is a certain "
-       + "instance in a positive bag. The possible radius are those which can "
-       + "achieve the highest classification accuracy. The model select the "
+       + "instance in a positive bag. The possible radiuses are those which can "
+       + "achieve the highest classification accuracy. The model selects the "
        + "maximum radius as the radius of the optimal ball.\n\n"
-       + "For more information about this algorithm, see:\n"
-       + "Peter Auer and Ronald Ortner (2004). A Boosting Approach to "
-       + "Multiple Instance Learning. ECML 2004, LNAI 3201, pp. 63-74, 2004";
+       + "For more information about this algorithm, see:\n\n"
+       + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Peter Auer and Ronald Ortner");
+    result.setValue(Field.TITLE, "A Boosting Approach to Multiple Instance Learning");
+    result.setValue(Field.BOOKTITLE, "15th European Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2004");
+    result.setValue(Field.PAGES, "63-74");
+    result.setValue(Field.PUBLISHER, "Springer");
+    result.setValue(Field.NOTE, "LNAI 3201");
+    
+    return result;
   }
 
   /**
@@ -425,7 +472,16 @@ public class MIOptimalBall
   }
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  Whether to 0=normalize/1=standardize/2=neither. 
+   *  (default 0=normalize)</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported 

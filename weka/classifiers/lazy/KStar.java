@@ -15,12 +15,11 @@
  */
 
 /*
- *    KS.java
+ *    KStar.java
  *    Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).
  *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
  *
  */
-
 
 package weka.classifiers.lazy;
 
@@ -38,6 +37,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -46,28 +49,56 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * K* is an instance-based classifier, that is the class of a test
- * instance is based upon the class of those training instances
- * similar to it, as determined by some similarity function.  The
- * underlying assumption of instance-based classifiers such as K*,
- * IB1, PEBLS, etc, is that similar instances will have similar
- * classes.
+ <!-- globalinfo-start -->
+ * K* is an instance-based classifier, that is the class of a test instance is based upon the class of those training instances similar to it, as determined by some similarity function.  It differs from other instance-based learners in that it uses an entropy-based distance function.<br/>
+ * <br/>
+ * For more information on K*, see<br/>
+ * <br/>
+ * John G. Cleary, Leonard E. Trigg: K*: An Instance-based Learner Using an Entropic Distance Measure. In: 12th International Conference on Machine Learning, 108-114, 1995.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information on K*, see <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Cleary1995,
+ *    author = {John G. Cleary and Leonard E. Trigg},
+ *    booktitle = {12th International Conference on Machine Learning},
+ *    pages = {108-114},
+ *    title = {K*: An Instance-based Learner Using an Entropic Distance Measure},
+ *    year = {1995}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * John, G. Cleary and Leonard, E. Trigg (1995) "K*: An Instance-
- * based Learner Using an Entropic Distance Measure",
- * <i>Proceedings of the 12th International Conference on Machine
- * learning</i>, pp. 108-114.<p>
+ * <pre> -B &lt;num&gt;
+ *  Manual blend setting (default 20%)
+ * </pre>
+ * 
+ * <pre> -E
+ *  Enable entropic auto-blend setting (symbolic class only)
+ * </pre>
+ * 
+ * <pre> -M &lt;char&gt;
+ *  Specify the missing value treatment mode (default a)
+ *  Valid options are: a(verage), d(elete), m(axdiff), n(ormal)
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
+public class KStar 
+  extends Classifier
+  implements KStarConstants, UpdateableClassifier, TechnicalInformationHandler {
 
-public class KStar extends Classifier
-  implements KStarConstants, UpdateableClassifier {
-
+  /** for serialization */
   static final long serialVersionUID = 332458330800479083L;
   
   /** The training instances used for classification. */
@@ -128,11 +159,29 @@ public class KStar extends Classifier
       + "instance is based upon the class of those training instances "
       + "similar to it, as determined by some similarity function.  It differs "
       + "from other instance-based learners in that it uses an entropy-based "
-      + "distance function. For more information on K*, see\n\n"
-      + "John, G. Cleary and Leonard, E. Trigg (1995) \"K*: An Instance- "
-      + "based Learner Using an Entropic Distance Measure\", "
-      + "Proceedings of the 12th International Conference on Machine "
-      + "learning, pp. 108-114.";
+      + "distance function.\n\n"
+      + "For more information on K*, see\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "John G. Cleary and Leonard E. Trigg");
+    result.setValue(Field.TITLE, "K*: An Instance-based Learner Using an Entropic Distance Measure");
+    result.setValue(Field.BOOKTITLE, "12th International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "1995");
+    result.setValue(Field.PAGES, "108-114");
+    
+    return result;
   }
 
   /**
@@ -165,7 +214,7 @@ public class KStar extends Classifier
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     String debug = "(KStar.buildClassifier) ";
@@ -187,7 +236,7 @@ public class KStar extends Classifier
    * Adds the supplied instance to the training set
    *
    * @param instance the instance to add
-   * @exception Exception if instance could not be incorporated successfully
+   * @throws Exception if instance could not be incorporated successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
     String debug = "(KStar.updateClassifier) ";
@@ -206,7 +255,7 @@ public class KStar extends Classifier
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if an error occurred during the prediction
+   * @throws Exception if an error occurred during the prediction
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
 
@@ -457,11 +506,28 @@ public class KStar extends Classifier
   }
 
   /**
-   * Parses a given list of options. Valid options are:
-   * ...
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B &lt;num&gt;
+   *  Manual blend setting (default 20%)
+   * </pre>
+   * 
+   * <pre> -E
+   *  Enable entropic auto-blend setting (symbolic class only)
+   * </pre>
+   * 
+   * <pre> -M &lt;char&gt;
+   *  Specify the missing value treatment mode (default a)
+   *  Valid options are: a(verage), d(elete), m(axdiff), n(ormal)
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String debug = "(KStar.setOptions)";
@@ -626,6 +692,7 @@ public class KStar extends Classifier
    * Returns a copy of the array with its elements randomly redistributed.
    *
    * @param array the array to randomize.
+   * @param generator the random number generator to use
    * @return a copy of the array with its elements randomly redistributed.
    */
   private int [] randomize(int [] array, Random generator) {
@@ -644,4 +711,3 @@ public class KStar extends Classifier
   }
 
 } // class end
-

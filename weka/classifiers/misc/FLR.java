@@ -31,6 +31,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Summarizable;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -42,55 +46,101 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * <p>Fuzzy Lattice Reasoning Classifier</p>
- * <p>FLR Classifier implementation in WEKA </p>
- * <p>
- * <p>The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy Lattices
- *  for creating a Reasoning Environment.
- *  <p>The current version can be used for classification using numeric predictors.
+ <!-- globalinfo-start -->
+ * Fuzzy Lattice Reasoning Classifier (FLR) v5.0<br/>
+ * <br/>
+ * The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy Lattices for creating a Reasoning Environment.<br/>
+ * The current version can be used for classification using numeric predictors.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas, V. Petridis: Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support. In: 1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003), Gdansk, Poland, , 2003.<br/>
+ * <br/>
+ * V. G. Kaburlasos, I. N. Athanasiadis, P. A. Mitkas, V. Petridis (2003). Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved Estimation of Ambient Ozone Concentration.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are: <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Athanasiadis2003,
+ *    address = {Gdansk, Poland},
+ *    author = {I. N. Athanasiadis and V. G. Kaburlasos and P. A. Mitkas and V. Petridis},
+ *    booktitle = {1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003)},
+ *    note = {Abstract in ICSC-NAISO Academic Press, Canada (ISBN:3906454339), pg.51},
+ *    publisher = {ICSC-NAISO Academic Press},
+ *    title = {Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support},
+ *    year = {2003}
+ * }
+ * 
+ * &#64;unpublished{Kaburlasos2003,
+ *    author = {V. G. Kaburlasos and I. N. Athanasiadis and P. A. Mitkas and V. Petridis},
+ *    title = {Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved Estimation of Ambient Ozone Concentration},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * -R rhoa<br>
- *  Set vignilance parameter rhoa  (a float in range [0,1])<p>
- * -B BoundsPath <br>
- *  Point the boundaries file (use full path of the file)<p>
- * -Y Display the induced ruleset <br>
- *  (if set true) <p>
- * <p> For further information contact I.N.Athanasiadis (ionathan@iti.gr)
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R
+ *  Set vigilance parameter rhoa.
+ *  (a float in range [0,1])</pre>
+ * 
+ * <pre> -B
+ *  Set boundaries File
+ *  Note:  The boundaries file is a simple text file containing 
+ *  a row with a Fuzzy Lattice defining the metric space.
+ *  For example, the boundaries file could contain the following 
+ *  the metric space for the iris dataset:
+ *  [ 4.3  7.9 ]  [ 2.0  4.4 ]  [ 1.0  6.9 ]  [ 0.1  2.5 ]  in Class:  -1
+ *  This lattice just contains the min and max value in each 
+ *  dimension.
+ *  In other kind of problems this may not be just a min-max 
+ *  operation, but it could contain limits defined by the problem 
+ *  itself.
+ *  Thus, this option should be set by the user.
+ *  If ommited, the metric space used contains the mins and maxs 
+ *  of the training split.</pre>
+ * 
+ * <pre> -Y
+ *  Show Rules</pre>
+ * 
+ <!-- options-end -->
+ * 
+ * For further information contact I.N.Athanasiadis (ionathan@iti.gr)
  *
  * @author Ioannis N. Athanasiadis
  * @email: ionathan@iti.gr, alias: ionathan@ieee.org
  * @version 5.0
- * @version $Revision: 1.5 $
- *
- * <p> This classifier is described in the following papers:
- * <p> I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas and V. Petridis
- * <i>Applying Machine Learning Techniques on Air Quality Data for Real-Time
- * Decision Support</i>, Proceedings 1st Intl. NAISO Symposium on Information
- * Technologies in Environmental Engineering (ITEE-2003). Gdansk, Poland:
- * ICSC-NAISO Academic Press. Abstract in ICSC-NAISO Academic Press, Canada
- * (ISBN:3906454339), pg.51.
- *
- * <p> V. G. Kaburlasos, I. N. Athanasiadis, P. A. Mitkas and V. Petridis
- * <i>Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved
- * Estimation of Ambient Ozone Concentration</i>, unpublished working paper (2003)
+ * @version $Revision: 1.6 $
  */
-
 public class FLR
     extends Classifier
-    implements Serializable, Summarizable, AdditionalMeasureProducer {
+    implements Serializable, Summarizable, AdditionalMeasureProducer,
+               TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 3337906540579569626L;
   
   public static final float EPSILON = 0.000001f;
-  private Vector learnedCode; // the RuleSet: a vector keeping the learned Fuzzy Lattices
-  private double m_Rhoa = 0.5; // a double keeping the vignilance parameter rhoa
-  private FuzzyLattice bounds; // a Fuzzy Lattice keeping the metric space
-  private File m_BoundsFile = new File(""); // a File pointing to the boundaries file (bounds.txt)
-  private boolean m_showRules = true; // a flag indicating whether the RuleSet will be displayed
-  private int index[]; // an index of the RuleSet (keeps how many rules are needed for each class)
-  private String classNames[]; // an array of the names of the classes
+  
+  /** the RuleSet: a vector keeping the learned Fuzzy Lattices */
+  private Vector learnedCode; 
+  /** a double keeping the vignilance parameter rhoa */
+  private double m_Rhoa = 0.5; 
+  /** a Fuzzy Lattice keeping the metric space */
+  private FuzzyLattice bounds; 
+  /** a File pointing to the boundaries file (bounds.txt) */
+  private File m_BoundsFile = new File(""); 
+  /** a flag indicating whether the RuleSet will be displayed */
+  private boolean m_showRules = true; 
+  /** an index of the RuleSet (keeps how many rules are needed for each class) */
+  private int index[]; 
+  /** an array of the names of the classes */
+  private String classNames[]; 
 
 
   /**
@@ -117,7 +167,7 @@ public class FLR
    * Builds the FLR Classifier
    *
    * @param data the training dataset (Instances)
-       * @exception Exception if the training dataset is not supported or is erroneous
+       * @throws Exception if the training dataset is not supported or is erroneous
    */
   public void buildClassifier(Instances data) throws Exception {
     // can classifier handle the data?
@@ -340,44 +390,103 @@ public class FLR
   } //showRules
 
   /**
-   * Returns an enumeration describing the available options.
+   * Returns an enumeration describing the available options. <p/>
    *
-   * Valid options are: <p>
-   *
-   * -R rhoa<br>
-   *  Set vignilance parameter rhoa  (a float in range [0,1])<p>
-   * -B BoundsPath <br>
-   *  Set the path pointing to the boundaries file (a full path of the file)<p>
-   * -Y Display the induced ruleset <br>
-   *  (if set true) <p>
-   *
-   * Note:  The boundaries file is a simple text file containing a row with a
-   * Fuzzy Lattice defining the metric space .
-   * For example, the boundaries file could contain the following the metric
-   * space for the iris dataset:
-   * <br> [ 4.3  7.9 ]  [ 2.0  4.4 ]  [ 1.0  6.9 ]  [ 0.1  2.5 ]  in Class:  -1
-   * <br> This lattice just contains the min and max value in each dimention.
-   * In other kind of problems this may not be just a min-max operation, but it
-   * could contain limits defined by the problem itself.
-   * Thus, this option should be set by the user.
-   * If ommited, the metric space used contains the mins and maxs of the training split.
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R
+   *  Set vigilance parameter rhoa.
+   *  (a float in range [0,1])</pre>
+   * 
+   * <pre> -B
+   *  Set boundaries File
+   *  Note:  The boundaries file is a simple text file containing 
+   *  a row with a Fuzzy Lattice defining the metric space.
+   *  For example, the boundaries file could contain the following 
+   *  the metric space for the iris dataset:
+   *  [ 4.3  7.9 ]  [ 2.0  4.4 ]  [ 1.0  6.9 ]  [ 0.1  2.5 ]  in Class:  -1
+   *  This lattice just contains the min and max value in each 
+   *  dimension.
+   *  In other kind of problems this may not be just a min-max 
+   *  operation, but it could contain limits defined by the problem 
+   *  itself.
+   *  Thus, this option should be set by the user.
+   *  If ommited, the metric space used contains the mins and maxs 
+   *  of the training split.</pre>
+   * 
+   * <pre> -Y
+   *  Show Rules</pre>
+   * 
+   <!-- options-end -->
    *
    * @return enumeration an enumeration of valid options
    */
   public Enumeration listOptions() {
     Vector newVector = new Vector(3);
-    newVector.addElement(new Option("\tSet vigilance parameter rhoa.", "R", 1,
-                                    "-R"));
-    newVector.addElement(new Option("\tSet boundaries File", "B", 1, "-B"));
-    newVector.addElement(new Option("\tShow Rules", "Y", 0, "-Y"));
+
+    newVector.addElement(new Option(
+	"\tSet vigilance parameter rhoa.\n"
+	+ "\t(a float in range [0,1])", 
+	"R", 1, "-R"));
+    
+    newVector.addElement(new Option(
+	"\tSet boundaries File\n"
+	+ "\tNote:  The boundaries file is a simple text file containing \n"
+	+ "\ta row with a Fuzzy Lattice defining the metric space.\n"
+	+ "\tFor example, the boundaries file could contain the following \n"
+	+ "\tthe metric space for the iris dataset:\n"
+	+ "\t[ 4.3  7.9 ]  [ 2.0  4.4 ]  [ 1.0  6.9 ]  [ 0.1  2.5 ]  in Class:  -1\n"
+	+ "\tThis lattice just contains the min and max value in each \n"
+	+ "\tdimension.\n"
+	+ "\tIn other kind of problems this may not be just a min-max \n"
+	+ "\toperation, but it could contain limits defined by the problem \n"
+	+ "\titself.\n"
+	+ "\tThus, this option should be set by the user.\n"
+	+ "\tIf ommited, the metric space used contains the mins and maxs \n"
+	+ "\tof the training split.", 
+	"B", 1, "-B"));
+
+    newVector.addElement(new Option(
+	"\tShow Rules", 
+	"Y", 0, "-Y"));
+    
     return newVector.elements();
   } //listOptions
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R
+   *  Set vigilance parameter rhoa.
+   *  (a float in range [0,1])</pre>
+   * 
+   * <pre> -B
+   *  Set boundaries File
+   *  Note:  The boundaries file is a simple text file containing 
+   *  a row with a Fuzzy Lattice defining the metric space.
+   *  For example, the boundaries file could contain the following 
+   *  the metric space for the iris dataset:
+   *  [ 4.3  7.9 ]  [ 2.0  4.4 ]  [ 1.0  6.9 ]  [ 0.1  2.5 ]  in Class:  -1
+   *  This lattice just contains the min and max value in each 
+   *  dimension.
+   *  In other kind of problems this may not be just a min-max 
+   *  operation, but it could contain limits defined by the problem 
+   *  itself.
+   *  Thus, this option should be set by the user.
+   *  If ommited, the metric space used contains the mins and maxs 
+   *  of the training split.</pre>
+   * 
+   * <pre> -Y
+   *  Show Rules</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported (
+   * @throws Exception if an option is not supported (
    */
   public void setOptions(String[] options) throws Exception {
     // Option -Y
@@ -465,8 +574,6 @@ public class FLR
   /**
    * Set Boundaries File
    * @param newBoundsFile a new file containing the boundaries
-   * @throws Exception if the Bounds file is incompatible with the training set
-   * or missing
    */
   public void setBoundsFile(String newBoundsFile) {
     m_BoundsFile = new File(newBoundsFile);
@@ -537,9 +644,9 @@ public class FLR
 
   /**
    * Returns the value of the named measure
-       * @param additionalMeasureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
@@ -578,9 +685,41 @@ public class FLR
    * @return the description
    */
   public String globalInfo() {
-    return "Fuzzy Lattice Reasoning Classifier (FLR) v5.0"
-        +
-        "The current version can be used for classification using numeric predictors.";
+    return 
+        "Fuzzy Lattice Reasoning Classifier (FLR) v5.0\n\n"
+      + "The Fuzzy Lattice Reasoning Classifier uses the notion of Fuzzy "
+      + "Lattices for creating a Reasoning Environment.\n"
+      + "The current version can be used for classification using numeric predictors.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+   
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "I. N. Athanasiadis and V. G. Kaburlasos and P. A. Mitkas and V. Petridis");
+    result.setValue(Field.TITLE, "Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support");
+    result.setValue(Field.BOOKTITLE, "1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003)");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.ADDRESS, "Gdansk, Poland");
+    result.setValue(Field.PUBLISHER, "ICSC-NAISO Academic Press");
+    result.setValue(Field.NOTE, "Abstract in ICSC-NAISO Academic Press, Canada (ISBN:3906454339), pg.51");
+    
+    additional = result.add(Type.UNPUBLISHED);
+    additional.setValue(Field.AUTHOR, "V. G. Kaburlasos and I. N. Athanasiadis and P. A. Mitkas and V. Petridis");
+    additional.setValue(Field.TITLE, "Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved Estimation of Ambient Ozone Concentration");
+    additional.setValue(Field.YEAR, "2003");
+    
+    return result;
   }
 
   /**
@@ -610,12 +749,15 @@ public class FLR
   private class FuzzyLattice
       implements Serializable {
 
+    /** for serialization */
+    static final long serialVersionUID = -3568003680327062404L;
+    
     private double min[];
     private double max[];
     private int categ;
     private String className;
 
-//Constructors
+    //Constructors
 
     /**
      * Constructs a Fuzzy Lattice from a instance
@@ -664,8 +806,8 @@ public class FLR
     }
 
     /**
-         * Converts a String to a Fuzzy Lattice pointing in Class "Metric Space" (-1)
-         * Note that the input String should be compatible with the toString() method.
+     * Converts a String to a Fuzzy Lattice pointing in Class "Metric Space" (-1)
+     * Note that the input String should be compatible with the toString() method.
      * @param rule the input String.
      */
     public FuzzyLattice(String rule) {
@@ -706,7 +848,7 @@ public class FLR
       className = "Metric Space";
     }
 
-// Functions
+    // Functions
 
     /**
      * Calculates the valuation function of the FuzzyLattice
@@ -751,7 +893,7 @@ public class FLR
       return b;
     }
 
-// Get-Set Functions
+    // Get-Set Functions
 
     public int getCateg() {
       return categ;
@@ -797,7 +939,5 @@ public class FLR
       rule = rule + "in Class:  " + className + " \n";
       return rule;
     }
-
   }
-
 }

@@ -31,6 +31,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -42,33 +46,73 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for building a logistic regression model using LogitBoost.
- * Incorporates attribute selection by fitting simple regression functions in LogitBoost.
- * For more information, see master thesis "Logistic Model Trees" (Niels Landwehr, 2003)<p>
+ <!-- globalinfo-start -->
+ * Classifier for building linear logistic regression models. LogitBoost with simple regression functions as base learners is used for fitting the logistic models. The optimal number of LogitBoost iterations to perform is cross-validated, which leads to automatic attribute selection. For more information see:<br/>
+ * Niels Landwehr, Mark Hall, Eibe Frank: Logistic Model Trees. In: 14th European Conference on Machine Learning, 241-252, 2003.<br/>
+ * <br/>
+ * Niels Landwehr (2003). Logistic Model Trees. Hamilton, New Zealand.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are: <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Landwehr2003,
+ *    author = {Niels Landwehr and Mark Hall and Eibe Frank},
+ *    booktitle = {14th European Conference on Machine Learning},
+ *    pages = {241-252},
+ *    publisher = {Springer},
+ *    title = {Logistic Model Trees},
+ *    year = {2003}
+ * }
+ * 
+ * &#64;mastersthesis{Landwehr2003,
+ *    address = {Hamilton, New Zealand},
+ *    author = {Niels Landwehr},
+ *    school = {Dept. of Computer Science, University of Waikato},
+ *    title = {Logistic Model Trees},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * -I iterations <br>
- * Set fixed number of iterations for LogitBoost (instead of using cross-validation). <p>
- * -S <br>
- * Select the number of LogitBoost iterations that gives minimal error on the training set 
- * (instead of using cross-validation). <p>
- * -P <br>
- * Minimize error on probabilities instead of misclassification error. <p>
- * -M iterations <br>
- * Set maximum number of iterations for LogitBoost. <p>
- * -H iter <br>
- * Set parameter for heuristic for early stopping of LogitBoost.
- * If enabled, the minimum is selected greedily, stopping if the current minimum has not changed 
- * for iter iterations. By default, heuristic is enabled with value 50. Set to zero to disable heuristic.
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -I &lt;iterations&gt;
+ *  Set fixed number of iterations for LogitBoost</pre>
+ * 
+ * <pre> -S
+ *  Use stopping criterion on training set (instead of
+ *  cross-validation)</pre>
+ * 
+ * <pre> -P
+ *  Use error on probabilities (rmse) instead of
+ *  misclassification error for stopping criterion</pre>
+ * 
+ * <pre> -M &lt;iterations&gt;
+ *  Set maximum number of boosting iterations</pre>
+ * 
+ * <pre> -H &lt;iterations&gt;
+ *  Set parameter for heuristic for early stopping of
+ *  LogitBoost.
+ *  If enabled, the minimum is selected greedily, stopping
+ *  if the current minimum has not changed for iter iterations.
+ *  By default, heuristic is enabled with value 50. Set to
+ *  zero to disable heuristic.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
+public class SimpleLogistic 
+  extends Classifier 
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
+             TechnicalInformationHandler {
 
-public class SimpleLogistic extends Classifier 
-  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
-
+    /** for serialization */
     static final long serialVersionUID = 7397710626304705059L;
   
     /**The actual logistic regression model */
@@ -141,7 +185,7 @@ public class SimpleLogistic extends Classifier
     /**
      * Builds the logistic regression using LogitBoost.
      * @param data the training data
-     * @exception Exception if something goes wrong 
+     * @throws Exception if something goes wrong 
      */
     public void buildClassifier(Instances data) throws Exception {
 
@@ -174,7 +218,9 @@ public class SimpleLogistic extends Classifier
     /** 
      * Returns class probabilities for an instance.
      *
-     * @exception Exception if distribution can't be computed successfully
+     * @param inst the instance to compute the probabilities for
+     * @return the probabilities
+     * @throws Exception if distribution can't be computed successfully
      */
     public double[] distributionForInstance(Instance inst) 
 	throws Exception {
@@ -195,36 +241,71 @@ public class SimpleLogistic extends Classifier
      * @return an enumeration of all the available options.
      */
     public Enumeration listOptions() {
-	Vector newVector = new Vector(5);
+	Vector newVector = new Vector();
 	
-	newVector.addElement(new Option("\tSet fixed number of iterations for LogitBoost\n",
-					"I",1,"-I <iterations>"));
+	newVector.addElement(new Option(
+	    "\tSet fixed number of iterations for LogitBoost",
+	    "I",1,"-I <iterations>"));
 	
-	newVector.addElement(new Option("\tUse stopping criterion on training set (instead of cross-validation)\n",
-					"S",0,"-S"));
+	newVector.addElement(new Option(
+	    "\tUse stopping criterion on training set (instead of\n"
+	    + "\tcross-validation)",
+	    "S",0,"-S"));
 	
-	newVector.addElement(new Option("\tUse error on probabilities (rmse) instead of misclassification error " +
-					"for stopping criterion\n",
-					"P",0,"-P"));
+	newVector.addElement(new Option(
+	    "\tUse error on probabilities (rmse) instead of\n"
+	    + "\tmisclassification error for stopping criterion",
+	    "P",0,"-P"));
 
-	newVector.addElement(new Option("\tSet maximum number of boosting iterations\n",
-					"M",1,"-M <iterations>"));
+	newVector.addElement(new Option(
+	    "\tSet maximum number of boosting iterations",
+	    "M",1,"-M <iterations>"));
 
-	newVector.addElement(new Option("\tSet parameter for heuristic for early stopping of LogitBoost."+
-					"If enabled, the minimum is selected greedily, stopping if the current minimum"+
-					" has not changed for iter iterations. By default, heuristic is enabled with"+
-					"value 50. Set to zero to disable heuristic."+
-					"\n",
-					"H",1,"-H <iterations>"));
+	newVector.addElement(new Option(
+	    "\tSet parameter for heuristic for early stopping of\n"
+	    + "\tLogitBoost.\n"
+	    + "\tIf enabled, the minimum is selected greedily, stopping\n"
+	    + "\tif the current minimum has not changed for iter iterations.\n"
+	    + "\tBy default, heuristic is enabled with value 50. Set to\n"
+	    + "\tzero to disable heuristic.",
+	    "H",1,"-H <iterations>"));
+	
 	return newVector.elements();
     } 
     
 
     /**
-     * Parses a given list of options.
+     * Parses a given list of options. <p/>
+     *
+     <!-- options-start -->
+     * Valid options are: <p/>
+     * 
+     * <pre> -I &lt;iterations&gt;
+     *  Set fixed number of iterations for LogitBoost</pre>
+     * 
+     * <pre> -S
+     *  Use stopping criterion on training set (instead of
+     *  cross-validation)</pre>
+     * 
+     * <pre> -P
+     *  Use error on probabilities (rmse) instead of
+     *  misclassification error for stopping criterion</pre>
+     * 
+     * <pre> -M &lt;iterations&gt;
+     *  Set maximum number of boosting iterations</pre>
+     * 
+     * <pre> -H &lt;iterations&gt;
+     *  Set parameter for heuristic for early stopping of
+     *  LogitBoost.
+     *  If enabled, the minimum is selected greedily, stopping
+     *  if the current minimum has not changed for iter iterations.
+     *  By default, heuristic is enabled with value 50. Set to
+     *  zero to disable heuristic.</pre>
+     * 
+     <!-- options-end -->
      *
      * @param options the list of options as an array of strings
-     * @exception Exception if an option is not supported
+     * @throws Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
 
@@ -283,12 +364,16 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Get the value of numBoostingIterations.
+     * 
+     * @return the number of boosting iterations
      */
     public int getNumBoostingIterations(){
 	return m_numBoostingIterations;
     }
     /**
      * Get the value of useCrossValidation.
+     * 
+     * @return true if cross-validation is used
      */
     public boolean getUseCrossValidation(){
 	return m_useCrossValidation;
@@ -296,6 +381,9 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Get the value of errorOnProbabilities.
+     * 
+     * @return 	If true, use minimize error on probabilities instead of 
+     * 		misclassification error
      */
     public boolean getErrorOnProbabilities(){
 	return m_errorOnProbabilities;
@@ -303,6 +391,8 @@ public class SimpleLogistic extends Classifier
     
     /**
      * Get the value of maxBoostingIterations.
+     * 
+     * @return the maximum number of boosting iterations
      */
     public int getMaxBoostingIterations(){
 	return m_maxBoostingIterations;
@@ -310,6 +400,8 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Get the value of heuristicStop.
+     * 
+     * @return the value of heuristicStop
      */
     public int getHeuristicStop(){
 	return m_heuristicStop;
@@ -317,6 +409,8 @@ public class SimpleLogistic extends Classifier
     
     /**
      * Set the value of numBoostingIterations.
+     * 
+     * @param n the number of boosting iterations
      */
     public void setNumBoostingIterations(int n){
 	m_numBoostingIterations = n;
@@ -324,6 +418,8 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Set the value of useCrossValidation.
+     * 
+     * @param l whether to use cross-validation
      */
     public void setUseCrossValidation(boolean l){
 	m_useCrossValidation = l;
@@ -331,6 +427,9 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Set the value of errorOnProbabilities.
+     * 
+     * @param l If true, use minimize error on probabilities instead of 
+     * 		misclassification error
      */
     public void setErrorOnProbabilities(boolean l){
 	m_errorOnProbabilities = l;
@@ -338,6 +437,8 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Set the value of maxBoostingIterations.
+     * 
+     * @param n the maximum number of boosting iterations
      */
     public void setMaxBoostingIterations(int n){
 	m_maxBoostingIterations = n;
@@ -345,13 +446,21 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Set the value of heuristicStop.
+     * 
+     * @param n the value of heuristicStop
      */
     public void setHeuristicStop(int n){
-	if (n == 0) m_heuristicStop = m_maxBoostingIterations; else m_heuristicStop = n;
+	if (n == 0) 
+	  m_heuristicStop = m_maxBoostingIterations; 
+	else 
+	  m_heuristicStop = n;
     }
 
     /**
-     * Get the number of LogitBoost iterations performed (= the number of regression functions fit by LogitBoost).
+     * Get the number of LogitBoost iterations performed (= the number of 
+     * regression functions fit by LogitBoost).
+     * 
+     * @return the number of LogitBoost iterations performed
      */
     public int getNumRegressions(){
 	return m_boostedModel.getNumRegressions();
@@ -359,6 +468,8 @@ public class SimpleLogistic extends Classifier
 
     /**
      * Returns a description of the logistic model (attributes/coefficients).
+     * 
+     * @return the model as string
      */
     public String toString(){
 	if (m_boostedModel == null) return "No model built";
@@ -366,8 +477,11 @@ public class SimpleLogistic extends Classifier
     }
 
     /**
-     * Returns the fraction of all attributes in the data that are used in the logistic model (in percent).
-     * An attribute is used in the model if it is used in any of the models for the different classes.
+     * Returns the fraction of all attributes in the data that are used in the 
+     * logistic model (in percent). An attribute is used in the model if it is 
+     * used in any of the models for the different classes.
+     * 
+     * @return percentage of attributes used in the model
      */
     public double measureAttributesUsed(){
 	return m_boostedModel.percentAttributesUsed();
@@ -388,7 +502,7 @@ public class SimpleLogistic extends Classifier
      * Returns the value of the named measure
      * @param additionalMeasureName the name of the measure to query for its value
      * @return the value of the named measure
-     * @exception IllegalArgumentException if the named measure is not supported
+     * @throws IllegalArgumentException if the named measure is not supported
      */
     public double getMeasure(String additionalMeasureName) {
 	if (additionalMeasureName.compareToIgnoreCase("measureAttributesUsed") == 0) {
@@ -411,7 +525,37 @@ public class SimpleLogistic extends Classifier
 	return "Classifier for building linear logistic regression models. LogitBoost with simple regression "
 	    +"functions as base learners is used for fitting the logistic models. The optimal number of LogitBoost "
 	    +"iterations to perform is cross-validated, which leads to automatic attribute selection. "
-	    +"For more information see: N.Landwehr, M.Hall, E. Frank 'Logistic Model Trees' (ECML 2003).";	    
+	    +"For more information see:\n"
+	    + getTechnicalInformation().toString();
+    }
+
+    /**
+     * Returns an instance of a TechnicalInformation object, containing 
+     * detailed information about the technical background of this class,
+     * e.g., paper reference or book this class is based on.
+     * 
+     * @return the technical information about this class
+     */
+    public TechnicalInformation getTechnicalInformation() {
+      TechnicalInformation 	result;
+      TechnicalInformation 	additional;
+      
+      result = new TechnicalInformation(Type.INPROCEEDINGS);
+      result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
+      result.setValue(Field.TITLE, "Logistic Model Trees");
+      result.setValue(Field.BOOKTITLE, "14th European Conference on Machine Learning");
+      result.setValue(Field.YEAR, "2003");
+      result.setValue(Field.PAGES, "241-252");
+      result.setValue(Field.PUBLISHER, "Springer");
+      
+      additional = result.add(Type.MASTERSTHESIS);
+      additional.setValue(Field.AUTHOR, "Niels Landwehr");
+      additional.setValue(Field.TITLE, "Logistic Model Trees");
+      additional.setValue(Field.YEAR, "2003");
+      additional.setValue(Field.SCHOOL, "Dept. of Computer Science, University of Waikato");
+      additional.setValue(Field.ADDRESS, "Hamilton, New Zealand");
+      
+      return result;
     }
 
     /**
@@ -473,7 +617,7 @@ public class SimpleLogistic extends Classifier
     /**
      * Main method for testing this class
      *
-     * @param String options 
+     * @param argv commandline options 
      */
     public static void main(String[] argv) {	
 	try {
@@ -483,11 +627,4 @@ public class SimpleLogistic extends Classifier
 	    System.err.println(e.getMessage());
 	}
     }
-
 }
-
-
-
-
-
-

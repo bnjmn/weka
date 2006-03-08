@@ -28,52 +28,127 @@ import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * This meta classifier creates a number of disjoint, stratified folds out
- * of the data and feeds each chunk of data to a copy of the supplied
- * base classifier. Predictions are made via majority vote, by putting all the
- * generated base classifiers into the Vote meta classifier. <p/>
- * Useful for base classifiers that are quadratic or worse in time behavior,
- * regarding to number of instances in the training data. <p/>
- * 
- * For more information, see: <p/>
- * Ting, K. M. and Witten, I. H. 1997. Stacking Bagged and Dagged Models. In
- * Proceedings of the Fourteenth international Conference on Machine Learning
- * (July 08 - 12, 1997). D. H. Fisher, Ed. Morgan Kaufmann Publishers, San
- * Francisco, CA, 367-375.<p/>
- *
- * Valid options are:<p/>
- *
- * -W classname <br/>
- * Specify the full class name of a weak classifier as the basis for 
- * bagging (required).<p/>
- *
- * -F num <br/>
- * Set the number of folds to use for splitting the training set (default 10).
+ <!-- globalinfo-start -->
+ * This meta classifier creates a number of disjoint, stratified folds out of the data and feeds each chunk of data to a copy of the supplied base classifier. Predictions are made via majority vote, since all the generated base classifiers are put into the Vote meta classifier. <br/>
+ * Useful for base classifiers that are quadratic or worse in time behavior, regarding number of instances in the training data. <br/>
+ * <br/>
+ * For more information, see: <br/>
+ * Ting, K. M., Witten, I. H.: Stacking Bagged and Dagged Models. In: Fourteenth international Conference on Machine Learning, San Francisco, CA, 367-375, 1997.
  * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Ting1997,
+ *    address = {San Francisco, CA},
+ *    author = {Ting, K. M. and Witten, I. H.},
+ *    booktitle = {Fourteenth international Conference on Machine Learning},
+ *    editor = {D. H. Fisher},
+ *    pages = {367-375},
+ *    publisher = {Morgan Kaufmann Publishers},
+ *    title = {Stacking Bagged and Dagged Models},
+ *    year = {1997}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * -S seed <br/>
- * Random number seed for resampling (default 1). <p/>
- *
- * -verbose <br/>
- * outputs some progress information during building the classifier (default
- * off). <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -F &lt;folds&gt;
+ *  The number of folds for splitting the training set into
+ *  smaller chunks for the base classifier.
+ *  (default 10)</pre>
+ * 
+ * <pre> -verbose
+ *  Whether to print some more information during building the
+ *  classifier.
+ *  (default is off)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.functions.SMO)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.functions.SMO:
+ * </pre>
+ * 
+ * <pre> -C &lt;double&gt;
+ *  The complexity constant C. (default 1)</pre>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  The exponent for the polynomial kernel. (default 1)</pre>
+ * 
+ * <pre> -G &lt;double&gt;
+ *  Gamma for the RBF kernel. (default 0.01)</pre>
+ * 
+ * <pre> -N
+ *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ * 
+ * <pre> -F
+ *  Feature-space normalization (only for
+ *  non-linear polynomial kernels).</pre>
+ * 
+ * <pre> -O
+ *  Use lower-order terms (only for non-linear
+ *  polynomial kernels).</pre>
+ * 
+ * <pre> -R
+ *  Use RBF kernel. (default poly)</pre>
+ * 
+ * <pre> -A &lt;int&gt;
+ *  The size of the kernel cache. (default 250007, use 0 for full cache)</pre>
+ * 
+ * <pre> -L &lt;double&gt;
+ *  The tolerance parameter. (default 1.0e-3)</pre>
+ * 
+ * <pre> -P &lt;double&gt;
+ *  The epsilon for round-off error. (default 1.0e-12)</pre>
+ * 
+ * <pre> -M
+ *  Fit logistic models to SVM outputs. </pre>
+ * 
+ * <pre> -V &lt;double&gt;
+ *  The number of folds for the internal
+ *  cross-validation. (default -1, use training data)</pre>
+ * 
+ * <pre> -W &lt;double&gt;
+ *  The random number seed. (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p/>
  *
  * @author Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see       Vote
  */
 public class Dagging
-  extends RandomizableSingleClassifierEnhancer {
+  extends RandomizableSingleClassifierEnhancer
+  implements TechnicalInformationHandler {
   
+  /** for serialization */
   static final long serialVersionUID = 4560165876570074309L;
 
   /** the number of folds to use to split the training data */
@@ -100,10 +175,30 @@ public class Dagging
      + "behavior, regarding number of instances in the training data. \n"
      + "\n"
      + "For more information, see: \n"
-     + "Ting, K. M. and Witten, I. H. 1997. Stacking Bagged and Dagged Models. "
-     + "In Proceedings of the Fourteenth international Conference on Machine "
-     + "Learning (July 08 - 12, 1997). D. H. Fisher, Ed. Morgan Kaufmann "
-     + "Publishers, San Francisco, CA, 367-375.\n";
+     + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Ting, K. M. and Witten, I. H.");
+    result.setValue(Field.TITLE, "Stacking Bagged and Dagged Models");
+    result.setValue(Field.BOOKTITLE, "Fourteenth international Conference on Machine Learning");
+    result.setValue(Field.EDITOR, "D. H. Fisher");
+    result.setValue(Field.YEAR, "1997");
+    result.setValue(Field.PAGES, "367-375");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
+    result.setValue(Field.ADDRESS, "San Francisco, CA");
+    
+    return result;
   }
     
   /**
@@ -115,6 +210,8 @@ public class Dagging
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     return weka.classifiers.functions.SMO.class.getName();
@@ -149,27 +246,85 @@ public class Dagging
 
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -W classname <br>
-   * Specify the full class name of a weak classifier as the basis for 
-   * bagging (required).<p>
-   *
-   * -F num <br/>
-   * Set the number of folds to use for splitting the training set (default 10).
-   * <p/>
-   *
-   * -S seed <br>
-   * Random number seed for resampling (default 1).<p>
-   *
-   * -verbose <br/>
-   *  whether to output some more information during improving the classifier.
-   *  <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -F &lt;folds&gt;
+   *  The number of folds for splitting the training set into
+   *  smaller chunks for the base classifier.
+   *  (default 10)</pre>
+   * 
+   * <pre> -verbose
+   *  Whether to print some more information during building the
+   *  classifier.
+   *  (default is off)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.functions.SMO)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.functions.SMO:
+   * </pre>
+   * 
+   * <pre> -C &lt;double&gt;
+   *  The complexity constant C. (default 1)</pre>
+   * 
+   * <pre> -E &lt;double&gt;
+   *  The exponent for the polynomial kernel. (default 1)</pre>
+   * 
+   * <pre> -G &lt;double&gt;
+   *  Gamma for the RBF kernel. (default 0.01)</pre>
+   * 
+   * <pre> -N
+   *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+   * 
+   * <pre> -F
+   *  Feature-space normalization (only for
+   *  non-linear polynomial kernels).</pre>
+   * 
+   * <pre> -O
+   *  Use lower-order terms (only for non-linear
+   *  polynomial kernels).</pre>
+   * 
+   * <pre> -R
+   *  Use RBF kernel. (default poly)</pre>
+   * 
+   * <pre> -A &lt;int&gt;
+   *  The size of the kernel cache. (default 250007, use 0 for full cache)</pre>
+   * 
+   * <pre> -L &lt;double&gt;
+   *  The tolerance parameter. (default 1.0e-3)</pre>
+   * 
+   * <pre> -P &lt;double&gt;
+   *  The epsilon for round-off error. (default 1.0e-12)</pre>
+   * 
+   * <pre> -M
+   *  Fit logistic models to SVM outputs. </pre>
+   * 
+   * <pre> -V &lt;double&gt;
+   *  The number of folds for the internal
+   *  cross-validation. (default -1, use training data)</pre>
+   * 
+   * <pre> -W &lt;double&gt;
+   *  The random number seed. (default 1)</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String        tmpStr;
@@ -274,7 +429,7 @@ public class Dagging
    *
    * @param data the training data to be used for generating the
    * bagged classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
     Classifier[]        base;
@@ -339,7 +494,7 @@ public class Dagging
    *
    * @param instance the instance to be classified
    * @return preedicted class probability distribution
-   * @exception Exception if distribution can't be computed successfully 
+   * @throws Exception if distribution can't be computed successfully 
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     return m_Vote.distributionForInstance(instance);

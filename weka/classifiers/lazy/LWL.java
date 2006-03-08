@@ -31,57 +31,97 @@ import weka.core.Instances;
 import weka.core.LinearNN;
 import weka.core.NearestNeighbourSearch;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Locally-weighted learning. Uses an instance-based algorithm to
- * assign instance weights which are then used by a specified
- * WeightedInstancesHandler.  A good choice for classification is
- * NaiveBayes. LinearRegression is suitable for regression problems.
- * For more information, see<p>
+ <!-- globalinfo-start -->
+ * Locally weighted learning. Uses an instance-based algorithm to assign instance weights which are then used by a specified WeightedInstancesHandler.<br/>
+ * Can do classification (e.g. using naive Bayes) or regression (e.g. using linear regression).<br/>
+ * <br/>
+ * For more info, see<br/>
+ * <br/>
+ * Eibe Frank, Mark Hall, Bernhard Pfahringer: Locally Weighted Naive Bayes. In: 19th Conference in Uncertainty in Artificial Intelligence, 249-256, 2003.<br/>
+ * <br/>
+ * C. Atkeson, A. Moore, S. Schaal (1996). Locally weighted learning. AI Review..
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Eibe Frank, Mark Hall, and Bernhard Pfahringer (2003). Locally
- * Weighted Naive Bayes. Working Paper 04/03, Department of Computer
- * Science, University of Waikato.
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Frank2003,
+ *    author = {Eibe Frank and Mark Hall and Bernhard Pfahringer},
+ *    booktitle = {19th Conference in Uncertainty in Artificial Intelligence},
+ *    pages = {249-256},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Locally Weighted Naive Bayes},
+ *    year = {2003}
+ * }
+ * 
+ * &#64;article{Atkeson1996,
+ *    author = {C. Atkeson and A. Moore and S. Schaal},
+ *    journal = {AI Review},
+ *    title = {Locally weighted learning},
+ *    year = {1996}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Atkeson, C., A. Moore, and S. Schaal (1996) <i>Locally weighted
- * learning</i>
- * <a href="ftp://ftp.cc.gatech.edu/pub/people/cga/air1.ps.gz">download 
- * postscript</a>. <p>
- *
- * Valid options are:<p>
- *
- * -D <br>
- * Produce debugging output. <p>
- *
- * -N <br>
- * Do not normalize numeric attributes' values in distance calculation.<p>
- *
- * -K num <br>
- * Set the number of neighbours used for setting kernel bandwidth.
- * (default all) <p>
- *
- * -U num <br>
- * Set the weighting kernel shape to use. 0 = Linear, 1 = Epnechnikov, 
- * 2 = Tricube, 3 = Inverse, 4 = Gaussian and 5 = Constant.
- * (default 0 = Linear) <p>
- *
- * -W classname <br>
- * Specify the full class name of a base classifier (which needs
- * to be a WeightedInstancesHandler).<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -A
+ *  The nearest neighbour search algorithm to use (default: LinearNN).
+ * </pre>
+ * 
+ * <pre> -K &lt;number of neighbours&gt;
+ *  Set the number of neighbours used to set the kernel bandwidth.
+ *  (default all)</pre>
+ * 
+ * <pre> -U &lt;number of weighting method&gt;
+ *  Set the weighting kernel shape to use. 0=Linear, 1=Epanechnikov,
+ *  2=Tricube, 3=Inverse, 4=Gaussian.
+ *  (default 0 = Linear)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.DecisionStump:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
-public class LWL extends SingleClassifierEnhancer
-  implements UpdateableClassifier, WeightedInstancesHandler {
+public class LWL 
+  extends SingleClassifierEnhancer
+  implements UpdateableClassifier, WeightedInstancesHandler, 
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 1979797405383665815L;
 
   /** The training instances used for classification. */
@@ -113,15 +153,42 @@ public class LWL extends SingleClassifierEnhancer
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
+    return 
+        "Locally weighted learning. Uses an instance-based algorithm to "
+      + "assign instance weights which are then used by a specified "
+      + "WeightedInstancesHandler.\n"
+      + "Can do classification (e.g. using naive Bayes) or regression "
+      + "(e.g. using linear regression).\n\n"
+      + "For more info, see\n\n"
+      + getTechnicalInformation().toString();
+  }
 
-    return "Class for performing locally weighted learning. Can do "
-      + "classification (e.g. using naive Bayes) or regression (e.g. using "
-      + "linear regression). The base learner needs to implement "
-      + "WeightedInstancesHandler. For more info, see\n\n"
-      + "Eibe Frank, Mark Hall, and Bernhard Pfahringer (2003). \"Locally "
-      + "Weighted Naive Bayes\". Conference on Uncertainty in AI.\n\n"
-      + "Atkeson, C., A. Moore, and S. Schaal (1996) \"Locally weighted "
-      + "learning\" AI Reviews.";
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Eibe Frank and Mark Hall and Bernhard Pfahringer");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.TITLE, "Locally Weighted Naive Bayes");
+    result.setValue(Field.BOOKTITLE, "19th Conference in Uncertainty in Artificial Intelligence");
+    result.setValue(Field.PAGES, "249-256");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    
+    additional = result.add(Type.ARTICLE);
+    additional.setValue(Field.AUTHOR, "C. Atkeson and A. Moore and S. Schaal");
+    additional.setValue(Field.YEAR, "1996");
+    additional.setValue(Field.TITLE, "Locally weighted learning");
+    additional.setValue(Field.JOURNAL, "AI Review");
+    
+    return result;
   }
     
   /**
@@ -134,6 +201,8 @@ public class LWL extends SingleClassifierEnhancer
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -170,30 +239,44 @@ public class LWL extends SingleClassifierEnhancer
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D <br>
-   * Produce debugging output. <p>
-   *
-   * -N <br>
-   * Do not normalize numeric attributes' values in distance calculation.
-   * (default DO normalization)<p>
-   *
-   * -K num <br>
-   * Set the number of neighbours used for setting kernel bandwidth.
-   * (default all) <p>
-   *
-   * -U num <br>
-   * Set the weighting kernel shape to use. 0 = Linear, 1 = Epnechnikov, 
-   * 2 = Tricube, 3 = Inverse, 4 = Gaussian and 5 = Constant.
-   * (default 0 = Linear) <p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a base classifier (which needs
-   * to be a WeightedInstancesHandler).<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -A
+   *  The nearest neighbour search algorithm to use (default: LinearNN).
+   * </pre>
+   * 
+   * <pre> -K &lt;number of neighbours&gt;
+   *  Set the number of neighbours used to set the kernel bandwidth.
+   *  (default all)</pre>
+   * 
+   * <pre> -U &lt;number of weighting method&gt;
+   *  Set the weighting kernel shape to use. 0=Linear, 1=Epanechnikov,
+   *  2=Tricube, 3=Inverse, 4=Gaussian.
+   *  (default 0 = Linear)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.DecisionStump:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -380,6 +463,10 @@ public class LWL extends SingleClassifierEnhancer
     
     result.setMinimumNumberInstances(0);
     
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
+    
     return result;
   }
   
@@ -387,7 +474,7 @@ public class LWL extends SingleClassifierEnhancer
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -412,7 +499,7 @@ public class LWL extends SingleClassifierEnhancer
    * Adds the supplied instance to the training set
    *
    * @param instance the instance to add
-   * @exception Exception if instance could not be incorporated
+   * @throws Exception if instance could not be incorporated
    * successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
@@ -434,7 +521,7 @@ public class LWL extends SingleClassifierEnhancer
    *
    * @param instance the instance to be classified
    * @return preedicted class probability distribution
-   * @exception Exception if distribution can't be computed successfully
+   * @throws Exception if distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     
@@ -596,5 +683,4 @@ public class LWL extends SingleClassifierEnhancer
       System.err.println(e.getMessage());
     }
   }
-  
 }

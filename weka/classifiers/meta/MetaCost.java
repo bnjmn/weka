@@ -33,6 +33,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -46,64 +50,93 @@ import java.util.Vector;
 
 
 /**
- * This metaclassifier makes its base classifier cost-sensitive using the
- * method specified in <p>
+ <!-- globalinfo-start -->
+ * This metaclassifier makes its base classifier cost-sensitive using the method specified in<br/>
+ * <br/>
+ * Pedro Domingos: MetaCost: A general method for making classifiers cost-sensitive. In: Fifth International Conference on Knowledge Discovery and Data Mining, 155-164, 1999.<br/>
+ * <br/>
+ * This classifier should produce similar results to one created by passing the base learner to Bagging, which is in turn passed to a CostSensitiveClassifier operating on minimum expected cost. The difference is that MetaCost produces a single cost-sensitive classifier of the base learner, giving the benefits of fast classification and interpretable output (if the base learner itself is interpretable). This implementation  uses all bagging iterations when reclassifying training data (the MetaCost paper reports a marginal improvement when only those iterations containing each training instance are used in reclassifying that instance).
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Pedro Domingos (1999). <i>MetaCost: A general method for making classifiers
- * cost-sensitive</i>, Proceedings of the Fifth International Conference on 
- * Knowledge Discovery and Data Mining, pp. 155-164. Also available online at
- * <a href="http://www.cs.washington.edu/homes/pedrod/kdd99.ps.gz">
- * http://www.cs.washington.edu/homes/pedrod/kdd99.ps.gz</a>. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Domingos1999,
+ *    author = {Pedro Domingos},
+ *    booktitle = {Fifth International Conference on Knowledge Discovery and Data Mining},
+ *    pages = {155-164},
+ *    title = {MetaCost: A general method for making classifiers cost-sensitive},
+ *    year = {1999}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * This classifier should produce similar results to one created by
- * passing the base learner to Bagging, which is in turn passed to a
- * CostSensitiveClassifier operating on minimum expected cost. The difference
- * is that MetaCost produces a single cost-sensitive classifier of the
- * base learner, giving the benefits of fast classification and interpretable
- * output (if the base learner itself is interpretable). This implementation 
- * uses all bagging iterations when reclassifying training data (the MetaCost
- * paper reports a marginal improvement when only those iterations containing
- * each training instance are used in reclassifying that instance). <p>
- *
- * Valid options are:<p>
- *
- * -W classname <br>
- * Specify the full class name of a classifier (required).<p>
- *
- * -C cost file <br>
- * File name of a cost matrix to use. If this is not supplied, a cost
- * matrix will be loaded on demand. The name of the on-demand file
- * is the relation name of the training data plus ".cost", and the
- * path to the on-demand file is specified with the -N option.<p>
- *
- * -N directory <br>
- * Name of a directory to search for cost files when loading costs on demand
- * (default current directory). <p>
- *
- * -I num <br>
- * Set the number of bagging iterations (default 10). <p>
- *
- * -S seed <br>
- * Random number seed used when reweighting by resampling (default 1).<p>
- *
- * -P num <br>
- * Size of each bag, as a percentage of the training size (default 100). <p>
- *
- * -cost-matrix matrix<br>
- * The cost matrix, specified in Matlab single line format.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  Number of bagging iterations.
+ *  (default 10)</pre>
+ * 
+ * <pre> -C &lt;cost file name&gt;
+ *  File name of a cost matrix to use. If this is not supplied,
+ *  a cost matrix will be loaded on demand. The name of the
+ *  on-demand file is the relation name of the training data
+ *  plus ".cost", and the path to the on-demand file is
+ *  specified with the -N option.</pre>
+ * 
+ * <pre> -N &lt;directory&gt;
+ *  Name of a directory to search for cost files when loading
+ *  costs on demand (default current directory).</pre>
+ * 
+ * <pre> -cost-matrix &lt;matrix&gt;
+ *  The cost matrix in Matlab single line format.</pre>
+ * 
+ * <pre> -P
+ *  Size of each bag, as a percentage of the
+ *  training set size. (default 100)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
-public class MetaCost extends RandomizableSingleClassifierEnhancer {
+public class MetaCost 
+  extends RandomizableSingleClassifierEnhancer
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 1205317833344726855L;
   
-  /* Specify possible sources of the cost matrix */
+  /** load cost matrix on demand */
   public static final int MATRIX_ON_DEMAND = 1;
+  /** use explicit matrix */
   public static final int MATRIX_SUPPLIED = 2;
+  /** Specify possible sources of the cost matrix */
   public static final Tag [] TAGS_MATRIX_SOURCE = {
     new Tag(MATRIX_ON_DEMAND, "Load cost matrix on demand"),
     new Tag(MATRIX_SUPPLIED, "Use explicit cost matrix")
@@ -139,9 +172,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
  
     return  "This metaclassifier makes its base classifier cost-sensitive using the "
       + "method specified in\n\n"
-      + "Pedro Domingos (1999) \"MetaCost: A general method for making classifiers "
-      + "cost-sensitive\", Proceedings of the Fifth International Conference on "
-      + "Knowledge Discovery and Data Mining, pp 155-164.\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
       + "This classifier should produce similar results to one created by "
       + "passing the base learner to Bagging, which is in turn passed to a "
       + "CostSensitiveClassifier operating on minimum expected cost. The difference "
@@ -152,6 +183,26 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
       + "paper reports a marginal improvement when only those iterations containing "
       + "each training instance are used in reclassifying that instance).";
  
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Pedro Domingos");
+    result.setValue(Field.TITLE, "MetaCost: A general method for making classifiers cost-sensitive");
+    result.setValue(Field.BOOKTITLE, "Fifth International Conference on Knowledge Discovery and Data Mining");
+    result.setValue(Field.YEAR, "1999");
+    result.setValue(Field.PAGES, "155-164");
+    
+    return result;
   }
 
   /**
@@ -194,37 +245,59 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -W classname <br>
-   * Specify the full class name of a classifier (required).<p>
-   *
-   * -C cost file <br>
-   * File name of a cost matrix to use. If this is not supplied, a cost
-   * matrix will be loaded on demand. The name of the on-demand file
-   * is the relation name of the training data plus ".cost", and the
-   * path to the on-demand file is specified with the -N option.<p>
-   *
-   * -N directory <br>
-   * Name of a directory to search for cost files when loading costs on demand
-   * (default current directory). <p>
-   *
-   * -I num <br>
-   * Set the number of bagging iterations (default 10). <p>
-   *
-   * -S seed <br>
-   * Random number seed used when reweighting by resampling (default 1).<p>
-   *
-   * -P num <br>
-   * Size of each bag, as a percentage of the training size (default 100). <p>
-   *
-   * -cost-matrix matrix<br>
-   * The cost matrix, specified in Matlab single line format.<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  Number of bagging iterations.
+   *  (default 10)</pre>
+   * 
+   * <pre> -C &lt;cost file name&gt;
+   *  File name of a cost matrix to use. If this is not supplied,
+   *  a cost matrix will be loaded on demand. The name of the
+   *  on-demand file is the relation name of the training data
+   *  plus ".cost", and the path to the on-demand file is
+   *  specified with the -N option.</pre>
+   * 
+   * <pre> -N &lt;directory&gt;
+   *  Name of a directory to search for cost files when loading
+   *  costs on demand (default current directory).</pre>
+   * 
+   * <pre> -cost-matrix &lt;matrix&gt;
+   *  The cost matrix in Matlab single line format.</pre>
+   * 
+   * <pre> -P
+   *  Size of each bag, as a percentage of the
+   *  training set size. (default 100)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -418,6 +491,8 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
   
   /**
    * Sets the number of bagging iterations
+   * 
+   * @param numIterations the number of iterations to use
    */
   public void setNumIterations(int numIterations) {
 
@@ -456,7 +531,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
   /**
    * Sets the misclassification cost matrix.
    *
-   * @param the cost matrix
+   * @param newCostMatrix the cost matrix
    */
   public void setCostMatrix(CostMatrix newCostMatrix) {
     
@@ -474,6 +549,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     
     return result;
@@ -483,7 +559,7 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
    * Builds the model of the base learner.
    *
    * @param data the training data
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -530,7 +606,8 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
    * Classifies a given test instance.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the classification for this instance
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
@@ -552,6 +629,8 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a string representaiton of the classifier 
    */
   public String toString() {
 
@@ -587,5 +666,4 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
       System.err.println(e.getMessage());
     }
   }
-
 }

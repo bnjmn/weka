@@ -34,6 +34,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -46,35 +50,54 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Implements Qi Zhang's EM-DD algorithm <p/>
+ <!-- globalinfo-start -->
+ * EMDD model builds heavily upon Dietterich's Diverse Density (DD) algorithm.<br/>
+ * It is a general framework for MI learning of converting the MI problem to a single-instance setting using EM. In this implementation, we use most-likely cause DD model and only use 3 random selected postive bags as initial starting points of EM.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Qi Zhang, Sally A. Goldman: EM-DD: An Improved Multiple-Instance Learning Technique. In: Advances in Neural Information Processing Systems 14, 1073-108, 2001.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * EMDD model builds heavily upon Dietterich's Diverse Density (DD) algorithm.
- * It is a general framework for MI learning of converting the MI problem to a
- * single-instance setting using EM.  In this implementation, we use
- * most-likely cause DD model and only use 3 random selected postive bags as
- * initial starting points of EM. <p/>
- * 
- * For more information see: <br/>
- * Qi Zhang and Sally A. Goldman (2002). <i>EM-DD: an improved 
- * multiple-instance learning technique.</i> <p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Zhang2001,
+ *    author = {Qi Zhang and Sally A. Goldman},
+ *    booktitle = {Advances in Neural Information Processing Systems 14},
+ *    pages = {1073-108},
+ *    publisher = {MIT Press},
+ *    title = {EM-DD: An Improved Multiple-Instance Learning Technique},
+ *    year = {2001}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -D <br/>
- * Turn on debugging output. <p/>
- *
- * -N 0|1|2 <br/>
- * Whether to 0=normalize/1=standardize/2=neither. (default 1=standardize) <p/>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Whether to 0=normalize/1=standardize/2=neither.
+ *  (default 1=standardize)</pre>
+ * 
+ <!-- options-end -->
  *     
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class MIEMDD 
   extends Classifier 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 3899547154866223734L;
   
   /** The index of the class attribute */
@@ -103,10 +126,13 @@ public class MIEMDD
   /** Whether to normalize/standardize/neither, default:standardize */
   protected int m_filterType = FILTER_STANDARDIZE;
 
-  /** The filter to apply to the training data */
+  /** Normalize training data */
   public static final int FILTER_NORMALIZE = 0;
+  /** Standardize training data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** No normalization/standardization */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -125,13 +151,33 @@ public class MIEMDD
   public String globalInfo() {
     return 
         "EMDD model builds heavily upon Dietterich's Diverse Density (DD) "
-      + "algorithm.\n It is a general framework for MI learning of converting "
+      + "algorithm.\nIt is a general framework for MI learning of converting "
       + "the MI problem to a single-instance setting using EM. In this "
       + "implementation, we use most-likely cause DD model and only use 3 "
       + "random selected postive bags as initial starting points of EM.\n\n"
-      + "For more information see:\n"
-      + "Qi Zhang and Sally A. Goldman (2002). EM-DD: an improved "
-      + "multiple-instance learning technique.";
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Qi Zhang and Sally A. Goldman");
+    result.setValue(Field.TITLE, "EM-DD: An Improved Multiple-Instance Learning Technique");
+    result.setValue(Field.BOOKTITLE, "Advances in Neural Information Processing Systems 14");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.PAGES, "1073-108");
+    result.setValue(Field.PUBLISHER, "MIT Press");
+    
+    return result;
   }
 
   /**
@@ -155,7 +201,19 @@ public class MIEMDD
   }
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  Whether to 0=normalize/1=standardize/2=neither.
+   *  (default 1=standardize)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -676,4 +734,3 @@ public class MIEMDD
     }
   }
 }
-

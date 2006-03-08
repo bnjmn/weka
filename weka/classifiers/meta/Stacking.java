@@ -33,6 +33,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -41,33 +45,64 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Implements stacking. For more information, see<p>
+ <!-- globalinfo-start -->
+ * Combines several classifiers using the stacking method. Can do classification or regression.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * David H. Wolpert (1992). Stacked generalization. Neural Networks. Vol.5, pp. 241-259.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * David H. Wolpert (1992). <i>Stacked
- * generalization</i>. Neural Networks, 5:241-259, Pergamon Press. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Wolpert1992,
+ *    author = {David H. Wolpert},
+ *    journal = {Neural Networks},
+ *    pages = {pp. 241-259},
+ *    publisher = {Pergamon Press},
+ *    title = {Stacked generalization},
+ *    volume = {Vol.5},
+ *    year = {1992}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -X num_folds <br>
- * The number of folds for the cross-validation (default 10).<p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
- *
- * -B classifierstring <br>
- * Classifierstring should contain the full class name of a base scheme
- * followed by options to the classifier.
- * (required, option should be used once for each classifier).<p>
- *
- * -M classifierstring <br>
- * Classifierstring for the meta classifier. Same format as for base
- * classifiers. (required) <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;scheme specification&gt;
+ *  Full name of meta classifier, followed by options.
+ *  (default: "weka.classifiers.rules.Zero")</pre>
+ * 
+ * <pre> -X &lt;number of folds&gt;
+ *  Sets the number of cross-validation folds.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -B &lt;classifier specification&gt;
+ *  Full class name of classifier to include, followed
+ *  by scheme options. May be specified multiple times.
+ *  (default: "weka.classifiers.rules.ZeroR")</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
-public class Stacking extends RandomizableMultipleClassifiersCombiner {
+public class Stacking 
+  extends RandomizableMultipleClassifiersCombiner
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 5134738557155845452L;
   
   /** The meta classifier */
@@ -90,10 +125,31 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
   public String globalInfo() {
 
     return "Combines several classifiers using the stacking method. "
-      + "Can do classification or regression. "
+      + "Can do classification or regression.\n\n"
       + "For more information, see\n\n"
-      + "David H. Wolpert (1992). \"Stacked "
-      + "generalization\". Neural Networks, 5:241-259, Pergamon Press.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "David H. Wolpert");
+    result.setValue(Field.YEAR, "1992");
+    result.setValue(Field.TITLE, "Stacked generalization");
+    result.setValue(Field.JOURNAL, "Neural Networks");
+    result.setValue(Field.VOLUME, "Vol.5");
+    result.setValue(Field.PAGES, "pp. 241-259");
+    result.setValue(Field.PUBLISHER, "Pergamon Press");
+    
+    return result;
   }
   
   /**
@@ -120,6 +176,8 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /**
    * String describing option for setting meta classifier
+   * 
+   * @return the string describing the option
    */
   protected String metaOption() {
 
@@ -128,25 +186,35 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -X num_folds <br>
-   * The number of folds for the cross-validation (default 10).<p>
-   *
-   * -S seed <br>
-   * Random number seed (default 1).<p>
-   *
-   * -B classifierstring <br>
-   * Classifierstring should contain the full class name of a base scheme
-   * followed by options to the classifier.
-   * (required, option should be used once for each classifier).<p>
-   *
-   * -M classifierstring <br>
-   * Classifierstring for the meta classifier. Same format as for base
-   * classifiers. (default: weka.classifiers.rules.ZeroR) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M &lt;scheme specification&gt;
+   *  Full name of meta classifier, followed by options.
+   *  (default: "weka.classifiers.rules.Zero")</pre>
+   * 
+   * <pre> -X &lt;number of folds&gt;
+   *  Sets the number of cross-validation folds.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -B &lt;classifier specification&gt;
+   *  Full class name of classifier to include, followed
+   *  by scheme options. May be specified multiple times.
+   *  (default: "weka.classifiers.rules.ZeroR")</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -162,6 +230,9 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /**
    * Process options setting meta classifier.
+   * 
+   * @param options the options to parse
+   * @throws Exception if the parsing fails
    */
   protected void processMetaOptions(String[] options) throws Exception {
 
@@ -221,7 +292,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
    * Sets the number of folds for the cross-validation.
    *
    * @param numFolds the number of folds for the cross-validation
-   * @exception Exception if parameter illegal
+   * @throws Exception if parameter illegal
    */
   public void setNumFolds(int numFolds) throws Exception {
     
@@ -278,6 +349,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
@@ -294,7 +366,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -327,6 +399,10 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /**
    * Generates the meta data
+   * 
+   * @param newData the data to work on
+   * @param random the random number generator to use for cross-validation
+   * @throws Exception if generation fails
    */
   protected void generateMetaLevel(Instances newData, Random random) 
     throws Exception {
@@ -355,7 +431,8 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
    * Returns class probabilities.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the distribution
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
@@ -365,6 +442,8 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -393,6 +472,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
    *
    * @param instances the level-0 format
    * @return the format for the meta data
+   * @throws Exception if the format generation fails
    */
   protected Instances metaFormat(Instances instances) throws Exception {
 
@@ -423,6 +503,7 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
    * 
    * @param instance the instance to be transformed
    * @return the level-1 instance
+   * @throws Exception if the instance generation fails
    */
   protected Instance metaInstance(Instance instance) throws Exception {
 
@@ -461,12 +542,3 @@ public class Stacking extends RandomizableMultipleClassifiersCombiner {
     }
   }
 }
-
-
-
-
-
-
-
-
-

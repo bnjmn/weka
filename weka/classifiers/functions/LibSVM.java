@@ -31,6 +31,9 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -43,31 +46,99 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-/**
- * A wrapper class for the libsvm tools (the libsvm classes, typically the jar
- * file, need to be in the classpath to use this classifier). <p/>
- * LibSVM (= originally WLSVM) runs faster than SMO since it uses LibSVM to
- * build the SVM classifier. LibSVM allows Weka users to experiment with
- * One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM
- * reports many useful statistics about LibSVM classifier (e.g., confusion
- * matrix, precision, recall, ROC score, etc.). <p/>
- * 
- * LibSVM was originally developed as 'WLSVM' by Yasser EL-Manzalawy: <br/>
- *   <a href="http://www.cs.iastate.edu/~yasser/wlsvm/">http://www.cs.iastate.edu/~yasser/wlsvm/</a>
- *
- * @author  Yasser EL-Manzalawy
- * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
- */
-
 /*
  * Modifications by FracPete:
  * - complete overhaul to make it useable in Weka
  * - accesses libsvm classes only via Reflection to make Weka compile without
  *   the libsvm classes
  */
+
+/** 
+ <!-- globalinfo-start -->
+ * A wrapper class for the libsvm tools (the libsvm classes, typically the jar file, need to be in the classpath to use this classifier).<br/>
+ * LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier.LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.).<br/>
+ * <br/>
+ * Yasser EL-Manzalawy (2005). WLSVM. URL http://www.cs.iastate.edu/~yasser/wlsvm/.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;misc{EL-Manzalawy2005,
+ *    author = {Yasser EL-Manzalawy},
+ *    note = {LibSVM was originally developed as 'WLSVM'},
+ *    title = {WLSVM},
+ *    year = {2005},
+ *    URL = {http://www.cs.iastate.edu/~yasser/wlsvm/}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;int&gt;
+ *   set type of SVM (default 0)
+ *    0 = C-SVC
+ *    1 = nu-SVC
+ *    2 = one-class SVM
+ *    3 = epsilon-SVR
+ *    4 = nu-SVR</pre>
+ * 
+ * <pre> -K &lt;int&gt;
+ *   set type of kernel function (default 2)
+ *    0 = linear: u'*v
+ *    1 = polynomial: (gamma*u'*v + coef0)^degree
+ *    2 = radial basis function: exp(-gamma*|u-v|^2)
+ *    3 = sigmoid: tanh(gamma*u'*v + coef0)</pre>
+ * 
+ * <pre> -D &lt;int&gt;
+ *   set degree in kernel function (default 3)</pre>
+ * 
+ * <pre> -G &lt;double&gt;
+ *   set gamma in kernel function (default 1/k)</pre>
+ * 
+ * <pre> -R &lt;double&gt;
+ *   set coef0 in kernel function (default 0)</pre>
+ * 
+ * <pre> -C &lt;double&gt;
+ *   set the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+ *   (default 1)</pre>
+ * 
+ * <pre> -N &lt;double&gt;
+ *   set the parameter nu of nu-SVC, one-class SVM, and nu-SVR
+ *   (default 0.5)</pre>
+ * 
+ * <pre> -Z
+ *   turns on normalization of input data (default off)</pre>
+ * 
+ * <pre> -P &lt;double&gt;
+ *   set the epsilon in loss function of epsilon-SVR (default 0.1)</pre>
+ * 
+ * <pre> -M &lt;double&gt;
+ *   set cache memory size in MB (default 40)</pre>
+ * 
+ * <pre> -E &lt;double&gt;
+ *   set tolerance of termination criterion (default 0.001)</pre>
+ * 
+ * <pre> -H
+ *   turns the shrinking heuristics off (default on)</pre>
+ * 
+ * <pre> -W &lt;double&gt;
+ *   set the parameters C of class i to weight[i]*C, for C-SVC
+ *   (default 1)</pre>
+ * 
+ <!-- options-end -->
+ *
+ * @author  Yasser EL-Manzalawy
+ * @author  FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.3 $
+ */
 public class LibSVM 
-  extends Classifier {
+  extends Classifier
+  implements TechnicalInformationHandler {
   
   /** the svm classname */
   protected final static String CLASS_SVM = "libsvm.svm";
@@ -96,11 +167,17 @@ public class LibSVM
   /** normalize input data */
   protected boolean m_Normalize = false;
   
+  /** SVM type C-SVC */
   public static final int SVMTYPE_C_SVC = 0;
+  /** SVM type nu-SVC */
   public static final int SVMTYPE_NU_SVC = 1;
+  /** SVM type one-class SVM */
   public static final int SVMTYPE_ONE_CLASS_SVM = 2;
+  /** SVM type epsilon-SVR */
   public static final int SVMTYPE_EPSILON_SVR = 3;
+  /** SVM type nu-SVR */
   public static final int SVMTYPE_NU_SVR = 4;
+  /** SVM types */
   public static final Tag[] TAGS_SVMTYPE = {
     new Tag(SVMTYPE_C_SVC, "C-SVC"),
     new Tag(SVMTYPE_NU_SVC, "nu-SVC"),
@@ -112,10 +189,15 @@ public class LibSVM
   /** the SVM type */
   protected int m_SVMType = SVMTYPE_C_SVC;
   
+  /** kernel type linear: u'*v */
   public static final int KERNELTYPE_LINEAR = 0;
+  /** kernel type polynomial: (gamma*u'*v + coef0)^degree */
   public static final int KERNELTYPE_POLYNOMIAL = 1;
+  /** kernel type radial basis function: exp(-gamma*|u-v|^2) */
   public static final int KERNELTYPE_RBF = 2;
+  /** kernel type sigmoid: tanh(gamma*u'*v + coef0) */
   public static final int KERNELTYPE_SIGMOID = 3;
+  /** the different kernel types */
   public static final Tag[] TAGS_KERNELTYPE = {
     new Tag(KERNELTYPE_LINEAR, "linear: u'*v"),
     new Tag(KERNELTYPE_POLYNOMIAL, "polynomial: (gamma*u'*v + coef0)^degree"),
@@ -194,8 +276,27 @@ public class LibSVM
     + "statistics about LibSVM classifier (e.g., confusion matrix,"
     + "precision, recall, ROC score, etc.).\n"
     + "\n"
-    + "LibSVM was originally developed as 'WLSVM' by Yasser EL-Manzalawy:\n"
-    + "   http://www.cs.iastate.edu/~yasser/wlsvm/";
+    + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.MISC);
+    result.setValue(TechnicalInformation.Field.AUTHOR, "Yasser EL-Manzalawy");
+    result.setValue(TechnicalInformation.Field.YEAR, "2005");
+    result.setValue(TechnicalInformation.Field.TITLE, "WLSVM");
+    result.setValue(TechnicalInformation.Field.NOTE, "LibSVM was originally developed as 'WLSVM'");
+    result.setValue(TechnicalInformation.Field.URL, "http://www.cs.iastate.edu/~yasser/wlsvm/");
+    
+    return result;
   }
   
   /**
@@ -289,9 +390,66 @@ public class LibSVM
   }
   
   /**
-   * Sets the classifier options
+   * Sets the classifier options <p/>
    * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;int&gt;
+   *   set type of SVM (default 0)
+   *    0 = C-SVC
+   *    1 = nu-SVC
+   *    2 = one-class SVM
+   *    3 = epsilon-SVR
+   *    4 = nu-SVR</pre>
+   * 
+   * <pre> -K &lt;int&gt;
+   *   set type of kernel function (default 2)
+   *    0 = linear: u'*v
+   *    1 = polynomial: (gamma*u'*v + coef0)^degree
+   *    2 = radial basis function: exp(-gamma*|u-v|^2)
+   *    3 = sigmoid: tanh(gamma*u'*v + coef0)</pre>
+   * 
+   * <pre> -D &lt;int&gt;
+   *   set degree in kernel function (default 3)</pre>
+   * 
+   * <pre> -G &lt;double&gt;
+   *   set gamma in kernel function (default 1/k)</pre>
+   * 
+   * <pre> -R &lt;double&gt;
+   *   set coef0 in kernel function (default 0)</pre>
+   * 
+   * <pre> -C &lt;double&gt;
+   *   set the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+   *   (default 1)</pre>
+   * 
+   * <pre> -N &lt;double&gt;
+   *   set the parameter nu of nu-SVC, one-class SVM, and nu-SVR
+   *   (default 0.5)</pre>
+   * 
+   * <pre> -Z
+   *   turns on normalization of input data (default off)</pre>
+   * 
+   * <pre> -P &lt;double&gt;
+   *   set the epsilon in loss function of epsilon-SVR (default 0.1)</pre>
+   * 
+   * <pre> -M &lt;double&gt;
+   *   set cache memory size in MB (default 40)</pre>
+   * 
+   * <pre> -E &lt;double&gt;
+   *   set tolerance of termination criterion (default 0.001)</pre>
+   * 
+   * <pre> -H
+   *   turns the shrinking heuristics off (default on)</pre>
+   * 
+   * <pre> -W &lt;double&gt;
+   *   set the parameters C of class i to weight[i]*C, for C-SVC
+   *   (default 1)</pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options     the options to parse
+   * @throws Exception  if parsing fails
    */
   public void setOptions(String[] options) throws Exception {
     String      tmpStr;
@@ -949,6 +1107,8 @@ public class LibSVM
   
   /**
    * transfers the local variables into a svm_parameter object
+   * 
+   * @return the configured svm_parameter object
    */
   protected Object getParameters() {
     Object      result;
@@ -987,6 +1147,10 @@ public class LibSVM
   
   /**
    * returns the svm_problem
+   * 
+   * @param vx the x values
+   * @param vy the y values
+   * @return the svm_problem object
    */
   protected Object getProblem(Vector vx, Vector vy) {
     Object      result;
@@ -1036,7 +1200,7 @@ public class LibSVM
   /**
    * converts an ARFF dataset into sparse format
    * 
-   * @param instances           the dataset to process
+   * @param data                the dataset to process
    * @return                    the processed data
    */
   protected Vector dataToSparse(Instances data) {
@@ -1053,6 +1217,7 @@ public class LibSVM
    * 
    * @param instance            the instance to classify
    * @return                    the class label
+   * @throws Exception          if an error occurs
    */
   public double classifyInstance(Instance instance) throws Exception {
     
@@ -1100,7 +1265,6 @@ public class LibSVM
     
     StringTokenizer st = new StringTokenizer(line, " \t\n\r\f:");
     
-    double target = Double.parseDouble(st.nextToken());
     int m = st.countTokens() / 2;
     Object x = Array.newInstance(Class.forName(CLASS_SVMNODE), m);
     for (int j = 0; j < m; j++) {

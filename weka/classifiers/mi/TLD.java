@@ -31,6 +31,10 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -39,31 +43,61 @@ import java.util.Random;
 import java.util.Vector;
 
 /** 
- * Two-Level Distribution approach, changes the starting value of the searching
- * algorithm, supplement the cut-off modification and check missing values.
+ <!-- globalinfo-start -->
+ * Two-Level Distribution approach, changes the starting value of the searching algorithm, supplement the cut-off modification and check missing values.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Xin Xu (2003). Statistical learning in multiple instance problem. Hamilton, NZ.
  * <p/>
- * For more information see: <br/>
- * Xin Xu (2003). Statistical learning in multiple instance problem.  
- * (University of Waikato, Hamilton, NZ, Xin Xu's thesis: 0657.594) <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;misc{Xu2003,
+ *    address = {Hamilton, NZ},
+ *    author = {Xin Xu},
+ *    note = {0657.594},
+ *    school = {University of Waikato},
+ *    title = {Statistical learning in multiple instance problem},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -C <br/>
- * Set whether or not use empirical log-odds cut-off instead of 0
- * (default: Not use) <p/>
- *
- * -R numOfRuns <br/>
- * Set the number of multiple runs needed for searching the MLE.  (default: 1)
- * <p/>
+ * 
+ * <pre> -C
+ *  Set whether or not use empirical
+ *  log-odds cut-off instead of 0</pre>
+ * 
+ * <pre> -R &lt;numOfRuns&gt;
+ *  Set the number of multiple runs 
+ *  needed for searching the MLE.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class TLD 
   extends RandomizableClassifier 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 6657315525171152210L;
   
   /** The mean for each attribute of each positive exemplar */
@@ -120,9 +154,29 @@ public class TLD
         "Two-Level Distribution approach, changes the starting value of "
       + "the searching algorithm, supplement the cut-off modification and "
       + "check missing values.\n\n"
-      + "For more information see:\n"
-      + "Xin Xu (2003). Statistical learning in multiple instance problem. "
-      + "(University of Waikato, Hamilton, NZ, Xin Xu's thesis: 0657.594)";
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+  
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.MISC);
+    result.setValue(Field.AUTHOR, "Xin Xu");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.TITLE, "Statistical learning in multiple instance problem");
+    result.setValue(Field.SCHOOL, "University of Waikato");
+    result.setValue(Field.ADDRESS, "Hamilton, NZ");
+    result.setValue(Field.NOTE, "0657.594");
+    
+    return result;
   }
 
   /**
@@ -670,7 +724,28 @@ public class TLD
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C
+   *  Set whether or not use empirical
+   *  log-odds cut-off instead of 0</pre>
+   * 
+   * <pre> -R &lt;numOfRuns&gt;
+   *  Set the number of multiple runs 
+   *  needed for searching the MLE.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -850,7 +925,7 @@ class TLD_Optm extends Optimization{
     return rt;
   }
 
-  /* 
+  /**
    * Implement this procedure to evaluate objective
    * function to be minimized
    */
@@ -915,7 +990,7 @@ class TLD_Optm extends Optimization{
     return NLL;
   }
 
-  /* 
+  /**
    * Subclass should implement this procedure to evaluate gradient
    * of the objective function
    */
@@ -958,7 +1033,7 @@ class TLD_Optm extends Optimization{
     return g;
   }
 
-  /* 
+  /**
    * Subclass should implement this procedure to evaluate second-order
    * gradient of the objective function
    */
