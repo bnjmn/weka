@@ -43,14 +43,13 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * The implementation of a RIpple-DOwn Rule learner.
- *
- * It generates the default rule first and then the exceptions for the default rule
- * with the least (weighted) error rate.  Then it generates the "best" exceptions for
- * each exception and iterates until pure.  Thus it performs a tree-like expansion of
- * exceptions and the leaf has only default rule but no exceptions. <br>
- * The exceptions are a set of rules that predict the class other than class in default
- * rule.  IREP is used to find out the exceptions. <p>
+ <!-- globalinfo-start -->
+ * The implementation of a RIpple-DOwn Rule learner.<br/>
+ * <br/>
+ * It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  * There are five inner classes defined in this class. <br>
  * The first is Ridor_node, which implements one node in the Ridor tree.  It's basically
  * composed of a default class and a set of exception rules to the default class.<br>
@@ -63,14 +62,46 @@ import java.util.Vector;
  * implement the functions related to a antecedent with a nominal attribute and a numeric 
  * attribute respectively.<p>
  * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -F &lt;number of folds&gt;
+ *  Set number of folds for IREP
+ *  One fold is used as pruning set.
+ *  (default 3)</pre>
+ * 
+ * <pre> -S &lt;number of shuffles&gt;
+ *  Set number of shuffles to randomize
+ *  the data in order to get better rule.
+ *  (default 10)</pre>
+ * 
+ * <pre> -A
+ *  Set flag of whether use the error rate 
+ *  of all the data to select the default class
+ *  in each step. If not set, the learner will only use the error rate in the pruning data</pre>
+ * 
+ * <pre> -M
+ *   Set flag of whether use the majority class as
+ *  the default class in each step instead of 
+ *  choosing default class based on the error rate
+ *  (if the flag is not set)</pre>
+ * 
+ * <pre> -N &lt;min. weights&gt;
+ *  Set the minimal weights of instances
+ *  within a split.
+ *  (default 2.0)</pre>
+ * 
+ <!-- options-end -->
  *
- * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @author Xin XU (xx5@cs.waikato.ac.nz)
+ * @version $Revision: 1.14 $ 
  */
 
-public class Ridor extends Classifier
+public class Ridor 
+  extends Classifier
   implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -7261533075088314436L;
   
   /** The number of folds to split data into Grow and Prune for IREP */
@@ -109,7 +140,7 @@ public class Ridor extends Classifier
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "The implementation of a RIpple-DOwn Rule learner. " 
+    return "The implementation of a RIpple-DOwn Rule learner.\n\n" 
       + "It generates a default rule first and then the exceptions for the default rule "
       + "with the least (weighted) error rate.  Then it generates the \"best\" exceptions for "
       + "each exception and iterates until pure.  Thus it performs a tree-like expansion of "
@@ -123,7 +154,11 @@ public class Ridor extends Classifier
    * It consists of a default class label, a set of exceptions to the default rule
    * and the exceptions to each exception
    */
-  private class Ridor_node implements Serializable {
+  private class Ridor_node 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = -581370560157467677L;
 	
     /** The default class label */
     private double defClass = Double.NaN;
@@ -139,10 +174,32 @@ public class Ridor extends Classifier
     /** The level of this node */
     private int level;
 
-    /** "Get" member functions */
-    public double getDefClass() { return defClass; }
-    public RidorRule[] getRules() { return rules; }
-    public Ridor_node[] getExcepts() { return excepts; }
+    /**
+     * Gets the default class label
+     *
+     * @return the default class label
+     */
+    public double getDefClass() { 
+      return defClass; 
+    }
+    
+    /**
+     * Gets the set of exceptions
+     * 
+     * @return the set of exceptions
+     */
+    public RidorRule[] getRules() { 
+      return rules; 
+    }
+    
+    /**
+     * Gets the exceptions of the exceptions rules
+     * 
+     * @return the exceptions of the exceptions rules
+     */
+    public Ridor_node[] getExcepts() { 
+      return excepts; 
+    }
 
     /**
      * Builds a ripple-down manner rule learner.
@@ -150,7 +207,7 @@ public class Ridor extends Classifier
      * @param dataByClass the divided data by their class label. The real class
      * labels of the instances are all set to 0
      * @param lvl the level of the parent node
-     * @exception Exception if ruleset of this node cannot be built
+     * @throws Exception if ruleset of this node cannot be built
      */
     public void findRules(Instances[] dataByClass, int lvl) throws Exception {
       Vector finalRules = null;
@@ -270,7 +327,7 @@ public class Ridor extends Classifier
      *                   yet covered by the ruleset
      * @param ruleset the ruleset to be built
      * @return the weighted accuracy rate of the ruleset
-     * @exception if the rules cannot be built properly
+     * @throws if the rules cannot be built properly
      */
     private double buildRuleset(Instances insts, double classCount, Vector ruleset) 
       throws Exception {	    
@@ -454,9 +511,12 @@ public class Ridor extends Classifier
    * an antecedent and Reduced Error Prunning (REP) is used to prune the rule. 
    *
    */
-    
-  private class RidorRule implements WeightedInstancesHandler, Serializable {
+  private class RidorRule 
+    implements WeightedInstancesHandler, Serializable {
 	
+    /** for serialization */
+    static final long serialVersionUID = 4375199423973848157L;
+    
     /** The internal representation of the class label to be predicted*/
     private double m_Class = -1;	
 	
@@ -488,7 +548,7 @@ public class Ridor extends Classifier
      * m_Class.
      *
      * @param instances the training data
-     * @exception Exception if classifier can't be built successfully
+     * @throws Exception if classifier can't be built successfully
      */
     public void buildClassifier(Instances instances) throws Exception {
       m_ClassAttribute = instances.classAttribute();
@@ -815,28 +875,29 @@ public class Ridor extends Classifier
    * the corresponding value.  There are two inherited classes, namely NumericAntd
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
+  private abstract class Antd 
+    implements Serializable {
     
-  private abstract class Antd implements Serializable {
-    /* The attribute of the antecedent */
+    /** The attribute of the antecedent */
     protected Attribute att;
 	
-    /* The attribute value of the antecedent.  
+    /** The attribute value of the antecedent.  
        For numeric attribute, value is either 0(1st bag) or 1(2nd bag) */
     protected double value; 
 	
-    /* The maximum infoGain achieved by this antecedent test */
+    /** The maximum infoGain achieved by this antecedent test */
     protected double maxInfoGain;
 	
-    /* The accurate rate of this antecedent test on the growing data */
+    /** The accurate rate of this antecedent test on the growing data */
     protected double accuRate;
 	
-    /* The coverage of this antecedent */
+    /** The coverage of this antecedent */
     protected double cover;
 	
-    /* The accurate data for this antecedent */
+    /** The accurate data for this antecedent */
     protected double accu;
 	
-    /* Constructor*/
+    /** Constructor*/
     public Antd(Attribute a){
       att=a;
       value=Double.NaN; 
@@ -863,18 +924,22 @@ public class Ridor extends Classifier
   /** 
    * The antecedent with numeric attribute
    */
-  private class NumericAntd extends Antd{
+  private class NumericAntd 
+    extends Antd {
+    
+    /** for serialization */
+    static final long serialVersionUID = 1968761518014492214L;
 	
-    /* The split point for this numeric antecedent */
+    /** The split point for this numeric antecedent */
     private double splitPoint;
 	
-    /* Constructor*/
+    /** Constructor*/
     public NumericAntd(Attribute a){ 
       super(a);
       splitPoint = Double.NaN;
     }    
 	
-    /* Get split point of this numeric antecedent */
+    /** Get split point of this numeric antecedent */
     public double getSplitPoint(){ return splitPoint; }
 	
     /**
@@ -1037,14 +1102,18 @@ public class Ridor extends Classifier
   /** 
    * The antecedent with nominal attribute
    */
-  private class NominalAntd extends Antd{
+  private class NominalAntd 
+    extends Antd {
+    
+    /** for serialization */
+    static final long serialVersionUID = -256386137196078004L;
 	
     /* The parameters of infoGain calculated for each attribute value */
     private double[] accurate;
     private double[] coverage;
     private double[] infoGain;
 	
-    /* Constructor*/
+    /** Constructor*/
     public NominalAntd(Attribute a){ 
       super(a);
       int bag = att.numValues();
@@ -1165,7 +1234,7 @@ public class Ridor extends Classifier
    * Builds a ripple-down manner rule learner.
    *
    * @param data the training data
-   * @exception Exception if classifier can't be built successfully
+   * @throws Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -1293,10 +1362,41 @@ public class Ridor extends Classifier
   }
     
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -F &lt;number of folds&gt;
+   *  Set number of folds for IREP
+   *  One fold is used as pruning set.
+   *  (default 3)</pre>
+   * 
+   * <pre> -S &lt;number of shuffles&gt;
+   *  Set number of shuffles to randomize
+   *  the data in order to get better rule.
+   *  (default 10)</pre>
+   * 
+   * <pre> -A
+   *  Set flag of whether use the error rate 
+   *  of all the data to select the default class
+   *  in each step. If not set, the learner will only use the error rate in the pruning data</pre>
+   * 
+   * <pre> -M
+   *   Set flag of whether use the majority class as
+   *  the default class in each step instead of 
+   *  choosing default class based on the error rate
+   *  (if the flag is not set)</pre>
+   * 
+   * <pre> -N &lt;min. weights&gt;
+   *  Set the minimal weights of instances
+   *  within a split.
+   *  (default 2.0)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 	
@@ -1441,7 +1541,7 @@ public class Ridor extends Classifier
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) 
