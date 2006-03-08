@@ -28,31 +28,86 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
 /**
- * Class for doing classification using regression methods. For more
- * information, see <p>
+ <!-- globalinfo-start -->
+ * Class for doing classification using regression methods. Class is binarized and one regression model is built for each class value. For more information, see, for example<br/>
+ * <br/>
+ * E. Frank, Y. Wang, S. Inglis, G. Holmes, I.H. Witten (1998). Using model trees for classification. Machine Learning. Vol.32, No.1, pp. 63-76.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * E. Frank, Y. Wang, S. Inglis, G. Holmes, and I.H. Witten (1998)
- * "Using model trees for classification", <i>Machine Learning</i>,
- * Vol.32, No.1, pp. 63-76.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Frank1998,
+ *    author = {E. Frank and Y. Wang and S. Inglis and G. Holmes and I.H. Witten},
+ *    journal = {Machine Learning},
+ *    number = {No.1},
+ *    pages = {pp. 63-76},
+ *    title = {Using model trees for classification},
+ *    volume = {Vol.32},
+ *    year = {1998}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -W classname <br>
- * Specify the full class name of a numeric predictor as the basis for 
- * the classifier (required).<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.M5P)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.M5P:
+ * </pre>
+ * 
+ * <pre> -N
+ *  Use unpruned tree/rules
+ * </pre>
+ * 
+ * <pre> -U
+ *  Use unsmoothed predictions
+ * </pre>
+ * 
+ * <pre> -R
+ *  Build regression tree/rule rather than a model tree/rule
+ * </pre>
+ * 
+ * <pre> -M &lt;minimum number of instances&gt;
+ *  Set minimum number of instances per leaf
+ *  (default 4)</pre>
+ * 
+ * <pre> -L
+ *  Save instances at the nodes in
+ *  the tree (for visualization purposes)
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
 */
-public class ClassificationViaRegression extends SingleClassifierEnhancer {
+public class ClassificationViaRegression 
+  extends SingleClassifierEnhancer
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 4500023123618669859L;
   
   /** The classifiers. (One for each class.) */
@@ -60,6 +115,14 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
   /** The filters used to transform the class. */
   private MakeIndicator[] m_ClassFilters;
+
+  /**
+   * Default constructor.
+   */
+  public ClassificationViaRegression() {
+    
+    m_Classifier = new weka.classifiers.trees.M5P();
+  }
     
   /**
    * Returns a string describing classifier
@@ -71,25 +134,39 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
     return "Class for doing classification using regression methods. Class is "
       + "binarized and one regression model is built for each class value. For more "
       + "information, see, for example\n\n"
-      + "E. Frank, Y. Wang, S. Inglis, G. Holmes, and I.H. Witten (1998) "
-      + "\"Using model trees for classification\", Machine Learning, "
-      + "Vol.32, No.1, pp. 63-76.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "E. Frank and Y. Wang and S. Inglis and G. Holmes and I.H. Witten");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.TITLE, "Using model trees for classification");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.32");
+    result.setValue(Field.NUMBER, "No.1");
+    result.setValue(Field.PAGES, "pp. 63-76");
+    
+    return result;
   }
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
     return "weka.classifiers.trees.M5P";
-  }
-
-  /**
-   * Default constructor.
-   */
-  public ClassificationViaRegression() {
-    
-    m_Classifier = new weka.classifiers.trees.M5P();
   }
 
   /**
@@ -102,6 +179,7 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     
     return result;
@@ -111,7 +189,7 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
    * Builds the classifiers.
    *
    * @param insts the training data.
-   * @exception Exception if a classifier can't be built
+   * @throws Exception if a classifier can't be built
    */
   public void buildClassifier(Instances insts) throws Exception {
 
@@ -140,13 +218,15 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
   /**
    * Returns the distribution for an instance.
    *
-   * @exception Exception if the distribution can't be computed successfully
+   * @param inst the instance to get the distribution for
+   * @return the computed distribution
+   * @throws Exception if the distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
     
     double[] probs = new double[inst.numClasses()];
     Instance newInst;
-    double sum = 0, max = Double.MIN_VALUE, min = Double.MAX_VALUE;
+    double sum = 0;
 
     for (int i = 0; i < inst.numClasses(); i++) {
       m_ClassFilters[i].input(inst);
@@ -169,6 +249,8 @@ public class ClassificationViaRegression extends SingleClassifierEnhancer {
 
   /**
    * Prints the classifiers.
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
