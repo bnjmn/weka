@@ -24,6 +24,7 @@ package weka.core;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -33,32 +34,137 @@ import java.util.Vector;
  * ensures that new features have to be enabled explicitly.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
+  
+  /** serialversion UID */
+  static final long serialVersionUID = -5478590032325567849L;  
+  
+  /** defines an attribute type */
+  private final static int ATTRIBUTE = 1;
+  
+  /** defines a class type */
+  private final static int CLASS = 2;
+  
+  /** defines an attribute capability */
+  private final static int ATTRIBUTE_CAPABILITY = 4;
+  
+  /** defines a class capability */
+  private final static int CLASS_CAPABILITY = 8;
+  
+  /** defines a other capability */
+  private final static int OTHER_CAPABILITY = 16;
 
   /** enumeration of all capabilities */
   public enum Capability {
     // attributes
-    NOMINAL_ATTRIBUTES,
-    BINARY_ATTRIBUTES,
-    NUMERIC_ATTRIBUTES,
-    DATE_ATTRIBUTES,
-    STRING_ATTRIBUTES,
-    RELATIONAL_ATTRIBUTES,
-    MISSING_VALUES,
+    /** can handle nominal attributes */
+    NOMINAL_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Nominal attributes"),
+    /** can handle binary attributes */
+    BINARY_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Binary attributes"),
+    /** can handle numeric attributes */
+    NUMERIC_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Numeric attributes"),
+    /** can handle date attributes */
+    DATE_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Date attributes"),
+    /** can handle string attributes */
+    STRING_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "String attributes"),
+    /** can handle relational attributes */
+    RELATIONAL_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Relational attributes"),
+    /** can handle missing values in attributes */
+    MISSING_VALUES(ATTRIBUTE_CAPABILITY, "Missing values"),
     // class
-    NO_CLASS,
-    NOMINAL_CLASS,
-    BINARY_CLASS,
-    NUMERIC_CLASS,
-    DATE_CLASS,
-    STRING_CLASS,
-    RELATIONAL_CLASS,
-    MISSING_CLASS_VALUES,
+    /** can handle data without class attribute, eg clusterers */
+    NO_CLASS(CLASS_CAPABILITY, "No class"),
+    /** can handle nominal classes */
+    NOMINAL_CLASS(CLASS + CLASS_CAPABILITY, "Nominal class"),
+    /** can handle binary classes */
+    BINARY_CLASS(CLASS + CLASS_CAPABILITY, "Binary class"),
+    /** can handle numeric classes */
+    NUMERIC_CLASS(CLASS + CLASS_CAPABILITY, "Numeric class"),
+    /** can handle date classes */
+    DATE_CLASS(CLASS + CLASS_CAPABILITY, "Date class"),
+    /** can handle string classes */
+    STRING_CLASS(CLASS + CLASS_CAPABILITY, "String class"),
+    /** can handle relational classes */
+    RELATIONAL_CLASS(CLASS + CLASS_CAPABILITY, "Relational class"),
+    /** can handle missing values in class attribute */
+    MISSING_CLASS_VALUES(CLASS_CAPABILITY, "Missing class values"),
     // other
-    ONLY_MULTIINSTANCE
+    /** can handle multi-instance data */
+    ONLY_MULTIINSTANCE(OTHER_CAPABILITY, "Only multi-Instance data");
+
+    /** the flags for the capabilities */
+    private int m_Flags = 0;
+    
+    /** the display string */
+    private String m_Display;
+    
+    /**
+     * initializes the capability with the given flags
+     * 
+     * @param flags	"meta-data" for the capability
+     * @param display	the display string (must be unique!)
+     */
+    private Capability(int flags, String display) {
+      m_Flags   = flags;
+      m_Display = display;
+    }
+    
+    /**
+     * returns true if the capability is an attribute
+     * 
+     * @return true if the capability is an attribute
+     */
+    public boolean isAttribute() {
+      return ((m_Flags & ATTRIBUTE) == ATTRIBUTE);
+    }
+    
+    /**
+     * returns true if the capability is a class
+     * 
+     * @return true if the capability is a class
+     */
+    public boolean isClass() {
+      return ((m_Flags & CLASS) == CLASS);
+    }
+    
+    /**
+     * returns true if the capability is an attribute capability
+     * 
+     * @return true if the capability is an attribute capability
+     */
+    public boolean isAttributeCapability() {
+      return ((m_Flags & ATTRIBUTE_CAPABILITY) == ATTRIBUTE_CAPABILITY);
+    }
+    
+    /**
+     * returns true if the capability is a class capability
+     * 
+     * @return true if the capability is a class capability
+     */
+    public boolean isOtherCapability() {
+      return ((m_Flags & OTHER_CAPABILITY) == OTHER_CAPABILITY);
+    }
+    
+    /**
+     * returns true if the capability is a other capability
+     * 
+     * @return true if the capability is a other capability
+     */
+    public boolean isClassCapability() {
+      return ((m_Flags & CLASS_CAPABILITY) == CLASS_CAPABILITY);
+    }
+    
+    /**
+     * returns the display string of the capability
+     * 
+     * @return the display string
+     */
+    public String toString() {
+      return m_Display;
+    }
   };
 
   /** the object that owns this capabilities instance */
@@ -66,6 +172,9 @@ public class Capabilities
   
   /** the hashset for storing the active capabilities */
   protected HashSet m_Capabilities;
+  
+  /** the hashset for storing dependent capabilities, eg for meta-classifiers */
+  protected HashSet m_Dependencies;
   
   /** the reason why the test failed, used to throw an exception */
   protected Exception m_FailReason = null;
@@ -83,10 +192,13 @@ public class Capabilities
 
     setOwner(owner);
     m_Capabilities = new HashSet();
+    m_Dependencies = new HashSet();
   }
   
   /**
    * Creates and returns a copy of this object.
+   * 
+   * @return	a clone of this object
    */
   public Object clone() {
     Capabilities    result;
@@ -104,10 +216,16 @@ public class Capabilities
    */
   public void assign(Capabilities c) {
     for (Capability cap: Capability.values()) {
+      // capability
       if (c.handles(cap))
         enable(cap);
       else
 	disable(cap);
+      // dependency
+      if (c.hasDependency(cap))
+        enableDependency(cap);
+      else
+	disableDependency(cap);
     }
 
     setMinimumNumberInstances(c.getMinimumNumberInstances());
@@ -121,10 +239,16 @@ public class Capabilities
    */
   public void and(Capabilities c) {
     for (Capability cap: Capability.values()) {
+      // capability
       if (handles(cap) && c.handles(cap))
         m_Capabilities.add(cap);
       else
         m_Capabilities.remove(cap);
+      // dependency
+      if (hasDependency(cap) && c.hasDependency(cap))
+        m_Dependencies.add(cap);
+      else
+        m_Dependencies.remove(cap);
     }
     
     // minimum number of instances that both handlers need at least to work
@@ -140,10 +264,16 @@ public class Capabilities
    */
   public void or(Capabilities c) {
     for (Capability cap: Capability.values()) {
+      // capability
       if (handles(cap) || c.handles(cap))
         m_Capabilities.add(cap);
       else
         m_Capabilities.remove(cap);
+      // dependency
+      if (hasDependency(cap) || c.hasDependency(cap))
+        m_Dependencies.add(cap);
+      else
+        m_Dependencies.remove(cap);
     }
     
     if (c.getMinimumNumberInstances() < getMinimumNumberInstances())
@@ -164,6 +294,30 @@ public class Capabilities
     
     for (Capability cap: Capability.values()) {
       if (c.handles(cap) && !handles(cap)) {
+	result = false;
+	break;
+      }
+    }
+
+    return result;
+  }
+  
+  /**
+   * Returns true if the currently set capabilities support (or have a 
+   * dependency) at least all of the capabilities of the given Capabilities 
+   * object (checks only the enum!)
+   * 
+   * @param c	the capabilities (or dependencies) to support at least
+   * @return	true if all the requested capabilities are supported (or at 
+   * 		least have a dependency)
+   */
+  public boolean supportsMaybe(Capabilities c) {
+    boolean	result;
+    
+    result = true;
+    
+    for (Capability cap: Capability.values()) {
+      if (c.handles(cap) && !(handles(cap) || hasDependency(cap))) {
 	result = false;
 	break;
       }
@@ -210,6 +364,24 @@ public class Capabilities
   }
   
   /**
+   * Returns an Iterator over the stored capabilities
+   * 
+   * @return iterator over the current capabilities
+   */
+  public Iterator capabilities() {
+    return m_Capabilities.iterator();
+  }
+  
+  /**
+   * Returns an Iterator over the stored dependencies
+   * 
+   * @return iterator over the current dependencies
+   */
+  public Iterator dependencies() {
+    return m_Dependencies.iterator();
+  }
+  
+  /**
    * enables the given capability
    *
    * @param c     the capability to enable
@@ -226,17 +398,45 @@ public class Capabilities
   }
   
   /**
+   * enables the dependency flag for the given capability
+   *
+   * @param c     the capability to enable the dependency flag for
+   */
+  public void enableDependency(Capability c) {
+    if (c == Capability.NOMINAL_ATTRIBUTES) {
+      enableDependency(Capability.BINARY_ATTRIBUTES);
+    }
+    else if (c == Capability.NOMINAL_CLASS) {
+      enableDependency(Capability.BINARY_CLASS);
+    }
+
+    m_Dependencies.add(c);
+  }
+  
+  /**
    * enables all class types
    * 
    * @see #disableAllClasses()
    * @see #getClassCapabilities()
    */
   public void enableAllClasses() {
-    enable(Capability.NOMINAL_CLASS);
-    enable(Capability.NUMERIC_CLASS);
-    enable(Capability.DATE_CLASS);
-    enable(Capability.STRING_CLASS);
-    enable(Capability.RELATIONAL_CLASS);
+    for (Capability cap: Capability.values()) {
+      if (cap.isClass())
+	enable(cap);
+    }
+  }
+  
+  /**
+   * enables all class type dependencies
+   * 
+   * @see #disableAllClassDependencies()
+   * @see #getClassCapabilities()
+   */
+  public void enableAllClassDependencies() {
+    for (Capability cap: Capability.values()) {
+      if (cap.isClass())
+	enableDependency(cap);
+    }
   }
   
   /**
@@ -246,11 +446,23 @@ public class Capabilities
    * @see #getAttributeCapabilities()
    */
   public void enableAllAttributes() {
-    enable(Capability.NOMINAL_ATTRIBUTES);
-    enable(Capability.NUMERIC_ATTRIBUTES);
-    enable(Capability.DATE_ATTRIBUTES);
-    enable(Capability.STRING_ATTRIBUTES);
-    enable(Capability.RELATIONAL_ATTRIBUTES);
+    for (Capability cap: Capability.values()) {
+      if (cap.isAttribute())
+	enable(cap);
+    }
+  }
+  
+  /**
+   * enables all attribute type dependencies
+   * 
+   * @see #disableAllAttributeDependencies()
+   * @see #getAttributeCapabilities()
+   */
+  public void enableAllAttributeDependencies() {
+    for (Capability cap: Capability.values()) {
+      if (cap.isAttribute())
+	enableDependency(cap);
+    }
   }
 
   /**
@@ -268,6 +480,22 @@ public class Capabilities
 
     m_Capabilities.remove(c);
   }
+
+  /**
+   * disables the dependency of the given capability
+   *
+   * @param c     the capability to disable the dependency flag for
+   */
+  public void disableDependency(Capability c) {
+    if (c == Capability.NOMINAL_ATTRIBUTES) {
+      disableDependency(Capability.BINARY_ATTRIBUTES);
+    }
+    else if (c == Capability.NOMINAL_CLASS) {
+      disableDependency(Capability.BINARY_CLASS);
+    }
+
+    m_Dependencies.remove(c);
+  }
   
   /**
    * disables all class types
@@ -276,11 +504,23 @@ public class Capabilities
    * @see #getClassCapabilities()
    */
   public void disableAllClasses() {
-    disable(Capability.NOMINAL_CLASS);
-    disable(Capability.NUMERIC_CLASS);
-    disable(Capability.DATE_CLASS);
-    disable(Capability.STRING_CLASS);
-    disable(Capability.RELATIONAL_CLASS);
+    for (Capability cap: Capability.values()) {
+      if (cap.isClass())
+	disable(cap);
+    }
+  }
+  
+  /**
+   * disables all class type dependencies
+   * 
+   * @see #enableAllClassDependencies()
+   * @see #getClassCapabilities()
+   */
+  public void disableAllClassDependencies() {
+    for (Capability cap: Capability.values()) {
+      if (cap.isClass())
+	disableDependency(cap);
+    }
   }
   
   /**
@@ -290,11 +530,23 @@ public class Capabilities
    * @see #getAttributeCapabilities()
    */
   public void disableAllAttributes() {
-    disable(Capability.NOMINAL_ATTRIBUTES);
-    disable(Capability.NUMERIC_ATTRIBUTES);
-    disable(Capability.DATE_ATTRIBUTES);
-    disable(Capability.STRING_ATTRIBUTES);
-    disable(Capability.RELATIONAL_ATTRIBUTES);
+    for (Capability cap: Capability.values()) {
+      if (cap.isAttribute())
+	disable(cap);
+    }
+  }
+  
+  /**
+   * disables all attribute type dependencies
+   * 
+   * @see #enableAllAttributeDependencies()
+   * @see #getAttributeCapabilities()
+   */
+  public void disableAllAttributeDependencies() {
+    for (Capability cap: Capability.values()) {
+      if (cap.isAttribute())
+	disableDependency(cap);
+    }
   }
   
   /**
@@ -309,22 +561,12 @@ public class Capabilities
     
     result = new Capabilities(getOwner());
     
-    if (handles(Capability.NOMINAL_CLASS))
-      result.enable(Capability.NOMINAL_CLASS);
-    if (handles(Capability.BINARY_CLASS))
-      result.enable(Capability.BINARY_CLASS);
-    if (handles(Capability.NUMERIC_CLASS))
-      result.enable(Capability.NUMERIC_CLASS);
-    if (handles(Capability.DATE_CLASS))
-      result.enable(Capability.DATE_CLASS);
-    if (handles(Capability.STRING_CLASS))
-      result.enable(Capability.STRING_CLASS);
-    if (handles(Capability.RELATIONAL_CLASS))
-      result.enable(Capability.RELATIONAL_CLASS);
-    if (handles(Capability.NO_CLASS))
-      result.enable(Capability.NO_CLASS);
-    if (handles(Capability.MISSING_CLASS_VALUES))
-      result.enable(Capability.MISSING_CLASS_VALUES);
+    for (Capability cap: Capability.values()) {
+      if (cap.isClassCapability()) {
+	if (handles(cap))
+	  result.enable(cap);
+      }
+    }
     
     return result;
   }
@@ -341,20 +583,12 @@ public class Capabilities
     
     result = new Capabilities(getOwner());
     
-    if (handles(Capability.NOMINAL_ATTRIBUTES))
-      result.enable(Capability.NOMINAL_ATTRIBUTES);
-    if (handles(Capability.BINARY_ATTRIBUTES))
-      result.enable(Capability.BINARY_ATTRIBUTES);
-    if (handles(Capability.NUMERIC_ATTRIBUTES))
-      result.enable(Capability.NUMERIC_ATTRIBUTES);
-    if (handles(Capability.DATE_ATTRIBUTES))
-      result.enable(Capability.DATE_ATTRIBUTES);
-    if (handles(Capability.STRING_ATTRIBUTES))
-      result.enable(Capability.STRING_ATTRIBUTES);
-    if (handles(Capability.RELATIONAL_ATTRIBUTES))
-      result.enable(Capability.RELATIONAL_ATTRIBUTES);
-    if (handles(Capability.MISSING_VALUES))
-      result.enable(Capability.MISSING_VALUES);
+    for (Capability cap: Capability.values()) {
+      if (cap.isAttributeCapability()) {
+	if (handles(cap))
+	  result.enable(cap);
+      }
+    }
     
     return result;
   }
@@ -370,20 +604,45 @@ public class Capabilities
     
     result = new Capabilities(getOwner());
     
-    if (handles(Capability.ONLY_MULTIINSTANCE))
-      result.enable(Capability.ONLY_MULTIINSTANCE);
+    for (Capability cap: Capability.values()) {
+      if (cap.isOtherCapability()) {
+	if (handles(cap))
+	  result.enable(cap);
+      }
+    }
     
     return result;
   }
 
   /**
-   * returns true if the classifier has the specified capability
+   * returns true if the classifier handler has the specified capability
    *
    * @param c     the capability to test
-   * @return      true if the classifier has the capability
+   * @return      true if the classifier handler has the capability
    */
   public boolean handles(Capability c) {
     return m_Capabilities.contains(c);
+  }
+
+  /**
+   * returns true if the classifier handler has a dependency for the specified 
+   * capability
+   *
+   * @param c     the capability to test
+   * @return      true if the classifier handler has a dependency for the 
+   *               capability
+   */
+  public boolean hasDependency(Capability c) {
+    return m_Dependencies.contains(c);
+  }
+  
+  /**
+   * Checks whether there are any dependencies at all
+   * 
+   * @return true if there is at least one dependency for a capability
+   */
+  public boolean hasDependencies() {
+    return (m_Dependencies.size() > 0);
   }
 
   /**
@@ -709,6 +968,8 @@ public class Capabilities
   
   /**
    * returns a string representation of the capabilities
+   * 
+   * @return 	a string representation of this object
    */
   public String toString() {
     Vector		sorted;
@@ -720,6 +981,11 @@ public class Capabilities
     sorted = new Vector(m_Capabilities);
     Collections.sort(sorted);
     result.append("Capabilities: " + sorted.toString() + "\n");
+
+    // dependencies
+    sorted = new Vector(m_Dependencies);
+    Collections.sort(sorted);
+    result.append("Dependencies: " + sorted.toString() + "\n");
     
     // other stuff
     result.append("min # Instance: " + getMinimumNumberInstances() + "\n");
@@ -733,6 +999,7 @@ public class Capabilities
    * is not set.
    * 
    * @param data	the data to base the capabilities on
+   * @return		a data-specific capabilities object
    * @throws Exception	in case an error occurrs, e.g., an unknown attribute 
    * 			type
    */
