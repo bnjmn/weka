@@ -29,6 +29,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -39,34 +43,71 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Implements the "Farthest First Traversal Algorithm" by 
- * Hochbaum and Shmoys 1985: A best possible heuristic for the
- * k-center problem, Mathematics of Operations Research, 10(2):180-184,
- * as cited by Sanjoy Dasgupta "performance guarantees for hierarchical
- * clustering", colt 2002, sydney
+ <!-- globalinfo-start -->
+ * Cluster data using the FarthestFirst algorithm.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Hochbaum, Shmoys (1985). A best possible heuristic for the k-center problem. Mathematics of Operations Research. Vol.10, No.2, pp. 180-184.<br/>
+ * <br/>
+ * Sanjoy Dasgupta: Performance Guarantees for Hierarchical Clustering. In: 15th Annual Conference on Computational Learning Theory, 351-363, 2002.<br/>
+ * <br/>
+ * Notes:<br/>
+ * - works as a fast simple approximate clusterer<br/>
+ * - modelled after SimpleKMeans, might be a useful initializer for it
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * works as a fast simple approximate clusterer
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Hochbaum1985,
+ *    author = {Hochbaum and Shmoys},
+ *    journal = {Mathematics of Operations Research},
+ *    number = {No.2},
+ *    pages = {pp. 180-184},
+ *    title = {A best possible heuristic for the k-center problem},
+ *    volume = {Vol.10},
+ *    year = {1985}
+ * }
+ * 
+ * &#64;incproceedings{Dasgupta2002,
+ *    author = {Sanjoy Dasgupta},
+ *    booktitle = {15th Annual Conference on Computational Learning Theory},
+ *    pages = {351-363},
+ *    publisher = {Springer},
+ *    title = {Performance Guarantees for Hierarchical Clustering},
+ *    year = {2002}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * modelled after SimpleKMeans, might be a useful initializer for it
- *
- * Valid options are:<p>
- *
- * -N <number of clusters> <br>
- * Specify the number of clusters to generate. <p>
- *
- * -S <seed> <br>
- * Specify random number seed. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  number of clusters. (default = 2).</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  random number seed.
+ *  (default 10)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Clusterer
  * @see OptionHandler
  */
 
 // Todo: rewrite to be fully incremental
 //       cleanup, like deleting m_instances 
-public class FarthestFirst extends Clusterer implements OptionHandler {
+public class FarthestFirst 
+  extends Clusterer 
+  implements OptionHandler, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 7499838100631329509L;
   
   /**
@@ -111,7 +152,43 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Cluster data using the FarthestFirst algorithm";
+    return "Cluster data using the FarthestFirst algorithm.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
+      + "Notes:\n"
+      + "- works as a fast simple approximate clusterer\n"
+      + "- modelled after SimpleKMeans, might be a useful initializer for it";
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Hochbaum and Shmoys");
+    result.setValue(Field.YEAR, "1985");
+    result.setValue(Field.TITLE, "A best possible heuristic for the k-center problem");
+    result.setValue(Field.JOURNAL, "Mathematics of Operations Research");
+    result.setValue(Field.VOLUME, "Vol.10");
+    result.setValue(Field.NUMBER, "No.2");
+    result.setValue(Field.PAGES, "pp. 180-184");
+    
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Sanjoy Dasgupta");
+    additional.setValue(Field.TITLE, "Performance Guarantees for Hierarchical Clustering");
+    additional.setValue(Field.BOOKTITLE, "15th Annual Conference on Computational Learning Theory");
+    additional.setValue(Field.YEAR, "2002");
+    additional.setValue(Field.PAGES, "351-363");
+    additional.setValue(Field.PUBLISHER, "Springer");
+    
+    return result;
   }
 
   /**
@@ -136,7 +213,7 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    * that are not being set via options.
    *
    * @param data set of instances serving as training data 
-   * @exception Exception if the clusterer has not been 
+   * @throws Exception if the clusterer has not been 
    * generated successfully
    */
   public void buildClusterer(Instances data) throws Exception {
@@ -267,7 +344,7 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an integer
    * if the class is enumerated, otherwise the predicted value
-   * @exception Exception if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
@@ -281,8 +358,8 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
   /**
    * Calculates the distance between two instances
    *
-   * @param test the first instance
-   * @param train the second instance
+   * @param first the first instance
+   * @param second the second instance
    * @return the distance between the two given instances, between 0 and 1
    */          
   protected double distance(Instance first, Instance second) {  
@@ -379,6 +456,7 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    *
    * @param x the value to be normalized
    * @param i the attribute's index
+   * @return the normalized value
    */
   protected double norm(double x, int i) {
 
@@ -393,7 +471,7 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @exception Exception if number of clusters could not be returned
+   * @throws Exception if number of clusters could not be returned
    * successfully
    */
   public int numberOfClusters() throws Exception {
@@ -405,12 +483,12 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    *
    * Valid options are:<p>
    *
-   * -N <number of clusters> <br>
+   * -N number of clusters <br>
    * Specify the number of clusters to generate. If omitted,
    * FarthestFirst will use cross validation to select the number of clusters
    * automatically. <p>
    *
-   * -S <seed> <br>
+   * -S seed <br>
    * Specify random number seed. <p>
    *
    * @return an enumeration of all the available options.
@@ -440,6 +518,7 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
    * set the number of clusters to generate
    *
    * @param n the number of clusters to generate
+   * @throws Exception if number of clusters is negative
    */
   public void setNumClusters(int n) throws Exception {
     if (n < 0) {
@@ -487,11 +566,23 @@ public class FarthestFirst extends Clusterer implements OptionHandler {
   }
 
   /**
-   * Parses a given list of options.
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  number of clusters. (default = 2).</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  random number seed.
+   *  (default 10)</pre>
+   * 
+   <!-- options-end -->
    *
-   **/
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
   public void setOptions (String[] options)
     throws Exception {
 

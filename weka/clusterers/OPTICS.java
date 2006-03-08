@@ -36,6 +36,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -54,25 +58,56 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * <p>
- * OPTICS.java <br/>
- * Authors: Rainer Holzmann, Zhanna Melnikova-Albrecht, Matthias Schubert <br/>
- * Date: Sep 5, 2004 <br/>
- * Time: 9:18:51 PM <br/>
- * $ Revision 1.4 $ <br/>
- * <br/><br/>
- * Reference: Ankerst M., Breunig M. M., Kriegel H.-P., Sander J.:<br>
- * OPTICS: Ordering Points To Identify the Clustering Structure <br>
- * Proc. ACM SIGMOD Int. Conf. on Management of Data (SIGMOD'99), Philadelphia, PA, 1999, pp. 49-60. <br>
- * </p>
+ <!-- globalinfo-start -->
+ * Mihael Ankerst, Markus M. Breunig, Hans-Peter Kriegel, Joerg Sander: OPTICS: Ordering Points To Identify the Clustering Structure. In: ACM SIGMOD International Conference on Management of Data, 49-60, 1999.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Ankerst1999,
+ *    author = {Mihael Ankerst and Markus M. Breunig and Hans-Peter Kriegel and Joerg Sander},
+ *    booktitle = {ACM SIGMOD International Conference on Management of Data},
+ *    pages = {49-60},
+ *    publisher = {ACM Press},
+ *    title = {OPTICS: Ordering Points To Identify the Clustering Structure},
+ *    year = {1999}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  epsilon (default = 0.9)</pre>
+ * 
+ * <pre> -M &lt;int&gt;
+ *  minPoints (default = 6)</pre>
+ * 
+ * <pre> -I &lt;String&gt;
+ *  index (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
+ * 
+ * <pre> -D &lt;String&gt;
+ *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+ * 
+ * <pre> -F
+ *  write results to OPTICS_#TimeStamp#.TXT - File</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class OPTICS extends Clusterer implements OptionHandler {
+public class OPTICS 
+    extends Clusterer 
+    implements OptionHandler, TechnicalInformationHandler {
 
+    /** for serialization */
     static final long serialVersionUID = 274552680222105221L;
   
     /**
@@ -301,7 +336,7 @@ public class OPTICS extends Clusterer implements OptionHandler {
      *
      * @param instance The instance to be assigned to a cluster
      * @return int The number of the assigned cluster as an integer
-     * @exception java.lang.Exception If instance could not be clustered
+     * @throws java.lang.Exception If instance could not be clustered
      * successfully
      */
     public int clusterInstance(Instance instance) throws Exception {
@@ -312,7 +347,7 @@ public class OPTICS extends Clusterer implements OptionHandler {
      * Returns the number of clusters.
      *
      * @return int The number of clusters generated for a training dataset.
-     * @exception java.lang.Exception If number of clusters could not be returned
+     * @throws java.lang.Exception If number of clusters could not be returned
      * successfully
      */
     public int numberOfClusters() throws Exception {
@@ -358,10 +393,30 @@ public class OPTICS extends Clusterer implements OptionHandler {
     /**
      * Sets the OptionHandler's options using the given list. All options
      * will be set (or reset) during this call (i.e. incremental setting
-     * of options is not possible).
+     * of options is not possible). <p/>
+     * 
+     <!-- options-start -->
+     * Valid options are: <p/>
+     * 
+     * <pre> -E &lt;double&gt;
+     *  epsilon (default = 0.9)</pre>
+     * 
+     * <pre> -M &lt;int&gt;
+     *  minPoints (default = 6)</pre>
+     * 
+     * <pre> -I &lt;String&gt;
+     *  index (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
+     * 
+     * <pre> -D &lt;String&gt;
+     *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+     * 
+     * <pre> -F
+     *  write results to OPTICS_#TimeStamp#.TXT - File</pre>
+     * 
+     <!-- options-end -->
      *
      * @param options The list of options as an array of strings
-     * @exception java.lang.Exception If an option is not supported
+     * @throws java.lang.Exception If an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
         String optionString = Utils.getOption('E', options);
@@ -617,13 +672,34 @@ public class OPTICS extends Clusterer implements OptionHandler {
      * @return String Information for the gui-explorer
      */
     public String globalInfo() {
-        return " Ankerst M., Breunig M. M., Kriegel H.-P., Sander J.: OPTICS: Ordering Points "+
-        "To Identify the Clustering Structure, Proc. ACM SIGMOD Int. Conf. on Management of Data"+
-        " (SIGMOD'99), Philadelphia, PA, 1999, pp. 49-60.";
+        return getTechnicalInformation().toString();
+    }
+
+    /**
+     * Returns an instance of a TechnicalInformation object, containing 
+     * detailed information about the technical background of this class,
+     * e.g., paper reference or book this class is based on.
+     * 
+     * @return the technical information about this class
+     */
+    public TechnicalInformation getTechnicalInformation() {
+      TechnicalInformation 	result;
+      
+      result = new TechnicalInformation(Type.INPROCEEDINGS);
+      result.setValue(Field.AUTHOR, "Mihael Ankerst and Markus M. Breunig and Hans-Peter Kriegel and Joerg Sander");
+      result.setValue(Field.TITLE, "OPTICS: Ordering Points To Identify the Clustering Structure");
+      result.setValue(Field.BOOKTITLE, "ACM SIGMOD International Conference on Management of Data");
+      result.setValue(Field.YEAR, "1999");
+      result.setValue(Field.PAGES, "49-60");
+      result.setValue(Field.PUBLISHER, "ACM Press");
+      
+      return result;
     }
 
     /**
      * Returns the internal database
+     * 
+     * @return the internal database
      */
     public SERObject getSERObject() {
         SERObject serObject = new SERObject(resultVector,
@@ -639,6 +715,11 @@ public class OPTICS extends Clusterer implements OptionHandler {
         return serObject;
     }
 
+    /**
+     * Returns a description of the clusterer
+     * 
+     * @return the clusterer as string
+     */
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("OPTICS clustering results\n" +
