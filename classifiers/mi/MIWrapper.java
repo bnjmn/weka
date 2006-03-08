@@ -32,6 +32,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -41,56 +45,91 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * A simple Wrapper method for applying standard propositional learners to
- * multi-instance data. <p/>
- * 
+ <!-- globalinfo-start -->
+ * A simple Wrapper method for applying standard propositional learners to multi-instance data.<br/>
+ * <br/>
  * For more information see:<br/>
- * Frank, E. T. and Xu, X. (2003), <i>Applying propositional learning
- * algorithms to multi-instance data</i>, Working Paper 06/03, Department of
- * Computer Science, The University of Waikato, Hamilton.
+ * <br/>
+ * E. T. Frank, X. Xu (2003). Applying propositional learning algorithms to multi-instance data. Department of Computer Science, University of Waikato, Hamilton, NZ.
  * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;techreport{Frank2003,
+ *    address = {Department of Computer Science, University of Waikato, Hamilton, NZ},
+ *    author = {E. T. Frank and X. Xu},
+ *    institution = {University of Waikato},
+ *    month = {06},
+ *    title = {Applying propositional learning algorithms to multi-instance data},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p/>
- *
- * -D <br/>
- * Turn on debugging output.<p/>
- *
- * -W classname <br/>
- * Specify the full class name of a classifier as the basis (required).<p/>
- *
- * -P 1|2|3 <br/>
- * Set which method to use in testing: <br/>
- * 1.arithmetic average <br/>
- * 2.geometric average <br/>
- * 3.max probability of positive bag. <br/>
- * (default: 1)<p/>
- *
- * -A 0|1|2|3 <br/>
- *  four different methods of setting the weight of each single-instance:
- *  (default method: 3) <br/>
- *  0. keep the weight to be the same as the original value <br/>
- *  1. weight = 1.0 <br/>
- *  2. weight = 1.0/Total number of single-instance in the corresponding bag
- *  <br>
- *  3. weight = Total number of single-instance / (Total number of bags * Total
- *     number of single-instance in the corresponding bag) <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -P [1|2|3]
+ *  The method used in testing:
+ *  1.arithmetic average
+ *  2.geometric average
+ *  3.max probability of positive bag.
+ *  (default: 1)</pre>
+ * 
+ * <pre> -A [0|1|2|3]
+ *  The type of weight setting for each single-instance:
+ *  0.keep the weight to be the same as the original value;
+ *  1.weight = 1.0
+ *  2.weight = 1.0/Total number of single-instance in the
+ *   corresponding bag
+ *  3. weight = Total number of single-instance / (Total
+ *   number of bags * Total number of single-instance 
+ *   in the corresponding bag).
+ *  (default: 3)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MIWrapper 
   extends SingleClassifierEnhancer
-  implements MultiInstanceCapabilitiesHandler, OptionHandler {  
+  implements MultiInstanceCapabilitiesHandler, OptionHandler,
+             TechnicalInformationHandler {  
 
+  /** for serialization */
   static final long serialVersionUID = -7707766152904315910L;
   
   /** The number of the class labels */
   protected int m_NumClasses;
 
+  /** arithmetic average */
   public static final int TESTMETHOD_ARITHMETIC = 1;
+  /** geometric average */
   public static final int TESTMETHOD_GEOMETRIC = 2;
+  /** max probability of positive bag */
   public static final int TESTMETHOD_MAXPROB = 3;
+  /** the test methods */
   public static final Tag[] TAGS_TESTMETHOD = {
     new Tag(TESTMETHOD_ARITHMETIC, "arithmetic average"),
     new Tag(TESTMETHOD_GEOMETRIC, "geometric average"),
@@ -116,10 +155,29 @@ public class MIWrapper
     return 
          "A simple Wrapper method for applying standard propositional learners "
        + "to multi-instance data.\n\n"
-       + "For more information see:\n"
-       + "Frank, E. T. and Xu, X. (2003), Applying propositional learning "
-       + "algorithms to multi-instance data, Working Paper 06/03, Department "
-       + "of Computer Science, The University of Waikato, Hamilton.";
+       + "For more information see:\n\n"
+       + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.TECHREPORT);
+    result.setValue(Field.AUTHOR, "E. T. Frank and X. Xu");
+    result.setValue(Field.TITLE, "Applying propositional learning algorithms to multi-instance data");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.MONTH, "06");
+    result.setValue(Field.INSTITUTION, "University of Waikato");
+    result.setValue(Field.ADDRESS, "Department of Computer Science, University of Waikato, Hamilton, NZ");
+    
+    return result;
   }
 
   /**
@@ -160,7 +218,46 @@ public class MIWrapper
 
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -P [1|2|3]
+   *  The method used in testing:
+   *  1.arithmetic average
+   *  2.geometric average
+   *  3.max probability of positive bag.
+   *  (default: 1)</pre>
+   * 
+   * <pre> -A [0|1|2|3]
+   *  The type of weight setting for each single-instance:
+   *  0.keep the weight to be the same as the original value;
+   *  1.weight = 1.0
+   *  2.weight = 1.0/Total number of single-instance in the
+   *   corresponding bag
+   *  3. weight = Total number of single-instance / (Total
+   *   number of bags * Total number of single-instance 
+   *   in the corresponding bag).
+   *  (default: 3)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -243,6 +340,8 @@ public class MIWrapper
 
   /**
    * Returns the current weighting method for instances.
+   * 
+   * @return the current weighting method
    */
   public SelectedTag getWeightMethod(){
     return new SelectedTag(
@@ -262,7 +361,7 @@ public class MIWrapper
   /**
    * Set the method used in testing. 
    *
-   * @param newMethod the index of method to use.
+   * @param method the index of method to use.
    */
   public void setMethod(SelectedTag method) {
     if (method.getTags() == TAGS_TESTMETHOD)
@@ -288,6 +387,7 @@ public class MIWrapper
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     if (super.getCapabilities().handles(Capability.NOMINAL_CLASS))
       result.enable(Capability.NOMINAL_CLASS);
     if (super.getCapabilities().handles(Capability.BINARY_CLASS))

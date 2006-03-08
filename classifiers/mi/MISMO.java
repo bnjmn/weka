@@ -40,6 +40,10 @@ import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -57,91 +61,114 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Implements John C. Platt's sequential minimal optimization
- * algorithm for training a support vector classifier using polynomial
- * or RBF kernels. <p/>
+ <!-- globalinfo-start -->
+ * Implements John Platt's sequential minimal optimization algorithm for training a support vector classifier.<br/>
+ * <br/>
+ * This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes by default. (In that case the coefficients in the output are based on the normalized data, not the original data --- this is important for interpreting the classifier.)<br/>
+ * <br/>
+ * Multi-class problems are solved using pairwise classification.<br/>
+ * <br/>
+ * To obtain proper probability estimates, use the option that fits logistic regression models to the outputs of the support vector machine. In the multi-class case the predicted probabilities are coupled using Hastie and Tibshirani's pairwise coupling method.<br/>
+ * <br/>
+ * Note: for improved speed normalization should be turned off when operating on SparseInstances.<br/>
+ * <br/>
+ * For more information on the SMO algorithm, see<br/>
+ * <br/>
+ * J. Platt: Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, , 1998.<br/>
+ * <br/>
+ * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. Vol.13, No.3, pp. 637-649.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * This implementation globally replaces all missing values and
- * transforms nominal attributes into binary ones. It also
- * normalizes all attributes by default. (Note that the coefficients
- * in the output are based on the normalized/standardized data, not the
- * original data.) <p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incollection{Platt1998,
+ *    author = {J. Platt},
+ *    booktitle = {Advances in Kernel Methods - Support Vector Learning},
+ *    editor = {B. Schoelkopf and C. Burges and A. Smola},
+ *    publisher = {MIT Press},
+ *    title = {Machines using Sequential Minimal Optimization},
+ *    year = {1998}
+ * }
+ * 
+ * &#64;article{Keerthi2001,
+ *    author = {S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy},
+ *    journal = {Neural Computation},
+ *    number = {No.3},
+ *    pages = {pp. 637-649},
+ *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
+ *    volume = {Vol.13},
+ *    year = {2001}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Multi-class problems are solved using pairwise classification. <p/>
- *
- * To obtain proper probability estimates, use the option that fits
- * logistic regression models to the outputs of the support vector
- * machine. In the multi-class case the predicted probabilities
- * will be coupled using Hastie and Tibshirani's pairwise coupling
- * method. <p/>
- *
- * Note: for improved speed standardization should be turned off when
- * operating on SparseInstances.<p/>
- *
- * For more information on the SMO algorithm, see<p/>
- *
- * J. Platt (1998). <i>Fast Training of Support Vector
- * Machines using Sequential Minimal Optimization</i>. Advances in Kernel
- * Methods - Support Vector Learning, B. Schoelkopf, C. Burges, and
- * A. Smola, eds., MIT Press. <p/>
- *
- * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy, 
- * <i>Improvements to Platt's SMO Algorithm for SVM Classifier Design</i>. 
- * Neural Computation, 13(3), pp 637-649, 2001. <p/>
- *
- * Valid options are:<p/>
- *
- * -C num <br/>
- * The complexity constant C. (default 1)<p/>
- *
- * -E num <br/>
- * The exponent for the polynomial kernel. (default 1)<p/>
- *
- * -G num <br/>
- * Gamma for the RBF kernel. (default 0.01)<p/>
- *
- * -N <0|1|2> <br/>
- * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p/>
- *
- * -F <br/>
- * Feature-space normalization (only for non-linear polynomial kernels). <p/>
- *
- * -O <br/>
- * Use lower-order terms (only for non-linear polynomial kernels). <p/>
- *
- * -R <br/>
- * Use the RBF kernel. (default poly)<p/>
- *
- * -A num <br/>
- * Sets the size of the kernel cache. Should be a prime number. 
- * (default 250007, use 0 for full cache) <p/>
- *
- * -L num <br/>
- * Sets the tolerance parameter. (default 1.0e-3)<p/>
- *
- * -P num <br/>
- * Sets the epsilon for round-off error. (default 1.0e-12)<p/>
- *
- * -M <br/>
- * Fit logistic models to SVM outputs.<p/>
- *
- * -V num <br/>
- * Number of folds for cross-validation used to generate data
- * for logistic models. (default -1, use training data)
- *
- * -W num <br/>
- * Random number seed for cross-validation. (default 1)
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;double&gt;
+ *  The complexity constant C. (default 1)</pre>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  The exponent for the polynomial kernel. (default 1)</pre>
+ * 
+ * <pre> -G &lt;double&gt;
+ *  Gamma for the RBF kernel. (default 0.01)</pre>
+ * 
+ * <pre> -N
+ *  Whether to 0=normalize/1=standardize/2=neither.
+ *  (default 0=normalize)</pre>
+ * 
+ * <pre> -F
+ *  Feature-space normalization (only for
+ *  non-linear polynomial kernels).</pre>
+ * 
+ * <pre> -O
+ *  Use lower-order terms (only for non-linear
+ *  polynomial kernels).</pre>
+ * 
+ * <pre> -R
+ *  Use MIRBF kernel. (default poly)</pre>
+ * 
+ * <pre> -I
+ *  Use MIminimax feature space. </pre>
+ * 
+ * <pre> -A &lt;int&gt;
+ *  The size of the kernel cache. 
+ *  (default 250007, use 0 for full cache)</pre>
+ * 
+ * <pre> -L &lt;double&gt;
+ *  The tolerance parameter. (default 1.0e-3)</pre>
+ * 
+ * <pre> -P &lt;double&gt;
+ *  The epsilon for round-off error. (default 1.0e-12)</pre>
+ * 
+ * <pre> -M
+ *  Fit logistic models to SVM outputs. </pre>
+ * 
+ * <pre> -V &lt;double&gt;
+ *  The number of folds for the internal cross-validation. 
+ *  (default -1, use training data)</pre>
+ * 
+ * <pre> -W &lt;double&gt;
+ *  The random number seed. (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MISMO 
   extends Classifier 
-  implements WeightedInstancesHandler, MultiInstanceCapabilitiesHandler {
+  implements WeightedInstancesHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -5834036950143719712L;
   
   /**
@@ -167,20 +194,49 @@ public class MISMO
       + "Note: for improved speed normalization should be turned off when "
       + "operating on SparseInstances.\n\n"
       + "For more information on the SMO algorithm, see\n\n"
-      + "J. Platt (1998). \"Fast Training of Support Vector "
-      + "Machines using Sequential Minimal Optimization\". Advances in Kernel "
-      + "Methods - Support Vector Learning, B. Schoelkopf, C. Burges, and "
-      + "A. Smola, eds., MIT Press. \n\n"
-      + "S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy,  "
-      + "\"Improvements to Platt's SMO Algorithm for SVM Classifier Design\".  "
-      + "Neural Computation, 13(3), pp 637-649, 2001.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INCOLLECTION);
+    result.setValue(Field.AUTHOR, "J. Platt");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.TITLE, "Machines using Sequential Minimal Optimization");
+    result.setValue(Field.BOOKTITLE, "Advances in Kernel Methods - Support Vector Learning");
+    result.setValue(Field.EDITOR, "B. Schoelkopf and C. Burges and A. Smola");
+    result.setValue(Field.PUBLISHER, "MIT Press");
+    
+    additional = result.add(Type.ARTICLE);
+    additional.setValue(Field.AUTHOR, "S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy");
+    additional.setValue(Field.YEAR, "2001");
+    additional.setValue(Field.TITLE, "Improvements to Platt's SMO Algorithm for SVM Classifier Design");
+    additional.setValue(Field.JOURNAL, "Neural Computation");
+    additional.setValue(Field.VOLUME, "Vol.13");
+    additional.setValue(Field.NUMBER, "No.3");
+    additional.setValue(Field.PAGES, "pp. 637-649");
+    
+    return result;
   }
 
   /**
    * Class for building a binary support vector machine.
    */
-  protected class BinaryMISMO implements Serializable {
+  protected class BinaryMISMO 
+    implements Serializable {
 
+    /** for serialization */
+    static final long serialVersionUID = -7107082483475433531L;
+    
     /** The Lagrange multipliers. */
     protected double[] m_alpha;
 
@@ -210,15 +266,20 @@ public class MISMO
     /** The current set of errors for all non-bound examples. */
     protected double[] m_errors;
 
-    /** The five different sets used by the algorithm. */
-    protected SMOset m_I0; // {i: 0 < m_alpha[i] < C}
-    protected SMOset m_I1; // {i: m_class[i] = 1, m_alpha[i] = 0}
-    protected SMOset m_I2; // {i: m_class[i] = -1, m_alpha[i] =C}
-    protected SMOset m_I3; // {i: m_class[i] = 1, m_alpha[i] = C}
-    protected SMOset m_I4; // {i: m_class[i] = -1, m_alpha[i] = 0}
+    /* The five different sets used by the algorithm. */
+    /** {i: 0 < m_alpha[i] < C} */
+    protected SMOset m_I0;
+    /** {i: m_class[i] = 1, m_alpha[i] = 0} */
+    protected SMOset m_I1; 
+    /** {i: m_class[i] = -1, m_alpha[i] = C} */
+    protected SMOset m_I2; 
+    /** {i: m_class[i] = 1, m_alpha[i] = C} */
+    protected SMOset m_I3; 
+    /** {i: m_class[i] = -1, m_alpha[i] = 0} */
+    protected SMOset m_I4; 
 
-    /** The set of support vectors */
-    protected SMOset m_supportVectors; // {i: 0 < m_alpha[i]}
+    /** The set of support vectors {i: 0 < m_alpha[i]} */
+    protected SMOset m_supportVectors;
 
     /** Stores logistic regression model for probability estimate */
     protected Logistic m_logistic = null;
@@ -234,6 +295,8 @@ public class MISMO
      * @param insts the set of training instances
      * @param cl1 the first class' index
      * @param cl2 the second class' index
+     * @param numFolds the number of folds for cross-validation
+     * @param random the random number generator for cross-validation
      * @throws Exception if the sigmoid can't be fit successfully
      */
     protected void fitLogistic(Instances insts, int cl1, int cl2,
@@ -307,7 +370,7 @@ public class MISMO
      * @param cl2 the second class' index
      * @param fitLogistic true if logistic model is to be fit
      * @param numFolds number of folds for internal cross-validation
-     * @param random random number generator for cross-validation
+     * @param randomSeed seed value for random number generator for cross-validation
      * @throws Exception if the classifier can't be built successfully
      */
     protected void buildClassifier(Instances insts, int cl1, int cl2,
@@ -519,6 +582,7 @@ public class MISMO
      * @param index the instance for which output is to be computed
      * @param inst the instance 
      * @return the output of the SVM for the given instance
+     * @throws Exception if something goes wrong
      */
     protected double SVMOutput(int index, Instance inst) throws Exception {
 
@@ -733,6 +797,7 @@ public class MISMO
      *
      * @param i1 index of the first instance
      * @param i2 index of the second instance
+     * @param F2
      * @return true if multipliers could be found
      * @throws Exception if something goes wrong
      */
@@ -967,6 +1032,8 @@ public class MISMO
 
     /**
      * Quick and dirty check whether the quadratic programming problem is solved.
+     * 
+     * @throws Exception if something goes wrong
      */
     protected void checkClassifier() throws Exception {
 
@@ -1000,10 +1067,13 @@ public class MISMO
     }  
   }
 
-  /** The filter to apply to the training data */
+  /** Normalize training data */
   public static final int FILTER_NORMALIZE = 0;
+  /** Standardize training data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** No normalization/standardization */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -1290,6 +1360,10 @@ public class MISMO
 
   /**
    * Estimates class probabilities for given instance.
+   * 
+   * @param inst the instance to compute the distribution for
+   * @return the class probabilities
+   * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance inst) throws Exception { 
 
@@ -1486,6 +1560,8 @@ public class MISMO
 
   /**
    * Returns the weights in sparse format.
+   * 
+   * @return the weights in sparse format
    */
   public double [][][] sparseWeights() {
 
@@ -1503,6 +1579,8 @@ public class MISMO
 
   /**
    * Returns the indices in sparse format.
+   * 
+   * @return the indices in sparse format
    */
   public int [][][] sparseIndices() {
 
@@ -1520,6 +1598,8 @@ public class MISMO
 
   /**
    * Returns the bias of each binary SMO.
+   * 
+   * @return the bias of each binary SMO
    */
   public double [][] bias() {
 
@@ -1535,16 +1615,20 @@ public class MISMO
     return bias;
   }
 
-  /*
+  /**
    * Returns the number of values of the class attribute.
+   * 
+   * @return the number values of the class attribute
    */
   public int numClassAttributeValues() {
 
     return m_classAttribute.numValues();
   }
 
-  /*
+  /**
    * Returns the names of the class attributes.
+   * 
+   * @return the names of the class attributes
    */
   public String[] classAttributeNames() {
 
@@ -1561,6 +1645,8 @@ public class MISMO
 
   /**
    * Returns the attribute names.
+   * 
+   * @return the attribute names
    */
   public String[][][] attributeNames() {
 
@@ -1654,7 +1740,59 @@ public class MISMO
   }
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;double&gt;
+   *  The complexity constant C. (default 1)</pre>
+   * 
+   * <pre> -E &lt;double&gt;
+   *  The exponent for the polynomial kernel. (default 1)</pre>
+   * 
+   * <pre> -G &lt;double&gt;
+   *  Gamma for the RBF kernel. (default 0.01)</pre>
+   * 
+   * <pre> -N
+   *  Whether to 0=normalize/1=standardize/2=neither.
+   *  (default 0=normalize)</pre>
+   * 
+   * <pre> -F
+   *  Feature-space normalization (only for
+   *  non-linear polynomial kernels).</pre>
+   * 
+   * <pre> -O
+   *  Use lower-order terms (only for non-linear
+   *  polynomial kernels).</pre>
+   * 
+   * <pre> -R
+   *  Use MIRBF kernel. (default poly)</pre>
+   * 
+   * <pre> -I
+   *  Use MIminimax feature space. </pre>
+   * 
+   * <pre> -A &lt;int&gt;
+   *  The size of the kernel cache. 
+   *  (default 250007, use 0 for full cache)</pre>
+   * 
+   * <pre> -L &lt;double&gt;
+   *  The tolerance parameter. (default 1.0e-3)</pre>
+   * 
+   * <pre> -P &lt;double&gt;
+   *  The epsilon for round-off error. (default 1.0e-12)</pre>
+   * 
+   * <pre> -M
+   *  Fit logistic models to SVM outputs. </pre>
+   * 
+   * <pre> -V &lt;double&gt;
+   *  The number of folds for the internal cross-validation. 
+   *  (default -1, use training data)</pre>
+   * 
+   * <pre> -W &lt;double&gt;
+   *  The random number seed. (default 1)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported 
@@ -2079,7 +2217,7 @@ public class MISMO
    * Check whether feature spaces is being normalized.
    * @return true if feature space is normalized.
    */
-  public boolean getFeatureSpaceNormalization() throws Exception {
+  public boolean getFeatureSpaceNormalization() {
 
     return m_featureSpaceNormalization;
   }
@@ -2088,7 +2226,7 @@ public class MISMO
    * Set whether feature space is normalized.
    * @param v  true if feature space is to be normalized.
    */
-  public void setFeatureSpaceNormalization(boolean v) throws Exception {
+  public void setFeatureSpaceNormalization(boolean v) {
 
     if ((m_useRBF) || (m_exponent == 1.0)) {
       m_featureSpaceNormalization = false;
@@ -2259,6 +2397,8 @@ public class MISMO
 
   /**
    * Main method for testing this class.
+   * 
+   * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
 

@@ -1,4 +1,3 @@
-
 /*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -35,8 +34,12 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -46,33 +49,58 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Re-implement the Diverse Density algorithm, changes the testing procedure.
+ <!-- globalinfo-start -->
+ * Re-implement the Diverse Density algorithm, changes the testing procedure.<br/>
+ * <br/>
+ * Oded Maron (1998). Learning from ambiguity.<br/>
+ * <br/>
+ * O. Maron, T. Lozano-Perez (1998). A Framework for Multiple Instance Learning. Neural Information Processing Systems. 10.
  * <p/>
+ <!-- globalinfo-end -->
  * 
- * More information about DD:<br/>
- * Oded Maron (1998), Learning from ambiguity. PhD thesis, 
- * Massachusetts Institute of Technology, United States. <br/>
- * Maron, O. & Lozano-Perez, T. (1998). A framework for multiple-instance 
- * learning. 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;phdthesis{Maron1998,
+ *    author = {Oded Maron},
+ *    school = {Massachusetts Institute of Technology},
+ *    title = {Learning from ambiguity},
+ *    year = {1998}
+ * }
+ * 
+ * &#64;article{Maron1998,
+ *    author = {O. Maron and T. Lozano-Perez},
+ *    journal = {Neural Information Processing Systems},
+ *    title = {A Framework for Multiple Instance Learning},
+ *    volume = {10},
+ *    year = {1998}
+ * }
+ * </pre>
  * <p/>
+ <!-- technical-bibtex-end -->
  * 
- * Valid options are:<p/>
- *
- * -D <br/>
- * Turn on debugging output.<p/>
- *
- * -N 0|1|2 <br/>
- * Whether to 0=normalize/1=standardize/2=neither. (default 1=standardize) <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Whether to 0=normalize/1=standardize/2=neither.
+ *  (default 1=standardize)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
-
 public class MIDD 
   extends Classifier 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 4263507733600536168L;
   
   /** The index of the class attribute */
@@ -98,10 +126,13 @@ public class MIDD
   /** Whether to normalize/standardize/neither, default:standardize */
   protected int m_filterType = FILTER_STANDARDIZE;
 
-  /** The filter to apply to the training data */
+  /** Normalize training data */
   public static final int FILTER_NORMALIZE = 0;
+  /** Standardize training data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** No normalization/standardization */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -121,11 +152,34 @@ public class MIDD
     return 
         "Re-implement the Diverse Density algorithm, changes the testing "
       + "procedure.\n\n"
-      + "More information about DD:\n"
-      + "Oded Maron (1998), Learning from ambiguity. PhD thesis, "
-      + "Massachusetts Institute of Technology, United States.\n"
-      + "Maron, O. & Lozano-Perez, T. (1998). A framework for multiple-instance "
-      + "learning.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.PHDTHESIS);
+    result.setValue(Field.AUTHOR, "Oded Maron");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.TITLE, "Learning from ambiguity");
+    result.setValue(Field.SCHOOL, "Massachusetts Institute of Technology");
+    
+    additional = result.add(Type.ARTICLE);
+    additional.setValue(Field.AUTHOR, "O. Maron and T. Lozano-Perez");
+    additional.setValue(Field.YEAR, "1998");
+    additional.setValue(Field.TITLE, "A Framework for Multiple Instance Learning");
+    additional.setValue(Field.JOURNAL, "Neural Information Processing Systems");
+    additional.setValue(Field.VOLUME, "10");
+    
+    return result;
   }
 
   /**
@@ -149,8 +203,20 @@ public class MIDD
   }
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
    *     
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  Whether to 0=normalize/1=standardize/2=neither.
+   *  (default 1=standardize)</pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */

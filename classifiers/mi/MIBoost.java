@@ -32,6 +32,10 @@ import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.MultiInstanceCapabilitiesHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -43,27 +47,68 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * 
- * MI AdaBoost method, consider the geometric mean of posterior
- * of instances inside a bag (arithmatic mean of log-posterior) and 
- * the expectation for a bag is taken inside the loss function.  
- * Exact derivation from Hastie et al. paper. <p/>
+ <!-- globalinfo-start -->
+ * MI AdaBoost method, considers the geometric mean of posterior of instances inside a bag (arithmatic mean of log-posterior) and the expectation for a bag is taken inside the loss function.<br/>
+ * <br/>
+ * For more information about Adaboost, see:<br/>
+ * <br/>
+ * Yoav Freund, Robert E. Schapire: Experiments with a new boosting algorithm. In: Thirteenth International Conference on Machine Learning, San Francisco, 148-156, 1996.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Freund1996,
+ *    address = {San Francisco},
+ *    author = {Yoav Freund and Robert E. Schapire},
+ *    booktitle = {Thirteenth International Conference on Machine Learning},
+ *    pages = {148-156},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Experiments with a new boosting algorithm},
+ *    year = {1996}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -D <br/>
- * Turn on debugging output.<p/>
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -B &lt;num&gt;
+ *  The number of bins in discretization
+ *  (default 0, no discretization)</pre>
+ * 
+ * <pre> -R &lt;num&gt;
+ *  Maximum number of boost iterations.
+ *  (default 10)</pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  Full name of classifier to boost.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MIBoost 
   extends SingleClassifierEnhancer
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -3808427225599279539L;
   
+  /** the models for the iterations */
   protected Classifier[] m_Models;
 
   /** The number of the class labels */
@@ -81,10 +126,13 @@ public class MIBoost
   /** Voting weights of models */ 
   protected double[] m_Beta;
 
+  /** the maximum number of boost iterations */
   protected int m_MaxIterations = 10;
 
+  /** the number of discretization bins */
   protected int m_DiscretizeBin = 0;
 
+  /** filter used for discretization */
   protected Discretize m_Filter = null;
 
   /** filter used to convert the MI dataset into single-instance dataset */
@@ -98,10 +146,33 @@ public class MIBoost
    */
   public String globalInfo() {
     return 
-        "MI AdaBoost method, consider the geometric mean of posterior "
+        "MI AdaBoost method, considers the geometric mean of posterior "
       + "of instances inside a bag (arithmatic mean of log-posterior) and "
-      + "the expectation for a bag is taken inside the loss function.\n"
-      + "Exact derivation from Hastie et al. paper.";
+      + "the expectation for a bag is taken inside the loss function.\n\n"
+      + "For more information about Adaboost, see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Yoav Freund and Robert E. Schapire");
+    result.setValue(Field.TITLE, "Experiments with a new boosting algorithm");
+    result.setValue(Field.BOOKTITLE, "Thirteenth International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "1996");
+    result.setValue(Field.PAGES, "148-156");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    result.setValue(Field.ADDRESS, "San Francisco");
+    
+    return result;
   }
 
   /**
@@ -140,7 +211,31 @@ public class MIBoost
   }
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -B &lt;num&gt;
+   *  The number of bins in discretization
+   *  (default 0, no discretization)</pre>
+   * 
+   * <pre> -R &lt;num&gt;
+   *  Maximum number of boost iterations.
+   *  (default 10)</pre>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  Full name of classifier to boost.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -249,7 +344,9 @@ public class MIBoost
     return m_DiscretizeBin;
   }
 
-  private class OptEng extends Optimization{
+  private class OptEng 
+    extends Optimization {
+    
     private double[] weights, errs;
 
     public void setWeights(double[] w){
@@ -264,6 +361,7 @@ public class MIBoost
      * Evaluate objective function
      * @param x the current values of variables
      * @return the value of the objective function 
+     * @throws Exception if result is NaN
      */
     protected double objectiveFunction(double[] x) throws Exception{
       double obj=0;
@@ -280,6 +378,7 @@ public class MIBoost
      * Evaluate Jacobian vector
      * @param x the current values of variables
      * @return the gradient vector 
+     * @throws Exception if gradient is NaN
      */
     protected double[] evaluateGradient(double[] x)  throws Exception{
       double[] grad = new double[1];
@@ -308,6 +407,7 @@ public class MIBoost
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     if (super.getCapabilities().handles(Capability.BINARY_CLASS))
       result.enable(Capability.BINARY_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
@@ -338,7 +438,7 @@ public class MIBoost
   /**
    * Builds the classifier
    *
-   * @param train the training data to be used for generating the
+   * @param exps the training data to be used for generating the
    * boosted classifier.
    * @throws Exception if the classifier could not be built successfully
    */

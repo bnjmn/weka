@@ -32,6 +32,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Summarizable;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -42,52 +46,89 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for performing parameter selection by cross-validation for any
- * classifier. For more information, see<p>
+ <!-- globalinfo-start -->
+ * Class for performing parameter selection by cross-validation for any classifier.<br/>
+ * <br/>
+ * For more information, see:<br/>
+ * <br/>
+ * R. Kohavi (1995). Wrappers for Performance Enhancement and Oblivious Decision Graphs. Department of Computer Science, Stanford University.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * R. Kohavi (1995). <i>Wrappers for Performance
- * Enhancement and Oblivious Decision Graphs</i>. PhD
- * Thesis. Department of Computer Science, Stanford University. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;phdthesis{Kohavi1995,
+ *    address = {Department of Computer Science, Stanford University},
+ *    author = {R. Kohavi},
+ *    school = {Stanford University},
+ *    title = {Wrappers for Performance Enhancement and Oblivious Decision Graphs},
+ *    year = {1995}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -D <br>
- * Turn on debugging output.<p>
- *
- * -W classname <br>
- * Specify the full class name of classifier to perform cross-validation
- * selection on.<p>
- *
- * -X num <br>
- * Number of folds used for cross validation (default 10). <p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
- *
- * -P "N 1 5 10" <br>
- * Sets an optimisation parameter for the classifier with name -N,
- * lower bound 1, upper bound 5, and 10 optimisation steps.
- * The upper bound may be the character 'A' or 'I' to substitute 
- * the number of attributes or instances in the training data,
- * respectively.
- * This parameter may be supplied more than once to optimise over
- * several classifier options simultaneously. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -X &lt;number of folds&gt;
+ *  Number of folds used for cross validation (default 10).</pre>
+ * 
+ * <pre> -P &lt;classifier parameter&gt;
+ *  Classifier parameter options.
+ *  eg: "N 1 5 10" Sets an optimisation parameter for the
+ *  classifier with name -N, with lower bound 1, upper bound
+ *  5, and 10 optimisation steps. The upper bound may be the
+ *  character 'A' or 'I' to substitute the number of
+ *  attributes or instances in the training data,
+ *  respectively. This parameter may be supplied more than
+ *  once to optimise over several classifier options
+ *  simultaneously.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $ 
+ * @version $Revision: 1.32 $ 
 */
-public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
-  implements Drawable, Summarizable {
+public class CVParameterSelection 
+  extends RandomizableSingleClassifierEnhancer
+  implements Drawable, Summarizable, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -6529603380876641265L;
   
   /**
    * A data structure to hold values associated with a single
    * cross-validation search parameter
    */
-  protected class CVParameter implements Serializable {
+  protected class CVParameter 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = -4668812017709421953L;
 
     /**  Char used to identify the option of interest */
     private char m_ParamChar;    
@@ -112,6 +153,9 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 
     /**
      * Constructs a CVParameter.
+     * 
+     * @param param the parameter definition
+     * @throws Exception if construction of CVParameter fails
      */
     public CVParameter(String param) throws Exception {
      
@@ -160,6 +204,8 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 
     /**
      * Returns a CVParameter as a string.
+     * 
+     * @return the CVParameter as string
      */
     public String toString() {
 
@@ -252,9 +298,11 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   /**
    * Finds the best parameter combination. (recursive for each parameter
    * being optimised).
-   *
+   * 
    * @param depth the index of the parameter to be optimised at this level
-   * @exception Exception if an error occurs
+   * @param trainData the data the search is based on
+   * @param random a random number generator
+   * @throws Exception if an error occurs
    */
   protected void findParamsByCrossValidation(int depth, Instances trainData,
 					     Random random)
@@ -325,11 +373,30 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return  "Class for performing parameter selection by cross-validation "+
-	    "for any classifier. For more information, see:\n"+
-	    "R. Kohavi (1995). Wrappers for Performance "+
-	    "Enhancement and Oblivious Decision Graphs. PhD "+
-	    "Thesis. Department of Computer Science, Stanford University.";
+    return    "Class for performing parameter selection by cross-validation "
+	    + "for any classifier.\n\n"
+            + "For more information, see:\n\n"
+            + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.PHDTHESIS);
+    result.setValue(Field.AUTHOR, "R. Kohavi");
+    result.setValue(Field.YEAR, "1995");
+    result.setValue(Field.TITLE, "Wrappers for Performance Enhancement and Oblivious Decision Graphs");
+    result.setValue(Field.SCHOOL, "Stanford University");
+    result.setValue(Field.ADDRESS, "Department of Computer Science, Stanford University");
+    
+    return result;
   }
 
   /**
@@ -366,34 +433,51 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of classifier to perform cross-validation
-   * selection on.<p>
-   *
-   * -X num <br>
-   * Number of folds used for cross validation (default 10). <p>
-   *
-   * -S seed <br>
-   * Random number seed (default 1).<p>
-   *
-   * -P "N 1 5 10" <br>
-   * Sets an optimisation parameter for the classifier with name -N,
-   * lower bound 1, upper bound 5, and 10 optimisation steps.
-   * The upper bound may be the character 'A' or 'I' to substitute 
-   * the number of attributes or instances in the training data,
-   * respectively.
-   * This parameter may be supplied more than once to optimise over
-   * several classifier options simultaneously. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -X &lt;number of folds&gt;
+   *  Number of folds used for cross validation (default 10).</pre>
+   * 
+   * <pre> -P &lt;classifier parameter&gt;
+   *  Classifier parameter options.
+   *  eg: "N 1 5 10" Sets an optimisation parameter for the
+   *  classifier with name -N, with lower bound 1, upper bound
+   *  5, and 10 optimisation steps. The upper bound may be the
+   *  character 'A' or 'I' to substitute the number of
+   *  attributes or instances in the training data,
+   *  respectively. This parameter may be supplied more than
+   *  once to optimise over several classifier options
+   *  simultaneously.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated sub-classifier. <p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -468,7 +552,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -521,7 +605,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    *
    * @param instance the instance to be classified
    * @return the predicted class value
-   * @exception Exception if an error occurred during the prediction
+   * @throws Exception if an error occurred during the prediction
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     
@@ -537,7 +621,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    * param_char lower_bound upper_bound number_of_steps <br>
    * eg to search a parameter -P from 1 to 10 by increments of 1: <br>
    * P 1 10 11 <br>
-   * @exception Exception if the parameter specifier is of the wrong format
+   * @throws Exception if the parameter specifier is of the wrong format
    */
   public void addCVParameter(String cvParam) throws Exception {
 
@@ -548,6 +632,9 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 
   /**
    * Gets the scheme paramter with the given index.
+   * 
+   * @param index the index for the parameter
+   * @return the scheme parameter
    */
   public String getCVParameter(int index) {
 
@@ -573,6 +660,8 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 
   /**
    * Get method for CVParameters.
+   * 
+   * @return the CVParameters
    */
   public Object[] getCVParameters() {
       
@@ -589,6 +678,9 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   
   /**
    * Set method for CVParameters.
+   * 
+   * @param params the CVParameters to use
+   * @throws Exception if the setting of the CVParameters fails
    */
   public void setCVParameters(Object[] params) throws Exception {
       
@@ -626,7 +718,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    * Sets the number of folds for the cross-validation.
    *
    * @param numFolds the number of folds for the cross-validation
-   * @exception Exception if parameter illegal
+   * @throws Exception if parameter illegal
    */
   public void setNumFolds(int numFolds) throws Exception {
     
@@ -640,6 +732,8 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   /**
    *  Returns the type of graph this classifier
    *  represents.
+   *  
+   *  @return the type of graph this classifier represents
    */   
   public int graphType() {
     
@@ -653,7 +747,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
    * Returns graph describing the classifier (if possible).
    *
    * @return the graph of the classifier in dotty format
-   * @exception Exception if the classifier cannot be graphed
+   * @throws Exception if the classifier cannot be graphed
    */
   public String graph() throws Exception {
     
@@ -706,6 +800,11 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
     return result;
   }
 
+  /**
+   * A concise description of the model.
+   * 
+   * @return a concise description of the model
+   */
   public String toSummaryString() {
 
     String result = "Selected values: "
@@ -728,6 +827,3 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
     }
   }
 }
-
-
-  

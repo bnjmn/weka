@@ -1,4 +1,3 @@
-
 /*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -34,6 +33,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -47,45 +50,65 @@ import java.util.Vector;
 
 
 /**
- * Implement Stuart Andrews' mi_SVM (Maximum pattern Margin Formulation of
- * MIL). Applying weka.classifiers.functions.SMO to solve multiple
- * instances problem. <p/>
- *
- * The algorithm first assign the bag label to each instance in the bag as its
- * initial class label.  After that applying SMO to compute SVM solution for
- * all instances in positive bags And then reassign the class label of each
- * instance in the positive bag according to the SVM result Keep on iteration
- * until labels do not change anymore. <p/>
+ <!-- globalinfo-start -->
+ * Implements Stuart Andrews' mi_SVM (Maximum pattern Margin Formulation of MIL). Applying weka.classifiers.functions.SMO to solve multiple instances problem.<br/>
+ * The algorithm first assign the bag label to each instance in the bag as its initial class label.  After that applying SMO to compute SVM solution for all instances in positive bags And then reassign the class label of each instance in the positive bag according to the SVM result Keep on iteration until labels do not change anymore.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Stuart Andrews, Ioannis Tsochantaridis, Thomas Hofmann: Support Vector Machines for Multiple-Instance Learning. In: Advances in Neural Information Processing Systems 15, 561-568, 2003.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Valid options are:<p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Andrews2003,
+ *    author = {Stuart Andrews and Ioannis Tsochantaridis and Thomas Hofmann},
+ *    booktitle = {Advances in Neural Information Processing Systems 15},
+ *    pages = {561-568},
+ *    publisher = {MIT Press},
+ *    title = {Support Vector Machines for Multiple-Instance Learning},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * -C num <br/>
- * The complexity constant C. (default 1)<p/>
- *
- * -E num <br/>
- * The exponent for the polynomial kernel. (default 1)<p/>
- *
- * -G num <br/>
- * Gamma for the RBF kernel. (default 0.01)<p/>
- *
- * -R <br/>
- * Use the RBF kernel. (default poly)<p/>
- *
- * -N <0|1|2> <br/>
- * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- *-D <br/>
- * Turn on debugging output.<p/>
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -C &lt;double&gt;
+ *  The complexity constant C. (default 1)</pre>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  The exponent for the polynomial kernel. (default 1)</pre>
+ * 
+ * <pre> -G &lt;double&gt;
+ *  Gamma for the RBF kernel. (default 0.01)</pre>
+ * 
+ * <pre> -R
+ *  Use RBF kernel. (default poly)</pre>
+ * 
+ * <pre> -N &lt;default 0&gt;
+ *  Whether to 0=normalize/1=standardize/2=neither.
+ *  (default 0=normalize)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  * @see weka.classifiers.functions.SMO
  */
-
 public class MISVM 
   extends Classifier 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 7622231064035278145L;
   
   /** The filter used to transform the sparse datasets to nonsparse */
@@ -112,10 +135,13 @@ public class MISVM
   /** Whether to normalize/standardize/neither */
   protected int m_filterType = FILTER_NORMALIZE;
 
-  /** The filter to apply to the training data */
+  /** Normalize training data */
   public static final int FILTER_NORMALIZE = 0;
+  /** Standardize training data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** No normalization/standardization */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -137,7 +163,7 @@ public class MISVM
    */
   public String globalInfo() {
     return 
-         "Implement Stuart Andrews' mi_SVM (Maximum pattern Margin "
+         "Implements Stuart Andrews' mi_SVM (Maximum pattern Margin "
        + "Formulation of MIL). Applying weka.classifiers.functions.SMO "
        + "to solve multiple instances problem.\n"
        + "The algorithm first assign the bag label to each instance in the "
@@ -145,7 +171,30 @@ public class MISVM
        + "SVM solution for all instances in positive bags And then reassign "
        + "the class label of each instance in the positive bag according to "
        + "the SVM result Keep on iteration until labels do not change "
-       + "anymore.";
+       + "anymore.\n\n"
+       + "For more information see:\n\n"
+       + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Stuart Andrews and Ioannis Tsochantaridis and Thomas Hofmann");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.TITLE, "Support Vector Machines for Multiple-Instance Learning");
+    result.setValue(Field.BOOKTITLE, "Advances in Neural Information Processing Systems 15");
+    result.setValue(Field.PUBLISHER, "MIT Press");
+    result.setValue(Field.PAGES, "561-568");
+    
+    return result;
   }
 
   /**
@@ -187,7 +236,31 @@ public class MISVM
 
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -C &lt;double&gt;
+   *  The complexity constant C. (default 1)</pre>
+   * 
+   * <pre> -E &lt;double&gt;
+   *  The exponent for the polynomial kernel. (default 1)</pre>
+   * 
+   * <pre> -G &lt;double&gt;
+   *  Gamma for the RBF kernel. (default 0.01)</pre>
+   * 
+   * <pre> -R
+   *  Use RBF kernel. (default poly)</pre>
+   * 
+   * <pre> -N &lt;default 0&gt;
+   *  Whether to 0=normalize/1=standardize/2=neither.
+   *  (default 0=normalize)</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -406,6 +479,13 @@ public class MISVM
   }
 
   private class SVM extends SMO {
+    
+    /** for serialization */
+    static final long serialVersionUID = -8325638229658828931L;
+    
+    /**
+     * Constructor
+     */
     protected SVM (){
       super();
     }

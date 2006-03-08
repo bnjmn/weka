@@ -36,6 +36,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -49,34 +53,89 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Implements Alex J.Smola and Bernhard Scholkopf sequential minimal optimization
- * algorithm for training a support vector regression using polynomial
- * or RBF kernels. 
+ <!-- globalinfo-start -->
+ * Implements Alex Smola and Bernhard Scholkopf's sequential minimal optimization algorithm for training a support vector regression model. This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes by default. (Note that the coefficients in the output are based on the normalized/standardized data, not the original data.)<br/>
+ * <br/>
+ * For more information on the SMO algorithm, see<br/>
+ * <br/>
+ * Alex J. Smola, Bernhard Schoelkopf: A Tutorial on Support Vector Regression. In NeuroCOLT2 Technical Report Series, , 1998.<br/>
+ * <br/>
+ * S.K. Shevade, S.S. Keerthi, C. Bhattacharyya, K.R.K. Murthy (1999). Improvements to SMO Algorithm for SVM Regression. Control Division Dept of Mechanical and Production Engineering, National University of Singapore.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * This implementation globally replaces all missing values and
- * transforms nominal attributes into binary ones. It also
- * normalizes all attributes by default. (Note that the coefficients
- * in the output are based on the normalized/standardized data, not the
- * original data.)
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incollection{Smola1998,
+ *    author = {Alex J. Smola and Bernhard Schoelkopf},
+ *    booktitle = {NeuroCOLT2 Technical Report Series},
+ *    note = {NC2-TR-1998-030},
+ *    title = {A Tutorial on Support Vector Regression},
+ *    year = {1998}
+ * }
+ * 
+ * &#64;techreport{Shevade1999,
+ *    address = {Control Division Dept of Mechanical and Production Engineering, National University of Singapore},
+ *    author = {S.K. Shevade and S.S. Keerthi and C. Bhattacharyya and K.R.K. Murthy},
+ *    institution = {National University of Singapore},
+ *    note = {Technical Report CD-99-16},
+ *    title = {Improvements to SMO Algorithm for SVM Regression},
+ *    year = {1999}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- *
- * For more information on the SMO algorithm, see<p>
- *
- * Alex J. Smola, Bernhard Scholkopf (1998). <i>A Tutorial on Support Vector Regression</i>. 
- * NeuroCOLT2 Technical Report Series - NC2-TR-1998-030. <p>
- *
- * S.K. Shevade, S.S. Keerthi, C. Bhattacharyya, K.R.K. Murthy, 
- * <i>Improvements to SMO Algorithm for SVM Regression</i>. 
- * Technical Report CD-99-16, Control Division Dept of Mechanical and Production Engineering, 
- * National University of Singapore.<p>
- *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;double&gt;
+ *  The amount up to which deviations are
+ *  tolerated (epsilon). (default 1e-3)</pre>
+ * 
+ * <pre> -C &lt;double&gt;
+ *  The complexity constant C. (default 1)</pre>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  The exponent for the polynomial kernel. (default 1)</pre>
+ * 
+ * <pre> -G &lt;double&gt;
+ *  Gamma for the RBF kernel. (default 0.01)</pre>
+ * 
+ * <pre> -N
+ *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ * 
+ * <pre> -F
+ *  Feature-space normalization (only for
+ *  non-linear polynomial kernels).</pre>
+ * 
+ * <pre> -O
+ *  Use lower-order terms (only for non-linear
+ *  polynomial kernels).</pre>
+ * 
+ * <pre> -R
+ *  Use RBF kernel. (default poly)</pre>
+ * 
+ * <pre> -A &lt;int&gt;
+ *  The size of the kernel cache. (default 250007, use 0 for full cache)</pre>
+ * 
+ * <pre> -T &lt;double&gt;
+ *  The tolerance parameter. (default 1.0e-3)</pre>
+ * 
+ * <pre> -P &lt;double&gt;
+ *  The epsilon for round-off error. (default 1.0e-12)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class SMOreg extends Classifier implements OptionHandler, 
-  WeightedInstancesHandler {
-    
+public class SMOreg 
+  extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
+
+  /** for serialization */
   static final long serialVersionUID = 5783729368717679645L;
 
   /** Feature-space normalization? */
@@ -108,11 +167,14 @@ public class SMOreg extends Classifier implements OptionHandler,
 
   /** The filter used to make attributes numeric. */
   protected NominalToBinary m_NominalToBinary;
-    
-  /** The filter to apply to the training data */
+
+  /** normalize data */
   public static final int FILTER_NORMALIZE = 0;
+  /** standardize data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** no filtering */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -157,11 +219,15 @@ public class SMOreg extends Classifier implements OptionHandler,
   /** The current set of errors for all non-bound examples. */
   protected double[] m_fcache;
 
-  /** The five different sets used by the algorithm. */
-  protected SMOset m_I0; // {i: 0 < m_alpha[i] < C || 0 < m_alpha_[i] < C}
-  protected SMOset m_I1; // {i: m_class[i] = 0, m_alpha_[i] = 0}
-  protected SMOset m_I2; // {i: m_class[i] = 0, m_alpha_[i] = C}
-  protected SMOset m_I3; // {i: m_class[i] = C, m_alpha_[i] = 0}
+  /* The four different sets used by the algorithm. */
+  /** {i: 0 < m_alpha[i] < C || 0 < m_alpha_[i] < C} */
+  protected SMOset m_I0; 
+  /** {i: m_class[i] = 0, m_alpha_[i] = 0} */
+  protected SMOset m_I1; 
+  /** {i: m_class[i] = 0, m_alpha_[i] = C} */
+  protected SMOset m_I2; 
+  /** {i: m_class[i] = C, m_alpha_[i] = 0} */
+  protected SMOset m_I3; 
 
   /** The parameter epsilon */
   protected double m_epsilon = 1e-3;
@@ -198,14 +264,38 @@ public class SMOreg extends Classifier implements OptionHandler,
       + "transforms nominal attributes into binary ones. It also "
       + "normalizes all attributes by default. (Note that the coefficients "
       + "in the output are based on the normalized/standardized data, not the "
-      + "original data.) "
+      + "original data.)\n\n"
       + "For more information on the SMO algorithm, see\n\n"
-      + "Alex J. Smola, Bernhard Scholkopf (1998). \"A Tutorial on Support Vector "
-      + "Regression\".  NeuroCOLT2 Technical Report Series - NC2-TR-1998-030.\n\n"
-      + "S.K. Shevade, S.S. Keerthi, C. Bhattacharyya, K.R.K. Murthy,  "
-      + "\"Improvements to SMO Algorithm for SVM Regression\".  "
-      + "Technical Report CD-99-16, Control Division Dept of Mechanical and "
-      + "Production Engineering, National University of Singapore. ";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INCOLLECTION);
+    result.setValue(Field.AUTHOR, "Alex J. Smola and Bernhard Schoelkopf");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.TITLE, "A Tutorial on Support Vector Regression");
+    result.setValue(Field.BOOKTITLE, "NeuroCOLT2 Technical Report Series");
+    result.setValue(Field.NOTE, "NC2-TR-1998-030");
+    
+    additional = result.add(Type.TECHREPORT);
+    additional.setValue(Field.AUTHOR, "S.K. Shevade and S.S. Keerthi and C. Bhattacharyya and K.R.K. Murthy");
+    additional.setValue(Field.YEAR, "1999");
+    additional.setValue(Field.TITLE, "Improvements to SMO Algorithm for SVM Regression");
+    additional.setValue(Field.INSTITUTION, "National University of Singapore");
+    additional.setValue(Field.ADDRESS, "Control Division Dept of Mechanical and Production Engineering, National University of Singapore");
+    additional.setValue(Field.NOTE, "Technical Report CD-99-16");
+    
+    return result;
   }
 
   /**
@@ -947,7 +1037,7 @@ public class SMOreg extends Classifier implements OptionHandler,
   /**
    * Classifies a given instance.
    *
-   * @param instance the instance to be classified
+   * @param inst the instance to be classified
    * @return the classification
    * @exception Exception if instance could not be classified
    * successfully
@@ -1063,8 +1153,9 @@ public class SMOreg extends Classifier implements OptionHandler,
     
     
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
+   <!-- options-end -->
    * -S num <br>
    * The amount up to which deviation are tolerated (epsilon). (default 1e-3)
    * Watch out, the value of epsilon is used with the (normalized/standardize) data<p>
@@ -1098,6 +1189,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    *
    * -P num <br> 
    * Sets the epsilon for round-off error. (default 1.0e-12)<p>
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported 
@@ -1485,7 +1577,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Check whether feature spaces is being normalized.
    * @return true if feature space is normalized.
    */
-  public boolean getFeatureSpaceNormalization() throws Exception {
+  public boolean getFeatureSpaceNormalization() {
 
     return m_featureSpaceNormalization;
   }
@@ -1495,7 +1587,7 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Set whether feature space is normalized.
    * @param v  true if feature space is to be normalized.
    */
-  public void setFeatureSpaceNormalization(boolean v) throws Exception {
+  public void setFeatureSpaceNormalization(boolean v) {
     
     if ((m_useRBF) || (m_exponent == 1.0)) {
       m_featureSpaceNormalization = false;
@@ -1689,6 +1781,8 @@ public class SMOreg extends Classifier implements OptionHandler,
 
   /**
    * Main method for testing this class.
+   * 
+   * @param argv the commandline options
    */
   public static void main(String[] argv) {
 	
@@ -1708,6 +1802,9 @@ public class SMOreg extends Classifier implements OptionHandler,
   /**
    * Debuggage function.
    * Compute the value of the objective function.
+   * 
+   * @return the value of the objective function
+   * @throws Exception if computation fails
    */
   protected double objFun() throws Exception {
 	
@@ -1768,6 +1865,8 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Debuggage function.
    * Check that the set I0, I1, I2 and I3 cover the whole set of index 
    * and that no attribute appears in two different sets. 
+   * 
+   * @throws Exception if check fails
    */
   protected void checkSets() throws Exception{
 	
@@ -1822,10 +1921,12 @@ public class SMOreg extends Classifier implements OptionHandler,
 
 
   /**
-   * Debuggage function
-   * Checks that : 
-   *      alpha*alpha_=0 
+   * Debuggage function <br/>
+   * Checks that : <br/>
+   *      alpha*alpha_=0 <br/>
    *      sum(alpha[i] - alpha_[i]) = 0 
+   *      
+   * @throws Exception if check fails
    */
   protected void checkAlphas() throws Exception{
 
@@ -1848,6 +1949,8 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Display the current status of the program.
    * @param i1 the first current indice
    * @param i2 the second current indice
+   * 
+   * @throws Exception if printing of current status fails
    */
   protected void displayStat(int i1, int i2) throws Exception {
 	
@@ -1877,6 +1980,8 @@ public class SMOreg extends Classifier implements OptionHandler,
   /**
    * Debuggage function
    * Compute and display bLow, lUp and so on...
+   * 
+   * @throws Exception if display fails
    */
   protected void displayB() throws Exception {
 
@@ -1923,6 +2028,8 @@ public class SMOreg extends Classifier implements OptionHandler,
    * Checks if the equations (6), (8a), (8b), (8c), (8d) hold.
    * (Refers to "Improvements to SMO Algorithm for SVM Regression".)
    * Prints warnings for each equation which doesn't hold.
+   * 
+   * @throws Exception if check fails
    */
   protected void checkOptimality() throws Exception {
 
@@ -2001,5 +2108,4 @@ public class SMOreg extends Classifier implements OptionHandler,
       //displayB();
     }
   }
-
 }

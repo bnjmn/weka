@@ -29,41 +29,74 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
 import java.util.Random;
 
 /**
- * Implements Grading. For more information, see<p>
+ <!-- globalinfo-start -->
+ * Implements Grading. The base classifiers are "graded".<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * A.K. Seewald, J. Fuernkranz: An Evaluation of Grading Classifiers. In: Advances in Intelligent Data Analysis: 4th International Conference, Berlin/Heidelberg/New York/Tokyo, 115-124, 2001.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- *  Seewald A.K., Fuernkranz J. (2001): An Evaluation of Grading
- *    Classifiers, in Hoffmann F.\ et al.\ (eds.), Advances in Intelligent
- *    Data Analysis, 4th International Conference, IDA 2001, Proceedings,
- *    Springer, Berlin/Heidelberg/New York/Tokyo, pp.115-124, 2001
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Seewald2001,
+ *    address = {Berlin/Heidelberg/New York/Tokyo},
+ *    author = {A.K. Seewald and J. Fuernkranz},
+ *    booktitle = {Advances in Intelligent Data Analysis: 4th International Conference},
+ *    editor = {F. Hoffmann et al.},
+ *    pages = {115-124},
+ *    publisher = {Springer},
+ *    title = {An Evaluation of Grading Classifiers},
+ *    year = {2001}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -X num_folds <br>
- * The number of folds for the cross-validation (default 10).<p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
- *
- * -B classifierstring <br>
- * Classifierstring should contain the full class name of a base scheme
- * followed by options to the classifier.
- * (required, option should be used once for each classifier).<p>
- *
- * -M classifierstring <br>
- * Classifierstring for the meta classifier. Same format as for base
- * classifiers. This classifier estimates confidence in prediction of
- * base classifiers. (required) <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;scheme specification&gt;
+ *  Full name of meta classifier, followed by options.
+ *  (default: "weka.classifiers.rules.Zero")</pre>
+ * 
+ * <pre> -X &lt;number of folds&gt;
+ *  Sets the number of cross-validation folds.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -B &lt;classifier specification&gt;
+ *  Full class name of classifier to include, followed
+ *  by scheme options. May be specified multiple times.
+ *  (default: "weka.classifiers.rules.ZeroR")</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
-public class Grading extends Stacking {
+public class Grading 
+  extends Stacking
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 5207837947890081170L;
   
   /** The meta classifiers, one for each base classifier. */
@@ -79,16 +112,41 @@ public class Grading extends Stacking {
    */
   public String globalInfo() {
 
-    return "Implements Grading. The base classifiers are \"graded\". "
+    return 
+        "Implements Grading. The base classifiers are \"graded\".\n\n"
       + "For more information, see\n\n"
-      + "Seewald A.K., Fuernkranz J. (2001): An Evaluation of Grading "
-      + "Classifiers, in Hoffmann F. et al. (eds.), Advances in Intelligent "
-      + "Data Analysis, 4th International Conference, IDA 2001, Proceedings, "
-      + "Springer, Berlin/Heidelberg/New York/Tokyo, pp.115-124, 2001";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "A.K. Seewald and J. Fuernkranz");
+    result.setValue(Field.TITLE, "An Evaluation of Grading Classifiers");
+    result.setValue(Field.BOOKTITLE, "Advances in Intelligent Data Analysis: 4th International Conference");
+    result.setValue(Field.EDITOR, "F. Hoffmann et al.");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.PAGES, "115-124");
+    result.setValue(Field.PUBLISHER, "Springer");
+    result.setValue(Field.ADDRESS, "Berlin/Heidelberg/New York/Tokyo");
+    
+    return result;
   }
 
   /**
    * Generates the meta data
+   * 
+   * @param newData the data to work on
+   * @param random the random number generator used in the generation
+   * @throws Exception if generation fails
    */
   protected void generateMetaLevel(Instances newData, Random random) 
     throws Exception {
@@ -132,8 +190,9 @@ public class Grading extends Stacking {
    * One class will always get all the probability mass (i.e. probability one).
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
+   * @return the class distribution for the given instance
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -205,6 +264,8 @@ public class Grading extends Stacking {
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -235,6 +296,7 @@ public class Grading extends Stacking {
    *
    * @param instances the level-0 format
    * @return the format for the meta data
+   * @throws Exception if an error occurs
    */
   protected Instances metaFormat(Instances instances) throws Exception {
 
@@ -261,7 +323,9 @@ public class Grading extends Stacking {
    * Makes a level-1 instance from the given instance.
    * 
    * @param instance the instance to be transformed
+   * @param k index of the classifier
    * @return the level-1 instance
+   * @throws Exception if an error occurs
    */
   protected Instance metaInstance(Instance instance, int k) throws Exception {
 

@@ -29,6 +29,10 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -38,45 +42,78 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for boosting a classifier using Freund &amp; Schapire's Adaboost 
- * M1 method. For more information, see<p>
+ <!-- globalinfo-start -->
+ * Class for boosting a nominal class classifier using the Adaboost M1 method. Only nominal class problems can be tackled. Often dramatically improves performance, but sometimes overfits.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * Yoav Freund, Robert E. Schapire: Experiments with a new boosting algorithm. In: Thirteenth International Conference on Machine Learning, San Francisco, 148-156, 1996.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Yoav Freund and Robert E. Schapire
- * (1996). <i>Experiments with a new boosting algorithm</i>.  Proc
- * International Conference on Machine Learning, pages 148-156, Morgan
- * Kaufmann, San Francisco.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Freund1996,
+ *    address = {San Francisco},
+ *    author = {Yoav Freund and Robert E. Schapire},
+ *    booktitle = {Thirteenth International Conference on Machine Learning},
+ *    pages = {148-156},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Experiments with a new boosting algorithm},
+ *    year = {1996}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -D <br>
- * Turn on debugging output.<p>
- *
- * -W classname <br>
- * Specify the full class name of a classifier as the basis for 
- * boosting (required).<p>
- *
- * -I num <br>
- * Set the number of boost iterations (default 10). <p>
- *
- * -P num <br>
- * Set the percentage of weight mass used to build classifiers
- * (default 100). <p>
- *
- * -Q <br>
- * Use resampling instead of reweighting.<p>
- *
- * -S seed <br>
- * Random number seed for resampling (default 1). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -P &lt;num&gt;
+ *  Percentage of weight mass to base training on.
+ *  (default 100, reduce to around 90 speed up)</pre>
+ * 
+ * <pre> -Q
+ *  Use resampling for boosting.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  Number of iterations.
+ *  (default 10)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.DecisionStump:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
-public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
-  implements WeightedInstancesHandler, Sourcable {
+public class AdaBoostM1 
+  extends RandomizableIteratedSingleClassifierEnhancer 
+  implements WeightedInstancesHandler, Sourcable, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -7378107808933117974L;
   
   /** Max num iterations tried to find classifier with non-zero error. */ 
@@ -96,6 +133,14 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
   /** The number of classes */
   protected int m_NumClasses;
+  
+  /**
+   * Constructor.
+   */
+  public AdaBoostM1() {
+    
+    m_Classifier = new weka.classifiers.trees.DecisionStump();
+  }
     
   /**
    * Returns a string describing classifier
@@ -106,23 +151,37 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
  
     return "Class for boosting a nominal class classifier using the Adaboost "
       + "M1 method. Only nominal class problems can be tackled. Often "
-      + "dramatically improves performance, but sometimes overfits. For more "
-      + "information, see\n\n"
-      + "Yoav Freund and Robert E. Schapire (1996). \"Experiments with a new boosting "
-      + "algorithm\".  Proc International Conference on Machine Learning, "
-      + "pages 148-156, Morgan Kaufmann, San Francisco.";
+      + "dramatically improves performance, but sometimes overfits.\n\n"
+      + "For more information, see\n\n"
+      + getTechnicalInformation().toString();
   }
-    
+
   /**
-   * Constructor.
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
    */
-  public AdaBoostM1() {
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
     
-    m_Classifier = new weka.classifiers.trees.DecisionStump();
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Yoav Freund and Robert E. Schapire");
+    result.setValue(Field.TITLE, "Experiments with a new boosting algorithm");
+    result.setValue(Field.BOOKTITLE, "Thirteenth International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "1996");
+    result.setValue(Field.PAGES, "148-156");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    result.setValue(Field.ADDRESS, "San Francisco");
+    
+    return result;
   }
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -198,32 +257,48 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a classifier as the basis for 
-   * boosting (required).<p>
-   *
-   * -I num <br>
-   * Set the number of boost iterations (default 10). <p>
-   *
-   * -P num <br>
-   * Set the percentage of weight mass used to build classifiers
-   * (default 100). <p>
-   *
-   * -Q <br>
-   * Use resampling instead of reweighting.<p>
-   *
-   * -S seed <br>
-   * Random number seed for resampling (default 1).<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -P &lt;num&gt;
+   *  Percentage of weight mass to base training on.
+   *  (default 100, reduce to around 90 speed up)</pre>
+   * 
+   * <pre> -Q
+   *  Use resampling for boosting.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  Number of iterations.
+   *  (default 10)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.DecisionStump)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.DecisionStump:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -278,7 +353,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Set weight threshold
    *
-   * @param thresholding the percentage of weight mass used for training
+   * @param threshold the percentage of weight mass used for training
    */
   public void setWeightThreshold(int threshold) {
 
@@ -307,7 +382,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Set resampling mode
    *
-   * @param resampling true if resampling should be done
+   * @param r true if resampling should be done
    */
   public void setUseResampling(boolean r) {
 
@@ -334,6 +409,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     if (super.getCapabilities().handles(Capability.NOMINAL_CLASS))
       result.enable(Capability.NOMINAL_CLASS);
     if (super.getCapabilities().handles(Capability.BINARY_CLASS))
@@ -347,7 +423,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
 
   public void buildClassifier(Instances data) throws Exception {
@@ -375,7 +451,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   protected void buildClassifierUsingResampling(Instances data) 
     throws Exception {
@@ -456,6 +532,10 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
   /**
    * Sets the weights for the next iteration.
+   * 
+   * @param training the training instances
+   * @param reweight the reweighting factor
+   * @throws Exception if something goes wrong
    */
   protected void setWeights(Instances training, double reweight) 
     throws Exception {
@@ -487,7 +567,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   protected void buildClassifierWithWeights(Instances data) 
     throws Exception {
@@ -552,7 +632,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double [] distributionForInstance(Instance instance) 
@@ -576,8 +656,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Returns the boosted model as Java source code.
    *
+   * @param className the classname of the generated class
    * @return the tree as Java source code
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public String toSource(String className) throws Exception {
 
@@ -659,6 +740,3 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     }
   }
 }
-
-
-  

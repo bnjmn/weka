@@ -37,6 +37,10 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -49,22 +53,63 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for using Gaussian Processes for prediction. <p>
+ <!-- globalinfo-start -->
+ * Implements Gaussian Processes for regression without hyperparameter-tuning. For more information see<br/>
+ * <br/>
+ * David J.C. Mackay (1998). Introduction to Gaussian Processes. Dept. of Physics, Cambridge University, UK. URL http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;misc{Mackay1998,
+ *    address = {Dept. of Physics, Cambridge University, UK},
+ *    author = {David J.C. Mackay},
+ *    title = {Introduction to Gaussian Processes},
+ *    year = {1998},
+ *    URL = {http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- *
- * For more information on the Gaussian Processes algorithm, see<p>
- *
- * David J.C. Mackay, <i>Introduction to Gaussian Processes</i>.
- * http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  The exponent for the polynomial kernel. (default 1)</pre>
+ * 
+ * <pre> -G &lt;double&gt;
+ *  Gamma for the RBF kernel. (default 0.01)</pre>
+ * 
+ * <pre> -L &lt;double&gt;
+ *  Level of Gaussian Noise. (default 0.1)</pre>
+ * 
+ * <pre> -N
+ *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ * 
+ * <pre> -F
+ *  Feature-space normalization (only for
+ *  non-linear polynomial kernels).</pre>
+ * 
+ * <pre> -O
+ *  Use lower-order terms (only for non-linear
+ *  polynomial kernels).</pre>
+ * 
+ * <pre> -P
+ *  Use Polynomial kernel. (default false)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
- *
+ * @version $Revision: 1.3 $
  */
-public class GaussianProcesses extends Classifier implements OptionHandler, IntervalEstimator {
+public class GaussianProcesses 
+  extends Classifier 
+  implements OptionHandler, IntervalEstimator, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -8620066949967678545L;
   
   /** Only numeric attributes in the dataset? */
@@ -72,11 +117,14 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
 
   /** The filter used to make attributes numeric. */
   protected NominalToBinary m_NominalToBinary;
-    
-  /** The filter to apply to the training data */
+  
+  /** normalizes the data */
   public static final int FILTER_NORMALIZE = 0;
+  /** standardizes the data */
   public static final int FILTER_STANDARDIZE = 1;
+  /** no filter */
   public static final int FILTER_NONE = 2;
+  /** The filter to apply to the training data */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
@@ -151,8 +199,27 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
     return  "Implements Gaussian Processes for regression "
 	+ "without hyperparameter-tuning. "
 	+ "For more information see\n\n"
-	+ "David J.C. Mackay, Introduction to Gaussian Processes. " 
-	+ "http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz";
+	+ getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.MISC);
+    result.setValue(Field.AUTHOR, "David J.C. Mackay");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.TITLE, "Introduction to Gaussian Processes");
+    result.setValue(Field.ADDRESS, "Dept. of Physics, Cambridge University, UK");
+    result.setValue(Field.URL, "http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz");
+    
+    return result;
   }
 
   /**
@@ -181,7 +248,7 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
    * Method for building the classifier. 
    *
    * @param insts the set of training instances
-   * @exception Exception if the classifier can't be built successfully
+   * @throws Exception if the classifier can't be built successfully
    */
   public void buildClassifier(Instances insts) throws Exception {
 
@@ -316,7 +383,7 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
    *
    * @param inst the instance to be classified
    * @return the classification
-   * @exception Exception if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double classifyInstance(Instance inst) throws Exception {
@@ -358,7 +425,7 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
    * @param inst the instance to make the prediction for
    * @param confidenceLevel the percentage of cases the interval should cover
    * @return a 1*2 array that contains the boundaries of the interval
-   * @exception Exception if interval could not be estimated
+   * @throws Exception if interval could not be estimated
    * successfully
    */
   public double[][] predictInterval(Instance inst, double confidenceLevel) throws Exception {
@@ -412,6 +479,7 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
    *
    * @param inst the instance to get the variance for
    * @return tha variance
+   * @throws Exception if computation fails
    */
     public double getStandardDeviation(Instance inst) throws Exception {
 
@@ -486,31 +554,38 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
     
     
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -E num <br>
-   * The exponent for the polynomial kernel. (default 1) <p>
-   *
-   * -G num <br>
-   * Gamma for the RBF kernel. (default 1.0) <p>
-   *
-   * -L num <br>
-   * Gaussian Noise level. (default 1.0) <p>
-   *
-   * -N <0|1|2> <br>
-   * Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)<p>
-   *
-   * -F <br>
-   * Feature-space normalization (only for non-linear polynomial kernels). <p>
-   *
-   * -O <br>
-   * Use lower-order terms (only for non-linear polynomial kernels). <p>
-   *
-   * -P <br>
-   * Use Polynomial kernel (default false). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -E &lt;double&gt;
+   *  The exponent for the polynomial kernel. (default 1)</pre>
+   * 
+   * <pre> -G &lt;double&gt;
+   *  Gamma for the RBF kernel. (default 0.01)</pre>
+   * 
+   * <pre> -L &lt;double&gt;
+   *  Level of Gaussian Noise. (default 0.1)</pre>
+   * 
+   * <pre> -N
+   *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+   * 
+   * <pre> -F
+   *  Feature-space normalization (only for
+   *  non-linear polynomial kernels).</pre>
+   * 
+   * <pre> -O
+   *  Use lower-order terms (only for non-linear
+   *  polynomial kernels).</pre>
+   * 
+   * <pre> -P
+   *  Use Polynomial kernel. (default false)</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported 
+   * @throws Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -752,7 +827,7 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
    * Check whether feature spaces is being normalized.
    * @return true if feature space is normalized.
    */
-  public boolean getFeatureSpaceNormalization() throws Exception {
+  public boolean getFeatureSpaceNormalization() {
 
     return m_featureSpaceNormalization;
   }
@@ -761,7 +836,7 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
    * Set whether feature space is normalized.
    * @param v  true if feature space is to be normalized.
    */
-  public void setFeatureSpaceNormalization(boolean v) throws Exception {
+  public void setFeatureSpaceNormalization(boolean v) {
     
     if ((!m_usePoly) || (m_exponent == 1.0)) {
       m_featureSpaceNormalization = false;
@@ -875,6 +950,8 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
  
  /**
    * Main method for testing this class.
+   * 
+   * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
 	
@@ -887,6 +964,4 @@ public class GaussianProcesses extends Classifier implements OptionHandler, Inte
       System.err.println(e.getMessage());
     }
   }
- 
-
 }

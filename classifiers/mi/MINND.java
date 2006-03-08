@@ -30,6 +30,10 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -37,49 +41,60 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * Multiple-Instance Nearest Neighbour with Distribution learner . <p/>
- *
- * It uses gradient descent to find the weight for each dimension of each
- * exeamplar from the starting point of 1.0.  In order to
- * avoid overfitting, it uses mean-square function (i.e. the Euclidean 
- * distance) to search for the weights. <br/>
- * It then uses the weights to cleanse the training data.  After that it 
- * searches for the weights again from the starting points of the weights
- * searched before. <br/>
- * Finally it uses the most updated weights to cleanse the test exemplar
- * and then finds the nearest neighbour of the test exemplar using 
- * partly-weighted Kullback distance.  But the variances in the Kullback
- * distance are the ones before cleansing.
+ <!-- globalinfo-start -->
+ * Multiple-Instance Nearest Neighbour with Distribution learner.<br/>
+ * <br/>
+ * It uses gradient descent to find the weight for each dimension of each exeamplar from the starting point of 1.0. In order to avoid overfitting, it uses mean-square function (i.e. the Euclidean distance) to search for the weights.<br/>
+ *  It then uses the weights to cleanse the training data. After that it searches for the weights again from the starting points of the weights searched before.<br/>
+ *  Finally it uses the most updated weights to cleanse the test exemplar and then finds the nearest neighbour of the test exemplar using partly-weighted Kullback distance. But the variances in the Kullback distance are the ones before cleansing.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Xin Xu (2001). A nearest distribution approach to multiple-instance learning. Hamilton, NZ.
  * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information see: <br/>
- * Xin Xu (2001). A nearest distribution approach to multiple-instance 
- * learning. (University of Waikato, Hamilton, NZ, Xin Xu's thesis: 0657.591B)
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;misc{Xu2001,
+ *    address = {Hamilton, NZ},
+ *    author = {Xin Xu},
+ *    note = {0657.591B},
+ *    school = {University of Waikato},
+ *    title = {A nearest distribution approach to multiple-instance learning},
+ *    year = {2001}
+ * }
+ * </pre>
  * <p/>
+ <!-- technical-bibtex-end -->
  *
+ <!-- options-start -->
  * Valid options are: <p/>
- *
- * -K number <br/>
- * Set number of nearest neighbour used for prediction 
- * (Default: 1) <p/>
  * 
- * -S number <br/>
- * Set number of nearest neighbour instances used for cleansing the 
- * training data 
- * (Default: 1) <p/>
- *
- * -E number <br/>
- * Set number of nearest neighbour exemplars used for cleansing the 
- * testing data 
- * (Default: 1) <p/>
+ * <pre> -K &lt;number of neighbours&gt;
+ *  Set number of nearest neighbour for prediction
+ *  (default 1)</pre>
+ * 
+ * <pre> -S &lt;number of neighbours&gt;
+ *  Set number of nearest neighbour for cleansing the training data
+ *  (default 1)</pre>
+ * 
+ * <pre> -E &lt;number of neighbours&gt;
+ *  Set number of nearest neighbour for cleansing the testing data
+ *  (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MINND 
   extends Classifier 
-  implements OptionHandler, MultiInstanceCapabilitiesHandler {
+  implements OptionHandler, MultiInstanceCapabilitiesHandler,
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -4512599203273864994L;
   
   /** The number of nearest neighbour for prediction */
@@ -159,9 +174,29 @@ public class MINND
       + "and then finds the nearest neighbour of the test exemplar using "
       + "partly-weighted Kullback distance. But the variances in the Kullback "
       + "distance are the ones before cleansing.\n\n"
-      + "For more information see:\n"
-      + "Xin Xu (2001). A nearest distribution approach to multiple-instance "
-      + "learning. (University of Waikato, Hamilton, NZ, Xin Xu's thesis: 0657.591B)";
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.MISC);
+    result.setValue(Field.AUTHOR, "Xin Xu");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.TITLE, "A nearest distribution approach to multiple-instance learning");
+    result.setValue(Field.SCHOOL, "University of Waikato");
+    result.setValue(Field.ADDRESS, "Hamilton, NZ");
+    result.setValue(Field.NOTE, "0657.591B");
+    
+    return result;
   }
 
   /**
@@ -818,7 +853,24 @@ search:
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -K &lt;number of neighbours&gt;
+   *  Set number of nearest neighbour for prediction
+   *  (default 1)</pre>
+   * 
+   * <pre> -S &lt;number of neighbours&gt;
+   *  Set number of nearest neighbour for cleansing the training data
+   *  (default 1)</pre>
+   * 
+   * <pre> -E &lt;number of neighbours&gt;
+   *  Set number of nearest neighbour for cleansing the testing data
+   *  (default 1)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
