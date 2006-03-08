@@ -102,7 +102,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -140,7 +140,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** The property panel created for the objects */
   protected PropertyPanel m_ObjectPropertyPanel;
     
-
+  /** whether the class can be changed */
   protected boolean m_canChangeClassInDialog;
 
   /** whether to generate the properties dynamically or use the static props-file */
@@ -206,6 +206,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public class GOETreeNode
     extends DefaultMutableTreeNode {
     
+    /** for serialization */
+    static final long serialVersionUID = -1707872446682150133L;
+    
+    /** color for "no support" */
+    public final static String NO_SUPPORT = "red";
+    
+    /** color for "maybe support" */
+    public final static String MAYBE_SUPPORT = "blue";
+    
     /** the Capabilities object to use for filtering */
     protected Capabilities m_Capabilities = null;
     
@@ -270,6 +279,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * returns a string representation of this treenode
+     * 
+     * @return 		the text to display 
      */
     public String toString() {
       String	result;
@@ -279,8 +290,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       if (m_CapabilitiesFilter != null) {
 	initCapabilities();
 	if (m_Capabilities != null) {
-	  if (!m_Capabilities.supports(m_CapabilitiesFilter))
-	    result = "<html><font color=\"red\">" + result + "</font></i><html>";
+	  if (m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && !m_Capabilities.supports(m_CapabilitiesFilter))
+	    result = "<html><font color=\"" + MAYBE_SUPPORT + "\">" + result + "</font></i><html>";
+	  else if (!m_Capabilities.supports(m_CapabilitiesFilter))
+	    result = "<html><font color=\"" + NO_SUPPORT + "\">" + result + "</font></i><html>";
 	}
       }
       
@@ -293,6 +306,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   public class CapabilitiesFilterDialog 
     extends JDialog {
+    
+    /** for serialization */
+    static final long serialVersionUID = -7845503345689646266L;
     
     /** the dialog itself */
     protected JDialog m_Self;
@@ -342,8 +358,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_InfoLabel.setText(
 	    "<html>"
 	  + m_ClassType.getName().replaceAll(".*\\.", "") + "s"
-	  + " have to support <i>at least</i> the following capabilities<br>"
-	  + "(the ones highlighted <font color=\"red\">red</font> don't meet these requirements):"
+	  + " have to support <i>at least</i> the following capabilities <br>"
+	  + "(the ones highlighted <font color=\"" + GOETreeNode.NO_SUPPORT + "\">" + GOETreeNode.NO_SUPPORT + "</font> don't meet these requirements <br>"
+	  + "the ones highlighted  <font color=\"" + GOETreeNode.MAYBE_SUPPORT + "\">" + GOETreeNode.MAYBE_SUPPORT + "</font> possibly meet them):"
 	  + "</html>");
       panel.add(m_InfoLabel, BorderLayout.CENTER);
       
@@ -418,6 +435,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * sets the initial capabilities
+     * 
+     * @param value the capabilities to use
      */
     public void setCapabilities(Capabilities value) {
       if (value != null)
@@ -430,6 +449,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * returns the currently selected capabilities
+     * 
+     * @return the currently selected capabilities
      */
     public Capabilities getCapabilities() {
       return m_Capabilities;
@@ -437,6 +458,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * sets the JPopupMenu to display again after closing the dialog
+     * 
+     * @param value the JPopupMenu to display again
      */
     public void setPopup(JPopupMenu value) {
       m_Popup = value;
@@ -444,6 +467,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * returns the currently set JPopupMenu
+     * 
+     * @return the current JPopupMenu
      */
     public JPopupMenu getPopup() {
       return m_Popup;
@@ -465,6 +490,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   public class JTreePopupMenu 
     extends JPopupMenu {
+    
+    /** for serialization */
+    static final long serialVersionUID = -3404546329655057387L;
 
     /** the popup itself */
     private JPopupMenu m_Self;
@@ -496,32 +524,32 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       setLayout(new BorderLayout());
       JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
       add(panel, BorderLayout.SOUTH);
-      
+
       if (ClassDiscovery.hasInterface(CapabilitiesHandler.class, m_ClassType)) {
 	// filter
 	m_FilterButton.setMnemonic('F');
 	m_FilterButton.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == m_FilterButton) {
-              CapabilitiesFilterDialog dialog = new CapabilitiesFilterDialog();
-              dialog.setCapabilities(m_CapabilitiesFilter);
-              dialog.setPopup(m_Self);
-              dialog.setVisible(true);
-              repaint();
-            }
-          }
+	  public void actionPerformed(ActionEvent e) {
+	    if (e.getSource() == m_FilterButton) {
+	      CapabilitiesFilterDialog dialog = new CapabilitiesFilterDialog();
+	      dialog.setCapabilities(m_CapabilitiesFilter);
+	      dialog.setPopup(m_Self);
+	      dialog.setVisible(true);
+	      repaint();
+	    }
+	  }
 	});
 	panel.add(m_FilterButton);
 	
 	// remove
 	m_RemoveFilterButton.setMnemonic('R');
 	m_RemoveFilterButton.addActionListener(new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            if (e.getSource() == m_RemoveFilterButton) {
-              m_CapabilitiesFilter = null;
-              repaint();
-            }
-          }
+	  public void actionPerformed(ActionEvent e) {
+	    if (e.getSource() == m_RemoveFilterButton) {
+	      m_CapabilitiesFilter = null;
+	      repaint();
+	    }
+	  }
 	});
 	panel.add(m_RemoveFilterButton);
       }
@@ -588,7 +616,11 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Handles the GUI side of editing values.
    */
-  public class GOEPanel extends JPanel {
+  public class GOEPanel 
+    extends JPanel {
+    
+    /** for serialization */
+    static final long serialVersionUID = 3656028520876011335L;
     
     /** The component that performs classifier customization */
     protected PropertySheetPanel m_ChildPropertySheet;
@@ -772,9 +804,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * Opens an object from a file selected by the user.
+     * Saves an object to a file selected by the user.
      * 
-     * @return the loaded object, or null if the operation was cancelled
+     * @param object the object to save
      */
     protected void saveObject(Object object) {
       
@@ -1052,6 +1084,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * returns the name of the root element of the given class name, 
    * <code>null</code> if it doesn't contain the separator
+   * 
+   * @param clsname the full classname
+   * @param separator the separator 
+   * @return string the root element
    */
   protected static String getRootFromClass(String clsname, String separator) {
     if (clsname.indexOf(separator) > -1)
@@ -1130,7 +1166,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     return result;
   }
 
-  /** Called when the class of object being edited changes. */
+  /** 
+   * Called when the class of object being edited changes. 
+   * 
+   * @return the hashtable containing the HierarchyPropertyParsers for the root
+   *         elements
+   */
   protected Hashtable getClassesFromProperties() {	    
 
     Hashtable hpps = new Hashtable();
@@ -1379,7 +1420,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * Returns null as we don't support getting/setting values as text. 
    *
    * @param text the text value
-   * @exception IllegalArgumentException as we don't support
+   * @throws IllegalArgumentException as we don't support
    * getting/setting values as text.
    */
   public void setAsText(String text) {
@@ -1443,6 +1484,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Gets the custom panel used for editing the object.
    *
+   * @return the panel
    */
   public JPanel getCustomPanel() {
 
@@ -1459,6 +1501,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Creates a button that when clicked will enable the user to change
    * the class of the object being edited.
+   * 
+   * @return the choose button
    */
   protected JButton createChooseClassButton() {
 
@@ -1549,7 +1593,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /**
    * Creates a JTree from an object heirarchy.
    *
-   * @param hpp the hierarchy of objects to mirror in the tree
+   * @param hpps the hierarchy of objects to mirror in the tree
    * @return a JTree representation of the hierarchy
    */
   protected JTree createTree(Hashtable hpps) {
