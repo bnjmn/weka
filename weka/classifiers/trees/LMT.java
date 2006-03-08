@@ -35,6 +35,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -45,40 +49,68 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for "logistic model tree" classifier.
- * For more information, see master thesis "Logistic Model Trees" (Niels Landwehr, 2003)<p>
+ <!-- globalinfo-start -->
+ * Classifier for building 'logistic model trees', which are classification trees with logistic regression functions at the leaves. The algorithm can deal with binary and multi-class target variables, numeric and nominal attributes and missing values.<br/>
+ * <br/>
+ * For more information see: <br/>
+ * <br/>
+ * Niels Landwehr, Mark Hall, Eibe Frank: Logistic Model Trees. In: 14th European Conference on Machine Learning, 241-252, 2003.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are: <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Landwehr2003,
+ *    author = {Niels Landwehr and Mark Hall and Eibe Frank},
+ *    booktitle = {14th European Conference on Machine Learning},
+ *    pages = {241-252},
+ *    publisher = {Springer},
+ *    title = {Logistic Model Trees},
+ *    year = {2003}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * -B <br>
- * Binary splits (convert nominal attributes to binary ones).<p>
- *
- * -R <br>
- * Split on residuals instead of class values <p>
- *
- * -C <br>
- *  Use cross-validation for boosting at all nodes (i.e., disable heuristic) <p>
- *
- * -P <br>
- * Use error on probabilities instead of misclassification error for
- * stopping criterion of LogitBoost. <p>
- *
- * -I iterations <br>
- * Set fixed number of iterations for LogitBoost (instead of using cross-validation). <p>
- *
- * -M numInstances <br>
- *
- * Set minimum number of instances at which a node can be split (default 15)
- *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B
+ *  Binary splits (convert nominal attributes to binary ones)
+ * </pre>
+ * 
+ * <pre> -R
+ *  Split on residuals instead of class values
+ * </pre>
+ * 
+ * <pre> -C
+ *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)
+ * </pre>
+ * 
+ * <pre> -P
+ *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.
+ * </pre>
+ * 
+ * <pre> -I &lt;numIterations&gt;
+ *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)
+ * </pre>
+ * 
+ * <pre> -M &lt;numInstances&gt;
+ *  Set minimum number of instances at which a node can be split (default 15)
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-
-
-public class LMT extends Classifier implements OptionHandler, AdditionalMeasureProducer,
-					       Drawable{
+public class LMT 
+  extends Classifier 
+  implements OptionHandler, AdditionalMeasureProducer, Drawable,
+             TechnicalInformationHandler {
     
+  /** for serialization */
   static final long serialVersionUID = -1113212459618104943L;
   
   /** Filter to replace missing values*/
@@ -106,12 +138,11 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   protected int m_minNumInstances;
 
   /**if non-zero, use fixed number of iterations for LogitBoost*/
-  protected int  m_numBoostingIterations;
+  protected int m_numBoostingIterations;
     
   /**
    * Creates an instance of LMT with standard options
    */
-       
   public LMT() {
     m_fastRegression = true;
     m_numBoostingIterations = -1;
@@ -142,9 +173,9 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   /**
    * Builds the classifier.
    *
-   * @exception Exception if classifier can't be built successfully
+   * @param data the data to train with
+   * @throws Exception if classifier can't be built successfully
    */
-    
   public void buildClassifier(Instances data) throws Exception{
 	
     // can classifier handle the data?
@@ -188,9 +219,10 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   /** 
    * Returns class probabilities for an instance.
    *
-   * @exception Exception if distribution can't be computed successfully
+   * @param instance the instance to compute the distribution for
+   * @return the class probabilities
+   * @throws Exception if distribution can't be computed successfully
    */
-    
   public double [] distributionForInstance(Instance instance) throws Exception {
 	
     //replace missing values
@@ -209,7 +241,9 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   /**
    * Classifies an instance.
    *
-   * @exception Exception if instance can't be classified successfully
+   * @param instance the instance to classify
+   * @return the classification
+   * @throws Exception if instance can't be classified successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
 
@@ -229,6 +263,8 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
      
   /**
    * Returns a description of the classifier.
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
     if (m_tree!=null) {
@@ -246,33 +282,62 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   public Enumeration listOptions() {
     Vector newVector = new Vector(8);
   	
-    newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)\n", 
+    newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)", 
 				    "B", 0, "-B"));
 
-    newVector.addElement(new Option("\tSplit on residuals instead of class values\n", 
+    newVector.addElement(new Option("\tSplit on residuals instead of class values", 
 				    "R", 0, "-R"));
 
-    newVector.addElement(new Option("\tUse cross-validation for boosting at all nodes (i.e., disable heuristic)\n", 
+    newVector.addElement(new Option("\tUse cross-validation for boosting at all nodes (i.e., disable heuristic)", 
 				    "C", 0, "-C"));
 		
     newVector.addElement(new Option("\tUse error on probabilities instead of misclassification error "+
-				    "for stopping criterion of LogitBoost.\n", 
+				    "for stopping criterion of LogitBoost.", 
 				    "P", 0, "-P"));
 
     newVector.addElement(new Option("\tSet fixed number of iterations for LogitBoost (instead of using "+
-				    "cross-validation)\n",
+				    "cross-validation)",
 				    "I",1,"-I <numIterations>"));
 	
-    newVector.addElement(new Option("\tSet minimum number of instances at which a node can be split (default 15)\n",
+    newVector.addElement(new Option("\tSet minimum number of instances at which a node can be split (default 15)",
 				    "M",1,"-M <numInstances>"));
     return newVector.elements();
   } 
     
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B
+   *  Binary splits (convert nominal attributes to binary ones)
+   * </pre>
+   * 
+   * <pre> -R
+   *  Split on residuals instead of class values
+   * </pre>
+   * 
+   * <pre> -C
+   *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)
+   * </pre>
+   * 
+   * <pre> -P
+   *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.
+   * </pre>
+   * 
+   * <pre> -I &lt;numIterations&gt;
+   *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)
+   * </pre>
+   * 
+   * <pre> -M &lt;numInstances&gt;
+   *  Set minimum number of instances at which a node can be split (default 15)
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -452,7 +517,8 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   /**
    * Returns graph describing the tree.
    *
-   * @exception Exception if graph can't be computed
+   * @return the graph describing the tree
+   * @throws Exception if graph can't be computed
    */
   public String graph() throws Exception {
 
@@ -492,7 +558,7 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
    * Returns the value of the named measure
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureTreeSize") == 0) {
@@ -513,10 +579,31 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   public String globalInfo() {
     return "Classifier for building 'logistic model trees', which are classification trees with "
       +"logistic regression functions at the leaves. The algorithm can deal with binary and multi-class "
-      +"target variables, numeric and nominal attributes and missing values. "
-      +"For more information see: N.Landwehr, M.Hall, E. Frank 'Logistic Model Trees' (ECML 2003).";	    
+      +"target variables, numeric and nominal attributes and missing values.\n\n"
+      +"For more information see: \n\n"
+      + getTechnicalInformation().toString();
   }
 
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
+    result.setValue(Field.TITLE, "Logistic Model Trees");
+    result.setValue(Field.BOOKTITLE, "14th European Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.PAGES, "241-252");
+    result.setValue(Field.PUBLISHER, "Springer");
+    
+    return result;
+  }
 
   /**
    * Returns the tip text for this property
@@ -590,15 +677,14 @@ public class LMT extends Classifier implements OptionHandler, AdditionalMeasureP
   /**
    * Main method for testing this class
    *
-   * @param String options 
+   * @param argv the commandline options 
    */
-  public static void main (String [] argv) throws Exception{	
-    System.out.println(Evaluation.evaluateModel(new LMT(), argv));
-
+  public static void main (String [] argv) {	
+    try {
+      System.out.println(Evaluation.evaluateModel(new LMT(), argv));
+    } 
+    catch (Exception e) {
+      System.err.println(e.getMessage());
+    } 
   }  
-
 }
-
-
-
-
