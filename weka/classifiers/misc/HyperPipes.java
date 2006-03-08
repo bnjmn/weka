@@ -35,21 +35,29 @@ import weka.core.Capabilities.Capability;
 import java.io.Serializable;
 
 /**
- * Class implementing a HyperPipe classifier. For each category a
- * HyperPipe is constructed that contains all points of that category 
- * (essentially records the attribute bounds observed for each category).
- * Test instances are classified according to the category that most 
- * contains the instance). 
- * Does not handle numeric class, or missing values in test cases. Extremely
- * simple algorithm, but has the advantage of being extremely fast, and
- * works quite well when you have smegloads of attributes.
+ <!-- globalinfo-start -->
+ * Class implementing a HyperPipe classifier. For each category a HyperPipe is constructed that contains all points of that category (essentially records the attribute bounds observed for each category). Test instances are classified according to the category that "most contains the instance".<br/>
+ * Does not handle numeric class, or missing values in test cases. Extremely simple algorithm, but has the advantage of being extremely fast, and works quite well when you have "smegloads" of attributes.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */ 
-public class HyperPipes extends Classifier {
+public class HyperPipes 
+  extends Classifier {
 
+  /** for serialization */
   static final long serialVersionUID = -7527596632268975274L;
   
   /** The index of the class attribute */
@@ -73,7 +81,7 @@ public class HyperPipes extends Classifier {
     +  "HyperPipe is constructed that contains all points of that category "
       + "(essentially records the attribute bounds observed for each category). "
       + "Test instances are classified according to the category that \"most "
-      + "contains the instance\". " 
+      + "contains the instance\".\n" 
       + "Does not handle numeric class, or missing values in test cases. Extremely "
       + "simple algorithm, but has the advantage of being extremely fast, and "
       + "works quite well when you have \"smegloads\" of attributes.";
@@ -83,7 +91,11 @@ public class HyperPipes extends Classifier {
    * Represents an n-dimensional structure that bounds all instances 
    * passed to it (generally all of a given class value).
    */
-  class HyperPipe implements Serializable {
+  class HyperPipe 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = 3972254260367902025L;
 
     /** Contains the numeric bounds of all instances in the HyperPipe */
     protected double [][] m_NumericBounds;
@@ -97,7 +109,7 @@ public class HyperPipes extends Classifier {
      * pointSet.
      *
      * @param instances all instances belonging to the same class
-     * @exception Exception if missing values are found
+     * @throws Exception if missing values are found
      */
     public HyperPipe(Instances instances) throws Exception {
       
@@ -130,7 +142,7 @@ public class HyperPipes extends Classifier {
      * are ignored (i.e. they don't change the bounds for that attribute)
      *
      * @param instance the instance
-     * @exception Exception if any missing values are encountered
+     * @throws Exception if any missing values are encountered
      */
     public void addInstance(Instance instance) throws Exception {
 
@@ -158,7 +170,8 @@ public class HyperPipes extends Classifier {
      * values lying within the corresponding bounds of the HyperPipe.
      *
      * @param instance the instance
-     * @exception Exception if any missing values are encountered
+     * @return the fraction of dimensions
+     * @throws Exception if any missing values are encountered
      */
     public double partialContains(Instance instance) throws Exception {
       
@@ -219,7 +232,7 @@ public class HyperPipes extends Classifier {
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     
@@ -250,7 +263,7 @@ public class HyperPipes extends Classifier {
    * Updates the classifier.
    *
    * @param instance the instance to be put into the classifier
-   * @exception Exception if the instance could not be included successfully
+   * @throws Exception if the instance could not be included successfully
    */
   public void updateClassifier(Instance instance) throws Exception {
   
@@ -266,7 +279,7 @@ public class HyperPipes extends Classifier {
    *
    * @param instance the instance to be classified
    * @return the predicted class for the instance 
-   * @exception Exception if the instance can't be classified
+   * @throws Exception if the instance can't be classified
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
         

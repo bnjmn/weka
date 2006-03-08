@@ -29,24 +29,57 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
 import java.io.Serializable;
 import java.util.Enumeration;
 
 /**
- * Class for building and using a PRISM rule set for classifcation.  
- * Can only deal with nominal attributes. Can't deal with missing values.
- * Doesn't do any pruning. For more information, see <p>
+ <!-- globalinfo-start -->
+ * Class for building and using a PRISM rule set for classification. Can only deal with nominal attributes. Can't deal with missing values. Doesn't do any pruning.<br/>
+ * <br/>
+ * For more information, see <br/>
+ * <br/>
+ * J. Cendrowska (1987). PRISM: An algorithm for inducing modular rules. International Journal of Man-Machine Studies. Vol.27, No.4, pp. 349-370.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * J. Cendrowska (1987). <i>PRISM: An algorithm for
- * inducing modular rules</i>. International Journal of Man-Machine
- * Studies. Vol.27, No.4, pp.349-370.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Cendrowska1987,
+ *    author = {J. Cendrowska},
+ *    journal = {International Journal of Man-Machine Studies},
+ *    number = {No.4},
+ *    pages = {pp. 349-370},
+ *    title = {PRISM: An algorithm for inducing modular rules},
+ *    volume = {Vol.27},
+ *    year = {1987}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
 */
-public class Prism extends Classifier {
+public class Prism 
+  extends Classifier
+  implements TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 1310258880025902106L;
   
   /**
@@ -55,18 +88,43 @@ public class Prism extends Classifier {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-  return "Class for building and using a PRISM rule set for classification. "
-    + "Can only deal with nominal attributes. Can't deal with missing values. "
-    + "Doesn't do any pruning. For more information, see \n\n"
-    + "J. Cendrowska (1987). \"PRISM: An algorithm for "
-    + "inducing modular rules\". International Journal of Man-Machine "
-    + "Studies. Vol.27, No.4, pp.349-370.";
+    return "Class for building and using a PRISM rule set for classification. "
+      + "Can only deal with nominal attributes. Can't deal with missing values. "
+      + "Doesn't do any pruning.\n\n"
+      + "For more information, see \n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "J. Cendrowska");
+    result.setValue(Field.YEAR, "1987");
+    result.setValue(Field.TITLE, "PRISM: An algorithm for inducing modular rules");
+    result.setValue(Field.JOURNAL, "International Journal of Man-Machine Studies");
+    result.setValue(Field.VOLUME, "Vol.27");
+    result.setValue(Field.NUMBER, "No.4");
+    result.setValue(Field.PAGES, "pp. 349-370");
+    
+    return result;
   }
 
   /**
    * Class for storing a PRISM ruleset, i.e. a list of rules
    */
-  private class PrismRule implements Serializable {
+  private class PrismRule 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = 4248784350656508583L;
     
     /** The classification */
     private int m_classification;
@@ -216,7 +274,11 @@ public class Prism extends Classifier {
   /**
    * Class for storing a list of attribute-value tests
    */
-  private class Test implements Serializable { 
+  private class Test 
+    implements Serializable { 
+    
+    /** for serialization */
+    static final long serialVersionUID = -8925333011350280799L;
 
     /** Attribute to test */
     private int m_attr = -1; 
@@ -411,6 +473,7 @@ public class Prism extends Classifier {
    * @param E the instances to be checked
    * @param C the class
    * @return true if there are any instances of class C
+   * @throws Exception if something goes wrong
    */
   private static boolean contains(Instances E, int C) throws Exception {
 
@@ -428,6 +491,7 @@ public class Prism extends Classifier {
    *
    * @param attr the attribute to be checked for
    * @param t test contained by rule
+   * @return true if the attribute is mentioned in the rule
    */
   private static boolean isMentionedIn(Attribute attr, Test t) {
 
@@ -455,6 +519,8 @@ public class Prism extends Classifier {
 
   /**
    * Main method for testing this class
+   * 
+   * @param args the commandline parameters
    */
   public static void main(String[] args) {
 
@@ -465,7 +531,3 @@ public class Prism extends Classifier {
     }
   }
 }
-
-
-
-
