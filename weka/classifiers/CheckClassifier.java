@@ -117,7 +117,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @see TestInstances
  */
 
@@ -1667,7 +1667,11 @@ public class CheckClassifier implements OptionHandler {
     } 
     catch (Exception ex) {
       boolean acceptable = false;
-      String msg = ex.getMessage().toLowerCase();
+      String msg;
+      if (ex.getMessage() == null)
+	msg = "";
+      else
+        msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("not in classpath") > -1)
 	m_ClasspathProblems = true;
       if (msg.indexOf("worse than zeror") >= 0) {
