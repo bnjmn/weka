@@ -30,6 +30,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -44,25 +48,54 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- * <p>
- * DBScan.java <br/>
- * Authors: Rainer Holzmann, Zhanna Melnikova-Albrecht, Matthias Schubert <br/>
- * Date: Aug 19, 2004 <br/>
- * Time: 5:47:24 PM <br/>
- * $ Revision 1.4 $ <br/>
- * <br/><br/>
- * Reference: Ester M., Kriegel H.-P., Sander J., Xu X.:<br>
- *  A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise <br>
- *  Proc. 2nd Int. Conf. on Knowledge Discovery and Data Mining (KDD'96), Portland, OR, 1996, pp. 226-231.<br>
- * </p>
+ <!-- globalinfo-start -->
+ * Martin Ester, Hans-Peter Kriegel, Joerg Sander, Xiaowei Xu: A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise. In: Second International Conference on Knowledge Discovery and Data Mining, 226-231, 1996.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Ester1996,
+ *    author = {Martin Ester and Hans-Peter Kriegel and Joerg Sander and Xiaowei Xu},
+ *    booktitle = {Second International Conference on Knowledge Discovery and Data Mining},
+ *    editor = {Evangelos Simoudis and Jiawei Han and Usama M. Fayyad},
+ *    pages = {226-231},
+ *    publisher = {AAAI Press},
+ *    title = {A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise},
+ *    year = {1996}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -E &lt;double&gt;
+ *  epsilon (default = 0.9)</pre>
+ * 
+ * <pre> -M &lt;int&gt;
+ *  minPoints (default = 6)</pre>
+ * 
+ * <pre> -I &lt;String&gt;
+ *  index (database) used for DBScan (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
+ * 
+ * <pre> -D &lt;String&gt;
+ *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class DBScan extends Clusterer implements OptionHandler {
+public class DBScan 
+    extends Clusterer 
+    implements OptionHandler, TechnicalInformationHandler {
 
+    /** for serialization */
     static final long serialVersionUID = -1666498248451219728L;
   
     /**
@@ -238,7 +271,7 @@ public class DBScan extends Clusterer implements OptionHandler {
      *
      * @param instance The instance to be assigned to a cluster
      * @return int The number of the assigned cluster as an integer
-     * @exception java.lang.Exception If instance could not be clustered
+     * @throws java.lang.Exception If instance could not be clustered
      * successfully
      */
     public int clusterInstance(Instance instance) throws Exception {
@@ -254,7 +287,7 @@ public class DBScan extends Clusterer implements OptionHandler {
      * Returns the number of clusters.
      *
      * @return int The number of clusters generated for a training dataset.
-     * @exception java.lang.Exception if number of clusters could not be returned
+     * @throws java.lang.Exception if number of clusters could not be returned
      * successfully
      */
     public int numberOfClusters() throws Exception {
@@ -295,10 +328,27 @@ public class DBScan extends Clusterer implements OptionHandler {
     /**
      * Sets the OptionHandler's options using the given list. All options
      * will be set (or reset) during this call (i.e. incremental setting
-     * of options is not possible).
+     * of options is not possible). <p/>
+     *
+     <!-- options-start -->
+     * Valid options are: <p/>
+     * 
+     * <pre> -E &lt;double&gt;
+     *  epsilon (default = 0.9)</pre>
+     * 
+     * <pre> -M &lt;int&gt;
+     *  minPoints (default = 6)</pre>
+     * 
+     * <pre> -I &lt;String&gt;
+     *  index (database) used for DBScan (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)</pre>
+     * 
+     * <pre> -D &lt;String&gt;
+     *  distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)</pre>
+     * 
+     <!-- options-end -->
      *
      * @param options The list of options as an array of strings
-     * @exception java.lang.Exception If an option is not supported
+     * @throws java.lang.Exception If an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
         String optionString = Utils.getOption('E', options);
@@ -511,11 +561,36 @@ public class DBScan extends Clusterer implements OptionHandler {
      * @return String Information for the gui-explorer
      */
     public String globalInfo() {
-        return " Ester M., Kriegel H.-P., Sander J., Xu X.: A Density-Based Algorithm for Discovering"+
-        " Clusters in Large Spatial Databases with Noise, Proc. 2nd Int. Conf. on Knowledge Discovery "+
-        "and Data Mining (KDD'96), Portland, OR, 1996, pp. 226-231.";
+        return getTechnicalInformation().toString();
     }
 
+    /**
+     * Returns an instance of a TechnicalInformation object, containing 
+     * detailed information about the technical background of this class,
+     * e.g., paper reference or book this class is based on.
+     * 
+     * @return the technical information about this class
+     */
+    public TechnicalInformation getTechnicalInformation() {
+      TechnicalInformation 	result;
+      
+      result = new TechnicalInformation(Type.INPROCEEDINGS);
+      result.setValue(Field.AUTHOR, "Martin Ester and Hans-Peter Kriegel and Joerg Sander and Xiaowei Xu");
+      result.setValue(Field.TITLE, "A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise");
+      result.setValue(Field.BOOKTITLE, "Second International Conference on Knowledge Discovery and Data Mining");
+      result.setValue(Field.EDITOR, "Evangelos Simoudis and Jiawei Han and Usama M. Fayyad");
+      result.setValue(Field.YEAR, "1996");
+      result.setValue(Field.PAGES, "226-231");
+      result.setValue(Field.PUBLISHER, "AAAI Press");
+      
+      return result;
+    }
+
+    /**
+     * Returns a description of the clusterer
+     * 
+     * @return a string representation of the clusterer
+     */
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("DBScan clustering results\n" +

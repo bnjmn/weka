@@ -36,21 +36,47 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for wrapping a Clusterer to make it return a distribution and density. Fits
- * normal distributions and discrete distributions within each cluster produced by
- * the wrapped clusterer. Supports the NumberOfClustersRequestable interface only
- * if the wrapped Clusterer does.
+ <!-- globalinfo-start -->
+ * Class for wrapping a Clusterer to make it return a distribution and density. Fits normal distributions and discrete distributions within each cluster produced by the wrapped clusterer. Supports the NumberOfClustersRequestable interface only if the wrapped Clusterer does.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  minimum allowable standard deviation for normal density computation 
+ *  (default 1e-6)</pre>
+ * 
+ * <pre> -W &lt;clusterer name&gt;
+ *  Clusterer to wrap. (required)
+ * </pre>
+ * 
+ * <pre> 
+ * Options specific to clusterer weka.clusterers.SimpleKMeans:
+ * </pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  number of clusters. (default = 2).</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  random number seed.
+ *  (default 10)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class MakeDensityBasedClusterer extends DensityBasedClusterer
+public class MakeDensityBasedClusterer 
+  extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
 	     OptionHandler, 
 	     WeightedInstancesHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -5643302427972186631L;
   
   /** holds training instances header information */
@@ -73,7 +99,6 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
    * 
    */  
   public MakeDensityBasedClusterer() {
-
   }
    
   /**
@@ -85,12 +110,26 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 
     setClusterer(toWrap);
   }
+  
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return 
+        "Class for wrapping a Clusterer to make it return a distribution "
+      + "and density. Fits normal distributions and discrete distributions "
+      + "within each cluster produced by the wrapped clusterer. Supports the "
+      + "NumberOfClustersRequestable interface only if the wrapped Clusterer "
+      + "does.";
+  }
 
   /**
    * Set the number of clusters to generate.
    *
    * @param n the number of clusters to generate
-   * @exception Exception if the wrapped clusterer has not been set, or if
+   * @throws Exception if the wrapped clusterer has not been set, or if
    * the wrapped clusterer does not implement this facility.
    */
   public void setNumClusters(int n) throws Exception {
@@ -122,8 +161,8 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
   /**
    * Builds a clusterer for a set of instances.
    *
-   * @param instances the instances to train the clusterer with
-   * @exception Exception if the clusterer hasn't been set or something goes wrong
+   * @param data the instances to train the clusterer with
+   * @throws Exception if the clusterer hasn't been set or something goes wrong
    */  
   public void buildClusterer(Instances data) throws Exception {
     // can clusterer handle the data?
@@ -221,6 +260,8 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 
   /**
    * Returns the cluster priors.
+   * 
+   * @return the cluster priors
    */
   public double[] clusterPriors() {
 
@@ -233,10 +274,9 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
   /**
    * Computes the log of the conditional density (per cluster) for a given instance.
    * 
-   * @param instance the instance to compute the density for
-   * @return the density.
+   * @param inst the instance to compute the density for
    * @return an array containing the estimated densities
-   * @exception Exception if the density could not be computed
+   * @throws Exception if the density could not be computed
    * successfully
    */
   public double[] logDensityPerClusterForInstance(Instance inst) throws Exception {
@@ -274,6 +314,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
    * @param x input value
    * @param mean mean of distribution
    * @param stdDev standard deviation of distribution
+   * @return the density
    */
   private double logNormalDens (double x, double mean, double stdDev) {
 
@@ -286,7 +327,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
    * Returns the number of clusters.
    *
    * @return the number of clusters generated for a training dataset.
-   * @exception Exception if number of clusters could not be returned successfully
+   * @throws Exception if number of clusters could not be returned successfully
    */
   public int numberOfClusters() throws Exception {
 
@@ -410,17 +451,34 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -W clusterer name <br>
-   * Clusterer to wrap. (required) <p>
-   *
-   * -M <num> <br>
-   *  Set the minimum allowable standard deviation for normal density 
-   * calculation. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M &lt;num&gt;
+   *  minimum allowable standard deviation for normal density computation 
+   *  (default 1e-6)</pre>
+   * 
+   * <pre> -W &lt;clusterer name&gt;
+   *  Clusterer to wrap. (required)
+   * </pre>
+   * 
+   * <pre> 
+   * Options specific to clusterer weka.clusterers.SimpleKMeans:
+   * </pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  number of clusters. (default = 2).</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  random number seed.
+   *  (default 10)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
