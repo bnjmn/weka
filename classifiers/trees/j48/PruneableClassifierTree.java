@@ -34,9 +34,13 @@ import java.util.Random;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class PruneableClassifierTree extends ClassifierTree{
+public class PruneableClassifierTree 
+  extends ClassifierTree {
+  
+  /** for serialization */
+  static final long serialVersionUID = -555775736857600201L;
 
   /** True if the tree is to be pruned. */
   private boolean pruneTheTree = false;
@@ -57,7 +61,9 @@ public class PruneableClassifierTree extends ClassifierTree{
    * @param toSelectLocModel selection method for local splitting model
    * @param pruneTree true if the tree is to be pruned
    * @param num number of subsets of equal size
-   * @exception Exception if something goes wrong
+   * @param cleanup
+   * @param seed the seed value to use
+   * @throws Exception if something goes wrong
    */
   public PruneableClassifierTree(ModelSelection toSelectLocModel,
 				 boolean pruneTree, int num, boolean cleanup,
@@ -99,7 +105,8 @@ public class PruneableClassifierTree extends ClassifierTree{
   /**
    * Method for building a pruneable classifier tree.
    *
-   * @exception Exception if tree can't be built successfully
+   * @param data the data to build the tree from 
+   * @throws Exception if tree can't be built successfully
    */
   public void buildClassifier(Instances data) 
        throws Exception {
@@ -126,7 +133,7 @@ public class PruneableClassifierTree extends ClassifierTree{
   /**
    * Prunes a tree.
    *
-   * @exception Exception if tree can't be pruned successfully
+   * @throws Exception if tree can't be pruned successfully
    */
   public void prune() throws Exception {
   
@@ -152,7 +159,10 @@ public class PruneableClassifierTree extends ClassifierTree{
   /**
    * Returns a newly created tree.
    *
-   * @param data and selection method for local models.
+   * @param train the training data
+   * @param test the test data
+   * @return the generated tree
+   * @throws Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances train, Instances test) 
        throws Exception {
@@ -167,7 +177,8 @@ public class PruneableClassifierTree extends ClassifierTree{
   /**
    * Computes estimated errors for tree.
    *
-   * @exception Exception if error estimate can't be computed
+   * @return the estimated errors
+   * @throws Exception if error estimate can't be computed
    */
   private double errorsForTree() throws Exception {
 
@@ -191,7 +202,8 @@ public class PruneableClassifierTree extends ClassifierTree{
   /**
    * Computes estimated errors for leaf.
    *
-   * @exception Exception if error estimate can't be computed
+   * @return the estimated errors
+   * @throws Exception if error estimate can't be computed
    */
   private double errorsForLeaf() throws Exception {
 
