@@ -135,7 +135,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -1170,14 +1170,14 @@ public class XMeans
     // add random vector to center
     AlgVector c = new AlgVector(center);
     AlgVector c2 = (AlgVector) c.clone();
-    c.add(r);
+    c = c.add(r);
     Instance newCenter = c.getAsInstance(model, random);
     children.add(newCenter);
     PFD(D_FOLLOWSPLIT, "first child "+ newCenter);
     
     // substract random vector to center
-    c2.substract(r);
-    newCenter = c.getAsInstance(model, random);
+    c2 = c2.substract(r);
+    newCenter = c2.getAsInstance(model, random);
     children.add(newCenter);
     PFD(D_FOLLOWSPLIT, "second child "+ newCenter);
 
