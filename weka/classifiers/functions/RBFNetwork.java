@@ -41,41 +41,39 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class that implements a normalized Gaussian radial basis function
- * network.  It uses the k-means clustering algorithm to provide the
- * basis functions and learns either a logistic regression (discrete
- * class problems) or linear regression (numeric class problems) on
- * top of that. Symmetric multivariate Gaussians are fit to the data from
- * each cluster. If the class is nominal it uses the given number of
- * clusters per class. It standardizes all numeric attributes to zero
- * mean and unit variance.
+ <!-- globalinfo-start -->
+ * Class that implements a normalized Gaussian radial basisbasis function network.<br/>
+ * It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class.It standardizes all numeric attributes to zero mean and unit variance.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -B num <br>
- * Set the number of clusters (basis functions) to use.<p>
- *
- * -R ridge <br>
- * Set the ridge parameter for the logistic regression or linear regression.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -M num <br>
- * Set the maximum number of iterations for logistic regression.
- * (default -1, until convergence)<p>
+ * <pre> -B &lt;number&gt;
+ *  Set the number of clusters (basis functions) to generate. (default = 2).</pre>
+ * 
+ * <pre> -S &lt;seed&gt;
+ *  Set the random seed to be used by K-means. (default = 1).</pre>
+ * 
+ * <pre> -R &lt;ridge&gt;
+ *  Set the ridge value for the logistic or linear regression.</pre>
+ * 
+ * <pre> -M &lt;number&gt;
+ *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).</pre>
+ * 
+ * <pre> -W &lt;number&gt;
+ *  Set the minimum standard deviation for the clusters. (default 0.1).</pre>
+ * 
+ <!-- options-end -->
  *
- * -S seed <br>
- * Set the random seed used by K-means when generating clusters. 
- * (default 1). <p>
- *
- * -W num <br>
- * Set the minimum standard deviation for the clusters.
- * (default 0.1). <p>
-  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -3669814959712675720L;
   
   /** The logistic regression for classification problems */
@@ -112,7 +110,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public String globalInfo() {
     return "Class that implements a normalized Gaussian radial basis" 
-      + "basis function network. "
+      + "basis function network.\n"
       + "It uses the k-means clustering algorithm to provide the basis "
       + "functions and learns either a logistic regression (discrete "
       + "class problems) or linear regression (numeric class problems) "
@@ -144,7 +142,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * Builds the classifier
    *
    * @param instances the training data
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -191,7 +189,7 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    *
    * @param instance the instance for which distribution is computed
    * @return the distribution
-   * @exception Exception if the distribution can't be computed successfully
+   * @throws Exception if the distribution can't be computed successfully
    */
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
@@ -396,28 +394,30 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -B num <br>
-   * Set the number of clusters (basis functions) to use.<p>
-   *
-   * -R ridge <br>
-   * Set the ridge parameter for the logistic regression or linear regression.<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * -M num <br>
-   * Set the maximum number of iterations for logistic regression.
-   * (default -1, until convergence)<p>
-   *
-   * -S seed <br>
-   * Set the random seed used by K-means when generating clusters. 
-   * (default 1). <p>
-   *
-   * -W num <br>
-   * Set the minimum standard deviation for the clusters.
-   * (default 0.1). <p>
+   * <pre> -B &lt;number&gt;
+   *  Set the number of clusters (basis functions) to generate. (default = 2).</pre>
+   * 
+   * <pre> -S &lt;seed&gt;
+   *  Set the random seed to be used by K-means. (default = 1).</pre>
+   * 
+   * <pre> -R &lt;ridge&gt;
+   *  Set the ridge value for the logistic or linear regression.</pre>
+   * 
+   * <pre> -M &lt;number&gt;
+   *  Set the maximum number of iterations for the logistic regression. (default -1, until convergence).</pre>
+   * 
+   * <pre> -W &lt;number&gt;
+   *  Set the minimum standard deviation for the clusters. (default 0.1).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     setDebug(Utils.getFlag('D', options));

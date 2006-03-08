@@ -33,16 +33,27 @@ import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
 
 /**
- * Class for learning a simple linear regression model.
- * Picks the attribute that results in the lowest squared error.
- * Missing values are not allowed. Can only deal with numeric attributes.
+ <!-- globalinfo-start -->
+ * Learns a simple linear regression model. Picks the attribute that results in the lowest squared error. Missing values are not allowed. Can only deal with numeric attributes.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SimpleLinearRegression extends Classifier 
   implements WeightedInstancesHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 1679336022895414137L;
   
   /** The chosen attribute */
@@ -76,7 +87,7 @@ public class SimpleLinearRegression extends Classifier
    *
    * @param inst the instance to predict.
    * @return the prediction
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public double classifyInstance(Instance inst) throws Exception {
     
@@ -101,7 +112,6 @@ public class SimpleLinearRegression extends Classifier
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
 
     // class
     result.enable(Capability.NUMERIC_CLASS);
@@ -115,7 +125,7 @@ public class SimpleLinearRegression extends Classifier
    * Builds a simple linear regression model given the supplied training data.
    *
    * @param insts the training data.
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void buildClassifier(Instances insts) throws Exception {
 
@@ -276,5 +286,4 @@ public class SimpleLinearRegression extends Classifier
       e.printStackTrace();
     }
   } 
-
 }

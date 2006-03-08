@@ -43,32 +43,40 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for using linear regression for prediction. Uses the Akaike 
- * criterion for model selection, and is able to deal with weighted
- * instances. <p>
+ <!-- globalinfo-start -->
+ * Class for using linear regression for prediction. Uses the Akaike criterion for model selection, and is able to deal with weighted instances.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -D <br>
- * Produce debugging output. <p>
- *
- * -S num <br>
- * Set the attriute selection method to use. 1 = None, 2 = Greedy
- * (default 0 = M5' method) <p>
- *
- * -C <br>
- * Do not try to eliminate colinear attributes <p>
- *
- * -R num <br>
- * The ridge parameter (default 1.0e-8) <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Produce debugging output.
+ *  (default no debugging output)</pre>
+ * 
+ * <pre> -S &lt;number of selection method&gt;
+ *  Set the attribute selection method to use. 1 = None, 2 = Greedy.
+ *  (default 0 = M5' method)</pre>
+ * 
+ * <pre> -C
+ *  Do not try to eliminate colinear attributes.
+ * </pre>
+ * 
+ * <pre> -R &lt;double&gt;
+ *  Set ridge parameter (default 1.0e-8).
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
   
+  /** for serialization */
   static final long serialVersionUID = -3364580862046573747L;
 
   /** Array for storing coefficients of linear regression. */
@@ -108,10 +116,13 @@ public class LinearRegression extends Classifier implements OptionHandler,
   /** The current attribute selection method */
   private int m_AttributeSelection;
 
-  /* Attribute selection methods */
+  /** Attribute selection method: M5 method */
   public static final int SELECTION_M5 = 0;
+  /** Attribute selection method: No attribute selection */
   public static final int SELECTION_NONE = 1;
+  /** Attribute selection method: Greedy method */
   public static final int SELECTION_GREEDY = 2;
+  /** Attribute selection methods */
   public static final Tag [] TAGS_SELECTION = {
     new Tag(SELECTION_NONE, "No attribute selection"),
     new Tag(SELECTION_M5, "M5 method"),
@@ -183,7 +194,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    *
    * @param data the training data to be used for generating the
    * linear regression function
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
   
@@ -250,7 +261,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    *
    * @param instance the test instance
    * @return the classification
-   * @exception Exception if classification can't be done successfully
+   * @throws Exception if classification can't be done successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
 
@@ -273,6 +284,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
   /**
    * Outputs the linear regression model as a string.
+   * 
+   * @return the model as string
    */
   public String toString() {
 
@@ -332,23 +345,31 @@ public class LinearRegression extends Classifier implements OptionHandler,
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D <br>
-   * Produce debugging output. <p>
-   *
-   * -S num <br>
-   * Set the attriute selection method to use. 1 = None, 2 = Greedy
-   * (default 0 = M5' method) <p>
-   *
-   * -C <br>
-   * Do not try to eliminate colinear attributes <p>
-   *
-   * -R num <br>
-   * The ridge parameter (default 1.0e-8) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Produce debugging output.
+   *  (default no debugging output)</pre>
+   * 
+   * <pre> -S &lt;number of selection method&gt;
+   *  Set the attribute selection method to use. 1 = None, 2 = Greedy.
+   *  (default 0 = M5' method)</pre>
+   * 
+   * <pre> -C
+   *  Do not try to eliminate colinear attributes.
+   * </pre>
+   * 
+   * <pre> -R &lt;double&gt;
+   *  Set ridge parameter (default 1.0e-8).
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -373,6 +394,8 @@ public class LinearRegression extends Classifier implements OptionHandler,
 
   /**
    * Returns the coefficients for this linear model.
+   * 
+   * @return the coefficients for this linear model
    */
   public double[] coefficients() {
 
@@ -544,7 +567,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
   /**
    * Controls whether debugging output will be printed
    *
-   * @param debug true if debugging output should be printed
+   * @return true if debugging output is printed
    */
   public boolean getDebug() {
 
@@ -592,7 +615,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * Performs a greedy search for the best regression model using
    * Akaike's criterion.
    *
-   * @exception Exception if regression can't be done
+   * @throws Exception if regression can't be done
    */
   private void findBestModel() throws Exception {
 
@@ -735,7 +758,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * @param coefficients an array of coefficients for the regression
    * model
    * @return the mean squared error on the training data
-   * @exception Exception if there is a missing class value in the training
+   * @throws Exception if there is a missing class value in the training
    * data
    */
   private double calculateSE(boolean [] selectedAttributes, 
@@ -762,7 +785,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * @param coefficients an array of coefficients for the regression
    * model
    * @return the regression value for the instance.
-   * @exception Exception if the class attribute of the input instance
+   * @throws Exception if the class attribute of the input instance
    * is not assigned
    */
   private double regressionPrediction(Instance transformedInstance,
@@ -791,7 +814,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * is true if the corresponding attribute should be included in the
    * regression.
    * @return an array of coefficients for the linear regression model.
-   * @exception Exception if an error occurred during the regression.
+   * @throws Exception if an error occurred during the regression.
    */
   private double [] doRegression(boolean [] selectedAttributes) 
   throws Exception {
@@ -883,7 +906,7 @@ public class LinearRegression extends Classifier implements OptionHandler,
   /**
    * Generates a linear regression function predictor.
    *
-   * @param String the options
+   * @param argv the options
    */
   public static void main(String argv[]) {
     
@@ -896,6 +919,3 @@ public class LinearRegression extends Classifier implements OptionHandler,
     }
   }
 }
-
-
-  

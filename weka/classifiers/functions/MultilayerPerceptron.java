@@ -68,19 +68,79 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 /** 
- * A Classifier that uses backpropagation to classify instances.
- * This network can be built by hand, created by an algorithm or both.
- * The network can also be monitored and modified during training time.
- * The nodes in this network are all sigmoid (except for when the class
- * is numeric in which case the the output nodes become unthresholded linear
- * units).
+ <!-- globalinfo-start -->
+ * A Classifier that uses backpropagation to classify instances.<br/>
+ * This network can be built by hand, created by an algorithm or both. The network can also be monitored and modified during training time. The nodes in this network are all sigmoid (except for when the class is numeric in which case the the output nodes become unthresholded linear units).
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -L &lt;learning rate&gt;
+ *  Learning Rate for the backpropagation algorithm.
+ *  (Value should be between 0 - 1, Default = 0.3).</pre>
+ * 
+ * <pre> -M &lt;momentum&gt;
+ *  Momentum Rate for the backpropagation algorithm.
+ *  (Value should be between 0 - 1, Default = 0.2).</pre>
+ * 
+ * <pre> -N &lt;number of epochs&gt;
+ *  Number of epochs to train through.
+ *  (Default = 500).</pre>
+ * 
+ * <pre> -V &lt;percentage size of validation set&gt;
+ *  Percentage size of validation set to use to terminate training (if this is non zero it can pre-empt num of epochs.
+ *  (Value should be between 0 - 100, Default = 0).</pre>
+ * 
+ * <pre> -S &lt;seed&gt;
+ *  The value used to seed the random number generator (Value should be &gt;= 0 and and a long, Default = 0).</pre>
+ * 
+ * <pre> -E &lt;threshold for number of consequetive errors&gt;
+ *  The consequetive number of errors allowed for validation testing before the netwrok terminates. (Value should be &gt; 0, Default = 20).</pre>
+ * 
+ * <pre> -G
+ *  GUI will be opened.
+ *  (Use this to bring up a GUI).</pre>
+ * 
+ * <pre> -A
+ *  Autocreation of the network connections will NOT be done.
+ *  (This will be ignored if -G is NOT set)</pre>
+ * 
+ * <pre> -B
+ *  A NominalToBinary filter will NOT automatically be used.
+ *  (Set this to not use a NominalToBinary filter).</pre>
+ * 
+ * <pre> -H &lt;comma seperated numbers for nodes on each layer&gt;
+ *  The hidden layers to be created for the network.
+ *  (Value should be a list of comma seperated Natural numbers or the letters 'a' = (attribs + classes) / 2, 'i' = attribs, 'o' = classes, 't' = attribs .+ classes) For wildcard values,Default = a).</pre>
+ * 
+ * <pre> -C
+ *  Normalizing a numeric class will NOT be done.
+ *  (Set this to not normalize the class if it's numeric).</pre>
+ * 
+ * <pre> -I
+ *  Normalizing the attributes will NOT be done.
+ *  (Set this to not normalize the attributes).</pre>
+ * 
+ * <pre> -R
+ *  Reseting the network will NOT be allowed.
+ *  (Set this to not allow the network to reset).</pre>
+ * 
+ * <pre> -D
+ *  Learning rate decay will occur.
+ *  (Set this to cause the learning rate to decay).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class MultilayerPerceptron extends Classifier 
+public class MultilayerPerceptron 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
   
+  /** for serialization */
   static final long serialVersionUID = 572250905027665169L;
   
   /**
@@ -106,9 +166,12 @@ public class MultilayerPerceptron extends Classifier
    * only suitable to go on the attribute side or class side of the network
    * and not both.
    */
-  protected class NeuralEnd extends NeuralConnection {
+  protected class NeuralEnd 
+    extends NeuralConnection {
     
-    
+    /** for serialization */
+    static final long serialVersionUID = 7305185603191183338L;
+  
     /** 
      * the value that represents the instance value this node represents. 
      * For an input it is the attribute number, for an output, if nominal
@@ -119,7 +182,9 @@ public class MultilayerPerceptron extends Classifier
     /** True if node is an input, False if it's an output. */
     private boolean m_input;
 
-
+    /**
+     * Constructor
+     */
     public NeuralEnd(String id) {
       super(id);
 
@@ -348,9 +413,11 @@ public class MultilayerPerceptron extends Classifier
  
   /** Inner class used to draw the nodes onto.(uses the node lists!!) 
    * This will also handle the user input. */
-  private class NodePanel extends JPanel {
+  private class NodePanel 
+    extends JPanel {
     
-
+    /** for serialization */
+    static final long serialVersionUID = -3067621833388149984L;
 
     /**
      * The constructor.
@@ -590,9 +657,13 @@ public class MultilayerPerceptron extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
-  class ControlPanel extends JPanel {
+  class ControlPanel 
+    extends JPanel {
+    
+    /** for serialization */
+    static final long serialVersionUID = 7393543302294142271L;
     
     /** The start stop button. */
     public JButton m_startStop;
@@ -1624,7 +1695,7 @@ public class MultilayerPerceptron extends Classifier
    * Call this function to build and train a neural network for the training
    * data provided.
    * @param i The training data.
-   * @exception Throws exception if can't build classification properly.
+   * @throws Throws exception if can't build classification properly.
    */
   public void buildClassifier(Instances i) throws Exception {
 
@@ -1919,7 +1990,7 @@ public class MultilayerPerceptron extends Classifier
    * classification model has been built with the buildClassifier call.
    * @param i The instance to classify.
    * @return A double array filled with the probabilities of each class type.
-   * @exception if can't classify instance.
+   * @throws if can't classify instance.
    */
   public double[] distributionForInstance(Instance i) throws Exception {
 
@@ -2052,65 +2123,69 @@ public class MultilayerPerceptron extends Classifier
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -L num <br>
-   * Set the learning rate.
-   * (default 0.3) <p>
-   *
-   * -M num <br>
-   * Set the momentum
-   * (default 0.2) <p>
-   *
-   * -N num <br>
-   * Set the number of epochs to train through.
-   * (default 500) <p>
-   *
-   * -V num <br>
-   * Set the percentage size of the validation set from the training to use.
-   * (default 0 (no validation set is used, instead num of epochs is used) <p>
-   *
-   * -S num <br>
-   * Set the seed for the random number generator.
-   * (default 0) <p>
-   *
-   * -E num <br>
-   * Set the threshold for the number of consequetive errors allowed during
-   * validation testing.
-   * (default 20) <p>
-   *
-   * -G <br>
-   * Bring up a GUI for the neural net.
-   * <p>
-   *
-   * -A <br>
-   * Do not automatically create the connections in the net.
-   * (can only be used if -G is specified) <p>
-   *
-   * -B <br>
-   * Do Not automatically Preprocess the instances with a nominal to binary 
-   * filter. <p>
-   *
-   * -H str <br>
-   * Set the number of nodes to be used on each layer. Each number represents
-   * its own layer and the num of nodes on that layer. Each number should be
-   * comma seperated. There are also the wildcards 'a', 'i', 'o', 't'
-   * (default 4) <p>
-   *
-   * -C <br>
-   * Do not automatically Normalize the class if it's numeric. <p>
-   *
-   * -I <br>
-   * Do not automatically Normalize the attributes. <p>
-   *
-   * -R <br>
-   * Do not allow the network to be automatically reset. <p>
-   *
-   * -D <br>
-   * Cause the learning rate to decay as training is done. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -L &lt;learning rate&gt;
+   *  Learning Rate for the backpropagation algorithm.
+   *  (Value should be between 0 - 1, Default = 0.3).</pre>
+   * 
+   * <pre> -M &lt;momentum&gt;
+   *  Momentum Rate for the backpropagation algorithm.
+   *  (Value should be between 0 - 1, Default = 0.2).</pre>
+   * 
+   * <pre> -N &lt;number of epochs&gt;
+   *  Number of epochs to train through.
+   *  (Default = 500).</pre>
+   * 
+   * <pre> -V &lt;percentage size of validation set&gt;
+   *  Percentage size of validation set to use to terminate training (if this is non zero it can pre-empt num of epochs.
+   *  (Value should be between 0 - 100, Default = 0).</pre>
+   * 
+   * <pre> -S &lt;seed&gt;
+   *  The value used to seed the random number generator (Value should be &gt;= 0 and and a long, Default = 0).</pre>
+   * 
+   * <pre> -E &lt;threshold for number of consequetive errors&gt;
+   *  The consequetive number of errors allowed for validation testing before the netwrok terminates. (Value should be &gt; 0, Default = 20).</pre>
+   * 
+   * <pre> -G
+   *  GUI will be opened.
+   *  (Use this to bring up a GUI).</pre>
+   * 
+   * <pre> -A
+   *  Autocreation of the network connections will NOT be done.
+   *  (This will be ignored if -G is NOT set)</pre>
+   * 
+   * <pre> -B
+   *  A NominalToBinary filter will NOT automatically be used.
+   *  (Set this to not use a NominalToBinary filter).</pre>
+   * 
+   * <pre> -H &lt;comma seperated numbers for nodes on each layer&gt;
+   *  The hidden layers to be created for the network.
+   *  (Value should be a list of comma seperated Natural numbers or the letters 'a' = (attribs + classes) / 2, 'i' = attribs, 'o' = classes, 't' = attribs .+ classes) For wildcard values,Default = a).</pre>
+   * 
+   * <pre> -C
+   *  Normalizing a numeric class will NOT be done.
+   *  (Set this to not normalize the class if it's numeric).</pre>
+   * 
+   * <pre> -I
+   *  Normalizing the attributes will NOT be done.
+   *  (Set this to not normalize the attributes).</pre>
+   * 
+   * <pre> -R
+   *  Reseting the network will NOT be allowed.
+   *  (Set this to not allow the network to reset).</pre>
+   * 
+   * <pre> -D
+   *  Learning rate decay will occur.
+   *  (Set this to cause the learning rate to decay).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     //the defaults can be found here!!!!
@@ -2305,8 +2380,13 @@ public class MultilayerPerceptron extends Classifier
    * @return The string.
    */
   public String globalInfo() {
-
-    return "This neural network uses backpropagation to train.";
+    return 
+        "A Classifier that uses backpropagation to classify instances.\n"
+      + "This network can be built by hand, created by an algorithm or both. "
+      + "The network can also be monitored and modified during training time. "
+      + "The nodes in this network are all sigmoid (except for when the class "
+      + "is numeric in which case the the output nodes become unthresholded "
+      + "linear units).";
   }
   
   /**
@@ -2487,15 +2567,4 @@ public class MultilayerPerceptron extends Classifier
       ". If the learning rate is changed in the gui, this is treated as the" +
       " starting learning rate.";
   }
-    
 }
-
-
-
-
-
-
-
-
-
-
