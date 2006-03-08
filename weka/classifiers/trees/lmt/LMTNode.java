@@ -35,8 +35,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
-/** Auxiliary class for list of LMTNodes*/
-class CompareNode implements Comparator{    
+/** 
+ * Auxiliary class for list of LMTNodes
+ */
+class CompareNode 
+    implements Comparator {
+
+    /**
+     * Compares its two arguments for order.
+     * 
+     * @param o1 first object
+     * @param o2 second object
+     * @return a negative integer, zero, or a positive integer as the first 
+     *         argument is less than, equal to, or greater than the second.
+     */
     public int compare(Object o1, Object o2) {		
 	if ( ((LMTNode)o1).m_alpha < ((LMTNode)o2).m_alpha) return -1;
 	if ( ((LMTNode)o1).m_alpha > ((LMTNode)o2).m_alpha) return 1;
@@ -49,11 +61,12 @@ class CompareNode implements Comparator{
  * 
  * 
  * @author Niels Landwehr 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-
-public class LMTNode extends LogisticBase {   
+public class LMTNode 
+    extends LogisticBase {   
   
+    /** for serialization */
     static final long serialVersionUID = 1862737145870398755L;
     
     /** Total number of training instances. */
@@ -81,7 +94,7 @@ public class LMTNode extends LogisticBase {
     protected ModelSelection m_modelSelection;     
 
     /**Filter to convert nominal attributes to binary*/
-    protected NominalToBinary      m_nominalToBinary;  
+    protected NominalToBinary m_nominalToBinary;  
    
     /**Simple regression functions fit by LogitBoost at higher levels in the tree*/
     protected SimpleLinearRegression[][] m_higherRegressions;
@@ -113,6 +126,8 @@ public class LMTNode extends LogisticBase {
      * @param modelSelection selection method for local splitting model
      * @param numBoostingIterations sets the numBoostingIterations parameter
      * @param fastRegression sets the fastRegression parameter
+     * @param errorOnProbabilities Use error on probabilities for stopping criterion of LogitBoost?
+     * @param minNumInstances minimum number of instances at which a node is considered for splitting
      */
     public LMTNode(ModelSelection modelSelection, int numBoostingIterations, 
 		   boolean fastRegression, 
@@ -129,7 +144,8 @@ public class LMTNode extends LogisticBase {
      * Method for building a logistic model tree (only called for the root node).
      * Grows an initial logistic model tree and prunes it back using the CART pruning scheme.
      *
-     * @exception Exception if something goes wrong
+     * @param data the data to train with
+     * @throws Exception if something goes wrong
      */
     public void buildClassifier(Instances data) throws Exception{
 	
@@ -215,7 +231,7 @@ public class LMTNode extends LogisticBase {
      * levels in the tree. They represent a logistic regression model that is refined locally 
      * at this node.
      * @param totalInstanceWeight the total number of training examples
-     * @exception Exception if something goes wrong
+     * @throws Exception if something goes wrong
      */
     public void buildTree(Instances data, SimpleLinearRegression[][] higherRegressions, 
 			  double totalInstanceWeight) throws Exception{
@@ -294,8 +310,11 @@ public class LMTNode extends LogisticBase {
     }
 
     /** 
-     * Prunes a logistic model tree using the CART pruning scheme, given a cost-complexity parameter alpha.
+     * Prunes a logistic model tree using the CART pruning scheme, given a 
+     * cost-complexity parameter alpha.
+     * 
      * @param alpha the cost-complexity measure  
+     * @throws Exception if something goes wrong
      */
     public void prune(double alpha) throws Exception {
 	
@@ -339,7 +358,7 @@ public class LMTNode extends LogisticBase {
      * @param alphas array to hold the generated alpha-values
      * @param errors array to hold the corresponding error estimates
      * @param test test set of that fold (to obtain error estimates)
-     * @exception if something goes wrong
+     * @throws if something goes wrong
      */
 
     public int prune(double[] alphas, double[] errors, Instances test) throws Exception {
@@ -422,7 +441,7 @@ public class LMTNode extends LogisticBase {
      *regression function on the training data. Used for the heuristic that avoids cross-validating this
      *number again at every node.
      *@param data training instances for the logistic model
-     *@exception if something goes wrong
+     *@throws if something goes wrong
      */
     protected int tryLogistic(Instances data) throws Exception{
 	
@@ -552,7 +571,6 @@ public class LMTNode extends LogisticBase {
 	SimpleLinearRegression[][] result =
 	    new SimpleLinearRegression[m_numClasses][numModels1 + numModels2];
 	
-	int k = 0;
 	for (int i = 0; i < m_numClasses; i++)
 	    for (int j = 0; j < numModels1; j++) {
 		result[i][j]  = a1[i][j];
@@ -748,7 +766,7 @@ public class LMTNode extends LogisticBase {
     /**
      * Help method for printing tree structure.
      *
-     * @exception Exception if something goes wrong
+     * @throws Exception if something goes wrong
      */
     protected void dumpTree(int depth,StringBuffer text) 
 	throws Exception {
@@ -842,7 +860,7 @@ public class LMTNode extends LogisticBase {
     /**
      * Returns graph describing the tree.
      *
-     * @exception Exception if something goes wrong
+     * @throws Exception if something goes wrong
      */
     public String graph() throws Exception {
 	
@@ -869,7 +887,7 @@ public class LMTNode extends LogisticBase {
     /**
      * Helper function for graph description of tree
      *
-     * @exception Exception if something goes wrong
+     * @throws Exception if something goes wrong
      */
     private void graphTree(StringBuffer text) throws Exception {
 	

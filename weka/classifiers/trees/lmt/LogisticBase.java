@@ -37,11 +37,14 @@ import weka.core.WeightedInstancesHandler;
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
  * @author Niels Landwehr
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
-public class LogisticBase extends Classifier implements WeightedInstancesHandler{
+public class LogisticBase 
+    extends Classifier 
+    implements WeightedInstancesHandler {
 
+    /** for serialization */
     static final long serialVersionUID = 168765678097825064L;
   
     /** Header-only version of the numeric version of the training data*/
@@ -117,9 +120,9 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
      * Builds the logistic regression model usiing LogitBoost.
      * 
      * @param data the training data
+     * @throws Exception if something goes wrong
      */
-    
-    public void buildClassifier(Instances data) throws Exception{			
+    public void buildClassifier(Instances data) throws Exception {			
 
 	m_train = new Instances(data);
 	
@@ -153,6 +156,8 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Runs LogitBoost, determining the best number of iterations by cross-validation.
+     * 
+     * @throws Exception if something goes wrong
      */
     protected void performBoostingCV() throws Exception{			
 	
@@ -199,7 +204,7 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
      * @return the number of completed LogitBoost iterations (can be smaller than maxIterations 
      * if the heuristic for early stopping is active or there is a problem while fitting the regressions 
      * in LogitBoost).
-     * 
+     * @throws Exception if something goes wrong
      */
     protected int performBoosting(Instances train, Instances test, 
 				  double[] error, int maxIterations) throws Exception{
@@ -214,8 +219,6 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
 	int iteration = 0;
 
-	double[] testErrors = new double[maxIterations+1];
-	
  	int noMin = 0;
 	double lastMin = Double.MAX_VALUE;	
 	
@@ -253,6 +256,7 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     /**
      * Runs LogitBoost with a fixed number of iterations.
      * @param numIterations the number of iterations to run
+     * @throws Exception if something goes wrong
      */
     protected void performBoosting(int numIterations) throws Exception{
 
@@ -277,6 +281,7 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
      * Runs LogitBoost using the stopping criterion on the training set.
      * The number of iterations is used that gives the lowest error on the training set, either misclassification
      * or error on probabilities (depending on the errorOnProbabilities option).
+     * @throws Exception if something goes wrong
      */
     protected void performBoosting() throws Exception{
 	
@@ -323,6 +328,7 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
      * Returns the misclassification error of the current model on a set of instances.
      * @param data the set of instances
      * @return the error rate
+     * @throws Exception if something goes wrong
      */
     protected double getErrorRate(Instances data) throws Exception {
 	Evaluation eval = new Evaluation(data);
@@ -334,6 +340,7 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
      * Returns the error of the probability estimates for the current model on a set of instances.
      * @param data the set of instances
      * @return the error
+     * @throws Exception if something goes wrong
      */
     protected double getMeanAbsoluteError(Instances data) throws Exception {
 	Evaluation eval = new Evaluation(data);
@@ -343,6 +350,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Helper function to find the minimum in an array of error values.
+     * 
+     * @param errors an array containing errors
+     * @param maxIteration the maximum of iterations
+     * @return the minimum
      */
     protected int getBestIteration(double[] errors, int maxIteration) {
 	double bestError = errors[0];
@@ -366,6 +377,7 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
      * @param trainNumeric numeric version of the training data
      * @return returns true if iteration performed successfully, false if no simple regression function 
      * could be fitted.
+     * @throws Exception if something goes wrong
      */
     protected boolean performIteration(int iteration, 
 				       double[][] trainYs,
@@ -428,6 +440,8 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Helper function to initialize m_regressions.
+     * 
+     * @return the generated classifiers
      */
     protected SimpleLinearRegression[][] initRegressions(){
 	SimpleLinearRegression[][] classifiers =   
@@ -444,6 +458,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     /**
      * Converts training data to numeric version. The class variable is replaced by a pseudo-class 
      * used by LogitBoost.
+     * 
+     * @param data the data to convert
+     * @return the converted data
+     * @throws Exception if something goes wrong
      */
     protected Instances getNumericData(Instances data) throws Exception{
 	Instances numericData = new Instances(data);
@@ -457,8 +475,12 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
     
     /**
-     * Helper function for cutting back m_regressions to the set of classifiers (corresponsing to the number of 
-     * LogitBoost iterations) that gave the smallest error.
+     * Helper function for cutting back m_regressions to the set of classifiers 
+     * (corresponsing to the number of LogitBoost iterations) that gave the 
+     * smallest error.
+     * 
+     * @param classifiers the original set of classifiers
+     * @return the cut back set of classifiers
      */
     protected SimpleLinearRegression[][] selectRegressions(SimpleLinearRegression[][] classifiers){
 	SimpleLinearRegression[][] goodClassifiers = 
@@ -473,7 +495,12 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }		
     
     /**
-     * Computes the LogitBoost response variable from y/p values (actual/estimated class probabilities).
+     * Computes the LogitBoost response variable from y/p values 
+     * (actual/estimated class probabilities).
+     * 
+     * @param actual the actual class probability
+     * @param p the estimated class probability
+     * @return the LogitBoost response
      */
     protected double getZ(double actual, double p) {
 	double z;
@@ -492,7 +519,12 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
     
     /**
-     * Computes the LogitBoost response for an array of y/p values (actual/estimated class probabilities).
+     * Computes the LogitBoost response for an array of y/p values 
+     * (actual/estimated class probabilities).
+     * 
+     * @param dataYs the actual class probabilities
+     * @param probs the estimated class probabilities
+     * @return the LogitBoost response
      */
     protected double[][] getZs(double[][] probs, double[][] dataYs) {
 	
@@ -503,7 +535,12 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
     
     /**
-     * Computes the LogitBoost weights from an array of y/p values (actual/estimated class probabilities).
+     * Computes the LogitBoost weights from an array of y/p values 
+     * (actual/estimated class probabilities).
+     * 
+     * @param dataYs the actual class probabilities
+     * @param probs the estimated class probabilities
+     * @return the LogitBoost weights
      */
     protected double[][] getWs(double[][] probs, double[][] dataYs) {
 	
@@ -517,7 +554,11 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
 
     /**
-     * Computes the p-values (probabilities for the classes) from the F-values of the logistic model.
+     * Computes the p-values (probabilities for the classes) from the F-values 
+     * of the logistic model.
+     * 
+     * @param Fs the F-values
+     * @return the p-values
      */
     protected double[] probs(double[] Fs) {
 	
@@ -540,6 +581,9 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Computes the Y-values (actual class probabilities) for a set of instances.
+     * 
+     * @param data the data to compute the Y-values from
+     * @return the Y-values
      */
     protected double[][] getYs(Instances data){
 	
@@ -555,6 +599,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Computes the F-values for a single instance.
+     * 
+     * @param instance the instance to compute the F-values for
+     * @return the F-values
+     * @throws Exception if something goes wrong
      */
     protected double[] getFs(Instance instance) throws Exception{
 	
@@ -580,6 +628,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     
     /**
      * Computes the F-values for a set of instances.
+     * 
+     * @param data the data to work on
+     * @return the F-values
+     * @throws Exception if something goes wrong
      */
     protected double[][] getFs(Instances data) throws Exception{
 	
@@ -593,7 +645,11 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }   
 
     /**
-     * Computes the p-values (probabilities for the different classes) from the F-values for a set of instances.
+     * Computes the p-values (probabilities for the different classes) from 
+     * the F-values for a set of instances.
+     * 
+     * @param dataFs the F-values
+     * @return the p-values
      */
     protected double[][] getProbs(double[][] dataFs){
 	
@@ -609,6 +665,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     /**
      * Returns the likelihood of the Y-values (actual class probabilities) given the 
      * p-values (current probability estimates).
+     * 
+     * @param dataYs the Y-values
+     * @param probs the p-values
+     * @return the likelihood
      */
     protected double logLikelihood(double[][] dataYs, double[][] probs) {
 	
@@ -665,7 +725,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
 
     /**
-     * The number of LogitBoost iterations performed (= the number of simple regression functions fit).
+     * The number of LogitBoost iterations performed (= the number of simple 
+     * regression functions fit).
+     * 
+     * @return the number of LogitBoost iterations performed 
      */
     public int getNumRegressions() {
 	return m_numRegressions;
@@ -673,6 +736,8 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Sets the parameter "maxIterations".
+     * 
+     * @param maxIterations the maximum iterations
      */
     public void setMaxIterations(int maxIterations) {
 	m_maxIterations = maxIterations;
@@ -680,6 +745,8 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     
     /**
      * Sets the option "heuristicStop".
+     * 
+     * @param heuristicStop the heuristic stop to use
      */
     public void setHeuristicStop(int heuristicStop){
 	m_heuristicStop = heuristicStop;
@@ -687,6 +754,8 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 
     /**
      * Returns the maxIterations parameter.
+     * 
+     * @return the maximum iteration
      */
     public int getMaxIterations(){
 	return m_maxIterations;
@@ -718,8 +787,12 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
 
     /**
-     * Returns the fraction of all attributes in the data that are used in the logistic model (in percent).
-     * An attribute is used in the model if it is used in any of the models for the different classes.
+     * Returns the fraction of all attributes in the data that are used in the 
+     * logistic model (in percent). 
+     * An attribute is used in the model if it is used in any of the models for 
+     * the different classes.
+     * 
+     * @return the fraction of all attributes that are used
      */
     public double percentAttributesUsed(){	
 	boolean[] attributes = new boolean[m_numericDataHeader.numAttributes()];
@@ -740,7 +813,10 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     }
     
     /**
-     * Returns a description of the logistic model (i.e., attributes and coefficients).
+     * Returns a description of the logistic model (i.e., attributes and 
+     * coefficients).
+     * 
+     * @return the description of the model
      */
     public String toString(){
 	
@@ -770,7 +846,9 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
     /** 
      * Returns class probabilities for an instance.
      *
-     * @exception Exception if distribution can't be computed successfully
+     * @param instance the instance to compute the distribution for
+     * @return the class probabilities
+     * @throws Exception if distribution can't be computed successfully
      */
     public double[] distributionForInstance(Instance instance) throws Exception {
 	
