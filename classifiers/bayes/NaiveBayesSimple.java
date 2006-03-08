@@ -28,24 +28,56 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 
 /**
- * Class for building and using a simple Naive Bayes classifier.
- * Numeric attributes are modelled by a normal distribution. For more
- * information, see<p>
+ <!-- globalinfo-start -->
+ * Class for building and using a simple Naive Bayes classifier.Numeric attributes are modelled by a normal distribution.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * Richard Duda, Peter Hart (1973). Pattern Classification and Scene Analysis. Wiley, New York.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Richard Duda and Peter Hart (1973).<i>Pattern
- * Classification and Scene Analysis</i>. Wiley, New York.
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;book{Duda1973,
+ *    address = {New York},
+ *    author = {Richard Duda and Peter Hart},
+ *    publisher = {Wiley},
+ *    title = {Pattern Classification and Scene Analysis},
+ *    year = {1973}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
 */
-public class NaiveBayesSimple extends Classifier {
+public class NaiveBayesSimple 
+  extends Classifier
+  implements TechnicalInformationHandler {
   
+  /** for serialization */
   static final long serialVersionUID = -1478242251770381214L;
 
   /** All the counts for nominal attributes. */
@@ -72,11 +104,31 @@ public class NaiveBayesSimple extends Classifier {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Class for building and using a simple Naive Bayes classifier."
-      +"Numeric attributes are modelled by a normal distribution. For more "
-      +"information, see\n\n"
-      +"Richard Duda and Peter Hart (1973). Pattern "
-      +"Classification and Scene Analysis. Wiley, New York.";
+    return 
+        "Class for building and using a simple Naive Bayes classifier."
+      + "Numeric attributes are modelled by a normal distribution.\n\n"
+      + "For more information, see\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.BOOK);
+    result.setValue(Field.AUTHOR, "Richard Duda and Peter Hart");
+    result.setValue(Field.YEAR, "1973");
+    result.setValue(Field.TITLE, "Pattern Classification and Scene Analysis");
+    result.setValue(Field.PUBLISHER, "Wiley");
+    result.setValue(Field.ADDRESS, "New York");
+    
+    return result;
   }
 
   /**
@@ -343,6 +395,11 @@ public class NaiveBayesSimple extends Classifier {
 
   /**
    * Density function of normal distribution.
+   * 
+   * @param x the value to get the density for
+   * @param mean the mean
+   * @param stdDev the standard deviation
+   * @return the density
    */
   protected double normalDens(double x, double mean, double stdDev) {
     
@@ -369,5 +426,3 @@ public class NaiveBayesSimple extends Classifier {
     }
   }
 }
-
-

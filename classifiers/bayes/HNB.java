@@ -26,30 +26,56 @@ import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
 /**
- * Class for contructing Hidden Naive Bayes classification model
- * with high classification accuracy and AUC.<p/>
+ <!-- globalinfo-start -->
+ * Contructs Hidden Naive Bayes classification model with high classification accuracy and AUC.<br/>
+ * <br/>
+ * For more information refer to:<br/>
+ * <br/>
+ * H. Zhang, L. Jiang, J. Su: Hidden Naive Bayes. In: Twentieth National Conference on Artificial Intelligence, 919-924, 2005.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information on HNB, see<p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Zhang2005,
+ *    author = {H. Zhang and L. Jiang and J. Su},
+ *    booktitle = {Twentieth National Conference on Artificial Intelligence},
+ *    pages = {919-924},
+ *    publisher = {AAAI Press},
+ *    title = {Hidden Naive Bayes},
+ *    year = {2005}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * H. Zhang, L. Jiang and J. Su, Hidden Naive Bayes,
- * Proceedings of the Twentieth National Conference on Artificial
- * Intelligence(AAAI-05), pp.919-924, AAAI Press(2005).
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
+public class HNB  
+  extends Classifier
+  implements TechnicalInformationHandler {
 
-/**
- * Implement the Hidden Naive Bayes classifier.
- */
-
-public class HNB  extends Classifier {
-
+  /** for serialization */
   static final long serialVersionUID = -4503874444306113214L;
   
   /** The number of each class value occurs in the dataset */
@@ -92,11 +118,30 @@ public class HNB  extends Classifier {
 
     return
       "Contructs Hidden Naive Bayes classification model with high "
-      + "classification accuracy and AUC.\n"
-      + "For more information refer to:\n"
-      + "H. Zhang, L. Jiang and J. Su, Hidden Naive Bayes, Proceedings "
-      + "of the Twentieth National Conference on Artificial "
-      + "Intelligence(AAAI-05), pp.919-924, AAAI Press(2005).";
+      + "classification accuracy and AUC.\n\n"
+      + "For more information refer to:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "H. Zhang and L. Jiang and J. Su");
+    result.setValue(Field.TITLE, "Hidden Naive Bayes");
+    result.setValue(Field.BOOKTITLE, "Twentieth National Conference on Artificial Intelligence");
+    result.setValue(Field.YEAR, "2005");
+    result.setValue(Field.PAGES, "919-924");
+    result.setValue(Field.PUBLISHER, "AAAI Press");
+    
+    return result;
   }
 
   /**
@@ -196,10 +241,12 @@ public class HNB  extends Classifier {
   /**
    * Computes conditional mutual information between a pair of attributes.
    *
-   * @param son and parent are a pair of attributes
+   * @param son the son attribute
+   * @param parent the parent attribute
    * @return the conditional mutual information between son and parent given class
+   * @throws Exception if computation fails
    */
-  private double conditionalMutualInfo(int son, int parent)throws Exception{
+  private double conditionalMutualInfo(int son, int parent) throws Exception{
 
     double CondiMutualInfo=0;
     int sIndex=m_StartAttIndex[son];
@@ -246,7 +293,8 @@ public class HNB  extends Classifier {
   /**
    * compute the logarithm whose base is 2.
    *
-   * @param args x,y are numerator and denominator of the fraction.
+   * @param x numerator of the fraction.
+   * @param y denominator of the fraction.
    * @return the natual logarithm of this fraction.
    */
   private double log2(double x,double y){
@@ -312,6 +360,8 @@ public class HNB  extends Classifier {
 
   /**
    * returns a string representation of the classifier
+   * 
+   * @return a representation of the classifier
    */
   public String toString() {
 
@@ -334,4 +384,3 @@ public class HNB  extends Classifier {
     }
   }
 }
-
