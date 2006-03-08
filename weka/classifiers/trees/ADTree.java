@@ -42,6 +42,10 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -51,41 +55,57 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for generating an alternating decision tree. The basic algorithm is based on:<p>
+ <!-- globalinfo-start -->
+ * Class for generating an alternating decision tree. The basic algorithm is based on:<br/>
+ * <br/>
+ * Freund, Y., Mason, L.: The alternating decision tree learning algorithm. In: Proceeding of the Sixteenth International Conference on Machine Learning, Bled, Slovenia, 124-133, 1999.<br/>
+ * <br/>
+ * This version currently only supports two-class problems. The number of boosting iterations needs to be manually tuned to suit the dataset and the desired complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic search methods have been introduced to speed learning.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Freund, Y., Mason, L.: The alternating decision tree learning algorithm.
- * Proceeding of the Sixteenth International Conference on Machine Learning,
- * Bled, Slovenia, (1999) 124-133.</p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Freund1999,
+ *    address = {Bled, Slovenia},
+ *    author = {Freund, Y. and Mason, L.},
+ *    booktitle = {Proceeding of the Sixteenth International Conference on Machine Learning},
+ *    pages = {124-133},
+ *    title = {The alternating decision tree learning algorithm},
+ *    year = {1999}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * This version currently only supports two-class problems. The number of boosting
- * iterations needs to be manually tuned to suit the dataset and the desired 
- * complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic
- * search methods have been introduced to speed learning.<p>
- *
- * Valid options are: <p>
- *
- * -B num <br>
- * Set the number of boosting iterations
- * (default 10) <p>
- *
- * -E num <br>
- * Set the nodes to expand: -3(all), -2(weight), -1(z_pure), >=0 seed for random walk
- * (default -3) <p>
- *
- * -D <br>
- * Save the instance data with the model <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B &lt;number of boosting iterations&gt;
+ *  Number of boosting iterations.
+ *  (Default = 10)</pre>
+ * 
+ * <pre> -E &lt;-3|-2|-1|&gt;=0&gt;
+ *  Expand nodes: -3(all), -2(weight), -1(z_pure), &gt;=0 seed for random walk
+ *  (Default = -3)</pre>
+ * 
+ * <pre> -D
+ *  Save the instance data with the model</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ADTree
-  extends Classifier implements OptionHandler, Drawable,
-				AdditionalMeasureProducer,
-				WeightedInstancesHandler,
-				IterativeClassifier
-{
+  extends Classifier 
+  implements OptionHandler, Drawable, AdditionalMeasureProducer,
+             WeightedInstancesHandler, IterativeClassifier, 
+             TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -1532264837167690683L;
   
   /**
@@ -97,20 +117,22 @@ public class ADTree
 
     return  "Class for generating an alternating decision tree. The basic "
       + "algorithm is based on:\n\n"
-      + "Freund, Y., Mason, L.: \"The alternating decision tree learning algorithm\". "
-      + "Proceeding of the Sixteenth International Conference on Machine Learning, "
-      + "Bled, Slovenia, (1999) 124-133.\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
       + "This version currently only supports two-class problems. The number of boosting "
       + "iterations needs to be manually tuned to suit the dataset and the desired "
       + "complexity/accuracy tradeoff. Induction of the trees has been optimized, and heuristic "
       + "search methods have been introduced to speed learning.";
   }
 
-  /** The search modes */
+  /** search mode: Expand all paths */
   public static final int SEARCHPATH_ALL = 0;
+  /** search mode: Expand the heaviest path */
   public static final int SEARCHPATH_HEAVIEST = 1;
+  /** search mode: Expand the best z-pure path */
   public static final int SEARCHPATH_ZPURE = 2;
+  /** search mode: Expand a random path */
   public static final int SEARCHPATH_RANDOM = 3;
+  /** The search modes */
   public static final Tag [] TAGS_SEARCHPATH = {
     new Tag(SEARCHPATH_ALL, "Expand all paths"),
     new Tag(SEARCHPATH_HEAVIEST, "Expand the heaviest path"),
@@ -177,6 +199,27 @@ public class ADTree
 
   /** Option - whether the tree should remember the instance data */
   protected boolean m_saveInstanceData = false; 
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Freund, Y. and Mason, L.");
+    result.setValue(Field.YEAR, "1999");
+    result.setValue(Field.TITLE, "The alternating decision tree learning algorithm");
+    result.setValue(Field.BOOKTITLE, "Proceeding of the Sixteenth International Conference on Machine Learning");
+    result.setValue(Field.ADDRESS, "Bled, Slovenia");
+    result.setValue(Field.PAGES, "124-133");
+    
+    return result;
+  }
 
   /**
    * Sets up the tree ready to be trained, using two-class optimized method.
@@ -534,6 +577,7 @@ public class ADTree
    * @param posInstances the positive-class instances that apply at this node
    * @param negInstances the negative-class instances that apply at this node
    * @param allInstances all of the instances the apply at this node (pos+neg combined)
+   * @throws Exception in case of an error
    */
   private void evaluateNumericSplitSingle(int attIndex, PredictionNode currentNode,
 					  Instances posInstances, Instances negInstances,
@@ -678,6 +722,7 @@ public class ADTree
    * @param attIndex the index of the numeric attribute to find a split for
    * @return a double array, index[0] contains the split-point, index[1] contains the
    * Z-value of the split
+   * @throws Exception in case of an error
    */
   private double[] findLowestZNumericSplit(Instances instances, int attIndex)
     throws Exception {
@@ -860,6 +905,7 @@ public class ADTree
    * @param text the string built so far
    * @param splitOrder the order the parent splitter was added to the tree
    * @param predOrder the order this predictor was added to the split
+   * @param instances the data to work on
    * @exception Exception if something goes wrong
    */       
   protected void graphTraverse(PredictionNode currentNode, StringBuffer text,
@@ -1000,7 +1046,7 @@ public class ADTree
   /**
    * Sets random seed for a random walk.
    *
-   * @param s the random seed
+   * @param seed the random seed
    */
   public void setRandomSeed(int seed) {
     
@@ -1031,8 +1077,8 @@ public class ADTree
 
   /**
    * Sets whether the tree is to save instance data.
-   *
-   * @param s the random seed
+   * 
+   * @param v true then the tree saves instance data
    */
   public void setSaveInstanceData(boolean v) {
     
@@ -1187,7 +1233,7 @@ public class ADTree
   /**
    * Returns the value of the named measure.
    *
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */

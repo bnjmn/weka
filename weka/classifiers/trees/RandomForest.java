@@ -32,6 +32,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Randomizable;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
@@ -39,30 +43,55 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for constructing random forests.
+ <!-- globalinfo-start -->
+ * Class for constructing a forest of random trees.<br/>
+ * <br/>
+ * For more information see: <br/>
+ * <br/>
+ * Leo Breiman (2001). Random Forests. Machine Learning. Vol.45, No.1, pp. 5-32.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information see: <p>
- * Leo Breiman. Random Forests. Machine Learning 45 (1):5-32, October 2001. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Breiman2001,
+ *    author = {Leo Breiman},
+ *    journal = {Machine Learning},
+ *    number = {No.1},
+ *    pages = {pp. 5-32},
+ *    title = {Random Forests},
+ *    volume = {Vol.45},
+ *    year = {2001}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are: <p>
- *
- * -I num <br>
- * Set the number of trees in the forest
- * (default 10) <p>
- *
- * -K num <br>
- * Set the number of features to consider.
- * If < 1 (the default) will use logM+1, where M is the number of inputs. <p>
- *
- * -S seed <br>
- * Random number seed (default 1). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -I &lt;number of trees&gt;
+ *  Number of trees to build.</pre>
+ * 
+ * <pre> -K &lt;number of features&gt;
+ *  Number of features to consider (&lt;1=int(logM+1)).</pre>
+ * 
+ * <pre> -S
+ *  Seed for random number generator.
+ *  (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class RandomForest extends Classifier 
-  implements OptionHandler, Randomizable, WeightedInstancesHandler, AdditionalMeasureProducer {
+public class RandomForest 
+  extends Classifier 
+  implements OptionHandler, Randomizable, WeightedInstancesHandler, 
+             AdditionalMeasureProducer, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 4216839470751428698L;
   
   /** Number of trees in forest. */
@@ -88,9 +117,32 @@ public class RandomForest extends Classifier
    */
   public String globalInfo() {
 
-    return  "Class for constructing a forest of random trees. For more information "
-      + "see: \n\n"
-      + "Leo Breiman. \"Random Forests\". Machine Learning 45 (1):5-32, October 2001.";
+    return  
+        "Class for constructing a forest of random trees.\n\n"
+      + "For more information see: \n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Leo Breiman");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.TITLE, "Random Forests");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.45");
+    result.setValue(Field.NUMBER, "No.1");
+    result.setValue(Field.PAGES, "pp. 5-32");
+    
+    return result;
   }
   
   /**
@@ -207,9 +259,9 @@ public class RandomForest extends Classifier
   /**
    * Returns the value of the named measure.
    *
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     
@@ -265,9 +317,25 @@ public class RandomForest extends Classifier
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -I &lt;number of trees&gt;
+   *  Number of trees to build.</pre>
+   * 
+   * <pre> -K &lt;number of features&gt;
+   *  Number of features to consider (&lt;1=int(logM+1)).</pre>
+   * 
+   * <pre> -S
+   *  Seed for random number generator.
+   *  (default 1)</pre>
+   * 
+   <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception{
     
@@ -304,8 +372,8 @@ public class RandomForest extends Classifier
   /**
    * Builds a classifier for a set of instances.
    *
-   * @param instances the instances to train the classifier with
-   * @exception Exception if something goes wrong
+   * @param data the instances to train the classifier with
+   * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -337,6 +405,7 @@ public class RandomForest extends Classifier
    *
    * @param instance the instance to be classified
    * @return the distribution the forest generates for the instance
+   * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -373,5 +442,4 @@ public class RandomForest extends Classifier
       System.err.println(e.getMessage());
     }
   }
-
 }
