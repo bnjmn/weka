@@ -39,33 +39,63 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Reduces MI data into mono-instance data. <p/>
+ <!-- globalinfo-start -->
+ * Reduces MI data into mono-instance data.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p/>
- *
- * -M method index <br/>
- * Set which method to use in transformation: 1.arithmatic average; 2.geometric
- * centor; 3.using minimax combined features for each bag. (default: 1) <br/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * Method 3:<br/>
- * Define s to be the vector of the coordinate-wise maxima and minima of X,
- * ie., s(X)=(minx1, ..., minxm, maxx1, ...,maxxm), transform the exemplars
- * into mono-instance which contains attributes s(X)  <p/>
+ * <pre> -M [1|2|3]
+ *  The method used in transformation:
+ *  1.arithmatic average; 2.geometric centor;
+ *  3.using minimax combined features of a bag (default: 1)
+ * 
+ *  Method 3:
+ *  Define s to be the vector of the coordinate-wise maxima
+ *  and minima of X, ie., 
+ *  s(X)=(minx1, ..., minxm, maxx1, ...,maxxm), transform
+ *  the exemplars into mono-instance which contains attributes
+ *  s(X)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class SimpleMI 
   extends SingleClassifierEnhancer
   implements OptionHandler, MultiInstanceCapabilitiesHandler {  
 
+  /** for serialization */
   static final long serialVersionUID = 9137795893666592662L;
   
+  /** arithmetic average */
   public static final int TRANSFORMMETHOD_ARITHMETIC = 1;
+  /** geometric average */
   public static final int TRANSFORMMETHOD_GEOMETRIC = 2;
+  /** using minimax combined features of a bag */
   public static final int TRANSFORMMETHOD_MINIMAX = 3;
+  /** the transformation methods */
   public static final Tag[] TAGS_TRANSFORMMETHOD = {
     new Tag(TRANSFORMMETHOD_ARITHMETIC, "arithmetic average"),
     new Tag(TRANSFORMMETHOD_GEOMETRIC, "geometric average"),
@@ -96,7 +126,13 @@ public class SimpleMI
     result.addElement(new Option(
           "\tThe method used in transformation:\n"
           + "\t1.arithmatic average; 2.geometric centor;\n"
-          + "\t3.using minimax combined features of a bag (default: 1)",
+          + "\t3.using minimax combined features of a bag (default: 1)\n\n"
+          + "\tMethod 3:\n"
+          + "\tDefine s to be the vector of the coordinate-wise maxima\n"
+          + "\tand minima of X, ie., \n"
+          + "\ts(X)=(minx1, ..., minxm, maxx1, ...,maxxm), transform\n"
+          + "\tthe exemplars into mono-instance which contains attributes\n"
+          + "\ts(X)",
           "M", 1, "-M [1|2|3]"));
 
     Enumeration enu = super.listOptions();
@@ -109,7 +145,40 @@ public class SimpleMI
 
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M [1|2|3]
+   *  The method used in transformation:
+   *  1.arithmatic average; 2.geometric centor;
+   *  3.using minimax combined features of a bag (default: 1)
+   * 
+   *  Method 3:
+   *  Define s to be the vector of the coordinate-wise maxima
+   *  and minima of X, ie., 
+   *  s(X)=(minx1, ..., minxm, maxx1, ...,maxxm), transform
+   *  the exemplars into mono-instance which contains attributes
+   *  s(X)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -190,8 +259,8 @@ public class SimpleMI
    * @return the transformed dataset with each bag contain mono-instance
    * (without relational attribute) so that any classifier not for MI dataset
    * can be applied on it.
+   * @throws Exception if the transformation fails
    */
-
   public Instances transform(Instances train) throws Exception{
 
     Attribute classAttribute = (Attribute) train.classAttribute().copy();
@@ -314,6 +383,7 @@ public class SimpleMI
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     if (super.getCapabilities().handles(Capability.NOMINAL_CLASS))
       result.enable(Capability.NOMINAL_CLASS);
     if (super.getCapabilities().handles(Capability.BINARY_CLASS))
@@ -382,7 +452,7 @@ public class SimpleMI
   /**
    * Computes the distribution for a given exemplar
    *
-   * @param exmp the exemplar for which distribution is computed
+   * @param newBag the exemplar for which distribution is computed
    * @return the distribution
    * @throws Exception if the distribution can't be computed successfully
    */

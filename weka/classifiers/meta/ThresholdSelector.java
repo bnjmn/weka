@@ -45,83 +45,117 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for selecting a threshold on a probability output by a
- * distribution classifier. The threshold is set so that a given
- * performance measure is optimized. Currently this is the
- * F-measure. Performance is measured either on the training data, a hold-out
- * set or using cross-validation. In addition, the probabilities returned
- * by the base learner can have their range expanded so that the output
- * probabilities will reside between 0 and 1 (this is useful if the scheme
- * normally produces probabilities in a very narrow range).<p>
+ <!-- globalinfo-start -->
+ * A metaclassifier that selecting a mid-point threshold on the probability output by a Classifier. The midpoint threshold is set so that a given performance measure is optimized. Currently this is the F-measure. Performance is measured either on the training data, a hold-out set or using cross-validation. In addition, the probabilities returned by the base learner can have their range expanded so that the output probabilities will reside between 0 and 1 (this is useful if the scheme normally produces probabilities in a very narrow range).
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -C num <br>
- * The class for which threshold is determined. Valid values are:
- * 1, 2 (for first and second classes, respectively), 3 (for whichever
- * class is least frequent), 4 (for whichever class value is most 
- * frequent), and 5 (for the first class named any of "yes","pos(itive)",
- * "1", or method 3 if no matches). (default 5). <p>
- *
- * -W classname <br>
- * Specify the full class name of the base classifier. <p>
- *
- * -X num <br> 
- * Number of folds used for cross validation. If just a
- * hold-out set is used, this determines the size of the hold-out set
- * (default 3).<p>
- *
- * -R integer <br>
- * Sets whether confidence range correction is applied. This can be used
- * to ensure the confidences range from 0 to 1. Use 0 for no range correction,
- * 1 for correction based on the min/max values seen during threshold selection
- * (default 0).<p>
- *
- * -S seed <br>
- * Random number seed (default 1).<p>
- *
- * -E integer <br>
- * Sets the evaluation mode. Use 0 for evaluation using cross-validation,
- * 1 for evaluation using hold-out set, and 2 for evaluation on the
- * training data (default 1).<p>
- *
- * -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL] <br/>
- * measure used for evaluation. (default is FMEASURE). <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;integer&gt;
+ *  The class for which threshold is determined. Valid values are:
+ *  1, 2 (for first and second classes, respectively), 3 (for whichever
+ *  class is least frequent), and 4 (for whichever class value is most
+ *  frequent), and 5 (for the first class named any of "yes","pos(itive)"
+ *  "1", or method 3 if no matches). (default 5).</pre>
+ * 
+ * <pre> -X &lt;number of folds&gt;
+ *  Number of folds used for cross validation. If just a
+ *  hold-out set is used, this determines the size of the hold-out set
+ *  (default 3).</pre>
+ * 
+ * <pre> -R &lt;integer&gt;
+ *  Sets whether confidence range correction is applied. This
+ *  can be used to ensure the confidences range from 0 to 1.
+ *  Use 0 for no range correction, 1 for correction based on
+ *  the min/max values seen during threshold selection
+ *  (default 0).</pre>
+ * 
+ * <pre> -E &lt;integer&gt;
+ *  Sets the evaluation mode. Use 0 for
+ *  evaluation using cross-validation,
+ *  1 for evaluation using hold-out set,
+ *  and 2 for evaluation on the
+ *  training data (default 1).</pre>
+ * 
+ * <pre> -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]
+ *  Measure used for evaluation (default is FMEASURE).
+ * </pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.functions.Logistic)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.functions.Logistic:
+ * </pre>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -R &lt;ridge&gt;
+ *  Set the ridge in the log-likelihood.</pre>
+ * 
+ * <pre> -M &lt;number&gt;
+ *  Set the maximum number of iterations (default -1, until convergence).</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $ 
+ * @version $Revision: 1.36 $ 
  */
-public class ThresholdSelector extends RandomizableSingleClassifierEnhancer 
+public class ThresholdSelector 
+  extends RandomizableSingleClassifierEnhancer 
   implements OptionHandler, Drawable {
 
+  /** for serialization */
   static final long serialVersionUID = -1795038053239867444L;
-  
-  /* Type of correction applied to threshold range */ 
+
+  /** no range correction */
   public static final int RANGE_NONE = 0;
+  /** Correct based on min/max observed */
   public static final int RANGE_BOUNDS = 1;
+  /** Type of correction applied to threshold range */ 
   public static final Tag [] TAGS_RANGE = {
     new Tag(RANGE_NONE, "No range correction"),
     new Tag(RANGE_BOUNDS, "Correct based on min/max observed")
   };
 
-  /* The evaluation modes */
+  /** entire training set */
   public static final int EVAL_TRAINING_SET = 2;
+  /** single tuned fold */
   public static final int EVAL_TUNED_SPLIT = 1;
+  /** n-fold cross-validation */
   public static final int EVAL_CROSS_VALIDATION = 0;
+  /** The evaluation modes */
   public static final Tag [] TAGS_EVAL = {
     new Tag(EVAL_TRAINING_SET, "Entire training set"),
     new Tag(EVAL_TUNED_SPLIT, "Single tuned fold"),
     new Tag(EVAL_CROSS_VALIDATION, "N-Fold cross validation")
   };
 
-  /* How to determine which class value to optimize for */
+  /** first class value */
   public static final int OPTIMIZE_0     = 0;
+  /** second class value */
   public static final int OPTIMIZE_1     = 1;
+  /** least frequent class value */
   public static final int OPTIMIZE_LFREQ = 2;
+  /** most frequent class value */
   public static final int OPTIMIZE_MFREQ = 3;
+  /** class value name, either 'yes' or 'pos(itive)' */
   public static final int OPTIMIZE_POS_NAME = 4;
+  /** How to determine which class value to optimize for */
   public static final Tag [] TAGS_OPTIMIZE = {
     new Tag(OPTIMIZE_0, "First class value"),
     new Tag(OPTIMIZE_1, "Second class value"),
@@ -130,14 +164,21 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
     new Tag(OPTIMIZE_POS_NAME, "Class value named: \"yes\", \"pos(itive)\",\"1\"")
   };
 
+  /** F-measure */
   public static final int FMEASURE  = 1;
+  /** accuracy */
   public static final int ACCURACY  = 2;
+  /** true-positive */
   public static final int TRUE_POS  = 3;
+  /** true-negative */
   public static final int TRUE_NEG  = 4;
+  /** true-positive rate */
   public static final int TP_RATE   = 5;
+  /** precision */
   public static final int PRECISION = 6;
+  /** recall */
   public static final int RECALL    = 7;
-  
+  /** the measure to use */
   public static final Tag[] TAGS_MEASURE = {
     new Tag(FMEASURE,  "FMEASURE"),
     new Tag(ACCURACY,  "ACCURACY"),
@@ -192,6 +233,8 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -207,7 +250,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    * @param numFolds the number of folds to use if not evaluating on the
    * full training set.
    * @return a <code>FastVector</code> containing the predictions.
-   * @exception Exception if an error occurs generating the predictions.
+   * @throws Exception if an error occurs generating the predictions.
    */
   protected FastVector getPredictions(Instances instances, int mode, int numFolds) 
     throws Exception {
@@ -242,7 +285,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
   }
 
     /** set measure used for determining threshold
-     * @param newMeasure: Tag representing measure to be used
+     * @param newMeasure Tag representing measure to be used
      **/
     public void setMeasure(SelectedTag newMeasure) {
 	if (newMeasure.getTags() == TAGS_MEASURE) {
@@ -398,45 +441,72 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -C num <br>
-   * The class for which threshold is determined. Valid values are:
-   * 1, 2 (for first and second classes, respectively), 3 (for whichever
-   * class is least frequent), 4 (for whichever class value is most 
-   * frequent), and 5 (for the first class named any of "yes","pos(itive)",
-   * "1", or method 3 if no matches). (default 3). <p>
-   *
-   * -W classname <br>
-   * Specify the full class name of classifier to perform cross-validation
-   * selection on.<p>
-   *
-   * -X num <br> 
-   * Number of folds used for cross validation. If just a
-   * hold-out set is used, this determines the size of the hold-out set
-   * (default 3).<p>
-   *
-   * -R integer <br>
-   * Sets whether confidence range correction is applied. This can be used
-   * to ensure the confidences range from 0 to 1. Use 0 for no range correction,
-   * 1 for correction based on the min/max values seen during threshold 
-   * selection (default 0).<p>
-   *
-   * -S seed <br>
-   * Random number seed (default 1).<p>
-   *
-   * -E integer <br>
-   * Sets the evaluation mode. Use 0 for evaluation using cross-validation,
-   * 1 for evaluation using hold-out set, and 2 for evaluation on the
-   * training data (default 1).<p>
-   *
-   * -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL] <br/>
-   * measure used for evaluation. (default is FMEASURE). <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;integer&gt;
+   *  The class for which threshold is determined. Valid values are:
+   *  1, 2 (for first and second classes, respectively), 3 (for whichever
+   *  class is least frequent), and 4 (for whichever class value is most
+   *  frequent), and 5 (for the first class named any of "yes","pos(itive)"
+   *  "1", or method 3 if no matches). (default 5).</pre>
+   * 
+   * <pre> -X &lt;number of folds&gt;
+   *  Number of folds used for cross validation. If just a
+   *  hold-out set is used, this determines the size of the hold-out set
+   *  (default 3).</pre>
+   * 
+   * <pre> -R &lt;integer&gt;
+   *  Sets whether confidence range correction is applied. This
+   *  can be used to ensure the confidences range from 0 to 1.
+   *  Use 0 for no range correction, 1 for correction based on
+   *  the min/max values seen during threshold selection
+   *  (default 0).</pre>
+   * 
+   * <pre> -E &lt;integer&gt;
+   *  Sets the evaluation mode. Use 0 for
+   *  evaluation using cross-validation,
+   *  1 for evaluation using hold-out set,
+   *  and 2 for evaluation on the
+   *  training data (default 1).</pre>
+   * 
+   * <pre> -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]
+   *  Measure used for evaluation (default is FMEASURE).
+   * </pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.functions.Logistic)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.functions.Logistic:
+   * </pre>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -R &lt;ridge&gt;
+   *  Set the ridge in the log-likelihood.</pre>
+   * 
+   * <pre> -M &lt;number&gt;
+   *  Set the maximum number of iterations (default -1, until convergence).</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated sub-classifier. <p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -519,6 +589,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.BINARY_CLASS);
     
     return result;
@@ -528,7 +599,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) 
     throws Exception {
@@ -610,6 +681,10 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
 
   /**
    * Checks whether instance of designated class is in subset.
+   * 
+   * @param data the data to check for instance
+   * @return true if the instance is in the subset
+   * @throws Exception if checking fails
    */
   private boolean checkForInstance(Instances data) throws Exception {
 
@@ -627,7 +702,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double [] distributionForInstance(Instance instance) 
@@ -823,8 +898,10 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
   }
 
   /**
-   *  Returns the type of graph this classifier
-   *  represents.
+   * Returns the type of graph this classifier
+   * represents.
+   *  
+   * @return the type of graph this classifier represents
    */   
   public int graphType() {
     
@@ -838,7 +915,7 @@ public class ThresholdSelector extends RandomizableSingleClassifierEnhancer
    * Returns graph describing the classifier (if possible).
    *
    * @return the graph of the classifier in dotty format
-   * @exception Exception if the classifier cannot be graphed
+   * @throws Exception if the classifier cannot be graphed
    */
   public String graph() throws Exception {
     

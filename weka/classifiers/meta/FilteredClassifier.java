@@ -36,24 +36,75 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for running an arbitrary classifier on data that has been passed
- * through an arbitrary filter.<p>
+ <!-- globalinfo-start -->
+ * Class for running an arbitrary classifier on data that has been passed through an arbitrary filter. Like the classifier, the structure of the filter is based exclusively on the training data and test instances will be processed by the filter without changing their structure.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options from the command line are:<p>
- *
- * -W classifierstring <br>
- * Classifierstring should contain the full class name of a classifier
- * (options are specified after a --). <p>
- *
- * -F filterstring <br>
- * Filterstring should contain the full class name of a filter
- * followed by options to the filter. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -F &lt;filter specification&gt;
+ *  Full class name of filter to use, followed
+ *  by filter options.
+ *  eg: "weka.filters.AttributeFilter -V -R 1,2"</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.J48)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.J48:
+ * </pre>
+ * 
+ * <pre> -U
+ *  Use unpruned tree.</pre>
+ * 
+ * <pre> -C &lt;pruning confidence&gt;
+ *  Set confidence threshold for pruning.
+ *  (default 0.25)</pre>
+ * 
+ * <pre> -M &lt;minimum number of instances&gt;
+ *  Set minimum number of instances per leaf.
+ *  (default 2)</pre>
+ * 
+ * <pre> -R
+ *  Use reduced error pruning.</pre>
+ * 
+ * <pre> -N &lt;number of folds&gt;
+ *  Set number of folds for reduced error
+ *  pruning. One fold is used as pruning set.
+ *  (default 3)</pre>
+ * 
+ * <pre> -B
+ *  Use binary splits only.</pre>
+ * 
+ * <pre> -S
+ *  Don't perform subtree raising.</pre>
+ * 
+ * <pre> -L
+ *  Do not clean up after the tree has been built.</pre>
+ * 
+ * <pre> -A
+ *  Laplace smoothing for predicted probabilities.</pre>
+ * 
+ * <pre> -Q &lt;seed&gt;
+ *  Seed for random data shuffling (default 1).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
-public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
+public class FilteredClassifier 
+  extends SingleClassifierEnhancer 
+  implements Drawable {
 
+  /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
   
   /** The filter */
@@ -69,15 +120,15 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
    */
   public String globalInfo() {
     return   "Class for running an arbitrary classifier on data that has been passed "
-      + "through an arbitrary filter, providing the only way to access \"supervised\" "
-      + "filters in the Explorer. Like the classifier, the structure of the filter "
+      + "through an arbitrary filter. Like the classifier, the structure of the filter "
       + "is based exclusively on the training data and test instances will be processed "
-      + "by the filter without changing its structure.";
-
+      + "by the filter without changing their structure.";
   }
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -94,8 +145,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
   }
 
   /**
-   *  Returns the type of graph this classifier
-   *  represents.
+   * Returns the type of graph this classifier
+   * represents.
+   *  
+   * @return the graph type of this classifier
    */   
   public int graphType() {
     
@@ -109,7 +162,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
    * Returns graph describing the classifier (if possible).
    *
    * @return the graph of the classifier in dotty format
-   * @exception Exception if the classifier cannot be graphed
+   * @throws Exception if the classifier cannot be graphed
    */
   public String graph() throws Exception {
     
@@ -142,18 +195,66 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -W classifierstring <br>
-   * Classifierstring should contain the full class name of a classifier
-   * (options are specified after a --). <p>
-   *
-   * -F filterstring <br>
-   * Filterstring should contain the full class name of a filter
-   * followed by options to the filter.<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -F &lt;filter specification&gt;
+   *  Full class name of filter to use, followed
+   *  by filter options.
+   *  eg: "weka.filters.AttributeFilter -V -R 1,2"</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.J48)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.J48:
+   * </pre>
+   * 
+   * <pre> -U
+   *  Use unpruned tree.</pre>
+   * 
+   * <pre> -C &lt;pruning confidence&gt;
+   *  Set confidence threshold for pruning.
+   *  (default 0.25)</pre>
+   * 
+   * <pre> -M &lt;minimum number of instances&gt;
+   *  Set minimum number of instances per leaf.
+   *  (default 2)</pre>
+   * 
+   * <pre> -R
+   *  Use reduced error pruning.</pre>
+   * 
+   * <pre> -N &lt;number of folds&gt;
+   *  Set number of folds for reduced error
+   *  pruning. One fold is used as pruning set.
+   *  (default 3)</pre>
+   * 
+   * <pre> -B
+   *  Use binary splits only.</pre>
+   * 
+   * <pre> -S
+   *  Don't perform subtree raising.</pre>
+   * 
+   * <pre> -L
+   *  Do not clean up after the tree has been built.</pre>
+   * 
+   * <pre> -A
+   *  Laplace smoothing for predicted probabilities.</pre>
+   * 
+   * <pre> -Q &lt;seed&gt;
+   *  Seed for random data shuffling (default 1).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -242,7 +343,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
    * Build the classifier on the filtered data.
    *
    * @param data the training data
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -275,7 +376,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
    * Classifies a given instance after filtering.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the class distribution for the given instance
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double [] distributionForInstance(Instance instance)
@@ -312,6 +414,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a representation of this classifier
    */
   public String toString() {
 
@@ -346,5 +450,4 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements Draw
       System.err.println(e.getMessage());
     }
   }
-
 }
