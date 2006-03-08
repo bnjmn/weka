@@ -1,7 +1,4 @@
 /*
- *    M5P.java
- *    Copyright (C) 2001 Mark Hall
- *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -16,6 +13,13 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+/*
+ *    M5P.java
+ *    Copyright (C) 2001 Mark Hall
+ *
+ */
+
 package weka.classifiers.trees;
 
 import weka.classifiers.trees.m5.M5Base;
@@ -28,34 +32,76 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * M5P. Implements routines for generating M5 model trees.<p/>
+ <!-- globalinfo-start -->
+ * M5Base. Implements base routines for generating M5 Model trees and rules<br/>
+ * The original algorithm M5 was invented by R. Quinlan and Yong Wang made improvements.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Ross J. Quinlan: Learning with Continuous Classes. In: 5th Australian Joint Conference on Artificial Intelligence, Singapore, 343-348, 1992.<br/>
+ * <br/>
+ * Y. Wang, I. H. Witten: Induction of model trees for predicting continuous classes. In: Poster papers of the 9th European Conference on Machine Learning, , 1997.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * The original algorithm M5 was invented by Quinlan: <br/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Quinlan1992,
+ *    address = {Singapore},
+ *    author = {Ross J. Quinlan},
+ *    booktitle = {5th Australian Joint Conference on Artificial Intelligence},
+ *    pages = {343-348},
+ *    publisher = {World Scientific},
+ *    title = {Learning with Continuous Classes},
+ *    year = {1992}
+ * }
  * 
- * Quinlan J. R. (1992). Learning with continuous classes. Proceedings of
- * the Australian Joint Conference on Artificial Intelligence. 343--348.
- * World Scientific, Singapore. <p/>
- * 
- * Yong Wang made improvements and created M5': <br/>
- * 
- * Wang, Y and Witten, I. H. (1997). Induction of model trees for
- * predicting continuous classes. Proceedings of the poster papers of the
- * European Conference on Machine Learning. University of Economics,
- * Faculty of Informatics and Statistics, Prague. <p/>
+ * &#64;incproceedings{Wang1997,
+ *    author = {Y. Wang and I. H. Witten},
+ *    booktitle = {Poster papers of the 9th European Conference on Machine Learning},
+ *    publisher = {Springer},
+ *    title = {Induction of model trees for predicting continuous classes},
+ *    year = {1997}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- *
- * Valid options are:<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -U <br>
- * Use unsmoothed predictions. <p>
+ * <pre> -N
+ *  Use unpruned tree/rules
+ * </pre>
+ * 
+ * <pre> -U
+ *  Use unsmoothed predictions
+ * </pre>
+ * 
+ * <pre> -R
+ *  Build regression tree/rule rather than a model tree/rule
+ * </pre>
+ * 
+ * <pre> -M &lt;minimum number of instances&gt;
+ *  Set minimum number of instances per leaf
+ *  (default 4)</pre>
+ * 
+ * <pre> -L
+ *  Save instances at the nodes in
+ *  the tree (for visualization purposes)
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-
-public class M5P extends M5Base 
+public class M5P 
+  extends M5Base 
   implements Drawable {
 
+  /** for serialization */
   static final long serialVersionUID = -6118439039768244417L;
   
   /**
@@ -79,7 +125,7 @@ public class M5P extends M5Base
    * Return a dot style String describing the tree.
    *
    * @return a <code>String</code> value
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public String graph() throws Exception {
     StringBuffer text = new StringBuffer();
@@ -124,27 +170,42 @@ public class M5P extends M5Base
     }
 
     newVector.addElement(new Option("\tSave instances at the nodes in\n"
-				    +"\tthe tree (for visualization purposes)\n",
+				    +"\tthe tree (for visualization purposes)",
 				    "L", 0, "-L"));
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options. <p>
+   * Parses a given list of options. <p/>
    *
-   * Valid options are:<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * -U <br>
-   * Use unsmoothed predictions. <p>
-   *
-   * -R <br>
-   * Build a regression tree rather than a model tree. <p>
-   *
-   * -L <br>
-   * Save instance data at each node (for visualization purposes). <p>
+   * <pre> -N
+   *  Use unpruned tree/rules
+   * </pre>
+   * 
+   * <pre> -U
+   *  Use unsmoothed predictions
+   * </pre>
+   * 
+   * <pre> -R
+   *  Build regression tree/rule rather than a model tree/rule
+   * </pre>
+   * 
+   * <pre> -M &lt;minimum number of instances&gt;
+   *  Set minimum number of instances per leaf
+   *  (default 4)</pre>
+   * 
+   * <pre> -L
+   *  Save instances at the nodes in
+   *  the tree (for visualization purposes)
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     setSaveInstances(Utils.getFlag('L', options));
@@ -191,4 +252,3 @@ public class M5P extends M5Base
     } 
   } 
 }
-
