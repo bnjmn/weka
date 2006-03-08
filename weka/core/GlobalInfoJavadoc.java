@@ -32,19 +32,19 @@ import java.lang.reflect.Method;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -W &lt;classname&gt; <br/>
- *  The class to load. <p/>
+ * <pre> -W &lt;classname&gt;
+ *  The class to load.</pre>
  * 
- * -nostars <br/>
- *  Suppresses the '*' in the Javadoc. <p/>
+ * <pre> -nostars
+ *  Suppresses the '*' in the Javadoc.</pre>
  * 
- * -dir &lt;dir&gt; <br/>
- *  The directory above the package hierarchy of the class. <p/>
+ * <pre> -dir &lt;dir&gt;
+ *  The directory above the package hierarchy of the class.</pre>
  * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see #GLOBALINFO_METHOD
  * @see #GLOBALINFO_STARTTAG
  * @see #GLOBALINFO_ENDTAG
@@ -139,3 +139,4 @@ public class GlobalInfoJavadoc
     }
   }
 }
+

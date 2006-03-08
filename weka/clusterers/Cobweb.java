@@ -93,12 +93,12 @@ import java.util.Vector;
  * 
  * <pre> -C &lt;cutoff&gt;
  *  Cutoff.
- * a (default=0.002)</pre>
+ *  (default=0.002)</pre>
  * 
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -962,7 +962,7 @@ public class Cobweb
    * 
    * <pre> -C &lt;cutoff&gt;
    *  Cutoff.
-   * a (default=0.002)</pre>
+   *  (default=0.002)</pre>
    * 
    <!-- options-end -->
    *
@@ -1150,3 +1150,4 @@ public class Cobweb
     }
   }
 }
+

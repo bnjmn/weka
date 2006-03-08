@@ -79,12 +79,13 @@ import java.util.Vector;
  *  The noise variance (default 1.0).</pre>
  * 
  * <pre> -E &lt;expression&gt;
- *  The expression to use for generating y out of x  (default sin(abs(a1)) / abs(a1)).</pre>
+ *  The expression to use for generating y out of x 
+ *  (default sin(abs(a1)) / abs(a1)).</pre>
  * 
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     AddExpression
  * @see     MexicanHat
  */
@@ -183,7 +184,8 @@ public class Expression
    *  The noise variance (default 1.0).</pre>
    * 
    * <pre> -E &lt;expression&gt;
-   *  The expression to use for generating y out of x  (default sin(abs(a1)) / abs(a1)).</pre>
+   *  The expression to use for generating y out of x 
+   *  (default sin(abs(a1)) / abs(a1)).</pre>
    * 
    <!-- options-end -->
    *
@@ -426,3 +428,4 @@ public class Expression
     }
   }
 }
+

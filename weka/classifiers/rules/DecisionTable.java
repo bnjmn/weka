@@ -88,8 +88,7 @@ import java.util.Vector;
  *  (Default = leave one out CV)</pre>
  * 
  * <pre> -I
- *  Use nearest neighbour instead of global table majority.
- * </pre>
+ *  Use nearest neighbour instead of global table majority.</pre>
  * 
  * <pre> -R
  *  Display decision table rules.
@@ -98,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.33 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -1137,8 +1136,7 @@ public class DecisionTable
    *  (Default = leave one out CV)</pre>
    * 
    * <pre> -I
-   *  Use nearest neighbour instead of global table majority.
-   * </pre>
+   *  Use nearest neighbour instead of global table majority.</pre>
    * 
    * <pre> -R
    *  Display decision table rules.
@@ -1529,3 +1527,4 @@ public class DecisionTable
     }
   }
 }
+

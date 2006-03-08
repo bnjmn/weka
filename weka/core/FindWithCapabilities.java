@@ -38,84 +38,84 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -num-instances &lt;num&gt; <br/>
- *  The minimum number of instances (default 1). <p/>
+ * <pre> -num-instances &lt;num&gt;
+ *  The minimum number of instances (default 1).</pre>
  * 
- * -nominal-class <br/>
- *  Must handle nominal classes. <p/>
+ * <pre> -nominal-class
+ *  Must handle nominal classes.</pre>
  * 
- * -binary-class <br/>
- *  Must handle binary classes. <p/>
+ * <pre> -binary-class
+ *  Must handle binary classes.</pre>
  * 
- * -numeric-class <br/>
- *  Must handle numeric classes. <p/>
+ * <pre> -numeric-class
+ *  Must handle numeric classes.</pre>
  * 
- * -string-class <br/>
- *  Must handle string classes. <p/>
+ * <pre> -string-class
+ *  Must handle string classes.</pre>
  * 
- * -date-class <br/>
- *  Must handle date classes. <p/>
+ * <pre> -date-class
+ *  Must handle date classes.</pre>
  * 
- * -relational-class <br/>
- *  Must handle relational classes. <p/>
+ * <pre> -relational-class
+ *  Must handle relational classes.</pre>
  * 
- * -no-class <br/>
- *  Doesn't need a class. <p/>
+ * <pre> -no-class
+ *  Doesn't need a class.</pre>
  * 
- * -nominal-atts <br/>
- *  Must handle nominal attributes. <p/>
+ * <pre> -nominal-atts
+ *  Must handle nominal attributes.</pre>
  * 
- * -numeric-atts <br/>
- *  Must handle numeric attributes. <p/>
+ * <pre> -numeric-atts
+ *  Must handle numeric attributes.</pre>
  * 
- * -string-atts <br/>
- *  Must handle string attributes. <p/>
+ * <pre> -string-atts
+ *  Must handle string attributes.</pre>
  * 
- * -date-atts <br/>
- *  Must handle date attributes. <p/>
+ * <pre> -date-atts
+ *  Must handle date attributes.</pre>
  * 
- * -relational-atts <br/>
- *  Must handle relational attributes. <p/>
+ * <pre> -relational-atts
+ *  Must handle relational attributes.</pre>
  * 
- * -only-multiinstance <br/>
- *  Must handle multi-instance data. <p/>
+ * <pre> -only-multiinstance
+ *  Must handle multi-instance data.</pre>
  * 
- * -W &lt;classname&gt; <br/>
+ * <pre> -W &lt;classname&gt;
  *  The Capabilities handler to base the handling on.
  *  The other parameters can be used to override the ones
  *  determined from the handler. Additional parameters for
  *  handler can be passed on after the '--'.
- *  Either '-W' or '-t' can be used. <p/>
+ *  Either '-W' or '-t' can be used.</pre>
  * 
- * -t &lt;file&gt; <br/>
+ * <pre> -t &lt;file&gt;
  *  The dataset to base the capabilities on.
  *  The other parameters can be used to override the ones
  *  determined from the handler.
- *  Either '-t' or '-W' can be used. <p/>
+ *  Either '-t' or '-W' can be used.</pre>
  * 
- * -c &lt;num&gt; <br/>
+ * <pre> -c &lt;num&gt;
  *  The index of the class attribute, -1 for none.
  *  'first' and 'last' are also valid.
- *  Only in conjunction with option '-t'. <p/>
+ *  Only in conjunction with option '-t'.</pre>
  * 
- * -superclass <br/>
+ * <pre> -superclass
  *  Superclass to look for in the packages.
- *  <p/>
+ * </pre>
  * 
- * -packages <br/>
- *  Comma-separated list of packages to search in. <p/>
+ * <pre> -packages
+ *  Comma-separated list of packages to search in.</pre>
  * 
- * -generic <br/>
+ * <pre> -generic
  *  Retrieves the package list from the GenericPropertiesCreator
- *  for the given superclass. (overrides -packages &lt;list&gt;). <p/>
+ *  for the given superclass. (overrides -packages &lt;list&gt;).</pre>
  * 
- * -misses <br/>
- *  Also prints the classname that didn't match the criteria. <p/>
+ * <pre> -misses
+ *  Also prints the classname that didn't match the criteria.</pre>
  * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator

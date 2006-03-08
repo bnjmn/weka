@@ -77,16 +77,13 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  * </pre>
  * 
  * <pre> -N
- *  Use unpruned tree/rules
- * </pre>
+ *  Use unpruned tree/rules</pre>
  * 
  * <pre> -U
- *  Use unsmoothed predictions
- * </pre>
+ *  Use unsmoothed predictions</pre>
  * 
  * <pre> -R
- *  Build regression tree/rule rather than a model tree/rule
- * </pre>
+ *  Build regression tree/rule rather than a model tree/rule</pre>
  * 
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf
@@ -94,14 +91,13 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  * 
  * <pre> -L
  *  Save instances at the nodes in
- *  the tree (for visualization purposes)
- * </pre>
+ *  the tree (for visualization purposes)</pre>
  * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
 */
 public class ClassificationViaRegression 
   extends SingleClassifierEnhancer
@@ -283,3 +279,4 @@ public class ClassificationViaRegression
     }
   }
 }
+
