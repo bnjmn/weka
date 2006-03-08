@@ -35,14 +35,28 @@ import weka.core.WeightedInstancesHandler;
 import java.util.Enumeration;
 
 /**
- * Class for building and using a 0-R classifier. Predicts the mean
- * (for a numeric class) or the mode (for a nominal class).
+ <!-- globalinfo-start -->
+ * Class for building and using a 0-R classifier. Predicts the mean (for a numeric class) or the mode (for a nominal class).
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class ZeroR extends Classifier implements WeightedInstancesHandler {
+public class ZeroR 
+  extends Classifier 
+  implements WeightedInstancesHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 48055541465867954L;
   
   /** The class value 0R predicts. */
@@ -205,5 +219,3 @@ public class ZeroR extends Classifier implements WeightedInstancesHandler {
     }
   }
 }
-
-
