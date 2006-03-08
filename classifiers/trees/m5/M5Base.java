@@ -27,6 +27,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
@@ -61,11 +65,13 @@ import java.util.Vector;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public abstract class M5Base extends Classifier 
+public abstract class M5Base 
+  extends Classifier 
   implements OptionHandler,
-	     AdditionalMeasureProducer {
+	     AdditionalMeasureProducer,
+	     TechnicalInformationHandler {
 
   /**
    * the instances covered by the tree/rules
@@ -129,19 +135,47 @@ public abstract class M5Base extends Classifier
 
   /**
    * returns information about the classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
     return 
-        "The original algorithm M5 was invented by Quinlan:\n"
-      + "Quinlan J. R. (1992). Learning with continuous classes. Proceedings of "
-      + "the Australian Joint Conference on Artificial Intelligence. 343--348. "
-      + "World Scientific, Singapore.\n"
-      + "\n"
-      + "Yong Wang made improvements and created M5':\n"
-      + "Wang, Y and Witten, I. H. (1997). Induction of model trees for "
-      + "predicting continuous classes. Proceedings of the poster papers of "
-      + "the European Conference on Machine Learning. University of Economics, "
-      + "Faculty of Informatics and Statistics, Prague.";
+        "M5Base. Implements base routines for generating M5 Model trees and " 
+      + "rules\n"
+      + "The original algorithm M5 was invented by R. Quinlan and Yong Wang "
+      + "made improvements.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Ross J. Quinlan");
+    result.setValue(Field.TITLE, "Learning with Continuous Classes");
+    result.setValue(Field.BOOKTITLE, "5th Australian Joint Conference on Artificial Intelligence");
+    result.setValue(Field.YEAR, "1992");
+    result.setValue(Field.PAGES, "343-348");
+    result.setValue(Field.PUBLISHER, "World Scientific");
+    result.setValue(Field.ADDRESS, "Singapore");
+    
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Y. Wang and I. H. Witten");
+    additional.setValue(Field.TITLE, "Induction of model trees for predicting continuous classes");
+    additional.setValue(Field.BOOKTITLE, "Poster papers of the 9th European Conference on Machine Learning");
+    additional.setValue(Field.YEAR, "1997");
+    additional.setValue(Field.PUBLISHER, "Springer");
+    
+    return result;
   }
 
   /**
@@ -152,14 +186,14 @@ public abstract class M5Base extends Classifier
   public Enumeration listOptions() {
     Vector newVector = new Vector(4);
 
-    newVector.addElement(new Option("\tUse unpruned tree/rules\n", 
+    newVector.addElement(new Option("\tUse unpruned tree/rules", 
 				    "N", 0, "-N"));
 
-    newVector.addElement(new Option("\tUse unsmoothed predictions\n", 
+    newVector.addElement(new Option("\tUse unsmoothed predictions", 
 				    "U", 0, "-U"));
 
     newVector.addElement(new Option("\tBuild regression tree/rule rather "
-				    +"than a model tree/rule\n", 
+				    +"than a model tree/rule", 
 				    "R", 0, "-R"));
 
     newVector.addElement(new Option("\tSet minimum number of instances "
@@ -169,7 +203,7 @@ public abstract class M5Base extends Classifier
   } 
 
   /**
-   * Parses a given list of options. <p>
+   * Parses a given list of options. <p/>
    * 
    * Valid options are:<p>
    * 
@@ -180,7 +214,7 @@ public abstract class M5Base extends Classifier
    * Build a regression tree rather than a model tree. <p>
    * 
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     setUnpruned(Utils.getFlag('N', options));
@@ -328,7 +362,7 @@ public abstract class M5Base extends Classifier
    * Generates the classifier.
    * 
    * @param data set of instances serving as training data
-   * @exception Exception if the classifier has not been generated
+   * @throws Exception if the classifier has not been generated
    * successfully
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -402,7 +436,7 @@ public abstract class M5Base extends Classifier
    * 
    * @param inst the instance whos class value is to be predicted
    * @return the prediction
-   * @exception if a prediction can't be made.
+   * @throws if a prediction can't be made.
    */
   public double classifyInstance(Instance inst) throws Exception {
     Rule   temp;
@@ -506,7 +540,7 @@ public abstract class M5Base extends Classifier
    * Returns the value of the named measure
    * @param measureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception Exception if the named measure is not supported
+   * @throws Exception if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) 
     {

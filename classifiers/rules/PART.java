@@ -35,6 +35,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Summarizable;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
@@ -42,45 +46,71 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for generating a PART decision list. For more information, see<p>
+ <!-- globalinfo-start -->
+ * Class for generating a PART decision list. Uses separate-and-conquer. Builds a partial C4.5 decision tree in each iteration and makes the "best" leaf into a rule.<br/>
+ * <br/>
+ * For more information, see:<br/>
+ * <br/>
+ * Eibe Frank, Ian H. Witten: Generating Accurate Rule Sets Without Global Optimization. In: Fifteenth International Conference on Machine Learning, 144-151, 1998.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Eibe Frank and Ian H. Witten (1998).  <a
- * href="http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz">Generating
- * Accurate Rule Sets Without Global Optimization.</a> In Shavlik, J.,
- * ed., <i>Machine Learning: Proceedings of the Fifteenth
- * International Conference</i>, Morgan Kaufmann Publishers, San
- * Francisco, CA. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Frank1998,
+ *    author = {Eibe Frank and Ian H. Witten},
+ *    booktitle = {Fifteenth International Conference on Machine Learning},
+ *    editor = {J. Shavlik},
+ *    pages = {144-151},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Generating Accurate Rule Sets Without Global Optimization},
+ *    year = {1998},
+ *    URL = {http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are: <p>
- *
- * -C confidence <br>
- * Set confidence threshold for pruning. (Default: 0.25) <p>
- *
- * -M number <br>
- * Set minimum number of instances per leaf. (Default: 2) <p>
- *
- * -R <br>
- * Use reduced error pruning. <p>
- *
- * -N number <br>
- * Set number of folds for reduced error pruning. One fold is
- * used as the pruning set. (Default: 3) <p>
- *
- * -B <br>
- * Use binary splits for nominal attributes. <p>
- *
- * -U <br>
- * Generate unpruned decision list. <p>
- *
- * -Q <br>
- * The seed for reduced-error pruning. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;pruning confidence&gt;
+ *  Set confidence threshold for pruning.
+ *  (default 0.25)</pre>
+ * 
+ * <pre> -M &lt;minimum number of objects&gt;
+ *  Set minimum number of objects per leaf.
+ *  (default 2)</pre>
+ * 
+ * <pre> -R
+ *  Use reduced error pruning.</pre>
+ * 
+ * <pre> -N &lt;number of folds&gt;
+ *  Set number of folds for reduced error
+ *  pruning. One fold is used as pruning set.
+ *  (default 3)</pre>
+ * 
+ * <pre> -B
+ *  Use binary splits only.</pre>
+ * 
+ * <pre> -U
+ *  Generate unpruned decision list.</pre>
+ * 
+ * <pre> -Q &lt;seed&gt;
+ *  Seed for random data shuffling (default 1).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class PART extends Classifier implements OptionHandler,
-  WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
+public class PART 
+  extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler, Summarizable, 
+             AdditionalMeasureProducer, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 8121455039782598361L;
   
   /** The decision list */
@@ -116,12 +146,32 @@ public class PART extends Classifier implements OptionHandler,
 
     return  "Class for generating a PART decision list. Uses "
       + "separate-and-conquer. Builds a partial C4.5 decision tree "
-      + "in each iteration and makes the \"best\" leaf into a rule. "
+      + "in each iteration and makes the \"best\" leaf into a rule.\n\n"
       + "For more information, see:\n\n"
-      + "Eibe Frank and Ian H. Witten (1998). \"Generating "
-      + "Accurate Rule Sets Without Global Optimization.\""
-      + "In Shavlik, J., ed., Machine Learning: Proceedings of the "
-      + "Fifteenth International Conference, Morgan Kaufmann Publishers.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Eibe Frank and Ian H. Witten");
+    result.setValue(Field.TITLE, "Generating Accurate Rule Sets Without Global Optimization");
+    result.setValue(Field.BOOKTITLE, "Fifteenth International Conference on Machine Learning");
+    result.setValue(Field.EDITOR, "J. Shavlik");
+    result.setValue(Field.YEAR, "1998");
+    result.setValue(Field.PAGES, "144-151");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    result.setValue(Field.URL, "http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz");
+    
+    return result;
   }
 
   /**
@@ -145,7 +195,8 @@ public class PART extends Classifier implements OptionHandler,
   /**
    * Generates the classifier.
    *
-   * @exception Exception if classifier can't be built successfully
+   * @param instances the data to train with
+   * @throws Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) 
        throws Exception {
@@ -180,7 +231,9 @@ public class PART extends Classifier implements OptionHandler,
   /**
    * Classifies an instance.
    *
-   * @exception Exception if instance can't be classified successfully
+   * @param instance the instance to classify
+   * @return the classification
+   * @throws Exception if instance can't be classified successfully
    */
   public double classifyInstance(Instance instance) 
        throws Exception {
@@ -191,7 +244,9 @@ public class PART extends Classifier implements OptionHandler,
   /** 
    * Returns class probabilities for an instance.
    *
-   * @exception Exception if the distribution can't be computed successfully
+   * @param instance the instance to get the distribution for
+   * @return the class probabilities
+   * @throws Exception if the distribution can't be computed successfully
    */
   public final double [] distributionForInstance(Instance instance) 
        throws Exception {
@@ -262,10 +317,40 @@ public class PART extends Classifier implements OptionHandler,
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;pruning confidence&gt;
+   *  Set confidence threshold for pruning.
+   *  (default 0.25)</pre>
+   * 
+   * <pre> -M &lt;minimum number of objects&gt;
+   *  Set minimum number of objects per leaf.
+   *  (default 2)</pre>
+   * 
+   * <pre> -R
+   *  Use reduced error pruning.</pre>
+   * 
+   * <pre> -N &lt;number of folds&gt;
+   *  Set number of folds for reduced error
+   *  pruning. One fold is used as pruning set.
+   *  (default 3)</pre>
+   * 
+   * <pre> -B
+   *  Use binary splits only.</pre>
+   * 
+   * <pre> -U
+   *  Generate unpruned decision list.</pre>
+   * 
+   * <pre> -Q &lt;seed&gt;
+   *  Seed for random data shuffling (default 1).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -351,6 +436,8 @@ public class PART extends Classifier implements OptionHandler,
 
   /**
    * Returns a description of the classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -362,6 +449,8 @@ public class PART extends Classifier implements OptionHandler,
   
   /**
    * Returns a superconcise version of the model
+   * 
+   * @return a concise version of the model
    */
   public String toSummaryString() {
 
@@ -388,9 +477,9 @@ public class PART extends Classifier implements OptionHandler,
 
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
@@ -622,12 +711,3 @@ public class PART extends Classifier implements OptionHandler,
     }
   }
 }
-
-
-  
-
-
-
-
-
-

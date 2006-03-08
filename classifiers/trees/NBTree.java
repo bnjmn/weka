@@ -32,29 +32,64 @@ import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Summarizable;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.WeightedInstancesHandler;
 
 import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for generating a Naive Bayes tree (decision tree with
- * Naive Bayes classifiers at the leaves). <p>
+ <!-- globalinfo-start -->
+ * Class for generating a decision tree with naive Bayes classifiers at the leaves.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * Ron Kohavi: Scaling Up the Accuracy of Naive-Bayes Classifiers: A Decision-Tree Hybrid. In: Second International Conference on Knoledge Discovery and Data Mining, 202-207, 1996.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * For more information, see<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Kohavi1996,
+ *    author = {Ron Kohavi},
+ *    booktitle = {Second International Conference on Knoledge Discovery and Data Mining},
+ *    pages = {202-207},
+ *    title = {Scaling Up the Accuracy of Naive-Bayes Classifiers: A Decision-Tree Hybrid},
+ *    year = {1996}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Ron Kohavi (1996). Scaling up the accuracy of naive-Bayes classifiers:
- * a decision tree hybrid. <i>Proceedings of the Second International
- * Conference on Knowledge Discovery and Data Mining</i>.</p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class NBTree extends Classifier 
+public class NBTree 
+  extends Classifier 
   implements WeightedInstancesHandler, Drawable, Summarizable,
-	     AdditionalMeasureProducer {
+	     AdditionalMeasureProducer, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = -4716005707058256086L;
+
+  /** Minimum number of instances */
+  private int m_minNumObj = 30;
+
+  /** The root of the tree */
+  private NBTreeClassifierTree m_root;
   
   /**
    * Returns a string describing classifier
@@ -63,16 +98,30 @@ public class NBTree extends Classifier
    */
   public String globalInfo() {
     return "Class for generating a decision tree with naive Bayes classifiers at "
-      +"the leaves. For more information, see\n\nRon Kohavi (1996). Scaling up "
-      +"the accuracy of naive-Bayes classifiers: a decision tree hybrid. Procedings "
-      +"of the Second Internaltional Conference on Knoledge Discovery and Data Mining.";
+      + "the leaves.\n\n"
+      + "For more information, see\n\n"
+      + getTechnicalInformation().toString();
   }
 
-  /** Minimum number of instances */
-  private int m_minNumObj = 30;
-
-  /** The root of the tree */
-  private NBTreeClassifierTree m_root;
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Ron Kohavi");
+    result.setValue(Field.TITLE, "Scaling Up the Accuracy of Naive-Bayes Classifiers: A Decision-Tree Hybrid");
+    result.setValue(Field.BOOKTITLE, "Second International Conference on Knoledge Discovery and Data Mining");
+    result.setValue(Field.YEAR, "1996");
+    result.setValue(Field.PAGES, "202-207");
+    
+    return result;
+  }
 
   /**
    * Returns default capabilities of the classifier.
@@ -86,7 +135,8 @@ public class NBTree extends Classifier
   /**
    * Generates the classifier.
    *
-   * @exception Exception if classifier can't be built successfully
+   * @param instances the data to train with
+   * @throws Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     
@@ -100,7 +150,9 @@ public class NBTree extends Classifier
   /**
    * Classifies an instance.
    *
-   * @exception Exception if instance can't be classified successfully
+   * @param instance the instance to classify
+   * @return the classification
+   * @throws Exception if instance can't be classified successfully
    */
   public double classifyInstance(Instance instance) throws Exception {
 
@@ -110,9 +162,11 @@ public class NBTree extends Classifier
   /** 
    * Returns class probabilities for an instance.
    *
-   * @exception Exception if distribution can't be computed successfully
+   * @param instance the instance to get the distribution for
+   * @return the class probabilities
+   * @throws Exception if distribution can't be computed successfully
    */
-  public final double [] distributionForInstance(Instance instance) 
+  public final double[] distributionForInstance(Instance instance) 
        throws Exception {
 
     return m_root.distributionForInstance(instance, false);
@@ -120,6 +174,8 @@ public class NBTree extends Classifier
 
   /**
    * Returns a description of the classifier.
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -141,7 +197,8 @@ public class NBTree extends Classifier
   /**
    * Returns graph describing the tree.
    *
-   * @exception Exception if graph can't be computed
+   * @return the graph describing the tree
+   * @throws Exception if graph can't be computed
    */
   public String graph() throws Exception {
 
@@ -150,6 +207,8 @@ public class NBTree extends Classifier
 
   /**
    * Returns a superconcise version of the model
+   * 
+   * @return a description of the model
    */
   public String toSummaryString() {
 
@@ -183,9 +242,9 @@ public class NBTree extends Classifier
 
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
@@ -215,9 +274,9 @@ public class NBTree extends Classifier
   /**
    * Main method for testing this class
    *
-   * @param String options 
+   * @param argv the commandline options
    */
-  public static void main(String [] argv){
+  public static void main(String[] argv){
 
     try {
       System.out.println(Evaluation.evaluateModel(new NBTree(), argv));
