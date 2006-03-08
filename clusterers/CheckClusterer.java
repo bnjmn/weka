@@ -109,19 +109,20 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see TestInstances
  */
+public class CheckClusterer 
+  implements OptionHandler {
 
-/*
- * Note about test methods:
- * - methods return array of booleans
- * - first index: success or not
- * - second index: acceptable or not (e.g., Exception is OK)
- *
- * FracPete (fracpete at waikato dot ac dot nz)
- */
-public class CheckClusterer implements OptionHandler {
+  /*
+   * Note about test methods:
+   * - methods return array of booleans
+   * - first index: success or not
+   * - second index: acceptable or not (e.g., Exception is OK)
+   *
+   * FracPete (fracpete at waikato dot ac dot nz)
+   */
   
   /*** The clusterer to be examined */
   protected Clusterer m_Clusterer = new SimpleKMeans();
@@ -754,7 +755,7 @@ public class CheckClusterer implements OptionHandler {
    * @param multiInstance whether multi-instance is needed
    * @param predictorMissing true if the missing values may be in 
    * the predictors
-   * @param level the percentage of missing values
+   * @param missingLevel the percentage of missing values
    * @return index 0 is true if the test was passed, index 1 is true if test 
    *         was acceptable
    */
@@ -1269,6 +1270,8 @@ public class CheckClusterer implements OptionHandler {
   
   /**
    * Test method for this class
+   * 
+   * @param args the commandline options
    */
   public static void main(String [] args) {
     try {
