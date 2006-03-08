@@ -30,6 +30,10 @@ import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -57,23 +61,50 @@ import javax.swing.JTabbedPane;
 
 
 /**
- * Class for generating an user defined decision tree. For more info see <p>
+ <!-- globalinfo-start -->
+ * Interactively classify through visual means. You are Presented with a scatter graph of the data against two user selectable attributes, as well as a view of the decision tree. You can create binary splits by creating polygons around data plotted on the scatter graph, as well as by allowing another classifier to take over at points in the decision tree should you see fit.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Malcolm Ware, Eibe Frank, Geoffrey Holmes, Mark Hall, Ian H. Witten (2001). Interactive machine learning: letting users build classifiers. Int. J. Hum.-Comput. Stud.. 55, 3, pp. 281-292. URL http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Ware M., Frank E., Holmes G., Hall M. and Witten I.H. (2000).
- * <i>interactive machine learning - letting users build classifiers</i>,
- * Working Paper 00/4, Department of Computer Science, 
- * University of Waikato; March. Also available online at
- * <a href="http://www.cs.waikato.ac.nz/~ml/publications/2000/
- * 00MW-etal-Interactive-ML.ps">
- * http://www.cs.waikato.ac.nz/~ml/publications/2000/
- * 00MW-etal-Interactive-ML.ps</a>. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Ware2001,
+ *    author = {Malcolm Ware and Eibe Frank and Geoffrey Holmes and Mark Hall and Ian H. Witten},
+ *    journal = {Int. J. Hum.-Comput. Stud.},
+ *    number = {3},
+ *    pages = {pp. 281-292},
+ *    title = {Interactive machine learning: letting users build classifiers},
+ *    volume = {55},
+ *    year = {2001},
+ *    URL = {http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
-public class UserClassifier extends Classifier implements Drawable,
-TreeDisplayListener, VisualizePanelListener {
+public class UserClassifier 
+  extends Classifier 
+  implements Drawable, TreeDisplayListener, VisualizePanelListener,
+             TechnicalInformationHandler {
   
+  /** for serialization */
   static final long serialVersionUID = 6483901103562809843L;
 
   /** I am not sure if these are strictly adhered to in visualizepanel
@@ -107,7 +138,7 @@ TreeDisplayListener, VisualizePanelListener {
   /** A window for selecting other classifiers. */
   private PropertyDialog m_propertyDialog;
 
-  /* Register the property editors we need */
+  /** Register the property editors we need */
   static {
      GenericObjectEditor.registerEditors();
   }
@@ -148,10 +179,7 @@ TreeDisplayListener, VisualizePanelListener {
     }
     
     return text.toString();
-
-
   }
-
 
   /**
    * Receives user choices from the tree view, and then deals with these 
@@ -301,7 +329,6 @@ TreeDisplayListener, VisualizePanelListener {
       er.printStackTrace();
     }
   }
-  
 
   /**
    * This receives shapes from the data view. 
@@ -397,7 +424,7 @@ TreeDisplayListener, VisualizePanelListener {
   /**
    * @return A string formatted with a dotty representation of the decision
    * tree.
-   * @exception Exception if String can't be built properly.
+   * @throws Exception if String can't be built properly.
    */
   public String graph() throws Exception {
     //create a dotty rep of the tree from here
@@ -444,7 +471,32 @@ TreeDisplayListener, VisualizePanelListener {
       + " You can create binary splits by creating polygons around data"
       + " plotted on the scatter graph, as well as by allowing another"
       + " classifier to take over at points in the decision tree should you"
-      + " see fit.";
+      + " see fit.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Malcolm Ware and Eibe Frank and Geoffrey Holmes and Mark Hall and Ian H. Witten");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.TITLE, "Interactive machine learning: letting users build classifiers");
+    result.setValue(Field.JOURNAL, "Int. J. Hum.-Comput. Stud.");
+    result.setValue(Field.VOLUME, "55");
+    result.setValue(Field.NUMBER, "3");
+    result.setValue(Field.PAGES, "pp. 281-292");
+    result.setValue(Field.URL, "http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps");
+    
+    return result;
   }
 
   /**
@@ -479,7 +531,7 @@ TreeDisplayListener, VisualizePanelListener {
    * Call this function to build a decision tree for the training
    * data provided.
    * @param i The training data.
-   * @exception Exception if can't build classification properly.
+   * @throws Exception if can't build classification properly.
    */
   public void buildClassifier(Instances i) throws Exception {
     // can classifier handle the data?
@@ -553,10 +605,6 @@ TreeDisplayListener, VisualizePanelListener {
     m_reps = new JTabbedPane();
     m_mainWin.getContentPane().add(m_reps);
     
-
-    
-
-    
     //make a backup of the instances so that any changes don't go past here.
     Instances te = new Instances(i, i.numInstances());
     for (int noa = 0; noa < i.numInstances(); noa++) {
@@ -608,10 +656,9 @@ TreeDisplayListener, VisualizePanelListener {
    * of how likely each class type is the class of the instance.
    * @param i The instance to classify.
    * @return A double array filled with the probalities of each class type.
-   * @exception Exception if can't classify instance.
+   * @throws Exception if can't classify instance.
    */
   public double[] distributionForInstance(Instance i) throws Exception {
-    
 
     if (!m_built) {
       return null;
@@ -645,14 +692,14 @@ TreeDisplayListener, VisualizePanelListener {
     return res;
   }
   
-
-  
-  
-  
   /**
    * Inner class used to represent the actual decision tree structure and data.
    */
-  private class TreeClass implements Serializable {
+  private class TreeClass 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = 595663560871347434L;
     
     /**
      * This contains the info for the coords of the shape converted 
@@ -663,19 +710,25 @@ TreeDisplayListener, VisualizePanelListener {
      */
     public FastVector m_ranges;
 
+    /** the first attribute */
     public int m_attrib1;
+    
+    /** the second attribute */
     public int m_attrib2;
     
     public TreeClass m_set1;
     public TreeClass m_set2;
 
+    /** the parent */
     public TreeClass m_parent;
 
     /** A string to uniquely identify this node. */
     public String m_identity;
     
+    /** the weight of this node */
     public double m_weight;
     
+    /** the training instances for this node */
     public Instances m_training;
     
     /** Used instead of the standard leaf if one exists. */
@@ -692,7 +745,8 @@ TreeDisplayListener, VisualizePanelListener {
      * @param id The unique id number for this node.
      * @param w The weight of this node.
      * @param i The instances that make it to this node from the training data.
-     * @exception Exception if can't use 'i' properly.
+     * @param p the parent
+     * @throws Exception if can't use 'i' properly.
      */
     public TreeClass(FastVector r, int a1, int a2, int id, double w, 
 		     Instances i, TreeClass p) throws Exception {
@@ -734,7 +788,7 @@ TreeDisplayListener, VisualizePanelListener {
     /**
      * Call this to set an alternate classifier For this node.
      * @param c The alternative classifier to use.
-     * @exception Exception if alternate classifier can't build classification.
+     * @throws Exception if alternate classifier can't build classification.
      */
     public void setClassifier(Classifier c) throws Exception {
       m_classObject = c;
@@ -744,11 +798,11 @@ TreeDisplayListener, VisualizePanelListener {
     /**
      * Call this to set this node with different information to what
      * it was created with.
-     * @param a1 The first attribute.
-     * @param a2 The second attribute.
+     * @param at1 The first attribute.
+     * @param at2 The second attribute.
      * @param ar The shapes at this node, null if leaf node, or 
      * alternate classifier.
-     * @exception Exception if leaf node and cant't create leaf info.
+     * @throws Exception if leaf node and cant't create leaf info.
      */
     public void setInfo(int at1, int at2, FastVector ar) throws Exception {
       m_classObject = null;
@@ -786,7 +840,7 @@ TreeDisplayListener, VisualizePanelListener {
     /**
      * This sets up the informtion about this node such as the s.d or the
      * number of each class.
-     * @exception Exception if problem with training instances.
+     * @throws Exception if problem with training instances.
      */
     private void setLeaf() throws Exception {
       //this will fill the ranges array with the number of times 
@@ -843,14 +897,10 @@ TreeDisplayListener, VisualizePanelListener {
 	    tmp.addElement(new Double(0));
 	    tmp.addElement(new Double(Double.NaN));
 	  }
-
 	}
       }
-      
-      
     }
 
-    
     /**
      * This will recursively go through the tree and return inside the 
      * array the weightings of each of the class types
@@ -860,7 +910,7 @@ TreeDisplayListener, VisualizePanelListener {
      *
      * @param i The instance to test
      * @return A double array containing the results.
-     * @exception Exception if can't use instance i properly.
+     * @throws Exception if can't use instance i properly.
      */
     public double[] calcClassType(Instance i) throws Exception {
       //note that it will be the same calcs for both numeric and nominal
@@ -882,7 +932,6 @@ TreeDisplayListener, VisualizePanelListener {
 	rt = new double[1];
       }
 
-      
       FastVector tmp;
       if (m_classObject != null) {
 	//then use the classifier.
@@ -927,8 +976,6 @@ TreeDisplayListener, VisualizePanelListener {
 	return rt;
       }
       
-      
-
       for (int noa = 0; noa < m_ranges.size(); noa++) {
 	
 	tmp = (FastVector)m_ranges.elementAt(noa);
@@ -991,11 +1038,10 @@ TreeDisplayListener, VisualizePanelListener {
       return rt;
     }
     
-    
     /**
      * This function gets called to set the node to use a linear regression
      * and attribute filter.
-     * @exception If can't set a default linear egression model.
+     * @throws If can't set a default linear egression model.
      */
     private void setLinear() throws Exception {
       //then set default behaviour for node.
@@ -1031,7 +1077,6 @@ TreeDisplayListener, VisualizePanelListener {
 	}
       }
       
-      
       //fill an int array with the numbers of those attribs
       int[] attributeList2 = new int[count];
       count = 0;
@@ -1051,11 +1096,7 @@ TreeDisplayListener, VisualizePanelListener {
       temp2.setClassIndex(classind);
       m_classObject = new LinearRegression();
       m_classObject.buildClassifier(temp2);
-      
-      
-      
     }
-    
     
     /**
      * Call to find out if an instance is in a polyline.
@@ -1093,8 +1134,6 @@ TreeDisplayListener, VisualizePanelListener {
 	      countx++;
 	    }
 	  }
-	  
-	  
 	}
 	else if (noa == 1) {
 	  if ((y < y2 && vecy > 0) || (y > y2 && vecy < 0)) {
@@ -1150,17 +1189,13 @@ TreeDisplayListener, VisualizePanelListener {
 	}
       }
       
-      
       if ((countx % 2) == 1) {
 	return true;
       }
       else {
 	return false;
       }
-      
-      
     }
-    
     
     /** 
      * Call this to determine if an instance is in a polygon.
@@ -1208,7 +1243,6 @@ TreeDisplayListener, VisualizePanelListener {
       //System.out.println("WHAT?!?!?!?!!?!??!?!");
       //return false;
     }
-    
 
     /**
      * Goes through the tree structure recursively and returns the node that
@@ -1237,12 +1271,11 @@ TreeDisplayListener, VisualizePanelListener {
       return null;
     }
     
-    
     /**
      * Returns a string containing a bit of information about this node, in 
      * alternate form.
      * @param s The string buffer to fill.
-     * @exception Exception if can't create label.
+     * @throws Exception if can't create label.
      */
     public void getAlternateLabel(StringBuffer s) throws Exception {
       
@@ -1294,12 +1327,10 @@ TreeDisplayListener, VisualizePanelListener {
       //return s.toString();
     }
     
-
-    
     /**
      * Returns a string containing a bit of information about this node.
      * @param s The stringbuffer to fill.
-     * @exception Exception if can't create label.
+     * @throws Exception if can't create label.
      */
     public void getLabel(StringBuffer s) throws Exception {
       //for now just return identity
@@ -1353,7 +1384,7 @@ TreeDisplayListener, VisualizePanelListener {
     /**
      * Converts The tree structure to a dotty string.
      * @param t The stringbuffer to fill with the dotty structure.
-     * @exception Exception if can't convert structure to dotty.
+     * @throws Exception if can't convert structure to dotty.
      */
     public void toDotty(StringBuffer t) throws Exception {
       //this will recursively create all the dotty info for the structure
@@ -1408,11 +1439,9 @@ TreeDisplayListener, VisualizePanelListener {
      * Converts the tree structure to a string. for people to read.
      * @param l How deep this node is in the tree.
      * @param t The stringbuffer to fill with the string.
-     * @exception Exception if can't convert th string.
+     * @throws Exception if can't convert th string.
      */
     public void toString(int l, StringBuffer t) throws Exception {
-      
-
       
       if (((Double)((FastVector)m_ranges.elementAt(0)).elementAt(0)).intValue()
 	  == LEAF) {
@@ -1440,9 +1469,5 @@ TreeDisplayListener, VisualizePanelListener {
       }
       //return t.toString();
     }
-    
   }
-  
-  
-  
 }
