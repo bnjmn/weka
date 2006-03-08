@@ -30,7 +30,7 @@ import java.util.*;
  *  for learning Bayesian Networks.
  * 
  * @author Manuel Neubach
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LAGDHillClimber extends HillClimber {
 
@@ -345,7 +345,8 @@ public class LAGDHillClimber extends HillClimber {
 	  "but a sequence of nrOfLookAheadSteps operations, which leads to a network structure whose score is most likely " +
 	  "higher in comparison to the network obtained by performing a sequence of nrOfLookAheadSteps greedy operations. " +
 	  "The search is not restricted by an order " +
-	  "on the variables (unlike K2). The difference with B and B2 is that this hill " +	  "climber also considers arrows part of the naive Bayes structure for deletion.";
+	  "on the variables (unlike K2). The difference with B and B2 is that this hill " +
+          "climber also considers arrows part of the naive Bayes structure for deletion.";
 	} // globalInfo
 
 	/**
