@@ -31,6 +31,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -39,42 +43,67 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * AODE achieves highly accurate classification by averaging over all
- * of a small space of alternative naive-Bayes-like models that have
- * weaker (and hence less detrimental) independence assumptions than
- * naive Bayes. The resulting algorithm is computationally efficient while
- * delivering highly accurate classification on many learning tasks.<br>
- * For more information, see<p>
- * G. Webb, J. Boughton &amp; Z. Wang (2005). Not So Naive Bayes: Aggregating
- * One-Dependence Estimators. <i>Machine Learning</i> 58 (1):5-24.
- * <p>Further papers are available at <a href="http://www.csse.monash.edu.au/~webb/" target="_blank">http://www.csse.monash.edu.au/~webb/</a>.
+ <!-- globalinfo-start -->
+ * AODE achieves highly accurate classification by averaging over all of a small space of alternative naive-Bayes-like models that have weaker (and hence less detrimental) independence assumptions than naive Bayes. The resulting algorithm is computationally efficient while delivering highly accurate classification on many learning  tasks.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. Vol.58, No.1, pp. 5-24.<br/>
+ * <br/>
+ * Further papers are available at<br/>
+ *   http://www.csse.monash.edu.au/~webb/.<br/>
+ * <br/>
+ * Can use an m-estimate for smoothing base probability estimates in place of the Laplace correction (via option -M).<br/>
+ * Default frequency limit set to 1.
  * <p/>
+ <!-- globalinfo-end -->
  * 
- * Can use an m-estimate for smoothing base probability estimates in place of
- * the Laplace correction (via option -M).  <br/>
- * Default frequency limit set to 1. <p/>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Webb2005,
+ *    author = {G. Webb and J. Boughton and Z. Wang},
+ *    journal = {Machine Learning},
+ *    number = {No.1},
+ *    pages = {pp. 5-24},
+ *    title = {Not So Naive Bayes: Aggregating One-Dependence Estimators},
+ *    volume = {Vol.58},
+ *    year = {2005}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * Valid options are:<p>
- *
- * -D <br>
- * Debugging information is printed if this flag is specified.<p>
+ * <pre> -D
+ *  Output debugging information
+ * </pre>
  * 
- * -F num <br>
- * Specify the frequency limit for parent attributes (default is 1).<p>
- *
- * -M <br>
- *  Use m-estimates instead of Laplace correction.<p>
- *
- * -W num <br>
- *  Specify a weight for use with m-estimate (default is 1).<p>
+ * <pre> -F &lt;int&gt;
+ *  Impose a frequency limit for superParents
+ *  (default is 1)</pre>
+ * 
+ * <pre> -M
+ *  Use m-estimate instead of laplace correction
+ * </pre>
+ * 
+ * <pre> -W &lt;int&gt;
+ *  Specify a weight to use with m-estimate
+ *  (default is 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class AODE extends Classifier
-    implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier {
+    implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
+               TechnicalInformationHandler {
     
+  /** for serialization */
   static final long serialVersionUID = 9197439980415113523L;
   
   /**
@@ -160,11 +189,34 @@ public class AODE extends Classifier
       +"while delivering highly accurate classification on many learning  "
       +"tasks.\n\n"
       +"For more information, see\n\n"
-      +"G. Webb, J. Boughton & Z. Wang (2005). Not So Naive Bayes: "
-      +"Aggregating One-Dependence Estimators. Machine Learning "
-      +"58 (1):5-24.\n\n"
+      + getTechnicalInformation().toString() + "\n\n"
       +"Further papers are available at\n"
-      +"  http://www.csse.monash.edu.au/~webb/.";
+      +"  http://www.csse.monash.edu.au/~webb/.\n\n"
+      + "Can use an m-estimate for smoothing base probability estimates "
+      + "in place of the Laplace correction (via option -M).\n"
+      + "Default frequency limit set to 1.";
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "G. Webb and J. Boughton and Z. Wang");
+    result.setValue(Field.YEAR, "2005");
+    result.setValue(Field.TITLE, "Not So Naive Bayes: Aggregating One-Dependence Estimators");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.58");
+    result.setValue(Field.NUMBER, "No.1");
+    result.setValue(Field.PAGES, "pp. 5-24");
+
+    return result;
   }
 
   /**
@@ -193,7 +245,7 @@ public class AODE extends Classifier
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data
-   * @exception Exception if the classifier has not been generated
+   * @throws Exception if the classifier has not been generated
    * successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
@@ -249,8 +301,6 @@ public class AODE extends Classifier
    * Updates the classifier with the given instance.
    *
    * @param instance the new training instance to include in the model 
-   * @exception Exception if the instance could not be incorporated in
-   * the model.
    */
     public void updateClassifier(Instance instance) {
 	this.addToCounts(instance);
@@ -318,7 +368,7 @@ public class AODE extends Classifier
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if there is a problem generating the prediction
+   * @throws Exception if there is a problem generating the prediction
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
  
@@ -442,7 +492,6 @@ public class AODE extends Classifier
    * @param instance the instance to be classified
    * @param classVal the class for which to calculate the probability
    * @return predicted class probability
-   * @exception Exception if there is a problem generating the prediction
    */
   public double NBconditionalProb(Instance instance, int classVal) {
     
@@ -506,10 +555,31 @@ public class AODE extends Classifier
 
     
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Output debugging information
+   * </pre>
+   * 
+   * <pre> -F &lt;int&gt;
+   *  Impose a frequency limit for superParents
+   *  (default is 1)</pre>
+   * 
+   * <pre> -M
+   *  Use m-estimate instead of laplace correction
+   * </pre>
+   * 
+   * <pre> -W &lt;int&gt;
+   *  Specify a weight to use with m-estimate
+   *  (default is 1)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
