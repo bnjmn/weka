@@ -48,50 +48,71 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * This metaclassifier makes its base classifier cost-sensitive. Two methods
- * can be used to introduce cost-sensitivity: reweighting training instances 
- * according to the total cost assigned to each class; or predicting the class
- * with minimum expected misclassification cost (rather than the most likely 
- * class). <p>
+ <!-- globalinfo-start -->
+ * A metaclassifier that makes its base classifier cost-sensitive. Two methods can be used to introduce cost-sensitivity: reweighting training instances according to the total cost assigned to each class; or predicting the class with minimum expected misclassification cost (rather than the most likely class). Performance can often be improved by using a Bagged classifier to improve the probability estimates of the base classifier.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -M <br>
- * Minimize expected misclassification cost. 
- * (default is to reweight training instances according to costs per class)<p>
- *
- * -W classname <br>
- * Specify the full class name of a classifier (required).<p>
- *
- * -C cost file <br>
- * File name of a cost matrix to use. If this is not supplied, a cost
- * matrix will be loaded on demand. The name of the on-demand file
- * is the relation name of the training data plus ".cost", and the
- * path to the on-demand file is specified with the -N option.<p>
- *
- * -N directory <br>
- * Name of a directory to search for cost files when loading costs on demand
- * (default current directory). <p>
- *
- * -S seed <br>
- * Random number seed used when reweighting by resampling (default 1).<p>
- *
- * -cost-matrix matrix<br>
- * The cost matrix, specified in Matlab single line format.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M
+ *  Minimize expected misclassification cost. Default is to
+ *  reweight training instances according to costs per class</pre>
+ * 
+ * <pre> -C &lt;cost file name&gt;
+ *  File name of a cost matrix to use. If this is not supplied,
+ *  a cost matrix will be loaded on demand. The name of the
+ *  on-demand file is the relation name of the training data
+ *  plus ".cost", and the path to the on-demand file is
+ *  specified with the -N option.</pre>
+ * 
+ * <pre> -N &lt;directory&gt;
+ *  Name of a directory to search for cost files when loading
+ *  costs on demand (default current directory).</pre>
+ * 
+ * <pre> -cost-matrix &lt;matrix&gt;
+ *  The cost matrix in Matlab single line format.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
-public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhancer
+public class CostSensitiveClassifier 
+  extends RandomizableSingleClassifierEnhancer
   implements OptionHandler, Drawable {
 
+  /** for serialization */
   static final long serialVersionUID = -720658209263002404L;
   
-  /* Specify possible sources of the cost matrix */
+  /** load cost matrix on demand */
   public static final int MATRIX_ON_DEMAND = 1;
+  /** use explicit cost matrix */
   public static final int MATRIX_SUPPLIED = 2;
+  /** Specify possible sources of the cost matrix */
   public static final Tag [] TAGS_MATRIX_SOURCE = {
     new Tag(MATRIX_ON_DEMAND, "Load cost matrix on demand"),
     new Tag(MATRIX_SUPPLIED, "Use explicit cost matrix")
@@ -120,6 +141,8 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
   
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname 
    */
   protected String defaultClassifierString() {
     
@@ -170,35 +193,55 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -M <br>
-   * Minimize expected misclassification cost.
-   * (default is to reweight training instances according to costs per class)<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a classifier (required).<p>
-   *
-   * -C cost file <br>
-   * File name of a cost matrix to use. If this is not supplied, a cost
-   * matrix will be loaded on demand. The name of the on-demand file
-   * is the relation name of the training data plus ".cost", and the
-   * path to the on-demand file is specified with the -N option.<p>
-   *
-   * -N directory <br>
-   * Name of a directory to search for cost files when loading costs on demand
-   * (default current directory). <p>
-   *
-   * -S seed <br>
-   * Random number seed used when reweighting by resampling (default 1).<p>
-   *
-   * -cost-matrix matrix<br>
-   * The cost matrix, specified in Matlab single line format.<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M
+   *  Minimize expected misclassification cost. Default is to
+   *  reweight training instances according to costs per class</pre>
+   * 
+   * <pre> -C &lt;cost file name&gt;
+   *  File name of a cost matrix to use. If this is not supplied,
+   *  a cost matrix will be loaded on demand. The name of the
+   *  on-demand file is the relation name of the training data
+   *  plus ".cost", and the path to the on-demand file is
+   *  specified with the -N option.</pre>
+   * 
+   * <pre> -N &lt;directory&gt;
+   *  Name of a directory to search for cost files when loading
+   *  costs on demand (default current directory).</pre>
+   * 
+   * <pre> -cost-matrix &lt;matrix&gt;
+   *  The cost matrix in Matlab single line format.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -443,7 +486,7 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
   /**
    * Sets the misclassification cost matrix.
    *
-   * @param the cost matrix
+   * @param newCostMatrix the cost matrix
    */
   public void setCostMatrix(CostMatrix newCostMatrix) {
     
@@ -461,6 +504,7 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     
     return result;
@@ -470,7 +514,7 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
    * Builds the model of the base learner.
    *
    * @param data the training data
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -516,7 +560,8 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
    * the base classifier.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the computed distribution for the given instance
+   * @throws Exception if instance could not be classified
    * successfully */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -551,6 +596,8 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
   /**
    *  Returns the type of graph this classifier
    *  represents.
+   *  
+   *  @return the type of graph this classifier represents
    */   
   public int graphType() {
     
@@ -564,7 +611,7 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
    * Returns graph describing the classifier (if possible).
    *
    * @return the graph of the classifier in dotty format
-   * @exception Exception if the classifier cannot be graphed
+   * @throws Exception if the classifier cannot be graphed
    */
   public String graph() throws Exception {
     
@@ -576,6 +623,8 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -614,5 +663,4 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
       System.err.println(e.getMessage());
     }
   }
-
 }

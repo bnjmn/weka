@@ -37,26 +37,75 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for a regression scheme that employs any distribution
- * classifier on a copy of the data that has the class attribute (equal-width)
- * discretized. The predicted value is the expected value of the 
- * mean class value for each discretized interval (based on the 
- * predicted probabilities for each interval).<p>
+ <!-- globalinfo-start -->
+ * A regression scheme that employs any classifier on a copy of the data that has the class attribute (equal-width) discretized. The predicted value is the expected value of the mean class value for each discretized interval (based on the predicted probabilities for each interval).
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p>
- *
- * -D <br>
- * Produce debugging output. <p>
- *
- * -B <int> <br>
- * Number of bins for equal-width discretization (default 10).<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B &lt;int&gt;
+ *  Number of bins for equal-width discretization
+ *  (default 10).
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.J48)</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.J48:
+ * </pre>
+ * 
+ * <pre> -U
+ *  Use unpruned tree.</pre>
+ * 
+ * <pre> -C &lt;pruning confidence&gt;
+ *  Set confidence threshold for pruning.
+ *  (default 0.25)</pre>
+ * 
+ * <pre> -M &lt;minimum number of instances&gt;
+ *  Set minimum number of instances per leaf.
+ *  (default 2)</pre>
+ * 
+ * <pre> -R
+ *  Use reduced error pruning.</pre>
+ * 
+ * <pre> -N &lt;number of folds&gt;
+ *  Set number of folds for reduced error
+ *  pruning. One fold is used as pruning set.
+ *  (default 3)</pre>
+ * 
+ * <pre> -B
+ *  Use binary splits only.</pre>
+ * 
+ * <pre> -S
+ *  Don't perform subtree raising.</pre>
+ * 
+ * <pre> -L
+ *  Do not clean up after the tree has been built.</pre>
+ * 
+ * <pre> -A
+ *  Laplace smoothing for predicted probabilities.</pre>
+ * 
+ * <pre> -Q &lt;seed&gt;
+ *  Seed for random data shuffling (default 1).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
-public class RegressionByDiscretization extends SingleClassifierEnhancer {
+public class RegressionByDiscretization 
+  extends SingleClassifierEnhancer {
   
+  /** for serialization */
   static final long serialVersionUID = 5066426153134050375L;
   
   /** The discretization filter. */
@@ -84,6 +133,8 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
 
   /**
    * String describing default classifier.
+   * 
+   * @return the default classifier classname
    */
   protected String defaultClassifierString() {
     
@@ -108,6 +159,7 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
 
     // class
     result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     
@@ -118,7 +170,7 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
 
@@ -174,7 +226,7 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
    *
    * @param instance the instance to be classified
    * @return predicted class value
-   * @exception Exception if the prediction couldn't be made
+   * @throws Exception if the prediction couldn't be made
    */
   public double classifyInstance(Instance instance) throws Exception {  
 
@@ -226,8 +278,9 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
+   <!-- options-end -->
    * -D <br>
    * Produce debugging output. <p>
    *
@@ -236,11 +289,12 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
    * followed by options to the classifier
    * (default: weka.classifiers.rules.ZeroR).<p>
    *
-   * -B <int> <br>
+   * -B int <br>
    * Number of bins for equal-width discretization (default 10).<p>
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -343,6 +397,3 @@ public class RegressionByDiscretization extends SingleClassifierEnhancer {
     }
   }
 }
-
-
-

@@ -28,24 +28,33 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * Class for combining classifiers using unweighted average of
- * probability estimates (classification) or numeric predictions 
- * (regression).
+ <!-- globalinfo-start -->
+ * Class for combining classifiers using unweighted average of probability estimates (classification) or numeric predictions (regression).
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options from the command line are:<p>
- *
- * -B classifierstring <br>
- * Classifierstring should contain the full class name of a scheme
- * included for selection followed by options to the classifier
- * (required, option should be used once for each classifier).<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B &lt;classifier specification&gt;
+ *  Full class name of classifier to include, followed
+ *  by scheme options. May be specified multiple times.
+ *  (default: "weka.classifiers.rules.ZeroR")</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class Vote extends MultipleClassifiersCombiner {
     
+  /** for serialization */
   static final long serialVersionUID = -637891196294399624L;
   
   /**
@@ -66,7 +75,7 @@ public class Vote extends MultipleClassifiersCombiner {
    *
    * @param data the training data to be used for generating the
    * boosted classifier.
-   * @exception Exception if the classifier could not be built successfully
+   * @throws Exception if the classifier could not be built successfully
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -86,7 +95,8 @@ public class Vote extends MultipleClassifiersCombiner {
    * Classifies a given instance using the selected classifier.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the distribution
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
@@ -106,6 +116,8 @@ public class Vote extends MultipleClassifiersCombiner {
 
   /**
    * Output a representation of this classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -136,5 +148,4 @@ public class Vote extends MultipleClassifiersCombiner {
       System.err.println(e.getMessage());
     }
   }
-
 }

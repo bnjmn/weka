@@ -40,32 +40,37 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Uses either standard or collective multi-instance assumption, but
- * within linear regression. For the collective assumption, it offers
- * arithmetic or geometric mean for the posteriors. <p/>
+ <!-- globalinfo-start -->
+ * Uses either standard or collective multi-instance assumption, but within linear regression. For the collective assumption, it offers arithmetic or geometric mean for the posteriors.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options are:<p/>
- *
- * -D <br/>
- * Turn on debugging output.<p/>
- *
- * -R ridge <br/>
- * Set the ridge parameter for the log-likelihood.<p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -A 0|1|2 <br/>
- * The type of algorithm to use: <br/>
- * 0. standard MI assumption <br/>
- * 1. collective MI assumption, arithmetic mean for posteriors <br/>
- * 2. collective MI assumption, geometric mean for posteriors <p/>
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -R &lt;ridge&gt;
+ *  Set the ridge in the log-likelihood.</pre>
+ * 
+ * <pre> -A [0|1|2]
+ *  Defines the type of algorithm:
+ *   0. standard MI assumption
+ *   1. collective MI assumption, arithmetic mean for posteriors
+ *   2. collective MI assumption, geometric mean for posteriors</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class MILR
   extends Classifier 
   implements OptionHandler, MultiInstanceCapabilitiesHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 1996101190172373826L;
   
   protected double[] m_Par;
@@ -90,9 +95,13 @@ public class MILR
   /** the type of processing */
   protected int m_AlgorithmType = ALGORITHMTYPE_DEFAULT;
 
+  /** standard MI assumption */
   public static final int ALGORITHMTYPE_DEFAULT = 0;
+  /** collective MI assumption, arithmetic mean for posteriors */
   public static final int ALGORITHMTYPE_ARITHMETIC = 1;
+  /** collective MI assumption, geometric mean for posteriors */
   public static final int ALGORITHMTYPE_GEOMETRIC = 2;
+  /** the types of algorithms */
   public static final Tag [] TAGS_ALGORITHMTYPE = {
     new Tag(ALGORITHMTYPE_DEFAULT, "standard MI assumption"),
     new Tag(ALGORITHMTYPE_ARITHMETIC, "collective MI assumption, arithmetic mean for posteriors"),
@@ -246,12 +255,15 @@ public class MILR
   private class OptEng 
     extends Optimization {
     
+    /** the type to use 
+     * @see MILR#TAGS_ALGORITHMTYPE */
     private int m_Type;
     
     /**
      * initializes the object
      * 
      * @param type      the type top use
+     * @see MILR#TAGS_ALGORITHMTYPE
      */
     public OptEng(int type) {
       super();
