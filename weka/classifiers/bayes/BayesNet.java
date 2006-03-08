@@ -53,20 +53,43 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Base class for a Bayes Network classifier. Provides datastructures (network structure,
- * conditional probability distributions, etc.) and facilities common to Bayes Network
- * learning algorithms like K2 and B.
- * Works with nominal variables and no missing values only.
+ <!-- globalinfo-start -->
+ * Bayes Network learning using various search algorithms and quality measures.<br/>
+ * Base class for a Bayes Network classifier. Provides datastructures (network structure, conditional probability distributions, etc.) and facilities common to Bayes Network learning algorithms like K2 and B.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * http://www.cs.waikato.ac.nz/~remco/weka.pdf
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * For further documentation, see 
- * <a href='http://www.cs.waikato.ac.nz/~remco/weka.pdf>Bayesian networks in Weka</a>
- * user documentation.
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
+ * <pre> -D
+ *  Do not use ADTree data structure
+ * </pre>
+ * 
+ * <pre> -B &lt;BIF file&gt;
+ *  BIF file to compare with
+ * </pre>
+ * 
+ * <pre> -Q weka.classifiers.bayes.net.search.SearchAlgorithm
+ *  Search algorithm
+ * </pre>
+ * 
+ * <pre> -E weka.classifiers.bayes.net.estimate.SimpleEstimator
+ *  Estimator algorithm
+ * </pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
+    /** for serialization */
     static final long serialVersionUID = 746037443258775954L;
   
     /**
@@ -82,10 +105,12 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
    	/** filter used to quantize continuous variables, if any **/
     Discretize m_DiscretizeFilter = null;
+    
+    /** attribute index of a non-nominal attribute */
     int m_nNonDiscreteAttribute = -1;
 
-	/** filter used to fill in missing values, if any **/
-	ReplaceMissingValues m_MissingValuesFilter = null;	
+    /** filter used to fill in missing values, if any **/
+    ReplaceMissingValues m_MissingValuesFilter = null;	
 	
     /**
      * The number of classes
@@ -151,7 +176,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * Generates the classifier.
      * 
      * @param instances set of instances serving as training data
-     * @exception Exception if the classifier has not been generated
+     * @throws Exception if the classifier has not been generated
      * successfully
      */
     public void buildClassifier(Instances instances) throws Exception {
@@ -193,9 +218,9 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     } // buildClassifier
 
 	/** ensure that all variables are nominal and that there are no missing values
-	 * @param instances: data set to check and quantize and/or fill in missing values
+	 * @param instances data set to check and quantize and/or fill in missing values
 	 * @return filtered instances
-	 * @throws Exception
+	 * @throws Exception if a filter (Discretize, ReplaceMissingValues) fails
 	 */
 	Instances normalizeDataSet(Instances instances) throws Exception {
 		m_DiscretizeFilter = null;
@@ -238,9 +263,9 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	} // normalizeDataSet
 
 	/** ensure that all variables are nominal and that there are no missing values
-	 * @param instance: instance to check and quantize and/or fill in missing values
+	 * @param instance instance to check and quantize and/or fill in missing values
 	 * @return filtered instance
-	 * @throws Exception
+	 * @throws Exception if a filter (Discretize, ReplaceMissingValues) fails
 	 */
 	Instance normalizeInstance(Instance instance) throws Exception {
 		if ((m_DiscretizeFilter != null) &&
@@ -272,6 +297,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     /**
      * Init structure initializes the structure to an empty graph or a Naive Bayes
      * graph (depending on the -N flag).
+     * 
+     * @throws Exception in case of an error
      */
     public void initStructure() throws Exception {
 
@@ -303,6 +330,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * node as its parent (i.e., a BayesNet that behaves like a naive Bayes classifier).
      * This method can be overridden by derived classes to restrict the class
      * of network structures that are acceptable.
+     * 
+     * @throws Exception in case of an error
      */
     public void buildStructure() throws Exception {
         m_SearchAlgorithm.buildStructure(this, m_Instances);
@@ -311,11 +340,18 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     /**
      * estimateCPTs estimates the conditional probability tables for the Bayes
      * Net using the network structure.
+     * 
+     * @throws Exception in case of an error
      */
     public void estimateCPTs() throws Exception {
         m_BayesNetEstimator.estimateCPTs(this);
     } // estimateCPTs
 
+    /**
+     * initializes the conditional probabilities
+     * 
+     * @throws Exception in case of an error
+     */
     public void initCPTs() throws Exception {
         m_BayesNetEstimator.initCPTs(this);
     } // estimateCPTs
@@ -324,7 +360,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * Updates the classifier with the given instance.
      * 
      * @param instance the new training instance to include in the model
-     * @exception Exception if the instance could not be incorporated in
+     * @throws Exception if the instance could not be incorporated in
      * the model.
      */
     public void updateClassifier(Instance instance) throws Exception {
@@ -338,7 +374,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * 
      * @param instance the instance to be classified
      * @return predicted class probability distribution
-     * @exception Exception if there is a problem generating the prediction
+     * @throws Exception if there is a problem generating the prediction
      */
     public double[] distributionForInstance(Instance instance) throws Exception {
     	instance = normalizeInstance(instance);
@@ -351,7 +387,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * 
      * @param instance the instance to be classified
      * @return counts for Dirichlet distribution for class probability 
-     * @exception Exception if there is a problem generating the prediction
+     * @throws Exception if there is a problem generating the prediction
      */
     public double[] countsForInstance(Instance instance) throws Exception {
         double[] fCounts = new double[m_NumClasses];
@@ -407,10 +443,31 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     } // listOptions
 
     /**
-     * Parses a given list of options. Valid options are:<p>
+     * Parses a given list of options. <p>
      * 
+     <!-- options-start -->
+     * Valid options are: <p/>
+     * 
+     * <pre> -D
+     *  Do not use ADTree data structure
+     * </pre>
+     * 
+     * <pre> -B &lt;BIF file&gt;
+     *  BIF file to compare with
+     * </pre>
+     * 
+     * <pre> -Q weka.classifiers.bayes.net.search.SearchAlgorithm
+     *  Search algorithm
+     * </pre>
+     * 
+     * <pre> -E weka.classifiers.bayes.net.estimate.SimpleEstimator
+     *  Estimator algorithm
+     * </pre>
+     * 
+     <!-- options-end -->
+     *
      * @param options the list of options as an array of strings
-     * @exception Exception if an option is not supported
+     * @throws Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
         m_bUseADTree = !(Utils.getFlag('D', options));
@@ -548,7 +605,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
     /**
         * Set the Estimator Algorithm used in calculating the CPTs 
-        * @param newEstimator the Estimator to use.
+        * @param newBayesNetEstimator the Estimator to use.
         */
     public void setEstimator(BayesNetEstimator newBayesNetEstimator) {
         m_BayesNetEstimator = newBayesNetEstimator;
@@ -564,7 +621,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
     /**
      * Set whether ADTree structure is used or not
-     * @param bUseADTree
+     * @param bUseADTree true if an ADTree structure is used
      */
     public void setUseADTree(boolean bUseADTree) {
         m_bUseADTree = bUseADTree;
@@ -580,7 +637,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
     /**
      * Set name of network in BIF file to compare with
-     * @param sBIFFile
+     * @param sBIFFile the name of the BIF file
      */
     public void setBIFFile(String sBIFFile) {
         try {
@@ -677,11 +734,10 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
   }
 
   /**
-	 Returns a BayesNet graph in XMLBIF ver
-	 0.3 format.
-	 @return - String representing this
-			   BayesNet in XMLBIF ver  0.3
-  */
+   * Returns a BayesNet graph in XMLBIF ver 0.3 format.
+   * @return String representing this BayesNet in XMLBIF ver  0.3
+   * @throws Exception in case BIF generation fails
+   */
   public String graph() throws Exception {
 	  return toXMLBIF03();
   }
@@ -819,7 +875,15 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @return The string.
      */
     public String globalInfo() {
-        return "Bayes Network learning using various search algorithms and quality measures.";
+        return 
+            "Bayes Network learning using various search algorithms and "
+          + "quality measures.\n"
+          + "Base class for a Bayes Network classifier. Provides "
+          + "datastructures (network structure, conditional probability "
+          + "distributions, etc.) and facilities common to Bayes Network "
+          + "learning algorithms like K2 and B.\n\n"
+          + "For more information see:\n\n"
+          + "http://www.cs.waikato.ac.nz/~remco/weka.pdf";
     }
 
     /**
@@ -851,7 +915,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
 
     /** get name of a node in the Bayes network
-     * @param iNode: index of the node
+     * @param iNode index of the node
      * @return name of the specified node
      */
     public String getNodeName(int iNode) {
@@ -859,7 +923,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
 
     /** get number of values a node can take
-     * @param iNode: index of the node
+     * @param iNode index of the node
      * @return cardinality of the specified node
      */
     public int getCardinality(int iNode) {
@@ -867,8 +931,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
 
     /** get name of a particular value of a node
-     * @param iNode: index of the node
-     * @param iValue: index of the value
+     * @param iNode index of the node
+     * @param iValue index of the value
      * @return cardinality of the specified node
      */
     public String getNodeValue(int iNode, int iValue) {
@@ -876,7 +940,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
 
     /** get number of parents of a node in the network structure
-     * @param iNode: index of the node
+     * @param iNode index of the node
      * @return number of parents of the specified node
      */
     public int getNrOfParents(int iNode) {
@@ -884,8 +948,8 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
 
     /** get node index of a parent of a node in the network structure
-     * @param iNode: index of the node
-     * @param iParent: index of the parents, e.g., 0 is the first parent, 1 the second parent, etc.
+     * @param iNode index of the node
+     * @param iParent index of the parents, e.g., 0 is the first parent, 1 the second parent, etc.
      * @return node index of the iParent's parent of the specified node
      */
     public int getParent(int iNode, int iParent) {
@@ -907,7 +971,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	}
 
     /** get number of values the collection of parents of a node can take
-     * @param iNode: index of the node
+     * @param iNode index of the node
      * @return cardinality of the parent set of the specified node
      */
     public int getParentCardinality(int iNode) {
@@ -916,9 +980,9 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
     /** get particular probability of the conditional probability distribtion
      * of a node given its parents.
-     * @param iNode: index of the node
-     * @param iParent: index of the parent set, 0 <= iParent <= getParentCardinality(iNode)
-     * @param iValue: index of the value, 0 <= iValue <= getCardinality(iNode)
+     * @param iNode index of the node
+     * @param iParent index of the parent set, 0 <= iParent <= getParentCardinality(iNode)
+     * @param iValue index of the value, 0 <= iValue <= getCardinality(iNode)
      * @return probability
      */
     public double getProbability(int iNode, int iParent, int iValue) {
@@ -926,7 +990,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
 
     /** get the parent set of a node 
-     * @param iNode: index of the node
+     * @param iNode index of the node
      * @return Parent set of the specified node.
      */
     public ParentSet getParentSet(int iNode) {
@@ -1016,7 +1080,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	   * Returns the value of the named measure
 	   * @param measureName the name of the measure to query for its value
 	   * @return the value of the named measure
-	   * @exception IllegalArgumentException if the named measure is not supported
+	   * @throws IllegalArgumentException if the named measure is not supported
 	   */
 	  public double getMeasure(String measureName) {
 	  	if (measureName.equals("measureExtraArcs")) {
