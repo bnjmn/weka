@@ -22,31 +22,79 @@
 
 package weka.classifiers.functions;
 
-import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.instance.RemoveRange;
-import weka.filters.Filter;
-import weka.core.*;
-import weka.core.Capabilities.Capability;
 
-import java.io.*;
-import java.util.*;
-
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
- * Implements a least median sqaured linear regression utilising the
- * existing weka LinearRegression class to form predictions.
- * The basis of the algorithm is Robust regression and outlier detection
- * Peter J. Rousseeuw, Annick M. Leroy. c1987
+ <!-- globalinfo-start -->
+ * Implements a least median sqaured linear regression utilising the existing weka LinearRegression class to form predictions. <br/>
+ * Least squared regression functions are generated from random subsamples of the data. The least squared regression with the lowest meadian squared error is chosen as the final model.<br/>
+ * <br/>
+ * The basis of the algorithm is <br/>
+ * <br/>
+ * Peter J. Rousseeuw, Annick M. Leroy (1987). Robust regression and outlier detection. .
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;book{Rousseeuw1987,
+ *    author = {Peter J. Rousseeuw and Annick M. Leroy},
+ *    title = {Robust regression and outlier detection},
+ *    year = {1987}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;sample size&gt;
+ *  Set sample size
+ *  (default: 4)
+ * </pre>
+ * 
+ * <pre> -G &lt;seed&gt;
+ *  Set the seed used to generate samples
+ *  (default: 0)
+ * </pre>
+ * 
+ * <pre> -D
+ *  Produce debugging output
+ *  (default no debugging output)
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class LeastMedSq extends Classifier implements OptionHandler {
+public class LeastMedSq 
+  extends Classifier 
+  implements OptionHandler, TechnicalInformationHandler {
   
+  /** for serialization */
   static final long serialVersionUID = 4288954049987652970L;
   
   private double[] m_Residuals;
@@ -96,12 +144,30 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    */
   public String globalInfo() {
     return "Implements a least median sqaured linear regression utilising the "
-      +"existing weka LinearRegression class to form predictions. "
+      +"existing weka LinearRegression class to form predictions. \n"
       +"Least squared regression functions are generated from random subsamples of "
       +"the data. The least squared regression with the lowest meadian squared error "
       +"is chosen as the final model.\n\n"
-      +"The basis of the algorithm is \n\nRobust regression and outlier detection "
-      +"Peter J. Rousseeuw, Annick M. Leroy. c1987";
+      +"The basis of the algorithm is \n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.BOOK);
+    result.setValue(Field.AUTHOR, "Peter J. Rousseeuw and Annick M. Leroy");
+    result.setValue(Field.YEAR, "1987");
+    result.setValue(Field.TITLE, "Robust regression and outlier detection");
+    
+    return result;
   }
 
   /**
@@ -130,7 +196,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Build lms regression
    *
    * @param data training data
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void buildClassifier(Instances data)throws Exception{
 
@@ -157,7 +223,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    *
    * @param instance instance to be classified
    * @return class value
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public double classifyInstance(Instance instance)throws Exception{
 
@@ -174,7 +240,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Cleans up data
    *
    * @param data data to be cleaned up
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   private void cleanUpData(Instances data)throws Exception{
 
@@ -190,12 +256,12 @@ public class LeastMedSq extends Classifier implements OptionHandler {
 
   /**
    * Gets the number of samples to use.
-   *
+   * 
+   * @throws Exception if an error occurs
    */
   private void getSamples()throws Exception{
 
     int stuf[] = new int[] {500,50,22,17,15,14};
-    int x = m_samplesize * 500;
     if ( m_samplesize < 7){
       if ( m_Data.numInstances() < stuf[m_samplesize - 1])
 	m_samples = combinations(m_Data.numInstances(), m_samplesize);
@@ -224,7 +290,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Finds the best regression generated from m_samples
    * random samples from the training data
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   private void findBestRegression()throws Exception{
 
@@ -251,7 +317,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Generates a LinearRegression classifier from
    * the current m_SubSample
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   private void genRegression()throws Exception{
 
@@ -265,7 +331,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Finds residuals (squared) for the current
    * regression.
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   private void findResiduals()throws Exception{
 
@@ -283,7 +349,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * finds the median residual squared for the
    * current regression
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   private void getMedian()throws Exception{
 
@@ -314,6 +380,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Builds a weight function removing instances with an
    * abnormally high scaled residual
    *
+   * @throws Exception if weight building fails
    */
   private void buildWeight()throws Exception{
 
@@ -330,6 +397,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * Builds a new LinearRegression without the 'bad' data
    * found by buildWeight
    *
+   * @throws if building fails
    */
   private void buildRLSRegression()throws Exception{
 
@@ -409,7 +477,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * in m_SubSample
    *
    * @param data data from which to take sample
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   private void selectSubSample(Instances data)throws Exception{
 
@@ -548,8 +616,28 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * will be set (or reset) during this call (i.e. incremental setting
    * of options is not possible).
    *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;sample size&gt;
+   *  Set sample size
+   *  (default: 4)
+   * </pre>
+   * 
+   * <pre> -G &lt;seed&gt;
+   *  Set the seed used to generate samples
+   *  (default: 0)
+   * </pre>
+   * 
+   * <pre> -D
+   *  Produce debugging output
+   *  (default no debugging output)
+   * </pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -602,7 +690,7 @@ public class LeastMedSq extends Classifier implements OptionHandler {
    * @param n
    * @param n
    * @return the combination
-   * @exception Exception if r is greater than n
+   * @throws Exception if r is greater than n
    */
   public static int combinations (int n, int r)throws Exception {
 
