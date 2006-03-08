@@ -30,6 +30,10 @@ import weka.core.Instances;
 import weka.core.KDTree;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -45,89 +49,116 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * XMeans clustering class.
+ <!-- globalinfo-start -->
+ * Cluster data using the X-means algorithm.<br/>
+ * <br/>
+ * X-Means is K-Means extended by an Improve-Structure part In this part of the algorithm the centers are attempted to be split in its region. The decision between the children of each center and itself is done comparing the BIC-values of the two structures.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * X-Means is K-Means extended by an Improve-Structure part In this part of 
- * the algorithm the centers are attempted to be split in its region. 
- * The decision between the children of 
- * each center and itself is done comparing the BIC-values of 
- * the two structures.
- * See also D. Pelleg and A. Moore's paper 'X-means: Extending 
- * K-means with Efficient Estimation of the Number of Clusters'. <p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Pelleg2000,
+ *    author = {Dan Pelleg and Andrew W. Moore},
+ *    booktitle = {Seventeenth International Conference on Machine Learning},
+ *    pages = {727-734},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {X-means: Extending K-means with Efficient Estimation of the Number of Clusters},
+ *    year = {2000}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -I max iterations <br>
- * Maximum number of iterations in the overall loop (default = 1). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -M max iterations <br>
- * Maximum number of iterations in the kMeans loop in <br>
- * the Improve-Parameter part (default = 1000).<p>
- *
- * -J max iterations <br>
- * Maximum number of iterations in the kMeans loop for the splitted <br>
- * centroids in the Improve-Structure part (default = 1000).<p>
- *
- * -L minimal number of clusters <br>
- * Specify the number of clusters to start with.<p>
- *
- * -H <maximal number of clusters <br>
- * Specify the maximal number of clusters.<p>
- *
- * -B value <br>
- * Distance value between true and false of binary attributes and <br>
- * "same" and "different" of nominal attributes (default = 1.0).<p>
- *
- * -K kdtree class<br>
- * KDTrees class and its options (can only use the same distance function
- * as XMeans).<p>
- *
- * -C cutoff factor <br>
- * If none of the children are better, percentage of the best splits<br>
- * to be taken.<p>
+ * <pre> -I &lt;num&gt;
+ *  maximum number of overall iterations
+ *  (default = 1).</pre>
  * 
- * -D distance function class
- * Distance function class to be used (default = Euclidean distance)
+ * <pre> -M &lt;num&gt;
+ *  maximum number of iterations in the kMeans loop in
+ *  the Improve-Parameter part 
+ *  (default = 1000).</pre>
  * 
- * -N file name <br>
- * Input starting cluster centers from file (ARFF-format). <p>
- *
- * -O file name <br>
- * Output cluster centers to file (ARFF-format). <p>
- *
- * -S seed <br>
- * Specify random number seed. <p>
- *
- * -U debuglevel <br>
- * Set debuglevel. <p>
- *
- * -Y file name <br>
- * Used for debugging: Input random vektors from file. <p>
- *
- * major TODOS:
- *
- * make BIC-Score replaceable by other scores
+ * <pre> -J &lt;num&gt;
+ *  maximum number of iterations in the kMeans loop
+ *  for the splitted centroids in the Improve-Structure part 
+ *  (default = 1000).</pre>
+ * 
+ * <pre> -L &lt;num&gt;
+ *  minimum number of clusters
+ *  (default = 2).</pre>
+ * 
+ * <pre> -H &lt;num&gt;
+ *  maximum number of clusters
+ *  (default = 4).</pre>
+ * 
+ * <pre> -V &lt;value&gt;
+ *  distance value for binary attributes
+ *  (default = 1.0).</pre>
+ * 
+ * <pre> -K &lt;KDTree class specification&gt;
+ *  Full class name of KDTree class to use, followed
+ *  by scheme options.
+ *  eg: "weka.core.KDTree -P"
+ *  (default = no KDTree class used).</pre>
+ * 
+ * <pre> -C &lt;value&gt;
+ *  cutoff factor, takes the given percentage of the splitted 
+ *  centroids if none of the children win
+ *  (default = 0.0).</pre>
+ * 
+ * <pre> -K &lt;distance function class specification&gt;
+ *  Full class name of Distance function class to use, followed
+ *  by scheme options.
+ *  eg: "weka.core.MahalanobisDistance"
+ *  (default = weka.core.EuclideanDistance).</pre>
+ * 
+ * <pre> -N &lt;file name&gt;
+ *  file to read starting centers from (ARFF format).</pre>
+ * 
+ * <pre> -O &lt;file name&gt;
+ *  file to write centers to (ARFF format).</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  random number seed (default 10).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see Clusterer
  * @see OptionHandler
  */
-public class XMeans extends Clusterer implements OptionHandler {
+public class XMeans 
+  extends Clusterer 
+  implements OptionHandler, TechnicalInformationHandler {
 
+  /*
+   * major TODOS:
+   *
+   * make BIC-Score replaceable by other scores
+   */
+
+  /** for serialization */
   static final long serialVersionUID = -7941793078404132616L;
   
-  //private AlgVector algv; // TODO just a trick
-
-  /* training instances */
+  /** training instances */
   private Instances m_Instances = null;
 
-  /* model information, should increase readability */
+  /** model information, should increase readability */
   private Instances m_Model = null;
   
-  /* replace missing values in training instances */
+  /** replace missing values in training instances */
   private ReplaceMissingValues m_ReplaceMissingFilter;
 
   /**
@@ -136,13 +167,13 @@ public class XMeans extends Clusterer implements OptionHandler {
    */
   private double m_BinValue = 1.0;
 
-  /* BIC-Score of the current model */
+  /** BIC-Score of the current model */
   double m_Bic = Double.MIN_VALUE;
 
-  /* Distortion  */
+  /** Distortion  */
   double [] m_Mle = null;
 
-  /* maximum overall iterations */
+  /** maximum overall iterations */
   private int m_MaxIterations = 1;
 
   /**
@@ -151,44 +182,44 @@ public class XMeans extends Clusterer implements OptionHandler {
    */
   private int m_MaxKMeans = 1000;
 
-  /* see above, but for kMeans of splitted clusters
+  /** see above, but for kMeans of splitted clusters
    */
   private int m_MaxKMeansForChildren = 1000;
 
-  /* The actual number of clusters */
+  /** The actual number of clusters */
   private int m_NumClusters = 2;
 
-  /* min number of clusters to generate */
+  /** min number of clusters to generate */
   private int m_MinNumClusters = 2;
 
-  /* max number of clusters to generate */
+  /** max number of clusters to generate */
   private int m_MaxNumClusters = 4;
 
   /** the distance function used */
-  private EuclideanDistance m_DistanceF = null;
+  private EuclideanDistance m_DistanceF = new EuclideanDistance();
 
-  /* cluster centers */
+  /** cluster centers */
   private Instances m_ClusterCenters;
 
-  /* file name of the output file for the cluster centers */
+  /** file name of the output file for the cluster centers */
   String m_InputCenterFile = null;
 
-  /*--> DebugVektors - USED FOR DEBUGGING */
-  /* input file for the random vektors --> USED FOR DEBUGGING */
+  /* --> DebugVektors - USED FOR DEBUGGING */
+  /** input file for the random vektors --> USED FOR DEBUGGING */
   Reader m_DebugVektorsInput = null;
   int m_DebugVektorsIndex = 0;
   Instances m_DebugVektors = null;
 
-  /* file name of the input file for the random vektors */
+  /** file name of the input file for the random vektors */
   String m_DebugVektorsFile = null;
 
-  /* input file for the cluster centers */
+  /** input file for the cluster centers */
   Reader m_CenterInput = null;
     
-  /* file name of the output file for the cluster centers */
+  /** file name of the output file for the cluster centers */
   String m_OutputCenterFile = null;
   
-  /* output file for the cluster centers */
+  /** output file for the cluster centers */
   PrintWriter m_CenterOutput = null;
     
   /**
@@ -196,7 +227,7 @@ public class XMeans extends Clusterer implements OptionHandler {
    */
   private int [] m_ClusterAssignments;
 
-  /* cutoff factor - percentage of splits done in Improve-Structure part
+  /** cutoff factor - percentage of splits done in Improve-Structure part
      only relevant, if all children lost */ 
   double m_CutOffFactor = 0.5;
 
@@ -204,11 +235,6 @@ public class XMeans extends Clusterer implements OptionHandler {
    * random seed
    */
   private int m_Seed = 10;
-
-  /**
-   * Ranges of the universe of data, lowest value, highest value and width
-   */  //not being used anywhere better to remove
-//double [][] m_Ranges;
 
   /**
    * Index in ranges for LOW and HIGH and WIDTH
@@ -222,43 +248,44 @@ public class XMeans extends Clusterer implements OptionHandler {
    */
   private KDTree m_KDTree = null;
 
-  /* counts iterations done in main loop */
+  /** counts iterations done in main loop */
   private int m_IterationCount = 0;
 
-  /* counter to say how often kMeans was stopped by loop counter */
+  /** counter to say how often kMeans was stopped by loop counter */
   private int m_KMeansStopped = 0;
 
-  /* Number of splits prepared */
+  /** Number of splits prepared */
   private int m_NumSplits = 0;
 
-  /* Number of splits accepted (including cutoff factor decisions) */
+  /** Number of splits accepted (including cutoff factor decisions) */
   private int m_NumSplitsDone = 0;
 
-  /* Number of splits accepted just because of cutoff factor */
+  /** Number of splits accepted just because of cutoff factor */
   private int m_NumSplitsStillDone = 0;
 
   /**
    * level of debug output, 0 is no output.
    */
   private int m_DebugLevel = 0;
+  
   public static int D_PRINTCENTERS = 1;
-  // follows the splitting of the centers
+  /** follows the splitting of the centers */
   public static int D_FOLLOWSPLIT = 2;
-  // have a closer look at converge children
+  /** have a closer look at converge children */
   public static int D_CONVCHCLOSER = 3;
-  // check on random vektors
+  /** check on random vektors */
   public static int D_RANDOMVEKTOR = 4;
-  // check on kdtree
+  /** check on kdtree */
   public static int D_KDTREE = 5;
-  // follow iterations
+  /** follow iterations */
   public static int D_ITERCOUNT = 6;
-  // functions were maybe misused 
+  /** functions were maybe misused  */
   public static int D_METH_MISUSE = 80; 
-  // for current debug 
+  /** for current debug  */
   public static int D_CURR = 88;
   public static int D_GENERAL = 99;
 
-  // Flag: I'm debugging
+  /** Flag: I'm debugging */
   public boolean m_CurrDebugFlag = true;
 
    /**
@@ -267,9 +294,35 @@ public class XMeans extends Clusterer implements OptionHandler {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Cluster data using the X-means algorithm" +
-      ", as described in D. Pelleg and A. Moore's paper 'X-means: Extending" +
-      " K-means with Efficient Estimation of the Number of Clusters'.";
+    return 
+        "Cluster data using the X-means algorithm.\n\n" 
+      + "X-Means is K-Means extended by an Improve-Structure part In this "
+      + "part of the algorithm the centers are attempted to be split in "
+      + "its region. The decision between the children of each center and "
+      + "itself is done comparing the BIC-values of the two structures.\n\n"
+      + "For more information see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Dan Pelleg and Andrew W. Moore");
+    result.setValue(Field.TITLE, "X-means: Extending K-means with Efficient Estimation of the Number of Clusters");
+    result.setValue(Field.BOOKTITLE, "Seventeenth International Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2000");
+    result.setValue(Field.PAGES, "727-734");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    
+    return result;
   }
 
   /**
@@ -281,7 +334,6 @@ public class XMeans extends Clusterer implements OptionHandler {
     Capabilities result = super.getCapabilities();
 
     // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
@@ -301,11 +353,14 @@ public class XMeans extends Clusterer implements OptionHandler {
     // can clusterer handle the data?
     getCapabilities().testWithFail(data);
 
+    m_NumSplits = 0;
+    m_NumSplitsDone = 0;
+    m_NumSplitsStillDone = 0;
+
     // replace missing values
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(data);
-    data = Filter.useFilter(data, m_ReplaceMissingFilter);
-    m_Instances = data;
+    m_Instances = Filter.useFilter(data, m_ReplaceMissingFilter);
     
     // initialize random function
     Random random0 = new Random(m_Seed);
@@ -315,17 +370,12 @@ public class XMeans extends Clusterer implements OptionHandler {
 
     // set distance function to default
     if (m_DistanceF == null) {
-      m_DistanceF = new EuclideanDistance(data);
-      checkInstances();
-    }
-    else if(m_DistanceF.getInstances() == null)
-      m_DistanceF.setInstances(data);
-    
-    if (m_DistanceF != null) {
-      checkInstances();
+      m_DistanceF = new EuclideanDistance();
     }
 
-    // 
+    m_DistanceF.setInstances(m_Instances);
+    checkInstances();
+
     if (m_DebugVektorsFile != null)
       initDebugVektorsInput();
 
@@ -335,11 +385,6 @@ public class XMeans extends Clusterer implements OptionHandler {
       allInstList[i] = i;
     }
     
-    // prepare the min and max value    
-    //done to save memory better not change m_Ranges. It is not being changed at
-    //time of writing this code.
-    //m_Ranges = m_DistanceF.getRanges(); //m_Instances.initializeRanges(allInstList);
-
     // set model used (just for convenience)
     m_Model = new Instances(m_Instances, 0);
 
@@ -365,8 +410,7 @@ public class XMeans extends Clusterer implements OptionHandler {
 
     // builds up a KDTree
     if (m_KDTree != null) {
-      m_KDTree.setInstances(m_Instances); //m_Ranges);
-      //PFD(D_KDTREE, tree.toString());
+      m_KDTree.setInstances(m_Instances);
     }
   
     // loop counter of main loop
@@ -423,15 +467,8 @@ public class XMeans extends Clusterer implements OptionHandler {
 				    m_ClusterAssignments,
 				    kMeansIteration);
 	
-        /*gabifor (int l = 0; l < instOfCent.length; l++) {
-	  System.out.println(" " + instOfCent[l].length + "+++");
-          for (int m = 0; m < instOfCent[l].length; m++) {
-	  OOPS(" " + instOfCent[l][m]);
-	  }
-	  }*/
 	PFD(D_FOLLOWSPLIT, "\nMain loop - Assign - centers:");
 	PrCentersFD(D_FOLLOWSPLIT);
-	//System.out.println(" ");
 	// compute new centers = centers of mass of points
         converged = recomputeCenters(m_ClusterCenters, // clusters
 				     instOfCent,       // their instances
@@ -442,15 +479,6 @@ public class XMeans extends Clusterer implements OptionHandler {
       PFD(D_FOLLOWSPLIT, "");
       PFD(D_FOLLOWSPLIT, "End of Part: 1. Improve-Params - conventional K-means");
 
-      /*
-      for (int m = 0; m < instOfCent.length; m++) {
-        System.out.println("Center "+m+" : "+ m_ClusterCenters.instance(m));
-        for (int n = 0; n < instOfCent[m].length; n++) {
-	  System.out.print(instOfCent[m][n]+", ");
-	}
-	PFD(D_FOLLOWSPLIT, "");
-	}*/
-    
       /** =====================================================================
        * 2. Improve-Structur
        */
@@ -586,7 +614,7 @@ public class XMeans extends Clusterer implements OptionHandler {
   /**
    * Checks for nominal attributes in the dataset.
    * Class attribute is ignored.
-   * @param data 
+   * @param data the data to check
    * @return false if no nominal attributes are present
    */
   public boolean checkForNominalAttributes(Instances data) {
@@ -782,8 +810,11 @@ public class XMeans extends Clusterer implements OptionHandler {
 
   /**
    * Checks if iterationCount has to be checked and if yes
-   * (this means m_MaxIterations is > 0) compares it with
-   * m_MaxIteration
+   * (this means max is > 0) compares it with max
+   * 
+   * @param iterationCount the current iteration count
+   * @param max the maximum number of iterations
+   * @return true if maximum has been reached
    */ 
   private boolean stopIteration(int iterationCount, int max) {
     boolean stopIterate = false;
@@ -796,7 +827,7 @@ public class XMeans extends Clusterer implements OptionHandler {
    * Recompute the new centers. New cluster center is center of mass of its 
    * instances. Returns true if cluster stays the same.
    * @param centers the input and output centers
-   * @param instancesOfCent the instances to the centers 
+   * @param instOfCent the instances to the centers 
    * @param model data model information
    * @return true if converged.
    */
@@ -897,6 +928,7 @@ public class XMeans extends Clusterer implements OptionHandler {
    * @param assignments assignments of instances to centers
    * @param iterationCount the number of iteration 
    * @return true if converged
+   * @throws Exception is something goes wrong
    */
   private boolean assignToCenters(KDTree tree,
                                   Instances centers, 
@@ -927,12 +959,13 @@ public class XMeans extends Clusterer implements OptionHandler {
    * First part of conventionell K-Means, returns true if new assignment
    * is the same as the last one.
    *
-   * @param tree KDTree on all instances
+   * @param kdtree KDTree on all instances
    * @param centers all the input centers
    * @param instOfCent the instances to each center
    * @param assignments assignments of instances to centers
    * @param iterationCount the number of iteration 
    * @return true if converged
+   * @throws Exception in case instances are not assigned to cluster
    */
   private boolean assignToCenters(KDTree kdtree,
 				  Instances centers, 
@@ -947,7 +980,6 @@ public class XMeans extends Clusterer implements OptionHandler {
     // WARNING:  assignments is "input/output-parameter"
     // should not be null
     if (assignments == null) {
-      OOPS(D_METH_MISUSE, "assignment was null");
       assignments = new int[numInst];
       for (int i = 0; i < numInst; i++) {
 	assignments[0] = -1;
@@ -957,7 +989,6 @@ public class XMeans extends Clusterer implements OptionHandler {
     // WARNING:  instOfCent is "input/output-parameter"
     // should not be null
     if (instOfCent == null) {
-      OOPS(D_METH_MISUSE, "inst of cent was null");
       instOfCent = new int [numCent][];
     }
     
@@ -971,11 +1002,6 @@ public class XMeans extends Clusterer implements OptionHandler {
 			   Math.pow(.8, iterationCount));	
     boolean converged = true;
   
-    //PFD_CURR("assignments");
-    //for (int d = 0; d < assignments.length; d++) {
-    //  System.out.print(" "+assignments[d]+", ");
-    //}
-    //PFD(D_CURR, " ");
     // compare with previous assignment
     for (int i = 0; converged && (i < assignments.length); i++) {
       converged = (oldAssignments[i] == assignments[i]);
@@ -1005,10 +1031,6 @@ public class XMeans extends Clusterer implements OptionHandler {
 	  instOfCent[i][j] = index;
 	}
       }
-      /*      for (int i = 0; i < numInst; i++) {
-	  int center = assignments[i];
-	  instOfCent[center][numInstOfCent[center]++] = i;
-	  }*/
     }
   
     return converged;
@@ -1024,12 +1046,14 @@ public class XMeans extends Clusterer implements OptionHandler {
    * @param allInstList list of all indexes
    * @param assignments assignments of instances to centers
    * @return true if converged
+   * @throws Exception if something goes wrong
    */
   private boolean assignToCenters(Instances centers, 
 				  int [][] instOfCent,
 				  int [] allInstList,
 				  int [] assignments) 
     throws Exception {
+    
     // todo: undecided situations
     boolean converged = true; // true if new assignment is the same 
                               // as the old one
@@ -1042,7 +1066,6 @@ public class XMeans extends Clusterer implements OptionHandler {
     // WARNING:  assignments is "input/output-parameter"
     // should not be null
     if (assignments == null) {
-      OOPS(D_METH_MISUSE, "assignment was null");
       assignments = new int[numInst];
       for (int i = 0; i < numInst; i++) {
 	assignments[i] = -1;
@@ -1052,7 +1075,6 @@ public class XMeans extends Clusterer implements OptionHandler {
     // WARNING: instOfCent is "input/output-parameter"
     // should not be null
     if (instOfCent == null) {
-      OOPS(D_METH_MISUSE, "inst of cent was null");
       instOfCent = new int [numCent][];
     }
 
@@ -1096,7 +1118,7 @@ public class XMeans extends Clusterer implements OptionHandler {
    * Searches along the assignment array for the next entry of the center 
    * in question.
    * @param cent index of the center 
-   * @param lasIndex index to start searching
+   * @param lastIndex index to start searching
    * @param assignments assignments
    * @return index of the instance the center cent is assigned to
    */
@@ -1139,15 +1161,10 @@ public class XMeans extends Clusterer implements OptionHandler {
       r = new AlgVector(nextVektor);
     }
     else {
-      //OOPS("before split variance "+ variance);
-      //OOPS("center to be split "+ center);
-      
       // random vector of length = variance
       r = new AlgVector(model, random);
     }
     r.changeLength(Math.pow(variance, 0.5));
-    //OOPS(D_FOLLOWSPLIT, "variance " + variance + 
-    //                    " sqrt-variance " + Math.pow(variance, 0.5));
     PFD(D_RANDOMVEKTOR, "random vector *variance "+ r);
     
     // add random vector to center
@@ -1170,7 +1187,10 @@ public class XMeans extends Clusterer implements OptionHandler {
   /**
    * Split centers in their region.
    * (*Alternative version of splitCenter()*) 
+   * 
+   * @param random the random number generator
    * @param instances of the region
+   * @param model 
    * @return a pair of new centers
    */
   private Instances splitCenters(Random random,
@@ -1338,16 +1358,7 @@ public class XMeans extends Clusterer implements OptionHandler {
 	+ ni * Math.log(ni) 
 	- ni * Math.log(r);
       */
-      //OOPS("distortion " + distortion);
-      //OOPS("variance " + variance);
-      //OOPS("p1 " + p1);
-      //OOPS("p2 " + p2);
-      //OOPS("p3 " + p3);
-      //OOPS("p4 " + p4);
-      //OOPS(p1 + " " + p2 + " " + p3 + " " + p4 + " " + p5 + " " +
-      //	       distortion);
       loglike = p1 + p2 + p3 + p4; // diff + p5;
-      //OOPS("loglike " + loglike);
       //the log(r) is something that can be reused.
       //as is the log(2 PI), these could provide extra speed up later on.
       //since distortion is so expensive to compute, I only do that once.
@@ -1455,36 +1466,36 @@ throws Exception{
     Vector newVector = new Vector(4);
 
      newVector.addElement(new Option(
-       "\tmaximum number of overall iterations" +
-       " (default = 1).", 
+       "\tmaximum number of overall iterations\n" +
+       "\t(default = 1).", 
        "I", 1, "-I <num>"));
      newVector.addElement(new Option(
-       "\tmaximum number of iterations in the kMeans loop in" +
-       " the Improve-Parameter part "+
-       " (default = 1000).", 
+       "\tmaximum number of iterations in the kMeans loop in\n" +
+       "\tthe Improve-Parameter part \n"+
+       "\t(default = 1000).", 
        "M", 1, "-M <num>"));
      newVector.addElement(new Option(
-       "\tmaximum number of iterations in the kMeans loop" +
-       " for the splitted centroids in the Improve-Structure part "+
-       " (default = 1000).",
+       "\tmaximum number of iterations in the kMeans loop\n" +
+       "\tfor the splitted centroids in the Improve-Structure part \n"+
+       "\t(default = 1000).",
        "J", 1, "-J <num>"));
      newVector.addElement(new Option(
-       "\tminimum number of clusters" +
-       " (default = 2).", 
+       "\tminimum number of clusters\n" +
+       "\t(default = 2).", 
        "L", 1, "-L <num>"));
      newVector.addElement(new Option(
-       "\tmaximum number of clusters" +
-       " (default = 4).",
+       "\tmaximum number of clusters\n" +
+       "\t(default = 4).",
        "H", 1, "-H <num>"));
      newVector.addElement(new Option(
-       "\tdistance value for binary attributes" +
-       " (default = 1.0).",
+       "\tdistance value for binary attributes\n" +
+       "\t(default = 1.0).",
        "V", 1, "-V <value>"));
      newVector.addElement(new Option(
        "\tFull class name of KDTree class to use, followed\n" +
        "\tby scheme options.\n" +
        "\teg: \"weka.core.KDTree -P\"\n" +
-       "(default = no KDTree class used).",
+       "\t(default = no KDTree class used).",
        "K", 1, "-K <KDTree class specification>"));
      newVector.addElement(new Option(
        "\tcutoff factor, takes the given percentage of the splitted \n" +
@@ -1842,7 +1853,65 @@ throws Exception{
   }
   
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  maximum number of overall iterations
+   *  (default = 1).</pre>
+   * 
+   * <pre> -M &lt;num&gt;
+   *  maximum number of iterations in the kMeans loop in
+   *  the Improve-Parameter part 
+   *  (default = 1000).</pre>
+   * 
+   * <pre> -J &lt;num&gt;
+   *  maximum number of iterations in the kMeans loop
+   *  for the splitted centroids in the Improve-Structure part 
+   *  (default = 1000).</pre>
+   * 
+   * <pre> -L &lt;num&gt;
+   *  minimum number of clusters
+   *  (default = 2).</pre>
+   * 
+   * <pre> -H &lt;num&gt;
+   *  maximum number of clusters
+   *  (default = 4).</pre>
+   * 
+   * <pre> -V &lt;value&gt;
+   *  distance value for binary attributes
+   *  (default = 1.0).</pre>
+   * 
+   * <pre> -K &lt;KDTree class specification&gt;
+   *  Full class name of KDTree class to use, followed
+   *  by scheme options.
+   *  eg: "weka.core.KDTree -P"
+   *  (default = no KDTree class used).</pre>
+   * 
+   * <pre> -C &lt;value&gt;
+   *  cutoff factor, takes the given percentage of the splitted 
+   *  centroids if none of the children win
+   *  (default = 0.0).</pre>
+   * 
+   * <pre> -K &lt;distance function class specification&gt;
+   *  Full class name of Distance function class to use, followed
+   *  by scheme options.
+   *  eg: "weka.core.MahalanobisDistance"
+   *  (default = weka.core.EuclideanDistance).</pre>
+   * 
+   * <pre> -N &lt;file name&gt;
+   *  file to read starting centers from (ARFF format).</pre>
+   * 
+   * <pre> -O &lt;file name&gt;
+   *  file to write centers to (ARFF format).</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  random number seed (default 10).</pre>
+   * 
+   <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -2039,20 +2108,6 @@ throws Exception{
     temp.append("BIC-Value : " + Utils.doubleToString(m_Bic,6) + "\n");
     return temp.toString();
   }
-
-  /**
-   * Used for debug println's.
-   * @param output string that is printed
-   */
-  private void OOPS(int debugLevel, String output) {
-    if (debugLevel == m_DebugLevel)
-      System.out.println(output);
-  }
-
-  private void OOPS(String output) {
-    System.out.println(output);
-  }
-
 
   /**
    * Print centers for debug.
