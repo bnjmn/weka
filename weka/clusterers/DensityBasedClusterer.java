@@ -31,7 +31,7 @@ import weka.core.*;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.4 $
+ * @version  $Revision: 1.5 $
  */
 public abstract class DensityBasedClusterer extends Clusterer {
 
@@ -53,7 +53,6 @@ public abstract class DensityBasedClusterer extends Clusterer {
    * Computes the log of the conditional density (per cluster) for a given instance.
    * 
    * @param instance the instance to compute the density for
-   * @return the density.
    * @return an array containing the estimated densities
    * @exception Exception if the density could not be computed
    * successfully
@@ -86,6 +85,7 @@ public abstract class DensityBasedClusterer extends Clusterer {
    *
    * @param instance the instance to be clustered
    * @return the probability distribution
+   * @throws Exception if computation fails
    */  
   public double[] distributionForInstance(Instance instance) throws Exception {
     
