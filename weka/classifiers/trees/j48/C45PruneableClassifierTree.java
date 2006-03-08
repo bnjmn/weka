@@ -22,7 +22,9 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.Instances;
+import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
 /**
@@ -30,11 +32,15 @@ import weka.core.Capabilities.Capability;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
-public class C45PruneableClassifierTree extends ClassifierTree{
+public class C45PruneableClassifierTree 
+  extends ClassifierTree {
 
+  /** for serialization */
+  static final long serialVersionUID = -4813820170260388194L;
+  
   /** True if the tree is to be pruned. */
   boolean m_pruneTheTree = false;
 
@@ -54,7 +60,9 @@ public class C45PruneableClassifierTree extends ClassifierTree{
    * @param toSelectLocModel selection method for local splitting model
    * @param pruneTree true if the tree is to be pruned
    * @param cf the confidence factor for pruning
-   * @exception Exception if something goes wrong
+   * @param raiseTree
+   * @param cleanup
+   * @throws Exception if something goes wrong
    */
   public C45PruneableClassifierTree(ModelSelection toSelectLocModel,
 				    boolean pruneTree,float cf,
@@ -97,7 +105,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   /**
    * Method for building a pruneable classifier tree.
    *
-   * @exception Exception if something goes wrong
+   * @param data the data for building the tree
+   * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -147,7 +156,7 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   /**
    * Prunes a tree using C4.5's pruning procedure.
    *
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public void prune() throws Exception {
 
@@ -209,7 +218,9 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   /**
    * Returns a newly created tree.
    *
-   * @exception Exception if something goes wrong
+   * @param data the data to work with
+   * @return the new tree
+   * @throws Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances data) throws Exception {
     
@@ -223,6 +234,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 
   /**
    * Computes estimated errors for tree.
+   * 
+   * @return the estimated errors
    */
   private double getEstimatedErrors(){
 
@@ -241,7 +254,9 @@ public class C45PruneableClassifierTree extends ClassifierTree{
   /**
    * Computes estimated errors for one branch.
    *
-   * @exception Exception if something goes wrong
+   * @param data the data to work with
+   * @return the estimated errors
+   * @throws Exception if something goes wrong
    */
   private double getEstimatedErrorsForBranch(Instances data) 
        throws Exception {
@@ -266,6 +281,9 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 
   /**
    * Computes estimated errors for leaf.
+   * 
+   * @param theDistribution the distribution to use
+   * @return the estimated errors
    */
   private double getEstimatedErrorsForDistribution(Distribution 
 						   theDistribution){
@@ -280,6 +298,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 
   /**
    * Computes errors of tree on training data.
+   * 
+   * @return the training errors
    */
   private double getTrainingErrors(){
 
@@ -297,6 +317,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
 
   /**
    * Method just exists to make program easier to read.
+   * 
+   * @return the local split model
    */
   private ClassifierSplitModel localModel(){
     
@@ -307,7 +329,8 @@ public class C45PruneableClassifierTree extends ClassifierTree{
    * Computes new distributions of instances for nodes
    * in tree.
    *
-   * @exception Exception if something goes wrong
+   * @param data the data to compute the distributions for
+   * @throws Exception if something goes wrong
    */
   private void newDistribution(Instances data) throws Exception {
 
