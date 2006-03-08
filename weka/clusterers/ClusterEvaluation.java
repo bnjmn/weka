@@ -22,51 +22,64 @@
 
 package  weka.clusterers;
 
-import  java.util.*;
-import  java.io.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
-import weka.classifiers.Evaluation;
-import  weka.core.*;
-import  weka.filters.Filter;
-import  weka.filters.unsupervised.attribute.Remove;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Random;
 
 /**
  * Class for evaluating clustering models.<p>
  *
  * Valid options are: <p>
  *
- * -t <name of the training file> <br>
+ * -t name of the training file <br>
  * Specify the training file. <p>
  *
- * -T <name of the test file> <br>
+ * -T name of the test file <br>
  * Specify the test file to apply clusterer to. <p>
  *
- * -d <name of file to save clustering model to> <br>
+ * -d name of file to save clustering model to <br>
  * Specify output file. <p>
  *
- * -l <name of file to load clustering model from> <br>
+ * -l name of file to load clustering model from <br>
  * Specifiy input file. <p>
  *
- * -p <attribute range> <br>
+ * -p attribute range <br>
  * Output predictions. Predictions are for the training file if only the
  * training file is specified, otherwise they are for the test file. The range
  * specifies attribute values to be output with the predictions.
  * Use '-p 0' for none. <p>
  *
- * -x <num folds> <br>
+ * -x num folds <br>
  * Set the number of folds for a cross validation of the training data.
  * Cross validation can only be done for distribution clusterers and will
  * be performed if the test file is missing. <p>
  *
- * -c <class> <br>
+ * -c class <br>
  * Set the class attribute. If set, then class based evaluation of clustering
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.28 $
+ * @version  $Revision: 1.29 $
  */
-public class ClusterEvaluation implements Serializable {
+public class ClusterEvaluation 
+  implements Serializable {
 
+  /** for serialization */
   static final long serialVersionUID = -830188327319128005L;
   
   /** the instances to cluster */
@@ -85,7 +98,7 @@ public class ClusterEvaluation implements Serializable {
       dataset */
   private double [] m_clusterAssignments;
 
-  /* holds the average log likelihood for a particular testing dataset
+  /** holds the average log likelihood for a particular testing dataset
      if the clusterer is a DensityBasedClusterer */
   private double m_logL;
 
@@ -162,14 +175,12 @@ public class ClusterEvaluation implements Serializable {
    * statistics and stores cluster assigments for the instances in
    * m_clusterAssignments
    * @param test the set of instances to cluster
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public void evaluateClusterer(Instances test) throws Exception {
     int i = 0;
     int cnum;
     double loglk = 0.0;
-    double[] dist;
-    double temp;
     int cc = m_Clusterer.numberOfClusters();
     m_numClusters = cc;
     int numInstFieldWidth = (int)((Math.log(test.numInstances())/
@@ -285,7 +296,7 @@ public class ClusterEvaluation implements Serializable {
    * Assumes that m_Clusterer has been trained and tested on 
    * inst (minus the class).
    * @param inst the instances (including class) to evaluate with respect to
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private void evaluateClustersWithRespectToClass(Instances inst)
     throws Exception {
@@ -345,7 +356,8 @@ public class ClusterEvaluation implements Serializable {
    * @param counts the counts of classes for each cluster
    * @param clusterTotals total number of examples in each cluster
    * @param inst the training instances (with class)
-   * @exception Exception if matrix can't be generated
+   * @return the "confusion" style matrix as string
+   * @throws Exception if matrix can't be generated
    */
   private String toMatrixString(int [][] counts, int [] clusterTotals,
 				Instances inst) 
@@ -457,7 +469,7 @@ public class ClusterEvaluation implements Serializable {
    *
    * @param clusterer machine learning clusterer
    * @param options the array of string containing the options
-   * @exception Exception if model could not be evaluated successfully
+   * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results 
    */
   public static String evaluateClusterer (Clusterer clusterer, 
@@ -466,7 +478,6 @@ public class ClusterEvaluation implements Serializable {
     int seed = 1, folds = 10;
     boolean doXval = false;
     Instances train = null;
-    Instances test = null;
     Random random;
     String trainFileName, testFileName, seedString, foldsString, objectInputFileName, objectOutputFileName, attributeRangeString;
     String[] savedOptions = null;
@@ -676,7 +687,7 @@ public class ClusterEvaluation implements Serializable {
    * @param numFolds number of folds of cross validation to perform
    * @param random random number seed for cross-validation
    * @return the cross-validated log-likelihood
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public static double crossValidateModel(DensityBasedClusterer clusterer,
 					  Instances data,
@@ -684,7 +695,6 @@ public class ClusterEvaluation implements Serializable {
 					  Random random) throws Exception {
     Instances train, test;
     double foldAv = 0;;
-    double[] tempDist;
     data = new Instances(data);
     data.randomize(random);
     //    double sumOW = 0;
@@ -723,7 +733,7 @@ public class ClusterEvaluation implements Serializable {
    * @param options the options to the clusterer
    * @param random a random number generator
    * @return a string containing the cross validated log likelihood
-   * @exception Exception if a clusterer could not be generated 
+   * @throws Exception if a clusterer could not be generated 
    */
   public static String crossValidateModel (String clustererString, 
 					   Instances data, 
@@ -732,11 +742,8 @@ public class ClusterEvaluation implements Serializable {
 					   Random random)
     throws Exception {
     Clusterer clusterer = null;
-    Instances train, test;
     String[] savedOptions = null;
-    double foldAv;
     double CvAv = 0.0;
-    double[] tempDist;
     StringBuffer CvString = new StringBuffer();
 
     if (options != null) {
@@ -794,8 +801,9 @@ public class ClusterEvaluation implements Serializable {
    * or the testing data.
    *
    * @param clusterer the clusterer to use for generating statistics.
+   * @param fileName the file to load
    * @return a string containing cluster statistics.
-   * @exception if statistics can't be generated.
+   * @throws if statistics can't be generated.
    */
   private static String printClusterStats (Clusterer clusterer, 
 					   String fileName)
@@ -804,8 +812,6 @@ public class ClusterEvaluation implements Serializable {
     int i = 0;
     int cnum;
     double loglk = 0.0;
-    double[] dist;
-    double temp;
     int cc = clusterer.numberOfClusters();
     double[] instanceStats = new double[cc];
     int unclusteredInstances = 0;
@@ -899,7 +905,7 @@ public class ClusterEvaluation implements Serializable {
    *
    * @param clusterer the clusterer to use for cluster assignments
    * @return a string containing the instance indexes and cluster assigns.
-   * @exception if cluster assignments can't be printed
+   * @throws if cluster assignments can't be printed
    */
   private static String printClusterings (Clusterer clusterer, Instances train,
 					  String testFileName, Range attributesToOutput)
