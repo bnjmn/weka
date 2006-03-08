@@ -30,6 +30,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -42,38 +46,52 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for a Naive Bayes classifier using estimator classes. Numeric 
- * estimator precision values are chosen based on analysis of the 
- * training data. For this reason, the classifier is not an 
- * UpdateableClassifier (which in typical usage are initialized with zero 
- * training instances) -- if you need the UpdateableClassifier functionality,
- * use the NaiveBayesUpdateable classifier. The NaiveBayesUpdateable
- * classifier will  use a default precision of 0.1 for numeric attributes
- * when buildClassifier is called with zero training instances.
- * <p>
- * For more information on Naive Bayes classifiers, see<p>
+ <!-- globalinfo-start -->
+ * Class for a Naive Bayes classifier using estimator classes. Numeric estimator precision values are chosen based on analysis of the  training data. For this reason, the classifier is not an UpdateableClassifier (which in typical usage are initialized with zero training instances) -- if you need the UpdateableClassifier functionality, use the NaiveBayesUpdateable classifier. The NaiveBayesUpdateable classifier will  use a default precision of 0.1 for numeric attributes when buildClassifier is called with zero training instances.<br/>
+ * <br/>
+ * For more information on Naive Bayes classifiers, see<br/>
+ * <br/>
+ * George H. John, Pat Langley: Estimating Continuous Distributions in Bayesian Classifiers. In: Eleventh Conference on Uncertainty in Artificial Intelligence, San Mateo, 338-345, 1995.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * George H. John and Pat Langley (1995). <i>Estimating
- * Continuous Distributions in Bayesian Classifiers</i>. Proceedings
- * of the Eleventh Conference on Uncertainty in Artificial
- * Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{John1995,
+ *    address = {San Mateo},
+ *    author = {George H. John and Pat Langley},
+ *    booktitle = {Eleventh Conference on Uncertainty in Artificial Intelligence},
+ *    pages = {338-345},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Estimating Continuous Distributions in Bayesian Classifiers},
+ *    year = {1995}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -K <br>
- * Use kernel estimation for modelling numeric attributes rather than
- * a single normal distribution.<p>
- *
- * -D <br>
- * Use supervised discretization to process numeric attributes.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -K
+ *  Use kernel density estimator rather than normal
+ *  distribution for numeric attributes</pre>
+ * 
+ * <pre> -D
+ *  Use supervised discretization to process numeric attributes
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class NaiveBayes extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
 
+  /** for serialization */
   static final long serialVersionUID = 5995231201785697655L;
   
   /** The attribute estimators. */
@@ -126,10 +144,29 @@ public class NaiveBayes extends Classifier
       +" classifier will  use a default precision of 0.1 for numeric attributes"
       +" when buildClassifier is called with zero training instances.\n\n"
       +"For more information on Naive Bayes classifiers, see\n\n"
-      +"George H. John and Pat Langley (1995). Estimating"
-      + " Continuous Distributions in Bayesian Classifiers. Proceedings"
-      +" of the Eleventh Conference on Uncertainty in Artificial"
-      +" Intelligence. pp. 338-345. Morgan Kaufmann, San Mateo.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "George H. John and Pat Langley");
+    result.setValue(Field.TITLE, "Estimating Continuous Distributions in Bayesian Classifiers");
+    result.setValue(Field.BOOKTITLE, "Eleventh Conference on Uncertainty in Artificial Intelligence");
+    result.setValue(Field.YEAR, "1995");
+    result.setValue(Field.PAGES, "338-345");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    result.setValue(Field.ADDRESS, "San Mateo");
+    
+    return result;
   }
 
   /**
@@ -357,14 +394,20 @@ public class NaiveBayes extends Classifier
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -K <br>
-   * Use kernel estimation for modelling numeric attributes rather than
-   * a single normal distribution.<p>
-   *
-   * -D <br>
-   * Use supervised discretization to process numeric attributes.
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -K
+   *  Use kernel density estimator rather than normal
+   *  distribution for numeric attributes</pre>
+   * 
+   * <pre> -D
+   *  Use supervised discretization to process numeric attributes
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -522,15 +565,3 @@ public class NaiveBayes extends Classifier
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
