@@ -35,19 +35,32 @@ import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
 
 /**
- * Class for building and using a decision stump. Usually used in conjunction
- * with a boosting algorithm.
+ <!-- globalinfo-start -->
+ * Class for building and using a decision stump. Usually used in conjunction with a boosting algorithm. Does regression (based on mean-squared error) or classification (based on entropy). Missing is treated as a separate value.
+ * <p/>
+ <!-- globalinfo-end -->
  *
  * Typical usage: <p>
  * <code>java weka.classifiers.trees.LogitBoost -I 100 -W weka.classifiers.trees.DecisionStump 
  * -t training_data </code><p>
  * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
-public class DecisionStump extends Classifier 
+public class DecisionStump 
+  extends Classifier 
   implements WeightedInstancesHandler, Sourcable {
 
+  /** for serialization */
   static final long serialVersionUID = 1618384535950391L;
   
   /** The attribute used for classification. */
@@ -102,7 +115,7 @@ public class DecisionStump extends Classifier
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     
@@ -182,7 +195,7 @@ public class DecisionStump extends Classifier
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if distribution can't be computed
+   * @throws Exception if distribution can't be computed
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
@@ -192,8 +205,9 @@ public class DecisionStump extends Classifier
   /**
    * Returns the decision tree as Java source code.
    *
+   * @param className the classname of the generated code
    * @return the tree as Java source code
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public String toSource(String className) throws Exception {
 
@@ -223,6 +237,13 @@ public class DecisionStump extends Classifier
     return text.toString();
   }
 
+  /**
+   * Returns the value as string out of the given distribution
+   * 
+   * @param c the attribute to get the value for
+   * @param dist the distribution to extract the value
+   * @return the value
+   */
   private String sourceClass(Attribute c, double []dist) {
 
     if (c.isNominal()) {
@@ -294,7 +315,7 @@ public class DecisionStump extends Classifier
    *
    * @param dist the class distribution to print
    * @return the distribution as a string
-   * @exception Exception if distribution can't be printed
+   * @throws Exception if distribution can't be printed
    */
   private String printDist(double[] dist) throws Exception {
 
@@ -319,7 +340,7 @@ public class DecisionStump extends Classifier
    *
    * @param dist the class distribution
    * @return the classificationn as a string
-   * @exception Exception if the classification can't be printed
+   * @throws Exception if the classification can't be printed
    */
   private String printClass(double[] dist) throws Exception {
 
@@ -339,7 +360,7 @@ public class DecisionStump extends Classifier
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private double findSplitNominal(int index) throws Exception {
 
@@ -356,7 +377,7 @@ public class DecisionStump extends Classifier
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private double findSplitNominalNominal(int index) throws Exception {
 
@@ -422,7 +443,7 @@ public class DecisionStump extends Classifier
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private double findSplitNominalNumeric(int index) throws Exception {
 
@@ -501,7 +522,7 @@ public class DecisionStump extends Classifier
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private double findSplitNumeric(int index) throws Exception {
 
@@ -518,7 +539,7 @@ public class DecisionStump extends Classifier
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private double findSplitNumericNominal(int index) throws Exception {
 
@@ -583,7 +604,7 @@ public class DecisionStump extends Classifier
    *
    * @param index attribute index
    * @return value of criterion for the best split
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   private double findSplitNumericNumeric(int index) throws Exception {
 
@@ -653,6 +674,11 @@ public class DecisionStump extends Classifier
 
   /**
    * Computes variance for subsets.
+   * 
+   * @param s
+   * @param sS
+   * @param sumOfWeights
+   * @return the variance
    */
   private double variance(double[][] s,double[] sS,double[] sumOfWeights) {
 
@@ -669,6 +695,10 @@ public class DecisionStump extends Classifier
 
   /**
    * Returns the subset an instance falls into.
+   * 
+   * @param instance the instance to check
+   * @return the subset the instance falls into
+   * @throws Exception if something goes wrong
    */
   private int whichSubset(Instance instance) throws Exception {
 
@@ -706,5 +736,3 @@ public class DecisionStump extends Classifier
     }
   }
 }
-
-

@@ -41,16 +41,39 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Class for constructing a tree that considers K random features at each node.
- * Performs no pruning.
+ <!-- globalinfo-start -->
+ * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -K &lt;number of attributes&gt;
+ *  Number of attributes to randomly investigate
+ *  (&lt;1 = int(log(#attributes)+1)).</pre>
+ * 
+ * <pre> -M &lt;minimum number of instances&gt;
+ *  Set minimum number of instances per leaf.</pre>
+ * 
+ * <pre> -D
+ *  Turns debugging info on.</pre>
+ * 
+ * <pre> -S
+ *  Seed for random number generator.
+ *  (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class RandomTree extends Classifier 
+public class RandomTree 
+  extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
 
+  /** for serialization */
   static final long serialVersionUID = 8934314652175299374L;
   
   /** The subtrees appended to this tree. */ 
@@ -215,6 +238,8 @@ public class RandomTree extends Classifier
   
   /**
    * Lists the command-line options for this classifier.
+   * 
+   * @return an enumeration over all possible options
    */
   public Enumeration listOptions() {
     
@@ -243,6 +268,8 @@ public class RandomTree extends Classifier
 
   /**
    * Gets options from this classifier.
+   * 
+   * @return the options for the current setup
    */
   public String[] getOptions() {
     
@@ -264,9 +291,29 @@ public class RandomTree extends Classifier
   }
 
   /**
-   * Parses a given list of options.
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -K &lt;number of attributes&gt;
+   *  Number of attributes to randomly investigate
+   *  (&lt;1 = int(log(#attributes)+1)).</pre>
+   * 
+   * <pre> -M &lt;minimum number of instances&gt;
+   *  Set minimum number of instances per leaf.</pre>
+   * 
+   * <pre> -D
+   *  Turns debugging info on.</pre>
+   * 
+   * <pre> -S
+   *  Seed for random number generator.
+   *  (default 1)</pre>
+   * 
+   <!-- options-end -->
+   * 
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception{
     
@@ -315,6 +362,9 @@ public class RandomTree extends Classifier
 
   /**
    * Builds classifier.
+   * 
+   * @param data the data to train with
+   * @throws Exception if something goes wrong or the data doesn't fit
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -399,6 +449,10 @@ public class RandomTree extends Classifier
   
   /**
    * Computes class distribution of an instance using the decision tree.
+   * 
+   * @param instance the instance to compute the distribution for
+   * @return the computed class distribution
+   * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     
@@ -446,6 +500,8 @@ public class RandomTree extends Classifier
 
   /**
    * Outputs the decision tree as a graph
+   * 
+   * @return the tree as a graph
    */
   public String toGraph() {
 
@@ -462,6 +518,11 @@ public class RandomTree extends Classifier
   
   /**
    * Outputs one node for graph.
+   * 
+   * @param text the buffer to append the output to
+   * @param num unique node id
+   * @return the next node id
+   * @throws Exception if generation fails
    */
   public int toGraph(StringBuffer text, int num) throws Exception {
     
@@ -502,6 +563,8 @@ public class RandomTree extends Classifier
   
   /**
    * Outputs the decision tree.
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
     
@@ -516,6 +579,9 @@ public class RandomTree extends Classifier
 
   /**
    * Outputs a leaf.
+   * 
+   * @return the leaf as string
+   * @throws Exception if generation fails
    */
   protected String leafString() throws Exception {
     
@@ -529,6 +595,9 @@ public class RandomTree extends Classifier
   
   /**
    * Recursively outputs the tree.
+   * 
+   * @param level the current level of the tree
+   * @return the generated subtree
    */
   protected String toString(int level) {
 
@@ -579,6 +648,17 @@ public class RandomTree extends Classifier
 
   /**
    * Recursively generates a tree.
+   * 
+   * @param sortedIndices the indices of the instances
+   * @param weights the weights of the instances
+   * @param data the data to work with
+   * @param classProbs the class distribution
+   * @param header the header of the data
+   * @param minNum the minimum number of instances per leaf
+   * @param debug whether debugging is on
+   * @param attIndicesWindow the attribute window to choose attributes from
+   * @param random random number generator for choosing random attributes
+   * @throws Exception if generation fails
    */
   protected void buildTree(int[][] sortedIndices, double[][] weights,
 			 Instances data, double[] classProbs, 
@@ -686,6 +766,8 @@ public class RandomTree extends Classifier
 
   /**
    * Computes size of the tree.
+   * 
+   * @return the number of nodes
    */
   public int numNodes() {
     
@@ -702,6 +784,16 @@ public class RandomTree extends Classifier
 
   /**
    * Splits instances into subsets.
+   * 
+   * @param subsetIndices the sorted indices of the subset
+   * @param subsetWeights the weights of the subset
+   * @param att the attribute index
+   * @param splitPoint the splitpoint for numeric attributes
+   * @param sortedIndices the sorted indices of the whole set
+   * @param weights the weights of the whole set
+   * @param dist the distribution
+   * @param data the data to work with
+   * @throws Exception if something goes wrong
    */
   protected void splitData(int[][][] subsetIndices, double[][][] subsetWeights,
 			 int att, double splitPoint, 
@@ -785,6 +877,13 @@ public class RandomTree extends Classifier
 
   /**
    * Computes class distribution for an attribute.
+   * 
+   * @param probs
+   * @param dists
+   * @param att the attribute index
+   * @param sortedIndices the sorted indices of the data
+   * @param data the data to work with
+   * @throws Exception if something goes wrong
    */
   protected double distribution(double[][] props, double[][][] dists, int att, 
 			      int[] sortedIndices,
@@ -883,6 +982,9 @@ public class RandomTree extends Classifier
 
   /**
    * Computes value of splitting criterion before split.
+   * 
+   * @param dist the distributions
+   * @return the splitting criterion
    */
   protected double priorVal(double[][] dist) {
 
@@ -891,6 +993,10 @@ public class RandomTree extends Classifier
 
   /**
    * Computes value of splitting criterion after split.
+   * 
+   * @param dist the distributions
+   * @param priorVal the splitting criterion
+   * @return the gain after the split
    */
   protected double gain(double[][] dist, double priorVal) {
 
@@ -899,6 +1005,8 @@ public class RandomTree extends Classifier
 
   /**
    * Main method for this class.
+   * 
+   * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
 
