@@ -92,7 +92,7 @@ import java.util.Vector;
  *  The number of examples to generate (default 100)</pre>
  * 
  * <pre> -F &lt;num&gt;
- *  The function to use for generating the data. (default weka.core.SelectedTag&#64;1975b59)</pre>
+ *  The function to use for generating the data. (default 1)</pre>
  * 
  * <pre> -B
  *  Whether to balance the class.</pre>
@@ -104,7 +104,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class Agrawal
@@ -447,7 +447,7 @@ public class Agrawal
 
     result.add(new Option(
               "\tThe function to use for generating the data. (default " 
-              + defaultFunction() + ")",
+              + defaultFunction().getSelectedTag().getID() + ")",
               "F", 1, "-F <num>"));
 
     result.add(new Option(
@@ -488,7 +488,7 @@ public class Agrawal
    *  The number of examples to generate (default 100)</pre>
    * 
    * <pre> -F &lt;num&gt;
-   *  The function to use for generating the data. (default weka.core.SelectedTag&#64;1ee3914)</pre>
+   *  The function to use for generating the data. (default 1)</pre>
    * 
    * <pre> -B
    *  Whether to balance the class.</pre>
@@ -938,3 +938,4 @@ public class Agrawal
     }
   }
 }
+

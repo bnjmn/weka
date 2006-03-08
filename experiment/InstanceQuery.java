@@ -20,9 +20,7 @@
  *
  */
 
-
 package weka.experiment;
-
 
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -57,27 +55,32 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -Q &lt;query&gt; <br/>
- *  SQL query to execute. <p/>
+ * <pre> -Q &lt;query&gt;
+ *  SQL query to execute.</pre>
  * 
- * -S <br/>
- *  Return sparse rather than normal instances. <p/>
+ * <pre> -S
+ *  Return sparse rather than normal instances.</pre>
  * 
- * -U &lt;username&gt; <br/>
- *  The username to use for connecting. <p/>
+ * <pre> -U &lt;username&gt;
+ *  The username to use for connecting.</pre>
  * 
- * -P &lt;password&gt; <br/>
- *  The password to use for connecting. <p/>
+ * <pre> -P &lt;password&gt;
+ *  The password to use for connecting.</pre>
  * 
- * -D <br/>
- *  Enables debug output. <p/>
+ * <pre> -D
+ *  Enables debug output.</pre>
  * 
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
-public class InstanceQuery extends DatabaseUtils implements OptionHandler {
+public class InstanceQuery 
+  extends DatabaseUtils 
+  implements OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 718158370917782584L;
 
   /** Determines whether sparse data is created */
   boolean m_CreateSparseData = false;
@@ -98,6 +101,7 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
   /**
    * Returns an enumeration describing the available options <p>
    *
+   * @return an enumeration of all options
    */
    public Enumeration listOptions () {
      Vector result = new Vector();
@@ -131,20 +135,20 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * -Q &lt;query&gt; <br/>
-   *  SQL query to execute. <p/>
+   * <pre> -Q &lt;query&gt;
+   *  SQL query to execute.</pre>
    * 
-   * -S <br/>
-   *  Return sparse rather than normal instances. <p/>
+   * <pre> -S
+   *  Return sparse rather than normal instances.</pre>
    * 
-   * -U &lt;username&gt; <br/>
-   *  The username to use for connecting. <p/>
+   * <pre> -U &lt;username&gt;
+   *  The username to use for connecting.</pre>
    * 
-   * -P &lt;password&gt; <br/>
-   *  The password to use for connecting. <p/>
+   * <pre> -P &lt;password&gt;
+   *  The password to use for connecting.</pre>
    * 
-   * -D <br/>
-   *  Enables debug output. <p/>
+   * <pre> -D
+   *  Enables debug output.</pre>
    * 
    <!-- options-end -->
    *
@@ -561,3 +565,4 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler {
     }
   }
 }
+

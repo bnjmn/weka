@@ -30,10 +30,24 @@ import java.util.Vector;
  * <p/>
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;classname&gt;
+ *  The class to load.</pre>
+ * 
+ * <pre> -nostars
+ *  Suppresses the '*' in the Javadoc.</pre>
+ * 
+ * <pre> -dir &lt;dir&gt;
+ *  The directory above the package hierarchy of the class.</pre>
+ * 
+ * <pre> -noprolog
+ *  Suppresses the 'BibTex:' prolog in the Javadoc.</pre>
+ * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see #PLAINTEXT_STARTTAG
  * @see #PLAINTEXT_ENDTAG
  * @see #BIBTEX_STARTTAG
@@ -215,3 +229,4 @@ public class TechnicalInformationHandlerJavadoc
     }
   }
 }
+

@@ -77,33 +77,27 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -B
- *  Binary splits (convert nominal attributes to binary ones)
- * </pre>
+ *  Binary splits (convert nominal attributes to binary ones)</pre>
  * 
  * <pre> -R
- *  Split on residuals instead of class values
- * </pre>
+ *  Split on residuals instead of class values</pre>
  * 
  * <pre> -C
- *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)
- * </pre>
+ *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)</pre>
  * 
  * <pre> -P
- *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.
- * </pre>
+ *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.</pre>
  * 
  * <pre> -I &lt;numIterations&gt;
- *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)
- * </pre>
+ *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)</pre>
  * 
  * <pre> -M &lt;numInstances&gt;
- *  Set minimum number of instances at which a node can be split (default 15)
- * </pre>
+ *  Set minimum number of instances at which a node can be split (default 15)</pre>
  * 
  <!-- options-end -->
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LMT 
   extends Classifier 
@@ -311,28 +305,22 @@ public class LMT
    * Valid options are: <p/>
    * 
    * <pre> -B
-   *  Binary splits (convert nominal attributes to binary ones)
-   * </pre>
+   *  Binary splits (convert nominal attributes to binary ones)</pre>
    * 
    * <pre> -R
-   *  Split on residuals instead of class values
-   * </pre>
+   *  Split on residuals instead of class values</pre>
    * 
    * <pre> -C
-   *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)
-   * </pre>
+   *  Use cross-validation for boosting at all nodes (i.e., disable heuristic)</pre>
    * 
    * <pre> -P
-   *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.
-   * </pre>
+   *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.</pre>
    * 
    * <pre> -I &lt;numIterations&gt;
-   *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)
-   * </pre>
+   *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)</pre>
    * 
    * <pre> -M &lt;numInstances&gt;
-   *  Set minimum number of instances at which a node can be split (default 15)
-   * </pre>
+   *  Set minimum number of instances at which a node can be split (default 15)</pre>
    * 
    <!-- options-end -->
    *

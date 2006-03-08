@@ -111,7 +111,8 @@ import java.util.Vector;
  *  The pattern is random, if neither flag G nor flag I is set.</pre>
  * 
  * <pre> -I
- *  Set pattern to sine (default is random). This flag cannot be used at the same time as flag I.
+ *  Set pattern to sine (default is random).
+ *  This flag cannot be used at the same time as flag I.
  *  The pattern is random, if neither flag G nor flag I is set.</pre>
  * 
  * <pre> -N &lt;num&gt;..&lt;num&gt;
@@ -144,7 +145,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator
@@ -580,7 +581,8 @@ public class BIRCHCluster
    *  The pattern is random, if neither flag G nor flag I is set.</pre>
    * 
    * <pre> -I
-   *  Set pattern to sine (default is random). This flag cannot be used at the same time as flag I.
+   *  Set pattern to sine (default is random).
+   *  This flag cannot be used at the same time as flag I.
    *  The pattern is random, if neither flag G nor flag I is set.</pre>
    * 
    * <pre> -N &lt;num&gt;..&lt;num&gt;
@@ -1501,3 +1503,4 @@ public class BIRCHCluster
     }
   }
 }
+

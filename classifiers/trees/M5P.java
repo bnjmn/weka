@@ -72,16 +72,13 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -N
- *  Use unpruned tree/rules
- * </pre>
+ *  Use unpruned tree/rules</pre>
  * 
  * <pre> -U
- *  Use unsmoothed predictions
- * </pre>
+ *  Use unsmoothed predictions</pre>
  * 
  * <pre> -R
- *  Build regression tree/rule rather than a model tree/rule
- * </pre>
+ *  Build regression tree/rule rather than a model tree/rule</pre>
  * 
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf
@@ -89,13 +86,12 @@ import java.util.Vector;
  * 
  * <pre> -L
  *  Save instances at the nodes in
- *  the tree (for visualization purposes)
- * </pre>
+ *  the tree (for visualization purposes)</pre>
  * 
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class M5P 
   extends M5Base 
@@ -182,16 +178,13 @@ public class M5P
    * Valid options are: <p/>
    * 
    * <pre> -N
-   *  Use unpruned tree/rules
-   * </pre>
+   *  Use unpruned tree/rules</pre>
    * 
    * <pre> -U
-   *  Use unsmoothed predictions
-   * </pre>
+   *  Use unsmoothed predictions</pre>
    * 
    * <pre> -R
-   *  Build regression tree/rule rather than a model tree/rule
-   * </pre>
+   *  Build regression tree/rule rather than a model tree/rule</pre>
    * 
    * <pre> -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf
@@ -199,8 +192,7 @@ public class M5P
    * 
    * <pre> -L
    *  Save instances at the nodes in
-   *  the tree (for visualization purposes)
-   * </pre>
+   *  the tree (for visualization purposes)</pre>
    * 
    <!-- options-end -->
    *
@@ -252,3 +244,4 @@ public class M5P
     } 
   } 
 }
+
