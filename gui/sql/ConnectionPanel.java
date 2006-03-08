@@ -53,13 +53,16 @@ import javax.swing.event.CaretEvent;
  * to this database.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
 
 public class ConnectionPanel 
   extends JPanel 
   implements CaretListener {
 
+  /** for serialization */
+  static final long serialVersionUID = 3499317023969723490L;
+  
   /** the name of the history */
   public final static String HISTORY_NAME = "connection";
   
@@ -223,6 +226,8 @@ public class ConnectionPanel
 
   /**
    * returns the current URL
+   * 
+   * @return the current URL
    */
   public String getURL() {
     m_URL = m_TextURL.getText();
@@ -231,7 +236,7 @@ public class ConnectionPanel
 
   /**
    * sets the User
-   * @param url       the new value of the User
+   * @param user       the new value of the User
    */
   public void setUser(String user) {
     m_User = user;
@@ -239,6 +244,8 @@ public class ConnectionPanel
 
   /**
    * returns the current User
+   * 
+   * @return the current user
    */
   public String getUser() {
     return m_User;
@@ -246,7 +253,7 @@ public class ConnectionPanel
 
   /**
    * sets the Password
-   * @param url       the new value of the Password
+   * @param pw       the new value of the Password
    */
   public void setPassword(String pw) {
     m_Password = pw;
@@ -254,6 +261,8 @@ public class ConnectionPanel
 
   /**
    * returns the current Password
+   * 
+   * @return the current password
    */
   public String getPassword() {
     return m_Password;
@@ -303,7 +312,7 @@ public class ConnectionPanel
    * displays the database dialog
    */
   protected void showDialog() {
-    m_DbDialog = new DatabaseConnectionDialog(m_Parent, getURL(), getUser());
+    m_DbDialog = new DatabaseConnectionDialog(m_Parent, getURL(), getUser(), false);
     m_DbDialog.setVisible(true);
     if (m_DbDialog.getReturnValue() == JOptionPane.OK_OPTION) {
       setURL(m_DbDialog.getURL());
@@ -451,6 +460,8 @@ public class ConnectionPanel
 
   /**
    * Called when the caret position is updated.
+   * 
+   * @param event the event to process
    */
   public void caretUpdate(CaretEvent event) {
     setButtons();
