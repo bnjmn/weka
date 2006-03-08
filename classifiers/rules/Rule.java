@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public abstract class Rule 
@@ -48,7 +48,7 @@ public abstract class Rule
     /**
      * Whether the instance covered by this rule
      * 
-     * @param inst the instance in question
+     * @param datum the instance in question
      * @return the boolean value indicating whether the instance 
      *         is covered by this rule
      */
