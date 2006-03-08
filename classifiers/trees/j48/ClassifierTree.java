@@ -28,7 +28,6 @@ import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 
 import java.io.Serializable;
 
@@ -37,10 +36,14 @@ import java.io.Serializable;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
-public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandler {
+public class ClassifierTree 
+  implements Drawable, Serializable, CapabilitiesHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = -8722249377542734193L;
+  
   /** The model selection method. */  
   protected ModelSelection m_toSelectModel;     
 
@@ -110,7 +113,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Method for building a classifier tree.
    *
-   * @exception Exception if something goes wrong
+   * @param data the data to build the tree from
+   * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
 
@@ -130,7 +134,7 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
    * @param data the data for which the tree structure is to be
    * generated.
    * @param keepData is training data to be kept?
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public void buildTree(Instances data, boolean keepData) throws Exception {
     
@@ -167,7 +171,7 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
    * generated.
    * @param test the test data for potential pruning
    * @param keepData is training Data to be kept?
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public void buildTree(Instances train, Instances test, boolean keepData)
        throws Exception {
@@ -204,7 +208,9 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /** 
    * Classifies an instance.
    *
-   * @exception Exception if something goes wrong
+   * @param instance the instance to classify
+   * @return the classification
+   * @throws Exception if something goes wrong
    */
   public double classifyInstance(Instance instance) 
     throws Exception {
@@ -227,6 +233,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
 
   /**
    * Cleanup in order to save memory.
+   * 
+   * @param justHeaderInfo
    */
   public final void cleanup(Instances justHeaderInfo) {
 
@@ -240,7 +248,10 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /** 
    * Returns class probabilities for a weighted instance.
    *
-   * @exception Exception if something goes wrong
+   * @param instance the instance to get the distribution for
+   * @param useLaplace whether to use laplace or not
+   * @return the distribution
+   * @throws Exception if something goes wrong
    */
   public final double [] distributionForInstance(Instance instance,
 						 boolean useLaplace) 
@@ -261,6 +272,9 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
 
   /**
    * Assigns a uniqe id to every node in the tree.
+   * 
+   * @param lastID the last ID that was assign
+   * @return the new current ID
    */
   public int assignIDs(int lastID) {
 
@@ -287,7 +301,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Returns graph describing the tree.
    *
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
+   * @return the tree as graph
    */
   public String graph() throws Exception {
 
@@ -324,7 +339,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Returns tree in prefix order.
    *
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
+   * @return the prefix order
    */
   public String prefix() throws Exception {
     
@@ -350,7 +366,7 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
    * @param className the classname that this static classifier has
    * @return an array containing two stringbuffers, the first string containing
    * assignment code, and the second containing source for support code.
-   * @exception Exception if something goes wrong
+   * @throws Exception if something goes wrong
    */
   public StringBuffer [] toSource(String className) throws Exception {
     
@@ -361,7 +377,6 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
       result[1] = new StringBuffer("");
     } else {
       StringBuffer text = new StringBuffer();
-      String nextIndent = "      ";
       StringBuffer atEnd = new StringBuffer();
 
       long printID = ClassifierTree.nextID();
@@ -407,6 +422,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
 
   /**
    * Returns number of leaves in tree structure.
+   * 
+   * @return the number of leaves
    */
   public int numLeaves() {
     
@@ -424,6 +441,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
 
   /**
    * Returns number of nodes in tree structure.
+   * 
+   * @return the number of nodes
    */
   public int numNodes() {
     
@@ -439,6 +458,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
 
   /**
    * Prints tree structure.
+   * 
+   * @return the tree structure
    */
   public String toString() {
 
@@ -463,7 +484,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
    * Returns a newly created tree.
    *
    * @param data the training data
-   * @exception Exception if something goes wrong
+   * @return the generated tree
+   * @throws Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances data) throws Exception {
 	 
@@ -476,9 +498,10 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Returns a newly created tree.
    *
-   * @param data the training data
+   * @param train the training data
    * @param test the pruning data.
-   * @exception Exception if something goes wrong
+   * @return the generated tree
+   * @throws Exception if something goes wrong
    */
   protected ClassifierTree getNewTree(Instances train, Instances test) 
        throws Exception {
@@ -492,9 +515,11 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Help method for printing tree structure.
    *
-   * @exception Exception if something goes wrong
+   * @param depth the current depth
+   * @param text for outputting the structure
+   * @throws Exception if something goes wrong
    */
-  private void dumpTree(int depth,StringBuffer text) 
+  private void dumpTree(int depth, StringBuffer text) 
        throws Exception {
     
     int i,j;
@@ -516,7 +541,8 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Help method for printing tree structure as a graph.
    *
-   * @exception Exception if something goes wrong
+   * @param text for outputting the tree
+   * @throws Exception if something goes wrong
    */
   private void graphTree(StringBuffer text) throws Exception {
     
@@ -551,6 +577,9 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
 
   /**
    * Prints the tree in prefix form
+   * 
+   * @param text the buffer to output the prefix form to
+   * @throws Exception if something goes wrong
    */
   private void prefixTree(StringBuffer text) throws Exception {
 
@@ -578,7 +607,11 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
    * Help method for computing class probabilities of 
    * a given instance.
    *
-   * @exception Exception if something goes wrong
+   * @param classIndex the class index
+   * @param instance the instance to compute the probabilities for
+   * @param weight the weight to use
+   * @return the laplace probs
+   * @throws Exception if something goes wrong
    */
   private double getProbsLaplace(int classIndex, Instance instance, double weight) 
     throws Exception {
@@ -620,8 +653,12 @@ public class ClassifierTree implements Drawable, Serializable, CapabilitiesHandl
   /**
    * Help method for computing class probabilities of 
    * a given instance.
-   *
-   * @exception Exception if something goes wrong
+   * 
+   * @param classIndex the class index
+   * @param instance the instance to compute the probabilities for
+   * @param weight the weight to use
+   * @return the probs
+   * @throws Exception if something goes wrong
    */
   private double getProbs(int classIndex, Instance instance, double weight) 
     throws Exception {
