@@ -31,6 +31,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Capabilities.Capability;
 
 import java.io.Serializable;
@@ -38,22 +42,44 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Class for building and using a 1R classifier. For more information, see<p>
+ <!-- globalinfo-start -->
+ * Class for building and using a 1R classifier; in other words, uses the minimum-error attribute for prediction, discretizing numeric attributes. For more information, see<br/>
+ * <br/>
+ * :R.C. Holte (1993). Very simple classification rules perform well on most commonly used datasets. Machine Learning. Vol.11, pp. 63-91.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * R.C. Holte (1993). <i>Very simple classification rules
- * perform well on most commonly used datasets</i>. Machine Learning,
- * Vol. 11, pp. 63-91.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Holte1993,
+ *    author = {R.C. Holte},
+ *    journal = {Machine Learning},
+ *    pages = {pp. 63-91},
+ *    title = {Very simple classification rules perform well on most commonly used datasets},
+ *    volume = {Vol.11},
+ *    year = {1993}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -B num <br>
- * Specify the minimum number of objects in a bucket (default: 6). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B &lt;minimum bucket size&gt;
+ *  The minimum number of objects in a bucket (default: 6).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
 */
-public class OneR extends Classifier implements OptionHandler {
+public class OneR 
+  extends Classifier 
+  implements OptionHandler, TechnicalInformationHandler {
     
+  /** for serialization */
   static final long serialVersionUID = -2459427002147861445L;
   
   /**
@@ -66,15 +92,38 @@ public class OneR extends Classifier implements OptionHandler {
     return "Class for building and using a 1R classifier; in other words, uses "
       + "the minimum-error attribute for prediction, discretizing numeric "
       + "attributes. For more information, see\n\n:"
-      + "R.C. Holte (1993). \"Very simple classification rules "
-      + "perform well on most commonly used datasets\". Machine Learning, "
-      + "Vol. 11, pp. 63-91.";
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "R.C. Holte");
+    result.setValue(Field.YEAR, "1993");
+    result.setValue(Field.TITLE, "Very simple classification rules perform well on most commonly used datasets");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.VOLUME, "Vol.11");
+    result.setValue(Field.PAGES, "pp. 63-91");
+    
+    return result;
   }
 
   /**
    * Class for storing store a 1R rule.
    */
-  private class OneRRule implements Serializable {
+  private class OneRRule 
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = 1152814630957092281L;
 
     /** The class attribute. */
     private Attribute m_class;
@@ -99,6 +148,10 @@ public class OneR extends Classifier implements OptionHandler {
   
     /**
      * Constructor for nominal attribute.
+     * 
+     * @param data the data to work with
+     * @param attribute the attribute to use
+     * @throws Exception if something goes wrong
      */
     public OneRRule(Instances data, Attribute attribute) throws Exception {
 
@@ -111,6 +164,11 @@ public class OneR extends Classifier implements OptionHandler {
 
     /**
      * Constructor for numeric attribute.
+     * 
+     * @param data the data to work with
+     * @param attribute the attribute to use
+     * @param nBreaks the break point
+     * @throws Exception if something goes wrong
      */
     public OneRRule(Instances data, Attribute attribute, int nBreaks) throws Exception {
 
@@ -124,6 +182,8 @@ public class OneR extends Classifier implements OptionHandler {
     
     /**
      * Returns a description of the rule.
+     * 
+     * @return a string representation of the rule
      */
     public String toString() {
 
@@ -164,6 +224,7 @@ public class OneR extends Classifier implements OptionHandler {
    * Classifies a given instance.
    *
    * @param inst the instance to be classified
+   * @return the classification of the instance
    */
   public double classifyInstance(Instance inst) {
 
@@ -211,7 +272,7 @@ public class OneR extends Classifier implements OptionHandler {
    * Generates the classifier.
    *
    * @param instances the instances to be used for building the classifier
-   * @exception Exception if the classifier can't be built successfully
+   * @throws Exception if the classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) 
     throws Exception {
@@ -246,7 +307,8 @@ public class OneR extends Classifier implements OptionHandler {
    *
    * @param attr the attribute to branch on
    * @param data the data to be used for creating the rule
-   * @exception Exception if the rule can't be built successfully
+   * @return the generated rule
+   * @throws Exception if the rule can't be built successfully
    */
   public OneRRule newRule(Attribute attr, Instances data) throws Exception {
 
@@ -276,7 +338,8 @@ public class OneR extends Classifier implements OptionHandler {
    * @param attr the attribute to branch on
    * @param data the data to be used for creating the rule
    * @param missingValueCounts to be filled in
-   * @exception Exception if the rule can't be built successfully
+   * @return the generated rule
+   * @throws Exception if the rule can't be built successfully
    */
   public OneRRule newNominalRule(Attribute attr, Instances data,
                                  int[] missingValueCounts) throws Exception {
@@ -311,7 +374,8 @@ public class OneR extends Classifier implements OptionHandler {
    * @param attr the attribute to branch on
    * @param data the data to be used for creating the rule
    * @param missingValueCounts to be filled in
-   * @exception Exception if the rule can't be built successfully
+   * @return the generated rule
+   * @throws Exception if the rule can't be built successfully
    */
   public OneRRule newNumericRule(Attribute attr, Instances data,
                              int[] missingValueCounts) throws Exception {
@@ -409,13 +473,18 @@ public class OneR extends Classifier implements OptionHandler {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -B num <br>
-   * Specify the minimum number of objects in a bucket (default: 6). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B &lt;minimum bucket size&gt;
+   *  The minimum number of objects in a bucket (default: 6).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -447,6 +516,8 @@ public class OneR extends Classifier implements OptionHandler {
 
   /**
    * Returns a description of the classifier
+   * 
+   * @return a string representation of the classifier
    */
   public String toString() {
 
@@ -486,6 +557,8 @@ public class OneR extends Classifier implements OptionHandler {
   
   /**
    * Main method for testing this class
+   * 
+   * @param argv the commandline options
    */
   public static void main(String [] argv) {
 
@@ -496,14 +569,3 @@ public class OneR extends Classifier implements OptionHandler {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
