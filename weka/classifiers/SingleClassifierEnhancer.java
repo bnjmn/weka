@@ -27,6 +27,7 @@ import weka.core.Capabilities;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -36,7 +37,7 @@ import java.util.Vector;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 
@@ -171,6 +172,10 @@ public abstract class SingleClassifierEnhancer extends Classifier {
       result = getClassifier().getCapabilities();
     else
       result = new Capabilities(this);
+    
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
     
     result.setOwner(this);
     

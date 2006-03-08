@@ -26,6 +26,7 @@ import weka.core.Capabilities;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -35,7 +36,7 @@ import java.util.Vector;
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
   
@@ -201,6 +202,10 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       for (i = 1; i < getClassifiers().length; i++)
         result.and(getClassifier(i).getCapabilities());
     }
+    
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
 
     result.setOwner(this);
 
