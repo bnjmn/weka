@@ -38,13 +38,15 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.io.Serializable;
 import java.io.ObjectStreamClass;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 
 /**
  * A SplitEvaluator that produces results for a classification scheme
  * on a numeric class attribute.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class RegressionSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -76,7 +78,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 15;
+  private static final int RESULT_SIZE = 17; //15;
 
   /**
    * No args constructor.
@@ -342,6 +344,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     // Timing stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     resultTypes[current++] = "";
 
@@ -386,9 +390,11 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "SF_mean_entropy_gain";
 
     // Timing stats
-    resultNames[current++] = "Time_training";
-    resultNames[current++] = "Time_testing";
-
+    resultNames[current++] = "Elapsed_Time_training";
+    resultNames[current++] = "Elapsed_Time_testing";
+    resultNames[current++] = "UserCPU_Time_training";
+    resultNames[current++] = "UserCPU_Time_testing";
+    
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -421,18 +427,35 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
-    int addm = (m_AdditionalMeasures != null) 
-      ? m_AdditionalMeasures.length 
-      : 0;
+    ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
+    boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
+    if(!thMonitor.isThreadCpuTimeEnabled())
+      thMonitor.setThreadCpuTimeEnabled(true);
+    
+    int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
     Object [] result = new Object[RESULT_SIZE+addm];
+    long thID = Thread.currentThread().getId();
+    long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
+         trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
     Evaluation eval = new Evaluation(train);
     m_Classifier = Classifier.makeCopy(m_Template);
-    long trainTimeStart = System.currentTimeMillis();
+
+    trainTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime)
+      CPUStartTime = thMonitor.getThreadUserTime(thID);
     m_Classifier.buildClassifier(train);
-    long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
-    long testTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime)
+      trainCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
+    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+    testTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime)
+      CPUStartTime = thMonitor.getThreadUserTime(thID);
     eval.evaluateModel(m_Classifier, test);
-    long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
+    if(canMeasureCPUTime)
+      testCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
+    testTimeElapsed = System.currentTimeMillis() - testTimeStart;
+    thMonitor = null;
+    
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
@@ -451,36 +474,44 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.SFMeanPriorEntropy());
     result[current++] = new Double(eval.SFMeanSchemeEntropy());
     result[current++] = new Double(eval.SFMeanEntropyGain());
-
+    
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
-
+    if(canMeasureCPUTime) {
+      result[current++] = new Double((trainCPUTimeElapsed/1000000.0) / 1000.0);
+      result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
+    }
+    else {
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+    }
+    
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
       result[current++] = null;
     }
-
+    
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
-	try {
-	  double dv = ((AdditionalMeasureProducer)m_Classifier).
-	    getMeasure(m_AdditionalMeasures[i]);
-	  if (!Instance.isMissingValue(dv)) {
-	    Double value = new Double(dv);
-	    result[current++] = value;
-	  } else {
-	    result[current++] = null;
-	  }
-	} catch (Exception ex) {
-	  System.err.println(ex);
-	}
+        try {
+          double dv = ((AdditionalMeasureProducer)m_Classifier).
+          getMeasure(m_AdditionalMeasures[i]);
+          if (!Instance.isMissingValue(dv)) {
+            Double value = new Double(dv);
+            result[current++] = value;
+          } else {
+            result[current++] = null;
+          }
+        } catch (Exception ex) {
+          System.err.println(ex);
+        }
       } else {
-	result[current++] = null;
+        result[current++] = null;
       }
     }
-	
+    
     if (current != RESULT_SIZE+addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
