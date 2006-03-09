@@ -25,6 +25,8 @@ package weka.experiment;
 
 import java.io.*;
 import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 
 import weka.core.*;
 import weka.classifiers.*;
@@ -51,7 +53,7 @@ import weka.classifiers.rules.ZeroR;
  * Add the prediction and target columns to the result file for each fold.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ClassifierSplitEvaluator implements SplitEvaluator, 
   OptionHandler, AdditionalMeasureProducer {
@@ -91,7 +93,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   private static final int RESULT_SIZE = 25;
 
   /** The number of IR statistics */
-  private static final int NUM_IR_STATISTICS = 12;
+  private static final int NUM_IR_STATISTICS = 14; //12;
   
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
@@ -450,6 +452,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     // Timing stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultTypes[current++] = "";
@@ -535,8 +539,10 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     resultNames[current++] = "Area_under_ROC";
 
     // Timing stats
-    resultNames[current++] = "Time_training";
-    resultNames[current++] = "Time_testing";
+    resultNames[current++] = "Elapsed_Time_training";
+    resultNames[current++] = "Elapsed_Time_testing";
+    resultNames[current++] = "UserCPU_Time_training";
+    resultNames[current++] = "UserCPU_Time_testing";
 
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultNames[current++] = "Instance_ID";
@@ -568,8 +574,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * the array may be Strings, Doubles, or null (for the missing value).
    * @exception Exception if a problem occurs while getting the results
    */
-  public Object [] getResult(Instances train, Instances test) 
-    throws Exception {
+  public Object [] getResult(Instances train, Instances test)
+  throws Exception {
     
     if (train.classAttribute().type() != Attribute.NOMINAL) {
       throw new Exception("Class attribute is not nominal!");
@@ -577,23 +583,44 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
-    int addm = (m_AdditionalMeasures != null) 
-      ? m_AdditionalMeasures.length 
-      : 0;
+    int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
-
+    
+    ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
+    boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
+    if(!thMonitor.isThreadCpuTimeEnabled())
+      thMonitor.setThreadCpuTimeEnabled(true);
+    
     Object [] result = new Object[overall_length];
     Evaluation eval = new Evaluation(train);
     m_Classifier = Classifier.makeCopy(m_Template);
-    long trainTimeStart = System.currentTimeMillis();
-    m_Classifier.buildClassifier(train);
-    long trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
-    long testTimeStart = System.currentTimeMillis();
-    double predictions[] = eval.evaluateModel(m_Classifier, test);
-    long testTimeElapsed = System.currentTimeMillis() - testTimeStart;
+    double [] predictions;
+    long thID = Thread.currentThread().getId();
+    long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
+         trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
+
+    //training classifier
+    trainTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime)
+      CPUStartTime = thMonitor.getThreadUserTime(thID);
+    m_Classifier.buildClassifier(train);    
+    if(canMeasureCPUTime)
+      trainCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
+    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+    
+    //testing classifier
+    testTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime) 
+      CPUStartTime = thMonitor.getThreadUserTime(thID);
+    predictions = eval.evaluateModel(m_Classifier, test);
+    if(canMeasureCPUTime)
+      testCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
+    testTimeElapsed = System.currentTimeMillis() - testTimeStart;
+    thMonitor = null;
+    
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
@@ -607,24 +634,24 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.pctIncorrect());
     result[current++] = new Double(eval.pctUnclassified());
     result[current++] = new Double(eval.kappa());
-
+    
     result[current++] = new Double(eval.meanAbsoluteError());
     result[current++] = new Double(eval.rootMeanSquaredError());
     result[current++] = new Double(eval.relativeAbsoluteError());
     result[current++] = new Double(eval.rootRelativeSquaredError());
-
+    
     result[current++] = new Double(eval.SFPriorEntropy());
     result[current++] = new Double(eval.SFSchemeEntropy());
     result[current++] = new Double(eval.SFEntropyGain());
     result[current++] = new Double(eval.SFMeanPriorEntropy());
     result[current++] = new Double(eval.SFMeanSchemeEntropy());
     result[current++] = new Double(eval.SFMeanEntropyGain());
-
+    
     // K&B stats
     result[current++] = new Double(eval.KBInformation());
     result[current++] = new Double(eval.KBMeanInformation());
     result[current++] = new Double(eval.KBRelativeInformation());
-
+    
     // IR stats
     result[current++] = new Double(eval.truePositiveRate(m_IRclass));
     result[current++] = new Double(eval.numTruePositives(m_IRclass));
@@ -638,72 +665,80 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     result[current++] = new Double(eval.recall(m_IRclass));
     result[current++] = new Double(eval.fMeasure(m_IRclass));
     result[current++] = new Double(eval.areaUnderROC(m_IRclass));
-
+    
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
-
+    if(canMeasureCPUTime) {
+      result[current++] = new Double((trainCPUTimeElapsed/1000000.0) / 1000.0);
+      result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
+    }
+    else {
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+    }
+    
     // IDs
     if (getAttributeID() >= 0){
-        String idsString = "";
-        if (test.attribute(m_attID).isNumeric()){
-            if (test.numInstances() > 0)
-                idsString += test.instance(0).value(m_attID);
-            for(int i=1;i<test.numInstances();i++){
-                idsString += "|" + test.instance(i).value(m_attID);
-            }
-        } else {
-            if (test.numInstances() > 0)
-                idsString += test.instance(0).stringValue(m_attID);
-            for(int i=1;i<test.numInstances();i++){
-                idsString += "|" + test.instance(i).stringValue(m_attID);
-            }
+      String idsString = "";
+      if (test.attribute(m_attID).isNumeric()){
+        if (test.numInstances() > 0)
+          idsString += test.instance(0).value(m_attID);
+        for(int i=1;i<test.numInstances();i++){
+          idsString += "|" + test.instance(i).value(m_attID);
         }
-        result[current++] = idsString;
+      } else {
+        if (test.numInstances() > 0)
+          idsString += test.instance(0).stringValue(m_attID);
+        for(int i=1;i<test.numInstances();i++){
+          idsString += "|" + test.instance(i).stringValue(m_attID);
+        }
+      }
+      result[current++] = idsString;
     }
     
     if (getPredTargetColumn()){
-        if (test.classAttribute().isNumeric()){
-            // Targets
-            if (test.numInstances() > 0){
-                String targetsString = "";
-                targetsString += test.instance(0).value(test.classIndex());
-                for(int i=1;i<test.numInstances();i++){
-                    targetsString += "|" + test.instance(i).value(test.classIndex());
-                }
-                result[current++] = targetsString;
-            }
-    
-            // Predictions
-            if (predictions.length > 0){ 
-                String predictionsString = "";
-                predictionsString += predictions[0];
-                for(int i=1;i<predictions.length;i++){
-                    predictionsString += "|" + predictions[i];
-                }
-                result[current++] = predictionsString;
-            }            
-        } else {
-            // Targets
-            if (test.numInstances() > 0){
-                String targetsString = "";
-                targetsString += test.instance(0).stringValue(test.classIndex());
-                for(int i=1;i<test.numInstances();i++){
-                    targetsString += "|" + test.instance(i).stringValue(test.classIndex());
-                }
-                result[current++] = targetsString;
-            }
-    
-            // Predictions
-            if (predictions.length > 0){ 
-                String predictionsString = "";
-                predictionsString += test.classAttribute().value((int) predictions[0]);
-                for(int i=1;i<predictions.length;i++){
-                    predictionsString += "|" + test.classAttribute().value((int) predictions[i]);
-                }
-                result[current++] = predictionsString;
-            }
+      if (test.classAttribute().isNumeric()){
+        // Targets
+        if (test.numInstances() > 0){
+          String targetsString = "";
+          targetsString += test.instance(0).value(test.classIndex());
+          for(int i=1;i<test.numInstances();i++){
+            targetsString += "|" + test.instance(i).value(test.classIndex());
+          }
+          result[current++] = targetsString;
         }
+        
+        // Predictions
+        if (predictions.length > 0){
+          String predictionsString = "";
+          predictionsString += predictions[0];
+          for(int i=1;i<predictions.length;i++){
+            predictionsString += "|" + predictions[i];
+          }
+          result[current++] = predictionsString;
+        }
+      } else {
+        // Targets
+        if (test.numInstances() > 0){
+          String targetsString = "";
+          targetsString += test.instance(0).stringValue(test.classIndex());
+          for(int i=1;i<test.numInstances();i++){
+            targetsString += "|" + test.instance(i).stringValue(test.classIndex());
+          }
+          result[current++] = targetsString;
+        }
+        
+        // Predictions
+        if (predictions.length > 0){
+          String predictionsString = "";
+          predictionsString += test.classAttribute().value((int) predictions[0]);
+          for(int i=1;i<predictions.length;i++){
+            predictionsString += "|" + test.classAttribute().value((int) predictions[i]);
+          }
+          result[current++] = predictionsString;
+        }
+      }
     }
     
     if (m_Classifier instanceof Summarizable) {
@@ -711,26 +746,26 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
     } else {
       result[current++] = null;
     }
-
+    
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
-	try {
-	  double dv = ((AdditionalMeasureProducer)m_Classifier).
-	    getMeasure(m_AdditionalMeasures[i]);
-	  if (!Instance.isMissingValue(dv)) {
-	    Double value = new Double(dv);
-	    result[current++] = value;
-	  } else {
-	    result[current++] = null;
-	  }
-	} catch (Exception ex) {
-	  System.err.println(ex);
-	}
+        try {
+          double dv = ((AdditionalMeasureProducer)m_Classifier).
+          getMeasure(m_AdditionalMeasures[i]);
+          if (!Instance.isMissingValue(dv)) {
+            Double value = new Double(dv);
+            result[current++] = value;
+          } else {
+            result[current++] = null;
+          }
+        } catch (Exception ex) {
+          System.err.println(ex);
+        }
       } else {
-	result[current++] = null;
+        result[current++] = null;
       }
     }
-
+    
     if (current != overall_length) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }

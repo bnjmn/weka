@@ -25,6 +25,8 @@ package weka.experiment;
 
 import java.io.*;
 import java.util.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 
 import weka.core.*;
 import weka.classifiers.*;
@@ -34,7 +36,7 @@ import weka.classifiers.*;
  * on a nominal class attribute, including weighted misclassification costs.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -47,7 +49,7 @@ public class CostSensitiveClassifierSplitEvaluator
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 23;
+  private static final int RESULT_SIZE = 27; //23;
 
   /**
    * Returns a string describing this split evaluator
@@ -205,6 +207,12 @@ public class CostSensitiveClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
 
+    // Timing stats
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -261,6 +269,12 @@ public class CostSensitiveClassifierSplitEvaluator
     resultNames[current++] = "KB_mean_information";
     resultNames[current++] = "KB_relative_information";
 
+    // Timing stats
+    resultNames[current++] = "Elapsed_Time_training";
+    resultNames[current++] = "Elapsed_Time_testing";
+    resultNames[current++] = "UserCPU_Time_training";
+    resultNames[current++] = "UserCPU_Time_testing";
+
     // Classifier defined extras
     resultNames[current++] = "Summary";
     // add any additional measures
@@ -284,39 +298,59 @@ public class CostSensitiveClassifierSplitEvaluator
    * the array may be Strings, Doubles, or null (for the missing value).
    * @exception Exception if a problem occurs while getting the results
    */
-  public Object [] getResult(Instances train, Instances test) 
-    throws Exception {
-
+  public Object [] getResult(Instances train, Instances test)
+  throws Exception {
+    
     if (train.classAttribute().type() != Attribute.NOMINAL) {
       throw new Exception("Class attribute is not nominal!");
     }
     if (m_Template == null) {
       throw new Exception("No classifier has been specified");
     }
-    int addm = (m_AdditionalMeasures != null) 
-      ? m_AdditionalMeasures.length 
-      : 0;
+    ThreadMXBean thMonitor = ManagementFactory.getThreadMXBean();
+    boolean canMeasureCPUTime = thMonitor.isThreadCpuTimeSupported();
+    if(!thMonitor.isThreadCpuTimeEnabled())
+      thMonitor.setThreadCpuTimeEnabled(true);
+    
+    int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
     Object [] result = new Object[RESULT_SIZE+addm];
-
+    long thID = Thread.currentThread().getId();
+    long CPUStartTime=-1, trainCPUTimeElapsed=-1, testCPUTimeElapsed=-1,
+         trainTimeStart, trainTimeElapsed, testTimeStart, testTimeElapsed;    
+    
     String costName = train.relationName() + CostMatrix.FILE_EXTENSION;
     File costFile = new File(getOnDemandDirectory(), costName);
     if (!costFile.exists()) {
       throw new Exception("On-demand cost file doesn't exist: " + costFile);
     }
     CostMatrix costMatrix = new CostMatrix(new BufferedReader(
-                                           new FileReader(costFile)));
-
-    Evaluation eval = new Evaluation(train, costMatrix);
-
+    new FileReader(costFile)));
+    
+    Evaluation eval = new Evaluation(train, costMatrix);    
     m_Classifier = Classifier.makeCopy(m_Template);
+    
+    trainTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime)
+      CPUStartTime = thMonitor.getThreadUserTime(thID);
     m_Classifier.buildClassifier(train);
+    if(canMeasureCPUTime)
+      trainCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
+    trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
+    testTimeStart = System.currentTimeMillis();
+    if(canMeasureCPUTime)
+      CPUStartTime = thMonitor.getThreadUserTime(thID);
     eval.evaluateModel(m_Classifier, test);
+    if(canMeasureCPUTime)
+      testCPUTimeElapsed = thMonitor.getThreadUserTime(thID) - CPUStartTime;
+    testTimeElapsed = System.currentTimeMillis() - testTimeStart;
+    thMonitor = null;
+    
     m_result = eval.toSummaryString();
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;
     result[current++] = new Double(eval.numInstances());
-
+    
     result[current++] = new Double(eval.correct());
     result[current++] = new Double(eval.incorrect());
     result[current++] = new Double(eval.unclassified());
@@ -325,24 +359,36 @@ public class CostSensitiveClassifierSplitEvaluator
     result[current++] = new Double(eval.pctUnclassified());
     result[current++] = new Double(eval.totalCost());
     result[current++] = new Double(eval.avgCost());
-
+    
     result[current++] = new Double(eval.meanAbsoluteError());
     result[current++] = new Double(eval.rootMeanSquaredError());
     result[current++] = new Double(eval.relativeAbsoluteError());
     result[current++] = new Double(eval.rootRelativeSquaredError());
-
+    
     result[current++] = new Double(eval.SFPriorEntropy());
     result[current++] = new Double(eval.SFSchemeEntropy());
     result[current++] = new Double(eval.SFEntropyGain());
     result[current++] = new Double(eval.SFMeanPriorEntropy());
     result[current++] = new Double(eval.SFMeanSchemeEntropy());
     result[current++] = new Double(eval.SFMeanEntropyGain());
-
+    
     // K&B stats
     result[current++] = new Double(eval.KBInformation());
     result[current++] = new Double(eval.KBMeanInformation());
     result[current++] = new Double(eval.KBRelativeInformation());
-
+    
+    // Timing stats
+    result[current++] = new Double(trainTimeElapsed / 1000.0);
+    result[current++] = new Double(testTimeElapsed / 1000.0);
+    if(canMeasureCPUTime) {
+      result[current++] = new Double((trainCPUTimeElapsed/1000000.0) / 1000.0);
+      result[current++] = new Double((testCPUTimeElapsed /1000000.0) / 1000.0);
+    }
+    else {
+      result[current++] = new Double(Instance.missingValue());
+      result[current++] = new Double(Instance.missingValue());
+    }
+    
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
     } else {
@@ -351,23 +397,23 @@ public class CostSensitiveClassifierSplitEvaluator
     
     for (int i=0;i<addm;i++) {
       if (m_doesProduce[i]) {
-	try {
-	  double dv = ((AdditionalMeasureProducer)m_Classifier).
-	    getMeasure(m_AdditionalMeasures[i]);
-	  if (!Instance.isMissingValue(dv)) {
-	    Double value = new Double(dv);
-	    result[current++] = value;
-	  } else {
-	    result[current++] = null;
-	  }
-	} catch (Exception ex) {
-	  System.err.println(ex);
-	}
+        try {
+          double dv = ((AdditionalMeasureProducer)m_Classifier).
+          getMeasure(m_AdditionalMeasures[i]);
+          if (!Instance.isMissingValue(dv)) {
+            Double value = new Double(dv);
+            result[current++] = value;
+          } else {
+            result[current++] = null;
+          }
+        } catch (Exception ex) {
+          System.err.println(ex);
+        }
       } else {
-	result[current++] = null;
+        result[current++] = null;
       }
     }
-
+    
     if (current != RESULT_SIZE+addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
