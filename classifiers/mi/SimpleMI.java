@@ -80,7 +80,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class SimpleMI 
   extends SingleClassifierEnhancer
@@ -443,6 +443,7 @@ public class SimpleMI
       System.out.println("Start training ...");
     Instances data = transform(train); 
 
+    data.deleteAttributeAt(0); // delete the bagID attribute
     m_Classifier.buildClassifier(data);
 
     if (getDebug())
@@ -463,7 +464,9 @@ public class SimpleMI
     Instances test = new Instances (newBag.dataset(), 0);	
     test.add(newBag);	
 
-    Instance newInst=transform(test).firstInstance();
+    test = transform(test);
+    test.deleteAttributeAt(0);
+    Instance newInst=test.firstInstance();
 
     distribution = m_Classifier.distributionForInstance(newInst);
 
