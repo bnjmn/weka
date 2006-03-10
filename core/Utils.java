@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public final class Utils {
 
@@ -1197,9 +1197,9 @@ public final class Utils {
    */
   public static /*@pure@*/ double probToLogOdds(double prob) {
 
-    if ((prob > 1) || (prob < 0)) {
+    if (gr(prob, 1) || (sm(prob, 0))) {
       throw new IllegalArgumentException("probToLogOdds: probability must " +
-				     "be in [0,1]");
+				     "be in [0,1] "+prob);
     }
     double p = SMALL + (1.0 - 2 * SMALL) * prob;
     return Math.log(p / (1 - p));
