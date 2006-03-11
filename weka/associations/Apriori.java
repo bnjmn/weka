@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.1 $ */
+ * @version $Revision: 1.19.2.2 $ */
 
 public class Apriori extends Associator implements OptionHandler {
 
@@ -394,7 +394,7 @@ public class Apriori extends Associator implements OptionHandler {
 				    "-M <lower bound for minimum support>"));
     newVector.addElement(new Option(string6 + string7, "S", 1,
 				    "-S <significance level>"));
-    newVector.addElement(new Option(string8, "S", 0,
+    newVector.addElement(new Option(string8, "I", 0,
 				    "-I"));
     newVector.addElement(new Option("\tRemove columns that contain "
 				    +"all missing values (default = no)"
@@ -492,7 +492,7 @@ public class Apriori extends Associator implements OptionHandler {
    */
   public String [] getOptions() {
 
-    String [] options = new String [16];
+    String [] options = new String [17];
     int current = 0;
 
     if (m_outputItemSets) {
@@ -510,6 +510,8 @@ public class Apriori extends Associator implements OptionHandler {
     options[current++] = "-U"; options[current++] = ""+m_upperBoundMinSupport;
     options[current++] = "-M"; options[current++] = ""+m_lowerBoundMinSupport;
     options[current++] = "-S"; options[current++] = "" + m_significanceLevel;
+    if (m_verbose)
+      options[current++] = "-V";
 
     while (current < options.length) {
       options[current++] = "";
@@ -853,6 +855,56 @@ public class Apriori extends Associator implements OptionHandler {
   public void setSignificanceLevel(double v) {
     
     m_significanceLevel = v;
+  }
+
+  /**
+   * Sets whether itemsets are output as well
+   * @param flag true if itemsets are to be output as well
+   */  
+  public void setOutputItemSets(boolean flag){
+    m_outputItemSets = flag;
+  }
+  
+  /**
+   * Gets whether itemsets are output as well
+   * @return true if itemsets are output as well
+   */  
+  public boolean getOutputItemSets(){
+    return m_outputItemSets;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputItemSetsTipText() {
+    return "If enabled the itemsets are output as well.";
+  }
+
+  /**
+   * Sets verbose mode
+   * @param flag true if algorithm should be run in verbose mode
+   */  
+  public void setVerbose(boolean flag){
+    m_verbose = flag;
+  }
+  
+  /**
+   * Gets whether algorithm is run in verbose mode
+   * @return true if algorithm is run in verbose mode
+   */  
+  public boolean getVerbose(){
+    return m_verbose;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String verboseTipText() {
+    return "If enabled the algorithm will be run in verbose mode.";
   }
 
   /** 
