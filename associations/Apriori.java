@@ -128,7 +128,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class Apriori 
   extends Associator 
@@ -745,7 +745,10 @@ public class Apriori
     options[current++] = "-U"; options[current++] = "" + m_upperBoundMinSupport;
     options[current++] = "-M"; options[current++] = "" + m_lowerBoundMinSupport;
     options[current++] = "-S"; options[current++] = "" + m_significanceLevel;
-    options[current++] = "-A"; options[current++] = "" + m_car;
+    if (m_car)
+      options[current++] = "-A";
+    if (m_verbose)
+      options[current++] = "-V";
     options[current++] = "-c"; options[current++] = "" + m_classIndex;
     
     while (current < options.length) {
@@ -963,12 +966,12 @@ public class Apriori
     return "Index of the class attribute. If set to -1, the last attribute is taken as class attribute.";
 
   }
-     /**
+
+  /**
    * Sets class association rule mining
    * @param flag if class association rules are mined, false otherwise
    */  
   public void setCar(boolean flag){
-      
       m_car = flag;
   }
   
@@ -977,7 +980,6 @@ public class Apriori
    * @return true if class association rules are mined, false otherwise
    */  
   public boolean getCar(){
-      
       return m_car;
   }
 
@@ -1193,6 +1195,31 @@ public class Apriori
   public void setSignificanceLevel(double v) {
     
     m_significanceLevel = v;
+  }
+
+  /**
+   * Sets verbose mode
+   * @param flag true if algorithm should be run in verbose mode
+   */  
+  public void setVerbose(boolean flag){
+    m_verbose = flag;
+  }
+  
+  /**
+   * Gets whether algorithm is run in verbose mode
+   * @return true if algorithm is run in verbose mode
+   */  
+  public boolean getVerbose(){
+    return m_verbose;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String verboseTipText() {
+    return "If enabled the algorithm will be run in verbose mode.";
   }
 
   /** 
