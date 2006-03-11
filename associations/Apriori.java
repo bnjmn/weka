@@ -128,7 +128,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class Apriori 
   extends Associator 
@@ -1195,6 +1195,31 @@ public class Apriori
   public void setSignificanceLevel(double v) {
     
     m_significanceLevel = v;
+  }
+
+  /**
+   * Sets whether itemsets are output as well
+   * @param flag true if itemsets are to be output as well
+   */  
+  public void setOutputItemSets(boolean flag){
+    m_outputItemSets = flag;
+  }
+  
+  /**
+   * Gets whether itemsets are output as well
+   * @return true if itemsets are output as well
+   */  
+  public boolean getOutputItemSets(){
+    return m_outputItemSets;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputItemSetsTipText() {
+    return "If enabled the itemsets are output as well.";
   }
 
   /**
