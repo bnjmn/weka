@@ -76,7 +76,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.5 $
+ * @version $Revision: 1.7.2.6 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -148,24 +148,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 
   /* Register the property editors we need */
   static {
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(Object [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.CostMatrix.class,
-		      weka.gui.CostMatrixEditor.class);
+    GenericObjectEditor.registerEditors();
   }
 
   /**

@@ -91,7 +91,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.17.2.1 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -131,15 +131,7 @@ public class AssociationsPanel extends JPanel {
 
   /* Register the property editors we need */
   static {
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.associations.Associator.class,
-		      weka.gui.GenericObjectEditor.class);
+    GenericObjectEditor.registerEditors();
   }
   
   /**

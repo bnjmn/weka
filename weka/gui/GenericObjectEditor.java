@@ -22,15 +22,7 @@
 
 package weka.gui;
 
-import weka.gui.PropertySheetPanel;
-import weka.gui.SelectedTagEditor;
-import weka.gui.FileEditor;
-import weka.gui.PropertyDialog;
-
 import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Tag;
-import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -40,57 +32,41 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
 import java.awt.Window;
-import java.awt.Frame;
-import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.event.MenuListener;
-import javax.swing.event.MenuEvent;
-import javax.swing.event.MouseInputAdapter;
-
+import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-import javax.swing.event.TreeExpansionListener;
-import javax.swing.event.TreeExpansionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.event.TreeSelectionEvent;
+import javax.swing.tree.TreeSelectionModel;
 
 /**
  * A PropertyEditor for objects. It can be used either in a static or a dynamic
@@ -119,7 +95,7 @@ import javax.swing.event.TreeSelectionEvent;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.38.2.6 $
+ * @version $Revision: 1.38.2.7 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -157,11 +133,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** The property panel created for the objects */
   protected PropertyPanel m_ObjectPropertyPanel;
     
-
+  /** whether the class can be changed */
   protected boolean m_canChangeClassInDialog;
 
   /** whether to generate the properties dynamically or use the static props-file */
   protected final static boolean USE_DYNAMIC = true;
+  
+  /** whether the Weka Editors were already registered */
+  protected static boolean m_EditorsRegistered;
   
   /** 
    * Loads the configuration property file (USE_DYNAMIC is FALSE) or determines
@@ -606,6 +585,111 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
     m_canChangeClassInDialog = canChangeClassInDialog;
   }
+  
+  /**
+   * registers all the editors in Weka
+   */
+  public static void registerEditors() {
+    if (m_EditorsRegistered)
+      return;
+    
+    System.err.println("---Registering Weka Editors---");
+    m_EditorsRegistered = true;
+
+    // general
+    java.beans.PropertyEditorManager.registerEditor(
+        Object[].class,
+        weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        java.io.File.class,
+        FileEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        java.text.SimpleDateFormat.class,
+        SimpleDateFormatEditor.class);
+    
+    // core
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.core.SelectedTag.class, 
+        weka.gui.SelectedTagEditor.class);
+    
+    // converters
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.core.converters.Loader.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.core.converters.Saver.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // estimators
+    java.beans.PropertyEditorManager.registerEditor(
+	weka.estimators.Estimator.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.estimators.Estimator[].class, 
+        weka.gui.GenericArrayEditor.class);
+    
+    // filters
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.filters.Filter.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.filters.Filter[].class, 
+        weka.gui.GenericArrayEditor.class);
+    
+    // classifiers
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.Classifier.class, 
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.Classifier[].class, 
+        weka.gui.GenericArrayEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.CostMatrix.class, 
+        weka.gui.CostMatrixEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.bayes.net.search.SearchAlgorithm.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.bayes.net.estimate.BayesNetEstimator.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // experiment
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.experiment.ResultListener.class,
+        GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.experiment.ResultProducer.class,
+        GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.experiment.SplitEvaluator.class,
+        GenericObjectEditor.class);
+    
+
+    // associations
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.associations.Associator.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // clusterers
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.clusterers.Clusterer.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.clusterers.DensityBasedClusterer.class,
+        weka.gui.GenericObjectEditor.class);
+    
+    // attribute selection
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.attributeSelection.ASEvaluation.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.attributeSelection.ASSearch.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.attributeSelection.UnsupervisedSubsetEvaluator.class,
+         GenericObjectEditor.class);
+  }
+
   
   /**
    * returns the name of the root element of the given class name, 
@@ -1216,28 +1300,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public static void main(String [] args) {
 
     try {
-      System.err.println("---Registering Weka Editors---");
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.experiment.ResultProducer.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.experiment.SplitEvaluator.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.classifiers.Classifier.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.attributeSelection.ASEvaluation.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.attributeSelection.ASSearch.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(SelectedTag.class,
-			SelectedTagEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(java.io.File.class,
-			FileEditor.class);
+      GenericObjectEditor.registerEditors();
       GenericObjectEditor ce = new GenericObjectEditor(true);
       ce.setClassType(weka.classifiers.Classifier.class);
       Object initial = new weka.classifiers.rules.ZeroR();

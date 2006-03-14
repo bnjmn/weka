@@ -68,7 +68,7 @@ import javax.swing.JOptionPane;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.13.2.1 $
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -499,19 +499,8 @@ public class GenericArrayEditor extends JPanel
   public static void main(String [] args) {
 
     try {
-      System.err.println("---Registering Weka Editors---");
-      java.beans.PropertyEditorManager
-	.registerEditor(Classifier.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(SelectedTag.class,
-			SelectedTagEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(weka.filters.Filter.class,
-			GenericObjectEditor.class);
-      java.beans.PropertyEditorManager
-	.registerEditor(String [].class,
-			GenericArrayEditor.class);
+      GenericObjectEditor.registerEditors();
+      
       final GenericArrayEditor ce = new GenericArrayEditor();
 
       final weka.filters.Filter [] initial = new weka.filters.Filter [0];

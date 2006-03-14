@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.45.2.3 $
+ * @version $Revision: 1.45.2.4 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -240,18 +240,7 @@ public class ClustererPanel extends JPanel {
 
   /* Register the property editors we need */
   static {
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.clusterers.Clusterer.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.clusterers.DensityBasedClusterer.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.UnsupervisedSubsetEvaluator.class,
-		      weka.gui.GenericObjectEditor.class);
+    GenericObjectEditor.registerEditors();
   }
   
   /**

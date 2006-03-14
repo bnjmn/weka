@@ -110,7 +110,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.1 $
+ * @version $Revision: 1.31.2.2 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -192,30 +192,7 @@ public class AttributeSelectionPanel extends JPanel {
 
   /* Register the property editors we need */
   static {
-    java.beans.PropertyEditorManager
-      .registerEditor(java.io.File.class,
-                      FileEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(Object [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASEvaluation.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASSearch.class,
-		      weka.gui.GenericObjectEditor.class);
+    GenericObjectEditor.registerEditors();
   }
   
   /**

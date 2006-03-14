@@ -55,45 +55,12 @@ import weka.core.converters.DatabaseSaver;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class SaverCustomizer extends JPanel implements Customizer, CustomizerCloseRequester {
 
   static {
-
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.converters.Saver.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.converters.Loader.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASEvaluation.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(Object [].class,
-		      weka.gui.GenericArrayEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.Classifier.class,
-		      weka.gui.GenericObjectEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.classifiers.CostMatrix.class,
-		      weka.gui.CostMatrixEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(java.io.File.class,
-		      weka.gui.FileEditor.class);
+    GenericObjectEditor.registerEditors();
   }
 
   private PropertyChangeSupport m_pcSupport = 

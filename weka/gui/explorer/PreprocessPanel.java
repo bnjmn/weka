@@ -84,7 +84,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.50.2.2 $
+ * @version $Revision: 1.50.2.3 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -187,30 +187,7 @@ public class PreprocessPanel extends JPanel {
   protected Logger m_Log = new SysErrLog();
   
   static {
-    java.beans.PropertyEditorManager
-      .registerEditor(java.io.File.class,
-                      FileEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.core.SelectedTag.class,
-		      weka.gui.SelectedTagEditor.class);
-    java.beans.PropertyEditorManager
-      .registerEditor(weka.filters.Filter.class,
-		      weka.gui.GenericObjectEditor.class);
-     java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASSearch.class,
-		      weka.gui.GenericObjectEditor.class);
-     java.beans.PropertyEditorManager
-      .registerEditor(weka.attributeSelection.ASEvaluation.class,
-		      weka.gui.GenericObjectEditor.class);
-     java.beans.PropertyEditorManager
-      .registerEditor(weka.experiment.InstanceQuery.class,
-		      weka.gui.GenericObjectEditor.class);
-     java.beans.PropertyEditorManager
-       .registerEditor(weka.core.converters.Loader.class,
-		      weka.gui.GenericObjectEditor.class);
-     java.beans.PropertyEditorManager
-       .registerEditor(weka.core.converters.Saver.class,
-		      weka.gui.GenericObjectEditor.class);
+    GenericObjectEditor.registerEditors();
   }
   
   /**
