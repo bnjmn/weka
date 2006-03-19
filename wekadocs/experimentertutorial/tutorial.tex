@@ -13,6 +13,7 @@
 \hyphenation{Cross-Validation-Result-Producer}
 \hyphenation{Random-Split-Result-Producer}
 \hyphenation{Database-Result-Listener}
+\hyphenation{DatabaseUtils}
 
 \begin{document}
 
@@ -616,7 +617,8 @@ For the following examples, we assume a user called \textit{johndoe} with this s
 \begin{itemize}
 	\item Access to a set of computers running a flavour of Unix (pathnames need to be changed for Windows)
    \item The home directory is located at \texttt{/home/johndoe} 
-   \item This remote experiment description uses the HSQLDB \cite{hsql} database, which requires editing the \textit{DatabaseUtils.props} file 
+   \item This remote experiment description uses the HSQLDB \cite{hsql} database, which requires editing the \textit{DatabaseUtils.props} file
+    \item HSQLDB needs special parameter settings being transferred from \textit{DatabaseUtils.props.hsql} to  \textit{DatabaseUtils.props}
 	\item The jar archive for HSQLDB is located here: \texttt{/home/johndoe/hsqldb.jar} 
 \end{itemize}
 
