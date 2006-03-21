@@ -128,7 +128,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.60 $
+ * @version  $Revision: 1.61 $
  */
 public class Evaluation implements Summarizable {
 
@@ -566,7 +566,7 @@ public class Evaluation implements Summarizable {
     String trainFileName, testFileName, sourceClass, 
       classIndexString, seedString, foldsString, objectInputFileName, 
       objectOutputFileName, attributeRangeString;
-    boolean IRstatistics = false, noOutput = false,
+    boolean noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
       printGraph = false, classStatistics = false, printSource = false;
@@ -579,9 +579,9 @@ public class Evaluation implements Summarizable {
     Range attributesToOutput = null;
     long trainTimeStart = 0, trainTimeElapsed = 0,
       testTimeStart = 0, testTimeElapsed = 0;
-    Instances originalTrain = null;
     String xml = "";
     String[] optionsTmp = null;
+    Classifier classifierBackup;
 
     try {
       // do we get the input from XML instead of normal parameters?
@@ -771,6 +771,9 @@ public class Evaluation implements Summarizable {
       }
     }
 
+    // backup of fully setup classifier for cross-validation
+    classifierBackup = Classifier.makeCopy(classifier);
+    
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier) &&
 	(testFileName.length() != 0) &&
@@ -946,6 +949,8 @@ public class Evaluation implements Summarizable {
 
       // Testing is via cross-validation on training data
       Random random = new Random(seed);
+      // use untrained (!) classifier for cross-validation
+      classifier = Classifier.makeCopy(classifierBackup);
       testingEvaluation.crossValidateModel(classifier, train, folds, random);
       if (template.classAttribute().isNumeric()) {
 	text.append("\n\n\n" + testingEvaluation.
