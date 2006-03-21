@@ -41,13 +41,16 @@ import javax.swing.table.AbstractTableModel;
  * Represents a TableModel with sorting functionality.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class SortedTableModel
   extends AbstractTableModel
   implements TableModelListener {
 
+  /** for serialization */
+  static final long serialVersionUID = 4030907921461127548L;
+  
   /** the actual table model */
   protected TableModel mModel;
 
@@ -135,6 +138,20 @@ public class SortedTableModel
     return (getModel() != null);
   }
 
+  /**
+   * Returns the actual underlying row the given visible one represents. Useful
+   * for retrieving "non-visual" data that is also stored in a TableModel.
+   * 
+   * @param visibleRow	the displayed row to retrieve the original row for
+   * @return		the original row
+   */
+  public int getActualRow(int visibleRow) {
+    if (!isInitialized())
+      return -1;
+    else
+      return mIndices[visibleRow];
+  }
+  
   /**
    * Returns the most specific superclass for all the cell values in the
    * column.
