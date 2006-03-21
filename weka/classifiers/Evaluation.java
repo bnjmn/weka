@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.53.2.2 $
+ * @version  $Revision: 1.53.2.3 $
   */
 public class Evaluation implements Summarizable {
 
@@ -518,7 +518,7 @@ public class Evaluation implements Summarizable {
     String trainFileName, testFileName, sourceClass, 
       classIndexString, seedString, foldsString, objectInputFileName, 
       objectOutputFileName, attributeRangeString;
-    boolean IRstatistics = false, noOutput = false,
+    boolean noOutput = false,
       printClassifications = false, trainStatistics = true,
       printMargins = false, printComplexityStatistics = false,
       printGraph = false, classStatistics = false, printSource = false;
@@ -530,6 +530,7 @@ public class Evaluation implements Summarizable {
     Range attributesToOutput = null;
     long trainTimeStart = 0, trainTimeElapsed = 0,
       testTimeStart = 0, testTimeElapsed = 0;
+    Classifier classifierBackup;
     
     try {
 
@@ -684,6 +685,9 @@ public class Evaluation implements Summarizable {
       classifier = (Classifier) objectInputStream.readObject();
       objectInputStream.close();
     }
+    
+    // backup of fully setup classifier for cross-validation
+    classifierBackup = Classifier.makeCopy(classifier);
     
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier) &&
@@ -843,6 +847,8 @@ public class Evaluation implements Summarizable {
 
       // Testing is via cross-validation on training data
       Random random = new Random(seed);
+      // use untrained (!) classifier for cross-validation
+      classifier = Classifier.makeCopy(classifierBackup);
       testingEvaluation.crossValidateModel(classifier, train, folds, random);
       if (template.classAttribute().isNumeric()) {
 	text.append("\n\n\n" + testingEvaluation.
