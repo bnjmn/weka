@@ -37,7 +37,8 @@ import weka.core.WeightedInstancesHandler;
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
  * @author Niels Landwehr
- * @version $Revision: 1.4 $
+ * @author Marc Sumner
+ * @version $Revision: 1.5 $
  */
 
 public class LogisticBase 
@@ -89,6 +90,17 @@ public class LogisticBase
 
     /**Threshold on the Z-value for LogitBoost*/
     protected static final double Z_MAX = 3;
+    
+    /** If true, the AIC is used to choose the best iteration*/
+    private boolean m_useAIC = false;
+    
+    /** Effective number of parameters used for AIC / BIC automatic stopping */
+    protected double m_numParameters = 0;
+    
+    /**Threshold for trimming weights. Instances with a weight lower than this (as a percentage
+     * of total weights) are not included in the regression fit.
+     **/
+    protected double m_weightTrimBeta = 0;
 
     /**
      * Constructor that creates LogisticBase object with standard options.
@@ -98,6 +110,8 @@ public class LogisticBase
 	m_useCrossValidation = true;
 	m_errorOnProbabilities = false;	
 	m_maxIterations = 500;
+        m_useAIC = false;
+        m_numParameters = 0;
     }
     
     /**
@@ -114,6 +128,8 @@ public class LogisticBase
 	m_useCrossValidation = useCrossValidation;
 	m_errorOnProbabilities = errorOnProbabilities;	
 	m_maxIterations = 500;
+        m_useAIC = false;
+        m_numParameters = 0;
     }    
 
     /**
@@ -142,7 +158,10 @@ public class LogisticBase
 	if (m_fixedNumIterations > 0) {
 	    //run LogitBoost for fixed number of iterations
 	    performBoosting(m_fixedNumIterations);
-	} else if (m_useCrossValidation) {
+	} else if (m_useAIC) { // Marc had this after the test for m_useCrossValidation. Changed by Eibe.
+            //run LogitBoost using information criterion for stopping
+            performBoostingInfCriterion();
+        } else if (m_useCrossValidation) {
 	    //cross-validate number of LogitBoost iterations
 	    performBoostingCV();
 	} else {
@@ -193,6 +212,61 @@ public class LogisticBase
 	m_numRegressions = 0;
 	performBoosting(bestIteration);
     }    
+    
+    /**
+     * Runs LogitBoost, determining the best number of iterations by an information criterion (currently AIC).
+     */
+    protected void performBoostingInfCriterion() throws Exception{
+        
+        double criterion = 0.0;
+        double bestCriterion = Double.MAX_VALUE;
+        int bestIteration = 0;
+        int noMin = 0;
+        
+        // Variable to keep track of criterion values (AIC)
+        double criterionValue = Double.MAX_VALUE;
+        
+        // initialize Ys/Fs/ps
+        double[][] trainYs = getYs(m_train);
+        double[][] trainFs = getFs(m_numericData);
+        double[][] probs = getProbs(trainFs);
+        
+        // Array with true/false if the attribute is included in the model or not
+        boolean[][] attributes = new boolean[m_numClasses][m_numericDataHeader.numAttributes()];
+        
+        int iteration = 0;
+        while (iteration < m_maxIterations) {
+            
+            //perform single LogitBoost iteration
+            boolean foundAttribute = performIteration(iteration, trainYs, trainFs, probs, m_numericData);
+            if (foundAttribute) {
+                iteration++;
+                m_numRegressions = iteration;
+            } else {
+                //could not fit simple linear regression: stop LogitBoost
+                break;
+            }
+            
+            double numberOfAttributes = m_numParameters + iteration;
+            
+            // Fill criterion array values
+            criterionValue = 2.0 * negativeLogLikelihood(trainYs, probs) +
+              2.0 * numberOfAttributes;
+
+            //heuristic: stop LogitBoost if the current minimum has not changed for <m_heuristicStop> iterations
+            if (noMin > m_heuristicStop) break;
+            if (criterionValue < bestCriterion) {
+                bestCriterion = criterionValue;
+                bestIteration = iteration;
+                noMin = 0;
+            } else {
+                noMin++;
+            }
+        }
+
+        m_numRegressions = 0;
+        performBoosting(bestIteration);
+    }
 
     /**
      * Runs LogitBoost on a training set and monitors the error on a test set.
@@ -386,6 +460,9 @@ public class LogisticBase
 				       Instances trainNumeric) throws Exception {
 	
 	for (int j = 0; j < m_numClasses; j++) {
+            // Keep track of sum of weights
+            double[] weights = new double[trainNumeric.numInstances()];
+            double weightSum = 0.0;
 	    
 	    //make copy of data (need to save the weights) 
 	    Instances boostData = new Instances(trainNumeric);
@@ -402,10 +479,39 @@ public class LogisticBase
 		Instance current = boostData.instance(i);
 		current.setValue(boostData.classIndex(), z);
 		current.setWeight(current.weight() * w);				
+                
+                weights[i] = current.weight();
+                weightSum += current.weight();
 	    }
+            
+            Instances instancesCopy = new Instances(boostData);
+            
+            if (weightSum > 0) {
+                // Only the (1-beta)th quantile of instances are sent to the base classifier
+                if (m_weightTrimBeta > 0) {
+                    double weightPercentage = 0.0;
+                    int[] weightsOrder = new int[trainNumeric.numInstances()];
+                    weightsOrder = Utils.sort(weights);
+                    instancesCopy.delete();
+                    
+                    
+                    for (int i = weightsOrder.length-1; (i >= 0) && (weightPercentage < (1-m_weightTrimBeta)); i--) {
+                        instancesCopy.add(boostData.instance(weightsOrder[i]));
+                        weightPercentage += (weights[weightsOrder[i]] / weightSum);
+                        
+                    }
+                }
+                
+                //Scale the weights
+                weightSum = instancesCopy.sumOfWeights();
+                for (int i = 0; i < instancesCopy.numInstances(); i++) {
+                    Instance current = instancesCopy.instance(i);
+                    current.setWeight(current.weight() * (double)instancesCopy.numInstances() / weightSum);
+                }
+            }
 	    
 	    //fit simple regression function
-	    m_regressions[j][iteration].buildClassifier(boostData);
+	    m_regressions[j][iteration].buildClassifier(instancesCopy);
 	    
 	    boolean foundAttribute = m_regressions[j][iteration].foundUsefulAttribute();
 	    if (!foundAttribute) {
@@ -663,14 +769,14 @@ public class LogisticBase
     }
     
     /**
-     * Returns the likelihood of the Y-values (actual class probabilities) given the 
+     * Returns the negative loglikelihood of the Y-values (actual class probabilities) given the 
      * p-values (current probability estimates).
      * 
      * @param dataYs the Y-values
      * @param probs the p-values
      * @return the likelihood
      */
-    protected double logLikelihood(double[][] dataYs, double[][] probs) {
+    protected double negativeLogLikelihood(double[][] dataYs, double[][] probs) {
 	
 	double logLikelihood = 0;
 	for (int i = 0; i < dataYs.length; i++) {
@@ -680,7 +786,7 @@ public class LogisticBase
 		}
 	    }
 	}
-	return logLikelihood / (double)dataYs.length;
+	return logLikelihood;// / (double)dataYs.length;
     }
 
     /**
@@ -733,6 +839,24 @@ public class LogisticBase
     public int getNumRegressions() {
 	return m_numRegressions;
     }
+    
+    /**
+     * Get the value of weightTrimBeta.
+     *
+     * @return Value of weightTrimBeta.
+     */
+    public double getWeightTrimBeta(){
+        return m_weightTrimBeta;
+    }
+    
+    /**
+     * Get the value of useAIC.
+     *
+     * @return Value of useAIC.
+     */
+    public boolean getUseAIC(){
+        return m_useAIC;
+    }
 
     /**
      * Sets the parameter "maxIterations".
@@ -750,6 +874,22 @@ public class LogisticBase
      */
     public void setHeuristicStop(int heuristicStop){
 	m_heuristicStop = heuristicStop;
+    }
+    
+    /**
+     * Sets the option "weightTrimBeta".
+     */
+    public void setWeightTrimBeta(double w){
+        m_weightTrimBeta = w;
+    }
+    
+    /**
+     * Set the value of useAIC.
+     *
+     * @param c Value to assign to useAIC.
+     */
+    public void setUseAIC(boolean c){
+        m_useAIC = c;
     }
 
     /**

@@ -97,7 +97,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.6 $
+ * @author Marc Sumner 
+ * @version $Revision: 1.7 $
  */
 public class LMT 
   extends Classifier 
@@ -134,6 +135,14 @@ public class LMT
   /**if non-zero, use fixed number of iterations for LogitBoost*/
   protected int m_numBoostingIterations;
     
+  /**Threshold for trimming weights. Instances with a weight lower than this (as a percentage
+   * of total weights) are not included in the regression fit.
+   **/
+  protected double m_weightTrimBeta;
+  
+  /** If true, the AIC is used to choose the best LogitBoost iteration*/
+  private boolean m_useAIC = false;
+  
   /**
    * Creates an instance of LMT with standard options
    */
@@ -141,6 +150,8 @@ public class LMT
     m_fastRegression = true;
     m_numBoostingIterations = -1;
     m_minNumInstances = 15;
+    m_weightTrimBeta = 0;
+    m_useAIC = false;
   }    
 
   /**
@@ -203,7 +214,7 @@ public class LMT
 	
     //create tree root
     m_tree = new LMTNode(modSelection, m_numBoostingIterations, m_fastRegression, 
-			 m_errorOnProbabilities, m_minNumInstances);
+			 m_errorOnProbabilities, m_minNumInstances, m_weightTrimBeta, m_useAIC);
     //build tree
     m_tree.buildClassifier(filteredData);
 
@@ -267,7 +278,7 @@ public class LMT
       return "No tree build";
     }
   }    
-
+    
   /**
    * Returns an enumeration describing the available options.
    *
@@ -275,28 +286,35 @@ public class LMT
    */
   public Enumeration listOptions() {
     Vector newVector = new Vector(8);
-  	
-    newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)", 
-				    "B", 0, "-B"));
-
-    newVector.addElement(new Option("\tSplit on residuals instead of class values", 
-				    "R", 0, "-R"));
-
-    newVector.addElement(new Option("\tUse cross-validation for boosting at all nodes (i.e., disable heuristic)", 
-				    "C", 0, "-C"));
-		
+    
+    newVector.addElement(new Option("\tBinary splits (convert nominal attributes to binary ones)\n",
+                                    "B", 0, "-B"));
+    
+    newVector.addElement(new Option("\tSplit on residuals instead of class values\n",
+                                    "R", 0, "-R"));
+    
+    newVector.addElement(new Option("\tUse cross-validation for boosting at all nodes (i.e., disable heuristic)\n",
+                                    "C", 0, "-C"));
+    
     newVector.addElement(new Option("\tUse error on probabilities instead of misclassification error "+
-				    "for stopping criterion of LogitBoost.", 
-				    "P", 0, "-P"));
-
+                                    "for stopping criterion of LogitBoost.\n",
+                                    "P", 0, "-P"));
+    
     newVector.addElement(new Option("\tSet fixed number of iterations for LogitBoost (instead of using "+
-				    "cross-validation)",
-				    "I",1,"-I <numIterations>"));
-	
-    newVector.addElement(new Option("\tSet minimum number of instances at which a node can be split (default 15)",
-				    "M",1,"-M <numInstances>"));
+                                    "cross-validation)\n",
+                                    "I",1,"-I <numIterations>"));
+    
+    newVector.addElement(new Option("\tSet minimum number of instances at which a node can be split (default 15)\n",
+                                    "M",1,"-M <numInstances>"));
+    
+    newVector.addElement(new Option("\tSet beta for weight trimming for LogitBoost. Set to 0 (default) for no weight trimming.\n",
+                                    "W",1,"-W <beta>"));
+    
+    newVector.addElement(new Option("\tThe AIC is used to choose the best iteration.\n",
+                                    "A", 0, "-A"));
+    
     return newVector.elements();
-  } 
+  }
     
   /**
    * Parses a given list of options. <p/>
@@ -343,7 +361,14 @@ public class LMT
     if (optionString.length() != 0) {
       setMinNumInstances((new Integer(optionString)).intValue());
     }
-	
+
+    optionString = Utils.getOption('W', options);
+    if (optionString.length() != 0) {
+      setWeightTrimBeta((new Double(optionString)).doubleValue());
+    }
+    
+    setUseAIC(Utils.getFlag('A', options));        
+    
     Utils.checkForRemainingOptions(options);
 	
   } 
@@ -354,7 +379,7 @@ public class LMT
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[8];
+    String[] options = new String[11];
     int current = 0;
 
     if (getConvertNominal()) {
@@ -378,13 +403,52 @@ public class LMT
 
     options[current++] = "-M"; 
     options[current++] = ""+getMinNumInstances();
-	
+        
+    options[current++] = "-W";
+    options[current++] = ""+getWeightTrimBeta();
+    
+    if (getUseAIC()) {
+      options[current++] = "-A";
+    }
+    
     while (current < options.length) {
       options[current++] = "";
     } 
     return options;
   } 
 
+  /**
+   * Get the value of weightTrimBeta.
+   */
+  public double getWeightTrimBeta(){
+    return m_weightTrimBeta;
+  }
+  
+  /**
+   * Get the value of useAIC.
+   *
+   * @return Value of useAIC.
+   */
+  public boolean getUseAIC(){
+    return m_useAIC;
+  }
+    
+  /**
+   * Set the value of weightTrimBeta.
+   */
+  public void setWeightTrimBeta(double n){
+    m_weightTrimBeta = n;
+  }
+  
+  /**
+   * Set the value of useAIC.
+   *
+   * @param c Value to assign to useAIC.
+   */
+  public void setUseAIC(boolean c){
+    m_useAIC = c;
+  }
+  
   /**
    * Get the value of convertNominal.
    *
@@ -581,13 +645,22 @@ public class LMT
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.INPROCEEDINGS);
+      
+    result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
     result.setValue(Field.TITLE, "Logistic Model Trees");
-    result.setValue(Field.BOOKTITLE, "14th European Conference on Machine Learning");
-    result.setValue(Field.YEAR, "2003");
-    result.setValue(Field.PAGES, "241-252");
+    result.setValue(Field.BOOKTITLE, "Machine Learning");
+    result.setValue(Field.YEAR, "2005");
+    result.setValue(Field.VOLUME, "95");
+    result.setValue(Field.PAGES, "161-205");
+    result.setValue(Field.NUMBER, "1-2");
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Marc Sumner and Eibe Frank and Mark Hall");
+    result.setValue(Field.TITLE, "Speeding up Logistic Model Tree Induction");
+    result.setValue(Field.BOOKTITLE, "9th European Conference on Principles and Practice of Knowledge Discovery in Databases");
+    result.setValue(Field.YEAR, "2005");
+    result.setValue(Field.PAGES, "675-683");
     result.setValue(Field.PUBLISHER, "Springer");
     
     return result;
@@ -661,6 +734,28 @@ public class LMT
     return "Set the minimum number of instances at which a node is considered for splitting. "
       +"The default value is 15.";
   }  
+    
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String weightTrimBetaTipText() {
+        return "Set the beta value used for weight trimming in LogitBoost. "
+        +"Only instances carrying (1 - beta)% of the weight from previous iteration "
+        +"are used in the next iteration. Set to 0 for no weight trimming. "
+        +"The default value is 0.";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String useAICTipText() {
+        return "The AIC is used to determine when to stop LogitBoost iterations. "
+        +"The default is not to use AIC.";
+    }
 
   /**
    * Main method for testing this class

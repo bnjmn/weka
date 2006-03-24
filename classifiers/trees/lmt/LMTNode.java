@@ -61,7 +61,8 @@ class CompareNode
  * 
  * 
  * @author Niels Landwehr 
- * @version $Revision: 1.3 $
+ * @author Marc Sumner 
+ * @version $Revision: 1.4 $
  */
 public class LMTNode 
     extends LogisticBase {   
@@ -131,13 +132,16 @@ public class LMTNode
      */
     public LMTNode(ModelSelection modelSelection, int numBoostingIterations, 
 		   boolean fastRegression, 
-		    boolean errorOnProbabilities, int minNumInstances) {
+                   boolean errorOnProbabilities, int minNumInstances,
+                   double weightTrimBeta, boolean useAIC) {
 	m_modelSelection = modelSelection;
 	m_fixedNumIterations = numBoostingIterations;      
 	m_fastRegression = fastRegression;
 	m_errorOnProbabilities = errorOnProbabilities;
 	m_minNumInstances = minNumInstances;
 	m_maxIterations = 200;
+        setWeightTrimBeta(weightTrimBeta);
+        setUseAIC(useAIC);
     }         
     
     /**
@@ -166,7 +170,7 @@ public class LMTNode
 	    Instances train = cvData.trainCV(m_numFoldsPruning, i);
 	    Instances test = cvData.testCV(m_numFoldsPruning, i);
 	    
-	    buildTree(train, null, train.numInstances());	
+	    buildTree(train, null, train.numInstances() , 0);	
 	    
 	    int numNodes = getNumInnerNodes();	   
 	    alphas[i] = new double[numNodes + 2];
@@ -177,7 +181,7 @@ public class LMTNode
 	}
 	
 	//build tree using all the data
-	buildTree(data, null, data.numInstances());
+	buildTree(data, null, data.numInstances(), 0);
 	int numNodes = getNumInnerNodes();
 
 	double[] treeAlphas = new double[numNodes + 2];	
@@ -231,10 +235,12 @@ public class LMTNode
      * levels in the tree. They represent a logistic regression model that is refined locally 
      * at this node.
      * @param totalInstanceWeight the total number of training examples
+     * @param higherNumParameters effective number of parameters in the logistic regression model built
+     * in parent nodes
      * @throws Exception if something goes wrong
      */
     public void buildTree(Instances data, SimpleLinearRegression[][] higherRegressions, 
-			  double totalInstanceWeight) throws Exception{
+			  double totalInstanceWeight, double higherNumParameters) throws Exception{
 
 	//save some stuff
 	m_totalInstanceWeight = totalInstanceWeight;
@@ -257,15 +263,21 @@ public class LMTNode
 	else m_higherRegressions = new SimpleLinearRegression[m_numClasses][0];	
 
 	m_numHigherRegressions = m_higherRegressions[0].length;	
-	
-	//build logistic model
-	if (m_numInstances >= m_numFoldsBoosting) {	    
-	    if (m_fixedNumIterations > 0){
-		performBoosting(m_fixedNumIterations);
-	    } else {
-		performBoostingCV();
-	    }
-	}
+        
+        m_numParameters = higherNumParameters;
+        
+        //build logistic model
+        if (m_numInstances >= m_numFoldsBoosting) {
+            if (m_fixedNumIterations > 0){
+                performBoosting(m_fixedNumIterations);
+            } else if (getUseAIC()) {
+                performBoostingInfCriterion();
+            } else {
+                performBoostingCV();
+            }
+        }
+        
+        m_numParameters += m_numRegressions;
 	
 	//only keep the simple regression functions that correspond to the selected number of LogitBoost iterations
 	m_regressions = selectRegressions(m_regressions);
@@ -298,12 +310,13 @@ public class LMTNode
 	    for (int i = 0; i < m_sons.length; i++) {
 		m_sons[i] = new LMTNode(m_modelSelection, m_fixedNumIterations, 
 					 m_fastRegression,  
-					 m_errorOnProbabilities,m_minNumInstances);
+					 m_errorOnProbabilities,m_minNumInstances,
+                                        getWeightTrimBeta(), getUseAIC());
 		//the "higherRegressions" (partial logistic model fit at higher levels in the tree) passed
 		//on to the children are the "higherRegressions" at this node plus the regressions added
 		//at this node (m_regressions).
 		m_sons[i].buildTree(localInstances[i],
-				  mergeArrays(m_regressions, m_higherRegressions), m_totalInstanceWeight);		
+				  mergeArrays(m_regressions, m_higherRegressions), m_totalInstanceWeight, m_numParameters);		
 		localInstances[i] = null;
 	    }	    
 	} 
@@ -455,6 +468,8 @@ public class LMTNode
 	
 	//limit LogitBoost to 200 iterations (speed)
 	logistic.setMaxIterations(200);
+        logistic.setWeightTrimBeta(getWeightTrimBeta()); // Not in Marc's code. Added by Eibe.
+        logistic.setUseAIC(getUseAIC());
 	logistic.buildClassifier(filteredData);
 	
 	//return best number of iterations
