@@ -105,7 +105,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Niels Landwehr 
- * @version $Revision: 1.8 $
+ * @author Marc Sumner 
+ * @version $Revision: 1.9 $
  */
 public class SimpleLogistic 
   extends Classifier 
@@ -138,6 +139,14 @@ public class SimpleLogistic
 
     /**If true, use minimize error on probabilities instead of misclassification error*/
     protected boolean m_errorOnProbabilities;
+    
+    /**Threshold for trimming weights. Instances with a weight lower than this (as a percentage
+     * of total weights) are not included in the regression fit.
+     */
+    protected double m_weightTrimBeta = 0;
+    
+    /** If true, the AIC is used to choose the best iteration*/
+    private boolean m_useAIC = false;
 
     /**
      * Constructor for creating SimpleLogistic object with standard options.
@@ -146,6 +155,8 @@ public class SimpleLogistic
 	m_numBoostingIterations = 0;
 	m_useCrossValidation = true;
 	m_errorOnProbabilities = false;
+        m_weightTrimBeta = 0;
+        m_useAIC = false;
     }
 
     /**
@@ -159,6 +170,8 @@ public class SimpleLogistic
   	m_numBoostingIterations = numBoostingIterations;
 	m_useCrossValidation = useCrossValidation;
 	m_errorOnProbabilities = errorOnProbabilities;
+        m_weightTrimBeta = 0;
+        m_useAIC = false;
     }
 
     /**
@@ -210,6 +223,8 @@ public class SimpleLogistic
 	m_boostedModel = new LogisticBase(m_numBoostingIterations, m_useCrossValidation, m_errorOnProbabilities);
 	m_boostedModel.setMaxIterations(m_maxBoostingIterations);
 	m_boostedModel.setHeuristicStop(m_heuristicStop);
+        m_boostedModel.setWeightTrimBeta(m_weightTrimBeta);
+        m_boostedModel.setUseAIC(m_useAIC);
 	
 	//build logistic model
 	m_boostedModel.buildClassifier(data);
@@ -269,6 +284,12 @@ public class SimpleLogistic
 	    + "\tBy default, heuristic is enabled with value 50. Set to\n"
 	    + "\tzero to disable heuristic.",
 	    "H",1,"-H <iterations>"));
+        
+        newVector.addElement(new Option("\tSet beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.\n",
+                                        "W",1,"-W <beta>"));
+        
+        newVector.addElement(new Option("\tThe AIC is used to choose the best iteration (instead of CV or training error).\n",
+                                        "A", 0, "-A"));
 	
 	return newVector.elements();
     } 
@@ -326,6 +347,13 @@ public class SimpleLogistic
 	if (optionString.length() != 0) {
 	    setHeuristicStop((new Integer(optionString)).intValue());
 	}
+        
+        optionString = Utils.getOption('W', options);
+        if (optionString.length() != 0) {
+            setWeightTrimBeta((new Double(optionString)).doubleValue());
+        }
+        
+        setUseAIC(Utils.getFlag('A', options));        
 
 	Utils.checkForRemainingOptions(options);
     } 
@@ -336,7 +364,7 @@ public class SimpleLogistic
      * @return an array of strings suitable for passing to setOptions
      */
     public String[] getOptions() {
-	String[] options = new String[9];
+	String[] options = new String[11];
 	int current = 0;
 		
 	options[current++] = "-I"; 
@@ -355,6 +383,13 @@ public class SimpleLogistic
 	
 	options[current++] = "-H"; 
 	options[current++] = ""+getHeuristicStop();
+        
+        options[current++] = "-W";
+        options[current++] = ""+getWeightTrimBeta();
+        
+        if (getUseAIC()) {
+            options[current++] = "-A";
+        }
 
 	while (current < options.length) {
 	    options[current++] = "";
@@ -408,6 +443,22 @@ public class SimpleLogistic
     }
     
     /**
+     * Get the value of weightTrimBeta.
+     */
+    public double getWeightTrimBeta(){
+        return m_weightTrimBeta;
+    }
+    
+    /**
+     * Get the value of useAIC.
+     *
+     * @return Value of useAIC.
+     */
+    public boolean getUseAIC(){
+        return m_useAIC;
+    }
+    
+    /**
      * Set the value of numBoostingIterations.
      * 
      * @param n the number of boosting iterations
@@ -454,6 +505,22 @@ public class SimpleLogistic
 	  m_heuristicStop = m_maxBoostingIterations; 
 	else 
 	  m_heuristicStop = n;
+    }
+    
+    /**
+     * Set the value of weightTrimBeta.
+     */
+    public void setWeightTrimBeta(double n){
+        m_weightTrimBeta = n;
+    }
+    
+    /**
+     * Set the value of useAIC.
+     *
+     * @param c Value to assign to useAIC.
+     */
+    public void setUseAIC(boolean c){
+        m_useAIC = c;
     }
 
     /**
@@ -540,20 +607,22 @@ public class SimpleLogistic
       TechnicalInformation 	result;
       TechnicalInformation 	additional;
       
-      result = new TechnicalInformation(Type.INPROCEEDINGS);
+      result = new TechnicalInformation(Type.ARTICLE);
       result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
       result.setValue(Field.TITLE, "Logistic Model Trees");
-      result.setValue(Field.BOOKTITLE, "14th European Conference on Machine Learning");
-      result.setValue(Field.YEAR, "2003");
-      result.setValue(Field.PAGES, "241-252");
-      result.setValue(Field.PUBLISHER, "Springer");
+      result.setValue(Field.BOOKTITLE, "Machine Learning");
+      result.setValue(Field.YEAR, "2005");
+      result.setValue(Field.VOLUME, "95");
+      result.setValue(Field.PAGES, "161-205");
+      result.setValue(Field.NUMBER, "1-2");
       
-      additional = result.add(Type.MASTERSTHESIS);
-      additional.setValue(Field.AUTHOR, "Niels Landwehr");
-      additional.setValue(Field.TITLE, "Logistic Model Trees");
-      additional.setValue(Field.YEAR, "2003");
-      additional.setValue(Field.SCHOOL, "Dept. of Computer Science, University of Waikato");
-      additional.setValue(Field.ADDRESS, "Hamilton, New Zealand");
+      result = new TechnicalInformation(Type.INPROCEEDINGS);
+      result.setValue(Field.AUTHOR, "Marc Sumner and Eibe Frank and Mark Hall");
+      result.setValue(Field.TITLE, "Speeding up Logistic Model Tree Induction");
+      result.setValue(Field.BOOKTITLE, "9th European Conference on Principles and Practice of Knowledge Discovery in Databases");
+      result.setValue(Field.YEAR, "2005");
+      result.setValue(Field.PAGES, "675-683");
+      result.setValue(Field.PUBLISHER, "Springer");
       
       return result;
     }
@@ -613,6 +682,28 @@ public class SimpleLogistic
 	    +"has been reached in the last heuristicStop iterations. It is recommended to use this heuristic, "
 	    +"it gives a large speed-up especially on small datasets. The default value is 50.";
     }    
+    
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String weightTrimBetaTipText() {
+        return "Set the beta value used for weight trimming in LogitBoost. "
+        +"Only instances carrying (1 - beta)% of the weight from previous iteration "
+        +"are used in the next iteration. Set to 0 for no weight trimming. "
+        +"The default value is 0.";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String useAICTipText() {
+        return "The AIC is used to determine when to stop LogitBoost iterations "
+        +"(instead of cross-validation or training error).";
+    }
 
     /**
      * Main method for testing this class
