@@ -87,10 +87,14 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
-public class Attribute implements Copyable, Serializable {
+public class Attribute
+  implements Copyable, Serializable {
 
+  /** for serialization */
+  static final long serialVersionUID = -742180568732916383L;
+  
   /** Constant set for numeric attributes. */
   public static final int NUMERIC = 0;
 
@@ -678,7 +682,6 @@ public class Attribute implements Copyable, Serializable {
    * Returns the header info for a relation-valued attribute,
    * null if the attribute is not relation-valued.
    *
-   * @param valIndex the value's index
    * @return the attribute's value as an Instances object
    */
   public final /*@ non_null pure @*/ Instances relation() {
@@ -826,7 +829,7 @@ public class Attribute implements Copyable, Serializable {
    * more efficient than addStringValue(String) for long strings.
    *
    * @param src The Attribute containing the string value to add.
-   * @param int index the index of the string value in the source attribute.
+   * @param index the index of the string value in the source attribute.
    * @return the index assigned to the string, or -1 if the attribute is not
    * of type Attribute.STRING 
    */
@@ -917,7 +920,7 @@ public class Attribute implements Copyable, Serializable {
    * removing it.
    *
    * @param index the value's index
-   * @exception IllegalArgumentException if the attribute is not 
+   * @throws IllegalArgumentException if the attribute is not 
    * of the correct type
    */
   //@ requires isNominal() || isString() || isRelationValued();
@@ -974,7 +977,7 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Sets the index of this attribute.
    *
-   * @param the index of this attribute
+   * @param index the index of this attribute
    */
   //@ requires 0 <= index;
   //@ assignable m_Index;
@@ -990,7 +993,7 @@ public class Attribute implements Copyable, Serializable {
    *
    * @param index the value's index
    * @param string the value
-   * @exception IllegalArgumentException if the attribute is not nominal or 
+   * @throws IllegalArgumentException if the attribute is not nominal or 
    * string.
    */
   //@ requires string != null;
@@ -1027,8 +1030,8 @@ public class Attribute implements Copyable, Serializable {
    * Creates a fresh list of attribute values before it is set.
    *
    * @param index the value's index
-   * @param string the value
-   * @exception IllegalArgumentException if the attribute is not 
+   * @param data the value
+   * @throws IllegalArgumentException if the attribute is not 
    * relation-valued.
    */
   final void setValue(int index, Instances data) {
@@ -1046,6 +1049,14 @@ public class Attribute implements Copyable, Serializable {
     }
   }
 
+  /**
+   * Returns the given amount of milliseconds formatted according to the
+   * current Date format.
+   * 
+   * @param date 	the date, represented in milliseconds since 
+   * 			January 1, 1970, 00:00:00 GMT, to return as string
+   * @return 		the formatted date
+   */
   //@ requires isDate();
   public /*@pure@*/ String formatDate(double date) {
     switch (m_Type) {
@@ -1057,6 +1068,14 @@ public class Attribute implements Copyable, Serializable {
     }
   }
 
+  /**
+   * Parses the given String as Date, according to the current format and
+   * returns the corresponding amount of milliseconds.
+   * 
+   * @param string the date to parse
+   * @return the date in milliseconds since January 1, 1970, 00:00:00 GMT
+   * @throws ParseException if parsing fails
+   */
   //@ requires isDate();
   //@ requires string != null;
   public double parseDate(String string) throws ParseException {
@@ -1179,6 +1198,7 @@ public class Attribute implements Copyable, Serializable {
   /**
    * Determines whether a value lies within the bounds of the attribute.
    *
+   * @param value the value to check
    * @return whether the value is in range
    */
   public final /*@ pure @*/ boolean isInRange(double value) {
@@ -1218,7 +1238,7 @@ public class Attribute implements Copyable, Serializable {
    * calling the getMetadata() method.
    *
    * @param metadata the metadata
-   * @exception IllegalArgumentException if the properties are not consistent
+   * @throws IllegalArgumentException if the properties are not consistent
    */
   //@ requires metadata != null;
   private void setMetadata(ProtectedProperties metadata) {
@@ -1308,7 +1328,7 @@ public class Attribute implements Copyable, Serializable {
    * Examples of valid range strings: "[-inf,20)","(-13.5,-5.2)","(5,inf]"
    *
    * @param rangeString the string to parse as the attribute's numeric range
-   * @exception IllegalArgumentException if the range is not valid
+   * @throws IllegalArgumentException if the range is not valid
    */
   //@ requires rangeString != null;
   private void setNumericRange(String rangeString)
