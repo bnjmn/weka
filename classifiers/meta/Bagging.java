@@ -122,9 +122,9 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
-public class Bagging 
+public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer,
              TechnicalInformationHandler {
@@ -497,18 +497,21 @@ public class Bagging
       throw new IllegalArgumentException("Bag size needs to be 100% if " +
 					 "out-of-bag error is to be calculated!");
     }
-    double outOfBagCount = 0.0;
-    double errorSum = 0.0;
 
     int bagSize = data.numInstances() * m_BagSizePercent / 100;
     Random random = new Random(m_Seed);
+    
+    boolean[][] inBag = null;
+    if (m_CalcOutOfBag)
+      inBag = new boolean[m_Classifiers.length][];
+    
     for (int j = 0; j < m_Classifiers.length; j++) {
       Instances bagData = null;
-      boolean[] inBag = null;
+
       // create the in-bag dataset
       if (m_CalcOutOfBag) {
-	inBag = new boolean[data.numInstances()];
-	bagData = resampleWithWeights(data, random, inBag);
+	inBag[j] = new boolean[data.numInstances()];
+	bagData = resampleWithWeights(data, random, inBag[j]);
       } else {
 	bagData = data.resampleWithWeights(random);
 	if (bagSize < data.numInstances()) {
@@ -517,32 +520,66 @@ public class Bagging
 	  bagData = newBagData;
 	}
       }
+      
       if (m_Classifier instanceof Randomizable) {
 	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
       }
+      
       // build the classifier
       m_Classifiers[j].buildClassifier(bagData);
-      if (m_CalcOutOfBag) {
-	// calculate out of bag error
-	for (int i=0; i<inBag.length; i++) {  
-	  if (!inBag[i]) {
-	    Instance outOfBagInst = data.instance(i);
-	    outOfBagCount += outOfBagInst.weight();
-	    if (data.classAttribute().isNumeric()) {
-	      errorSum += outOfBagInst.weight() *
-		Math.abs(m_Classifiers[j].classifyInstance(outOfBagInst)
-			 - outOfBagInst.classValue());
-	    } else {
-	      if (m_Classifiers[j].classifyInstance(outOfBagInst)
-		  != outOfBagInst.classValue()) {
-		errorSum += outOfBagInst.weight();
-	      }
-	    }
-	  }
+    }
+    
+    // calc OOB error?
+    if (getCalcOutOfBag()) {
+      double outOfBagCount = 0.0;
+      double errorSum = 0.0;
+      boolean numeric = data.classAttribute().isNumeric();
+      
+      for (int i = 0; i < data.numInstances(); i++) {
+	double vote;
+	double[] votes;
+	if (numeric)
+	  votes = new double[1];
+	else
+	  votes = new double[data.numClasses()];
+	
+	// determine predictions for instance
+	int voteCount = 0;
+	for (int j = 0; j < m_Classifiers.length; j++) {
+	  if (!inBag[j][i])
+	    continue;
+	  
+	  voteCount++;
+	  double pred = m_Classifiers[j].classifyInstance(data.instance(i));
+	  if (numeric)
+	    votes[0] += pred;
+	  else
+	    votes[(int) pred]++;
+	}
+	
+	// "vote"
+	if (numeric)
+	  vote = votes[0] / voteCount;    // average
+	else
+	  vote = Utils.maxIndex(votes);   // majority vote
+	
+	// error for instance
+	outOfBagCount += data.instance(i).weight();
+	if (numeric) {
+	  errorSum += StrictMath.abs(vote - data.instance(i).classValue()) 
+	  * data.instance(i).weight();
+	}
+	else {
+	  if (vote != data.instance(i).classValue())
+	    errorSum += data.instance(i).weight();
 	}
       }
+      
+      m_OutOfBagError = errorSum / outOfBagCount;
     }
-    m_OutOfBagError = errorSum / outOfBagCount;
+    else {
+      m_OutOfBagError = 0;
+    }
   }
 
   /**
