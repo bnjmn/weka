@@ -22,8 +22,8 @@
 
 package weka.core;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
+import java.util.Enumeration;
 
 /**
  * Class for handling an instance. All values (numeric, date, nominal, string
@@ -62,9 +62,13 @@ import java.io.*;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
  */
-public class Instance implements Copyable, Serializable {
+public class Instance
+  implements Copyable, Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = 1482635194499365122L;
   
   /** Constant representing a missing value. */
   protected static final double MISSING_VALUE = Double.NaN;
@@ -139,7 +143,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param index the attribute's index
    * @return the attribute at the given position
-   * @exception UnassignedDatasetException if instance doesn't have access to a
+   * @throws UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
   //@ requires m_Dataset != null;
@@ -157,7 +161,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @param indexOfIndex the index of the attribute's index 
    * @return the attribute at the given position
-   * @exception UnassignedDatasetException if instance doesn't have access to a
+   * @throws UnassignedDatasetException if instance doesn't have access to a
    * dataset
    */ 
   //@ requires m_Dataset != null;
@@ -173,7 +177,7 @@ public class Instance implements Copyable, Serializable {
    * Returns class attribute.
    *
    * @return the class attribute
-   * @exception UnassignedDatasetException if the class is not set or the
+   * @throws UnassignedDatasetException if the class is not set or the
    * instance doesn't have access to a dataset
    */
   //@ requires m_Dataset != null;
@@ -189,7 +193,7 @@ public class Instance implements Copyable, Serializable {
    * Returns the class attribute's index.
    *
    * @return the class index as an integer 
-   * @exception UnassignedDatasetException if instance doesn't have access to a dataset 
+   * @throws UnassignedDatasetException if instance doesn't have access to a dataset 
    */
   //@ requires m_Dataset != null;
   //@ ensures  \result == m_Dataset.classIndex();
@@ -205,7 +209,7 @@ public class Instance implements Copyable, Serializable {
    * Tests if an instance's class is missing.
    *
    * @return true if the instance's class is missing
-   * @exception UnassignedClassException if the class is not set or the instance doesn't
+   * @throws UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset
    */
   //@ requires classIndex() >= 0;
@@ -224,7 +228,7 @@ public class Instance implements Copyable, Serializable {
    * @return the corresponding value as a double (If the 
    * corresponding attribute is nominal (or a string) then it returns the 
    * value's index as a double).
-   * @exception UnassignedClassException if the class is not set or the instance doesn't
+   * @throws UnassignedClassException if the class is not set or the instance doesn't
    * have access to a dataset 
    */
   //@ requires classIndex() >= 0;
@@ -273,8 +277,8 @@ public class Instance implements Copyable, Serializable {
    * have access to any dataset because otherwise inconsistencies
    * could be introduced.
    *
-   * @param pos the attribute's position
-   * @exception RuntimeException if the instance has access to a
+   * @param position the attribute's position
+   * @throws RuntimeException if the instance has access to a
    * dataset 
    */
   //@ requires m_Dataset != null;
@@ -290,7 +294,7 @@ public class Instance implements Copyable, Serializable {
    * Returns an enumeration of all the attributes.
    *
    * @return enumeration of all the attributes
-   * @exception UnassignedDatasetException if the instance doesn't
+   * @throws UnassignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
   //@ requires m_Dataset != null;
@@ -305,10 +309,10 @@ public class Instance implements Copyable, Serializable {
   /**
    * Tests if the headers of two instances are equivalent.
    *
-   * @param instance another instance
+   * @param inst another instance
    * @return true if the header of the given instance is 
    * equivalent to this instance's header
-   * @exception UnassignedDatasetException if instance doesn't have access to any
+   * @throws UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
   //@ requires m_Dataset != null;
@@ -323,7 +327,7 @@ public class Instance implements Copyable, Serializable {
   /**
    * Tests whether an instance has a missing value. Skips the class attribute if set.
    * @return true if instance has a missing value.
-   * @exception UnassignedDatasetException if instance doesn't have access to any
+   * @throws UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
   //@ requires m_Dataset != null;
@@ -360,10 +364,10 @@ public class Instance implements Copyable, Serializable {
    * have access to any dataset because otherwise inconsistencies
    * could be introduced.
    *
-   * @param pos the attribute's position
-   * @exception RuntimeException if the instance has accesss to a
+   * @param position the attribute's position
+   * @throws RuntimeException if the instance has accesss to a
    * dataset
-   * @exception IllegalArgumentException if the position is out of range
+   * @throws IllegalArgumentException if the position is out of range
    */
   //@ requires m_Dataset == null;
   //@ requires 0 <= position && position <= numAttributes();
@@ -384,6 +388,7 @@ public class Instance implements Copyable, Serializable {
    * Tests if a specific value is "missing".
    *
    * @param attIndex the attribute's index
+   * @return true if the value is "missing"
    */
   public /*@pure@*/ boolean isMissing(int attIndex) {
 
@@ -398,6 +403,7 @@ public class Instance implements Copyable, Serializable {
    * the same thing as isMissing() if applied to an Instance.
    *
    * @param indexOfIndex the index of the attribute's index 
+   * @return true if the value is "missing"
    */
   public /*@pure@*/ boolean isMissingSparse(int indexOfIndex) {
 
@@ -412,6 +418,7 @@ public class Instance implements Copyable, Serializable {
    * The given attribute has to belong to a dataset.
    *
    * @param att the attribute
+   * @return true if the value is "missing"
    */
   public /*@pure@*/ boolean isMissing(Attribute att) {
 
@@ -475,7 +482,7 @@ public class Instance implements Copyable, Serializable {
    *
    * @return the number of class labels as an integer if the 
    * class attribute is nominal, 1 otherwise.
-   * @exception UnassignedDatasetException if instance doesn't have access to any
+   * @throws UnassignedDatasetException if instance doesn't have access to any
    * dataset
    */
   //@ requires m_Dataset != null;
@@ -505,7 +512,7 @@ public class Instance implements Copyable, Serializable {
    * values are replaced.
    *
    * @param array containing the means and modes
-   * @exception IllegalArgumentException if numbers of attributes are unequal
+   * @throws IllegalArgumentException if numbers of attributes are unequal
    */
   public void replaceMissingValues(double[] array) {
 	 
@@ -526,8 +533,8 @@ public class Instance implements Copyable, Serializable {
    * the vector of attribute values is performed before the
    * value is set to be missing.
    *
-   * @exception UnassignedClassException if the class is not set
-   * @exception UnassignedDatasetException if the instance doesn't
+   * @throws UnassignedClassException if the class is not set
+   * @throws UnassignedDatasetException if the instance doesn't
    * have access to a dataset
    */
   //@ requires classIndex() >= 0;
@@ -547,8 +554,8 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the corresponding
    * attribute is nominal (or a string) then this is the new value's
    * index as a double).  
-   * @exception UnassignedClassException if the class is not set
-   * @exception UnaddignedDatasetException if the instance doesn't
+   * @throws UnassignedClassException if the class is not set
+   * @throws UnaddignedDatasetException if the instance doesn't
    * have access to a dataset 
    */
   //@ requires classIndex() >= 0;
@@ -568,9 +575,9 @@ public class Instance implements Copyable, Serializable {
    * @param value the new class value (If the class
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception UnassignedClassException if the class is not set
-   * @exception UnassignedDatasetException if the dataset is not set
-   * @exception IllegalArgumentException if the attribute is not
+   * @throws UnassignedClassException if the class is not set
+   * @throws UnassignedDatasetException if the dataset is not set
+   * @throws IllegalArgumentException if the attribute is not
    * nominal or a string, or the value couldn't be found for a nominal
    * attribute 
    */
@@ -662,8 +669,8 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception UnassignedDatasetException if the dataset is not set
-   * @exception IllegalArgumentException if the selected
+   * @throws UnassignedDatasetException if the dataset is not set
+   * @throws IllegalArgumentException if the selected
    * attribute is not nominal or a string, or the supplied value couldn't 
    * be found for a nominal attribute 
    */
@@ -720,7 +727,7 @@ public class Instance implements Copyable, Serializable {
    * @param value the new attribute value (If the attribute
    * is a string attribute and the value can't be found,
    * the value is added to the attribute).
-   * @exception IllegalArgumentException if the the attribute is not
+   * @throws IllegalArgumentException if the the attribute is not
    * nominal or a string, or the value couldn't be found for a nominal
    * attribute 
    */
@@ -757,9 +764,9 @@ public class Instance implements Copyable, Serializable {
    *
    * @param attIndex the attribute's index
    * @return the corresponding relation as an Instances object
-   * @exception IllegalArgumentException if the attribute is not a
+   * @throws IllegalArgumentException if the attribute is not a
    * relation-valued attribute
-   * @exception UnassignedDatasetException if the instance doesn't belong
+   * @throws UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   //@ requires m_Dataset != null;
@@ -775,11 +782,11 @@ public class Instance implements Copyable, Serializable {
   /** 
    * Returns the relational value of a relational attribute.
    *
-   * @param attIndex the attribute's index
+   * @param att the attribute
    * @return the corresponding relation as an Instances object
-   * @exception IllegalArgumentException if the attribute is not a
+   * @throws IllegalArgumentException if the attribute is not a
    * relation-valued attribute
-   * @exception UnassignedDatasetException if the instance doesn't belong
+   * @throws UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   public final /*@pure@*/ Instances relationalValue(Attribute att) {
@@ -798,9 +805,9 @@ public class Instance implements Copyable, Serializable {
    *
    * @param attIndex the attribute's index
    * @return the value as a string
-   * @exception IllegalArgumentException if the attribute is not a nominal,
+   * @throws IllegalArgumentException if the attribute is not a nominal,
    * string, date, or relation-valued attribute.
-   * @exception UnassignedDatasetException if the instance doesn't belong
+   * @throws UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   //@ requires m_Dataset != null;
@@ -817,11 +824,11 @@ public class Instance implements Copyable, Serializable {
    * Returns the value of a nominal, string, date, or relational attribute
    * for the instance as a string.
    *
-   * @param attIndex the attribute's index
+   * @param att the attribute
    * @return the value as a string
-   * @exception IllegalArgumentException if the attribute is not a nominal,
+   * @throws IllegalArgumentException if the attribute is not a nominal,
    * string, date, or relation-valued attribute.
-   * @exception UnassignedDatasetException if the instance doesn't belong
+   * @throws UnassignedDatasetException if the instance doesn't belong
    * to a dataset.
    */
   public final /*@pure@*/ String stringValue(Attribute att) {
@@ -982,9 +989,8 @@ public class Instance implements Copyable, Serializable {
    * Deletes an attribute at the given position (0 to 
    * numAttributes() - 1).
    *
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
-
   void forceDeleteAttributeAt(int position) {
 
     double[] newValues = new double[m_AttValues.length - 1];
@@ -1002,7 +1008,7 @@ public class Instance implements Copyable, Serializable {
    * Inserts an attribute at the given position
    * (0 to numAttributes()) and sets its value to be missing. 
    *
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   void forceInsertAttributeAt(int position)  {
 
@@ -1032,6 +1038,8 @@ public class Instance implements Copyable, Serializable {
 
   /**
    * Main method for testing this class.
+   * 
+   * @param options the commandline options - ignored
    */
   //@ requires options != null;
   public static void main(String[] options) {

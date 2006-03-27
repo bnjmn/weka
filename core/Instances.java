@@ -22,9 +22,17 @@
 
 package weka.core;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Random;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
@@ -55,9 +63,13 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.62 $ 
+ * @version $Revision: 1.63 $ 
  */
-public class Instances implements Serializable {
+public class Instances 
+  implements Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = -19412345060742748L;
   
   /** The filename extension that should be used for arff files */
   public static String FILE_EXTENSION = ".arff";
@@ -99,7 +111,7 @@ public class Instances implements Serializable {
    * attribute be undefined (negative).
    *
    * @param reader the reader
-   * @exception IOException if the ARFF file is not read 
+   * @throws IOException if the ARFF file is not read 
    * successfully
    */
   public Instances(/*@non_null@*/Reader reader) throws IOException {
@@ -122,9 +134,9 @@ public class Instances implements Serializable {
    *
    * @param reader the reader
    * @param capacity the capacity
-   * @exception IllegalArgumentException if the header is not read successfully
+   * @throws IllegalArgumentException if the header is not read successfully
    * or the capacity is negative.
-   * @exception IOException if there is a problem with the reader.
+   * @throws IOException if there is a problem with the reader.
    */
   //@ requires capacity >= 0;
   //@ ensures classIndex() == -1;
@@ -147,7 +159,7 @@ public class Instances implements Serializable {
    * Constructor copying all instances and references to
    * the header information from the given set of instances.
    *
-   * @param instances the set to be copied
+   * @param dataset the set to be copied
    */
   public Instances(/*@non_null@*/Instances dataset) {
 
@@ -161,7 +173,7 @@ public class Instances implements Serializable {
    * to the header information from the given set of instances. Sets
    * the capacity of the set of instances to 0 if its negative.
    *
-   * @param instances the instances from which the header 
+   * @param dataset the instances from which the header 
    * information is to be taken
    * @param capacity the capacity of the new dataset 
    */
@@ -190,7 +202,7 @@ public class Instances implements Serializable {
    * is to be created
    * @param first the index of the first instance to be copied
    * @param toCopy the number of instances to be copied
-   * @exception IllegalArgumentException if first and toCopy are out of range
+   * @throws IllegalArgumentException if first and toCopy are out of range
    */
   //@ requires 0 <= first;
   //@ requires 0 <= toCopy;
@@ -270,7 +282,7 @@ public class Instances implements Serializable {
   /**
    * Returns an attribute.
    *
-   * @param index the attribute's index
+   * @param index the attribute's index (index starts with 0)
    * @return the attribute at the given position
    */
   //@ requires 0 <= index;
@@ -333,6 +345,7 @@ public class Instances implements Serializable {
    * the instance and the ranges of the values for 
    * nominal and string attributes.
    *
+   * @param instance the instance to check
    * @return true if the instance is compatible with the dataset 
    */
   public /*@pure@*/ boolean checkInstance(Instance instance) {
@@ -362,7 +375,7 @@ public class Instances implements Serializable {
    * Returns the class attribute.
    *
    * @return the class attribute
-   * @exception UnassignedClassException if the class is not set
+   * @throws UnassignedClassException if the class is not set
    */
   //@ requires classIndex() >= 0;
   public /*@pure@*/ Attribute classAttribute() {
@@ -405,7 +418,7 @@ public class Instances implements Serializable {
   /**
    * Removes an instance at the given position from the set.
    *
-   * @param index the instance's position
+   * @param index the instance's position (index starts with 0)
    */
   //@ requires 0 <= index && index < numInstances();
   public void delete(int index) {
@@ -418,8 +431,8 @@ public class Instances implements Serializable {
    * (0 to numAttributes() - 1). A deep copy of the attribute
    * information is performed before the attribute is deleted.
    *
-   * @param pos the attribute's position
-   * @exception IllegalArgumentException if the given index is out of range 
+   * @param position the attribute's position (position starts with 0)
+   * @throws IllegalArgumentException if the given index is out of range 
    *            or the class attribute is being deleted
    */
   //@ requires 0 <= position && position < numAttributes();
@@ -470,7 +483,7 @@ public class Instances implements Serializable {
    * Deletes all string attributes in the dataset. A deep copy of the attribute
    * information is performed before an attribute is deleted.
    *
-   * @exception IllegalArgumentException if string attribute couldn't be 
+   * @throws IllegalArgumentException if string attribute couldn't be 
    * successfully deleted (probably because it is the class attribute).
    * @see #deleteAttributeType(int)
    */
@@ -482,7 +495,7 @@ public class Instances implements Serializable {
    * Removes all instances with missing values for a particular
    * attribute from the dataset.
    *
-   * @param attIndex the attribute's index
+   * @param attIndex the attribute's index (index starts with 0)
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   public void deleteWithMissing(int attIndex) {
@@ -512,7 +525,7 @@ public class Instances implements Serializable {
    * Removes all instances with a missing class value
    * from the dataset.
    *
-   * @exception UnassignedClassException if class is not set
+   * @throws UnassignedClassException if class is not set
    */
   public void deleteWithMissingClass() {
 
@@ -600,8 +613,8 @@ public class Instances implements Serializable {
    * a deep copy of the existing attribute information.
    *
    * @param att the attribute to be inserted
-   * @param pos the attribute's position
-   * @exception IllegalArgumentException if the given index is out of range
+   * @param position the attribute's position (position starts with 0)
+   * @throws IllegalArgumentException if the given index is out of range
    */
   //@ requires 0 <= position;
   //@ requires position <= numAttributes();
@@ -630,7 +643,7 @@ public class Instances implements Serializable {
   /**
    * Returns the instance at the given position.
    *
-   * @param index the instance's index
+   * @param index the instance's index (index starts with 0)
    * @return the instance at the given position
    */
   //@ requires 0 <= index;
@@ -709,7 +722,7 @@ public class Instances implements Serializable {
    * a floating-point value. Returns 0 if the attribute is neither nominal nor 
    * numeric. If all values are missing it returns zero.
    *
-   * @param attIndex the attribute's index
+   * @param attIndex the attribute's index (index starts with 0)
    * @return the mean or the mode
    */
   public /*@pure@*/ double meanOrMode(int attIndex) {
@@ -772,7 +785,7 @@ public class Instances implements Serializable {
    *
    * @return the number of class labels as an integer if the class 
    * attribute is nominal, 1 otherwise.
-   * @exception UnassignedClassException if the class is not set
+   * @throws UnassignedClassException if the class is not set
    */
   //@ requires classIndex() >= 0;
   public /*@pure@*/ int numClasses() {
@@ -792,7 +805,7 @@ public class Instances implements Serializable {
    * Returns the number of instances if the attribute is a
    * string attribute. The value 'missing' is not counted.
    *
-   * @param attIndex the attribute
+   * @param attIndex the attribute (index starts with 0)
    * @return the number of distinct values of a given attribute
    */
   //@ requires 0 <= attIndex;
@@ -865,7 +878,7 @@ public class Instances implements Serializable {
    *
    * @param reader the reader 
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @throws IOException if the information is not read 
    * successfully
    */ 
   public boolean readInstance(Reader reader) 
@@ -892,7 +905,7 @@ public class Instances implements Serializable {
    * Renames an attribute. This change only affects this
    * dataset.
    *
-   * @param att the attribute's index
+   * @param att the attribute's index (index starts with 0)
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
@@ -926,8 +939,8 @@ public class Instances implements Serializable {
    * Renames the value of a nominal (or string) attribute value. This
    * change only affects this dataset.
    *
-   * @param att the attribute's index
-   * @param val the value's index
+   * @param att the attribute's index (index starts with 0)
+   * @param val the value's index (index starts with 0)
    * @param name the new name 
    */
   public void renameAttributeValue(int att, int val, String name) {
@@ -1007,7 +1020,7 @@ public class Instances implements Serializable {
    * @param random a random number generator
    * @param weights the weight vector
    * @return the new dataset
-   * @exception IllegalArgumentException if the weights array is of the wrong
+   * @throws IllegalArgumentException if the weights array is of the wrong
    * length or contains negative weights.
    */
   public Instances resampleWithWeights(Random random, 
@@ -1063,8 +1076,8 @@ public class Instances implements Serializable {
    * If the class index is negative there is assumed to be no class.
    * (ie. it is undefined)
    *
-   * @param classIndex the new class index
-   * @exception IllegalArgumentException if the class index is too big or < 0
+   * @param classIndex the new class index (index starts with 0)
+   * @throws IllegalArgumentException if the class index is too big or < 0
    */
   public void setClassIndex(int classIndex) {
 
@@ -1091,7 +1104,7 @@ public class Instances implements Serializable {
    * specified in the header. Instances with missing values for the 
    * attribute are placed at the end of the dataset.
    *
-   * @param attIndex the attribute's index
+   * @param attIndex the attribute's index (index starts with 0)
    */
   public void sort(int attIndex) {
 
@@ -1134,7 +1147,7 @@ public class Instances implements Serializable {
    * stratified cross-validation can be performed).
    *
    * @param numFolds the number of folds in the cross-validation
-   * @exception UnassignedClassException if the class is not set
+   * @throws UnassignedClassException if the class is not set
    */
   public void stratify(int numFolds) {
     
@@ -1188,7 +1201,7 @@ public class Instances implements Serializable {
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the test set as a set of weighted instances
-   * @exception IllegalArgumentException if the number of folds is less than 2
+   * @throws IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
@@ -1266,7 +1279,7 @@ public class Instances implements Serializable {
    * be greater than 1.
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @return the training set 
-   * @exception IllegalArgumentException if the number of folds is less than 2
+   * @throws IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
@@ -1307,7 +1320,7 @@ public class Instances implements Serializable {
    * @param numFold 0 for the first fold, 1 for the second, ...
    * @param random the random number generator
    * @return the training set 
-   * @exception IllegalArgumentException if the number of folds is less than 2
+   * @throws IllegalArgumentException if the number of folds is less than 2
    * or greater than the number of instances.
    */
   //@ requires 2 <= numFolds && numFolds < numInstances();
@@ -1322,9 +1335,9 @@ public class Instances implements Serializable {
   /**
    * Computes the variance for a numeric attribute.
    *
-   * @param attIndex the numeric attribute
+   * @param attIndex the numeric attribute (index starts with 0)
    * @return the variance if the attribute is numeric
-   * @exception IllegalArgumentException if the attribute is not numeric
+   * @throws IllegalArgumentException if the attribute is not numeric
    */
   public /*@pure@*/ double variance(int attIndex) {
   
@@ -1363,7 +1376,7 @@ public class Instances implements Serializable {
    *
    * @param att the numeric attribute
    * @return the variance if the attribute is numeric
-   * @exception IllegalArgumentException if the attribute is not numeric
+   * @throws IllegalArgumentException if the attribute is not numeric
    */
   public /*@pure@*/ double variance(Attribute att) {
     
@@ -1374,7 +1387,7 @@ public class Instances implements Serializable {
    * Calculates summary statistics on the values that appear in this
    * set of instances for a specified attribute.
    *
-   * @param index the index of the attribute to summarize.
+   * @param index the index of the attribute to summarize (index starts with 0)
    * @return an AttributeStats object with it's fields calculated.
    */
   //@ requires 0 <= index && index < numAttributes();
@@ -1529,7 +1542,7 @@ public class Instances implements Serializable {
    * @param flag if method should test for carriage return after 
    * each instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @throws IOException if the information is not read 
    * successfully
    */ 
   protected boolean getInstance(StreamTokenizer tokenizer, 
@@ -1564,7 +1577,7 @@ public class Instances implements Serializable {
    * @param flag if method should test for carriage return after 
    * each instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @throws IOException if the information is not read 
    * successfully
    */ 
   protected boolean getInstanceSparse(StreamTokenizer tokenizer, 
@@ -1682,7 +1695,7 @@ public class Instances implements Serializable {
    * @param flag if method should test for carriage return after 
    * each instance
    * @return false if end of file has been reached
-   * @exception IOException if the information is not read 
+   * @throws IOException if the information is not read 
    * successfully
    */ 
   protected boolean getInstanceFull(StreamTokenizer tokenizer, 
@@ -1769,7 +1782,7 @@ public class Instances implements Serializable {
    * Reads and stores header of an ARFF file.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if the information is not read 
+   * @throws IOException if the information is not read 
    * successfully
    */ 
   protected void readHeader(StreamTokenizer tokenizer) 
@@ -1820,7 +1833,7 @@ public class Instances implements Serializable {
    * Parses the attribute declaration.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if the information is not read 
+   * @throws IOException if the information is not read 
    * successfully
    */
   protected void parseAttribute(StreamTokenizer tokenizer) 
@@ -1936,7 +1949,6 @@ public class Instances implements Serializable {
    * Copies instances from one set to the end of another 
    * one.
    *
-   * @param source the source of the instances
    * @param from the position of the first instance to be copied
    * @param dest the destination for the instances
    * @param num the number of instances to be copied
@@ -1976,7 +1988,7 @@ public class Instances implements Serializable {
    * Gets next token, skipping empty lines.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if reading the next token fails
+   * @throws IOException if reading the next token fails
    */
   protected void getFirstToken(StreamTokenizer tokenizer) 
     throws IOException {
@@ -1995,7 +2007,7 @@ public class Instances implements Serializable {
    * Gets index, checking for a premature and of line.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if it finds a premature end of line
+   * @throws IOException if it finds a premature end of line
    */
   protected void getIndex(StreamTokenizer tokenizer) throws IOException {
     
@@ -2011,7 +2023,7 @@ public class Instances implements Serializable {
    * Gets token and checks if its end of line.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if it doesn't find an end of line
+   * @throws IOException if it doesn't find an end of line
    */
   protected void getLastToken(StreamTokenizer tokenizer, boolean endOfFileOk) 
        throws IOException {
@@ -2026,7 +2038,7 @@ public class Instances implements Serializable {
    * Gets next token, checking for a premature and of line.
    *
    * @param tokenizer the stream tokenizer
-   * @exception IOException if it finds a premature end of line
+   * @throws IOException if it finds a premature end of line
    */
   protected void getNextToken(StreamTokenizer tokenizer) 
        throws IOException {
@@ -2087,9 +2099,9 @@ public class Instances implements Serializable {
    * Partitions the instances around a pivot. Used by quicksort and
    * kthSmallestValue.
    *
-   * @param attIndex the attribute's index
-   * @param left the first index of the subset 
-   * @param right the last index of the subset 
+   * @param attIndex the attribute's index (index starts with 0)
+   * @param left the first index of the subset (index starts with 0)
+   * @param right the last index of the subset (index starts with 0)
    *
    * @return the index of the middle element
    */
@@ -2123,9 +2135,9 @@ public class Instances implements Serializable {
    * Implements quicksort according to Manber's "Introduction to
    * Algorithms".
    *
-   * @param attIndex the attribute's index
-   * @param left the first index of the subset to be sorted
-   * @param right the last index of the subset to be sorted
+   * @param attIndex the attribute's index (index starts with 0)
+   * @param left the first index of the subset to be sorted (index starts with 0)
+   * @param right the last index of the subset to be sorted (index starts with 0)
    */
   //@ requires 0 <= attIndex && attIndex < numAttributes();
   //@ requires 0 <= first && first <= right && right < numInstances();
@@ -2154,9 +2166,9 @@ public class Instances implements Serializable {
    * Implements computation of the kth-smallest element according
    * to Manber's "Introduction to Algorithms".
    *
-   * @param attIndex the attribute's index
-   * @param left the first index of the subset 
-   * @param right the last index of the subset 
+   * @param attIndex the attribute's index (index starts with 0)
+   * @param left the first index of the subset (index starts with 0)
+   * @param right the last index of the subset (index starts with 0)
    * @param k the value of k
    *
    * @return the index of the kth-smallest element
@@ -2202,8 +2214,8 @@ public class Instances implements Serializable {
   /**
    * Swaps two instances in the set.
    *
-   * @param i the first instance's index
-   * @param j the second instance's index
+   * @param i the first instance's index (index starts with 0)
+   * @param j the second instance's index (index starts with 0)
    */
   //@ requires 0 <= i && i < numInstances();
   //@ requires 0 <= j && j < numInstances();
@@ -2220,7 +2232,7 @@ public class Instances implements Serializable {
    * @param first the first set of Instances
    * @param second the second set of Instances
    * @return the merged set of Instances
-   * @exception IllegalArgumentException if the datasets are not the same size
+   * @throws IllegalArgumentException if the datasets are not the same size
    */
   public static Instances mergeInstances(Instances first, Instances second) {
 
