@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -55,7 +55,7 @@ public class TechnicalInformation {
     /** A part of a book having its own title. */
     INCOLLECTION("incollection", "A part of a book having its own title."),
     /** An article in a conference proceedings. */
-    INPROCEEDINGS("incproceedings", "An article in a conference proceedings."),
+    INPROCEEDINGS("inproceedings", "An article in a conference proceedings."),
     /** Technical documentation. */
     MANUAL("manual", "Technical documentation."),
     /** A Master's thesis. */
