@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -194,7 +194,14 @@ public class TechnicalInformation {
     /** The physical dimensions of a work. */
     SIZE("size", "The physical dimensions of a work."),
     /** The WWW Universal Resource Locator that points to the item being referenced. This often is used for technical reports to point to the ftp site where the postscript source of the report is located. */
-    URL("URL", "The WWW Universal Resource Locator that points to the item being referenced. This often is used for technical reports to point to the ftp site where the postscript source of the report is located.");
+    URL("URL", "The WWW Universal Resource Locator that points to the item being referenced. This often is used for technical reports to point to the ftp site where the postscript source of the report is located."),
+    // additional fields
+    /** A link to a postscript file. */
+    PS("PS", "A link to a postscript file."),
+    /** A link to a postscript file. */
+    PDF("PDF", "A link to a PDF file."),
+    /** A link to a postscript file. */
+    HTTP("HTTP", "A hyperlink to a resource.");
     
     /** the string used in toString()  */
     protected String m_Display;
