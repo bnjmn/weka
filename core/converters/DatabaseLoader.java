@@ -39,38 +39,53 @@ import java.util.Vector;
 
 
 /**
- * Reads from a database.
- * Can read a database in batch or incremental mode.
- * In inremental mode MySQL and HSQLDB are supported.
- * For all other DBMS set a pseudoincremental mode is used:
- * In pseudo incremental mode the instances are read into main memory all at once and then incrementally provided to the user.
- * For incremental loading the rows in the database table have to be ordered uniquely.
- * The reason for this is that every time only a single row is fetched by extending the user" query by a LIMIT clause.
- * If this extension is impossible instances will be loaded pseudoincrementally. To ensure that every row is fetched exaclty once, they have to ordered.
- * Therefore a (primary) key is necessary.This approach is chosen, instead of using JDBC driver facilities, because the latter one differ betweeen different drivers.
- * If you use the DatabaseSaver and save instances by generating automatically a primary key (its name is defined in DtabaseUtils), this primary key will
- * be used for ordering but will not be part of the output. The user defined SQL query to extract the instances should not contain LIMIT and ORDER BY clauses (see -Q option). 
- * In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.  
+ <!-- globalinfo-start -->
+ * Reads Instances from a Database. Can read a database in batch or incremental mode.<br/>
+ * In inremental mode MySQL and HSQLDB are supported.<br/>
+ * For all other DBMS set a pseudoincremental mode is used:<br/>
+ * In pseudo incremental mode the instances are read into main memory all at once and then incrementally provided to the user.<br/>
+ * For incremental loading the rows in the database table have to be ordered uniquely.<br/>
+ * The reason for this is that every time only a single row is fetched by extending the user query by a LIMIT clause.<br/>
+ * If this extension is impossible instances will be loaded pseudoincrementally. To ensure that every row is fetched exaclty once, they have to ordered.<br/>
+ * Therefore a (primary) key is necessary.This approach is chosen, instead of using JDBC driver facilities, because the latter one differ betweeen different drivers.<br/>
+ * If you use the DatabaseSaver and save instances by generating automatically a primary key (its name is defined in DtabaseUtils), this primary key will be used for ordering but will not be part of the output. The user defined SQL query to extract the instances should not contain LIMIT and ORDER BY clauses (see -Q option).<br/>
+ * In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.<br/>
  * In batch mode no string attributes will be created.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Available options are: 
- * -Q the query to specify which tuples to load<br>
- * The query must have the form:
- * SELECT *|<column-list> FROM <table> [WHERE}
- * (default: SELECT * FROM Results0).<p>
- *
- * -P comma separted list of columns that are a unqiue key <br>
- * Only needed for incremental loading, if it cannot be detected automatically<p>
- *
- * -I <br>
- * Sets incremental loading
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -Q &lt;query&gt;
+ *  SQL query of the form
+ *  SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
+ *  to execute (default Select * From Results0).</pre>
+ * 
+ * <pre> -P &lt;list of column names&gt;
+ *  List of column names uniquely defining a DB row
+ *  (separated by ', ').
+ *  Used for incremental loading.
+ *  If not specified, the key will be determined automatically,
+ *  if possible with the used JDBC driver.
+ *  The auto ID column created by the DatabaseSaver won't be loaded.</pre>
+ * 
+ * <pre> -I
+ *  Sets incremental loading</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
-public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
+public class DatabaseLoader 
+  extends AbstractLoader 
+  implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = -7936159015338318659L;
+  
   /** The header information that is retrieved in the beginning of incremental loading */
   protected Instances m_structure;
   
@@ -83,7 +98,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   /** The database connection */
   private DatabaseConnection m_DataBaseConnection;
   
-  /** The user defined query to load instances. (form: SELECT *|<column-list> FROM <table> [WHERE <condition>]) */
+  /** The user defined query to load instances. (form: SELECT *|&ltcolumn-list&gt; FROM &lttable&gt; [WHERE &lt;condition&gt;]) */
   private String m_query = "Select * from Results0";;
   
   /** Flag indicating that pseudo incremental mode is used (all instances load at once into main memeory and then incrementally from main memory instead of the database) */
@@ -119,17 +134,6 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   /** Name of the primary key column that will allow unique ordering necessary for incremental loading. The name is specified in the DatabaseUtils file.*/
   private String m_idColumn;
   
-  /* Type mapping used for reading*/
-  public static final int STRING = 0;
-  public static final int BOOL = 1;
-  public static final int DOUBLE = 2;
-  public static final int BYTE = 3;
-  public static final int SHORT = 4;
-  public static final int INTEGER = 5;
-  public static final int LONG = 6;
-  public static final int FLOAT = 7;
-  public static final int DATE = 8; 
-  
   /** The property file for the database connection */
   protected static String PROPERTY_FILE
     = "weka/experiment/DatabaseUtils.props";
@@ -151,6 +155,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Constructor
+   * 
+   * @throws Exception if initialization fails
    */
   public DatabaseLoader() throws Exception{
   
@@ -163,11 +169,25 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 
   /**
    * Returns a string describing this Loader
+   * 
    * @return a description of the Loader suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Reads Instances from a Database";
+    return 
+        "Reads Instances from a Database. "
+      + "Can read a database in batch or incremental mode.\n"
+      + "In inremental mode MySQL and HSQLDB are supported.\n"
+      + "For all other DBMS set a pseudoincremental mode is used:\n"
+      + "In pseudo incremental mode the instances are read into main memory all at once and then incrementally provided to the user.\n"
+      + "For incremental loading the rows in the database table have to be ordered uniquely.\n"
+      + "The reason for this is that every time only a single row is fetched by extending the user query by a LIMIT clause.\n"
+      + "If this extension is impossible instances will be loaded pseudoincrementally. To ensure that every row is fetched exaclty once, they have to ordered.\n"
+      + "Therefore a (primary) key is necessary.This approach is chosen, instead of using JDBC driver facilities, because the latter one differ betweeen different drivers.\n"
+      + "If you use the DatabaseSaver and save instances by generating automatically a primary key (its name is defined in DtabaseUtils), this primary key will "
+      + "be used for ordering but will not be part of the output. The user defined SQL query to extract the instances should not contain LIMIT and ORDER BY clauses (see -Q option).\n"
+      + "In addition, for incremental loading,  you can define in the DatabaseUtils file how many distinct values a nominal attribute is allowed to have. If this number is exceeded, the column will become a string attribute.\n"
+      + "In batch mode no string attributes will be created.";
   }
 
   
@@ -188,7 +208,9 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   }
   
   
-  /** Resets the structure of instances*/
+  /** 
+   * Resets the structure of instances
+   */
   public void resetStructure(){
   
       m_structure = null;
@@ -204,6 +226,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Sets the query to execute against the database
+   * 
    * @param q the query to execute
    */
   public void setQuery(String q) {
@@ -214,6 +237,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 
   /**
    * Gets the query to execute against the database
+   * 
    * @return the query
    */
   public String getQuery() {
@@ -222,6 +246,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * the tip text for this property
+   * 
    * @return the tip text
    */
   public String queryTipText(){
@@ -232,6 +257,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Sets the key columns of a database table
+   * 
    * @param keys a String containing the key columns in a comma separated list.
    */
   public void setKeys(String keys){
@@ -247,6 +273,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
    /**
    * Gets the key columns' name
+   * 
    * @return name of the key columns'
    */
   public String getKeys(){
@@ -262,6 +289,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * the tip text for this property
+   * 
    * @return the tip text
    */
   public String keysTipText(){
@@ -274,7 +302,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Sets the database URL
-   * @param string with the database URL
+   * 
+   * @param url string with the database URL
    */
   public void setUrl(String url){
       
@@ -284,6 +313,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Gets the URL
+   * 
    * @return the URL
    */
   public String getUrl(){
@@ -293,6 +323,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * the tip text for this property
+   * 
    * @return the tip text
    */
   public String urlTipText(){
@@ -302,7 +333,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Sets the database user
-   * @param the database user name
+   * 
+   * @param user the database user name
    */
   public void setUser(String user){
    
@@ -311,6 +343,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Gets the user name
+   * 
    * @return name of database user
    */
   public String getUser(){
@@ -320,6 +353,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * the tip text for this property
+   * 
    * @return the tip text
    */
   public String userTipText(){
@@ -329,7 +363,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Sets user password for the database
-   * @param the password
+   * 
+   * @param password the password
    */
   public void setPassword(String password){
    
@@ -338,6 +373,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * the tip text for this property
+   * 
    * @return the tip text
    */
   public String passwordTipText(){
@@ -346,7 +382,9 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   }
   
   
-  /** Sets the database url
+  /** 
+   * Sets the database url, user and pw
+   * 
    * @param url the database url
    * @param userName the user name
    * @param password the password
@@ -363,7 +401,9 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
       }    
   }
   
-  /** Sets the database url
+  /** 
+   * Sets the database url
+   * 
    * @param url the database url
    */  
   public void setSource(String url){
@@ -376,7 +416,11 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
        }    
   }
   
-  /** Sets the database url using the DatabaseUtils file */  
+  /** 
+   * Sets the database url using the DatabaseUtils file
+   * 
+   * @throws Exception if something goes wrong
+   */  
   public void setSource() throws Exception{
   
         m_DataBaseConnection = new DatabaseConnection();
@@ -384,7 +428,6 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   /**
    * Opens a connection to the database
-   *
    */
   public void connectToDatabase() {
    
@@ -398,8 +441,10 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   }
   
   
-  /** Returns the table name or all after the FROM clause of the user specified query
+  /** 
+   * Returns the table name or all after the FROM clause of the user specified query
    * to retrieve instances.
+   * 
    * @param onlyTableName true if only the table name should be returned, false otherwise
    * @return the end of the query
    */  
@@ -420,11 +465,13 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
       return table;
   }
   
-  /** Checks for a unique key using the JDBC driver's method:
+  /** 
+   * Checks for a unique key using the JDBC driver's method:
    * getPrimaryKey(), getBestRowIdentifier().
    * Depending on their implementation a key can be detected.
    * The key is needed to order the instances uniquely for an inremental loading.
    * If an existing key cannot be detected, use -P option.
+   * 
    * @throws Exception if database error occurs
    * @return true, if a key could have been detected, false otherwise
    */  
@@ -468,8 +515,10 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
       return false;
   }
   
-  /** Converts string attribute into nominal ones for an instance read during
+  /** 
+   * Converts string attribute into nominal ones for an instance read during
    * incremental loading
+   * 
    * @param rs The result set
    * @param i the index of the nominal value
    * @throws Exception exception if it cannot be converted
@@ -489,9 +538,11 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
       }
   }
   
-  /** Used in incremental loading. Modifies the SQL statement,
+  /** 
+   * Used in incremental loading. Modifies the SQL statement,
    * so that only one instance per time is tretieved and the instances are ordered
    * uniquely.
+   * 
    * @param query the query to modify for incremental loading
    * @param offset sets which tuple out of the uniquely ordered ones should be returned
    * @param choice the kind of query that is suitable for the used DBMS
@@ -532,7 +583,9 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
       return limitedQuery;
   }
   
-  /** Counts the number of rows that are loaded from the database
+  /** 
+   * Counts the number of rows that are loaded from the database
+   * 
    * @throws Exception if the number of rows cannot be calculated
    * @return the entire number of rows
    */  
@@ -555,7 +608,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
    * header) of the data set as an empty set of instances.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @exception IOException if an error occurs
+   * @throws IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
 
@@ -608,7 +661,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
         m_nominalStrings = new FastVector [numAttributes];
         for (int i = 1; i <= numAttributes; i++) {
             switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-                case STRING :
+                case DatabaseConnection.STRING :
                     //System.err.println("String --> nominal");
                     ResultSet rs1;
                     String columnName = md.getColumnName(i);
@@ -637,7 +690,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
                     stringToNominal(rs1,i);
                     rs1.close();
                     break;
-                case BOOL:
+                case DatabaseConnection.BOOL:
                     //System.err.println("boolean --> nominal");
                     attributeTypes[i - 1] = Attribute.NOMINAL;
                     m_nominalIndexes[i - 1] = new Hashtable();
@@ -647,31 +700,31 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
                     m_nominalStrings[i - 1].addElement("false");
                     m_nominalStrings[i - 1].addElement("true");
                     break;
-                case DOUBLE:
+                case DatabaseConnection.DOUBLE:
                     //System.err.println("BigDecimal --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case BYTE:
+                case DatabaseConnection.BYTE:
                     //System.err.println("byte --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case SHORT:
+                case DatabaseConnection.SHORT:
                     //System.err.println("short --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case INTEGER:
+                case DatabaseConnection.INTEGER:
                     //System.err.println("int --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case LONG:
+                case DatabaseConnection.LONG:
                     //System.err.println("long --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case FLOAT:
+                case DatabaseConnection.FLOAT:
                     //System.err.println("float --> numeric");
                     attributeTypes[i - 1] = Attribute.NUMERIC;
                     break;
-                case DATE:
+                case DatabaseConnection.DATE:
                     attributeTypes[i - 1] = Attribute.DATE;
                     break;
                 default:
@@ -734,7 +787,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
    * Return the full data set in batch mode (header and all intances at once).
    *
    * @return the structure of the data set as an empty set of Instances
-   * @exception IOException if there is no source or parsing fails
+   * @throws IOException if there is no source or parsing fails
    */
   public Instances getDataSet() throws IOException {
 
@@ -762,7 +815,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
     for (int i = 1; i <= numAttributes; i++) {
       switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
 	
-      case STRING :
+      case DatabaseConnection.STRING :
         ResultSet rs1;
         String columnName = md.getColumnName(i);
         if(m_DataBaseConnection.getUpperCase())
@@ -778,7 +831,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
         stringToNominal(rs1,i);
         rs1.close();  
 	break;
-      case BOOL:
+      case DatabaseConnection.BOOL:
 	//System.err.println("boolean --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
 	m_nominalIndexes[i - 1] = new Hashtable();
@@ -788,31 +841,31 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	m_nominalStrings[i - 1].addElement("false");
 	m_nominalStrings[i - 1].addElement("true");
 	break;
-      case DOUBLE:
+      case DatabaseConnection.DOUBLE:
 	//System.err.println("BigDecimal --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case BYTE:
+      case DatabaseConnection.BYTE:
 	//System.err.println("byte --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case SHORT:
+      case DatabaseConnection.SHORT:
 	//System.err.println("short --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case INTEGER:
+      case DatabaseConnection.INTEGER:
 	//System.err.println("int --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case LONG:
+      case DatabaseConnection.LONG:
 	//System.err.println("long --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case FLOAT:
+      case DatabaseConnection.FLOAT:
 	//System.err.println("float --> numeric");
 	attributeTypes[i - 1] = Attribute.NUMERIC;
 	break;
-      case DATE:
+      case DatabaseConnection.DATE:
 	attributeTypes[i - 1] = Attribute.DATE;
 	break;
       default:
@@ -828,7 +881,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
       double[] vals = new double[numAttributes];
       for(int i = 1; i <= numAttributes; i++) {
 	switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-	case STRING :
+	case DatabaseConnection.STRING :
 	  String str = rs.getString(i);
 	  
 	  if (rs.wasNull()) {
@@ -841,7 +894,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
                 vals[i - 1] = index.doubleValue();
             }
 	  break;
-	case BOOL:
+	case DatabaseConnection.BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -849,7 +902,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
 	  break;
-	case DOUBLE:
+	case DatabaseConnection.DOUBLE:
 	  double dd = rs.getDouble(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -857,7 +910,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] =  dd;
 	  }
 	  break;
-	case BYTE:
+	case DatabaseConnection.BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -865,7 +918,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)by;
 	  }
 	  break;
-	case SHORT:
+	case DatabaseConnection.SHORT:
 	  short sh = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -873,7 +926,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)sh;
 	  }
 	  break;
-	case INTEGER:
+	case DatabaseConnection.INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -881,7 +934,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)in;
 	  }
 	  break;
-	case LONG:
+	case DatabaseConnection.LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -889,7 +942,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)lo;
 	  }
 	  break;
-	case FLOAT:
+	case DatabaseConnection.FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -897,7 +950,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)fl;
 	  }
 	  break;
-	case DATE:
+	case DatabaseConnection.DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -972,21 +1025,22 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
     return result;
   }
   
-  /** Reads an instance from a database.
+  /** 
+   * Reads an instance from a database.
+   * 
    * @param rs the ReusltSet to load
    * @throws Exception if instance cannot be read
    * @return an instance read from the database
    */  
   private Instance readInstance(ResultSet rs) throws Exception{
   
-      FastVector instances = new FastVector();
       ResultSetMetaData md = rs.getMetaData();
       int numAttributes = md.getColumnCount();
       double[] vals = new double[numAttributes];
       m_structure.delete();
       for(int i = 1; i <= numAttributes; i++) {
 	switch (m_DataBaseConnection.translateDBColumnType(md.getColumnTypeName(i))) {
-	case STRING :
+	case DatabaseConnection.STRING :
 	  String str = rs.getString(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -998,7 +1052,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = index.doubleValue();
 	  }
 	  break;
-	case BOOL:
+	case DatabaseConnection.BOOL:
 	  boolean boo = rs.getBoolean(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1006,7 +1060,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (boo ? 1.0 : 0.0);
 	  }
 	  break;
-	case DOUBLE:
+	case DatabaseConnection.DOUBLE:
 	  //	  BigDecimal bd = rs.getBigDecimal(i, 4); 
 	  double dd = rs.getDouble(i);
 	  // Use the column precision instead of 4?
@@ -1017,7 +1071,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] =  dd;
 	  }
 	  break;
-	case BYTE:
+	case DatabaseConnection.BYTE:
 	  byte by = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1025,7 +1079,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)by;
 	  }
 	  break;
-	case SHORT:
+	case DatabaseConnection.SHORT:
 	  short sh = rs.getByte(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1033,7 +1087,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)sh;
 	  }
 	  break;
-	case INTEGER:
+	case DatabaseConnection.INTEGER:
 	  int in = rs.getInt(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1041,7 +1095,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)in;
 	  }
 	  break;
-	case LONG:
+	case DatabaseConnection.LONG:
 	  long lo = rs.getLong(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1049,7 +1103,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)lo;
 	  }
 	  break;
-	case FLOAT:
+	case DatabaseConnection.FLOAT:
 	  float fl = rs.getFloat(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1057,7 +1111,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	    vals[i - 1] = (double)fl;
 	  }
 	  break;
-	case DATE:
+	case DatabaseConnection.DATE:
           Date date = rs.getDate(i);
           if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
@@ -1099,7 +1153,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @exception IOException if there is an error during parsing
+   * @throws IOException if there is an error during parsing
    */
   public Instance getNextInstance() throws IOException {
 
@@ -1168,7 +1222,9 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
   
   
   
-  /** Gets the setting
+  /** 
+   * Gets the setting
+   * 
    * @return the current setting
    */  
   public String[] getOptions() {
@@ -1193,37 +1249,57 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
     return (String[]) options.toArray(new String[options.size()]);
   }
   
-  /** Lists the available options
+  /** 
+   * Lists the available options
+   * 
    * @return an enumeration of the available options
    */  
   public java.util.Enumeration listOptions() {
       
      FastVector newVector = new FastVector(3);
 
-     newVector.addElement(new Option("\tSQL query of the form SELECT <list of columns>|* FROM <table> [WHERE] to execute (default Select * From Results0).",
-				     "Q",1,"-Q <query>"));
-     newVector.addElement(new Option("\tList of column names uniquely defining a DB row (separated by ', ').\n\tUsed for incremental loading."
-        +"\n\tIf not specified, the key will be determined automatically, if possible with the used JDBC driver.\n\tThe auto ID column created by the DatabaseSaver won't be loaded.",
-				     "P",1,"-P<list of column names>"));
-     newVector.addElement(new Option("\tSets incremental loading", "I", 0,
-				    "-I"));
+     newVector.addElement(new Option(
+	 "\tSQL query of the form\n"
+	 + "\tSELECT <list of columns>|* FROM <table> [WHERE]\n"
+	 + "\tto execute (default Select * From Results0).",
+	"Q",1,"-Q <query>"));
+     newVector.addElement(new Option(
+	 "\tList of column names uniquely defining a DB row\n"
+	 + "\t(separated by ', ').\n\tUsed for incremental loading.\n"
+	 + "\tIf not specified, the key will be determined automatically,\n"
+	 + "\tif possible with the used JDBC driver.\n"
+	 + "\tThe auto ID column created by the DatabaseSaver won't be loaded.",
+	 "P",1,"-P <list of column names>"));
+     newVector.addElement(new Option(
+	 "\tSets incremental loading", 
+	 "I", 0, "-I"));
      
      return  newVector.elements();
   }
   
-  /** Sets the options.
+  /** 
+   * Sets the options.
    *
-   * Available options are:
-   * -Q the query to specify which tuples to load<br>
-   * The query must have the form:
-   * SELECT *|<column-list> FROM <table> [WHERE}
-   * (default: SELECT * FROM Results0).<p>
-   *
-   * -P comma separted list of columns that are a unqiue key <br>
-   * Only needed for incremental loading, if it cannot be detected automatically<p>
-   *
-   * -I <br>
-   * Sets incremental loading
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -Q &lt;query&gt;
+   *  SQL query of the form
+   *  SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
+   *  to execute (default Select * From Results0).</pre>
+   * 
+   * <pre> -P &lt;list of column names&gt;
+   *  List of column names uniquely defining a DB row
+   *  (separated by ', ').
+   *  Used for incremental loading.
+   *  If not specified, the key will be determined automatically,
+   *  if possible with the used JDBC driver.
+   *  The auto ID column created by the DatabaseSaver won't be loaded.</pre>
+   * 
+   * <pre> -I
+   *  Sets incremental loading</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the options
    * @throws Exception if options cannot be set
@@ -1298,9 +1374,5 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	e.printStackTrace();
         System.out.println("\n"+e.getMessage());
       }
-    
   }
-  
-  
-  
 }
