@@ -48,7 +48,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */
@@ -159,24 +159,30 @@ public class OptionHandlerJavadoc
    */
   protected String generateJavadoc(int index) throws Exception {
     String		result;
-    Class		cls;
     OptionHandler	handler;
     String		optionStr;
     
     result = "";
     
     if (index == 0) {
-      cls = Class.forName(getClassname());
-      if (!ClassDiscovery.hasInterface(OptionHandler.class, cls))
+      if (!canInstantiateClass())
+	return result;
+	    
+      if (!ClassDiscovery.hasInterface(OptionHandler.class, getInstance().getClass()))
 	throw new Exception("Class '" + getClassname() + "' is not an OptionHandler!");
+      
+      // any options at all?
+      handler = (OptionHandler) getInstance();
+      Enumeration enm = handler.listOptions();
+      if (!enm.hasMoreElements())
+	return result;
       
       // prolog?
       if (getProlog())
 	result = "Valid options are: <p/>\n\n";
       
       // options
-      handler = (OptionHandler) cls.newInstance();
-      Enumeration enm = handler.listOptions();
+      enm = handler.listOptions();
       while (enm.hasMoreElements()) {
 	Option option = (Option) enm.nextElement();
 	optionStr =   toHTML(option.synopsis()) 
