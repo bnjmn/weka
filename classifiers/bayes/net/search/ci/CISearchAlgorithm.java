@@ -24,19 +24,53 @@ package weka.classifiers.bayes.net.search.ci;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
-import weka.classifiers.bayes.net.search.local.*;
+import weka.classifiers.bayes.net.search.local.LocalScoreSearchAlgorithm;
 import weka.core.Instances;
 
-/** The CISearchAlgorithm class supports Bayes net structure search algorithms
- * that are based on conditional independence test (as opposed to for example
- * score based of cross validation based search algorithms).
+/** 
+ <!-- globalinfo-start -->
+ * The CISearchAlgorithm class supports Bayes net structure search algorithms that are based on conditional independence test (as opposed to for example score based of cross validation based search algorithms).
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class CISearchAlgorithm extends LocalScoreSearchAlgorithm {
+public class CISearchAlgorithm 
+	extends LocalScoreSearchAlgorithm {
+  	
+  	/** for serialization */
+  	static final long serialVersionUID = 3165802334119704560L;
+  	
 	BayesNet  m_BayesNet;
 	Instances m_instances;
+	    
+	/**
+	 * Returns a string describing this object
+	 * @return a description of the classifier suitable for
+	 * displaying in the explorer/experimenter gui
+	 */
+	public String globalInfo() {
+	  return 
+	      "The CISearchAlgorithm class supports Bayes net structure "
+	    + "search algorithms that are based on conditional independence "
+	    + "test (as opposed to for example score based of cross validation "
+	    + "based search algorithms).";
+	}
 
 	/** IsConditionalIndependent tests whether two nodes X and Y are independent
 	 *  given a set of variables Z. The test compares the score of the Bayes network
@@ -75,4 +109,3 @@ public class CISearchAlgorithm extends LocalScoreSearchAlgorithm {
 	} // IsConditionalIndependent
 	        	
 } // class CISearchAlgorithm
-

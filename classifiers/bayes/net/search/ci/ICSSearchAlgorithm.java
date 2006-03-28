@@ -33,27 +33,89 @@ import java.io.FileReader;
 import java.util.Enumeration;
 import java.util.Vector;
 
-/** ICSSearchAlgorithm implements Conditional Independence based search
- * algorithm for Bayes Network structure learning.
+/** 
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm uses conditional independence tests to find a skeleton, finds V-nodes and applies a set of rules to find the directions of the remaining arrows.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -cardinality &lt;num&gt;
+ *  When determining whether an edge exists a search is performed 
+ *  for a set Z that separates the nodes. MaxCardinality determines 
+ *  the maximum size of the set Z. This greatly influences the 
+ *  length of the search. (default 2)</pre>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */ 
-public class ICSSearchAlgorithm extends CISearchAlgorithm {
+public class ICSSearchAlgorithm 
+    extends CISearchAlgorithm {
 
-    String name(int iAttribute) {return m_instances.attribute(iAttribute).name();}
-    int maxn() {return m_instances.numAttributes();}
+    /** for serialization */
+    static final long serialVersionUID = -2510985917284798576L;
+  
+    /**
+     * returns the name of the attribute with the given index
+     * 
+     * @param iAttribute the index of the attribute
+     * @return the name of the attribute
+     */
+    String name(int iAttribute) {
+      return m_instances.attribute(iAttribute).name();
+    }
+    
+    /**
+     * returns the number of attributes
+     * 
+     * @return the number of attributes
+     */
+    int maxn() {
+      return m_instances.numAttributes();
+    }
     
     /** maximum size of separating set **/
-	private int m_nMaxCardinality = 2; 
-	public void setMaxCardinality(int nMaxCardinality) {m_nMaxCardinality = nMaxCardinality;}
-	public int getMaxCardinality() {return m_nMaxCardinality;}
+    private int m_nMaxCardinality = 2; 
+
+    /**
+     * sets the cardinality
+     * 
+     * @param nMaxCardinality the max cardinality
+     */
+    public void setMaxCardinality(int nMaxCardinality) {
+      m_nMaxCardinality = nMaxCardinality;
+    }
+    
+    /**
+     * returns the max cardinality
+     * 
+     * @return the max cardinality
+     */
+    public int getMaxCardinality() {
+      return m_nMaxCardinality;
+    }
 	
 
 	
     class SeparationSet {
         public int [] m_set;
         
+        /**
+         * constructor
+         */
         public SeparationSet() {
 			m_set= new int [getMaxCardinality() + 1];
         } // c'tor
@@ -71,9 +133,10 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 
 	/**
 	 * Search for Bayes network structure using ICS algorithm
-	 * @param bayesNet : datastructure to build network structure for
-	 * @param instances : data set to learn from
+	 * @param bayesNet datastructure to build network structure for
+	 * @param instances data set to learn from
 	 * @see weka.classifiers.bayes.SearchAlgorithm#search(BayesNet, Instances)
+	 * @throws Exception if something goes wrong
 	 */
 	protected void search(BayesNet bayesNet, Instances instances) throws Exception {
         // init
@@ -115,8 +178,8 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * The set Z is found by trying all possible subsets of nodes adjacent 
 	 * to a and b, first of size 0, then of size 1, etc. up to size 
 	 * m_nMaxCardinality
-	 * @param edges : boolean matrix representing the edges
-	 * @param sepsets : set of separating sets
+	 * @param edges boolean matrix representing the edges
+	 * @param sepsets set of separating sets
 	 */
 	void calcDependencyGraph(boolean[][] edges, SeparationSet[][] sepsets) {
 		/*calc undirected graph a-b iff D(a,S,b) for all S)*/
@@ -175,10 +238,10 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * cardiniality exists. 
 	 * The set Z is found by trying all possible subsets of nodes adjacent 
 	 * to both a and b of the requested cardinality.
-	 * @param iNode1 : index of first node a
-	 * @param iNode2 : index of second node b
-	 * @param nCardinality : size of the separating set Z
-	 * @param deparc : skeleton
+	 * @param iNode1 index of first node a
+	 * @param iNode2 index of second node b
+	 * @param nCardinality size of the separating set Z
+	 * @param edges
 	 * @return SeparationSet containing set that separates iNode1 and iNode2 or null if no such set exists
 	 */
     SeparationSet existsSepSet(int iNode1, int iNode2, int nCardinality, boolean [] [] edges)
@@ -242,10 +305,10 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	/** 
 	 * determine index of node that makes next candidate separating set
 	 * adjacent to iNode1 and iNode2, but not iNode2 itself
-	 * @param x : index of current node
-	 * @param iNode1 : first node
-	 * @param iNode2 : second node (must be larger than iNode1)
-	 * @param edges : skeleton so far
+	 * @param x index of current node
+	 * @param iNode1 first node
+	 * @param iNode2 second node (must be larger than iNode1)
+	 * @param edges skeleton so far
 	 * @return int index of next node adjacent to iNode1 after x
 	 */
 	int next(int x, int iNode1, int iNode2, boolean [] [] edges)
@@ -262,10 +325,10 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	 * a->c<-b and a-/-b. These nodes are identified by finding nodes
 	 * a,b,c in the skeleton such that a--c, c--b and a-/-b and furthermore
 	 * c is not in the set Z that separates a and b
-	 * @param edges : skeleton
-	 * @param arrows : resulting partially directed skeleton after all V-nodes 
+	 * @param edges skeleton
+	 * @param arrows resulting partially directed skeleton after all V-nodes 
 	 * have been identified
-	 * @param sepsets : separating sets
+	 * @param sepsets separating sets
 	 */
 	void calcVeeNodes(
 		boolean[][] edges,
@@ -314,8 +377,8 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	  i->j   \ /
 			  j
 	   Rule 5: if no edges are directed then take a random one (first we can find)
-	 * @param edges : skeleton
-	 * @param arrows : resulting fully directed DAG
+	 * @param edges skeleton
+	 * @param arrows resulting fully directed DAG
 	 */
 	void calcArcDirections(boolean[][] edges, boolean[][] arrows) {
 		/*give direction to remaining arcs*/
@@ -474,10 +537,10 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	  Vector result = new Vector();
 	  
 	  result.addElement(new Option(
-                "\tWhen determining whether an edge exists a search is performed "
-              + "\tfor a set Z that separates the nodes. MaxCardinality determines "
-              + "\tthe maximum size of the set Z. This greatly influences the "
-              + "\tlength of the search. (default  2)",
+                "\tWhen determining whether an edge exists a search is performed \n"
+              + "\tfor a set Z that separates the nodes. MaxCardinality determines \n"
+              + "\tthe maximum size of the set Z. This greatly influences the \n"
+              + "\tlength of the search. (default 2)",
 	      "cardinality", 1, "-cardinality <num>"));
 	  
 	  Enumeration en = super.listOptions();
@@ -488,9 +551,30 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	} // listOption
 	
 	/**
-	 * Parses a given list of options. Valid options are:<p>
+	 * Parses a given list of options. <p/>
+	 *
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -cardinality &lt;num&gt;
+	 *  When determining whether an edge exists a search is performed 
+	 *  for a set Z that separates the nodes. MaxCardinality determines 
+	 *  the maximum size of the set Z. This greatly influences the 
+	 *  length of the search. (default 2)</pre>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+	 * 
+	 <!-- options-end -->
+	 * 
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 	  String        tmpStr;
@@ -545,6 +629,11 @@ public class ICSSearchAlgorithm extends CISearchAlgorithm {
 	  "of the remaining arrows.";
 	}
 
+	/**
+	 * for testing the class
+	 * 
+	 * @param argv the commandline parameters
+	 */
 	static public void main(String [] argv) {
 		try {
 			BayesNet b = new BayesNet();

@@ -21,18 +21,46 @@
  */
 package weka.classifiers.bayes.net.search.fixed;
 
-import weka.classifiers.bayes.net.search.SearchAlgorithm;
 import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.net.search.SearchAlgorithm;
 import weka.core.Instances;
 
-/** The NaiveBayes class generates a fixed Bayes network structure
- * with arrows from the class variable to each of the attribute variables.
+/** 
+ <!-- globalinfo-start -->
+ * The NaiveBayes class generates a fixed Bayes network structure with arrows from the class variable to each of the attribute variables.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class NaiveBayes extends SearchAlgorithm {
+public class NaiveBayes 
+	extends SearchAlgorithm {
+
+  	/** for serialization */
+  	static final long serialVersionUID = -4808572519709755811L;
+  	    
+  	/**
+  	 * Returns a string describing this object
+  	 * @return a description of the classifier suitable for
+  	 * displaying in the explorer/experimenter gui
+  	 */
+  	public String globalInfo() {
+  	  return 
+  	      "The NaiveBayes class generates a fixed Bayes network structure "
+  	    + "with arrows from the class variable to each of the attribute "
+  	    + "variables.";
+  	}
 	
+  	/**
+  	 * 
+  	 * @param bayesNet
+  	 * @param instances the instances to work with
+  	 * @throws Exception if something goes wrong
+  	 */
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
         	if (iAttribute != instances.classIndex()) {

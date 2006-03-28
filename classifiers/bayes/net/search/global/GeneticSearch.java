@@ -23,18 +23,72 @@
 package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.bayes.net.*;
-import weka.core.*;
-import java.util.*;
+import weka.classifiers.bayes.net.ParentSet;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 
-/** GeneticSearch is a crude implementation of genetic search for learning 
- * Bayesian network structures. 
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
+/** 
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm uses genetic search for finding a well scoring Bayes network structure. Genetic search works by having a population of Bayes network structures and allow them to mutate and apply cross over to get offspring. The best network structure found during the process is returned.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -L &lt;integer&gt;
+ *  Population size</pre>
+ * 
+ * <pre> -A &lt;integer&gt;
+ *  Descendant population size</pre>
+ * 
+ * <pre> -U &lt;integer&gt;
+ *  Number of runs</pre>
+ * 
+ * <pre> -M
+ *  Use mutation.
+ *  (default true)</pre>
+ * 
+ * <pre> -C
+ *  Use cross-over.
+ *  (default true)</pre>
+ * 
+ * <pre> -O
+ *  Use tournament selection (true) or maximum subpopulatin (false).
+ *  (default false)</pre>
+ * 
+ * <pre> -R &lt;seed&gt;
+ *  Random number seed</pre>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
+ *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
+ * 
+ * <pre> -Q
+ *  Use probabilistic or 0/1 scoring.
+ *  (default probabilistic scoring)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class GeneticSearch extends GlobalScoreSearchAlgorithm {
+public class GeneticSearch 
+    extends GlobalScoreSearchAlgorithm {
 
+    /** for serialization */
+    static final long serialVersionUID = 4236165533882462203L;
+  
     /** number of runs **/
     int m_nRuns = 10;
 
@@ -77,12 +131,20 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 		/** score of represented network structure **/
 		double m_fScore = 0.0f;
 		
-		/** return score of represented network structure **/
+		/** 
+		 * return score of represented network structure
+		 * 
+		 * @return the score
+		 */
 		public double getScore() {
 			return m_fScore;
 		} // getScore
 
-		/** c'tor **/
+		/** 
+		 * c'tor 
+		 * 
+		 * @param nNodes the number of nodes
+		 */
 		BayesNetRepresentation (int nNodes) {
 			m_nNodes = nNodes;
 		} // c'tor
@@ -197,7 +259,7 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 
 		/** Apply cross-over operation to BayesNet 
 		 * Calculate score and as a side effect sets BayesNet parent sets.
-		 * @param other: BayesNetRepresentation to cross over with
+		 * @param other BayesNetRepresentation to cross over with
 		 */
 		void crossOver(BayesNetRepresentation other) {
 			boolean [] bits = new boolean [m_bits.length];
@@ -221,7 +283,7 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 				
 		/** check if number is square and initialize g_bIsSquare structure
 		 * if necessary
-		 * @param nNum: number to check (should be below m_nNodes * m_nNodes)
+		 * @param nNum number to check (should be below m_nNodes * m_nNodes)
 		 * @return true if number is square
 		 */
 		boolean isSquare(int nNum) {
@@ -236,9 +298,13 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 	} // class BayesNetRepresentation 
 	    	
 	/**
-	* search determines the network structure/graph of the network
-	* with a genetic search algorithm.
-	**/
+	 * search determines the network structure/graph of the network
+	 * with a genetic search algorithm.
+	 * 
+	 * @param bayesNet the network to search
+	 * @param instances the instances to use
+	 * @throws Exception if population size doesn fit or neither cross-over or mutation was chosen
+	 */
 	protected void search(BayesNet bayesNet, Instances instances) throws Exception {
 		// sanity check
 		if (getDescendantPopulationSize() < getPopulationSize()) {
@@ -264,7 +330,6 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
                 
         // initialize population        
 		BayesNetRepresentation  [] population = new BayesNetRepresentation [getPopulationSize()];
-		double [] score = new double[getPopulationSize()];
         for (int i = 0; i < getPopulationSize(); i++) {
         	population[i] = new BayesNetRepresentation (instances.numAttributes());
 			population[i].randomInit();
@@ -341,8 +406,8 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 
 
 	/** copyParentSets copies parent sets of source to dest BayesNet
-	 * @param dest: destination network
-	 * @param source: source network
+	 * @param dest destination network
+	 * @param source source network
 	 */
 	void copyParentSets(BayesNet dest, BayesNet source) {
 		int nNodes = source.getNrOfNodes();
@@ -375,13 +440,13 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(7);
 
-		newVector.addElement(new Option("\tPopulation size\n", "L", 1, "-L <integer>"));
-		newVector.addElement(new Option("\tDescendant population size\n", "A", 1, "-A <integer>"));
-		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
+		newVector.addElement(new Option("\tPopulation size", "L", 1, "-L <integer>"));
+		newVector.addElement(new Option("\tDescendant population size", "A", 1, "-A <integer>"));
+		newVector.addElement(new Option("\tNumber of runs", "U", 1, "-U <integer>"));
 		newVector.addElement(new Option("\tUse mutation.\n\t(default true)", "M", 0, "-M"));
 		newVector.addElement(new Option("\tUse cross-over.\n\t(default true)", "C", 0, "-C"));
 		newVector.addElement(new Option("\tUse tournament selection (true) or maximum subpopulatin (false).\n\t(default false)", "O", 0, "-O"));
-		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
+		newVector.addElement(new Option("\tRandom number seed", "R", 1, "-R <seed>"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -391,12 +456,52 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. Valid options are:<p>
+	 * Parses a given list of options. <p/>
 	 *
-	 * For other options see search algorithm.
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -L &lt;integer&gt;
+	 *  Population size</pre>
+	 * 
+	 * <pre> -A &lt;integer&gt;
+	 *  Descendant population size</pre>
+	 * 
+	 * <pre> -U &lt;integer&gt;
+	 *  Number of runs</pre>
+	 * 
+	 * <pre> -M
+	 *  Use mutation.
+	 *  (default true)</pre>
+	 * 
+	 * <pre> -C
+	 *  Use cross-over.
+	 *  (default true)</pre>
+	 * 
+	 * <pre> -O
+	 *  Use tournament selection (true) or maximum subpopulatin (false).
+	 *  (default false)</pre>
+	 * 
+	 * <pre> -R &lt;seed&gt;
+	 *  Random number seed</pre>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
+	 *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
+	 * 
+	 * <pre> -Q
+	 *  Use probabilistic or 0/1 scoring.
+	 *  (default probabilistic scoring)</pre>
+	 * 
+	 <!-- options-end -->
 	 *
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		String sPopulationSize = Utils.getOption('L', options);
@@ -495,14 +600,14 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 	}
 
 	/**
-	 * @param bUseCrossOver: sets whether cross-over is used
+	 * @param bUseCrossOver sets whether cross-over is used
 	 */
 	public void setUseCrossOver(boolean bUseCrossOver) {
 		m_bUseCrossOver = bUseCrossOver;
 	}
 
 	/**
-	 * @param bUseMutation: sets whether mutation is used
+	 * @param bUseMutation sets whether mutation is used
 	 */
 	public void setUseMutation(boolean bUseMutation) {
 		m_bUseMutation = bUseMutation;
@@ -516,21 +621,21 @@ public class GeneticSearch extends GlobalScoreSearchAlgorithm {
 	}
 
 	/**
-	 * @param bUseTournamentSelection: sets whether Tournament Selection or Maximum Sub-Population should be used
+	 * @param bUseTournamentSelection sets whether Tournament Selection or Maximum Sub-Population should be used
 	 */
 	public void setUseTournamentSelection(boolean bUseTournamentSelection) {
 		m_bUseTournamentSelection = bUseTournamentSelection;
 	}
 
 	/**
-	 * @param iDescendantPopulationSize: sets descendant population size
+	 * @param iDescendantPopulationSize sets descendant population size
 	 */
 	public void setDescendantPopulationSize(int iDescendantPopulationSize) {
 		m_nDescendantPopulationSize = iDescendantPopulationSize;
 	}
 
 	/**
-	 * @param iPopulationSize: sets population size
+	 * @param iPopulationSize sets population size
 	 */
 	public void setPopulationSize(int iPopulationSize) {
 		m_nPopulationSize = iPopulationSize;

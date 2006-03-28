@@ -21,23 +21,61 @@
  */
 package weka.classifiers.bayes.net.search.fixed;
 
-import weka.classifiers.bayes.net.search.SearchAlgorithm;
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.ParentSet;
-import weka.core.*;
-import java.util.*;
+import weka.classifiers.bayes.net.search.SearchAlgorithm;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 
-/** The FromFile reads the structure of a Bayes net from a file
- * in BIFF format.
+import java.util.Enumeration;
+import java.util.Vector;
+
+/** 
+ <!-- globalinfo-start -->
+ * The FromFile reads the structure of a Bayes net from a file in BIFF format.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B &lt;BIF File&gt;
+ *  Name of file containing network structure in BIF format
+ * </pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class FromFile extends SearchAlgorithm {
+public class FromFile 
+	extends SearchAlgorithm {
+  
+  	/** for serialization */
+  	static final long serialVersionUID = 7334358169507619525L;
+  
 	/** name of file to read structure from **/
 	String m_sBIFFile = "";
+	    
+	/**
+	 * Returns a string describing this object
+	 * @return a description of the classifier suitable for
+	 * displaying in the explorer/experimenter gui
+	 */
+	public String globalInfo() {
+	  return 
+	      "The FromFile reads the structure of a Bayes net from a file "
+	    + "in BIFF format.";
+	}
 
+	/**
+	 * 
+	 * @param bayesNet
+	 * @param instances the instances to work with
+	 * @throws Exception if attribute from BIF file could not be found
+	 */
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
 		// read network structure in BIF format
 		BIFReader bifReader = new BIFReader();
@@ -62,7 +100,8 @@ public class FromFile extends SearchAlgorithm {
 
     /**
      * Set name of network in BIF file to read structure from
-     * @param sBIFFile
+     * 
+     * @param sBIFFile the name of the BIF file
      */
     public void setBIFFile(String sBIFFile) {
     	m_sBIFFile = sBIFFile;
@@ -95,13 +134,19 @@ public class FromFile extends SearchAlgorithm {
 	}
 
 	/**
-	 * Parses a given list of options. Valid options are:<p>
+	 * Parses a given list of options. <p/>
 	 *
-	 * -B
-	 * Set the random order to true (default false). <p>
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -B &lt;BIF File&gt;
+	 *  Name of file containing network structure in BIF format
+	 * </pre>
+	 * 
+	 <!-- options-end -->
 	 *
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 	  setBIFFile( Utils.getOption('B', options));

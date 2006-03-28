@@ -15,7 +15,7 @@
  */
 
 /*
- * TabuSearch.java
+ * HillClimber.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
@@ -24,29 +24,73 @@ package weka.classifiers.bayes.net.search.local;
 
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
-import weka.core.*;
-import java.util.*;
-import java.io.Serializable;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 
-/** HillClimber implements hill climbing using local search 
- * for learning Bayesian network.
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
+/** 
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm uses a hill climbing algorithm adding, deleting and reversing arcs. The search is not restricted by an order on the variables (unlike K2). The difference with B and B2 is that this hill climber also considers arrows part of the naive Bayes structure for deletion.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -P &lt;nr of parents&gt;
+ *  Maximum number of parents</pre>
+ * 
+ * <pre> -R
+ *  Use arc reversal operation.
+ *  (default false)</pre>
+ * 
+ * <pre> -N
+ *  Initial structure is empty (instead of Naive Bayes)</pre>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class HillClimber extends LocalScoreSearchAlgorithm {
+public class HillClimber 
+    extends LocalScoreSearchAlgorithm {
+  
+    /** for serialization */
+    static final long serialVersionUID = 4322783593818122403L;
 
 	/** the Operation class contains info on operations performed
 	 * on the current Bayesian network.
 	 */
-    class Operation implements Serializable {
+    class Operation 
+    	implements Serializable {
+      
+      	/** for serialization */
+        static final long serialVersionUID = -4880888790432547895L;
+      
     	// constants indicating the type of an operation
     	final static int OPERATION_ADD = 0;
     	final static int OPERATION_DEL = 1;
     	final static int OPERATION_REVERSE = 2;
-    	/** c'tor **/
+    	
+    	/** 
+    	 * c'tor
+    	 */
         public Operation() {
         }
+        
 		/** c'tor + initializers
 		 * 
 		 * @param nTail
@@ -59,7 +103,7 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 			m_nOperation = nOperation;
 		}
 		/** compare this operation with another
-		 * @param other: operation to compare with
+		 * @param other operation to compare with
 		 * @return true if operation is the same
 		 */
 		public boolean equals(Operation other) {
@@ -70,12 +114,16 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 			(m_nHead == other.m_nHead) &&
 			(m_nTail == other.m_nTail));
 		} // equals
+		
 		/** number of the tail node **/
         public int m_nTail;
+        
 		/** number of the head node **/
         public int m_nHead;
+        
 		/** type of operation (ADD, DEL, REVERSE) **/
         public int m_nOperation;
+        
         /** change of score due to this operation **/
         public double m_fDeltaScore = -1E100;
     } // class Operation
@@ -88,7 +136,7 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 		/** change in score due to deleting an arc **/
 		double [] [] m_fDeltaScoreDel;
 		/** c'tor
-		 * @param nNrOfNodes: number of nodes in network, used to determine memory size to reserve
+		 * @param nNrOfNodes number of nodes in network, used to determine memory size to reserve
 		 */
 		Cache(int nNrOfNodes) {
 			m_fDeltaScoreAdd = new double [nNrOfNodes][nNrOfNodes];
@@ -96,8 +144,8 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 		}
 
 		/** set cache entry
-		 * @param oOperation: operation to perform
-		 * @param fValue: value to put in cache
+		 * @param oOperation operation to perform
+		 * @param fValue value to put in cache
 		 */
 		public void put(Operation oOperation, double fValue) {
 			if (oOperation.m_nOperation == Operation.OPERATION_ADD) {
@@ -108,7 +156,7 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 		} // put
 
 		/** get cache entry
-		 * @param oOperation: operation to perform
+		 * @param oOperation operation to perform
 		 * @return cache value
 		 */
 		public double get(Operation oOperation) {
@@ -133,10 +181,14 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
     boolean m_bUseArcReversal = false;
     	
 
-	/**
-	* search determines the network structure/graph of the network
-	* with the Taby algorithm.
-	**/
+    /**
+     * search determines the network structure/graph of the network
+     * with the Taby algorithm.
+     * 
+     * @param bayesNet the network to use
+     * @param instances the data to use
+     * @throws Exception if something goes wrong
+     */
     protected void search(BayesNet bayesNet, Instances instances) throws Exception {
         initCache(bayesNet, instances);
 
@@ -152,10 +204,12 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
     } // search
 
 
-	/** initCache initializes the cache
-	 * @param bayesNet: Bayes network to be learned
-	 * @param instances: data set to learn from
-	 * @throws Exception
+	/** 
+	 * initCache initializes the cache
+	 * 
+	 * @param bayesNet Bayes network to be learned
+	 * @param instances data set to learn from
+	 * @throws Exception if something goes wrong
 	 */
     void initCache(BayesNet bayesNet, Instances instances)  throws Exception {
     	
@@ -188,19 +242,21 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	/** check whether the operation is not in the forbidden.
 	 * For base hill climber, there are no restrictions on operations,
 	 * so we always return true.
-	 * @param oOperation: operation to be checked
+	 * @param oOperation operation to be checked
 	 * @return true if operation is not in the tabu list
 	 */
 	boolean isNotTabu(Operation oOperation) {
 		return true;
 	} // isNotTabu
 
-	/** getOptimalOperation finds the optimal operation that can be performed
+	/** 
+	 * getOptimalOperation finds the optimal operation that can be performed
 	 * on the Bayes network that is not in the tabu list.
-	 * @param bayesNet: Bayes network to apply operation on
-	 * @param instances: data set to learn from
+	 * 
+	 * @param bayesNet Bayes network to apply operation on
+	 * @param instances data set to learn from
 	 * @return optimal operation found
-	 * @throws Exception
+	 * @throws Exception if something goes wrong
 	 */
     Operation getOptimalOperation(BayesNet bayesNet, Instances instances) throws Exception {
         Operation oBestOperation = new Operation();
@@ -222,12 +278,14 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
         return oBestOperation;
     } // getOptimalOperation
 
-	/** performOperation applies an operation 
+	/** 
+	 * performOperation applies an operation 
 	 * on the Bayes network and update the cache.
-	 * @param bayesNet: Bayes network to apply operation on
-	 * @param instances: data set to learn from
-	 * @param oOperation: operation to perform
-	 * @throws Exception
+	 * 
+	 * @param bayesNet Bayes network to apply operation on
+	 * @param instances data set to learn from
+	 * @param oOperation operation to perform
+	 * @throws Exception if something goes wrong
 	 */
 	void performOperation(BayesNet bayesNet, Instances instances, Operation oOperation) throws Exception {
 		// perform operation
@@ -255,12 +313,26 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	} // performOperation
 
 
+	/**
+	 * 
+	 * @param bayesNet
+	 * @param iHead
+	 * @param iTail
+	 * @param instances
+	 */
 	void applyArcAddition(BayesNet bayesNet, int iHead, int iTail, Instances instances) {
 		ParentSet bestParentSet = bayesNet.getParentSet(iHead);
 		bestParentSet.addParent(iTail, instances);
 		updateCache(iHead, instances.numAttributes(), bestParentSet);
 	} // applyArcAddition
 
+	/**
+	 * 
+	 * @param bayesNet
+	 * @param iHead
+	 * @param iTail
+	 * @param instances
+	 */
 	void applyArcDeletion(BayesNet bayesNet, int iHead, int iTail, Instances instances) {
 		ParentSet bestParentSet = bayesNet.getParentSet(iHead);
 		bestParentSet.deleteParent(iTail, instances);
@@ -268,9 +340,12 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	} // applyArcAddition
 
 
-	/** find best (or least bad) arc addition operation
-	 * @param bayesNet: Bayes network to add arc to
-	 * @param instances: data set
+	/** 
+	 * find best (or least bad) arc addition operation
+	 * 
+	 * @param bayesNet Bayes network to add arc to
+	 * @param instances data set
+	 * @param oBestOperation
 	 * @return Operation containing best arc to add, or null if no arc addition is allowed 
 	 * (this can happen if any arc addition introduces a cycle, or all parent sets are filled
 	 * up to the maximum nr of parents).
@@ -296,9 +371,12 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 		return oBestOperation;
 	} // findBestArcToAdd
 
-	/** find best (or least bad) arc deletion operation
-	 * @param bayesNet: Bayes network to delete arc from
-	 * @param instances: data set
+	/** 
+	 * find best (or least bad) arc deletion operation
+	 * 
+	 * @param bayesNet Bayes network to delete arc from
+	 * @param instances data set
+	 * @param oBestOperation
 	 * @return Operation containing best arc to delete, or null if no deletion can be made 
 	 * (happens when there is no arc in the network yet).
 	 */
@@ -320,9 +398,12 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 		return oBestOperation;
 	} // findBestArcToDelete
 
-	/** find best (or least bad) arc reversal operation
-	 * @param bayesNet: Bayes network to reverse arc in
-	 * @param instances: data set
+	/** 
+	 * find best (or least bad) arc reversal operation
+	 * 
+	 * @param bayesNet Bayes network to reverse arc in
+	 * @param instances data set
+	 * @param oBestOperation
 	 * @return Operation containing best arc to reverse, or null if no reversal is allowed
 	 * (happens if there is no arc in the network yet, or when any such reversal introduces
 	 * a cycle).
@@ -351,10 +432,12 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 		return oBestOperation;
 	} // findBestArcToReverse
 
-	/** update the cache due to change of parent set of a node
-	 * @param iAttributeHead: node that has its parent set changed
-	 * @param nNrOfAtts: number of nodes/attributes in data set
-	 * @param parentSet: new parents set of node iAttributeHead
+	/** 
+	 * update the cache due to change of parent set of a node
+	 * 
+	 * @param iAttributeHead node that has its parent set changed
+	 * @param nNrOfAtts number of nodes/attributes in data set
+	 * @param parentSet new parents set of node iAttributeHead
 	 */
 	void updateCache(int iAttributeHead, int nNrOfAtts, ParentSet parentSet) {
 		// update cache entries for arrows heading towards iAttributeHead
@@ -379,20 +462,18 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	
 
 	/**
-	 * Method declaration
+	 * Sets the max number of parents
 	 *
-	 * @param nMaxNrOfParents
-	 *
+	 * @param nMaxNrOfParents the max number of parents
 	 */
 	public void setMaxNrOfParents(int nMaxNrOfParents) {
 	  m_nMaxNrOfParents = nMaxNrOfParents;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets the max number of parents.
 	 *
-	 * @return
-	 *
+	 * @return the max number of parents
 	 */
 	public int getMaxNrOfParents() {
 	  return m_nMaxNrOfParents;
@@ -406,9 +487,9 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(2);
 
-		newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, "-P <nr of parents>"));
+		newVector.addElement(new Option("\tMaximum number of parents", "P", 1, "-P <nr of parents>"));
 		newVector.addElement(new Option("\tUse arc reversal operation.\n\t(default false)", "R", 0, "-R"));
-		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)\n", "N", 0, "-N"));
+		newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)", "N", 0, "-N"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -418,12 +499,34 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	} // listOptions
 
 	/**
-	 * Parses a given list of options. Valid options are:<p>
+	 * Parses a given list of options. <p/>
 	 *
-	 * For other options see search algorithm.
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -P &lt;nr of parents&gt;
+	 *  Maximum number of parents</pre>
+	 * 
+	 * <pre> -R
+	 *  Use arc reversal operation.
+	 *  (default false)</pre>
+	 * 
+	 * <pre> -N
+	 *  Initial structure is empty (instead of Naive Bayes)</pre>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+	 * 
+	 <!-- options-end -->
 	 *
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		setUseArcReversal(Utils.getFlag('R', options));
@@ -473,20 +576,18 @@ public class HillClimber extends LocalScoreSearchAlgorithm {
 	} // getOptions
 
 	/**
-	 * Method declaration
+	 * Sets whether to init as naive bayes
 	 *
-	 * @param bInitAsNaiveBayes
-	 *
+	 * @param bInitAsNaiveBayes whether to init as naive bayes
 	 */
 	public void setInitAsNaiveBayes(boolean bInitAsNaiveBayes) {
 	  m_bInitAsNaiveBayes = bInitAsNaiveBayes;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets whether to init as naive bayes
 	 *
-	 * @return
-	 *
+	 * @return whether to init as naive bayes
 	 */
 	public boolean getInitAsNaiveBayes() {
 	  return m_bInitAsNaiveBayes;

@@ -23,25 +23,83 @@
 package weka.classifiers.bayes.net.search.global;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 
-/** SimulatedAnnealing uses simulated annealing for learning Bayesian network
- * structures. For details, see for example 
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
+/** 
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm uses the general purpose search method of simulated annealing to find a well scoring network structure.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * R.R. Bouckaert (1995). Bayesian Belief Networks: from Construction to Inference. Utrecht, Netherlands.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * R.R. Bouckaert. 
- * Bayesian Belief Networks: from Construction to Inference. 
- * Ph.D. thesis, 
- * University of Utrecht, 
- * 1995
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;phdthesis{Bouckaert1995,
+ *    address = {Utrecht, Netherlands},
+ *    author = {R.R. Bouckaert},
+ *    institution = {University of Utrecht},
+ *    title = {Bayesian Belief Networks: from Construction to Inference},
+ *    year = {1995}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -A &lt;float&gt;
+ *  Start temperature</pre>
+ * 
+ * <pre> -U &lt;integer&gt;
+ *  Number of runs</pre>
+ * 
+ * <pre> -D &lt;float&gt;
+ *  Delta temperature</pre>
+ * 
+ * <pre> -R &lt;seed&gt;
+ *  Random number seed</pre>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
+ *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
+ * 
+ * <pre> -Q
+ *  Use probabilistic or 0/1 scoring.
+ *  (default probabilistic scoring)</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * Version: $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
+public class SimulatedAnnealing 
+	extends GlobalScoreSearchAlgorithm
+	implements TechnicalInformationHandler {
 
-public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
+  	/** for serialization */
+  	static final long serialVersionUID = -5482721887881010916L;
 
-    /** start temperature **/
+    	/** start temperature **/
 	double m_fTStart = 10;
 
 	/** change in temperature at every run **/
@@ -59,6 +117,32 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 	/** random number generator **/
 	Random m_random;
 
+	/**
+	 * Returns an instance of a TechnicalInformation object, containing 
+	 * detailed information about the technical background of this class,
+	 * e.g., paper reference or book this class is based on.
+	 * 
+	 * @return the technical information about this class
+	 */
+	public TechnicalInformation getTechnicalInformation() {
+	  TechnicalInformation 	result;
+	  
+	  result = new TechnicalInformation(Type.PHDTHESIS);
+	  result.setValue(Field.AUTHOR, "R.R. Bouckaert");
+	  result.setValue(Field.YEAR, "1995");
+	  result.setValue(Field.TITLE, "Bayesian Belief Networks: from Construction to Inference");
+	  result.setValue(Field.INSTITUTION, "University of Utrecht");
+	  result.setValue(Field.ADDRESS, "Utrecht, Netherlands");
+	  
+	  return result;
+	}
+	
+    /**
+     * 
+     * @param bayesNet the bayes net to use
+     * @param instances the data to use
+     * @throws Exception if something goes wrong
+     */
     public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
         super.buildStructure(bayesNet, instances);
 		m_random = new Random(m_nSeed);
@@ -123,8 +207,8 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
     } // buildStructure 
 	
 	/** CopyParentSets copies parent sets of source to dest BayesNet
-	 * @param dest: destination network
-	 * @param source: source network
+	 * @param dest destination network
+	 * @param source source network
 	 */
 	void copyParentSets(BayesNet dest, BayesNet source) {
 		int nNodes = source.getNrOfNodes();
@@ -157,7 +241,7 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 
     /**
      * Sets the m_fDelta.
-     * @param m_fDelta The m_fDelta to set
+     * @param fDelta The m_fDelta to set
      */
     public void setDelta(double fDelta) {
         m_fDelta = fDelta;
@@ -165,7 +249,7 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 
     /**
      * Sets the m_fTStart.
-     * @param m_fTStart The m_fTStart to set
+     * @param fTStart The m_fTStart to set
      */
     public void setTStart(double fTStart) {
         m_fTStart = fTStart;
@@ -173,7 +257,7 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 
     /**
      * Sets the m_nRuns.
-     * @param m_nRuns The m_nRuns to set
+     * @param nRuns The m_nRuns to set
      */
     public void setRuns(int nRuns) {
         m_nRuns = nRuns;
@@ -202,10 +286,10 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 	public Enumeration listOptions() {
 		Vector newVector = new Vector(3);
 
-		newVector.addElement(new Option("\tStart temperature\n", "A", 1, "-A <float>"));
-		newVector.addElement(new Option("\tNumber of runs\n", "U", 1, "-U <integer>"));
-		newVector.addElement(new Option("\tDelta temperature\n", "D", 1, "-D <float>"));
-		newVector.addElement(new Option("\tRandom number seed\n", "R", 1, "-R <seed>"));
+		newVector.addElement(new Option("\tStart temperature", "A", 1, "-A <float>"));
+		newVector.addElement(new Option("\tNumber of runs", "U", 1, "-U <integer>"));
+		newVector.addElement(new Option("\tDelta temperature", "D", 1, "-D <float>"));
+		newVector.addElement(new Option("\tRandom number seed", "R", 1, "-R <seed>"));
 
 		Enumeration enu = super.listOptions();
 		while (enu.hasMoreElements()) {
@@ -215,12 +299,40 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 	}
 
 	/**
-	 * Parses a given list of options. Valid options are:<p>
-	 *
-	 * For other options see search algorithm.
+	 * Parses a given list of options. <p/>
+	 * 
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -A &lt;float&gt;
+	 *  Start temperature</pre>
+	 * 
+	 * <pre> -U &lt;integer&gt;
+	 *  Number of runs</pre>
+	 * 
+	 * <pre> -D &lt;float&gt;
+	 *  Delta temperature</pre>
+	 * 
+	 * <pre> -R &lt;seed&gt;
+	 *  Random number seed</pre>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [LOO-CV|k-Fold-CV|Cumulative-CV]
+	 *  Score type (LOO-CV,k-Fold-CV,Cumulative-CV)</pre>
+	 * 
+	 * <pre> -Q
+	 *  Use probabilistic or 0/1 scoring.
+	 *  (default probabilistic scoring)</pre>
+	 * 
+	 <!-- options-end -->
 	 *
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		String sTStart = Utils.getOption('A', options);
@@ -280,8 +392,11 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 	 * @return The string.
 	 */
 	public String globalInfo() {
-		return "This Bayes Network learning algorithm uses the general purpose search method " +
-		"of simulated annealing to find a well scoring network structure.";
+		return 
+		    "This Bayes Network learning algorithm uses the general purpose search method "
+		  + "of simulated annealing to find a well scoring network structure.\n\n"
+		  + "For more information see:\n\n"
+		  + getTechnicalInformation().toString();
 	} // globalInfo
 	
 	/**
@@ -317,4 +432,3 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm {
 	} // seedTipText
 
 } // SimulatedAnnealing
-
