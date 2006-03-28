@@ -32,68 +32,74 @@ import java.util.Vector;
  * Generates artificial datasets for testing. In case of Multi-Instance data
  * the settings for the number of attributes applies to the data inside
  * the bag. Originally based on code from the CheckClassifier.<p/>
- * 
+ *
+ <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -h|-help <br/>
- *  prints this help <p/>
- *  
- * -relation name <br/>
- *  The name of the data set. <p/>
- *  
- * -seed num <br/>
- *  The seed value. <p/>
- *  
- * -num-instances num <br/>
- *  The number of instances in the datasets (default 20). <p/>
- *  
- * -class-type num <br/>
+ * <pre> -relation &lt;name&gt;
+ *  The name of the data set.</pre>
+ * 
+ * <pre> -seed &lt;num&gt;
+ *  The seed value.</pre>
+ * 
+ * <pre> -num-instances &lt;num&gt;
+ *  The number of instances in the datasets (default 20).</pre>
+ * 
+ * <pre> -class-type &lt;num&gt;
  *  The class type, see constants in weka.core.Attribute
- *  (default 1=nominal). <p/>
- *  
- * -classes-values num <br/>
+ *  (default 1=nominal).</pre>
+ * 
+ * <pre> -classes-values &lt;num&gt;
  *  The number of classes to generate (for nominal classes only)
- *  (default 2). <p/>
- *  
- * -class-index num <br/>
- *  The class index, with -1=last, (default -1). <p/>
- *  
- * -no-class <br/>
- *  Doesn't include a class attribute in the output. <p/>
- *  
- * -nominal num <br/>
- *  The number of nominal attributes (default 1). <p/>
- *  
- * -nominal-values num <br/>
- *  The number of values for nominal attributes (default 2). <p/>
- *  
- * -numeric num <br/>
- *  The number of numeric attributes (default 0). <p/>
- *  
- * -string num <br/>
- *  The number of string attributes (default 0). <p/>
- *  
- * -date num <br/>
- *  The number of date attributes (default 0). <p/>
- *  
- * -relational num <br/>
- *  The number of relational attributes (default 0). <p/>
- *  
- * -multi-instance <br/>
- *  Generates multi-instance data. <p/>
- *  
- * -W classname <br/>
- *  The Capabilities handler to get base the dataset on.
+ *  (default 2).</pre>
+ * 
+ * <pre> -class-index &lt;num&gt;
+ *  The class index, with -1=last, (default -1).</pre>
+ * 
+ * <pre> -no-class
+ *  Doesn't include a class attribute in the output.</pre>
+ * 
+ * <pre> -nominal &lt;num&gt;
+ *  The number of nominal attributes (default 1).</pre>
+ * 
+ * <pre> -nominal-values &lt;num&gt;
+ *  The number of values for nominal attributes (default 2).</pre>
+ * 
+ * <pre> -numeric &lt;num&gt;
+ *  The number of numeric attributes (default 0).</pre>
+ * 
+ * <pre> -string &lt;num&gt;
+ *  The number of string attributes (default 0).</pre>
+ * 
+ * <pre> -date &lt;num&gt;
+ *  The number of date attributes (default 0).</pre>
+ * 
+ * <pre> -relational &lt;num&gt;
+ *  The number of relational attributes (default 0).</pre>
+ * 
+ * <pre> -num-instances-relational &lt;num&gt;
+ *  The number of instances in relational/bag attributes (default 10).</pre>
+ * 
+ * <pre> -multi-instance
+ *  Generates multi-instance data.</pre>
+ * 
+ * <pre> -W &lt;classname&gt;
+ *  The Capabilities handler to base the dataset on.
  *  The other parameters can be used to override the ones
  *  determined from the handler. Additional parameters for
- *  handler can be passed on after the '--'. <p/>
+ *  handler can be passed on after the '--'.</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
   implements Cloneable, Serializable, OptionHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6263968936330390469L;
 
   /** can be used for settting the class attribute index to last 
    * @see #setClassIndex(int) */
@@ -309,7 +315,65 @@ public class TestInstances
   }
   
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -relation &lt;name&gt;
+   *  The name of the data set.</pre>
+   * 
+   * <pre> -seed &lt;num&gt;
+   *  The seed value.</pre>
+   * 
+   * <pre> -num-instances &lt;num&gt;
+   *  The number of instances in the datasets (default 20).</pre>
+   * 
+   * <pre> -class-type &lt;num&gt;
+   *  The class type, see constants in weka.core.Attribute
+   *  (default 1=nominal).</pre>
+   * 
+   * <pre> -classes-values &lt;num&gt;
+   *  The number of classes to generate (for nominal classes only)
+   *  (default 2).</pre>
+   * 
+   * <pre> -class-index &lt;num&gt;
+   *  The class index, with -1=last, (default -1).</pre>
+   * 
+   * <pre> -no-class
+   *  Doesn't include a class attribute in the output.</pre>
+   * 
+   * <pre> -nominal &lt;num&gt;
+   *  The number of nominal attributes (default 1).</pre>
+   * 
+   * <pre> -nominal-values &lt;num&gt;
+   *  The number of values for nominal attributes (default 2).</pre>
+   * 
+   * <pre> -numeric &lt;num&gt;
+   *  The number of numeric attributes (default 0).</pre>
+   * 
+   * <pre> -string &lt;num&gt;
+   *  The number of string attributes (default 0).</pre>
+   * 
+   * <pre> -date &lt;num&gt;
+   *  The number of date attributes (default 0).</pre>
+   * 
+   * <pre> -relational &lt;num&gt;
+   *  The number of relational attributes (default 0).</pre>
+   * 
+   * <pre> -num-instances-relational &lt;num&gt;
+   *  The number of instances in relational/bag attributes (default 10).</pre>
+   * 
+   * <pre> -multi-instance
+   *  Generates multi-instance data.</pre>
+   * 
+   * <pre> -W &lt;classname&gt;
+   *  The Capabilities handler to base the dataset on.
+   *  The other parameters can be used to override the ones
+   *  determined from the handler. Additional parameters for
+   *  handler can be passed on after the '--'.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -500,6 +564,8 @@ public class TestInstances
   
   /**
    * sets the name of the relation
+   * 
+   * @param value 	the name of the relation
    */
   public void setRelation(String value) {
     m_Relation = value;
@@ -507,6 +573,8 @@ public class TestInstances
   
   /**
    * returns the current name of the relation
+   * 
+   * @return 		the name of the relation
    */
   public String getRelation() {
     return m_Relation;
@@ -514,6 +582,8 @@ public class TestInstances
   
   /**
    * sets the seed value for the random number generator
+   * 
+   * @param value	the seed
    */
   public void setSeed(int value) {
     m_Seed   = value;
@@ -522,6 +592,8 @@ public class TestInstances
   
   /**
    * returns the current seed value
+   * 
+   * @return 		the seed value
    */
   public int getSeed() {
     return m_Seed;
@@ -529,6 +601,8 @@ public class TestInstances
   
   /**
    * sets the number of instances to produce
+   * 
+   * @param value	the number of instances
    */
   public void setNumInstances(int value) {
     m_NumInstances = value;
@@ -536,6 +610,8 @@ public class TestInstances
   
   /**
    * returns the current number of instances to produce
+   * 
+   * @return the number of instances
    */
   public int getNumInstances() {
     return m_NumInstances;
@@ -543,6 +619,8 @@ public class TestInstances
   
   /**
    * sets the class attribute type
+   * 
+   * @param value	the class attribute type
    */
   public void setClassType(int value) {
     m_ClassType = value;
@@ -551,6 +629,8 @@ public class TestInstances
   
   /**
    * returns the current class type
+   * 
+   * @return the class attribute type
    */
   public int getClassType() {
     return m_ClassType;
@@ -558,6 +638,8 @@ public class TestInstances
   
   /**
    * sets the number of classes
+   * 
+   * @param value	the number of classes
    */
   public void setNumClasses(int value) {
     m_NumClasses = value;
@@ -565,6 +647,8 @@ public class TestInstances
   
   /**
    * returns the current number of classes
+   * 
+   * @return the number of classes
    */
   public int getNumClasses() {
     return m_NumClasses;
@@ -573,6 +657,7 @@ public class TestInstances
   /**
    * sets the class index (0-based)
    * 
+   * @param value	the class index 
    * @see #CLASS_IS_LAST
    * @see #NO_CLASS
    */
@@ -583,6 +668,7 @@ public class TestInstances
   /**
    * returns the current class index (0-based), -1 is last attribute
    * 
+   * @return 		the class index
    * @see #CLASS_IS_LAST
    * @see #NO_CLASS
    */
@@ -594,6 +680,7 @@ public class TestInstances
    * whether to have no class, e.g., for clusterers; otherwise the class
    * attribute index is set to last
    * 
+   * @param value whether to have no class
    * @see #CLASS_IS_LAST
    * @see #NO_CLASS
    */
@@ -606,6 +693,8 @@ public class TestInstances
   
   /**
    * whether no class attribute is generated
+   * 
+   * @return 		true if no class attribute is generated
    */
   public boolean getNoClass() {
     return (getClassIndex() == NO_CLASS);
@@ -613,6 +702,8 @@ public class TestInstances
   
   /**
    * sets the number of nominal attributes
+   * 
+   * @param value	the number of nominal attributes
    */
   public void setNumNominal(int value) {
     m_NumNominal = value;
@@ -620,6 +711,8 @@ public class TestInstances
   
   /**
    * returns the current number of nominal attributes
+   * 
+   * @return 		the number of nominal attributes
    */
   public int getNumNominal() {
     return m_NumNominal;
@@ -627,6 +720,8 @@ public class TestInstances
   
   /**
    * sets the number of values for nominal attributes
+   * 
+   * @param value	the number of values
    */
   public void setNumNominalValues(int value) {
     m_NumNominalValues = value;
@@ -634,6 +729,8 @@ public class TestInstances
   
   /**
    * returns the current number of values for nominal attributes
+   * 
+   * @return 		the number of values
    */
   public int getNumNominalValues() {
     return m_NumNominalValues;
@@ -641,6 +738,8 @@ public class TestInstances
   
   /**
    * sets the number of numeric attributes
+   * 
+   * @param value 	the number of numeric attributes
    */
   public void setNumNumeric(int value) {
     m_NumNumeric = value;
@@ -648,6 +747,8 @@ public class TestInstances
   
   /**
    * returns the current number of numeric attributes
+   * 
+   * @return 		the number of numeric attributes
    */
   public int getNumNumeric() {
     return m_NumNumeric;
@@ -655,6 +756,8 @@ public class TestInstances
   
   /**
    * sets the number of string attributes
+   * 
+   * @param value 	the number of string attributes
    */
   public void setNumString(int value) {
     m_NumString = value;
@@ -662,6 +765,8 @@ public class TestInstances
   
   /**
    * returns the current number of string attributes
+   * 
+   * @return 		the number of string attributes
    */
   public int getNumString() {
     return m_NumString;
@@ -669,6 +774,8 @@ public class TestInstances
   
   /**
    * sets the number of data attributes
+   * 
+   * @param value	the number of date attributes
    */
   public void setNumDate(int value) {
     m_NumDate = value;
@@ -676,6 +783,8 @@ public class TestInstances
   
   /**
    * returns the current number of date attributes
+   * 
+   * @return		the number of date attributes
    */
   public int getNumDate() {
     return m_NumDate;
@@ -683,6 +792,8 @@ public class TestInstances
   
   /**
    * sets the number of relational attributes
+   * 
+   * @param value	the number of relational attributes
    */
   public void setNumRelational(int value) {
     m_NumRelational = value;
@@ -691,6 +802,8 @@ public class TestInstances
   
   /**
    * returns the current number of relational attributes
+   * 
+   * @return		the number of relational attributes
    */
   public int getNumRelational() {
     return m_NumRelational;
@@ -698,6 +811,8 @@ public class TestInstances
   
   /**
    * sets the number of instances in relational/bag attributes to produce
+   * 
+   * @param value	the number of instances
    */
   public void setNumInstancesRelational(int value) {
     m_NumInstancesRelational = value;
@@ -705,6 +820,8 @@ public class TestInstances
   
   /**
    * returns the current number of instances in relational/bag attributes to produce
+   * 
+   * @return		the number of instances
    */
   public int getNumInstancesRelational() {
     return m_NumInstancesRelational;
@@ -713,6 +830,8 @@ public class TestInstances
   /**
    * sets whether multi-instance data should be generated (with a fixed
    * data structure)
+   * 
+   * @param value	whether multi-instance data is generated
    */
   public void setMultiInstance(boolean value) {
     m_MultiInstance = value;
@@ -720,6 +839,8 @@ public class TestInstances
   
   /**
    * Gets whether multi-instance data (with a fixed structure) is generated
+   * 
+   * @return		true if multi-instance data is generated
    */
   public boolean getMultiInstance() {
     return m_MultiInstance;
@@ -750,6 +871,8 @@ public class TestInstances
 
   /**
    * sets the structure for the relational class attribute
+   * 
+   * @param value	the structure for the relational attribute
    */
   public void setRelationalClassFormat(Instances value) {
     if (value != null)
@@ -761,6 +884,8 @@ public class TestInstances
   /**
    * returns the current strcuture of the relational class attribute, can
    * be null
+   * 
+   * @return 		the relational structure of the class attribute
    */
   public Instances getRelationalClassFormat() {
     return m_RelationalClassFormat;
@@ -769,6 +894,8 @@ public class TestInstances
   /**
    * returns the overall number of attributes (incl. class, if that is also
    * generated)
+   * 
+   * @return 		the overall number of attributes
    */
   public int getNumAttributes() {
     int		result;
@@ -783,6 +910,8 @@ public class TestInstances
   
   /**
    * returns the current dataset, can be null
+   * 
+   * @return		the current dataset
    */
   public Instances getData() {
     return m_Data;
@@ -790,6 +919,8 @@ public class TestInstances
   
   /**
    * sets the Capabilities handler to generate the data for
+   * 
+   * @param value	the handler to generate the data for
    */
   public void setHandler(CapabilitiesHandler value) {
     m_Handler = value;
@@ -798,6 +929,8 @@ public class TestInstances
   /**
    * returns the current set CapabilitiesHandler to generate the dataset
    * for, can be null
+   * 
+   * @return		the handler to generate the data for
    */
   public CapabilitiesHandler getHandler() {
     return m_Handler;
@@ -809,6 +942,7 @@ public class TestInstances
    * @param index the index of the current attribute (0-based)
    * @param attType the attribute type (NUMERIC, NOMINAL, etc.)
    * @return the configured attribute
+   * @throws Exception if something goes wrong, e.g., an unknown attribute type
    * 
    * @see Attribute#type()
    * @see #CLASS_IS_LAST
@@ -914,8 +1048,9 @@ public class TestInstances
   /**
    * Generates the class value
    * 
-   * @param data  the dataset to work on
-   * @return      the new class value
+   * @param data  	the dataset to work on
+   * @return      	the new class value
+   * @throws Exception 	if something goes wrong
    */
   protected double generateClassValue(Instances data) throws Exception {
     double result = Double.NaN;
@@ -976,6 +1111,7 @@ public class TestInstances
    * @param classVal      the class value for the current instance, might be 
    *                      used in the calculation
    * @return              the new attribute value
+   * @throws Exception    if something goes wrong
    */
   protected double generateAttributeValue(Instances data, int index, double classVal) throws Exception {
     double result = Double.NaN;
@@ -1029,6 +1165,9 @@ public class TestInstances
   
   /**
    * generates a new dataset.
+   * 
+   * @return 		the generated data
+   * @throws Exception	if something goes wrong
    */
   public Instances generate() throws Exception {
     if (getMultiInstance()) {
@@ -1186,6 +1325,8 @@ public class TestInstances
   
   /**
    * returns a string representation of the object
+   * 
+   * @return		a string representation of the object
    */
   public String toString() {
     String	result;
@@ -1214,6 +1355,7 @@ public class TestInstances
    * to stdout
    * 
    * @param args	the commandline parameters
+   * @throws Exception	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     TestInstances inst;
