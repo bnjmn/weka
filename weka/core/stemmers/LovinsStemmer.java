@@ -22,26 +22,45 @@
 
 package weka.core.stemmers;
 
-import weka.core.Utils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
 import java.util.HashMap;
 
 /**
- * A stemmer based on the Lovins stemmer, described here: <p/>
- *
- * The following archives contain implementations of the Lovins stemmer as
- * described in "Development of a Stemming Algorithm" by Julie Beth Lovins
- * (published in "Mechanical translation and computational linguistics",
- * 11:22-31, 1968)
- *
+ <!-- globalinfo-start -->
+ * A stemmer based on the Lovins stemmer, described here:<br/>
+ * <br/>
+ * Julie Beth Lovins (1968). Development of a stemming algorithm. Mechanical Translation and Computational Linguistics. 11, 22-31.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Lovins1968,
+ *    author = {Julie Beth Lovins},
+ *    journal = {Mechanical Translation and Computational Linguistics},
+ *    pages = {22-31},
+ *    title = {Development of a stemming algorithm},
+ *    volume = {11},
+ *    year = {1968}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-
 public class LovinsStemmer 
-  implements Stemmer {
+  implements Stemmer, TechnicalInformationHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = -6113024782588197L;
+  
   /** Enters C version compatibility mode if set to true (emulates
     features of the original C implementation that are inconsistent
     with the algorithm as described in Lovins's paper) */
@@ -382,15 +401,36 @@ public class LovinsStemmer
    */
   public String globalInfo() {
     return 
-        "A stemmer based on the Lovins stemmer, described here:\n "
-      + "The following archives contain implementations of the Lovins stemmer "
-      + "as described in \"Development of a Stemming Algorithm\" by Julie "
-      + "Beth Lovins (published in \"Mechanical translation and computational "
-      + "linguistics\", 11:22-31, 1968)";
+        "A stemmer based on the Lovins stemmer, described here:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Julie Beth Lovins");
+    result.setValue(Field.YEAR, "1968");
+    result.setValue(Field.TITLE, "Development of a stemming algorithm");
+    result.setValue(Field.JOURNAL, "Mechanical Translation and Computational Linguistics");
+    result.setValue(Field.VOLUME, "11");
+    result.setValue(Field.PAGES, "22-31");
+
+    return result;
   }
 
   /**
    * Finds and removes ending from given word.
+   * 
+   * @param word	the word to work on
+   * @return 		the processed word
    */
   private String removeEnding(String word) {
 
@@ -653,6 +693,9 @@ public class LovinsStemmer
 
   /**
    * Recodes ending of given word.
+   * 
+   * @param word	the word to work on
+   * @return		the processed word
    */
   private String recodeEnding(String word) {
 
@@ -876,7 +919,8 @@ public class LovinsStemmer
    * Returns the stemmed version of the given word.
    * Word is converted to lower case before stemming.
    * 
-   * @param word a string consisting of a single word
+   * @param word 	a string consisting of a single word
+   * @return 		the stemmed word
    */
   public String stem(String word) {
 
@@ -890,6 +934,9 @@ public class LovinsStemmer
   /**
    * Stems everything in the given string. String
    * is converted to lower case before stemming.
+   * 
+   * @param str		the string to stem
+   * @return 		the processed string
    */
   public String stemString(String str) {
 
@@ -920,7 +967,9 @@ public class LovinsStemmer
   }
 
   /**
-   * returns a string representation of the the stemmer
+   * returns a string representation of the stemmer
+   * 
+   * @return a string representation of the stemmer
    */
   public String toString() {
     return getClass().getName();
@@ -940,5 +989,3 @@ public class LovinsStemmer
     }
   }
 }
-
-

@@ -23,15 +23,40 @@
 package weka.core.stemmers;
 
 /**
- * An iterated version of the Lovins stemmer.
+ <!-- globalinfo-start -->
+ * An iterated version of the Lovins stemmer. It stems the word (in case it's longer than 2 characters) until it no further changes.<br/>
+ * <br/>
+ * For more information about the Lovins stemmer see:<br/>
+ * <br/>
+ * Julie Beth Lovins (1968). Development of a stemming algorithm. Mechanical Translation and Computational Linguistics. 11, 22-31.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Lovins1968,
+ *    author = {Julie Beth Lovins},
+ *    journal = {Mechanical Translation and Computational Linguistics},
+ *    pages = {22-31},
+ *    title = {Development of a stemming algorithm},
+ *    volume = {11},
+ *    year = {1968}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 
   extends LovinsStemmer {
 
+  /** for serialization */
+  static final long serialVersionUID = 960689687163788264L;
+  
   /**
    * Returns a string describing the stemmer
    * @return a description suitable for
@@ -40,12 +65,17 @@ public class IteratedLovinsStemmer
   public String globalInfo() {
     return 
         "An iterated version of the Lovins stemmer. It stems the word (in "
-      + "case it's longer than 2 characters) until it no further changes.";
+      + "case it's longer than 2 characters) until it no further changes.\n\n"
+      + "For more information about the Lovins stemmer see:\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
    * Iterated stemming of the given word.
    * Word is converted to lower case.
+   * 
+   * @param str 	the word to stem
+   * @return 		the stemmed word
    */
   public String stem(String str) {
 
@@ -74,5 +104,3 @@ public class IteratedLovinsStemmer
     }
   }
 }
-
-

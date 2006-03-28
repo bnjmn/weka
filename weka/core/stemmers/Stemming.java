@@ -42,7 +42,7 @@ import java.util.Vector;
  * all the available options.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Stemming {
 
@@ -50,6 +50,7 @@ public class Stemming {
    * lists all the options on the command line
    *
    * @param stemmer     the stemmer to list the parameters for
+   * @return 		the option string
    */
   protected static String makeOptionsString(Stemmer stemmer) {
     Vector          options;
@@ -105,6 +106,7 @@ public class Stemming {
    *
    * @param stemmer     the stemmer to use
    * @param options     the options for the stemmer
+   * @throws Exception	if something goes wrong
    */
   public static void useStemmer(Stemmer stemmer, String[] options) 
     throws Exception {

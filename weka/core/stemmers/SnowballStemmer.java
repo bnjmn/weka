@@ -32,15 +32,34 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * Wrapper class for the <a href="http://snowball.tartarus.org/">Snowball</a>
- * stemmer library (Java port). The stemmer classes must be present in the
- * CLASSPATH to be available.
+ <!-- globalinfo-start -->
+ * A wrapper class for the Snowball stemmers. Only available if the Snowball classes are in the classpath.<br/>
+ * For more information visit these web sites:<br/>
+ *   http://www.cs.waikato.ac.nz/~ml/weka/stemmers/<br/>
+ *   http://snowball.tartarus.org/<br/>
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;name&gt;
+ *  The name of the snowball stemmer (default 'porter').
+ *  available stemmers:
+ *     danish, dutch, english, finnish, french, german, italian, 
+ *     norwegian, porter, portuguese, russian, spanish, swedish
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.4 $
+ * @version   $Revision: 1.5 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -6111170431963015178L;
   
   /** the package name for snowball */
   public final static String PACKAGE = "org.tartarus.snowball";
@@ -140,7 +159,22 @@ public class SnowballStemmer
   }
   
   /**
-   * parses the options.
+   * Parses the options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;name&gt;
+   *  The name of the snowball stemmer (default 'porter').
+   *  available stemmers:
+   *     danish, dutch, english, finnish, french, german, italian, 
+   *     norwegian, porter, portuguese, russian, spanish, swedish
+   * </pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options	the options to parse
+   * @throws Exception 	if parsing fails
    */
   public void setOptions(String[] options) throws Exception {
     String      tmpStr;
@@ -220,6 +254,8 @@ public class SnowballStemmer
 
   /**
    * returns an enumeration over all currently stored stemmer names
+   * 
+   * @return all available stemmers
    */
   public static Enumeration listStemmers() {
     return m_Stemmers.elements();
@@ -261,6 +297,8 @@ public class SnowballStemmer
 
   /**
    * returns the name of the current stemmer, null if none is set
+   * 
+   * @return the name of the stemmer
    */
   public String getStemmer() {
     if (m_Stemmer == null)
@@ -355,7 +393,9 @@ public class SnowballStemmer
   }
 
   /**
-   * returns a string representation of the the stemmer
+   * returns a string representation of the stemmer
+   * 
+   * @return a string representation of the stemmer
    */
   public String toString() {
     String      result;
