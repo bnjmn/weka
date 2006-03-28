@@ -23,15 +23,20 @@
 package weka.core.stemmers;
 
 /**
- * Actually no real stemmer, since it doesn't perform any stemming at all.
- * Only as dummy stemmer used.
- *
+ <!-- globalinfo-start -->
+ * A dummy stemmer that performs no stemming at all.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.3 $
+ * @version   $Revision: 1.4 $
  */
 public class NullStemmer 
   implements Stemmer {
 
+  /** for serialization */
+  static final long serialVersionUID = -3671261636532625496L;
+  
   /**
    * Returns a string describing the stemmer
    * @return a description suitable for
@@ -53,7 +58,9 @@ public class NullStemmer
   }
 
   /**
-   * returns a string representation of the the stemmer
+   * returns a string representation of the stemmer
+   * 
+   * @return a string representation of the stemmer
    */
   public String toString() {
     return getClass().getName();
