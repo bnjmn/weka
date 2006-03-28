@@ -25,9 +25,23 @@ import java.util.Vector;
 
 /**
  * Applies all known Javadoc-derived classes to a source file.
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;classname&gt;
+ *  The class to load.</pre>
+ * 
+ * <pre> -nostars
+ *  Suppresses the '*' in the Javadoc.</pre>
+ * 
+ * <pre> -dir &lt;dir&gt;
+ *  The directory above the package hierarchy of the class.</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AllJavadoc
   extends Javadoc {
