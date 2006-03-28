@@ -33,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class Javadoc 
   implements OptionHandler {
@@ -176,6 +176,62 @@ public abstract class Javadoc
     return m_Dir;
   }
 
+  /**
+   * returns true if the class can be instantiated, i.e., has a default
+   * constructor.
+   * 
+   * @return true if the class can be instantiated
+   */
+  protected boolean canInstantiateClass() {
+    boolean	result;
+    Class	cls;
+
+    result = true;
+    cls    = null;
+
+    try {
+      cls = Class.forName(getClassname());
+    }
+    catch (Exception e) {
+      result = false;
+      System.err.println("Cannot instantiate '" + getClassname() + "'! Class in CLASSPATH?");
+    }
+
+    if (result) {
+      try {
+	cls.newInstance();
+      }
+      catch (Exception e) {
+	result = false;
+	System.err.println("Cannot instantiate '" + getClassname() + "'! Missing default constructor?");
+      }
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Returns a new instance of the class
+   * 
+   * @return a new instance of the class
+   */
+  protected Object getInstance() {
+    Object	result;
+    Class	cls;
+
+    result = null;
+    
+    try {
+      cls    = Class.forName(getClassname());
+      result = cls.newInstance();
+    }
+    catch (Exception e) {
+      result = null;
+    }
+    
+    return result;
+  }
+  
   /**
    * converts the given String into HTML, i.e., replacing some char entities
    * with HTML entities.
