@@ -22,52 +22,94 @@
 
 package weka.classifiers;
 
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.rules.ZeroR;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Reader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
- * Class for performing a Bias-Variance decomposition on any classifier 
- * using the method specified in:<p>
+ <!-- globalinfo-start -->
+ * Class for performing a Bias-Variance decomposition on any classifier using the method specified in:<br/>
+ * <br/>
+ * Ron Kohavi, David H. Wolpert: Bias Plus Variance Decomposition for Zero-One Loss Functions. In: Machine Learning: Proceedings of the Thirteenth International Conference, 275-283, 1996.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * R. Kohavi & D. Wolpert (1996), <i>Bias plus variance decomposition for 
- * zero-one loss functions</i>, in Proc. of the Thirteenth International 
- * Machine Learning Conference (ICML96) 
- * <a href="http://robotics.stanford.edu/~ronnyk/biasVar.ps">
- * download postscript</a>.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;incproceedings{Kohavi1996,
+ *    author = {Ron Kohavi and David H. Wolpert},
+ *    booktitle = {Machine Learning: Proceedings of the Thirteenth International Conference},
+ *    editor = {Lorenza Saitta},
+ *    pages = {275-283},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Bias Plus Variance Decomposition for Zero-One Loss Functions},
+ *    year = {1996},
+ *    PS = {http://robotics.stanford.edu/~ronnyk/biasVar.ps}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
- * Valid options are:<p>
- *
- * -D <br>
- * Turn on debugging output.<p>
- *
- * -W classname <br>
- * Specify the full class name of a learner to perform the 
- * decomposition on (required).<p>
- *
- * -t filename <br>
- * Set the arff file to use for the decomposition (required).<p>
- *
- * -T num <br>
- * Specify the number of instances in the training pool (default 100).<p>
- *
- * -c num <br>
- * Specify the index of the class attribute (default last).<p>
- *
- * -x num <br>
- * Set the number of train iterations (default 50). <p>
- *
- * -s num <br>
- * Set the seed for the dataset randomisation (default 1). <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -c &lt;class index&gt;
+ *  The index of the class attribute.
+ *  (default last)</pre>
+ * 
+ * <pre> -t &lt;name of arff file&gt;
+ *  The name of the arff file used for the decomposition.</pre>
+ * 
+ * <pre> -T &lt;training pool size&gt;
+ *  The number of instances placed in the training pool.
+ *  The remainder will be used for testing. (default 100)</pre>
+ * 
+ * <pre> -s &lt;seed&gt;
+ *  The random number seed used.</pre>
+ * 
+ * <pre> -x &lt;num&gt;
+ *  The number of training repetitions used.
+ *  (default 50)</pre>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -W &lt;classifier class name&gt;
+ *  Full class name of the learner used in the decomposition.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> 
+ * Options specific to learner weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class BVDecompose implements OptionHandler {
+public class BVDecompose
+  implements OptionHandler, TechnicalInformationHandler {
 
   /** Debugging mode, gives extra output if true */
   protected boolean m_Debug;
@@ -104,6 +146,42 @@ public class BVDecompose implements OptionHandler {
 
   /** The number of instances used in the training pool */
   protected int m_TrainPoolSize = 100;
+  
+  /**
+   * Returns a string describing this object
+   * @return a description of the classifier suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return 
+        "Class for performing a Bias-Variance decomposition on any classifier "
+      + "using the method specified in:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Ron Kohavi and David H. Wolpert");
+    result.setValue(Field.YEAR, "1996");
+    result.setValue(Field.TITLE, "Bias Plus Variance Decomposition for Zero-One Loss Functions");
+    result.setValue(Field.BOOKTITLE, "Machine Learning: Proceedings of the Thirteenth International Conference");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
+    result.setValue(Field.EDITOR, "Lorenza Saitta");
+    result.setValue(Field.PAGES, "275-283");
+    result.setValue(Field.PS, "http://robotics.stanford.edu/~ronnyk/biasVar.ps");
+
+    return result;
+  }
 
   /**
    * Returns an enumeration describing the available options.
@@ -156,34 +234,50 @@ public class BVDecompose implements OptionHandler {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D <br>
-   * Turn on debugging output.<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of a learner to perform the 
-   * decomposition on (required).<p>
-   *
-   * -t filename <br>
-   * Set the arff file to use for the decomposition (required).<p>
-   *
-   * -T num <br>
-   * Specify the number of instances in the training pool (default 100).<p>
-   *
-   * -c num <br>
-   * Specify the index of the class attribute (default last).<p>
-   *
-   * -x num <br>
-   * Set the number of train iterations (default 50). <p>
-   *
-   * -s num <br>
-   * Set the seed for the dataset randomisation (default 1). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -c &lt;class index&gt;
+   *  The index of the class attribute.
+   *  (default last)</pre>
+   * 
+   * <pre> -t &lt;name of arff file&gt;
+   *  The name of the arff file used for the decomposition.</pre>
+   * 
+   * <pre> -T &lt;training pool size&gt;
+   *  The number of instances placed in the training pool.
+   *  The remainder will be used for testing. (default 100)</pre>
+   * 
+   * <pre> -s &lt;seed&gt;
+   *  The random number seed used.</pre>
+   * 
+   * <pre> -x &lt;num&gt;
+   *  The number of training repetitions used.
+   *  (default 50)</pre>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -W &lt;classifier class name&gt;
+   *  Full class name of the learner used in the decomposition.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> 
+   * Options specific to learner weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * Options after -- are passed to the designated sub-learner. <p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -338,6 +432,8 @@ public class BVDecompose implements OptionHandler {
 
   /**
    * Sets the random number seed
+   * 
+   * @param seed the random number seed
    */
   public void setSeed(int seed) {
 
@@ -356,6 +452,8 @@ public class BVDecompose implements OptionHandler {
 
   /**
    * Sets the maximum number of boost iterations
+   * 
+   * @param trainIterations the number of boost iterations
    */
   public void setTrainIterations(int trainIterations) {
 
@@ -373,7 +471,9 @@ public class BVDecompose implements OptionHandler {
   }
 
   /**
-   * Sets the maximum number of boost iterations
+   * Sets the name of the data file used for the decomposition
+   * 
+   * @param dataFileName the data file to use
    */
   public void setDataFileName(String dataFileName) {
 
@@ -403,7 +503,7 @@ public class BVDecompose implements OptionHandler {
   /**
    * Sets index of attribute to discretize on
    *
-   * @param index the index (starting from 1) of the class attribute
+   * @param classIndex the index (starting from 1) of the class attribute
    */
   public void setClassIndex(int classIndex) {
 
@@ -453,7 +553,7 @@ public class BVDecompose implements OptionHandler {
   /**
    * Carry out the bias-variance decomposition
    *
-   * @exception Exception if the decomposition couldn't be carried out
+   * @throws Exception if the decomposition couldn't be carried out
    */
   public void decompose() throws Exception {
 
@@ -606,5 +706,3 @@ public class BVDecompose implements OptionHandler {
     }
   }
 }
-
-
