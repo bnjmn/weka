@@ -22,40 +22,43 @@
 
 package weka.core.converters;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+
 /**
- * Writes to a destination in csv format.
+ <!-- globalinfo-start -->
+ * Writes to a destination that is in csv format
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid options:
- *
- * -i input arff file <br>
- * The input filw in ARFF format. <p>
- *
- * -o the output file <br>
- * The output file. The prefix of the output file is sufficient. If no output file is given, Saver tries to use standard out. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
+ * <pre> -i &lt;the input file&gt;
+ * The input file</pre>
+ * 
+ * <pre> -o &lt;the output file&gt;
+ * The output file</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Saver
  */
-public class CSVSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
+public class CSVSaver 
+  extends AbstractFileSaver 
+  implements BatchConverter, IncrementalConverter, FileSourcedConverter {
 
-    /** Constructor */  
+  /** for serialization */
+  static final long serialVersionUID = 476636654410701807L;
+  
+  /** Constructor */  
   public CSVSaver(){
   
       resetOptions();
@@ -270,6 +273,3 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
       
     }
 }
-  
-  
-

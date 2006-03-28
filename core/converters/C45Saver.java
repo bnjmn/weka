@@ -22,46 +22,51 @@
 
 package weka.core.converters;
 
-import java.io.BufferedWriter;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Attribute;
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.FastVector;
-
 /**
- * Writes to a destination in the format used by the C4.5 slgorithm.
- * The output are two files: *.names, *.data
- *
- * Valid options:
- *
- * -i input arff file <br>
- * The input filw in ARFF format. <p>
- *
- * -o the output file <br>
- * The output file. The prefix of the output file is sufficient.<p>
- *
- * -c class index <br>
- * The index of the class attribute. first and last are valid as well (default: last). <p>
+ <!-- globalinfo-start -->
+ * Writes to a destination that is in the format used by the C4.5 algorithm.<br/>
+ * Therefore it outputs a names and a data file.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -i &lt;the input file&gt;
+ * The input file</pre>
+ * 
+ * <pre> -o &lt;the output file&gt;
+ * The output file</pre>
+ * 
+ * <pre> -c &lt;the class index&gt;
+ * The class index</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Saver
  */
-public class C45Saver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, OptionHandler {
+public class C45Saver 
+  extends AbstractFileSaver 
+  implements BatchConverter, IncrementalConverter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = -821428878384253377L;
+  
   /** Constructor */  
   public C45Saver(){
   
@@ -96,7 +101,7 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
     setFileExtension(".names");
   }
 
-/** Saves an instances incrementally. Structure has to be set by using the
+  /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
    * @param inst the instance to save
    * @throws IOException throws IOEXception if an instance cannot be saved incrementally.
@@ -237,7 +242,8 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
   }
 
   
-  /** Writes a Batch of instances
+  /** 
+   * Writes a Batch of instances
    * @throws IOException throws IOException if saving in batch mode is not possible
    */
   public void writeBatch() throws IOException {
@@ -341,7 +347,7 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
   }
   
   
-   /**
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
@@ -363,20 +369,25 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
   }
 
  
-/**
-   * Parses a given list of options. Valid option is:<p>
-   *   
-   * -i input arff file <br>
-   * The input filw in ARFF format. <p>
-   *  
-   * -o the output file <br>
-   * The output file. The prefix of the output file is sufficient.<p>
+  /**
+   * Parses a given list of options. <p/>
    *
-   * -c class index <br>
-   * The index of the class attribute. first and last are valid as well (default: last). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -i &lt;the input file&gt;
+   * The input file</pre>
+   * 
+   * <pre> -o &lt;the output file&gt;
+   * The output file</pre>
+   * 
+   * <pre> -c &lt;the class index&gt;
+   * The class index</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported 
+   * @throws Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -509,6 +520,3 @@ public class C45Saver extends AbstractFileSaver implements BatchConverter, Incre
       
     }
 }
-  
-  
-

@@ -23,41 +23,52 @@
 package weka.core.converters;
 
 
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Attribute;
-import weka.core.Utils;
 import weka.core.Option;
-import weka.core.FastVector;
 import weka.core.OptionHandler;
+import weka.core.Utils;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.FileInputStream;
-import java.util.Properties;
+import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.Properties;
 import java.util.Vector;
-import java.sql.*;
 
 
 /**
+ <!-- globalinfo-start -->
  * Writes to a database (tested with MySQL, InstantDB, HSQLDB).
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Available options are:
- * -T <table name> <br>
- * Sets the name of teh table (default: the name of the relation)<p>
- *
- * -P <br>
- * If set, a primary key column is generated automatically (containing the row number as INTEGER). The name of this columns is defined in the DatabaseUtils file.<p>
- *
- * -i <input-file> <br>
- * Specifies an ARFF file as input (for command line use) <p>
- *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -T &lt;table name&gt;
+ *  The name of the table (default: the relation name).</pre>
+ * 
+ * <pre> -P
+ *  Add an ID column as primary key. The name is specified in the DatabaseUtils file. The DatabaseLoader won't load this column.</pre>
+ * 
+ * <pre> -i&lt;input file name&gt;
+ *  Input file in arff format that should be saved in database.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class DatabaseSaver extends AbstractSaver implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
-    
+public class DatabaseSaver 
+  extends AbstractSaver 
+  implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 863971733782624956L;
+  
   /** The database connection */
   private DatabaseConnection m_DataBaseConnection;
   
@@ -107,7 +118,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
     }
   }
   
-   /** Constructor
+   /** 
+    * Constructor
+    * 
     * @throws Exception throws Exception if property file cannot be read
     */
   public DatabaseSaver() throws Exception{
@@ -119,7 +132,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       m_idColumn = PROPERTIES.getProperty("idColumn");
   }
   
-  /** Resets the Saver ready to save a new data set
+  /** 
+   * Resets the Saver ready to save a new data set
    */
   public void resetOptions(){
 
@@ -138,7 +152,10 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
     }    
   }
   
-  /** Cancels the incremental saving process and tries to drop the table if the write mode is CANCEL. */  
+  /** 
+   * Cancels the incremental saving process and tries to drop the table if 
+   * the write mode is CANCEL.
+   */  
   public void cancel(){
   
       if(getWriteMode() == CANCEL){
@@ -155,15 +172,18 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
    
   /**
    * Returns a string describing this Saver
+   * 
    * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Writes to a database";
+    return "Writes to a database (tested with MySQL, InstantDB, HSQLDB).";
   }
 
   
-  /** Sets the table's name
+  /** 
+   * Sets the table's name
+   * 
    * @param tn the name of the table
    */  
   public void setTableName(String tn){
@@ -171,7 +191,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       m_tableName = tn;
   }
   
-  /** Gets the table's name
+  /** 
+   * Gets the table's name
+   * 
    * @return the table's name
    */  
   public String getTableName(){
@@ -179,21 +201,29 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       return m_tableName;
   }
   
-  /** Returns the tip text fo this property*/
+  /** 
+   * Returns the tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String tableNameTipText(){
   
       return "Sets the name of the table.";
   }
   
-  /** En/Dis-ables the automatic generation of a primary key
-   * @param boolean flag 
+  /** 
+   * En/Dis-ables the automatic generation of a primary key
+   * 
+   * @param flag flag for automatic key-genereration
    */  
   public void setAutoKeyGeneration(boolean flag){
   
       m_id = flag;
   }
   
-   /** Gets whether or not a primary key will be generated automatically
+  /** 
+   * Gets whether or not a primary key will be generated automatically
+   * 
    * @return true if a primary key column will be generated, false otherwise
    */  
   public boolean getAutoKeyGeneration(){
@@ -201,22 +231,30 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       return m_id;
   }
   
-  /** Returns the tip text fo this property*/
+  /** 
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property
+   */
   public String autoKeyGenerationTipText(){
   
       return "If set to true, a primary key column is generated automatically (containing the row number as INTEGER). The name of the key is read from DatabaseUtils (idColumn)"
         +" This primary key can be used for incremental loading (requires an unique key). This primary key will not be loaded as an attribute.";
   }
   
-  /** En/Dis-ables that the relation name is used for the name of the table (default enabled).
-   * @param boolean flag
+  /** 
+   * En/Dis-ables that the relation name is used for the name of the table (default enabled).
+   * 
+   * @param flag if true the relation name is used as table name
    */  
   public void setRelationForTableName(boolean flag){
   
       m_tabName = flag;
   }
   
-  /** Gets whether or not the relation name is used as name of the table
+  /** 
+   * Gets whether or not the relation name is used as name of the table
+   * 
    * @return true if the relation name is used as the name of the table, false otherwise
    */  
   public boolean getRelationForTableName(){
@@ -224,14 +262,20 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       return m_tabName;
   }
   
-  /** Returns the tip text fo this property*/
+  /** 
+   * Returns the tip text fo this property
+   * 
+   * @return the tip text for this property
+   */
   public String relationForTableNameTipText(){
   
       return "If set to true, the relation name will be used as name for the database table. Otherwise the user has to provide a table name.";
   }
   
-  /** Sets the database URL
-   * @param the URL
+  /** 
+   * Sets the database URL
+   * 
+   * @param url the URL
    */  
   public void setUrl(String url){
       
@@ -239,7 +283,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
     
   }
   
-  /** Gets the database URL
+  /** 
+   * Gets the database URL
+   * 
    * @return the URL
    */  
   public String getUrl(){
@@ -247,21 +293,29 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       return m_DataBaseConnection.getDatabaseURL();
   }
   
-  /** Returns the tip text fo this property*/
+  /** 
+   * Returns the tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String urlTipText(){
   
       return "The URL of the database";
   }
   
-  /** Sets the database user
-   * @param the user name
+  /** 
+   * Sets the database user
+   * 
+   * @param user the user name
    */  
   public void setUser(String user){
    
       m_DataBaseConnection.setUsername(user);
   }
   
-  /** Gets the database user
+  /** 
+   * Gets the database user
+   * 
    * @return the user name
    */  
   public String getUser(){
@@ -269,27 +323,39 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       return m_DataBaseConnection.getUsername();
   }
   
-  /** Returns the tip text fo this property*/
+  /** 
+   * Returns the tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String userTipText(){
   
       return "The user name for the database";
   }
   
-  /** Sets the database password
-   * @param the password
+  /** 
+   * Sets the database password
+   * 
+   * @param password the password
    */  
   public void setPassword(String password){
    
       m_DataBaseConnection.setPassword(password);
   }
   
-  /** Returns the tip text fo this property*/
+  /** 
+   * Returns the tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String passwordTipText(){
   
       return "The database password";
   }
       
-   /** Sets the database url
+  /** 
+   * Sets the database url
+   * 
    * @param url the database url
    * @param userName the user name
    * @param password the password
@@ -306,7 +372,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       }    
   }
   
-  /** Sets the database url
+  /** 
+   * Sets the database url
+   * 
    * @param url the database url
    */  
   public void setDestination(String url){
@@ -343,7 +411,11 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
        }    
   }
   
-  /** Writes the structure (header information) to a database by creating a new table.*/
+  /** 
+   * Writes the structure (header information) to a database by creating a new table.
+   * 
+   * @throws Exception if something goes wrong
+   */
   private void writeStructure() throws Exception{
   
       StringBuffer query = new StringBuffer();
@@ -397,6 +469,12 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       }
   }
   
+  /**
+   * inserts the given instance into the table
+   * 
+   * @param inst the instance to insert
+   * @throws Exception if something goes wrong
+   */
   private void writeInstance(Instance inst) throws Exception{
   
       StringBuffer insert = new StringBuffer();
@@ -430,8 +508,10 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       }
   }
   
-  /** Saves an instances incrementally. Structure has to be set by using the
+  /** 
+   * Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method. When a structure is set, a table is created. 
+   * 
    * @param inst the instance to save
    * @throws IOException throws IOEXception.
    */  
@@ -486,7 +566,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
        }    
   }
   
-  /** Writes a Batch of instances
+  /** 
+   * Writes a Batch of instances
+   * 
    * @throws IOException throws IOException
    */
   public void writeBatch() throws IOException {
@@ -516,7 +598,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
        }    
   }
 
-    /**Prints an exception
+  /**
+   * Prints an exception
+   * 
    * @param ex the exception to print
    */  
   private void printException(Exception ex){
@@ -539,7 +623,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       
   }
   
-  /** Gets the setting
+  /** 
+   * Gets the setting
+   * 
    * @return the current setting
    */  
   public String[] getOptions() {
@@ -561,7 +647,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
     return (String[]) options.toArray(new String[options.size()]);
   }
   
-  /** Lists the available options
+  /** 
+   * Lists the available options
+   * 
    * @return an enumeration of the available options
    */  
   public java.util.Enumeration listOptions() {
@@ -578,17 +666,22 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
      return  newVector.elements();
   }
   
-  /** Sets the options.
+  /** 
+   * Sets the options. <p/>
    *
-   * Available options are:
-   * -T <table name> <br>
-   * Sets the name of teh table (default: the name of the relation)<p>
-   *
-   * -P <br>
-   * If set, a primary key column is generated automatically (containing the row number as INTEGER)<p>
-   *
-   * -i <input-file> <br>
-   * Specifies an ARFF file as input (for command line use) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -T &lt;table name&gt;
+   *  The name of the table (default: the relation name).</pre>
+   * 
+   * <pre> -P
+   *  Add an ID column as primary key. The name is specified in the DatabaseUtils file. The DatabaseLoader won't load this column.</pre>
+   * 
+   * <pre> -i&lt;input file name&gt;
+   *  Input file in arff format that should be saved in database.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the options
    * @throws Exception if options cannot be set
@@ -664,5 +757,3 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
       
     }
 }
-  
-  
