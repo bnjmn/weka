@@ -44,7 +44,7 @@ import java.lang.reflect.Method;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see #GLOBALINFO_METHOD
  * @see #GLOBALINFO_STARTTAG
  * @see #GLOBALINFO_ENDTAG
@@ -82,16 +82,16 @@ public class GlobalInfoJavadoc
    */
   protected String generateJavadoc(int index) throws Exception {
     String		result;
-    Class		cls;
-    Object		obj;
     Method		method;
     
     result = "";
     
     if (index == 0) {
-      cls = Class.forName(getClassname());
+      if (!canInstantiateClass())
+	return result;
+	    
       try {
-	method = cls.getMethod(GLOBALINFO_METHOD, (Class[]) null);
+	method = getInstance().getClass().getMethod(GLOBALINFO_METHOD, (Class[]) null);
       }
       catch (Exception e) {
 	// no method "globalInfo"
@@ -99,8 +99,7 @@ public class GlobalInfoJavadoc
       }
       
       // retrieve global info
-      obj    = cls.newInstance();
-      result = toHTML((String) method.invoke(obj, (Object[]) null));
+      result = toHTML((String) method.invoke(getInstance(), (Object[]) null));
       result = result.trim() + "\n<p/>\n";
       
       // stars?
