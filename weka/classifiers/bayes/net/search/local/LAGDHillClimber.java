@@ -23,28 +23,71 @@
 package weka.classifiers.bayes.net.search.local;
 
 import weka.classifiers.bayes.BayesNet;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 
-/** LAGDHillClimber implements LAGD Hill Climbing using Local Search 
- *  for learning Bayesian Networks.
+import java.util.Enumeration;
+import java.util.Vector;
+
+/** 
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm uses a Look Ahead Hill Climbing algorithm called LAGD Hill Climbing. Unlike Greedy Hill Climbing it doesn't calculate a best greedy operation (adding, deleting or reversing an arc) but a sequence of nrOfLookAheadSteps operations, which leads to a network structure whose score is most likely higher in comparison to the network obtained by performing a sequence of nrOfLookAheadSteps greedy operations. The search is not restricted by an order on the variables (unlike K2). The difference with B and B2 is that this hill climber also considers arrows part of the naive Bayes structure for deletion.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -L &lt;nr of look ahead steps&gt;
+ *  Look Ahead Depth</pre>
+ * 
+ * <pre> -G &lt;nr of good operations&gt;
+ *  Nr of Good Operations</pre>
+ * 
+ * <pre> -P &lt;nr of parents&gt;
+ *  Maximum number of parents</pre>
+ * 
+ * <pre> -R
+ *  Use arc reversal operation.
+ *  (default false)</pre>
+ * 
+ * <pre> -N
+ *  Initial structure is empty (instead of Naive Bayes)</pre>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Manuel Neubach
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class LAGDHillClimber extends HillClimber {
+public class LAGDHillClimber 
+    extends HillClimber {
+  
+    /** for serialization */
+    static final long serialVersionUID = 7217437499439184344L;
 
     /** Number of Look Ahead Steps **/
     int m_nNrOfLookAheadSteps = 2;
 
     /** Number of Good Operations per Step **/
     int m_nNrOfGoodOperations = 5;
-   
 
    /**
      * search determines the network structure/graph of the network
      * 
-     **/
+     * @param bayesNet the network
+     * @param instances the data to use
+     * @throws Exception if something goes wrong
+     */
    protected void search(BayesNet bayesNet, Instances instances) throws Exception {
         int k=m_nNrOfLookAheadSteps;  // Number of Look Ahead Steps
         int l=m_nNrOfGoodOperations; // Number of Good Operations per step
@@ -53,8 +96,14 @@ public class LAGDHillClimber extends HillClimber {
 
 
    /**
-      * lookAheadInGoodDirectionsSearch determines the network structure/graph of the network
-      * with best score according to LAGD Hill Climbing
+    * lookAheadInGoodDirectionsSearch determines the network structure/graph of the network
+    * with best score according to LAGD Hill Climbing
+    * 
+    * @param bayesNet the network
+    * @param instances the data to use
+    * @param nrOfLookAheadSteps
+    * @param nrOfGoodOperations
+    * @throws Exception if something goes wrong
     */
     protected void lookAheadInGoodDirectionsSearch(BayesNet bayesNet, Instances instances, int nrOfLookAheadSteps, int nrOfGoodOperations) throws Exception {
          System.out.println("Initializing Cache");
@@ -108,10 +157,11 @@ public class LAGDHillClimber extends HillClimber {
 
     /**
       * getAntiOperation determines the Operation, which is needed to cancel oOperation
-      * @param oOperation: Operation to cancel
+      * 
+      * @param oOperation Operation to cancel
       * @return antiOperation to oOperation
-      * @throws Exception
-      **/
+      * @throws Exception if something goes wrong
+      */
     protected Operation getAntiOperation(Operation oOperation) throws Exception {
         if (oOperation.m_nOperation == Operation.OPERATION_ADD)
            return (new Operation (oOperation.m_nTail, oOperation.m_nHead, Operation.OPERATION_DEL));
@@ -128,11 +178,11 @@ public class LAGDHillClimber extends HillClimber {
     /**
       * getGoodOperations determines the nrOfGoodOperations best Operations, which are considered for
       * the calculation of an optimal operationsequence
-      * @param bayesNet: Bayes network to apply operation on
-      * @param instances: data set to learn from
-      * @param nrOfGoodOperations: number of good operations to consider
+      * @param bayesNet Bayes network to apply operation on
+      * @param instances data set to learn from
+      * @param nrOfGoodOperations number of good operations to consider
       * @return good operations to consider
-      * @throws Exception
+      * @throws Exception if something goes wrong
       **/
     protected Operation [] getGoodOperations(BayesNet bayesNet, Instances instances, int nrOfGoodOperations) throws Exception {
 		Operation [] goodOperations=new Operation [nrOfGoodOperations];
@@ -157,12 +207,12 @@ public class LAGDHillClimber extends HillClimber {
     /**
       * getOptimalOperations determines an optimal operationsequence in respect of the parameters 
       * nrOfLookAheadSteps and nrOfGoodOperations
-      * @param bayesNet: Bayes network to apply operation on
-      * @param instances: data set to learn from
-      * @param nrOfLookAheadSteps: number of lood ahead steps to use
-      * @param nrOfGoodOperations: number of good operations to consider
+      * @param bayesNet Bayes network to apply operation on
+      * @param instances data set to learn from
+      * @param nrOfLookAheadSteps number of lood ahead steps to use
+      * @param nrOfGoodOperations number of good operations to consider
       * @return optimal sequence of operations in respect to nrOfLookAheadSteps and nrOfGoodOperations
-      * @throws Exception
+      * @throws Exception if something goes wrong
       **/
     protected Operation [] getOptimalOperations(BayesNet bayesNet, Instances instances, int nrOfLookAheadSteps, int nrOfGoodOperations) throws Exception {
        if (nrOfLookAheadSteps == 1) { // Abbruch der Rekursion
@@ -202,60 +252,54 @@ public class LAGDHillClimber extends HillClimber {
 
 
 	/**
-	 * Method declaration
+	 * Sets the max number of parents
 	 *
-	 * @param nMaxNrOfParents
-	 *
+	 * @param nMaxNrOfParents the max number of parents
 	 */
 	public void setMaxNrOfParents(int nMaxNrOfParents) {
 	  m_nMaxNrOfParents = nMaxNrOfParents;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets the max number of parents.
 	 *
-	 * @return
-	 *
+	 * @return the max number of parents
 	 */
 	public int getMaxNrOfParents() {
 	  return m_nMaxNrOfParents;
 	} 
 
 	/**
-	 * Method declaration
+	 * Sets the number of look-ahead steps
 	 *
-	 * @param nNrOfLookAheadSteps
-	 *
+	 * @param nNrOfLookAheadSteps the number of look-ahead steps
 	 */
 	public void setNrOfLookAheadSteps(int nNrOfLookAheadSteps) {
 	  m_nNrOfLookAheadSteps = nNrOfLookAheadSteps;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets the number of look-ahead steps
 	 *
-	 * @return
-	 *
+	 * @return the number of look-ahead step
 	 */
 	public int getNrOfLookAheadSteps() {
 	  return m_nNrOfLookAheadSteps;
 	} 
 
 	/**
-	 * Method declaration
+	 * Sets the number of "good operations"
 	 *
-	 * @param nNrOfGoodOperations
-	 *
+	 * @param nNrOfGoodOperations the number of "good operations"
 	 */
 	public void setNrOfGoodOperations(int nNrOfGoodOperations) {
 	  m_nNrOfGoodOperations = nNrOfGoodOperations;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets the number of "good operations"
 	 *
-	 * @return
-	 *
+	 * @return the number of "good operations"
 	 */
 	public int getNrOfGoodOperations() {
 	  return m_nNrOfGoodOperations;
@@ -268,10 +312,10 @@ public class LAGDHillClimber extends HillClimber {
 	 * @return an enumeration of all the available options.
 	 */
 	public Enumeration listOptions() {
-		Vector newVector = new Vector(2);
+		Vector newVector = new Vector();
 
-		newVector.addElement(new Option("\tLook Ahead Depth\n)", "L", 2, "-L <nr of look ahead steps>"));
-		newVector.addElement(new Option("\tNr of Good Operations\n)", "G", 5, "-G <nr of good operations>"));
+		newVector.addElement(new Option("\tLook Ahead Depth", "L", 2, "-L <nr of look ahead steps>"));
+		newVector.addElement(new Option("\tNr of Good Operations", "G", 5, "-G <nr of good operations>"));
 
 		Enumeration enm = super.listOptions();
 		while (enm.hasMoreElements()) {
@@ -283,13 +327,41 @@ public class LAGDHillClimber extends HillClimber {
 	/**
 	 * Parses a given list of options. Valid options are:<p>
 	 *
-	 * For other options see search algorithm.
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -L &lt;nr of look ahead steps&gt;
+	 *  Look Ahead Depth</pre>
+	 * 
+	 * <pre> -G &lt;nr of good operations&gt;
+	 *  Nr of Good Operations</pre>
+	 * 
+	 * <pre> -P &lt;nr of parents&gt;
+	 *  Maximum number of parents</pre>
+	 * 
+	 * <pre> -R
+	 *  Use arc reversal operation.
+	 *  (default false)</pre>
+	 * 
+	 * <pre> -N
+	 *  Initial structure is empty (instead of Naive Bayes)</pre>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+	 * 
+	 <!-- options-end -->
 	 *
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
-        String sNrOfLookAheadSteps = Utils.getOption('L', options);
+	  	String sNrOfLookAheadSteps = Utils.getOption('L', options);
 		if (sNrOfLookAheadSteps.length() != 0) {
 		  setNrOfLookAheadSteps(Integer.parseInt(sNrOfLookAheadSteps));
 		} else {

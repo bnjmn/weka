@@ -15,33 +15,101 @@
  */
 
 /*
- * BayesNet.java
+ * TAN.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
 
 package weka.classifiers.bayes.net.search.local;
 
-import java.util.Enumeration;
-
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
-/** Search for TAN = Tree Augmented Naive Bayes network structure
- *      N. Friedman, D. Geiger, M. Goldszmidt.
- *      Bayesian Network Classifiers.
- *      Machine Learning, 29: 131--163, 1997
+import java.util.Enumeration;
+
+/** 
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm determines the maximum weight spanning tree  and returns a Naive Bayes network augmented with a tree.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * N. Friedman, D. Geiger, M. Goldszmidt (1997). Bayesian network classifiers. Machine Learning. 29, 2-3, 131-163.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Friedman1997,
+ *    author = {N. Friedman and D. Geiger and M. Goldszmidt},
+ *    journal = {Machine Learning},
+ *    number = {2-3},
+ *    pages = {131-163},
+ *    title = {Bayesian network classifiers},
+ *    volume = {29},
+ *    year = {1997}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
+public class TAN 
+	extends LocalScoreSearchAlgorithm
+	implements TechnicalInformationHandler {
+  
+  	/** for serialization */
+  	static final long serialVersionUID = 965182127977228690L;
 
-public class TAN extends LocalScoreSearchAlgorithm {
+  	/**
+  	 * Returns an instance of a TechnicalInformation object, containing 
+  	 * detailed information about the technical background of this class,
+  	 * e.g., paper reference or book this class is based on.
+  	 * 
+  	 * @return the technical information about this class
+  	 */
+  	public TechnicalInformation getTechnicalInformation() {
+  	  TechnicalInformation 	result;
+  	  
+  	  result = new TechnicalInformation(Type.ARTICLE);
+  	  result.setValue(Field.AUTHOR, "N. Friedman and D. Geiger and M. Goldszmidt");
+  	  result.setValue(Field.YEAR, "1997");
+  	  result.setValue(Field.TITLE, "Bayesian network classifiers");
+  	  result.setValue(Field.JOURNAL, "Machine Learning");
+  	  result.setValue(Field.VOLUME, "29");
+  	  result.setValue(Field.NUMBER, "2-3");
+  	  result.setValue(Field.PAGES, "131-163");
+  	  
+  	  return result;
+  	}
 
 	/**
 	 * buildStructure determines the network structure/graph of the network
 	 * using the maximimum weight spanning tree algorithm of Chow and Liu
 	 * 
+	 * @param bayesNet the network
+	 * @param instances the data to use
+	 * @throws Exception if something goes wrong
 	 */
 	public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
 
@@ -158,9 +226,24 @@ public class TAN extends LocalScoreSearchAlgorithm {
 	} // listOption
 
 	/**
-	 * Parses a given list of options. Valid options are:<p>
+	 * Parses a given list of options. <p/>
+	 *
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+	 * 
+	 <!-- options-end -->
+	 * 
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
 		super.setOptions(options);
@@ -180,8 +263,11 @@ public class TAN extends LocalScoreSearchAlgorithm {
 	 * @return The string.
 	 */
 	public String globalInfo() {
-		return "This Bayes Network learning algorithm determines the maximum weight spanning tree " +
-		" and returns a Naive Bayes network augmented with a tree.";
+		return 
+		    "This Bayes Network learning algorithm determines the maximum weight spanning tree "
+		  + " and returns a Naive Bayes network augmented with a tree.\n\n"
+		  + "For more information see:\n\n"
+		  + getTechnicalInformation().toString();
 	} // globalInfo
 
 } // TAN

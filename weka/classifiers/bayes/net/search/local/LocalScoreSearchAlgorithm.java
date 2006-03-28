@@ -15,7 +15,7 @@
  */
 
 /*
- * ScoreSearchAlgorithm.java
+ * LocalScoreSearchAlgorithm.java
  * Copyright (C) 2004 Remco Bouckaert
  * 
  */
@@ -36,22 +36,47 @@ import weka.core.SelectedTag;
 import java.util.Vector;
 import java.util.Enumeration;
 
-/** The ScoreBasedSearchAlgorithm class supports Bayes net structure search algorithms
- * that are based on maximizing scores (as opposed to for example
- * conditional independence based search algorithms).
+/** 
+ <!-- globalinfo-start -->
+ * The ScoreBasedSearchAlgorithm class supports Bayes net structure search algorithms that are based on maximizing scores (as opposed to for example conditional independence based search algorithms).
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure,  after a network structure is learned. This ensures that all  nodes in the network are part of the Markov blanket of the  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
+public class LocalScoreSearchAlgorithm 
+	extends SearchAlgorithm {
 
+  	/** for serialization */
+  	static final long serialVersionUID = 3325995552474190374L;
+  	
 	/** points to Bayes network for which a structure is searched for **/
 	BayesNet m_BayesNet;
-//	Instances m_Instances;
 	
+	/**
+	 * default constructor
+	 */
 	public LocalScoreSearchAlgorithm() {
 	} // c'tor
 	
+	/**
+	 * constructor
+	 * 
+	 * @param bayesNet the network
+	 * @param instances the data
+	 */
 	public LocalScoreSearchAlgorithm(BayesNet bayesNet, Instances instances) {
 		m_BayesNet = bayesNet;
 //		m_Instances = instances;
@@ -62,14 +87,14 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 	 */
 	double m_fAlpha = 0.5;
 
-	public static final Tag[] TAGS_SCORE_TYPE =
-		{
-            new Tag(Scoreable.BAYES, "BAYES"),
-            new Tag(Scoreable.BDeu, "BDeu"),
-			new Tag(Scoreable.MDL, "MDL"),
-			new Tag(Scoreable.ENTROPY, "ENTROPY"),
-			new Tag(Scoreable.AIC, "AIC")
-		};
+	/** the score types */
+	public static final Tag[] TAGS_SCORE_TYPE = {
+	  new Tag(Scoreable.BAYES, "BAYES"),
+	  new Tag(Scoreable.BDeu, "BDeu"),
+	  new Tag(Scoreable.MDL, "MDL"),
+	  new Tag(Scoreable.ENTROPY, "ENTROPY"),
+	  new Tag(Scoreable.AIC, "AIC")
+	};
 
 	/**
 	 * Holds the score type used to measure quality of network
@@ -122,6 +147,10 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 	* buildStructure determines the network structure/graph of the network
 	* with the K2 algorithm, restricted by its initial structure (which can
 	* be an empty graph, or a Naive Bayes graph.
+	* 
+	* @param bayesNet the network
+	* @param instances the data to use
+	* @throws Exception if something goes wrong
 	*/
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
 		m_BayesNet = bayesNet;
@@ -145,8 +174,8 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 
 	/**
 	 * helper function for CalcNodeScore above using the ADTree data structure
+	 * 
 	 * @param nNode node for which the score is calculate
-	 * @param instances used to calculate score with
 	 * @return log score
 	 */
 	private double calcNodeScoreADTree(int nNode) {
@@ -454,11 +483,6 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 		// set up candidate parent
 		oParentSet.addParent(nCandidateParent, m_BayesNet.m_Instances);
 
-		// determine cardinality of parent set & reserve space for frequency counts
-		int nCardinality = oParentSet.getCardinalityOfParents();
-		int numValues = m_BayesNet.m_Instances.attribute(nNode).numValues();
-		int [][] nCounts = new int[nCardinality][numValues];
-
 		// calculate the score
 		double logScore = calcNodeScore(nNode);
 
@@ -487,11 +511,6 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 		// set up candidate parent
 		int iParent = oParentSet.deleteParent(nCandidateParent, m_BayesNet.m_Instances);
 
-		// determine cardinality of parent set & reserve space for frequency counts
-		int nCardinality = oParentSet.getCardinalityOfParents();
-		int numValues = m_BayesNet.m_Instances.attribute(nNode).numValues();
-		int [][] nCounts = new int[nCardinality][numValues];
-
 		// calculate the score
 		double logScore = calcNodeScore(nNode);
 
@@ -503,7 +522,8 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 
 	/**
 	 * set quality measure to be used in searching for networks.
-	 * @param scoreType
+	 * 
+	 * @param newScoreType the new score type
 	 */
 	public void setScoreType(SelectedTag newScoreType) {
 		if (newScoreType.getTags() == TAGS_SCORE_TYPE) {
@@ -519,13 +539,21 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 		return new SelectedTag(m_nScoreType, TAGS_SCORE_TYPE);
 	}
 
-  public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
-    super.setMarkovBlanketClassifier(bMarkovBlanketClassifier);
-  }
-
-  public boolean getMarkovBlanketClassifier() {
-    return super.getMarkovBlanketClassifier();
-  }
+	/**
+	 * 
+	 * @param bMarkovBlanketClassifier
+	 */
+	public void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
+	  super.setMarkovBlanketClassifier(bMarkovBlanketClassifier);
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean getMarkovBlanketClassifier() {
+	  return super.getMarkovBlanketClassifier();
+	}
 
 	/**
 	 * Returns an enumeration describing the available options
@@ -535,16 +563,16 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 	public Enumeration listOptions() {
 		Vector newVector = new Vector();
 
-    newVector.addElement(new Option(
-            "\tApplies a Markov Blanket correction to the network structure, "
-          + "\tafter a network structure is learned. This ensures that all "
-          + "\tnodes in the network are part of the Markov blanket of the "
-          + "\tclassifier node.\n",
-          "mbc", 0, "-mbc"));
+		newVector.addElement(new Option(
+		    "\tApplies a Markov Blanket correction to the network structure, \n"
+		  + "\tafter a network structure is learned. This ensures that all \n"
+		  + "\tnodes in the network are part of the Markov blanket of the \n"
+		  + "\tclassifier node.",
+		  "mbc", 0, "-mbc"));
       
 		newVector.addElement(
 			new Option(
-				"\tScore type (BAYES, BDeu, MDL, ENTROPY and AIC)\n",
+				"\tScore type (BAYES, BDeu, MDL, ENTROPY and AIC)",
 				"S",
 				1,
 				"-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]"));
@@ -552,9 +580,26 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 		return newVector.elements();
 	} // listOptions
 
+	/**
+	 * Parses a given list of options. <p/>
+	 *
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure,  after a network structure is learned. This ensures that all  nodes in the network are part of the Markov blanket of the  classifier node.</pre>
+	 * 
+	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+	 * 
+	 <!-- options-end -->
+	 *
+	 * @param options the list of options as an array of strings
+	 * @throws Exception if an option is not supported
+	 */
 	public void setOptions(String[] options) throws Exception {
 
-    setMarkovBlanketClassifier(Utils.getFlag("mbc", options));
+	  	setMarkovBlanketClassifier(Utils.getFlag("mbc", options));
 
 		String sScore = Utils.getOption('S', options);
 
@@ -575,13 +620,18 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 		}
 	} // setOptions
 
+	/**
+	 * Gets the current settings of the search algorithm.
+	 *
+	 * @return an array of strings suitable for passing to setOptions
+	 */
 	public String[] getOptions() {
                 String[] superOptions = super.getOptions();
 		String[] options = new String[3 + superOptions.length];
 		int current = 0;
 
-    if (getMarkovBlanketClassifier())
-      options[current++] = "-mbc";
+		if (getMarkovBlanketClassifier())
+		  options[current++] = "-mbc";
 
 		options[current++] = "-S";
 
@@ -630,11 +680,23 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 			+ " network structure. It can be one of Bayes, BDeu, Minimum Description Length (MDL),"
 			+ " Akaike Information Criterion (AIC), and Entropy.";
 	}
+	
+	/**
+	 * @return a string to describe the MarkovBlanketClassifier option.
+	 */
+	public String markovBlanketClassifierTipText() {
+	  return super.markovBlanketClassifierTipText();
+	}
 
-  /**
-   * @return a string to describe the MarkovBlanketClassifier option.
-   */
-  public String markovBlanketClassifierTipText() {
-    return super.markovBlanketClassifierTipText();
-  }
-} // class ScoreBasedSearchAlgorithm
+	/**
+	 * This will return a string describing the search algorithm.
+	 * @return The string.
+	 */
+	public String globalInfo() {
+	  return 
+	      "The ScoreBasedSearchAlgorithm class supports Bayes net "
+	    + "structure search algorithms that are based on maximizing "
+	    + "scores (as opposed to for example conditional independence "
+	    + "based search algorithms).";
+	} // globalInfo
+}

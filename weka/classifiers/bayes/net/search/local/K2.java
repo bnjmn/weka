@@ -15,41 +15,140 @@
  */
 
 /*
- * SearchAlgorithmK2.java
+ * K2.java
  * Copyright (C) 2001 Remco Bouckaert
  * 
  */
 package weka.classifiers.bayes.net.search.local;
 
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Random;
-
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 
 /**
- * Class for a Bayes Network classifier based on K2 for learning structure.
- * K2 is a hill climbing algorihtm by Greg Cooper and Ed Herskovitz,
- * Proceedings Uncertainty in Artificial Intelligence, 1991, Also in
- * Machine Learning, 1992 pages 309-347.
+ <!-- globalinfo-start -->
+ * This Bayes Network learning algorithm uses a hill climbing algorithm restricted by an order on the variables.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * G.F. Cooper, E. Herskovits (1990). A Bayesian method for constructing Bayesian belief networks from databases.<br/>
+ * <br/>
+ * G. Cooper, E. Herskovits (1992). A Bayesian method for the induction of probabilistic networks from data. Machine Learning. Vol.9, No.4, pp. 309-347.<br/>
+ * <br/>
  * Works with nominal variables and no missing values only.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;proceedings{Cooper1990,
+ *    author = {G.F. Cooper and E. Herskovits},
+ *    booktitle = {Proceedings of the Conference on Uncertainty in AI},
+ *    pages = {86-94},
+ *    title = {A Bayesian method for constructing Bayesian belief networks from databases},
+ *    year = {1990}
+ * }
+ * 
+ * &#64;article{Cooper1992,
+ *    author = {G. Cooper and E. Herskovits},
+ *    journal = {Machine Learning},
+ *    number = {No.4},
+ *    pages = {pp. 309-347},
+ *    title = {A Bayesian method for the induction of probabilistic networks from data},
+ *    volume = {Vol.9},
+ *    year = {1992}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N
+ *  Initial structure is empty (instead of Naive Bayes)</pre>
+ * 
+ * <pre> -P &lt;nr of parents&gt;
+ *  Maximum number of parents</pre>
+ * 
+ * <pre> -R
+ *  Random order.
+ *  (default false)</pre>
+ * 
+ * <pre> -mbc
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
+ * 
+ * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+ *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class K2 extends LocalScoreSearchAlgorithm {
+public class K2 
+ 	extends LocalScoreSearchAlgorithm
+ 	implements TechnicalInformationHandler {
+  
+  	/** for serialization */
+  	static final long serialVersionUID = 6176545934752116631L;
+  
 	/** Holds flag to indicate ordering should be random **/
 	boolean m_bRandomOrder = false;
 
 	/**
-	* buildStructure determines the network structure/graph of the network
-	* with the K2 algorithm, restricted by its initial structure (which can
-	* be an empty graph, or a Naive Bayes graph.
-	*/
+	 * Returns an instance of a TechnicalInformation object, containing 
+	 * detailed information about the technical background of this class,
+	 * e.g., paper reference or book this class is based on.
+	 * 
+	 * @return the technical information about this class
+	 */
+	public TechnicalInformation getTechnicalInformation() {
+	  TechnicalInformation 	result;
+	  TechnicalInformation 	additional;
+	  
+	  result = new TechnicalInformation(Type.PROCEEDINGS);
+	  result.setValue(Field.AUTHOR, "G.F. Cooper and E. Herskovits");
+	  result.setValue(Field.YEAR, "1990");
+	  result.setValue(Field.TITLE, "A Bayesian method for constructing Bayesian belief networks from databases");
+	  result.setValue(Field.BOOKTITLE, "Proceedings of the Conference on Uncertainty in AI");
+	  result.setValue(Field.PAGES, "86-94");
+	  
+	  additional = result.add(Type.ARTICLE);
+	  additional.setValue(Field.AUTHOR, "G. Cooper and E. Herskovits");
+	  additional.setValue(Field.YEAR, "1992");
+	  additional.setValue(Field.TITLE, "A Bayesian method for the induction of probabilistic networks from data");
+	  additional.setValue(Field.JOURNAL, "Machine Learning");
+	  additional.setValue(Field.VOLUME, "Vol.9");
+	  additional.setValue(Field.NUMBER, "No.4");
+	  additional.setValue(Field.PAGES, "pp. 309-347");
+	  
+	  return result;
+	}
+
+	/**
+	 * buildStructure determines the network structure/graph of the network
+	 * with the K2 algorithm, restricted by its initial structure (which can
+	 * be an empty graph, or a Naive Bayes graph.
+	 * 
+	 * @param bayesNet the network
+	 * @param instances the data to work with
+	 * @throws Exception if something goes wrong
+	 */
 	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
 		super.buildStructure(bayesNet, instances);
 		int nOrder[] = new int [instances.numAttributes()];
@@ -118,59 +217,55 @@ public class K2 extends LocalScoreSearchAlgorithm {
 	} // buildStructure 
 
 	/**
-	 * Method declaration
+	 * Sets the max number of parents
 	 *
-	 * @param nMaxNrOfParents
-	 *
+	 * @param nMaxNrOfParents the max number of parents
 	 */
 	public void setMaxNrOfParents(int nMaxNrOfParents) {
 	  m_nMaxNrOfParents = nMaxNrOfParents;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets the max number of parents.
 	 *
-	 * @return
-	 *
+	 * @return the max number of parents
 	 */
 	public int getMaxNrOfParents() {
 	  return m_nMaxNrOfParents;
 	} 
 
 	/**
-	 * Method declaration
+	 * Sets whether to init as naive bayes
 	 *
-	 * @param bInitAsNaiveBayes
-	 *
+	 * @param bInitAsNaiveBayes whether to init as naive bayes
 	 */
 	public void setInitAsNaiveBayes(boolean bInitAsNaiveBayes) {
 	  m_bInitAsNaiveBayes = bInitAsNaiveBayes;
 	} 
 
 	/**
-	 * Method declaration
+	 * Gets whether to init as naive bayes
 	 *
-	 * @return
-	 *
+	 * @return whether to init as naive bayes
 	 */
 	public boolean getInitAsNaiveBayes() {
 	  return m_bInitAsNaiveBayes;
 	} 
 
 	/** 
-	* Set random order flag 
-	*
-	* @param bRandomOrder
-	**/
+	 * Set random order flag 
+	 *
+	 * @param bRandomOrder the random order flag
+	 */
 	public void setRandomOrder(boolean bRandomOrder) {
 		m_bRandomOrder = bRandomOrder;
 	} // SetRandomOrder
 
 	/** 
-	* Get random order flag 
-	*
-	* @returns m_bRandomOrder
-	**/
+	 * Get random order flag 
+	 *
+	 * @return the random order flag
+	 */
 	public boolean getRandomOrder() {
 		return m_bRandomOrder;
 	} // getRandomOrder
@@ -183,10 +278,10 @@ public class K2 extends LocalScoreSearchAlgorithm {
 	public Enumeration listOptions() {
 	  Vector newVector = new Vector(0);
 
-	  newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)\n", 
+	  newVector.addElement(new Option("\tInitial structure is empty (instead of Naive Bayes)", 
 					 "N", 0, "-N"));
 
-	  newVector.addElement(new Option("\tMaximum number of parents\n", "P", 1, 
+	  newVector.addElement(new Option("\tMaximum number of parents", "P", 1, 
 						"-P <nr of parents>"));
 
 	  newVector.addElement(new Option(
@@ -202,15 +297,34 @@ public class K2 extends LocalScoreSearchAlgorithm {
 	}
 
 	/**
-	 * Parses a given list of options. Valid options are:<p>
+	 * Parses a given list of options. <p/>
 	 *
-	 * -R
-	 * Set the random order to true (default false). <p>
-	 *
-	 * For other options see search algorithm.
+	 <!-- options-start -->
+	 * Valid options are: <p/>
+	 * 
+	 * <pre> -N
+	 *  Initial structure is empty (instead of Naive Bayes)</pre>
+	 * 
+	 * <pre> -P &lt;nr of parents&gt;
+	 *  Maximum number of parents</pre>
+	 * 
+	 * <pre> -R
+	 *  Random order.
+	 *  (default false)</pre>
+	 * 
+	 * <pre> -mbc
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
+	 * 
+	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
+	 * 
+	 <!-- options-end -->
 	 *
 	 * @param options the list of options as an array of strings
-	 * @exception Exception if an option is not supported
+	 * @throws Exception if an option is not supported
 	 */
 	public void setOptions(String[] options) throws Exception {
     
@@ -262,8 +376,12 @@ public class K2 extends LocalScoreSearchAlgorithm {
 	 * @return The string.
 	 */
 	public String globalInfo() {
-	  return "This Bayes Network learning algorithm uses a hill climbing algorithm" +
-	  " restricted by an order on the variables";
+	  return
+	      "This Bayes Network learning algorithm uses a hill climbing algorithm "
+	    + "restricted by an order on the variables.\n\n"
+	    + "For more information see:\n\n"
+	    + getTechnicalInformation().toString() + "\n\n"
+	    + "Works with nominal variables and no missing values only.";
 	}
 
 	/**
@@ -278,4 +396,4 @@ public class K2 extends LocalScoreSearchAlgorithm {
 	} // randomOrderTipText
 
   
-} // class SearchAlgorithmK2 
+}

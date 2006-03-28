@@ -21,24 +21,32 @@
  */
 package weka.classifiers.bayes.net.search;
 
-import java.io.Serializable;
-import java.util.Vector;
-import java.util.Enumeration;
-
 import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
  * This is the base class for all search algorithms for learning Bayes networks.
  * It contains some common code, used by other network structure search algorithms,
  * and should not be used by itself.
+ *
+ <!-- options-start -->
+ <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class SearchAlgorithm implements OptionHandler, Serializable {
+public class SearchAlgorithm 
+    implements OptionHandler, Serializable {
+  
+    /** for serialization */
+    static final long serialVersionUID = 6164792240778525312L;
+  
     /**
      * Holds upper bound on number of parents
      */
@@ -63,6 +71,8 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * AddArcMakesSense checks whether adding the arc from iAttributeTail to iAttributeHead
      * does not already exists and does not introduce a cycle
      * 
+     * @param bayesNet
+     * @param instances
      * @param iAttributeHead index of the attribute that becomes head of the arrow
      * @param iAttributeTail index of the attribute that becomes tail of the arrow
      * @return true if adding arc is allowed, otherwise false
@@ -130,14 +140,18 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * reverseArcMakesSense checks whether the arc from iAttributeTail to
      * iAttributeHead exists and reversing does not introduce a cycle
      * 
-     * @param index of the attribute that is head of the arrow
-     * @param index of the attribute that is tail of the arrow
+     * @param bayesNet
+     * @param instances
+     * @param iAttributeHead index of the attribute that is head of the arrow
+     * @param iAttributeTail index of the attribute that is tail of the arrow
+     * @return true if the arc from iAttributeTail to iAttributeHead exists and reversing does not introduce a cycle 
      */
     protected boolean reverseArcMakesSense(
         BayesNet bayesNet,
         Instances instances,
         int iAttributeHead,
         int iAttributeTail) {
+      
         if (iAttributeHead == iAttributeTail) {
             return false;
         }
@@ -197,8 +211,10 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
     /**
      * IsArc checks whether the arc from iAttributeTail to iAttributeHead already exists
      * 
-     * @param index of the attribute that becomes head of the arrow
-     * @param index of the attribute that becomes tail of the arrow
+     * @param bayesNet
+     * @param iAttributeHead index of the attribute that becomes head of the arrow
+     * @param iAttributeTail index of the attribute that becomes tail of the arrow
+     * @return true if the arc from iAttributeTail to iAttributeHead already exists
      */
     protected boolean isArc(BayesNet bayesNet, int iAttributeHead, int iAttributeTail) {
         for (int iParent = 0; iParent < bayesNet.getParentSet(iAttributeHead).getNrOfParents(); iParent++) {
@@ -220,9 +236,10 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
     } // listOption
 
     /**
-     * Parses a given list of options. Valid options are:<p>
+     * Parses a given list of options. <p/>
+     * 
      * @param options the list of options as an array of strings
-     * @exception Exception if an option is not supported
+     * @throws Exception if an option is not supported
      */
     public void setOptions(String[] options) throws Exception {
     } // setOptions
@@ -236,6 +253,11 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         return new String[0];
     } // getOptions
 
+    /**
+     * a string representation of the algorithm
+     * 
+     * @return a string representation
+     */
     public String toString() {
         return "SearchAlgorithm\n";
     } // toString
@@ -246,6 +268,10 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
      * node as its parent (i.e., a BayesNet that behaves like a naive Bayes classifier).
      * This method can be overridden by derived classes to restrict the class
      * of network structures that are acceptable.
+     * 
+     * @param bayesNet the network
+     * @param instances the data to use
+     * @throws Exception if something goes wrong
      */
     public void buildStructure(BayesNet bayesNet, Instances instances) throws Exception {
         if (m_bInitAsNaiveBayes) {
@@ -264,15 +290,24 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
     } // buildStructure 
 
+    /**
+     * 
+     * @param bayesNet
+     * @param instances
+     */
     protected void search(BayesNet bayesNet, Instances instances) throws Exception {
         // placeholder with implementation in derived classes
     } // search
 
-    /* for each node in the network make sure it is in the
+    /** 
+     * for each node in the network make sure it is in the
      * Markov blanket of the classifier node, and if not,
      * add arrows so that it is. If the node is an ancestor
      * of the classifier node, add arrow pointing to the classifier
      * node, otherwise, add arrow pointing to attribute node.
+     * 
+     * @param bayesNet
+     * @param instances
      */
     protected void doMarkovBlanketCorrection(BayesNet bayesNet, Instances instances) {
         // Add class node as parent if it is not in the Markov Boundary
@@ -313,10 +348,18 @@ public class SearchAlgorithm implements OptionHandler, Serializable {
         }
     } // doMarkovBlanketCorrection
 
+    /**
+     * 
+     * @param bMarkovBlanketClassifier
+     */
     protected void setMarkovBlanketClassifier(boolean bMarkovBlanketClassifier) {
         m_bMarkovBlanketClassifier = bMarkovBlanketClassifier;
     }
 
+    /**
+     * 
+     * @return
+     */
     protected boolean getMarkovBlanketClassifier() {
         return m_bMarkovBlanketClassifier;
     }
