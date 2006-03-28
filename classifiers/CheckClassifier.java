@@ -98,39 +98,50 @@ import java.util.Vector;
  * class to test all the classifiers. Any changes here, have to be 
  * checked in that abstract test class, too. <p/>
  *
- * Valid options are:<p/>
- *
- * -D <br/>
- * Turn on debugging output.<p/>
- *
- * -S <br/>
- * Silent mode, i.e., no output at all.<p/>
- *
- * -N num <br/>
- * Number of instances to use for datasets (default 20).<p/>
- *
- * -W classname <br/>
- * Specify the full class name of a classifier to perform the 
- * tests on (required).<p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -S
+ *  Silent mode - prints nothing to stdout.</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  The number of instances in the datasets (default 20).</pre>
+ * 
+ * <pre> -W
+ *  Full name of the classifier analysed.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p/>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @see TestInstances
  */
-
-/*
- * Note about test methods:
- * - methods return array of booleans
- * - first index: success or not
- * - second index: acceptable or not (e.g., Exception is OK)
- * - in case the performance is worse than that of ZeroR both indices are true
- *
- * FracPete (fracpete at waikato dot ac dot nz)
- */
 public class CheckClassifier implements OptionHandler {
+
+  /*
+   * Note about test methods:
+   * - methods return array of booleans
+   * - first index: success or not
+   * - second index: acceptable or not (e.g., Exception is OK)
+   * - in case the performance is worse than that of ZeroR both indices are true
+   *
+   * FracPete (fracpete at waikato dot ac dot nz)
+   */
   
   /** a class for postprocessing the test-data 
    * @see #makeTestDataset(int, int, int, int, int, int, int, int, int, int, boolean) */
@@ -213,6 +224,32 @@ public class CheckClassifier implements OptionHandler {
   
   /**
    * Parses a given list of options. 
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -S
+   *  Silent mode - prints nothing to stdout.</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  The number of instances in the datasets (default 20).</pre>
+   * 
+   * <pre> -W
+   *  Full name of the classifier analysed.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -994,7 +1031,7 @@ public class CheckClassifier implements OptionHandler {
    * @param predictorMissing true if the missing values may be in 
    * the predictors
    * @param classMissing true if the missing values may be in the class
-   * @param level the percentage of missing values
+   * @param missingLevel the percentage of missing values
    * @return index 0 is true if the test was passed, index 1 is true if test 
    *         was acceptable
    */
@@ -1548,6 +1585,22 @@ public class CheckClassifier implements OptionHandler {
   
   /**
    * Runs a text on the datasets with the given characteristics.
+   * 
+   * @param nominalPredictor if true use nominal predictor attributes
+   * @param numericPredictor if true use numeric predictor attributes
+   * @param stringPredictor if true use string predictor attributes
+   * @param datePredictor if true use date predictor attributes
+   * @param relationalPredictor if true use relational predictor attributes
+   * @param multiInstance whether multi-instance is needed
+   * @param classType the class type (NUMERIC, NOMINAL, etc.)
+   * @param missingLevel the percentage of missing values
+   * @param predictorMissing true if the missing values may be in 
+   * the predictors
+   * @param classMissing true if the missing values may be in the class
+   * @param numTrain the number of instances in the training set
+   * @param numTest the number of instaces in the test set
+   * @param numClasses the number of classes
+   * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
    *         was acceptable
    */
@@ -1586,6 +1639,23 @@ public class CheckClassifier implements OptionHandler {
   
   /**
    * Runs a text on the datasets with the given characteristics.
+   * 
+   * @param nominalPredictor if true use nominal predictor attributes
+   * @param numericPredictor if true use numeric predictor attributes
+   * @param stringPredictor if true use string predictor attributes
+   * @param datePredictor if true use date predictor attributes
+   * @param relationalPredictor if true use relational predictor attributes
+   * @param multiInstance whether multi-instance is needed
+   * @param classType the class type (NUMERIC, NOMINAL, etc.)
+   * @param classIndex the attribute index of the class
+   * @param missingLevel the percentage of missing values
+   * @param predictorMissing true if the missing values may be in 
+   * the predictors
+   * @param classMissing true if the missing values may be in the class
+   * @param numTrain the number of instances in the training set
+   * @param numTest the number of instaces in the test set
+   * @param numClasses the number of classes
+   * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
    *         was acceptable
    */
@@ -1989,6 +2059,8 @@ public class CheckClassifier implements OptionHandler {
   
   /**
    * Test method for this class
+   * 
+   * @param args the commandline parameters
    */
   public static void main(String [] args) {
     try {

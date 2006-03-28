@@ -36,11 +36,19 @@ import weka.core.WeightedInstancesHandler;
  * Used for building logistic model trees (weka.classifiers.trees.lmt.LMT)
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-
 public class LogisticBase 
     extends Classifier 
     implements WeightedInstancesHandler {
@@ -1010,12 +1018,3 @@ public class LogisticBase
 	m_numericData = null;	
     }
 }
-
-
-
-
-
-
-
-
-
