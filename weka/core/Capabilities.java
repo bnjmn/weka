@@ -28,13 +28,38 @@ import java.util.Iterator;
 import java.util.Vector;
 
 /**
- * a class that describes the capabilites (e.g., handling certain types of
+ * A class that describes the capabilites (e.g., handling certain types of
  * attributes, missing values, types of classes, etc.) of a specific
  * classifier. By default, the classifier is capable of nothing. This
- * ensures that new features have to be enabled explicitly.
+ * ensures that new features have to be enabled explicitly. <p/>
+ * 
+ * A common code fragment for making use of the capabilities in a classifier 
+ * would be this:
+ * <pre>
+ * public void <b>buildClassifier</b>(Instances instances) throws Exception {
+ *   // can the classifier handle the data?
+ *   getCapabilities().<b>testWithFail(instances)</b>;
+ *   ...
+ *   // possible deletion of instances with missing class labels, etc.
+ * </pre>
+ * For only testing a single attribute, use this:
+ * <pre>
+ *   ...
+ *   Attribute att = instances.attribute(0);
+ *   getCapabilities().<b>testWithFail(att)</b>;
+ *   ...
+ * </pre>
+ * Or for testing the class attribute (uses the capabilities that are 
+ * especially for the class):
+ * <pre>
+ *   ...
+ *   Attribute att = instances.classAttribute();
+ *   getCapabilities().<b>testWithFail(att, <i>true</i>)</b>;
+ *   ...
+ * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -668,7 +693,138 @@ public class Capabilities
   }
   
   /**
-   * Tests the given data, whether it can be processed by the classifier,
+   * Test the given attribute, whether it can be processed by the handler,
+   * given its capabilities. The method assumes that the specified attribute
+   * is not the class attribute.
+   * 
+   * @param att		the attribute to test
+   * @return		true if all the tests succeeded
+   */
+  public boolean test(Attribute att) {
+    return test(att, false);
+  }
+  
+  /**
+   * Test the given attribute, whether it can be processed by the handler,
+   * given its capabilities.
+   * 
+   * @param att		the attribute to test
+   * @param isClass	whether this attribute is the class attribute
+   * @return		true if all the tests succeeded
+   */
+  public boolean test(Attribute att, boolean isClass) {
+    boolean		result;
+    Capability		cap;
+    Capability		capBinary;
+    String		errorStr;
+    
+    result = true;
+
+    // for exception
+    if (isClass)
+      errorStr  = "class";
+    else
+      errorStr  = "attributes";
+    
+    switch (att.type()) {
+      case Attribute.NOMINAL:
+	if (isClass) {
+	  cap       = Capability.NOMINAL_CLASS;
+	  capBinary = Capability.BINARY_CLASS;
+	}
+	else {
+	  cap       = Capability.NOMINAL_ATTRIBUTES;
+	  capBinary = Capability.BINARY_ATTRIBUTES;
+	}
+	
+        // all types
+        if (handles(cap))
+          break;
+        
+        // none
+        if (    !handles(cap) 
+             && !handles(capBinary) ) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+                              createMessage("Cannot handle nominal " + errorStr + "!"));
+          result = false;
+        }
+        
+        // binary
+        if (    handles(capBinary)
+             && !handles(cap)
+             && (att.numValues() != 2) ) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+                              createMessage("Cannot handle non-binary " + errorStr + "!"));
+          result = false;
+        }
+        break;
+
+      case Attribute.NUMERIC:
+	if (isClass)
+	  cap = Capability.NUMERIC_CLASS;
+	else
+	  cap = Capability.NUMERIC_ATTRIBUTES;
+	
+        if (!handles(cap)) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+                              createMessage("Cannot handle numeric " + errorStr + "!"));
+          result = false;
+        }
+        break;
+
+      case Attribute.DATE:
+	if (isClass)
+	  cap = Capability.DATE_CLASS;
+	else
+	  cap = Capability.DATE_ATTRIBUTES;
+	
+        if (!handles(cap)) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+                              createMessage("Cannot handle date " + errorStr + "!"));
+          result = false;
+        }
+        break;
+
+      case Attribute.STRING:
+	if (isClass)
+	  cap = Capability.STRING_CLASS;
+	else
+	  cap = Capability.STRING_ATTRIBUTES;
+	
+        if (!handles(cap)) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+                              createMessage("Cannot handle string " + errorStr + "!"));
+          result = false;
+        }
+        break;
+
+      case Attribute.RELATIONAL:
+	if (isClass)
+	  cap = Capability.RELATIONAL_CLASS;
+	else
+	  cap = Capability.RELATIONAL_ATTRIBUTES;
+	
+        if (!handles(cap)) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+                              createMessage("Cannot handle relational " + errorStr + "!"));
+          result = false;
+        }
+        // attributes in the relation of this attribute must be tested
+        // separately with a different Capabilites object
+        break;
+
+      default:
+        m_FailReason = new UnsupportedAttributeTypeException(
+                            createMessage("Cannot handle unknown attribute type '" 
+                                        + att.type() + "'!"));
+        result = false;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Tests the given data, whether it can be processed by the handler,
    * given its capabilities. Classifiers implementing the 
    * <code>MultiInstanceCapabilitiesHandler</code> interface are checked 
    * automatically for their multi-instance Capabilities (if no bags, then
@@ -706,70 +862,8 @@ public class Capabilities
         continue;
       
       // check attribute types
-      switch (att.type()) {
-        case Attribute.NOMINAL:
-          // all types
-          if (handles(Capability.NOMINAL_ATTRIBUTES))
-            continue;
-          
-          // none
-          if (    !handles(Capability.NOMINAL_ATTRIBUTES) 
-               && !handles(Capability.BINARY_ATTRIBUTES) ) {
-            m_FailReason = new UnsupportedAttributeTypeException(
-                                createMessage("Cannot handle nominal attributes!"));
-            return false;
-          }
-          
-          // binary
-          if (    handles(Capability.BINARY_ATTRIBUTES)
-               && !handles(Capability.NOMINAL_ATTRIBUTES)
-               && (att.numValues() != 2) ) {
-            m_FailReason = new UnsupportedAttributeTypeException(
-                                createMessage("Cannot handle non-binary attributes!"));
-            return false;
-          }
-          break;
-
-        case Attribute.NUMERIC:
-          if (!handles(Capability.NUMERIC_ATTRIBUTES)) {
-            m_FailReason = new UnsupportedAttributeTypeException(
-                                createMessage("Cannot handle numeric attributes!"));
-            return false;
-          }
-          break;
-
-        case Attribute.DATE:
-          if (!handles(Capability.DATE_ATTRIBUTES)) {
-            m_FailReason = new UnsupportedAttributeTypeException(
-                                createMessage("Cannot handle date attributes!"));
-            return false;
-          }
-          break;
-
-        case Attribute.STRING:
-          if (!handles(Capability.STRING_ATTRIBUTES)) {
-            m_FailReason = new UnsupportedAttributeTypeException(
-                                createMessage("Cannot handle string attributes!"));
-            return false;
-          }
-          break;
-
-        case Attribute.RELATIONAL:
-          if (!handles(Capability.RELATIONAL_ATTRIBUTES)) {
-            m_FailReason = new UnsupportedAttributeTypeException(
-                                createMessage("Cannot handle relational attributes!"));
-            return false;
-          }
-          // attributes in the relation of this attribute must be tested
-          // separately with a different Capabilites object
-          break;
-
-        default:
-          m_FailReason = new UnsupportedAttributeTypeException(
-                              createMessage("Cannot handle unknown attribute type '" 
-                                          + att.type() + "'!"));
-          return false;
-      }
+      if (!test(att))
+	return false;
     }
     
     // class
@@ -781,79 +875,20 @@ public class Capabilities
       }
       
       att = data.classAttribute();
+      if (!test(att, true))
+	return false;
 
-      // type
-      switch (att.type()) {
-        case Attribute.NOMINAL:
-          // all types
-          if (handles(Capability.NOMINAL_CLASS))
-            break;
-          
-          // none
-          if (    !handles(Capability.NOMINAL_CLASS) 
-               && !handles(Capability.BINARY_CLASS) ) {
-            m_FailReason = new UnsupportedClassTypeException(
-                                createMessage("Cannot handle nominal class!"));
-            return false;
-          }
-          
-          // binary
-          if (    handles(Capability.BINARY_CLASS) 
-               && !handles(Capability.NOMINAL_CLASS)
-               && (att.numValues() != 2) ) {
-            m_FailReason = new UnsupportedClassTypeException(
-                                createMessage("Cannot handle non-binary class!"));
-            return false;
-          }
-          break;
-
-        case Attribute.NUMERIC:
-          if (!handles(Capability.NUMERIC_CLASS)) {
-            m_FailReason = new UnsupportedClassTypeException(
-                                createMessage("Cannot handle numeric class!"));
-            return false;
-          }
-          break;
-
-        case Attribute.DATE:
-          if (!handles(Capability.DATE_CLASS)) {
-            m_FailReason = new UnsupportedClassTypeException(
-                                createMessage("Cannot handle date class!"));
-            return false;
-          }
-          break;
-
-        case Attribute.STRING:
-          if (!handles(Capability.STRING_CLASS)) {
-            m_FailReason = new UnsupportedClassTypeException(
-                                createMessage("Cannot handle string class!"));
-            return false;
-          }
-          break;
-
-        case Attribute.RELATIONAL:
-          if (!handles(Capability.RELATIONAL_CLASS)) {
-            m_FailReason = new UnsupportedClassTypeException(
-                                createMessage("Cannot handle relational class!"));
-            return false;
-          }
-          
-          // test recursively (but add ability to handle NO_CLASS)
-          noClass = handles(Capability.NO_CLASS);
-          if (!noClass)
-            enable(Capability.NO_CLASS);
-          tmpResult = test(att.relation());
-          if (!noClass) 
-            disable(Capability.NO_CLASS);
-          if (!tmpResult)
-            return false;
-          
-          break;
-
-        default:
-          m_FailReason = new UnsupportedClassTypeException(
-                              createMessage("Cannot handle unknown attribute type '" + att.type() + "'!"));
-          return false;
+      // special handling of RELATIONAL class
+      if (att.type() == Attribute.RELATIONAL) {
+	// test recursively (but add ability to handle NO_CLASS)
+	noClass = handles(Capability.NO_CLASS);
+	if (!noClass)
+	  enable(Capability.NO_CLASS);
+	tmpResult = test(att.relation());
+	if (!noClass) 
+	  disable(Capability.NO_CLASS);
+	if (!tmpResult)
+	  return false;
       }
       
       // missing class labels
@@ -951,6 +986,33 @@ public class Capabilities
     
     // passed all tests!
     return true;
+  }
+
+  /**
+   * tests the given attribute by calling the test(Attribute,boolean) method 
+   * and throws an exception if the test fails. The method assumes that the
+   * specified attribute is not the class attribute.
+   *
+   * @param att        	the attribute to test
+   * @throws Exception  in case the attribute doesn't pass the tests
+   * @see #test(Attribute,boolean)
+   */
+  public void testWithFail(Attribute att) throws Exception {
+    test(att, false);
+  }
+
+  /**
+   * tests the given attribute by calling the test(Attribute,boolean) method 
+   * and throws an exception if the test fails.
+   *
+   * @param att        	the attribute to test
+   * @param isClass	whether this attribute is the class attribute
+   * @throws Exception  in case the attribute doesn't pass the tests
+   * @see #test(Attribute,boolean)
+   */
+  public void testWithFail(Attribute att, boolean isClass) throws Exception {
+    if (!test(att, isClass))
+      throw m_FailReason;
   }
 
   /**
