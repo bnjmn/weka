@@ -55,21 +55,22 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
-
-public class ArffTableModel implements TableModel, Undoable {
-  // the listeners
+public class ArffTableModel 
+  implements TableModel, Undoable {
+  
+  /** the listeners */
   private HashSet         listeners;
-  // the data
+  /** the data */
   private Instances       data;
-  // whether notfication is enabled
+  /** whether notfication is enabled */
   private boolean         notificationEnabled;
-  // whether undo is active
+  /** whether undo is active */
   private boolean         undoEnabled;
-  // whether to ignore changes, i.e. not adding to undo history
+  /** whether to ignore changes, i.e. not adding to undo history */
   private boolean         ignoreChanges;
-  // the undo list (contains temp. filenames)
+  /** the undo list (contains temp. filenames) */
   private Vector          undoList;
   
   /**
@@ -88,6 +89,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * initializes the object and loads the given file
+   * 
+   * @param filename	the file to load
    */
   public ArffTableModel(String filename) {
     this();
@@ -98,6 +101,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * initializes the model with the given data
+   * 
+   * @param data 	the data to use
    */
   public ArffTableModel(Instances data) {
     this();
@@ -107,6 +112,8 @@ public class ArffTableModel implements TableModel, Undoable {
 
   /**
    * returns whether the notification of changes is enabled
+   * 
+   * @return 		true if notification of changes is enabled
    */
   public boolean isNotificationEnabled() {
     return notificationEnabled;
@@ -114,6 +121,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * sets whether the notification of changes is enabled
+   * 
+   * @param enabled	enables/disables the notification
    */
   public void setNotificationEnabled(boolean enabled) {
     notificationEnabled = enabled;
@@ -121,6 +130,8 @@ public class ArffTableModel implements TableModel, Undoable {
 
   /**
    * returns whether undo support is enabled
+   * 
+   * @return 		true if undo support is enabled
    */
   public boolean isUndoEnabled() {
     return undoEnabled;
@@ -128,6 +139,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * sets whether undo support is enabled
+   * 
+   * @param enabled	whether to enable/disable undo support
    */
   public void setUndoEnabled(boolean enabled) {
     undoEnabled = enabled;
@@ -135,6 +148,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * loads the specified ARFF file
+   * 
+   * @param filename	the file to load
    */
   private void loadFile(String filename) {
     AbstractLoader          loader;
@@ -166,6 +181,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * sets the data
+   * 
+   * @param data	the data to use
    */
   public void setInstances(Instances data) {
     this.data = data;
@@ -173,6 +190,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the data
+   * 
+   * @return		the current data
    */
   public Instances getInstances() {
     return data;
@@ -181,6 +200,9 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * returns the attribute at the given index, can be NULL if not an attribute
    * column
+   * 
+   * @param columnIndex		the index of the column
+   * @return			the attribute at the position
    */
   public Attribute getAttributeAt(int columnIndex) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) )
@@ -191,6 +213,9 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the TYPE of the attribute at the given position
+   * 
+   * @param columnIndex		the index of the column
+   * @return			the attribute type
    */
   public int getType(int columnIndex) {
     return getType(0, columnIndex);
@@ -198,6 +223,10 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the TYPE of the attribute at the given position
+   * 
+   * @param rowIndex		the index of the row
+   * @param columnIndex		the index of the column
+   * @return			the attribute type
    */
   public int getType(int rowIndex, int columnIndex) {
     int            result;
@@ -205,7 +234,7 @@ public class ArffTableModel implements TableModel, Undoable {
     result = Attribute.STRING;
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
-        && (columnIndex > 0) & (columnIndex < getColumnCount()) )
+         && (columnIndex > 0) && (columnIndex < getColumnCount()) )
       result = data.instance(rowIndex).attribute(columnIndex - 1).type();
     
     return result;
@@ -213,6 +242,7 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * deletes the attribute at the given col index. notifies the listeners.
+   * 
    * @param columnIndex     the index of the attribute to delete
    */
   public void deleteAttributeAt(int columnIndex) {
@@ -221,6 +251,7 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * deletes the attribute at the given col index
+   * 
    * @param columnIndex     the index of the attribute to delete
    * @param notify          whether to notify the listeners
    */
@@ -236,6 +267,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * deletes the attributes at the given indices
+   * 
+   * @param columnIndices	the column indices
    */
   public void deleteAttributes(int[] columnIndices) {
     int            i;
@@ -254,6 +287,9 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * renames the attribute at the given col index
+   * 
+   * @param columnIndex		the index of the column
+   * @param newName		the new name of the attribute
    */
   public void renameAttributeAt(int columnIndex, String newName) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
@@ -266,6 +302,8 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * sets the attribute at the given col index as the new class attribute, i.e.
    * it moves it to the end of the attributes
+   * 
+   * @param columnIndex		the index of the column
    */
   public void attributeAsClassAt(int columnIndex) {
     Reorder     reorder;
@@ -311,6 +349,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * deletes the instance at the given index
+   * 
+   * @param rowIndex		the index of the row
    */
   public void deleteInstanceAt(int rowIndex) {
     deleteInstanceAt(rowIndex, true);
@@ -318,6 +358,9 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * deletes the instance at the given index
+   * 
+   * @param rowIndex		the index of the row
+   * @param notify		whether to notify the listeners
    */
   public void deleteInstanceAt(int rowIndex, boolean notify) {
     if ( (rowIndex >= 0) && (rowIndex < getRowCount()) ) {
@@ -334,6 +377,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * deletes the instances at the given positions
+   * 
+   * @param rowIndices		the indices to delete
    */
   public void deleteInstances(int[] rowIndices) {
     int               i;
@@ -355,6 +400,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * sorts the instances via the given attribute
+   * 
+   * @param columnIndex		the index of the column
    */
   public void sortInstances(int columnIndex) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
@@ -366,6 +413,9 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the column of the given attribute name, -1 if not found
+   * 
+   * @param name		the name of the attribute
+   * @return			the column index or -1 if not found
    */
   public int getAttributeColumn(String name) {
     int            i;
@@ -386,6 +436,9 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * returns the most specific superclass for all the cell values in the 
    * column (always String)
+   * 
+   * @param columnIndex		the column index
+   * @return			the class of the column
    */
   public Class getColumnClass(int columnIndex) {
     Class       result;
@@ -406,6 +459,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the number of columns in the model
+   * 
+   * @return		the number of columns
    */
   public int getColumnCount() {
     int         result;
@@ -419,6 +474,9 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * checks whether the column represents the class or not
+   * 
+   * @param columnIndex		the index of the column
+   * @return			true if the column is the class attribute
    */
   private boolean isClassIndex(int columnIndex) {
     boolean        result;
@@ -433,6 +491,9 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the name of the column at columnIndex
+   * 
+   * @param columnIndex		the index of the column
+   * @return			the name of the column
    */
   public String getColumnName(int columnIndex) {
     String      result;
@@ -469,6 +530,11 @@ public class ArffTableModel implements TableModel, Undoable {
               case Attribute.NUMERIC:
                 result += "<br><font size=\"-2\">Numeric</font>";
                 break;
+              case Attribute.RELATIONAL:
+                result += "<br><font size=\"-2\">Relational</font>";
+                break;
+              default:
+                result += "<br><font size=\"-2\">???</font>";
             }
             
             result += "</center></html>";
@@ -482,6 +548,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns the number of rows in the model
+   * 
+   * @return		the number of rows
    */
   public int getRowCount() {
     if (data == null)
@@ -492,6 +560,10 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * checks whether the value at the given position is missing
+   * 
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @return			true if the value at the position is missing
    */
   public boolean isMissingAt(int rowIndex, int columnIndex) {
     boolean           result;
@@ -499,14 +571,38 @@ public class ArffTableModel implements TableModel, Undoable {
     result = false;
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
-        && (columnIndex > 0) & (columnIndex < getColumnCount()) )
+         && (columnIndex > 0) && (columnIndex < getColumnCount()) )
       result = (data.instance(rowIndex).isMissing(columnIndex - 1));
     
     return result;
   }
   
   /**
+   * returns the double value of the underlying Instances object at the
+   * given position, -1 if out of bounds
+   * 
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @return			the underlying value in the Instances object
+   */
+  public double getInstancesValueAt(int rowIndex, int columnIndex) {
+    double	result;
+    
+    result = -1;
+    
+    if (    (rowIndex >= 0) && (rowIndex < getRowCount())
+         && (columnIndex > 0) && (columnIndex < getColumnCount()) )
+      result = data.instance(rowIndex).value(columnIndex - 1);
+    
+    return result;
+  }
+  
+  /**
    * returns the value for the cell at columnindex and rowIndex
+   * 
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @return 			the value at the position
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
     Object            result;
@@ -515,7 +611,7 @@ public class ArffTableModel implements TableModel, Undoable {
     result = null;
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
-        && (columnIndex >= 0) & (columnIndex < getColumnCount()) ) {
+        && (columnIndex >= 0) && (columnIndex < getColumnCount()) ) {
       if (columnIndex == 0) {
         result = new Integer(rowIndex + 1);
       }
@@ -528,11 +624,14 @@ public class ArffTableModel implements TableModel, Undoable {
             case Attribute.DATE: 
             case Attribute.NOMINAL:
             case Attribute.STRING:
+            case Attribute.RELATIONAL:
               result = data.instance(rowIndex).stringValue(columnIndex - 1);
               break;
             case Attribute.NUMERIC:
               result = new Double(data.instance(rowIndex).value(columnIndex - 1));
               break;
+            default:
+              result = "-can't display-";
           }
         }
       }
@@ -540,13 +639,13 @@ public class ArffTableModel implements TableModel, Undoable {
     
     if (getType(columnIndex) != Attribute.NUMERIC) {
       if (result != null) {
-        // does it contain "\n" or "\r"? -> replace with ", "
+        // does it contain "\n" or "\r"? -> replace with red html tag
         tmp = result.toString();
         if ( (tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1) ) {
-          tmp    = tmp.replaceAll("\\r\\n", ", ");
-          tmp    = tmp.replaceAll("\\r", ", ").replaceAll("\\n", ", ");
-          tmp    = tmp.replaceAll(", $", "");
-          result = tmp;
+          tmp    = tmp.replaceAll("\\r\\n", "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
+          tmp    = tmp.replaceAll("\\r", "<font color=\"red\"><b>\\\\r</b></font>");
+          tmp    = tmp.replaceAll("\\n", "<font color=\"red\"><b>\\\\n</b></font>");
+          result = "<html>" + tmp + "</html>";
         }
       }
     }
@@ -556,6 +655,10 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * returns true if the cell at rowindex and columnindexis editable
+   * 
+   * @param rowIndex		the index of the row
+   * @param columnIndex		the index of the column
+   * @return			true if the cell is editable
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
     return (columnIndex > 0);
@@ -564,6 +667,10 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * sets the value in the cell at columnIndex and rowIndex to aValue.
    * but only the value and the value can be changed
+   * 
+   * @param aValue		the new value
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
    */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     setValueAt(aValue, rowIndex, columnIndex, true);
@@ -572,6 +679,11 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * sets the value in the cell at columnIndex and rowIndex to aValue.
    * but only the value and the value can be changed
+   * 
+   * @param aValue		the new value
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @param notify		whether to notify the listeners
    */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex, boolean notify) {
     int            type;
@@ -626,6 +738,18 @@ public class ArffTableModel implements TableModel, Undoable {
             // ignore
           }
           break;
+          
+        case Attribute.RELATIONAL:
+          try {
+            inst.setValue(index, inst.attribute(index).addRelation((Instances) aValue));
+          }
+          catch (Exception e) {
+            // ignore
+          }
+          break;
+          
+        default:
+          throw new IllegalArgumentException("Unsupported Attribute type: " + type + "!");
       }
     }
     
@@ -637,6 +761,8 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * adds a listener to the list that is notified each time a change to data 
    * model occurs
+   * 
+   * @param l		the listener to add
    */
   public void addTableModelListener(TableModelListener l) {
     listeners.add(l);
@@ -645,6 +771,8 @@ public class ArffTableModel implements TableModel, Undoable {
   /**
    * removes a listener from the list that is notified each time a change to
    * the data model occurs
+   * 
+   * @param l		the listener to remove
    */
   public void removeTableModelListener(TableModelListener l) {
     listeners.remove(l);
@@ -652,6 +780,8 @@ public class ArffTableModel implements TableModel, Undoable {
   
   /**
    * notfies all listener of the change of the model
+   * 
+   * @param e		the event to send to the listeners
    */
   public void notifyListener(TableModelEvent e) {
     Iterator                iter;

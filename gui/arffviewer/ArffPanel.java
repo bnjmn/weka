@@ -60,13 +60,16 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 public class ArffPanel 
-extends    JPanel
-implements ActionListener, ChangeListener, MouseListener, Undoable
-{
+  extends JPanel
+  implements ActionListener, ChangeListener, MouseListener, Undoable {
+  
+  /** for serialization */
+  static final long serialVersionUID = -4697041150989513939L;
+  
   /** the name of the tab for instances that were set directly */
   public final static String       TAB_INSTANCES     = "Instances";
   
@@ -267,6 +270,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns the table component
+   * 
+   * @return 		the table
    */
   public ArffTable getTable() {
     return tableArff;
@@ -274,6 +279,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns the title for the Tab, i.e. the filename
+   * 
+   * @return 		the title for the tab
    */
   public String getTitle() {
     return title;
@@ -281,6 +288,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns the filename
+   * 
+   * @return		the filename
    */
   public String getFilename() {
     return filename;
@@ -288,6 +297,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * sets the filename
+   * 
+   * @param filename	the new filename
    */
   public void setFilename(String filename) {
     this.filename = filename;
@@ -296,6 +307,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns the instances of the panel, if none then NULL
+   * 
+   * @return		the instances of the panel
    */
   public Instances getInstances() {
     Instances            result;
@@ -314,6 +327,7 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
    * if a different instances object is used here, don't forget to clear
    * the undo-history by calling <code>clearUndo()</code>
    * 
+   * @param data	the instances to display
    * @see               #TAB_INSTANCES
    * @see               #clearUndo()
    */
@@ -336,6 +350,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns a list with the attributes
+   * 
+   * @return		a list of the attributes
    */
   public Vector getAttributes() {
     Vector               result;
@@ -351,6 +367,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * can only reset the changed state to FALSE
+   * 
+   * @param changed		if false, resets the changed state
    */
   public void setChanged(boolean changed) {
     if (!changed)
@@ -362,6 +380,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns whether the content of the panel was changed
+   * 
+   * @return		true if the content was changed
    */
   public boolean isChanged() {
     return changed;
@@ -369,6 +389,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
 
   /**
    * returns whether undo support is enabled
+   * 
+   * @return 		true if undo is enabled
    */
   public boolean isUndoEnabled() {
     return ((ArffSortedTableModel) tableArff.getModel()).isUndoEnabled();
@@ -376,6 +398,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * sets whether undo support is enabled
+   * 
+   * @param enabled		whether to enable/disable undo support
    */
   public void setUndoEnabled(boolean enabled) {
     ((ArffSortedTableModel) tableArff.getModel()).setUndoEnabled(enabled);
@@ -390,6 +414,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * returns whether an undo is possible 
+   * 
+   * @return		true if undo is possible
    */
   public boolean canUndo() {
     return ((ArffSortedTableModel) tableArff.getModel()).canUndo();
@@ -458,6 +484,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * loads the specified file into the table
+   * 
+   * @param filename		the file to load
    */
   private void loadFile(String filename) {
     ArffSortedTableModel         model;
@@ -512,6 +540,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * sets the specified values in a column to a new value
+   * 
+   * @param o		the menu item
    */
   private void setValues(Object o) {
     String                     msg;
@@ -794,6 +824,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * invoked when an action occurs
+   * 
+   * @param e		the action event
    */
   public void actionPerformed(ActionEvent e) {
     Object          o;
@@ -838,6 +870,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * Invoked when a mouse button has been pressed and released on a component
+   * 
+   * @param e		the mouse event
    */
   public void mouseClicked(MouseEvent e) {
     int            col;
@@ -875,30 +909,40 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * Invoked when the mouse enters a component.
+   * 
+   * @param e		the mouse event
    */
   public void mouseEntered(MouseEvent e) {
   }
   
   /**
    * Invoked when the mouse exits a component
+   * 
+   * @param e		the mouse event
    */
   public void mouseExited(MouseEvent e) {
   }
   
   /**
    * Invoked when a mouse button has been pressed on a component
+   * 
+   * @param e		the mouse event
    */
   public void mousePressed(MouseEvent e) {
   }
   
   /**
    * Invoked when a mouse button has been released on a component.
+   * 
+   * @param e		the mouse event
    */
   public void mouseReleased(MouseEvent e) {
   }
   
   /**
    * Invoked when the target of the listener has changed its state.
+   * 
+   * @param e		the change event
    */
   public void stateChanged(ChangeEvent e) {
     changed = true;
@@ -919,6 +963,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * Adds a ChangeListener to the panel
+   * 
+   * @param l		the listener to add
    */
   public void addChangeListener(ChangeListener l) {
     changeListeners.add(l);
@@ -926,6 +972,8 @@ implements ActionListener, ChangeListener, MouseListener, Undoable
   
   /**
    * Removes a ChangeListener from the panel
+   * 
+   * @param l		the listener to remove
    */
   public void removeChangeListener(ChangeListener l) {
     changeListeners.remove(l);

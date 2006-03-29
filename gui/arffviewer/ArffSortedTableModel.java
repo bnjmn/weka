@@ -34,16 +34,21 @@ import javax.swing.event.TableModelListener;
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 
 public class ArffSortedTableModel 
   extends SortedTableModel 
   implements Undoable {
   
+  /** for serialization */
+  static final long serialVersionUID = -5733148376354254030L;
+  
   /**
    * initializes the sorter w/o a model, but loads the given file and creates
    * from that a model
+   * 
+   * @param filename	the file to load
    */
   public ArffSortedTableModel(String filename) {
     this(new ArffTableModel(filename));
@@ -52,6 +57,8 @@ public class ArffSortedTableModel
   /**
    * initializes the sorter w/o a model, but uses the given data to create
    * a model from that
+   * 
+   * @param data 	the data to use
    */
   public ArffSortedTableModel(Instances data) {
     this(new ArffTableModel(data));
@@ -59,6 +66,8 @@ public class ArffSortedTableModel
   
   /**
    * initializes the sorter with the given model
+   * 
+   * @param model	the model to use
    */
   public ArffSortedTableModel(TableModel model) {
     super(model);
@@ -66,6 +75,8 @@ public class ArffSortedTableModel
   
   /**
    * returns whether the notification of changes is enabled
+   * 
+   * @return 		true if notification of changes is enabled
    */
   public boolean isNotificationEnabled() {
     return ((ArffTableModel) getModel()).isNotificationEnabled();
@@ -73,6 +84,8 @@ public class ArffSortedTableModel
   
   /**
    * sets whether the notification of changes is enabled
+   * 
+   * @param enabled	enables/disables the notification
    */
   public void setNotificationEnabled(boolean enabled) {
     ((ArffTableModel) getModel()).setNotificationEnabled(enabled);
@@ -80,6 +93,8 @@ public class ArffSortedTableModel
   
   /**
    * returns whether undo support is enabled
+   * 
+   * @return 		true if undo support is enabled
    */
   public boolean isUndoEnabled() {
     return ((ArffTableModel) getModel()).isUndoEnabled();
@@ -87,13 +102,31 @@ public class ArffSortedTableModel
   
   /**
    * sets whether undo support is enabled
+   * 
+   * @param enabled	whether to enable/disable undo support
    */
   public void setUndoEnabled(boolean enabled) {
     ((ArffTableModel) getModel()).setUndoEnabled(enabled);
   }
   
   /**
+   * returns the double value of the underlying Instances object at the
+   * given position, -1 if out of bounds
+   * 
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @return			the underlying value in the Instances object
+   */
+  public double getInstancesValueAt(int rowIndex, int columnIndex) {
+    return ((ArffTableModel) getModel()).getInstancesValueAt(mIndices[rowIndex], columnIndex);
+  }
+  
+  /**
    * returns the value at the given position
+   * 
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @return			the value of the model at the given  position
    */
   public Object getModelValueAt(int rowIndex, int columnIndex) {
     Object            result;
@@ -109,6 +142,9 @@ public class ArffSortedTableModel
   
   /**
    * returns the TYPE of the attribute at the given position
+   * 
+   * @param columnIndex		the index of the column
+   * @return			the attribute type
    */
   public int getType(int columnIndex) {
     return ((ArffTableModel) getModel()).getType(mIndices[0], columnIndex);
@@ -116,6 +152,10 @@ public class ArffSortedTableModel
   
   /**
    * returns the TYPE of the attribute at the given position
+   * 
+   * @param rowIndex		the index of the row
+   * @param columnIndex		the index of the column
+   * @return			the attribute type
    */
   public int getType(int rowIndex, int columnIndex) {
     return ((ArffTableModel) getModel()).getType(mIndices[rowIndex], columnIndex);
@@ -123,6 +163,8 @@ public class ArffSortedTableModel
   
   /**
    * deletes the attribute at the given col index
+   * 
+   * @param columnIndex     the index of the attribute to delete
    */
   public void deleteAttributeAt(int columnIndex) {
     ((ArffTableModel) getModel()).deleteAttributeAt(columnIndex);
@@ -130,6 +172,8 @@ public class ArffSortedTableModel
   
   /**
    * deletes the attributes at the given indices
+   * 
+   * @param columnIndices	the column indices
    */
   public void deleteAttributes(int[] columnIndices) {
     ((ArffTableModel) getModel()).deleteAttributes(columnIndices);
@@ -137,6 +181,9 @@ public class ArffSortedTableModel
   
   /**
    * renames the attribute at the given col index
+   * 
+   * @param columnIndex		the index of the column
+   * @param newName		the new name of the attribute
    */
   public void renameAttributeAt(int columnIndex, String newName) {
     ((ArffTableModel) getModel()).renameAttributeAt(columnIndex, newName);
@@ -144,6 +191,8 @@ public class ArffSortedTableModel
   
   /**
    * sets the attribute at the given col index as the new class attribute
+   * 
+   * @param columnIndex		the index of the column
    */
   public void attributeAsClassAt(int columnIndex) {
     ((ArffTableModel) getModel()).attributeAsClassAt(columnIndex);
@@ -151,6 +200,8 @@ public class ArffSortedTableModel
   
   /**
    * deletes the instance at the given index
+   * 
+   * @param rowIndex		the index of the row
    */
   public void deleteInstanceAt(int rowIndex) {
     ((ArffTableModel) getModel()).deleteInstanceAt(mIndices[rowIndex]);
@@ -158,6 +209,8 @@ public class ArffSortedTableModel
   
   /**
    * deletes the instances at the given positions
+   * 
+   * @param rowIndices		the indices to delete
    */
   public void deleteInstances(int[] rowIndices) {
     int[]               realIndices;
@@ -172,6 +225,8 @@ public class ArffSortedTableModel
   
   /**
    * sorts the instances via the given attribute
+   * 
+   * @param columnIndex		the index of the column
    */
   public void sortInstances(int columnIndex) {
     ((ArffTableModel) getModel()).sortInstances(columnIndex);
@@ -179,6 +234,9 @@ public class ArffSortedTableModel
   
   /**
    * returns the column of the given attribute name, -1 if not found
+   * 
+   * @param name		the name of the attribute
+   * @return			the column index or -1 if not found
    */
   public int getAttributeColumn(String name) {
     return ((ArffTableModel) getModel()).getAttributeColumn(name);
@@ -186,6 +244,10 @@ public class ArffSortedTableModel
   
   /**
    * checks whether the value at the given position is missing
+   * 
+   * @param rowIndex		the row index
+   * @param columnIndex		the column index
+   * @return			true if the value at the position is missing
    */
   public boolean isMissingAt(int rowIndex, int columnIndex) {
     return ((ArffTableModel) getModel()).isMissingAt(mIndices[rowIndex], columnIndex);
@@ -193,6 +255,8 @@ public class ArffSortedTableModel
   
   /**
    * sets the data
+   * 
+   * @param data	the data to use
    */
   public void setInstances(Instances data) {
     ((ArffTableModel) getModel()).setInstances(data);
@@ -200,6 +264,8 @@ public class ArffSortedTableModel
   
   /**
    * returns the data
+   * 
+   * @return		the current data
    */
   public Instances getInstances() {
     return ((ArffTableModel) getModel()).getInstances();
@@ -208,6 +274,9 @@ public class ArffSortedTableModel
   /**
    * returns the attribute at the given index, can be NULL if not an attribute
    * column
+   * 
+   * @param columnIndex		the index of the column
+   * @return			the attribute at the position
    */
   public Attribute getAttributeAt(int columnIndex) {
     return ((ArffTableModel) getModel()).getAttributeAt(columnIndex);
@@ -216,6 +285,8 @@ public class ArffSortedTableModel
   /**
    * adds a listener to the list that is notified each time a change to data 
    * model occurs
+   * 
+   * @param l		the listener to add
    */
   public void addTableModelListener(TableModelListener l) {
     if (getModel() != null)
@@ -225,6 +296,8 @@ public class ArffSortedTableModel
   /**
    * removes a listener from the list that is notified each time a change to
    * the data model occurs
+   * 
+   * @param l		the listener to remove
    */
   public void removeTableModelListener(TableModelListener l) {
     if (getModel() != null)
@@ -233,6 +306,8 @@ public class ArffSortedTableModel
   
   /**
    * notfies all listener of the change of the model
+   * 
+   * @param e		the event to send to the listeners
    */
   public void notifyListener(TableModelEvent e) {
     ((ArffTableModel) getModel()).notifyListener(e);

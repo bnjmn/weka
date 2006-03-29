@@ -62,12 +62,15 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
 public class ArffViewerMainPanel 
   extends JPanel 
   implements ActionListener, ChangeListener {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8763161167586738753L;
   
   /** the default for width */
   public final static int    DEFAULT_WIDTH     = -1;
@@ -123,6 +126,8 @@ public class ArffViewerMainPanel
   
   /**
    * initializes the object
+   * 
+   * @param parentFrame		the parent frame
    */
   public ArffViewerMainPanel(JFrame parentFrame) {
     parent     = parentFrame;
@@ -253,6 +258,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the menu bar to be added in a frame
+   * 
+   * @return		the menu bar
    */
   public JMenuBar getMenu() {
     return menuBar;
@@ -260,6 +267,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the tabbedpane instance
+   * 
+   * @return		the tabbed pane
    */
   public JTabbedPane getTabbedPane() {
     return tabbedPane;
@@ -285,6 +294,8 @@ public class ArffViewerMainPanel
 
   /**
    * whether to do a System.exit(0) on close
+   * 
+   * @param value	enables/disables a System.exit(0) on close
    */
   public void setExitOnClose(boolean value) {
     exitOnClose = value;
@@ -292,6 +303,8 @@ public class ArffViewerMainPanel
 
   /**
    * returns TRUE if a System.exit(0) is done on a close
+   * 
+   * @return		true if a System.exit(0) is done on close
    */
   public boolean getExitOnClose() {
     return exitOnClose;
@@ -307,6 +320,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the title (incl. filename) for the frame
+   * 
+   * @return		the frame title
    */
   public String getFrameTitle() {
     if (getCurrentFilename().equals(""))
@@ -363,6 +378,8 @@ public class ArffViewerMainPanel
   
   /**
    * sets the title of the tab that contains the given component
+   * 
+   * @param component		the component to set the title for
    */
   protected void setTabTitle(JComponent component) {
     int            index;
@@ -380,6 +397,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the number of panels currently open
+   * 
+   * @return		the number of open panels
    */
   public int getPanelCount() {
     return tabbedPane.getTabCount();
@@ -387,6 +406,9 @@ public class ArffViewerMainPanel
   
   /**
    * returns the specified panel, <code>null</code> if index is out of bounds  
+   * 
+   * @param index	the index of the panel
+   * @return		the panel
    */
   public ArffPanel getPanel(int index) {
     if ((index >= 0) && (index < getPanelCount()))
@@ -397,6 +419,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the currently selected tab index
+   * 
+   * @return		the index of the currently selected tab
    */
   public int getCurrentIndex() {
     return tabbedPane.getSelectedIndex();
@@ -404,6 +428,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the currently selected panel
+   * 
+   * @return		the currently selected panel
    */
   public ArffPanel getCurrentPanel() {
     return getPanel(getCurrentIndex());
@@ -411,6 +437,8 @@ public class ArffViewerMainPanel
   
   /**
    * checks whether a panel is currently selected
+   * 
+   * @return		true if a panel is currently selected
    */
   public boolean isPanelSelected() {
     return (getCurrentPanel() != null);
@@ -418,6 +446,9 @@ public class ArffViewerMainPanel
   
   /**
    * returns the filename of the specified panel 
+   * 
+   * @param index	the index of the panel
+   * @return		the filename for the panel
    */
   public String getFilename(int index) {
     String            result;
@@ -434,6 +465,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns the filename of the current tab
+   * 
+   * @return		the current filename
    */
   public String getCurrentFilename() {
     return getFilename(getCurrentIndex());
@@ -441,6 +474,9 @@ public class ArffViewerMainPanel
   
   /**
    * sets the filename of the specified panel
+   * 
+   * @param index	the index of the panel
+   * @param filename	the new filename
    */
   public void setFilename(int index, String filename) {
     ArffPanel         panel;
@@ -455,6 +491,8 @@ public class ArffViewerMainPanel
   
   /**
    * sets the filename of the current tab
+   * 
+   * @param filename	the new filename
    */
   public void setCurrentFilename(String filename) {
     setFilename(getCurrentIndex(), filename);
@@ -463,6 +501,8 @@ public class ArffViewerMainPanel
   /**
    * if the file is changed it pops up a dialog whether to change the
    * settings. if the project wasn't changed or saved it returns TRUE
+   * 
+   * @return 		true if project wasn't changed or saved
    */
   protected boolean saveChanges() {
     return saveChanges(true);
@@ -471,7 +511,9 @@ public class ArffViewerMainPanel
   /**
    * if the file is changed it pops up a dialog whether to change the
    * settings. if the project wasn't changed or saved it returns TRUE
-   * @param showCancel           whether we have YES/NO/CANCEL or only YES/NO
+   * 
+   * @param showCancel	whether we have YES/NO/CANCEL or only YES/NO
+   * @return 		true if project wasn't changed or saved
    */
   protected boolean saveChanges(boolean showCancel) {
     int            button;
@@ -522,6 +564,8 @@ public class ArffViewerMainPanel
 
   /**
    * loads the specified file
+   * 
+   * @param filename	the file to load
    */
   public void loadFile(String filename) {
     ArffPanel         panel;
@@ -771,6 +815,8 @@ public class ArffViewerMainPanel
   
   /**
    * deletes the current selected Attribute or several chosen ones
+   * 
+   * @param multiple	whether to delete myultiple attributes
    */
   public void deleteAttribute(boolean multiple) {
     if (!isPanelSelected())
@@ -784,6 +830,8 @@ public class ArffViewerMainPanel
   
   /**
    * deletes the current selected Instance or several chosen ones
+   * 
+   * @param multiple		whether to delete multiple instances
    */
   public void deleteInstance(boolean multiple) {
     if (!isPanelSelected())
@@ -807,6 +855,8 @@ public class ArffViewerMainPanel
   
   /**
    * displays all the attributes, returns the selected item or NULL if canceled
+   * 
+   * @return		the name of the selected attribute
    */
   public String showAttributes() {
     ArffSortedTableModel     model;
@@ -898,6 +948,8 @@ public class ArffViewerMainPanel
   
   /**
    * invoked when an action occurs
+   * 
+   * @param e		the action event
    */
   public void actionPerformed(ActionEvent e) {
     Object          o;
@@ -952,6 +1004,8 @@ public class ArffViewerMainPanel
   
   /**
    * Invoked when the target of the listener has changed its state.
+   * 
+   * @param e		the change event
    */
   public void stateChanged(ChangeEvent e) {
     updateFrameTitle();
@@ -964,6 +1018,8 @@ public class ArffViewerMainPanel
   
   /**
    * returns only the classname
+   * 
+   * @return		the classname
    */
   public String toString() {
     return this.getClass().getName();

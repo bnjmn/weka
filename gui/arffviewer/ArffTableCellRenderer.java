@@ -36,14 +36,22 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
-public class ArffTableCellRenderer extends DefaultTableCellRenderer {
-  // the color for missing values
+public class ArffTableCellRenderer 
+  extends DefaultTableCellRenderer {
+  
+  /** for serialization */
+  static final long serialVersionUID = 9195794493301191171L;
+  
+  /** the color for missing values */
   private Color           missingColor;
+  /** the color for selected missing values */
   private Color           missingColorSelected;
+  /** the color for highlighted values */
   private Color           highlightColor;
+  /** the color for selected highlighted values */
   private Color           highlightColorSelected;
   
   /**
@@ -56,6 +64,9 @@ public class ArffTableCellRenderer extends DefaultTableCellRenderer {
   
   /**
    * initializes the Renderer with the given colors
+   * 
+   * @param missingColor		the color for missing values
+   * @param missingColorSelected	the color selected missing values
    */
   public ArffTableCellRenderer( Color missingColor, 
       Color missingColorSelected ) {
@@ -67,6 +78,11 @@ public class ArffTableCellRenderer extends DefaultTableCellRenderer {
   
   /**
    * initializes the Renderer with the given colors
+   * 
+   * @param missingColor		the color for missing values
+   * @param missingColorSelected	the color selected missing values
+   * @param highlightColor		the color for highlighted values
+   * @param highlightColorSelected	the color selected highlighted values
    */
   public ArffTableCellRenderer( Color missingColor, 
       Color missingColorSelected,
@@ -83,6 +99,14 @@ public class ArffTableCellRenderer extends DefaultTableCellRenderer {
   /**
    * Returns the default table cell renderer.
    * stuff for the header is taken from <a href="http://www.chka.de/swing/table/faq.html">here</a>
+   * 
+   * @param table		the table this object belongs to
+   * @param value		the actual cell value
+   * @param isSelected		whether the cell is selected
+   * @param hasFocus		whether the cell has the focus
+   * @param row			the row in the table
+   * @param column		the column in the table
+   * @return			the rendering component
    */
   public Component getTableCellRendererComponent(
       JTable table, Object value, boolean isSelected, 
