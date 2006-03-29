@@ -23,31 +23,89 @@
 
 package weka.experiment;
 
-import java.util.Enumeration;
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.Random;
-import java.util.Vector;
-import java.io.File;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.Utils;
 import weka.core.AdditionalMeasureProducer;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
+import java.io.File;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.TimeZone;
+import java.util.Vector;
 
 
 /**
- * Generates for each run, carries out an n-fold cross-validation,
- * using the set SplitEvaluator to generate some results. If the class
- * attribute is nominal, the dataset is stratified. Results for each fold
- * are generated, so you may wish to use this in addition with an
- * AveragingResultProducer to obtain averages for each run.
+ <!-- globalinfo-start -->
+ * Generates for each run, carries out an n-fold cross-validation, using the set SplitEvaluator to generate some results. If the class attribute is nominal, the dataset is stratified. Results for each fold are generated, so you may wish to use this in addition with an AveragingResultProducer to obtain averages for each run.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -X &lt;number of folds&gt;
+ *  The number of folds to use for the cross-validation.
+ *  (default 10)</pre>
+ * 
+ * <pre> -D
+ * Save raw split evaluator output.</pre>
+ * 
+ * <pre> -O &lt;file/directory name/path&gt;
+ *  The filename where raw output will be stored.
+ *  If a directory name is specified then then individual
+ *  outputs will be gzipped, otherwise all output will be
+ *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of a SplitEvaluator.
+ *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+ * 
+ * <pre> 
+ * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
+ * </pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the classifier.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  The index of the class for which IR statistics
+ *  are to be output. (default 1)</pre>
+ * 
+ * <pre> -I &lt;index&gt;
+ *  The index of an attribute to output in the
+ *  results. This attribute should identify an
+ *  instance in order to know which instances are
+ *  in the test set of a cross validation. if 0
+ *  no output (default 0).</pre>
+ * 
+ * <pre> -P
+ *  Add target and prediction columns to the result
+ *  for each fold.</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
+ * 
+ * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {
+  
+  /** for serialization */
+  static final long serialVersionUID = -1580053925080091917L;
   
   /** The dataset of interest */
   protected Instances m_Instances;
@@ -75,16 +133,16 @@ public class CrossValidationResultProducer
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String [] m_AdditionalMeasures = null;
 
-  /* The name of the key field containing the dataset name */
+  /** The name of the key field containing the dataset name */
   public static String DATASET_FIELD_NAME = "Dataset";
 
-  /* The name of the key field containing the run number */
+  /** The name of the key field containing the run number */
   public static String RUN_FIELD_NAME = "Run";
 
-  /* The name of the key field containing the fold number */
+  /** The name of the key field containing the fold number */
   public static String FOLD_FIELD_NAME = "Fold";
 
-  /* The name of the result field containing the timestamp */
+  /** The name of the result field containing the timestamp */
   public static String TIMESTAMP_FIELD_NAME = "Date_time";
 
   /**
@@ -93,8 +151,12 @@ public class CrossValidationResultProducer
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Performs a cross validation run using a supplied "
-      +"evaluator.";
+    return 
+        "Generates for each run, carries out an n-fold cross-validation, "
+      + "using the set SplitEvaluator to generate some results. If the class "
+      + "attribute is nominal, the dataset is stratified. Results for each fold "
+      + "are generated, so you may wish to use this in addition with an "
+      + "AveragingResultProducer to obtain averages for each run.";
   }
 
   /**
@@ -155,9 +217,9 @@ public class CrossValidationResultProducer
   
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (m_SplitEvaluator instanceof AdditionalMeasureProducer) {
@@ -191,7 +253,7 @@ public class CrossValidationResultProducer
   /**
    * Prepare to generate results.
    *
-   * @exception Exception if an error occurs during preprocessing.
+   * @throws Exception if an error occurs during preprocessing.
    */
   public void preProcess() throws Exception {
 
@@ -209,7 +271,7 @@ public class CrossValidationResultProducer
    * that no more requests to generate results for the current experiment
    * will be sent.
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void postProcess() throws Exception {
 
@@ -229,7 +291,7 @@ public class CrossValidationResultProducer
    * produced should be sent to the current ResultListener
    *
    * @param run the run number to get keys for.
-   * @exception Exception if a problem occurs while getting the keys
+   * @throws Exception if a problem occurs while getting the keys
    */
   public void doRunKeys(int run) throws Exception {
     if (m_Instances == null) {
@@ -267,7 +329,7 @@ public class CrossValidationResultProducer
    * produced should be sent to the current ResultListener
    *
    * @param run the run number to get results for.
-   * @exception Exception if a problem occurs while getting the results
+   * @throws Exception if a problem occurs while getting the results
    */
   public void doRun(int run) throws Exception {
 
@@ -590,27 +652,65 @@ public class CrossValidationResultProducer
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -X num_folds <br>
-   * The number of folds to use for the cross-validation. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -X &lt;number of folds&gt;
+   *  The number of folds to use for the cross-validation.
+   *  (default 10)</pre>
+   * 
+   * <pre> -D
+   * Save raw split evaluator output.</pre>
+   * 
+   * <pre> -O &lt;file/directory name/path&gt;
+   *  The filename where raw output will be stored.
+   *  If a directory name is specified then then individual
+   *  outputs will be gzipped, otherwise all output will be
+   *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of a SplitEvaluator.
+   *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+   * 
+   * <pre> 
+   * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
+   * </pre>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of the classifier.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> -C &lt;index&gt;
+   *  The index of the class for which IR statistics
+   *  are to be output. (default 1)</pre>
+   * 
+   * <pre> -I &lt;index&gt;
+   *  The index of an attribute to output in the
+   *  results. This attribute should identify an
+   *  instance in order to know which instances are
+   *  in the test set of a cross validation. if 0
+   *  no output (default 0).</pre>
+   * 
+   * <pre> -P
+   *  Add target and prediction columns to the result
+   *  for each fold.</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
-   * -D <br>
-   * Specify that raw split evaluator output is to be saved. <p>
-   *
-   * -O file/directory name <br>
-   * Specify the file or directory to which raw split evaluator output
-   * is to be saved. If a directory is specified, then each output string
-   * is saved as an individual gzip file. If a file is specified, then
-   * each output string is saved as an entry in a zip file. <p>
-   *
-   * -W classname <br>
-   * Specify the full class name of the split evaluator. <p>
-   *
-   * All option after -- will be passed to the split evaluator.
+   * All options after -- will be passed to the split evaluator.
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -704,13 +804,13 @@ public class CrossValidationResultProducer
   }
 
     
-  // Quick test of timestamp
+  /** 
+   * Quick test of timestamp
+   * 
+   * @param args	the commandline options
+   */
   public static void main(String [] args) {
     
     System.err.println(Utils.doubleToString(getTimestamp().doubleValue(), 4));
   }
 } // CrossValidationResultProducer
-
-
-
-

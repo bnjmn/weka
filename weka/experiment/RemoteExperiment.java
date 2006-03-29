@@ -23,36 +23,27 @@
 
 package weka.experiment;
 
-import weka.core.SerializedObject;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Option;
 import weka.core.FastVector;
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.Queue;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.experiment.xml.XMLExperiment;
 
-import java.rmi.*;
-
-import java.io.Serializable;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.lang.reflect.Array;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.beans.PropertyDescriptor;
-import javax.swing.DefaultListModel;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.BufferedOutputStream;
+import java.rmi.Naming;
+import java.util.Enumeration;
+
+import javax.swing.DefaultListModel;
 
 /**
  * Holds all the necessary configuration information for a distributed
@@ -104,10 +95,99 @@ import java.io.BufferedOutputStream;
  * trailing "/" is *most* important unless the weka classes are in a jar
  * file. <p>
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -L &lt;num&gt;
+ *  The lower run number to start the experiment from.
+ *  (default 1)</pre>
+ * 
+ * <pre> -U &lt;num&gt;
+ *  The upper run number to end the experiment at (inclusive).
+ *  (default 10)</pre>
+ * 
+ * <pre> -T &lt;arff file&gt;
+ *  The dataset to run the experiment on.
+ *  (required, may be specified multiple times)</pre>
+ * 
+ * <pre> -P &lt;class name&gt;
+ *  The full class name of a ResultProducer (required).
+ *  eg: weka.experiment.RandomSplitResultProducer</pre>
+ * 
+ * <pre> -D &lt;class name&gt;
+ *  The full class name of a ResultListener (required).
+ *  eg: weka.experiment.CSVResultListener</pre>
+ * 
+ * <pre> -N &lt;string&gt;
+ *  A string containing any notes about the experiment.
+ *  (default none)</pre>
+ * 
+ * <pre> 
+ * Options specific to result producer weka.experiment.RandomSplitResultProducer:
+ * </pre>
+ * 
+ * <pre> -P &lt;percent&gt;
+ *  The percentage of instances to use for training.
+ *  (default 66)</pre>
+ * 
+ * <pre> -D
+ * Save raw split evaluator output.</pre>
+ * 
+ * <pre> -O &lt;file/directory name/path&gt;
+ *  The filename where raw output will be stored.
+ *  If a directory name is specified then then individual
+ *  outputs will be gzipped, otherwise all output will be
+ *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of a SplitEvaluator.
+ *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+ * 
+ * <pre> -R
+ *  Set when data is not to be randomized and the data sets' size.
+ *  Is not to be determined via probabilistic rounding.</pre>
+ * 
+ * <pre> 
+ * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
+ * </pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the classifier.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  The index of the class for which IR statistics
+ *  are to be output. (default 1)</pre>
+ * 
+ * <pre> -I &lt;index&gt;
+ *  The index of an attribute to output in the
+ *  results. This attribute should identify an
+ *  instance in order to know which instances are
+ *  in the test set of a cross validation. if 0
+ *  no output (default 0).</pre>
+ * 
+ * <pre> -P
+ *  Add target and prediction columns to the result
+ *  for each fold.</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-public class RemoteExperiment extends Experiment {
+public class RemoteExperiment 
+  extends Experiment {
+  
+  /** for serialization */
+  static final long serialVersionUID = -7357668825635314937L;
 
   /** The list of objects listening for remote experiment events */
   private FastVector m_listeners = new FastVector();
@@ -124,9 +204,13 @@ public class RemoteExperiment extends Experiment {
   /** The number of times tasks have failed on each remote host */
   private int [] m_remoteHostFailureCounts;
 
+  /** status of the remote host: available */
   protected static final int AVAILABLE=0;
+  /** status of the remote host: in use */
   protected static final int IN_USE=1;
+  /** status of the remote host: connection failed */
   protected static final int CONNECTION_FAILED=2;
+  /** status of the remote host: some other failure */
   protected static final int SOME_OTHER_FAILURE=3;
 
 //    protected static final int TO_BE_RUN=0;
@@ -198,7 +282,7 @@ public class RemoteExperiment extends Experiment {
   /**
    * Construct a new RemoteExperiment using an empty Experiment as base 
    * Experiment
-   * @exception Exception if the base experiment is null
+   * @throws Exception if the base experiment is null
    */
   public RemoteExperiment() throws Exception {
      this(new Experiment());
@@ -207,7 +291,7 @@ public class RemoteExperiment extends Experiment {
   /**
    * Construct a new RemoteExperiment using a base Experiment
    * @param base the base experiment to use
-   * @exception Exception if the base experiment is null
+   * @throws Exception if the base experiment is null
    */
   public RemoteExperiment(Experiment base) throws Exception {
     setBaseExperiment(base);
@@ -234,7 +318,7 @@ public class RemoteExperiment extends Experiment {
    * Set the base experiment. A sub experiment will be created for each
    * run in the base experiment.
    * @param base the base experiment to use.
-   * @exception Exception if supplied base experiment is null
+   * @throws Exception if supplied base experiment is null
    */
   public void setBaseExperiment(Experiment base) throws Exception {
     if (base == null) {
@@ -357,7 +441,7 @@ public class RemoteExperiment extends Experiment {
   /**
    * Prepares a remote experiment for running, creates sub experiments
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void initialize() throws Exception {
     if (m_baseExperiment == null) {
@@ -480,6 +564,8 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Check to see if we have failed to connect to all hosts
+   * 
+   * @return true if failed to connect to all hosts
    */
   private boolean checkForAllFailedHosts() {
     boolean allbad = true;
@@ -681,7 +767,7 @@ public class RemoteExperiment extends Experiment {
 
   /**
    * Overides the one in Experiment
-   * @exception Exception
+   * @throws Exception never throws an exception
    */
   public void nextIteration() throws Exception {
 

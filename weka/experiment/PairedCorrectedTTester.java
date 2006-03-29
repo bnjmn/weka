@@ -23,7 +23,16 @@
 
 package weka.experiment;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -31,17 +40,99 @@ import java.util.Enumeration;
 
 /**
  * Behaves the same as PairedTTester, only it uses the corrected
- * resampled t-test statistic.<p>
+ * resampled t-test statistic.<p/>
  *
- * For more information see:<p>
+ * For more information see:<p/>
  *
- * Claude Nadeau and Yoshua Bengio, "Inference for the Generalization Error,"
- * Machine Learning, 2001.
+ <!-- technical-plaintext-start -->
+ * Claude Nadeau, Yoshua Bengio (2001). Inference for the Generalization Error. Machine Learning..
+ <!-- technical-plaintext-end -->
+ * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Nadeau2001,
+ *    author = {Claude Nadeau and Yoshua Bengio},
+ *    journal = {Machine Learning},
+ *    title = {Inference for the Generalization Error},
+ *    year = {2001},
+ *    PDF = {http://www.iro.umontreal.ca/~lisa/bib/pub_subject/comparative/pointeurs/nadeau_MLJ1597.pdf}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D &lt;index,index2-index4,...&gt;
+ *  Specify list of columns that specify a unique
+ *  dataset.
+ *  First and last are valid indexes. (default none)</pre>
+ * 
+ * <pre> -R &lt;index&gt;
+ *  Set the index of the column containing the run number</pre>
+ * 
+ * <pre> -F &lt;index&gt;
+ *  Set the index of the column containing the fold number</pre>
+ * 
+ * <pre> -G &lt;index1,index2-index4,...&gt;
+ *  Specify list of columns that specify a unique
+ *  'result generator' (eg: classifier name and options).
+ *  First and last are valid indexes. (default none)</pre>
+ * 
+ * <pre> -S &lt;significance level&gt;
+ *  Set the significance level for comparisons (default 0.05)</pre>
+ * 
+ * <pre> -V
+ *  Show standard deviations</pre>
+ * 
+ * <pre> -L
+ *  Produce table comparisons in Latex table format</pre>
+ * 
+ * <pre> -csv
+ *  Produce table comparisons in CSV table format</pre>
+ * 
+ * <pre> -html
+ *  Produce table comparisons in HTML table format</pre>
+ * 
+ * <pre> -significance
+ *  Produce table comparisons with only the significance values</pre>
+ * 
+ * <pre> -gnuplot
+ *  Produce table comparisons output suitable for GNUPlot</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class PairedCorrectedTTester extends PairedTTester {
+public class PairedCorrectedTTester 
+  extends PairedTTester
+  implements TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -3105268939845653323L;
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Claude Nadeau and Yoshua Bengio");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.TITLE, "Inference for the Generalization Error");
+    result.setValue(Field.JOURNAL, "Machine Learning");
+    result.setValue(Field.PDF, "http://www.iro.umontreal.ca/~lisa/bib/pub_subject/comparative/pointeurs/nadeau_MLJ1597.pdf");
+
+    return result;
+  }
 
   /**
    * Computes a paired t-test comparison for a specified dataset between
@@ -52,7 +143,7 @@ public class PairedCorrectedTTester extends PairedTTester {
    * @param resultset2Index the index of the second resultset
    * @param comparisonColumn the column containing values to compare
    * @return the results of the paired comparison
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public PairedStats calculateStatistics(Instance datasetSpecifier,
 					 int resultset1Index,
@@ -219,6 +310,8 @@ public class PairedCorrectedTTester extends PairedTTester {
 
   /**
    * returns the name of the tester
+   * 
+   * @return the display name
    */
   public String getDisplayName() {
     return "Paired T-Tester (corrected)";
@@ -227,6 +320,8 @@ public class PairedCorrectedTTester extends PairedTTester {
   /**
    * returns a string that is displayed as tooltip on the "perform test"
    * button in the experimenter
+   * 
+   * @return the string for the tool tip
    */
   public String getToolTipText() {
     return "Performs test using corrected resampled t-test statistic (Nadeau and Bengio)";

@@ -23,64 +23,75 @@
 
 package weka.experiment;
 
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Range;
 import weka.core.Attribute;
-import weka.core.Utils;
 import weka.core.FastVector;
-import weka.core.Statistics;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.Utils;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
-import weka.core.Option;
 
 /**
- * Calculates T-Test statistics on data stored in a set of instances.<p>
+ * Calculates T-Test statistics on data stored in a set of instances. <p/>
  *
- * Valid options from the command-line are:<p>
- *
- * -D num,num2... <br>
- * The column numbers that uniquely specify a dataset.
- * (default last) <p>
- *
- * -R num <br>
- * The column number containing the run number.
- * (default last) <p>
- *
- * -F num <br>
- * The column number containing the fold number.
- * (default none) <p>
- *
- * -S num <br>
- * The significance level for T-Tests.
- * (default 0.05) <p>
- *
- * -G num,num2... <br>
- * The column numbers that uniquely specify one result generator (eg:
- * scheme name plus options).
- * (default last) <p>
- *
- * -L <br>
- * Produce comparison tables in Latex table format <p>
- *
- * -csv <br>
- * Produce comparison tables in csv format <p>
- *
- * -html <br>
- * Produce comparison tables in HTML format <p>
- *
- * -significance <br>
- * Produce comparison tables with only the significances <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D &lt;index,index2-index4,...&gt;
+ *  Specify list of columns that specify a unique
+ *  dataset.
+ *  First and last are valid indexes. (default none)</pre>
+ * 
+ * <pre> -R &lt;index&gt;
+ *  Set the index of the column containing the run number</pre>
+ * 
+ * <pre> -F &lt;index&gt;
+ *  Set the index of the column containing the fold number</pre>
+ * 
+ * <pre> -G &lt;index1,index2-index4,...&gt;
+ *  Specify list of columns that specify a unique
+ *  'result generator' (eg: classifier name and options).
+ *  First and last are valid indexes. (default none)</pre>
+ * 
+ * <pre> -S &lt;significance level&gt;
+ *  Set the significance level for comparisons (default 0.05)</pre>
+ * 
+ * <pre> -V
+ *  Show standard deviations</pre>
+ * 
+ * <pre> -L
+ *  Produce table comparisons in Latex table format</pre>
+ * 
+ * <pre> -csv
+ *  Produce table comparisons in CSV table format</pre>
+ * 
+ * <pre> -html
+ *  Produce table comparisons in HTML table format</pre>
+ * 
+ * <pre> -significance
+ *  Produce table comparisons with only the significance values</pre>
+ * 
+ * <pre> -gnuplot
+ *  Produce table comparisons output suitable for GNUPlot</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
-public class PairedTTester implements OptionHandler, Tester {
+public class PairedTTester 
+  implements OptionHandler, Tester {
+  
+  /** for serialization */
+  static final long serialVersionUID = 8370014624008728610L;
 
   /** The set of instances we will analyse */
   protected Instances m_Instances;
@@ -143,9 +154,10 @@ public class PairedTTester implements OptionHandler, Tester {
   /** the instance of the class to produce the output. */
   protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
   
-  /* A list of unique "dataset" specifiers that have been observed */
+  /** A list of unique "dataset" specifiers that have been observed */
   protected class DatasetSpecifiers {
 
+    /** the specifiers that have been observed */
     FastVector m_Specifiers = new FastVector();
 
     /**
@@ -158,6 +170,8 @@ public class PairedTTester implements OptionHandler, Tester {
 
     /** 
      * Add an instance to the list of specifiers (if necessary)
+     * 
+     * @param inst	the instance to add
      */
     protected void add(Instance inst) {
       
@@ -179,6 +193,9 @@ public class PairedTTester implements OptionHandler, Tester {
 
     /**
      * Get the template at the given position.
+     * 
+     * @param i		the index
+     * @return		the template
      */
     protected Instance specifier(int i) {
 
@@ -187,6 +204,8 @@ public class PairedTTester implements OptionHandler, Tester {
 
     /**
      * Gets the number of specifiers.
+     * 
+     * @return		the current number of specifiers
      */
     protected int numSpecifiers() {
 
@@ -194,12 +213,20 @@ public class PairedTTester implements OptionHandler, Tester {
     }
   }
 
-  /* Utility class to store the instances pertaining to a dataset */
+  /** Utility class to store the instances pertaining to a dataset */
   protected class Dataset {
 
+    /** the template */
     Instance m_Template;
+
+    /** the dataset */
     FastVector m_Dataset;
 
+    /**
+     * Constructor
+     * 
+     * @param template	the template
+     */
     public Dataset(Instance template) {
 
       m_Template = template;
@@ -212,7 +239,6 @@ public class PairedTTester implements OptionHandler, Tester {
      * been designated key columns (eg: scheme name and scheme options)
      *
      * @param first the first instance
-     * @param second the second instance
      * @return true if first and second match on the currently set key columns
      */
     protected boolean matchesTemplate(Instance first) {
@@ -228,6 +254,8 @@ public class PairedTTester implements OptionHandler, Tester {
 
     /**
      * Adds the given instance to the dataset
+     * 
+     * @param inst	the instance to add
      */
     protected void add(Instance inst) {
       
@@ -236,6 +264,8 @@ public class PairedTTester implements OptionHandler, Tester {
 
     /**
      * Returns a vector containing the instances in the dataset
+     * 
+     * @return 		the current contents
      */
     protected FastVector contents() {
 
@@ -262,12 +292,20 @@ public class PairedTTester implements OptionHandler, Tester {
     }
   }
  
-  /* Utility class to store the instances in a resultset */
+  /** Utility class to store the instances in a resultset */
   protected class Resultset {
 
+    /** the template */
     Instance m_Template;
+    
+    /** the dataset */
     FastVector m_Datasets;
 
+    /**
+     * Constructir
+     * 
+     * @param template		the template
+     */
     public Resultset(Instance template) {
 
       m_Template = template;
@@ -280,7 +318,6 @@ public class PairedTTester implements OptionHandler, Tester {
      * been designated key columns (eg: scheme name and scheme options)
      *
      * @param first the first instance
-     * @param second the second instance
      * @return true if first and second match on the currently set key columns
      */
     protected boolean matchesTemplate(Instance first) {
@@ -319,7 +356,7 @@ public class PairedTTester implements OptionHandler, Tester {
     /**
      * Returns a vector containing all instances belonging to one dataset.
      *
-     * @param index a template instance
+     * @param inst a template instance
      * @return a value of type 'FastVector'
      */
     public FastVector dataset(Instance inst) {
@@ -418,7 +455,7 @@ public class PairedTTester implements OptionHandler, Tester {
   /**
    * Separates the instances into resultsets and by dataset/run.
    *
-   * @exception Exception if the TTest parameters have not been set.
+   * @throws Exception if the TTest parameters have not been set.
    */
   protected void prepareData() throws Exception {
 
@@ -585,7 +622,7 @@ public class PairedTTester implements OptionHandler, Tester {
    * @param resultset2Index the index of the second resultset
    * @param comparisonColumn the column containing values to compare
    * @return the results of the paired comparison
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public PairedStats calculateStatistics(Instance datasetSpecifier,
 					 int resultset1Index,
@@ -714,9 +751,10 @@ public class PairedTTester implements OptionHandler, Tester {
    * of datsets where one resultset outperforms the other.
    *
    * @param comparisonColumn the index of the comparison column
+   * @param nonSigWin for storing the non-significant wins
    * @return a 2d array where element [i][j] is the number of times resultset
    * j performed significantly better than resultset i.
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public int [][] multiResultsetWins(int comparisonColumn, int [][] nonSigWin)
     throws Exception {
@@ -780,7 +818,7 @@ public class PairedTTester implements OptionHandler, Tester {
    *
    * @param comparisonColumn the index of the comparison column
    * @return the results in a string
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public String multiResultsetSummary(int comparisonColumn)
     throws Exception {
@@ -796,6 +834,10 @@ public class PairedTTester implements OptionHandler, Tester {
 
   /**
    * returns a ranking of the resultsets
+   * 
+   * @param comparisonColumn	the column to compare with
+   * @return			the ranking
+   * @throws Exception		if something goes wrong
    */
   public String multiResultsetRanking(int comparisonColumn)
     throws Exception {
@@ -816,7 +858,7 @@ public class PairedTTester implements OptionHandler, Tester {
    * @param baseResultset the index of the base resultset
    * @param comparisonColumn the index of the column to compare over
    * @return the comparison table string
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public String multiResultsetFull(int baseResultset,
 				   int comparisonColumn) throws Exception {
@@ -1006,46 +1048,52 @@ public class PairedTTester implements OptionHandler, Tester {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D num,num2... <br>
-   * The column numbers that uniquely specify a dataset.
-   * (default last) <p>
-   *
-   * -R num <br>
-   * The column number containing the run number.
-   * (default last) <p>
-   *
-   * -F num <br>
-   * The column number containing the fold number.
-   * (default none) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * -S num <br>
-   * The significance level for T-Tests.
-   * (default 0.05) <p>
-   *
-   * -G num,num2... <br>
-   * The column numbers that uniquely specify one result generator (eg:
-   * scheme name plus options).
-   * (default last) <p>
-   *
-   * -V <br>
-   * Show standard deviations <p>
-   *
-   * -L <br>
-   * Produce comparison tables in Latex table format <p>
-   *
-   * -csv <br>
-   * Produce comparison tables in CSV format <p>
-   *
-   * -html <br>
-   * Produce comparison tables in HTML format <p>
-   *
-   * -significance <br>
-   * Produce comparison tables with only the significance values<p>
+   * <pre> -D &lt;index,index2-index4,...&gt;
+   *  Specify list of columns that specify a unique
+   *  dataset.
+   *  First and last are valid indexes. (default none)</pre>
+   * 
+   * <pre> -R &lt;index&gt;
+   *  Set the index of the column containing the run number</pre>
+   * 
+   * <pre> -F &lt;index&gt;
+   *  Set the index of the column containing the fold number</pre>
+   * 
+   * <pre> -G &lt;index1,index2-index4,...&gt;
+   *  Specify list of columns that specify a unique
+   *  'result generator' (eg: classifier name and options).
+   *  First and last are valid indexes. (default none)</pre>
+   * 
+   * <pre> -S &lt;significance level&gt;
+   *  Set the significance level for comparisons (default 0.05)</pre>
+   * 
+   * <pre> -V
+   *  Show standard deviations</pre>
+   * 
+   * <pre> -L
+   *  Produce table comparisons in Latex table format</pre>
+   * 
+   * <pre> -csv
+   *  Produce table comparisons in CSV table format</pre>
+   * 
+   * <pre> -html
+   *  Produce table comparisons in HTML table format</pre>
+   * 
+   * <pre> -significance
+   *  Produce table comparisons with only the significance values</pre>
+   * 
+   * <pre> -gnuplot
+   *  Produce table comparisons output suitable for GNUPlot</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options an array containing options to set.
-   * @exception Exception if invalid options are given
+   * @throws Exception if invalid options are given
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -1343,6 +1391,8 @@ public class PairedTTester implements OptionHandler, Tester {
   /**
    * returns a string that is displayed as tooltip on the "perform test"
    * button in the experimenter
+   * 
+   * @return	the tool tip
    */
   public String getToolTipText() {
     return "Performs test using t-test statistic";
@@ -1350,6 +1400,8 @@ public class PairedTTester implements OptionHandler, Tester {
 
   /**
    * returns the name of the tester
+   * 
+   * @return	the display name
    */
   public String getDisplayName() {
     return "Paired T-Tester";

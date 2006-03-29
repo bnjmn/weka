@@ -23,24 +23,77 @@
 
 package weka.experiment;
 
-import java.io.*;
-import java.util.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.CostMatrix;
+import weka.classifiers.Evaluation;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Summarizable;
+import weka.core.Utils;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-
-import weka.core.*;
-import weka.classifiers.*;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * A SplitEvaluator that produces results for a classification scheme
- * on a nominal class attribute, including weighted misclassification costs.
+ <!-- globalinfo-start -->
+ * SplitEvaluator that produces results for a classification scheme on a nominal class attribute, including weighted misclassification costs.
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the classifier.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  The index of the class for which IR statistics
+ *  are to be output. (default 1)</pre>
+ * 
+ * <pre> -I &lt;index&gt;
+ *  The index of an attribute to output in the
+ *  results. This attribute should identify an
+ *  instance in order to know which instances are
+ *  in the test set of a cross validation. if 0
+ *  no output (default 0).</pre>
+ * 
+ * <pre> -P
+ *  Add target and prediction columns to the result
+ *  for each fold.</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -D &lt;directory&gt;
+ *  Name of a directory to search for cost files when loading
+ *  costs on demand (default current directory).</pre>
+ * 
+ <!-- options-end -->
+ *
+ * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
-  
+
+  /** for serialization */
+  static final long serialVersionUID = -8069566663019501276L;
 
   /** 
    * The directory used when loading cost files on demand, null indicates
@@ -84,17 +137,48 @@ public class CostSensitiveClassifierSplitEvaluator
   }
 
   /**
-   * Parses a given list of options. Valid options (in addition to those of
-   * ClassifierSplitEvaluator) are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -D directory <br>
-   * Name of a directory to search for cost files when loading costs on demand
-   * (default current directory). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of the classifier.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> -C &lt;index&gt;
+   *  The index of the class for which IR statistics
+   *  are to be output. (default 1)</pre>
+   * 
+   * <pre> -I &lt;index&gt;
+   *  The index of an attribute to output in the
+   *  results. This attribute should identify an
+   *  instance in order to know which instances are
+   *  in the test set of a cross validation. if 0
+   *  no output (default 0).</pre>
+   * 
+   * <pre> -P
+   *  Add target and prediction columns to the result
+   *  for each fold.</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -D &lt;directory&gt;
+   *  Name of a directory to search for cost files when loading
+   *  costs on demand (default current directory).</pre>
+   * 
+   <!-- options-end -->
    *
-   * All option after -- will be passed to the classifier.
+   * All options after -- will be passed to the classifier.
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -296,7 +380,7 @@ public class CostSensitiveClassifierSplitEvaluator
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in
    * the array may be Strings, Doubles, or null (for the missing value).
-   * @exception Exception if a problem occurs while getting the results
+   * @throws Exception if a problem occurs while getting the results
    */
   public Object [] getResult(Instances train, Instances test)
   throws Exception {
