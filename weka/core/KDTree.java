@@ -22,47 +22,48 @@
 
 package weka.core;
 
-import  weka.core.*;
 import java.io.Serializable;
-import java.util.*;
-import java.lang.Math;
-
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * This is a KD-Tree data structure that can be used for nearest neighbour 
- * search. It stores instances using a divide and conquer method. It is also
- * used to find centroids in XMeans clustering algorithm.
+ <!-- globalinfo-start -->
+ * Class implementing the KDTree search algorithm for nearest neighbour search.<br/>
+ * The connection to dataset is only a reference. For the tree structure the indexes are stored in an array. <br/>
+ * Building the tree:<br/>
+ * If a node has &lt;maximal-inst-number&gt; (option -L) instances no further splitting is done. Also if the split would leave one side empty, the branch is not split any further even if the instances in the resulting node are more than &lt;maximal-inst-number&gt; instances.<br/>
+ * **PLEASE NOTE:** The algorithm can not handle missing values, so it is advisable to run ReplaceMissingValues filter if there are any missing values in the dataset.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * The connection to dataset is only a reference. For the tree structure the 
- * indexes are stored in an array.
- * Building the tree:
- * If a node has <maxleaf> (option -L) instances no further splitting is done.
- * Also if the split would leave one side empty, the branch is not split any 
- * further even if the instances in the resulting node are more than <maxleaf> 
- * instances.
- * PLEASE NOTE: The algorithm can not handle missing values, so it is advisable
- * to run ReplaceMissingValues filter if there are any missing values in the
- * dataset.
- *
- * -P <br>
- * Pruning flag. <p>
- *
- * -W <minimal-box-relative-width> <br>
- * minimal width of a box
- *
- * -L <maximal-inst-number> <br>
- * maximal instance number in a leaf
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * -N <br>
- * Set Normalization. Used when building the tree and selecting the
- * widest dimension, each dimension is 'normalized' to the universe range.
+ * <pre> -W &lt;value&gt;
+ *  Set minimal width of a box
+ *  (default = 1.0E-2).</pre>
+ * 
+ * <pre> -L
+ *  Maximal number of instances in a leaf
+ *  (default = 40).</pre>
+ * 
+ * <pre> -N
+ *  Normalizing will be done
+ *  (Select dimension for split, with normalising to universe).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class KDTree extends NearestNeighbourSearch implements OptionHandler, Serializable {
+public class KDTree 
+  extends NearestNeighbourSearch 
+  implements OptionHandler, Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = 6945099921195713112L;
 
   /** flag for normalizing */
   boolean m_NormalizeNodeWidth = false;
@@ -73,12 +74,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * dimension
    */
   private double[][] m_Universe;
-
-  /** value to split on. */
-  private double m_SplitValue;
-
-  /** attribute to split on. */
-  private int m_SplitDim;
 
   /** root node */
   private KDTreeNode m_Root = null;
@@ -98,14 +93,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      m_DistanceFunction = m_EuclideanDistance = new EuclideanDistance();
   }
  
-  /* minimal relative width of a KDTree rectangle */ 
+  /** minimal relative width of a KDTree rectangle */ 
   double m_MinBoxRelWidth = 1.0E-2;
 
   /** maximal number of instances in a leaf */
   int m_MaxInstInLeaf = 40;
-  
-  /** used in debugging */
-  private int m_Debug=0;
 
   /**
    * Index in range array of attributes for MIN and MAX and WIDTH (range) of 
@@ -138,7 +130,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * A class for storing a KDTree node.
    *
    **************************************************************************/
-  private class KDTreeNode implements Serializable {
+  private class KDTreeNode
+    implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = 6569698002660546608L;
 
     /** node number (only for debug) */
     private int m_NodeNumber;
@@ -170,6 +166,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     
     /**
      * Gets the splitting dimension.
+     * 
      * @return splitting dimension
      */
     public int getSplitDim() {
@@ -178,6 +175,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     
     /**
      * Gets the splitting value.
+     * 
      * @return splitting value
      */
     public double getSplitValue() {
@@ -186,6 +184,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
     /**
      * Checks if node is a leaf.
+     * 
      * @return true if it is a leaf
      */
     public boolean isALeaf () {
@@ -195,11 +194,12 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     /**
      * Makes a KDTreeNode. 
      * Use this, if ranges are already defined.
+     * 
      * @param num number of the current node 
      * @param ranges the ranges 
      * @param start start index of the instances
      * @param end index of the instances
-     * @exception thrown if instance couldn't be retrieved
+     * @throws Exception if instance couldn't be retrieved
      */
     private void makeKDTreeNode(int[] num, double[][] ranges, int start,
 			       int end) throws Exception {
@@ -209,10 +209,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
     /**
      * Makes a KDTreeNode. 
+     * 
      * @param num the node number 
      * @param start the start index of the instances in the index list
      * @param end the end index of the instances in the index list
-     * @exception thrown if instance couldn't be retrieved
+     * @throws Exception if instance couldn't be retrieved
      */
     private void makeKDTreeNode(int [] num, int start, int end) 
       throws Exception {
@@ -235,13 +236,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	makeALeaf = true;
       }
 
-      // prepare local instance list to work with
-      //int [] instList = new int[numInst];
-      //int index = 0;
-      //for (int i = start; i <= end; i++) {
-      //instList[index++] = m_InstList[i];
-      //}
-
       // set ranges and split parameter
       if (m_NodeRanges == null)
         m_NodeRanges = m_EuclideanDistance.initializeRanges(m_InstList, start, end);
@@ -260,15 +254,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
                    / m_Universe[m_SplitDim][R_WIDTH];
       }
 
-      /* calculate bias 
-      double bias = 0.0;
-      for (int i = 0; i < m_Instances.numAttributes(); i++) {
-	double tmp =  m_NodeRanges[i][R_WIDTH] / m_Universe[i][R_WIDTH];
-	bias += tmp * tmp;
-      }
-      m_Bias = bias * numInst;
-      */
-
       // check if thin enough to make a leaf
       if (relWidth <= m_MinBoxRelWidth) {
 	makeALeaf = true;
@@ -285,8 +270,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	// which means, do nothing
 	if ((numLeft == 0) || (numLeft == numInst)) {
 	  makeALeaf = true; 
-	  //OOPS("makeKDTreeNode: " + m_NodeNumber 
-          //     + " one side was empty after split");
 	}
       }
 
@@ -299,38 +282,9 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	// of all row vectors with themselves
       } else {
 	// and now really make two lists
-	int [] leftInstList = new int[numLeft];
-	int [] rightInstList = new int[numInst - numLeft];
 	int startLeft = start;
 	int startRight = start + numLeft;
-        //splitInstances(left, instList, startLeft, startRight);
         splitInstances(left, start, end, startLeft);
-
-	/*
-	for (int i = 0; i < m_InstList.length; i++) { 
-          if (i == startLeft) System.out.print(" /LE/ "); 
-          if (i == startRight) System.out.print("\n /RI/ "); 
-	  System.out.print(" / " + m_InstList[i]);
-        }
-        int[] debugInstList = new int[m_InstList.length];
-	for (int i = 0; i < debugInstList.length; i++) {
-	  debugInstList[i] = m_InstList[i]; 
-	}
-	boolean [] debugleft = new boolean[m_InstList.length]; 
-	int debugnumLeft = checkSplitInstances(debugleft, debugInstList,
-				      m_SplitDim, m_SplitValue);
-	boolean first = true;
-	for (int i = start; i < end; i++) {
-          if (first && !debugleft[i]) {
-	    first = false;
-
-	  }
-	  System.out.print(" " + debugleft[i]);
-	}
-	OOPS(" ");
-
-	//end debug */
-       
 
 	// make left subKDTree  
 	int endLeft = startLeft + numLeft - 1;
@@ -346,7 +300,9 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
     /**
      * Returns the widest dimension.
+     * 
      * @param normalize if true normalization is used
+     * @param classIdx the index of the class attribute
      * @return attribute index that has widest range
      */
     private int widestDim(boolean normalize, int classIdx) {
@@ -377,13 +333,13 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     
     /**
      * Returns the split value of a given dimension.
+     * 
      * @param dim dimension where split happens
      * @return the split value
      */
     private double splitValue(int dim) {
       
       double split = m_EuclideanDistance.getMiddle(m_NodeRanges[dim]);
-      // split = m_NodeRanges[dim][R_MIN] + m_NodeRanges[dim][R_WIDTH] * 0.5;
       return split;
     }
 
@@ -392,9 +348,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * be done.
      * Looks for the subnode the instance actually belongs to.
      * Corrects the end boundary of the instance list by coming up
+     * 
      * @param instance the instance to add
      * @return true if adding was done
-     **/
+     * @throws Exception if something goes wrong
+     */
     public boolean addInstance(Instance instance) throws Exception {
       
       boolean success = false;
@@ -455,7 +413,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     /**
      * Corrects the boundaries of all nodes to the right of the leaf where 
      * the instance was added to.
-     **/
+     */
     public void afterAddInstance() {
 
       m_Start++;
@@ -465,77 +423,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	m_Right.afterAddInstance();
       }
     }
-
-    /**
-     * Deletes one instance in this KDTree node or its subsequent nodes.
-     * @param index the index of the instance to be deleted
-     * @return true if instance was deleted
-     -/
-    public boolean deleteInstance(int index) throws Exception {  //This is also being done in the method 
-                                                                 //outside this class.
-      int pos = m_InstList.deleteOneIndex(index);
-      if (pos >= 0) {
-	m_Root.tidyUpAfterDelete(pos);
-	return true;
-      } else {
-	return false;
-      }
-    }
-    */
-
-    
-    /**
-     * Tidies up after delete. This means it changes start and end ranges. 
-     * @param deleted index of the already deleted instance
-     -/
-    public void tidyUpAfterDelete(int deleted) {
-    
-      boolean changed = false;
-
-      // test, if one of the childrens last instance gets deleted
-      if (!isALeaf()) {
-	boolean deleteLastOne = false;
-	if ((m_Left.m_Start == deleted) && (m_Left.m_End == deleted)) {
-	  deleteLastOne = true;
-	}
-	if ((m_Right.m_Start == deleted) && (m_Right.m_End == deleted)) {
-	  deleteLastOne = true;
-	}
-
-	if (deleteLastOne) {
-	  // make a leaf
-	  m_Right = null;
-	  m_Left = null;
-	}
-      }
-
-      // test if start or/and end needs to be changed
-      if (deleted <= m_End) {
-	m_End--;
-	changed = true;
-	if (deleted < m_Start) {
-	  m_Start--;
-	}
-      }
-
-      if (changed) {
-	// prepare local instance list to work with
-	int numInst = m_End - m_Start + 1;
-	int [] instList = new int[numInst];
-	int index = 0;
-	for (int i = m_Start; i <= m_End; i++) {
-	  instList[index++] = m_InstList[i]; //m_InstList.get(i);
-	}
-
-	// set ranges and split parameter
-	m_NodeRanges = m_EuclideanDistance.initializeRanges(instList); //m_Instances.initializeRanges(instList);
-      }
-    }
-    */
     
     /**
      * Returns statistics about the KDTree.
-     * @param num give number of nodes
+     * 
+     * @param nodes give number of nodes
      * @param leaves give number of leaves
      * @return a text string that contains the statistics to the KDTree
      */
@@ -556,6 +448,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
     /**
      * Returns statistics about the KDTree.
+     * 
      * @param count number of nodes so far
      * @param stats array with stats info 
      * @return the number of nodes 
@@ -573,6 +466,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
     /**
      * Returns the KDTree node and its underlying branches as string.
+     * 
      * @param leaves adds the instances of the leaves
      * @return a string representing the node
      */
@@ -609,7 +503,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * @param candidates the current centers the method works on
      * @param assignments the center index for each instance
      * @param pc the threshold value for pruning
-     * @param p True if pruning should be used
+     * @throws Exception if something goes wrong
      */
     private void determineAssignments(Instances centers,
 		        	       int[] candidates,
@@ -643,9 +537,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     
     /**
      * Refines the ownerlist.
+     * 
      * @param centers all centers
      * @param candidates the indexes of those centers that are candidates
      * @return list of owners
+     * @throws Exception if something goes wrong
      */
     private int [] refineOwners(Instances centers, int [] candidates) 
       throws Exception {
@@ -724,10 +620,12 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * @param candidate instance that is candidate to be owner
      * @param competitor instance that competes against the candidate
      * @return true if candidate is full owner
+     * @throws Exception if something goes wrong
      */
     private boolean candidateIsFullOwner(Instance candidate, 
 					 Instance competitor) 
       throws Exception {
+      
       // get extreme point
       Instance extreme = new Instance(candidate);
       for (int i = 0; i < m_Instances.numAttributes(); i++) {
@@ -747,8 +645,10 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
     /**
      * Returns the distance between a point and an hyperrectangle.
+     * 
      * @param x the point
      * @return the distance
+     * @throws Exception if something goes wrong
      */
     private double distanceToHrect(Instance x) throws Exception {
       double distance = 0.0;
@@ -798,14 +698,15 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * @param centers all the input centers
      * @param centList the list of centers to work with
      * @param assignments index list of last assignments
+     * @throws Exception if something goes wrong
      */
     public void assignSubToCenters(double [][] ranges,
 				   Instances centers, 
 				   int [] centList, 
 				   int [] assignments) 
       throws Exception {
+      
       //todo: undecided situations
-      int numCent = centList.length;
       
       // WARNING:  assignments is "input/output-parameter"
       // should not be null and the following should not happen
@@ -831,16 +732,13 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
      * Find k nearest neighbours to target by simply searching through all instances
      * in the leaf.
      * No check on missing class.
+     * 
      * @param target the instance to find nearest neighbour for
-     * @param minDist the minimal distance found so far
      * @return the minimal distance found
+     * @throws Exception if something goes wrong
      */
     public double simpleKNearestNeighbour(Instance target) throws Exception {
-      //debug
-      //boolean print=false;
-      //if(target.toString().startsWith("40-49,premeno,25-29,0-2,no,2"))   //target.value(0) == 146)
-      //{ print=true; System.out.println("Inspecting node: "+this.nodeToString(true)); }
-        
+
       double dist = 0;
       int currIndex;
       // sets and uses:
@@ -853,9 +751,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       // if no instances, return max value as distance
       if (m_End < m_Start) 
 	return Double.MAX_VALUE;
-      
-      //if(target.value(0)==146 && i>0)
-      //  System.out.println("Initialized i to "+m_NearestListLength);
       
       if (m_NearestListLength<m_kNN) {
 	for (;(index <= m_End) && (i < m_kNN);) { 
@@ -873,29 +768,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	  index++;
 	}
         m_NearestListLength = i;
-          
-        //if(print==true) {  //target.value(0)==146) 
-        //  System.out.println("New m_NearestListLength: "+m_NearestListLength);
-        //  for(int j=0; j<m_NearestListLength; ) {
-        //    System.out.println(j+": "+m_Instances.instance(m_NearestList[j])+","+m_DistanceList[j]);
-        //    j++;
-        //  }          
-        //}
-
       }
-      
-      /*
-	System.out.print("dist: ");
-      for (int j = 0; j < m_kNN; j++) {
-	System.out.print(" " + m_DistanceList[j]);
-      }
-      System.out.println();
-      System.out.print("near: ");
-      for (int j = 0; j < m_kNN; j++) {
-	System.out.print(" " + m_NearestList[j]);
-      }
-      System.out.println();
-      */
       
       // set the new furthest nearest
       m_FurthestNear = checkFurthestNear();  //FURTHEST IN m_kNN NEAREST NEIGHBOURS
@@ -911,8 +784,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 	Instance trainInstance = m_Instances.instance(currIndex);
 	if (target != trainInstance) { // for hold-one-out cross-validation
           
-          //if(print==true)
-          //  OOPS("K: "+m_NearestListLength);
           dist = m_EuclideanDistance.distance(target, trainInstance, m_MaxMinDist, print);
 	  
           // is instance one of the nearest?
@@ -960,25 +831,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
             }
           }
 	}
-        
-        //if(m_NodeNumber==10) {
-        //  System.out.println("Processed index: "+index);
-        //  for(int j=0; j<m_NearestListLength; ) {
-        //    System.out.println(j+": "+m_Instances.instance(m_NearestList[j])+","+m_DistanceList[j]);
-        //    j++;
-        //  }
-        //}
-        
       }
-      
-      //debug
-      //if(print==true) { //target.value(0)==146) {
-      //  for(int j=0; j<m_NearestListLength; ) {
-      //    System.out.println(j+": "+m_Instances.instance(m_NearestList[j])+","+m_DistanceList[j]);
-      //    j++;
-      //  }
-      //  System.out.println("====================");
-      //}
       
       return m_MaxMinDist;
     }
@@ -986,8 +839,8 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     /**
      * Finds the nearest neighbour to target, this method is called recursively.
      * @param target the instance to find nearest neighbour for
-     * @param maxDist the distance to the nearest neighbour so far
      * @return the minimal distance found
+     * @throws Exception if something goes wrong
      */
     private double kNearestNeighbour(Instance target) throws Exception {
       double maxDist;
@@ -1029,8 +882,13 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     }
 
   } 
-  // End of class KDTreeNode
 
+  /**
+   * sets the instances and builds the KDTree
+   * 
+   * @param instances 	the instances to build the tree from
+   * @throws Exception	if something goes wrong
+   */
   public void setInstances(Instances instances) throws Exception {
    buildKDTree(instances);
   }
@@ -1039,7 +897,9 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * Builds the KDTree.
    * It is adviseable to run the replace missing attributes filter on the
    * passed instances first.
+   * 
    * @param instances instances to build the tree of
+   * @throws Exception if something goes wrong
    */
   private void buildKDTree(Instances instances) throws Exception {
 
@@ -1078,8 +938,10 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   /**
    * Adds one instance to the KDTree. This updates the KDTree structure to take
    * into account the newly added training instance.
-   * @param instance the instance to be added. Usually the newly added instance
-   * in the training set. 
+   * 
+   * @param instance 	the instance to be added. Usually the newly added instance
+   * 			in the training set. 
+   * @throws Exception 	if something goes wrong or instances are null
    */
   public void update(Instance instance) throws Exception {  //better to change to addInstance
     if(m_Instances==null)
@@ -1097,53 +959,17 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   /**
    * Adds one instance to KDTree loosly. It only changes the ranges in 
    * EuclideanDistance, and does not affect the structure of the KDTree. 
+   * 
    * @param instance the new instance.  Usually this is the test instance 
    * supplied to update the range of attributes in the distance function.
    */
   public void addInstanceInfo(Instance instance) {
-//    if(m_Instances==null)
-//      throw new Exception("No instances supplied yet. Have to call " +
-//                          "setInstances(instances) with a set of Instances " +
-//                          "first.");
     m_EuclideanDistance.updateRanges(instance);
   }
-  
-  /**
-   * Deletes one instance in the KDTree.
-   * @param instance the instance to be deleted
-   -/
-  public void deleteInstance(Instance instance)   //doesn't seem to be doing anything useful
-  throws Exception {
-    int index =0;
-    //    for (int 
-    deleteInstance(index);
-  }
-  */
 
   /**
-   * Deletes one instance in the KDTree.
-   * @param index the index of the instance to be deleted
-   * @return true if instance was deleted
-   -/
-  public boolean deleteInstance(int index) throws Exception {
-    
-    boolean success = false;
-    int pos = m_InstList.deleteOneIndex(index);   //this is also being done in KDTreeNode
-    if (pos >= 0) {
-      m_Root.tidyUpAfterDelete(pos);
-      success =  true;
-    } 
-    if (!success) {
-      // make a new tree
-      double [][] m_EuclideanDistance.m_Ranges = null; //dummyRanges = null; 
-      buildKDTree(m_Instances, m_EuclideanDistance); //dummyRanges);
-    }
-    return success;
-  }
-  */
-
-  /**
-   * toString  
+   * string representing the tree  
+   * 
    * @return string representing the tree
    */
   public String toString() {
@@ -1155,11 +981,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     }
     int[] num = new int[1];
     num[0] = 0;
-    // index list in string format:
-    //for (int i = 0; i <= m_InstList.length; i++) {
-    //  int instIndex = m_InstList[i];
-    //  text.append(instIndex + "/ ");
-    //} 
 
     text.append("\nKDTree build:");
     text.append(tree.statToString(true, true));
@@ -1174,7 +995,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * @param centers the current centers
    * @param assignments the centerindex for each instance
    * @param pc the threshold value for pruning.
-   * @param p True if pruning should be used.
+   * @throws Exception if something goes wrong
    */
   public void centerInstances(Instances centers, int [] assignments,
 				double pc) throws Exception {
@@ -1186,25 +1007,19 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     m_Root.determineAssignments(centers, centList, 
 			 assignments, pc);
   }
-  
-  /**
-   * Used for debug println's.
-   * @param output string that is printed
-   */
-  private void OOPS(String output) {
-    System.out.println(output);
-  }
 
   /**
    * Returns array of boolean set true or false if instance is part
    * of next left kdtree.
+   * 
    * @param left list of boolean values, true if instance belongs to left
-   * @param instList list of indexes of instances of this node
+   * @param startIdx
+   * @param endIdx
    * @param splitDim index of splitting attribute
    * @param splitValue value at which the node is split
    * @return number of instances that belong to the left
    */
-  private int checkSplitInstances(boolean [] left, //int [] instList,
+  private int checkSplitInstances(boolean [] left,
       int startIdx, int endIdx,
       int splitDim, double splitValue) {
 
@@ -1227,11 +1042,12 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
   /**
    * Sorts instances newly into left and right part.
+   * 
    * @param left list of flags, set true by this method if instance
    * should go to the left follow node
-   * @param instList list of instances of this node
-   * @param iLeft index to the left 
-   * @param iRight index to the right 
+   * @param startIdx
+   * @param endIdx
+   * @param startLeft  
    */
   private void splitInstances(boolean [] left,  int startIdx, int endIdx,
                               int startLeft) {
@@ -1252,7 +1068,10 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
   /** 
    * Checks if there is any instance with missing values. Throws an exception 
-   *   if there is, as KDTree does not handle missing values. 
+   * if there is, as KDTree does not handle missing values. 
+   * 
+   * @param instances the instances to check
+   * @throws Exception if missing values are encountered
    */
   private void checkMissing(Instances instances) throws Exception {
     for(int i=0; i<instances.numInstances(); i++) {
@@ -1270,6 +1089,9 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
   /**
    * Checks if there is any missing value in the instance. 
+   * 
+   * @param ins		the instances to check
+   * @throws Exception 	if missing values are encountered
    */
   private void checkMissing(Instance ins) throws Exception {
     for(int j=0; j<ins.numValues(); j++) {
@@ -1298,9 +1120,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   /** number of nearest neighbours k */
   private int m_kNN = 0; 
 
-  /** distance to current nearest neighbour */
-  private double m_MinDist = Double.MAX_VALUE;
-
   /** distance to current furthest of the neighbours */
   private double m_MaxMinDist = Double.MAX_VALUE;
 
@@ -1314,12 +1133,12 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * Returns the distances to the kNearest or 1 nearest neighbour currently 
    *  found with either the kNearestNeighbours or the nearestNeighbour method.
    *
-   * @returns - distances[] array containing the distances of the 
-   *            nearestNeighbours. The length and ordering of the array is the 
-   *            same as that of the instances returned by nearestNeighbour 
-   *            functions.
-   * @exception Throws an exception if called before calling kNearestNeighbours
-   *            or nearestNeighbours.
+   * @return distances[] array containing the distances of the 
+   *         nearestNeighbours. The length and ordering of the array is the 
+   *         same as that of the instances returned by nearestNeighbour 
+   *         functions.
+   * @throws Exception Throws an exception if called before calling kNearestNeighbours
+   *         or nearestNeighbours.
    */
   public double[] getDistances() throws Exception {
     if(m_Instances==null || m_DistanceList==null)
@@ -1329,15 +1148,18 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     return m_DistanceList;
   }
   
+  /** debug pls remove after use. */
+  private boolean print = false; 
+
   /** 
    * Returns the k nearest neighbours to the supplied instance. 
    * 
-   * @param target - The instance to find the nearest neighbours for.
-   * @param k - The number of neighbours to find.
-   * @exception - Throws an exception if the nearest neighbour could not be 
+   * @param target The instance to find the nearest neighbours for.
+   * @param k The number of neighbours to find.
+   * @return the neighbors
+   * @throws Exception Throws an exception if the nearest neighbour could not be 
    *              found.
-    */
-  private boolean print=false; //debug pls remove after use.
+   */
   public Instances kNearestNeighbours(Instance target, int k) throws Exception {
     checkMissing(target);
     if(m_Instances==null) 
@@ -1345,11 +1167,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
                           "setInstances(instances) with a set of Instances " +
                           "first.");
 
-//    if(target.value(0)==618) //target.toString().startsWith("1,1,1,1,1,3.544656,1,1,1"))
-//      print=true;
-//    else
-//      print=false;    
-    
     m_kNN = k;
     double maxDist;
     m_NearestList  = new int[m_Instances.numInstances()];
@@ -1360,8 +1177,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
     }
     maxDist = m_Root.kNearestNeighbour(target);
     combSort11(m_DistanceList, m_NearestList);
-    //super.insertionSort(m_NearestList, m_DistanceList);
-    //super.insertionSort(m_DistanceList, m_NearestList);    
     m_EuclideanDistance.postProcessDistances(m_DistanceList);
     
     Instances nearest = new Instances(m_Instances, 0);
@@ -1371,16 +1186,6 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       newDistanceList[i] = m_DistanceList[i];
     }
     
-    //debug stmt
-//    if(print==true) {
-//      OOPS("Target: "+target+" found "+nearest.numInstances()+" neighbours\n");
-//      for(int i=0; i<nearest.numInstances(); i++) {
-//        System.out.println("Node: instance "+nearest.instance(i)+", distance "+
-//        m_DistanceList[i]);
-//      }
-//      System.out.println("");
-//    }
-    
     m_DistanceList = newDistanceList;
     return nearest;
   }
@@ -1388,8 +1193,9 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   /** 
    * Returns the nearest neighbour to the supplied instance.
    *
-   * @param target - The instance to find the nearest neighbour for.
-   * @exception - Throws an exception if the neighbours could not be found.
+   * @param target The instance to find the nearest neighbour for.
+   * @return the nearest neighbor
+   * @throws Exception Throws an exception if the neighbours could not be found.
    */
   public Instance nearestNeighbour(Instance target) throws Exception {
     return (kNearestNeighbours(target, 1)).instance(0);
@@ -1399,8 +1205,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * Find k nearest neighbours to target. This is the main method.
    *
    * @param target the instance to find nearest neighbour for
-   * @param maxDist the distance to the nearest neighbor so far
-   * @param nearest the index of the nearest neighbor (second return value)
+   * @param kNN the number of neighbors to find
+   * @param nearestList 
+   * @param distanceList 
+   * @return 
+   * @throws Exception if something goes wrong
    */ //redundant no longer needed
   public int findKNearestNeighbour(Instance target, int kNN, int [] nearestList,
                                    double [] distanceList) throws Exception {
@@ -1421,7 +1230,8 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * Get the distance of the furthest of the nearest neighbour 
    * returns the index of this instance 
    * in the index list.
-   * @param nearest index of k nearest instances
+   * 
+   * @return the index of the instance
    */
   private int checkFurthestNear() {
     double max = 0.0;
@@ -1439,7 +1249,11 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * the GET and SET - functions ===============================================
    **/
 
-  /** Tip text for this property */
+  /** 
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String minBoxRelWidthTipText() {
     return "The minimum relative width of the box. A node is only made a leaf "+
            "if the width of the split dimension of the instances in a node " +
@@ -1449,9 +1263,10 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   
   /**
    * Sets the minimum relative box width.
+   * 
    * @param i the minimum relative box width
    */
-  public void setMinBoxRelWidth(double i) throws Exception {
+  public void setMinBoxRelWidth(double i) {
     m_MinBoxRelWidth = i;
   }
 
@@ -1460,31 +1275,41 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
    * @return the minimum relative box width
    */
   public double getMinBoxRelWidth() {
-    return  m_MinBoxRelWidth;
+    return m_MinBoxRelWidth;
   }
 
-  /** Tip text for this property */
+  /** 
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String maxInstInLeafTipText() {
     return "The max number of instances in a leaf.";
   }
   
   /**
    * Sets the maximum number of instances in a leaf.
+   * 
    * @param i the maximum number of instances in a leaf
    */
-  public void setMaxInstInLeaf(int i) throws Exception {
+  public void setMaxInstInLeaf(int i) {
     m_MaxInstInLeaf = i;
   }
 
   /**
    * Get the maximum number of instances in a leaf.
+   * 
    * @return the maximum number of instances in a leaf
    */
   public int getMaxInstInLeaf() {
     return  m_MaxInstInLeaf;
   }
 
-  /** Tip text for this property */
+  /** 
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
   public String normalizeNodeWidthTipText() {
     return "Whether if the widths of the KDTree node should be normalized " +
            "by the width of the universe or not. "+
@@ -1497,6 +1322,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   /**
    * Sets the flag for normalizing the widths of a KDTree Node by the width
    * of the dimension in the universe. 
+   * 
    * @param n true to use normalizing.
    */
   public void setNormalizeNodeWidth(boolean n) {
@@ -1505,18 +1331,28 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
   /**
    * Gets the normalize flag.
+   * 
    * @return True if normalizing
    */
   public boolean getNormalizeNodeWidth() {
     return m_NormalizeNodeWidth;
   }
 
-  /** returns the distance function currently in use */
+  /** 
+   * returns the distance function currently in use
+   *
+   * @return the distance function
+   */
   public DistanceFunction getDistanceFunction() {
     return (DistanceFunction) m_EuclideanDistance;
   }
   
-  /** sets the  distance function to use for nearest neighbour search */
+  /** 
+   * sets the distance function to use for nearest neighbour search
+   * 
+   * @param df		the distance function to use
+   * @throws Exception	if not EuclideanDistance
+   */
   public void setDistanceFunction(DistanceFunction df) throws Exception {
     if(!(df instanceof EuclideanDistance))
       throw new Exception("KDTree currently only works with " +
@@ -1526,6 +1362,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   
   /**
    * Returns a string describing this nearest neighbour search algorithm.
+   * 
    * @return a description of the algorithm for displaying in the 
    * explorer/experimenter gui
    */
@@ -1548,6 +1385,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   
   /**
    * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
@@ -1566,11 +1404,28 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
   }
 
   /**
-   * Parses a given list of options.
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * Parses a given list of options. <p/>
    *
-   **/
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -W &lt;value&gt;
+   *  Set minimal width of a box
+   *  (default = 1.0E-2).</pre>
+   * 
+   * <pre> -L
+   *  Maximal number of instances in a leaf
+   *  (default = 40).</pre>
+   * 
+   * <pre> -N
+   *  Normalizing will be done
+   *  (Select dimension for split, with normalising to universe).</pre>
+   * 
+   <!-- options-end -->
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
   public void setOptions(String[] options)
     throws Exception {
 
@@ -1595,6 +1450,7 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
   /**
    * Gets the current settings of KDtree.
+   * 
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
@@ -1621,12 +1477,13 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
 
   /**
    * Main method for testing this class
+   * 
+   * @param args	the commandline parameters
    */
   public static void main(String [] args) {
     try {
       if (args.length < 1 ) {
-	System.err.println("Usage : weka.gui.visualize.VisualizePanel "
-			   +"<dataset> [<dataset> <dataset>...]");
+	System.err.println("Usage: " + KDTree.class.getName() + " <dataset>");
 	System.exit(1);
       }
       Instances insts = new Instances(new java.io.FileReader(args[0]));
@@ -1636,10 +1493,10 @@ public class KDTree extends NearestNeighbourSearch implements OptionHandler, Ser
       tree.setInstances(insts);
       tree.setDistanceFunction(df);
       System.out.println(tree.toString());
-    }catch (Exception ex) {
+    }
+    catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
   }
-  
 }
