@@ -36,11 +36,13 @@ import javax.swing.JFileChooser;
  * NullPointerException! ;-)
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
-
 public class FileChooser 
   extends JFileChooser {
+
+  /** for serialization */
+  static final long serialVersionUID = -2222457737584574588L;
   
   /**
    * default constructor, pointing to the user's default directory
@@ -69,6 +71,9 @@ public class FileChooser
   
   /**
    * Pops up a "Save File" file chooser dialog
+   * 
+   * @param parent	the parent of this dialog
+   * @return		the result of the dialog
    */
   public int showSaveDialog(Component parent) {
     int         result;
