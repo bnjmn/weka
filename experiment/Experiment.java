@@ -23,52 +23,135 @@
 
 package weka.experiment;
 
+import weka.core.AdditionalMeasureProducer;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Option;
-import weka.core.Instances;
-import weka.core.FastVector;
-import weka.core.AdditionalMeasureProducer;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.experiment.xml.XMLExperiment;
 
-import java.io.Serializable;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.FileReader;
+import java.beans.PropertyDescriptor;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Reader;
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.beans.PropertyDescriptor;
-import javax.swing.DefaultListModel;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.ObjectOutputStream;
 
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyDescriptor;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyEditor;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
+import javax.swing.DefaultListModel;
 
 /**
  * Holds all the necessary configuration information for a standard
  * type experiment. This object is able to be serialized for storage
  * on disk.
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -L &lt;num&gt;
+ *  The lower run number to start the experiment from.
+ *  (default 1)</pre>
+ * 
+ * <pre> -U &lt;num&gt;
+ *  The upper run number to end the experiment at (inclusive).
+ *  (default 10)</pre>
+ * 
+ * <pre> -T &lt;arff file&gt;
+ *  The dataset to run the experiment on.
+ *  (required, may be specified multiple times)</pre>
+ * 
+ * <pre> -P &lt;class name&gt;
+ *  The full class name of a ResultProducer (required).
+ *  eg: weka.experiment.RandomSplitResultProducer</pre>
+ * 
+ * <pre> -D &lt;class name&gt;
+ *  The full class name of a ResultListener (required).
+ *  eg: weka.experiment.CSVResultListener</pre>
+ * 
+ * <pre> -N &lt;string&gt;
+ *  A string containing any notes about the experiment.
+ *  (default none)</pre>
+ * 
+ * <pre> 
+ * Options specific to result producer weka.experiment.RandomSplitResultProducer:
+ * </pre>
+ * 
+ * <pre> -P &lt;percent&gt;
+ *  The percentage of instances to use for training.
+ *  (default 66)</pre>
+ * 
+ * <pre> -D
+ * Save raw split evaluator output.</pre>
+ * 
+ * <pre> -O &lt;file/directory name/path&gt;
+ *  The filename where raw output will be stored.
+ *  If a directory name is specified then then individual
+ *  outputs will be gzipped, otherwise all output will be
+ *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of a SplitEvaluator.
+ *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+ * 
+ * <pre> -R
+ *  Set when data is not to be randomized and the data sets' size.
+ *  Is not to be determined via probabilistic rounding.</pre>
+ * 
+ * <pre> 
+ * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
+ * </pre>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the classifier.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  The index of the class for which IR statistics
+ *  are to be output. (default 1)</pre>
+ * 
+ * <pre> -I &lt;index&gt;
+ *  The index of an attribute to output in the
+ *  results. This attribute should identify an
+ *  instance in order to know which instances are
+ *  in the test set of a cross validation. if 0
+ *  no output (default 0).</pre>
+ * 
+ * <pre> -P
+ *  Add target and prediction columns to the result
+ *  for each fold.</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
+ *
+ * All options after -- will be passed to the result producer. <p>
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
-public class Experiment implements Serializable, OptionHandler {
+public class Experiment 
+  implements Serializable, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 44945596742646663L;
   
   /** The filename extension that should be used for experiment files */
   public static String FILE_EXTENSION = ".exp";
@@ -117,14 +200,13 @@ public class Experiment implements Serializable, OptionHandler {
    * Sets whether the first attribute is treated as the class
    * for all datasets involved in the experiment. This information
    * is not output with the result of the experiments!
+   * 
+   * @param flag	whether the class attribute is the first and not the last
    */
   public void classFirst(boolean flag) {
     
     m_ClassFirst = flag;
   }
-
-  
-  boolean m_m_AdvanceRunFirst;
   
   /**
    * Get the value of m_DataSetFirstFirst.
@@ -139,7 +221,7 @@ public class Experiment implements Serializable, OptionHandler {
   /**
    * Set the value of m_AdvanceDataSetFirst.
    *
-   * @param newm_AdvanceDataSetFirst Value to assign to m_AdvanceRunFirst.
+   * @param newAdvanceDataSetFirst Value to assign to m_AdvanceRunFirst.
    */
   public void setAdvanceDataSetFirst(boolean newAdvanceDataSetFirst) {
     
@@ -280,7 +362,7 @@ public class Experiment implements Serializable, OptionHandler {
    * Prepares an experiment for running, initializing current iterator
    * settings.
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void initialize() throws Exception {
     
@@ -327,6 +409,9 @@ public class Experiment implements Serializable, OptionHandler {
   /**
    * Iterate over the objects in the property array to determine what
    * (if any) additional measures they support
+   * 
+   * @throws Exception 	if additional measures don't comply to the naming 
+   * 			convention (starting with "measure")
    */
   private void determineAdditionalResultMeasures() throws Exception {
     m_AdditionalMeasures = null;
@@ -389,7 +474,7 @@ public class Experiment implements Serializable, OptionHandler {
    *
    * @param propertyDepth the current position along the property path
    * @param origValue the value to set the property to
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   protected void setProperty(int propertyDepth, Object origValue)
     throws Exception {
@@ -422,7 +507,7 @@ public class Experiment implements Serializable, OptionHandler {
   /**
    * Carries out the next iteration of the experiment.
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void nextIteration() throws Exception {
     
@@ -519,7 +604,7 @@ public class Experiment implements Serializable, OptionHandler {
    * Signals that the experiment is finished running, so that cleanup
    * can be done.
    *
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void postProcess() throws Exception {
 
@@ -700,34 +785,97 @@ public class Experiment implements Serializable, OptionHandler {
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -L num <br>
-   * The lower run number to start the experiment from.
-   * (default 1) <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -L &lt;num&gt;
+   *  The lower run number to start the experiment from.
+   *  (default 1)</pre>
+   * 
+   * <pre> -U &lt;num&gt;
+   *  The upper run number to end the experiment at (inclusive).
+   *  (default 10)</pre>
+   * 
+   * <pre> -T &lt;arff file&gt;
+   *  The dataset to run the experiment on.
+   *  (required, may be specified multiple times)</pre>
+   * 
+   * <pre> -P &lt;class name&gt;
+   *  The full class name of a ResultProducer (required).
+   *  eg: weka.experiment.RandomSplitResultProducer</pre>
+   * 
+   * <pre> -D &lt;class name&gt;
+   *  The full class name of a ResultListener (required).
+   *  eg: weka.experiment.CSVResultListener</pre>
+   * 
+   * <pre> -N &lt;string&gt;
+   *  A string containing any notes about the experiment.
+   *  (default none)</pre>
+   * 
+   * <pre> 
+   * Options specific to result producer weka.experiment.RandomSplitResultProducer:
+   * </pre>
+   * 
+   * <pre> -P &lt;percent&gt;
+   *  The percentage of instances to use for training.
+   *  (default 66)</pre>
+   * 
+   * <pre> -D
+   * Save raw split evaluator output.</pre>
+   * 
+   * <pre> -O &lt;file/directory name/path&gt;
+   *  The filename where raw output will be stored.
+   *  If a directory name is specified then then individual
+   *  outputs will be gzipped, otherwise all output will be
+   *  zipped to the named file. Use in conjuction with -D. (default splitEvalutorOut.zip)</pre>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of a SplitEvaluator.
+   *  eg: weka.experiment.ClassifierSplitEvaluator</pre>
+   * 
+   * <pre> -R
+   *  Set when data is not to be randomized and the data sets' size.
+   *  Is not to be determined via probabilistic rounding.</pre>
+   * 
+   * <pre> 
+   * Options specific to split evaluator weka.experiment.ClassifierSplitEvaluator:
+   * </pre>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of the classifier.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> -C &lt;index&gt;
+   *  The index of the class for which IR statistics
+   *  are to be output. (default 1)</pre>
+   * 
+   * <pre> -I &lt;index&gt;
+   *  The index of an attribute to output in the
+   *  results. This attribute should identify an
+   *  instance in order to know which instances are
+   *  in the test set of a cross validation. if 0
+   *  no output (default 0).</pre>
+   * 
+   * <pre> -P
+   *  Add target and prediction columns to the result
+   *  for each fold.</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
-   * -U num <br>
-   * The upper run number to end the experiment at (inclusive).
-   * (default 10) <p>
-   *
-   * -T arff_file <br>
-   * The dataset to run the experiment on.
-   * (required, may be specified multiple times) <p>
-   *
-   * -P class_name <br>
-   * The full class name of a ResultProducer (required).
-   * eg: weka.experiment.RandomSplitResultProducer <p>
-   *
-   * -D "class_name" <br>
-   * The full class name of a ResultListener followed by any options.
-   * If options are supplied then full string must be enclosed in quotes.
-   * (required).
-   * eg: "weka.experiment.CSVResultListener -O outfile.csv" <p>
-   *
-   * All option after -- will be passed to the result producer. <p>
+   * All options after -- will be passed to the result producer. <p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String [] options) throws Exception {
 

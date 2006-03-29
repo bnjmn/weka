@@ -23,40 +23,74 @@
 
 package weka.experiment;
 
-import java.io.*;
-import java.util.*;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.rules.ZeroR;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Summarizable;
+import weka.core.Utils;
+
+import java.io.ObjectStreamClass;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-
-import weka.core.*;
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /**
- * A SplitEvaluator that produces results for a classification scheme
- * on a nominal class attribute.
+ <!-- globalinfo-start -->
+ * A SplitEvaluator that produces results for a classification scheme on a nominal class attribute.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * -W classname <br>
- * Specify the full class name of the classifier to evaluate. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the classifier.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  The index of the class for which IR statistics
+ *  are to be output. (default 1)</pre>
+ * 
+ * <pre> -I &lt;index&gt;
+ *  The index of an attribute to output in the
+ *  results. This attribute should identify an
+ *  instance in order to know which instances are
+ *  in the test set of a cross validation. if 0
+ *  no output (default 0).</pre>
+ * 
+ * <pre> -P
+ *  Add target and prediction columns to the result
+ *  for each fold.</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
  *
- * -C class index <br>
- * The index of the class for which IR statistics are to
- * be output. (default 1) <p>
- *
- * -I attr index <br>
- * The index of an attribute to output in the tresults. This 
- * attribute should identify an instance in order to know 
- * which instances are tested in a fold (default 1).
- *
- * -P 
- * Add the prediction and target columns to the result file for each fold.
+ * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
-public class ClassifierSplitEvaluator implements SplitEvaluator, 
-  OptionHandler, AdditionalMeasureProducer {
+public class ClassifierSplitEvaluator 
+  implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8511241602760467265L;
   
   /** The template classifier */
   protected Classifier m_Template = new ZeroR();
@@ -170,28 +204,44 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -W classname <br>
-   * Specify the full class name of the classifier to evaluate. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of the classifier.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> -C &lt;index&gt;
+   *  The index of the class for which IR statistics
+   *  are to be output. (default 1)</pre>
+   * 
+   * <pre> -I &lt;index&gt;
+   *  The index of an attribute to output in the
+   *  results. This attribute should identify an
+   *  instance in order to know which instances are
+   *  in the test set of a cross validation. if 0
+   *  no output (default 0).</pre>
+   * 
+   * <pre> -P
+   *  Add target and prediction columns to the result
+   *  for each fold.</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
-   * -C class index <br>
-   * The index of the class for which IR statistics are to
-   * be output. (default 1) <p>
-   *
-   * -I attr index <br>
-   * The index of an attribute to output in the tresults. This 
-   * attribute should identify an instance in order to know 
-   * which instances are tested in a fold. if zero, no output (default 0).
-   *
-   * -P 
-   * The flag that indicate if the prediction and targets have to be output
-   * in the result files for each fold.
-   *
-   * All option after -- will be passed to the classifier.
+   * All options after -- will be passed to the classifier.
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -318,9 +368,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
   
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (m_Template instanceof AdditionalMeasureProducer) {
@@ -572,7 +622,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in
    * the array may be Strings, Doubles, or null (for the missing value).
-   * @exception Exception if a problem occurs while getting the results
+   * @throws Exception if a problem occurs while getting the results
    */
   public Object [] getResult(Instances train, Instances test)
   throws Exception {
@@ -873,8 +923,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator,
    * Set the Classifier to use, given it's class name. A new classifier will be
    * instantiated.
    *
-   * @param newClassifier the Classifier class name.
-   * @exception Exception if the class name is invalid.
+   * @param newClassifierName the Classifier class name.
+   * @throws Exception if the class name is invalid.
    */
   public void setClassifierName(String newClassifierName) throws Exception {
 

@@ -23,33 +23,56 @@
 
 package weka.experiment;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.Utils;
-import weka.core.Attribute;
-import weka.core.Summarizable;
-import weka.core.AdditionalMeasureProducer;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.io.Serializable;
+import weka.core.AdditionalMeasureProducer;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Summarizable;
+import weka.core.Utils;
+
 import java.io.ObjectStreamClass;
+import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * A SplitEvaluator that produces results for a classification scheme
- * on a numeric class attribute.
+ <!-- globalinfo-start -->
+ * A SplitEvaluator that produces results for a classification scheme on a numeric class attribute.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;class name&gt;
+ *  The full class name of the classifier.
+ *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ <!-- options-end -->
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
-public class RegressionSplitEvaluator implements SplitEvaluator, 
-  OptionHandler, AdditionalMeasureProducer {
+public class RegressionSplitEvaluator 
+  implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
+  
+  /** for serialization */
+  static final long serialVersionUID = -328181640503349202L;
 
   /** The template classifier */
   protected Classifier m_Template = new ZeroR();
@@ -128,15 +151,29 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   }
 
   /**
-   * Parses a given list of options. Valid options are:<p>
+   * Parses a given list of options. <p/>
    *
-   * -W classname <br>
-   * Specify the full class name of the classifier to evaluate. <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -W &lt;class name&gt;
+   *  The full class name of the classifier.
+   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   <!-- options-end -->
    *
    * All option after -- will be passed to the classifier.
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -240,9 +277,9 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
   
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
-   * @exception IllegalArgumentException if the named measure is not supported
+   * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
     if (m_Template instanceof AdditionalMeasureProducer) {
@@ -416,7 +453,7 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in
    * the array may be Strings, Doubles, or null (for the missing value).
-   * @exception Exception if a problem occurs while getting the results
+   * @throws Exception if a problem occurs while getting the results
    */
   public Object [] getResult(Instances train, Instances test) 
     throws Exception {
@@ -574,8 +611,8 @@ public class RegressionSplitEvaluator implements SplitEvaluator,
    * Set the Classifier to use, given it's class name. A new classifier will be
    * instantiated.
    *
-   * @param newClassifier the Classifier class name.
-   * @exception Exception if the class name is invalid.
+   * @param newClassifierName the Classifier class name.
+   * @throws Exception if the class name is invalid.
    */
   public void setClassifierName(String newClassifierName) throws Exception {
 

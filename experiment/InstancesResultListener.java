@@ -23,31 +23,40 @@
 
 package weka.experiment;
 
-import weka.core.Utils;
-import java.io.PrintWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import weka.core.OptionHandler;
-import java.util.Enumeration;
-import java.util.Vector;
-import weka.core.Option;
-import weka.core.Instances;
-import java.util.Hashtable;
-import weka.core.FastVector;
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.Instances;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.util.Hashtable;
 
 /**
- * InstancesResultListener outputs the received results in arff format to
- * a Writer. All results must be received before the instances can be
- * written out.
+ <!-- globalinfo-start -->
+ * Outputs the received results in arff format to a Writer. All results must be received before the instances can be written out.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -O &lt;file name&gt;
+ *  The filename where output will be stored. Use - for stdout.
+ *  (default temp file)</pre>
+ * 
+ <!-- options-end -->
+ * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class InstancesResultListener extends CSVResultListener {
+public class InstancesResultListener 
+  extends CSVResultListener {
+  
+  /** for serialization */
+  static final long serialVersionUID = -2203808461809311178L;
 
   /** Stores the instances created so far, before assigning to a header */
   protected transient FastVector m_Instances;
@@ -84,8 +93,10 @@ public class InstancesResultListener extends CSVResultListener {
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Takes results from a result producer and assembles them into "
-      +"a set of instances.";
+    return
+        "Outputs the received results in arff format to "
+      + "a Writer. All results must be received before the instances can be "
+      + "written out.";
   }
 
   /**
@@ -241,6 +252,3 @@ public class InstancesResultListener extends CSVResultListener {
     m_Instances.addElement(newInst);
   }
 } // InstancesResultListener
-
-
-
