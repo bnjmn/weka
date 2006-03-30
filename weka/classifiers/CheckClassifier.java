@@ -128,7 +128,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @see TestInstances
  */
 public class CheckClassifier implements OptionHandler {
@@ -163,9 +163,6 @@ public class CheckClassifier implements OptionHandler {
   
   /** The options to be passed to the base classifier. */
   protected String[] m_ClassifierOptions;
-  
-  /** The results of the analysis as a string */
-  protected String m_AnalysisResults;
   
   /** Debugging mode, gives extra output if true */
   protected boolean m_Debug = false;
