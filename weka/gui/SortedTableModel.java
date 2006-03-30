@@ -41,7 +41,7 @@ import javax.swing.table.AbstractTableModel;
  * Represents a TableModel with sorting functionality.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class SortedTableModel
@@ -402,6 +402,7 @@ public class SortedTableModel
           int column = tableFinal.convertColumnIndexToModel(viewColumn);
           if (    e.getButton() == MouseEvent.BUTTON1 
                && e.getClickCount() == 1 
+               && !e.isAltDown()
                && column != -1 ) {
             int shiftPressed = e.getModifiers() & InputEvent.SHIFT_MASK;
             boolean ascending = (shiftPressed == 0);
