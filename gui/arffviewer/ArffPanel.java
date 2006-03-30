@@ -60,7 +60,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 
 public class ArffPanel 
@@ -116,6 +116,8 @@ public class ArffPanel
   
   /**
    * initializes the panel and loads the specified file
+   * 
+   * @param filename	the file to load
    */
   public ArffPanel(String filename) {
     this();
@@ -125,6 +127,8 @@ public class ArffPanel
   
   /**
    * initializes the panel with the given data
+   * 
+   * @param data	the data to use
    */
   public ArffPanel(Instances data) {
     this();
@@ -222,9 +226,9 @@ public class ArffPanel
     
     // table
     tableArff = new ArffTable();
-    tableArff.setToolTipText("Right click for context menu");
+    tableArff.setToolTipText("Right click (or left+alt) for context menu");
     tableArff.getTableHeader().addMouseListener(this);
-    tableArff.getTableHeader().setToolTipText("<html><b>Sort view:</b> left click = ascending / Shift + left click = descending<br><b>Menu:</b> right click</html>");
+    tableArff.getTableHeader().setToolTipText("<html><b>Sort view:</b> left click = ascending / Shift + left click = descending<br><b>Menu:</b> right click (or left+alt)</html>");
     tableArff.getTableHeader().setDefaultRenderer(new ArffTableCellRenderer());
     tableArff.addChangeListener(this);
     tableArff.addMouseListener(this);
@@ -874,16 +878,18 @@ public class ArffPanel
    * @param e		the mouse event
    */
   public void mouseClicked(MouseEvent e) {
-    int            col;
+    int		col;
+    boolean	popup;
     
-    col = tableArff.columnAtPoint(e.getPoint());
+    col   = tableArff.columnAtPoint(e.getPoint());
+    popup =    ((e.getButton() == MouseEvent.BUTTON3) && (e.getClickCount() == 1))
+            || ((e.getButton() == MouseEvent.BUTTON1) && (e.getClickCount() == 1) && e.isAltDown() && !e.isControlDown() && !e.isShiftDown());
     
     if (e.getSource() == tableArff.getTableHeader()) {
       currentCol = col;
       
       // Popup-Menu
-      if (    (e.getButton() == MouseEvent.BUTTON3) 
-          && (e.getClickCount() == 1) ) {
+      if (popup) {
         e.consume();
         setMenu();
         popupHeader.show(e.getComponent(), e.getX(), e.getY());
@@ -891,8 +897,7 @@ public class ArffPanel
     }
     else if (e.getSource() == tableArff) {
       // Popup-Menu
-      if (    (e.getButton() == MouseEvent.BUTTON3) 
-          && (e.getClickCount() == 1) ) {
+      if (popup) {
         e.consume();
         setMenu();
         popupRows.show(e.getComponent(), e.getX(), e.getY());
@@ -901,8 +906,9 @@ public class ArffPanel
     
     // highlihgt column
     if (    (e.getButton() == MouseEvent.BUTTON1)  
-        && (e.getClickCount() == 1) 
-        && (col > -1) ) {
+         && (e.getClickCount() == 1) 
+         && (!e.isAltDown())
+         && (col > -1) ) {
       tableArff.setSelectedColumn(col);
     }
   }
