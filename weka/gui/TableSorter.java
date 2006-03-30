@@ -54,7 +54,7 @@ import javax.swing.table.TableColumnModel;
  *
  * version 1.5 12/17/97
  * @author Philip Milne
- * @version $Revision: 1.1.2.1 $ 
+ * @version $Revision: 1.1.2.2 $ 
  */
 
 public class TableSorter extends TableMap {
@@ -348,6 +348,7 @@ public class TableSorter extends TableMap {
         int column = tableView.convertColumnIndexToModel(viewColumn);
         if (    e.getButton() == MouseEvent.BUTTON1 
             && e.getClickCount() == 1 
+            && !e.isAltDown()
             && column != -1 ) {
           //System.out.println("Sorting ...");
           int shiftPressed = e.getModifiers()&InputEvent.SHIFT_MASK;
