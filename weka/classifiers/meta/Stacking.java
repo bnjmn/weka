@@ -96,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
 public class Stacking 
   extends RandomizableMultipleClassifiersCombiner
@@ -338,14 +338,7 @@ public class Stacking
    * @return      the capabilities of this classifier
    */
   public Capabilities getCapabilities() {
-    Capabilities        result;
-
-    if (getMetaClassifier() != null)
-      result = getMetaClassifier().getCapabilities();
-    else
-      result = new Capabilities(this);
-
-    result.setOwner(this);
+    Capabilities result = super.getCapabilities();
     
     // class
     result.disableAllClasses();
