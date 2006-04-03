@@ -36,7 +36,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RuleNode 
   extends Classifier {
@@ -620,7 +620,7 @@ public class RuleNode
 	text
 	  .append(" (" + m_numInstances + "/" 
 		  + Utils.doubleToString((100.0 * m_rootMeanSquaredError /
-					     m_globalAbsDeviation), 1, 3) 
+					     m_globalDeviation), 1, 3) 
 		  + "%)\n");
       } else {
 	text.append(" (" + m_numInstances + ")\n");
@@ -1060,7 +1060,7 @@ public class RuleNode
 			  ?  m_numInstances + "/" 
 			     + Utils.doubleToString((100.0 * 
 						     m_rootMeanSquaredError /
-						     m_globalAbsDeviation), 
+						     m_globalDeviation), 
 						    1, 3) 
 			     + "%)"
 			   : m_numInstances + ")")
