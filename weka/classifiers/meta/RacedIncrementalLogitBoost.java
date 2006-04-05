@@ -98,7 +98,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class RacedIncrementalLogitBoost 
   extends RandomizableSingleClassifierEnhancer
@@ -1008,6 +1008,22 @@ public class RacedIncrementalLogitBoost
   public String globalInfo() {
 
     return "Classifier for incremental learning of large datasets by way of racing logit-boosted committees.";
+  }
+
+  /**
+   * Set the base learner.
+   *
+   * @param newClassifier 		the classifier to use.
+   * @throws IllegalArgumentException 	if base classifier cannot handle numeric 
+   * 					class
+   */
+  public void setClassifier(Classifier newClassifier) {
+    Capabilities cap = newClassifier.getCapabilities();
+    
+    if (!cap.handles(Capability.NUMERIC_CLASS))
+      throw new IllegalArgumentException("Base classifier cannot handle numeric class!");
+      
+    super.setClassifier(newClassifier);
   }
 
   /**
