@@ -95,7 +95,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.57 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -562,6 +562,9 @@ public class PreprocessPanel extends JPanel {
 	      m_Log.statusMessage("Saving undo information");
 	      addUndoPoint();
 	      m_AttVisualizePanel.setColoringIndex(copy.classIndex());
+	      // if class was not set before, reset it again after use of filter
+	      if (m_Instances.classIndex() < 0)
+		newInstances.setClassIndex(-1);
 	      m_Instances = newInstances;
 	      setInstances(m_Instances);
 	      if (m_Log instanceof TaskLogger) {
