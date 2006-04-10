@@ -48,7 +48,7 @@ import java.util.Vector;
  * Class for performing additive logistic regression. <br/>
  * This class performs classification using a regression scheme as the base learner, and can handle multi-class problems.  For more information, see<br/>
  * <br/>
- * J. Friedman, T. Hastie, R. Tibshirani (1998). Additive Logistic Regression: a Statistical View of Boosting. Stanford University. URL http://www-stat.stanford.edu/~jhf/ftp/boost.ps.<br/>
+ * J. Friedman, T. Hastie, R. Tibshirani (1998). Additive Logistic Regression: a Statistical View of Boosting. Stanford University.<br/>
  * <br/>
  * Can do efficient internal cross-validation to determine appropriate number of iterations.
  * <p/>
@@ -62,7 +62,7 @@ import java.util.Vector;
  *    author = {J. Friedman and T. Hastie and R. Tibshirani},
  *    title = {Additive Logistic Regression: a Statistical View of Boosting},
  *    year = {1998},
- *    URL = {http://www-stat.stanford.edu/~jhf/ftp/boost.ps}
+ *    PS = {http://www-stat.stanford.edu/~jhf/ftp/boost.ps}
  * }
  * </pre>
  * <p/>
@@ -124,7 +124,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $ 
+ * @version $Revision: 1.36 $ 
  */
 public class LogitBoost 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -216,7 +216,7 @@ public class LogitBoost
     result.setValue(Field.YEAR, "1998");
     result.setValue(Field.TITLE, "Additive Logistic Regression: a Statistical View of Boosting");
     result.setValue(Field.ADDRESS, "Stanford University");
-    result.setValue(Field.URL, "http://www-stat.stanford.edu/~jhf/ftp/boost.ps");
+    result.setValue(Field.PS, "http://www-stat.stanford.edu/~jhf/ftp/boost.ps");
     
     return result;
   }

@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Frank1998,
+ * &#64;inproceedings{Frank1998,
  *    author = {Eibe Frank and Ian H. Witten},
  *    booktitle = {Fifteenth International Conference on Machine Learning},
  *    editor = {J. Shavlik},
@@ -66,7 +66,7 @@ import java.util.Vector;
  *    publisher = {Morgan Kaufmann},
  *    title = {Generating Accurate Rule Sets Without Global Optimization},
  *    year = {1998},
- *    URL = {http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz}
+ *    PS = {http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz}
  * }
  * </pre>
  * <p/>
@@ -103,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PART 
   extends Classifier 
@@ -169,7 +169,7 @@ public class PART
     result.setValue(Field.YEAR, "1998");
     result.setValue(Field.PAGES, "144-151");
     result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
-    result.setValue(Field.URL, "http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz");
+    result.setValue(Field.PS, "http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz");
     
     return result;
   }

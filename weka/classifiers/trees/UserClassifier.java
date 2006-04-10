@@ -66,7 +66,7 @@ import javax.swing.JTabbedPane;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Malcolm Ware, Eibe Frank, Geoffrey Holmes, Mark Hall, Ian H. Witten (2001). Interactive machine learning: letting users build classifiers. Int. J. Hum.-Comput. Stud.. 55, 3, pp. 281-292. URL http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps.
+ * Malcolm Ware, Eibe Frank, Geoffrey Holmes, Mark Hall, Ian H. Witten (2001). Interactive machine learning: letting users build classifiers. Int. J. Hum.-Comput. Stud.. 55(3):281-292.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -77,11 +77,11 @@ import javax.swing.JTabbedPane;
  *    author = {Malcolm Ware and Eibe Frank and Geoffrey Holmes and Mark Hall and Ian H. Witten},
  *    journal = {Int. J. Hum.-Comput. Stud.},
  *    number = {3},
- *    pages = {pp. 281-292},
+ *    pages = {281-292},
  *    title = {Interactive machine learning: letting users build classifiers},
  *    volume = {55},
  *    year = {2001},
- *    URL = {http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps}
+ *    PS = {http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps}
  * }
  * </pre>
  * <p/>
@@ -97,7 +97,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -493,8 +493,8 @@ public class UserClassifier
     result.setValue(Field.JOURNAL, "Int. J. Hum.-Comput. Stud.");
     result.setValue(Field.VOLUME, "55");
     result.setValue(Field.NUMBER, "3");
-    result.setValue(Field.PAGES, "pp. 281-292");
-    result.setValue(Field.URL, "http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps");
+    result.setValue(Field.PAGES, "281-292");
+    result.setValue(Field.PS, "http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps");
     
     return result;
   }

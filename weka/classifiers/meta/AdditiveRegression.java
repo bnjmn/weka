@@ -49,7 +49,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * J.H. Friedman (1999). Stochastic Gradient Boosting. URL http://www-stat.stanford.edu/~jhf/ftp/stobst.ps.
+ * J.H. Friedman (1999). Stochastic Gradient Boosting.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -61,7 +61,7 @@ import java.util.Vector;
  *    institution = {Stanford University},
  *    title = {Stochastic Gradient Boosting},
  *    year = {1999},
- *    URL = {http://www-stat.stanford.edu/~jhf/ftp/stobst.ps}
+ *    PS = {http://www-stat.stanford.edu/~jhf/ftp/stobst.ps}
  * }
  * </pre>
  * <p/>
@@ -97,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class AdditiveRegression 
   extends IteratedSingleClassifierEnhancer 
@@ -152,7 +152,7 @@ public class AdditiveRegression
     result.setValue(Field.YEAR, "1999");
     result.setValue(Field.TITLE, "Stochastic Gradient Boosting");
     result.setValue(Field.INSTITUTION, "Stanford University");
-    result.setValue(Field.URL, "http://www-stat.stanford.edu/~jhf/ftp/stobst.ps");
+    result.setValue(Field.PS, "http://www-stat.stanford.edu/~jhf/ftp/stobst.ps");
     
     return result;
   }
