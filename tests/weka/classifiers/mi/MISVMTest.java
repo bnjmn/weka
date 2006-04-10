@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.mi.MISVM
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MISVMTest 
   extends AbstractClassifierTest {
@@ -40,9 +40,11 @@ public class MISVMTest
     super(name);  
   }
 
-  /** Creates a default MISVM */
+  /** Creates a default MISVM (with limited number of iterations though) */
   public Classifier getClassifier() {
-    return new MISVM();
+    MISVM classifier = new MISVM();
+    classifier.setMaxIterations(50);
+    return classifier;
   }
 
   public static Test suite() {
