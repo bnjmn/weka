@@ -26,10 +26,8 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.functions.supportVector.NormalizedPolyKernel;
-import weka.classifiers.functions.supportVector.SMOset;
 import weka.classifiers.mi.supportVector.MIPolyKernel;
-import weka.classifiers.mi.supportVector.MIRBFKernel;
+import weka.classifiers.functions.supportVector.SMOset;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -37,22 +35,23 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MultiInstanceToPropositional;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.PropositionalToMultiInstance;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
 
 import java.io.Serializable;
@@ -74,9 +73,9 @@ import java.util.Vector;
  * <br/>
  * For more information on the SMO algorithm, see<br/>
  * <br/>
- * J. Platt: Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, , 1998.<br/>
+ * J. Platt: Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br/>
  * <br/>
- * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. Vol.13, No.3, pp. 637-649.
+ * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -95,10 +94,10 @@ import java.util.Vector;
  * &#64;article{Keerthi2001,
  *    author = {S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy},
  *    journal = {Neural Computation},
- *    number = {No.3},
- *    pages = {pp. 637-649},
+ *    number = {3},
+ *    pages = {637-649},
  *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
- *    volume = {Vol.13},
+ *    volume = {13},
  *    year = {2001}
  * }
  * </pre>
@@ -108,36 +107,28 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  Turning them off assumes that data is purely numeric, doesn't
+ *  contain any missing values, and has a nominal class. Turning them
+ *  off also means that no header information will be stored if the
+ *  machine is linear. Finally, it also assumes that no instance has
+ *  a weight equal to 0.
+ *  (default: checks on)</pre>
+ * 
  * <pre> -C &lt;double&gt;
  *  The complexity constant C. (default 1)</pre>
- * 
- * <pre> -E &lt;double&gt;
- *  The exponent for the polynomial kernel. (default 1)</pre>
- * 
- * <pre> -G &lt;double&gt;
- *  Gamma for the RBF kernel. (default 0.01)</pre>
  * 
  * <pre> -N
  *  Whether to 0=normalize/1=standardize/2=neither.
  *  (default 0=normalize)</pre>
  * 
- * <pre> -F
- *  Feature-space normalization (only for
- *  non-linear polynomial kernels).</pre>
- * 
- * <pre> -O
- *  Use lower-order terms (only for non-linear
- *  polynomial kernels).</pre>
- * 
- * <pre> -R
- *  Use MIRBF kernel. (default poly)</pre>
- * 
  * <pre> -I
  *  Use MIminimax feature space. </pre>
- * 
- * <pre> -A &lt;int&gt;
- *  The size of the kernel cache. 
- *  (default 250007, use 0 for full cache)</pre>
  * 
  * <pre> -L &lt;double&gt;
  *  The tolerance parameter. (default 1.0e-3)</pre>
@@ -155,13 +146,41 @@ import java.util.Vector;
  * <pre> -W &lt;double&gt;
  *  The random number seed. (default 1)</pre>
  * 
+ * <pre> -K &lt;classname and parameters&gt;
+ *  The Kernel to use.
+ *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ * 
+ * <pre> 
+ * Options specific to kernel weka.classifiers.mi.supportVector.MIPolyKernel:
+ * </pre>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class MISMO 
   extends Classifier 
@@ -221,9 +240,9 @@ public class MISMO
     additional.setValue(Field.YEAR, "2001");
     additional.setValue(Field.TITLE, "Improvements to Platt's SMO Algorithm for SVM Classifier Design");
     additional.setValue(Field.JOURNAL, "Neural Computation");
-    additional.setValue(Field.VOLUME, "Vol.13");
-    additional.setValue(Field.NUMBER, "No.3");
-    additional.setValue(Field.PAGES, "pp. 637-649");
+    additional.setValue(Field.VOLUME, "13");
+    additional.setValue(Field.NUMBER, "3");
+    additional.setValue(Field.PAGES, "637-649");
     
     return result;
   }
@@ -286,7 +305,6 @@ public class MISMO
 
     /** Stores the weight of the training instances */
     protected double m_sumOfWeights = 0;
-
 
     /**
      * Fits logistic regression model to SVM outputs analogue
@@ -361,6 +379,24 @@ public class MISMO
       m_logistic = new Logistic();
       m_logistic.buildClassifier(data);
     }
+    
+    /**
+     * sets the kernel to use
+     * 
+     * @param value	the kernel to use
+     */
+    public void setKernel(Kernel value) {
+      m_kernel = value;
+    }
+    
+    /**
+     * Returns the kernel to use
+     * 
+     * @return 		the current kernel
+     */
+    public Kernel getKernel() {
+      return m_kernel;
+    }
 
     /**
      * Method for building the binary classifier.
@@ -409,15 +445,9 @@ public class MISMO
           m_class = null;
           return;
         }
-        /*if (!m_useRBF && m_exponent == 1.0) {
-          m_sparseWeights = new double[0];
-          m_sparseIndices = new int[0];
-          m_class = null;
-          } else {*/
         m_supportVectors = new SMOset(0);
         m_alpha = new double[0];
         m_class = new double[0];
-        //}
 
         // Fit sigmoid if requested
         if (fitLogistic) {
@@ -428,13 +458,7 @@ public class MISMO
 
       // Set the reference to the data
       m_data = insts;
-
-      // If machine is linear, reserve space for weights
-      /*  if (!m_useRBF && m_exponent == 1.0) {
-          m_weights = new double[m_data.numAttributes()];
-          } else { */
       m_weights = null;
-      //}
 
       // Initialize alpha array to zero
       m_alpha = new double[m_data.numInstances()];
@@ -456,16 +480,7 @@ public class MISMO
       m_errors[m_iLow] = 1; m_errors[m_iUp] = -1;
 
       // Initialize kernel
-      if(m_useRBF) {
-        m_kernel = new MIRBFKernel(m_data, m_cacheSize, m_gamma);
-      } else {
-        if (m_featureSpaceNormalization) { 
-          m_kernel = new NormalizedPolyKernel(m_data, m_cacheSize, m_exponent, 
-              m_lowerOrder);
-        } else {				      
-          m_kernel = new MIPolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder); 
-        }      
-      }
+      m_kernel.buildKernel(m_data);
 
       // Build up I1 and I4
       for (int i = 0; i < m_class.length; i++ ) {
@@ -529,46 +544,6 @@ public class MISMO
       m_errors = null;
       m_I0 = m_I1 = m_I2 = m_I3 = m_I4 = null;
 
-      // If machine is linear, delete training data
-      // and store weight vector in sparse format
-      /*if (!m_useRBF && m_exponent == 1.0) {
-
-      // We don't need to store the set of support vectors
-      m_supportVectors = null;
-
-      // We don't need to store the class values either
-      m_class = null;
-
-      // Clean out training data
-      if (!m_checksTurnedOff) {
-      m_data = new Instances(m_data, 0);
-      } else {
-      m_data = null;
-      }
-
-      // Convert weight vector
-      double[] sparseWeights = new double[m_weights.length];
-      int[] sparseIndices = new int[m_weights.length];
-      int counter = 0;
-      for (int i = 0; i < m_weights.length; i++) {
-      if (m_weights[i] != 0.0) {
-      sparseWeights[counter] = m_weights[i];
-      sparseIndices[counter] = i;
-      counter++;
-      }
-      }
-      m_sparseWeights = new double[counter];
-      m_sparseIndices = new int[counter];
-      System.arraycopy(sparseWeights, 0, m_sparseWeights, 0, counter);
-      System.arraycopy(sparseIndices, 0, m_sparseIndices, 0, counter);
-
-      // Clean out weight vector
-      m_weights = null;
-
-      // We don't need the alphas in the linear case
-      m_alpha = null;
-      }*/
-
       // Fit sigmoid if requested
       if (fitLogistic) {
         fitLogistic(insts, cl1, cl2, numFolds, new Random(randomSeed));
@@ -588,40 +563,10 @@ public class MISMO
 
       double result = 0;
 
-      // Is the machine linear?
-      /* if (!m_useRBF && m_exponent == 1.0) {
-
-      // Is weight vector stored in sparse format?
-      if (m_sparseWeights == null) {
-      int n1 = inst.numValues(); 
-      for (int p = 0; p < n1; p++) {
-      if (inst.index(p) != m_classIndex) {
-      result += m_weights[inst.index(p)] * inst.valueSparse(p);
-      }
-      }
-      } else {
-      int n1 = inst.numValues(); int n2 = m_sparseWeights.length;
-      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
-      int ind1 = inst.index(p1); 
-      int ind2 = m_sparseIndices[p2];
-      if (ind1 == ind2) {
-      if (ind1 != m_classIndex) {
-      result += inst.valueSparse(p1) * m_sparseWeights[p2];
-      }
-      p1++; p2++;
-      } else if (ind1 > ind2) {
-      p2++;
-      } else { 
-      p1++;
-      }
-      }
-      }
-      } else { */
       for (int i = m_supportVectors.getNext(-1); i != -1; 
           i = m_supportVectors.getNext(i)) {
         result += m_class[i] * m_alpha[i] * m_kernel.eval(index, i, inst);
-          }
-      // }
+      }
       result -= m_b;
 
       return result;
@@ -643,37 +588,6 @@ public class MISMO
       try {
         text.append("BinaryMISMO\n\n");
 
-        // If machine linear, print weight vector
-        /*	if (!m_useRBF && m_exponent == 1.0) {
-                text.append("Machine linear: showing attribute weights, ");
-                text.append("not support vectors.\n\n");
-
-        // We can assume that the weight vector is stored in sparse
-        // format because the classifier has been built
-        for (int i = 0; i < m_sparseWeights.length; i++) {
-        if (m_sparseIndices[i] != (int)m_classIndex) {
-        if (printed > 0) {
-        text.append(" + ");
-        } else {
-        text.append("   ");
-        }
-        text.append(Utils.doubleToString(m_sparseWeights[i], 12, 4) +
-        " * ");
-        if (m_filterType == FILTER_STANDARDIZE) {
-        text.append("(standardized) ");
-        } else if (m_filterType == FILTER_NORMALIZE) {
-        text.append("(normalized) ");
-        }
-        if (!m_checksTurnedOff) {
-        text.append(m_data.attribute(m_sparseIndices[i]).name()+"\n");
-        } else {
-        text.append("attribute with index " + 
-        m_sparseIndices[i] +"\n");
-        }
-        printed++;
-        }
-        }
-        } else { */
         for (int i = 0; i < m_alpha.length; i++) {
           if (m_supportVectors.contains(i)) {
             double val = m_alpha[i];
@@ -698,17 +612,15 @@ public class MISMO
             printed++;
           }
         }
-        //}
+
         if (m_b > 0) {
           text.append(" - " + Utils.doubleToString(m_b, 12, 4));
         } else {
           text.append(" + " + Utils.doubleToString(-m_b, 12, 4));
         }
 
-        if (m_useRBF || m_exponent != 1.0) {
-          text.append("\n\nNumber of support vectors: " + 
-              m_supportVectors.numElements());
-        }
+        text.append("\n\nNumber of support vectors: " + 
+            m_supportVectors.numElements());
         int numEval = 0;
         int numCacheHits = -1;
         if(m_kernel != null)
@@ -954,24 +866,6 @@ public class MISMO
         m_I4.delete(i2);
       }
 
-      // Update weight vector to reflect change a1 and a2, if linear SVM
-      /*    if (!m_useRBF && m_exponent == 1.0) {
-            Instance inst1 = m_data.instance(i1);
-            for (int p1 = 0; p1 < inst1.numValues(); p1++) {
-            if (inst1.index(p1) != m_data.classIndex()) {
-            m_weights[inst1.index(p1)] += 
-            y1 * (a1 - alph1) * inst1.valueSparse(p1);
-            }
-            }
-            Instance inst2 = m_data.instance(i2);
-            for (int p2 = 0; p2 < inst2.numValues(); p2++) {
-            if (inst2.index(p2) != m_data.classIndex()) {
-            m_weights[inst2.index(p2)] += 
-            y2 * (a2 - alph2) * inst2.valueSparse(p2);
-            }
-            }
-      }
-      */      
       // Update error cache using new Lagrange multipliers
       for (int j = m_I0.getNext(-1); j != -1; j = m_I0.getNext(j)) {
         if ((j != i1) && (j != i2)) {
@@ -1083,15 +977,6 @@ public class MISMO
   /** The binary classifier(s) */
   protected BinaryMISMO[][] m_classifiers = null;
 
-  /** The exponent for the polynomial kernel. */
-  protected double m_exponent = 1.0;
-
-  /** Use lower-order terms? */
-  protected boolean m_lowerOrder = false;
-
-  /** Gamma for the RBF kernel. */
-  protected double m_gamma = 0.01;
-
   /** The complexity parameter. */
   protected double m_C = 1.0;
 
@@ -1104,17 +989,8 @@ public class MISMO
   /** Whether to normalize/standardize/neither */
   protected int m_filterType = FILTER_NORMALIZE;
 
-  /** Feature-space normalization? */
-  protected boolean m_featureSpaceNormalization = false;
-
-  /** Use RBF kernel? (default: poly) */
-  protected boolean m_useRBF = false;
-
   /** Use MIMinimax feature space?  */
   protected boolean m_minimax = false;   
-
-  /** The size of the cache (a prime number) */
-  protected int m_cacheSize = 250007;
 
   /** The filter used to make attributes numeric. */
   protected NominalToBinary m_NominalToBinary;
@@ -1125,15 +1001,14 @@ public class MISMO
   /** The filter used to get rid of missing values. */
   protected ReplaceMissingValues m_Missing;
 
-  /** Only numeric attributes in the dataset? */
-  protected boolean m_onlyNumeric;
-
   /** The class index from the training data */
   protected int m_classIndex = -1;
 
   /** The class attribute */
   protected Attribute m_classAttribute;
-
+  
+  /** Kernel to use **/
+  protected Kernel m_kernel = new MIPolyKernel();
 
   /** Turn off all checks and conversions? Turning them off assumes
     that data is purely numeric, doesn't contain any missing values,
@@ -1176,7 +1051,8 @@ public class MISMO
    * @return      the capabilities of this classifier
    */
   public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
+    Capabilities result = getKernel().getCapabilities();
+    result.setOwner(this);
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1184,6 +1060,8 @@ public class MISMO
     result.enable(Capability.MISSING_VALUES);
 
     // class
+    result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
@@ -1201,17 +1079,16 @@ public class MISMO
    * @see               Capabilities
    */
   public Capabilities getMultiInstanceCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+    Capabilities result = ((MultiInstanceCapabilitiesHandler) getKernel()).getMultiInstanceCapabilities();
+    result.setOwner(this);
 
-    // class
-    result.disableAllClasses();
-    result.enable(Capability.NO_CLASS);
+    // attribute
+    result.enableAllAttributeDependencies();
+    // with NominalToBinary we can also handle nominal attributes, but only
+    // if the kernel can handle numeric attributes
+    if (result.handles(Capability.NUMERIC_ATTRIBUTES))
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
     
     return result;
   }
@@ -1247,30 +1124,37 @@ public class MISMO
       insts = data;     
     }
 
-    m_onlyNumeric = true;
-    if (!m_checksTurnedOff) {
-      for (int i = 0; i < insts.numAttributes(); i++) {
-        if (i != insts.classIndex()) {
-          if (!insts.attribute(i).isNumeric()) {
-            m_onlyNumeric = false;
-            break;
-          }
-        }
-      }
-    }
-
     // filter data
     if (!m_checksTurnedOff) 
       m_Missing = new ReplaceMissingValues();
     else 
       m_Missing = null;
 
-
-    if (!m_onlyNumeric) 
-      m_NominalToBinary = new NominalToBinary();
-    else 
+    if (getCapabilities().handles(Capability.NUMERIC_ATTRIBUTES)) {
+      boolean onlyNumeric = true;
+      if (!m_checksTurnedOff) {
+	for (int i = 0; i < insts.numAttributes(); i++) {
+	  if (i != insts.classIndex()) {
+	    if (!insts.attribute(i).isNumeric()) {
+	      onlyNumeric = false;
+	      break;
+	    }
+	  }
+	}
+      }
+      
+      if (!onlyNumeric) {
+	m_NominalToBinary = new NominalToBinary();
+	// exclude the bag attribute
+	m_NominalToBinary.setAttributeIndices("2-last");
+      }
+      else {
+	m_NominalToBinary = null;
+      }
+    }
+    else {
       m_NominalToBinary = null;
-
+    }
 
     if (m_filterType == FILTER_STANDARDIZE) 
       m_Filter = new Standardize();
@@ -1292,24 +1176,24 @@ public class MISMO
       transMinimax.setTransformMethod(
           new SelectedTag(
             SimpleMI.TRANSFORMMETHOD_MINIMAX, SimpleMI.TAGS_TRANSFORMMETHOD));
-      transformedInsts= transMinimax.transform (insts);
+      transformedInsts = transMinimax.transform(insts);
     }
     else { 
       convertToProp.setInputFormat(insts);
       transformedInsts=Filter.useFilter(insts, convertToProp);
     }
 
-    if (m_Missing!=null) {
+    if (m_Missing != null) {
       m_Missing.setInputFormat(transformedInsts);
       transformedInsts = Filter.useFilter(transformedInsts, m_Missing); 
     }
 
-    /*  if (m_NominalToBinary!=null) { 
-        m_NominalToBinary.setInputFormat(transformedInsts);
-        transformedInsts = Filter.useFilter(transformedInsts, m_NominalToBinary); 
-        }*/
+    if (m_NominalToBinary != null) { 
+      m_NominalToBinary.setInputFormat(transformedInsts);
+      transformedInsts = Filter.useFilter(transformedInsts, m_NominalToBinary); 
+    }
 
-    if (m_Filter!=null) {
+    if (m_Filter != null) {
       m_Filter.setInputFormat(transformedInsts);
       transformedInsts = Filter.useFilter(transformedInsts, m_Filter); 
     }
@@ -1320,7 +1204,6 @@ public class MISMO
 
     m_classIndex = insts.classIndex();
     m_classAttribute = insts.classAttribute();
-
 
     // Generate subsets representing each class
     Instances[] subsets = new Instances[insts.numClasses()];
@@ -1341,6 +1224,7 @@ public class MISMO
     for (int i = 0; i < insts.numClasses(); i++) {
       for (int j = i + 1; j < insts.numClasses(); j++) {
         m_classifiers[i][j] = new BinaryMISMO();  
+        m_classifiers[i][j].setKernel(Kernel.makeCopy(getKernel()));
         Instances data = new Instances(insts, insts.numInstances());
         for (int k = 0; k < subsets[i].numInstances(); k++) {
           data.add(subsets[i].instance(k));
@@ -1390,9 +1274,6 @@ public class MISMO
     // Filter instances 
     if (m_Missing!=null) 
       insts = Filter.useFilter(insts, m_Missing); 
-
-    // if (m_NominalToBinary!=null) 
-    //  insts = Filter.useFilter(insts, m_NominalToBinary); 
 
     if (m_Filter!=null)
       insts = Filter.useFilter(insts, m_Filter);     
@@ -1517,48 +1398,6 @@ public class MISMO
   }
 
   /**
-   * Returns an array of votes for the given instance.
-   * @param inst the instance
-   * @return array of votex
-   * @throws Exception if something goes wrong
-   */
-  /* public int[] obtainVotes(Instance inst) throws Exception {
-  // Filter instance
-  if (!m_checksTurnedOff) {
-  m_Missing.input(inst);
-  m_Missing.batchFinished();
-  inst = m_Missing.output();
-  }
-
-  if (!m_onlyNumeric) {
-  m_NominalToBinary.input(inst);
-  m_NominalToBinary.batchFinished();
-  inst = m_NominalToBinary.output();
-  }
-
-  if (m_Filter != null) {
-  m_Filter.input(inst);
-  m_Filter.batchFinished();
-  inst = m_Filter.output();
-  }
-
-  int[] votes = new int[inst.numClasses()];
-  for (int i = 0; i < inst.numClasses(); i++) {
-  for (int j = i + 1; j < inst.numClasses(); j++) {
-  double output = m_classifiers[i][j].SVMOutput(-1, inst);
-  if (output > 0) {
-  votes[j] += 1;
-  } else {
-  votes[i] += 1;
-  }
-  }
-  }
-  return votes;
-  }
-  */
-
-
-  /**
    * Returns the weights in sparse format.
    * 
    * @return the weights in sparse format
@@ -1675,17 +1514,23 @@ public class MISMO
 
     Vector result = new Vector();
 
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
+
+    result.addElement(new Option(
+	"\tTurns off all checks - use with caution!\n"
+	+ "\tTurning them off assumes that data is purely numeric, doesn't\n"
+	+ "\tcontain any missing values, and has a nominal class. Turning them\n"
+	+ "\toff also means that no header information will be stored if the\n"
+	+ "\tmachine is linear. Finally, it also assumes that no instance has\n"
+	+ "\ta weight equal to 0.\n"
+	+ "\t(default: checks on)",
+	"no-checks", 0, "-no-checks"));
+
     result.addElement(new Option(
           "\tThe complexity constant C. (default 1)",
           "C", 1, "-C <double>"));
-    
-    result.addElement(new Option(
-          "\tThe exponent for the polynomial kernel. (default 1)",
-          "E", 1, "-E <double>"));
-    
-    result.addElement(new Option(
-          "\tGamma for the RBF kernel. (default 0.01)",
-          "G", 1, "-G <double>"));
     
     result.addElement(new Option(
           "\tWhether to 0=normalize/1=standardize/2=neither.\n" 
@@ -1693,27 +1538,8 @@ public class MISMO
           "N", 1, "-N"));
     
     result.addElement(new Option(
-          "\tFeature-space normalization (only for\n"
-          + "\tnon-linear polynomial kernels).",
-          "F", 0, "-F"));
-    
-    result.addElement(new Option(
-          "\tUse lower-order terms (only for non-linear\n"
-          + "\tpolynomial kernels).",
-          "O", 0, "-O"));
-    
-    result.addElement(new Option(
-          "\tUse MIRBF kernel. (default poly)",
-          "R", 0, "-R"));
-    
-    result.addElement(new Option(
           "\tUse MIminimax feature space. ",
-          "R", 0, "-I"));
-    
-    result.addElement(new Option(
-          "\tThe size of the kernel cache. \n"
-          + "\t(default 250007, use 0 for full cache)",
-          "A", 1, "-A <int>"));
+          "I", 0, "-I"));
     
     result.addElement(new Option(
           "\tThe tolerance parameter. (default 1.0e-3)",
@@ -1735,6 +1561,20 @@ public class MISMO
     result.addElement(new Option(
           "\tThe random number seed. (default 1)",
           "W", 1, "-W <double>"));
+    
+    result.addElement(new Option(
+	"\tThe Kernel to use.\n"
+	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
+	"K", 1, "-K <classname and parameters>"));
+
+    result.addElement(new Option(
+	"",
+	"", 0, "\nOptions specific to kernel "
+	+ getKernel().getClass().getName() + ":"));
+    
+    enm = ((OptionHandler) getKernel()).listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     return result.elements();
   }
@@ -1745,36 +1585,28 @@ public class MISMO
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  Turning them off assumes that data is purely numeric, doesn't
+   *  contain any missing values, and has a nominal class. Turning them
+   *  off also means that no header information will be stored if the
+   *  machine is linear. Finally, it also assumes that no instance has
+   *  a weight equal to 0.
+   *  (default: checks on)</pre>
+   * 
    * <pre> -C &lt;double&gt;
    *  The complexity constant C. (default 1)</pre>
-   * 
-   * <pre> -E &lt;double&gt;
-   *  The exponent for the polynomial kernel. (default 1)</pre>
-   * 
-   * <pre> -G &lt;double&gt;
-   *  Gamma for the RBF kernel. (default 0.01)</pre>
    * 
    * <pre> -N
    *  Whether to 0=normalize/1=standardize/2=neither.
    *  (default 0=normalize)</pre>
    * 
-   * <pre> -F
-   *  Feature-space normalization (only for
-   *  non-linear polynomial kernels).</pre>
-   * 
-   * <pre> -O
-   *  Use lower-order terms (only for non-linear
-   *  polynomial kernels).</pre>
-   * 
-   * <pre> -R
-   *  Use MIRBF kernel. (default poly)</pre>
-   * 
    * <pre> -I
    *  Use MIminimax feature space. </pre>
-   * 
-   * <pre> -A &lt;int&gt;
-   *  The size of the kernel cache. 
-   *  (default 250007, use 0 for full cache)</pre>
    * 
    * <pre> -L &lt;double&gt;
    *  The tolerance parameter. (default 1.0e-3)</pre>
@@ -1792,87 +1624,94 @@ public class MISMO
    * <pre> -W &lt;double&gt;
    *  The random number seed. (default 1)</pre>
    * 
+   * <pre> -K &lt;classname and parameters&gt;
+   *  The Kernel to use.
+   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   * 
+   * <pre> 
+   * Options specific to kernel weka.classifiers.mi.supportVector.MIPolyKernel:
+   * </pre>
+   * 
+   * <pre> -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number).
+   *  (default: 250007)</pre>
+   * 
+   * <pre> -E &lt;num&gt;
+   *  The Exponent to use.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -L
+   *  Use lower-order terms.
+   *  (default: no)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
+    String	tmpStr;
+    String[]	tmpOptions;
+    
+    setChecksTurnedOff(Utils.getFlag("no-checks", options));
 
-    setDebug(Utils.getFlag('D', options));
+    tmpStr = Utils.getOption('C', options);
+    if (tmpStr.length() != 0)
+      setC(Double.parseDouble(tmpStr));
+    else
+      setC(1.0);
 
-    String complexityString = Utils.getOption('C', options);
-    if (complexityString.length() != 0) {
-      m_C = (new Double(complexityString)).doubleValue();
-    } else {
-      m_C = 1.0;
-    }
-    String exponentsString = Utils.getOption('E', options);
-    if (exponentsString.length() != 0) {
-      m_exponent = (new Double(exponentsString)).doubleValue();
-    } else {
-      m_exponent = 1.0;
-    }
-    String gammaString = Utils.getOption('G', options);
-    if (gammaString.length() != 0) {
-      m_gamma = (new Double(gammaString)).doubleValue();
-    } else {
-      m_gamma = 0.01;
-    }
-    String cacheString = Utils.getOption('A', options);
-    if (cacheString.length() != 0) {
-      m_cacheSize = Integer.parseInt(cacheString);
-    } else {
-      m_cacheSize = 250007;
-    }
-    String toleranceString = Utils.getOption('L', options);
-    if (toleranceString.length() != 0) {
-      m_tol = (new Double(toleranceString)).doubleValue();
-    } else {
-      m_tol = 1.0e-3;
-    }
-    String epsilonString = Utils.getOption('P', options);
-    if (epsilonString.length() != 0) {
-      m_eps = (new Double(epsilonString)).doubleValue();
-    } else {
-      m_eps = 1.0e-12;
-    }
-    m_useRBF = Utils.getFlag('R', options);
-    m_minimax = Utils.getFlag('I', options);
+    tmpStr = Utils.getOption('L', options);
+    if (tmpStr.length() != 0)
+      setToleranceParameter(Double.parseDouble(tmpStr));
+    else
+      setToleranceParameter(1.0e-3);
+    
+    tmpStr = Utils.getOption('P', options);
+    if (tmpStr.length() != 0)
+      setEpsilon(new Double(tmpStr));
+    else
+      setEpsilon(1.0e-12);
 
-    String nString = Utils.getOption('N', options);
-    if (nString.length() != 0) {
-      setFilterType(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
-    } else {
+    setMinimax(Utils.getFlag('I', options));
+
+    tmpStr = Utils.getOption('N', options);
+    if (tmpStr.length() != 0)
+      setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
+    else
       setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
-    }
-    m_featureSpaceNormalization = Utils.getFlag('F', options);
-    if ((m_useRBF) && (m_featureSpaceNormalization)) {
-      throw new Exception("RBF machine doesn't require feature-space normalization.");
-    }
-    if ((m_exponent == 1.0) && (m_featureSpaceNormalization)) {
-      throw new Exception("Can't use feature-space normalization with linear machine.");
-    }
-    m_lowerOrder = Utils.getFlag('O', options);
-    if ((m_useRBF) && (m_lowerOrder)) {
-      throw new Exception("Can't use lower-order terms with RBF machine.");
-    }
-    if ((m_exponent == 1.0) && (m_lowerOrder)) {
-      throw new Exception("Can't use lower-order terms with linear machine.");
-    }
-    m_fitLogisticModels = Utils.getFlag('M', options);
-    String foldsString = Utils.getOption('V', options);
-    if (foldsString.length() != 0) {
-      m_numFolds = Integer.parseInt(foldsString);
-    } else {
+    
+    setBuildLogisticModels(Utils.getFlag('M', options));
+    
+    tmpStr = Utils.getOption('V', options);
+    if (tmpStr.length() != 0)
+      m_numFolds = Integer.parseInt(tmpStr);
+    else
       m_numFolds = -1;
+
+    tmpStr = Utils.getOption('W', options);
+    if (tmpStr.length() != 0)
+      setRandomSeed(Integer.parseInt(tmpStr));
+    else
+      setRandomSeed(1);
+
+    tmpStr     = Utils.getOption('K', options);
+    tmpOptions = Utils.splitOptions(tmpStr);
+    if (tmpOptions.length != 0) {
+      tmpStr        = tmpOptions[0];
+      tmpOptions[0] = "";
+      setKernel(Kernel.forName(tmpStr, tmpOptions));
     }
-    String randomSeedString = Utils.getOption('W', options);
-    if (randomSeedString.length() != 0) {
-      m_randomSeed = Integer.parseInt(randomSeedString);
-    } else {
-      m_randomSeed = 1;
-    }
+    
+    super.setOptions(options);
   }
 
   /**
@@ -1881,125 +1720,111 @@ public class MISMO
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
-    
-    result = new Vector();
+    int       i;
+    Vector    result;
+    String[]  options;
 
-    if (getDebug())
-      result.add("-D");
-    
+    result = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    if (getChecksTurnedOff())
+      result.add("-no-checks");
+
     result.add("-C"); 
-    result.add("" + m_C);
-    
-    result.add("-E");
-    result.add("" + m_exponent);
-    
-    result.add("-G");
-    result.add("" + m_gamma);
-    
-    result.add("-A");
-    result.add("" + m_cacheSize);
+    result.add("" + getC());
     
     result.add("-L");
-    result.add("" + m_tol);
+    result.add("" + getToleranceParameter());
     
     result.add("-P");
-    result.add("" + m_eps);
+    result.add("" + getEpsilon());
     
     result.add("-N");
     result.add("" + m_filterType);
     
-    if (m_featureSpaceNormalization) {
-      result.add("-F");
-    }
-    
-    if (m_lowerOrder) {
-      result.add("-O");
-    }
-    
-    if (m_useRBF) {
-      result.add("-R");
-    }
-    
-    if (m_minimax) {
+    if (getMinimax())
       result.add("-I");
-    }
 
-    if (m_fitLogisticModels) {
+    if (getBuildLogisticModels())
       result.add("-M");
-    }
     
     result.add("-V");
-    result.add("" + m_numFolds);
+    result.add("" + getNumFolds());
     
     result.add("-W");
-    result.add("" + m_randomSeed);
+    result.add("" + getRandomSeed());
+    
+    result.add("-K");
+    result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
+    
+    return (String[]) result.toArray(new String[result.size()]);	  
+  }
 
-    return (String[]) result.toArray(new String[result.size()]);
+  /**
+   * Disables or enables the checks (which could be time-consuming). Use with
+   * caution!
+   * 
+   * @param value	if true turns off all checks
+   */
+  public void setChecksTurnedOff(boolean value) {
+    if (value)
+      turnChecksOff();
+    else
+      turnChecksOn();
+  }
+  
+  /**
+   * Returns whether the checks are turned off or not.
+   * 
+   * @return		true if the checks are turned off
+   */
+  public boolean getChecksTurnedOff() {
+    return m_checksTurnedOff;
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
    */
-  public String exponentTipText() {
-    return "The exponent for the polynomial kernel.";
+  public String checksTurnedOffTipText() {
+    return "Turns time-consuming checks off - use with caution.";
   }
-
-  /**
-   * Get the value of exponent. 
-   *
-   * @return Value of exponent.
-   */
-  public double getExponent() {
-
-    return m_exponent;
-  }
-
-  /**
-   * Set the value of exponent. If linear kernel
-   * is used, rescaling and lower-order terms are
-   * turned off.
-   *
-   * @param v  Value to assign to exponent.
-   */
-  public void setExponent(double v) {
-
-    if (v == 1.0) {
-      m_featureSpaceNormalization = false;
-      m_lowerOrder = false;
-    }
-    m_exponent = v;
-  }
-
+  
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
    */
-  public String gammaTipText() {
-    return "The value of the gamma parameter for RBF kernels.";
+  public String kernelTipText() {
+    return "The kernel to use.";
   }
 
   /**
-   * Get the value of gamma. 
+   * Gets the kernel to use.
    *
-   * @return Value of gamma.
+   * @return 		the kernel
    */
-  public double getGamma() {
-
-    return m_gamma;
+  public Kernel getKernel() {
+    return m_kernel;
   }
-
+    
   /**
-   * Set the value of gamma. 
+   * Sets the kernel to use.
    *
-   * @param v  Value to assign to gamma.
+   * @param value	the kernel
    */
-  public void setGamma(double v) {
-
-    m_gamma = v;
+  public void setKernel(Kernel value) {
+    if (!(value instanceof MultiInstanceCapabilitiesHandler))
+      throw new IllegalArgumentException(
+	  "Kernel must be able to handle multi-instance data!\n"
+	  + "(This one does not implement " + MultiInstanceCapabilitiesHandler.class.getName() + ")");
+    
+    m_kernel = value;
   }
 
   /**
@@ -2090,33 +1915,6 @@ public class MISMO
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String cacheSizeTipText() {
-    return "The size of the kernel cache (should be a prime number). Use 0 for full cache.";
-  }
-
-  /**
-   * Get the size of the kernel cache
-   * @return Size of kernel cache.
-   */
-  public int getCacheSize() {
-
-    return m_cacheSize;
-  }
-
-  /**
-   * Set the value of the kernel cache.
-   * @param v  Size of kernel cache.
-   */
-  public void setCacheSize(int v) {
-
-    m_cacheSize = v;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
   public String filterTypeTipText() {
     return "Determines how/if the data will be transformed.";
   }
@@ -2147,37 +1945,6 @@ public class MISMO
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String useRBFTipText() {
-    return "Whether to use an RBF kernel instead of a polynomial one.";
-  }
-
-  /**
-   * Check if the RBF kernel is to be used.
-   * @return true if RBF
-   */
-  public boolean getUseRBF() {
-
-    return m_useRBF;
-  }
-
-  /**
-   * Set if the RBF kernel is to be used.
-   * @param v  true if RBF
-   */
-  public void setUseRBF(boolean v) {
-
-    if (v) {
-      m_featureSpaceNormalization = false;
-      m_lowerOrder = false;
-    }
-    m_useRBF = v;
-  }
-
-  /**
-   * Returns the tip text for this property
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -2201,71 +1968,6 @@ public class MISMO
    */
   public void setMinimax(boolean v) {
     m_minimax = v;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String featureSpaceNormalizationTipText() {
-    return "Whether feature-space normalization is performed (only "
-      + "available for non-linear polynomial kernels).";
-  }
-
-  /**
-   * Check whether feature spaces is being normalized.
-   * @return true if feature space is normalized.
-   */
-  public boolean getFeatureSpaceNormalization() {
-
-    return m_featureSpaceNormalization;
-  }
-
-  /**
-   * Set whether feature space is normalized.
-   * @param v  true if feature space is to be normalized.
-   */
-  public void setFeatureSpaceNormalization(boolean v) {
-
-    if ((m_useRBF) || (m_exponent == 1.0)) {
-      m_featureSpaceNormalization = false;
-    } else {
-      m_featureSpaceNormalization = v;
-    }
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String lowerOrderTermsTipText() {
-    return "Whether lower order polyomials are also used (only "
-      + "available for non-linear polynomial kernels).";
-  }
-
-  /**
-   * Check whether lower-order terms are being used.
-   * @return Value of lowerOrder.
-   */
-  public boolean getLowerOrderTerms() {
-
-    return m_lowerOrder;
-  }
-
-  /**
-   * Set whether lower-order terms are to be used. Defaults
-   * to false if a linear machine is built.
-   * @param v  Value to assign to lowerOrder.
-   */
-  public void setLowerOrderTerms(boolean v) {
-
-    if (m_exponent == 1.0 || m_useRBF) {
-      m_lowerOrder = false;
-    } else {
-      m_lowerOrder = v;
-    }
   }
 
   /**
