@@ -102,7 +102,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.51 $
+ * @version $Revision: 1.52 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -1022,6 +1022,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         weka.gui.GenericObjectEditor.class);
     java.beans.PropertyEditorManager.registerEditor(
         weka.classifiers.bayes.net.estimate.BayesNetEstimator.class,
+        weka.gui.GenericObjectEditor.class);
+    java.beans.PropertyEditorManager.registerEditor(
+        weka.classifiers.functions.supportVector.Kernel.class,
         weka.gui.GenericObjectEditor.class);
     
     // experiment
