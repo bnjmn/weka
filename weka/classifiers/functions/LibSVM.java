@@ -134,7 +134,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LibSVM 
   extends Classifier
@@ -1265,6 +1265,7 @@ public class LibSVM
     
     StringTokenizer st = new StringTokenizer(line, " \t\n\r\f:");
     
+    st.nextToken();   // skip class
     int m = st.countTokens() / 2;
     Object x = Array.newInstance(Class.forName(CLASS_SVMNODE), m);
     for (int j = 0; j < m; j++) {
