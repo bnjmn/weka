@@ -34,16 +34,36 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
+ * The RBF kernel. K(x, y) = e^-(gamma * &lt;x-y, x-y&gt;^2)
+ * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -G &lt;num&gt;
+ *  The Gamma parameter.
+ *  (default: 0.01)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RBFKernel 
   extends CachedKernel {
@@ -121,6 +141,24 @@ public class RBFKernel
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number).
+   *  (default: 250007)</pre>
+   * 
+   * <pre> -G &lt;num&gt;
+   *  The Gamma parameter.
+   *  (default: 0.01)</pre>
+   * 
    <!-- options-end -->
    * 
    * @param options 	the list of options as an array of strings
