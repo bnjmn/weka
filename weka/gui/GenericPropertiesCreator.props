@@ -104,3 +104,9 @@ weka.core.stemmers.Stemmer=\
 weka.estimators.Estimator= \
  weka.estimators
 
+# Lists of Kernels I want to choose from
+weka.classifiers.functions.supportVector.Kernel=\
+ weka.classifiers.functions.supportVector,\
+ weka.classifiers.mi.supportVector
+
+
