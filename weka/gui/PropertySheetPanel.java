@@ -23,48 +23,47 @@
 
 package weka.gui;
 
-import java.util.Hashtable;
-import java.util.Vector;
-import java.awt.Component;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.MultiInstanceCapabilitiesHandler;
+
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.Font;
-import java.awt.Dimension;
-import java.beans.Customizer;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyDescriptor;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyEditor;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
-import java.beans.IntrospectionException;
 import java.beans.BeanInfo;
+import java.beans.Beans;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
-import java.beans.Beans;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import java.lang.reflect.Method;
+import java.util.Iterator;
+
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import java.awt.FlowLayout;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 
 
 /** 
@@ -72,11 +71,153 @@ import java.awt.FlowLayout;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
 
+  /** for serialization */
+  static final long serialVersionUID = -557854258929870536L;
+  
+  /**
+   * A specialized frame for displaying the capabilities
+   */
+  protected class CapabilitiesHelpFrame
+    extends JFrame
+    implements PropertyChangeListener {
+    
+    /** for serialization */
+    private static final long serialVersionUID = 3591124039176891020L;
+    
+    /** the frame itself */
+    private CapabilitiesHelpFrame m_Self;
+    
+    /**
+     * default constructor
+     */
+    public CapabilitiesHelpFrame() {
+      super("Information about Capabilities");
+
+      m_Self = this;
+      
+      m_CapabilitiesText = new JTextArea();
+      m_CapabilitiesText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      m_CapabilitiesText.setLineWrap(true);
+      m_CapabilitiesText.setWrapStyleWord(true);
+      m_CapabilitiesText.setEditable(false);
+      updateText();
+      addWindowListener(new WindowAdapter() {
+	public void windowClosing(WindowEvent e) {
+	  m_Self.dispose();
+	  if (m_CapabilitiesFrame == m_Self) {
+	    m_CapabilitiesBut.setEnabled(true);
+	  }
+	}
+      });
+      getContentPane().setLayout(new BorderLayout());
+      getContentPane().add(new JScrollPane(m_CapabilitiesText), BorderLayout.CENTER);
+      pack();
+    }
+
+    /**
+     * returns a comma-separated list of all the capabilities
+     * 
+     * @param c		the capabilities to get a string representation from
+     * @return		the string describing the capabilities
+     */
+    protected String listCapabilities(Capabilities c) {
+      String	result;
+      Iterator	iter;
+      
+      result = "";
+      iter   = c.capabilities();
+      while (iter.hasNext()) {
+        if (result.length() != 0)
+  	result += ", ";
+        result += iter.next().toString();
+      }
+      
+      return result;
+    }
+    
+    /**
+     * generates a string from the capapbilities, suitable to add to the help 
+     * text.
+     * 
+     * @param title	the title for the capabilities
+     * @param c		the capabilities
+     * @return		a string describing the capabilities
+     */
+    protected String addCapabilities(String title, Capabilities c) {
+      String		result;
+      String		caps;
+      
+      result = title + "\n";
+      
+      // class
+      caps = listCapabilities(c.getClassCapabilities());
+      if (caps.length() != 0) {
+	result += "Class -- ";
+	result += caps;
+	result += "\n\n";
+      }
+      
+      // attribute
+      caps = listCapabilities(c.getAttributeCapabilities());
+      if (caps.length() != 0) {
+	result += "Attributes -- ";
+	result += caps;
+	result += "\n\n";
+      }
+      
+      // other capabilities
+      caps = listCapabilities(c.getOtherCapabilities());
+      if (caps.length() != 0) {
+	result += "Other -- ";
+	result += caps;
+	result += "\n\n";
+      }
+      
+      // additional stuff
+      result += "Additional\n";
+      result += "min # of instances: " + c.getMinimumNumberInstances() + "\n";
+      result += "\n";
+      
+      return result;
+    }  
+
+    /**
+     * updates the content of the capabilities help frame
+     */
+    protected void updateText() {
+      StringBuffer helpText = new StringBuffer();
+      
+      if (m_Target instanceof CapabilitiesHandler)
+        helpText.append(
+  	  addCapabilities(
+  	      "CAPABILITIES", 
+  	      ((CapabilitiesHandler) m_Target).getCapabilities()));
+      
+      if (m_Target instanceof MultiInstanceCapabilitiesHandler)
+        helpText.append(
+  	  addCapabilities(
+  	      "MI CAPABILITIES", 
+  	      ((MultiInstanceCapabilitiesHandler) m_Target).getMultiInstanceCapabilities()));
+      
+      m_CapabilitiesText.setText(helpText.toString());
+      m_CapabilitiesText.setCaretPosition(0);
+    }
+    
+    /**
+     * This method gets called when a bound property is changed.
+     *  
+     * @param evt	the change event
+     */
+    public void propertyChange(PropertyChangeEvent evt) {
+      updateText();
+    }
+  }
+  
   /** The target object being edited */
   private Object m_Target;
 
@@ -107,8 +248,17 @@ public class PropertySheetPanel extends JPanel
   /** Help frame */
   private JFrame m_HelpFrame;
 
+  /** Capabilities Help frame */
+  private CapabilitiesHelpFrame m_CapabilitiesFrame;
+
   /** Button to pop up the full help text in a separate frame */
   private JButton m_HelpBut;
+
+  /** Button to pop up the capabilities in a separate frame */
+  private JButton m_CapabilitiesBut;
+  
+  /** the TextArea of the Capabilities help frame */
+  private JTextArea m_CapabilitiesText;
 
   /** A count of the number of properties we have an editor for */
   private int m_NumEditable = 0;
@@ -168,7 +318,7 @@ public class PropertySheetPanel extends JPanel
   public void removePropertyChangeListener(PropertyChangeListener l) {
     support.removePropertyChangeListener(l);
   }
-
+  
   /**
    * Sets a new target object for customisation.
    *
@@ -198,10 +348,8 @@ public class PropertySheetPanel extends JPanel
       return;
     }
 
-    int rowHeight = 12;
     JTextArea jt = new JTextArea();
     m_HelpText = null;
-    JScrollPane js = null;
     // Look for a globalInfo method that returns a string
     // describing the target
     for (int i = 0;i < m_Methods.length; i++) {
@@ -232,6 +380,22 @@ public class PropertySheetPanel extends JPanel
               }
             });
 
+	    if (m_Target instanceof CapabilitiesHandler) {
+	      m_CapabilitiesBut = new JButton("Capabilities");
+	      m_CapabilitiesBut.setToolTipText("The capabilities of "
+		  + className);
+	      
+	      m_CapabilitiesBut.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent a) {
+		  openCapabilitiesHelpFrame();
+		  m_CapabilitiesBut.setEnabled(false);
+		}
+	      });
+	    }
+	    else {
+	      m_CapabilitiesBut = null;
+	    }
+
 	    jt.setColumns(30);
 	    jt.setFont(new Font("SansSerif", Font.PLAIN,12));
 	    jt.setEditable(false);
@@ -239,7 +403,6 @@ public class PropertySheetPanel extends JPanel
 	    jt.setWrapStyleWord(true);
 	    jt.setText(summary);
             jt.setBackground(getBackground());
-	    rowHeight = 12;
 	    JPanel jp = new JPanel();
 	    jp.setBorder(BorderFactory.createCompoundBorder(
 			 BorderFactory.createTitledBorder("About"),
@@ -250,6 +413,12 @@ public class PropertySheetPanel extends JPanel
             JPanel p2 = new JPanel();
             p2.setLayout(new BorderLayout());
             p2.add(m_HelpBut, BorderLayout.NORTH);
+            if (m_CapabilitiesBut != null) {
+              JPanel p3 = new JPanel();
+              p3.setLayout(new BorderLayout());
+              p3.add(m_CapabilitiesBut, BorderLayout.NORTH);
+              p2.add(p3, BorderLayout.CENTER);
+            }
             jp.add(p2, BorderLayout.EAST);
 	    GridBagConstraints gbConstraints = new GridBagConstraints();
 	    //	    gbConstraints.anchor = GridBagConstraints.EAST;
@@ -393,7 +562,7 @@ public class PropertySheetPanel extends JPanel
 			     + "\" has non-displayabale editor.  Skipping.");
 	  continue;
 	}
-
+	
 	editor.addPropertyChangeListener(this);
 
       } catch (InvocationTargetException ex) {
@@ -434,6 +603,7 @@ public class PropertySheetPanel extends JPanel
       add(newPanel);
       m_NumEditable ++;
     }
+
     if (m_NumEditable == 0) {
       JLabel empty = new JLabel("No editable properties", 
                                 SwingConstants.CENTER);
@@ -452,6 +622,9 @@ public class PropertySheetPanel extends JPanel
     setVisible(true);	
   }
 
+  /**
+   * opens the help frame
+   */
   protected void openHelpFrame() {
 
     JTextArea ta = new JTextArea();
@@ -481,7 +654,19 @@ public class PropertySheetPanel extends JPanel
     jf.setVisible(true);
     m_HelpFrame = jf;
   }
-
+  
+  /**
+   * opens the help frame for the capabilities
+   */
+  protected void openCapabilitiesHelpFrame() {
+    m_CapabilitiesFrame = new CapabilitiesHelpFrame();
+    m_CapabilitiesFrame.setSize(400, 350);
+    m_CapabilitiesFrame.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
+                   + m_aboutPanel.getTopLevelAncestor().getSize().width,
+                   m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().y);
+    m_CapabilitiesFrame.setVisible(true);
+    addPropertyChangeListener(m_CapabilitiesFrame);
+  }
 
   /**
    * Gets the number of editable properties for the current target.
