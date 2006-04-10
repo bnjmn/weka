@@ -43,9 +43,9 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Class for building and using a 1R classifier; in other words, uses the minimum-error attribute for prediction, discretizing numeric attributes. For more information, see<br/>
+ * Class for building and using a 1R classifier; in other words, uses the minimum-error attribute for prediction, discretizing numeric attributes. For more information, see:<br/>
  * <br/>
- * :R.C. Holte (1993). Very simple classification rules perform well on most commonly used datasets. Machine Learning. Vol.11, pp. 63-91.
+ * R.C. Holte (1993). Very simple classification rules perform well on most commonly used datasets. Machine Learning. 11:63-91.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -55,9 +55,9 @@ import java.util.Vector;
  * &#64;article{Holte1993,
  *    author = {R.C. Holte},
  *    journal = {Machine Learning},
- *    pages = {pp. 63-91},
+ *    pages = {63-91},
  *    title = {Very simple classification rules perform well on most commonly used datasets},
- *    volume = {Vol.11},
+ *    volume = {11},
  *    year = {1993}
  * }
  * </pre>
@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
 */
 public class OneR 
   extends Classifier 
@@ -91,7 +91,7 @@ public class OneR
 
     return "Class for building and using a 1R classifier; in other words, uses "
       + "the minimum-error attribute for prediction, discretizing numeric "
-      + "attributes. For more information, see\n\n:"
+      + "attributes. For more information, see:\n\n"
       + getTechnicalInformation().toString();
   }
 
@@ -110,8 +110,8 @@ public class OneR
     result.setValue(Field.YEAR, "1993");
     result.setValue(Field.TITLE, "Very simple classification rules perform well on most commonly used datasets");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.11");
-    result.setValue(Field.PAGES, "pp. 63-91");
+    result.setValue(Field.VOLUME, "11");
+    result.setValue(Field.PAGES, "63-91");
     
     return result;
   }

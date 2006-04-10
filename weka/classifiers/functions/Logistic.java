@@ -76,7 +76,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * le Cessie, S., van Houwelingen, J.C. (1992). Ridge Estimators in Logistic Regression. Applied Statistics. Vol.41, No.1, pp. 191-201.<br/>
+ * le Cessie, S., van Houwelingen, J.C. (1992). Ridge Estimators in Logistic Regression. Applied Statistics. 41(1):191-201.<br/>
  * <br/>
  * Note: Missing values are replaced using a ReplaceMissingValuesFilter, and nominal attributes are transformed into numeric attributes using a NominalToBinaryFilter.
  * <p/>
@@ -88,10 +88,10 @@ import java.util.Vector;
  * &#64;article{leCessie1992,
  *    author = {le Cessie, S. and van Houwelingen, J.C.},
  *    journal = {Applied Statistics},
- *    number = {No.1},
- *    pages = {pp. 191-201},
+ *    number = {1},
+ *    pages = {191-201},
  *    title = {Ridge Estimators in Logistic Regression},
- *    volume = {Vol.41},
+ *    volume = {41},
  *    year = {1992}
  * }
  * </pre>
@@ -113,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -208,9 +208,9 @@ public class Logistic extends Classifier
     result.setValue(Field.YEAR, "1992");
     result.setValue(Field.TITLE, "Ridge Estimators in Logistic Regression");
     result.setValue(Field.JOURNAL, "Applied Statistics");
-    result.setValue(Field.VOLUME, "Vol.41");
-    result.setValue(Field.NUMBER, "No.1");
-    result.setValue(Field.PAGES, "pp. 191-201");
+    result.setValue(Field.VOLUME, "41");
+    result.setValue(Field.NUMBER, "1");
+    result.setValue(Field.PAGES, "191-201");
     
     return result;
   }

@@ -50,7 +50,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection. Artificial Intelligence. Vol.97, Nos.1-2, pp. 273-324.
+ * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection. Artificial Intelligence. 97(1-2):273-324.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -61,10 +61,10 @@ import java.util.Vector;
  *    author = {Ron Kohavi and George H. John},
  *    journal = {Artificial Intelligence},
  *    note = {Special issue on relevance},
- *    number = {Nos.1-2},
- *    pages = {pp. 273-324},
+ *    number = {1-2},
+ *    pages = {273-324},
  *    title = {Wrappers for feature subset selection},
- *    volume = {Vol.97},
+ *    volume = {97},
  *    year = {1997},
  *    ISSN = {0004-3702}
  * }
@@ -108,7 +108,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class WrapperSubsetEval
   extends SubsetEvaluator
@@ -168,9 +168,9 @@ public class WrapperSubsetEval
     result.setValue(Field.YEAR, "1997");
     result.setValue(Field.TITLE, "Wrappers for feature subset selection");
     result.setValue(Field.JOURNAL, "Artificial Intelligence");
-    result.setValue(Field.VOLUME, "Vol.97");
-    result.setValue(Field.NUMBER, "Nos.1-2");
-    result.setValue(Field.PAGES, "pp. 273-324");
+    result.setValue(Field.VOLUME, "97");
+    result.setValue(Field.NUMBER, "1-2");
+    result.setValue(Field.PAGES, "273-324");
     result.setValue(Field.NOTE, "Special issue on relevance");
     result.setValue(Field.ISSN, "0004-3702");
     
@@ -653,5 +653,4 @@ public class WrapperSubsetEval
       System.out.println(e.getMessage());
     }
   }
-
 }

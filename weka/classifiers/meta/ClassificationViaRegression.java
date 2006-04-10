@@ -41,7 +41,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  <!-- globalinfo-start -->
  * Class for doing classification using regression methods. Class is binarized and one regression model is built for each class value. For more information, see, for example<br/>
  * <br/>
- * E. Frank, Y. Wang, S. Inglis, G. Holmes, I.H. Witten (1998). Using model trees for classification. Machine Learning. Vol.32, No.1, pp. 63-76.
+ * E. Frank, Y. Wang, S. Inglis, G. Holmes, I.H. Witten (1998). Using model trees for classification. Machine Learning. 32(1):63-76.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -51,10 +51,10 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  * &#64;article{Frank1998,
  *    author = {E. Frank and Y. Wang and S. Inglis and G. Holmes and I.H. Witten},
  *    journal = {Machine Learning},
- *    number = {No.1},
- *    pages = {pp. 63-76},
+ *    number = {1},
+ *    pages = {63-76},
  *    title = {Using model trees for classification},
- *    volume = {Vol.32},
+ *    volume = {32},
  *    year = {1998}
  * }
  * </pre>
@@ -97,7 +97,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
 */
 public class ClassificationViaRegression 
   extends SingleClassifierEnhancer
@@ -148,9 +148,9 @@ public class ClassificationViaRegression
     result.setValue(Field.YEAR, "1998");
     result.setValue(Field.TITLE, "Using model trees for classification");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.32");
-    result.setValue(Field.NUMBER, "No.1");
-    result.setValue(Field.PAGES, "pp. 63-76");
+    result.setValue(Field.VOLUME, "32");
+    result.setValue(Field.NUMBER, "1");
+    result.setValue(Field.PAGES, "63-76");
     
     return result;
   }
@@ -279,4 +279,3 @@ public class ClassificationViaRegression
     }
   }
 }
-

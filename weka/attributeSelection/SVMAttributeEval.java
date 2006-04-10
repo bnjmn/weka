@@ -49,7 +49,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * I. Guyon, J. Weston, S. Barnhill, V. Vapnik (2002). Gene selection for cancer classification using support vector machines. Machine Learning. Vol.46, pp. 389-422.
+ * I. Guyon, J. Weston, S. Barnhill, V. Vapnik (2002). Gene selection for cancer classification using support vector machines. Machine Learning. 46:389-422.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -59,9 +59,9 @@ import java.util.Vector;
  * &#64;article{Guyon2002,
  *    author = {I. Guyon and J. Weston and S. Barnhill and V. Vapnik},
  *    journal = {Machine Learning},
- *    pages = {pp. 389-422},
+ *    pages = {389-422},
  *    title = {Gene selection for cancer classification using support vector machines},
- *    volume = {Vol.46},
+ *    volume = {46},
  *    year = {2002}
  * }
  * </pre>
@@ -115,7 +115,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator
@@ -181,8 +181,8 @@ public class SVMAttributeEval
     result.setValue(Field.YEAR, "2002");
     result.setValue(Field.TITLE, "Gene selection for cancer classification using support vector machines");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.46");
-    result.setValue(Field.PAGES, "pp. 389-422");
+    result.setValue(Field.VOLUME, "46");
+    result.setValue(Field.PAGES, "389-422");
     
     return result;
   }

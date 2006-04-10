@@ -43,7 +43,7 @@ import java.util.Enumeration;
  * <br/>
  * For more information, see <br/>
  * <br/>
- * J. Cendrowska (1987). PRISM: An algorithm for inducing modular rules. International Journal of Man-Machine Studies. Vol.27, No.4, pp. 349-370.
+ * J. Cendrowska (1987). PRISM: An algorithm for inducing modular rules. International Journal of Man-Machine Studies. 27(4):349-370.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -53,10 +53,10 @@ import java.util.Enumeration;
  * &#64;article{Cendrowska1987,
  *    author = {J. Cendrowska},
  *    journal = {International Journal of Man-Machine Studies},
- *    number = {No.4},
- *    pages = {pp. 349-370},
+ *    number = {4},
+ *    pages = {349-370},
  *    title = {PRISM: An algorithm for inducing modular rules},
- *    volume = {Vol.27},
+ *    volume = {27},
  *    year = {1987}
  * }
  * </pre>
@@ -73,7 +73,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
 */
 public class Prism 
   extends Classifier
@@ -110,9 +110,9 @@ public class Prism
     result.setValue(Field.YEAR, "1987");
     result.setValue(Field.TITLE, "PRISM: An algorithm for inducing modular rules");
     result.setValue(Field.JOURNAL, "International Journal of Man-Machine Studies");
-    result.setValue(Field.VOLUME, "Vol.27");
-    result.setValue(Field.NUMBER, "No.4");
-    result.setValue(Field.PAGES, "pp. 349-370");
+    result.setValue(Field.VOLUME, "27");
+    result.setValue(Field.NUMBER, "4");
+    result.setValue(Field.PAGES, "349-370");
     
     return result;
   }

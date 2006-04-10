@@ -50,7 +50,7 @@ import java.util.Vector;
  * <br/>
  * For more information, see<br/>
  * <br/>
- * David H. Wolpert (1992). Stacked generalization. Neural Networks. Vol.5, pp. 241-259.
+ * David H. Wolpert (1992). Stacked generalization. Neural Networks. 5:241-259.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -60,10 +60,10 @@ import java.util.Vector;
  * &#64;article{Wolpert1992,
  *    author = {David H. Wolpert},
  *    journal = {Neural Networks},
- *    pages = {pp. 241-259},
+ *    pages = {241-259},
  *    publisher = {Pergamon Press},
  *    title = {Stacked generalization},
- *    volume = {Vol.5},
+ *    volume = {5},
  *    year = {1992}
  * }
  * </pre>
@@ -96,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class Stacking 
   extends RandomizableMultipleClassifiersCombiner
@@ -145,8 +145,8 @@ public class Stacking
     result.setValue(Field.YEAR, "1992");
     result.setValue(Field.TITLE, "Stacked generalization");
     result.setValue(Field.JOURNAL, "Neural Networks");
-    result.setValue(Field.VOLUME, "Vol.5");
-    result.setValue(Field.PAGES, "pp. 241-259");
+    result.setValue(Field.VOLUME, "5");
+    result.setValue(Field.PAGES, "241-259");
     result.setValue(Field.PUBLISHER, "Pergamon Press");
     
     return result;
