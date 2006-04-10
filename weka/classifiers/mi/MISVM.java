@@ -25,6 +25,8 @@ package weka.classifiers.mi;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.supportVector.Kernel;
+import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -34,11 +36,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MultiInstanceToPropositional;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -63,7 +65,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Andrews2003,
+ * &#64;inproceedings{Andrews2003,
  *    author = {Stuart Andrews and Ioannis Tsochantaridis and Thomas Hofmann},
  *    booktitle = {Advances in Neural Information Processing Systems 15},
  *    pages = {561-568},
@@ -79,28 +81,52 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -D
- *  Turn on debugging output.</pre>
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  * <pre> -C &lt;double&gt;
  *  The complexity constant C. (default 1)</pre>
  * 
- * <pre> -E &lt;double&gt;
- *  The exponent for the polynomial kernel. (default 1)</pre>
- * 
- * <pre> -G &lt;double&gt;
- *  Gamma for the RBF kernel. (default 0.01)</pre>
- * 
- * <pre> -R
- *  Use RBF kernel. (default poly)</pre>
- * 
  * <pre> -N &lt;default 0&gt;
  *  Whether to 0=normalize/1=standardize/2=neither.
- *  (default 0=normalize)</pre>
+ *  (default: 0=normalize)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  The maximum number of iterations to perform.
+ *  (default: 500)</pre>
+ * 
+ * <pre> -K &lt;classname and parameters&gt;
+ *  The Kernel to use.
+ *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ * 
+ * <pre> 
+ * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+ * </pre>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
  * 
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  * @see weka.classifiers.functions.SMO
  */
 public class MISVM 
@@ -117,14 +143,8 @@ public class MISVM
   /** The SMO classifier used to compute SVM soluton w,b for the dataset */
   protected SVM m_SVM;
 
-  /** The exponent for the polynomial kernel. */
-  protected double m_exponent = 1.0;
-
-  /** Use RBF kernel? (default: poly) */
-  protected boolean m_useRBF = false;
-
-  /** Gamma for the RBF kernel. */
-  protected double m_gamma = 0.01;
+  /** the kernel to use */
+  protected Kernel m_kernel = new PolyKernel();
 
   /** The complexity parameter. */
   protected double m_C = 1.0;
@@ -148,12 +168,11 @@ public class MISVM
     new Tag(FILTER_NONE, "No normalization/standardization"),
   };
 
+  /** the maximum number of iterations to perform */
+  protected int m_MaxIterations = 500;
+  
   /** filter used to convert the MI dataset into single-instance dataset */
   protected MultiInstanceToPropositional m_ConvertToProp = new MultiInstanceToPropositional();
-
-  /** indicate whether use the MI weight setting instead of initialize the
-   * instance weight to be 1.0 */
-  protected boolean m_UseMIWeight=false;
 
   /**
    * Returns a string describing this filter
@@ -205,30 +224,37 @@ public class MISVM
   public Enumeration listOptions() {
     Vector result = new Vector();
     
-    result.addElement(new Option(
-          "\tTurn on debugging output.",
-          "D", 0, "-D"));
-    
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
+
     result.addElement(new Option(
           "\tThe complexity constant C. (default 1)",
           "C", 1, "-C <double>"));
     
     result.addElement(new Option(
-          "\tThe exponent for the polynomial kernel. (default 1)",
-          "E", 1, "-E <double>"));
-    
+        "\tWhether to 0=normalize/1=standardize/2=neither.\n"
+        + "\t(default: 0=normalize)",
+        "N", 1, "-N <default 0>"));
+  
     result.addElement(new Option(
-          "\tGamma for the RBF kernel. (default 0.01)",
-          "G", 1, "-G <double>"));	
-    
+        "\tThe maximum number of iterations to perform.\n"
+        + "\t(default: 500)",
+        "I", 1, "-I <num>"));
+  
     result.addElement(new Option(
-          "\tUse RBF kernel. (default poly)",
-          "R", 0, "-R"));	
-    
+	"\tThe Kernel to use.\n"
+	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
+	"K", 1, "-K <classname and parameters>"));
+
     result.addElement(new Option(
-          "\tWhether to 0=normalize/1=standardize/2=neither.\n"
-          + "\t(default 0=normalize)",
-          "N", 1, "-N <default 0>"));
+	"",
+	"", 0, "\nOptions specific to kernel "
+	+ getKernel().getClass().getName() + ":"));
+    
+    enm = ((OptionHandler) getKernel()).listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     return result.elements();
   }
@@ -242,23 +268,47 @@ public class MISVM
    * Valid options are: <p/>
    * 
    * <pre> -D
-   *  Turn on debugging output.</pre>
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
    * 
    * <pre> -C &lt;double&gt;
    *  The complexity constant C. (default 1)</pre>
    * 
-   * <pre> -E &lt;double&gt;
-   *  The exponent for the polynomial kernel. (default 1)</pre>
-   * 
-   * <pre> -G &lt;double&gt;
-   *  Gamma for the RBF kernel. (default 0.01)</pre>
-   * 
-   * <pre> -R
-   *  Use RBF kernel. (default poly)</pre>
-   * 
    * <pre> -N &lt;default 0&gt;
    *  Whether to 0=normalize/1=standardize/2=neither.
-   *  (default 0=normalize)</pre>
+   *  (default: 0=normalize)</pre>
+   * 
+   * <pre> -I &lt;num&gt;
+   *  The maximum number of iterations to perform.
+   *  (default: 500)</pre>
+   * 
+   * <pre> -K &lt;classname and parameters&gt;
+   *  The Kernel to use.
+   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   * 
+   * <pre> 
+   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+   * </pre>
+   * 
+   * <pre> -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number).
+   *  (default: 250007)</pre>
+   * 
+   * <pre> -E &lt;num&gt;
+   *  The Exponent to use.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -L
+   *  Use lower-order terms.
+   *  (default: no)</pre>
    * 
    <!-- options-end -->
    * 
@@ -266,37 +316,36 @@ public class MISVM
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    setDebug(Utils.getFlag('D', options));
-
-    setUseRBF(Utils.getFlag('R', options));
-
-    String complexityString = Utils.getOption('C', options);
-    if (complexityString.length() != 0) {
-      setC(Double.parseDouble(complexityString));
-    } else {
+    String	tmpStr;
+    String[]	tmpOptions;
+    
+    tmpStr = Utils.getOption('C', options);
+    if (tmpStr.length() != 0)
+      setC(Double.parseDouble(tmpStr));
+    else
       setC(1.0);
-    }
     
-    String exponentsString = Utils.getOption('E', options);
-    if (exponentsString.length() != 0) {
-      setExponent(Double.parseDouble(exponentsString));
-    } else {
-      setExponent(1.0);
-    }
-    
-    String gammaString = Utils.getOption('G', options);
-    if (gammaString.length() != 0) {
-      setGamma(Double.parseDouble(gammaString));
-    } else {
-      setGamma(0.01);
-    }
-
-    String nString = Utils.getOption('N', options);
-    if (nString.length() != 0) {
-      setFilterType(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
-    } else {
+    tmpStr = Utils.getOption('N', options);
+    if (tmpStr.length() != 0)
+      setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
+    else
       setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
-    }     
+
+    tmpStr = Utils.getOption('I', options);
+    if (tmpStr.length() != 0)
+      setMaxIterations(Integer.parseInt(tmpStr));
+    else
+      setMaxIterations(500);
+    
+    tmpStr     = Utils.getOption('K', options);
+    tmpOptions = Utils.splitOptions(tmpStr);
+    if (tmpOptions.length != 0) {
+      tmpStr        = tmpOptions[0];
+      tmpOptions[0] = "";
+      setKernel(Kernel.forName(tmpStr, tmpOptions));
+    }
+    
+    super.setOptions(options);
   }
 
 
@@ -316,19 +365,41 @@ public class MISVM
     result.add("-C");
     result.add("" + getC());
     
-    result.add("-E");
-    result.add("" + getExponent());
-    
-    result.add("-G");
-    result.add("" + getGamma());
-    
     result.add("-N");
     result.add("" + m_filterType);
 
-    if (getUseRBF())
-      result.add("-R");
+    result.add("-K");
+    result.add("" + getKernel().getClass().getName() + " " + Utils.joinOptions(getKernel().getOptions()));
 
     return (String[]) result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String kernelTipText() {
+    return "The kernel to use.";
+  }
+
+  /**
+   * Gets the kernel to use.
+   *
+   * @return 		the kernel
+   */
+  public Kernel getKernel() {
+    return m_kernel;
+  }
+    
+  /**
+   * Sets the kernel to use.
+   *
+   * @param value	the kernel
+   */
+  public void setKernel(Kernel value) {
+    m_kernel = value;
   }
 
   /**
@@ -371,90 +442,6 @@ public class MISVM
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String exponentTipText() {
-    return "The value of the exponent.";
-  }
-
-  /**
-   * Get the value of exponent. 
-   *
-   * @return Value of exponent.
-   */
-  public double getExponent() {
-    return m_exponent;
-  }
-
-  /**
-   * Set the value of exponent. If linear kernel
-   * is used, rescaling and lower-order terms are
-   * turned off.
-   *
-   * @param v  Value to assign to exponent.
-   */
-  public void setExponent(double v) {
-    m_exponent = v;
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String gammaTipText() {
-    return "The value for Gamma.";
-  }
-
-  /**
-   * Get the value of gamma. 
-   *
-   * @return Value of gamma.
-   */
-  public double getGamma() {
-    return m_gamma;
-  }
-
-  /**
-   * Set the value of gamma. 
-   *
-   * @param v  Value to assign to gamma.
-   */
-  public void setGamma(double v) {
-    m_gamma = v;
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String useRBFTipText() {
-    return "Whether to use a RBF kernel.";
-  }
-
-  /**
-   * Check if the RBF kernel is to be used.
-   * @return true if RBF
-   */
-  public boolean getUseRBF() {
-    return m_useRBF;
-  }
-
-  /**
-   * Set if the RBF kernel is to be used.
-   * @param v  true if RBF
-   */
-  public void setUseRBF(boolean v) {
-    m_useRBF = v;
-  }
-
-  /**
-   * Returns the tip text for this property
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
   public String cTipText() {
     return "The value for C.";
   }
@@ -478,6 +465,41 @@ public class MISVM
     m_C = v;
   }
 
+  /**
+   * Returns the tip text for this property
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String maxIterationsTipText() {
+    return "The maximum number of iterations to perform.";
+  }
+
+  /**
+   * Gets the maximum number of iterations.
+   *
+   * @return 		the maximum number of iterations.
+   */
+  public int getMaxIterations() {
+    return m_MaxIterations;
+  }
+
+  /**
+   * Sets the maximum number of iterations.
+   *
+   * @param value	the maximum number of iterations.
+   */
+  public void setMaxIterations(int value) {
+    if (value < 1)
+      System.out.println(
+	  "At least 1 iteration is necessary (provided: " + value + ")!");
+    else
+      m_MaxIterations = value;
+  }
+
+  /**
+   * adapted version of SMO
+   */
   private class SVM extends SMO {
     
     /** for serialization */
@@ -490,9 +512,17 @@ public class MISVM
       super();
     }
 
-    protected double output (int index, Instance inst) throws Exception {
-      double output=0;
-      output=m_classifiers[0][1].SVMOutput(index, inst);
+    /**
+     * Computes SVM output for given instance.
+     *
+     * @param index the instance for which output is to be computed
+     * @param inst the instance 
+     * @return the output of the SVM for the given instance
+     * @throws Exception in case of an error
+     */
+    protected double output(int index, Instance inst) throws Exception {
+      double output = 0;
+      output = m_classifiers[0][1].SVMOutput(index, inst);
       return output;
     }
   }
@@ -511,6 +541,8 @@ public class MISVM
     result.enable(Capability.MISSING_VALUES);
 
     // class
+    result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.BINARY_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
@@ -528,14 +560,22 @@ public class MISVM
    * @see               Capabilities
    */
   public Capabilities getMultiInstanceCapabilities() {
-    Capabilities result = super.getCapabilities();
-    
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+    SVM 		classifier;
+    Capabilities 	result;
 
+    classifier = null;
+    result     = null;
+    
+    try {
+      classifier = new SVM();
+      classifier.setKernel(Kernel.makeCopy(getKernel()));
+      result = classifier.getCapabilities();
+      result.setOwner(this);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+    
     // class
     result.disableAllClasses();
     result.enable(Capability.NO_CLASS);
@@ -618,11 +658,7 @@ public class MISVM
       // set the proper SMO options in order to build a SVM model
       m_SVM = new SVM();
       m_SVM.setC(getC());
-      m_SVM.setExponent(getExponent()); 
-      if (getUseRBF()){
-        m_SVM.setUseRBF(true);
-        m_SVM.setGamma(getGamma());
-      }
+      m_SVM.setKernel(Kernel.makeCopy(getKernel()));
       // SVM model do not normalize / standardize the input dataset as the the dataset has already been processed  
       m_SVM.setFilterType(new SelectedTag(FILTER_NONE, TAGS_FILTER));  
 
@@ -695,7 +731,7 @@ public class MISVM
         }else   //negative bags
           index += bagSize[h];
       }
-    }while(!instLabels.equals(pre_instLabels) && loopNum<500);
+    }while(!instLabels.equals(pre_instLabels) && loopNum < m_MaxIterations);
 
     if (getDebug())
       System.out.println("finish building model.");
@@ -713,32 +749,32 @@ public class MISVM
 
     double sum=0;
     double classValue;
-    double [] distribution = new double[2];
+    double[] distribution = new double[2];
 
     Instances testData = new Instances(exmp.dataset(), 0);
     testData.add(exmp);
 
     // convert the training dataset into single-instance dataset
-    testData = Filter.useFilter( testData, m_ConvertToProp);	
+    testData = Filter.useFilter(testData, m_ConvertToProp);	
     testData.deleteAttributeAt(0); //remove the bagIndex attribute	
 
-    if (m_Filter!=null)	
+    if (m_Filter != null)	
       testData = Filter.useFilter(testData, m_Filter); 
 
-    for(int j=0; j<testData.numInstances() ; j++){
-      Instance inst=testData.instance(j);
-      double output=m_SVM.output(-1, inst); 
-      if (output<=0)
-        classValue=0.0;
+    for(int j = 0; j < testData.numInstances(); j++){
+      Instance inst = testData.instance(j);
+      double output = m_SVM.output(-1, inst); 
+      if (output <= 0)
+        classValue = 0.0;
       else
-        classValue=1.0;
+        classValue = 1.0;
       sum += classValue;
     }
-    if (sum==0)
+    if (sum == 0)
       distribution[0] = 1.0;
     else 
-      distribution[0]=0.0;
-    distribution [1]=1.0-distribution[0];
+      distribution[0] = 0.0;
+    distribution [1] = 1.0 - distribution[0];
 
     return distribution;
   }

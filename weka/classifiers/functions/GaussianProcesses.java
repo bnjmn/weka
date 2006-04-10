@@ -26,7 +26,6 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.functions.supportVector.NormalizedPolyKernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.Capabilities;
@@ -38,11 +37,11 @@ import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -56,7 +55,7 @@ import java.util.Vector;
  <!-- globalinfo-start -->
  * Implements Gaussian Processes for regression without hyperparameter-tuning. For more information see<br/>
  * <br/>
- * David J.C. Mackay (1998). Introduction to Gaussian Processes. Dept. of Physics, Cambridge University, UK. URL http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz.
+ * David J.C. Mackay (1998). Introduction to Gaussian Processes. Dept. of Physics, Cambridge University, UK.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -68,7 +67,7 @@ import java.util.Vector;
  *    author = {David J.C. Mackay},
  *    title = {Introduction to Gaussian Processes},
  *    year = {1998},
- *    URL = {http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz}
+ *    PS = {http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz}
  * }
  * </pre>
  * <p/>
@@ -77,11 +76,9 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -E &lt;double&gt;
- *  The exponent for the polynomial kernel. (default 1)</pre>
- * 
- * <pre> -G &lt;double&gt;
- *  Gamma for the RBF kernel. (default 0.01)</pre>
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  * <pre> -L &lt;double&gt;
  *  Level of Gaussian Noise. (default 0.1)</pre>
@@ -89,21 +86,34 @@ import java.util.Vector;
  * <pre> -N
  *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
  * 
- * <pre> -F
- *  Feature-space normalization (only for
- *  non-linear polynomial kernels).</pre>
+ * <pre> -K &lt;classname and parameters&gt;
+ *  The Kernel to use.
+ *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
  * 
- * <pre> -O
- *  Use lower-order terms (only for non-linear
- *  polynomial kernels).</pre>
+ * <pre> 
+ * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+ * </pre>
  * 
- * <pre> -P
- *  Use Polynomial kernel. (default false)</pre>
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -G &lt;num&gt;
+ *  The Gamma parameter.
+ *  (default: 0.01)</pre>
  * 
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -112,9 +122,6 @@ public class GaussianProcesses
   /** for serialization */
   static final long serialVersionUID = -8620066949967678545L;
   
-  /** Only numeric attributes in the dataset? */
-  protected boolean m_onlyNumeric;
-
   /** The filter used to make attributes numeric. */
   protected NominalToBinary m_NominalToBinary;
   
@@ -144,24 +151,6 @@ public class GaussianProcesses
       that data is purely numeric, doesn't contain any missing values,
       and has a numeric class. */
   protected boolean m_checksTurnedOff = false;
-    
-  /** Feature-space normalization? */ 
-  protected boolean m_featureSpaceNormalization = false;
-
-  /** Use Polynomial kernel? (default: RBF) */
-  protected boolean m_usePoly = false;
-    
-  /** The size of the cache (a prime number) */
-  protected int m_cacheSize = 1;
-    
-  /** Use lower-order terms? */
-  protected boolean m_lowerOrder = false;
-
-  /** The exponent for the polynomial kernel. */
-  protected double m_exponent = 1.0;
-    
-  /** Gamma for the RBF kernel. */
-  protected double m_gamma = 1.0;
 
   /** Gaussian Noise Value. */
   protected double m_delta = 1.0;
@@ -175,7 +164,7 @@ public class GaussianProcesses
   protected double m_Blin;
 
   /** Kernel to use **/
-  protected Kernel m_kernel;
+  protected Kernel m_kernel = null;
 
   /** The training data. */
   protected Instances m_data;
@@ -188,7 +177,20 @@ public class GaussianProcesses
     
   /** The vector of target values. */
   protected weka.core.matrix.Matrix m_t;
+  
+  /** whether the kernel is a linear one */
+  protected boolean m_KernelIsLinear = false;
 
+  /**
+   * the default constructor
+   */
+  public GaussianProcesses() {
+    super();
+    
+    m_kernel = new RBFKernel();
+    ((RBFKernel) m_kernel).setGamma(1.0);
+  }
+  
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -217,7 +219,7 @@ public class GaussianProcesses
     result.setValue(Field.YEAR, "1998");
     result.setValue(Field.TITLE, "Introduction to Gaussian Processes");
     result.setValue(Field.ADDRESS, "Dept. of Physics, Cambridge University, UK");
-    result.setValue(Field.URL, "http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz");
+    result.setValue(Field.PS, "http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz");
     
     return result;
   }
@@ -228,15 +230,20 @@ public class GaussianProcesses
    * @return      the capabilities of this classifier
    */
   public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
+    Capabilities result = getKernel().getCapabilities();
+    result.setOwner(this);
 
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
+    // attribute
+    result.enableAllAttributeDependencies();
+    // with NominalToBinary we can also handle nominal attributes, but only
+    // if the kernel can handle numeric attributes
+    if (result.handles(Capability.NUMERIC_ATTRIBUTES))
+      result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
-
+    
     // class
+    result.disableAllClasses();
+    result.disableAllClassDependencies();
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
@@ -262,18 +269,6 @@ public class GaussianProcesses
       insts.deleteWithMissingClass();
     }
       
-    m_onlyNumeric = true;
-    if (!m_checksTurnedOff) {
-      for (int i = 0; i < insts.numAttributes(); i++) {
-	if (i != insts.classIndex()) {
-	  if (!insts.attribute(i).isNumeric()) {
-	    m_onlyNumeric = false;
-	    break;
-	  }
-	}
-      }
-    }
-
     if (!m_checksTurnedOff) {
       m_Missing = new ReplaceMissingValues();
       m_Missing.setInputFormat(insts);
@@ -282,11 +277,28 @@ public class GaussianProcesses
       m_Missing = null;
     }
 
-    if (!m_onlyNumeric) {
-      m_NominalToBinary = new NominalToBinary();
-      m_NominalToBinary.setInputFormat(insts);
-      insts = Filter.useFilter(insts, m_NominalToBinary);
-    } else {
+    if (getCapabilities().handles(Capability.NUMERIC_ATTRIBUTES)) {
+      boolean onlyNumeric = true;
+      if (!m_checksTurnedOff) {
+	for (int i = 0; i < insts.numAttributes(); i++) {
+	  if (i != insts.classIndex()) {
+	    if (!insts.attribute(i).isNumeric()) {
+	      onlyNumeric = false;
+	      break;
+	    }
+	  }
+	}
+      }
+      
+      if (!onlyNumeric) {
+	m_NominalToBinary = new NominalToBinary();
+	m_NominalToBinary.setInputFormat(insts);
+	insts = Filter.useFilter(insts, m_NominalToBinary);
+      } else {
+	m_NominalToBinary = null;
+      }
+    }
+    else {
       m_NominalToBinary = null;
     }
 
@@ -327,15 +339,8 @@ public class GaussianProcesses
     }
 
     // Initialize kernel
-    if(!m_usePoly) { 
-      m_kernel = new RBFKernel(m_data, m_cacheSize, m_gamma);
-    } else {
-      if (m_featureSpaceNormalization) {
-	m_kernel = new NormalizedPolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
-      } else {
-	m_kernel = new PolyKernel(m_data, m_cacheSize, m_exponent, m_lowerOrder);
-      }
-    }
+    m_kernel.buildKernel(m_data);
+    m_KernelIsLinear = (m_kernel instanceof PolyKernel) && (((PolyKernel) m_kernel).getExponent() == 1.0);
 
     // Build Inverted Covariance Matrix
 
@@ -395,7 +400,7 @@ public class GaussianProcesses
       inst = m_Missing.output();
     }
 
-    if (!m_onlyNumeric) {
+    if (m_NominalToBinary != null) {
       m_NominalToBinary.input(inst);
       m_NominalToBinary.batchFinished();
       inst = m_NominalToBinary.output();
@@ -437,7 +442,7 @@ public class GaussianProcesses
       inst = m_Missing.output();
     }
 
-    if (!m_onlyNumeric) {
+    if (m_NominalToBinary != null) {
       m_NominalToBinary.input(inst);
       m_NominalToBinary.batchFinished();
       inst = m_NominalToBinary.output();
@@ -490,7 +495,7 @@ public class GaussianProcesses
       inst = m_Missing.output();
     }
 
-    if (!m_onlyNumeric) {
+    if (m_NominalToBinary != null) {
       m_NominalToBinary.input(inst);m_Alin = 1.0;
       m_Blin = 0.0;
 
@@ -526,30 +531,37 @@ public class GaussianProcesses
    */
   public Enumeration listOptions() {
 	
-    Vector newVector = new Vector(6);
+    Vector result = new Vector();
 
-    newVector.addElement(new Option("\tThe exponent for the "
-				    + "polynomial kernel. (default 1)",
-				    "E", 1, "-E <double>"));
-    newVector.addElement(new Option("\tGamma for the "
-				    + "RBF kernel. (default 0.01)",
-				    "G", 1, "-G <double>"));
-    newVector.addElement(new Option("\tLevel of Gaussian Noise."
-				    + " (default 0.1)",
-				    "L", 1, "-L <double>"));
-    newVector.addElement(new Option("\tWhether to 0=normalize/1=standardize/2=neither. " +
-				    "(default 0=normalize)",
-				    "N", 1, "-N"));
-    newVector.addElement(new Option("\tFeature-space normalization (only for\n"
-				    +"\tnon-linear polynomial kernels).",
-				    "F", 0, "-F"));
-    newVector.addElement(new Option("\tUse lower-order terms (only for non-linear\n"
-				    +"\tpolynomial kernels).",
-				    "O", 0, "-O"));
-    newVector.addElement(new Option("\tUse Polynomial kernel. " +
-				    "(default false)",
-				    "P", 0, "-P"));
-    return newVector.elements();
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
+
+    result.addElement(new Option(
+	"\tLevel of Gaussian Noise."
+	+ " (default 0.1)",
+	"L", 1, "-L <double>"));
+    
+    result.addElement(new Option(
+	"\tWhether to 0=normalize/1=standardize/2=neither. " +
+	"(default 0=normalize)",
+	"N", 1, "-N"));
+    
+    result.addElement(new Option(
+	"\tThe Kernel to use.\n"
+	+ "\t(default: weka.classifiers.functions.supportVector.PolyKernel)",
+	"K", 1, "-K <classname and parameters>"));
+
+    result.addElement(new Option(
+	"",
+	"", 0, "\nOptions specific to kernel "
+	+ getKernel().getClass().getName() + ":"));
+    
+    enm = ((OptionHandler) getKernel()).listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
+
+    return result.elements();
   }
     
     
@@ -559,11 +571,9 @@ public class GaussianProcesses
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -E &lt;double&gt;
-   *  The exponent for the polynomial kernel. (default 1)</pre>
-   * 
-   * <pre> -G &lt;double&gt;
-   *  Gamma for the RBF kernel. (default 0.01)</pre>
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
    * 
    * <pre> -L &lt;double&gt;
    *  Level of Gaussian Noise. (default 0.1)</pre>
@@ -571,16 +581,29 @@ public class GaussianProcesses
    * <pre> -N
    *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
    * 
-   * <pre> -F
-   *  Feature-space normalization (only for
-   *  non-linear polynomial kernels).</pre>
+   * <pre> -K &lt;classname and parameters&gt;
+   *  The Kernel to use.
+   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
    * 
-   * <pre> -O
-   *  Use lower-order terms (only for non-linear
-   *  polynomial kernels).</pre>
+   * <pre> 
+   * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+   * </pre>
    * 
-   * <pre> -P
-   *  Use Polynomial kernel. (default false)</pre>
+   * <pre> -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number).
+   *  (default: 250007)</pre>
+   * 
+   * <pre> -G &lt;num&gt;
+   *  The Gamma parameter.
+   *  (default: 0.01)</pre>
    * 
    <!-- options-end -->
    * 
@@ -588,46 +611,30 @@ public class GaussianProcesses
    * @throws Exception if an option is not supported 
    */
   public void setOptions(String[] options) throws Exception {
+    String	tmpStr;
+    String[]	tmpOptions;
     
-    String exponentsString = Utils.getOption('E', options);
-    if (exponentsString.length() != 0) {
-      m_exponent = (new Double(exponentsString)).doubleValue();
-    } else {
-      m_exponent = 1.0;
-    }
-    String gammaString = Utils.getOption('G', options);
-    if (gammaString.length() != 0) {
-      m_gamma = (new Double(gammaString)).doubleValue();
-    } else {
-      m_gamma = 1.0;
-    }
-    String noiseString = Utils.getOption('L', options);
-    if (noiseString.length() != 0) {
-      m_delta = (new Double(noiseString)).doubleValue();
-    } else {
-      m_delta = 1.0;
-    }
-    m_usePoly = Utils.getFlag('P', options);
-    String nString = Utils.getOption('N', options);
-    if (nString.length() != 0) {
-      setFilterType(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
-    } else {
+    tmpStr = Utils.getOption('L', options);
+    if (tmpStr.length() != 0)
+      setNoise(Double.parseDouble(tmpStr));
+    else
+      setNoise(0.1);
+
+    tmpStr = Utils.getOption('N', options);
+    if (tmpStr.length() != 0)
+      setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
+    else
       setFilterType(new SelectedTag(FILTER_NORMALIZE, TAGS_FILTER));
+
+    tmpStr     = Utils.getOption('K', options);
+    tmpOptions = Utils.splitOptions(tmpStr);
+    if (tmpOptions.length != 0) {
+      tmpStr        = tmpOptions[0];
+      tmpOptions[0] = "";
+      setKernel(Kernel.forName(tmpStr, tmpOptions));
     }
-    m_featureSpaceNormalization = Utils.getFlag('F', options);
-    if ((!m_usePoly) && (m_featureSpaceNormalization)) {
-      throw new Exception("RBF machine doesn't require feature-space normalization.");
-    }
-    if ((m_exponent == 1.0) && (m_featureSpaceNormalization)) {
-      throw new Exception("Can't use feature-space normalization with linear kernel.");
-    }
-    m_lowerOrder = Utils.getFlag('O', options);
-    if ((!m_usePoly) && (m_lowerOrder)) {
-      throw new Exception("Can't use lower-order terms with RBF kernel.");
-    }
-    if ((m_exponent == 1.0) && (m_lowerOrder)) {
-      throw new Exception("Can't use lower-order terms with linear kernel.");
-    }
+    
+    super.setOptions(options);
   }
 
   /**
@@ -635,24 +642,54 @@ public class GaussianProcesses
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  public String[] getOptions() {
+    int       i;
+    Vector    result;
+    String[]  options;
 
-    Vector options = new Vector();
+    result = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
-    options.add("-E"); options.add("" + m_exponent);
-    options.add("-G"); options.add("" + m_gamma);
-    options.add("-L"); options.add("" + m_delta);
-    options.add("-N"); options.add("" + m_filterType);
-    if (m_featureSpaceNormalization) {
-      options.add("-F");
-    }
-    if (m_lowerOrder) {
-      options.add("-O");
-    }
-    if (m_usePoly) {
-      options.add("-P");
-    }
-    return (String[])options.toArray(new String[options.size()]);
+    result.add("-L");
+    result.add("" + getNoise());
+    
+    result.add("-N");
+    result.add("" + m_filterType);
+    
+    result.add("-K");
+    result.add("" + m_kernel.getClass().getName() + " " + Utils.joinOptions(m_kernel.getOptions()));
+    
+    return (String[]) result.toArray(new String[result.size()]);	  
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String kernelTipText() {
+    return "The kernel to use.";
+  }
+
+  /**
+   * Gets the kernel to use.
+   *
+   * @return 		the kernel
+   */
+  public Kernel getKernel() {
+    return m_kernel;
+  }
+    
+  /**
+   * Sets the kernel to use.
+   *
+   * @param value	the new kernel
+   */
+  public void setKernel(Kernel value) {
+    m_kernel = value;
   }
 
   /**
@@ -674,7 +711,6 @@ public class GaussianProcesses
 	
     return new SelectedTag(m_filterType, TAGS_FILTER);
   }
-
     
   /**
    * Sets how the training data will be transformed. Should be one of
@@ -687,70 +723,6 @@ public class GaussianProcesses
     if (newType.getTags() == TAGS_FILTER) {
       m_filterType = newType.getSelectedTag().getID();
     }
-  }
-     
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String exponentTipText() {
-    return "The exponent for the polynomial kernel.";
-  }
-  
-  /**
-   * Get the value of exponent. 
-   *
-   * @return Value of exponent.
-   */
-  public double getExponent() {
-    
-    return m_exponent;
-  }
-
-  /**
-   * Set the value of exponent. If linear kernel
-   * is used, rescaling and lower-order terms are
-   * turned off.
-   *
-   * @param v  Value to assign to exponent.
-   */
-  public void setExponent(double v) {
-    
-    if (v == 1.0) {
-      m_featureSpaceNormalization = false;
-      m_lowerOrder = false;
-    }
-    m_exponent = v;
-  }
-     
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String gammaTipText() {
-    return "The value of the gamma parameter for RBF kernels.";
-  }
-  
-  /**
-   * Get the value of gamma. 
-   *
-   * @return Value of gamma.
-   */
-  public double getGamma() {
-    
-    return m_gamma;
-  }
-  
-  /**
-   * Set the value of gamma. 
-   *
-   * @param v  Value to assign to gamma.
-   */
-  public void setGamma(double v) {
-    
-    m_gamma = v;
   }
 
   /**
@@ -768,7 +740,6 @@ public class GaussianProcesses
    * @return Value of noise.
    */
   public double getNoise() {
-    
     return m_delta;
   }
   
@@ -778,106 +749,8 @@ public class GaussianProcesses
    * @param v  Value to assign to noise.
    */
   public void setNoise(double v) {
-    
     m_delta = v;
   }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String usePolyTipText() {
-    return "Whether to use an Polynomial kernel instead of an RBF one.";
-  }
-  
-  /**
-   * Check if the Polynomial kernel is to be used.
-   * @return true if Poly
-   */
-  public boolean getUsePoly() {
-    
-    return m_usePoly;
-  }
-
-  /**
-   * Set if the Polynomial kernel is to be used.
-   * @param v  true if Poly
-   */
-  public void setUsePoly(boolean v) {
-
-    if (!v) {
-      m_featureSpaceNormalization = false;
-      m_lowerOrder = false;
-    }
-    m_usePoly = v;
-  }
-     
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String featureSpaceNormalizationTipText() {
-    return "Whether feature-space normalization is performed (only "
-      + "available for non-linear polynomial kernels).";
-  }
-  
-  /**
-   * Check whether feature spaces is being normalized.
-   * @return true if feature space is normalized.
-   */
-  public boolean getFeatureSpaceNormalization() {
-
-    return m_featureSpaceNormalization;
-  }
-
-  /**
-   * Set whether feature space is normalized.
-   * @param v  true if feature space is to be normalized.
-   */
-  public void setFeatureSpaceNormalization(boolean v) {
-    
-    if ((!m_usePoly) || (m_exponent == 1.0)) {
-      m_featureSpaceNormalization = false;
-    } else {
-      m_featureSpaceNormalization = v;
-    }
-  }
-     
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String lowerOrderTermsTipText() {
-    return "Whether lower order polyomials are also used (only "
-      + "available for non-linear polynomial kernels).";
-  }
-
-  /**
-   * Check whether lower-order terms are being used.
-   * @return Value of lowerOrder.
-   */
-  public boolean getLowerOrderTerms() {
-    
-    return m_lowerOrder;
-  }
-
-  /**
-   * Set whether lower-order terms are to be used. Defaults
-   * to false if a linear machine is built.
-   * @param v  Value to assign to lowerOrder.
-   */
-  public void setLowerOrderTerms(boolean v) {
-    
-    if (m_exponent == 1.0 || (!m_usePoly)) {
-      m_lowerOrder = false;
-    } else {
-      m_lowerOrder = v;
-    }
-  }
-
 
   /**
    * Prints out the classifier.
@@ -894,30 +767,7 @@ public class GaussianProcesses
     try {
 
       text.append("Gaussian Processes\n\n");
-
-      text.append("Kernel used : \n");
-      if(!m_usePoly) {
-	text.append("  RBF kernel : K(x,y) = e^-(" + m_gamma + "* <x-y,x-y>^2)");
-      } else if (m_exponent == 1){
-	text.append("  Linear Kernel : K(x,y) = <x,y>");
-      } else {
-	if (m_featureSpaceNormalization) {
-	  if (m_lowerOrder){
-	    text.append("  Normalized Poly Kernel with lower order : K(x,y) = (<x,y>+1)^" + m_exponent + "/" + 
-			"((<x,x>+1)^" + m_exponent + "*" + "(<y,y>+1)^" + m_exponent + ")^(1/2)");		    
-	  } else {
-	    text.append("  Normalized Poly Kernel : K(x,y) = <x,y>^" + m_exponent + "/" + "(<x,x>^" + 
-			m_exponent + "*" + "<y,y>^" + m_exponent + ")^(1/2)");
-	  }
-	} else {
-	  if (m_lowerOrder){
-	    text.append("  Poly Kernel with lower order : K(x,y) = (<x,y> + 1)^" + m_exponent);
-	  } else {
-	    text.append("  Poly Kernel : K(x,y) = <x,y>^" + m_exponent);		
-	  }
-	}
-      }
-      text.append("\n\n");
+      text.append("Kernel used:\n  " + m_kernel.toString() + "\n\n");
 
       text.append("Average Target Value : " + m_avg_target + "\n");
 
