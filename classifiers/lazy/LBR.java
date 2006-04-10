@@ -27,7 +27,7 @@
  *
  *    For more information, see
  <!-- technical-plaintext-start -->
- * Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. Vol.4, No.1, pp. 53-84.
+ * Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. 4(1):53-84.
  <!-- technical-plaintext-end -->
  *
  *    http://www.cm.deakin.edu.au/webb
@@ -66,7 +66,7 @@ import java.util.ArrayList;
  * <br/>
  * For more information, see:<br/>
  * <br/>
- * Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. Vol.4, No.1, pp. 53-84.
+ * Zijian Zheng, G. Webb (2000). Lazy Learning of Bayesian Rules. Machine Learning. 4(1):53-84.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -76,10 +76,10 @@ import java.util.ArrayList;
  * &#64;article{Zheng2000,
  *    author = {Zijian Zheng and G. Webb},
  *    journal = {Machine Learning},
- *    number = {No.1},
- *    pages = {pp. 53-84},
+ *    number = {1},
+ *    pages = {53-84},
  *    title = {Lazy Learning of Bayesian Rules},
- *    volume = {Vol.4},
+ *    volume = {4},
  *    year = {2000}
  * }
  * </pre>
@@ -97,7 +97,7 @@ import java.util.ArrayList;
  *
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class LBR 
   extends Classifier
@@ -695,9 +695,9 @@ public class LBR
     result.setValue(Field.YEAR, "2000");
     result.setValue(Field.TITLE, "Lazy Learning of Bayesian Rules");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.4");
-    result.setValue(Field.NUMBER, "No.1");
-    result.setValue(Field.PAGES, "pp. 53-84");
+    result.setValue(Field.VOLUME, "4");
+    result.setValue(Field.NUMBER, "1");
+    result.setValue(Field.PAGES, "53-84");
     
     return result;
   }

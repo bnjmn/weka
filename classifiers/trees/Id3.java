@@ -42,7 +42,7 @@ import java.util.Enumeration;
  <!-- globalinfo-start -->
  * Class for constructing an unpruned decision tree based on the ID3 algorithm. Can only deal with nominal attributes. No missing values allowed. Empty leaves may result in unclassified instances. For more information see: <br/>
  * <br/>
- * R. Quinlan (1986). Induction of decision trees. Machine Learning. Vol.1, No.1, pp. 81-106.
+ * R. Quinlan (1986). Induction of decision trees. Machine Learning. 1(1):81-106.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -52,10 +52,10 @@ import java.util.Enumeration;
  * &#64;article{Quinlan1986,
  *    author = {R. Quinlan},
  *    journal = {Machine Learning},
- *    number = {No.1},
- *    pages = {pp. 81-106},
+ *    number = {1},
+ *    pages = {81-106},
  *    title = {Induction of decision trees},
- *    volume = {Vol.1},
+ *    volume = {1},
  *    year = {1986}
  * }
  * </pre>
@@ -72,7 +72,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class Id3 
   extends Classifier 
@@ -124,9 +124,9 @@ public class Id3
     result.setValue(Field.YEAR, "1986");
     result.setValue(Field.TITLE, "Induction of decision trees");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.1");
-    result.setValue(Field.NUMBER, "No.1");
-    result.setValue(Field.PAGES, "pp. 81-106");
+    result.setValue(Field.VOLUME, "1");
+    result.setValue(Field.NUMBER, "1");
+    result.setValue(Field.PAGES, "81-106");
     
     return result;
   }

@@ -53,9 +53,9 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * D. Fisher (1987). Knowledge acquisition via incremental conceptual clustering. Machine Learning. Vol.2, No.2, pp. 139-172.<br/>
+ * D. Fisher (1987). Knowledge acquisition via incremental conceptual clustering. Machine Learning. 2(2):139-172.<br/>
  * <br/>
- * J. H. Gennari, P. Langley, D. Fisher (1990). Models of incremental concept formation. Artificial Intelligence. Vol.40, pp. 11-61.
+ * J. H. Gennari, P. Langley, D. Fisher (1990). Models of incremental concept formation. Artificial Intelligence. 40:11-61.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -65,19 +65,19 @@ import java.util.Vector;
  * &#64;article{Fisher1987,
  *    author = {D. Fisher},
  *    journal = {Machine Learning},
- *    number = {No.2},
- *    pages = {pp. 139-172},
+ *    number = {2},
+ *    pages = {139-172},
  *    title = {Knowledge acquisition via incremental conceptual clustering},
- *    volume = {Vol.2},
+ *    volume = {2},
  *    year = {1987}
  * }
  * 
  * &#64;article{Gennari1990,
  *    author = {J. H. Gennari and P. Langley and D. Fisher},
  *    journal = {Artificial Intelligence},
- *    pages = {pp. 11-61},
+ *    pages = {11-61},
  *    title = {Models of incremental concept formation},
- *    volume = {Vol.40},
+ *    volume = {40},
  *    year = {1990}
  * }
  * </pre>
@@ -98,7 +98,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @see Clusterer
  * @see OptionHandler
  * @see Drawable
@@ -818,17 +818,17 @@ public class Cobweb
     result.setValue(Field.YEAR, "1987");
     result.setValue(Field.TITLE, "Knowledge acquisition via incremental conceptual clustering");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.2");
-    result.setValue(Field.NUMBER, "No.2");
-    result.setValue(Field.PAGES, "pp. 139-172");
+    result.setValue(Field.VOLUME, "2");
+    result.setValue(Field.NUMBER, "2");
+    result.setValue(Field.PAGES, "139-172");
     
     additional = result.add(Type.ARTICLE);
     additional.setValue(Field.AUTHOR, "J. H. Gennari and P. Langley and D. Fisher");
     additional.setValue(Field.YEAR, "1990");
     additional.setValue(Field.TITLE, "Models of incremental concept formation");
     additional.setValue(Field.JOURNAL, "Artificial Intelligence");
-    additional.setValue(Field.VOLUME, "Vol.40");
-    additional.setValue(Field.PAGES, "pp. 11-61");
+    additional.setValue(Field.VOLUME, "40");
+    additional.setValue(Field.PAGES, "11-61");
     
     return result;
   }
@@ -1150,4 +1150,3 @@ public class Cobweb
     }
   }
 }
-

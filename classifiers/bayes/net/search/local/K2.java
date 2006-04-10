@@ -43,7 +43,7 @@ import java.util.Vector;
  * <br/>
  * G.F. Cooper, E. Herskovits (1990). A Bayesian method for constructing Bayesian belief networks from databases.<br/>
  * <br/>
- * G. Cooper, E. Herskovits (1992). A Bayesian method for the induction of probabilistic networks from data. Machine Learning. Vol.9, No.4, pp. 309-347.<br/>
+ * G. Cooper, E. Herskovits (1992). A Bayesian method for the induction of probabilistic networks from data. Machine Learning. 9(4):309-347.<br/>
  * <br/>
  * Works with nominal variables and no missing values only.
  * <p/>
@@ -63,10 +63,10 @@ import java.util.Vector;
  * &#64;article{Cooper1992,
  *    author = {G. Cooper and E. Herskovits},
  *    journal = {Machine Learning},
- *    number = {No.4},
- *    pages = {pp. 309-347},
+ *    number = {4},
+ *    pages = {309-347},
  *    title = {A Bayesian method for the induction of probabilistic networks from data},
- *    volume = {Vol.9},
+ *    volume = {9},
  *    year = {1992}
  * }
  * </pre>
@@ -98,7 +98,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class K2 
  	extends LocalScoreSearchAlgorithm
@@ -133,9 +133,9 @@ public class K2
 	  additional.setValue(Field.YEAR, "1992");
 	  additional.setValue(Field.TITLE, "A Bayesian method for the induction of probabilistic networks from data");
 	  additional.setValue(Field.JOURNAL, "Machine Learning");
-	  additional.setValue(Field.VOLUME, "Vol.9");
-	  additional.setValue(Field.NUMBER, "No.4");
-	  additional.setValue(Field.PAGES, "pp. 309-347");
+	  additional.setValue(Field.VOLUME, "9");
+	  additional.setValue(Field.NUMBER, "4");
+	  additional.setValue(Field.PAGES, "309-347");
 	  
 	  return result;
 	}
@@ -394,6 +394,4 @@ public class K2
 	  " In any case, when the network was initialized as Naive Bayes Network, the" +
 	  " class variable is first in the ordering though.";
 	} // randomOrderTipText
-
-  
 }

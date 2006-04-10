@@ -48,7 +48,7 @@ import java.util.Vector;
  * <br/>
  * For more information, see<br/>
  * <br/>
- * N. Littlestone (1988). Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm. Machine Learning. Vol.2, pp. 285-318.<br/>
+ * N. Littlestone (1988). Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm. Machine Learning. 2:285-318.<br/>
  * <br/>
  * N. Littlestone (1989). Mistake bounds and logarithmic linear-threshold learning algorithms. University of California, Santa Cruz.<br/>
  * <br/>
@@ -62,9 +62,9 @@ import java.util.Vector;
  * &#64;article{Littlestone1988,
  *    author = {N. Littlestone},
  *    journal = {Machine Learning},
- *    pages = {pp. 285-318},
+ *    pages = {285-318},
  *    title = {Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm},
- *    volume = {Vol.2},
+ *    volume = {2},
  *    year = {1988}
  * }
  * 
@@ -114,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author J. Lindgren (jtlindgr at cs.helsinki.fi)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
 */
 public class Winnow 
   extends Classifier 
@@ -197,8 +197,8 @@ public class Winnow
     result.setValue(Field.YEAR, "1988");
     result.setValue(Field.TITLE, "Learning quickly when irrelevant attributes are abound: A new linear threshold algorithm");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.2");
-    result.setValue(Field.PAGES, "pp. 285-318");
+    result.setValue(Field.VOLUME, "2");
+    result.setValue(Field.PAGES, "285-318");
     
     additional = result.add(Type.TECHREPORT);
     additional.setValue(Field.AUTHOR, "N. Littlestone");

@@ -48,7 +48,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * Hochbaum, Shmoys (1985). A best possible heuristic for the k-center problem. Mathematics of Operations Research. Vol.10, No.2, pp. 180-184.<br/>
+ * Hochbaum, Shmoys (1985). A best possible heuristic for the k-center problem. Mathematics of Operations Research. 10(2):180-184.<br/>
  * <br/>
  * Sanjoy Dasgupta: Performance Guarantees for Hierarchical Clustering. In: 15th Annual Conference on Computational Learning Theory, 351-363, 2002.<br/>
  * <br/>
@@ -64,14 +64,14 @@ import java.util.Vector;
  * &#64;article{Hochbaum1985,
  *    author = {Hochbaum and Shmoys},
  *    journal = {Mathematics of Operations Research},
- *    number = {No.2},
- *    pages = {pp. 180-184},
+ *    number = {2},
+ *    pages = {180-184},
  *    title = {A best possible heuristic for the k-center problem},
- *    volume = {Vol.10},
+ *    volume = {10},
  *    year = {1985}
  * }
  * 
- * &#64;incproceedings{Dasgupta2002,
+ * &#64;inproceedings{Dasgupta2002,
  *    author = {Sanjoy Dasgupta},
  *    booktitle = {15th Annual Conference on Computational Learning Theory},
  *    pages = {351-363},
@@ -96,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -176,9 +176,9 @@ public class FarthestFirst
     result.setValue(Field.YEAR, "1985");
     result.setValue(Field.TITLE, "A best possible heuristic for the k-center problem");
     result.setValue(Field.JOURNAL, "Mathematics of Operations Research");
-    result.setValue(Field.VOLUME, "Vol.10");
-    result.setValue(Field.NUMBER, "No.2");
-    result.setValue(Field.PAGES, "pp. 180-184");
+    result.setValue(Field.VOLUME, "10");
+    result.setValue(Field.NUMBER, "2");
+    result.setValue(Field.PAGES, "180-184");
     
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Sanjoy Dasgupta");

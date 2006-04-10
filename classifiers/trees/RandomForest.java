@@ -48,7 +48,7 @@ import java.util.Vector;
  * <br/>
  * For more information see: <br/>
  * <br/>
- * Leo Breiman (2001). Random Forests. Machine Learning. Vol.45, No.1, pp. 5-32.
+ * Leo Breiman (2001). Random Forests. Machine Learning. 45(1):5-32.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -58,10 +58,10 @@ import java.util.Vector;
  * &#64;article{Breiman2001,
  *    author = {Leo Breiman},
  *    journal = {Machine Learning},
- *    number = {No.1},
- *    pages = {pp. 5-32},
+ *    number = {1},
+ *    pages = {5-32},
  *    title = {Random Forests},
- *    volume = {Vol.45},
+ *    volume = {45},
  *    year = {2001}
  * }
  * </pre>
@@ -84,7 +84,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class RandomForest 
   extends Classifier 
@@ -138,9 +138,9 @@ public class RandomForest
     result.setValue(Field.YEAR, "2001");
     result.setValue(Field.TITLE, "Random Forests");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.45");
-    result.setValue(Field.NUMBER, "No.1");
-    result.setValue(Field.PAGES, "pp. 5-32");
+    result.setValue(Field.VOLUME, "45");
+    result.setValue(Field.NUMBER, "1");
+    result.setValue(Field.PAGES, "5-32");
     
     return result;
   }

@@ -43,7 +43,7 @@ import java.util.Enumeration;
  * <br/>
  * For more information, see <br/>
  * <br/>
- * D. Aha, D. Kibler (1991). Instance-based learning algorithms. Machine Learning. Vol.6, pp. 37-66.
+ * D. Aha, D. Kibler (1991). Instance-based learning algorithms. Machine Learning. 6:37-66.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -53,9 +53,9 @@ import java.util.Enumeration;
  * &#64;article{Aha1991,
  *    author = {D. Aha and D. Kibler},
  *    journal = {Machine Learning},
- *    pages = {pp. 37-66},
+ *    pages = {37-66},
  *    title = {Instance-based learning algorithms},
- *    volume = {Vol.6},
+ *    volume = {6},
  *    year = {1991}
  * }
  * </pre>
@@ -74,7 +74,7 @@ import java.util.Enumeration;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class IB1 
   extends Classifier 
@@ -123,8 +123,8 @@ public class IB1
     result.setValue(Field.YEAR, "1991");
     result.setValue(Field.TITLE, "Instance-based learning algorithms");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.6");
-    result.setValue(Field.PAGES, "pp. 37-66");
+    result.setValue(Field.VOLUME, "6");
+    result.setValue(Field.PAGES, "37-66");
     
     return result;
   }

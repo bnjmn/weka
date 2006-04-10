@@ -46,7 +46,7 @@ import java.util.Vector;
  * <br/>
  * For more information, see<br/>
  * <br/>
- * Leo Breiman (1996). Bagging predictors. Machine Learning. Vol.24, No.2, pp. 123-140.
+ * Leo Breiman (1996). Bagging predictors. Machine Learning. 24(2):123-140.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -56,10 +56,10 @@ import java.util.Vector;
  * &#64;article{Breiman1996,
  *    author = {Leo Breiman},
  *    journal = {Machine Learning},
- *    number = {No.2},
- *    pages = {pp. 123-140},
+ *    number = {2},
+ *    pages = {123-140},
  *    title = {Bagging predictors},
- *    volume = {Vol.24},
+ *    volume = {24},
  *    year = {1996}
  * }
  * </pre>
@@ -122,7 +122,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -177,9 +177,9 @@ public class Bagging
     result.setValue(Field.YEAR, "1996");
     result.setValue(Field.TITLE, "Bagging predictors");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.24");
-    result.setValue(Field.NUMBER, "No.2");
-    result.setValue(Field.PAGES, "pp. 123-140");
+    result.setValue(Field.VOLUME, "24");
+    result.setValue(Field.NUMBER, "2");
+    result.setValue(Field.PAGES, "123-140");
     
     return result;
   }

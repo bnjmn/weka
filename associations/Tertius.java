@@ -69,7 +69,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * P. A. Flach, N. Lachiche (1999). Confirmation-Guided Discovery of first-order rules with Tertius. Machine Learning. Vol.42, pp. 61-95.
+ * P. A. Flach, N. Lachiche (1999). Confirmation-Guided Discovery of first-order rules with Tertius. Machine Learning. 42:61-95.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -79,9 +79,9 @@ import java.util.Vector;
  * &#64;article{Flach1999,
  *    author = {P. A. Flach and N. Lachiche},
  *    journal = {Machine Learning},
- *    pages = {pp. 61-95},
+ *    pages = {61-95},
  *    title = {Confirmation-Guided Discovery of first-order rules with Tertius},
- *    volume = {Vol.42},
+ *    volume = {42},
  *    year = {1999}
  * }
  * </pre>
@@ -146,7 +146,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class Tertius 
@@ -325,8 +325,8 @@ public class Tertius
     result.setValue(Field.YEAR, "1999");
     result.setValue(Field.TITLE, "Confirmation-Guided Discovery of first-order rules with Tertius");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.42");
-    result.setValue(Field.PAGES, "pp. 61-95");
+    result.setValue(Field.VOLUME, "42");
+    result.setValue(Field.PAGES, "61-95");
     
     return result;
   }

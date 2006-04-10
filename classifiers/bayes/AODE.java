@@ -48,7 +48,7 @@ import java.util.Vector;
  * <br/>
  * For more information, see<br/>
  * <br/>
- * G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. Vol.58, No.1, pp. 5-24.<br/>
+ * G. Webb, J. Boughton, Z. Wang (2005). Not So Naive Bayes: Aggregating One-Dependence Estimators. Machine Learning. 58(1):5-24.<br/>
  * <br/>
  * Further papers are available at<br/>
  *   http://www.csse.monash.edu.au/~webb/.<br/>
@@ -64,10 +64,10 @@ import java.util.Vector;
  * &#64;article{Webb2005,
  *    author = {G. Webb and J. Boughton and Z. Wang},
  *    journal = {Machine Learning},
- *    number = {No.1},
- *    pages = {pp. 5-24},
+ *    number = {1},
+ *    pages = {5-24},
  *    title = {Not So Naive Bayes: Aggregating One-Dependence Estimators},
- *    volume = {Vol.58},
+ *    volume = {58},
  *    year = {2005}
  * }
  * </pre>
@@ -97,7 +97,7 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class AODE extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
@@ -212,9 +212,9 @@ public class AODE extends Classifier
     result.setValue(Field.YEAR, "2005");
     result.setValue(Field.TITLE, "Not So Naive Bayes: Aggregating One-Dependence Estimators");
     result.setValue(Field.JOURNAL, "Machine Learning");
-    result.setValue(Field.VOLUME, "Vol.58");
-    result.setValue(Field.NUMBER, "No.1");
-    result.setValue(Field.PAGES, "pp. 5-24");
+    result.setValue(Field.VOLUME, "58");
+    result.setValue(Field.NUMBER, "1");
+    result.setValue(Field.PAGES, "5-24");
 
     return result;
   }
