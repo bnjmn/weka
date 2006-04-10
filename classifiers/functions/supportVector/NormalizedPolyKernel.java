@@ -27,13 +27,38 @@ import weka.core.Instances;
 
 /**
  <!-- globalinfo-start -->
+ * The normalized polynomial kernel.<br/>
+ * K(x,y) = &lt;x,y&gt;/sqrt(&lt;x,x&gt;&lt;y,y&gt;) where &lt;x,y&gt; = PolyKernel(x,y)
+ * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NormalizedPolyKernel 
   extends PolyKernel {

@@ -34,15 +34,39 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
+ * The polynomial kernel : K(x, y) = &lt;x, y&gt;^p or K(x, y) = (&lt;x, y&gt;+1)^p
+ * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PolyKernel 
   extends CachedKernel {
@@ -127,6 +151,28 @@ public class PolyKernel
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number).
+   *  (default: 250007)</pre>
+   * 
+   * <pre> -E &lt;num&gt;
+   *  The Exponent to use.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -L
+   *  Use lower-order terms.
+   *  (default: no)</pre>
+   * 
    <!-- options-end -->
    * 
    * @param options 	the list of options as an array of strings
