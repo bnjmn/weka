@@ -22,47 +22,87 @@
 
 package weka.classifiers.mi.supportVector;
 
-import weka.classifiers.functions.supportVector.CachedKernel;
+import weka.classifiers.functions.supportVector.PolyKernel;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.MultiInstanceCapabilitiesHandler;
+import weka.core.Capabilities.Capability;
 
 /**
- * The polynomial kernel : K(x, y) = &lt;x, y&gt;^p or K(x, y) = ( &lt;x,
- * y&gt;+1)^p <p/>
+ <!-- globalinfo-start -->
+ * The polynomial kernel : K(x, y) = &lt;x, y&gt;^p or K(x, y) = (&lt;x, y&gt;+1)^p
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
-
 public class MIPolyKernel 
-  extends CachedKernel {
+  extends PolyKernel 
+  implements MultiInstanceCapabilitiesHandler {
 
-  /** Use lower-order terms? */
-  private boolean m_lowerOrder = false;
-
-  /** The exponent for the polynomial kernel. */
-  private double m_exponent = 1.0;
+  /** for serialiation */
+  private static final long serialVersionUID = 7926421479341051777L;
 
   /**
-   * Creates a new <code>PolyKernel</code> instance.
-   * 
-   * @param dataset
-   *            the training dataset used.
-   * @param cacheSize
-   *            the size of the cache (a prime number)
+   * default constructor - does nothing.
    */
-  public MIPolyKernel(Instances dataset, int cacheSize, double exponent,
-      boolean lowerOrder) {
-
-    super(dataset, cacheSize);
-
-    m_exponent = exponent;
-    m_lowerOrder = lowerOrder;
+  public MIPolyKernel() {
+    super();
   }
 
+  /**
+   * Creates a new <code>MIPolyKernel</code> instance.
+   * 
+   * @param data	the training dataset used.
+   * @param cacheSize	the size of the cache (a prime number)
+   * @param exponent	the exponent to use
+   * @param lowerOrder	whether to use lower-order terms
+   * @throws Exception	if something goes wrong
+   */
+  public MIPolyKernel(Instances data, int cacheSize, double exponent,
+      boolean lowerOrder) throws Exception {
+
+    super(data, cacheSize, exponent, lowerOrder);
+  }
+
+  /**
+   * 
+   * @param id1   	the index of instance 1
+   * @param id2		the index of instance 2
+   * @param inst1	the instance 1 object
+   * @return 		the dot product
+   * @throws Exception 	if something goes wrong
+   */
   protected double evaluate(int id1, int id2, Instance inst1)
     throws Exception {
 
@@ -80,11 +120,11 @@ public class MIPolyKernel
         result = dotProd(data1.instance(i), data2.instance(j));
 
         // Use lower order terms?
-        if (m_lowerOrder) {
+        if (getUseLowerOrder()) {
           result += 1.0; 
         }
-        if (m_exponent != 1.0) {
-          result = Math.pow(result, m_exponent);
+        if (getExponent() != 1.0) {
+          result = Math.pow(result, getExponent());
         }
 
         res += result;
@@ -93,8 +133,44 @@ public class MIPolyKernel
 
     return res;
   }
+
+  /** 
+   * Returns the Capabilities of this kernel.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enableAllClasses();
+
+    // other
+    result.enable(Capability.ONLY_MULTIINSTANCE);
+    
+    return result;
+  }
+
+  /**
+   * Returns the capabilities of this multi-instance kernel for the
+   * relational data.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getMultiInstanceCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // class
+    result.disableAllClasses();
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
 }
-
-
-
-
