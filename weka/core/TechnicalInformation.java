@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -493,9 +493,9 @@ public class TechnicalInformation {
 	if (exists(Field.VOLUME))
 	  result += " " + getValue(Field.VOLUME);
 	if (exists(Field.NUMBER))
-	  result += ", " + getValue(Field.NUMBER);
+	  result += "(" + getValue(Field.NUMBER) + ")";
 	if (exists(Field.PAGES))
-	  result += ", " + getValue(Field.PAGES);
+	  result += ":" + getValue(Field.PAGES);
 	
 	result += ".";
       }
@@ -537,7 +537,8 @@ public class TechnicalInformation {
       
       if (exists(Field.ADDRESS))
 	result += ", " + getValue(Field.ADDRESS);
-      result += ", " + getValue(Field.PAGES);
+      if (exists(Field.PAGES))
+	result += ", " + getValue(Field.PAGES);
 	
       result += ", " + getValue(Field.YEAR) + ".";
     }
@@ -685,9 +686,9 @@ public class TechnicalInformation {
       info.setValue(Field.YEAR, "1986");
       info.setValue(Field.TITLE, "Induction of decision trees");
       info.setValue(Field.JOURNAL, "Machine Learning");
-      info.setValue(Field.VOLUME, "Vol.1");
-      info.setValue(Field.NUMBER, "No.1");
-      info.setValue(Field.PAGES, "pp. 81-106");
+      info.setValue(Field.VOLUME, "1");
+      info.setValue(Field.NUMBER, "1");
+      info.setValue(Field.PAGES, "81-106");
       
       additional = new TechnicalInformation(Type.BOOK);
       additional.setValue(Field.AUTHOR, "Ross Quinlan");
