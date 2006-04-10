@@ -16,7 +16,13 @@
 
 package weka.classifiers.functions.supportVector;
 
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Base class for RBFKernel and PolyKernel that implements a simple LRU.
@@ -29,61 +35,126 @@ import weka.core.*;
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Steven Hugg (hugg@fasterlight.com) (refactored, LRU cache)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz) (full cache)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public abstract class CachedKernel extends Kernel {
+public abstract class CachedKernel 
+  extends Kernel {
     
   /** Counts the number of kernel evaluations. */
-  private int m_kernelEvals = 0;
+  protected int m_kernelEvals = 0;
 
   /** Counts the number of kernel cache hits. */
-  private int m_cacheHits = 0;
+  protected int m_cacheHits = 0;
 
   /** The size of the cache (a prime number) */
-  private int m_cacheSize;
+  protected int m_cacheSize = 250007;
 
   /** Kernel cache */
-  private double[] m_storage;
+  protected double[] m_storage;
   protected long[] m_keys;
 
   /** The kernel matrix if full cache is used (i.e. size is set to 0) */
-  private double[][] m_kernelMatrix;
+  protected double[][] m_kernelMatrix;
 
   /** The number of instance in the dataset */
-  private int m_numInsts;
+  protected int m_numInsts;
 
   /** number of cache slots in an entry */
-  private int m_cacheSlots = 4;
+  protected int m_cacheSlots = 4;
 
-
+  /**
+   * default constructor - does nothing.
+   */
+  public CachedKernel() {
+    super();
+  }
+  
   /**
    * Initializes the kernel cache. The actual size of the cache in bytes is
    * (64 * cacheSize).
+   * 
+   * @param data	the data to use
+   * @param cacheSize	the cache size
+   * @throws Exception	if something goes wrong
    */
-  protected CachedKernel(Instances data, int cacheSize) {
-    m_data = data;
-    m_cacheSize = cacheSize;
-    if (cacheSize > 0) {
+  protected CachedKernel(Instances data, int cacheSize) throws Exception {
+    super();
+    
+    setCacheSize(cacheSize);
+    
+    buildKernel(data);
+  }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return 		an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector		result;
+    Enumeration		en;
+    
+    result = new Vector();
 
-      // Use LRU cache
-      m_storage = new double[m_cacheSize * m_cacheSlots];
-      m_keys = new long[m_cacheSize * m_cacheSlots];
-    } 
+    en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
 
-    m_numInsts = m_data.numInstances();
+    result.addElement(new Option(
+	"\tThe size of the cache (a prime number).\n"
+	+ "\t(default: 250007)",
+	"C", 1, "-C <num>"));
+
+    return result.elements();
+  }
+
+  /**
+   * Parses a given list of options. <p/>
+   * 
+   * @param options 	the list of options as an array of strings
+   * @throws Exception 	if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    String	tmpStr;
+    
+    tmpStr = Utils.getOption('C', options);
+    if (tmpStr.length() != 0)
+      setCacheSize(Integer.parseInt(tmpStr));
+    else
+      setCacheSize(250007);
+    
+    super.setOptions(options);
+  }
+
+  /**
+   * Gets the current settings of the Kernel.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    int       i;
+    Vector    result;
+    String[]  options;
+
+    result = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    result.add("-C");
+    result.add("" + getCacheSize());
+
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
   /**
    * This method is overridden in subclasses to implement specific kernels.
    * 
-   * @param id1
-   *            the index of instance 1
-   * @param id2
-   *            the index of instance 2
-   * @param inst1
-   *            the instance 1 object
-   * @return the dot product
-   * @throws Exception
+   * @param id1   	the index of instance 1
+   * @param id2		the index of instance 2
+   * @param inst1	the instance 1 object
+   * @return 		the dot product
+   * @throws Exception 	if something goes wrong
    */
   protected abstract double evaluate(int id1, int id2, Instance inst1)
     throws Exception;
@@ -91,6 +162,12 @@ public abstract class CachedKernel extends Kernel {
   /**
    * Implements the abstract function of Kernel using the cache. This method
    * uses the evaluate() method to do the actual dot product.
+   *
+   * @param id1 	the index of the first instance in the dataset
+   * @param id2 	the index of the second instance in the dataset
+   * @param inst1 	the instance corresponding to id1 (used if id1 == -1)
+   * @return 		the result of the kernel function
+   * @throws Exception 	if something goes wrong
    */
   public double eval(int id1, int id2, Instance inst1) throws Exception {
 		
@@ -169,7 +246,7 @@ public abstract class CachedKernel extends Kernel {
   /**
    * Returns the number of time Eval has been called.
    * 
-   * @return the number of kernel evaluation.
+   * @return 		the number of kernel evaluation.
    */
   public int numEvals() {
     return m_kernelEvals;
@@ -178,7 +255,7 @@ public abstract class CachedKernel extends Kernel {
   /**
    * Returns the number of cache hits on dot products.
    * 
-   * @return the number of cache hits.
+   * @return 		the number of cache hits.
    */
   public int numCacheHits() {
     return m_cacheHits;
@@ -196,13 +273,10 @@ public abstract class CachedKernel extends Kernel {
   /**
    * Calculates a dot product between two instances
    * 
-   * @param inst1
-   *            the first instance
-   * @param inst2
-   *            the second instance
-   * @return the dot product of the two instances.
-   * @exception Exception
-   *                if an error occurs
+   * @param inst1	the first instance
+   * @param inst2	the second instance
+   * @return 		the dot product of the two instances.
+   * @throws Exception	if an error occurs
    */
   protected final double dotProd(Instance inst1, Instance inst2)
     throws Exception {
@@ -231,4 +305,70 @@ public abstract class CachedKernel extends Kernel {
     return (result);
   }
 
+  /**
+   * Sets the size of the cache to use (a prime number)
+   * 
+   * @param value	the size of the cache
+   */
+  public void setCacheSize(int value) {
+    if (value >= 0) {
+      m_cacheSize = value;
+      clean();
+    }
+    else {
+      System.out.println(
+	  "Cache size cannot be smaller than 0 (provided: " + value + ")!");
+    }
+  }
+  
+  /**
+   * Gets the size of the cache
+   * 
+   * @return 		the cache size
+   */
+  public int getCacheSize() {
+    return m_cacheSize;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String cacheSizeTipText() {
+    return "The size of the cache (a prime number).";
+  }
+
+  /**
+   * initializes variables etc.
+   * 
+   * @param data	the data to use
+   */
+  protected void initVars(Instances data) {
+    super.initVars(data);
+    
+    m_numInsts = m_data.numInstances();
+
+    if (getCacheSize() > 0) {
+      // Use LRU cache
+      m_storage = new double[m_cacheSize * m_cacheSlots];
+      m_keys    = new long[m_cacheSize * m_cacheSlots];
+    } 
+  }
+  
+  /**
+   * builds the kernel with the given data. Initializes the kernel cache. 
+   * The actual size of the cache in bytes is (64 * cacheSize).
+   * 
+   * @param data	the data to base the kernel on
+   * @throws Exception	if something goes wrong
+   */
+  public void buildKernel(Instances data) throws Exception {
+    // does kernel handle the data?
+    if (!getChecksTurnedOff())
+      getCapabilities().testWithFail(data);
+
+    initVars(data);
+  }
 }

@@ -22,21 +22,47 @@
 
 package weka.classifiers.functions.supportVector;
 
-import weka.core.*;
-import java.io.*;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract kernel. 
  * Kernels implementing this class must respect Mercer's condition in order 
  * to ensure a correct behaviour of SMOreg.
- *
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.4 $
  */
-public  abstract class Kernel implements Serializable {
+public abstract class Kernel 
+  implements Serializable, OptionHandler, CapabilitiesHandler {
 
   /** The dataset */
   protected Instances m_data;
+
+  /** enables debugging output */
+  protected boolean m_Debug = false;
+
+  /** Turns off all checks */
+  protected boolean m_ChecksTurnedOff = false;
+  
+  /**
+   * Returns a string describing the kernel
+   * 
+   * @return a description suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public abstract String globalInfo();
     
   /**
    * Computes the result of the kernel function for two instances.
@@ -44,21 +70,20 @@ public  abstract class Kernel implements Serializable {
    *
    * @param id1 the index of the first instance in the dataset
    * @param id2 the index of the second instance in the dataset
-   * @param inst the instance corresponding to id1 (used if id1 == -1)
+   * @param inst1 the instance corresponding to id1 (used if id1 == -1)
    * @return the result of the kernel function
+   * @throws Exception if something goes wrong
    */
   public abstract double eval(int id1, int id2, Instance inst1) 
     throws Exception;
 
-    
   /**
    * Frees the memory used by the kernel.
-   * (Usefull with kernels which use cache.)
+   * (Useful with kernels which use cache.)
    * This function is called when the training is done.
    * i.e. after that, eval will be called with id1 == -1.
    */
   public abstract void clean();
-
 
   /**
    * Returns the number of kernel evaluation performed.
@@ -74,4 +99,179 @@ public  abstract class Kernel implements Serializable {
    */
   public abstract int numCacheHits();
     
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector		result;
+    
+    result = new Vector();
+
+    result.addElement(new Option(
+	"\tEnables debugging output (if available) to be printed.\n"
+	+ "\t(default: off)",
+	"D", 0, "-D"));
+
+    result.addElement(new Option(
+	"\tTurns off all checks - use with caution!\n"
+	+ "\t(default: checks on)",
+	"no-checks", 0, "-no-checks"));
+
+    return result.elements();
+  }
+
+  /**
+   * Parses a given list of options. <p/>
+   * 
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    setDebug(Utils.getFlag('D', options));
+
+    setChecksTurnedOff(Utils.getFlag("no-checks", options));
+
+    Utils.checkForRemainingOptions(options);
+  }
+
+  /**
+   * Gets the current settings of the Kernel.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector    result;
+
+    result = new Vector();
+
+    if (getDebug())
+      result.add("-D");
+
+    if (getChecksTurnedOff())
+      result.add("-no-checks");
+
+    return (String[]) result.toArray(new String[result.size()]);	  
+  }
+
+  /**
+   * Enables or disables the output of debug information (if the derived
+   * kernel supports that)
+   * 
+   * @param value	whether to output debugging information
+   */
+  public void setDebug(boolean value) {
+    m_Debug = value;
+  }
+  
+  /**
+   * Gets whether debugging output is turned on or not.
+   * 
+   * @return		true if debugging output is produced.
+   */
+  public boolean getDebug() {
+    return m_Debug;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Turns on the output of debugging information.";
+  }
+  
+  /**
+   * Disables or enables the checks (which could be time-consuming). Use with
+   * caution!
+   * 
+   * @param value	if true turns off all checks
+   */
+  public void setChecksTurnedOff(boolean value) {
+    m_ChecksTurnedOff = value;
+  }
+  
+  /**
+   * Returns whether the checks are turned off or not.
+   * 
+   * @return		true if the checks are turned off
+   */
+  public boolean getChecksTurnedOff() {
+    return m_ChecksTurnedOff;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String checksTurnedOffTipText() {
+    return "Turns time-consuming checks off - use with caution.";
+  }
+  
+  /**
+   * initializes variables etc.
+   * 
+   * @param data	the data to use
+   */
+  protected void initVars(Instances data) {
+    m_data = data;
+  }
+
+  /** 
+   * Returns the Capabilities of this kernel. Derived kernels have to
+   * override this method to enable capabilities.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    return new Capabilities(this);
+  }
+  
+  /**
+   * builds the kernel with the given data
+   * 
+   * @param data	the data to base the kernel on
+   * @throws Exception	if something goes wrong
+   */
+  public void buildKernel(Instances data) throws Exception {
+    // does kernel handle the data?
+    if (!getChecksTurnedOff())
+      getCapabilities().testWithFail(data);
+    
+    initVars(data);
+  }
+
+  /**
+   * Creates a deep copy of the given kernel using serialization.
+   *
+   * @param kernel 	the kernel to copy
+   * @return 		a deep copy of the kernel
+   * @throws Exception 	if an error occurs
+   */
+  public static Kernel makeCopy(Kernel kernel) throws Exception {
+    return (Kernel) new SerializedObject(kernel).getObject();
+  }
+  
+  /**
+   * Creates a new instance of a kernel given it's class name and
+   * (optional) arguments to pass to it's setOptions method.
+   *
+   * @param kernelName 	the fully qualified class name of the classifier
+   * @param options 	an array of options suitable for passing to setOptions. May
+   * 			be null.
+   * @return 		the newly created classifier, ready for use.
+   * @throws Exception 	if the classifier name is invalid, or the options
+   * 			supplied are not acceptable to the classifier
+   */
+  public static Kernel forName(String kernelName, String[] options) 
+    throws Exception {
+
+    return (Kernel) Utils.forName(Kernel.class, kernelName, options);
+  }
 }
