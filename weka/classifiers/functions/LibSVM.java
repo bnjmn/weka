@@ -56,9 +56,12 @@ import java.util.Vector;
 /** 
  <!-- globalinfo-start -->
  * A wrapper class for the libsvm tools (the libsvm classes, typically the jar file, need to be in the classpath to use this classifier).<br/>
- * LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier.LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.).<br/>
+ * LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier.<br/>
+ * LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.).<br/>
  * <br/>
- * Yasser EL-Manzalawy (2005). WLSVM. URL http://www.cs.iastate.edu/~yasser/wlsvm/.
+ * Yasser EL-Manzalawy (2005). WLSVM. URL http://www.cs.iastate.edu/~yasser/wlsvm/.<br/>
+ * <br/>
+ * Chih-Chung Chang, Chih-Jen Lin (2001). LIBSVM - A Library for Support Vector Machines. URL http://www.csie.ntu.edu.tw/~cjlin/libsvm/.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -67,10 +70,18 @@ import java.util.Vector;
  * <pre>
  * &#64;misc{EL-Manzalawy2005,
  *    author = {Yasser EL-Manzalawy},
- *    note = {LibSVM was originally developed as 'WLSVM'},
+ *    note = {You don't need to include the WLSVM package in the CLASSPATH},
  *    title = {WLSVM},
  *    year = {2005},
  *    URL = {http://www.cs.iastate.edu/~yasser/wlsvm/}
+ * }
+ * 
+ * &#64;misc{Chang2001,
+ *    author = {Chih-Chung Chang and Chih-Jen Lin},
+ *    note = {The Weka classifier works with version 2.82 of LIBSVM},
+ *    title = {LIBSVM - A Library for Support Vector Machines},
+ *    year = {2001},
+ *    URL = {http://www.csie.ntu.edu.tw/~cjlin/libsvm/}
  * }
  * </pre>
  * <p/>
@@ -134,7 +145,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LibSVM 
   extends Classifier
@@ -208,8 +219,9 @@ public class LibSVM
   /** the kernel type */
   protected int m_KernelType = KERNELTYPE_RBF;
   
-  /** for poly */
-  protected double m_Degree = 3;
+  /** for poly - in older versions of libsvm declared as a double.
+   * At least since 2.82 it is an int. */
+  protected int m_Degree = 3;
   
   /** for poly/rbf/sigmoid */
   protected double m_Gamma = 0;
@@ -270,7 +282,7 @@ public class LibSVM
       "A wrapper class for the libsvm tools (the libsvm classes, typically "
     + "the jar file, need to be in the classpath to use this classifier).\n"
     + "LibSVM runs faster than SMO since it uses LibSVM to build the SVM "
-    + "classifier."
+    + "classifier.\n"
     + "LibSVM allows users to experiment with One-class SVM, Regressing SVM, "
     + "and nu-SVM supported by LibSVM tool. LibSVM reports many useful "
     + "statistics about LibSVM classifier (e.g., confusion matrix,"
@@ -288,6 +300,7 @@ public class LibSVM
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
+    TechnicalInformation 	additional;
     
     result = new TechnicalInformation(Type.MISC);
     result.setValue(TechnicalInformation.Field.AUTHOR, "Yasser EL-Manzalawy");
@@ -295,6 +308,14 @@ public class LibSVM
     result.setValue(TechnicalInformation.Field.TITLE, "WLSVM");
     result.setValue(TechnicalInformation.Field.NOTE, "LibSVM was originally developed as 'WLSVM'");
     result.setValue(TechnicalInformation.Field.URL, "http://www.cs.iastate.edu/~yasser/wlsvm/");
+    result.setValue(TechnicalInformation.Field.NOTE, "You don't need to include the WLSVM package in the CLASSPATH");
+    
+    additional = result.add(Type.MISC);
+    additional.setValue(TechnicalInformation.Field.AUTHOR, "Chih-Chung Chang and Chih-Jen Lin");
+    additional.setValue(TechnicalInformation.Field.TITLE, "LIBSVM - A Library for Support Vector Machines");
+    additional.setValue(TechnicalInformation.Field.YEAR, "2001");
+    additional.setValue(TechnicalInformation.Field.URL, "http://www.csie.ntu.edu.tw/~cjlin/libsvm/");
+    additional.setValue(TechnicalInformation.Field.NOTE, "The Weka classifier works with version 2.82 of LIBSVM");
     
     return result;
   }
@@ -472,7 +493,7 @@ public class LibSVM
     
     tmpStr = Utils.getOption('D', options);
     if (tmpStr.length() != 0)
-      setDegree(Double.parseDouble(tmpStr));
+      setDegree(Integer.parseInt(tmpStr));
     else
       setDegree(3);
     
@@ -652,7 +673,7 @@ public class LibSVM
    * 
    * @param value       the degree of the kernel
    */
-  public void setDegree(double value) {
+  public void setDegree(int value) {
     m_Degree = value;
   }
   
@@ -661,7 +682,7 @@ public class LibSVM
    * 
    * @return            the degree of the kernel
    */
-  public double getDegree() {
+  public int getDegree() {
     return m_Degree;
   }
   
@@ -1119,7 +1140,7 @@ public class LibSVM
       
       setField(result, "svm_type", new Integer(m_SVMType));
       setField(result, "kernel_type", new Integer(m_KernelType));
-      setField(result, "degree", new Double(m_Degree));
+      setField(result, "degree", new Integer(m_Degree));
       setField(result, "gamma", new Double(m_GammaActual));
       setField(result, "coef0", new Double(m_Coef0));
       setField(result, "nu", new Double(m_nu));
