@@ -28,7 +28,7 @@ import weka.filters.*;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Rule implements Serializable {
 
@@ -424,7 +424,7 @@ public class Rule implements Serializable {
 	  text.append("/"+Utils.doubleToString((100 * 
 						   m_ruleModel.
 						   rootMeanSquaredError() / 
-						   m_globalAbsDev), 1, 3) 
+						   m_globalStdDev), 1, 3) 
 		      + "%]\n\n");
 	} else {
 	  text.append("]\n\n");
