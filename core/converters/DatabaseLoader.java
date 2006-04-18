@@ -76,7 +76,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -369,6 +369,15 @@ public class DatabaseLoader
   public void setPassword(String password){
    
       m_DataBaseConnection.setPassword(password);
+  }
+
+  /**
+   * Returns the database password
+   *
+   * @return the database password
+   */
+  public String getPassword() {
+    return m_DataBaseConnection.getPassword();
   }
   
   /**
@@ -1230,7 +1239,22 @@ public class DatabaseLoader
   public String[] getOptions() {
       
     Vector options = new Vector();
+
+    if ( (getUrl() != null) && (getUrl().length() != 0) ) {
+      options.add("-url");
+      options.add(getUrl());
+    }
     
+    if ( (getUser() != null) && (getUser().length() != 0) ) {
+      options.add("-user");
+      options.add(getUser());
+    }
+    
+    if ( (getPassword() != null) && (getPassword().length() != 0) ) {
+      options.add("-password");
+      options.add(getPassword());
+    }
+
     options.add("-Q"); 
     options.add(getQuery());
     
@@ -1256,20 +1280,39 @@ public class DatabaseLoader
    */  
   public java.util.Enumeration listOptions() {
       
-     FastVector newVector = new FastVector(3);
+     FastVector newVector = new FastVector();
 
      newVector.addElement(new Option(
+           "\tThe JDBC URL to connect to.\n"
+           + "\t(default: from DatabaseUtils.props file)",
+           "url", 1, "-url <JDBC URL>"));
+     
+     newVector.addElement(new Option(
+           "\tThe user to connect with to the database.\n"
+           + "\t(default: none)",
+           "user", 1, "-user <name>"));
+     
+     newVector.addElement(new Option(
+           "\tThe password to connect with to the database.\n"
+           + "\t(default: none)",
+           "password", 1, "-password <password>"));
+     
+     newVector.addElement(new Option(
 	 "\tSQL query of the form\n"
-	 + "\tSELECT <list of columns>|* FROM <table> [WHERE]\n"
-	 + "\tto execute (default Select * From Results0).",
-	"Q",1,"-Q <query>"));
+	 + "\t\tSELECT <list of columns>|* FROM <table> [WHERE]\n"
+	 + "\tto execute.\n"
+         + "\t(default: Select * From Results0)",
+	 "Q",1,"-Q <query>"));
+     
      newVector.addElement(new Option(
 	 "\tList of column names uniquely defining a DB row\n"
-	 + "\t(separated by ', ').\n\tUsed for incremental loading.\n"
+	 + "\t(separated by ', ').\n"
+         + "\tUsed for incremental loading.\n"
 	 + "\tIf not specified, the key will be determined automatically,\n"
 	 + "\tif possible with the used JDBC driver.\n"
 	 + "\tThe auto ID column created by the DatabaseSaver won't be loaded.",
 	 "P",1,"-P <list of column names>"));
+
      newVector.addElement(new Option(
 	 "\tSets incremental loading", 
 	 "I", 0, "-I"));
@@ -1306,14 +1349,33 @@ public class DatabaseLoader
    */  
   public void setOptions(String[] options) throws Exception {
       
-    String optionString, keyString;
-    optionString = Utils.getOption('Q',options);
-    keyString = Utils.getOption('P',options);
+    String optionString, keyString, tmpStr;
+    
+    optionString = Utils.getOption('Q', options);
+    
+    keyString = Utils.getOption('P', options);
+    
     reset();
+    
+    tmpStr = Utils.getOption("url", options);
+    if (tmpStr.length() != 0)
+      setUrl(tmpStr);
+
+    tmpStr = Utils.getOption("user", options);
+    if (tmpStr.length() != 0)
+      setUser(tmpStr);
+    
+    tmpStr = Utils.getOption("password", options);
+    if (tmpStr.length() != 0)
+      setPassword(tmpStr);
+    
     if (optionString.length() != 0)
       setQuery(optionString);
+    
     m_orderBy.removeAllElements();
+    
     m_inc = Utils.getFlag('I', options);
+    
     if(m_inc){
         StringTokenizer st = new StringTokenizer(keyString, ",");
         while (st.hasMoreTokens()) {

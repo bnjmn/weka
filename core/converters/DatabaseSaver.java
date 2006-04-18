@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -341,6 +341,15 @@ public class DatabaseSaver
   public void setPassword(String password){
    
       m_DataBaseConnection.setPassword(password);
+  }
+
+  /**
+   * Returns the database password
+   *
+   * @return the database password
+   */
+  public String getPassword() {
+    return m_DataBaseConnection.getPassword();
   }
   
   /** 
@@ -631,6 +640,21 @@ public class DatabaseSaver
   public String[] getOptions() {
     Vector options = new Vector();
 
+    if ( (getUrl() != null) && (getUrl().length() != 0) ) {
+      options.add("-url");
+      options.add(getUrl());
+    }
+
+    if ( (getUser() != null) && (getUser().length() != 0) ) {
+      options.add("-user");
+      options.add(getUser());
+    }
+
+    if ( (getPassword() != null) && (getPassword().length() != 0) ) {
+      options.add("-password");
+      options.add(getPassword());
+    }
+
     if ( (m_tableName != null) && (m_tableName.length() != 0) ) {
       options.add("-T"); 
       options.add(m_tableName);
@@ -654,14 +678,37 @@ public class DatabaseSaver
    */  
   public java.util.Enumeration listOptions() {
       
-     FastVector newVector = new FastVector(3);
+     FastVector newVector = new FastVector();
 
-     newVector.addElement(new Option("\tThe name of the table (default: the relation name).",
-				     "T",1,"-T <table name>"));
-     newVector.addElement(new Option("\tAdd an ID column as primary key. The name is specified in the DatabaseUtils file. The DatabaseLoader won't load this column.",
-				     "P",0,"-P"));
-     newVector.addElement(new Option("\tInput file in arff format that should be saved in database.",
-				     "i",1,"-i<input file name>"));
+     newVector.addElement(new Option(
+           "\tThe JDBC URL to connect to.\n"
+           + "\t(default: from DatabaseUtils.props file)",
+           "url", 1, "-url <JDBC URL>"));
+     
+     newVector.addElement(new Option(
+           "\tThe user to connect with to the database.\n"
+           + "\t(default: none)",
+           "user", 1, "-user <name>"));
+     
+     newVector.addElement(new Option(
+           "\tThe password to connect with to the database.\n"
+           + "\t(default: none)",
+           "password", 1, "-password <password>"));
+     
+     newVector.addElement(new Option(
+           "\tThe name of the table.\n"
+           + "\t(default: the relation name)",
+           "T", 1, "-T <table name>"));
+     
+     newVector.addElement(new Option(
+           "\tAdd an ID column as primary key. The name is specified\n"
+           + "\tin the DatabaseUtils file ('idColumn'). The DatabaseLoader\n"
+           + "\twon't load this column.",
+           "P", 0, "-P"));
+     
+     newVector.addElement(new Option(
+           "\tInput file in arff format that should be saved in database.",
+           "i", 1, "-i <input file name>"));
      
      return  newVector.elements();
   }
@@ -688,15 +735,33 @@ public class DatabaseSaver
    */  
   public void setOptions(String[] options) throws Exception {
       
-    String tableString, inputString;
-    tableString = Utils.getOption('T',options);
-    inputString = Utils.getOption('i',options);
+    String tableString, inputString, tmpStr;
+    
     resetOptions();
+
+    tmpStr = Utils.getOption("url", options);
+    if (tmpStr.length() != 0)
+      setUrl(tmpStr);
+
+    tmpStr = Utils.getOption("user", options);
+    if (tmpStr.length() != 0)
+      setUser(tmpStr);
+
+    tmpStr = Utils.getOption("password", options);
+    if (tmpStr.length() != 0)
+      setPassword(tmpStr);
+    
+    tableString = Utils.getOption('T', options);
+    
+    inputString = Utils.getOption('i', options);
+    
     if(tableString.length() != 0){
         m_tableName = tableString;
         m_tabName = false;
     }
+    
     m_id = Utils.getFlag('P', options);
+    
     if(inputString.length() != 0){
         try{
             m_inputFile = inputString;
