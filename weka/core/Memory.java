@@ -32,7 +32,7 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.1.2.3 $
+ * @version   $Revision: 1.1.2.4 $
  * @see       #setEnabled(boolean)
  */
 public class Memory {
@@ -164,7 +164,9 @@ public class Memory {
                  + "Note:\n"
                  + "The Java heap size can be specified with the -Xmx option.\n"
                  + "E.g., to use 128MB as heap size, the command line looks like this:\n"
-                 + "   java -Xmx128m -classpath ...";
+                 + "   java -Xmx128m -classpath ...\n"
+                 + "This does NOT work in the SimpleCLI, the java command refers\n"
+                 + "to the one with which Weka is started.";
     
     System.err.println(msg);
     
