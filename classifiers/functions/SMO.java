@@ -61,7 +61,7 @@ import java.util.Vector;
  * <br/>
  * This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes by default. (In that case the coefficients in the output are based on the normalized data, not the original data --- this is important for interpreting the classifier.)<br/>
  * <br/>
- * Multi-class problems are solved using pairwise classification.<br/>
+ * Multi-class problems are solved using pairwise classification (1-vs-1 and if logistic models are built pairwise coupling according to Friedman, 1996).<br/>
  * <br/>
  * To obtain proper probability estimates, use the option that fits logistic regression models to the outputs of the support vector machine. In the multi-class case the predicted probabilities are coupled using Hastie and Tibshirani's pairwise coupling method.<br/>
  * <br/>
@@ -71,7 +71,9 @@ import java.util.Vector;
  * <br/>
  * J. Platt: Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br/>
  * <br/>
- * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.
+ * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.<br/>
+ * <br/>
+ * J. H. Friedman (1996). Another approach to polychotomous classification. Department of Statistics, Stanford, CA.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -95,6 +97,16 @@ import java.util.Vector;
  *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
  *    volume = {13},
  *    year = {2001}
+ * }
+ * 
+ * &#64;techreport{Friedman1996,
+ *    address = {Department of Statistics, Stanford, CA},
+ *    author = {J. H. Friedman},
+ *    institution = {Stanford University},
+ *    month = {10},
+ *    title = {Another approach to polychotomous classification},
+ *    year = {1996},
+ *    PS = {http://www-stat.stanford.edu/~jhf/ftp/poly.ps.Z}
  * }
  * </pre>
  * <p/>
@@ -171,7 +183,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.59 $
  */
 public class SMO 
   extends Classifier 
@@ -194,7 +206,9 @@ public class SMO
       + "normalizes all attributes by default. (In that case the coefficients "
       + "in the output are based on the normalized data, not the "
       + "original data --- this is important for interpreting the classifier.)\n\n"
-      + "Multi-class problems are solved using pairwise classification.\n\n"
+      + "Multi-class problems are solved using pairwise classification "
+      + "(1-vs-1 and if logistic models are built pairwise coupling "
+      + "according to Friedman, 1996).\n\n"
       + "To obtain proper probability estimates, use the option that fits "
       + "logistic regression models to the outputs of the support vector "
       + "machine. In the multi-class case the predicted probabilities "
@@ -233,6 +247,15 @@ public class SMO
     additional.setValue(Field.VOLUME, "13");
     additional.setValue(Field.NUMBER, "3");
     additional.setValue(Field.PAGES, "637-649");
+    
+    additional = result.add(Type.TECHREPORT);
+    additional.setValue(Field.AUTHOR, "J. H. Friedman");
+    additional.setValue(Field.YEAR, "1996");
+    additional.setValue(Field.TITLE, "Another approach to polychotomous classification");
+    additional.setValue(Field.MONTH, "10");
+    additional.setValue(Field.INSTITUTION, "Stanford University");
+    additional.setValue(Field.ADDRESS, "Department of Statistics, Stanford, CA");
+    additional.setValue(Field.PS, "http://www-stat.stanford.edu/~jhf/ftp/poly.ps.Z");
     
     return result;
   }
