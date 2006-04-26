@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -518,7 +518,8 @@ public class TechnicalInformation {
       
       if (exists(Field.ADDRESS))
 	result += ", " + getValue(Field.ADDRESS);
-      result += ", " + getValue(Field.PAGES);
+      if (exists(Field.PAGES))
+	result += ", " + getValue(Field.PAGES);
 	
       result += ", " + getValue(Field.YEAR) + ".";
     }
