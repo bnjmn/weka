@@ -58,14 +58,76 @@ import java.util.Vector;
 
 
 /** 
- * Converts String attributes into a set of attributes representing word
- * occurrence information from the text contained in the strings. The set of
- * words (attributes) is determined by the first batch filtered (typically
- * training data).
+ <!-- globalinfo-start -->
+ * Converts String attributes into a set of attributes representing word occurrence information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C
+ *  Output word counts rather than boolean word presence.
+ * </pre>
+ * 
+ * <pre> -D &lt;delimiter set&gt;
+ *  String containing the set of delimiter characters
+ *  (default: " \n\t.,:'\"()?!")</pre>
+ * 
+ * <pre> -R &lt;index1,index2-index4,...&gt;
+ *  Specify list of string attributes to convert to words (as weka Range).
+ *  (default: select all string attributes)</pre>
+ * 
+ * <pre> -P &lt;attribute name prefix&gt;
+ *  Specify a prefix for the created attribute names.
+ *  (default: "")</pre>
+ * 
+ * <pre> -W &lt;number of words to keep&gt;
+ *  Specify approximate number of word fields to create.
+ *  Surplus words will be discarded..
+ *  (default: 1000)</pre>
+ * 
+ * <pre> -T
+ *  Transform the word frequencies into log(1+fij)
+ *  where fij is the frequency of word i in jth document(instance).
+ * </pre>
+ * 
+ * <pre> -I
+ *  Transform each word frequency into:
+ *  fij*log(num of Documents/num of  documents containing word i)
+ *    where fij if frequency of word i in  jth document(instance)</pre>
+ * 
+ * <pre> -N
+ *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
+ *  to average length of training documents (default 0=don't normalize).</pre>
+ * 
+ * <pre> -A
+ *  Only form tokens from contiguous alphabetic sequences
+ *  (The delimiter string is ignored if this is set).</pre>
+ * 
+ * <pre> -L
+ *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+ * 
+ * <pre> -S
+ *  Ignore words that are in the stoplist.</pre>
+ * 
+ * <pre> -stemmer &lt;spec&gt;
+ *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+ * 
+ * <pre> -M &lt;int&gt;
+ *  The minimum term frequency (default = 1).</pre>
+ * 
+ * <pre> -O
+ *  If this is set, the maximum number of words and the 
+ *  minimum term frequency is not enforced on a per-class 
+ *  basis but based on the documents in all the classes 
+ *  (even if a class attribute is set).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class StringToWordVector 
   extends Filter
@@ -121,12 +183,16 @@ public class StringToWordVector
   /** The normalization to apply. */
   protected int m_filterType = FILTER_NONE;
   
-  /** Specifies whether document's (instance's) word frequencies are
-      to be normalized.  The are normalized to average length of
-      documents specified as input format. */
+  /** normalization: No normalization */
   public static final int FILTER_NONE = 0;
+  /** normalization: Normalize all data */
   public static final int FILTER_NORMALIZE_ALL = 1;
+  /** normalization: Normalize test data only */
   public static final int FILTER_NORMALIZE_TEST_ONLY = 2;
+
+  /** Specifies whether document's (instance's) word frequencies are
+   * to be normalized.  The are normalized to average length of
+   * documents specified as input format. */
   public static final Tag [] TAGS_FILTER = {
     new Tag(FILTER_NONE, "No normalization"),
     new Tag(FILTER_NORMALIZE_ALL, "Normalize all data"),
@@ -205,7 +271,7 @@ public class StringToWordVector
 				    "N", 1, "-N"));
     newVector.addElement(new Option(
 				    "\tOnly form tokens from contiguous "+
-                                    "alphabetic sequences (The delimiter "+
+                                    "alphabetic sequences\n\t(The delimiter "+
                                     "string is ignored if this is set).",
 				    "A", 0, "-A"));
     newVector.addElement(new Option(
@@ -222,9 +288,9 @@ public class StringToWordVector
 				    "\tThe minimum term frequency (default = 1).",
 				    "M", 1, "-M <int>"));
     newVector.addElement(new Option(
-				    "\tIf this is set, the maximum number of words and the "
-				    + "\tminimum term frequency is not enforced on a per-class "
-				    + "\tbasis but based on the documents in all the classes "
+				    "\tIf this is set, the maximum number of words and the \n"
+				    + "\tminimum term frequency is not enforced on a per-class \n"
+				    + "\tbasis but based on the documents in all the classes \n"
 				    + "\t(even if a class attribute is set).",
 				    "O", 0, "-O"));
 
@@ -232,64 +298,72 @@ public class StringToWordVector
   }
 
   /**
-   * Parses a given list of options controlling the behaviour of this object.
-   * Valid options are:<p>
-   *
-   * -C<br>
-   * Output word counts rather than boolean word presence.<p>
+   * Parses a given list of options. <p/>
    * 
-   * -D delimiter_charcters <br>
-   * Specify set of delimiter characters
-   * (default: " \n\t.,:'\\\"()?!\"<p>
-   *
-   * -R index1,index2-index4,...<br>
-   * Specify list of string attributes to convert to words.
-   * (default: all string attributes)<p>
-   *
-   * -P attribute_name_prefix <br>
-   * Specify a prefix for the created attribute names.
-   * (default: "")<p>
-   *
-   * -W number_of_words_to_keep <br>
-   * Specify number of word fields to create.
-   * Other, less useful words will be discarded.
-   * (default: 1000)<p>
-   *
-   * -A <br>
-   * Only tokenize contiguous alphabetic sequences. <p>
-   *
-   * -L <br>
-   * Convert all tokens to lower case before adding to the dictionary. <p>
-   *
-   * -S <br>
-   * Do not add words to the dictionary which are on the stop list. <p>
-   *
-   * -T <br>
-   * Transform word frequencies to log(1+fij) where fij is frequency of word i 
-   * in document j. <p>
-   *
-   * -I <br>
-   * Transform word frequencies to fij*log(numOfDocs/numOfDocsWithWordi)
-   * where fij is frequency of word i in document j. <p>
-   *
-   * -N <0|1|2> <br>
-   * Whether to 0=not normalize/1=normalize all data/2=normalize test data only 
-   * to average length of training documents (default 0=don\'t normalize).<p>
-   *
-   * -stemmer &lt;spec&gt; <br>
-   * The stemming algorihtm (classname plus options) to use. <p>
-   *
-   * -M <int> <br>
-   * The minimum term frequency (default = 1). <p>
-   *
-   * -O <br>
-   * If this is set, the maximum number of words and the 
-   * minimum term frequency is not enforced on a per-class 
-   * basis but based on the documents in all the classes 
-   * (even if a class attribute is set). <p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C
+   *  Output word counts rather than boolean word presence.
+   * </pre>
+   * 
+   * <pre> -D &lt;delimiter set&gt;
+   *  String containing the set of delimiter characters
+   *  (default: " \n\t.,:'\"()?!")</pre>
+   * 
+   * <pre> -R &lt;index1,index2-index4,...&gt;
+   *  Specify list of string attributes to convert to words (as weka Range).
+   *  (default: select all string attributes)</pre>
+   * 
+   * <pre> -P &lt;attribute name prefix&gt;
+   *  Specify a prefix for the created attribute names.
+   *  (default: "")</pre>
+   * 
+   * <pre> -W &lt;number of words to keep&gt;
+   *  Specify approximate number of word fields to create.
+   *  Surplus words will be discarded..
+   *  (default: 1000)</pre>
+   * 
+   * <pre> -T
+   *  Transform the word frequencies into log(1+fij)
+   *  where fij is the frequency of word i in jth document(instance).
+   * </pre>
+   * 
+   * <pre> -I
+   *  Transform each word frequency into:
+   *  fij*log(num of Documents/num of  documents containing word i)
+   *    where fij if frequency of word i in  jth document(instance)</pre>
+   * 
+   * <pre> -N
+   *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
+   *  to average length of training documents (default 0=don't normalize).</pre>
+   * 
+   * <pre> -A
+   *  Only form tokens from contiguous alphabetic sequences
+   *  (The delimiter string is ignored if this is set).</pre>
+   * 
+   * <pre> -L
+   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+   * 
+   * <pre> -S
+   *  Ignore words that are in the stoplist.</pre>
+   * 
+   * <pre> -stemmer &lt;spec&gt;
+   *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+   * 
+   * <pre> -M &lt;int&gt;
+   *  The minimum term frequency (default = 1).</pre>
+   * 
+   * <pre> -O
+   *  If this is set, the maximum number of words and the 
+   *  minimum term frequency is not enforced on a per-class 
+   *  basis but based on the documents in all the classes 
+   *  (even if a class attribute is set).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -446,9 +520,23 @@ public class StringToWordVector
    * Used to store word counts for dictionary selection based on 
    * a threshold.
    */
-  private class Count implements Serializable {
+  private class Count 
+    implements Serializable {
+
+    /** for serialization */
+    static final long serialVersionUID = 2157223818584474321L;
+    
+    /** the counts */
     public int count, docCount;
-    public Count(int c) { count = c; }
+    
+    /**
+     * the constructor
+     * 
+     * @param c the count
+     */
+    public Count(int c) { 
+      count = c; 
+    }
   }
 
   /**
@@ -458,7 +546,7 @@ public class StringToWordVector
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -477,7 +565,7 @@ public class StringToWordVector
    * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input structure has been defined.
+   * @throws IllegalStateException if no input structure has been defined.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -509,7 +597,7 @@ public class StringToWordVector
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output.
-   * @exception IllegalStateException if no input structure has been defined.
+   * @throws IllegalStateException if no input structure has been defined.
    */
   public boolean batchFinished() throws Exception {
 
@@ -623,7 +711,7 @@ public class StringToWordVector
   /**
    * Set the value of delimiters.
    *
-   * @param newdelimiters Value to assign to delimiters.
+   * @param newDelimiters Value to assign to delimiters.
    */
   public void setDelimiters(String newDelimiters) {
     delimiters = newDelimiters;
@@ -731,7 +819,7 @@ public class StringToWordVector
   /** Sets whether if the word frequencies should be transformed into
    *  log(1+fij) where fij is the frequency of word i in document(instance) j.
    *
-   * @param true if word frequencies are to be transformed.
+   * @param TFTransform true if word frequencies are to be transformed.
    */
   public void setTFTransform(boolean TFTransform) {
       this.m_TFTransform = TFTransform;
@@ -764,7 +852,7 @@ public class StringToWordVector
    * fij*log(num of Docs/num of Docs with word i) <br>
    *      where fij is the frequency of word i in document(instance) j.
    *
-   * @param true if the word frequecies are to be transformed
+   * @param IDFTransform true if the word frequecies are to be transformed
    */
   public void setIDFTransform(boolean IDFTransform) {
       this.m_IDFTransform = IDFTransform;
@@ -796,7 +884,7 @@ public class StringToWordVector
   /** Sets whether if the word frequencies for a document (instance) should
    *  be normalized or not.
    *
-   * @param true if word frequencies are to be normalized.
+   * @param newType the new type.
    */
   public void setNormalizeDocLength(SelectedTag newType) {
     
@@ -830,7 +918,7 @@ public class StringToWordVector
    * character sequences. The delimiter string is ignored if this option is 
    * set to true.
    *
-   * @param onlyAlphabeticSequences should be set to true if only alphabetic 
+   * @param tokenizeOnlyAlphabeticSequences should be set to true if only alphabetic 
    * tokens should be formed.
    */
   public void setOnlyAlphabeticTokens(boolean tokenizeOnlyAlphabeticSequences) {
@@ -996,6 +1084,11 @@ public class StringToWordVector
     return "The stemming algorithm to use on the words.";
   }
   
+  /**
+   * sorts an array
+   * 
+   * @param array the array to sort
+   */
   private static void sortArray(int [] array) {
       
     int i, j, h, N = array.length - 1;
@@ -1015,6 +1108,9 @@ public class StringToWordVector
     }
   }
 
+  /**
+   * determines the selected range
+   */
   private void determineSelectedRange() {
     
     Instances inputFormat = getInputFormat();
@@ -1043,6 +1139,9 @@ public class StringToWordVector
     // System.err.println("Selected Range: " + getSelectedRange().getRanges()); 
   }
   
+  /**
+   * determines the dictionary
+   */
   private void determineDictionary() {
 
     // Operate on a per-class basis if class attribute is set
@@ -1215,6 +1314,10 @@ public class StringToWordVector
 
   /**
    * Converts the instance w/o normalization.
+   * 
+   * @oaram instance the instance to convert
+   * @param v
+   * @return the conerted instance
    */
   private int convertInstancewoDocNorm(Instance instance, FastVector v) {
 
@@ -1340,6 +1443,10 @@ public class StringToWordVector
   /**
    * Normalizes given instance to average doc length (only the newly
    * constructed attributes).
+   * 
+   * @param inst	the instance to normalize
+   * @param firstCopy
+   * @throws Exception if avg. doc length not set
    */
   private void normalizeInstance(Instance inst, int firstCopy) 
     throws Exception {
@@ -1392,16 +1499,33 @@ public class StringToWordVector
   }
   
   
-  
-  private class AlphabeticStringTokenizer implements Enumeration {
+  /**
+   * alphabetic string tokenizer
+   */
+  private class AlphabeticStringTokenizer 
+      implements Enumeration {
+    
+      /** the characters of the string */
       private char[] str;
+      
+      /** the current position */
       int currentPos=0;
       
+      /**
+       * Constructor
+       * 
+       * @param toTokenize the string to tokenize
+       */
       public AlphabeticStringTokenizer(String toTokenize) {
           str = new char[toTokenize.length()];
           toTokenize.getChars(0, toTokenize.length(), str, 0);
       }
       
+      /**
+       * returns whether there are more elements still
+       * 
+       * @return true if there are still more elements
+       */
       public boolean hasMoreElements() {
           int beginpos = currentPos;
           
@@ -1422,6 +1546,11 @@ public class StringToWordVector
               return false;
       }
       
+      /**
+       * returns the next element
+       * 
+       * @return the next element
+       */
       public Object nextElement() {
           int beginpos, endpos;
           beginpos = currentPos;
@@ -1452,5 +1581,4 @@ public class StringToWordVector
           return s;
       }      
   }
-  
 }

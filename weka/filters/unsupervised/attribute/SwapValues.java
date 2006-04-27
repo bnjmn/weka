@@ -41,21 +41,27 @@ import java.util.Vector;
 
 
 /** 
- * Swaps two values of a nominal attribute.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -C col <br>
- * Index of the attribute to be changed. (default last)<p>
- *
- * -F index <br>
- * Index of the first value (default first).<p>
- *
- * -S index <br>
- * Index of the second value (default last).<p>
+ <!-- globalinfo-start -->
+ * Swaps two values of a nominal attribute.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;col&gt;
+ *  Sets the attribute index (default last).</pre>
+ * 
+ * <pre> -F &lt;value index&gt;
+ *  Sets the first value's index (default first).</pre>
+ * 
+ * <pre> -S &lt;value index&gt;
+ *  Sets the second value's index (default last).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SwapValues 
   extends Filter 
@@ -91,9 +97,9 @@ public class SwapValues
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception UnsupportedAttributeTypeException if the selected attribute
+   * @throws UnsupportedAttributeTypeException if the selected attribute
    * is not nominal or if it only has one value.
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -123,7 +129,7 @@ public class SwapValues
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input structure has been defined.
+   * @throws IllegalStateException if no input structure has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -173,19 +179,24 @@ public class SwapValues
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -C col <br>
-   * The column containing the values to be merged. (default last)<p>
-   *
-   * -F index <br>
-   * Index of the first value (default first).<p>
-   *
-   * -S index <br>
-   * Index of the second value (default last).<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;col&gt;
+   *  Sets the attribute index (default last).</pre>
+   * 
+   * <pre> -F &lt;value index&gt;
+   *  Sets the first value's index (default first).</pre>
+   * 
+   * <pre> -S &lt;value index&gt;
+   *  Sets the second value's index (default last).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -260,7 +271,7 @@ public class SwapValues
   /**
    * Sets index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -290,7 +301,7 @@ public class SwapValues
   /**
    * Sets index of the first value used.
    *
-   * @param index the index of the first value
+   * @param firstIndex the index of the first value
    */
   public void setFirstValueIndex(String firstIndex) {
     
@@ -320,7 +331,7 @@ public class SwapValues
   /**
    * Sets index of the second value used.
    *
-   * @param index the index of the second value
+   * @param secondIndex the index of the second value
    */
   public void setSecondValueIndex(String secondIndex) {
     
@@ -387,11 +398,3 @@ public class SwapValues
     }
   }
 }
-
-
-
-
-
-
-
-
