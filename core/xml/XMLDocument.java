@@ -73,15 +73,17 @@ public class XMLDocument {
    /** the root node as String */
    protected String m_RootNode = null;
    
-	/**
-	 * initializes the factory with non-validating parser
-	 */
-	public XMLDocument() throws Exception {
-	    m_Factory = DocumentBuilderFactory.newInstance();
-       setDocType(null);
-       setRootNode(null);
-	    setValidating(false);
-	}
+   /**
+    * initializes the factory with non-validating parser
+    * 
+    * @throws Exception if the construction fails
+    */
+   public XMLDocument() throws Exception {
+     m_Factory = DocumentBuilderFactory.newInstance();
+     setDocType(null);
+     setRootNode(null);
+     setValidating(false);
+   }
    
    /** 
     * Creates a new instance of XMLDocument 
@@ -202,7 +204,7 @@ public class XMLDocument {
    /**
     * sets the root node to use in the XML output. Performs NO checking with DOCTYPE!
     *  
-    * @param docType the DOCTYPE definition to use in XML output 
+    * @param rootNode the root node to use in the XML output
     */
    public void setRootNode(String rootNode) {
       if (rootNode == null)

@@ -75,7 +75,7 @@ public class KOML {
    
    /**
     * reads the XML-serialized object from the given file
-    * @filename the file to deserialize the object from
+    * @param filename the file to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the file
     */
@@ -85,7 +85,7 @@ public class KOML {
    
    /**
     * reads the XML-serialized object from the given file
-    * @file the file to deserialize the object from
+    * @param file the file to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the file
     */
@@ -95,7 +95,7 @@ public class KOML {
    
    /**
     * reads the XML-serialized object from a stream
-    * @stream the stream to deserialize the object from
+    * @param stream the stream to deserialize the object from
     * @return the deserialized object
     * @throws Exception if something goes wrong while reading from the stream
     */
@@ -148,8 +148,8 @@ public class KOML {
    
    /**
     * writes the XML-serialized object to the given file
-    * @filename the file to serialize the object to
-    * @o the object to write to the file
+    * @param filename the file to serialize the object to
+    * @param o the object to write to the file
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the file
     */
@@ -159,8 +159,8 @@ public class KOML {
    
    /**
     * write the XML-serialized object to the given file
-    * @file the file to serialize the object to
-    * @o the object to write to the file
+    * @param file the file to serialize the object to
+    * @param o the object to write to the file
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the file
     */
@@ -170,8 +170,8 @@ public class KOML {
    
    /**
     * writes the XML-serialized object to a stream
-    * @stream the stream to serialize the object to
-    * @o the object to write to the stream
+    * @param stream the stream to serialize the object to
+    * @param o the object to write to the stream
     * @return whether writing was successful or not
     * @throws Exception if something goes wrong while writing to the stream
     */
