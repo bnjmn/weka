@@ -44,11 +44,7 @@ import java.util.Vector;
 /**
  <!-- globalinfo-start -->
  * Generates a people database and is based on the paper by Agrawal et al.:<br/>
- * R. Agrawal, T. Imielinski, A. Swami (1993). Database Mining: A Performance Perspective. IEEE Transactions on Knowledge and Data Engineering. Vol.5, No.6, pp. 914-925.<br/>
- * <br/>
- * Links:<br/>
- *  - http://www.almaden.ibm.com/software/quest/Publications/ByDate.html<br/>
- *  - http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf
+ * R. Agrawal, T. Imielinski, A. Swami (1993). Database Mining: A Performance Perspective. IEEE Transactions on Knowledge and Data Engineering. 5(6):914-925. URL http://www.almaden.ibm.com/software/quest/Publications/ByDate.html.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -59,11 +55,13 @@ import java.util.Vector;
  *    author = {R. Agrawal and T. Imielinski and A. Swami},
  *    journal = {IEEE Transactions on Knowledge and Data Engineering},
  *    note = {Special issue on Learning and Discovery in Knowledge-Based Databases},
- *    number = {No.6},
- *    pages = {pp. 914-925},
+ *    number = {6},
+ *    pages = {914-925},
  *    title = {Database Mining: A Performance Perspective},
- *    volume = {Vol.5},
- *    year = {1993}
+ *    volume = {5},
+ *    year = {1993},
+ *    URL = {http://www.almaden.ibm.com/software/quest/Publications/ByDate.html},
+ *    PDF = {http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf}
  * }
  * </pre>
  * <p/>
@@ -104,7 +102,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class Agrawal
@@ -407,11 +405,7 @@ public class Agrawal
     return 
          "Generates a people database and is based on the paper by Agrawal "
        + "et al.:\n"
-       + getTechnicalInformation().toString() + "\n"
-       + "\n"
-       + "Links:\n"
-       + " - http://www.almaden.ibm.com/software/quest/Publications/ByDate.html\n"
-       + " - http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf";
+       + getTechnicalInformation().toString();
   }
 
   /**
@@ -429,10 +423,12 @@ public class Agrawal
     result.setValue(Field.YEAR, "1993");
     result.setValue(Field.TITLE, "Database Mining: A Performance Perspective");
     result.setValue(Field.JOURNAL, "IEEE Transactions on Knowledge and Data Engineering");
-    result.setValue(Field.VOLUME, "Vol.5");
-    result.setValue(Field.NUMBER, "No.6");
-    result.setValue(Field.PAGES, "pp. 914-925");
+    result.setValue(Field.VOLUME, "5");
+    result.setValue(Field.NUMBER, "6");
+    result.setValue(Field.PAGES, "914-925");
     result.setValue(Field.NOTE, "Special issue on Learning and Discovery in Knowledge-Based Databases");
+    result.setValue(Field.URL, "http://www.almaden.ibm.com/software/quest/Publications/ByDate.html");
+    result.setValue(Field.PDF, "http://www.almaden.ibm.com/software/quest/Publications/papers/tkde93.pdf");
     
     return result;
   }
@@ -938,4 +934,3 @@ public class Agrawal
     }
   }
 }
-
