@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class LeastMedSq 
   extends Classifier 
@@ -688,7 +688,7 @@ public class LeastMedSq
    * Produces the combination nCr
    *
    * @param n
-   * @param n
+   * @param r
    * @return the combination
    * @throws Exception if r is greater than n
    */
