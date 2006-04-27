@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MergeTwoValues 
   extends Filter
@@ -272,7 +272,7 @@ public class MergeTwoValues
   /**
    * Sets index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -302,7 +302,7 @@ public class MergeTwoValues
   /**
    * Sets index of the first value used.
    *
-   * @param index the index of the first value
+   * @param firstIndex the index of the first value
    */
   public void setFirstValueIndex(String firstIndex) {
     
@@ -332,7 +332,7 @@ public class MergeTwoValues
   /**
    * Sets index of the second value used.
    *
-   * @param index the index of the second value
+   * @param secondIndex the index of the second value
    */
   public void setSecondValueIndex(String secondIndex) {
     

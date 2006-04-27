@@ -52,7 +52,7 @@ import weka.experiment.PropertyNode;
  * @see Experiment#m_ClassFirst
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class XMLExperiment extends XMLBasicSerialization {
    /** the name of the classFirst property */
@@ -79,6 +79,8 @@ public class XMLExperiment extends XMLBasicSerialization {
    /**
     * generates internally a new XML document and clears also the IgnoreList and
     * the mappings for the Read/Write-Methods
+    * 
+    * @throws Exception if initializing fails
     */
    public void clear() throws Exception {
       super.clear();
@@ -202,7 +204,6 @@ public class XMLExperiment extends XMLBasicSerialization {
    /**
     * builds the PropertyNode from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -266,6 +267,9 @@ public class XMLExperiment extends XMLBasicSerialization {
     * Otherwise it loads the binary file, saves the XML representation in a 
     * file with the original filename appended by ".xml" and once again in a
     * binary file with the original filename appended by ".exp".
+    * 
+    * @param args 	the commandline arguments
+    * @throws Exception	if something goes wrong, e.g., file not found
     */
    public static void main(String[] args) throws Exception {
       if (args.length > 0) {

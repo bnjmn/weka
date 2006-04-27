@@ -64,7 +64,7 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class XMLBasicSerialization extends XMLSerialization {
 
@@ -92,6 +92,8 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * generates internally a new XML document and clears also the IgnoreList
     * and the mappings for the Read/Write-Methods
+    * 
+    * @throws Exception if initializing fails
     */
    public void clear() throws Exception {
       super.clear();
@@ -150,7 +152,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * builds the DefaultListModel from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -233,7 +234,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * builds the Collection from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -328,7 +328,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * builds the Map from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -414,7 +413,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * builds the Matrix from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -489,7 +487,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * builds the Matrix (old) from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
@@ -537,7 +534,6 @@ public class XMLBasicSerialization extends XMLSerialization {
    /**
     * builds the Matrix (old) from the given DOM node. 
     * 
-    * @param parent the parent object to get the properties for
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails 
