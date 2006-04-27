@@ -25,6 +25,10 @@ package weka.classifiers.bayes.net;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 
 import java.io.FileReader;
 import java.io.Serializable;
@@ -32,17 +36,33 @@ import java.io.Serializable;
 /**
  * The ADNode class implements the ADTree datastructure which increases
  * the speed with which sub-contingency tables can be constructed from
- * a data set in an Instances object. For details, see
+ * a data set in an Instances object. For details, see: <p/>
  *
- * Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets
- * Andrew Moore, and Mary Soon Lee
- * Journal of Artificial Intelligence Research 8 (1998) 67-91
+ <!-- technical-plaintext-start -->
+ * Andrew W. Moore, Mary S. Lee (1998). Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets. Journal of Artificial Intelligence Research. 8:67-91.
+ <!-- technical-plaintext-end -->
+ * <p/>
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Moore1998,
+ *    author = {Andrew W. Moore and Mary S. Lee},
+ *    journal = {Journal of Artificial Intelligence Research},
+ *    pages = {67-91},
+ *    title = {Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets},
+ *    volume = {8},
+ *    year = {1998}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ADNode 
-	implements Serializable {
+	implements Serializable, TechnicalInformationHandler {
   
   	/** for serialization */
   	static final long serialVersionUID = 397409728366910204L;
@@ -62,6 +82,27 @@ public class ADNode
 
         /** Creates new ADNode */
         public ADNode() {
+        }
+
+        /**
+         * Returns an instance of a TechnicalInformation object, containing 
+         * detailed information about the technical background of this class,
+         * e.g., paper reference or book this class is based on.
+         * 
+         * @return the technical information about this class
+         */
+        public TechnicalInformation getTechnicalInformation() {
+          TechnicalInformation 	result;
+          
+          result = new TechnicalInformation(Type.ARTICLE);
+          result.setValue(Field.AUTHOR, "Andrew W. Moore and Mary S. Lee");
+          result.setValue(Field.YEAR, "1998");
+          result.setValue(Field.TITLE, "Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets");
+          result.setValue(Field.JOURNAL, "Journal of Artificial Intelligence Research");
+          result.setValue(Field.VOLUME, "8");
+          result.setValue(Field.PAGES, "67-91");
+          
+          return result;
         }
 
 	/** create sub tree
