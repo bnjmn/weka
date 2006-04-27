@@ -29,9 +29,9 @@ import javax.swing.JComponent;
  * This class takes any JComponent and outputs it to a file. Scaling is by
  * default enabled.
  *
- * @see #setScalingEnabled()
+ * @see #setScalingEnabled(boolean)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class JComponentWriter {
   /** whether to print some debug information */
@@ -98,6 +98,8 @@ public abstract class JComponentWriter {
   
   /**
    * sets the component to print to an output format
+   * 
+   * @param c the component to print
    */
   public void setComponent(JComponent c) {
     component = c;
@@ -105,6 +107,8 @@ public abstract class JComponentWriter {
   
   /**
    * returns the component that is stored in the output format
+   * 
+   * @return the component to print
    */
   public JComponent getComponent() {
     return component;
@@ -112,6 +116,8 @@ public abstract class JComponentWriter {
   
   /**
    * sets the file to store the output in
+   * 
+   * @param f the file to store the output in
    */
   public void setFile(File f) {
     outputFile = f;
@@ -119,6 +125,8 @@ public abstract class JComponentWriter {
   
   /**
    * returns the file being used for storing the output
+   * 
+   * @return the file to store the output in
    */
   public File getFile() {
     return outputFile;
@@ -127,6 +135,8 @@ public abstract class JComponentWriter {
   /**
    * returns the name of the writer, to display in the FileChooser.
    * must be overridden in the derived class.
+   * 
+   * @return the name of the writer
    */
   public String getDescription() {
     return null;
@@ -136,6 +146,8 @@ public abstract class JComponentWriter {
    * returns the extension (incl. ".") of the output format, to use in the
    * FileChooser. 
    * must be overridden in the derived class.
+   * 
+   * @return the file extension
    */
   public String getExtension() {
     return null;
@@ -143,6 +155,8 @@ public abstract class JComponentWriter {
   
   /**
    * whether scaling is enabled or ignored
+   * 
+   * @return true if scaling is enabled
    */
   public boolean getScalingEnabled() {
     return m_ScalingEnabled;
@@ -150,6 +164,8 @@ public abstract class JComponentWriter {
   
   /**
    * sets whether to enable scaling
+   * 
+   * @param enabled whether scaling is enabled
    */
   public void setScalingEnabled(boolean enabled) {
     m_ScalingEnabled = enabled;
@@ -176,6 +192,8 @@ public abstract class JComponentWriter {
   
   /**
    * returns the scale factor for the x-axis
+   * 
+   * @return the scale scale factor for the x-axis
    */
   public double getXScale() {
     return m_xScale;
@@ -183,6 +201,8 @@ public abstract class JComponentWriter {
   
   /**
    * returns the scale factor for the y-axis
+   * 
+   * @return the scale scale factor for the y-axis
    */
   public double getYScale() {
     return m_xScale;

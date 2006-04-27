@@ -316,7 +316,7 @@ public class XMLDocument {
 	
 	/**
 	 * writes the current DOM document into the given stream
-	 * @param file the filename to write to
+	 * @param stream the filename to write to
 	 * @throws if something goes wrong with the parsing
 	 */
 	public void write(OutputStream stream) throws Exception {
@@ -329,7 +329,7 @@ public class XMLDocument {
 	
 	/**
 	 * writes the current DOM document into the given writer
-	 * @param file the filename to write to
+	 * @param writer the filename to write to
 	 * @throws if something goes wrong with the parsing
 	 */
 	public void write(Writer writer) throws Exception {
@@ -388,7 +388,7 @@ public class XMLDocument {
 	 * turns the given node into a XML-stringbuffer according to the depth
 	 * @param buf the stringbuffer so far
 	 * @param parent the current node
-	 * @depth the current depth
+	 * @param depth the current depth
 	 * @return the new XML-stringbuffer
 	 */
 	protected StringBuffer toString(StringBuffer buf, Node parent, int depth) {
@@ -457,7 +457,6 @@ public class XMLDocument {
 	
 	/**
 	 * returns the current DOM document as XML-string
-	 * @param document the document to return as XML-string
 	 * @return the document as XML-string representation
 	 * @throws Exception if anything goes wrong initializing the parsing
 	 */
