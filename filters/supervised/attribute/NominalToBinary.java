@@ -23,34 +23,70 @@
 
 package weka.filters.supervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SparseInstance;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.UnassignedClassException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Converts all nominal attributes into binary numeric attributes. An
- * attribute with k values is transformed into k binary attributes if
- * the class is nominal (using the one-attribute-per-value approach).
- * Binary attributes are left binary.
- *
- * If the class is numeric, k - 1 new binary attributes are generated
- * (in the manner described in "Classification and Regression
- * Trees").<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -N <br>
- * If binary attributes are to be coded as nominal ones.<p>
+ <!-- globalinfo-start -->
+ * Converts all nominal attributes into binary numeric attributes. An attribute with k values is transformed into k binary attributes if the class is nominal (using the one-attribute-per-value approach). Binary attributes are left binary, if option '-A' is not given.If the class is numeric, k - 1 new binary attributes are generated in the manner described in "Classification and Regression Trees" by Breiman et al. (i.e. taking the average class value associated with each attribute value into account)<br/>
+ * <br/>
+ * For more information, see:<br/>
+ * <br/>
+ * L. Breiman, J.H. Friedman, R.A. Olshen, C.J. Stone (1984). Classification and Regression Trees. Wadsworth Inc.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * -A <br>
- * For each nominal value a new attribute is created, not only if there are more than 2 values.<p>
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;book{Breiman1984,
+ *    author = {L. Breiman and J.H. Friedman and R.A. Olshen and C.J. Stone},
+ *    publisher = {Wadsworth Inc},
+ *    title = {Classification and Regression Trees},
+ *    year = {1984},
+ *    ISBN = {0412048418}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N
+ *  Sets if binary attributes are to be coded as nominal ones.</pre>
+ * 
+ * <pre> -A
+ *  For each nominal value a new attribute is created, 
+ *  not only if there are more than 2 values.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
-public class NominalToBinary extends Filter implements SupervisedFilter,
-						       OptionHandler {
+public class NominalToBinary 
+  extends Filter 
+  implements SupervisedFilter, OptionHandler, TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -5004607029857673950L;
 
   /** The sorted indices of the attribute values. */
   private int[][] m_Indices = null;
@@ -76,7 +112,29 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
       + "If the class is numeric, k - 1 new binary attributes are generated "
       + "in the manner described in \"Classification and Regression "
       + "Trees\" by Breiman et al. (i.e. taking the average class value associated "
-      + "with each attribute value into account)";
+      + "with each attribute value into account)\n\n"
+      + "For more information, see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.BOOK);
+    result.setValue(Field.AUTHOR, "L. Breiman and J.H. Friedman and R.A. Olshen and C.J. Stone");
+    result.setValue(Field.TITLE, "Classification and Regression Trees");
+    result.setValue(Field.YEAR, "1984");
+    result.setValue(Field.PUBLISHER, "Wadsworth Inc");
+    result.setValue(Field.ISBN, "0412048418");
+    
+    return result;
   }
 
   /**
@@ -86,7 +144,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -112,7 +170,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set
+   * @throws IllegalStateException if no input format has been set
    */
   public boolean input(Instance instance) {
 
@@ -138,7 +196,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -172,27 +230,35 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     Vector newVector = new Vector(1);
 
     newVector.addElement(new Option(
-	      "\tSets if binary attributes are to be coded as nominal ones.",
-	      "N", 0, "-N"));
+	"\tSets if binary attributes are to be coded as nominal ones.",
+	"N", 0, "-N"));
+    
     newVector.addElement(new Option(
-	      "\tFor each nominal value a new attribute is created, \nnot only if there are more than 2 values.",
-	      "A", 0, "-A"));
+	"\tFor each nominal value a new attribute is created, \n"
+	+ "\tnot only if there are more than 2 values.",
+	"A", 0, "-A"));
 
     return newVector.elements();
   }
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -N <br>
-   * If binary attributes are to be coded as nominal ones.<p>
-   *
-   * -A <br>
-   * Whether all nominal values are turned into new attributes.<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N
+   *  Sets if binary attributes are to be coded as nominal ones.</pre>
+   * 
+   * <pre> -A
+   *  For each nominal value a new attribute is created, 
+   *  not only if there are more than 2 values.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
