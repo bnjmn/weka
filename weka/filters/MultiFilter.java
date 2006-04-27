@@ -35,24 +35,31 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * This filter is a meta filter and applies several filters successively.
- * In case all supplied filters are StreamableFilters it can act also as
- * such. <p/>
+ <!-- globalinfo-start -->
+ * Applies several filters successively. In case all supplied filters are StreamableFilters, it will act as a streamable one, too.
+ * <p/>
+ <!-- globalinfo-end -->
  *
- * Valid filter-specific options are:<p/>
- *
- * -D <br/>
- * Turns on output of debugging information.<p/>
- *
- * -F filter <br/>
- * A filter to apply to the instances. Can have multiple of these.<p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Turns on output of debugging information.</pre>
+ * 
+ * <pre> -F &lt;classname [options]&gt;
+ *  A filter to apply (can be specified multiple times).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
   extends SimpleStreamFilter {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6293720886005713120L;
 
   /** The filters */
   protected Filter m_Filters[] = {new AllFilter()};
@@ -65,8 +72,8 @@ public class MultiFilter
   
   /**
    * Returns a string describing this classifier
-   * @return a description of the classifier suitable for
-   * displaying in the explorer/experimenter gui
+   * @return 		a description of the classifier suitable for
+   * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
     return 
@@ -77,7 +84,7 @@ public class MultiFilter
   /**
    * Returns an enumeration describing the available options.
    *
-   * @return an enumeration of all the available options.
+   * @return 		an enumeration of all the available options.
    */
   public Enumeration listOptions() {
     Vector result = new Vector();
@@ -86,20 +93,28 @@ public class MultiFilter
       result.add(enm.nextElement());
       
     result.addElement(new Option(
-              "\tA filter to apply.",
-              "F", 1, "-F classname [options]"));
+              "\tA filter to apply (can be specified multiple times).",
+              "F", 1, "-F <classname [options]>"));
 
     return result.elements();
   }
 
   /**
-   * Parses a list of options for this object. 
-   * Also resets the state of the filter (this reset doesn't affect the 
-   * options).
+   * Parses a list of options for this object. <p/>
    *
-   * @param options the list of options as an array of strings
-   * @throws Exception if an option is not supported
-   * @see    #reset()
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turns on output of debugging information.</pre>
+   * 
+   * <pre> -F &lt;classname [options]&gt;
+   *  A filter to apply (can be specified multiple times).</pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options 	the list of options as an array of strings
+   * @throws Exception 	if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String        tmpStr;
@@ -121,13 +136,13 @@ public class MultiFilter
     if (filters.size() == 0)
       filters.add(new AllFilter());
 
-    m_Filters = (Filter[]) filters.toArray(new Filter[filters.size()]);
+    setFilters((Filter[]) filters.toArray(new Filter[filters.size()]));
   }
 
   /**
    * Gets the current settings of the filter.
    *
-   * @return an array of strings suitable for passing to setOptions
+   * @return 		an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
     Vector        result;
@@ -165,8 +180,8 @@ public class MultiFilter
    * Also resets the state of the filter (this reset doesn't affect the 
    * options).
    *
-   * @param filters     an array of filters with all options set.
-   * @see                   #reset()
+   * @param filters	an array of filters with all options set.
+   * @see #reset()
    */
   public void setFilters(Filter[] filters) {
     m_Filters           = filters;
@@ -176,7 +191,7 @@ public class MultiFilter
   /**
    * Gets the list of possible filters to choose from.
    *
-   * @return the array of Filters
+   * @return 	the array of Filters
    */
   public Filter[] getFilters() {
     return m_Filters;
@@ -194,8 +209,8 @@ public class MultiFilter
   /**
    * Gets a single filter from the set of available filters.
    *
-   * @param index the index of the filter wanted
-   * @return the Filter
+   * @param 	index the index of the filter wanted
+   * @return 	the Filter
    */
   public Filter getFilter(int index) {
     return m_Filters[index];
@@ -203,8 +218,11 @@ public class MultiFilter
 
   /**
    * creates, if possible, a filter of the given classname and options
+   * 
    * @param name        the classname of the filter
    * @param options     the options for the filter
+   * @return		the completely configured filter
+   * @throws Exception	if something goes wrong
    */
   public static Filter forName(String name, String[] options) throws Exception {
     Filter        result;
@@ -220,6 +238,9 @@ public class MultiFilter
 
   /**
    * returns the filter classname and the options as one string
+   * 
+   * @param filter	the filter to get the specs for
+   * @return		the classname plus options
    */
   public static String getFilterSpec(Filter filter) {
     String        result;
@@ -240,7 +261,7 @@ public class MultiFilter
   /**
    * tests whether all the enclosed filters are streamable
    *
-   * @return        true if all the enclosed filters are streamable
+   * @return	true if all the enclosed filters are streamable
    */
   public boolean isStreamableFilter() {
     int           i;
@@ -376,4 +397,3 @@ public class MultiFilter
     }
   }
 }
-
