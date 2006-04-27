@@ -43,9 +43,13 @@ import java.text.DecimalFormat;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
-
-public class PaceMatrix extends Matrix {
+ * @version $Revision: 1.3 $
+ */
+public class PaceMatrix 
+  extends Matrix {
+  
+  /** for serialization */
+  static final long serialVersionUID = 2699925616857843973L;
     
   /* ------------------------
      Constructors
@@ -70,7 +74,7 @@ public class PaceMatrix extends Matrix {
     
   /** Construct a PACE matrix from a 2-D array.
       @param A    Two-dimensional array of doubles.
-      @exception  IllegalArgumentException All rows must have the same length
+      @throws  IllegalArgumentException All rows must have the same length
   */
   public PaceMatrix( double[][] A ) {
     super( A );
@@ -88,7 +92,7 @@ public class PaceMatrix extends Matrix {
   /** Construct a PaceMatrix from a one-dimensional packed array
       @param vals One-dimensional array of doubles, packed by columns (ala Fortran).
       @param m    Number of rows.
-      @exception  IllegalArgumentException Array length must be a multiple of m.
+      @throws  IllegalArgumentException Array length must be a multiple of m.
   */
   public PaceMatrix( double vals[], int m ) {
     super( vals, m );
@@ -130,7 +134,10 @@ public class PaceMatrix extends Matrix {
     n = columnDimension;
   }
 
-  /** Clone the PaceMatrix object.
+  /** 
+   * Clone the PaceMatrix object.
+   * 
+   * @return the clone
    */
   public Object clone () {
     PaceMatrix X = new PaceMatrix(m,n);
@@ -195,7 +202,7 @@ public class PaceMatrix extends Matrix {
   /** Set the whole matrix from a 1-D array 
    *  @param v    1-D array of doubles
    *  @param columnFirst   Whether to fill the column first or the row.
-   * 	@exception  ArrayIndexOutOfBoundsException Submatrix indices
+   *  @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix ( double[] v, boolean columnFirst ) {
     try {
@@ -255,7 +262,7 @@ public class PaceMatrix extends Matrix {
       that is, the elements of A[i0:i1][j].
       @param i0 the index of the first element of the column
       @param i1 the index of the last element of the column
-      @param j  the index of the column
+      @param column the index of the column
       @return the minimum value 
   */
   public double minAbs ( int i0, int i1, int column ) {
@@ -277,6 +284,7 @@ public class PaceMatrix extends Matrix {
     
   /** Return a DoubleVector that stores a column of the matrix 
    *  @param j the index of the column
+   *  @return the column
    */
   public DoubleVector  getColumn( int j ) {
     DoubleVector v = new DoubleVector( m );
@@ -312,6 +320,7 @@ public class PaceMatrix extends Matrix {
    *  @param j1 the index of the last column in the first matrix
    *  @param B the second matrix
    *  @param l the index of the column in the second matrix
+   *  @return the result of the multiplication
    */
   public double  times( int i, int j0, int j1, PaceMatrix B, int l ) {
     double s = 0.0;
@@ -330,18 +339,29 @@ public class PaceMatrix extends Matrix {
   
   /** Decimal format for converting a matrix into a string
    *  @param digits the number of digits
+   *  @return the decimal format
    */
   protected DecimalFormat []  format( int digits ) {
     return format(0, m-1, 0, n-1, digits, false);
   }
 
   /** Decimal format for converting a matrix into a string
+   *  @param digits the number of digits
+   *  @param trailing
+   *  @return the decimal format
    */
   protected DecimalFormat []  format( int digits, boolean trailing ) {
     return format(0, m-1, 0, n-1, digits, trailing);
   }
   
   /** Decimal format for converting a matrix into a string
+   *  @param digits the number of digits
+   *  @param i0
+   *  @param i1
+   *  @param j
+   *  @param digits
+   *  @param trailing
+   *  @return the decimal format
    */
   protected DecimalFormat  format(int i0, int i1, int j, int digits, 
 				  boolean trailing) {
@@ -353,6 +373,13 @@ public class PaceMatrix extends Matrix {
   }
   
   /** Decimal format for converting a matrix into a string
+   *  @param digits the number of digits
+   *  @param i0
+   *  @param i1
+   *  @param j
+   *  @param trailing
+   *  @param digits
+   *  @return the decimal format
    */
   protected DecimalFormat []  format(int i0, int i1, int j0, int j1, 
 				     int digits, boolean trailing) {
@@ -363,15 +390,21 @@ public class PaceMatrix extends Matrix {
     return f;
   }
   
-  /** Converts matrix to string
+  /** 
+   * Converts matrix to string
+   * 
+   * @return the matrix as string
    */ 
   public String  toString() {
     return toString( 5, false );
   }
   
-  /** Converts matrix to string
+  /** 
+   * Converts matrix to string
+   * 
    * @param digits number of digits after decimal point
    * @param trailing true if trailing zeros are padded
+   * @return the matrix as string
    */ 
   public String  toString( int digits, boolean trailing ) {
     
@@ -414,11 +447,12 @@ public class PaceMatrix extends Matrix {
   }
   
   /** Squared sum of a column or row in a matrix
-   *
-   @param j the index of the column or row
-   @param i0 the index of the first element
-   @param i1 the index of the last element
-   @param col if true, sum over a column; otherwise, over a row */
+   * @param j the index of the column or row
+   * @param i0 the index of the first element
+   * @param i1 the index of the last element
+   * @param col if true, sum over a column; otherwise, over a row
+   * @return the squared sum
+   */
   public double sum2( int j, int i0, int i1, boolean col ) {
     double s2 = 0;
     if( col ) {   // column 
@@ -433,8 +467,9 @@ public class PaceMatrix extends Matrix {
   }
   
   /** Squared sum of columns or rows of a matrix
-   *
-   @param col if true, sum over columns; otherwise, over rows */
+   * @param col if true, sum over columns; otherwise, over rows
+   * @return the squared sum
+   */
   public double[] sum2( boolean col ) {
     int l = col ? n : m;
     int p = col ? m : n;
@@ -495,7 +530,7 @@ public class PaceMatrix extends Matrix {
     return cs;
   }
   
-  /* Performs the Givens rotation
+  /** Performs the Givens rotation
    * @param cs a array storing the cosine and sine values
    * @param i0 the index of the row of the first element
    * @param i1 the index of the row of the second element
@@ -525,10 +560,11 @@ public class PaceMatrix extends Matrix {
    *  response, when each of columns pvt[ks:] is moved to become the
    *  ks-th column. On input, A and b are both QR-transformed.
    *  
-   *@param b    response
-   *@param pvt  pivoting index of A
-   *@param ks   columns pvt[ks:] of A are to be tested 
-   **/
+   * @param b    response
+   * @param pvt  pivoting index of A
+   * @param ks   columns pvt[ks:] of A are to be tested 
+   * @return the index of the column
+   */
   public int  mostExplainingColumn( PaceMatrix b, IntVector pvt, int ks ) {
     double val;
     int [] p = pvt.getArray();
@@ -550,11 +586,10 @@ public class PaceMatrix extends Matrix {
    * 
    *  A and b must have the same number of rows, being the (pseudo-)rank. 
    *  
-   *@param b     PaceMatrix b
-   *@param pvt   pivoting vector
-   *@param ks    number of QR-transformed columns; psuedo-rank of A 
-   *@param k0    first k0 columns in pvt[] are not to be ordered.
-   *@return      void
+   * @param b     PaceMatrix b
+   * @param pvt   pivoting vector
+   * @param ks    number of QR-transformed columns; psuedo-rank of A 
+   * @param k0    first k0 columns in pvt[] are not to be ordered.
    */
   public void backward( PaceMatrix b, IntVector pvt, int ks, int k0 ) {
     for( int j = ks; j > k0; j-- ) {
@@ -566,10 +601,12 @@ public class PaceMatrix extends Matrix {
    *  response, when the column is moved to become the (ks-1)-th
    *  column. On input, A and b are both QR-transformed.
    *  
-   *@param b    response
-   *@param pvt  pivoting index of A
-   *@param ks   psudo-rank of A
-   *@param k0   A[][pvt[0:(k0-1)]] are excluded from the testing.  */
+   * @param b    response
+   * @param pvt  pivoting index of A
+   * @param ks   psudo-rank of A
+   * @param k0   A[][pvt[0:(k0-1)]] are excluded from the testing.
+   * @return the index of the column
+   */
   public int  leastExplainingColumn( PaceMatrix b, IntVector pvt, int ks, 
 				     int k0 ) {
     double val;
@@ -638,18 +675,19 @@ public class PaceMatrix extends Matrix {
     return val * val;  // or inner product in later implementation???
   }
 
-  /** QR transformation for a least squares problem
-   *            A x = b
+  /** 
+   * QR transformation for a least squares problem<br/>
+   *            A x = b<br/>
+   * implicitly both A and b are transformed. pvt.size() is the psuedo-rank of 
+   * A.
    *  
-   *@param b    PaceMatrix b
-   *@param pvt  pivoting vector
-   *@param k0   the first k0 columns of A (indexed by pvt) are pre-chosen. 
+   * @param b    PaceMatrix b
+   * @param pvt  pivoting vector
+   * @param k0   the first k0 columns of A (indexed by pvt) are pre-chosen. 
    *            (But subject to rank examination.) 
    * 
    *            For example, the constant term may be reserved, in which
    *            case k0 = 1.
-   *@return     void; implicitly both A and b are transformed. pvt.size() is 
-   *            is the psuedo-rank of A.
    **/
   public void  lsqr( PaceMatrix b, IntVector pvt, int k0 ) {
     final double TINY = 1e-15;
@@ -684,18 +722,17 @@ public class PaceMatrix extends Matrix {
     pvt.setSize( ks );
   }
     
-  /** QR transformation for a least squares problem
-   *            A x = b
+  /** QR transformation for a least squares problem <br/>
+   *            A x = b <br/>
+   * implicitly both A and b are transformed. pvt.size() is the psuedo-rank of A.
    *  
-   *@param b    PaceMatrix b
-   *@param pvt  pivoting vector
-   *@param k0   the first k0 columns of A (indexed by pvt) are pre-chosen. 
+   * @param b    PaceMatrix b
+   * @param pvt  pivoting vector
+   * @param k0   the first k0 columns of A (indexed by pvt) are pre-chosen. 
    *            (But subject to rank examination.) 
    * 
    *            For example, the constant term may be reserved, in which
    *            case k0 = 1.
-   *@return     void; implicitly both A and b are transformed. pvt.size() is 
-   *            is the psuedo-rank of A.
    **/
   public void  lsqrSelection( PaceMatrix b, IntVector pvt, int k0 ) {
     int numObs = m;         // number of instances
@@ -769,12 +806,12 @@ public class PaceMatrix extends Matrix {
     }
   }
     
-  /** Solves upper-triangular equation
-   *   	R x = b
+  /** Solves upper-triangular equation <br/>
+   *   	R x = b <br/>
+   *  On output, the solution is stored in b
    *  @param b the response
    *  @param pvt the pivoting vector
    *  @param kp the number of the first columns involved 
-   *  @return  void. On output, the solution is stored in b 
    */
   public void  rsolve( PaceMatrix b, IntVector pvt, int kp) {
     if(kp == 0) b.m = 0;
@@ -903,10 +940,12 @@ public class PaceMatrix extends Matrix {
    *	constraint. That is, <p>
    *  <center> min ||A x - b||, subject to x >= 0 and c x = d. </center> <p>
    *
-   *	@param b the response
+   *  @param b the response
    *  @param c coeficients of equality constraints
    *  @param d constants of equality constraints
-   *	@param pvt vector storing pivoting column indices */
+   *  @param pvt vector storing pivoting column indices
+   *  @return the solution
+   */
   public DoubleVector nnlse( PaceMatrix b, PaceMatrix c, PaceMatrix d, 
 			     IntVector pvt ) {
     double eps = 1e-10 * Math.max( c.maxAbs(), d.maxAbs() ) /
@@ -923,7 +962,9 @@ public class PaceMatrix extends Matrix {
    *  <center> min ||A x - b||,  subject to x >= 0 and || x || = 1. </center>
    *  <p>
    *  @param b the response 
-   *	@param pvt vector storing pivoting column indices */
+   *  @param pvt vector storing pivoting column indices
+   *  @return the solution
+   */
   public DoubleVector nnlse1( PaceMatrix b, IntVector pvt ) {
     PaceMatrix c = new PaceMatrix( 1, n, 1 );
     PaceMatrix d = new PaceMatrix( 1, b.n, 1 );
@@ -948,6 +989,11 @@ public class PaceMatrix extends Matrix {
     return A;
   }
 
+  /**
+   * for testing only
+   * 
+   * @param args the commandline arguments - ignored
+   */
   public static void  main( String args[] ) {
     System.out.println("================================================" + 
 		       "===========");
