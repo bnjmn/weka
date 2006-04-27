@@ -44,7 +44,7 @@ import java.util.Vector;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see #toStringMatrix()
  * @see #toStringKey()
  * @see #toStringHeader()
@@ -772,7 +772,7 @@ public abstract class ResultMatrix implements Serializable {
    * sets the mean at the given position (if the position is valid)
    * @param col     the column of the mean
    * @param row     the row of the mean
-   * @param valuue  the value of the mean
+   * @param value   the value of the mean
    */
   public void setMean(int col, int row, double value) {
     if (    (col >= 0) && (col < getColCount()) 
@@ -823,7 +823,7 @@ public abstract class ResultMatrix implements Serializable {
    * sets the std deviation at the given position (if the position is valid)
    * @param col     the column of the std. deviation
    * @param row     the row of the std deviation
-   * @param valuue  the value of the std deviation
+   * @param value   the value of the std deviation
    */
   public void setStdDev(int col, int row, double value) {
     if (    (col >= 0) && (col < getColCount()) 
@@ -847,7 +847,7 @@ public abstract class ResultMatrix implements Serializable {
    * sets the significance at the given position (if the position is valid)
    * @param col     the column of the significance
    * @param row     the row of the significance
-   * @param valuue  the value of the significance
+   * @param value   the value of the significance
    */
   public void setSignificance(int col, int row, int value) {
     if (    (col >= 0) && (col < getColCount()) 
@@ -1512,7 +1512,7 @@ public abstract class ResultMatrix implements Serializable {
   /**
    * sets the non-significant and significant wins of the resultsets
    * @param nonSigWins      the non-significant wins
-   * @param sigWins         the significant wins
+   * @param wins         the significant wins
    */
   public void setSummary(int[][] nonSigWins, int[][] wins) {
     int         i;

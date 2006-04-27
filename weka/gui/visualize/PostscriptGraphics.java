@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class PostscriptGraphics extends Graphics2D {
@@ -575,7 +575,7 @@ public class PostscriptGraphics extends Graphics2D {
   /**
    * Draw text in current pen color.
    *
-   * @param String Text to output
+   * @param str Text to output
    * @param x starting x coord
    * @param y starting y coord
    */

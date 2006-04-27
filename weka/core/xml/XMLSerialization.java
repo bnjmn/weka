@@ -88,7 +88,7 @@ import org.w3c.dom.Element;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
@@ -168,7 +168,7 @@ public class XMLSerialization {
    protected XMLSerializationMethodHandler m_CustomMethods = null;
 
    /** for overriding class names (Class &lt;-&gt; Classname (String)) 
-    * @see #overrideClassname(Class) */
+    * @see #overrideClassname(Object) */
    protected Hashtable m_ClassnameOverride = null;
    
    /**
@@ -882,7 +882,6 @@ public class XMLSerialization {
     * @param name the name of the object
     * @return the node that was created
     * @throws Exception if invocation or turning into XML fails
-    * @see #m_CustomReadMethods
     */
    protected Element invokeWriteToXML(Element parent, Object o, String name) throws Exception {
       Method         method;
@@ -1460,7 +1459,6 @@ public class XMLSerialization {
     * @param node the associated XML node
     * @return the instance created from the XML description
     * @throws Exception if instantiation fails
-    * @see #m_CustomReadMethods 
     */
    protected Object invokeReadFromXML(Element node) throws Exception {
       Method         method;
@@ -1633,7 +1631,7 @@ public class XMLSerialization {
    /**
     * writes the given object into the stream
     * 
-    * @param file the filename to write to
+    * @param stream the filename to write to
     * @param o the object to serialize as XML
     * @throws if something goes wrong with the parsing
     */
@@ -1644,7 +1642,7 @@ public class XMLSerialization {
    /**
     * writes the given object into the writer
     * 
-    * @param file the filename to write to
+    * @param writer the filename to write to
     * @param o the object to serialize as XML
     * @throws if something goes wrong with the parsing
     */
