@@ -21,7 +21,11 @@
  */
 
 package weka.classifiers.bayes.net;
-import weka.core.*;
+
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+
 import java.io.FileReader;
 import java.io.Serializable;
 
@@ -35,9 +39,14 @@ import java.io.Serializable;
  * Journal of Artificial Intelligence Research 8 (1998) 67-91
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class ADNode implements Serializable {
+public class ADNode 
+	implements Serializable {
+  
+  	/** for serialization */
+  	static final long serialVersionUID = 397409728366910204L;
+  
         final static int MIN_RECORD_SIZE = 0;
 	
 	/** list of VaryNode children **/
@@ -56,9 +65,9 @@ public class ADNode implements Serializable {
         }
 
 	/** create sub tree
-	 * @param iNode: index of the lowest node in the tree
-	 * @param nRecords: set of records in instances to be considered
-	 * @param instances: data set
+	 * @param iNode index of the lowest node in the tree
+	 * @param nRecords set of records in instances to be considered
+	 * @param instances data set
          * @return VaryNode representing part of an ADTree
  	 **/
 	public static VaryNode makeVaryNode(int iNode, FastVector nRecords, Instances instances) {
@@ -100,12 +109,14 @@ public class ADNode implements Serializable {
 		return _VaryNode;
 	} // MakeVaryNode
 
-	/** create sub tree
-	 * @param iNode: index of the lowest node in the tree
-	 * @param nRecords: set of records in instances to be considered
-	 * @param instances: data set
+	/** 
+	 * create sub tree
+	 * 
+	 * @param iNode index of the lowest node in the tree
+	 * @param nRecords set of records in instances to be considered
+	 * @param instances data set
          * @return ADNode representing an ADTree
-	 **/
+	 */
 	public static ADNode makeADTree(int iNode, FastVector nRecords, Instances instances) {
 		ADNode _ADNode = new ADNode();
                 _ADNode.m_nCount = nRecords.size();
@@ -124,10 +135,12 @@ public class ADNode implements Serializable {
 		return _ADNode;
 	} // MakeADTree
 
-	/** create AD tree from set of instances
-	 * @param instances: data set
+	/** 
+	 * create AD tree from set of instances
+	 * 
+	 * @param instances data set
          * @return ADNode representing an ADTree
-	 **/
+	 */
 	public static ADNode makeADTree(Instances instances) {
           FastVector nRecords = new FastVector(instances.numInstances());
           for (int iRecord = 0; iRecord < instances.numInstances(); iRecord++) {
@@ -136,7 +149,9 @@ public class ADNode implements Serializable {
           return makeADTree(0, nRecords, instances);
         } // MakeADTree
         
-          /** get counts for specific instantiation of a set of nodes
+          /** 
+           * get counts for specific instantiation of a set of nodes
+           * 
            * @param nCounts - array for storing counts
            * @param nNodes - array of node indexes 
            * @param nOffsets - offset for nodes in nNodes in nCounts
@@ -184,8 +199,9 @@ public class ADNode implements Serializable {
         } // getCounts
 
 
-          /* print is used for debugging only and shows the ADTree in ASCII graphics
-           */
+        /** 
+         * print is used for debugging only and shows the ADTree in ASCII graphics
+         */
         public void print() {
           String sTab = new String();for (int i = 0; i < m_nStartNode; i++) {
               sTab = sTab + "  ";
@@ -201,6 +217,11 @@ public class ADNode implements Serializable {
           }
         }
         
+        /**
+         * for testing only
+         * 
+         * @param argv the commandline options
+         */
         public static void main(String [] argv) {
             try {
                 Instances instances = new Instances(new FileReader("\\iris.2.arff"));
