@@ -37,23 +37,34 @@ import java.util.Random;
 import java.util.Vector;
 
 /** 
- * Converts the propositional instance dataset into multi-instance dataset (with
- * relational attribute).  When normalize or standardize a multi-instance
- * dataset, a MIToSingleInstance filter can be applied first to convert the
- * multi-instance dataset into propositional instance dataset. After normalization or
- * standardization, may use this PropositionalToMultiInstance filter to convert the data
- * back to multi-instance format. <p/>
+ <!-- globalinfo-start -->
+ * Converts the propositional instance dataset into multi-instance dataset (with relational attribute). When normalize or standardize a multi-instance dataset, a MIToSingleInstance filter can be applied first to convert the multi-instance dataset into propositional instance dataset. After normalization or standardization, may use this PropositionalToMultiInstance filter to convert the data back to multi-instance format.<br/>
+ * <br/>
+ * Note: the first attribute of the original propositional instance dataset must be a nominal attribute which is expected to be bagId attribute.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Note: the first attribute of the original propositional instance dataset should be
- * a nominal attribute which is expected to be bagId attribute. <p/>
- *  
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  The seed for the randomization of the order of bags. (default 1)</pre>
+ * 
+ * <pre> -R
+ *  Randomizes the order of the produced bags after the generation. (default off)</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see MultiInstanceToPropositional
  */
 public class PropositionalToMultiInstance 
   extends Filter
   implements OptionHandler, UnsupervisedFilter {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5825873573912102482L;
 
   /** String attribute indices in the input data */
   protected int[] m_Indices = null;
@@ -74,9 +85,18 @@ public class PropositionalToMultiInstance
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Converts the multi-instance dataset into single instance dataset "
-      + "so that the Nominalization, Standardization and other type of filters "
-      + " can be applied to these data for the further preprocessing. ";
+    return  
+        "Converts the propositional instance dataset into multi-instance "
+      + "dataset (with relational attribute). When normalize or standardize a "
+      + "multi-instance dataset, a MIToSingleInstance filter can be applied "
+      + "first to convert the multi-instance dataset into propositional "
+      + "instance dataset. After normalization or standardization, may use "
+      + "this PropositionalToMultiInstance filter to convert the data back to "
+      + "multi-instance format.\n\n"
+      + "Note: the first attribute of the original propositional instance "
+      + "dataset must be a nominal attribute which is expected to be bagId "
+      + "attribute.";
+
   }
 
   /**
@@ -102,7 +122,18 @@ public class PropositionalToMultiInstance
 
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  The seed for the randomization of the order of bags. (default 1)</pre>
+   * 
+   * <pre> -R
+   *  Randomizes the order of the produced bags after the generation. (default off)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported

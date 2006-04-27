@@ -23,20 +23,30 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
 
 /** 
- * A filter that converts all incoming instances into sparse format.
- *
+ <!-- globalinfo-start -->
+ * An instance filter that converts all incoming instances into sparse format.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class NonSparseToSparse extends Filter
+public class NonSparseToSparse 
+  extends Filter
   implements UnsupervisedFilter, StreamableFilter {
 
+  /** for serialization */
+  static final long serialVersionUID = 4694489111366063852L;
+  
   /**
    * Returns a string describing this filter
    *
@@ -55,6 +65,7 @@ public class NonSparseToSparse extends Filter
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @throws Exception if format cannot be processed
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -72,7 +83,7 @@ public class NonSparseToSparse extends Filter
    * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
+   * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -107,11 +118,3 @@ public class NonSparseToSparse extends Filter
     }
   }
 }
-
-
-
-
-
-
-
-

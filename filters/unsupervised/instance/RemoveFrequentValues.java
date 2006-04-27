@@ -22,12 +22,6 @@
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.FastVector;
@@ -41,42 +35,51 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Vector;
+
 /** 
- * Determines which values (frequent or infrequent ones) of an (nominal) attribute 
- * are retained and filters the instances accordingly. In case of values with the 
- * same frequency, they are kept in the way they appear in the original instances
- * object. E.g. if you have the values "1,2,3,4" with the frequencies 
- * "10,5,5,3" and you chose to keep the 2 most common values, the values "1,2"
- * would be returned, since the value "2" comes before "3", even though they 
- * have the same frequency.<p>
- *
- * Valid filter-specific options are:<p>
- *
- * -C num<br>
- * Choose attribute to be used for selection (default last).<p>
- *
- * -N num<br>
- * Number of values to retain for the sepcified attribute, i.e. the ones with 
- * the most instances (default 2).
+ <!-- globalinfo-start -->
+ * Determines which values (frequent or infrequent ones) of an (nominal) attribute are retained and filters the instances accordingly. In case of values with the same frequency, they are kept in the way they appear in the original instances object. E.g. if you have the values "1,2,3,4" with the frequencies "10,5,5,3" and you chose to keep the 2 most common values, the values "1,2" would be returned, since the value "2" comes before "3", even though they have the same frequency.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * -L<br>
- * Instead of values with the most instances the ones with the least are 
- * retained.
- *
- * -H<br>
- * When selecting on nominal attributes, removes header references to
- * excluded values. <p>
- *
- * -V<br>
- * Invert matching sense, i.e. the number of values is now ALL - "-N num".
- * E.g. if there are 6 values and "-N 2" given, then 4 values are
- * kept. <p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  Choose attribute to be used for selection.</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Number of values to retain for the sepcified attribute, 
+ *  i.e. the ones with the most instances (default 2).</pre>
+ * 
+ * <pre> -L
+ *  Instead of values with the most instances the ones with the 
+ *  least are retained.
+ * </pre>
+ * 
+ * <pre> -H
+ *  When selecting on nominal attributes, removes header
+ *  references to excluded values.</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class RemoveFrequentValues extends Filter implements OptionHandler,
-      UnsupervisedFilter {
+public class RemoveFrequentValues 
+   extends Filter 
+   implements OptionHandler, UnsupervisedFilter {
+  
+   /** for serialization */
+   static final long serialVersionUID = -2447432930070059511L;
 
    /** The attribute's index setting. */
    private SingleIndex m_AttIndex = new SingleIndex("last"); 
@@ -105,7 +108,15 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
     * displaying in the explorer/experimenter gui
     */
    public String globalInfo() {
-     return "Retains a number of values of a nominal attribute.";
+     return 
+         "Determines which values (frequent or infrequent ones) of an "
+       + "(nominal) attribute are retained and filters the instances "
+       + "accordingly. In case of values with the same frequency, they are "
+       + "kept in the way they appear in the original instances object. E.g. "
+       + "if you have the values \"1,2,3,4\" with the frequencies \"10,5,5,3\" "
+       + "and you chose to keep the 2 most common values, the values \"1,2\" "
+       + "would be returned, since the value \"2\" comes before \"3\", even "
+       + "though they have the same frequency.";
    }
 
    /**
@@ -125,7 +136,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
                 "N", 1, "-N <num>"));
       newVector.addElement(new Option(
                   "\tInstead of values with the most instances the ones with the \n"
-                + "least are retained.\n",
+                + "\tleast are retained.\n",
                 "L", 0, "-L"));
       newVector.addElement(new Option(
                   "\tWhen selecting on nominal attributes, removes header\n"
@@ -139,31 +150,34 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
    }
 
    /**
-    * Parses a given list of options.
-    * Valid options are:<p>
-    *
-	 * -C num<br>
-	 * Choose attribute to be used for selection (default last).<p>
-	 *
-	 * -N num<br>
-	 * Number of values to retain for the sepcified attribute, i.e. the ones with 
-	 * the most instances (default 2).
-	 * 
-	 * -L<br>
-	 * Instead of values with the most instances the ones with the least are 
-	 * retained.
-	 *
-    * -H<br>
-    * When selecting on nominal attributes, removes header references to
-    * excluded values. <p>
-    *
-    * -V<br>
-    * Invert matching sense, i.e. the number of values is now ALL - "-N num".
-    * E.g. if there are 6 values and "-N 2" given, then 4 values are
-    * kept. <p>
+    * Parses a given list of options. <p/>
+    * 
+    <!-- options-start -->
+    * Valid options are: <p/>
+    * 
+    * <pre> -C &lt;num&gt;
+    *  Choose attribute to be used for selection.</pre>
+    * 
+    * <pre> -N &lt;num&gt;
+    *  Number of values to retain for the sepcified attribute, 
+    *  i.e. the ones with the most instances (default 2).</pre>
+    * 
+    * <pre> -L
+    *  Instead of values with the most instances the ones with the 
+    *  least are retained.
+    * </pre>
+    * 
+    * <pre> -H
+    *  When selecting on nominal attributes, removes header
+    *  references to excluded values.</pre>
+    * 
+    * <pre> -V
+    *  Invert matching sense.</pre>
+    * 
+    <!-- options-end -->
     *
     * @param options the list of options as an array of strings
-    * @exception Exception if an option is not supported
+    * @throws Exception if an option is not supported
     */
    public void setOptions(String[] options) throws Exception {
       String attIndex = Utils.getOption('C', options);
@@ -240,7 +254,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
    /**
     * Sets index of the attribute used.
     *
-    * @param index the index of the attribute
+    * @param attIndex the index of the attribute
     */
    public void setAttributeIndex(String attIndex) {
      m_AttIndex.setSingleIndex(attIndex);
@@ -537,7 +551,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
     * @param instance the input instance
     * @return true if the filtered instance may now be
     * collected with output().
-    * @exception IllegalStateException if no input format has been set.
+    * @throws IllegalStateException if no input format has been set.
     */
    public boolean input(Instance instance) {
       if (getInputFormat() == null) {
@@ -560,7 +574,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
     * be called to retrieve the filtered instances.
     *
     * @return true if there are instances pending output
-    * @exception IllegalStateException if no input structure has been defined
+    * @throws IllegalStateException if no input structure has been defined
     */
    public boolean batchFinished() {
       if (getInputFormat() == null) {

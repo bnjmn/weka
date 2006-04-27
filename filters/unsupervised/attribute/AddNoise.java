@@ -21,43 +21,54 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Attribute;
-import weka.core.OptionHandler;
 import weka.core.Option;
-import weka.core.Utils;
+import weka.core.OptionHandler;
 import weka.core.SingleIndex;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
-import java.util.Random;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Vector;
 
 /** 
- * Introduces noise data  a random subsample of the dataset 
- * by changing a given attribute
- * (attribute must be nominal)
- * Valid options are:<p>
- *
- * -C col <br>
- * Index of the attribute to be changed. (default last)<p>
- *
- * -M <br>
- * flag: missing values are treated as an extra value <p>
- *
- * -P num <br>
- * Percentage of noise to be introduced to the data (default 10).<p>
- *
- * -S seed <br>
- * Random number seed for choosing the data to be changed <p>
- * and for choosing the value it is changed to (default 1). <p>
+ <!-- globalinfo-start -->
+ * An instance filter that changes a percentage of a given attributes values. The attribute must be nominal. Missing value can be treated as value itself.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;col&gt;
+ *  Index of the attribute to be changed 
+ *  (default last attribute)</pre>
+ * 
+ * <pre> -M
+ *  Treat missing values as an extra value 
+ * </pre>
+ * 
+ * <pre> -P &lt;num&gt;
+ *  Specify the percentage of noise introduced 
+ *  to the data (default 10)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Specify the random number seed (default 1)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
- **/
-public class AddNoise extends Filter implements UnsupervisedFilter,
-						OptionHandler {
+ * @version $Revision: 1.4 $ 
+ */
+public class AddNoise 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8499673222857299082L;
 
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
@@ -84,7 +95,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
            + " Missing value can be treated as value itself.";
   }
 
- /**
+  /**
    * Returns an enumeration describing the available options
    *
    * @return an enumeration of all the available options
@@ -112,22 +123,30 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Parses a list of options for this object. Valid options are:<p>
-   *
-   * -C col <br>
-   * Index of the attribute to be changed. (default last)<p>
-   *
-   * -M <br>
-   * missing values are treated as an extra value <p>
-   *
-   * -P num <br>
-   * Specify the percentage of noise introduced to the data (default 10).<p>
-   *
-   * -S num <br>
-   * Specify the random number seed (default 1).<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;col&gt;
+   *  Index of the attribute to be changed 
+   *  (default last attribute)</pre>
+   * 
+   * <pre> -M
+   *  Treat missing values as an extra value 
+   * </pre>
+   * 
+   * <pre> -P &lt;num&gt;
+   *  Specify the percentage of noise introduced 
+   *  to the data (default 10)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Specify the random number seed (default 1)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -301,21 +320,21 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   /**
    * Sets index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
     m_AttIndex.setSingleIndex(attIndex);
   }
 
- /**
+  /**
    * Sets the format of the input instances.
    *
    * @param instanceInfo an Instances object containing the input 
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -351,7 +370,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input format was not set
+   * @throws Exception if the input format was not set
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -377,11 +396,9 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception Exception if no input structure has been defined
+   * @throws Exception if no input structure has been defined
    */
   public boolean batchFinished() throws Exception {
-
-    Instance current;
 
     if (getInputFormat() == null) {
       throw new Exception("No input instance format defined");
@@ -412,7 +429,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    * @param seed used for random function
    * @param percent percentage of instances that are changed
    * @param attIndex index of the attribute changed
-   * @param useMissingValue if true missing values are treated as extra value
+   * @param useMissing if true missing values are treated as extra value
    */
   public void addNoise (Instances instances, 
                          int seed, 
@@ -594,5 +611,3 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-

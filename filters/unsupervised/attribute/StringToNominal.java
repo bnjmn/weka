@@ -23,35 +23,45 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.util.Enumeration;
-import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Converts a string attribute (i.e. unspecified number of values) to nominal
- * (i.e. set number of values). You should ensure that all string values that
- * will appear are represented in the dataset.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -C col <br>
- * Index of the attribute to be changed. (default last)<p>
+ <!-- globalinfo-start -->
+ * Converts a string attribute (i.e. unspecified number of values) to nominal (i.e. set number of values). You should ensure that all string values that will appear are represented in the first batch of the data.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;col&gt;
+ *  Sets the attribute index (default last).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class StringToNominal extends Filter 
+public class StringToNominal 
+  extends Filter 
   implements UnsupervisedFilter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 8655492378380068939L;
+  
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
@@ -75,9 +85,9 @@ public class StringToNominal extends Filter
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately.
-   * @exception UnsupportedAttributeTypeException if the selected attribute
+   * @throws UnsupportedAttributeTypeException if the selected attribute
    * a string attribute.
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully.
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -99,7 +109,7 @@ public class StringToNominal extends Filter
    * @param instance the input instance.
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input structure has been defined.
+   * @throws IllegalStateException if no input structure has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -128,7 +138,7 @@ public class StringToNominal extends Filter
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output.
-   * @exception IllegalStateException if no input structure has been defined.
+   * @throws IllegalStateException if no input structure has been defined.
    */
   public boolean batchFinished() {
 
@@ -169,13 +179,18 @@ public class StringToNominal extends Filter
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -C col <br>
-   * The column containing the values to be merged. (default last)<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;col&gt;
+   *  Sets the attribute index (default last).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -296,11 +311,3 @@ public class StringToNominal extends Filter
     }
   }
 }
-
-
-
-
-
-
-
-

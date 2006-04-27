@@ -23,31 +23,52 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Merges two values of a nominal attribute.<p>
+ <!-- globalinfo-start -->
+ * Merges two values of a nominal attribute into one value.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Valid filter-specific options are: <p>
- *
- * -C col <br>
- * The column containing the values to be merged. (default last)<p>
- *
- * -F index <br>
- * Index of the first value (default first).<p>
- *
- * -S index <br>
- * Index of the second value (default last).<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;col&gt;
+ *  Sets the attribute index (default last).</pre>
+ * 
+ * <pre> -F &lt;value index&gt;
+ *  Sets the first value's index (default first).</pre>
+ * 
+ * <pre> -S &lt;value index&gt;
+ *  Sets the second value's index (default last).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class MergeTwoValues extends Filter
+public class MergeTwoValues 
+  extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 2925048980504034018L;
+  
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
 
@@ -75,7 +96,7 @@ public class MergeTwoValues extends Filter
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -110,7 +131,7 @@ public class MergeTwoValues extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
+   * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -159,19 +180,24 @@ public class MergeTwoValues extends Filter
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -C col <br>
-   * The column containing the values to be merged. (default last)<p>
-   *
-   * -F index <br>
-   * Index of the first value (default first).<p>
-   *
-   * -S index <br>
-   * Index of the second value (default last).<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;col&gt;
+   *  Sets the attribute index (default last).</pre>
+   * 
+   * <pre> -F &lt;value index&gt;
+   *  Sets the first value's index (default first).</pre>
+   * 
+   * <pre> -S &lt;value index&gt;
+   *  Sets the second value's index (default last).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -407,11 +433,3 @@ public class MergeTwoValues extends Filter
     }
   }
 }
-
-
-
-
-
-
-
-

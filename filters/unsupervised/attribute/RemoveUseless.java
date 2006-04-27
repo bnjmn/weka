@@ -22,27 +22,41 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import weka.core.*;
+import weka.core.AttributeStats;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * This filter removes attributes that do not vary at all or that vary too much.
- * All constant attributes are deleted automatically, along with any that exceed
- * the maximum percentage of variance parameter. The maximum variance test is
- * only applied to nominal attributes.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -M percentage <br>
- * The maximum variance allowed before an attribute will be deleted (default 99).<p>
+ <!-- globalinfo-start -->
+ * This filter removes attributes that do not vary at all or that vary too much. All constant attributes are deleted automatically, along with any that exceed the maximum percentage of variance parameter. The maximum variance test is only applied to nominal attributes.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -M &lt;max variance %&gt;
+ *  Maximum variance percentage allowed (default 99)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class RemoveUseless extends Filter implements UnsupervisedFilter,
-						     OptionHandler {
+public class RemoveUseless 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8659417851407640038L;
 
   /** The filter used to remove attributes */
   protected Remove m_removeFilter = null;
@@ -57,7 +71,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the inputFormat can't be set successfully 
+   * @throws Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -97,6 +111,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
+   * @throws Exception if no input format defined
    */  
   public boolean batchFinished() throws Exception {
 
@@ -175,13 +190,18 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -M percentage <br>
-   * The maximum variance allowed before an attribute will be deleted (default 99).
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -M &lt;max variance %&gt;
+   *  Maximum variance percentage allowed (default 99)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -223,8 +243,11 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-
-    return "Removes constant attributes, along with nominal attributes that vary too much.";
+    return 
+        "This filter removes attributes that do not vary at all or that vary "
+      + "too much. All constant attributes are deleted automatically, along "
+      + "with any that exceed the maximum percentage of variance parameter. "
+      + "The maximum variance test is only applied to nominal attributes.";
   }
 
   /**

@@ -35,9 +35,6 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
-
-
-
 /** 
  * An abstract instance filter that assumes instances form time-series data and
  * performs some merging of attribute values in the current instance with 
@@ -66,7 +63,7 @@ import weka.filters.UnsupervisedFilter;
  * instances). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -141,7 +138,7 @@ public abstract class AbstractTimeSeries extends Filter
    * instances). <p>
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -202,7 +199,7 @@ public abstract class AbstractTimeSeries extends Filter
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the format couldn't be set successfully
+   * @throws Exception if the format couldn't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -221,7 +218,7 @@ public abstract class AbstractTimeSeries extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception Exception if the input instance was not of the correct 
+   * @throws Exception if the input instance was not of the correct 
    * format or if there was a problem with the filtering.
    */
   public boolean input(Instance instance) throws Exception {
@@ -250,7 +247,7 @@ public abstract class AbstractTimeSeries extends Filter
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 

@@ -23,32 +23,48 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * An instance filter that copies a range of attributes in the dataset.
- * This is used in conjunction with other filters that overwrite attribute
- * during the course of their operation -- this filter allows the original
- * attributes to be kept as well as the new attributes.<p>
- *
- * Valid filter-specific options are:<p>
- *
- * -R index1,index2-index4,...<br>
- * Specify list of columns to copy. First and last are valid indexes.
- * Attribute copies are placed at the end of the dataset.
- * (default none)<p>
- *
- * -V<br>
- * Invert matching sense (i.e. copy all non-specified columns)<p>
+ <!-- globalinfo-start -->
+ * An instance filter that copies a range of attributes in the dataset. This is used in conjunction with other filters that overwrite attribute values during the course of their operation -- this filter allows the original attributes to be kept as well as the new attributes.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R &lt;index1,index2-index4,...&gt;
+ *  Specify list of columns to copy. First and last are valid
+ *  indexes. (default none)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense (i.e. copy all non-specified columns)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Copy extends Filter implements UnsupervisedFilter,
-					    StreamableFilter, OptionHandler {
+public class Copy 
+  extends Filter 
+  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8543707493627441566L;
 
   /** Stores which columns to copy */
   protected Range m_CopyCols = new Range();
@@ -86,18 +102,22 @@ public class Copy extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Parses a given list of options controlling the behaviour of this object.
-   * Valid options are:<p>
-   *
-   * -R index1,index2-index4,...<br>
-   * Specify list of columns to copy. First and last are valid indexes.
-   * (default none)<p>
-   *
-   * -V<br>
-   * Invert matching sense (i.e. copy all non-specified columns)<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R &lt;index1,index2-index4,...&gt;
+   *  Specify list of columns to copy. First and last are valid
+   *  indexes. (default none)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense (i.e. copy all non-specified columns)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -142,7 +162,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if a problem occurs setting the input format
+   * @throws Exception if a problem occurs setting the input format
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -185,7 +205,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -304,7 +324,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * Note: use this method before you call 
    * <code>setInputFormat(Instances)</code>, since the output format is
    * determined in that method.
-   * @exception Exception if an invalid range list is supplied
+   * @throws Exception if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) throws Exception {
 
@@ -320,7 +340,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
    * Note: use this method before you call 
    * <code>setInputFormat(Instances)</code>, since the output format is
    * determined in that method.
-   * @exception Exception if an invalid set of ranges is supplied
+   * @throws Exception if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) throws Exception {
 
@@ -345,11 +365,3 @@ public class Copy extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-

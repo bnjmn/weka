@@ -23,33 +23,53 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SingleIndex;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * An instance filter that adds a new attribute to the dataset. 
- * The new attribute contains all missing values.<p>
- *
- * Valid filter-specific options are:<p>
- *
- * -C index <br>
- * Specify where to insert the column. First and last are valid indexes.
- * (default last)<p>
- *
- * -L label1,label2,...<br>
- * Create nominal attribute with the given labels
- * (default numeric attribute)<p>
- *
- * -N name<br>
- * Name of the new attribute. (default = 'Unnamed')<p>
+ <!-- globalinfo-start -->
+ * An instance filter that adds a new attribute to the dataset. The new attribute will contain all missing values.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  Specify where to insert the column. First and last
+ *  are valid indexes.(default last)</pre>
+ * 
+ * <pre> -L &lt;label1,label2,...&gt;
+ *  Create nominal attribute with given labels
+ *  (default numeric attribute)</pre>
+ * 
+ * <pre> -N &lt;name&gt;
+ *  Name of the new attribute.
+ *  (default = 'Unnamed')</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Add extends Filter implements UnsupervisedFilter,
-					   StreamableFilter, OptionHandler {
+public class Add 
+  extends Filter 
+  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 761386447332932389L;
 
   /** Record the type of attribute to insert */
   protected int m_AttributeType = Attribute.NUMERIC;
@@ -102,21 +122,27 @@ public class Add extends Filter implements UnsupervisedFilter,
 
 
   /**
-   * Parses a list of options for this object. Valid options are:<p>
-   *
-   * -C index <br>
-   * Specify where to insert the column. First and last are valid indexes.
-   * (default last)<p>
-   *
-   * -L label1,label2,...<br>
-   * Create nominal attribute with the given labels
-   * (default numeric attribute)<p>
-   *
-   * -N name<br>
-   * Name of the new attribute. (default = 'Unnamed')<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;index&gt;
+   *  Specify where to insert the column. First and last
+   *  are valid indexes.(default last)</pre>
+   * 
+   * <pre> -L &lt;label1,label2,...&gt;
+   *  Create nominal attribute with given labels
+   *  (default numeric attribute)</pre>
+   * 
+   * <pre> -N &lt;name&gt;
+   *  Name of the new attribute.
+   *  (default = 'Unnamed')</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -159,7 +185,7 @@ public class Add extends Filter implements UnsupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the format couldn't be set successfully
+   * @throws Exception if the format couldn't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -196,7 +222,7 @@ public class Add extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -290,7 +316,7 @@ public class Add extends Filter implements UnsupervisedFilter,
   /**
    * Sets index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -331,7 +357,7 @@ public class Add extends Filter implements UnsupervisedFilter,
    * Set the labels for nominal attribute creation.
    *
    * @param labelList a comma separated list of labels
-   * @exception IllegalArgumentException if the labelList was invalid
+   * @throws IllegalArgumentException if the labelList was invalid
    */
   public void setNominalLabels(String labelList) {
 
@@ -381,11 +407,3 @@ public class Add extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-

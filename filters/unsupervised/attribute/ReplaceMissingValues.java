@@ -23,21 +23,29 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
 /** 
- * Replaces all missing values for nominal and numeric attributes in a 
- * dataset with the modes and means from the training data.
- *
+ <!-- globalinfo-start -->
+ * Replaces all missing values for nominal and numeric attributes in a dataset with the modes and means from the training data.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class ReplaceMissingValues extends PotentialClassIgnorer
+public class ReplaceMissingValues 
+  extends PotentialClassIgnorer
   implements UnsupervisedFilter {
 
+  /** for serialization */
+  static final long serialVersionUID = 8349568310991609867L;
+  
   /** The modes and means */
   private double[] m_ModesAndMeans = null;
 
@@ -60,7 +68,7 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -79,7 +87,7 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
+   * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -105,7 +113,7 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -248,11 +256,3 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
     }
   }
 }
-
-
-
-
-
-
-
-

@@ -22,34 +22,62 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.AttributeStats;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 /** 
- * Modify numeric attributes according to a given expression. <p/>
- *
+ <!-- globalinfo-start -->
+ * Modify numeric attributes according to a given expression
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -E expression <br/>
- *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX) <br/>
+ * <pre> -E &lt;expression&gt;
+ *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
  *  Supported operators are +, -, *, /, pow, log,
  *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
- *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse <p/>
- *
- * -R range <br/>
+ *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse</pre>
+ * 
+ * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of columns to ignore. First and last are valid
- *  indexes. (default none) <p/>
+ *  indexes. (default none)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense (i.e. only modify specified columns)</pre>
+ * 
+ <!-- options-end -->
  *
- * -V <br/>
- *  Invert matching sense (i.e. only modify specified columns) <p/>
- *  
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class MathExpression extends PotentialClassIgnorer implements UnsupervisedFilter, OptionHandler {
+public class MathExpression 
+  extends PotentialClassIgnorer 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -3713222714671997901L;
+  
   /** Stores which columns to select as a funky range */
   protected Range m_SelectCols = new Range();
     
@@ -89,7 +117,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -109,7 +137,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
+   * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -135,8 +163,8 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() throws Exception {
 
@@ -173,6 +201,7 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
    * added to the end of the output queue.
    *
    * @param instance the instance to convert
+   * @throws Exception if instance cannot be converted
    */
   private void convertInstance(Instance instance) throws Exception {
   
@@ -252,11 +281,29 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
     push(inst);
   }
 
-    /**
-   * Parses a list of options for this object. 
+  /**
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -E &lt;expression&gt;
+   *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
+   *  Supported operators are +, -, *, /, pow, log,
+   *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
+   *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse</pre>
+   * 
+   * <pre> -R &lt;index1,index2-index4,...&gt;
+   *  Specify list of columns to ignore. First and last are valid
+   *  indexes. (default none)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense (i.e. only modify specified columns)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     String expString = Utils.getOption('E', options);
@@ -427,7 +474,9 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
   
   
   
-  /** Class to built the tree of the grammar:<br/>
+  /** 
+   * Class to built the tree of the grammar:<br/>
+   * 
    * Exp  -&gt; Term '+' Exp   <br/>
    *         | Term '-' Exp <br/>
    *         | Term         <br/>
@@ -449,13 +498,26 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
    */
   static public class Parser {
       
-      /**A tokenizer for Math Expression*/
-      static public class Tokenizer extends StreamTokenizer {
+      /**
+       * A tokenizer for Math Expression
+       */
+      static public class Tokenizer 
+        extends StreamTokenizer {
+	
+	/** token for a variable */
         final static int  TT_VAR = -5;
+        
+        /** token for a function */
         final static int  TT_FUN = -6;
+        
+        /** token for if-else */
         final static int  TT_IFELSE = -7;
         
-        /**Constructor*/
+        /**
+         * Constructor
+         * 
+         * @param r		the reader to use
+         */
         public Tokenizer(Reader r) {
             super(r);
             resetSyntax();
@@ -465,7 +527,13 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
             wordChars('A','Z');
             ordinaryChar('-');
         }
-        
+     
+        /**
+         * returns the next token
+         * 
+         * @return		the next token
+         * @throws IOException	if something goes wrong
+         */
         public int nextToken() throws IOException {
             super.nextToken();
             if (ttype == TT_WORD) {
@@ -481,18 +549,31 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         }
       }
       
-      /**Tree Node of Math Expression*/
-      static public class TreeNode implements Serializable {
-        /*The known functions and their arity*/
+      /**
+       * Tree Node of Math Expression
+       */
+      static public class TreeNode 
+        implements Serializable {
+	
+	/** for serialization */
+	static final long serialVersionUID = -654720966350007711L;
+	
+        /** The known functions */
         static public String[] funs = {"abs", "sqrt", "log", "exp","sin","cos","tan","rint","floor","pow", "ceil"};
+        
+        /** The arity of the known functions */
         static public int[] arity   = {    1,      1,     1,     1,    1,    1,    1,     1,      1,    2,      1};
-        /*Node type*/
+        
+        /** Node type */
         int type;
-        /*Constant value*/
+        
+        /** Constant value */
         double nval;
-        /*Var name*/
+        
+        /** Var name */
         String sval = null;
-        /*table of operands*/
+        
+        /** table of operands */
         TreeNode operands[] = null;
         
         /**Construct a constant node
@@ -503,8 +584,10 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
           nval = v;
         }
 
-        /**Construct a constant node
-         *@param v the value of the constant
+        /**
+         * Construct a constant node
+         * 
+         * @param n the value of the constant
          */
         TreeNode(TreeNode n) {
           type = '!';
@@ -512,16 +595,20 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
           operands[0] = n;
         }
         
-        /**Construct a variable node
-         *@param v the name of the variable
+        /**
+         * Construct a variable node
+         * 
+         * @param v the name of the variable
          */
         TreeNode(String v) {
           type = Tokenizer.TT_VAR;
           sval = v;
         }
 
-        /**Construct an ifelse node
-         *@param p parameters of the ifelse
+        /**
+         * Construct an ifelse node
+         * 
+         * @param p parameters of the ifelse
          */
         TreeNode(Vector p) {
           type = Tokenizer.TT_IFELSE;
@@ -531,9 +618,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
           }
         }
         
-        /**Construct a function node
-         *@param v the name of the function
-         *@param ops the operands of the function
+        /**
+         * Construct a function node
+         * 
+         * @param f the name of the function
+         * @param ops the operands of the function
+         * @throws Exception if function is unknown or wrong arity
          */        
         TreeNode(String f,Vector ops) throws Exception {
           int i = 0;
@@ -553,9 +643,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
           }
         }
         
-        /**Construct an operator node
-         *@param t the operator '+','-','*','/'
-         *@param ops the operands of the operator
+        /**
+         * Construct an operator node
+         * 
+         * @param t the operator '+','-','*','/'
+         * @param ops the operands of the operator
+         * @throws Exception is something goes wrong
          */        
         TreeNode(int t,Vector ops) throws Exception {
           type = t;
@@ -565,8 +658,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
           }
         }
           
-        /**Evaluate the tree with for specific values of the variables
+        /**
+         * Evaluate the tree with for specific values of the variables
+         * 
          * @param symbols a map associating a Double value to each variable name
+         * @return the evaluation
+         * @throws Exception if a symbol, function or node type is unknown
          */  
         public double eval(Map symbols) throws Exception {
           switch (type) {
@@ -614,8 +711,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         }
       }
 
-    /**Construct the Expression tree for a given String
-     *@param exp the expression used to build the tree
+    /**
+     * Construct the Expression tree for a given String
+     * 
+     * @param exp the expression used to build the tree
+     * @return the generated node
+     * @throws Exception if EOF is not reached
      */
     public static TreeNode parse(String exp) throws Exception {
         Tokenizer tokenizer = new Tokenizer(new StringReader(exp));
@@ -627,9 +728,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         return res;
     }
     
-    /**Parse the exp rule
-     *@param streamTokenizer the tokenizer from which the token are extracted.
-     *@return the tree of the corresponding expression
+    /**
+     * Parse the exp rule
+     * 
+     * @param tokenizer the tokenizer from which the token are extracted.
+     * @return the tree of the corresponding expression
+     * @throws Exception if something goes wrong
      */
     public static TreeNode parseExp(Tokenizer tokenizer) throws Exception {
         Vector operands = new Vector();
@@ -648,9 +752,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         }
     }    
     
-    /**Parse the term rule
-     *@param streamTokenizer the tokenizer from which the token are extracted.
-     *@return the tree of the corresponding term
+    /**
+     * Parse the term rule
+     * 
+     * @param tokenizer the tokenizer from which the token are extracted.
+     * @return the tree of the corresponding term
+     * @throws Exception if something goes wrong
      */    
     public static TreeNode parseTerm(Tokenizer tokenizer) throws Exception {
         Vector operands = new Vector();
@@ -669,9 +776,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         }
     }    
 
-    /**Parse the atom rule
-     *@param streamTokenizer the tokenizer from which the token are extracted.
-     *@return the tree of the corresponding atom
+    /**
+     * Parse the atom rule
+     * 
+     * @param tokenizer the tokenizer from which the token are extracted.
+     * @return the tree of the corresponding atom
+     * @throws Exception if a syntax error occurs
      */    
     public static TreeNode parseAtom(Tokenizer tokenizer) throws Exception {
         switch (tokenizer.ttype) {
@@ -732,9 +842,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         }
     }
 
-    /**Disjunctive boolean test
-     *@param streamTokenizer the tokenizer from which the token are extracted.
-     *@return the tree of the corresponding Dijunction
+    /**
+     * Disjunctive boolean test
+     * 
+     * @param tokenizer the tokenizer from which the token are extracted.
+     * @return the tree of the corresponding Dijunction
+     * @throws Exception if something goes wrong
      */    
     public static TreeNode parseDisjunction(Tokenizer tokenizer) throws Exception {
         Vector params = new Vector(2);
@@ -747,9 +860,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         return new TreeNode('|',params);
     }
 
-    /**Conjunction boolean test
-     *@param streamTokenizer the tokenizer from which the token are extracted.
-     *@return the tree of the corresponding Conjunction
+    /**
+     * Conjunction boolean test
+     * 
+     * @param tokenizer the tokenizer from which the token are extracted.
+     * @return the tree of the corresponding Conjunction
+     * @throws Exception if something goes wrong
      */        
     public static TreeNode parseConjunction(Tokenizer tokenizer) throws Exception {
         Vector params = new Vector(2);
@@ -762,9 +878,12 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
         return new TreeNode('&',params);
     }
 
-    /**Parse a numeric test
-     *@param streamTokenizer the tokenizer from which the token are extracted.
-     *@return the tree of the corresponding test
+    /**
+     * Parse a numeric test
+     * 
+     * @param tokenizer the tokenizer from which the token are extracted.
+     * @return the tree of the corresponding test
+     * @throws Exception if brackets don't match or test unknown
      */            
     public static TreeNode parseNumTest(Tokenizer tokenizer) throws Exception {
         TreeNode n;
@@ -824,4 +943,3 @@ public class MathExpression extends PotentialClassIgnorer implements Unsupervise
     }
   }
 }
-

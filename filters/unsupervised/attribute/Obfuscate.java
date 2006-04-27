@@ -23,21 +23,30 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
 
 /** 
- * A simple instance filter that renames the relation, all attribute names
- * and all nominal (and string) attribute values. For exchanging sensitive
- * datasets. Currently doesn't like string attributes.
- *
+ <!-- globalinfo-start -->
+ * A simple instance filter that renames the relation, all attribute names and all nominal (and string) attribute values. For exchanging sensitive datasets. Currently doesn't like string or relational attributes.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Obfuscate extends Filter implements UnsupervisedFilter,
-						 StreamableFilter {
+public class Obfuscate 
+  extends Filter 
+  implements UnsupervisedFilter, StreamableFilter {
+  
+  /** for serialization */
+  static final long serialVersionUID = -343922772462971561L;
 
   /**
    * Returns a string describing this filter
@@ -46,7 +55,10 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "An instance filter that obfuscates all strings in the data";
+    return 
+        "A simple instance filter that renames the relation, all attribute names "
+      + "and all nominal (and string) attribute values. For exchanging sensitive "
+      + "datasets. Currently doesn't like string or relational attributes.";
   }
 
   /**
@@ -56,6 +68,7 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @throws Exception if 
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -67,21 +80,22 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
       Attribute oldAtt = instanceInfo.attribute(i);
       Attribute newAtt = null;
       switch (oldAtt.type()) {
-      case Attribute.NUMERIC:
-        newAtt = new Attribute("A" + (i + 1));
-        break;
-      case Attribute.NOMINAL:
-        FastVector vals = new FastVector();
-        for (int j = 0; j < oldAtt.numValues(); j++) {
-          vals.addElement("V" + (j + 1));
-        }
-        newAtt = new Attribute("A" + (i + 1), vals);
-        break;
-      case Attribute.STRING:
-      default:
-        newAtt = (Attribute) oldAtt.copy();
-        System.err.println("Not converting attribute: " + oldAtt.name());
-        break;
+	case Attribute.NUMERIC:
+	  newAtt = new Attribute("A" + (i + 1));
+	  break;
+	case Attribute.NOMINAL:
+	  FastVector vals = new FastVector();
+	  for (int j = 0; j < oldAtt.numValues(); j++) {
+	    vals.addElement("V" + (j + 1));
+	  }
+	  newAtt = new Attribute("A" + (i + 1), vals);
+	  break;
+	case Attribute.STRING:
+	case Attribute.RELATIONAL:
+	default:
+	  newAtt = (Attribute) oldAtt.copy();
+  	  System.err.println("Not converting attribute: " + oldAtt.name());
+	  break;
       }
       v.addElement(newAtt);
     }
@@ -99,7 +113,7 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
+   * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
 
@@ -132,11 +146,3 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-

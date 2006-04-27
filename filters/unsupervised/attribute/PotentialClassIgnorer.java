@@ -34,7 +34,7 @@ import weka.core.Instances;
  * attribute that is originally the class attribute !
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public abstract class PotentialClassIgnorer extends Filter {
 
@@ -55,7 +55,7 @@ public abstract class PotentialClassIgnorer extends Filter {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the inputFormat can't be set successfully 
+   * @throws Exception if the inputFormat can't be set successfully 
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -75,7 +75,7 @@ public abstract class PotentialClassIgnorer extends Filter {
    *
    * @return an Instances object containing the output instance
    * structure only.
-   * @exception NullPointerException if no input structure has been
+   * @throws NullPointerException if no input structure has been
    * defined (or the output format hasn't been determined yet) 
    */
   public final Instances getOutputFormat() {

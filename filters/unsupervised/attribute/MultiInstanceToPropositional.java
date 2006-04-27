@@ -38,34 +38,39 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * Converts the multi-instance dataset (with relational-valued attribute) into
- * single instance dataset so that the Nominalize, Standardize and other type
- * of filters or transformation can be applied to these data before the further
- * processing. <p/>
+ <!-- globalinfo-start -->
+ * Converts the multi-instance dataset into single instance dataset so that the Nominalize, Standardize and other type of filters or transformation  can be applied to these data for the further preprocessing.<br/>
+ * Note: the first attribute of the converted dataset is a nominal attribute and refers to the bagId.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * Note the first attribute of the converted dataset is a nominal attribute
- * refers to the bagId.  <p/>
- *
+ <!-- options-start -->
  * Valid options are: <p/>
  * 
- * -A 0|1|2|3 <br/>
- *  four different methods of setting the weight of each propositional instance:
- *  (default method: 0) <br/>
- *  0. weight = original single bag weight /Total number of propositional instance
- *  in the corresponding bag; <br/>
- *  1. weight = 1.0 <br/>
- *  2. weight = 1.0/Total number of propositional instance in the corresponding bag
- *  <br/>
- *  3. weight = Total number of propositional instance / (Total number of bags *
- *  Total number of propositional instance in the corresponding bag) <br/>
+ * <pre> -A &lt;num&gt;
+ *  The type of weight setting for each prop. instance:
+ *  0.weight = original single bag weight /Total number of
+ *  prop. instance in the corresponding bag;
+ *  1.weight = 1.0;
+ *  2.weight = 1.0/Total number of prop. instance in the 
+ *   corresponding bag; 
+ *  3. weight = Total number of prop. instance / (Total number 
+ *   of bags * Total number of prop. instance in the 
+ *   corresponding bag). 
+ *  (default:0)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
   extends Filter 
   implements OptionHandler, UnsupervisedFilter {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4102847628883002530L;
 
   /** the total number of bags */
   protected int m_NumBags;
@@ -75,10 +80,16 @@ public class MultiInstanceToPropositional
   
   /** the total number of the propositional instance in the dataset */
   protected int m_NumInstances;
+  
+  /** weight method: keep the weight to be the same as the original value */
   public static final int WEIGHTMETHOD_ORIGINAL = 0;
+  /** weight method: 1.0 */
   public static final int WEIGHTMETHOD_1 = 1;
+  /** weight method: 1.0 / Total # of prop. instance in the corresp. bag */
   public static final int WEIGHTMETHOD_INVERSE1 = 2;
+  /** weight method: Total # of prop. instance / (Total # of bags * Total # of prop. instance in the corresp. bag) */
   public static final int WEIGHTMETHOD_INVERSE2 = 3;
+  /** weight methods */
   public static final Tag[] TAGS_WEIGHTMETHOD = {
     new Tag(WEIGHTMETHOD_ORIGINAL, 
         "keep the weight to be the same as the original value"),
@@ -119,7 +130,24 @@ public class MultiInstanceToPropositional
 
 
   /**
-   * Parses a given list of options. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -A &lt;num&gt;
+   *  The type of weight setting for each prop. instance:
+   *  0.weight = original single bag weight /Total number of
+   *  prop. instance in the corresponding bag;
+   *  1.weight = 1.0;
+   *  2.weight = 1.0/Total number of prop. instance in the 
+   *   corresponding bag; 
+   *  3. weight = Total number of prop. instance / (Total number 
+   *   of bags * Total number of prop. instance in the 
+   *   corresponding bag). 
+   *  (default:0)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -173,6 +201,8 @@ public class MultiInstanceToPropositional
 
   /**
    * Returns the current weighting method for instances.
+   * 
+   * @return		the current weight method
    */
   public SelectedTag getWeightMethod(){
     return new SelectedTag(m_WeightMethod, TAGS_WEIGHTMETHOD);
@@ -186,9 +216,12 @@ public class MultiInstanceToPropositional
    */
   public String globalInfo() {
 
-    return "Converts the multi-instance dataset into single instance dataset "
+    return 
+        "Converts the multi-instance dataset into single instance dataset "
       + "so that the Nominalize, Standardize and other type of filters or transformation "
-      + " can be applied to these data for the further preprocessing. ";
+      + " can be applied to these data for the further preprocessing.\n"
+      + "Note: the first attribute of the converted dataset is a nominal "
+      + "attribute and refers to the bagId.";
   }
 
   /**
@@ -350,4 +383,3 @@ public class MultiInstanceToPropositional
     }
   }
 }
-
