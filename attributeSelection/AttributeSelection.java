@@ -20,51 +20,57 @@
  *
  */
 
-package  weka.attributeSelection;
+package weka.attributeSelection;
 
-import  java.io.*;
-import  java.util.*;
-import  weka.core.*;
-import  weka.filters.Filter;
-import  weka.filters.unsupervised.attribute.Remove;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
-import java.beans.IntrospectionException;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
+import java.io.FileReader;
+import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Random;
 
 /** 
  * Attribute selection class. Takes the name of a search class and
- * an evaluation class on the command line. <p>
+ * an evaluation class on the command line. <p/>
  *
- * Valid options are: <p>
+ * Valid options are: <p/>
  *
- * -h <br>
- * Display help. <p>
+ * -h <br/>
+ * Display help. <p/>
  *
- * -I <name of input file> <br>
- * Specify the training arff file. <p>
+ * -I &lt;name of input file&gt; <br/>
+ * Specify the training arff file. <p/>
  * 
- * -C <class index> <br>
- * The index of the attribute to use as the class. <p>
+ * -C &lt;class index&gt; <br/>
+ * The index of the attribute to use as the class. <p/>
  * 
- * -S <search method> <br>
+ * -S &lt;search method&gt; <br/>
  * The full class name of the search method followed by search method options
- * (if any).<br>
- * Eg. -S "weka.attributeSelection.BestFirst -N 10" <p>
+ * (if any).<br/>
+ * Eg. -S "weka.attributeSelection.BestFirst -N 10" <p/>
  *
- * -X <number of folds> <br>
- * Perform a cross validation. <p>
+ * -X &lt;number of folds&gt; <br/>
+ * Perform a cross validation. <p/>
  *
- * -N <random number seed> <br>
- * Specify a random number seed. Use in conjuction with -X. (Default = 1). <p>
+ * -N &lt;random number seed&gt; <br/>
+ * Specify a random number seed. Use in conjuction with -X. (Default = 1). <p/>
  * 
- * ------------------------------------------------------------------------ <p>
+ * ------------------------------------------------------------------------ <p/>
  * 
  * Example usage as the main of an attribute evaluator (called FunkyEvaluator):
- * <code> <pre>
+ * <pre>
  * public static void main(String [] args) {
  *   try {
  *     ASEvaluator eval = new FunkyEvaluator();
@@ -73,15 +79,19 @@ import java.lang.reflect.Method;
  *     System.err.println(e.getMessage());
  *   }
  * }
- * </code> </pre>
- * <p>
+ * </pre>
+ * <p/>
  *
- * ------------------------------------------------------------------------ <p>
+ * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.39 $
+ * @version  $Revision: 1.40 $
  */
-public class AttributeSelection implements Serializable {
+public class AttributeSelection 
+  implements Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = 4170171824147584330L;
 
   /** the instances to select attributes from */
   private Instances m_trainInstances;
@@ -511,9 +521,6 @@ public class AttributeSelection implements Serializable {
   public String CrossValidateAttributes () throws Exception {
     Instances cvData = new Instances(m_trainInstances);
     Instances train;
-    double[][] rankResults;
-    double[] subsetResults;
-    double[][] attributeRanking = null;
 
     Random random = new Random(m_seed);
     cvData.randomize(random);
@@ -784,8 +791,6 @@ public class AttributeSelection implements Serializable {
    * @param ASEvaluator an evaluator object
    * @param options an array of options, not only for the evaluator
    * but also the search method (if any) and an input data file
-   * @param outAttributes index 0 will contain the array of selected
-   * attribute indices
    * @param train the input instances
    * @return the results of attribute selection as a String
    * @exception Exception if incorrect options are supplied
@@ -795,20 +800,14 @@ public class AttributeSelection implements Serializable {
 					 Instances train)
     throws Exception {
     int seed = 1, folds = 10;
-    String cutString, foldsString, seedString, searchName;
+    String foldsString, seedString, searchName;
     String classString;
     String searchClassName;
     String[] searchOptions = null; //new String [1];
-    Random random;
     ASSearch searchMethod = null;
     boolean doCrossVal = false;
-    Range initialRange;
     int classIndex = -1;
-    int[] selectedAttributes;
-    double cutoff = -Double.MAX_VALUE;
     boolean helpRequested = false;
-    StringBuffer text = new StringBuffer();
-    initialRange = new Range();
     AttributeSelection trainSelector = new AttributeSelection();
 
     try {
@@ -1003,10 +1002,12 @@ public class AttributeSelection implements Serializable {
    * @param ASEvaluator the attribute evaluator to include options for
    * @param searchMethod the search method to include options for
    * @return a string detailing the valid command line options
+   * @throws Exception if something goes wrong
    */
   private static String makeOptionString (ASEvaluation ASEvaluator, 
 					  ASSearch searchMethod)
     throws Exception {
+    
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
