@@ -23,40 +23,99 @@
 
 package weka.filters.supervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.ContingencyTables;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.SpecialFunctions;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.UnassignedClassException;
+import weka.core.UnsupportedClassTypeException;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * An instance filter that discretizes a range of numeric attributes in 
- * the dataset into nominal attributes. Discretization is by 
- * Fayyad & Irani's MDL method (the default).<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -R col1,col2-col4,... <br>
- * Specifies list of columns to Discretize. First
- * and last are valid indexes. (default: none) <p>
- *
- * -V <br>
- * Invert matching sense.<p>
- *
- * -D <br>
- * Make binary nominal attributes. <p>
- *
- * -E <br>
- * Use better encoding of split point for MDL. <p>
- *   
- * -K <br>
- * Use Kononeko's MDL criterion. <p>
+ <!-- globalinfo-start -->
+ * An instance filter that discretizes a range of numeric attributes in the dataset into nominal attributes. Discretization is by Fayyad &amp; Irani's MDL method (the default).<br/>
+ * <br/>
+ * For more information, see:<br/>
+ * <br/>
+ * Usama M. Fayyad, Keki B. Irani: Multi-interval discretization of continuousvalued attributes for classification learning. In: Thirteenth International Joint Conference on Articial Intelligence, 1022-1027, 1993.<br/>
+ * <br/>
+ * Igor Kononenko: On Biases in Estimating Multi-Valued Attributes. In: 14th International Joint Conference on Articial Intelligence, 1034-1040, 1995.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Fayyad1993,
+ *    author = {Usama M. Fayyad and Keki B. Irani},
+ *    booktitle = {Thirteenth International Joint Conference on Articial Intelligence},
+ *    pages = {1022-1027},
+ *    publisher = {Morgan Kaufmann Publishers},
+ *    title = {Multi-interval discretization of continuousvalued attributes for classification learning},
+ *    volume = {2},
+ *    year = {1993}
+ * }
+ * 
+ * &#64;inproceedings{Kononenko1995,
+ *    author = {Igor Kononenko},
+ *    booktitle = {14th International Joint Conference on Articial Intelligence},
+ *    pages = {1034-1040},
+ *    title = {On Biases in Estimating Multi-Valued Attributes},
+ *    year = {1995},
+ *    PS = {http://ai.fri.uni-lj.si/papers/kononenko95-ijcai.ps.gz}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R &lt;col1,col2-col4,...&gt;
+ *  Specifies list of columns to Discretize. First and last are valid indexes.
+ *  (default none)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
+ * 
+ * <pre> -D
+ *  Output binary attributes for discretized attributes.</pre>
+ * 
+ * <pre> -E
+ *  Use better encoding of split point for MDL.</pre>
+ * 
+ * <pre> -K
+ *  Use Kononenko's MDL criterion.</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class Discretize extends Filter 
-  implements SupervisedFilter, OptionHandler, WeightedInstancesHandler {
+public class Discretize 
+  extends Filter 
+  implements SupervisedFilter, OptionHandler, WeightedInstancesHandler, 
+  	     TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -3141006402280129097L;
 
   /** Stores which columns to Discretize */
   protected Range m_DiscretizeCols = new Range();
@@ -116,26 +175,31 @@ public class Discretize extends Filter
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -R col1,col2-col4,... <br>
-   * Specifies list of columns to Discretize. First
-   * and last are valid indexes. (default none) <p>
-   *
-   * -V <br>
-   * Invert matching sense.<p>
-   *
-   * -D <br>
-   * Make binary nominal attributes. <p>
-   *
-   * -E <br>
-   * Use better encoding of split point for MDL. <p>
-   *   
-   * -K <br>
-   * Use Kononeko's MDL criterion. <p>
+   * Parses a given list of options. <p/>
    * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R &lt;col1,col2-col4,...&gt;
+   *  Specifies list of columns to Discretize. First and last are valid indexes.
+   *  (default none)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
+   * 
+   * <pre> -D
+   *  Output binary attributes for discretized attributes.</pre>
+   * 
+   * <pre> -E
+   *  Use better encoding of split point for MDL.</pre>
+   * 
+   * <pre> -K
+   *  Use Kononenko's MDL criterion.</pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -194,7 +258,7 @@ public class Discretize extends Filter
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set successfully
+   * @throws Exception if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -227,7 +291,7 @@ public class Discretize extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -255,7 +319,7 @@ public class Discretize extends Filter
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -290,7 +354,40 @@ public class Discretize extends Filter
 
     return "An instance filter that discretizes a range of numeric"
       + " attributes in the dataset into nominal attributes."
-      + " Discretization is by Fayyad & Irani's MDL method (the default).";
+      + " Discretization is by Fayyad & Irani's MDL method (the default).\n\n"
+      + "For more information, see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    TechnicalInformation 	additional;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Usama M. Fayyad and Keki B. Irani");
+    result.setValue(Field.TITLE, "Multi-interval discretization of continuousvalued attributes for classification learning");
+    result.setValue(Field.BOOKTITLE, "Thirteenth International Joint Conference on Articial Intelligence");
+    result.setValue(Field.YEAR, "1993");
+    result.setValue(Field.VOLUME, "2");
+    result.setValue(Field.PAGES, "1022-1027");
+    result.setValue(Field.PUBLISHER, "Morgan Kaufmann Publishers");
+    
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Igor Kononenko");
+    additional.setValue(Field.TITLE, "On Biases in Estimating Multi-Valued Attributes");
+    additional.setValue(Field.BOOKTITLE, "14th International Joint Conference on Articial Intelligence");
+    additional.setValue(Field.YEAR, "1995");
+    additional.setValue(Field.PAGES, "1034-1040");
+    additional.setValue(Field.PS, "http://ai.fri.uni-lj.si/papers/kononenko95-ijcai.ps.gz");
+    
+    return result;
   }
   
   /**
@@ -453,7 +550,7 @@ public class Discretize extends Filter
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @exception IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -467,7 +564,7 @@ public class Discretize extends Filter
    * @param attributes an array containing indexes of attributes to Discretize.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @exception IllegalArgumentException if an invalid set of ranges
+   * @throws IllegalArgumentException if an invalid set of ranges
    * is supplied 
    */
   public void setAttributeIndicesArray(int [] attributes) {
@@ -478,7 +575,7 @@ public class Discretize extends Filter
   /**
    * Gets the cut points for an attribute
    *
-   * @param the index (from 0) of the attribute to get the cut points of
+   * @param attributeIndex the index (from 0) of the attribute to get the cut points of
    * @return an array containing the cutpoints (or null if the
    * attribute requested isn't being Discretized
    */
@@ -513,6 +610,7 @@ public class Discretize extends Filter
    * Set cutpoints for a single attribute using MDL.
    *
    * @param index the index of the attribute to set cutpoints for
+   * @param data the data to work with
    */
   protected void calculateCutPointsByMDL(int index,
 					 Instances data) {
@@ -531,7 +629,15 @@ public class Discretize extends Filter
     m_CutPoints[index] = cutPointsForSubset(data, index, 0, firstMissing);
   }
 
-  /** Test using Kononenko's MDL criterion. */
+  /** 
+   * Test using Kononenko's MDL criterion.
+   * 
+   * @param priorCounts
+   * @param bestCounts
+   * @param numInstances
+   * @param numCutPoints
+   * @return true if the split is acceptable
+   */
   private boolean KononenkosMDL(double[] priorCounts,
 				double[][] bestCounts,
 				double numInstances,
@@ -577,7 +683,15 @@ public class Discretize extends Filter
   }
 
 
-  /** Test using Fayyad and Irani's MDL criterion. */
+  /** 
+   * Test using Fayyad and Irani's MDL criterion.
+   * 
+   * @param priorCounts
+   * @param bestCounts
+   * @param numInstances
+   * @param numCutPoints
+   * @return true if the splits is acceptable
+   */
   private boolean FayyadAndIranisMDL(double[] priorCounts,
 				     double[][] bestCounts,
 				     double numInstances,
@@ -635,7 +749,15 @@ public class Discretize extends Filter
   }
     
 
-  /** Selects cutpoints for sorted subset. */
+  /** 
+   * Selects cutpoints for sorted subset.
+   * 
+   * @param instances
+   * @param attIndex
+   * @param first
+   * @param lastPlusOne
+   * @return
+   */
   private double[] cutPointsForSubset(Instances instances, int attIndex, 
 				      int first, int lastPlusOne) { 
 
@@ -894,11 +1016,3 @@ public class Discretize extends Filter
     }
   }
 }
-
-
-
-
-
-
-
-

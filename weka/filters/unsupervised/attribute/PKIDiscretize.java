@@ -22,31 +22,69 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * Discretizes numeric attributes using equal frequency binning where the
- * number of bins is equal to the square root of the number of non-missing
- * values.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -R col1,col2-col4,... <br>
- * Specifies list of columns to Discretize. First
- * and last are valid indexes. (default: first-last) <p>
- *
- * -V <br>
- * Invert matching sense.<p>
- *
- * -D <br>
- * Make binary nominal attributes. <p>
+ <!-- globalinfo-start -->
+ * Discretizes numeric attributes using equal frequency binning, where the number of bins is equal to the square root of the number of non-missing values.<br/>
+ * <br/>
+ * For more information, see:<br/>
+ * <br/>
+ * Ying Yang, Geoffrey I. Webb: Proportional k-Interval Discretization for Naive-Bayes Classifiers. In: 12th European Conference on Machine Learning, 564-575, 2001.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Yang2001,
+ *    author = {Ying Yang and Geoffrey I. Webb},
+ *    booktitle = {12th European Conference on Machine Learning},
+ *    pages = {564-575},
+ *    publisher = {Springer},
+ *    series = {LNCS},
+ *    title = {Proportional k-Interval Discretization for Naive-Bayes Classifiers},
+ *    volume = {2167},
+ *    year = {2001}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R &lt;col1,col2-col4,...&gt;
+ *  Specifies list of columns to Discretize. First and last are valid indexes.
+ *  (default: first-last)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
+ * 
+ * <pre> -D
+ *  Output binary attributes for discretized attributes.</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class PKIDiscretize extends Discretize {
+public class PKIDiscretize 
+  extends Discretize
+  implements TechnicalInformationHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 6153101248977702675L;
 
   /**
    * Sets the format of the input instances.
@@ -55,7 +93,7 @@ public class PKIDiscretize extends Discretize {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set successfully
+   * @throws Exception if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -115,20 +153,25 @@ public class PKIDiscretize extends Discretize {
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -R col1,col2-col4,... <br>
-   * Specifies list of columns to Discretize. First
-   * and last are valid indexes. (default none) <p>
-   *
-   * -V <br>
-   * Invert matching sense.<p>
-   *
-   * -D <br>
-   * Make binary nominal attributes. <p>
+   * Parses a given list of options. <p/>
    * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R &lt;col1,col2-col4,...&gt;
+   *  Specifies list of columns to Discretize. First and last are valid indexes.
+   *  (default: first-last)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
+   * 
+   * <pre> -D
+   *  Output binary attributes for discretized attributes.</pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -181,7 +224,32 @@ public class PKIDiscretize extends Discretize {
 
     return "Discretizes numeric attributes using equal frequency binning,"
       + " where the number of bins is equal to the square root of the"
-      + " number of non-missing values.";
+      + " number of non-missing values.\n\n"
+      + "For more information, see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Ying Yang and Geoffrey I. Webb");
+    result.setValue(Field.TITLE, "Proportional k-Interval Discretization for Naive-Bayes Classifiers");
+    result.setValue(Field.BOOKTITLE, "12th European Conference on Machine Learning");
+    result.setValue(Field.YEAR, "2001");
+    result.setValue(Field.PAGES, "564-575");
+    result.setValue(Field.PUBLISHER, "Springer");
+    result.setValue(Field.SERIES, "LNCS");
+    result.setValue(Field.VOLUME, "2167");
+    
+    return result;
   }
   
   /**
@@ -292,4 +360,3 @@ public class PKIDiscretize extends Discretize {
     }
   }
 }
-
