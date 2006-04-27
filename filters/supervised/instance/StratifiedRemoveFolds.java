@@ -36,13 +36,34 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
+ * This filter takes a dataset and outputs a specified fold for cross validation. If you do not want the folds to be stratified use the unsupervised version.
+ * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -V
+ *  Specifies if inverse of selection is to be output.
+ * </pre>
+ * 
+ * <pre> -N &lt;number of folds&gt;
+ *  Specifies number of folds dataset is split into. 
+ *  (default 10)
+ * </pre>
+ * 
+ * <pre> -F &lt;fold&gt;
+ *  Specifies which fold is selected. (default 1)
+ * </pre>
+ * 
+ * <pre> -S &lt;seed&gt;
+ *  Specifies random number seed. (default 0, no randomizing)
+ * </pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class StratifiedRemoveFolds 
   extends Filter 
@@ -96,6 +117,25 @@ public class StratifiedRemoveFolds
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -V
+   *  Specifies if inverse of selection is to be output.
+   * </pre>
+   * 
+   * <pre> -N &lt;number of folds&gt;
+   *  Specifies number of folds dataset is split into. 
+   *  (default 10)
+   * </pre>
+   * 
+   * <pre> -F &lt;fold&gt;
+   *  Specifies which fold is selected. (default 1)
+   * </pre>
+   * 
+   * <pre> -S &lt;seed&gt;
+   *  Specifies random number seed. (default 0, no randomizing)
+   * </pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
