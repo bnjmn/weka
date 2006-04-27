@@ -23,37 +23,56 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Converts all nominal attributes into binary numeric attributes. An
- * attribute with k values is transformed into k binary attributes
- * (using the one-attribute-per-value approach).
- * Binary attributes are left binary.
- *
- * Valid filter-specific options are: <p>
- *
- * -N <br>
- * If binary attributes are to be coded as nominal ones.<p>
+ <!-- globalinfo-start -->
+ * Converts all nominal attributes into binary numeric attributes. An attribute with k values is transformed into k binary attributes if the class is nominal (using the one-attribute-per-value approach). Binary attributes are left binary, if option '-A' is not given.If the class is numeric, you might want to use the supervised version of this filter.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
- * -A <br>
- * For each nominal value a new attribute is created, not only if there are more than 2 values.<p>
- *
- * -R col1,col2-col4,... <br>
- * Specifies list of columns to convert. First
- * and last are valid indexes. (default: first-last) <p>
- *
- * -V <br>
- * Invert matching sense.<p>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N
+ *  Sets if binary attributes are to be coded as nominal ones.</pre>
+ * 
+ * <pre> -A
+ *  For each nominal value a new attribute is created, 
+ *  not only if there are more than 2 values.</pre>
+ * 
+ * <pre> -R &lt;col1,col2-col4,...&gt;
+ *  Specifies list of columns to act on. First and last are 
+ *  valid indexes.
+ *  (default: first-last)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
-public class NominalToBinary extends Filter implements UnsupervisedFilter,
-						       OptionHandler {
+public class NominalToBinary 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -1130642825710549138L;
 
   /** Stores which columns to act on */
   protected Range m_Columns = new Range();
@@ -96,7 +115,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -118,7 +137,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set
+   * @throws IllegalStateException if no input format has been set
    */
   public boolean input(Instance instance) {
 
@@ -144,45 +163,53 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
-	      "\tSets if binary attributes are to be coded as nominal ones.",
-	      "N", 0, "-N"));
+	"\tSets if binary attributes are to be coded as nominal ones.",
+	"N", 0, "-N"));
 
     newVector.addElement(new Option(
-	      "\tFor each nominal value a new attribute is created, \nnot only if there are more than 2 values.",
-	      "A", 0, "-A"));
+	"\tFor each nominal value a new attribute is created, \n"
+	+ "\tnot only if there are more than 2 values.",
+	"A", 0, "-A"));
 
     newVector.addElement(new Option(
-              "\tSpecifies list of columns to act on. First"
-	      + " and last are valid indexes.\n"
-	      + "\t(default: first-last)",
-              "R", 1, "-R <col1,col2-col4,...>"));
+	"\tSpecifies list of columns to act on. First and last are \n"
+	+ "\tvalid indexes.\n"
+	+ "\t(default: first-last)",
+	"R", 1, "-R <col1,col2-col4,...>"));
 
     newVector.addElement(new Option(
-              "\tInvert matching sense of column indexes.",
-              "V", 0, "-V"));
+	"\tInvert matching sense of column indexes.",
+	"V", 0, "-V"));
 
     return newVector.elements();
   }
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -N <br>
-   * If binary attributes are to be coded as nominal ones.<p>
-   *
-   * -A <br>
-   * Whether all nominal values are turned into new attributes.<p>
-   *
-   * -R col1,col2-col4,... <br>
-   * Specifies list of columns to convert. First
-   * and last are valid indexes. (default none) <p>
-   *
-   * -V <br>
-   * Invert matching sense.<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N
+   *  Sets if binary attributes are to be coded as nominal ones.</pre>
+   * 
+   * <pre> -A
+   *  For each nominal value a new attribute is created, 
+   *  not only if there are more than 2 values.</pre>
+   * 
+   * <pre> -R &lt;col1,col2-col4,...&gt;
+   *  Specifies list of columns to act on. First and last are 
+   *  valid indexes.
+   *  (default: first-last)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -360,7 +387,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @exception IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setAttributeIndices(String rangeList) {
 

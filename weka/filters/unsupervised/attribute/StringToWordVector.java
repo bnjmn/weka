@@ -31,15 +31,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.NoSuchElementException;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -47,14 +38,23 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.Tag;
 import weka.core.SelectedTag;
+import weka.core.SparseInstance;
+import weka.core.Tag;
+import weka.core.Utils;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.Vector;
 
 
 /** 
@@ -65,11 +65,15 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
-public class StringToWordVector extends Filter
+public class StringToWordVector 
+  extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 8249106275278565424L;
+  
   /** Delimiters used in tokenization */
   private String delimiters = " \n\t.,:'\"()?!";
 

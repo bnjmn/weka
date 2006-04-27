@@ -21,40 +21,52 @@
  */
 package weka.filters.supervised.attribute;
 
-import weka.filters.*;
-
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Random;
-
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.FastVector;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
- * A filter that sorts the order of classes so that the class values are 
- * no longer of in the order of that in the header file after filtered.
- * The values of the class will be in the order specified by the user
- * -- it could be either in ascending/descending order by the class
- * frequency or in random order.<p>
- *
- * The format of the header is thus not changed in this filter 
- * (although it still uses <code>setInputFormat()</code>), but
- * the class value of each instance is converted to sorted 
- * values within the same range.  The value can also be converted back
- * using <code>originalValue(double value)</code> procedure.<p>  
+ <!-- globalinfo-start -->
+ * Changes the order of the classes so that the class values are no longer of in the order specified in the header. The values will be in the order specified by the user -- it could be either in ascending/descending order by the class frequency or in random order. Note that this filter currently does not change the header, only the class values of the instances, so there is not much point in using it in conjunction with the FilteredClassifier. The value can also be converted back using 'originalValue(double value)' procedure.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R &lt;seed&gt;
+ *  Specify the seed of randomization
+ *  used to randomize the class
+ *  order (default: 1)</pre>
+ * 
+ * <pre> -C &lt;order&gt;
+ *  Specify the class order to be
+ *  sorted, could be 0: ascending
+ *  1: descending and 2: random.(default: 0)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class ClassOrder extends Filter implements SupervisedFilter,
-						  OptionHandler {
+public class ClassOrder 
+  extends Filter 
+  implements SupervisedFilter, OptionHandler {
     
+  /** for serialization */
+  static final long serialVersionUID = -2116226838887628411L;
+  
   /** The seed of randomization */
   private long m_Seed = 1;
     
@@ -101,7 +113,8 @@ public class ClassOrder extends Filter implements SupervisedFilter,
       + "frequency or in random order. Note that this filter currently does not "
       + "change the header, only the class values of the instances, "
       + "so there is not much point in using it in conjunction with the "
-      + "FilteredClassifier.";
+      + "FilteredClassifier. The value can also be converted back using "
+      + "'originalValue(double value)' procedure.";
   }
     
   /**
@@ -128,19 +141,25 @@ public class ClassOrder extends Filter implements SupervisedFilter,
     
     
   /**
-   * Parses a given list of options controlling the behaviour of this object.
-   * Valid options are:<p>
-   *
-   * -R <seed> <br>
-   * Specify the seed of randomization used to randomize the class order
-   * (default: 1)<p>
-   *
-   * -C <order><br>
-   * Specify the class order to be sorted, could be 0: ascending, 1: descending 
-   * and 2: random(default: 0)<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R &lt;seed&gt;
+   *  Specify the seed of randomization
+   *  used to randomize the class
+   *  order (default: 1)</pre>
+   * 
+   * <pre> -C &lt;order&gt;
+   *  Specify the class order to be
+   *  sorted, could be 0: ascending
+   *  1: descending and 2: random.(default: 0)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 	
@@ -247,6 +266,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @throws Exception if no class index set or class not nominal
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {     
 
@@ -274,7 +294,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 	
@@ -315,8 +335,8 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    * sorts the class values and provide class counts in the output format
    *
    * @return true if there are instances pending output
-   * @exception NullPointerException if no input structure has been defined,
-   * @exception Exception if there was a problem finishing the batch.
+   * @throws IllegalStateException if no input structure has been defined,
+   * @throws Exception if there was a problem finishing the batch.
    */
   public boolean batchFinished() throws Exception {
 
@@ -449,7 +469,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
    *
    * @param value the given value
    * @return the original internal value, -1 if not found
-   * @exception if the coverter table is not set yet
+   * @throws if the coverter table is not set yet
    */
   public double originalValue(double value)throws Exception{
 

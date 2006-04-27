@@ -23,38 +23,45 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.OptionHandler;
 import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
-import java.util.Random;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Vector;
 
 /** 
- * Produces a random subsample of a dataset using sampling with
- * replacement. The original dataset must fit entirely in memory. The
- * number of instances in the generated dataset may be specified. When
- * used in batch mode, subsequent batches are <b>not</b> resampled.
- *
- * Valid options are:<p>
- *
- * -S num <br>
- * Specify the random number seed (default 1).<p>
- *
- * -Z percent <br>
- * Specify the size of the output dataset, as a percentage of the input
- * dataset (default 100). <p>
+ <!-- globalinfo-start -->
+ * Produces a random subsample of a dataset using sampling with replacement. The original dataset must fit entirely in memory. The number of instances in the generated dataset may be specified. When used in batch mode, subsequent batches are NOT resampled.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Specify the random number seed (default 1)</pre>
+ * 
+ * <pre> -Z &lt;num&gt;
+ *  The size of the output dataset, as a percentage of
+ *  the input dataset (default 100)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.4 $ 
- *
+ * @version $Revision: 1.5 $ 
  */
-public class Resample extends Filter implements UnsupervisedFilter,
-						OptionHandler {
+public class Resample 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 3119607037607101160L;
 
   /** The subsample size, percent of original set, default 100% */
   private double m_SampleSizePercent = 100;
@@ -71,10 +78,11 @@ public class Resample extends Filter implements UnsupervisedFilter,
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Produces a random subsample of a dataset using sampling with"
-      + "replacement. The original dataset must "
-      +"fit entirely in memory. The number of instances in the generated "
-      +"dataset may be specified.";
+    return 
+        "Produces a random subsample of a dataset using sampling with "
+      + "replacement. The original dataset must fit entirely in memory. The "
+      + "number of instances in the generated dataset may be specified. When "
+      + "used in batch mode, subsequent batches are NOT resampled.";
   }
 
   /**
@@ -99,17 +107,22 @@ public class Resample extends Filter implements UnsupervisedFilter,
 
 
   /**
-   * Parses a list of options for this object. Valid options are:<p>
-   *
-   * -S num <br>
-   * Specify the random number seed (default 1).<p>
-   *
-   * -Z percent <br>
-   * Specify the size of the output dataset, as a percentage of the input
-   * dataset (default 100). <p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Specify the random number seed (default 1)</pre>
+   * 
+   * <pre> -Z &lt;num&gt;
+   *  The size of the output dataset, as a percentage of
+   *  the input dataset (default 100)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -217,7 +230,7 @@ public class Resample extends Filter implements UnsupervisedFilter,
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -236,7 +249,7 @@ public class Resample extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean input(Instance instance) {
 
@@ -262,7 +275,7 @@ public class Resample extends Filter implements UnsupervisedFilter,
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -319,11 +332,3 @@ public class Resample extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-

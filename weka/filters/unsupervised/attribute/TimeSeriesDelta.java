@@ -23,43 +23,49 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
 
 /** 
- * An instance filter that assumes instances form time-series data and
- * replaces attribute values in the current instance with the difference
- * between the current value and the equivalent attribute attribute value
- * of some previous (or future) instance. For instances where the time-shifted
- * value is unknown either the instance may be dropped, or missing values
- * used.<p>
- *
- * Valid filter-specific options are:<p>
- *
- * -R index1,index2-index4,...<br>
- * Specify list of columns to calculate new values for.
- * First and last are valid indexes.
- * (default none)<p>
- *
- * -V <br>
- * Invert matching sense (i.e. calculate for all non-specified columns)<p>
- *
- * -I num <br>
- * The number of instances forward to take value differences between.
- * A negative number indicates taking values from a past instance.
- * (default -1) <p>
- *
- * -M <br>
- * For instances at the beginning or end of the dataset where the delta
- * values are not known, use missing values (default is to remove those
- * instances). <p>
+ <!-- globalinfo-start -->
+ * An instance filter that assumes instances form time-series data and replaces attribute values in the current instance with the difference between the current value and the equivalent attribute attribute value of some previous (or future) instance. For instances where the time-shifted value is unknown either the instance may be dropped, or missing values used.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R &lt;index1,index2-index4,...&gt;
+ *  Specify list of columns to translate in time. First and
+ *  last are valid indexes. (default none)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense (i.e. calculate for all non-specified columns)</pre>
+ * 
+ * <pre> -I &lt;num&gt;
+ *  The number of instances forward to translate values
+ *  between. A negative number indicates taking values from
+ *  a past instance. (default -1)</pre>
+ * 
+ * <pre> -M
+ *  For instances at the beginning or end of the dataset where
+ *  the translated values are not known, use missing values
+ *  (default is to remove those instances).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class TimeSeriesDelta extends TimeSeriesTranslate {
+public class TimeSeriesDelta 
+  extends TimeSeriesTranslate {
+  
+  /** for serialization */
+  static final long serialVersionUID = 3101490081896634942L;
 
   /**
    * Returns a string describing this classifier
@@ -82,7 +88,7 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception UnsupportedAttributeTypeException if selected
+   * @throws UnsupportedAttributeTypeException if selected
    * attributes are not numeric.  
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
@@ -115,7 +121,6 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
    * @param source the source instance
    * @param dest the destination instance
    * @return the new merged instance
-   * @exception Exception if a problem occurs during merging
    */
   protected Instance mergeInstances(Instance source, Instance dest) {
 
@@ -160,11 +165,3 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
     }
   }
 }
-
-
-
-
-
-
-
-

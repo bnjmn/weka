@@ -23,44 +23,53 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.Filter;
-import weka.filters.UnsupervisedFilter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.clusterers.Clusterer;
 import weka.clusterers.DensityBasedClusterer;
 import weka.core.Attribute;
-import weka.core.Instances;
+import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
-import weka.core.FastVector;
-import weka.core.Option;
 import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
- * A filter that uses a clusterer to obtain cluster membership values
- * for each input instance and outputs them as new instances. The
- * clusterer needs to be a density-based clusterer. If
- * a (nominal) class is set, then the clusterer will be run individually
- * for each class.<p>
+ <!-- globalinfo-start -->
+ * A filter that uses a density-based clusterer to generate cluster membership values; filtered instances are composed of these values plus the class attribute (if set in the input data). If a (nominal) class attribute is set, the clusterer is run separately for each class. The class attribute (if set) and any user-specified attributes are ignored during the clustering operation
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;clusterer name&gt;
+ *  Full name of clusterer to use (required).
+ *  eg: weka.clusterers.EM
+ *  Additional options after the '--'.</pre>
+ * 
+ * <pre> -I &lt;att1,att2-att4,...&gt;
+ *  The range of attributes the clusterer should ignore.
+ *  (the class attribute is automatically ignored)</pre>
+ * 
+ <!-- options-end -->
  *
- * Valid filter-specific options are: <p>
- *
- * Full class name of clusterer to use. Clusterer options may be
- * specified at the end following a -- .(required)<p>
- *   
- * -I range string <br>
- * The range of attributes the clusterer should ignore. Note: 
- * the class attribute (if set) is automatically ignored during clustering.<p>
+ * Options after the -- are passed on to the clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class ClusterMembership extends Filter implements UnsupervisedFilter, 
-							 OptionHandler {
+public class ClusterMembership 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 6675702504667714026L;
 
   /** The clusterer */
   protected DensityBasedClusterer m_clusterer = new weka.clusterers.EM();
@@ -84,7 +93,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the inputFormat can't be set successfully 
+   * @throws Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     
@@ -99,7 +108,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    * Signify that this batch of input to the filter is finished.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined 
+   * @throws IllegalStateException if no input structure has been defined 
    */  
   public boolean batchFinished() throws Exception {
 
@@ -210,7 +219,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) throws Exception {
 
@@ -233,6 +242,11 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
 
   /**
    * Converts logs back to density values.
+   * 
+   * @param j the index of the clusterer
+   * @param in the instance to convert the logs back
+   * @return the densities
+   * @throws Exception if something goes wrong
    */
   protected double[] logs2densities(int j, Instance in) throws Exception {
 
@@ -249,6 +263,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    * the end of the output queue.
    *
    * @param instance the instance to convert
+   * @throws Execption if something goes wrong
    */
   protected void convertInstance(Instance instance) throws Exception {
     
@@ -294,7 +309,8 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     
     newVector.
       addElement(new Option("\tFull name of clusterer to use (required).\n"
-			    + "\teg: weka.clusterers.EM",
+			    + "\teg: weka.clusterers.EM\n"
+			    + "\tAdditional options after the '--'.",
 			    "W", 1, "-W <clusterer name>"));
 
     newVector.
@@ -306,18 +322,26 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Parses the options for this object. Valid options are: <p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -W &lt;clusterer name&gt;
+   *  Full name of clusterer to use (required).
+   *  eg: weka.clusterers.EM
+   *  Additional options after the '--'.</pre>
+   * 
+   * <pre> -I &lt;att1,att2-att4,...&gt;
+   *  The range of attributes the clusterer should ignore.
+   *  (the class attribute is automatically ignored)</pre>
+   * 
+   <!-- options-end -->
    *
-   * -W clusterer string <br>
-   * Full class name of clusterer to use. Clusterer options may be
-   * specified at the end following a -- .(required)<p>
-   *   
-   * -I range string <br>
-   * The range of attributes the clusterer should ignore. Note: 
-   * the class attribute (if set) is automatically ignored during clustering.<p>
+   * Options after the -- are passed on to the clusterer.
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -445,7 +469,7 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
    *
    * @param rangeList a string representing the list of attributes. 
    * eg: first-3,5,6-last
-   * @exception IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setIgnoredAttributeIndices(String rangeList) {
 
@@ -475,4 +499,3 @@ public class ClusterMembership extends Filter implements UnsupervisedFilter,
     }
   }
 }
-  

@@ -22,25 +22,32 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
 
 /** 
- * Converts all numeric attributes into binary attributes (apart from
- * the class attribute): if the value of the numeric attribute is
- * exactly zero, the value of the new attribute will be zero. If the
- * value of the numeric attribute is missing, the value of the new
- * attribute will be missing. Otherwise, the value of the new
- * attribute will be one. The new attributes will nominal.<p>
- *
+ <!-- globalinfo-start -->
+ * Converts all numeric attributes into binary attributes (apart from the class attribute, if set): if the value of the numeric attribute is exactly zero, the value of the new attribute will be zero. If the value of the numeric attribute is missing, the value of the new attribute will be missing. Otherwise, the value of the new attribute will be one. The new attributes will be nominal.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
-public class NumericToBinary extends PotentialClassIgnorer
+public class NumericToBinary 
+  extends PotentialClassIgnorer
   implements UnsupervisedFilter, StreamableFilter {
 
+  /** for serialization */
+  static final long serialVersionUID = 2616879323359470802L;
+  
   /**
    * Returns a string describing this filter
    *
@@ -54,7 +61,7 @@ public class NumericToBinary extends PotentialClassIgnorer
       + "exactly zero, the value of the new attribute will be zero. If the "
       + "value of the numeric attribute is missing, the value of the new "
       + "attribute will be missing. Otherwise, the value of the new "
-      + "attribute will be one. The new attributes will nominal.";
+      + "attribute will be one. The new attributes will be nominal.";
   }
 
   /**
@@ -64,7 +71,7 @@ public class NumericToBinary extends PotentialClassIgnorer
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
@@ -80,7 +87,7 @@ public class NumericToBinary extends PotentialClassIgnorer
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -191,11 +198,3 @@ public class NumericToBinary extends PotentialClassIgnorer
     }
   }
 }
-
-
-
-
-
-
-
-

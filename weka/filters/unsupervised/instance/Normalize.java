@@ -23,27 +23,43 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * This filter normalize all instances of a dataset to have a given norm.
- * Only numeric values are considered, and the class attribute is ignored.
- *
- * Valid filter-specific options are:<p>
- *
- * -L num <br>
- * Specify the Lnorm to used on the normalization (default 2.0).<p>
- *
- * -N num <br>
- * Specify the norm of the instances after normalization (default 1.0).<p>
+ <!-- globalinfo-start -->
+ * An instance filter that normalize instances considering only numeric attributes and ignoring class index.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Specify the norm that each instance must have (default 1.0)</pre>
+ * 
+ * <pre> -L &lt;num&gt;
+ *  Specify L-norm to use (default 2.0)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Julien Prados
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class Normalize extends Filter implements UnsupervisedFilter, OptionHandler {
+public class Normalize 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -7947971807522917395L;
 
   /** The norm that each instance must have at the end */
   protected double m_Norm = 1.0;
@@ -102,16 +118,21 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
 
 
   /**
-   * Parses a list of options for this object. Valid options are:<p>
-   *
-   * -L num <br>
-   * Specify the L-Norm to use (default 2.0).<p>
-   *
-   * -N num <br>
-   * Specify the norm of the instances after normalization (default 1.0).<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  Specify the norm that each instance must have (default 1.0)</pre>
+   * 
+   * <pre> -L &lt;num&gt;
+   *  Specify L-norm to use (default 2.0)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -183,7 +204,7 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
   /**
    * Set the L-norm to used
    *
-   * @param the L-norm
+   * @param newLNorm the L-norm
    */
   public void setLNorm(double newLNorm) {
     m_LNorm = newLNorm;
@@ -197,6 +218,7 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @throws Exception if format cannot be processed
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     /* CHECK REMOVE, BECAUSE THE FILTER IS APPLIED ONLY TO NUMERIC ATTRIBUTE
@@ -224,7 +246,7 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) throws Exception {
     if (getInputFormat() == null) {
@@ -277,11 +299,3 @@ public class Normalize extends Filter implements UnsupervisedFilter, OptionHandl
     }
   }
 }
-
-
-
-
-
-
-
-

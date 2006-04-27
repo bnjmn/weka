@@ -23,52 +23,71 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * An instance filter that discretizes a range of numeric attributes in 
- * the dataset into nominal attributes. Discretization is by simple binning.
- * Skips the class attribute if set.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -B num <br>
- * Specifies the (maximum) number of bins to divide numeric attributes into.
- * Default = 10.<p>
- *
- * -M num <br>
- * Specifies the desired weight of instances per bin for equal-frequency
- * binning. If this is set to a positive number then the -B option will be 
- * ignored. Default = -1.<p>
- *
- * -F <br>
- * Use equal-frequency instead of equal-width discretization if 
- * class-based discretisation is turned off.<p>
- *
- * -O <br>
- * Optimize the number of bins using a leave-one-out estimate of the 
- * entropy (for equal-width binning). If this is set then the -B option
- * will be ignored.<p>
- *
- * -R col1,col2-col4,... <br>
- * Specifies list of columns to Discretize. First
- * and last are valid indexes. (default: first-last) <p>
- *
- * -V <br>
- * Invert matching sense.<p>
- *
- * -D <br>
- * Make binary nominal attributes. <p>
+ <!-- globalinfo-start -->
+ * An instance filter that discretizes a range of numeric attributes in the dataset into nominal attributes. Discretization is by simple binning. Skips the class attribute if set.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -B &lt;num&gt;
+ *  Specifies the (maximum) number of bins to divide numeric attributes into.
+ *  (default = 10)</pre>
+ * 
+ * <pre> -M &lt;num&gt;
+ *  Specifies the desired weight of instances per bin for
+ *  equal-frequency binning. If this is set to a positive
+ *  number then the -B option will be ignored.
+ *  (default = -1)</pre>
+ * 
+ * <pre> -F
+ *  Use equal-frequency instead of equal-width discretization.</pre>
+ * 
+ * <pre> -O
+ *  Optimize number of bins using leave-one-out estimate
+ *  of estimated entropy (for equal-width discretization).
+ *  If this is set then the -B option will be ignored.</pre>
+ * 
+ * <pre> -R &lt;col1,col2-col4,...&gt;
+ *  Specifies list of columns to Discretize. First and last are valid indexes.
+ *  (default: first-last)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
+ * 
+ * <pre> -D
+ *  Output binary attributes for discretized attributes.</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class Discretize extends PotentialClassIgnorer 
+public class Discretize 
+  extends PotentialClassIgnorer 
   implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -1358531742174527279L;
 
   /** Stores which columns to Discretize */
   protected Range m_DiscretizeCols = new Range();
@@ -101,7 +120,11 @@ public class Discretize extends PotentialClassIgnorer
     setAttributeIndices("first-last");
   }
 
-  /** Another constructor */
+  /** 
+   * Another constructor, sets the attribute indices immediately
+   * 
+   * @param cols the attribute indices
+   */
   public Discretize(String cols) {
 
     m_DefaultCols = cols;
@@ -159,38 +182,43 @@ public class Discretize extends PotentialClassIgnorer
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -B num <br>
-   * Specifies the (maximum) number of bins to divide numeric attributes into.
-   * Default = 10.<p>
-   *
-   * -M num <br>
-   * Specifies the desired weight of instances per bin for equal-frequency
-   * binning. If this is set to a positive number then the -B option will be 
-   * ignored. Default = -1.<p>
-   *
-   * -F <br>
-   * Use equal-frequency instead of equal-width discretization if 
-   * class-based discretisation is turned off.<p>
-   *
-   * -O <br>
-   * Optimize the number of bins using a leave-one-out estimate of the 
-   * entropy (for equal-width binning). If this is set then the -B
-   * option will be ignored.<p>
-   *
-   * -R col1,col2-col4,... <br>
-   * Specifies list of columns to Discretize. First
-   * and last are valid indexes. (default none) <p>
-   *
-   * -V <br>
-   * Invert matching sense.<p>
-   *
-   * -D <br>
-   * Make binary nominal attributes. <p>
+   * Parses a given list of options. <p/>
    * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B &lt;num&gt;
+   *  Specifies the (maximum) number of bins to divide numeric attributes into.
+   *  (default = 10)</pre>
+   * 
+   * <pre> -M &lt;num&gt;
+   *  Specifies the desired weight of instances per bin for
+   *  equal-frequency binning. If this is set to a positive
+   *  number then the -B option will be ignored.
+   *  (default = -1)</pre>
+   * 
+   * <pre> -F
+   *  Use equal-frequency instead of equal-width discretization.</pre>
+   * 
+   * <pre> -O
+   *  Optimize number of bins using leave-one-out estimate
+   *  of estimated entropy (for equal-width discretization).
+   *  If this is set then the -B option will be ignored.</pre>
+   * 
+   * <pre> -R &lt;col1,col2-col4,...&gt;
+   *  Specifies list of columns to Discretize. First and last are valid indexes.
+   *  (default: first-last)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
+   * 
+   * <pre> -D
+   *  Output binary attributes for discretized attributes.</pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -266,7 +294,7 @@ public class Discretize extends PotentialClassIgnorer
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set successfully
+   * @throws Exception if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -298,7 +326,7 @@ public class Discretize extends PotentialClassIgnorer
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -325,7 +353,7 @@ public class Discretize extends PotentialClassIgnorer
    * be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
 
@@ -586,7 +614,7 @@ public class Discretize extends PotentialClassIgnorer
    * the string will typically come from a user, attributes are indexed from
    * 1. <br>
    * eg: first-3,5,6-last
-   * @exception IllegalArgumentException if an invalid range list is supplied 
+   * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setAttributeIndices(String rangeList) {
 
@@ -600,7 +628,7 @@ public class Discretize extends PotentialClassIgnorer
    * @param attributes an array containing indexes of attributes to Discretize.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @exception IllegalArgumentException if an invalid set of ranges
+   * @throws IllegalArgumentException if an invalid set of ranges
    * is supplied 
    */
   public void setAttributeIndicesArray(int [] attributes) {
@@ -611,7 +639,7 @@ public class Discretize extends PotentialClassIgnorer
   /**
    * Gets the cut points for an attribute
    *
-   * @param the index (from 0) of the attribute to get the cut points of
+   * @param attributeIndex the index (from 0) of the attribute to get the cut points of
    * @return an array containing the cutpoints (or null if the
    * attribute requested has been discretized into only one interval.)
    */
@@ -625,8 +653,6 @@ public class Discretize extends PotentialClassIgnorer
 
   /** Generate the cutpoints for each attribute */
   protected void calculateCutPoints() {
-
-    Instances copy = null;
 
     m_CutPoints = new double [getInputFormat().numAttributes()] [];
     for(int i = getInputFormat().numAttributes() - 1; i >= 0; i--) {
@@ -1007,11 +1033,3 @@ public class Discretize extends PotentialClassIgnorer
     }
   }
 }
-
-
-
-
-
-
-
-

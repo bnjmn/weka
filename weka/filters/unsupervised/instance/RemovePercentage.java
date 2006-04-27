@@ -23,28 +23,46 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * This filter removes a given percentage of a dataset.
- *
- * Valid options are: <p>
- *
- * -V <br>
- * Specifies if inverse of selection is to be output.<p>
- *
- * -P percentage <br>
- * The percentage of instances to select. (default 50)<p>
+ <!-- globalinfo-start -->
+ * A filter that removes a given percentage of a dataset.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -P &lt;percentage&gt;
+ *  Specifies percentage of instances to select. (default 50)
+ * </pre>
+ * 
+ * <pre> -V
+ *  Specifies if inverse of selection is to be output.
+ * </pre>
+ * 
+ <!-- options-end -->
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
 */
-public class RemovePercentage extends Filter
+public class RemovePercentage 
+  extends Filter
   implements UnsupervisedFilter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = 2150341191158533133L;
+  
   /** Percentage of instances to select. */
   private int m_Percentage = 50;
 
@@ -72,16 +90,23 @@ public class RemovePercentage extends Filter
   }
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -P percentage <br>
-   * The percentage of instances to select. (default 50)<p>
-   *
-   * -V <br>
-   * Specifies if inverse of selection is to be output.<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -P &lt;percentage&gt;
+   *  Specifies percentage of instances to select. (default 50)
+   * </pre>
+   * 
+   * <pre> -V
+   *  Specifies if inverse of selection is to be output.
+   * </pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
 
@@ -155,7 +180,7 @@ public class RemovePercentage extends Filter
    * Sets the percentage of intances to select.
    *
    * @param percent the percentage
-   * @exception IllegalArgumentException if percenatge out of range
+   * @throws IllegalArgumentException if percenatge out of range
    */
   public void setPercentage(int percent) {
 
@@ -203,7 +228,7 @@ public class RemovePercentage extends Filter
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true because outputFormat can be collected immediately
-   * @exception Exception if the input format can't be set successfully
+   * @throws Exception if the input format can't be set successfully
    */  
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -218,7 +243,7 @@ public class RemovePercentage extends Filter
    * instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined 
+   * @throws IllegalStateException if no input structure has been defined 
    */
   public boolean batchFinished() {
 

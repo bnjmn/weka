@@ -35,27 +35,34 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * This filter adds a unqiue ID for each instance to the dataset, i.e., a 
- * new attribute with the index of the instance. <br/>
- * <b>Note:</b> The ID is not reset for the second batch of files (using -b and
- * -r and -s). 
+ <!-- globalinfo-start -->
+ * An instance filter that adds an ID attribute to the dataset. The new attribute contains a unique ID for each instance.<br/>
+ * Note: The ID is not reset for the second batch of files (using -b and -r and -s).
  * <p/>
+ <!-- globalinfo-end -->
  * 
- * Valid options are:<p/>
- *
- * -C index <br/>
- * Specify where to insert the ID. First and last are valid indexes.
- * (default first) <p/>
- *
- * -N name <br/>
- * Name of the new attribute. (default = 'ID') <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;index&gt;
+ *  Specify where to insert the ID. First and last
+ *  are valid indexes.(default first)</pre>
+ * 
+ * <pre> -N &lt;name&gt;
+ *  Name of the new attribute.
+ *  (default = 'ID')</pre>
+ * 
+ <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddID
   extends Filter
   implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 4734383199819293390L;
 
   /** the index of the attribute */
   protected SingleIndex m_Index = new SingleIndex("first");
@@ -74,8 +81,10 @@ public class AddID
    */
   public String globalInfo() {
     return 
-        "An instance filter that adds an ID attribute to the dataset."
-      + " The new attribute contains a unique ID for each instance.";
+        "An instance filter that adds an ID attribute to the dataset. "
+      + "The new attribute contains a unique ID for each instance.\n"
+      + "Note: The ID is not reset for the second batch of files (using -b "
+      + "and -r and -s).";
   }
 
   /**
@@ -101,7 +110,20 @@ public class AddID
 
 
   /**
-   * Parses a list of options for this object. 
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;index&gt;
+   *  Specify where to insert the ID. First and last
+   *  are valid indexes.(default first)</pre>
+   * 
+   * <pre> -N &lt;name&gt;
+   *  Name of the new attribute.
+   *  (default = 'ID')</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -239,7 +261,7 @@ public class AddID
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
+   * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
     if (getInputFormat() == null)
@@ -266,7 +288,7 @@ public class AddID
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException if no input structure has been defined
    */
   public boolean batchFinished() {
     if (getInputFormat() == null)

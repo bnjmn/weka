@@ -22,38 +22,57 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
- * Transforms numeric attributes using a
- * given transformation method.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -R index1,index2-index4,...<br>
- * Specify list of columns to transform. First and last are valid indexes.
- * (default none). Non-numeric columns are skipped.<p>
- *
- * -V<br>
- * Invert matching sense.<p>
- *
- * -C string <br>
- * Name of the class containing the method used for transformation. 
- * (default java.lang.Math) <p>
- *
- * -M string <br>
- * Name of the method used for the transformation.
- * (default abs) <p>
+ <!-- globalinfo-start -->
+ * Transforms numeric attributes using a given transformation method.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R &lt;index1,index2-index4,...&gt;
+ *  Specify list of columns to transform. First and last are
+ *  valid indexes (default none). Non-numeric columns are 
+ *  skipped.</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense.</pre>
+ * 
+ * <pre> -C &lt;string&gt;
+ *  Sets the class containing transformation method.
+ *  (default java.lang.Math)</pre>
+ * 
+ * <pre> -M &lt;string&gt;
+ *  Sets the method. (default abs)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class NumericTransform extends Filter
+public class NumericTransform 
+  extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = -8561413333351366934L;
 
   /** Stores which columns to transform. */
   private Range m_Cols = new Range();
@@ -95,7 +114,7 @@ public class NumericTransform extends Filter
    * instance structure (any instances contained in the object are 
    * ignored - only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the input format can't be set 
+   * @throws Exception if the input format can't be set 
    * successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
@@ -120,8 +139,8 @@ public class NumericTransform extends Filter
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been set.
-   * @exception InvocationTargetException if there is a problem applying
+   * @throws IllegalStateException if no input format has been set.
+   * @throws InvocationTargetException if there is a problem applying
    * the configured transform method.
    */
   public boolean input(Instance instance) throws Exception {
@@ -201,25 +220,30 @@ public class NumericTransform extends Filter
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -R index1,index2-index4,...<br>
-   * Specify list of columns to transform. First and last are valid indexes.
-   * (default none). Non-numeric columns are skipped.<p>
-   *
-   * -V<br>
-   * Invert matching sense.<p>
-   *
-   * -C string <br>
-   * Name of the class containing the method used for transformation.
-   * (default java.lang.Math) <p>
-   *
-   * -M string <br>
-   * Name of the method used for the transformation.
-   * (default abs) <p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R &lt;index1,index2-index4,...&gt;
+   *  Specify list of columns to transform. First and last are
+   *  valid indexes (default none). Non-numeric columns are 
+   *  skipped.</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense.</pre>
+   * 
+   * <pre> -C &lt;string&gt;
+   *  Sets the class containing transformation method.
+   *  (default java.lang.Math)</pre>
+   * 
+   * <pre> -M &lt;string&gt;
+   *  Sets the method. (default abs)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -292,7 +316,7 @@ public class NumericTransform extends Filter
    * Sets the class containing the transformation method.
    *
    * @param name the name of the class
-   * @exception ClassNotFoundException if class can't be found
+   * @throws ClassNotFoundException if class can't be found
    */
   public void setClassName(String name) throws ClassNotFoundException {
   
@@ -323,7 +347,7 @@ public class NumericTransform extends Filter
    * Set the transformation method.
    *
    * @param name the name of the method
-   * @exception NoSuchMethodException if method can't be found in class
+   * @throws NoSuchMethodException if method can't be found in class
    */
   public void setMethodName(String name) throws NoSuchMethodException {
 
@@ -390,7 +414,7 @@ public class NumericTransform extends Filter
    * the string will typically come from a user, attributes are indexed from
    * 1. <br> eg: 
    * first-3,5,6-last
-   * @exception InvalidArgumentException if an invalid range list is supplied
+   * @throws InvalidArgumentException if an invalid range list is supplied
    */
 
   public void setAttributeIndices(String rangeList) {
@@ -404,7 +428,7 @@ public class NumericTransform extends Filter
    * @param attributes an array containing indexes of attributes to select.
    * Since the array will typically come from a program, attributes are indexed
    * from 0.
-   * @exception InvalidArgumentException if an invalid set of ranges is supplied
+   * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int [] attributes) {
 
@@ -430,11 +454,3 @@ public class NumericTransform extends Filter
     }
   }
 }
-
-
-
-
-
-
-
-

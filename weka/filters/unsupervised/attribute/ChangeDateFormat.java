@@ -23,10 +23,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Enumeration;
-import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -40,28 +36,37 @@ import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
- * Changes the date format used by a date attribute. This is most
- * useful for converting to a format with less precision, for example,
- * from an absolute date to day of year, etc. This changes the format
- * string, and changes the date values to those that would be parsed
- * by the new format.<p>
- *
- * Valid filter-specific options are: <p>
- *
- * -C col <br>
- * The column containing the date attribute to be changed. (default last)<p>
- *
- * -F format <br>
- * The output date format (default corresponds to ISO-8601 format).<p>
+ <!-- globalinfo-start -->
+ * Changes the date format used by a date attribute. This is most useful for converting to a format with less precision, for example, from an absolute date to day of year, etc. This changes the format string, and changes the date values to those that would be parsed by the new format.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;col&gt;
+ *  Sets the attribute index (default last).</pre>
+ * 
+ * <pre> -F &lt;value index&gt;
+ *  Sets the output date format string (default corresponds to ISO-8601).</pre>
+ * 
+ <!-- options-end -->
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class ChangeDateFormat extends Filter 
+public class ChangeDateFormat 
+  extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
+  /** for serialization */
+  static final long serialVersionUID = -1609344074013448737L;
 
   /** The default output date format. Corresponds to ISO-8601 format. */
   private static final SimpleDateFormat DEFAULT_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -84,12 +89,25 @@ public class ChangeDateFormat extends Filter
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-
-    return "Changes the format used by a date attribute.";
+    return 
+        "Changes the date format used by a date attribute. This is most "
+      + "useful for converting to a format with less precision, for example, "
+      + "from an absolute date to day of year, etc. This changes the format "
+      + "string, and changes the date values to those that would be parsed "
+      + "by the new format.";
   }
 
 
-  /** {@inheritDoc */
+ /**
+  * Sets the format of the input instances.
+  *
+  * @param instanceInfo an Instances object containing the input 
+  * instance structure (any instances contained in the object are 
+  * ignored - only the structure is required).
+  * @return true if the outputFormat may be collected immediately
+  * @throws Exception if the input format can't be set 
+  * successfully
+  */
   public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
 
@@ -104,8 +122,16 @@ public class ChangeDateFormat extends Filter
   }
 
 
-  /** {@inheritDoc */
-  public boolean input(Instance instance) {
+  /**
+   * Input an instance for filtering. 
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws Exception if the input format was not set or the date format cannot
+   * be parsed
+   */
+  public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -132,7 +158,11 @@ public class ChangeDateFormat extends Filter
   }
 
 
-  /** {@inheritDoc */
+  /**
+   * Returns an enumeration describing the available options
+   *
+   * @return an enumeration of all the available options
+   */
   public Enumeration listOptions() {
 
     Vector newVector = new Vector(2);
@@ -150,16 +180,21 @@ public class ChangeDateFormat extends Filter
 
 
   /**
-   * Parses the options for this object. Valid options are: <p>
-   *
-   * -C col <br>
-   * The column containing the date attribute to be changed. (default last)<p>
-   *
-   * -F index <br>
-   * The output date format (default corresponds to ISO-8601 format).<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;col&gt;
+   *  Sets the attribute index (default last).</pre>
+   * 
+   * <pre> -F &lt;value index&gt;
+   *  Sets the output date format string (default corresponds to ISO-8601).</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -183,7 +218,11 @@ public class ChangeDateFormat extends Filter
   }
 
 
-  /** {@inheritDoc */
+ /**
+  * Gets the current settings of the filter.
+  *
+  * @return an array of strings suitable for passing to setOptions
+  */
   public String [] getOptions() {
 
     String [] options = new String [4];
@@ -225,7 +264,7 @@ public class ChangeDateFormat extends Filter
   /**
    * Sets the index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
@@ -258,7 +297,7 @@ public class ChangeDateFormat extends Filter
   /**
    * Sets the output date format.
    *
-   * @param index the output date format.
+   * @param dateFormat the output date format.
    */
   public void setDateFormat(String dateFormat) {
 
@@ -268,7 +307,7 @@ public class ChangeDateFormat extends Filter
   /**
    * Sets the output date format.
    *
-   * @param index the output date format.
+   * @param dateFormat the output date format.
    */
   public void setDateFormat(SimpleDateFormat dateFormat) {
     if (dateFormat == null) {
@@ -322,11 +361,3 @@ public class ChangeDateFormat extends Filter
     }
   }
 }
-
-
-
-
-
-
-
-

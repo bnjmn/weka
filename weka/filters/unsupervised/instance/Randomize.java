@@ -23,26 +23,40 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
- * This filter randomly shuffles the order of instances passed through it.
- * The random number generator is reset with the seed value whenever
- * setInputFormat() is called. <p>
- *
- * Valid filter-specific options are:<p>
- *
- * -S num <br>
- * Specify the random number seed (default 42).<p>
+ <!-- globalinfo-start -->
+ * Randomly shuffles the order of instances passed through it. The random number generator is reset with the seed value whenever a new set of instances is passed in.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Specify the random number seed (default 42)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Randomize extends Filter implements UnsupervisedFilter,
-						 OptionHandler {
+public class Randomize 
+  extends Filter 
+  implements UnsupervisedFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 8854479785121877582L;
 
   /** The random number seed */
   protected int m_Seed = 42;
@@ -79,13 +93,18 @@ public class Randomize extends Filter implements UnsupervisedFilter,
 
 
   /**
-   * Parses a list of options for this object. Valid options are:<p>
-   *
-   * -S num <br>
-   * Specify the random number seed (default 42).<p>
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Specify the random number seed (default 42)</pre>
+   * 
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
+   * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
     
@@ -156,6 +175,7 @@ public class Randomize extends Filter implements UnsupervisedFilter,
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
+   * @throws Exception if format cannot be processed
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -175,7 +195,7 @@ public class Randomize extends Filter implements UnsupervisedFilter,
    * implementation randomizes all the instances received in the batch.
    *
    * @return true if there are instances pending output
-   * @exception IllegalStateException if no input format has been set. 
+   * @throws IllegalStateException if no input format has been set. 
    */
   public boolean batchFinished() {
 
@@ -212,11 +232,3 @@ public class Randomize extends Filter implements UnsupervisedFilter,
     }
   }
 }
-
-
-
-
-
-
-
-

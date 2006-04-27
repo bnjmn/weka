@@ -23,10 +23,21 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SingleIndex;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 
 /** 
@@ -44,10 +55,14 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class SwapValues extends Filter 
+public class SwapValues 
+  extends Filter 
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
+  
+  /** for serialization */
+  static final long serialVersionUID = 6155834679414275855L;
 
   /** The attribute's index setting. */
   private SingleIndex m_AttIndex = new SingleIndex("last"); 
