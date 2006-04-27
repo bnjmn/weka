@@ -22,9 +22,13 @@
 
 package weka.associations;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.ContingencyTables;
+import weka.core.FastVector;
+import weka.core.Instances;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 
 /**
@@ -35,13 +39,20 @@ import weka.core.*;
  * The class provides methods that are used in the Apriori algorithm to construct
  * association rules.
  *
- * @author Eibe Frank (eibe@cs.waikato.ac.nz), Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
+ * @version $Revision: 1.4 $
  */
-public class AprioriItemSet extends ItemSet implements Serializable {
+public class AprioriItemSet 
+  extends ItemSet 
+  implements Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = 7684467755712672058L;
 
   /**
    * Constructor
+   * 
    * @param totalTrans the total number of transactions in the data
    */
   public AprioriItemSet(int totalTrans) {
@@ -206,7 +217,8 @@ public class AprioriItemSet extends ItemSet implements Serializable {
    * item sets
    * @param numItemsInSet the size of the item set for which the rules
    * are to be generated
-   * @param the significance level for testing the rules
+   * @param numTransactions
+   * @param significanceLevel the significance level for testing the rules
    * @return all the rules with minimum metric for the given item set
    * @exception Exception if something goes wrong
    */
@@ -465,6 +477,7 @@ public class AprioriItemSet extends ItemSet implements Serializable {
    *
    * @param itemSets the set of (k-1)-item sets
    * @param size the value of (k-1)
+   * @param totalTrans the total number of transactions in the data
    * @return the generated (k)-item sets
    */
   public static FastVector mergeAllItemSets(FastVector itemSets, int size, 
