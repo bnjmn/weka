@@ -69,7 +69,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public abstract class Filter implements Serializable {
 
@@ -339,7 +339,7 @@ public abstract class Filter implements Serializable {
    * structure (any instances contained in the object are ignored - only the
    * structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @exception Exception if the inputFormat can't be set successfully 
+   * @throws Exception if the inputFormat can't be set successfully 
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -367,7 +367,7 @@ public abstract class Filter implements Serializable {
    *
    * @return an Instances object containing the output instance
    * structure only.
-   * @exception NullPointerException if no input structure has been
+   * @throws NullPointerException if no input structure has been
    * defined (or the output format hasn't been determined yet) 
    */
   public Instances getOutputFormat() {
@@ -390,9 +390,9 @@ public abstract class Filter implements Serializable {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception NullPointerException if the input format has not been
+   * @throws NullPointerException if the input format has not been
    * defined.
-   * @exception Exception if the input instance was not of the correct 
+   * @throws Exception if the input instance was not of the correct 
    * format or if there was a problem with the filtering.  
    */
   public boolean input(Instance instance) throws Exception {
@@ -419,8 +419,8 @@ public abstract class Filter implements Serializable {
    * inputFormat() and input().
    *
    * @return true if there are instances pending output
-   * @exception NullPointerException if no input structure has been defined,
-   * @exception Exception if there was a problem finishing the batch.
+   * @throws NullPointerException if no input structure has been defined,
+   * @throws Exception if there was a problem finishing the batch.
    */
   public boolean batchFinished() throws Exception {
 
@@ -438,7 +438,7 @@ public abstract class Filter implements Serializable {
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @exception NullPointerException if no output structure has been defined
+   * @throws NullPointerException if no output structure has been defined
    */
   public Instance output() {
 
@@ -464,7 +464,7 @@ public abstract class Filter implements Serializable {
    *
    * @return the instance that has most recently been filtered (or null if
    * the queue is empty).
-   * @exception NullPointerException if no input structure has been defined 
+   * @throws NullPointerException if no input structure has been defined 
    */
   public Instance outputPeek() {
 
@@ -482,7 +482,7 @@ public abstract class Filter implements Serializable {
    * Returns the number of instances pending output
    *
    * @return the number of instances  pending output
-   * @exception NullPointerException if no input structure has been defined
+   * @throws NullPointerException if no input structure has been defined
    */
   public int numPendingOutput() {
 
@@ -532,7 +532,7 @@ public abstract class Filter implements Serializable {
    * @param data the data to be filtered
    * @param filter the filter to be used
    * @return the filtered set of data
-   * @exception Exception if the filter can't be used successfully
+   * @throws Exception if the filter can't be used successfully
    */
   public static Instances useFilter(Instances data,
 				    Filter filter) throws Exception {
@@ -560,12 +560,13 @@ public abstract class Filter implements Serializable {
   /**
    * Method for testing filters.
    *
-   * @param argv should contain the following arguments: <br>
+   * @param filter the filter to use
+   * @param options should contain the following arguments: <br>
    * -i input_file <br>
    * -o output_file <br>
    * -c class_index <br>
    * or -h for help on options
-   * @exception Exception if something goes wrong or the user requests help on
+   * @throws Exception if something goes wrong or the user requests help on
    * command options
    */
   public static void filterFile(Filter filter, String [] options) 
@@ -717,14 +718,15 @@ public abstract class Filter implements Serializable {
   /**
    * Method for testing filters ability to process multiple batches.
    *
-   * @param argv should contain the following arguments:<br>
+   * @param filter the filter to use
+   * @param options should contain the following arguments:<br>
    * -i (first) input file <br>
    * -o (first) output file <br>
    * -r (second) input file <br>
    * -s (second) output file <br>
    * -c class_index <br>
    * or -h for help on options
-   * @exception Exception if something goes wrong or the user requests help on
+   * @throws Exception if something goes wrong or the user requests help on
    * command options
    */
   public static void batchFilterFile(Filter filter, String [] options) 
@@ -891,7 +893,7 @@ public abstract class Filter implements Serializable {
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain arguments to the filter: use -h for help
+   * @param args should contain arguments to the filter: use -h for help
    */
   public static void main(String [] args) {
     

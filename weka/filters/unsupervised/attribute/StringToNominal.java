@@ -53,7 +53,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class StringToNominal 
   extends Filter 
@@ -248,7 +248,7 @@ public class StringToNominal
   /**
    * Sets index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
