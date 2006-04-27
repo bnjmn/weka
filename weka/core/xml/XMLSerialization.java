@@ -61,7 +61,7 @@ import org.w3c.dom.Element;
  * <code>public</code>!) as the <code>readFromXML</code> and <code>writeToXML</code>
  * methods. Methods that apply to the naming rule <code>read + property name</code>
  * are added automatically to the list of methods by the method 
- * <code>XMLSerializationMethodHandler.addMethods()</code>.  
+ * <code>XMLSerializationMethodHandler.addMethods(...)</code>.  
  * <p>
  * Other properties that are not conform the bean set/get-methods have to be 
  * processed manually in a derived class (cf. <code>readPostProcess(Object)</code>, 
@@ -86,11 +86,9 @@ import org.w3c.dom.Element;
  * @see #writePostProcess(Object)
  * @see #readFromXML(Element)
  * @see #writeToXML(Element, Object, String)
- * @see #addMethods()
- * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */

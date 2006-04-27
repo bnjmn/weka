@@ -78,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RemoveWithValues 
   extends Filter
@@ -447,7 +447,7 @@ public class RemoveWithValues
   /**
    * Sets index of the attribute used.
    *
-   * @param index the index of the attribute
+   * @param attIndex the index of the attribute
    */
   public void setAttributeIndex(String attIndex) {
     
