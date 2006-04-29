@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.25.2.1 $
+ * @version $Revision: 1.25.2.2 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -320,14 +320,18 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    */
   public String[] getOptions () {
 
-    String[] options = new String[4];
+    String[] options = new String[6];
     int current = 0;
 
     if (!getNormalize()) {
       options[current++] = "-D";
     }
 
-    options[current++] = "-R"; options[current++] = ""+getVarianceCovered();
+    options[current++] = "-R";
+    options[current++] = ""+getVarianceCovered();
+
+    options[current++] = "-A";
+    options[current++] = ""+getMaximumAttributeNames();
 
     if (getTransformBackToOriginal()) {
       options[current++] = "-O";
