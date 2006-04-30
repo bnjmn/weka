@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.25.2.2 $
+ * @version $Revision: 1.25.2.3 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -262,6 +262,15 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    */
   public double getVarianceCovered() {
     return m_coverVariance;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String maximumAttributeNamesTipText() {
+    return "The maximum number of attributes to include in transformed attribute names.";
   }
 
   /**
@@ -667,6 +676,10 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
 
   /**
    * Convert a pc transformed instance back to the original space
+   * 
+   * @param inst	the instance to convert
+   * @return		the processed instance
+   * @throws Exception	if something goes wrong
    */
   private Instance convertInstanceToOriginal(Instance inst)
     throws Exception {
@@ -776,7 +789,10 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   }
 
   /**
-   * Set up the header for the PC->original space dataset
+   * Set up the header for the PC-&gt;original space dataset
+   * 
+   * @return 		the output format
+   * @throws Exception 	if something goes wrong
    */
   private Instances setOutputFormatOriginal() throws Exception {
     FastVector attributes = new FastVector();
