@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class RankSearch 
   extends ASSearch 
@@ -327,9 +327,9 @@ public class RankSearch
     String[] options = new String[8 + evaluatorOptions.length];
     int current = 0;
 
-    options[current++] = "S"; options[current++] = ""+getStepSize();
+    options[current++] = "-S"; options[current++] = ""+getStepSize();
 
-    options[current++] = "R"; options[current++] = ""+getStartPoint();
+    options[current++] = "-R"; options[current++] = ""+getStartPoint();
 
     if (getAttributeEvaluator() != null) {
       options[current++] = "-A";
