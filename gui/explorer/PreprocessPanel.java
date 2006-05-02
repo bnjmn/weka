@@ -95,7 +95,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.57 $
+ * @version $Revision: 1.58 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -1387,9 +1387,14 @@ public class PreprocessPanel extends JPanel {
   public void edit() {
     ViewerDialog        dialog;
     int                 result;
+    Instances           copy;
+    Instances           newInstances;
     
+    final int classIndex = m_AttVisualizePanel.getColoringIndex();
+    copy   = new Instances(m_Instances);
+    copy.setClassIndex(classIndex);
     dialog = new ViewerDialog(null);
-    result = dialog.showDialog(m_Instances);
+    result = dialog.showDialog(copy);
     if (result == ViewerDialog.APPROVE_OPTION) {
       try {
         addUndoPoint();
@@ -1397,7 +1402,11 @@ public class PreprocessPanel extends JPanel {
       catch (Exception e) {
         e.printStackTrace();
       }
-      setInstances(dialog.getInstances());
+      // if class was not set before, reset it again after use of filter
+      newInstances = dialog.getInstances();
+      if (m_Instances.classIndex() < 0)
+        newInstances.setClassIndex(-1);
+      setInstances(newInstances);
     }
   }
   
