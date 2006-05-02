@@ -53,7 +53,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class ArffTable
   extends JTable {
@@ -103,7 +103,9 @@ public class ArffTable
           int                 result;
           
           dialog = new ViewerDialog(null);
-          dialog.setTitle("Relational attribute Viewer - " + m_CurrentInst.attribute(m_ColumnIndex - 1));
+          dialog.setTitle(
+              "Relational attribute Viewer - " 
+              + ((ArffSortedTableModel) getModel()).getInstances().attribute(m_ColumnIndex - 1).name());
           result = dialog.showDialog(m_CurrentInst);
           if (result == ViewerDialog.APPROVE_OPTION) {
             m_CurrentInst = dialog.getInstances();
