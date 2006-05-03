@@ -16,7 +16,7 @@ import weka.test.Regression;
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class AbstractFilterTest extends TestCase {
 
@@ -257,7 +257,7 @@ public abstract class AbstractFilterTest extends TestCase {
     // Run the filter using deprecated calls to check it still works the same
     Instances icopy = new Instances(m_Instances);
     try {
-      m_Filter.inputFormat(icopy);
+      m_Filter.setInputFormat(icopy);
     } catch (Exception ex) {
       ex.printStackTrace();
       fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
@@ -267,7 +267,7 @@ public abstract class AbstractFilterTest extends TestCase {
         m_Filter.input(icopy.instance(i));
       }
       m_Filter.batchFinished();
-      result = m_Filter.outputFormat();
+      result = m_Filter.getOutputFormat();
       weka.core.Instance processed;
       while ((processed = m_Filter.output()) != null) {
         result.add(processed);
