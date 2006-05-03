@@ -32,6 +32,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformationHandler;
 import weka.core.UnsupportedClassTypeException;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -46,9 +50,30 @@ import java.util.Vector;
  <!-- globalinfo-start -->
  * The implementation of a RIpple-DOwn Rule learner.<br/>
  * <br/>
- * It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.
+ * It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.<br/>
+ * <br/>
+ * For more information about Ripple-Down Rules, see:<br/>
+ * <br/>
+ * Brian R. Gaines, Paul Compton (1995). Induction of Ripple-Down Rules Applied to Modeling Large Databases. J. Intell. Inf. Syst.. 5(3):211-228.
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Gaines1995,
+ *    author = {Brian R. Gaines and Paul Compton},
+ *    journal = {J. Intell. Inf. Syst.},
+ *    number = {3},
+ *    pages = {211-228},
+ *    title = {Induction of Ripple-Down Rules Applied to Modeling Large Databases},
+ *    volume = {5},
+ *    year = {1995},
+ *    PDF = {http://pages.cpsc.ucalgary.ca/~gaines/reports/ML/JIIS95/JIIS95.pdf}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
  * 
  * There are five inner classes defined in this class. <br>
  * The first is Ridor_node, which implements one node in the Ridor tree.  It's basically
@@ -94,12 +119,12 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
-
 public class Ridor 
   extends Classifier
-  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler {
+  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
+             TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -7261533075088314436L;
@@ -146,7 +171,32 @@ public class Ridor
       + "each exception and iterates until pure.  Thus it performs a tree-like expansion of "
       + "exceptions."
       + "The exceptions are a set of rules that predict classes other than the default. "
-      + "IREP is used to generate the exceptions.";
+      + "IREP is used to generate the exceptions.\n\n"
+      + "For more information about Ripple-Down Rules, see:\n\n"
+      + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation 	result;
+    
+    result = new TechnicalInformation(Type.ARTICLE);
+    result.setValue(Field.AUTHOR, "Brian R. Gaines and Paul Compton");
+    result.setValue(Field.YEAR, "1995");
+    result.setValue(Field.TITLE, "Induction of Ripple-Down Rules Applied to Modeling Large Databases");
+    result.setValue(Field.JOURNAL, "J. Intell. Inf. Syst.");
+    result.setValue(Field.VOLUME, "5");
+    result.setValue(Field.NUMBER, "3");
+    result.setValue(Field.PAGES, "211-228");
+    result.setValue(Field.PDF, "http://pages.cpsc.ucalgary.ca/~gaines/reports/ML/JIIS95/JIIS95.pdf");
+    
+    return result;
   }
     
   /** 
