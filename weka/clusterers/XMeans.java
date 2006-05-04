@@ -135,7 +135,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -1996,7 +1996,7 @@ throws Exception{
 	debugLevel = Integer.parseInt(optionString);
       } catch (NumberFormatException e) {
 	throw new Exception(optionString +
-                            "is an illegal value for option D"); 
+                            "is an illegal value for option -U"); 
       }
     }
     setDebugLevel(debugLevel);
