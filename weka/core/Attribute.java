@@ -87,7 +87,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class Attribute
   implements Copyable, Serializable {
@@ -388,7 +388,7 @@ public class Attribute
     m_Name = attributeName;
     m_Index = -1;
     m_Values = new FastVector();
-    m_Hashtable = null;
+    m_Hashtable = new Hashtable();
     m_Header = header;
     m_Type = RELATIONAL;
     setMetadata(metadata);
@@ -635,7 +635,7 @@ public class Attribute
       while (enm.hasMoreElements()) {
         text.append(enm.nextElement()).append("\n");
       }
-      text.append(ARFF_END_SUBRELATION).append(" ").append(m_Name);
+      text.append(ARFF_END_SUBRELATION).append(" ").append(Utils.quote(m_Name));
       break;
     default:
       text.append("UNKNOWN");
@@ -871,9 +871,15 @@ public class Attribute
       throw new IllegalArgumentException("Incompatible value for " +
                                          "relation-valued attribute.");
     }
-    int intIndex = m_Values.size();
-    m_Values.addElement(value);
-    return intIndex;
+    Integer index = (Integer)m_Hashtable.get(value);
+    if (index != null) {
+      return index.intValue();
+    } else {
+      int intIndex = m_Values.size();
+      m_Values.addElement(value);
+      m_Hashtable.put(value, new Integer(intIndex));
+      return intIndex;
+    }
   }
 
   /**
@@ -1437,6 +1443,8 @@ public class Attribute
 
   /**
    * Simple main method for testing this class.
+   * 
+   * @param ops the commandline options
    */
   //@ requires ops != null;
   //@ requires \nonnullelements(ops);
