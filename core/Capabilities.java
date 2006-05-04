@@ -59,7 +59,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -835,26 +835,51 @@ public class Capabilities
    * @see MultiInstanceCapabilitiesHandler
    */
   public boolean test(Instances data) {
+    return test(data, 0, data.numAttributes() - 1);
+  }
+  
+  /**
+   * Tests a certain range of attributes of the given data, whether it can be 
+   * processed by the handler, given its capabilities. Classifiers 
+   * implementing the <code>MultiInstanceCapabilitiesHandler</code> interface 
+   * are checked automatically for their multi-instance Capabilities (if no 
+   * bags, then only the bag-structure, otherwise only the first bag).
+   *
+   * @param data 	the data to test
+   * @param fromIndex	the range of attributes - start (incl.)
+   * @param toIndex	the range of attributes - end (incl.)
+   * @return		true if all the tests succeeded
+   * @see MultiInstanceCapabilitiesHandler
+   */
+  public boolean test(Instances data, int fromIndex, int toIndex) {
     int         i;
     int         n;
     Attribute   att;
     Instance    inst;
     boolean     noClass;
     boolean     tmpResult;
+    boolean	testClass;
     
     // no Capabilities? -> warning
     if (    (m_Capabilities.size() == 0) 
 	 || ((m_Capabilities.size() == 1) && handles(Capability.NO_CLASS)) )
       System.err.println(createMessage("No capabilities set!"));
     
-    // attributes
-    if (data.numAttributes() == 0) {
+    // any attributes?
+    if (toIndex - fromIndex < 0) {
       m_FailReason = new WekaException(
                           createMessage("No attributes!"));
       return false;
     }
 
-    for (i = 0; i < data.numAttributes(); i++) {
+    // do wee need to test the class attribute, i.e., is the class attribute
+    // within the range of attributes?
+    testClass =    (data.classIndex() > -1) 
+    		&& (data.classIndex() >= fromIndex)
+    		&& (data.classIndex() <= toIndex);
+    
+    // attributes
+    for (i = fromIndex; i <= toIndex; i++) {
       att = data.attribute(i);
       
       // class is handled separately
@@ -865,9 +890,9 @@ public class Capabilities
       if (!test(att))
 	return false;
     }
-    
+
     // class
-    if (!handles(Capability.NO_CLASS)) {
+    if (testClass && !handles(Capability.NO_CLASS)) {
       if (data.classIndex() == -1) {
         m_FailReason = new UnassignedClassException(
                             createMessage("Class attribute not set!"));
@@ -896,7 +921,7 @@ public class Capabilities
         for (i = 0; i < data.numInstances(); i++) {
           if (data.instance(i).classIsMissing()) {
             m_FailReason = new WekaException(
-                createMessage("No training data without missing class values!"));
+                createMessage("Cannot handle missing class values!"));
             return false;
           }
         }
@@ -925,7 +950,7 @@ public class Capabilities
     if (!handles(Capability.MISSING_VALUES)) {
       for (i = 0; i < data.numInstances(); i++) {
         inst = data.instance(i);
-        for (n = 0; n < inst.numAttributes(); n++) {
+        for (n = fromIndex; n <= toIndex; n++) {
           // skip class
           if (n == inst.classIndex())
             continue;
@@ -949,7 +974,7 @@ public class Capabilities
       return false;
     }
 
-    // Multi-Instance? -> check structure
+    // Multi-Instance? -> check structure (regardless of attribute range!)
     if (handles(Capability.ONLY_MULTIINSTANCE)) {
       // number of attributes?
       if (data.numAttributes() != 3) {
@@ -1012,6 +1037,21 @@ public class Capabilities
    */
   public void testWithFail(Attribute att, boolean isClass) throws Exception {
     if (!test(att, isClass))
+      throw m_FailReason;
+  }
+
+  /**
+   * tests the given data by calling the test(Instances,int,int) method and 
+   * throws an exception if the test fails.
+   *
+   * @param data        the data to test
+   * @param fromIndex	the range of attributes - start (incl.)
+   * @param toIndex	the range of attributes - end (incl.)
+   * @throws Exception  in case the data doesn't pass the tests
+   * @see #test(Instances)
+   */
+  public void testWithFail(Instances data, int fromIndex, int toIndex) throws Exception {
+    if (!test(data, fromIndex, toIndex))
       throw m_FailReason;
   }
 
