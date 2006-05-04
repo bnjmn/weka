@@ -80,7 +80,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Discretize 
   extends PotentialClassIgnorer 
@@ -1008,8 +1008,8 @@ public class Discretize
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
-                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
   }

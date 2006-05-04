@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AddCluster 
   extends Filter 
@@ -226,8 +226,10 @@ public class AddCluster
     } else {
       processed = new Instance(original.weight(), instanceVals);
     }
-    copyStringValues(original, false, original.dataset(), getOutputStringIndex(),
-		     getOutputFormat(), getOutputStringIndex());
+
+    processed.setDataset(instance.dataset());
+    copyValues(processed, false, instance.dataset(), getOutputFormat());
+    processed.setDataset(getOutputFormat());
       
     push(processed);
   }

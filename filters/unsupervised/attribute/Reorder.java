@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -36,6 +37,7 @@ import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 import java.util.Enumeration;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /** 
@@ -43,6 +45,7 @@ import java.util.Vector;
  * An instance filter that generates output with a new order of the attributes. Useful if one wants to move an attribute to the end to use it as class attribute (e.g. with using "-R 2-last,1").<br/>
  * But it's not only possible to change the order of all the attributes, but also to leave out attributes. E.g. if you have 10 attributes, you can generate the following output order: 1,3,5,7,9,10 or 10,1-5.<br/>
  * You can also duplicate attributes, e.g. for further processing later on: e.g. 1,1,1,4,4,4,2,2,2 where the second and the third column of each attribute are processed differently and the first one, i.e. the original one is kept.<br/>
+ * One can simply inverse the order of the attributes via 'last-first'.<br/>
  * After appyling the filter, the index of the class attribute is the last attribute.
  * <p/>
  <!-- globalinfo-end -->
@@ -57,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Reorder 
   extends Filter 
@@ -67,7 +70,7 @@ public class Reorder
   static final long serialVersionUID = -1135571321097202292L;
 
   /** Stores which columns to reorder */
-  protected Range m_NewOrderCols = new Range("first-last");
+  protected String m_NewOrderCols = "first-last";
 
   /**
    * Stores the indexes of the selected attributes in order, once the
@@ -142,6 +145,85 @@ public class Reorder
     }
     return options;
   }
+  
+  /**
+   * parses the index string and returns the corresponding int index
+   * 
+   * @param s			the index string to parse
+   * @param numAttributes	necessary for "last" and OutOfBounds checks
+   * @return			the int index determined form the index string
+   * @throws Exception		if index is not valid
+   */
+  protected int determineIndex(String s, int numAttributes) throws Exception {
+    int		result;
+    
+    if (s.equals("first"))
+      result = 0;
+    else if (s.equals("last"))
+      result = numAttributes - 1;
+    else
+      result = Integer.parseInt(s) - 1;
+    
+    // out of bounds?
+    if ( (result < 0) || (result > numAttributes - 1) )
+      throw new IllegalArgumentException(
+	  "'" + s + "' is not a valid index for the range '1-" + numAttributes + "'!");
+    
+    return result;
+  }
+  
+  /**
+   * parses the range string and returns an array with the indices
+   * 
+   * @param numAttributes	necessary for "last" and OutOfBounds checks
+   * @return			the indices determined form the range string
+   * @see			#m_NewOrderCols
+   * @throws Exception		if range is not valid
+   */
+  protected int[] determineIndices(int numAttributes) throws Exception {
+    int[]		result;
+    Vector<Integer>	list;
+    int			i;
+    StringTokenizer	tok;
+    String		token;
+    String[]		range;
+    int			from;
+    int			to;
+    
+    list = new Vector<Integer>();
+    
+    // parse range
+    tok = new StringTokenizer(m_NewOrderCols, ",");
+    while (tok.hasMoreTokens()) {
+      token = tok.nextToken();
+      if (token.indexOf("-") > -1) {
+	range = token.split("-");
+	if (range.length != 2)
+	  throw new IllegalArgumentException("'" + token + "' is not a valid range!");
+	from = determineIndex(range[0], numAttributes);
+	to   = determineIndex(range[1], numAttributes);
+
+	if (from <= to) {
+	  for (i = from; i <= to; i++)
+	    list.add(i);
+	}
+	else {
+	  for (i = from; i >= to; i--)
+	    list.add(i);
+	}
+      }
+      else {
+	list.add(determineIndex(token, numAttributes));
+      }
+    }
+    
+    // turn vector into int array
+    result = new int[list.size()];
+    for (i = 0; i < list.size(); i++)
+      result[i] = list.get(i);
+    
+    return result;
+  }
 
   /**
    * Sets the format of the input instances.
@@ -155,36 +237,23 @@ public class Reorder
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     super.setInputFormat(instanceInfo);
     
-    m_NewOrderCols.setUpper(instanceInfo.numAttributes() - 1);
-
-    // Create the output buffer
-    Instances outputFormat = new Instances(instanceInfo, 0); 
-    
-    // add attributes to the end
-    m_SelectedAttributes = m_NewOrderCols.getSelection();
-    int inStrCopiedLen = 0;
-    int[] inStrCopied = new int[m_SelectedAttributes.length];
+    FastVector attributes = new FastVector();
+    int outputClass = -1;
+    m_SelectedAttributes = determineIndices(instanceInfo.numAttributes());
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
-      // Create a copy of the attribute with a different name
-      Attribute origAttribute = instanceInfo.attribute(current);
-      outputFormat.insertAttributeAt((Attribute)origAttribute.copy(),
-				     outputFormat.numAttributes());
-      
-      if (origAttribute.type() == Attribute.STRING)
-        inStrCopied[inStrCopiedLen++] = current;
+      if (instanceInfo.classIndex() == current) {
+	outputClass = attributes.size();
+      }
+      Attribute keep = (Attribute)instanceInfo.attribute(current).copy();
+      attributes.addElement(keep);
     }
     
-    m_InputStringIndex = new int [inStrCopiedLen];
-    System.arraycopy(inStrCopied, 0, m_InputStringIndex, 0, inStrCopiedLen);
+    initInputLocators(instanceInfo, m_SelectedAttributes);
 
-    // move class index to last attribute
-    outputFormat.setClassIndex(outputFormat.numAttributes() - 1);
-    
-    // delete original attributes
-    for (int i = 0; i < instanceInfo.numAttributes(); i++)
-      outputFormat.deleteAttributeAt(0);
-    
+    Instances outputFormat = new Instances(instanceInfo.relationName(),
+					   attributes, 0); 
+    outputFormat.setClassIndex(outputClass);
     setOutputFormat(outputFormat);
     
     return true;
@@ -220,8 +289,9 @@ public class Reorder
       inst = new SparseInstance(instance.weight(), vals);
     else
       inst = new Instance(instance.weight(), vals);
-    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
-                     getOutputFormat(), getOutputStringIndex());
+
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     
     push(inst);
@@ -247,6 +317,7 @@ public class Reorder
       + "on: e.g. 1,1,1,4,4,4,2,2,2 where the second and the third column of "
       + "each attribute are processed differently and the first one, i.e. the "
       + "original one is kept.\n"
+      + "One can simply inverse the order of the attributes via 'last-first'.\n"
       + "After appyling the filter, the index of the class attribute is the "
       + "last attribute.";
   }
@@ -257,7 +328,7 @@ public class Reorder
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
-    return m_NewOrderCols.getRanges();
+    return m_NewOrderCols;
   }
 
   /**
@@ -286,7 +357,11 @@ public class Reorder
    * @throws Exception if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) throws Exception {
-    m_NewOrderCols.setRanges(rangeList);
+    // simple test
+    if (rangeList.replaceAll("[afilrst0-9\\-,]*", "").length() != 0)
+      throw new IllegalArgumentException("Not a valid range string!");
+    
+    m_NewOrderCols = rangeList;
   }
 
   /**

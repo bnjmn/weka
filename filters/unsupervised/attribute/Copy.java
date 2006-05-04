@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Copy 
   extends Filter 
@@ -74,12 +74,6 @@ public class Copy
    * dataset is seen
    */
   protected int [] m_SelectedAttributes;
-
-  /** 
-   * Contains an index of string attributes in the input format
-   * that survive the filtering process -- some entries may be duplicated 
-   */
-  protected int [] m_InputStringIndex;
 
   /**
    * Returns an enumeration describing the available options.
@@ -173,8 +167,6 @@ public class Copy
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
     m_SelectedAttributes = m_CopyCols.getSelection();
-    int inStrCopiedLen = 0;
-    int [] inStrCopied = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       // Create a copy of the attribute with a different name
@@ -183,16 +175,19 @@ public class Copy
 				     outputFormat.numAttributes());
       outputFormat.renameAttribute(outputFormat.numAttributes() - 1,
 				   "Copy of " + origAttribute.name());
-      if (origAttribute.type() == Attribute.STRING) {
-        inStrCopied[inStrCopiedLen++] = current;
-      }
+
     }
-    int [] origIndex = getInputStringIndex(); 
-    m_InputStringIndex = new int [origIndex.length + inStrCopiedLen];
-    System.arraycopy(origIndex, 0, m_InputStringIndex, 0, origIndex.length);
-    System.arraycopy(inStrCopied, 0, m_InputStringIndex, origIndex.length, 
-                     inStrCopiedLen);
+
+    // adapt locators
+    int[] newIndices = new int[instanceInfo.numAttributes() + m_SelectedAttributes.length];
+    for (int i = 0; i < instanceInfo.numAttributes(); i++)
+      newIndices[i] = i;
+    for (int i = 0; i < m_SelectedAttributes.length; i++)
+      newIndices[instanceInfo.numAttributes() + i] = m_SelectedAttributes[i];
+    initInputLocators(instanceInfo, newIndices);
+
     setOutputFormat(outputFormat);
+    
     return true;
   }
   
@@ -232,8 +227,9 @@ public class Copy
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
-                     getOutputFormat(), getOutputStringIndex());
+    
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;

@@ -29,7 +29,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.RelationalLocator;
 import weka.core.SingleIndex;
+import weka.core.StringLocator;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
@@ -62,7 +65,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Add 
   extends Filter 
@@ -211,6 +214,14 @@ public class Add
     }
     outputFormat.insertAttributeAt(newAttribute, m_Insert.getIndex());
     setOutputFormat(outputFormat);
+    
+    // all attributes, except index of added attribute
+    // (otherwise the length of the input/output indices differ)
+    Range atts = new Range(m_Insert.getSingleIndex());
+    atts.setInvert(true);
+    atts.setUpper(outputFormat.numAttributes() - 1);
+    initOutputLocators(outputFormat, atts.getSelection());
+    
     return true;
   }
 
@@ -237,10 +248,8 @@ public class Add
     Instance inst = (Instance)instance.copy();
 
     // First copy string values from input to output
-    // Will break if the attribute being created is of type STRING (currently
-    // Add only adds NOMINAL or NUMERIC types)
-    copyStringValues(inst, true, inst.dataset(), getOutputFormat());
-
+    copyValues(inst, true, inst.dataset(), getOutputFormat());
+    
     // Insert the new attribute and reassign to output
     inst.setDataset(null);
     inst.insertAttributeAt(m_Insert.getIndex());

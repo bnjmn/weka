@@ -55,7 +55,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AddID
   extends Filter
@@ -325,9 +325,7 @@ public class AddID
       inst = (Instance)instance.copy();
 
       // First copy string values from input to output
-      // Will break if the attribute being created is of type STRING (currently
-      // Add only adds NOMINAL or NUMERIC types)
-      copyStringValues(inst, true, inst.dataset(), getOutputFormat());
+      copyValues(inst, true, inst.dataset(), getOutputFormat());
 
       // Insert the new attribute and reassign to output
       inst.setDataset(null);
@@ -357,7 +355,7 @@ public class AddID
       }
     } 
     catch (Exception ex) {
-      ex.printStackTrace();
+      System.out.println(ex.getMessage());
     }
   }
 }
