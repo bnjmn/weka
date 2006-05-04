@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.2 $ */
+ * @version $Revision: 1.19.2.3 $ */
 
 public class Apriori extends Associator implements OptionHandler {
 
@@ -530,7 +530,10 @@ public class Apriori extends Associator implements OptionHandler {
       return "\nNo large itemsets and rules found!\n";
     text.append("\nApriori\n=======\n\n");
     text.append("Minimum support: " 
-		+ Utils.doubleToString(m_minSupport,2) + '\n');
+		+ Utils.doubleToString(m_minSupport,2) 
+		+ " (" + ((int)(m_minSupport * (double)m_instances.numInstances()+0.5)) 
+		+ " instances)"
+		+ '\n');
     text.append("Minimum metric <");
     switch(m_metricType) {
     case CONFIDENCE:
