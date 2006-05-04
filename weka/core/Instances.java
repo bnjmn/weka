@@ -63,7 +63,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.63 $ 
+ * @version $Revision: 1.64 $ 
  */
 public class Instances 
   implements Serializable {
@@ -255,7 +255,7 @@ public class Instances
       if (att.type() == Attribute.STRING) {
         atts.setElementAt(new Attribute(att.name(), (FastVector)null), i);
       } else if (att.type() == Attribute.RELATIONAL) {
-        atts.setElementAt(new Attribute(att.name(), att.relation()), i);
+        atts.setElementAt(new Attribute(att.name(), new Instances(att.relation(), 0)), i);
       }
     }
     Instances result = new Instances(relationName(), atts, 0);
