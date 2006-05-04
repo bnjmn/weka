@@ -28,6 +28,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RelationalLocator;
+import weka.core.StringLocator;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
@@ -56,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see MultiInstanceToPropositional
  */
 public class PropositionalToMultiInstance 
@@ -66,17 +68,17 @@ public class PropositionalToMultiInstance
   /** for serialization */
   private static final long serialVersionUID = 5825873573912102482L;
 
-  /** String attribute indices in the input data */
-  protected int[] m_Indices = null;
-
-  /** String attribute indices in the output data (in the relational attribute) */
-  protected int[] m_IndicesNew = null;
-
   /** the seed for randomizing, default is 1 */
   protected int m_Seed = 1;
   
   /** whether to randomize the output data */
   protected boolean m_Randomize = false;
+
+  /** Indices of string attributes in the bag */
+  protected StringLocator m_BagStringAtts = null;
+
+  /** Indices of relational attributes in the bag */
+  protected RelationalLocator m_BagRelAtts = null;
   
   /**
    * Returns a string describing this filter
@@ -256,6 +258,9 @@ public class PropositionalToMultiInstance
 
     super.setOutputFormat(data.stringFreeStructure());
 
+    m_BagStringAtts = new StringLocator(data.attribute(1).relation());
+    m_BagRelAtts    = new RelationalLocator(data.attribute(1).relation());
+    
     return true;
   }
 
@@ -277,9 +282,17 @@ public class PropositionalToMultiInstance
       double classValue, 
       double bagWeight) {
     
-    // copy strings
+    // copy strings/relational values
     for (int i = 0; i < bagInsts.numInstances(); i++) {
-      copyStringValues(bagInsts.instance(i), false, input, m_Indices, bagInsts, m_IndicesNew);
+      RelationalLocator.copyRelationalValues(
+	  bagInsts.instance(i), false, 
+	  input, m_InputRelAtts,
+	  bagInsts, m_BagRelAtts);
+
+      StringLocator.copyStringValues(
+	  bagInsts.instance(i), false, 
+	  input, m_InputStringAtts,
+	  bagInsts, m_BagStringAtts);
     }
     
     int value = output.attribute(1).addRelation(bagInsts);
@@ -326,23 +339,6 @@ public class PropositionalToMultiInstance
     Instance inst = new Instance(bagInsts.numAttributes());
     inst.setDataset(bagInsts);
 
-    // determine String att. indices
-    int count = 0;
-    for (int i = 0; i < input.numAttributes(); i++) {
-      if (input.attribute(i).isString())
-        count++;
-    }
-    m_Indices = new int[count];
-    m_IndicesNew = new int[count];
-    count = 0;
-    for (int i = 0; i < input.numAttributes(); i++) {
-      if (input.attribute(i).isString()) {
-        m_Indices[count] = i;
-        m_IndicesNew[count] = i - 1;
-        count++;
-      }
-    }
-    
     double bagIndex   = input.instance(0).value(0);
     double classValue = input.instance(0).classValue(); 
     double bagWeight  = 0.0;
@@ -403,7 +399,6 @@ public class PropositionalToMultiInstance
       }
     } 
     catch (Exception ex) {
-      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

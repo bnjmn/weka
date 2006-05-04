@@ -34,13 +34,13 @@ import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.SpecialFunctions;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.UnassignedClassException;
 import weka.core.UnsupportedClassTypeException;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -107,7 +107,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Discretize 
   extends Filter 
@@ -992,8 +992,8 @@ public class Discretize
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
-                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
   }

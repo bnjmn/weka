@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Remove 
   extends Filter
@@ -75,12 +75,6 @@ public class Remove
    * dataset is seen
    */
   protected int [] m_SelectedAttributes;
-
-  /** 
-   * Contains an index of string attributes in the input format
-   * that will survive the filtering process 
-   */
-  protected int [] m_InputStringIndex;
 
   /**
    * Constructor so that we can initialize the Range variable properly.
@@ -183,21 +177,15 @@ public class Remove
     FastVector attributes = new FastVector();
     int outputClass = -1;
     m_SelectedAttributes = m_SelectCols.getSelection();
-    int inStrKeepLen = 0;
-    int [] inStrKeep = new int[m_SelectedAttributes.length];
     for (int i = 0; i < m_SelectedAttributes.length; i++) {
       int current = m_SelectedAttributes[i];
       if (instanceInfo.classIndex() == current) {
 	outputClass = attributes.size();
       }
       Attribute keep = (Attribute)instanceInfo.attribute(current).copy();
-      if (keep.type() == Attribute.STRING) {
-        inStrKeep[inStrKeepLen++] = current;
-      }
       attributes.addElement(keep);
     }
-    m_InputStringIndex = new int [inStrKeepLen];
-    System.arraycopy(inStrKeep, 0, m_InputStringIndex, 0, inStrKeepLen);
+    initInputLocators(instanceInfo, m_SelectedAttributes);
     Instances outputFormat = new Instances(instanceInfo.relationName(),
 					   attributes, 0); 
     outputFormat.setClassIndex(outputClass);
@@ -240,8 +228,8 @@ public class Remove
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    copyStringValues(inst, false, instance.dataset(), m_InputStringIndex,
-                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;

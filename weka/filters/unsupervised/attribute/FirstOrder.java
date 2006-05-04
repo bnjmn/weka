@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class FirstOrder 
   extends Filter
@@ -267,8 +267,8 @@ public class FirstOrder
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    copyStringValues(inst, false, instance.dataset(), getInputStringIndex(),
-                     getOutputFormat(), getOutputStringIndex());
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;

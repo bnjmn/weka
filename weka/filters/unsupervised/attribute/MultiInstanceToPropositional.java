@@ -27,6 +27,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RelationalLocator;
 import weka.core.SelectedTag;
 import weka.core.StringLocator;
 import weka.core.Tag;
@@ -62,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
@@ -75,8 +76,11 @@ public class MultiInstanceToPropositional
   /** the total number of bags */
   protected int m_NumBags;
 
-  /** the string indices of the bag */
-  protected StringLocator m_BagStringAtts;
+  /** Indices of string attributes in the bag */
+  protected StringLocator m_BagStringAtts = null;
+
+  /** Indices of relational attributes in the bag */
+  protected RelationalLocator m_BagRelAtts = null;
   
   /** the total number of the propositional instance in the dataset */
   protected int m_NumInstances;
@@ -259,6 +263,7 @@ public class MultiInstanceToPropositional
     super.setOutputFormat(newData.stringFreeStructure());
 
     m_BagStringAtts = new StringLocator(instanceInfo.attribute(1).relation().stringFreeStructure());
+    m_BagRelAtts    = new RelationalLocator(instanceInfo.attribute(1).relation().stringFreeStructure());
 
     return true;
   }
@@ -330,14 +335,14 @@ public class MultiInstanceToPropositional
     double classValue = bag.classValue();
     double weight = 0.0; 
     //the proper weight for each instance in a bag 
-    if (m_WeightMethod == 1)
+    if (m_WeightMethod == WEIGHTMETHOD_1)
       weight = 1.0;
-    else if (m_WeightMethod == 2)
-      weight = (double) 1.0/bagSize;
-    else if (m_WeightMethod == 3 )
-      weight=(double)m_NumInstances/(m_NumBags * bagSize);
+    else if (m_WeightMethod == WEIGHTMETHOD_INVERSE1)
+      weight = (double) 1.0 / bagSize;
+    else if (m_WeightMethod == WEIGHTMETHOD_INVERSE2)
+      weight=(double) m_NumInstances / (m_NumBags * bagSize);
     else 
-      weight = (double) bag.weight()/bagSize;
+      weight = (double) bag.weight() / bagSize;
 
     Instance newInst;
     Instances outputFormat = getOutputFormat().stringFreeStructure();
@@ -355,8 +360,16 @@ public class MultiInstanceToPropositional
 
       newInst.setWeight(weight);
 
-      // copy strings
-      StringLocator.copyStringValues(newInst, false, data, m_BagStringAtts, outputFormat, m_OutputStringAtts);
+      // copy strings/relational values
+      StringLocator.copyStringValues(
+	  newInst, false, 
+	  data, m_BagStringAtts, 
+	  outputFormat, m_OutputStringAtts);
+
+      RelationalLocator.copyRelationalValues(
+	  newInst, false, 
+	  data, m_BagRelAtts, 
+	  outputFormat, m_OutputRelAtts);
       
       push(newInst);
     }
@@ -378,7 +391,6 @@ public class MultiInstanceToPropositional
       }
     } 
     catch (Exception ex) {
-      ex.printStackTrace();
       System.out.println(ex.getMessage());
     }
   }

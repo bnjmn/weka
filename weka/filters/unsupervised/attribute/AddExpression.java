@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AddExpression 
   extends Filter 
@@ -791,7 +791,9 @@ public class AddExpression
     } else {
       inst = new Instance(instance.weight(), vals);
     }
-    copyStringValues(inst, false, instance.dataset(), getOutputFormat());
+
+    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), getOutputFormat());
     inst.setDataset(getOutputFormat());
     push(inst);
     return true;
