@@ -59,7 +59,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1191,7 +1191,7 @@ public class Capabilities
 	continue;
       
       for (i = 0; i < data.numInstances(); i++) {
-	if (data.instance(i).classIsMissing()) {
+	if (data.instance(i).isMissing(n)) {
 	  result.enable(Capability.MISSING_VALUES);
 	  break;
 	}
