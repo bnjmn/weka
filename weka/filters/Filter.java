@@ -24,6 +24,16 @@
 
 package weka.filters;
 
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Queue;
+import weka.core.RelationalLocator;
+import weka.core.StringLocator;
+import weka.core.Utils;
+
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -32,14 +42,6 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.Enumeration;
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.StringLocator;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Queue;
-import weka.core.Utils;
 
 /** 
  * An abstract class for instance filters: objects that take instances
@@ -69,19 +71,9 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public abstract class Filter implements Serializable {
-
-  /*
-   * Filter refactoring TODO:
-   *
-   * - Update all filters to use getOutputFormat and setInputFormat
-   * instead of outputFormat, outputFormatPeek and inputFormat.
-   * - Update users of filters to use getOutputFormat and setInputFormat
-   * - remove outputFormat, outputFormatPeek and inputFormat
-   *
-   */
 
   /** The output format for instances */
   private Instances m_OutputFormat = null;
@@ -94,6 +86,12 @@ public abstract class Filter implements Serializable {
 
   /** Indices of string attributes in the input format */
   protected StringLocator m_InputStringAtts = null;
+
+  /** Indices of relational attributes in the output format */
+  protected RelationalLocator m_OutputRelAtts = null;
+
+  /** Indices of relational attributes in the input format */
+  protected RelationalLocator m_InputRelAtts = null;
 
   /** The input format for instances */
   private Instances m_InputFormat = null;
@@ -112,7 +110,7 @@ public abstract class Filter implements Serializable {
 
     if (outputFormat != null) {
       m_OutputFormat = outputFormat.stringFreeStructure();
-      m_OutputStringAtts = new StringLocator(m_OutputFormat);
+      initOutputLocators(m_OutputFormat, null);
 
       // Rename the relation
       String relationName = outputFormat.relationName() 
@@ -173,7 +171,7 @@ public abstract class Filter implements Serializable {
 
     if (instance != null) {
       if (instance.dataset() != null)
-	StringLocator.copyStringValues(instance, m_OutputFormat, m_OutputStringAtts);
+	copyValues(instance, false);
       instance.setDataset(m_OutputFormat);
       m_OutputQueue.push(instance);
     }
@@ -198,112 +196,113 @@ public abstract class Filter implements Serializable {
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      StringLocator.copyStringValues(instance, m_InputFormat, m_InputStringAtts);
+      copyValues(instance, true);
       m_InputFormat.add(instance);
     }
   }
 
   /**
-   * Returns an array containing the indices of all string attributes in the
-   * input format. This index is created during setInputFormat()
-   *
-   * @return an array containing the indices of string attributes in the 
-   * input dataset.
+   * Initializes the input attribute locators. If indices is null then all 
+   * attributes of the data will be considered, otherwise only the ones
+   * that were provided.
+   * 
+   * @param data		the data to initialize the locators with
+   * @param indices		if not null, the indices to which to restrict
+   * 				the locating
    */
-  protected int [] getInputStringIndex() {
-
-    return m_InputStringAtts.getAttributeIndices();
+  protected void initInputLocators(Instances data, int[] indices) {
+    if (indices == null) {
+      m_InputStringAtts = new StringLocator(data);
+      m_InputRelAtts    = new RelationalLocator(data);
+    }
+    else {
+      m_InputStringAtts = new StringLocator(data, indices);
+      m_InputRelAtts    = new RelationalLocator(data, indices);
+    }
   }
 
   /**
-   * Returns an array containing the indices of all string attributes in the
-   * output format. This index is created during setOutputFormat()
-   *
-   * @return an array containing the indices of string attributes in the 
-   * output dataset.
+   * Initializes the output attribute locators. If indices is null then all 
+   * attributes of the data will be considered, otherwise only the ones
+   * that were provided.
+   * 
+   * @param data		the data to initialize the locators with
+   * @param indices		if not null, the indices to which to restrict
+   * 				the locating
    */
-  protected int [] getOutputStringIndex() {
-    
-    return m_OutputStringAtts.getAttributeIndices();
+  protected void initOutputLocators(Instances data, int[] indices) {
+    if (indices == null) {
+      m_OutputStringAtts = new StringLocator(data);
+      m_OutputRelAtts    = new RelationalLocator(data);
+    }
+    else {
+      m_OutputStringAtts = new StringLocator(data, indices);
+      m_OutputRelAtts    = new RelationalLocator(data, indices);
+    }
+  }
+  
+  /**
+   * Copies string/relational values contained in the instance copied to a new
+   * dataset. The Instance must already be assigned to a dataset. This
+   * dataset and the destination dataset must have the same structure.
+   *
+   * @param instance		the Instance containing the string/relational 
+   * 				values to copy.
+   * @param isInput		if true the input format and input attribute 
+   * 				locators are used otherwise the output format 
+   * 				and output locators
+   */
+  protected void copyValues(Instance instance, boolean isInput) {
+
+    RelationalLocator.copyRelationalValues(
+	instance, 
+	(isInput) ? m_InputFormat : m_OutputFormat, 
+	(isInput) ? m_InputRelAtts : m_OutputRelAtts);
+
+    StringLocator.copyStringValues(
+	instance, 
+	(isInput) ? m_InputFormat : m_OutputFormat, 
+	(isInput) ? m_InputStringAtts : m_OutputStringAtts);
   }
 
   /**
-   * Takes string values referenced by an Instance and copies them from a
-   * source dataset to a destination dataset. The instance references are
-   * updated to be valid for the destination dataset. The instance may have the 
-   * structure (i.e. number and attribute position) of either dataset (this
-   * affects where references are obtained from). The source dataset must
-   * have the same structure as the filter input format and the destination
-   * must have the same structure as the filter output format.
-   *
-   * @param instance the instance containing references to strings in the source
-   * dataset that will have references updated to be valid for the destination
-   * dataset.
-   * @param instSrcCompat true if the instance structure is the same as the
-   * source, or false if it is the same as the destination
-   * @param srcDataset the dataset for which the current instance string
-   * references are valid (after any position mapping if needed)
-   * @param destDataset the dataset for which the current instance string
-   * references need to be inserted (after any position mapping if needed)
-   * @deprecated should now be done via the weka.core.StringLocator
-   * @see weka.core.StringLocator
-   */
-  protected void copyStringValues(Instance instance, boolean instSrcCompat,
-                                  Instances srcDataset, Instances destDataset) {
-
-    copyStringValues(instance, instSrcCompat, srcDataset, m_InputStringAtts.getAttributeIndices(),
-                     destDataset, m_OutputStringAtts.getAttributeIndices());
-  }
-
-  /**
-   * Takes string values referenced by an Instance and copies them from a
-   * source dataset to a destination dataset. The instance references are
+   * Takes string/relational values referenced by an Instance and copies them 
+   * from a source dataset to a destination dataset. The instance references are
    * updated to be valid for the destination dataset. The instance may have the 
    * structure (i.e. number and attribute position) of either dataset (this
    * affects where references are obtained from). Only works if the number
-   * of string attributes is the same in both indices (implicitly these string
-   * attributes should be semantically same but just with shifted positions).
+   * of string/relational attributes is the same in both indices (implicitly 
+   * these string/relational attributes should be semantically same but just 
+   * with shifted positions).
    *
-   * @param instance the instance containing references to strings in the source
-   * dataset that will have references updated to be valid for the destination
-   * dataset.
-   * @param instSrcCompat true if the instance structure is the same as the
-   * source, or false if it is the same as the destination (i.e. which of the
-   * string attribute indices contains the correct locations for this instance).
-   * @param srcDataset the dataset for which the current instance string
-   * references are valid (after any position mapping if needed)
-   * @param srcStrAtts an array containing the indices of string attributes
-   * in the source datset.
-   * @param destDataset the dataset for which the current instance string
-   * references need to be inserted (after any position mapping if needed)
-   * @param destStrAtts an array containing the indices of string attributes
-   * in the destination datset.
-   * @deprecated should now be done via the weka.core.StringLocator
-   * @see weka.core.StringLocator
+   * @param instance 		the instance containing references to strings/
+   * 				relational values in the source dataset that 
+   * 				will have references updated to be valid for 
+   * 				the destination dataset.
+   * @param instSrcCompat 	true if the instance structure is the same as 
+   * 				the source, or false if it is the same as the 
+   * 				destination (i.e. which of the string/relational 
+   * 				attribute indices contains the correct locations 
+   * 				for this instance).
+   * @param srcDataset 		the dataset for which the current instance 
+   * 				string/relational value references are valid 
+   * 				(after any position mapping if needed)
+   * @param destDataset 	the dataset for which the current instance 
+   * 				string/relational value references need to be 
+   * 				inserted (after any position mapping if needed)
    */
-  protected void copyStringValues(Instance instance, boolean instSrcCompat,
-                                  Instances srcDataset, int []srcStrAtts,
-                                  Instances destDataset, int []destStrAtts) {
-    if (srcDataset == destDataset) {
-      return;
-    }
-    if (srcStrAtts.length != destStrAtts.length) {
-      throw new IllegalArgumentException("Src and Dest string indices differ in length!!");
-    }
-    for (int i = 0; i < srcStrAtts.length; i++) {
-      int instIndex = instSrcCompat ? srcStrAtts[i] : destStrAtts[i];
-      Attribute src = srcDataset.attribute(srcStrAtts[i]);
-      Attribute dest = destDataset.attribute(destStrAtts[i]);
-      if (!instance.isMissing(instIndex)) {
-        //System.err.println(instance.value(srcIndex) 
-        //                   + " " + src.numValues()
-        //                   + " " + dest.numValues());
-        int valIndex = dest.addStringValue(src, (int)instance.value(instIndex));
-        // setValue here shouldn't be too slow here unless your dataset has
-        // squillions of string attributes
-        instance.setValue(instIndex, (double)valIndex);
-      }
-    }
+  protected void copyValues(Instance instance, boolean instSrcCompat,
+                         Instances srcDataset, Instances destDataset) {
+
+    RelationalLocator.copyRelationalValues(
+	instance, instSrcCompat, 
+	srcDataset, m_InputRelAtts,
+	destDataset, m_OutputRelAtts);
+
+    StringLocator.copyStringValues(
+	instance, instSrcCompat, 
+	srcDataset, m_InputStringAtts,
+	getOutputFormat(), m_OutputStringAtts);
   }
 
   /**
@@ -312,20 +311,13 @@ public abstract class Filter implements Serializable {
    */
   protected void flushInput() {
 
-    if (m_InputStringAtts.getAttributeIndices().length > 0) {
+    if (    (m_InputStringAtts.getAttributeIndices().length > 0) 
+	 || (m_InputRelAtts.getAttributeIndices().length > 0) ) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
     } else {
       // This more efficient than new Instances(m_InputFormat, 0);
       m_InputFormat.delete();
     }
-  }
-
-  /**
-   * @deprecated use <code>setInputFormat(Instances)</code> instead.
-   */
-  public boolean inputFormat(Instances instanceInfo) throws Exception {
-
-    return setInputFormat(instanceInfo);
   }
 
   /**
@@ -344,19 +336,11 @@ public abstract class Filter implements Serializable {
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     m_InputFormat = instanceInfo.stringFreeStructure();
-    m_InputStringAtts = new StringLocator(instanceInfo);
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
+    initInputLocators(instanceInfo, null);
     return false;
-  }
-
-  /**
-   * @deprecated use <code>getOutputFormat()</code> instead.
-   */
-  public Instances outputFormat() {
-
-    return getOutputFormat();
   }
 
   /**
@@ -449,9 +433,10 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    // Clear out references to old strings occasionally
+    // Clear out references to old strings/relationals occasionally
     if (m_OutputQueue.empty() && m_NewBatch) {
-      if (m_OutputStringAtts.getAttributeIndices().length > 0) {
+      if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
+	   || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
     }
