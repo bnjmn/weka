@@ -78,7 +78,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.3 $
+ * @version $Revision: 1.2.2.4 $
 */
 
 public class Matrix 
@@ -1339,10 +1339,10 @@ public class Matrix
       for (int j = 0; j < getColumnDimension(); j++) {
         double current = get(i, j);
         if (current < 0)
-          current *= -10;
+          current *= -11;
         if (current > maxval)
           maxval = current;
-        double fract = current - Math.rint(current);
+        double fract = Math.abs(current - Math.rint(current));
         if (!fractional
             && ((Math.log(fract) / Math.log(10)) >= -2)) {
           fractional = true;
