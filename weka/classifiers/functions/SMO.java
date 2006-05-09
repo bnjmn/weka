@@ -86,7 +86,10 @@ import java.util.Vector;
  *    editor = {B. Schoelkopf and C. Burges and A. Smola},
  *    publisher = {MIT Press},
  *    title = {Machines using Sequential Minimal Optimization},
- *    year = {1998}
+ *    year = {1998},
+ *    URL = {http://research.microsoft.com/~jplatt/smo.html},
+ *    PS = {http://research.microsoft.com/~jplatt/smo-book.ps.gz},
+ *    PDF = {http://research.microsoft.com/~jplatt/smo-book.pdf}
  * }
  * 
  * &#64;article{Keerthi2001,
@@ -96,7 +99,8 @@ import java.util.Vector;
  *    pages = {637-649},
  *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
  *    volume = {13},
- *    year = {2001}
+ *    year = {2001},
+ *    PS = {http://guppy.mpe.nus.edu.sg/~mpessk/svm/smo_mod_nc.ps.gz}
  * }
  * 
  * &#64;inproceedings{Hastie1998,
@@ -106,7 +110,8 @@ import java.util.Vector;
  *    publisher = {MIT Press},
  *    title = {Classification by Pairwise Coupling},
  *    volume = {10},
- *    year = {1998}
+ *    year = {1998},
+ *    PS = {http://www-stat.stanford.edu/~hastie/Papers/2class.ps}
  * }
  * </pre>
  * <p/>
@@ -183,7 +188,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.60 $
+ * @version $Revision: 1.61 $
  */
 public class SMO 
   extends Classifier 
@@ -238,6 +243,9 @@ public class SMO
     result.setValue(Field.BOOKTITLE, "Advances in Kernel Methods - Support Vector Learning");
     result.setValue(Field.EDITOR, "B. Schoelkopf and C. Burges and A. Smola");
     result.setValue(Field.PUBLISHER, "MIT Press");
+    result.setValue(Field.URL, "http://research.microsoft.com/~jplatt/smo.html");
+    result.setValue(Field.PDF, "http://research.microsoft.com/~jplatt/smo-book.pdf");
+    result.setValue(Field.PS, "http://research.microsoft.com/~jplatt/smo-book.ps.gz");
     
     additional = result.add(Type.ARTICLE);
     additional.setValue(Field.AUTHOR, "S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy");
@@ -247,6 +255,7 @@ public class SMO
     additional.setValue(Field.VOLUME, "13");
     additional.setValue(Field.NUMBER, "3");
     additional.setValue(Field.PAGES, "637-649");
+    additional.setValue(Field.PS, "http://guppy.mpe.nus.edu.sg/~mpessk/svm/smo_mod_nc.ps.gz");
     
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Trevor Hastie and Robert Tibshirani");
@@ -256,6 +265,7 @@ public class SMO
     additional.setValue(Field.VOLUME, "10");
     additional.setValue(Field.PUBLISHER, "MIT Press");
     additional.setValue(Field.EDITOR, "Michael I. Jordan and Michael J. Kearns and Sara A. Solla");
+    additional.setValue(Field.PS, "http://www-stat.stanford.edu/~hastie/Papers/2class.ps");
     
     return result;
   }
