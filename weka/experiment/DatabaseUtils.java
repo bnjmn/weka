@@ -53,7 +53,7 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.3 $
+ * @version $Revision: 1.18.2.4 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -231,8 +231,18 @@ public class DatabaseUtils implements Serializable {
       StringTokenizer st = new StringTokenizer(drivers, ", ");
       while (st.hasMoreTokens()) {
 	String driver = st.nextToken();
-	DRIVERS.addElement(driver);
-	System.err.println("Added driver: " + driver);
+	boolean result;
+	try {
+	  Class.forName(driver);
+	  DRIVERS.addElement(driver);
+	  result = true;
+	}
+	catch (Exception e) {
+	  result = false;
+	}
+        System.err.println(
+            "Trying to add JDBC driver: " + driver 
+            + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
       }
     } catch (Exception ex) {
       System.err.println("Problem reading properties. Fix before continuing.");
