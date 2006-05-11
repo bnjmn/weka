@@ -52,7 +52,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -248,9 +248,19 @@ public class DatabaseUtils implements Serializable {
       StringTokenizer st = new StringTokenizer(drivers, ", ");
       while (st.hasMoreTokens()) {
 	String driver = st.nextToken();
-	DRIVERS.addElement(driver);
-	if (m_Debug) 
-	  System.err.println("Added driver: " + driver);
+	boolean result;
+	try {
+	  Class.forName(driver);
+	  DRIVERS.addElement(driver);
+	  result = true;
+	}
+	catch (Exception e) {
+	  result = false;
+	}
+	if (m_Debug || !result) 
+	  System.err.println(
+	      "Trying to add JDBC driver: " + driver 
+	      + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
       }
     } catch (Exception ex) {
       System.err.println("Problem reading properties. Fix before continuing.");
