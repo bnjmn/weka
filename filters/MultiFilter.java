@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -374,8 +374,10 @@ public class MultiFilter
 
     result = instances;
     
-    for (i = 0; i < getFilters().length; i++)
+    for (i = 0; i < getFilters().length; i++) {
+      getFilter(i).setInputFormat(result);
       result = Filter.useFilter(result, getFilter(i));
+    }
     
     return result;
   }
