@@ -59,7 +59,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1106,7 +1106,22 @@ public class Capabilities
    * 			type
    */
   public static Capabilities forInstances(Instances data) throws Exception {
+    return forInstances(data, false);
+  }
+  
+  /**
+   * returns a Capabilities object specific for this data. The minimum number 
+   * of instances is not set, the check for multi-instance data is optional.
+   * 
+   * @param data	the data to base the capabilities on
+   * @param multi	if true then the structure is checked, too
+   * @return		a data-specific capabilities object
+   * @throws Exception	in case an error occurrs, e.g., an unknown attribute 
+   * 			type
+   */
+  public static Capabilities forInstances(Instances data, boolean multi) throws Exception {
     Capabilities	result;
+    Capabilities	multiInstance;
     int			i;
     int			n;
     
@@ -1198,6 +1213,21 @@ public class Capabilities
       }
     }
 
+    // multi-instance data?
+    if (multi) {
+      if (    (data.numAttributes() == 3)
+	   && (data.attribute(0).isNominal())		// bag-id
+	   && (data.attribute(1).isRelationValued()) 	// bag
+	   && (data.classIndex() == data.numAttributes() - 1) ) {
+	multiInstance = new Capabilities(null);
+	multiInstance.or(result.getClassCapabilities());
+	multiInstance.enable(Capability.NOMINAL_ATTRIBUTES);
+	multiInstance.enable(Capability.RELATIONAL_ATTRIBUTES);
+	multiInstance.enable(Capability.ONLY_MULTIINSTANCE);
+	result.assign(multiInstance);
+      }
+    }
+    
     return result;
   }
 }
