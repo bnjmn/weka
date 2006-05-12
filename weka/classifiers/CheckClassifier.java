@@ -128,7 +128,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  * @see TestInstances
  */
 public class CheckClassifier implements OptionHandler {
@@ -891,12 +891,6 @@ public class CheckClassifier implements OptionHandler {
                               numClasses, 
                               classType,
                               multiInstance);
-      if (nominalPredictor && !multiInstance) {
-        train1.deleteAttributeAt(0);
-        test1.deleteAttributeAt(0);
-        train2.deleteAttributeAt(0);
-        test2.deleteAttributeAt(0);
-      }
       if (missingLevel > 0) {
         addMissing(train1, missingLevel, predictorMissing, classMissing);
         addMissing(test1, Math.min(missingLevel,50), predictorMissing, 
@@ -1134,10 +1128,6 @@ public class CheckClassifier implements OptionHandler {
                              numClasses, 
                              classType,
                              multiInstance);
-      if (nominalPredictor && !multiInstance) {
-        train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
@@ -1254,10 +1244,6 @@ public class CheckClassifier implements OptionHandler {
                              numClasses, 
                              classType,
                              multiInstance);
-      if (nominalPredictor && !multiInstance) {
-        train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
@@ -1389,10 +1375,6 @@ public class CheckClassifier implements OptionHandler {
                              numClasses, 
                              classType,
                              multiInstance);
-      if (nominalPredictor && !multiInstance) {
-        train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
@@ -1531,10 +1513,6 @@ public class CheckClassifier implements OptionHandler {
                              numClasses, 
                              classType,
                              multiInstance);
-      if (nominalPredictor && !multiInstance) {
-        train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
@@ -1699,16 +1677,6 @@ public class CheckClassifier implements OptionHandler {
                              classType,
                              classIndex,
                              multiInstance);
-      if (nominalPredictor && !multiInstance) {
-	if (classIndex != 0) {
-          train.deleteAttributeAt(0);
-          test.deleteAttributeAt(0);
-	}
-	else {
-          train.deleteAttributeAt(1);
-          test.deleteAttributeAt(1);
-	}
-      }
       if (missingLevel > 0) {
         addMissing(train, missingLevel, predictorMissing, classMissing);
         addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
