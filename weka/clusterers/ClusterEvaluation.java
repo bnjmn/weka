@@ -22,6 +22,7 @@
 
 package  weka.clusterers;
 
+import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -32,9 +33,11 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
@@ -74,7 +77,7 @@ import java.util.Random;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.29 $
+ * @version  $Revision: 1.30 $
  */
 public class ClusterEvaluation 
   implements Serializable {
@@ -480,6 +483,7 @@ public class ClusterEvaluation
     Instances train = null;
     Random random;
     String trainFileName, testFileName, seedString, foldsString, objectInputFileName, objectOutputFileName, attributeRangeString;
+    String graphFileName;
     String[] savedOptions = null;
     boolean printClusterAssignments = false;
     Range attributesToOutput = null;
@@ -499,6 +503,7 @@ public class ClusterEvaluation
       objectOutputFileName = Utils.getOption('d', options);
       trainFileName = Utils.getOption('t', options);
       testFileName = Utils.getOption('T', options);
+      graphFileName = Utils.getOption('g', options);
 
       // Check -p option
       try {
@@ -676,6 +681,15 @@ public class ClusterEvaluation
       objectOutputStream.close();
     }
 
+    // If classifier is drawable output string describing graph
+    if ((clusterer instanceof Drawable) && (graphFileName.length() != 0)) {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(graphFileName));
+      writer.write(((Drawable) clusterer).graph());
+      writer.newLine();
+      writer.flush();
+      writer.close();
+    }
+    
     return  text.toString();
   }
 
@@ -1024,6 +1038,10 @@ public class ClusterEvaluation
     optionsText.append("\tSet class attribute. If supplied, class is ignored");
     optionsText.append("\n\tduring clustering but is used in a classes to");
     optionsText.append("\n\tclusters evaluation.\n");
+    if (clusterer instanceof Drawable) {
+      optionsText.append("-g <name of graph file>\n");
+      optionsText.append("\tOutputs the graph representation of the clusterer to the file.\n");
+    }
 
     // Get scheme-specific options
     if (clusterer instanceof OptionHandler) {
