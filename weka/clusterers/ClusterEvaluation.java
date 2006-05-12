@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.27 $
+ * @version  $Revision: 1.27.2.1 $
  */
 public class ClusterEvaluation implements Serializable {
 
@@ -465,6 +465,7 @@ public class ClusterEvaluation implements Serializable {
     Instances test = null;
     Random random;
     String trainFileName, testFileName, seedString, foldsString, objectInputFileName, objectOutputFileName, attributeRangeString;
+    String graphFileName;
     String[] savedOptions = null;
     boolean printClusterAssignments = false;
     Range attributesToOutput = null;
@@ -484,6 +485,7 @@ public class ClusterEvaluation implements Serializable {
       objectOutputFileName = Utils.getOption('d', options);
       trainFileName = Utils.getOption('t', options);
       testFileName = Utils.getOption('T', options);
+      graphFileName = Utils.getOption('g', options);
 
       // Check -p option
       try {
@@ -659,6 +661,15 @@ public class ClusterEvaluation implements Serializable {
       objectOutputStream.writeObject(clusterer);
       objectOutputStream.flush();
       objectOutputStream.close();
+    }
+
+    // If classifier is drawable output string describing graph
+    if ((clusterer instanceof Drawable) && (graphFileName.length() != 0)) {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(graphFileName));
+      writer.write(((Drawable) clusterer).graph());
+      writer.newLine();
+      writer.flush();
+      writer.close();
     }
 
     return  text.toString();
@@ -1014,6 +1025,10 @@ public class ClusterEvaluation implements Serializable {
     optionsText.append("\tSet class attribute. If supplied, class is ignored");
     optionsText.append("\n\tduring clustering but is used in a classes to");
     optionsText.append("\n\tclusters evaluation.\n");
+    if (clusterer instanceof Drawable) {
+      optionsText.append("-g <name of graph file>\n");
+      optionsText.append("\tOutputs the graph representation of the clusterer to the file.\n");
+    }
 
     // Get scheme-specific options
     if (clusterer instanceof OptionHandler) {
