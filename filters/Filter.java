@@ -24,13 +24,13 @@
 
 package weka.filters;
 
-import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Queue;
 import weka.core.RelationalLocator;
+import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.Utils;
 
@@ -71,7 +71,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public abstract class Filter implements Serializable {
 
@@ -488,26 +488,14 @@ public abstract class Filter implements Serializable {
   }
 
   /**
-   * Gets an array containing the indices of all string attributes.
+   * Creates a deep copy of the given filter using serialization.
    *
-   * @param insts the Instances to scan for string attributes. 
-   * @return an array containing the indices of string attributes in
-   * the input structure. Will be zero-length if there are no
-   * string attributes
+   * @param model the filter to copy
+   * @return a deep copy of the filter
+   * @throws Exception if an error occurs
    */
-  protected int [] getStringIndices(Instances insts) {
-    
-    // Scan through getting the indices of String attributes
-    int [] index = new int [insts.numAttributes()];
-    int indexSize = 0;
-    for (int i = 0; i < insts.numAttributes(); i++) {
-      if (insts.attribute(i).type() == Attribute.STRING) {
-        index[indexSize++] = i;
-      }
-    }
-    int [] result = new int [indexSize];
-    System.arraycopy(index, 0, result, 0, indexSize);
-    return result;
+  public static Filter makeCopy(Filter model) throws Exception {
+    return (Filter)new SerializedObject(model).getObject();
   }
   
   /**
