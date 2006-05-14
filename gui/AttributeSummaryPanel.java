@@ -24,30 +24,22 @@
 package weka.gui;
 
 import weka.core.Attribute;
-import weka.core.Instances;
 import weka.core.AttributeStats;
+import weka.core.Instances;
 import weka.core.Utils;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.GridBagLayout;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.JButton;
 import javax.swing.BorderFactory;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 /** 
@@ -57,9 +49,13 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class AttributeSummaryPanel extends JPanel {
+public class AttributeSummaryPanel 
+  extends JPanel {
+  
+  /** for serialization */
+  static final long serialVersionUID = -5434987925737735880L;
 
   /** Message shown when no instances have been loaded and no attribute set */
   protected static final String NO_SOURCE = "None";
@@ -80,7 +76,21 @@ public class AttributeSummaryPanel extends JPanel {
   protected JLabel m_DistinctLab = new JLabel(NO_SOURCE);
 
   /** Displays other stats in a table */
-  protected JTable m_StatsTable = new JTable();
+  protected JTable m_StatsTable = new JTable() {
+    /** for serialization */
+    private static final long serialVersionUID = 7165142874670048578L;
+
+    /**
+     * returns always false, since it's just information for the user
+     * 
+     * @param row	the row
+     * @param column	the column
+     * @return		always false, i.e., the whole table is not editable
+     */
+    public boolean isCellEditable(int row, int column) {
+      return false;
+    }
+  };
   
   /** The instances we're playing with */
   protected Instances m_Instances;
@@ -185,6 +195,7 @@ public class AttributeSummaryPanel extends JPanel {
     setLayout(new BorderLayout());
     add(simple, BorderLayout.NORTH);
     add(new JScrollPane(m_StatsTable), BorderLayout.CENTER);
+    m_StatsTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
   }
 
   /**
@@ -237,6 +248,8 @@ public class AttributeSummaryPanel extends JPanel {
   /**
    * Sets the gui elements for fields that are stored in the AttributeStats
    * structure.
+   * 
+   * @param index	the index of the attribute
    */
   protected void setDerived(int index) {
     
@@ -251,6 +264,9 @@ public class AttributeSummaryPanel extends JPanel {
 
   /**
    * Creates a tablemodel for the attribute being displayed
+   * 
+   * @param as		the attribute statistics
+   * @param index	the index of the attribute
    */
   protected void setTable(AttributeStats as, int index) {
 
@@ -279,6 +295,8 @@ public class AttributeSummaryPanel extends JPanel {
   /**
    * Sets the labels for fields we can determine just from the instance
    * header.
+   * 
+   * @param index	the index of the attribute
    */
   protected void setHeader(int index) {
     
