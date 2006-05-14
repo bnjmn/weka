@@ -44,6 +44,7 @@ import javax.swing.BorderFactory;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.JScrollPane;
@@ -57,7 +58,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.2 $
+ * @version $Revision: 1.7.2.3 $
  */
 public class AttributeSummaryPanel extends JPanel {
 
@@ -80,7 +81,18 @@ public class AttributeSummaryPanel extends JPanel {
   protected JLabel m_DistinctLab = new JLabel(NO_SOURCE);
 
   /** Displays other stats in a table */
-  protected JTable m_StatsTable = new JTable();
+  protected JTable m_StatsTable = new JTable() {
+    /**
+     * returns always false, since it's just information for the user
+     * 
+     * @param row	the row
+     * @param column	the column
+     * @return		always false, i.e., the whole table is not editable
+     */
+    public boolean isCellEditable(int row, int column) {
+      return false;
+    }
+  };
   
   /** The instances we're playing with */
   protected Instances m_Instances;
@@ -185,6 +197,7 @@ public class AttributeSummaryPanel extends JPanel {
     setLayout(new BorderLayout());
     add(simple, BorderLayout.NORTH);
     add(new JScrollPane(m_StatsTable), BorderLayout.CENTER);
+    m_StatsTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
   }
 
   /**
