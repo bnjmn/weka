@@ -23,14 +23,39 @@
 package weka.gui;
 
 import weka.classifiers.CostMatrix;
-import weka.core.Matrix;
-import java.beans.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
-import java.io.*;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyEditor;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.Reader;
+import java.io.Writer;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 
 /**
  * Class for editing CostMatrix objects. Brings up a custom editing panel
@@ -38,9 +63,10 @@ import java.io.*;
  * load cost matrices from files.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class CostMatrixEditor implements PropertyEditor {
+public class CostMatrixEditor 
+  implements PropertyEditor {
 
   /** The cost matrix being edited */
   private CostMatrix m_matrix;
@@ -59,7 +85,11 @@ public class CostMatrixEditor implements PropertyEditor {
    * This class wraps around the cost matrix presenting it as a TableModel
    * so that it can be displayed and edited in a JTable.
    */
-  private class CostMatrixTableModel extends AbstractTableModel {
+  private class CostMatrixTableModel 
+    extends AbstractTableModel {
+    
+    /** for serialization */
+    static final long serialVersionUID = -2762326138357037181L;
 
     /**
      * Gets the number of rows in the matrix. Cost matrices are square so it is the
@@ -143,8 +173,12 @@ public class CostMatrixEditor implements PropertyEditor {
    * This class presents a GUI for editing the cost matrix, and saving and 
    * loading from files.
    */
-  private class CustomEditor extends JPanel implements ActionListener,
-						       TableModelListener {
+  private class CustomEditor
+    extends JPanel 
+    implements ActionListener, TableModelListener {
+    
+    /** for serialization */
+    static final long serialVersionUID = -2931593489871197274L;
 
     /** The table model of the cost matrix being edited */
     private CostMatrixTableModel m_tableModel;
@@ -160,6 +194,9 @@ public class CostMatrixEditor implements PropertyEditor {
 
     /** The field for changing the size of the cost matrix */
     private JTextField m_classesField;
+
+    /** The button for resizing a matrix */
+    private JButton m_resizeButton;
 
     /**
      * Constructs a new CustomEditor.
@@ -178,11 +215,13 @@ public class CostMatrixEditor implements PropertyEditor {
       m_defaultButton = new JButton("Defaults");
       m_openButton = new JButton("Open...");
       m_saveButton = new JButton("Save...");
+      m_resizeButton = new JButton("Resize");
       m_classesField = new JTextField("" + m_matrix.size());
 
       m_defaultButton.addActionListener(this);
       m_openButton.addActionListener(this);
       m_saveButton.addActionListener(this);
+      m_resizeButton.addActionListener(this);
       m_classesField.addActionListener(this);
 
       // lay out the GUI
@@ -210,6 +249,9 @@ public class CostMatrixEditor implements PropertyEditor {
 
       gridBag.setConstraints(classesPanel, gbc);
       rightPanel.add(classesPanel);
+      
+      gridBag.setConstraints(m_resizeButton, gbc);
+      rightPanel.add(m_resizeButton);
 
       JPanel fill = new JPanel();
       gbc.weightx = 1.0; gbc.weighty = 1.0;
@@ -241,7 +283,8 @@ public class CostMatrixEditor implements PropertyEditor {
 	openMatrix();
       } else if (e.getSource() == m_saveButton) {
 	saveMatrix();
-      } else if (e.getSource() == m_classesField) {
+      } else if (    (e.getSource() == m_classesField) 
+	          || (e.getSource() == m_resizeButton) ) {
 	try {
 	  int newNumClasses = Integer.parseInt(m_classesField.getText());
 	  if (newNumClasses > 0 && newNumClasses != m_matrix.size()) {
@@ -418,11 +461,9 @@ public class CostMatrixEditor implements PropertyEditor {
    * Some objects can be represented as text, but a cost matrix cannot.
    *
    * @param text ignored
-   * @exception always throws an IllegalArgumentException
+   * @throws IllegalArgumentException always throws an IllegalArgumentException
    */   
-  public void setAsText(String text)
-    {
-
+  public void setAsText(String text) {
     throw new IllegalArgumentException("CostMatrixEditor: "
 				       + "CostMatrix properties cannot be "
 				       + "expressed as text");
