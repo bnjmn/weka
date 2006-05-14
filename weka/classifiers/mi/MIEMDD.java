@@ -22,8 +22,8 @@
 
 package weka.classifiers.mi;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableClassifier;
 import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -35,11 +35,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Zhang2001,
+ * &#64;inproceedings{Zhang2001,
  *    author = {Qi Zhang and Sally A. Goldman},
  *    booktitle = {Advances in Neural Information Processing Systems 14},
  *    pages = {1073-108},
@@ -78,22 +78,22 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -D
- *  Turn on debugging output.</pre>
- * 
  * <pre> -N &lt;num&gt;
  *  Whether to 0=normalize/1=standardize/2=neither.
  *  (default 1=standardize)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
  *     
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
-
 public class MIEMDD 
-  extends Classifier 
+  extends RandomizableClassifier 
   implements OptionHandler, MultiInstanceCapabilitiesHandler,
              TechnicalInformationHandler {
 
@@ -121,7 +121,7 @@ public class MIEMDD
   protected double[][] m_emData;
 
   /** The filter used to standardize/normalize all values. */
-  protected Filter m_Filter =null;
+  protected Filter m_Filter = null;
 
   /** Whether to normalize/standardize/neither, default:standardize */
   protected int m_filterType = FILTER_STANDARDIZE;
@@ -133,7 +133,7 @@ public class MIEMDD
   /** No normalization/standardization */
   public static final int FILTER_NONE = 2;
   /** The filter to apply to the training data */
-  public static final Tag [] TAGS_FILTER = {
+  public static final Tag[] TAGS_FILTER = {
     new Tag(FILTER_NORMALIZE, "Normalize training data"),
     new Tag(FILTER_STANDARDIZE, "Standardize training data"),
     new Tag(FILTER_NONE, "No normalization/standardization"),
@@ -189,13 +189,13 @@ public class MIEMDD
     Vector result = new Vector();
     
     result.addElement(new Option(
-          "\tTurn on debugging output.",
-          "D", 0, "-D"));
-    
-    result.addElement(new Option(
           "\tWhether to 0=normalize/1=standardize/2=neither.\n" 
           + "\t(default 1=standardize)",
           "N", 1, "-N <num>"));
+
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.addElement(enm.nextElement());
 
     return result.elements();
   }
@@ -206,12 +206,13 @@ public class MIEMDD
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -D
-   *  Turn on debugging output.</pre>
-   * 
    * <pre> -N &lt;num&gt;
    *  Whether to 0=normalize/1=standardize/2=neither.
    *  (default 1=standardize)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
    * 
    <!-- options-end -->
    *
@@ -219,14 +220,16 @@ public class MIEMDD
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    setDebug(Utils.getFlag('D', options));
-
-    String nString = Utils.getOption('N', options);
-    if (nString.length() != 0) {
-      setFilterType(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
+    String 	tmpStr;
+    
+    tmpStr = Utils.getOption('N', options);
+    if (tmpStr.length() != 0) {
+      setFilterType(new SelectedTag(Integer.parseInt(tmpStr), TAGS_FILTER));
     } else {
       setFilterType(new SelectedTag(FILTER_STANDARDIZE, TAGS_FILTER));
     }     
+
+    super.setOptions(options);
   }
 
 
@@ -236,12 +239,14 @@ public class MIEMDD
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    Vector        result;
+    Vector	result;
+    String[]	options;
+    int		i;
     
-    result = new Vector();
-
-    if (getDebug())
-      result.add("-D");
+    result  = new Vector();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
     
     result.add("-N");
     result.add("" + m_filterType);
@@ -291,9 +296,9 @@ public class MIEMDD
      */
     protected double objectiveFunction(double[] x){
       double nll = 0; // -LogLikelihood
-      for(int i=0; i<m_Classes.length; i++){ // ith bag
+      for (int i=0; i<m_Classes.length; i++){ // ith bag
         double ins=0.0;
-        for(int k=0; k<m_emData[i].length; k++)  //attribute index
+        for (int k=0; k<m_emData[i].length; k++)  //attribute index
           ins += (m_emData[i][k]-x[k*2])*(m_emData[i][k]-x[k*2])*
             x[k*2+1]*x[k*2+1];
         ins = Math.exp(-ins); // Pr. of being positive
@@ -318,23 +323,23 @@ public class MIEMDD
      */
     protected double[] evaluateGradient(double[] x){
       double[] grad = new double[x.length];
-      for(int i=0; i<m_Classes.length; i++){ // ith bag
+      for (int i=0; i<m_Classes.length; i++){ // ith bag
         double[] numrt = new double[x.length];
         double exp=0.0;
-        for(int k=0; k<m_emData[i].length; k++) //attr index
+        for (int k=0; k<m_emData[i].length; k++) //attr index
           exp += (m_emData[i][k]-x[k*2])*(m_emData[i][k]-x[k*2])
             *x[k*2+1]*x[k*2+1];
         exp = Math.exp(-exp);  //Pr. of being positive
 
         //Instance-wise update
-        for(int p=0; p<m_emData[i].length; p++){  // pth variable
+        for (int p=0; p<m_emData[i].length; p++){  // pth variable
           numrt[2*p] = 2.0*(x[2*p]-m_emData[i][p])*x[p*2+1]*x[p*2+1];
           numrt[2*p+1] = 2.0*(x[2*p]-m_emData[i][p])*(x[2*p]-m_emData[i][p])
             *x[p*2+1];
         }
 
         //Bag-wise update
-        for(int q=0; q<m_emData[i].length; q++){
+        for (int q=0; q<m_emData[i].length; q++){
           if (m_Classes[i] == 1) {//derivation of (-LogLikeliHood) for positive bags
             grad[2*q] += numrt[2*q];
             grad[2*q+1] += numrt[2*q+1];
@@ -416,27 +421,27 @@ public class MIEMDD
 
     int nR = train.attribute(1).relation().numAttributes();
     int nC = train.numInstances();
-    int [] bagSize=new int [nC];
-    Instances datasets= new Instances(train.attribute(1).relation(), 0);
+    int[] bagSize = new int[nC];
+    Instances datasets = new Instances(train.attribute(1).relation(), 0);
 
-    m_Data  = new double [nC][nR][];              // Data values
-    m_Classes  = new int [nC];                    // Class values
+    m_Data = new double [nC][nR][];              // Data values
+    m_Classes = new int [nC];                    // Class values
     m_Attributes = datasets.stringFreeStructure();
     if (m_Debug) {
       System.out.println("\n\nExtracting data...");
     }
 
-    for(int h=0; h<nC; h++)  {//h_th bag
+    for (int h = 0; h < nC; h++)  {//h_th bag
       Instance current = train.instance(h);
       m_Classes[h] = (int)current.classValue();  // Class value starts from 0
       Instances currInsts = current.relationalValue(1);
-      for (int i=0; i<currInsts.numInstances();i++){
-        Instance inst=currInsts.instance(i);
+      for (int i = 0; i < currInsts.numInstances(); i++){
+        Instance inst = currInsts.instance(i);
         datasets.add(inst);
       }
 
       int nI = currInsts.numInstances();
-      bagSize[h]=nI;
+      bagSize[h] = nI;
     }
 
 
@@ -448,7 +453,7 @@ public class MIEMDD
     else 
       m_Filter = null; 
 
-    if (m_Filter!=null) {    
+    if (m_Filter != null) {    
       m_Filter.setInputFormat(datasets);
       datasets = Filter.useFilter(datasets, m_Filter); 	
     }
@@ -456,16 +461,16 @@ public class MIEMDD
     m_Missing.setInputFormat(datasets);
     datasets = Filter.useFilter(datasets, m_Missing);
 
-    int instIndex=0;
-    int start=0;	
-    for(int h=0; h<nC; h++)  {	
+    int instIndex = 0;
+    int start = 0;	
+    for (int h = 0; h < nC; h++)  {	
       for (int i = 0; i < datasets.numAttributes(); i++) {
         // initialize m_data[][][]
         m_Data[h][i] = new double[bagSize[h]];
         instIndex=start;
-        for (int k=0; k<bagSize[h]; k++){
-          m_Data[h][i][k]=datasets.instance(instIndex).value(i);
-          instIndex ++;
+        for (int k = 0; k < bagSize[h]; k++){
+          m_Data[h][i][k] = datasets.instance(instIndex).value(i);
+          instIndex++;
         }
       }
       start=instIndex;
@@ -475,13 +480,13 @@ public class MIEMDD
       System.out.println("\n\nIteration History..." );
     }
 
-    m_emData =new double [nC][nR];
+    m_emData =new double[nC][nR];
     m_Par= new double[2*nR];
 
     double[] x = new double[nR*2];
-    double [] tmp = new double[x.length];
-    double [] pre_x = new double[x.length];
-    double [] best_hypothesis = new double[x.length];
+    double[] tmp = new double[x.length];
+    double[] pre_x = new double[x.length];
+    double[] best_hypothesis = new double[x.length];
     double[][] b = new double[2][x.length];
 
     OptEng opt;
@@ -491,48 +496,48 @@ public class MIEMDD
     int iterationCount;
 
 
-    for (int t=0; t<x.length; t++){
+    for (int t = 0; t < x.length; t++) {
       b[0][t] = Double.NaN;
       b[1][t] = Double.NaN;
     }
 
     //random pick 3 positive bags 
-    Random r=new Random();
-    FastVector index=new FastVector(); 
+    Random r = new Random(getSeed());
+    FastVector index = new FastVector(); 
     int n1, n2, n3;
-    do{
+    do {
       n1 = r.nextInt(nC-1);	
-    }while (m_Classes[n1]==0);
+    } while (m_Classes[n1] == 0);
     index.addElement(new Integer(n1)); 
 
-    do{
-      n2= r.nextInt(nC-1);
-    }while (n2==n1|| m_Classes[n2]==0);
+    do {
+      n2 = r.nextInt(nC-1);
+    } while (n2 == n1|| m_Classes[n2] == 0);
     index.addElement(new Integer(n2)); 
 
-    do{
+    do {
       n3 = r.nextInt(nC-1);
-    }while (n3==n1 || n3==n2 || m_Classes[n3]==0);
+    } while (n3 == n1 || n3 == n2 || m_Classes[n3] == 0);
     index.addElement(new Integer(n3));
 
-    for(int s=0; s<index.size(); s++){
+    for (int s = 0; s < index.size(); s++){
       int exIdx = ((Integer)index.elementAt(s)).intValue();
       if (m_Debug)
         System.out.println("\nH0 at "+exIdx);
 
 
-      for(int p=0; p<m_Data[exIdx][0].length; p++){
+      for (int p = 0; p < m_Data[exIdx][0].length; p++) {
         //initialize a hypothesis
         for (int q = 0; q < nR; q++) {
           x[2 * q] = m_Data[exIdx][q][p];
           x[2 * q + 1] = 1.0;
         } 
 
-        pre_nll=Double.MAX_VALUE;
-        nll=Double.MAX_VALUE/10.0;
-        iterationCount=0;
+        pre_nll = Double.MAX_VALUE;
+        nll = Double.MAX_VALUE/10.0;
+        iterationCount = 0;
         //while (Math.abs(nll-pre_nll)>0.01*pre_nll && iterationCount<10) {  //stop condition
-        while(nll <pre_nll && iterationCount<10)  {
+        while (nll < pre_nll && iterationCount < 10) {
           iterationCount++;
           pre_nll = nll;
 
@@ -561,8 +566,8 @@ public class MIEMDD
           }
           nll = opt.getMinFunction();
 
-          pre_x=x;
-          x=tmp; // update hypothesis 
+          pre_x = x;
+          x = tmp; // update hypothesis 
 
 
           //keep the track of the best target point which has the minimum nll
@@ -580,19 +585,19 @@ public class MIEMDD
 
         //evaluate the hypothesis on the training data and
         //keep the track of the hypothesis with minimum error on training data
-        double distribution [] = new double [2];
+        double distribution[] = new double[2];
         int error = 0;
         if (nll > pre_nll)
           m_Par = pre_x; 
         else
           m_Par = x;
 
-        for (int i=0; i<train.numInstances(); i++) {
+        for (int i = 0; i<train.numInstances(); i++) {
           distribution = distributionForInstance (train.instance(i));
-          if (distribution[1]>=0.5 && m_Classes[i] == 0)
-            error ++;
+          if (distribution[1] >= 0.5 && m_Classes[i] == 0)
+            error++;
           else if (distribution[1]<0.5 && m_Classes[i] == 1)
-            error ++;
+            error++;
         }
         if (error < min_error) {
           best_hypothesis = m_Par;
@@ -605,7 +610,7 @@ public class MIEMDD
             System.out.println("error= "+ error +"  nll= " + bestnll);
         }
       }
-      if (m_Debug){
+      if (m_Debug) {
         System.out.println(exIdx+ ":  -------------<Converged>--------------");
         System.out.println("current minimum error= "+min_error+"  nll= "+bestnll);
       }
@@ -631,9 +636,9 @@ public class MIEMDD
     int insIndex=0;
     int nI = m_Data[i][0].length; // numInstances in ith bag
 
-    for(int j=0; j<nI; j++){
+    for (int j=0; j<nI; j++){
       double ins=0.0;
-      for(int k=0; k<m_Data[i].length; k++)  // for each attribute
+      for (int k=0; k<m_Data[i].length; k++)  // for each attribute
         ins += (m_Data[i][k][j]-x[k*2])*(m_Data[i][k][j]-x[k*2])*
           x[k*2+1]*x[k*2+1];
 
@@ -667,17 +672,17 @@ public class MIEMDD
 
     int nI = ins.numInstances(), nA = ins.numAttributes();
     double[][] dat = new double [nI][nA];
-    for(int j = 0; j < nI; j++){
-      for(int k=0; k<nA; k++){
+    for (int j = 0; j < nI; j++){
+      for (int k=0; k<nA; k++){
         dat[j][k] = ins.instance(j).value(k);
       }
     }
     //find the concept instance in the exemplar
     double min = Double.MAX_VALUE;
     double maxProb = -1.0;
-    for(int j = 0; j < nI; j++){
+    for (int j = 0; j < nI; j++){
       double exp = 0.0;
-      for(int k = 0; k<nA; k++)  // for each attribute
+      for (int k = 0; k<nA; k++)  // for each attribute
         exp += (dat[j][k]-m_Par[k*2])*(dat[j][k]-m_Par[k*2])*m_Par[k*2+1]*m_Par[k*2+1];
       //the probability can be calculated as Math.exp(-exp)
       //to find the maximum Math.exp(-exp) is equivalent to find the minimum of (exp)
@@ -703,7 +708,7 @@ public class MIEMDD
    */
   public String toString() {
 
-    String result = "EMDD";
+    String result = "MIEMDD";
     if (m_Par == null) {
       return result + ": No model built yet.";
     }
