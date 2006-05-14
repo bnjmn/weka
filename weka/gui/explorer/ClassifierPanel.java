@@ -23,111 +23,95 @@
 
 package weka.gui.explorer;
 
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.FastVector;
-import weka.core.OptionHandler;
-import weka.core.Attribute;
-import weka.core.Utils;
-import weka.core.Drawable;
-import weka.core.SerializedObject;
-import weka.core.ClassDiscovery;
-import weka.core.Version;
-import weka.associations.CARuleMiner;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.CostMatrix;
-import weka.classifiers.evaluation.NominalPrediction;
+import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.CostCurve;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
-import weka.classifiers.evaluation.CostCurve;
-import weka.filters.Filter;
-import weka.gui.Logger;
-import weka.gui.TaskLogger;
-import weka.gui.SysErrLog;
+import weka.core.Attribute;
+import weka.core.ClassDiscovery;
+import weka.core.Drawable;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.gui.CostMatrixEditor;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
+import weka.gui.InstancesSummaryPanel;
+import weka.gui.Logger;
+import weka.gui.PropertyDialog;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
-import weka.gui.SetInstancesPanel;
-import weka.gui.CostMatrixEditor;
-import weka.gui.PropertyDialog;
-import weka.gui.InstancesSummaryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.SetInstancesPanel;
+import weka.gui.SysErrLog;
+import weka.gui.TaskLogger;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.Plot2D;
+import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.plugins.VisualizePlugin;
-import weka.gui.ExtensionFileFilter;
 
-import weka.gui.treevisualizer.*;
-
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.graphvisualizer.BIFFormatException;
-
-import java.util.Random;
-import java.util.Date;
-import java.util.Vector;
-import java.text.SimpleDateFormat;
-import java.awt.FlowLayout;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Point;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Window;
-import java.awt.Dimension;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-
+import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
-import java.io.BufferedWriter;
-import java.io.PrintWriter;
-
-import java.io.OutputStream;
-import java.io.ObjectOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.zip.GZIPOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
-import java.io.FileInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
+import java.util.Vector;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JButton;
 import javax.swing.BorderFactory;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
-import javax.swing.JOptionPane;
-import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JViewport;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.JPopupMenu;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
 /** 
@@ -141,9 +125,13 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.87 $
+ * @version $Revision: 1.88 $
  */
-public class ClassifierPanel extends JPanel {
+public class ClassifierPanel 
+  extends JPanel {
+   
+  /** for serialization */
+  static final long serialVersionUID = 6959973704963624003L;
 
   /** The filename extension that should be used for model files */
   public static String MODEL_FILE_EXTENSION = ".model";
@@ -390,6 +378,7 @@ public class ClassifierPanel extends JPanel {
 	m_SetCostsBut.setEnabled(false);
 	if (m_SetCostsFrame == null) {
 	  m_SetCostsFrame = new PropertyDialog(m_CostMatrixEditor, 100, 100);
+	  m_SetCostsFrame.setTitle("Cost Matrix Editor");
 	  //	pd.setSize(250,150);
 	  m_SetCostsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 	    public void windowClosing(java.awt.event.WindowEvent p) {
@@ -401,6 +390,13 @@ public class ClassifierPanel extends JPanel {
 	    }
 	  });
 	}
+	
+	// do we need to change the size of the matrix?
+	int classIndex = m_ClassCombo.getSelectedIndex();
+	int numClasses = m_Instances.attribute(classIndex).numValues();
+	if (numClasses != ((CostMatrix) m_CostMatrixEditor.getValue()).numColumns())
+	  m_CostMatrixEditor.setValue(new CostMatrix(numClasses));
+	
 	m_SetCostsFrame.setVisible(true);
       }
     });
@@ -1621,7 +1617,7 @@ public class ClassifierPanel extends JPanel {
 		//VisualizePanel vmc = new VisualizePanel();
 		ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
 		vmc.setROCString("(Area under ROC = " + 
-				 Utils.doubleToString(tc.getROCArea(result), 4) + ")");
+				 Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
 		vmc.setLog(m_Log);
 		vmc.setName(result.relationName()+". (Class value "+
 			    classAtt.value(classValue)+")");
