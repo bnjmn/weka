@@ -35,6 +35,7 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -110,6 +111,12 @@ import java.util.Vector;
  * <pre> -N &lt;num&gt;
  *  The number of instances in the datasets (default 20).</pre>
  * 
+ * <pre> -words &lt;comma-separated-list&gt;
+ *  The words to use in string attributes.</pre>
+ * 
+ * <pre> -word-separators &lt;chars&gt;
+ *  The word separators to use in string attributes.</pre>
+ * 
  * <pre> -W
  *  Full name of the classifier analysed.
  *  eg: weka.classifiers.bayes.NaiveBayes</pre>
@@ -128,7 +135,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @see TestInstances
  */
 public class CheckClassifier implements OptionHandler {
@@ -173,6 +180,12 @@ public class CheckClassifier implements OptionHandler {
   /** The number of instances in the datasets */
   protected int m_NumInstances = 20;
   
+  /** for generating String attributes/classes */
+  protected String[] m_Words = TestInstances.DEFAULT_WORDS;
+  
+  /** for generating String attributes/classes */
+  protected String m_WordSeparators = TestInstances.DEFAULT_SEPARATORS;
+  
   /** for post-processing the data even further */
   protected PostProcessor m_PostProcessor = null;
   
@@ -199,6 +212,14 @@ public class CheckClassifier implements OptionHandler {
     newVector.addElement(new Option(
         "\tThe number of instances in the datasets (default 20).",
         "N", 1, "-N <num>"));
+    
+    newVector.addElement(new Option(
+        "\tThe words to use in string attributes.",
+        "words", 1, "-words <comma-separated-list>"));
+    
+    newVector.addElement(new Option(
+        "\tThe word separators to use in string attributes.",
+        "word-separators", 1, "-word-separators <chars>"));
     
     newVector.addElement(new Option(
         "\tFull name of the classifier analysed.\n"
@@ -234,6 +255,12 @@ public class CheckClassifier implements OptionHandler {
    * <pre> -N &lt;num&gt;
    *  The number of instances in the datasets (default 20).</pre>
    * 
+   * <pre> -words &lt;comma-separated-list&gt;
+   *  The words to use in string attributes.</pre>
+   * 
+   * <pre> -word-separators &lt;chars&gt;
+   *  The word separators to use in string attributes.</pre>
+   * 
    * <pre> -W
    *  Full name of the classifier analysed.
    *  eg: weka.classifiers.bayes.NaiveBayes</pre>
@@ -264,6 +291,20 @@ public class CheckClassifier implements OptionHandler {
     else
       setNumInstances(20);
     
+    tmpStr = Utils.getOption("words", options);
+    if (tmpStr.length() != 0)
+      setWords(tmpStr);
+    else
+      setWords(new TestInstances().getWords());
+    
+    if (Utils.getOptionPos("word-separators", options) > -1) {
+      tmpStr = Utils.getOption("word-separators", options);
+      setWordSeparators(tmpStr);
+    }
+    else {
+      setWordSeparators(TestInstances.DEFAULT_SEPARATORS);
+    }
+    
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
       throw new Exception("A classifier must be specified with the -W option.");
@@ -290,6 +331,12 @@ public class CheckClassifier implements OptionHandler {
     
     result.add("-N");
     result.add("" + getNumInstances());
+    
+    result.add("-words");
+    result.add("" + getWords());
+    
+    result.add("-word-separators");
+    result.add("" + getWordSeparators());
     
     if (getClassifier() != null) {
       result.add("-W");
@@ -353,10 +400,12 @@ public class CheckClassifier implements OptionHandler {
     
     // Start tests
     m_ClasspathProblems = false;
+    println("--> Checking for interfaces");
     canTakeOptions();
     boolean updateableClassifier = updateableClassifier()[0];
     boolean weightedInstancesHandler = weightedInstancesHandler()[0];
     boolean multiInstanceHandler = multiInstanceHandler()[0];
+    println("--> Classifier tests");
     testsPerClassType(Attribute.NOMINAL,    updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.NUMERIC,    updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.DATE,       updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
@@ -438,6 +487,86 @@ public class CheckClassifier implements OptionHandler {
    */
   public Classifier getClassifier() {
     return m_Classifier;
+  }
+
+  /**
+   * turns the comma-separated list into an array
+   * 
+   * @param value	the list to process
+   * @return		the list as array
+   */
+  protected static String[] listToArray(String value) {
+    StringTokenizer	tok;
+    Vector		list;
+    
+    list = new Vector();
+    tok = new StringTokenizer(value, ",");
+    while (tok.hasMoreTokens())
+      list.add(tok.nextToken());
+    
+    return (String[]) list.toArray(new String[list.size()]);
+  }
+  
+  /**
+   * turns the array into a comma-separated list
+   * 
+   * @param value	the array to process
+   * @return		the array as list
+   */
+  protected static String arrayToList(String[] value) {
+    String	result;
+    int		i;
+    
+    result = "";
+    
+    for (i = 0; i < value.length; i++) {
+      if (i > 0)
+	result += ",";
+      result += value[i];
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Sets the comma-separated list of words to use for generating strings. The
+   * list must contain at least 2 words, otherwise an exception will be thrown.
+   * 
+   * @param value			the list of words
+   * @throws IllegalArgumentException	if not at least 2 words are provided
+   */
+  public void setWords(String value) {
+    if (listToArray(value).length < 2)
+      throw new IllegalArgumentException("At least 2 words must be provided!");
+    
+    m_Words = listToArray(value);
+  }
+  
+  /**
+   * returns the words used for assembling strings in a comma-separated list.
+   * 
+   * @return		the words as comma-separated list
+   */
+  public String getWords() {
+    return arrayToList(m_Words);
+  }
+
+  /**
+   * sets the word separators (chars) to use for assembling strings.
+   * 
+   * @param value	the characters to use as separators
+   */
+  public void setWordSeparators(String value) {
+    m_WordSeparators = value;
+  }
+  
+  /**
+   * returns the word separators (chars) to use for assembling strings.
+   * 
+   * @return		the current separators
+   */
+  public String getWordSeparators() {
+    return m_WordSeparators;
   }
   
   /**
@@ -1933,6 +2062,8 @@ public class CheckClassifier implements OptionHandler {
     dataset.setClassIndex(classIndex);
     dataset.setNumClasses(numClasses);
     dataset.setMultiInstance(multiInstance);
+    dataset.setWords(getWords());
+    dataset.setWordSeparators(getWordSeparators());
     
     return process(dataset.generate());
   }
