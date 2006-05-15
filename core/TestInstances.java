@@ -26,6 +26,7 @@ import weka.core.Capabilities.Capability;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
@@ -71,6 +72,12 @@ import java.util.Vector;
  * <pre> -string &lt;num&gt;
  *  The number of string attributes (default 0).</pre>
  * 
+ * <pre> -words &lt;comma-separated-list&gt;
+ *  The words to use in string attributes.</pre>
+ * 
+ * <pre> -word-separators &lt;chars&gt;
+ *  The word separators to use in string attributes.</pre>
+ * 
  * <pre> -date &lt;num&gt;
  *  The number of date attributes (default 0).</pre>
  * 
@@ -92,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -108,9 +115,18 @@ public class TestInstances
   /** can be used to avoid generating a class attribute
    * @see #setClassIndex(int) */
   public final static int NO_CLASS = -2;
+
+  /** the default list of words used in strings */
+  public final static String[] DEFAULT_WORDS = {"The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
+
+  /** the default word separators used in strings */
+  public final static String DEFAULT_SEPARATORS = " ";
   
   /** for generating String attributes/classes */
-  protected String[] m_Words = new String[]{"The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
+  protected String[] m_Words = DEFAULT_WORDS;
+  
+  /** for generating String attributes/classes */
+  protected String m_WordSeparators = DEFAULT_SEPARATORS;
   
   /** the name of the relation */
   protected String m_Relation = "Testdata";
@@ -192,6 +208,8 @@ public class TestInstances
     setNumRelational(0);
     setNumInstancesRelational(10);
     setMultiInstance(false);
+    setWords(arrayToList(DEFAULT_WORDS));
+    setWordSeparators(DEFAULT_SEPARATORS);
   }
   
   /**
@@ -232,6 +250,8 @@ public class TestInstances
       setRelationalFormat(i, t.getRelationalFormat(i));
     setRelationalClassFormat(t.getRelationalClassFormat());
     setNumInstancesRelational(t.getNumInstancesRelational());
+    setWords(t.getWords());
+    setWordSeparators(t.getWordSeparators());
   }
   
   /**
@@ -287,6 +307,14 @@ public class TestInstances
     result.addElement(new Option(
         "\tThe number of string attributes (default 0).",
         "string", 1, "-string <num>"));
+    
+    result.addElement(new Option(
+        "\tThe words to use in string attributes.",
+        "words", 1, "-words <comma-separated-list>"));
+    
+    result.addElement(new Option(
+        "\tThe word separators to use in string attributes.",
+        "word-separators", 1, "-word-separators <chars>"));
     
     result.addElement(new Option(
         "\tThe number of date attributes (default 0).",
@@ -354,6 +382,12 @@ public class TestInstances
    * 
    * <pre> -string &lt;num&gt;
    *  The number of string attributes (default 0).</pre>
+   * 
+   * <pre> -words &lt;comma-separated-list&gt;
+   *  The words to use in string attributes.</pre>
+   * 
+   * <pre> -word-separators &lt;chars&gt;
+   *  The word separators to use in string attributes.</pre>
    * 
    * <pre> -date &lt;num&gt;
    *  The number of date attributes (default 0).</pre>
@@ -467,6 +501,20 @@ public class TestInstances
     else if (!initialized)
       setNumString(0);
     
+    tmpStr = Utils.getOption("words", options);
+    if (tmpStr.length() != 0)
+      setWords(tmpStr);
+    else if (!initialized)
+      setWords(arrayToList(DEFAULT_WORDS));
+    
+    if (Utils.getOptionPos("word-separators", options) > -1) {
+      tmpStr = Utils.getOption("word-separators", options);
+      setWordSeparators(tmpStr);
+    }
+    else if (!initialized) {
+      setWordSeparators(DEFAULT_SEPARATORS);
+    }
+    
     tmpStr = Utils.getOption("date", options);
     if (tmpStr.length() != 0)
       setNumDate(Integer.parseInt(tmpStr));
@@ -535,6 +583,12 @@ public class TestInstances
     
     result.add("-string");
     result.add("" + getNumString());
+    
+    result.add("-words");
+    result.add("" + getWords());
+    
+    result.add("-word-separators");
+    result.add("" + getWordSeparators());
     
     result.add("-date");
     result.add("" + getNumDate());
@@ -770,6 +824,86 @@ public class TestInstances
    */
   public int getNumString() {
     return m_NumString;
+  }
+
+  /**
+   * turns the comma-separated list into an array
+   * 
+   * @param value	the list to process
+   * @return		the list as array
+   */
+  protected static String[] listToArray(String value) {
+    StringTokenizer	tok;
+    Vector		list;
+    
+    list = new Vector();
+    tok = new StringTokenizer(value, ",");
+    while (tok.hasMoreTokens())
+      list.add(tok.nextToken());
+    
+    return (String[]) list.toArray(new String[list.size()]);
+  }
+  
+  /**
+   * turns the array into a comma-separated list
+   * 
+   * @param value	the array to process
+   * @return		the array as list
+   */
+  protected static String arrayToList(String[] value) {
+    String	result;
+    int		i;
+    
+    result = "";
+    
+    for (i = 0; i < value.length; i++) {
+      if (i > 0)
+	result += ",";
+      result += value[i];
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Sets the comma-separated list of words to use for generating strings. The
+   * list must contain at least 2 words, otherwise an exception will be thrown.
+   * 
+   * @param value			the list of words
+   * @throws IllegalArgumentException	if not at least 2 words are provided
+   */
+  public void setWords(String value) {
+    if (listToArray(value).length < 2)
+      throw new IllegalArgumentException("At least 2 words must be provided!");
+    
+    m_Words = listToArray(value);
+  }
+  
+  /**
+   * returns the words used for assembling strings in a comma-separated list.
+   * 
+   * @return		the words as comma-separated list
+   */
+  public String getWords() {
+    return arrayToList(m_Words);
+  }
+
+  /**
+   * sets the word separators (chars) to use for assembling strings.
+   * 
+   * @param value	the characters to use as separators
+   */
+  public void setWordSeparators(String value) {
+    m_WordSeparators = value;
+  }
+  
+  /**
+   * returns the word separators (chars) to use for assembling strings.
+   * 
+   * @return		the current separators
+   */
+  public String getWordSeparators() {
+    return m_WordSeparators;
   }
   
   /**
@@ -1069,8 +1203,8 @@ public class TestInstances
       case Attribute.STRING:
         String str = "";
         for (int n = 0; n < m_Words.length; n++) {
-          if (n > 0)
-            str += " ";
+          if ( (n > 0) && (m_WordSeparators.length() != 0) )
+            str += m_WordSeparators.charAt(m_Random.nextInt(m_WordSeparators.length()));
           str += m_Words[m_Random.nextInt(m_Words.length)];
         }
         result = data.classAttribute().addStringValue(str);
@@ -1134,8 +1268,8 @@ public class TestInstances
       case Attribute.STRING:
         String str = "";
         for (int n = 0; n < m_Words.length; n++) {
-          if (n > 0)
-            str += " ";
+          if ( (n > 0) && (m_WordSeparators.length() != 0) )
+            str += m_WordSeparators.charAt(m_Random.nextInt(m_WordSeparators.length()));
           str += m_Words[m_Random.nextInt(m_Words.length)];
         }
         result = data.attribute(index).addStringValue(str);
@@ -1346,6 +1480,8 @@ public class TestInstances
     result += "# Relational: " + getNumRelational() + "\n";
     result += "# Relational Instances: " + getNumInstancesRelational() + "\n";
     result += "Multi-Instance: " + getMultiInstance() + "\n";
+    result += "Words: " + getWords() + "\n";
+    result += "Word separators: " + getWordSeparators() + "\n";
     
     return result;
   }
