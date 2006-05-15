@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.51 $
+ * @version $Revision: 1.52 $
  */
 public final class Utils {
 
@@ -256,7 +256,7 @@ public final class Utils {
     
     StringBuffer stringBuffer;
     double temp;
-    int i,dotPosition;
+    int dotPosition;
     long precisionValue;
     
     temp = value * Math.pow(10.0, afterDecimalPoint);
@@ -493,7 +493,8 @@ public final class Utils {
    */
   public static boolean getFlag(char flag, String [] options) 
     throws Exception {
-       return getFlag("" + flag, options);
+    
+    return getFlag("" + flag, options);
   }
   
   /**
@@ -508,26 +509,13 @@ public final class Utils {
    */
   public static boolean getFlag(String flag, String [] options) 
     throws Exception {
+    
+    int pos = getOptionPos(flag, options);
 
-    if (options == null) {
-      return false;
-    }
-    for (int i = 0; i < options.length; i++) {
-      if ((options[i].length() > 1) && (options[i].charAt(0) == '-')) {
-	try {
-	  Double dummy = Double.valueOf(options[i]);
-	} catch (NumberFormatException e) {
-	  if (options[i].equals("-" + flag)) {
-	    options[i] = "";
-	    return true;
-	  }
-	  if (options[i].charAt(1) == '-') {
-	    return false;
-	  }
-	}
-      }
-    }
-    return false;
+    if (pos > -1)
+      options[pos] = "";
+    
+    return (pos > -1);
   }
 
   /**
@@ -542,7 +530,8 @@ public final class Utils {
    */
   public static /*@non_null@*/ String getOption(char flag, String [] options) 
     throws Exception {
-     return getOption("" + flag, options);
+    
+    return getOption("" + flag, options);
   }
 
   /**
@@ -559,32 +548,68 @@ public final class Utils {
     throws Exception {
 
     String newString;
+    int i = getOptionPos(flag, options);
 
+    if (i > -1) {
+      if (options[i].equals("-" + flag)) {
+	if (i + 1 == options.length) {
+	  throw new Exception("No value given for -" + flag + " option.");
+	}
+	options[i] = "";
+	newString = new String(options[i + 1]);
+	options[i + 1] = "";
+	return newString;
+      }
+      if (options[i].charAt(1) == '-') {
+	return "";
+      }
+    }
+    
+    return "";
+  }
+
+  /**
+   * Gets the index of an option or flag indicated by a flag "-Char" from 
+   * the given array of strings. Stops searching at the first marker "--".
+   *
+   * @param flag 	the character indicating the option.
+   * @param options 	the array of strings containing all the options.
+   * @return 		the position if found, or -1 otherwise
+   */
+  public static int getOptionPos(char flag, String[] options) {
+     return getOptionPos("" + flag, options);
+  }
+
+  /**
+   * Gets the index of an option or flag indicated by a flag "-String" from 
+   * the given array of strings. Stops searching at the first marker "--".
+   *
+   * @param flag 	the String indicating the option.
+   * @param options 	the array of strings containing all the options.
+   * @return 		the position if found, or -1 otherwise
+   */
+  public static int getOptionPos(String flag, String[] options) {
     if (options == null)
-      return "";
+      return -1;
+    
     for (int i = 0; i < options.length; i++) {
       if ((options[i].length() > 0) && (options[i].charAt(0) == '-')) {
-	
 	// Check if it is a negative number
 	try {
-	  Double dummy = Double.valueOf(options[i]);
-	} catch (NumberFormatException e) {
-	  if (options[i].equals("-" + flag)) {
-	    if (i + 1 == options.length) {
-	      throw new Exception("No value given for -" + flag + " option.");
-	    }
-	    options[i] = "";
-	    newString = new String(options[i + 1]);
-	    options[i + 1] = "";
-	    return newString;
-	  }
-	  if (options[i].charAt(1) == '-') {
-	    return "";
-	  }
+	  Double.valueOf(options[i]);
+	} 
+	catch (NumberFormatException e) {
+	  // found?
+	  if (options[i].equals("-" + flag))
+	    return i;
+	  // did we reach "--"?
+	  if (options[i].charAt(1) == '-')
+	    return -1;
 	}
       }
     }
-    return "";
+    
+    return -1;
   }
 
   /**
@@ -921,7 +946,7 @@ public final class Utils {
    */
   public static /*@pure@*/ double info(int counts[]) {
     
-    int total = 0; int c;
+    int total = 0;
     double x = 0;
     for (int j = 0; j < counts.length; j++) {
       x -= xlogx(counts[j]);
@@ -1671,7 +1696,9 @@ public final class Utils {
       for (int i  = 0; i < partitionedOptions.length; i++) {
 	System.out.println(partitionedOptions[i]);
       }
+      System.out.println("Get position of flag -f: " + Utils.getOptionPos('f', ops));
       System.out.println("Get flag -f: " + Utils.getFlag('f', ops));
+      System.out.println("Get position of option -o: " + Utils.getOptionPos('o', ops));
       System.out.println("Get option -o: " + Utils.getOption('o', ops));
       System.out.println("Checking for remaining options... ");
       Utils.checkForRemainingOptions(ops);
