@@ -19,7 +19,7 @@ import java.util.Vector;
  * target="_blank">NSIS</a>.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.1 $
+ * @version   $Revision: 1.2 $
  */
 public class GenerateSetup {
 
@@ -269,16 +269,17 @@ public class GenerateSetup {
     block = "";
     block += "!define WEKA_WEKA \"Weka\"\n";
     block += "!define WEKA_VERSION \"" + mVersion + "\"\n";
-    block += "!define WEKA_FILES \"" + new File(mInputDir).getPath() + "\"\n";
-    block += "!define WEKA_TEMPLATES \"" + new File(TEMPLATES).getPath() + "\"\n";
+    block += "!define WEKA_FILES \"" + new File(mInputDir).getAbsolutePath() + "\"\n";
+    block += "!define WEKA_TEMPLATES \"" + new File(TEMPLATES).getAbsolutePath() + "\"\n";
     block += "!define WEKA_LINK_PREFIX \"" + mLinkPrefix + "\"\n";
     block += "!define WEKA_DIR \"" + mDir + "\"\n";
     block += "!define WEKA_URL \"http://www.cs.waikato.ac.nz/~ml/weka/\"\n";
     block += "!define WEKA_MLGROUP \"Machine Learning Group, University of Waikato, Hamilton, NZ\"\n";
-    block += "!define WEKA_HEADERIMAGE \"" + new File(IMAGES + "/weka_new.bmp").getPath() + "\"\n";
-    block += "!define WEKA_JRE \"" + new File(mJRE).getPath() + "\"\n";
+    block += "!define WEKA_HEADERIMAGE \"" + new File(IMAGES + "/weka_new.bmp").getAbsolutePath() + "\"\n";
+    block += "!define WEKA_JRE \"" + new File(mJRE).getAbsolutePath() + "\"\n";
     block += "!define WEKA_JRE_TEMP \"jre_setup.exe\"\n";
     block += "!define WEKA_JRE_INSTALL \"RunJREInstaller.bat\"\n";
+    block += "!define WEKA_JRE_INSTALL_DONE \"RunJREInstaller.done\"\n";
     if (mJRE.length() != 0)
       block += "!define WEKA_JRE_SUFFIX \"jre\"";
     else

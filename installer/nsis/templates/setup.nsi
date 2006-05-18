@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.1 $
+# Version: $Revision: 1.2 $
 
 Name Weka
 
@@ -21,6 +21,7 @@ Name Weka
 !define WEKA_JRE "D:\installs\windows\programming\java\jdk.14\j2re-1_4_2_11-windows-i586-p.exe"
 !define WEKA_JRE_TEMP "jre_setup.exe"
 !define WEKA_JRE_INSTALL "RunJREInstaller.bat"
+!define WEKA_JRE_INSTALL_DONE "RunJREInstaller.done"
 !define WEKA_JRE_SUFFIX ""
 # End: Weka
 
@@ -148,7 +149,7 @@ Section "Install JRE" SectionJRE
     ExecWait "${WEKA_JRE_INSTALL}"
     
     # delete batch file
-    Delete "${WEKA_JRE_INSTALL}"
+    Rename "${WEKA_JRE_INSTALL}" "${WEKA_JRE_INSTALL_DONE}"
 SectionEnd
 # End: JRE
 
@@ -191,6 +192,12 @@ Section /o un.Main UNSEC0000
     Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX} (console).lnk"
     Delete /REBOOTOK "$INSTDIR\RunWeka.bat"
     Delete /REBOOTOK "$INSTDIR\weka.ico"
+    Delete /REBOOTOK "$INSTDIR\weka.gif"
+    Delete /REBOOTOK "$INSTDIR\documentation.html"
+    Delete /REBOOTOK "$INSTDIR\documentation.css"
+    # Start: JRE
+    Delete /REBOOTOK "$INSTDIR\${WEKA_JRE_INSTALL_DONE}"
+    # End: JRE
     RmDir /r /REBOOTOK $INSTDIR
     DeleteRegValue HKLM "${REGKEY}\Components" Main
     DeleteRegKey HKCR ".arff"

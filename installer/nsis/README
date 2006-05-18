@@ -1,7 +1,7 @@
 README
 ======
 
-Version: $Revision: 1.1 $
+Version: $Revision: 1.2 $
 
 
 Parameters
@@ -14,8 +14,7 @@ Parameters
  e.g., ../../weka.previous_releases/weka-3-4-7.
 
 -output-dir <dir>
- the output folder for the script - must be ".", since the EXE will be
- generated at the same location as the .nsi file.
+ the output folder for the script, e.g., "./output".
 
 -dir <str>
  the directory for Weka under "Program Files", e.g.,  Weka-3-4.
@@ -30,7 +29,7 @@ Examples
   java GenerateSetup \
        -version 3.4.7 \
        -input-dir ../../weka.previous_releases/weka-3-4-7 \
-       -output-dir . \
+       -output-dir ./output \
        -dir Weka-3-4 \
        -link-prefix "Weka 3.4"
 
@@ -38,7 +37,7 @@ Examples
   java GenerateSetup \
        -version 3.4.7 \
        -input-dir ../../weka.previous_releases/weka-3-4-7 \
-       -output-dir . \
+       -output-dir ./output \
        -dir Weka-3-4 \
        -link-prefix "Weka 3.4" \
        -jre d:/installs/windows/programming/java/jdk.14/j2re-1_4_2_11-windows-i586-p.exe
