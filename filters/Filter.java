@@ -71,7 +71,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public abstract class Filter implements Serializable {
 
@@ -490,12 +490,34 @@ public abstract class Filter implements Serializable {
   /**
    * Creates a deep copy of the given filter using serialization.
    *
-   * @param model the filter to copy
-   * @return a deep copy of the filter
-   * @throws Exception if an error occurs
+   * @param model 	the filter to copy
+   * @return 		a deep copy of the filter
+   * @throws Exception 	if an error occurs
    */
   public static Filter makeCopy(Filter model) throws Exception {
     return (Filter)new SerializedObject(model).getObject();
+  }
+
+  /**
+   * Creates a given number of deep copies of the given filter using 
+   * serialization.
+   * 
+   * @param model 	the filter to copy
+   * @param num 	the number of filter copies to create.
+   * @return 		an array of filters.
+   * @throws Exception 	if an error occurs
+   */
+  public static Filter[] makeCopies(Filter model, int num) throws Exception {
+
+    if (model == null) {
+      throw new Exception("No model filter set");
+    }
+    Filter[] filters = new Filter[num];
+    SerializedObject so = new SerializedObject(model);
+    for (int i = 0; i < filters.length; i++) {
+      filters[i] = (Filter) so.getObject();
+    }
+    return filters;
   }
   
   /**
