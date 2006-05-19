@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -71,18 +72,33 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.ClassDiscovery
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class GenericPropertiesCreator {
+  
   /** whether to output some debug information */
   public final static boolean VERBOSE = false;
   
-  /** The name of the properties file to use as a template. Ccontains the 
+  /** The name of the properties file to use as a template. Contains the 
    * packages in which to look for derived classes. It has the same structure
    * as the <code>PROPERTY_FILE</code>
    * @see #PROPERTY_FILE
    */
   protected static String CREATOR_FILE = "weka/gui/GenericPropertiesCreator.props";
+  
+  /** The name of the properties file that lists classes/interfaces/superclasses
+   * to exclude from being shown in the GUI. See the file for more information.
+   */
+  protected static String EXCLUDE_FILE = "weka/gui/GenericPropertiesCreator.excludes";
+
+  /** the prefix for an interface exclusion */
+  protected static String EXCLUDE_INTERFACE = "I";
+
+  /** the prefix for an (exact) class exclusion */
+  protected static String EXCLUDE_CLASS = "C";
+
+  /** the prefix for a superclass exclusion */
+  protected static String EXCLUDE_SUPERCLASS = "S";
   
   /** The name of the properties file for the static GenericObjectEditor 
    * (<code>USE_DYNAMIC</code> = <code>false</code>) 
@@ -92,20 +108,24 @@ public class GenericPropertiesCreator {
   protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
   
   /** the input file with the packages */
-  protected String inputFilename;
+  protected String m_InputFilename;
   
   /** the output props file for the GenericObjectEditor */
-  protected String outputFilename;
+  protected String m_OutputFilename;
   
   /** the "template" properties file with the layout and the packages */
-  protected Properties inputProperties;
+  protected Properties m_InputProperties;
   
   /** the output properties file with the filled in classes */
-  protected Properties outputProperties;
+  protected Properties m_OutputProperties;
   
   /** whether an explicit input file was given - if false, the Utils class
    * is used to locate the props-file */
-  protected boolean explicitPropsFile;
+  protected boolean m_ExplicitPropsFile;
+  
+  /** the hashtable that stores the excludes: 
+   * key -&gt; Hashtable(prefix -&gt; Vector of classnames) */
+  protected Hashtable m_Excludes;
   
   /**
    * initializes the creator, locates the props file with the Utils class.
@@ -117,7 +137,7 @@ public class GenericPropertiesCreator {
    */
   public GenericPropertiesCreator() throws Exception {
     this(CREATOR_FILE);
-    explicitPropsFile = false;
+    m_ExplicitPropsFile = false;
   }
 
   /**
@@ -132,31 +152,38 @@ public class GenericPropertiesCreator {
    */
   public GenericPropertiesCreator(String filename) throws Exception {
     super();
-    inputFilename    = filename;
-    outputFilename   = PROPERTY_FILE;
-    inputProperties  = null;
-    outputProperties = null;
-    explicitPropsFile = true;
+    m_InputFilename     = filename;
+    m_OutputFilename    = PROPERTY_FILE;
+    m_InputProperties   = null;
+    m_OutputProperties  = null;
+    m_ExplicitPropsFile = true;
+    m_Excludes          = new Hashtable();
   }
 
   /**
    * if FALSE, the locating of a props-file of the Utils-class is used, 
    * otherwise it's tried to load the specified file
+   * 
+   * @param value 	if true the specified file will be loaded not via the 
+   * 			Utils-class
    * @see Utils#readProperties(String)
    * @see #loadInputProperties()
    */
   public void setExplicitPropsFile(boolean value) {
-    explicitPropsFile = value;
+    m_ExplicitPropsFile = value;
   }
   
   /**
    * returns TRUE, if a file is loaded and not the Utils class used for 
    * locating the props file.
+   * 
+   * @return	true if the specified file is used and not the one found by
+   * 		the Utils class
    * @see Utils#readProperties(String)
    * @see #loadInputProperties()
    */
   public boolean getExplicitPropsFile() {
-    return explicitPropsFile;
+    return m_ExplicitPropsFile;
   }
   
   /**
@@ -165,7 +192,7 @@ public class GenericPropertiesCreator {
    * @return the name of the output file 
    */
   public String getOutputFilename() {
-    return outputFilename;
+    return m_OutputFilename;
   }
   
   /**
@@ -174,7 +201,7 @@ public class GenericPropertiesCreator {
    * @param filename the filename for the output 
    */
   public void setOutputFilename(String filename) {
-    outputFilename = filename;
+    m_OutputFilename = filename;
   }
 
   /**
@@ -183,7 +210,7 @@ public class GenericPropertiesCreator {
    * @return the name of the input file 
    */
   public String getInputFilename() {
-    return inputFilename;
+    return m_InputFilename;
   }
   
   /**
@@ -194,42 +221,76 @@ public class GenericPropertiesCreator {
    * @see #setExplicitPropsFile(boolean)
    */
   public void setInputFilename(String filename) {
-    inputFilename = filename;
+    m_InputFilename = filename;
     setExplicitPropsFile(true);
   }
   
   /**
    * returns the input properties object (template containing the packages)
+   * 
+   * @return		the input properties (the template)
    */
   public Properties getInputProperties() {
-    return inputProperties;
+    return m_InputProperties;
   }
   
   /**
    * returns the output properties object (structure like the template, but
    * filled with classes instead of packages)
+   * 
+   * @return		the output properties (filled with classes)
    */
   public Properties getOutputProperties() {
-    return outputProperties;
+    return m_OutputProperties;
   }
   
   /**
    * loads the property file containing the layout and the packages of 
-   * the output-property-file
+   * the output-property-file. The exlcude property file is also read here.
    * 
-   * @see #inputProperties
-   * @see #inputFilename
+   * @see #m_InputProperties
+   * @see #m_InputFilename
    */
-  protected void loadInputProperties() throws Exception {
+  protected void loadInputProperties()  {
     if (VERBOSE)
       System.out.println("Loading '" + getInputFilename() + "'...");
-    inputProperties = new Properties();
+    m_InputProperties = new Properties();
     try {
       File f = new File(getInputFilename());
       if (getExplicitPropsFile() && f.exists())
-        inputProperties.load(new FileInputStream(getInputFilename()));
+        m_InputProperties.load(new FileInputStream(getInputFilename()));
       else
-        inputProperties = Utils.readProperties(getInputFilename());
+        m_InputProperties = Utils.readProperties(getInputFilename());
+      
+      // excludes
+      m_Excludes.clear();
+      Properties p = Utils.readProperties(EXCLUDE_FILE);
+      Enumeration enm = p.propertyNames();
+      while (enm.hasMoreElements()) {
+	String name = enm.nextElement().toString();
+	// new Hashtable for key
+	Hashtable t = new Hashtable();
+	m_Excludes.put(name, t);
+	t.put(EXCLUDE_INTERFACE, new Vector());
+	t.put(EXCLUDE_CLASS, new Vector());
+	t.put(EXCLUDE_SUPERCLASS, new Vector());
+	
+	// process entries
+	StringTokenizer tok = new StringTokenizer(p.getProperty(name), ",");
+	while (tok.hasMoreTokens()) {
+	  String item = tok.nextToken();
+	  // get list
+	  Vector list = new Vector();
+	  if (item.startsWith(EXCLUDE_INTERFACE + ":"))
+	    list = (Vector) t.get(EXCLUDE_INTERFACE);
+	  else if (item.startsWith(EXCLUDE_CLASS + ":"))
+	    list = (Vector) t.get(EXCLUDE_CLASS);
+	  else if (item.startsWith(EXCLUDE_SUPERCLASS))
+	    list = (Vector) t.get(EXCLUDE_SUPERCLASS);
+	  // add to list
+	  list.add(item.substring(item.indexOf(":") + 1));
+	}
+      }
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -247,30 +308,80 @@ public class GenericPropertiesCreator {
   }
 
   /**
-   * Checks whether the classname is a valid one for the given key.
-   * A hack that prevents, e.g., the ResultProducers to be listed in the
-   * ResultListeners (even though they implement the ResultListener
-   * interface, they're not supposed to be listed there).
+   * Checks whether the classname is a valid one for the given key. This is
+   * based on the settings in the Exclude file.
    *
    * @param key         the property key
    * @param classname   the classname to check
    * @return            whether the classname is a valid one
+   * @see		#EXCLUDE_FILE
    */
   protected boolean isValidClassname(String key, String classname) {
-    boolean       result;
-    Class         cls;
+    boolean	result;
+    Class	cls;
+    Class	clsCurrent;
+    Vector	list;
+    int		i;
 
     result = true;
 
-    // remove ResultProducers from ResultListener list
-    if (key.equals(weka.experiment.ResultListener.class.getName())) {
+    // are there excludes for this key?
+    if (m_Excludes.containsKey(key)) {
       try {
-        cls = Class.forName(classname);
-        if (ClassDiscovery.hasInterface(weka.experiment.ResultProducer.class, cls))
-          result = false;
+	clsCurrent = Class.forName(classname);
       }
       catch (Exception e) {
-        // we can ignore this exception
+	// we ignore this Exception
+	clsCurrent = null;
+      }
+      
+      // interface
+      if ((clsCurrent != null) && result) {
+	list = (Vector) ((Hashtable) m_Excludes.get(key)).get(EXCLUDE_INTERFACE);
+	for (i = 0; i < list.size(); i++) {
+	  try {
+	    cls = Class.forName(list.get(i).toString());
+	    if (ClassDiscovery.hasInterface(cls, clsCurrent)) {
+	      result = false;
+	      break;
+	    }
+	  }
+	  catch (Exception e) {
+	    // we ignore this Exception
+	  }
+	}
+      }
+      
+      // superclass
+      if ((clsCurrent != null) && result) {
+	list = (Vector) ((Hashtable) m_Excludes.get(key)).get(EXCLUDE_SUPERCLASS);
+	for (i = 0; i < list.size(); i++) {
+	  try {
+	    cls = Class.forName(list.get(i).toString());
+	    if (ClassDiscovery.isSubclass(cls, clsCurrent)) {
+	      result = false;
+	      break;
+	    }
+	  }
+	  catch (Exception e) {
+	    // we ignore this Exception
+	  }
+	}
+      }
+      
+      // class
+      if ((clsCurrent != null) && result) {
+	list = (Vector) ((Hashtable) m_Excludes.get(key)).get(EXCLUDE_CLASS);
+	for (i = 0; i < list.size(); i++) {
+	  try {
+	    cls = Class.forName(list.get(i).toString());
+	    if (cls.getName().equals(clsCurrent.getName()))
+	      result = false;
+	  }
+	  catch (Exception e) {
+	    // we ignore this Exception
+	  }
+	}
       }
     }
 
@@ -281,7 +392,8 @@ public class GenericPropertiesCreator {
    * fills in all the classes (based on the packages in the input properties 
    * file) into the output properties file
    *     
-   * @see #outputProperties
+   * @throws Exception 	if something goes wrong
+   * @see #m_OutputProperties
    */
   protected void generateOutputProperties() throws Exception {
     Enumeration       keys;
@@ -292,11 +404,11 @@ public class GenericPropertiesCreator {
     Vector            classes;
     int               i;
     
-    outputProperties = new Properties();
-    keys             = inputProperties.propertyNames();
+    m_OutputProperties = new Properties();
+    keys             = m_InputProperties.propertyNames();
     while (keys.hasMoreElements()) {
       key   = keys.nextElement().toString();
-      tok   = new StringTokenizer(inputProperties.getProperty(key), ",");
+      tok   = new StringTokenizer(m_InputProperties.getProperty(key), ",");
       value = "";
       // get classes for all packages
       while (tok.hasMoreTokens()) {
@@ -324,20 +436,21 @@ public class GenericPropertiesCreator {
         if (VERBOSE)
           System.out.println(pkg + " -> " + value);
       }
-      outputProperties.setProperty(key, value);
+      m_OutputProperties.setProperty(key, value);
     }
   }
   
   /**
    * stores the generated output properties file
    * 
-   * @see #outputProperties
-   * @see #outputFilename 
+   * @throws Exception	if the saving fails
+   * @see #m_OutputProperties
+   * @see #m_OutputFilename 
    */
   protected void storeOutputProperties() throws Exception {
     if (VERBOSE)
       System.out.println("Saving '" + getOutputFilename() + "'...");
-    outputProperties.store(
+    m_OutputProperties.store(
         new FileOutputStream(getOutputFilename()), 
         " Customises the list of options given by the GenericObjectEditor\n# for various superclasses.");
   }
@@ -345,6 +458,7 @@ public class GenericPropertiesCreator {
   /**
    * generates the props-file for the GenericObjectEditor and stores it
    * 
+   * @throws Exception	if something goes wrong
    * @see #execute(boolean)
    */
   public void execute() throws Exception {
@@ -357,8 +471,9 @@ public class GenericPropertiesCreator {
    * generated properties file can be retrieved via the <code>getOutputProperties</code>
    * method. 
    * 
-   * @param store     if TRUE then the properties file is stored to the stored 
-   *                  filename
+   * @param store     	if TRUE then the properties file is stored to the stored 
+   *                  	filename
+   * @throws Exception	if something goes wrong
    * @see #getOutputFilename()
    * @see #setOutputFilename(String)
    * @see #getOutputProperties()
@@ -392,6 +507,8 @@ public class GenericPropertiesCreator {
    *   </li>
    * </ul>
    *
+   * @param args	the commandline arguments
+   * @throws Exception 	if something goes wrong
    * @see #GenericPropertiesCreator()
    * @see #GenericPropertiesCreator(String)
    * @see #setOutputFilename(String)
