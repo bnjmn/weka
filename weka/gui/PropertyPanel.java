@@ -53,9 +53,13 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class PropertyPanel extends JPanel {
+public class PropertyPanel 
+  extends JPanel {
+  
+  /** for serialization */
+  static final long serialVersionUID = 5370025273466728904L;
 
   /** The property editor */
   private PropertyEditor m_Editor;
@@ -103,16 +107,17 @@ public class PropertyPanel extends JPanel {
   protected void createDefaultPanel() {
 
     setBorder(BorderFactory.createEtchedBorder());
-    setToolTipText("Left-click to edit properties for this object, right-click for menu");
+    setToolTipText("Left-click to edit properties for this object, right-click/Alt+Shift+left-click for menu");
     setOpaque(true);
     final Component comp = this;
     addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent evt) {
         if (evt.getClickCount() == 1) {
-          if (evt.getButton() == MouseEvent.BUTTON1) {
+          if (    (evt.getButton() == MouseEvent.BUTTON1) && !evt.isAltDown() && !evt.isShiftDown() ) {
             showPropertyDialog();
           }
-          else if (evt.getButton() == MouseEvent.BUTTON3) {
+          else if (    (evt.getButton() == MouseEvent.BUTTON3) 
+              	    || ((evt.getButton() == MouseEvent.BUTTON1) && evt.isAltDown() && evt.isShiftDown()) ) {
             if (m_Editor.getValue() != null) {
               JPopupMenu menu = new JPopupMenu();
               
