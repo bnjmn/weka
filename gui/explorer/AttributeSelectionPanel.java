@@ -96,9 +96,13 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
-public class AttributeSelectionPanel extends JPanel {
+public class AttributeSelectionPanel 
+  extends JPanel {
+  
+  /** for serialization */
+  static final long serialVersionUID = 5627185966993476142L;
 
   /** Lets the user configure the attribute evaluator */
   protected GenericObjectEditor m_AttributeEvaluatorEditor =
@@ -887,6 +891,18 @@ public class AttributeSelectionPanel extends JPanel {
     }
     resultListMenu.add(saveOutput);
     
+    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
+    if (selectedName != null) {
+      deleteOutput.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.removeResult(selectedName);
+	}
+      });
+    } else {
+      deleteOutput.setEnabled(false);
+    }
+    resultListMenu.add(deleteOutput);
+
 
     FastVector o = null;
     if (selectedName != null) {
