@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19.2.5 $
+   $Revision: 1.19.2.6 $
   ===========================================================================
 -->
 
@@ -20,6 +20,7 @@
   <property name="doc"  value="doc"/>
   <property name="reports"  value="reports"/>
   <property name="path_modifier" value=""/>
+  <property name="cvsroot_anon" value=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -205,7 +206,7 @@
     <!-- jar up the source -->
     <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
     basedir="${path_modifier}."
-    includes="weka/**/*.java,weka/**/*.props,weka/**/*.hsql,weka/**/*.gif,weka/**/*.jpeg,weka/**/*.jpg,weka/**/*.txt"/>
+    includes="weka/**/*.java,weka/**/*.props,weka/**/*.hsql,weka/**/*.gif,weka/**/*.jpeg,weka/**/*.jpg,weka/**/*.txt,weka/**/*.xml"/>
   </target>
 
   <!-- make a jar file containing just the stuff needed for running a remote experiment server -->
@@ -228,7 +229,7 @@
 
    <target name="changelog"
     description="Create a changelog file for a release of Weka. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changes (eg. 20 Aug 2004)&gt;, -Dtag=&lt;REVISION_FOR_CHANGELOG&gt;.">
-   <cvschangelog cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" 
+   <cvschangelog cvsroot="${cvsroot_anon}" 
                 tag="${tag}"
                 dir="${path_modifier}weka"
                 destfile="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"
@@ -290,22 +291,22 @@
   <target name = "init_build_from_cvs_checkout"
    depends="init_compile, init_dist">
      <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
-     <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
+     <cvspass cvsroot="${cvsroot_anon}" password=""/>
      <cvs command="checkout -P -r ${tag}" 
-      cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
-     <cvs command="checkout -P -r ${tag}" cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="tests" dest="."/>
-      <cvs command="checkout -P -r ${tag}" cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="wekadocs" dest="."/>
+      cvsRoot="${cvsroot_anon}" package="weka" dest="."/>
+     <cvs command="checkout -P -r ${tag}" cvsRoot="${cvsroot_anon}" package="tests" dest="."/>
+      <cvs command="checkout -P -r ${tag}" cvsRoot="${cvsroot_anon}" package="wekadocs" dest="."/>
   </target>
 
   <!-- Initialization for build from cvs export. User must supply revision tag to export by specifying -Dtag=tag_name_of_release when starting ant -->
   <target name = "init_build_from_cvs_export"
    depends="init_compile, init_dist">
      <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
-     <cvspass cvsroot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" password=""/>
+     <cvspass cvsroot="${cvsroot_anon}" password=""/>
      <cvs command="export -r ${tag}" 
-      cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="weka" dest="."/>
-     <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="tests" dest="."/>
-      <cvs cvsRoot=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs" package="wekadocs" dest="."/>
+      cvsRoot="${cvsroot_anon}" package="weka" dest="."/>
+     <cvs cvsRoot="${cvsroot_anon}" package="tests" dest="."/>
+      <cvs cvsRoot="${cvsroot_anon}" package="wekadocs" dest="."/>
   </target>
 
   <!-- Make a release via cvs export -->
