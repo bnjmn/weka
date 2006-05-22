@@ -23,36 +23,35 @@
 
 package weka.gui;
 
-import java.util.Hashtable;
+import weka.gui.visualize.PrintableComponent;
+
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.Serializable;
+import java.util.Hashtable;
 
-import javax.swing.JPanel;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
 import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
-import javax.swing.text.JTextComponent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.BorderFactory;
-import java.io.Serializable;
-
-import weka.gui.visualize.PrintableComponent;
+import javax.swing.text.JTextComponent;
 
 /** 
  * A component that accepts named stringbuffers and displays the name in a list
@@ -62,9 +61,13 @@ import weka.gui.visualize.PrintableComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
-public class ResultHistoryPanel extends JPanel {
+public class ResultHistoryPanel
+  extends JPanel {
+  
+  /** for serialization */
+  static final long serialVersionUID = 4297069440135326829L;
   
   /** An optional component for single-click display */
   protected JTextComponent m_SingleText;
@@ -98,14 +101,22 @@ public class ResultHistoryPanel extends JPanel {
    * Extension of MouseAdapter that implements Serializable.
    */
   public static class RMouseAdapter 
-    extends MouseAdapter implements Serializable {}
+    extends MouseAdapter implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = -8991922650552358669L;    
+  }
  
   
   /**
    * Extension of KeyAdapter that implements Serializable.
    */
   public static class RKeyAdapter 
-    extends KeyAdapter implements Serializable {}
+    extends KeyAdapter implements Serializable {
+    
+    /** for serialization */
+    static final long serialVersionUID = -8675332541861828079L;
+  }
 
   /**
    * Create the result history object
@@ -117,6 +128,7 @@ public class ResultHistoryPanel extends JPanel {
     if (text != null) {
       m_Printer = new PrintableComponent(m_SingleText);
     }
+    m_List.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     m_List.addMouseListener(new RMouseAdapter() {
       public void mouseClicked(MouseEvent e) {
 	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
