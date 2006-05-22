@@ -80,7 +80,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.15.2.1 $ 
+ * @version $Revision: 1.15.2.2 $ 
  */
 public class MetaCost extends RandomizableSingleClassifierEnhancer {
 
@@ -491,15 +491,15 @@ public class MetaCost extends RandomizableSingleClassifierEnhancer {
   }
 
   /**
-   * Classifies a given test instance.
+   * Classifies a given instance after filtering.
    *
    * @param instance the instance to be classified
-   * @exception Exception if instance could not be classified
+   * @return the class distribution for the given instance
+   * @throws Exception if instance could not be classified
    * successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    return m_Classifier.classifyInstance(instance);
+  public double[] distributionForInstance(Instance instance) throws Exception {
+    return m_Classifier.distributionForInstance(instance);
   }
 
   /**
