@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.88 $
+ * @version $Revision: 1.89 $
  */
 public class ClassifierPanel 
   extends JPanel {
@@ -1460,6 +1460,18 @@ public class ClassifierPanel
     }
     resultListMenu.add(saveOutput);
     
+    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
+    if (selectedName != null) {
+      deleteOutput.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_History.removeResult(selectedName);
+	}
+      });
+    } else {
+      deleteOutput.setEnabled(false);
+    }
+    resultListMenu.add(deleteOutput);
+
     resultListMenu.addSeparator();
     
     JMenuItem loadModel = new JMenuItem("Load model");
