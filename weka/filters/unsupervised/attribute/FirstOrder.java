@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class FirstOrder 
   extends Filter
@@ -201,8 +201,9 @@ public class FirstOrder
     FastVector newAtts = new FastVector();
     boolean inRange = false;
     String foName = null;
+    int clsIndex = -1;
     for(int i = 0; i < instanceInfo.numAttributes(); i++) {
-      if (m_DeltaCols.isInRange(i)) {
+      if (m_DeltaCols.isInRange(i) && (i != instanceInfo.classIndex())) {
 	if (inRange) {
 	  Attribute newAttrib = new Attribute(foName);
           newAtts.addElement(newAttrib);
@@ -212,9 +213,13 @@ public class FirstOrder
         inRange = true;
       } else {
 	newAtts.addElement((Attribute)instanceInfo.attribute(i).copy());
+	if ((i == instanceInfo.classIndex()))
+	  clsIndex = newAtts.size() - 1;
       }      
     }
-    setOutputFormat(new Instances(instanceInfo.relationName(), newAtts, 0));
+    Instances data = new Instances(instanceInfo.relationName(), newAtts, 0);
+    data.setClassIndex(clsIndex);
+    setOutputFormat(data);
     return true;
   }
   
@@ -245,7 +250,7 @@ public class FirstOrder
     double lastVal = Instance.missingValue();
     int i, j;
     for(i = 0, j = 0; j < outputFormat.numAttributes(); i++) {
-      if (m_DeltaCols.isInRange(i)) {
+      if (m_DeltaCols.isInRange(i) && (i != instance.classIndex())) {
 	if (inRange) {
 	  if (Instance.isMissingValue(lastVal) || instance.isMissing(i)) {
 	    vals[j++] = Instance.missingValue();
