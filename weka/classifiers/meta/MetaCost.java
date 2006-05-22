@@ -123,7 +123,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class MetaCost 
   extends RandomizableSingleClassifierEnhancer
@@ -603,23 +603,23 @@ public class MetaCost
   }
 
   /**
-   * Classifies a given test instance.
+   * Classifies a given instance after filtering.
    *
    * @param instance the instance to be classified
-   * @return the classification for this instance
+   * @return the class distribution for the given instance
    * @throws Exception if instance could not be classified
    * successfully
    */
-  public double classifyInstance(Instance instance) throws Exception {
-
-    return m_Classifier.classifyInstance(instance);
+  public double[] distributionForInstance(Instance instance) throws Exception {
+    return m_Classifier.distributionForInstance(instance);
   }
 
   /**
    * Gets the classifier specification string, which contains the
    * class name of the classifier and any options to the classifier
    *
-   * @return the classifier string.  */
+   * @return the classifier string.
+   */
   protected String getClassifierSpec() {
     
     Classifier c = getClassifier();
