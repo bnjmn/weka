@@ -13,9 +13,15 @@
 # <class>   the classname
 #
 # Author : fracpete (fracpete at waikato dot ac dot nz)
-# Version: $Revision: 1.1 $
+# Version: $Revision: 1.2 $
 
 # ResultListeners
 weka.experiment.ResultListener=\
   I:weka.experiment.ResultProducer
+
+# Search algorithms of the Bayes net package
+weka.classifiers.bayes.net.search.SearchAlgorithm=\
+  C:weka.classifiers.bayes.net.search.local.LocalScoreSearchAlgorithm,\
+  C:weka.classifiers.bayes.net.search.global.GlobalScoreSearchAlgorithm,\
+  C:weka.classifiers.bayes.net.search.ci.CIScoreSearchAlgorithm
 
