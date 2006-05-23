@@ -52,12 +52,12 @@ import weka.core.*;
  * (default -1) <p>
  *
  * -M <br>
- * For instances at the beginning or end of the dataset where the delta
- * values are not known, use missing values (default is to remove those
- * instances). <p>
+ * For instances at the beginning or end of the dataset where
+ * the translated values are not known, use missing values
+ * (default is to remove those instances).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class TimeSeriesDelta extends TimeSeriesTranslate {
 
@@ -72,7 +72,7 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
       + "between the current value and the equivalent attribute attribute value "
       + "of some previous (or future) instance. For instances where the time-shifted "
       + "value is unknown either the instance may be dropped, or missing values "
-      + "used.";
+      + "used. Skips the class attribute if it is set.";
   }
 
   /**
@@ -87,21 +87,28 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
+    if ((instanceInfo.classIndex() > 0) && (!getFillWithMissing())) {
+      throw new IllegalArgumentException("TimeSeriesDelta: Need to fill in missing values " +
+                                         "using appropriate option when class index is set.");
+    }
     super.setInputFormat(instanceInfo);
     // Create the output buffer
     Instances outputFormat = new Instances(instanceInfo, 0); 
     for(int i = 0; i < instanceInfo.numAttributes(); i++) {
-      if (m_SelectedCols.isInRange(i)) {
-	if (outputFormat.attribute(i).isNumeric()) {
-	  outputFormat.renameAttribute(i, outputFormat.attribute(i).name()
-				       + " d"
-				       + (m_InstanceRange < 0 ? '-' : '+')
-				       + Math.abs(m_InstanceRange));
-	} else {
-	  throw new UnsupportedAttributeTypeException("Time delta attributes must be numeric!");
-	}
+      if (i != instanceInfo.classIndex()) {
+        if (m_SelectedCols.isInRange(i)) {
+          if (outputFormat.attribute(i).isNumeric()) {
+            outputFormat.renameAttribute(i, outputFormat.attribute(i).name()
+                                         + " d"
+                                         + (m_InstanceRange < 0 ? '-' : '+')
+                                         + Math.abs(m_InstanceRange));
+          } else {
+            throw new UnsupportedAttributeTypeException("Time delta attributes must be numeric!");
+          }
+        }
       }
     }
+    outputFormat.setClassIndex(instanceInfo.classIndex());
     setOutputFormat(outputFormat);
     return true;
   }
@@ -122,14 +129,14 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
     Instances outputFormat = outputFormatPeek();
     double[] vals = new double[outputFormat.numAttributes()];
     for(int i = 0; i < vals.length; i++) {
-      if (m_SelectedCols.isInRange(i)) {
-	if ((source != null)
-	    && !source.isMissing(i)
-	    && !dest.isMissing(i)) {
-	  vals[i] = dest.value(i) - source.value(i);
-	}
+      if ((i != outputFormat.classIndex()) && (m_SelectedCols.isInRange(i))) {
+        if ((source != null) && !source.isMissing(i) && !dest.isMissing(i)) {
+          vals[i] = dest.value(i) - source.value(i);
+        } else {
+          vals[i] = Instance.missingValue();
+        }
       } else {
-	vals[i] = dest.value(i);
+        vals[i] = dest.value(i);
       }
     }
     Instance inst = null;
@@ -160,11 +167,4 @@ public class TimeSeriesDelta extends TimeSeriesTranslate {
     }
   }
 }
-
-
-
-
-
-
-
 

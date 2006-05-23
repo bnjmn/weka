@@ -35,9 +35,6 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
-
-
-
 /** 
  * An abstract instance filter that assumes instances form time-series data and
  * performs some merging of attribute values in the current instance with 
@@ -62,11 +59,11 @@ import weka.filters.UnsupervisedFilter;
  *
  * -M <br>
  * For instances at the beginning or end of the dataset where the translated
- * values are not known, use missing values (default is to remove those
- * instances). <p>
+ * values are not known, remove those instances (default is to use missing
+ * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -78,7 +75,7 @@ public abstract class AbstractTimeSeries extends Filter
    * True if missing values should be used rather than removing instances
    * where the translated value is not known (due to border effects).
    */
-  protected boolean m_FillWithMissing;
+  protected boolean m_FillWithMissing = true;
 
   /**
    * The number of instances forward to translate values between.
@@ -112,8 +109,8 @@ public abstract class AbstractTimeSeries extends Filter
               "I", 1, "-I <num>"));
     newVector.addElement(new Option(
 	      "\tFor instances at the beginning or end of the dataset where\n"
-	      + "\tthe translated values are not known, use missing values\n"
-	      + "\t(default is to remove those instances).",
+	      + "\tthe translated values are not known, remove those instances\n"
+	      + "\t(default is to use missing values).",
               "M", 0, "-M"));
 
     return newVector.elements();
@@ -137,8 +134,8 @@ public abstract class AbstractTimeSeries extends Filter
    *
    * -M <br>
    * For instances at the beginning or end of the dataset where the translated
-   * values are not known, use missing values (default is to remove those
-   * instances). <p>
+   * values are not known, remove those instances (default is to use missing
+   * values). <p>
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -154,7 +151,7 @@ public abstract class AbstractTimeSeries extends Filter
     
     setInvertSelection(Utils.getFlag('V', options));
 
-    setFillWithMissing(Utils.getFlag('M', options));
+    setFillWithMissing(!Utils.getFlag('M', options));
     
     String instanceRange = Utils.getOption('I', options);
     if (instanceRange.length() != 0) {
@@ -185,7 +182,7 @@ public abstract class AbstractTimeSeries extends Filter
       options[current++] = "-V";
     }
     options[current++] = "-I"; options[current++] = "" + getInstanceRange();
-    if (getFillWithMissing()) {
+    if (!getFillWithMissing()) {
       options[current++] = "-M";
     }
 
