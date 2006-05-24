@@ -28,7 +28,7 @@ package weka.core.stemmers;
  * <br/>
  * For more information about the Lovins stemmer see:<br/>
  * <br/>
- * Julie Beth Lovins (1968). Development of a stemming algorithm. Mechanical Translation and Computational Linguistics. 11, 22-31.
+ * Julie Beth Lovins (1968). Development of a stemming algorithm. Mechanical Translation and Computational Linguistics. 11:22-31.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -48,7 +48,7 @@ package weka.core.stemmers;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 
@@ -104,3 +104,4 @@ public class IteratedLovinsStemmer
     }
   }
 }
+
