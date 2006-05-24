@@ -33,7 +33,7 @@ import java.util.HashMap;
  <!-- globalinfo-start -->
  * A stemmer based on the Lovins stemmer, described here:<br/>
  * <br/>
- * Julie Beth Lovins (1968). Development of a stemming algorithm. Mechanical Translation and Computational Linguistics. 11, 22-31.
+ * Julie Beth Lovins (1968). Development of a stemming algorithm. Mechanical Translation and Computational Linguistics. 11:22-31.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -53,7 +53,7 @@ import java.util.HashMap;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LovinsStemmer 
   implements Stemmer, TechnicalInformationHandler {
@@ -989,3 +989,4 @@ public class LovinsStemmer
     }
   }
 }
+
