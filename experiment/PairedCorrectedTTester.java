@@ -47,6 +47,8 @@ import java.util.Enumeration;
  <!-- technical-plaintext-start -->
  * Claude Nadeau, Yoshua Bengio (2001). Inference for the Generalization Error. Machine Learning..
  <!-- technical-plaintext-end -->
+ *
+ * <p/>
  * 
  <!-- technical-bibtex-start -->
  * BibTeX:
@@ -105,7 +107,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PairedCorrectedTTester 
   extends PairedTTester
