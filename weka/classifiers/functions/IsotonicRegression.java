@@ -36,7 +36,7 @@ import java.util.Arrays;
 
 /**
  <!-- globalinfo-start -->
- * Learns a simple isotonic regression model. Picks the attribute that results in the lowest squared error. Missing values are not allowed. Can only deal with numeric attributes. Considers the monotonically decreasing case as well as the monotonically increasing case.
+ * Learns an isotonic regression model. Picks the attribute that results in the lowest squared error. Missing values are not allowed. Can only deal with numeric attributes.Considers the monotonically increasing case as well as the monotonicallydecreasing case
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -50,7 +50,7 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -278,3 +278,4 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
     }
   } 
 }
+

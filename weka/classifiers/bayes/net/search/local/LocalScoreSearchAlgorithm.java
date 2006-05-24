@@ -46,7 +46,10 @@ import java.util.Enumeration;
  * Valid options are: <p/>
  * 
  * <pre> -mbc
- *  Applies a Markov Blanket correction to the network structure,  after a network structure is learned. This ensures that all  nodes in the network are part of the Markov blanket of the  classifier node.</pre>
+ *  Applies a Markov Blanket correction to the network structure, 
+ *  after a network structure is learned. This ensures that all 
+ *  nodes in the network are part of the Markov blanket of the 
+ *  classifier node.</pre>
  * 
  * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
  *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
@@ -54,7 +57,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -587,7 +590,10 @@ public class LocalScoreSearchAlgorithm
 	 * Valid options are: <p/>
 	 * 
 	 * <pre> -mbc
-	 *  Applies a Markov Blanket correction to the network structure,  after a network structure is learned. This ensures that all  nodes in the network are part of the Markov blanket of the  classifier node.</pre>
+	 *  Applies a Markov Blanket correction to the network structure, 
+	 *  after a network structure is learned. This ensures that all 
+	 *  nodes in the network are part of the Markov blanket of the 
+	 *  classifier node.</pre>
 	 * 
 	 * <pre> -S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
 	 *  Score type (BAYES, BDeu, MDL, ENTROPY and AIC)</pre>
@@ -700,3 +706,4 @@ public class LocalScoreSearchAlgorithm
 	    + "based search algorithms).";
 	} // globalInfo
 }
+
