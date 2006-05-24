@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Auer2004,
+ * &#64;inproceedings{Auer2004,
  *    author = {Peter Auer and Ronald Ortner},
  *    booktitle = {15th European Conference on Machine Learning},
  *    note = {LNAI 3201},
@@ -85,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class MIOptimalBall 
   extends Classifier 
@@ -546,3 +546,4 @@ public class MIOptimalBall
     }
   }
 }
+

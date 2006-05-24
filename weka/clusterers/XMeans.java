@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Pelleg2000,
+ * &#64;inproceedings{Pelleg2000,
  *    author = {Dan Pelleg and Andrew W. Moore},
  *    booktitle = {Seventeenth International Conference on Machine Learning},
  *    pages = {727-734},
@@ -135,7 +135,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -2165,3 +2165,4 @@ throws Exception{
     }
   }
 }
+

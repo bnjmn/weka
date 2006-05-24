@@ -54,7 +54,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas, V. Petridis: Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support. In: 1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003), Gdansk, Poland, , 2003.<br/>
+ * I. N. Athanasiadis, V. G. Kaburlasos, P. A. Mitkas, V. Petridis: Applying Machine Learning Techniques on Air Quality Data for Real-Time Decision Support. In: 1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003), Gdansk, Poland, 2003.<br/>
  * <br/>
  * V. G. Kaburlasos, I. N. Athanasiadis, P. A. Mitkas, V. Petridis (2003). Fuzzy Lattice Reasoning (FLR) Classifier and its Application on Improved Estimation of Ambient Ozone Concentration.
  * <p/>
@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Athanasiadis2003,
+ * &#64;inproceedings{Athanasiadis2003,
  *    address = {Gdansk, Poland},
  *    author = {I. N. Athanasiadis and V. G. Kaburlasos and P. A. Mitkas and V. Petridis},
  *    booktitle = {1st Intl. NAISO Symposium on Information Technologies in Environmental Engineering (ITEE-2003)},
@@ -115,7 +115,7 @@ import java.util.Vector;
  * @author Ioannis N. Athanasiadis
  * @email: ionathan@iti.gr, alias: ionathan@ieee.org
  * @version 5.0
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class FLR
     extends Classifier
@@ -941,3 +941,4 @@ public class FLR
     }
   }
 }
+

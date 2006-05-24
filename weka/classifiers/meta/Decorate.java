@@ -56,7 +56,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Melville2003,
+ * &#64;inproceedings{Melville2003,
  *    author = {P. Melville and R. J. Mooney},
  *    booktitle = {Eighteenth International Joint Conference on Artificial Intelligence},
  *    pages = {505-510},
@@ -146,7 +146,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class Decorate 
     extends RandomizableIteratedSingleClassifierEnhancer
@@ -781,3 +781,4 @@ public class Decorate
 	}
     }
 }
+

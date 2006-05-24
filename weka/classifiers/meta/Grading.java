@@ -49,7 +49,7 @@ import java.util.Random;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Seewald2001,
+ * &#64;inproceedings{Seewald2001,
  *    address = {Berlin/Heidelberg/New York/Tokyo},
  *    author = {A.K. Seewald and J. Fuernkranz},
  *    booktitle = {Advances in Intelligent Data Analysis: 4th International Conference},
@@ -90,7 +90,7 @@ import java.util.Random;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class Grading 
   extends Stacking
@@ -383,3 +383,4 @@ public class Grading
     }
   }
 }
+

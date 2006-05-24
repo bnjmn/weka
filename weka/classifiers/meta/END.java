@@ -46,14 +46,14 @@ import java.util.Random;
  * <br/>
  * Lin Dong, Eibe Frank, Stefan Kramer: Ensembles of Balanced Nested Dichotomies for Multi-class Problems. In: PKDD, 84-95, 2005.<br/>
  * <br/>
- * Eibe Frank, Stefan Kramer: Ensembles of nested dichotomies for multi-class problems. In: Twenty-first International Conference on Machine Learning, , 2004.
+ * Eibe Frank, Stefan Kramer: Ensembles of nested dichotomies for multi-class problems. In: Twenty-first International Conference on Machine Learning, 2004.
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Dong2005,
+ * &#64;inproceedings{Dong2005,
  *    author = {Lin Dong and Eibe Frank and Stefan Kramer},
  *    booktitle = {PKDD},
  *    pages = {84-95},
@@ -62,7 +62,7 @@ import java.util.Random;
  *    year = {2005}
  * }
  * 
- * &#64;incproceedings{Frank2004,
+ * &#64;inproceedings{Frank2004,
  *    author = {Eibe Frank and Stefan Kramer},
  *    booktitle = {Twenty-first International Conference on Machine Learning},
  *    publisher = {ACM},
@@ -152,7 +152,7 @@ import java.util.Random;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class END 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -353,3 +353,4 @@ public class END
     }
   }
 }
+
