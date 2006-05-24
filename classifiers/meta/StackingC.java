@@ -55,7 +55,7 @@ import java.util.Random;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Seewald2002,
+ * &#64;inproceedings{Seewald2002,
  *    author = {A.K. Seewald},
  *    booktitle = {Nineteenth International Conference on Machine Learning},
  *    editor = {C. Sammut and A. Hoffmann},
@@ -95,7 +95,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class StackingC 
   extends Stacking 
@@ -329,3 +329,4 @@ public class StackingC
     }
   }
 }
+

@@ -54,7 +54,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Demiroz1997,
+ * &#64;inproceedings{Demiroz1997,
  *    author = {G. Demiroz and A. Guvenir},
  *    booktitle = {9th European Conference on Machine Learning},
  *    pages = {85-92},
@@ -126,7 +126,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class VFI 
   extends Classifier 
@@ -630,3 +630,4 @@ public class VFI
     }
   }
 }
+

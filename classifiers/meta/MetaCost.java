@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Domingos1999,
+ * &#64;inproceedings{Domingos1999,
  *    author = {Pedro Domingos},
  *    booktitle = {Fifth International Conference on Knowledge Discovery and Data Mining},
  *    pages = {155-164},
@@ -123,7 +123,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class MetaCost 
   extends RandomizableSingleClassifierEnhancer
@@ -667,3 +667,4 @@ public class MetaCost
     }
   }
 }
+

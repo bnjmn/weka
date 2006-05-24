@@ -66,7 +66,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Ankerst1999,
+ * &#64;inproceedings{Ankerst1999,
  *    author = {Mihael Ankerst and Markus M. Breunig and Hans-Peter Kriegel and Joerg Sander},
  *    booktitle = {ACM SIGMOD International Conference on Management of Data},
  *    pages = {49-60},
@@ -101,7 +101,7 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class OPTICS 
     extends Clusterer 
@@ -760,3 +760,4 @@ public class OPTICS
     // *****************************************************************************************************************
 
 }
+

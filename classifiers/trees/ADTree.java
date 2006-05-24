@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Freund1999,
+ * &#64;inproceedings{Freund1999,
  *    address = {Bled, Slovenia},
  *    author = {Freund, Y. and Mason, L.},
  *    booktitle = {Proceeding of the Sixteenth International Conference on Machine Learning},
@@ -97,7 +97,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ADTree
   extends Classifier 
@@ -1492,3 +1492,4 @@ public class ADTree
     }
   }
 }
+

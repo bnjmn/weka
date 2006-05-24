@@ -56,7 +56,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Ester1996,
+ * &#64;inproceedings{Ester1996,
  *    author = {Martin Ester and Hans-Peter Kriegel and Joerg Sander and Xiaowei Xu},
  *    booktitle = {Second International Conference on Knowledge Discovery and Data Mining},
  *    editor = {Evangelos Simoudis and Jiawei Han and Usama M. Fayyad},
@@ -89,7 +89,7 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DBScan 
     extends Clusterer 
@@ -634,3 +634,4 @@ public class DBScan
     // *****************************************************************************************************************
 
 }
+

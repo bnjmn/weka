@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Kohavi1995,
+ * &#64;inproceedings{Kohavi1995,
  *    author = {Ron Kohavi},
  *    booktitle = {8th European Conference on Machine Learning},
  *    pages = {174-189},
@@ -97,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.34 $ 
  */
 public class DecisionTable 
   extends Classifier 

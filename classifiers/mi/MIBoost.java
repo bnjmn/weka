@@ -59,7 +59,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Freund1996,
+ * &#64;inproceedings{Freund1996,
  *    address = {San Francisco},
  *    author = {Yoav Freund and Robert E. Schapire},
  *    booktitle = {Thirteenth International Conference on Machine Learning},
@@ -98,7 +98,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class MIBoost 
   extends SingleClassifierEnhancer
@@ -692,3 +692,4 @@ iterations:
     }
   }
 }
+

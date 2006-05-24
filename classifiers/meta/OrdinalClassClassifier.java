@@ -55,7 +55,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Frank2001,
+ * &#64;inproceedings{Frank2001,
  *    author = {Eibe Frank and Mark Hall},
  *    booktitle = {12th European Conference on Machine Learning},
  *    pages = {145-156},
@@ -434,3 +434,4 @@ public class OrdinalClassClassifier
     }
   }
 }
+

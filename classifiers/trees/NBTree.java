@@ -54,7 +54,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Kohavi1996,
+ * &#64;inproceedings{Kohavi1996,
  *    author = {Ron Kohavi},
  *    booktitle = {Second International Conference on Knoledge Discovery and Data Mining},
  *    pages = {202-207},
@@ -75,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NBTree 
   extends Classifier 
@@ -286,3 +286,4 @@ public class NBTree
     }
   }
 }
+

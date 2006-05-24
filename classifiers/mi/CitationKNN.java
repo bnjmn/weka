@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Wang2000,
+ * &#64;inproceedings{Wang2000,
  *    author = {Jun Wang and Zucker and Jean-Daniel},
  *    booktitle = {17th International Conference on Machine Learning},
  *    editor = {Pat Langley},
@@ -79,7 +79,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class CitationKNN 
   extends Classifier 
@@ -1087,3 +1087,4 @@ public class CitationKNN
     }
   }
 }
+

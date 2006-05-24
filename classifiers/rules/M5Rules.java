@@ -37,14 +37,14 @@ import weka.classifiers.trees.m5.M5Base;
  * <br/>
  * Ross J. Quinlan: Learning with Continuous Classes. In: 5th Australian Joint Conference on Artificial Intelligence, Singapore, 343-348, 1992.<br/>
  * <br/>
- * Y. Wang, I. H. Witten: Induction of model trees for predicting continuous classes. In: Poster papers of the 9th European Conference on Machine Learning, , 1997.
+ * Y. Wang, I. H. Witten: Induction of model trees for predicting continuous classes. In: Poster papers of the 9th European Conference on Machine Learning, 1997.
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Holmes1999,
+ * &#64;inproceedings{Holmes1999,
  *    author = {Geoffrey Holmes and Mark Hall and Eibe Frank},
  *    booktitle = {Twelfth Australian Joint Conference on Artificial Intelligence},
  *    pages = {1-12},
@@ -53,7 +53,7 @@ import weka.classifiers.trees.m5.M5Base;
  *    year = {1999}
  * }
  * 
- * &#64;incproceedings{Quinlan1992,
+ * &#64;inproceedings{Quinlan1992,
  *    address = {Singapore},
  *    author = {Ross J. Quinlan},
  *    booktitle = {5th Australian Joint Conference on Artificial Intelligence},
@@ -63,7 +63,7 @@ import weka.classifiers.trees.m5.M5Base;
  *    year = {1992}
  * }
  * 
- * &#64;incproceedings{Wang1997,
+ * &#64;inproceedings{Wang1997,
  *    author = {Y. Wang and I. H. Witten},
  *    booktitle = {Poster papers of the 9th European Conference on Machine Learning},
  *    publisher = {Springer},
@@ -93,7 +93,7 @@ import weka.classifiers.trees.m5.M5Base;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class M5Rules 
   extends M5Base
