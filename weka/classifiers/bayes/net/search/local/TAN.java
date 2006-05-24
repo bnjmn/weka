@@ -37,7 +37,7 @@ import java.util.Enumeration;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * N. Friedman, D. Geiger, M. Goldszmidt (1997). Bayesian network classifiers. Machine Learning. 29, 2-3, 131-163.
+ * N. Friedman, D. Geiger, M. Goldszmidt (1997). Bayesian network classifiers. Machine Learning. 29(2-3):131-163.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -72,7 +72,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TAN 
 	extends LocalScoreSearchAlgorithm
@@ -271,3 +271,4 @@ public class TAN
 	} // globalInfo
 
 } // TAN
+
