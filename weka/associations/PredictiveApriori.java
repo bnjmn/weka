@@ -58,7 +58,7 @@ import java.util.TreeSet;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Scheffer2001,
+ * &#64;inproceedings{Scheffer2001,
  *    author = {Tobias Scheffer},
  *    booktitle = {5th European Conference on Principles of Data Mining and Knowledge Discovery},
  *    pages = {424-435},
@@ -85,7 +85,7 @@ import java.util.TreeSet;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ */
+ * @version $Revision: 1.7 $ */
 
 public class PredictiveApriori 
   extends Associator 
@@ -796,3 +796,4 @@ public class PredictiveApriori
   }
   
 }
+
