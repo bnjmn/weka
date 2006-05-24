@@ -30,7 +30,7 @@
  *    
  *    For more info refer to :
  <!-- technical-plaintext-start -->
- * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40, No.2.
+ * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40(No.2).
  <!-- technical-plaintext-end -->
  *
  *    Originally based on AdaBoostM1.java
@@ -67,7 +67,7 @@ import java.util.Vector;
  * <br/>
  * For more information, see<br/>
  * <br/>
- * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40, No.2.
+ * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. Vol.40(No.2).
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -132,7 +132,7 @@ import java.util.Vector;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class MultiBoostAB 
   extends AdaBoostM1
@@ -407,3 +407,4 @@ public class MultiBoostAB
     }
   }
 }
+
