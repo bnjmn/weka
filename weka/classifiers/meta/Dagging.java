@@ -50,7 +50,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Ting1997,
+ * &#64;inproceedings{Ting1997,
  *    address = {San Francisco, CA},
  *    author = {Ting, K. M. and Witten, I. H.},
  *    booktitle = {Fourteenth international Conference on Machine Learning},
@@ -93,31 +93,24 @@ import java.util.Vector;
  * Options specific to classifier weka.classifiers.functions.SMO:
  * </pre>
  * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  Turning them off assumes that data is purely numeric, doesn't
+ *  contain any missing values, and has a nominal class. Turning them
+ *  off also means that no header information will be stored if the
+ *  machine is linear. Finally, it also assumes that no instance has
+ *  a weight equal to 0.
+ *  (default: checks on)</pre>
+ * 
  * <pre> -C &lt;double&gt;
  *  The complexity constant C. (default 1)</pre>
  * 
- * <pre> -E &lt;double&gt;
- *  The exponent for the polynomial kernel. (default 1)</pre>
- * 
- * <pre> -G &lt;double&gt;
- *  Gamma for the RBF kernel. (default 0.01)</pre>
- * 
  * <pre> -N
  *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
- * 
- * <pre> -F
- *  Feature-space normalization (only for
- *  non-linear polynomial kernels).</pre>
- * 
- * <pre> -O
- *  Use lower-order terms (only for non-linear
- *  polynomial kernels).</pre>
- * 
- * <pre> -R
- *  Use RBF kernel. (default poly)</pre>
- * 
- * <pre> -A &lt;int&gt;
- *  The size of the kernel cache. (default 250007, use 0 for full cache)</pre>
  * 
  * <pre> -L &lt;double&gt;
  *  The tolerance parameter. (default 1.0e-3)</pre>
@@ -135,13 +128,41 @@ import java.util.Vector;
  * <pre> -W &lt;double&gt;
  *  The random number seed. (default 1)</pre>
  * 
+ * <pre> -K &lt;classname and parameters&gt;
+ *  The Kernel to use.
+ *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ * 
+ * <pre> 
+ * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+ * </pre>
+ * 
+ * <pre> -D
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
+ * 
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
+ * 
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number).
+ *  (default: 250007)</pre>
+ * 
+ * <pre> -E &lt;num&gt;
+ *  The Exponent to use.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -L
+ *  Use lower-order terms.
+ *  (default: no)</pre>
+ * 
  <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p/>
  *
  * @author Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see       Vote
  */
 public class Dagging
@@ -277,31 +298,24 @@ public class Dagging
    * Options specific to classifier weka.classifiers.functions.SMO:
    * </pre>
    * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  Turning them off assumes that data is purely numeric, doesn't
+   *  contain any missing values, and has a nominal class. Turning them
+   *  off also means that no header information will be stored if the
+   *  machine is linear. Finally, it also assumes that no instance has
+   *  a weight equal to 0.
+   *  (default: checks on)</pre>
+   * 
    * <pre> -C &lt;double&gt;
    *  The complexity constant C. (default 1)</pre>
    * 
-   * <pre> -E &lt;double&gt;
-   *  The exponent for the polynomial kernel. (default 1)</pre>
-   * 
-   * <pre> -G &lt;double&gt;
-   *  Gamma for the RBF kernel. (default 0.01)</pre>
-   * 
    * <pre> -N
    *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
-   * 
-   * <pre> -F
-   *  Feature-space normalization (only for
-   *  non-linear polynomial kernels).</pre>
-   * 
-   * <pre> -O
-   *  Use lower-order terms (only for non-linear
-   *  polynomial kernels).</pre>
-   * 
-   * <pre> -R
-   *  Use RBF kernel. (default poly)</pre>
-   * 
-   * <pre> -A &lt;int&gt;
-   *  The size of the kernel cache. (default 250007, use 0 for full cache)</pre>
    * 
    * <pre> -L &lt;double&gt;
    *  The tolerance parameter. (default 1.0e-3)</pre>
@@ -318,6 +332,34 @@ public class Dagging
    * 
    * <pre> -W &lt;double&gt;
    *  The random number seed. (default 1)</pre>
+   * 
+   * <pre> -K &lt;classname and parameters&gt;
+   *  The Kernel to use.
+   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   * 
+   * <pre> 
+   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+   * </pre>
+   * 
+   * <pre> -D
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
+   * 
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
+   * 
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number).
+   *  (default: 250007)</pre>
+   * 
+   * <pre> -E &lt;num&gt;
+   *  The Exponent to use.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -L
+   *  Use lower-order terms.
+   *  (default: no)</pre>
    * 
    <!-- options-end -->
    *
@@ -528,3 +570,4 @@ public class Dagging
     }
   }
 }
+

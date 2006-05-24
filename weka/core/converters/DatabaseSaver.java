@@ -48,19 +48,34 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -url &lt;JDBC URL&gt;
+ *  The JDBC URL to connect to.
+ *  (default: from DatabaseUtils.props file)</pre>
+ * 
+ * <pre> -user &lt;name&gt;
+ *  The user to connect with to the database.
+ *  (default: none)</pre>
+ * 
+ * <pre> -password &lt;password&gt;
+ *  The password to connect with to the database.
+ *  (default: none)</pre>
+ * 
  * <pre> -T &lt;table name&gt;
- *  The name of the table (default: the relation name).</pre>
+ *  The name of the table.
+ *  (default: the relation name)</pre>
  * 
  * <pre> -P
- *  Add an ID column as primary key. The name is specified in the DatabaseUtils file. The DatabaseLoader won't load this column.</pre>
+ *  Add an ID column as primary key. The name is specified
+ *  in the DatabaseUtils file ('idColumn'). The DatabaseLoader
+ *  won't load this column.</pre>
  * 
- * <pre> -i&lt;input file name&gt;
+ * <pre> -i &lt;input file name&gt;
  *  Input file in arff format that should be saved in database.</pre>
  * 
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -719,13 +734,28 @@ public class DatabaseSaver
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -url &lt;JDBC URL&gt;
+   *  The JDBC URL to connect to.
+   *  (default: from DatabaseUtils.props file)</pre>
+   * 
+   * <pre> -user &lt;name&gt;
+   *  The user to connect with to the database.
+   *  (default: none)</pre>
+   * 
+   * <pre> -password &lt;password&gt;
+   *  The password to connect with to the database.
+   *  (default: none)</pre>
+   * 
    * <pre> -T &lt;table name&gt;
-   *  The name of the table (default: the relation name).</pre>
+   *  The name of the table.
+   *  (default: the relation name)</pre>
    * 
    * <pre> -P
-   *  Add an ID column as primary key. The name is specified in the DatabaseUtils file. The DatabaseLoader won't load this column.</pre>
+   *  Add an ID column as primary key. The name is specified
+   *  in the DatabaseUtils file ('idColumn'). The DatabaseLoader
+   *  won't load this column.</pre>
    * 
-   * <pre> -i&lt;input file name&gt;
+   * <pre> -i &lt;input file name&gt;
    *  Input file in arff format that should be saved in database.</pre>
    * 
    <!-- options-end -->
@@ -822,3 +852,4 @@ public class DatabaseSaver
       
     }
 }
+

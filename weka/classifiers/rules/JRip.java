@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Cohen1995,
+ * &#64;inproceedings{Cohen1995,
  *    author = {William W. Cohen},
  *    booktitle = {Twelfth International Conference on Machine Learning},
  *    pages = {115-123},
@@ -121,18 +121,18 @@ import java.util.Vector;
  *  (Default: 1)</pre>
  * 
  * <pre> -E
- * Whether NOT check the error rate&gt;=0.5
+ *  Whether NOT check the error rate&gt;=0.5
  *  in stopping criteria  (default: check)</pre>
  * 
  * <pre> -P
- * Whether NOT use pruning
+ *  Whether NOT use pruning
  *  (default: use pruning)</pre>
  * 
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class JRip 
   extends Classifier 
@@ -362,11 +362,11 @@ public class JRip
    *  (Default: 1)</pre>
    * 
    * <pre> -E
-   * Whether NOT check the error rate&gt;=0.5
+   *  Whether NOT check the error rate&gt;=0.5
    *  in stopping criteria  (default: check)</pre>
    * 
    * <pre> -P
-   * Whether NOT use pruning
+   *  Whether NOT use pruning
    *  (default: use pruning)</pre>
    * 
    <!-- options-end -->
@@ -2011,3 +2011,4 @@ public class JRip
     }
   } 
 }
+
