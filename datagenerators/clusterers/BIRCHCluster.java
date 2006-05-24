@@ -59,7 +59,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Zhang1996,
+ * &#64;inproceedings{Zhang1996,
  *    author = {Tian Zhang and Raghu Ramakrishnan and Miron Livny},
  *    booktitle = {ACM SIGMOD International Conference on Management of Data},
  *    pages = {103-114},
@@ -145,7 +145,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator
