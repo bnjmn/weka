@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Frank2003,
+ * &#64;inproceedings{Frank2003,
  *    author = {Eibe Frank and Mark Hall and Bernhard Pfahringer},
  *    booktitle = {19th Conference in Uncertainty in Artificial Intelligence},
  *    pages = {249-256},
@@ -114,7 +114,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
@@ -684,3 +684,4 @@ public class LWL
     }
   }
 }
+

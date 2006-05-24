@@ -91,7 +91,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Yu2003,
+ * &#64;inproceedings{Yu2003,
  *    author = {Lei Yu and Huan Liu},
  *    booktitle = {Proceedings of the Twentieth International Conference on Machine Learning},
  *    pages = {856-863},
@@ -112,7 +112,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SymmetricalUncertAttributeSetEval
   extends AttributeSetEvaluator
@@ -721,3 +721,4 @@ public class SymmetricalUncertAttributeSetEval
   }
 
 }
+

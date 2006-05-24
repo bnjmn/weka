@@ -55,7 +55,7 @@ import java.util.Hashtable;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Liu1996,
+ * &#64;inproceedings{Liu1996,
  *    author = {H. Liu and R. Setiono},
  *    booktitle = {13th International Conference on Machine Learning},
  *    pages = {319-327},
@@ -67,7 +67,7 @@ import java.util.Hashtable;
  <!-- technical-bibtex-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ConsistencySubsetEval 
   extends SubsetEvaluator
@@ -491,3 +491,4 @@ public class ConsistencySubsetEval
     }
   }
 }
+

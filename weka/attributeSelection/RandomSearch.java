@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Liu1996,
+ * &#64;inproceedings{Liu1996,
  *    author = {H. Liu and R. Setiono},
  *    booktitle = {13th International Conference on Machine Learning},
  *    pages = {319-327},
@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class RandomSearch 
   extends ASSearch 
@@ -656,3 +656,4 @@ public class RandomSearch
     m_verbose = false;
   }
 }
+

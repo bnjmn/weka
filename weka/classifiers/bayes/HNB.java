@@ -46,7 +46,7 @@ import weka.core.Capabilities.Capability;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Zhang2005,
+ * &#64;inproceedings{Zhang2005,
  *    author = {H. Zhang and L. Jiang and J. Su},
  *    booktitle = {Twentieth National Conference on Artificial Intelligence},
  *    pages = {919-924},
@@ -69,7 +69,7 @@ import weka.core.Capabilities.Capability;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class HNB  
   extends Classifier
@@ -384,3 +384,4 @@ public class HNB
     }
   }
 }
+

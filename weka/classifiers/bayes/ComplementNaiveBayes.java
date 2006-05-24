@@ -52,7 +52,7 @@ import weka.classifiers.Classifier;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Rennie2003,
+ * &#64;inproceedings{Rennie2003,
  *    author = {Jason D. Rennie and Lawrence Shih and Jaime Teevan and David R. Karger},
  *    booktitle = {ICML},
  *    pages = {616-623},
@@ -78,7 +78,7 @@ import weka.classifiers.Classifier;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -489,3 +489,4 @@ public class ComplementNaiveBayes extends Classifier
 	}
     }        
 }
+

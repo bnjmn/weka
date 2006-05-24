@@ -79,7 +79,7 @@ import java.util.Vector;
  *    year = {2000}
  * }
  * 
- * &#64;incproceedings{Wang2002,
+ * &#64;inproceedings{Wang2002,
  *    address = {Sydney, Australia},
  *    author = {Wang, Y. and Witten, I. H.},
  *    booktitle = {Proceedings of the Nineteenth International Conference in Machine Learning},
@@ -120,7 +120,7 @@ import java.util.Vector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class PaceRegression 
   extends Classifier 
@@ -784,3 +784,4 @@ public class PaceRegression
     }
   }
 }
+
