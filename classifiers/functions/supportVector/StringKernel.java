@@ -44,7 +44,7 @@ import java.util.Vector;
  * &#64;techreport{Kleedorfer2005,
  *    address = {Wien, Austria},
  *    author = {F. Kleedorfer and A. Seewald},
- *    institution = {Oesterreichisches Forschungsinstitut für Artificial Intelligence},
+ *    institution = {Oesterreichisches Forschungsinstitut fuer Artificial Intelligence},
  *    number = {TR-2005-13},
  *    title = {Implementation of a String Kernel for WEKA},
  *    year = {2005}
@@ -251,7 +251,7 @@ import java.util.Vector;
  *
  * @author Florian Kleedorfer (kleedorfer@austria.fm)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class StringKernel 
   extends Kernel
@@ -399,7 +399,7 @@ public class StringKernel
     additional.setValue(Field.AUTHOR, "F. Kleedorfer and A. Seewald");
     additional.setValue(Field.YEAR, "2005");
     additional.setValue(Field.TITLE, "Implementation of a String Kernel for WEKA");
-    additional.setValue(Field.INSTITUTION, "Oesterreichisches Forschungsinstitut für Artificial Intelligence");
+    additional.setValue(Field.INSTITUTION, "Oesterreichisches Forschungsinstitut fuer Artificial Intelligence");
     additional.setValue(Field.ADDRESS, "Wien, Austria");
     additional.setValue(Field.NUMBER, "TR-2005-13");
     
@@ -1464,3 +1464,4 @@ public class StringKernel
     super.buildKernel(data);
   }
 }
+
