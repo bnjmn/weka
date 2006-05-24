@@ -48,30 +48,32 @@ import java.util.Vector;
 /**
  <!-- globalinfo-start -->
  * Classifier for building linear logistic regression models. LogitBoost with simple regression functions as base learners is used for fitting the logistic models. The optimal number of LogitBoost iterations to perform is cross-validated, which leads to automatic attribute selection. For more information see:<br/>
- * Niels Landwehr, Mark Hall, Eibe Frank: Logistic Model Trees. In: 14th European Conference on Machine Learning, 241-252, 2003.<br/>
+ * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees.<br/>
  * <br/>
- * Niels Landwehr (2003). Logistic Model Trees. Hamilton, New Zealand.
+ * Marc Sumner, Eibe Frank, Mark Hall: Speeding up Logistic Model Tree Induction. In: 9th European Conference on Principles and Practice of Knowledge Discovery in Databases, 675-683, 2005.
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Landwehr2003,
+ * &#64;article{Landwehr2005,
  *    author = {Niels Landwehr and Mark Hall and Eibe Frank},
- *    booktitle = {14th European Conference on Machine Learning},
- *    pages = {241-252},
- *    publisher = {Springer},
+ *    booktitle = {Machine Learning},
+ *    number = {1-2},
+ *    pages = {161-205},
  *    title = {Logistic Model Trees},
- *    year = {2003}
+ *    volume = {95},
+ *    year = {2005}
  * }
  * 
- * &#64;mastersthesis{Landwehr2003,
- *    address = {Hamilton, New Zealand},
- *    author = {Niels Landwehr},
- *    school = {Dept. of Computer Science, University of Waikato},
- *    title = {Logistic Model Trees},
- *    year = {2003}
+ * &#64;inproceedings{Sumner2005,
+ *    author = {Marc Sumner and Eibe Frank and Mark Hall},
+ *    booktitle = {9th European Conference on Principles and Practice of Knowledge Discovery in Databases},
+ *    pages = {675-683},
+ *    publisher = {Springer},
+ *    title = {Speeding up Logistic Model Tree Induction},
+ *    year = {2005}
  * }
  * </pre>
  * <p/>
@@ -102,11 +104,19 @@ import java.util.Vector;
  *  By default, heuristic is enabled with value 50. Set to
  *  zero to disable heuristic.</pre>
  * 
+ * <pre> -W &lt;beta&gt;
+ *  Set beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.
+ * </pre>
+ * 
+ * <pre> -A
+ *  The AIC is used to choose the best iteration (instead of CV or training error).
+ * </pre>
+ * 
  <!-- options-end -->
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class SimpleLogistic 
   extends Classifier 
@@ -322,6 +332,14 @@ public class SimpleLogistic
      *  if the current minimum has not changed for iter iterations.
      *  By default, heuristic is enabled with value 50. Set to
      *  zero to disable heuristic.</pre>
+     * 
+     * <pre> -W &lt;beta&gt;
+     *  Set beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.
+     * </pre>
+     * 
+     * <pre> -A
+     *  The AIC is used to choose the best iteration (instead of CV or training error).
+     * </pre>
      * 
      <!-- options-end -->
      *
@@ -616,13 +634,13 @@ public class SimpleLogistic
       result.setValue(Field.PAGES, "161-205");
       result.setValue(Field.NUMBER, "1-2");
       
-      result = new TechnicalInformation(Type.INPROCEEDINGS);
-      result.setValue(Field.AUTHOR, "Marc Sumner and Eibe Frank and Mark Hall");
-      result.setValue(Field.TITLE, "Speeding up Logistic Model Tree Induction");
-      result.setValue(Field.BOOKTITLE, "9th European Conference on Principles and Practice of Knowledge Discovery in Databases");
-      result.setValue(Field.YEAR, "2005");
-      result.setValue(Field.PAGES, "675-683");
-      result.setValue(Field.PUBLISHER, "Springer");
+      additional = result.add(Type.INPROCEEDINGS);
+      additional.setValue(Field.AUTHOR, "Marc Sumner and Eibe Frank and Mark Hall");
+      additional.setValue(Field.TITLE, "Speeding up Logistic Model Tree Induction");
+      additional.setValue(Field.BOOKTITLE, "9th European Conference on Principles and Practice of Knowledge Discovery in Databases");
+      additional.setValue(Field.YEAR, "2005");
+      additional.setValue(Field.PAGES, "675-683");
+      additional.setValue(Field.PUBLISHER, "Springer");
       
       return result;
     }
@@ -719,3 +737,4 @@ public class SimpleLogistic
 	}
     }
 }
+
