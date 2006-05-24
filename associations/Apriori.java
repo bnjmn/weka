@@ -61,7 +61,7 @@ import java.util.Hashtable;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Agrawal1994,
+ * &#64;inproceedings{Agrawal1994,
  *    author = {R. Agrawal and R. Srikant},
  *    booktitle = {20th International Conference on Very Large Data Bases},
  *    pages = {478-499},
@@ -70,7 +70,7 @@ import java.util.Hashtable;
  *    year = {1994}
  * }
  * 
- * &#64;incproceedings{Liu1998,
+ * &#64;inproceedings{Liu1998,
  *    author = {Bing Liu and Wynne Hsu and Yiming Ma},
  *    booktitle = {Fourth International Conference on Knowledge Discovery and Data Mining},
  *    pages = {80-86},
@@ -128,7 +128,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class Apriori 
   extends Associator 
@@ -1457,3 +1457,4 @@ public class Apriori
     }
   }
 }
+
