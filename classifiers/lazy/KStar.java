@@ -61,7 +61,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Cleary1995,
+ * &#64;inproceedings{Cleary1995,
  *    author = {John G. Cleary and Leonard E. Trigg},
  *    booktitle = {12th International Conference on Machine Learning},
  *    pages = {108-114},
@@ -92,7 +92,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class KStar 
   extends Classifier
@@ -711,3 +711,4 @@ public class KStar
   }
 
 } // class end
+

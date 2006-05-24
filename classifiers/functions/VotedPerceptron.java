@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Freund1998,
+ * &#64;inproceedings{Freund1998,
  *    address = {New York, NY},
  *    author = {Y. Freund and R. E. Schapire},
  *    booktitle = {11th Annual Conference on Computational Learning Theory},
@@ -92,7 +92,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class VotedPerceptron 
   extends Classifier 
@@ -597,3 +597,4 @@ public class VotedPerceptron
     }
   }
 }
+

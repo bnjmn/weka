@@ -51,7 +51,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Kohavi1996,
+ * &#64;inproceedings{Kohavi1996,
  *    author = {Ron Kohavi and David H. Wolpert},
  *    booktitle = {Machine Learning: Proceedings of the Thirteenth International Conference},
  *    editor = {Lorenza Saitta},
@@ -106,7 +106,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class BVDecompose
   implements OptionHandler, TechnicalInformationHandler {
@@ -706,3 +706,4 @@ public class BVDecompose
     }
   }
 }
+

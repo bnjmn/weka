@@ -68,7 +68,7 @@ import java.util.Vector;
  * <br/>
  * Ron Kohavi, David H. Wolpert: Bias Plus Variance Decomposition for Zero-One Loss Functions. In: Machine Learning: Proceedings of the Thirteenth International Conference, 275-283, 1996.<br/>
  * <br/>
- * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. 40, 2, 159-196.
+ * Geoffrey I. Webb (2000). MultiBoosting: A Technique for Combining Boosting and Wagging. Machine Learning. 40(2):159-196.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -84,7 +84,7 @@ import java.util.Vector;
  *    PDF = {http://www.csse.monash.edu.au/~webb/Files/WebbConilione04.pdf}
  * }
  * 
- * &#64;incproceedings{Kohavi1996,
+ * &#64;inproceedings{Kohavi1996,
  *    author = {Ron Kohavi and David H. Wolpert},
  *    booktitle = {Machine Learning: Proceedings of the Thirteenth International Conference},
  *    editor = {Lorenza Saitta},
@@ -151,7 +151,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class BVDecomposeSegCVSub
     implements OptionHandler, TechnicalInformationHandler {
@@ -1105,3 +1105,4 @@ public class BVDecomposeSegCVSub
         }
     }
 }
+

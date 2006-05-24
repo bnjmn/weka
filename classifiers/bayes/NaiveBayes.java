@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{John1995,
+ * &#64;inproceedings{John1995,
  *    address = {San Mateo},
  *    author = {George H. John and Pat Langley},
  *    booktitle = {Eleventh Conference on Uncertainty in Artificial Intelligence},
@@ -86,7 +86,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class NaiveBayes extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -565,3 +565,4 @@ public class NaiveBayes extends Classifier
     }
   }
 }
+

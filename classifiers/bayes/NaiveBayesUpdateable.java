@@ -40,7 +40,7 @@ import weka.core.TechnicalInformation;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{John1995,
+ * &#64;inproceedings{John1995,
  *    address = {San Mateo},
  *    author = {George H. John and Pat Langley},
  *    booktitle = {Eleventh Conference on Uncertainty in Artificial Intelligence},
@@ -68,7 +68,7 @@ import weka.core.TechnicalInformation;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
@@ -132,3 +132,4 @@ public class NaiveBayesUpdateable extends NaiveBayes
   }
 
 }
+

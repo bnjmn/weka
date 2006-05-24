@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Kira1992,
+ * &#64;inproceedings{Kira1992,
  *    author = {Kenji Kira and Larry A. Rendell},
  *    booktitle = {Ninth International Workshop on Machine Learning},
  *    editor = {Derek H. Sleeman and Peter Edwards},
@@ -67,7 +67,7 @@ import java.util.Vector;
  *    year = {1992}
  * }
  * 
- * &#64;incproceedings{Kononenko1994,
+ * &#64;inproceedings{Kononenko1994,
  *    author = {Igor Kononenko},
  *    booktitle = {European Conference on Machine Learning},
  *    editor = {Francesco Bergadano and Luc De Raedt},
@@ -77,7 +77,7 @@ import java.util.Vector;
  *    year = {1994}
  * }
  * 
- * &#64;incproceedings{Robnik-Sikonja1997,
+ * &#64;inproceedings{Robnik-Sikonja1997,
  *    author = {Marko Robnik-Sikonja and Igor Kononenko},
  *    booktitle = {Fourteenth International Conference on Machine Learning},
  *    editor = {Douglas H. Fisher},
@@ -124,7 +124,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -1316,3 +1316,4 @@ public class ReliefFAttributeEval
     }
   }
 }
+

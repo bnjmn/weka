@@ -37,7 +37,7 @@ import weka.classifiers.Classifier;
  <!-- globalinfo-start -->
  * Class for building and using a multinomial Naive Bayes classifier. For more information see,<br/>
  * <br/>
- * Andrew Mccallum, Kamal Nigam: A Comparison of Event Models for Naive Bayes Text Classification. In: AAAI-98 Workshop on 'Learning for Text Categorization', , 1998.<br/>
+ * Andrew Mccallum, Kamal Nigam: A Comparison of Event Models for Naive Bayes Text Classification. In: AAAI-98 Workshop on 'Learning for Text Categorization', 1998.<br/>
  * <br/>
  * The core equation for this classifier:<br/>
  * <br/>
@@ -50,7 +50,7 @@ import weka.classifiers.Classifier;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Mccallum1998,
+ * &#64;inproceedings{Mccallum1998,
  *    author = {Andrew Mccallum and Kamal Nigam},
  *    booktitle = {AAAI-98 Workshop on 'Learning for Text Categorization'},
  *    title = {A Comparison of Event Models for Naive Bayes Text Classification},
@@ -71,7 +71,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class NaiveBayesMultinomial 
   extends Classifier 
@@ -376,3 +376,4 @@ public class NaiveBayesMultinomial
     }
   }
 }
+

@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;incproceedings{Moore1994,
+ * &#64;inproceedings{Moore1994,
  *    author = {Andrew W. Moore and Mary S. Lee},
  *    booktitle = {Eleventh International Conference on Machine Learning},
  *    pages = {190-198},
@@ -134,7 +134,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class RaceSearch 
   extends ASSearch 
@@ -1767,3 +1767,4 @@ public class RaceSearch
     m_numFolds = 10;
   }
 }
+
