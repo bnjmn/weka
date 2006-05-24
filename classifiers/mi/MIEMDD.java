@@ -82,6 +82,10 @@ import java.util.Vector;
  *  Whether to 0=normalize/1=standardize/2=neither.
  *  (default 1=standardize)</pre>
  * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
@@ -90,7 +94,7 @@ import java.util.Vector;
  *     
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class MIEMDD 
   extends RandomizableClassifier 
@@ -209,6 +213,10 @@ public class MIEMDD
    * <pre> -N &lt;num&gt;
    *  Whether to 0=normalize/1=standardize/2=neither.
    *  (default 1=standardize)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
    * 
    * <pre> -D
    *  If set, classifier is run in debug mode and
@@ -739,3 +747,4 @@ public class MIEMDD
     }
   }
 }
+

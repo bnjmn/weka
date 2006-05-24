@@ -57,10 +57,23 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -url &lt;JDBC URL&gt;
+ *  The JDBC URL to connect to.
+ *  (default: from DatabaseUtils.props file)</pre>
+ * 
+ * <pre> -user &lt;name&gt;
+ *  The user to connect with to the database.
+ *  (default: none)</pre>
+ * 
+ * <pre> -password &lt;password&gt;
+ *  The password to connect with to the database.
+ *  (default: none)</pre>
+ * 
  * <pre> -Q &lt;query&gt;
  *  SQL query of the form
- *  SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
- *  to execute (default Select * From Results0).</pre>
+ *   SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
+ *  to execute.
+ *  (default: Select * From Results0)</pre>
  * 
  * <pre> -P &lt;list of column names&gt;
  *  List of column names uniquely defining a DB row
@@ -76,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -1326,10 +1339,23 @@ public class DatabaseLoader
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -url &lt;JDBC URL&gt;
+   *  The JDBC URL to connect to.
+   *  (default: from DatabaseUtils.props file)</pre>
+   * 
+   * <pre> -user &lt;name&gt;
+   *  The user to connect with to the database.
+   *  (default: none)</pre>
+   * 
+   * <pre> -password &lt;password&gt;
+   *  The password to connect with to the database.
+   *  (default: none)</pre>
+   * 
    * <pre> -Q &lt;query&gt;
    *  SQL query of the form
-   *  SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
-   *  to execute (default Select * From Results0).</pre>
+   *   SELECT &lt;list of columns&gt;|* FROM &lt;table&gt; [WHERE]
+   *  to execute.
+   *  (default: Select * From Results0)</pre>
    * 
    * <pre> -P &lt;list of column names&gt;
    *  List of column names uniquely defining a DB row
@@ -1438,3 +1464,4 @@ public class DatabaseLoader
       }
   }
 }
+
