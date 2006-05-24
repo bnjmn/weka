@@ -53,7 +53,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.5 $
+ * @version   $Revision: 1.6 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -340,7 +340,7 @@ public class SnowballStemmer
       }
     }
     else {
-      System.out.println("Stemmer '" + name + "' unknown!");
+      System.err.println("Stemmer '" + name + "' unknown!");
       m_Stemmer = null;
     }
   }
