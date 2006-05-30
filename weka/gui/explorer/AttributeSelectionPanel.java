@@ -96,7 +96,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class AttributeSelectionPanel 
   extends JPanel {
@@ -547,6 +547,12 @@ public class AttributeSelectionPanel
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
+	break;
+      case Attribute.RELATIONAL:
+	type = "(Rel) ";
 	break;
       default:
 	type = "(???) ";

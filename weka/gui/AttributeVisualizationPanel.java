@@ -46,6 +46,7 @@ import javax.swing.JFrame;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
+import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.AttributeStats;
 import weka.core.Utils;
@@ -68,7 +69,7 @@ import weka.gui.visualize.PrintableComponent;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 
 public class AttributeVisualizationPanel extends PrintablePanel {
@@ -255,9 +256,28 @@ public class AttributeVisualizationPanel extends PrintablePanel {
       m_colorAttrib.removeAllItems();
       m_colorAttrib.addItem("No class");
       for(int i=0; i<m_data.numAttributes(); i++) {
+	String type = "";
+	switch (m_data.attribute(i).type()) {
+	  case Attribute.NOMINAL:
+	    type = "(Nom) ";
+	    break;
+	  case Attribute.NUMERIC:
+	    type = "(Num) ";
+	    break;
+	  case Attribute.STRING:
+	    type = "(Str) ";
+	    break;
+	  case Attribute.DATE:
+	    type = "(Dat) ";
+	    break;
+	  case Attribute.RELATIONAL:
+	    type = "(Rel) ";
+	    break;
+	  default:
+	    type = "(???) ";
+	}
         m_colorAttrib.addItem(new String("Class: "+m_data.attribute(i).name()+
-        " "+
-        ((m_data.attribute(i).isNominal()) ? "(Nom)":"")));
+        " " + type));
       }
       if (m_data.classIndex() >= 0) {
         m_colorAttrib.setSelectedIndex(m_data.classIndex() + 1);
