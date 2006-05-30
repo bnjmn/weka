@@ -110,7 +110,7 @@ import javax.swing.JMenuItem;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.2 $
+ * @version $Revision: 1.31.2.3 $
  */
 public class AttributeSelectionPanel extends JPanel {
 
@@ -557,6 +557,9 @@ public class AttributeSelectionPanel extends JPanel {
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
 	break;
       default:
 	type = "(???) ";

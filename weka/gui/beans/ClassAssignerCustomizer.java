@@ -39,7 +39,7 @@ import weka.core.Attribute;
  * GUI customizer for the class assigner bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class ClassAssignerCustomizer extends JPanel
   implements Customizer, CustomizerClosingListener, DataFormatListener {
@@ -106,6 +106,9 @@ public class ClassAssignerCustomizer extends JPanel
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
 	break;
       default:
 	type = "(???) ";

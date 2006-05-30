@@ -91,7 +91,7 @@ import java.awt.Point;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17.2.1 $
+ * @version $Revision: 1.17.2.2 $
  */
 public class AssociationsPanel extends JPanel {
 
@@ -287,6 +287,9 @@ public class AssociationsPanel extends JPanel {
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
 	break;
       default:
 	type = "(???) ";

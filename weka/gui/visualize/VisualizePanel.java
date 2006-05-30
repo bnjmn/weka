@@ -100,7 +100,7 @@ import java.awt.Graphics;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.3 $
+ * @version $Revision: 1.21.2.4 $
  */
 public class VisualizePanel extends PrintablePanel {
 
@@ -2211,6 +2211,9 @@ public class VisualizePanel extends PrintablePanel {
 	break;
       case Attribute.STRING:
 	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
 	break;
       default:
 	type = " (???)";

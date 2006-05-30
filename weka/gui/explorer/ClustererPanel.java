@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.45.2.4 $
+ * @version $Revision: 1.45.2.5 $
  */
 public class ClustererPanel extends JPanel {
 
@@ -542,6 +542,9 @@ public class ClustererPanel extends JPanel {
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
 	break;
       default:
 	type = "(???) ";

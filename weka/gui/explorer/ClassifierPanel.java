@@ -136,7 +136,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.79.2.4 $
+ * @version $Revision: 1.79.2.5 $
  */
 public class ClassifierPanel extends JPanel {
 
@@ -699,6 +699,9 @@ public class ClassifierPanel extends JPanel {
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
 	break;
       default:
 	type = "(???) ";
