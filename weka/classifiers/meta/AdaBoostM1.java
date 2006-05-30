@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
+import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
 import weka.core.Capabilities;
@@ -107,7 +108,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $ 
+ * @version $Revision: 1.31 $ 
  */
 public class AdaBoostM1 
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -237,21 +238,22 @@ public class AdaBoostM1
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector();
 
     newVector.addElement(new Option(
-	      "\tPercentage of weight mass to base training on.\n"
-	      +"\t(default 100, reduce to around 90 speed up)",
-	      "P", 1, "-P <num>"));
+	"\tPercentage of weight mass to base training on.\n"
+	+"\t(default 100, reduce to around 90 speed up)",
+	"P", 1, "-P <num>"));
+    
     newVector.addElement(new Option(
-	      "\tUse resampling for boosting.",
-	      "Q", 0, "-Q"));
-
+	"\tUse resampling for boosting.",
+	"Q", 0, "-Q"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
       newVector.addElement(enu.nextElement());
     }
+    
     return newVector.elements();
   }
 
@@ -457,7 +459,7 @@ public class AdaBoostM1
     throws Exception {
 
     Instances trainData, sample, training;
-    double epsilon, reweight, beta = 0, sumProbs;
+    double epsilon, reweight, sumProbs;
     Evaluation evaluation;
     int numInstances = data.numInstances();
     Random randomInstance = new Random(m_Seed);
@@ -518,7 +520,7 @@ public class AdaBoostM1
       }
       
       // Determine the weight to assign to this model
-      m_Betas[m_NumIterationsPerformed] = beta = Math.log((1 - epsilon) / epsilon);
+      m_Betas[m_NumIterationsPerformed] = Math.log((1 - epsilon) / epsilon);
       reweight = (1 - epsilon) / epsilon;
       if (m_Debug) {
 	System.err.println("\terror rate = " + epsilon
@@ -573,9 +575,10 @@ public class AdaBoostM1
     throws Exception {
 
     Instances trainData, training;
-    double epsilon, reweight, beta = 0;
+    double epsilon, reweight;
     Evaluation evaluation;
     int numInstances = data.numInstances();
+    Random randomInstance = new Random(m_Seed);
 
     // Initialize data
     m_Betas = new double [m_Classifiers.length];
@@ -600,6 +603,8 @@ public class AdaBoostM1
       }
 
       // Build the classifier
+      if (m_Classifiers[m_NumIterationsPerformed] instanceof RandomizableClassifier)
+	((RandomizableClassifier) m_Classifiers[m_NumIterationsPerformed]).setSeed(randomInstance.nextInt());
       m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
 
       // Evaluate the classifier
@@ -615,7 +620,7 @@ public class AdaBoostM1
 	break;
       }
       // Determine the weight to assign to this model
-      m_Betas[m_NumIterationsPerformed] = beta = Math.log((1 - epsilon) / epsilon);
+      m_Betas[m_NumIterationsPerformed] = Math.log((1 - epsilon) / epsilon);
       reweight = (1 - epsilon) / epsilon;
       if (m_Debug) {
 	System.err.println("\terror rate = " + epsilon
