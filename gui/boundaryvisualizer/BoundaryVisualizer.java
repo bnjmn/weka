@@ -76,7 +76,7 @@ import java.awt.Dimension;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @since 1.0
  * @see JPanel 
  */
@@ -789,11 +789,27 @@ public class BoundaryVisualizer extends JPanel {
 
     for (int i = 0; i < m_trainingInstances.numAttributes(); i++) {
       classAttNames[i] = m_trainingInstances.attribute(i).name();
-      if (m_trainingInstances.attribute(i).isNominal()) {
-	classAttNames[i] += " (Nom)";
-      } else {
-	classAttNames[i] += " (Num)";
+      String type = "";
+      switch (m_trainingInstances.attribute(i).type()) {
+	case Attribute.NOMINAL:
+	  type = " (Nom)";
+	  break;
+	case Attribute.NUMERIC:
+	  type = " (Num)";
+	  break;
+	case Attribute.STRING:
+	  type = " (Str)";
+	  break;
+	case Attribute.DATE:
+	  type = " (Dat)";
+	  break;
+	case Attribute.RELATIONAL:
+	  type = " (Rel)";
+	  break;
+	default:
+	  type = " (???)";
       }
+      classAttNames[i] += type;
       if (m_trainingInstances.attribute(i).isNumeric()) {
 	xAttNames.addElement("X: "+classAttNames[i]);
 	yAttNames.addElement("Y: "+classAttNames[i]);

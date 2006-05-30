@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.89 $
+ * @version $Revision: 1.90 $
  */
 public class ClassifierPanel 
   extends JPanel {
@@ -700,6 +700,12 @@ public class ClassifierPanel
 	break;
       case Attribute.STRING:
 	type = "(Str) ";
+	break;
+      case Attribute.DATE:
+	type = "(Dat) ";
+	break;
+      case Attribute.RELATIONAL:
+	type = "(Rel) ";
 	break;
       default:
 	type = "(???) ";

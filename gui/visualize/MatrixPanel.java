@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 
@@ -637,6 +637,12 @@ public class MatrixPanel extends JPanel{
 	break;
       case Attribute.STRING:
 	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
+	break;
+      case Attribute.RELATIONAL:
+	type = " (Rel)";
 	break;
       default:
 	type = " (???)";

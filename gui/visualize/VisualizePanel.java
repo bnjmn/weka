@@ -86,7 +86,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class VisualizePanel extends PrintablePanel {
 
@@ -2270,6 +2270,12 @@ public class VisualizePanel extends PrintablePanel {
 	break;
       case Attribute.STRING:
 	type = " (Str)";
+	break;
+      case Attribute.DATE:
+	type = " (Dat)";
+	break;
+      case Attribute.RELATIONAL:
+	type = " (Rel)";
 	break;
       default:
 	type = " (???)";
