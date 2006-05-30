@@ -81,10 +81,18 @@ import java.util.Vector;
  *  Seed for random number generator.
  *  (default 1)</pre>
  * 
+ * <pre> -depth &lt;num&gt;
+ *  The maximum depth of the trees, 0 for unlimited.
+ *  (default 0)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RandomForest 
   extends Classifier 
@@ -109,6 +117,9 @@ public class RandomForest
 
   /** The bagger. */
   protected Bagging m_bagger = null;
+  
+  /** The maximum depth of the trees (0 = unlimited) */
+  protected int m_MaxDepth = 0;
 
   /**
    * Returns a string describing classifier
@@ -231,6 +242,34 @@ public class RandomForest
 
     return m_randomSeed;
   }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String maxDepthTipText() {
+    return "The maximum depth of the trees, 0 for unlimited.";
+  }
+
+  /**
+   * Get the maximum depth of trh tree, 0 for unlimited.
+   *
+   * @return 		the maximum depth.
+   */
+  public int getMaxDepth() {
+    return m_MaxDepth;
+  }
+  
+  /**
+   * Set the maximum depth of the tree, 0 for unlimited.
+   *
+   * @param value 	the maximum depth.
+   */
+  public void setMaxDepth(int value) {
+    m_MaxDepth = value;
+  }
 
   /**
    * Gets the out of bag error that was calculated as the classifier was built.
@@ -280,18 +319,31 @@ public class RandomForest
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(3);
+    Vector newVector = new Vector();
 
-    newVector.
-      addElement(new Option("\tNumber of trees to build.",
-			    "I", 1, "-I <number of trees>"));
-    newVector.
-      addElement(new Option("\tNumber of features to consider (<1=int(logM+1)).",
-			    "K", 1, "-K <number of features>"));
-    newVector
-      .addElement(new Option("\tSeed for random number generator.\n"
-			     + "\t(default 1)",
-			     "S", 1, "-S"));
+    newVector.addElement(new Option(
+	"\tNumber of trees to build.",
+	"I", 1, "-I <number of trees>"));
+    
+    newVector.addElement(new Option(
+	"\tNumber of features to consider (<1=int(logM+1)).",
+	"K", 1, "-K <number of features>"));
+    
+    newVector.addElement(new Option(
+	"\tSeed for random number generator.\n"
+	+ "\t(default 1)",
+	"S", 1, "-S"));
+
+    newVector.addElement(new Option(
+	"\tThe maximum depth of the trees, 0 for unlimited.\n"
+	+ "\t(default 0)",
+	"depth", 1, "-depth <num>"));
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
+
     return newVector.elements();
   }
 
@@ -301,19 +353,31 @@ public class RandomForest
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
     
-    String [] options = new String [10];
-    int current = 0;
-    options[current++] = "-I"; 
-    options[current++] = "" + getNumTrees();
-    options[current++] = "-K"; 
-    options[current++] = "" + getNumFeatures();
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
-    while (current < options.length) {
-      options[current++] = "";
+    result = new Vector();
+    
+    result.add("-I");
+    result.add("" + getNumTrees());
+    
+    result.add("-K");
+    result.add("" + getNumFeatures());
+    
+    result.add("-S");
+    result.add("" + getSeed());
+    
+    if (getMaxDepth() > 0) {
+      result.add("-depth");
+      result.add("" + getMaxDepth());
     }
-    return options;
+    
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+    
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -332,31 +396,52 @@ public class RandomForest
    *  Seed for random number generator.
    *  (default 1)</pre>
    * 
+   * <pre> -depth &lt;num&gt;
+   *  The maximum depth of the trees, 0 for unlimited.
+   *  (default 0)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
    <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception{
+    String	tmpStr;
     
-    String numTreesString = Utils.getOption('I', options);
-    if (numTreesString.length() != 0) {
-      m_numTrees = Integer.parseInt(numTreesString);
+    tmpStr = Utils.getOption('I', options);
+    if (tmpStr.length() != 0) {
+      m_numTrees = Integer.parseInt(tmpStr);
     } else {
       m_numTrees = 10;
     }
-    String numFeaturesString = Utils.getOption('K', options);
-    if (numFeaturesString.length() != 0) {
-      m_numFeatures = Integer.parseInt(numFeaturesString);
+    
+    tmpStr = Utils.getOption('K', options);
+    if (tmpStr.length() != 0) {
+      m_numFeatures = Integer.parseInt(tmpStr);
     } else {
       m_numFeatures = 0;
     }
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
+    
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0) {
+      setSeed(Integer.parseInt(tmpStr));
     } else {
       setSeed(1);
     }
+    
+    tmpStr = Utils.getOption("depth", options);
+    if (tmpStr.length() != 0) {
+      setMaxDepth(Integer.parseInt(tmpStr));
+    } else {
+      setMaxDepth(0);
+    }
+    
+    super.setOptions(options);
+    
     Utils.checkForRemainingOptions(options);
   }  
 
@@ -391,6 +476,7 @@ public class RandomForest
     m_KValue = m_numFeatures;
     if (m_KValue < 1) m_KValue = (int) Utils.log2(data.numAttributes())+1;
     rTree.setKValue(m_KValue);
+    rTree.setMaxDepth(getMaxDepth());
 
     // set up the bagger and build the forest
     m_bagger.setClassifier(rTree);
@@ -419,13 +505,16 @@ public class RandomForest
    */
   public String toString() {
 
-    if (m_bagger == null) return "Random forest not built yet";
-    else return "Random forest of " + m_numTrees
+    if (m_bagger == null) 
+      return "Random forest not built yet";
+    else 
+      return "Random forest of " + m_numTrees
 	   + " trees, each constructed while considering "
 	   + m_KValue + " random feature" + (m_KValue==1 ? "" : "s") + ".\n"
 	   + "Out of bag error: "
-	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4)
-	   + "\n\n";
+	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4) + "\n"
+	   + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n") : (""))
+	   + "\n";
   }
 
   /**
