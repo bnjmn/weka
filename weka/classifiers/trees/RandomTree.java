@@ -56,18 +56,23 @@ import java.util.Vector;
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.</pre>
  * 
- * <pre> -D
- *  Turns debugging info on.</pre>
- * 
- * <pre> -S
+ * <pre> -S &lt;num&gt;
  *  Seed for random number generator.
  *  (default 1)</pre>
+ * 
+ * <pre> -depth &lt;num&gt;
+ *  The maximum depth of the tree, 0 for unlimited.
+ *  (default 0)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class RandomTree 
   extends Classifier 
@@ -99,15 +104,15 @@ public class RandomTree
     
   /** Minimum number of instances for leaf. */
   protected double m_MinNum = 1.0;
-    
-  /** Debug info */
-  protected boolean m_Debug = false;
   
   /** The number of attributes considered for a split. */
   protected int m_KValue = 1;
 
   /** The random seed to use. */
   protected int m_randomSeed = 1;
+  
+  /** The maximum depth of the tree (0 = unlimited) */
+  protected int m_MaxDepth = 0;
 
   /**
    * Returns a string describing classifier
@@ -177,35 +182,6 @@ public class RandomTree
     
     m_KValue = k;
   }
-  
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String debugTipText() {
-    return "Whether debug information is output to the console.";
-  }
-
-  /**
-   * Get the value of Debug.
-   *
-   * @return Value of Debug.
-   */
-  public boolean getDebug() {
-    
-    return m_Debug;
-  }
-  
-  /**
-   * Set the value of Debug.
-   *
-   * @param newDebug Value to assign to Debug.
-   */
-  public void setDebug(boolean newDebug) {
-    
-    m_Debug = newDebug;
-  }
 
   /**
    * Returns the tip text for this property
@@ -237,31 +213,65 @@ public class RandomTree
   }
   
   /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String maxDepthTipText() {
+    return "The maximum depth of the tree, 0 for unlimited.";
+  }
+
+  /**
+   * Get the maximum depth of trh tree, 0 for unlimited.
+   *
+   * @return 		the maximum depth.
+   */
+  public int getMaxDepth() {
+    return m_MaxDepth;
+  }
+  
+  /**
+   * Set the maximum depth of the tree, 0 for unlimited.
+   *
+   * @param value 	the maximum depth.
+   */
+  public void setMaxDepth(int value) {
+    m_MaxDepth = value;
+  }
+  
+  /**
    * Lists the command-line options for this classifier.
    * 
    * @return an enumeration over all possible options
    */
   public Enumeration listOptions() {
     
-    Vector newVector = new Vector(6);
+    Vector newVector = new Vector();
 
-    newVector.
-      addElement(new Option("\tNumber of attributes to randomly investigate\n"
-                            +"\t(<1 = int(log(#attributes)+1)).",
-			    "K", 1, "-K <number of attributes>"));
+    newVector.addElement(new Option(
+	"\tNumber of attributes to randomly investigate\n"
+	+"\t(<1 = int(log(#attributes)+1)).",
+	"K", 1, "-K <number of attributes>"));
 
-    newVector.
-      addElement(new Option("\tSet minimum number of instances per leaf.",
-			    "M", 1, "-M <minimum number of instances>"));
+    newVector.addElement(new Option(
+	"\tSet minimum number of instances per leaf.",
+	"M", 1, "-M <minimum number of instances>"));
 
-    newVector.
-      addElement(new Option("\tTurns debugging info on.",
-			    "D", 0, "-D"));
+    newVector.addElement(new Option(
+	"\tSeed for random number generator.\n"
+	+ "\t(default 1)",
+	"S", 1, "-S <num>"));
 
-    newVector
-      .addElement(new Option("\tSeed for random number generator.\n"
-			     + "\t(default 1)",
-			     "S", 1, "-S"));
+    newVector.addElement(new Option(
+	"\tThe maximum depth of the tree, 0 for unlimited.\n"
+	+ "\t(default 0)",
+	"depth", 1, "-depth <num>"));
+
+    Enumeration enu = super.listOptions();
+    while (enu.hasMoreElements()) {
+      newVector.addElement(enu.nextElement());
+    }
 
     return newVector.elements();
   } 
@@ -272,22 +282,31 @@ public class RandomTree
    * @return the options for the current setup
    */
   public String[] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
     
-    String [] options = new String [10];
-    int current = 0;
-    options[current++] = "-K"; 
-    options[current++] = "" + getKValue();
-    options[current++] = "-M"; 
-    options[current++] = "" + getMinNum();
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
-    if (getDebug()) {
-      options[current++] = "-D";
+    result = new Vector();
+    
+    result.add("-K");
+    result.add("" + getKValue());
+    
+    result.add("-M");
+    result.add("" + getMinNum());
+    
+    result.add("-S");
+    result.add("" + getSeed());
+    
+    if (getMaxDepth() > 0) {
+      result.add("-depth");
+      result.add("" + getMaxDepth());
     }
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+    
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -303,12 +322,17 @@ public class RandomTree
    * <pre> -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf.</pre>
    * 
-   * <pre> -D
-   *  Turns debugging info on.</pre>
-   * 
-   * <pre> -S
+   * <pre> -S &lt;num&gt;
    *  Seed for random number generator.
    *  (default 1)</pre>
+   * 
+   * <pre> -depth &lt;num&gt;
+   *  The maximum depth of the tree, 0 for unlimited.
+   *  (default 0)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
    * 
    <!-- options-end -->
    * 
@@ -316,26 +340,38 @@ public class RandomTree
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception{
+    String	tmpStr;
     
-    String kValueString = Utils.getOption('K', options);
-    if (kValueString.length() != 0) {
-      m_KValue = Integer.parseInt(kValueString);
+    tmpStr = Utils.getOption('K', options);
+    if (tmpStr.length() != 0) {
+      m_KValue = Integer.parseInt(tmpStr);
     } else {
       m_KValue = 1;
     }
-    String minNumString = Utils.getOption('M', options);
-    if (minNumString.length() != 0) {
-      m_MinNum = Double.parseDouble(minNumString);
+    
+    tmpStr = Utils.getOption('M', options);
+    if (tmpStr.length() != 0) {
+      m_MinNum = Double.parseDouble(tmpStr);
     } else {
       m_MinNum = 1;
     }
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
+    
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0) {
+      setSeed(Integer.parseInt(tmpStr));
     } else {
       setSeed(1);
     }
-    m_Debug = Utils.getFlag('D', options);
+    
+    tmpStr = Utils.getOption("depth", options);
+    if (tmpStr.length() != 0) {
+      setMaxDepth(Integer.parseInt(tmpStr));
+    } else {
+      setMaxDepth(0);
+    }
+    
+    super.setOptions(options);
+    
     Utils.checkForRemainingOptions(options);
   }
 
@@ -443,7 +479,7 @@ public class RandomTree
     // Build tree
     buildTree(sortedIndices, weights, train, classProbs,
 	      new Instances(train, 0), m_MinNum, m_Debug,
-	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed));
+	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed), 0);
 
   }
   
@@ -573,7 +609,8 @@ public class RandomTree
     } else {
       return     
 	"\nRandomTree\n==========\n" + toString(0) + "\n" +
-	"\nSize of the tree : " + numNodes();
+	"\nSize of the tree : " + numNodes() +
+	(getMaxDepth() > 0 ? ("\nMax depth of tree: " + getMaxDepth()) : (""));
     }
   }
 
@@ -658,12 +695,13 @@ public class RandomTree
    * @param debug whether debugging is on
    * @param attIndicesWindow the attribute window to choose attributes from
    * @param random random number generator for choosing random attributes
+   * @param depth the current depth
    * @throws Exception if generation fails
    */
   protected void buildTree(int[][] sortedIndices, double[][] weights,
 			 Instances data, double[] classProbs, 
 			 Instances header, double minNum, boolean debug,
-			 int[] attIndicesWindow, Random random) 
+			 int[] attIndicesWindow, Random random, int depth) 
     throws Exception {
 
     // Store structure of dataset, set minimum number of instances
@@ -679,12 +717,14 @@ public class RandomTree
       return;
     }
 
-    // Check if node doesn't contain enough instances or is pure
+    // Check if node doesn't contain enough instances or is pure 
+    // or maximum depth reached
     m_ClassProbs = new double[classProbs.length];
     System.arraycopy(classProbs, 0, m_ClassProbs, 0, classProbs.length);
     if (Utils.sm(Utils.sum(m_ClassProbs), 2 * m_MinNum) ||
 	Utils.eq(m_ClassProbs[Utils.maxIndex(m_ClassProbs)],
-		 Utils.sum(m_ClassProbs))) {
+		 Utils.sum(m_ClassProbs)) || 
+        ((getMaxDepth() > 0) && (depth >= getMaxDepth()))) {
 
       // Make leaf
       m_Attribute = -1;
@@ -746,9 +786,10 @@ public class RandomTree
       for (int i = 0; i < m_Distribution.length; i++) {
 	m_Successors[i] = new RandomTree();
 	m_Successors[i].setKValue(m_KValue);
+	m_Successors[i].setMaxDepth(getMaxDepth());
 	m_Successors[i].buildTree(subsetIndices[i], subsetWeights[i], data, 
 				  m_Distribution[i], header, m_MinNum, m_Debug,
-				  attIndicesWindow, random);
+				  attIndicesWindow, random, depth + 1);
       }
     } else {
       
