@@ -63,7 +63,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.64 $ 
+ * @version $Revision: 1.65 $ 
  */
 public class Instances 
   implements Serializable {
@@ -187,10 +187,7 @@ public class Instances
     // they can't be modified.
     m_ClassIndex = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
-    // Attribute-FastVector needs to be copied due to RELATIONAL attributes!
-    m_Attributes = new FastVector(dataset.numAttributes());
-    for (int i = 0; i < dataset.numAttributes(); i++)
-      m_Attributes.addElement(dataset.attribute(i).copy());
+    m_Attributes = dataset.m_Attributes;
     m_Instances = new FastVector(capacity);
   }
 
