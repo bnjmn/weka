@@ -23,20 +23,20 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
-import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.Randomizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -108,7 +108,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $ 
+ * @version $Revision: 1.32 $ 
  */
 public class AdaBoostM1 
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -603,8 +603,8 @@ public class AdaBoostM1
       }
 
       // Build the classifier
-      if (m_Classifiers[m_NumIterationsPerformed] instanceof RandomizableClassifier)
-	((RandomizableClassifier) m_Classifiers[m_NumIterationsPerformed]).setSeed(randomInstance.nextInt());
+      if (m_Classifiers[m_NumIterationsPerformed] instanceof Randomizable)
+	((Randomizable) m_Classifiers[m_NumIterationsPerformed]).setSeed(randomInstance.nextInt());
       m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
 
       // Evaluate the classifier
