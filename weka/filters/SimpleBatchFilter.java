@@ -143,7 +143,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     SimpleStreamFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -218,7 +218,7 @@ public abstract class SimpleBatchFilter
       flushInput();
 
       // if output format hasn't been set yet, do it now
-      if (!hasImmediateOutputFormat())
+      if (!hasImmediateOutputFormat() && !isFirstBatchDone())
         setOutputFormat(determineOutputFormat(new Instances(inst, 0)));
 
       // process data
