@@ -128,7 +128,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.61 $
+ * @version  $Revision: 1.62 $
  */
 public class Evaluation implements Summarizable {
 
@@ -1396,7 +1396,7 @@ public class Evaluation implements Summarizable {
     double varProd = 
       m_SumClassPredicted - m_SumClass * m_SumPredicted / m_WithClass;
 
-    if (Utils.smOrEq(varActual * varPredicted, 0.0)) {
+    if (varActual * varPredicted <= 0) {
       correlation = 0.0;
     } else {
       correlation = varProd / Math.sqrt(varActual * varPredicted);
