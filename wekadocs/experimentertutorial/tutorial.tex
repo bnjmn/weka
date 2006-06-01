@@ -2,7 +2,7 @@
 
 \usepackage{epsfig}
 
-\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Experimenter Tutorial\\for Version 3-5-2}
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Experimenter Tutorial\\for Version 3-5-3}
 \author{David Scuse\\Peter Reutemann}
 
 \setcounter{secnumdepth}{1}
@@ -25,7 +25,7 @@
 \center
 \vspace{8cm}
 
-\copyright 2002-2005 David Scuse and University of Waikato
+\copyright 2002-2006 David Scuse and University of Waikato
 
 \end{titlepage}
 
@@ -222,6 +222,7 @@ With the \textit{Choose} button one can open the \textit{GenericObjectEditor} an
 	\epsfig{file=images/simple_addalgorithm2.eps,width=6cm}
 \end{center}
 
+The \textit{Filter...} button enables one to highlight classifiers that can handle certain attribute and class types. With \textit{Remove filter} the highlighting will be removed again.
 
 Additional algorithms can be added again with the \textit{Add new...} button, e.g., the \texttt{J48} decision tree.
 
@@ -441,7 +442,7 @@ Click on the classifier entry (\texttt{ZeroR}) to display the scheme properties.
 	\epsfig{file=images/advanced_changeparameters4.eps,width=6cm}
 \end{center}
 
-This scheme has no modifiable properties (besides \textit{debug} mode on/off) but most other schemes do have properties that can be modified by the user. Click on the \textit{Choose} button to select a different scheme. The window below shows the parameters available for the \texttt{J48} decision-tree scheme. If desired, modify the parameters and then click \textit{OK} to close the window.
+This scheme has no modifiable properties (besides \textit{debug} mode on/off) but most other schemes do have properties that can be modified by the user. The \textit{Capabilities} button opens a small dialog listing all the attribute and class types this classifier can handle. Click on the \textit{Choose} button to select a different scheme. The window below shows the parameters available for the \texttt{J48} decision-tree scheme. If desired, modify the parameters and then click \textit{OK} to close the window.
 \begin{center}
 	\epsfig{file=images/advanced_changeparameters5.eps,width=6cm}
 \end{center}
@@ -473,6 +474,8 @@ To add another scheme, click on the \textit{Choose} button to display the \texti
 \begin{center}
 	\epsfig{file=images/advanced_additionalschemes4.eps,width=10cm}
 \end{center}
+
+The \textit{Filter...} button enables one to highlight classifiers that can handle certain attribute and class types. With \textit{Remove filter} the highlighting will be removed again.
 
 To change to a decision-tree scheme, select \texttt{J48} (in subgroup \textit{trees}).
 \begin{center}
@@ -772,7 +775,7 @@ Selecting \textit{Number\_correct} as the comparison field and clicking \textit{
 	\epsfig{file=images/analyser05.eps,width=10cm}
 \end{center}
 
-Clicking on the button for the \textit{Output format} leads to a dialog that lets you choose the precision for the \textit{mean} and the \textit{std. deviations}, as well as the format of the output. With the \textit{Remove filter classnames} checkbox one can remove the filter name and options from processed datasets (filter names in Weka can be quite lengthy).
+Clicking on the button for the \textit{Output format} leads to a dialog that lets you choose the precision for the \textit{mean} and the \textit{std. deviations}, as well as the format of the output. Checking the \textit{Show Average} checkbox adds an additional line to the output listing the average of each column. With the \textit{Remove filter classnames} checkbox one can remove the filter name and options from processed datasets (filter names in Weka can be quite lengthy).
 
 The following formats are supported:
 
