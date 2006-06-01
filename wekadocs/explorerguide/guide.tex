@@ -48,10 +48,11 @@ If you launch WEKA from a terminal window, some text begins scrolling in the
 terminal.  Ignore this text unless something goes wrong, in which case it can
 help in tracking down the cause.
 
-This User Manual focuses on using the Explorer but does not explain
+This User Manual, which is also available online on the \textit{WekaDoc Wiki} 
+\cite{wekadoc}, focuses on using the Explorer but does not explain
 the individual data preprocessing tools and learning algorithms in
-Weka. For more information on the various filters and learning methods
-in Weka, see the book {\em Data Mining} (Witten and Frank, 2005).
+WEKA. For more information on the various filters and learning methods
+in WEKA, see the book {\em Data Mining} \cite{witten}.
 
 \section{The WEKA Explorer}
 
@@ -462,7 +463,7 @@ to visualize the precision/recall tradeoff, for ROC curve analysis (true
 positive rate {\em vs} false positive rate), and for other types of curves. 
 \item \textbf{Visualize cost curve}.
 Generates a plot that gives an explicit representation of the expected cost, as
-described by Drummond and Holte (2000).
+described by \cite{drummond}.
 \end{enumerate}
 \noindent
 Options are greyed out if they do not apply to the specific set of results.
@@ -664,11 +665,13 @@ and returns you to the original graph with all points included.  Finally,
 clicking the \textbf{Save} button allows you to save the currently visible
 instances to a new ARFF file.
 
-\section*{References}
-
-Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
-\\\\
-Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
+\begin{thebibliography}{999}
+   \bibitem{drummond} Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
+Publishers, San Mateo, CA.
+	\bibitem{witten} Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
 learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
+	\bibitem{wekadoc} \textit{WekaDoc} -- \texttt{http://weka.sourceforge.net/wekadoc/}
+\end{thebibliography}
+
 \end{document}
