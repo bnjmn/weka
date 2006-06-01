@@ -92,7 +92,7 @@ import weka.core.Version;
  * 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.9 $ 
+ * @version $Revision: 1.1.2.10 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
@@ -749,6 +749,7 @@ public class XMLSerialization {
       int                  array;
       int                  i;
       Object               obj;
+      String               tmpStr;
 
       node = null;
       
@@ -835,15 +836,21 @@ public class XMLSerialization {
             memberlist = getDescriptors(o);
             // if no get/set methods -> we assume it has String-Constructor
             if (memberlist.size() == 0) {
-               if (!o.toString().equals(""))
-                  node.appendChild(node.getOwnerDocument().createTextNode(
-                      // these five entities are recognized by every XML processor
-                      // see http://www.xml.com/pub/a/2001/03/14/trxml10.html
-                      o.toString().replaceAll("&", "&amp;")
-                                  .replaceAll("\"", "&quot;")
-                                  .replaceAll("'", "&apos;")
-                                  .replaceAll("<", "&lt;")
-                                  .replaceAll(">", "&gt;")));
+              if (!o.toString().equals("")) {
+        	tmpStr = o.toString();
+        	// these five entities are recognized by every XML processor
+        	// see http://www.xml.com/pub/a/2001/03/14/trxml10.html
+        	tmpStr = tmpStr.replaceAll("&", "&amp;")
+        	               .replaceAll("\"", "&quot;")
+        	               .replaceAll("'", "&apos;")
+        	               .replaceAll("<", "&lt;")
+        	               .replaceAll(">", "&gt;");
+        	// in addition, replace some other entities as well
+        	tmpStr = tmpStr.replaceAll("\n", "&#10;")
+        	               .replaceAll("\r", "&#13;")
+        	               .replaceAll("\t", "&#9;");
+        	node.appendChild(node.getOwnerDocument().createTextNode(tmpStr));
+              }
             }
             else {
                enm = memberlist.keys();
