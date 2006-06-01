@@ -2,7 +2,7 @@
 
 \usepackage{epsfig}
 
-\title{\epsfig{file=coa-hor.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-1}
+\title{\epsfig{file=coa-hor.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-3}
 \author{Richard Kirkby\\Eibe Frank}
 
 \setcounter{secnumdepth}{1}
@@ -17,7 +17,7 @@
 \center
 \vspace{8cm}
 
-\copyright 2002-2005 University of Waikato
+\copyright 2002-2006 University of Waikato
 
 \end{titlepage}
 
@@ -54,10 +54,11 @@ If you launch WEKA from a terminal window, some text begins scrolling in the
 terminal.  Ignore this text unless something goes wrong, in which case it can
 help in tracking down the cause.
 
-This User Manual focuses on using the Explorer but does not explain
+This User Manual, which is also available online on the \textit{WekaDoc Wiki} 
+\cite{wekadoc}, focuses on using the Explorer but does not explain
 the individual data preprocessing tools and learning algorithms in
 WEKA. For more information on the various filters and learning methods
-in WEKA, see the book {\em Data Mining} (Witten and Frank, 2005).
+in WEKA, see the book {\em Data Mining} \cite{witten}.
 
 \section{The WEKA Explorer}
 
@@ -251,8 +252,11 @@ filters that are required.  At the left of the \textbf{Filter} box is
 a \textbf{Choose} button. By clicking this button it is possible to
 select one of the filters in WEKA. Once a filter has been selected,
 its name and options are shown in the field next to the
-\textbf{Choose} button. Clicking on this box brings up a
-GenericObjectEditor dialog box.
+\textbf{Choose} button. Clicking on this box with the \textit{left} mouse button
+brings up a GenericObjectEditor dialog box. A click with the \textit{right}
+mouse button (or \textit{Alt+Shift+left click}) brings up a menu where you can
+choose, either to display the properties in a GenericObjectEditor dialog
+box, or to copy the current setup string to the clipboard.
 
 \subsubsection*{The GenericObjectEditor Dialog Box}
 
@@ -272,7 +276,9 @@ the top of the GenericObjectEditor window.
 
 Some objects display a brief description of what they do in an \textbf{About}
 box, along with a \textbf{More} button. Clicking on the \textbf{More} button
-brings up a window describing what the different options do.
+brings up a window describing what the different options do. Others have an 
+additional button, \textit{Capabilities}, which lists the types of
+attributes and classes the object can handle. 
 
 At the bottom of the GenericObjectEditor dialog are four buttons. The first
 two, \textbf{Open...} and \textbf{Save...} allow object configurations to be
@@ -310,9 +316,13 @@ None}, in which case no class is set.
 \label{sec:classifier}
 At the top of the classify section is the \textbf{Classifier}
 box. This box has a text field that gives the name of the currently
-selected classifier, and its options. Clicking on the text box brings
-up a GenericObjectEditor dialog box, just the same as for filters,
-that you can use to configure the options of the current classifier.
+selected classifier, and its options. Clicking on the text box with 
+the left mouse button brings up a GenericObjectEditor dialog box, 
+just the same as for filters, that you can use to configure the options 
+of the current classifier. With a \textit{right click} (or 
+\textit{Alt+Shift+left click}) you can once again copy 
+the setup string to the clipboard or display the properties in a 
+GenericObjectEditor dialog box.
 The \textbf{Choose} button allows you to choose one of the classifiers
 that are available in WEKA.
 
@@ -476,7 +486,11 @@ to visualize the precision/recall trade-off, for ROC curve analysis (true
 positive rate {\em vs} false positive rate), and for other types of curves. 
 \item \textbf{Visualize cost curve}.
 Generates a plot that gives an explicit representation of the expected cost, as
-described by Drummond and Holte (2000).
+described by \cite{drummond}.
+\item \textbf{Plugins}.
+This menu item only appears if there are \textit{Explorer visualization plugins}
+available (by default: none). More about these plugins can be found on the 
+\textit{WekaWiki} \cite{wekawiki}.
 \end{enumerate}
 \noindent
 Options are greyed out if they do not apply to the specific set of results.
@@ -678,11 +692,14 @@ and returns you to the original graph with all points included.  Finally,
 clicking the \textbf{Save} button allows you to save the currently visible
 instances to a new ARFF file.
 
-\section*{References}
-
-Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
-\\\\
-Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
+\begin{thebibliography}{999}
+   \bibitem{drummond} Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
+Publishers, San Mateo, CA.
+	\bibitem{witten} Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
 learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
+	\bibitem{wekawiki} \textit{WekaWiki} -- \texttt{http://weka.sourceforge.net/wiki/}
+	\bibitem{wekadoc} \textit{WekaDoc} -- \texttt{http://weka.sourceforge.net/wekadoc/}
+\end{thebibliography}
+
 \end{document}
