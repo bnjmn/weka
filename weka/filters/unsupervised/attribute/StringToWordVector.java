@@ -127,7 +127,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class StringToWordVector 
   extends Filter
@@ -705,7 +705,7 @@ public class StringToWordVector
    * @return Value of delimiters.
    */
   public String getDelimiters() {
-    return delimiters;
+    return delimiters.replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'");
   }
     
   /**
@@ -714,7 +714,7 @@ public class StringToWordVector
    * @param newDelimiters Value to assign to delimiters.
    */
   public void setDelimiters(String newDelimiters) {
-    delimiters = newDelimiters;
+    delimiters = newDelimiters.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "'");
   }
 
   /**
