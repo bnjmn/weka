@@ -23,6 +23,7 @@
 
 package weka.gui;
 
+import weka.core.ClassDiscovery;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 
@@ -44,6 +45,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
 
 import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
@@ -53,7 +55,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PropertyPanel 
   extends JPanel {
@@ -118,10 +120,11 @@ public class PropertyPanel
           }
           else if (    (evt.getButton() == MouseEvent.BUTTON3) 
               	    || ((evt.getButton() == MouseEvent.BUTTON1) && evt.isAltDown() && evt.isShiftDown()) ) {
+            JPopupMenu menu = new JPopupMenu();
+            JMenuItem item;
+
             if (m_Editor.getValue() != null) {
-              JPopupMenu menu = new JPopupMenu();
-              
-              JMenuItem item = new JMenuItem("Show properties...");
+              item = new JMenuItem("Show properties...");
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   showPropertyDialog();
@@ -129,7 +132,7 @@ public class PropertyPanel
               });
               menu.add(item);
 
-              item = new JMenuItem("Copy to clipboard");
+              item = new JMenuItem("Copy configuration to clipboard");
               item.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                   String str = m_Editor.getValue().getClass().getName();
@@ -141,8 +144,37 @@ public class PropertyPanel
                 }
               });
               menu.add(item);
-              menu.show(comp, evt.getX(), evt.getY());
             }
+            
+            item = new JMenuItem("Enter configuration...");
+            item.addActionListener(new ActionListener() {
+              public void actionPerformed(ActionEvent e) {
+        	String str = JOptionPane.showInputDialog(
+        	                 comp, 
+        	                 "Configuration (<classname> [<options>])");
+        	if (str != null) {
+        	  try {
+        	    String[] options = Utils.splitOptions(str);
+        	    String classname = options[0];
+        	    options[0] = "";
+        	    m_Editor.setValue(
+        		Utils.forName(
+        		    Object.class, classname, options));
+        	  }
+        	  catch (Exception ex) {
+        	    ex.printStackTrace();
+        	    JOptionPane.showMessageDialog(
+        		comp, 
+        		"Error parsing commandline:\n" + ex, 
+        		"Error...",
+        		JOptionPane.ERROR_MESSAGE);
+        	  }
+        	}
+              }
+            });
+            menu.add(item);
+            
+            menu.show(comp, evt.getX(), evt.getY());
           }
         }
       }
