@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 public final class Utils {
 
@@ -174,7 +174,7 @@ public final class Utils {
    * another string.
    *
    * @param inString the string to replace substrings in.
-   * @param substring the substring to replace.
+   * @param subString the substring to replace.
    * @param replaceString the replacement substring
    * @return the input string with occurrences of substring replaced.
    */
@@ -367,7 +367,7 @@ public final class Utils {
   /**
    * Returns the basic class of an array class (handles multi-dimensional
    * arrays).
-   * @param o        the array to inspect
+   * @param c        the array to inspect
    * @return         the class of the innermost elements
    */
   public static Class getArrayClass(Class c) {
@@ -458,7 +458,7 @@ public final class Utils {
   /**
    * Checks if the given array contains any non-empty options.
    *
-   * @param strings an array of strings
+   * @param options an array of strings
    * @exception Exception if there are any non-empty options
    */
   public static void checkForRemainingOptions(String [] options) 
@@ -487,7 +487,7 @@ public final class Utils {
    * it is replaced with the empty string.
    *
    * @param flag the character indicating the flag.
-   * @param strings the array of strings containing all the options.
+   * @param options the array of strings containing all the options.
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
@@ -503,7 +503,7 @@ public final class Utils {
    * it is replaced with the empty string.
    *
    * @param flag the String indicating the flag.
-   * @param strings the array of strings containing all the options.
+   * @param options the array of strings containing all the options.
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
@@ -803,8 +803,10 @@ public final class Utils {
    * Split up a string containing options into an array of strings,
    * one for each option.
    *
-   * @param optionString the string containing the options
-   * @return the array of options
+   * @param 		quotedOptionString the string containing the options
+   * @return 		the array of options
+   * @throws Exception 	in case of an unterminated string, unknown character or
+   * 			a parse error
    */
   public static String [] splitOptions(String quotedOptionString) throws Exception{
 
@@ -833,8 +835,6 @@ public final class Utils {
 	    i += 1;
 	    if (i >= str.length()) 
 	      throw new Exception("String should not finish with \\");
-	    if (str.charAt(i) != '\\' &&  str.charAt(i) != '"') 
-	      throw new Exception("Unknow character \\" + str.charAt(i));
 	  }
 	  i += 1;
 	}
@@ -880,7 +880,7 @@ public final class Utils {
 	continue;
       }
       if (optionArray[i].indexOf(' ') != -1) {
-	optionString += '"' + optionArray[i] + '"';
+	optionString += '"' + backQuoteChars(optionArray[i]) + '"';
       } else {
 	optionString += optionArray[i];
       }
@@ -1038,7 +1038,8 @@ public final class Utils {
   /**
    * Returns the logarithm of a for base 2.
    *
-   * @param a a double
+   * @param a 	a double
+   * @return	the logarithm for base 2
    */
   public static /*@pure@*/ double log2(double a) {
     
@@ -1254,6 +1255,7 @@ public final class Utils {
    * the original double.
    *
    * @param value the double value
+   * @param rand the random number generator
    * @return the resulting integer value
    */
   public static int probRound(double value, Random rand) {
@@ -1498,8 +1500,8 @@ public final class Utils {
    *
    * @param array the array of doubles to be sorted
    * @param index the index into the array of doubles
-   * @param left the first index of the subset 
-   * @param right the last index of the subset 
+   * @param l the first index of the subset 
+   * @param r the last index of the subset 
    *
    * @return the index of the middle element
    */
@@ -1536,8 +1538,8 @@ public final class Utils {
    *
    * @param array the array of integers to be sorted
    * @param index the index into the array of integers
-   * @param left the first index of the subset 
-   * @param right the last index of the subset 
+   * @param l the first index of the subset 
+   * @param r the last index of the subset 
    *
    * @return the index of the middle element
    */
