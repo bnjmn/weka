@@ -1,5 +1,21 @@
 /*
- * Copyright (C) 2002 University of Waikato 
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/*
+ * Copyright (C) 2002-2006 University of Waikato 
  */
 
 package weka.classifiers;
@@ -7,8 +23,10 @@ package weka.classifiers;
 import weka.classifiers.CheckClassifier.PostProcessor;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.core.Attribute;
+import weka.core.CheckOptionHandler;
 import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.test.Regression;
 
 import junit.framework.TestCase;
@@ -20,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -75,6 +93,9 @@ public abstract class AbstractClassifierTest
   /** For testing the classifier */
   protected CheckClassifier m_Tester;
   
+  /** whether classifier is an OptionHandler */
+  protected boolean m_optionHandler;
+  
   /** whether classifier is updateable */
   protected boolean m_updateableClassifier;
 
@@ -127,6 +148,9 @@ public abstract class AbstractClassifierTest
   /** the results of the regression tests */
   protected FastVector[] m_RegressionResults;
   
+  /** the OptionHandler tester */
+  protected CheckOptionHandler m_OptionTester;
+  
   /**
    * Constructs the <code>AbstractClassifierTest</code>. Called by subclasses.
    *
@@ -166,15 +190,36 @@ public abstract class AbstractClassifierTest
   }
   
   /**
+   * Configures the CheckOptionHandler uses for testing the optionhandling.
+   * Sets the classifier return from the getClassifier() method.
+   * 
+   * @return	the fully configured CheckOptionHandler
+   * @see	#getClassifier()
+   */
+  protected CheckOptionHandler getOptionTester() {
+    CheckOptionHandler		result;
+    
+    result = new CheckOptionHandler();
+    if (m_optionHandler)
+      result.setOptionHandler((OptionHandler) getClassifier());
+    result.setUserOptions(new String[0]);
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
    * Called by JUnit before each test method. This implementation creates
    * the default classifier to test and loads a test set of Instances.
    *
    * @exception Exception if an error occurs reading the example instances.
    */
   protected void setUp() throws Exception {
-    m_Classifier = getClassifier();
-    m_Tester     = getTester();
+    m_Classifier   = getClassifier();
+    m_Tester       = getTester();
+    m_OptionTester = getOptionTester();
 
+    m_optionHandler                = m_Tester.canTakeOptions()[0];
     m_updateableClassifier         = m_Tester.updateableClassifier()[0];
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
@@ -850,5 +895,63 @@ public abstract class AbstractClassifierTest
     catch (java.io.IOException ex) {
       fail("Problem during regression testing.\n" + ex);
     }
+  }
+  
+  /**
+   * tests the listing of the options
+   */
+  public void testListOptions() throws Exception {
+    if (!m_optionHandler)
+      return;
+    
+    if (!m_OptionTester.checkListOptions())
+      fail("Options cannot be listed via listOptions.");
+  }
+  
+  /**
+   * tests the setting of the options
+   */
+  public void testSetOptions() throws Exception {
+    if (!m_optionHandler)
+      return;
+    
+    if (!m_OptionTester.checkSetOptions())
+      fail("setOptions method failed.");
+  }
+  
+  /**
+   * tests whether there are any remaining options
+   */
+  public void testRemainingOptions() throws Exception {
+    if (!m_optionHandler)
+      return;
+    
+    if (!m_OptionTester.checkRemainingOptions())
+      fail("There were 'left-over' options.");
+  }
+  
+  /**
+   * tests the whether the user-supplied options stay the same after setting.
+   * getting, and re-setting again.
+   * 
+   * @see 	#getOptionTester()
+   */
+  public void testCanonicalUserOptions() throws Exception {
+    if (!m_optionHandler)
+      return;
+    
+    if (!m_OptionTester.checkCanonicalUserOptions())
+      fail("setOptions method failed");
+  }
+  
+  /**
+   * tests the resetting of the options to the default ones
+   */
+  public void testResettingOptions() throws Exception {
+    if (!m_optionHandler)
+      return;
+    
+    if (!m_OptionTester.checkSetOptions())
+      fail("Resetting of options failed");
   }
 }
