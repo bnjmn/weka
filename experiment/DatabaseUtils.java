@@ -52,7 +52,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -569,7 +569,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += '\'' + key[i].toString() + '\'';
+	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
 	} else {
 	  query += key[i].toString();
 	}
@@ -629,7 +629,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += "'" + key[i].toString() + "'";
+	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
 	} else {
 	  query += key[i].toString();
 	}
@@ -708,7 +708,7 @@ public class DatabaseUtils implements Serializable {
       }
       if (key[i] != null) {
 	if (key[i] instanceof String) {
-	  query += '\'' + key[i].toString() + '\'';
+	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
 	} else if (key[i] instanceof Double) {
 	  query += safeDoubleToString((Double)key[i]);
 	} else {

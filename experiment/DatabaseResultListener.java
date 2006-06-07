@@ -24,6 +24,7 @@
 package weka.experiment;
 
 import weka.core.FastVector;
+import weka.core.Utils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -35,7 +36,7 @@ import java.sql.ResultSet;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DatabaseResultListener 
   extends DatabaseUtils
@@ -376,7 +377,7 @@ public class DatabaseResultListener
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += '\'' + key[i].toString() + '\'';
+	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
 	} else {
 	  query += key[i].toString();
 	}
