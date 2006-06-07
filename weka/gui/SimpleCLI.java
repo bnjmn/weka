@@ -23,31 +23,28 @@
 
 package weka.gui;
 
+import weka.core.Utils;
+
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Frame;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.TextArea;
 import java.awt.TextField;
-import java.awt.event.KeyListener;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
-import java.io.PipedOutputStream;
-import java.io.LineNumberReader;
-import java.io.Reader;
-import java.io.PipedInputStream;
-import java.io.PrintStream;
+import java.awt.event.WindowEvent;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.io.PrintStream;
+import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.StringTokenizer;
 import java.util.Vector;
-
 
 /**
  * Creates a very simple command line for invoking the main method of
@@ -56,9 +53,14 @@ import java.util.Vector;
  * through previous commmands. This gui uses only AWT (i.e. no Swing).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class SimpleCLI extends Frame implements ActionListener {
+public class SimpleCLI
+  extends Frame
+  implements ActionListener {
+  
+  /** for serialization */
+  static final long serialVersionUID = -50661410800566036L;
   
   /** The output area canvas added to the frame */
   protected TextArea m_OutputArea = new TextArea();
@@ -88,8 +90,11 @@ public class SimpleCLI extends Frame implements ActionListener {
   protected Thread m_RunThread;
   
 
-  /*
+  /**
    * A class that sends all lines from a reader to a TextArea component
+   * 
+   * @author Len Trigg (trigg@cs.waikato.ac.nz)
+   * @version $Revision: 1.8 $
    */
   class ReaderToTextArea extends Thread {
 
@@ -130,9 +135,12 @@ public class SimpleCLI extends Frame implements ActionListener {
     }
   }
 
-  /*
+  /**
    * A class that handles running the main method of the class
    * in a separate thread
+   * 
+   * @author Len Trigg (trigg@cs.waikato.ac.nz)
+   * @version $Revision: 1.8 $
    */
   class ClassRunner extends Thread {
 
@@ -244,7 +252,7 @@ public class SimpleCLI extends Frame implements ActionListener {
 
     System.out.println("> " + commands + '\n');
     System.out.flush();
-    String [] commandArgs = splitOptions(commands);
+    String [] commandArgs = Utils.splitOptions(commands);
     if (commandArgs.length == 0) {
       return;
     }
@@ -342,27 +350,6 @@ public class SimpleCLI extends Frame implements ActionListener {
   }
 
   /**
-   * Split up a string containing options into an array of strings,
-   * one for each option.
-   *
-   * @param optionString the string containing the options
-   * @return the array of options
-   */
-  protected static String [] splitOptions(String optionString) {
-
-    Vector optionsVec = new Vector();
-    StringTokenizer st = new StringTokenizer(optionString);
-    while (st.hasMoreTokens())
-      optionsVec.addElement(st.nextToken());
-
-    String [] options = new String[optionsVec.size()];
-    for (int i = 0; i < optionsVec.size(); i++) {
-      options[i] = (String)optionsVec.elementAt(i);
-    }
-    return options;
-  }
-
-  /**
    * Changes the currently displayed command line when certain keys
    * are pressed. The up arrow moves back through history entries
    * and the down arrow moves forward through history entries.
@@ -443,5 +430,4 @@ public class SimpleCLI extends Frame implements ActionListener {
       System.exit(0);
     }
   }
-  
 }
