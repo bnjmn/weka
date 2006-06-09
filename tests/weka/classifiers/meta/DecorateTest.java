@@ -21,10 +21,12 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.AbstractClassifierTest;
+import weka.classifiers.CheckClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.CheckClassifier.PostProcessor;
+import weka.core.Instances;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -32,10 +34,52 @@ import junit.framework.TestSuite;
  * java weka.classifiers.meta.Decorate
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class DecorateTest 
   extends AbstractClassifierTest {
+  
+  /** 
+   * a class for postprocessing the test-data: all nominal attributes with less 
+   * than 2 labels are removed from the data.
+   * 
+   * @author  FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.1.2.3 $
+   */
+  public static class SingularPostProcessor 
+    extends PostProcessor {
+    
+    /**
+     * initializes the PostProcessor
+     */
+    public SingularPostProcessor() {
+      super();
+    }
+    
+    /**
+     * Provides a hook for derived classes to further modify the data. Deletes
+     * all nominal attributes with less than 2 labels.
+     * 
+     * @param data	the data to process
+     * @return		the processed data
+     */
+    public Instances process(Instances data) {
+      Instances	result;
+      int		i;
+      
+      result = new Instances(super.process(data));
+      
+      i = 0;
+      while (i < result.numAttributes()) {
+        if (result.attribute(i).isNominal() && (result.attribute(i).numValues() < 2))
+  	result.deleteAttributeAt(i);
+        else
+  	i++;
+      }
+      
+      return result;
+    }
+  }
 
   public DecorateTest(String name) { 
     super(name);  
@@ -44,6 +88,21 @@ public class DecorateTest
   /** Creates a default Decorate */
   public Classifier getClassifier() {
     return new Decorate();
+  }
+
+  /**
+   * configures the CheckClassifier instance used throughout the tests
+   * 
+   * @return	the fully configured CheckClassifier instance used for testing
+   */
+  protected CheckClassifier getTester() {
+    CheckClassifier 	result;
+    
+    result = super.getTester();
+    result.setNumInstances(60);
+    result.setPostProcessor(new SingularPostProcessor());
+    
+    return result;
   }
 
   public static Test suite() {
