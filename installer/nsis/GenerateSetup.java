@@ -19,7 +19,7 @@ import java.util.Vector;
  * target="_blank">NSIS</a>.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.2 $
+ * @version   $Revision: 1.3 $
  */
 public class GenerateSetup {
 
@@ -261,6 +261,9 @@ public class GenerateSetup {
   protected boolean generateSetupFile() {
     Vector            setup;
     String            block;
+    String            versionHyphen;
+
+    versionHyphen = mVersion.replaceAll("\\.", "-");
 
     // load file
     setup = loadFile(TEMPLATES + "/" + "setup.nsi");
@@ -269,6 +272,7 @@ public class GenerateSetup {
     block = "";
     block += "!define WEKA_WEKA \"Weka\"\n";
     block += "!define WEKA_VERSION \"" + mVersion + "\"\n";
+    block += "!define WEKA_VERSION_HYPHEN \"" + versionHyphen + "\"\n";
     block += "!define WEKA_FILES \"" + new File(mInputDir).getAbsolutePath() + "\"\n";
     block += "!define WEKA_TEMPLATES \"" + new File(TEMPLATES).getAbsolutePath() + "\"\n";
     block += "!define WEKA_LINK_PREFIX \"" + mLinkPrefix + "\"\n";
@@ -292,9 +296,13 @@ public class GenerateSetup {
 
     // write file
     if (mJRE.length() != 0)
-      return writeToFile(setup, mOutputDir + "/Weka-" + mVersion + "jre.nsi");
+      return writeToFile(
+          setup, 
+          mOutputDir + "/weka-" + versionHyphen + "jre.nsi");
     else
-      return writeToFile(setup, mOutputDir + "/Weka-" + mVersion + ".nsi");
+      return writeToFile(
+          setup, 
+          mOutputDir + "/weka-" + versionHyphen + ".nsi");
   }
 
   /**
