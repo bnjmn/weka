@@ -51,7 +51,7 @@ import weka.classifiers.Classifier;
  * (default 1.0).
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.2.2.1 $ 
  */
 
 public class ComplementNaiveBayes extends Classifier
@@ -216,6 +216,9 @@ public class ComplementNaiveBayes extends Classifier
      */
     public void buildClassifier(Instances instances) throws Exception {
 
+        if (instances.numInstances() == 0)
+          throw new Exception("Not enough training instances!");
+      
         numClasses = instances.numClasses();
 	int numAttributes = instances.numAttributes();
         
