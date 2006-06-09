@@ -4,13 +4,14 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.2 $
+# Version: $Revision: 1.3 $
 
 Name Weka
 
 # Start: Weka
 !define WEKA_WEKA "Weka"
 !define WEKA_VERSION "3.4.7"   # must be of form 'X.Y.Z'
+!define WEKA_VERSION_HYPHEN "3-4-7"   # must be of form 'X-Y-Z'
 !define WEKA_FILES "D:\development\projects\weka.previous_releases\weka-3-4-7"
 !define WEKA_TEMPLATES "D:\development\projects\weka.release\nsis\templates"
 !define WEKA_LINK_PREFIX "Weka 3.4"
@@ -69,7 +70,7 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-OutFile "${WEKA_WEKA}-${WEKA_VERSION}${WEKA_JRE_SUFFIX}_setup.exe"
+OutFile "weka-${WEKA_VERSION_HYPHEN}${WEKA_JRE_SUFFIX}.exe"
 InstallDir $PROGRAMFILES\${WEKA_DIR}
 CRCCheck on
 XPStyle on
