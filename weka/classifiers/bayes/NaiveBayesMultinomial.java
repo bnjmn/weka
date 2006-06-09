@@ -36,7 +36,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.9.2.1 $ 
  */
 
 /**
@@ -50,26 +50,26 @@ import weka.classifiers.Classifier;
 public class NaiveBayesMultinomial extends Classifier 
   implements WeightedInstancesHandler {
     
-  /*
+  /**
     probability that a word (w) exists in a class (H) (i.e. Pr[w|H])
     The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
     NOTE: the values are actually the log of Pr[w|H]
   */
   private double[][] probOfWordGivenClass;
     
-  //the probability of a class (i.e. Pr[H])
+  /** the probability of a class (i.e. Pr[H]) */
   private double[] probOfClass;
     
-  //number of unique words
+  /** number of unique words */
   private int numAttributes;
     
-  //number of class values
+  /** number of class values */
   private int numClasses;
     
-  //cache lnFactorial computations
+  /** cache lnFactorial computations */
   private double[] lnFactorialCache = new double[]{0.0,0.0};
     
-  //copy of header information for use in toString method
+  /** copy of header information for use in toString method */
   Instances headerInfo;
 
   /**
@@ -147,6 +147,9 @@ public class NaiveBayesMultinomial extends Classifier
 		  wordsPerClass[classIndex] += numOccurences;
 		  probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
 		}
+	      else {
+		throw new Exception("Cannot handle missing values!");
+	      }
 	    } 
       }
 	
