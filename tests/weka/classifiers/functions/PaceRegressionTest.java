@@ -4,28 +4,69 @@
 
 package weka.classifiers.functions;
 
-import java.util.Random;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.FastVector;
-import weka.core.Instance;
+import weka.classifiers.AbstractClassifierTest;
+import weka.classifiers.CheckClassifier;
+import weka.classifiers.Classifier;
+import weka.classifiers.CheckClassifier.PostProcessor;
 import weka.core.Instances;
-import weka.core.SelectedTag;
-import weka.classifiers.evaluation.NominalPrediction;
-import weka.classifiers.*;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests PaceRegression. Run from the command line with:<p>
  * java weka.classifiers.nn.PaceRegressionTest
  *
  * @author <a href="mailto:mfw4@cs.waikato.ac.nz">Malcolm Ware</a>
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class PaceRegressionTest extends AbstractClassifierTest {
+  
+  /** 
+   * a class for postprocessing the test-data: all non-binary nominal attributes
+   * are deleted from the dataset.
+   * 
+   * @author  FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.1.2.2 $
+   */
+  public static class BinaryPostProcessor 
+    extends PostProcessor {
+    
+    /**
+     * initializes the PostProcessor
+     */
+    public BinaryPostProcessor() {
+      super();
+    }
+    
+    /**
+     * Provides a hook for derived classes to further modify the data. Deletes
+     * all non-binary nominal attributes.
+     * 
+     * @param data	the data to process
+     * @return		the processed data
+     */
+    public Instances process(Instances data) {
+      Instances	result;
+      int		i;
+      
+      result = new Instances(super.process(data));
+      
+      i = 0;
+      while (i < result.numAttributes()) {
+        if (result.attribute(i).isNominal() && (result.attribute(i).numValues() != 2))
+  	result.deleteAttributeAt(i);
+        else
+  	i++;
+      }
+      
+      return result;
+    }
+  }
 
-
-  public PaceRegressionTest(String name) { super(name);  }
+  public PaceRegressionTest(String name) { 
+    super(name);
+  }
 
   /**
    * Called by JUnit before each test method. This implementation creates
@@ -41,6 +82,32 @@ public class PaceRegressionTest extends AbstractClassifierTest {
   /** Creates a default ThresholdSelector */
   public Classifier getClassifier() {
     return new PaceRegression();
+  }
+
+  /**
+   * configures the CheckClassifier instance used throughout the tests
+   * 
+   * @return	the fully configured CheckClassifier instance used for testing
+   */
+  protected CheckClassifier getTester() {
+    CheckClassifier 	result;
+    
+    result = super.getTester();
+    result.setNumInstances(60);
+    result.setPostProcessor(new BinaryPostProcessor());
+    
+    return result;
+  }
+  
+  /**
+   * Provides a hook for derived classes to further modify the data. Deletes
+   * all non-binary nominal attributes.
+   * 
+   * @param data	the data to process
+   * @return		the processed data
+   */
+  protected Instances process(Instances data) {
+    return m_Tester.getPostProcessor().process(data);
   }
 
   public static Test suite() {
