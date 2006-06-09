@@ -105,18 +105,35 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p/>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16.2.1 $
- */
-
-/*
- * Note about test methods:
- * - return array of booleans
- * - first index: success or not
- * - second index: acceptable or not (e.g., Exception is OK)
- *
- * FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.16.2.2 $
  */
 public class CheckClassifier implements OptionHandler {
+
+  /*
+   * Note about test methods:
+   * - return array of booleans
+   * - first index: success or not
+   * - second index: acceptable or not (e.g., Exception is OK)
+   *
+   * FracPete (fracpete at waikato dot ac dot nz)
+   */
+  
+  /** 
+   * a class for postprocessing the test-data 
+   * @see #makeTestDataset(int, int, int, int, int, int, int, int, int, int, boolean)
+   */
+  public static class PostProcessor {
+    /**
+     * Provides a hook for derived classes to further modify the data. Currently,
+     * the data is just passed through.
+     * 
+     * @param data	the data to process
+     * @return		the processed data
+     */
+    public Instances process(Instances data) {
+      return data;
+    }
+  }
 
   /*** The classifier to be examined */
   protected Classifier m_Classifier = new weka.classifiers.rules.ZeroR();
@@ -135,6 +152,9 @@ public class CheckClassifier implements OptionHandler {
 
   /** The number of instances in the datasets */
   protected int m_NumInstances = 20;
+  
+  /** for post-processing the data even further */
+  protected PostProcessor m_PostProcessor = null;
   
   /**
    * Returns an enumeration describing the available options.
@@ -240,6 +260,25 @@ public class CheckClassifier implements OptionHandler {
     }
     
     return (String[]) result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * sets the PostProcessor to use
+   * 
+   * @param value	the new PostProcessor
+   * @see #m_PostProcessor
+   */
+  public void setPostProcessor(PostProcessor value) {
+    m_PostProcessor = value;
+  }
+  
+  /**
+   * returns the current PostProcessor, can be null
+   * 
+   * @return		the current PostProcessor
+   */
+  public PostProcessor getPostProcessor() {
+    return m_PostProcessor;
   }
 
   /**
@@ -577,6 +616,7 @@ public class CheckClassifier implements OptionHandler {
     print("...");
     FastVector accepts = new FastVector();
     accepts.addElement("train");
+    accepts.addElement("training");
     accepts.addElement("value");
     int numTrain = 0, numTest = getNumInstances(), numClasses = 2, 
         missingLevel = 0;
@@ -1357,6 +1397,7 @@ public class CheckClassifier implements OptionHandler {
       String msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("worse than zeror") >= 0) {
 	println("warning: performs worse than ZeroR");
+        result[0] = true;
         result[1] = true;
       } else {
 	for (int i = 0; i < accepts.size(); i++) {
@@ -1595,7 +1636,22 @@ public class CheckClassifier implements OptionHandler {
       }
       data.add(current);
     }
-    return data;
+    
+    return process(data);
+  }
+  
+  /**
+   * Provides a hook for derived classes to further modify the data. 
+   * 
+   * @param data	the data to process
+   * @return		the processed data
+   * @see #m_PostProcessor
+   */
+  protected Instances process(Instances data) {
+    if (getPostProcessor() == null)
+      return data;
+    else
+      return getPostProcessor().process(data);
   }
   
   /**
