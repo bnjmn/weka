@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URL;
 
 /**
  <!-- globalinfo-start -->
@@ -41,12 +42,15 @@ import java.io.Reader;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Loader
  */
 public class ArffLoader 
   extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter, IncrementalConverter {
+  implements FileSourcedConverter, 
+             BatchConverter, 
+             IncrementalConverter,
+             URLSourcedLoader {
 
   /** for serialization */
   static final long serialVersionUID = 2726929550544048587L;
@@ -64,6 +68,9 @@ public class ArffLoader
   /** the file */
   protected String m_File = 
     (new File(System.getProperty("user.dir"))).getAbsolutePath();
+
+  /** the url */
+  protected String m_URL = "http://";
 
   /**
    * The reader for the source file.
@@ -108,8 +115,10 @@ public class ArffLoader
     m_structure = null;
     //    m_sourceReader = null;
     setRetrieval(NONE);
-    if (m_File != null) {
+    if (m_File != null && (new File(m_File)).isFile()) {
       setFile(new File(m_File));
+    } else if (m_URL != null & !m_URL.equals("http://")) {
+      setURL(m_URL);
     }
   }
 
@@ -136,6 +145,22 @@ public class ArffLoader
     }
     m_File = file.getAbsolutePath();
   }
+
+  /**
+   * Resets the Loader object and sets the source of the data set to be 
+   * the supplied url.
+   *
+   * @param url the source url.
+   * @exception Exception if an error occurs
+   */
+  public void setSource(URL url) throws Exception {
+    m_structure = null;
+    setRetrieval(NONE);
+    
+    setSource(url.openStream());
+
+    m_URL = url.toString();
+  }
   
 
   /**
@@ -159,6 +184,26 @@ public class ArffLoader
   }
 
   /**
+   * Set the url to load from
+   *
+   * @param url the url to load from
+   * @exception Exception if the url can't be set.
+   */
+  public void setURL(String url) throws Exception {
+    m_URL = url;
+    setSource(new URL(url));
+  }
+
+  /**
+   * Return the current url
+   *
+   * @return the current url
+   */
+  public String retrieveURL() {
+    return m_URL;
+  }
+
+  /**
    * Resets the Loader object and sets the source of the data set to be 
    * the supplied InputStream.
    *
@@ -166,7 +211,11 @@ public class ArffLoader
    * @exception IOException always thrown.
    */
   public void setSource(InputStream in) throws IOException {
-    m_File = null;
+    // m_File = null;
+    m_File = (new File(System.getProperty("user.dir"))).
+      getAbsolutePath();
+    m_URL = "http://";
+
     m_sourceReader = new BufferedReader(new InputStreamReader(in));
   }
 
