@@ -114,7 +114,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.50 $
+ * @version $Revision: 1.51 $
  */
 public class ClustererPanel
   extends JPanel {
@@ -569,6 +569,7 @@ public class ClustererPanel
 
     if (m_SetTestFrame == null) {
       final SetInstancesPanel sp = new SetInstancesPanel();
+      sp.setReadIncrementally(false);
       m_Summary = sp.getSummary();
       if (m_TestInstances != null) {
 	sp.setInstances(m_TestInstances);
@@ -581,6 +582,7 @@ public class ClustererPanel
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
       m_SetTestFrame = new JFrame("Test Instances");
+      sp.setParentFrame(m_SetTestFrame);   // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
@@ -1415,94 +1417,129 @@ public class ClustererPanel
    * @param name the name of the clusterer entry
    * @param classifier the clusterer to evaluate
    */
-  protected void reevaluateModel(String name, Clusterer clusterer,
-				 Instances trainHeader, int[] ignoredAtts) {
+  protected void reevaluateModel(final String name, 
+                                 final Clusterer clusterer,
+				 final Instances trainHeader, 
+                                 final int[] ignoredAtts) {
 
-    StringBuffer outBuff = m_History.getNamedBuffer(name);
-    Instances userTest = null;
+    if (m_RunThread == null) {
+      m_StartBut.setEnabled(false);
+      m_StopBut.setEnabled(true);
+      m_ignoreBut.setEnabled(false);
+      m_RunThread = new Thread() {
+          public void run() {
+            // Copy the current state of things
+            m_Log.statusMessage("Setting up...");
 
-    PlotData2D predData = null;
-    if (m_TestInstances != null) {
-      userTest = new Instances(m_TestInstances);
-    }
+            StringBuffer outBuff = m_History.getNamedBuffer(name);
+            Instances userTest = null;
+
+            PlotData2D predData = null;
+            if (m_TestInstances != null) {
+              userTest = new Instances(m_TestInstances);
+            }
     
-    boolean saveVis = m_StorePredictionsBut.isSelected();
-    String grph = null;
+            boolean saveVis = m_StorePredictionsBut.isSelected();
+            String grph = null;
 
-    try {
-      if (userTest == null) {
-	throw new Exception("No user test set has been opened");
-      }
-      if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
-	throw new Exception("Train and test set are not compatible");
-      }
+            try {
+              if (userTest == null) {
+                throw new Exception("No user test set has been opened");
+              }
+              if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
+                throw new Exception("Train and test set are not compatible");
+              }
 
-      m_Log.statusMessage("Evaluating on test data...");
-      m_Log.logMessage("Re-evaluating clusterer (" + name + ") on test set");
-      ClusterEvaluation eval = new ClusterEvaluation();
-      eval.setClusterer(clusterer);
+              m_Log.statusMessage("Evaluating on test data...");
+              m_Log.logMessage("Re-evaluating clusterer (" + name + ") on test set");
+
+              m_Log.logMessage("Started reevaluate model");
+              if (m_Log instanceof TaskLogger) {
+                ((TaskLogger)m_Log).taskStarted();
+              }
+              ClusterEvaluation eval = new ClusterEvaluation();
+              eval.setClusterer(clusterer);
     
-      Instances userTestT = new Instances(userTest);
-      if (ignoredAtts != null) {
-	userTestT = removeIgnoreCols(userTestT, ignoredAtts);
-      }
+              Instances userTestT = new Instances(userTest);
+              if (ignoredAtts != null) {
+                userTestT = removeIgnoreCols(userTestT, ignoredAtts);
+              }
 
-      eval.evaluateClusterer(userTestT);
+              eval.evaluateClusterer(userTestT);
       
-      predData = setUpVisualizableInstances(userTest, eval);
+              predData = setUpVisualizableInstances(userTest, eval);
 
-      outBuff.append("\n=== Re-evaluation on test set ===\n\n");
-      outBuff.append("User supplied test set\n");  
-      outBuff.append("Relation:     " + userTest.relationName() + '\n');
-      outBuff.append("Instances:    " + userTest.numInstances() + '\n');
-      outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
-      if (trainHeader == null)
-	outBuff.append("NOTE - if test set is not compatible then results are "
-		       + "unpredictable\n\n");
+              outBuff.append("\n=== Re-evaluation on test set ===\n\n");
+              outBuff.append("User supplied test set\n");  
+              outBuff.append("Relation:     " + userTest.relationName() + '\n');
+              outBuff.append("Instances:    " + userTest.numInstances() + '\n');
+              outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
+              if (trainHeader == null)
+                outBuff.append("NOTE - if test set is not compatible then results are "
+                               + "unpredictable\n\n");
       
-      outBuff.append(eval.clusterResultsToString());
-      outBuff.append("\n");
-      m_History.updateResult(name);
-      m_Log.logMessage("Finished re-evaluation");
-      m_Log.statusMessage("OK");
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
-      JOptionPane.showMessageDialog(this,
-				    "Problem evaluating clusterer:\n"
-				    + ex.getMessage(),
-				    "Evaluate clusterer",
-				    JOptionPane.ERROR_MESSAGE);
-      m_Log.statusMessage("Problem evaluating clusterer");
+              outBuff.append(eval.clusterResultsToString());
+              outBuff.append("\n");
+              m_History.updateResult(name);
+              m_Log.logMessage("Finished re-evaluation");
+              m_Log.statusMessage("OK");
+            } catch (Exception ex) {
+              ex.printStackTrace();
+              m_Log.logMessage(ex.getMessage());
+              JOptionPane.showMessageDialog(ClustererPanel.this,
+                                            "Problem evaluating clusterer:\n"
+                                            + ex.getMessage(),
+                                            "Evaluate clusterer",
+                                            JOptionPane.ERROR_MESSAGE);
+              m_Log.statusMessage("Problem evaluating clusterer");
 
-    } finally {
-      if (predData != null) {
-	m_CurrentVis = new VisualizePanel();
-	m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
-	m_CurrentVis.setLog(m_Log);
-	predData.setPlotName(name+" ("+userTest.relationName()+")");
+            } finally {
+              if (predData != null) {
+                m_CurrentVis = new VisualizePanel();
+                m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
+                m_CurrentVis.setLog(m_Log);
+                predData.setPlotName(name+" ("+userTest.relationName()+")");
 	
-	try {
-	  m_CurrentVis.addPlot(predData);
-	} catch (Exception ex) {
-	  System.err.println(ex);
-	}
+                try {
+                  m_CurrentVis.addPlot(predData);
+                } catch (Exception ex) {
+                  System.err.println(ex);
+                }
 	
-	FastVector vv = new FastVector();
-	vv.addElement(clusterer);
-	if (trainHeader != null) vv.addElement(trainHeader);
-	if (ignoredAtts != null) vv.addElement(ignoredAtts);
-	if (saveVis) {
-	  vv.addElement(m_CurrentVis);
-	  if (grph != null) {
-	    vv.addElement(grph);
-	  }
+                FastVector vv = new FastVector();
+                vv.addElement(clusterer);
+                if (trainHeader != null) vv.addElement(trainHeader);
+                if (ignoredAtts != null) vv.addElement(ignoredAtts);
+                if (saveVis) {
+                  vv.addElement(m_CurrentVis);
+                  if (grph != null) {
+                    vv.addElement(grph);
+                  }
 	  
-	}
-	m_History.addObject(name, vv);
-      }
+                }
+                m_History.addObject(name, vv);
+
+              }
+              if (isInterrupted()) {
+                m_Log.logMessage("Interrupted reevaluate model");
+                m_Log.statusMessage("See error log");
+              }
+              m_RunThread = null;
+              m_StartBut.setEnabled(true);
+              m_StopBut.setEnabled(false);
+              m_ignoreBut.setEnabled(true);
+              if (m_Log instanceof TaskLogger) {
+                ((TaskLogger)m_Log).taskFinished();
+              }
+            }
+          }
+      
+        };
+      m_RunThread.setPriority(Thread.MIN_PRIORITY);
+      m_RunThread.start();
     }
   }
+
 
   /**
    * Tests out the clusterer panel from the command line.
