@@ -39,6 +39,7 @@ import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.converters.*;
 import weka.gui.CostMatrixEditor;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
@@ -125,7 +126,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.90 $
+ * @version $Revision: 1.91 $
  */
 public class ClassifierPanel 
   extends JPanel {
@@ -258,17 +259,14 @@ public class ClassifierPanel
   /** The main set of instances we're playing with */
   protected Instances m_Instances;
 
-  /** The user-supplied test set (if any) */
-  protected Instances m_TestInstances;
+  /** The loader used to load the user-supplied test set (if any) */
+  protected Loader m_TestLoader;
   
   /** A thread that classification runs in */
   protected Thread m_RunThread;
 
   /** The current visualization object */
   protected VisualizePanel m_CurrentVis = null;
-
-  /** The instances summary panel displayed by m_SetTestFrame */
-  protected InstancesSummaryPanel m_Summary = null;
 
   /** Filter to ensure only model files are selected */  
   protected FileFilter m_ModelFilter =
@@ -734,16 +732,21 @@ public class ClassifierPanel
 
     if (m_SetTestFrame == null) {
       final SetInstancesPanel sp = new SetInstancesPanel();
-      m_Summary = sp.getSummary();
-      if (m_TestInstances != null) {
-	sp.setInstances(m_TestInstances);
+
+      if (m_TestLoader != null) {
+        try {
+          if (m_TestLoader.getStructure() != null)
+            sp.setInstances(m_TestLoader.getStructure());
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
       }
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
-	  m_TestInstances = sp.getInstances();
+	  m_TestLoader = sp.getLoader();
 	}
       });
-      // Add propertychangelistener to update m_TestInstances whenever
+      // Add propertychangelistener to update m_TestLoader whenever
       // it changes in the settestframe
       m_SetTestFrame = new JFrame("Test Instances");
       sp.setParentFrame(m_SetTestFrame);   // enable Close-Button
@@ -922,7 +925,8 @@ public class ClassifierPanel
 	  m_Log.statusMessage("Setting up...");
 	  CostMatrix costMatrix = null;
 	  Instances inst = new Instances(m_Instances);
-	  Instances userTest = null;
+	  Loader userTest = null;
+          Instances userTestStructure = null;
 	  // additional vis info (either shape type or point size)
 	  FastVector plotShape = new FastVector();
 	  FastVector plotSize = new FastVector();
@@ -931,9 +935,15 @@ public class ClassifierPanel
 	  // for timing
 	  long trainTimeStart = 0, trainTimeElapsed = 0;
 
-	  if (m_TestInstances != null) {
-	    userTest = new Instances(m_TestInstances);
-	  }
+          try {
+            if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
+              m_TestLoader.reset();
+              userTest = m_TestLoader;
+              userTestStructure = userTest.getStructure();
+            }
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
 	  if (m_EvalWRTCostsBut.isSelected()) {
 	    costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
 					.getValue());
@@ -988,12 +998,12 @@ public class ClassifierPanel
 	      testMode = 4;
 	      // Check the test instance compatibility
 	      if (userTest == null) {
-		throw new Exception("No user test set has been opened");
+		throw new Exception("No user test set has been specified");
 	      }
-	      if (!inst.equalHeaders(userTest)) {
+	      if (!inst.equalHeaders(userTestStructure)) {
 		throw new Exception("Train and test set are not compatible");
 	      }
-	      userTest.setClassIndex(classIndex);
+              userTestStructure.setClassIndex(classIndex);
 	    } else {
 	      throw new Exception("Unknown test mode");
 	    }
@@ -1042,7 +1052,7 @@ public class ClassifierPanel
 	      break;
 	      case 4: // Test on user split
 	      outBuff.append("user supplied test set: "
-			     + userTest.numInstances() + " instances\n");
+			     + " size unknown (reading incrementally)\n");
 	      break;
 	    }
             if (costMatrix != null) {
@@ -1242,14 +1252,18 @@ public class ClassifierPanel
 		outBuff.append("\n");
 	      }
 
-	      for (int jj=0;jj<userTest.numInstances();jj++) {
-		processClassifierPrediction(userTest.instance(jj), classifier,
+              Instance incremental;
+              int jj = 0;
+              while ((incremental = userTest.getNextInstance()) != null) {
+                //	      for (int jj=0;jj<userTest.numInstances();jj++) {
+                incremental.setDataset(userTestStructure);
+		processClassifierPrediction(incremental, classifier,
 					    eval, predInstances, plotShape,
 					    plotSize);
 		if (outputPredictionsText) { 
-		  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
+		  outBuff.append(predictionText(classifier, incremental, jj+1));
 		}
-		if ((jj % 100) == 0) {
+		if ((++jj % 100) == 0) {
 		  m_Log.statusMessage("Evaluating on test data. Processed "
 				      +jj+" instances...");
 		}
@@ -1540,7 +1554,7 @@ public class ClassifierPanel
 
     JMenuItem reEvaluate =
       new JMenuItem("Re-evaluate model on current test set");
-    if (classifier != null && m_TestInstances != null) {
+    if (classifier != null && m_TestLoader != null) {
       reEvaluate.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
 	    reevaluateModel(selectedName, classifier, trainHeader);
@@ -1971,173 +1985,228 @@ public class ClassifierPanel
    * @param name the name of the classifier entry
    * @param classifier the classifier to evaluate
    */
-  protected void reevaluateModel(String name, Classifier classifier, Instances trainHeader) {
+  protected void reevaluateModel(final String name, 
+                                 final Classifier classifier, 
+                                 final Instances trainHeader) {
 
-    StringBuffer outBuff = m_History.getNamedBuffer(name);
-    Instances userTest = null;
-    // additional vis info (either shape type or point size)
-    FastVector plotShape = new FastVector();
-    FastVector plotSize = new FastVector();
-    Instances predInstances = null;
-
-    CostMatrix costMatrix = null;
-    if (m_EvalWRTCostsBut.isSelected()) {
-      costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
-				  .getValue());
-    }    
-    boolean outputConfusion = m_OutputConfusionBut.isSelected();
-    boolean outputPerClass = m_OutputPerClassBut.isSelected();
-    boolean outputSummary = true;
-    boolean outputEntropy = m_OutputEntropyBut.isSelected();
-    boolean saveVis = m_StorePredictionsBut.isSelected();
-    boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
-    String grph = null;    
-    Evaluation eval = null;
-
-    try {
-
-      if (m_TestInstances != null) {
-	userTest = new Instances(m_TestInstances);
+    if (m_RunThread == null) {
+      synchronized (this) {
+	m_StartBut.setEnabled(false);
+	m_StopBut.setEnabled(true);
       }
-      // Check the test instance compatibility
-      if (userTest == null) {
-	throw new Exception("No user test set has been opened");
-      }
-      if (trainHeader != null) {
-	if (trainHeader.classIndex() > userTest.numAttributes()-1)
-	  throw new Exception("Train and test set are not compatible");
-	userTest.setClassIndex(trainHeader.classIndex());
-	if (!trainHeader.equalHeaders(userTest)) {
-	  throw new Exception("Train and test set are not compatible");
-	}
-      } else {
-	userTest.setClassIndex(userTest.numAttributes()-1);
-      }
-      m_Log.statusMessage("Evaluating on test data...");
-      m_Log.logMessage("Re-evaluating classifier (" + name + ") on test set");
-      eval = new Evaluation(userTest, costMatrix);
+      m_RunThread = new Thread() {
+          public void run() {
+            // Copy the current state of things
+            m_Log.statusMessage("Setting up...");
+
+            StringBuffer outBuff = m_History.getNamedBuffer(name);
+            Loader userTest = null;
+            Instances userTestStructure = null;
+            // additional vis info (either shape type or point size)
+            FastVector plotShape = new FastVector();
+            FastVector plotSize = new FastVector();
+            Instances predInstances = null;
+
+            CostMatrix costMatrix = null;
+            if (m_EvalWRTCostsBut.isSelected()) {
+              costMatrix = new CostMatrix((CostMatrix) m_CostMatrixEditor
+                                          .getValue());
+            }    
+            boolean outputConfusion = m_OutputConfusionBut.isSelected();
+            boolean outputPerClass = m_OutputPerClassBut.isSelected();
+            boolean outputSummary = true;
+            boolean outputEntropy = m_OutputEntropyBut.isSelected();
+            boolean saveVis = m_StorePredictionsBut.isSelected();
+            boolean outputPredictionsText = 
+              m_OutputPredictionsTextBut.isSelected();
+            String grph = null;    
+            Evaluation eval = null;
+
+            try {
+
+              if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
+                m_TestLoader.reset();
+                userTest = m_TestLoader;
+                userTestStructure = userTest.getStructure();
+              }
+              // Check the test instance compatibility
+              if (userTest == null) {
+                throw new Exception("No user test set has been specified");
+              }
+              if (trainHeader != null) {
+                if (trainHeader.classIndex() > 
+                    userTestStructure.numAttributes()-1)
+                  throw new Exception("Train and test set are not compatible");
+                //	userTest.setClassIndex(trainHeader.classIndex());
+                userTestStructure.setClassIndex(trainHeader.classIndex());
+                if (!trainHeader.equalHeaders(userTestStructure)) {
+                  throw new Exception("Train and test set are not compatible");
+                }
+              } else {
+                //	userTest.setClassIndex(userTest.numAttributes()-1)
+                userTestStructure.
+                  setClassIndex(userTestStructure.numAttributes()-1);
+              }
+              if (m_Log instanceof TaskLogger) {
+                ((TaskLogger)m_Log).taskStarted();
+              }
+              m_Log.statusMessage("Evaluating on test data...");
+              m_Log.logMessage("Re-evaluating classifier (" + name 
+                               + ") on test set");
+              eval = new Evaluation(userTestStructure, costMatrix);
       
-      // set up the structure of the plottable instances for 
-      // visualization
-      predInstances = setUpVisualizableInstances(userTest);
-      predInstances.setClassIndex(userTest.classIndex()+1);
+              // set up the structure of the plottable instances for 
+              // visualization
+              predInstances = setUpVisualizableInstances(userTestStructure);
+              predInstances.setClassIndex(userTestStructure.classIndex()+1);
       
-      outBuff.append("\n=== Re-evaluation on test set ===\n\n");
-      outBuff.append("User supplied test set\n");  
-      outBuff.append("Relation:     " + userTest.relationName() + '\n');
-      outBuff.append("Instances:    " + userTest.numInstances() + '\n');
-      outBuff.append("Attributes:   " + userTest.numAttributes() + "\n\n");
-      if (trainHeader == null)
-	outBuff.append("NOTE - if test set is not compatible then results are "
-		       + "unpredictable\n\n");
+              outBuff.append("\n=== Re-evaluation on test set ===\n\n");
+              outBuff.append("User supplied test set\n");  
+              outBuff.append("Relation:     " 
+                             + userTestStructure.relationName() + '\n');
+              outBuff.
+                append("Instances:     unknown (yet). Reading incrementally"  
+                       + '\n');
+              outBuff.append("Attributes:   " 
+                             + userTestStructure.numAttributes() 
+                             + "\n\n");
+              if (trainHeader == null)
+                outBuff.append("NOTE - if test set is not compatible then results are "
+                               + "unpredictable\n\n");
 
-      if (outputPredictionsText) {
-	outBuff.append("=== Predictions on test set ===\n\n");
-	outBuff.append(" inst#,    actual, predicted, error");
-	if (userTest.classAttribute().isNominal()) {
-	  outBuff.append(", probability distribution");
-	}
-	outBuff.append("\n");
-      }
+              if (outputPredictionsText) {
+                outBuff.append("=== Predictions on test set ===\n\n");
+                outBuff.append(" inst#,    actual, predicted, error");
+                if (userTestStructure.classAttribute().isNominal()) {
+                  outBuff.append(", probability distribution");
+                }
+                outBuff.append("\n");
+              }
 
-      for (int jj=0;jj<userTest.numInstances();jj++) {
-	processClassifierPrediction(userTest.instance(jj), classifier,
-				    eval, predInstances, plotShape,
-				    plotSize);
-	if (outputPredictionsText) { 
-	  outBuff.append(predictionText(classifier, userTest.instance(jj), jj+1));
-	}
-	if ((jj % 100) == 0) {
-	  m_Log.statusMessage("Evaluating on test data. Processed "
-			      +jj+" instances...");
-	}
-      }
+              Instance incremental;
+              int jj = 0;
+              //      for (int jj=0;jj<userTest.numInstances();jj++) {
+              while ((incremental = userTest.getNextInstance()) != null) {
+                incremental.setDataset(userTestStructure);
+                processClassifierPrediction(incremental, classifier,
+                                            eval, predInstances, plotShape,
+                                            plotSize);
+                if (outputPredictionsText) { 
+                  outBuff.append(predictionText(classifier, incremental, jj+1));
+                }
+                if ((++jj % 100) == 0) {
+                  //                  System.err.println("Here");
+                  m_Log.statusMessage("Evaluating on test data. Processed "
+                                      +jj+" instances...");
+                }
+              }
 
-      if (outputPredictionsText) {
-	outBuff.append("\n");
-      } 
+              if (outputPredictionsText) {
+                outBuff.append("\n");
+              } 
       
-      if (outputSummary) {
-	outBuff.append(eval.toSummaryString(outputEntropy) + "\n");
-      }
+              if (outputSummary) {
+                outBuff.append(eval.toSummaryString(outputEntropy) + "\n");
+              }
       
-      if (userTest.classAttribute().isNominal()) {
+              if (userTestStructure.classAttribute().isNominal()) {
 	
-	if (outputPerClass) {
-	  outBuff.append(eval.toClassDetailsString() + "\n");
-	}
+                if (outputPerClass) {
+                  outBuff.append(eval.toClassDetailsString() + "\n");
+                }
 	
-	if (outputConfusion) {
-	  outBuff.append(eval.toMatrixString() + "\n");
-	}
-      }
+                if (outputConfusion) {
+                  outBuff.append(eval.toMatrixString() + "\n");
+                }
+              }
       
-      m_History.updateResult(name);
-      m_Log.logMessage("Finished re-evaluation");
-      m_Log.statusMessage("OK");
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
-      m_Log.statusMessage("See error log");
+              m_History.updateResult(name);
+              m_Log.logMessage("Finished re-evaluation");
+              m_Log.statusMessage("OK");
+            } catch (Exception ex) {
+              ex.printStackTrace();
+              m_Log.logMessage(ex.getMessage());
+              m_Log.statusMessage("See error log");
 
-      ex.printStackTrace();
-      m_Log.logMessage(ex.getMessage());
-      JOptionPane.showMessageDialog(this,
-				    "Problem evaluationg classifier:\n"
-				    + ex.getMessage(),
-				    "Evaluate classifier",
-				    JOptionPane.ERROR_MESSAGE);
-      m_Log.statusMessage("Problem evaluating classifier");
-    } finally {
-      try {
-	if (predInstances != null && predInstances.numInstances() > 0) {
-	  if (predInstances.attribute(predInstances.classIndex())
-	      .isNumeric()) {
-	    postProcessPlotInfo(plotSize);
-	  }
-	  m_CurrentVis = new VisualizePanel();
-	  m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
-	  m_CurrentVis.setLog(m_Log);
-	  PlotData2D tempd = new PlotData2D(predInstances);
-	  tempd.setShapeSize(plotSize);
-	  tempd.setShapeType(plotShape);
-	  tempd.setPlotName(name+" ("+userTest.relationName()+")");
-	  tempd.addInstanceNumberAttribute();
+              ex.printStackTrace();
+              m_Log.logMessage(ex.getMessage());
+              JOptionPane.showMessageDialog(ClassifierPanel.this,
+                                            "Problem evaluationg classifier:\n"
+                                            + ex.getMessage(),
+                                            "Evaluate classifier",
+                                            JOptionPane.ERROR_MESSAGE);
+              m_Log.statusMessage("Problem evaluating classifier");
+            } finally {
+              try {
+                if (predInstances != null && predInstances.numInstances() > 0) {
+                  if (predInstances.attribute(predInstances.classIndex())
+                      .isNumeric()) {
+                    postProcessPlotInfo(plotSize);
+                  }
+                  m_CurrentVis = new VisualizePanel();
+                  m_CurrentVis.setName(name+" ("
+                                       +userTestStructure.relationName()+")");
+                  m_CurrentVis.setLog(m_Log);
+                  PlotData2D tempd = new PlotData2D(predInstances);
+                  tempd.setShapeSize(plotSize);
+                  tempd.setShapeType(plotShape);
+                  tempd.setPlotName(name+" ("+userTestStructure.relationName()
+                                    +")");
+                  tempd.addInstanceNumberAttribute();
 	  
-	  m_CurrentVis.addPlot(tempd);
-	  m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
+                  m_CurrentVis.addPlot(tempd);
+                  m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
 	  
-	  if (classifier instanceof Drawable) {
-	    try {
-	      grph = ((Drawable)classifier).graph();
-	    } catch (Exception ex) {
-	    }
-	  }
+                  if (classifier instanceof Drawable) {
+                    try {
+                      grph = ((Drawable)classifier).graph();
+                    } catch (Exception ex) {
+                    }
+                  }
 
-	  if (saveVis) {
-	    FastVector vv = new FastVector();
-	    vv.addElement(classifier);
-	    if (trainHeader != null) vv.addElement(trainHeader);
-	    vv.addElement(m_CurrentVis);
-	    if (grph != null) {
-	      vv.addElement(grph);
-	    }
-	    if ((eval != null) && (eval.predictions() != null)) {
-	      vv.addElement(eval.predictions());
-	      vv.addElement(userTest.classAttribute());
-	    }
-	    m_History.addObject(name, vv);
-	  } else {
-	    FastVector vv = new FastVector();
-	    vv.addElement(classifier);
-	    if (trainHeader != null) vv.addElement(trainHeader);
-	    m_History.addObject(name, vv);
-	  }
-	}
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
-      
+                  if (saveVis) {
+                    FastVector vv = new FastVector();
+                    vv.addElement(classifier);
+                    if (trainHeader != null) vv.addElement(trainHeader);
+                    vv.addElement(m_CurrentVis);
+                    if (grph != null) {
+                      vv.addElement(grph);
+                    }
+                    if ((eval != null) && (eval.predictions() != null)) {
+                      vv.addElement(eval.predictions());
+                      vv.addElement(userTestStructure.classAttribute());
+                    }
+                    m_History.addObject(name, vv);
+                  } else {
+                    FastVector vv = new FastVector();
+                    vv.addElement(classifier);
+                    if (trainHeader != null) vv.addElement(trainHeader);
+                    m_History.addObject(name, vv);
+                  }
+                }
+              } catch (Exception ex) {
+                ex.printStackTrace();
+              }
+              if (isInterrupted()) {
+                m_Log.logMessage("Interrupted reevaluate model");
+                m_Log.statusMessage("Interrupted");
+              }
+
+              synchronized (this) {
+                m_StartBut.setEnabled(true);
+                m_StopBut.setEnabled(false);
+                m_RunThread = null;
+              }
+
+              if (m_Log instanceof TaskLogger) {
+                ((TaskLogger)m_Log).taskFinished();
+              }
+            }
+          }
+        };
+
+      m_RunThread.setPriority(Thread.MIN_PRIORITY);
+      m_RunThread.start();
     }
   }
   
