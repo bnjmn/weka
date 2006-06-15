@@ -24,6 +24,7 @@
 package weka.gui;
 
 import weka.core.Instances;
+import weka.core.converters.*;
 
 import java.net.URL;
 import java.io.File;
@@ -52,8 +53,17 @@ import javax.swing.BorderFactory;
  * A panel that displays an instance summary for a set of instances and
  * lets the user open a set of instances from either a file or URL.
  *
+ * Instances may be obtained either in a batch or incremental fashion.
+ * If incremental reading is used, then
+ * the client should obtain the Loader object (by calling
+ * getLoader()) and read the instances one at a time. If
+ * batch loading is used, then SetInstancesPanel will load
+ * the data into memory inside of a separate thread and notify
+ * the client when the operation is complete. The client can
+ * then retrieve the instances by calling getInstances().
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -91,12 +101,17 @@ public class SetInstancesPanel extends JPanel {
 
   /** The current set of instances loaded */
   protected Instances m_Instances;
+
+  /** The current loader used to obtain the current instances */
+  protected weka.core.converters.Loader m_Loader;
   
   /** the parent frame. if one is provided, the close-button is displayed */
   protected JFrame m_ParentFrame = null;
 
   /** the panel the Close-Button is located in */
   protected JPanel m_CloseButPanel = null;
+
+  protected boolean m_readIncrementally = true;
   
   /**
    * Create the panel.
@@ -255,9 +270,15 @@ public class SetInstancesPanel extends JPanel {
   protected void setInstancesFromFile(File f) {
       
     try {
-      Reader r = new BufferedReader(new FileReader(f));
-      setInstances(new Instances(r));
-      r.close();
+      m_Loader = new ArffLoader();
+      ((ArffLoader)m_Loader).setFile(f);
+      //      Reader r = new BufferedReader(new FileReader(f));
+      if (m_readIncrementally) {
+        setInstances(m_Loader.getStructure());
+      } else {
+        setInstances(m_Loader.getDataSet());
+      }
+      //      r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from file:\n"
@@ -275,9 +296,16 @@ public class SetInstancesPanel extends JPanel {
   protected void setInstancesFromURL(URL u) {
 
     try {
-      Reader r = new BufferedReader(new InputStreamReader(u.openStream()));
-      setInstances(new Instances(r));
-      r.close();
+      m_Loader = new ArffLoader();
+      ((URLSourcedLoader)m_Loader).setURL(u.toString());
+      //      Reader r = new BufferedReader(new InputStreamReader(u.openStream()));
+      if (m_readIncrementally) {
+        setInstances(m_Loader.getStructure());
+      } else {
+        setInstances(m_Loader.getDataSet());
+      }
+      //      setInstances(new Instances(r));
+      //      r.close();
     } catch (Exception ex) {
       JOptionPane.showMessageDialog(this,
 				    "Couldn't read from URL:\n"
@@ -311,12 +339,47 @@ public class SetInstancesPanel extends JPanel {
   }
 
   /**
+   * Gets the currently used Loader
+   *
+   * @return a value of type 'Loader'
+   */
+  public weka.core.converters.Loader getLoader() {
+    return m_Loader;
+  }
+
+  /**
    * Gets the instances summary panel associated with
    * this panel
    * @return the instances summary panel
    */
   public InstancesSummaryPanel getSummary() {
     return m_Summary;
+  }
+
+  /**
+   * Sets whether or not instances should be read incrementally
+   * by the Loader. If incremental reading is used, then
+   * the client should obtain the Loader object (by calling
+   * getLoader()) and read the instances one at a time. If
+   * batch loading is used, then SetInstancesPanel will load
+   * the data into memory inside of a separate thread and notify
+   * the client when the operation is complete. The client can
+   * then retrieve the instances by calling getInstances().
+   *
+   * @param incremental true if instances are to be read incrementally
+   * 
+   */
+  public void setReadIncrementally(boolean incremental) {
+    m_readIncrementally = incremental;
+  }
+
+  /**
+   * Gets whether instances are to be read incrementally or not
+   *
+   * @return true if instances are to be read incrementally
+   */
+  public boolean getReadIncrementally() {
+    return m_readIncrementally;
   }
   
   /**
