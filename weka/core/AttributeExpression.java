@@ -221,6 +221,9 @@ public class AttributeExpression {
       f = floor, h = ceil, r = rint, t = tan, n = sin */
   private static final String UNARY_FUNCTIONS = "lbcesfhrtn";
 
+  /** Holds the original infix expression */
+  private String m_originalInfix;
+  
   /** Holds the expression in postfix form */
   private Vector m_postFixExpVector;
 
@@ -311,6 +314,8 @@ public class AttributeExpression {
    * @throws Exception if something goes wrong during the conversion
    */
   public void convertInfixToPostfix(String infixExp) throws Exception {
+    m_originalInfix = infixExp;
+
     infixExp = Utils.removeSubstring(infixExp, " ");
     infixExp = Utils.replaceSubstring(infixExp,"log","l");
     infixExp = Utils.replaceSubstring(infixExp,"abs","b");
@@ -536,5 +541,9 @@ public class AttributeExpression {
    */
   public String getPostFixExpression() {
     return m_postFixExpVector.toString();
+  }
+
+  public String toString() {
+    return m_originalInfix;
   }
 }
