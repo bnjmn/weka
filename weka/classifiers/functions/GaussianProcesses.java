@@ -113,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -165,10 +165,10 @@ public class GaussianProcesses
 
   /** Kernel to use **/
   protected Kernel m_kernel = null;
-
-  /** The training data. */
-  protected Instances m_data;
     
+  /** The number of training instances */
+  protected int m_NumTrain = 0;
+  
   /** The training data. */
   protected double m_avg_target;
     
@@ -317,7 +317,7 @@ public class GaussianProcesses
       m_Filter = null;
     }
 
-    m_data = insts;
+    m_NumTrain = insts.numInstances();
 
     // determine which linear transformation has been 
     // applied to the class by the filter
@@ -339,27 +339,27 @@ public class GaussianProcesses
     }
 
     // Initialize kernel
-    m_kernel.buildKernel(m_data);
+    m_kernel.buildKernel(insts);
     m_KernelIsLinear = (m_kernel instanceof PolyKernel) && (((PolyKernel) m_kernel).getExponent() == 1.0);
 
     // Build Inverted Covariance Matrix
 
-    m_C = new weka.core.matrix.Matrix(m_data.numInstances(),m_data.numInstances());
+    m_C = new weka.core.matrix.Matrix(insts.numInstances(),insts.numInstances());
     double kv;
     double sum = 0.0;
 
-    for (int i = 0; i < m_data.numInstances(); i++) {
-	sum += m_data.instance(i).classValue();
+    for (int i = 0; i < insts.numInstances(); i++) {
+	sum += insts.instance(i).classValue();
       for (int j = 0; j < i; j++) {
-	kv = m_kernel.eval(i,j,m_data.instance(i));
+	kv = m_kernel.eval(i,j,insts.instance(i));
 	m_C.set(i,j,kv);
 	m_C.set(j,i,kv);
       }
-      kv = m_kernel.eval(i,i,m_data.instance(i));
+      kv = m_kernel.eval(i,i,insts.instance(i));
       m_C.set(i,i,kv+(m_delta*m_delta));
     }
 
-    m_avg_target = sum/m_data.numInstances();
+    m_avg_target = sum/insts.numInstances();
 
     //weka.core.matrix.CholeskyDecomposition cd = new weka.core.matrix.CholeskyDecomposition(m_C);
 
@@ -370,14 +370,14 @@ public class GaussianProcesses
     if (!lu.isNonsingular())
 	throw new Exception("Singular Matrix?!?");
 
-    weka.core.matrix.Matrix iMat = weka.core.matrix.Matrix.identity(m_data.numInstances(),m_data.numInstances());
+    weka.core.matrix.Matrix iMat = weka.core.matrix.Matrix.identity(insts.numInstances(),insts.numInstances());
 
     m_C = lu.solve(iMat);
 
-    m_t = new weka.core.matrix.Matrix(m_data.numInstances(),1);
+    m_t = new weka.core.matrix.Matrix(insts.numInstances(),1);
 
-    for (int i = 0; i < m_data.numInstances(); i++) 
-	m_t.set(i,0,m_data.instance(i).classValue()-m_avg_target);
+    for (int i = 0; i < insts.numInstances(); i++) 
+	m_t.set(i,0,insts.instance(i).classValue()-m_avg_target);
 
     m_t = m_C.times(m_t);
 
@@ -414,8 +414,8 @@ public class GaussianProcesses
 
     // Build K vector
 
-    weka.core.matrix.Matrix k = new weka.core.matrix.Matrix(m_data.numInstances(),1);
-    for (int i = 0; i < m_data.numInstances(); i++) 
+    weka.core.matrix.Matrix k = new weka.core.matrix.Matrix(m_NumTrain,1);
+    for (int i = 0; i < m_NumTrain; i++) 
       k.set(i,0,m_kernel.eval(-1,i,inst));
       
     double result = k.transpose().times(m_t).get(0,0)+m_avg_target;
@@ -456,8 +456,8 @@ public class GaussianProcesses
 
     // Build K vector (and Kappa)
 
-    weka.core.matrix.Matrix k = new weka.core.matrix.Matrix(m_data.numInstances(),1);
-    for (int i = 0; i < m_data.numInstances(); i++) 
+    weka.core.matrix.Matrix k = new weka.core.matrix.Matrix(m_NumTrain,1);
+    for (int i = 0; i < m_NumTrain; i++) 
       k.set(i,0,m_kernel.eval(-1,i,inst));
       
     double kappa = m_kernel.eval(-1,-1,inst) + m_delta*m_delta;
@@ -509,8 +509,8 @@ public class GaussianProcesses
       inst = m_Filter.output();
     }
 
-    weka.core.matrix.Matrix k = new weka.core.matrix.Matrix(m_data.numInstances(),1);
-    for (int i = 0; i < m_data.numInstances(); i++) 
+    weka.core.matrix.Matrix k = new weka.core.matrix.Matrix(m_NumTrain,1);
+    for (int i = 0; i < m_NumTrain; i++) 
       k.set(i,0,m_kernel.eval(-1,i,inst));
       
     double kappa = m_kernel.eval(-1,-1,inst) + m_delta*m_delta;
@@ -774,8 +774,8 @@ public class GaussianProcesses
       text.append("Inverted Covariance Matrix:\n");
       double min = m_C.get(0,0);
       double max = m_C.get(0,0);
-      for (int i = 0; i < m_data.numInstances(); i++)
-	for (int j = 0; j < m_data.numInstances(); j++) {
+      for (int i = 0; i < m_NumTrain; i++)
+	for (int j = 0; j < m_NumTrain; j++) {
 	    if (m_C.get(i,j) < min) min = m_C.get(i,j);
 	    else if (m_C.get(i,j) > max) max = m_C.get(i,j);
 	}
@@ -784,7 +784,7 @@ public class GaussianProcesses
       text.append("Inverted Covariance Matrix * Target-value Vector:\n");
       min = m_t.get(0,0);
       max = m_t.get(0,0);
-      for (int i = 0; i < m_data.numInstances(); i++) {
+      for (int i = 0; i < m_NumTrain; i++) {
 	    if (m_t.get(i,0) < min) min = m_t.get(i,0);
 	    else if (m_t.get(i,0) > max) max = m_t.get(i,0);
 	}
