@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class CostMatrix implements Serializable {
 
@@ -517,7 +517,20 @@ public class CostMatrix implements Serializable {
                 + ": too few matrix elements provided");
           }
 
-          setCell(currentRow, i, st.nextToken());
+          String nextTok = st.nextToken();
+          // try to parse as a double first
+          Double val = null;
+          try {
+            val = new Double(nextTok);
+            double value = val.doubleValue();
+          } catch (Exception ex) {
+            val = null;
+          }
+          if (val == null) {
+            setCell(currentRow, i, nextTok);
+          } else {
+            setCell(currentRow, i, val);
+          }
         }
         currentRow++;
       }
@@ -599,7 +612,8 @@ public class CostMatrix implements Serializable {
   }
 
   /**
-   * Return the contents of a particular cell
+   * Return the contents of a particular cell. Note: this
+   * method returns the Object stored at a particular cell.
    * 
    * @param rowIndex the row
    * @param columnIndex the column
@@ -667,4 +681,79 @@ public class CostMatrix implements Serializable {
   public static Matrix parseMatlab(String matlab) throws Exception {
     return Matrix.parseMatlab(matlab);
   }
+
+  /** 
+   * Converts a matrix to a string
+   *
+   * @return    the converted string
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public String toString() {
+    // Determine the width required for the maximum element,
+    // and check for fractional display requirement.
+    double maxval = 0;
+    boolean fractional = false;
+    Object element = null;
+    int widthNumber = 0;
+    int widthExpression = 0;
+    for (int i = 0; i < size(); i++) {
+      for (int j = 0; j < size(); j++) {
+        element = getCell(i, j);
+        if (element instanceof Double) {
+          double current = ((Double)element).doubleValue();
+       
+          if (current < 0)
+            current *= -11;
+          if (current > maxval)
+            maxval = current;
+          double fract = Math.abs(current - Math.rint(current));
+          if (!fractional
+              && ((Math.log(fract) / Math.log(10)) >= -2)) {
+            fractional = true;
+          }
+        } else {
+          if (element.toString().length() > widthExpression) {
+            widthExpression = element.toString().length();
+          }
+        }
+      }
+    }
+    if (maxval > 0) {
+      widthNumber = (int)(Math.log(maxval) / Math.log(10) 
+                          + (fractional ? 4 : 1));
+    }
+
+    int width = (widthNumber > widthExpression)
+      ? widthNumber
+      : widthExpression;
+
+    StringBuffer text = new StringBuffer();   
+    for (int i = 0; i < size(); i++) {
+      for (int j = 0; j < size(); j++) {
+        element = getCell(i, j);
+        if (element instanceof Double) {
+          text.append(" ").
+            append(Utils.doubleToString(((Double)element).
+                                        doubleValue(),
+                                        width, (fractional ? 2 : 0)));
+        } else {
+          int diff = width - element.toString().length();
+          if (diff > 0) {
+            int left = diff % 2;
+            left += diff / 2;
+            String temp = Utils.padLeft(element.toString(),
+                            element.toString().length()+left);
+            temp = Utils.padRight(temp, width);
+            text.append(" ").append(temp);
+          } else {
+            text.append(" ").
+              append(element.toString());
+          }
+        }
+      }
+      text.append("\n");
+    }
+
+    return text.toString();
+  } 
 }
