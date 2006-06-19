@@ -16,30 +16,56 @@
 
 /*
  *    CostMatrix.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2006 University of Waikato
  *
  */
 
 package weka.classifiers;
-import weka.core.Matrix;
 import weka.core.Instances;
+import weka.core.Instance;
 import weka.core.Utils;
+import weka.core.AttributeExpression;
+import weka.core.Matrix;
 import java.io.Reader;
+import java.io.Writer;
 import java.io.StreamTokenizer;
+import java.io.LineNumberReader;
+import java.io.Serializable;
 import java.util.Random;
+import java.util.StringTokenizer;
 
 /**
  * Class for storing and manipulating a misclassification cost matrix.
  * The element at position i,j in the matrix is the penalty for classifying
- * an instance of class j as class i.
+ * an instance of class j as class i. Cost values can be fixed or
+ * computed on a per-instance basis (cost sensitive evaluation only) 
+ * from the value of an attribute or an expression involving 
+ * attribute(s).
  *
+ * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class CostMatrix extends Matrix {
+public class CostMatrix implements Serializable {
+
+  private int m_size;
+
+  /** [rows][columns] */
+  protected Object [][] m_matrix;
 
   /** The deafult file extension for cost matrix files */
   public static String FILE_EXTENSION = ".cost";
+
+  /**
+   * Creates a default cost matrix of a particular size. 
+   * All diagonal values will be 0 and all non-diagonal values 1.
+   *
+   * @param numOfClasses the number of classes that the cost matrix holds.
+   */  
+  public CostMatrix(int numOfClasses) {
+    m_size = numOfClasses;
+    initialize();
+  }
 
   /**
    * Creates a cost matrix that is a copy of another.
@@ -47,61 +73,68 @@ public class CostMatrix extends Matrix {
    * @param toCopy the matrix to copy.
    */
   public CostMatrix(CostMatrix toCopy) {
-    
-    super(toCopy.size(), toCopy.size());
+    this(toCopy.size());
 
-    for (int x=0; x<toCopy.size(); x++) 
-      for (int y=0; y<toCopy.size(); y++) 
-	setElement(x, y, toCopy.getElement(x, y)); 
-  }
-
-  /**
-   * Creates a default cost matrix of a particular size. All values will be 0.
-   *
-   * @param numOfClasses the number of classes that the cost matrix holds.
-   */  
-  public CostMatrix(int numOfClasses) {
-    
-    super(numOfClasses, numOfClasses);
-  }
-
-  /**
-   * Creates a cost matrix from a reader.
-   *
-   * @param reader the reader to get the values from.
-   * @exception Exception if the matrix is invalid.
-   */  
-  public CostMatrix(Reader reader) throws Exception {
-
-    super(reader);
-
-    // make sure that the matrix is square
-    if (numRows() != numColumns())
-      throw new Exception("Trying to create a non-square cost matrix");
-  }
-
-  /**
-   * Sets the cost of all correct classifications to 0, and all
-   * misclassifications to 1.
-   *
-   */ 
-  public void initialize() {
-
-    for (int i = 0; i < size(); i++) {
-      for (int j = 0; j < size(); j++) {
-	setElement(i, j, i == j ? 0.0 : 1.0);
+    for (int i = 0; i < m_size; i++) {
+      for (int j = 0; j < m_size; j++) {
+        setCell(i, j, toCopy.getCell(i, j));
       }
     }
   }
 
   /**
-   * Gets the size of the matrix.
-   *
-   * @return the size.
+   * Initializes the matrix
+   */
+  public void initialize() {
+    m_matrix = new Object[m_size][m_size];
+    for (int i = 0; i < m_size; i++) {
+      for (int j = 0; j < m_size; j++) {
+	setCell(i, j, i == j ? new Double(0.0) : new Double(1.0));
+      }
+    }
+  }
+
+  /**
+   * The number of rows (and columns)
+   * @return the size of the matrix
    */
   public int size() {
+    return m_size;
+  }
 
-    return numColumns();
+  /**
+   * Same as size
+   * @return the number of columns
+   */
+  public int numColumns() {
+    return size();
+  }
+
+  /**
+   * Same as size
+   * @return the number of rows
+   */
+  public int numRows() {
+    return size();
+  }
+
+  private boolean replaceStrings() throws Exception {
+    boolean nonDouble = false;
+
+    for (int i = 0; i < m_size; i++) {
+      for (int j = 0; j < m_size; j++) {
+        if (getCell(i, j) instanceof String) {
+          AttributeExpression temp = new AttributeExpression();
+          temp.convertInfixToPostfix((String)getCell(i, j));
+          setCell(i, j, temp);
+          nonDouble = true;
+        } else if (getCell(i, j) instanceof AttributeExpression) {
+          nonDouble = true;
+        }
+      }
+    }
+    
+    return nonDouble;
   }
 
   /**
@@ -115,13 +148,20 @@ public class CostMatrix extends Matrix {
    * @return a new dataset reflecting the cost of misclassification.
    * @exception Exception if the data has no class or the matrix in inappropriate.
    */
-  public Instances applyCostMatrix(Instances data, Random random) throws Exception {
+  public Instances applyCostMatrix(Instances data, Random random)
+    throws Exception {
+    
+    if (replaceStrings()) {
+      // could reweight in the two class case
+      throw new Exception("Can't resample/reweight instances using "
+                          +"non-fixed cost values!");
+    }
 
     double sumOfWeightFactors = 0, sumOfMissClassWeights,
       sumOfWeights;
     double [] weightOfInstancesInClass, weightFactor, weightOfInstances;
     Instances newData;
-
+    
     if (data.classIndex() < 0) {
       throw new Exception("Class index is not set!");
     }
@@ -130,7 +170,7 @@ public class CostMatrix extends Matrix {
       throw new Exception("Misclassification cost matrix has "+
 			  "wrong format!");
     }
-
+ 
     weightFactor = new double[data.numClasses()];
     weightOfInstancesInClass = new double[data.numClasses()];
     for (int j = 0; j < data.numInstances(); j++) {
@@ -140,25 +180,27 @@ public class CostMatrix extends Matrix {
     sumOfWeights = Utils.sum(weightOfInstancesInClass);
 
     // normalize the matrix if not already
-    for (int i=0; i<size(); i++)
-      if (!Utils.eq(getElement(i, i),0)) {
+    for (int i=0; i< m_size; i++) {
+      if (!Utils.eq(((Double)getCell(i, i)).doubleValue(), 0)) {
 	CostMatrix normMatrix = new CostMatrix(this);
 	normMatrix.normalize();
 	return normMatrix.applyCostMatrix(data, random);
       }
-    
-    for (int i = 0; i < data.numClasses(); i++) {
+    }
 
+    for (int i = 0; i < data.numClasses(); i++) {      
       // Using Kai Ming Ting's formula for deriving weights for 
       // the classes and Breiman's heuristic for multiclass 
       // problems.
+
       sumOfMissClassWeights = 0;
       for (int j = 0; j < data.numClasses(); j++) {
-	if (Utils.sm(getElement(i,j),0)) {
+	if (Utils.sm(((Double)getCell(i,j)).doubleValue(),0)) {
 	  throw new Exception("Neg. weights in misclassification "+
 			      "cost matrix!"); 
 	}
-	sumOfMissClassWeights += getElement(i,j);
+	sumOfMissClassWeights 
+          += ((Double)getCell(i,j)).doubleValue();
       }
       weightFactor[i] = sumOfMissClassWeights * sumOfWeights;
       sumOfWeightFactors += sumOfMissClassWeights * 
@@ -167,13 +209,13 @@ public class CostMatrix extends Matrix {
     for (int i = 0; i < data.numClasses(); i++) {
       weightFactor[i] /= sumOfWeightFactors;
     }
-    
+
     // Store new weights
     weightOfInstances = new double[data.numInstances()];
     for (int i = 0; i < data.numInstances(); i++) {
       weightOfInstances[i] = data.instance(i).weight()*
 	weightFactor[(int)data.instance(i).classValue()];
-    } 
+    }
 
     // Change instances weight or do resampling
     if (random != null) {
@@ -197,14 +239,64 @@ public class CostMatrix extends Matrix {
    */
   public double[] expectedCosts(double[] classProbs) throws Exception {
 
-    if (classProbs.length != size())
-      throw new Exception("Length of probability estimates don't match cost matrix");
+    if (classProbs.length != m_size) { 
+      throw new Exception("Length of probability estimates don't "
+                          +"match cost matrix");
+    }
 
-    double[] costs = new double[size()];
+    double[] costs = new double[m_size];
 
-    for (int x=0; x<size(); x++)
-      for (int y=0; y<size(); y++) 
-	costs[x] += classProbs[y] * getElement(y, x);
+    for (int x = 0; x < m_size; x++) {
+      for (int y = 0; y < m_size; y++) {
+        Object element = getCell(y, x);
+        if (!(element instanceof Double)) {
+          throw new Exception("Can't use non-fixed costs in "
+                              +"computing expected costs.");
+        }
+	costs[x] += classProbs[y] * ((Double)element).doubleValue();
+      }
+    }
+
+    return costs;
+  }
+
+  /**
+   * Calculates the expected misclassification cost for each possible class value,
+   * given class probability estimates. 
+   *
+   * @param classProbs the class probability estimates.
+   * @param inst the current instance for which the class probabilites
+   * apply. Is used for computing any non-fixed cost values.
+   * @return the expected costs.
+   * @exception Exception if something goes wrong
+   */
+  public double[] expectedCosts(double [] classProbs, 
+                                Instance inst) throws Exception {
+
+    if (classProbs.length != m_size) { 
+      throw new Exception("Length of probability estimates don't "
+                          +"match cost matrix");
+    }
+
+    if (!replaceStrings()) {
+      return expectedCosts(classProbs);
+    }
+    
+    double[] costs = new double[m_size];
+
+    for (int x = 0; x < m_size; x++) {
+      for (int y = 0; y < m_size; y++) {
+        Object element = getCell(y, x);
+        double costVal;
+        if (!(element instanceof Double)) {
+          costVal = 
+            ((AttributeExpression)element).evaluateExpression(inst);
+        } else {
+          costVal = ((Double)element).doubleValue();
+        }
+	costs[x] += classProbs[y] * costVal;
+      }
+    }
 
     return costs;
   }
@@ -214,13 +306,20 @@ public class CostMatrix extends Matrix {
    *
    * @param classVal the class value.
    * @return the maximum cost.
+   * @exception Exception if cost matrix contains non-fixed
+   * costs
    */
-  public double getMaxCost(int classVal) {
+  public double getMaxCost(int classVal) throws Exception {
 
     double maxCost = Double.NEGATIVE_INFINITY;
 
-    for (int i=0; i<size(); i++) {
-      double cost = getElement(classVal, i);
+    for (int i = 0; i < m_size; i++) {
+      Object element = getCell(classVal, i);
+      if (!(element instanceof Double)) {
+          throw new Exception("Can't use non-fixed costs when "
+                              +"getting max cost.");
+      }
+      double cost = ((Double)element).doubleValue();
       if (cost > maxCost) maxCost = cost;
     }
 
@@ -228,15 +327,49 @@ public class CostMatrix extends Matrix {
   }
 
   /**
+   * Gets the maximum cost for a particular class value.
+   *
+   * @param classVal the class value.
+   * @return the maximum cost.
+   * @exception Exception if cost matrix contains non-fixed
+   * costs
+   */
+  public double getMaxCost(int classVal, Instance inst) 
+    throws Exception {
+
+    if (!replaceStrings()) {
+      return getMaxCost(classVal);
+    }
+
+    double maxCost = Double.NEGATIVE_INFINITY;
+    double cost;
+    for (int i = 0; i < m_size; i++) {
+      Object element = getCell(classVal, i);
+      if (!(element instanceof Double)) {
+        cost = 
+          ((AttributeExpression)element).evaluateExpression(inst);
+      } else {
+        cost = ((Double)element).doubleValue();
+      }
+      if (cost > maxCost) maxCost = cost;
+    }
+
+    return maxCost;
+  }
+
+
+  /**
    * Normalizes the matrix so that the diagonal contains zeros.
    *
    */
   public void normalize() {
 
-    for (int y=0; y<size(); y++) {
-      double diag = getElement(y, y);
-      for (int x=0; x<size(); x++)
-	setElement(x, y, getElement(x, y) - diag);
+    for (int y=0; y<m_size; y++) {
+      double diag = ((Double)getCell(y, y)).doubleValue();
+      for (int x=0; x<m_size; x++) {
+        setCell(x, y, new Double(((Double)getCell(x, y)).
+                                    doubleValue() - diag));
+      }
     }
   }
 
@@ -321,8 +454,217 @@ public class CostMatrix extends Matrix {
       if (!Utils.gr(weight,0)) {
 	throw new Exception("Only positive weights allowed!");
       }
-      setElement((int)firstIndex, (int)secondIndex, weight);
+      setCell((int)firstIndex, (int)secondIndex, 
+                 new Double(weight));
     }
   }
-}
 
+  /**
+   * Reads a matrix from a reader. The first line in the file should
+   * contain the number of rows and columns. Subsequent lines
+   * contain elements of the matrix.
+   *
+   * @param     reader the reader containing the matrix
+   * @throws    Exception if an error occurs
+   * @see       #write(Writer)
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public CostMatrix(Reader reader) throws Exception {
+    LineNumberReader lnr = new LineNumberReader(reader);
+    String line;
+    int currentRow = -1;
+
+    while ((line = lnr.readLine()) != null) {
+
+      // Comments
+      if (line.startsWith("%")) {  
+        continue;
+      }
+      
+      StringTokenizer st = new StringTokenizer(line);
+      // Ignore blank lines
+      if (!st.hasMoreTokens()) {
+        continue;
+      }
+
+      if (currentRow < 0) {
+        int rows = Integer.parseInt(st.nextToken());
+        if (!st.hasMoreTokens()) {
+          throw new Exception("Line " + lnr.getLineNumber() 
+              + ": expected number of columns");
+        }
+
+        int cols = Integer.parseInt(st.nextToken());
+        if (rows != cols) {
+          throw new Exception("Trying to create a non-square cost "
+                              +"matrix");
+        }
+        //        m_matrix = new Object[rows][cols];
+        m_size = rows;
+        initialize();
+        currentRow++;
+        continue;
+
+      } else {
+        if (currentRow == m_size) {
+          throw new Exception("Line " + lnr.getLineNumber() 
+              + ": too many rows provided");
+        }
+
+        for (int i = 0; i < m_size; i++) {
+          if (!st.hasMoreTokens()) {
+            throw new Exception("Line " + lnr.getLineNumber() 
+                + ": too few matrix elements provided");
+          }
+
+          setCell(currentRow, i, st.nextToken());
+        }
+        currentRow++;
+      }
+    }
+    
+    if (currentRow == -1) {
+      throw new Exception("Line " + lnr.getLineNumber() 
+                          + ": expected number of rows");
+    } else if (currentRow != m_size) {
+      throw new Exception("Line " + lnr.getLineNumber() 
+                          + ": too few rows provided");
+    }
+  }
+
+  /**
+   * Writes out a matrix. The format can be read via the 
+   * CostMatrix(Reader) constructor.
+   *
+   * @param     w the output Writer
+   * @throws    Exception if an error occurs
+   * @author    FracPete, taken from old weka.core.Matrix class
+   */
+  public void write(Writer w) throws Exception {
+    w.write("% Rows\tColumns\n");
+    w.write("" + m_size + "\t" + m_size + "\n");
+    w.write("% Matrix elements\n");
+    for(int i = 0; i < m_size; i++) {
+      for(int j = 0; j < m_size; j++) {
+        w.write("" + getCell(i, j) + "\t");
+      }
+      w.write("\n");
+    }
+    w.flush();
+  }
+
+  /**
+   * converts the Matrix into a single line Matlab string: matrix is enclosed 
+   * by parentheses, rows are separated by semicolon and single cells by
+   * blanks, e.g., [1 2; 3 4].
+   * @return      the matrix in Matlab single line format
+   */
+  public String toMatlab() {
+    StringBuffer      result;
+    int               i;
+    int               n;
+
+    result = new StringBuffer();
+
+    result.append("[");
+
+    for (i = 0; i < m_size; i++) {
+      if (i > 0) {
+        result.append("; ");
+      }
+      
+      for (n = 0; n < m_size; n++) {
+        if (n > 0) {
+          result.append(" ");
+        }
+        result.append(getCell(i, n));
+      }
+    }
+    
+    result.append("]");
+
+    return result.toString();
+  }
+
+  /**
+   * Set the value of a particular cell in the matrix
+   *
+   * @param rowIndex the row
+   * @param columnIndex the column
+   * @param value the value to set
+   */
+  public final void setCell(int rowIndex, int columnIndex,
+                               Object value) {
+    m_matrix[rowIndex][columnIndex] = value;
+  }
+
+  /**
+   * Return the contents of a particular cell
+   * 
+   * @param rowIndex the row
+   * @param columnIndex the column
+   * @return the value at the cell
+   */
+  public final Object getCell(int rowIndex, int columnIndex) {
+    return m_matrix[rowIndex][columnIndex];
+  }
+
+  /**
+   * Return the value of a cell as a double (for legacy code)
+   *
+   * @param rowIndex the row
+   * @param columnIndex the column
+   * @return the value at a particular cell as a double
+   * @exception Exception if the value is not a double
+   */
+  public final double getElement(int rowIndex, int columnIndex)
+    throws Exception {
+    if (!(m_matrix[rowIndex][columnIndex] instanceof Double)) {
+      throw new Exception("Cost matrix contains non-fixed costs!");
+    }
+    return ((Double)m_matrix[rowIndex][columnIndex]).doubleValue();
+  }
+
+  /**
+   * Return the value of a cell as a double. Computes the
+   * value for non-fixed costs using the supplied Instance
+   *
+   * @param rowIndex the row
+   * @param columnIndex the column
+   * @return the value from a particular cell
+   * @exception Exception if something goes wrong
+   */
+  public final double getElement(int rowIndex, int columnIndex,
+                                 Instance inst) throws Exception {
+
+    if (m_matrix[rowIndex][columnIndex] instanceof Double) {
+      return ((Double)m_matrix[rowIndex][columnIndex]).doubleValue();
+    } else if (m_matrix[rowIndex][columnIndex] instanceof String) {
+      replaceStrings();
+    }
+
+    return ((AttributeExpression)m_matrix[rowIndex][columnIndex]).
+      evaluateExpression(inst);
+  }
+
+  /**
+   * Set the value of a cell as a double
+   *
+   * @param rowIndex the row
+   * @param columnIndex the column
+   * @param value the value (double) to set
+   */
+  public final void setElement(int rowIndex, int columnIndex,
+                               double value) {
+    m_matrix[rowIndex][columnIndex] = new Double(value);
+  }
+
+  /**
+   * creates a matrix from the given Matlab string.
+   * @param matlab  the matrix in matlab format
+   * @return        the matrix represented by the given string
+   */
+  public static Matrix parseMatlab(String matlab) throws Exception {
+    return Matrix.parseMatlab(matlab);
+  }
+}
