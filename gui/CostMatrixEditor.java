@@ -63,7 +63,7 @@ import javax.swing.table.AbstractTableModel;
  * load cost matrices from files.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CostMatrixEditor 
   implements PropertyEditor {
@@ -122,7 +122,13 @@ public class CostMatrixEditor
      */
     public Object getValueAt(int row, int column) {
 
-      return new Double(m_matrix.getElement(row, column));
+      //      return new Double(m_matrix.getElement(row, column));
+      try {
+        return m_matrix.getCell(row, column);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+      return new Double(0.0);
     }
 
     /**
@@ -136,8 +142,9 @@ public class CostMatrixEditor
 			   int rowIndex,
 			   int columnIndex) {
 
-      double value = ((Double) aValue).doubleValue();
-      m_matrix.setElement(rowIndex, columnIndex, value);
+      //      double value = ((Double) aValue).doubleValue();
+      //      m_matrix.setElement(rowIndex, columnIndex, value);
+      m_matrix.setCell(rowIndex, columnIndex, aValue);
       fireTableCellUpdated(rowIndex, columnIndex);
     }
 
@@ -165,7 +172,7 @@ public class CostMatrixEditor
      */    
     public Class getColumnClass(int columnIndex) {
 
-      return Double.class;
+      return Object.class;
     }
   }
 
