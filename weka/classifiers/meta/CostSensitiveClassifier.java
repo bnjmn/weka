@@ -99,7 +99,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class CostSensitiveClassifier 
   extends RandomizableSingleClassifierEnhancer
@@ -548,7 +548,7 @@ public class CostSensitiveClassifier
       if (!(m_Classifier instanceof WeightedInstancesHandler)) {
 	random = new Random(m_Seed);
       }
-      data = m_CostMatrix.applyCostMatrix(data, random);
+      data = m_CostMatrix.applyCostMatrix(data, random);      
     }
     m_Classifier.buildClassifier(data);
   }
@@ -569,7 +569,7 @@ public class CostSensitiveClassifier
       return m_Classifier.distributionForInstance(instance);
     }
     double [] pred = m_Classifier.distributionForInstance(instance);
-    double [] costs = m_CostMatrix.expectedCosts(pred);
+    double [] costs = m_CostMatrix.expectedCosts(pred, instance);
     /*
     for (int i = 0; i < pred.length; i++) {
       System.out.print(pred[i] + " ");
