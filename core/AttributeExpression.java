@@ -44,7 +44,7 @@ import java.util.Vector;
  * @author Mark Hall
  * @version $Revision 1.0 $
  */
-public class AttributeExpression {
+public class AttributeExpression implements Serializable {
 
   /** for serialization */
   static final long serialVersionUID = 402130123261736245L;
