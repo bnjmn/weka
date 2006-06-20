@@ -102,7 +102,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -849,8 +849,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       Object result = null;
       try {
-	SerializedObject so = new SerializedObject(source);
-	result = so.getObject();
+        result = GenericObjectEditor.this.makeCopy(source);
 	setCancelButton(true);
 	
       } catch (Exception ex) {
@@ -1340,8 +1339,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return the current Object
    */
   public Object getValue() {
-
-    return m_Object;
+    
+    Object result = null;
+    try {
+      result = makeCopy(m_Object);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return result;
   }
   
   /**
@@ -1716,6 +1721,18 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   public void removeCapabilitiesFilter() {
     m_CapabilitiesFilter = null;
+  }
+
+  /**
+   * Makes a copy of an object using serialization
+   * @param source the object to copy
+   * @return a copy of the source object
+   * @exception Exception if the copy fails
+   */
+  public Object makeCopy(Object source) throws Exception {
+    SerializedObject so = new SerializedObject(source);
+    Object result = so.getObject();
+    return result;
   }
 
   /**
