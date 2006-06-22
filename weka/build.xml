@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19.2.7 $
+   $Revision: 1.19.2.8 $
   ===========================================================================
 -->
 
@@ -47,7 +47,7 @@
    description="Compile weka and leave class files in the source tree">
      <javac srcdir="${path_modifier}weka"
        destdir="${path_modifier}"
-       source="1.3" target="1.3"/>
+       source="1.4" target="1.4"/>
       <rmic base="${path_modifier}" 
        classname="weka.experiment.RemoteEngine"/>
   </target>
@@ -64,7 +64,7 @@
      <javac srcdir="${path_modifier}weka"
       destdir="${path_modifier}"
       deprecation="on" 
-      source="1.3" target="1.3"/>
+      source="1.4" target="1.4"/>
      <rmic base="${path_modifier}" 
       classname="weka.experiment.RemoteEngine"/>
   </target>
@@ -74,7 +74,7 @@
    description="Compile weka and deposit class files in ${path_modifier}/build/classes">
     <javac srcdir="${path_modifier}weka" 
       destdir="${path_modifier}${build}/classes"
-      source="1.3" target="1.3"/>
+      source="1.4" target="1.4"/>
     <copy todir="${path_modifier}${build}/classes" >
        <fileset dir="${path_modifier}.">
           <include name="weka/**/*.props"/>
@@ -125,7 +125,7 @@
    description="Compile unit tests into ${path_modifier}/build/testcases">
      <javac srcdir="${path_modifier}tests" 
        destdir="${path_modifier}${build}/testcases"
-       source="1.3" target="1.3">
+       source="1.4" target="1.4">
         <classpath>
 	   <pathelement location="${path_modifier}${build}/classes"/>
 	   <pathelement path="${path_modifier}${java.class.path}"/>
