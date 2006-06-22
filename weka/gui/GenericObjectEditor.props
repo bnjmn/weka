@@ -338,4 +338,18 @@ weka.core.stemmers.Stemmer=\
  weka.core.stemmers.LovinsStemmer,\
  weka.core.stemmers.NullStemmer,\
  weka.core.stemmers.SnowballStemmer
+ 
+# Lists the Kernels I want to choose from
+weka.classifiers.functions.supportVector.Kernel=\
+ weka.classifiers.functions.supportVector.NormalizedPolyKernel,\
+ weka.classifiers.functions.supportVector.PolyKernel,\
+ weka.classifiers.functions.supportVector.RBFKernel,\
+ weka.classifiers.functions.supportVector.StringKernel,\
+ weka.classifiers.mi.supportVector.MIPolyKernel,\
+ weka.classifiers.mi.supportVector.MIRBFKernel
+ 
+# Lists the RegOptimizers I want to choose from
+weka.classifiers.functions.supportVector.RegOptimizer=\
+ weka.classifiers.functions.supportVector.RegSMO,\
+ weka.classifiers.functions.supportVector.RegSMOImproved
    

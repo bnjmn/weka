@@ -109,4 +109,7 @@ weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.functions.supportVector,\
  weka.classifiers.mi.supportVector
 
+# List of SVMreg learning algorithms
+weka.classifiers.functions.supportVector.RegOptimizer=\
+ weka.classifiers.functions.supportVector
 
