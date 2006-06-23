@@ -135,7 +135,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  * @see TestInstances
  */
 public class CheckClassifier implements OptionHandler {
@@ -152,7 +152,7 @@ public class CheckClassifier implements OptionHandler {
   
   /** a class for postprocessing the test-data 
    * @see #makeTestDataset(int, int, int, int, int, int, int, int, int, int, boolean) */
-  public class PostProcessor {
+  public static class PostProcessor {
     /**
      * Provides a hook for derived classes to further modify the data. Currently,
      * the data is just passed through.
