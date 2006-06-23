@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -49,14 +49,14 @@ public abstract class AbstractClassifierTest
   
   /** a class for postprocessing the test-data: all values of numeric attributs
    * are replaced with their absolute value */
-  public class AbsPostProcessor 
+  public static class AbsPostProcessor 
     extends PostProcessor {
     
     /**
      * initializes the PostProcessor
      */
     public AbsPostProcessor() {
-      new CheckClassifier().super();
+      super();
     }
     
     /**
