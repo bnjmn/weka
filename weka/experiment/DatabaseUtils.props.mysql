@@ -1,0 +1,21 @@
+# Database settings for MySQL 3.23.x, 4.x
+#
+# url:     http://www.mysql.com/
+# jdbc:    http://www.mysql.com/products/connector/j/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.1 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=org.gjt.mm.mysql.Driver
+
+# database URL
+jdbcURL=jdbc:mysql://server_name:3306/database_name
+
+# other options
+CREATE_DOUBLE=DOUBLE
+CREATE_STRING=TEXT
+CREATE_INT=INT
+checkUpperCaseNames=false
+checkLowerCaseNames=false
+checkForTable=true
+
