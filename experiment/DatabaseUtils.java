@@ -52,7 +52,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class DatabaseUtils implements Serializable {
 
@@ -81,8 +81,6 @@ public class DatabaseUtils implements Serializable {
   /** Properties associated with the database connection */
   protected Properties PROPERTIES;
 
-
-
   /* Type mapping used for reading experiment results */
   public static final int STRING = 0;
   public static final int BOOL = 1;
@@ -93,30 +91,45 @@ public class DatabaseUtils implements Serializable {
   public static final int LONG = 6;
   public static final int FLOAT = 7;
   public static final int DATE = 8; 
- 
   
   /** Database URL */
   protected String m_DatabaseURL;
-
   
-  /* returns key column headings in their original case. Used for
-     those databases that create uppercase column names. */
+  /** 
+   * returns key column headings in their original case. Used for
+   * those databases that create uppercase column names.
+   * 
+   * @param columnName		the column to retrieve the original case for
+   * @return			the original case
+   */
   protected String attributeCaseFix(String columnName){
-    if (m_checkForUpperCaseNames==false){
-      return(columnName);
+    if (m_checkForUpperCaseNames) {
+      String ucname = columnName.toUpperCase();
+      if (ucname.equals(EXP_TYPE_COL.toUpperCase())) {
+	return EXP_TYPE_COL;
+      } else if (ucname.equals(EXP_SETUP_COL.toUpperCase())) {
+	return EXP_SETUP_COL;
+      } else if (ucname.equals(EXP_RESULT_COL.toUpperCase())) {
+	return EXP_RESULT_COL;
+      } else {
+	return columnName;
+      }
     }
-    String ucname = columnName.toUpperCase();
-    if (ucname.equals(EXP_TYPE_COL.toUpperCase())){
-      return (EXP_TYPE_COL);
-    } else if (ucname.equals(EXP_SETUP_COL.toUpperCase())){
-      return (EXP_SETUP_COL);
-    } else if (ucname.equals(EXP_RESULT_COL.toUpperCase())){
-      return (EXP_RESULT_COL);
-    } else {
-      return(columnName);
+    else if (m_checkForLowerCaseNames) {
+      String ucname = columnName.toLowerCase();
+      if (ucname.equals(EXP_TYPE_COL.toLowerCase())) {
+	return EXP_TYPE_COL;
+      } else if (ucname.equals(EXP_SETUP_COL.toLowerCase())) {
+	return EXP_SETUP_COL;
+      } else if (ucname.equals(EXP_RESULT_COL.toLowerCase())) {
+	return EXP_RESULT_COL;
+      } else {
+	return columnName;
+      }
     }
-    
-    
+    else {
+      return columnName;
+    }
   }
   
   /**
@@ -168,7 +181,6 @@ public class DatabaseUtils implements Serializable {
   public String getPassword(){
     return(m_password);
   }
-
  
   /**
    * translates the column data type string to an integer value that indicates
@@ -195,11 +207,9 @@ public class DatabaseUtils implements Serializable {
  
   /** The prepared statement used for database queries. */
   protected PreparedStatement m_PreparedStatement;
- 
    
   /** The database connection */
   protected Connection m_Connection;
-
 
   /** True if debugging output should be printed */
   protected boolean m_Debug = false;
@@ -214,17 +224,18 @@ public class DatabaseUtils implements Serializable {
   protected String m_stringType="LONGVARCHAR";
   protected String m_intType="INT";
   protected String m_doubleType="DOUBLE";
-  
 
-  /* For databases where Tables and Columns are created in upper case */
-  protected boolean m_checkForUpperCaseNames=false;
+  /** For databases where Tables and Columns are created in upper case */
+  protected boolean m_checkForUpperCaseNames = false;
 
-  /* setAutoCommit on the database? */
-  protected boolean m_setAutoCommit=true;
+  /** For databases where Tables and Columns are created in lower case */
+  protected boolean m_checkForLowerCaseNames = false;
 
-  /* create index on the database? */
-  protected boolean m_createIndex=false;
+  /** setAutoCommit on the database? */
+  protected boolean m_setAutoCommit = true;
 
+  /** create index on the database? */
+  protected boolean m_createIndex = false;
 
   /**
    * Reads properties and sets up the database drivers
@@ -272,12 +283,14 @@ public class DatabaseUtils implements Serializable {
     m_stringType=PROPERTIES.getProperty("CREATE_STRING");
     m_intType=PROPERTIES.getProperty("CREATE_INT");
     m_doubleType=PROPERTIES.getProperty("CREATE_DOUBLE");
-    String uctn=PROPERTIES.getProperty("checkUpperCaseNames");
+    String uctn=PROPERTIES.getProperty("checkUpperCaseNames", "false");
     if (uctn.equals("true")) {
       m_checkForUpperCaseNames=true;
     }else {
       m_checkForUpperCaseNames=false;
     }
+    m_checkForLowerCaseNames = PROPERTIES.getProperty(
+				"checkLowerCaseNames", "false").equals("true");
     uctn=PROPERTIES.getProperty("setAutoCommit");
     if (uctn.equals("true")) {
       m_setAutoCommit=true;
@@ -519,6 +532,8 @@ public class DatabaseUtils implements Serializable {
     ResultSet rs;
     if (m_checkForUpperCaseNames == true){
       rs = dbmd.getTables (null, null, tableName.toUpperCase(), null);
+    } else if (m_checkForLowerCaseNames == true){
+      rs = dbmd.getTables (null, null, tableName.toLowerCase(), null);
     } else {
       rs = dbmd.getTables (null, null, tableName, null);
     }
@@ -535,6 +550,18 @@ public class DatabaseUtils implements Serializable {
       }
     }
     return tableExists;
+  }
+
+  /**
+   * processes the string in such a way that it can be stored in the
+   * database, i.e., it changes backslashes into slashes and doubles single 
+   * quotes.
+   * 
+   * @param s		the string to work on
+   * @return		the processed string
+   */
+  public static String processKeyString(String s) {
+    return s.replaceAll("\\\\", "/").replaceAll("'", "''");
   }
   
   /**
@@ -569,7 +596,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
+	  query += "'" + processKeyString(key[i].toString()) + "'";
 	} else {
 	  query += key[i].toString();
 	}
@@ -629,7 +656,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
+	  query += "'" + processKeyString(key[i].toString()) + "'";
 	} else {
 	  query += key[i].toString();
 	}
@@ -690,7 +717,6 @@ public class DatabaseUtils implements Serializable {
    * @param rp the ResultProducer who will generate the result if required
    * @param key the key for the result
    * @param result the result to store
-   * @return true if the result with that key is in the database already
    * @throws Exception if an error occurs
    */
   public void putResultInTable(String tableName,
@@ -708,7 +734,7 @@ public class DatabaseUtils implements Serializable {
       }
       if (key[i] != null) {
 	if (key[i] instanceof String) {
-	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
+	  query += "'" + processKeyString(key[i].toString()) + "'";
 	} else if (key[i] instanceof Double) {
 	  query += safeDoubleToString((Double)key[i]);
 	} else {
@@ -749,6 +775,9 @@ public class DatabaseUtils implements Serializable {
   /**
    * Inserts a + if the double is in scientific notation.
    * MySQL doesn't understand the number otherwise.
+   * 
+   * @param number	the number to convert
+   * @return		the number as string
    */
   private String safeDoubleToString(Double number) {
     // NaN is treated as NULL
@@ -1058,6 +1087,4 @@ public class DatabaseUtils implements Serializable {
     }
     return tableName;
   }
-
-
-} // DatabaseUtils
+}
