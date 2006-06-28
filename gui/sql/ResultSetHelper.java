@@ -33,7 +33,7 @@ import java.sql.Types;
  *
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
 
 public class ResultSetHelper {
@@ -250,8 +250,14 @@ public class ResultSetHelper {
       
       for (i = 0; i < getRowCount(); i++) {
 
-        for (n = 0; n < getColumnCount(); n++)
-          result[i][n] = m_ResultSet.getObject(n + 1);
+        for (n = 0; n < getColumnCount(); n++) {
+          try {
+            result[i][n] = m_ResultSet.getObject(n + 1);
+          }
+          catch (Exception e) {
+            result[i][n] = null;
+          }
+        }
 
         // get next row
         if (i == getRowCount() - 1)
