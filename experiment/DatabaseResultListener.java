@@ -36,7 +36,7 @@ import java.sql.ResultSet;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class DatabaseResultListener 
   extends DatabaseUtils
@@ -377,7 +377,7 @@ public class DatabaseResultListener
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += "\"" + Utils.backQuoteChars(key[i].toString()) + "\"";
+	  query += "'" + DatabaseUtils.processKeyString(key[i].toString()) + "'";
 	} else {
 	  query += key[i].toString();
 	}
@@ -396,4 +396,4 @@ public class DatabaseResultListener
     m_CacheKey = (Object [])key.clone();
   }
   
-} // DatabaseResultListener
+}
