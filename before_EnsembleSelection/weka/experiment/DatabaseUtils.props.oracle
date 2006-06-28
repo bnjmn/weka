@@ -1,0 +1,26 @@
+# Database settings for Oracle 10g Express Edition
+#
+# url:     http://www.oracle.com/
+# jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.1 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=oracle.jdbc.driver.OracleDriver
+
+# database URL
+jdbcURL=jdbc:oracle:thin:@server_name:1521:XE
+
+# specific data types
+VARCHAR2=0
+NUMBER=2
+DOUBLE_PRECISION=2
+TIMESTAMP=8
+
+# other options
+CREATE_INT=INTEGER
+CREATE_STRING=VARCHAR2(4000)
+CREATE_DOUBLE=NUMBER
+checkUpperCaseNames=true
+checkForTable=true
+
