@@ -1,0 +1,25 @@
+# Database settings for ODBC in conjunction with MS SQL Server 2000
+#
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.1 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver
+
+# database URL
+jdbcURL=jdbc:odbc:DSN_name
+
+# specific data types
+varchar=0
+float=2
+tinyint=3
+int=5
+
+# other options
+CREATE_DOUBLE=DOUBLE PRECISION
+CREATE_STRING=VARCHAR(8000)
+CREATE_INT=INT
+checkUpperCaseNames=false
+checkLowerCaseNames=false
+checkForTable=true
+
