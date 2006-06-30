@@ -3,7 +3,7 @@
 # url:     http://www.postgresql.org/
 # jdbc:    http://jdbc.postgresql.org/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.1 $
+# version: $Revision: 1.2 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.postgresql.Driver
@@ -12,6 +12,15 @@ jdbcDriver=org.postgresql.Driver
 jdbcURL=jdbc:postgresql://server_name:5432/database_name
 
 # specific data types
+#string,getString()= 0;         -->nominal
+#boolean,getBoolean() = 1;  -->nominal
+#double,getDouble() = 2;    -->numeric
+#byte,getByte() = 3;        -->numeric
+#short,getByte()= 4;        -->numeric
+#int,getInteger() = 5;            -->numeric
+#long,getLong() = 6;                -->numeric
+#gloat,getFloat() = 7;            -->numeric
+#date,getDate() = 8;                -->date
 varchar=0
 text=0
 float4=2

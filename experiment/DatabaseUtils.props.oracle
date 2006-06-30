@@ -3,7 +3,7 @@
 # url:     http://www.oracle.com/
 # jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.1 $
+# version: $Revision: 1.2 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=oracle.jdbc.driver.OracleDriver
@@ -12,6 +12,15 @@ jdbcDriver=oracle.jdbc.driver.OracleDriver
 jdbcURL=jdbc:oracle:thin:@server_name:1521:XE
 
 # specific data types
+#string,getString()= 0;         -->nominal
+#boolean,getBoolean() = 1;  -->nominal
+#double,getDouble() = 2;    -->numeric
+#byte,getByte() = 3;        -->numeric
+#short,getByte()= 4;        -->numeric
+#int,getInteger() = 5;            -->numeric
+#long,getLong() = 6;                -->numeric
+#gloat,getFloat() = 7;            -->numeric
+#date,getDate() = 8;                -->date
 VARCHAR2=0
 NUMBER=2
 DOUBLE_PRECISION=2
