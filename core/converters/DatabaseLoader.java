@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -112,10 +112,14 @@ public class DatabaseLoader
   private DatabaseConnection m_DataBaseConnection;
   
   /** The user defined query to load instances. (form: SELECT *|&ltcolumn-list&gt; FROM &lttable&gt; [WHERE &lt;condition&gt;]) */
-  private String m_query = "Select * from Results0";;
+  private String m_query = "Select * from Results0";
   
   /** Flag indicating that pseudo incremental mode is used (all instances load at once into main memeory and then incrementally from main memory instead of the database) */
   private boolean m_pseudoIncremental;
+  
+  /** If true it checks whether or not the table exists in the database before loading depending on jdbc metadata information.
+   *  Set flag to false if no check is required or if jdbc metadata is not complete. */
+  private boolean m_checkForTable;
   
   /** Limit when an attribute is treated as string attribute and not as a nominal one because it has to many values. */
   private int m_nominalToStringLimit;
@@ -175,9 +179,12 @@ public class DatabaseLoader
   
       reset();
       m_pseudoIncremental=false;
+      m_checkForTable=true;
       String props=PROPERTIES.getProperty("nominalToStringLimit");
       m_nominalToStringLimit = Integer.parseInt(props);
       m_idColumn=PROPERTIES.getProperty("idColumn");
+      if (PROPERTIES.getProperty("checkForTable", "").equalsIgnoreCase("FALSE"))
+	m_checkForTable=false;
   }
 
   /**
@@ -651,8 +658,13 @@ public class DatabaseLoader
         return m_structure;
     }
     if (m_structure == null) {
+      if(m_checkForTable) {
         if(!m_DataBaseConnection.tableExists(endOfQuery(true)))
-            throw new IOException("Table does not exist.");
+          throw new IOException(
+              "Table does not exist according to metadata from JDBC driver. "
+              + "If you are convinced the table exists, set 'checkForTable' "
+              + "to 'False' in your DatabaseUtils.props file and try again.");
+      }
         //finds out which SQL statement to use for the DBMS to limit the number of resulting rows to one
         int choice = 0;
         boolean rightChoice = false;
@@ -1464,4 +1476,3 @@ public class DatabaseLoader
       }
   }
 }
-

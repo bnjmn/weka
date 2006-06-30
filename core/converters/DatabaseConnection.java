@@ -25,6 +25,7 @@ package weka.core.converters;
 
 import weka.core.Utils;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -42,7 +43,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DatabaseConnection 
   implements Serializable {
@@ -249,13 +250,14 @@ public class DatabaseConnection
    * @param type the column type as retrieved with java.sql.MetaData.getColumnTypeName(int)
    * @return an integer value that indicates
    * which data type / get()-Method to use in order to retrieve values from the
+   * @throws IOException in case a database type is not in the 
+   * 			 DatabaseUtils.props file
    */
-  int translateDBColumnType(String type) {
+  int translateDBColumnType(String type) throws IOException{
+    if (PROPERTIES.getProperty(type) == null)
+      throw new IOException("The following data type is unknown: "+type+". Please alter your DatabaseUtils.props!");
     return Integer.parseInt(PROPERTIES.getProperty(type));
   }
- 
-  
-
   
   /**
    * Converts an array of objects to a string by inserting a space
