@@ -23,33 +23,40 @@
 package weka.gui.beans;
 
 import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
 
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.VetoableChangeListener;
+import java.beans.beancontext.BeanContext;
+import java.beans.beancontext.BeanContextChild;
+import java.beans.beancontext.BeanContextChildSupport;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.ImageIcon;
-
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.BorderFactory;
-import java.awt.*;
-import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.beans.*;
-import java.beans.beancontext.*;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 
 /**
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class TextViewer 
   extends JPanel
@@ -144,6 +151,88 @@ public class TextViewer
     m_outText.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_outText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
+    m_history.setHandleRightClicks(false);
+    m_history.getList().addMouseListener(new MouseAdapter() {
+	public void mouseClicked(MouseEvent e) {
+	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
+	    int index = m_history.getList().locationToIndex(e.getPoint());
+	    if (index != -1) {
+	      String name = m_history.getNameAtIndex(index);
+	      visualize(name, e.getX(), e.getY());
+	    } else {
+	      visualize(null, e.getX(), e.getY());
+	    }
+	  }
+	}
+    });
+  }
+
+  /**
+   * Handles constructing a popup menu with visualization options.
+   * @param name the name of the result history list entry clicked on by
+   * the user
+   * @param x the x coordinate for popping up the menu
+   * @param y the y coordinate for popping up the menu
+   */
+  protected void visualize(String name, int x, int y) {
+    final JPanel panel = this;
+    final String selectedName = name;
+    JPopupMenu resultListMenu = new JPopupMenu();
+    
+    JMenuItem visMainBuffer = new JMenuItem("View in main window");
+    if (selectedName != null) {
+      visMainBuffer.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    m_history.setSingle(selectedName);
+	  }
+	});
+    } else {
+      visMainBuffer.setEnabled(false);
+    }
+    resultListMenu.add(visMainBuffer);
+    
+    JMenuItem visSepBuffer = new JMenuItem("View in separate window");
+    if (selectedName != null) {
+      visSepBuffer.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_history.openFrame(selectedName);
+	}
+      });
+    } else {
+      visSepBuffer.setEnabled(false);
+    }
+    resultListMenu.add(visSepBuffer);
+    
+    JMenuItem saveOutput = new JMenuItem("Save result buffer");
+    if (selectedName != null) {
+      saveOutput.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent e) {
+	    SaveBuffer m_SaveOut = new SaveBuffer(null, panel);
+	    StringBuffer sb = m_history.getNamedBuffer(selectedName);
+	    if (sb != null) {
+	      m_SaveOut.save(sb);
+	    }
+	  }
+	});
+    } else {
+      saveOutput.setEnabled(false);
+    }
+    resultListMenu.add(saveOutput);
+    
+    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
+    if (selectedName != null) {
+      deleteOutput.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  m_history.removeResult(selectedName);
+	}
+      });
+    } else {
+      deleteOutput.setEnabled(false);
+    }
+    resultListMenu.add(deleteOutput);
+
+    resultListMenu.show(m_history.getList(), x, y);
   }
 
   /**
