@@ -38,7 +38,7 @@ import  weka.filters.Filter;
  * Treat missing values as a seperate value. <br>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.15.2.1 $
  */
 public class SymmetricalUncertAttributeEval
   extends AttributeEvaluator
@@ -69,7 +69,7 @@ public class SymmetricalUncertAttributeEval
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "GainRatioAttributeEval :\n\nEvaluates the worth of an attribute "
+    return "SymmetricalUncertAttributeEval :\n\nEvaluates the worth of an attribute "
       +"by measuring the symmetrical uncertainty with respect to the class. "
       +"\n\n SymmU(Class, Attribute) = 2 * (H(Class) - H(Class | Attribute)) "
       +"/ H(Class) + H(Attribute).\n";
