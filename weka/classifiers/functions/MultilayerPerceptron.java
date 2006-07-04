@@ -90,14 +90,18 @@ import javax.swing.JTextField;
  *  (Default = 500).</pre>
  * 
  * <pre> -V &lt;percentage size of validation set&gt;
- *  Percentage size of validation set to use to terminate training (if this is non zero it can pre-empt num of epochs.
+ *  Percentage size of validation set to use to terminate
+ *  training (if this is non zero it can pre-empt num of epochs.
  *  (Value should be between 0 - 100, Default = 0).</pre>
  * 
  * <pre> -S &lt;seed&gt;
- *  The value used to seed the random number generator (Value should be &gt;= 0 and and a long, Default = 0).</pre>
+ *  The value used to seed the random number generator
+ *  (Value should be &gt;= 0 and and a long, Default = 0).</pre>
  * 
  * <pre> -E &lt;threshold for number of consequetive errors&gt;
- *  The consequetive number of errors allowed for validation testing before the netwrok terminates. (Value should be &gt; 0, Default = 20).</pre>
+ *  The consequetive number of errors allowed for validation
+ *  testing before the netwrok terminates.
+ *  (Value should be &gt; 0, Default = 20).</pre>
  * 
  * <pre> -G
  *  GUI will be opened.
@@ -113,7 +117,10 @@ import javax.swing.JTextField;
  * 
  * <pre> -H &lt;comma seperated numbers for nodes on each layer&gt;
  *  The hidden layers to be created for the network.
- *  (Value should be a list of comma seperated Natural numbers or the letters 'a' = (attribs + classes) / 2, 'i' = attribs, 'o' = classes, 't' = attribs .+ classes) For wildcard values,Default = a).</pre>
+ *  (Value should be a list of comma separated Natural 
+ *  numbers or the letters 'a' = (attribs + classes) / 2, 
+ *  'i' = attribs, 'o' = classes, 't' = attribs .+ classes)
+ *  for wildcard values, Default = a).</pre>
  * 
  * <pre> -C
  *  Normalizing a numeric class will NOT be done.
@@ -134,7 +141,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -657,7 +664,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   class ControlPanel 
     extends JPanel {
@@ -2068,18 +2075,18 @@ public class MultilayerPerceptron
 	      +"\t(Default = 500).",
 	      "N", 1,"-N <number of epochs>"));
     newVector.addElement(new Option(
-	      "\tPercentage size of validation set to use to terminate" +
-	      " training (if this is non zero it can pre-empt num of epochs.\n"
+	      "\tPercentage size of validation set to use to terminate\n"
+	      + "\ttraining (if this is non zero it can pre-empt num of epochs.\n"
 	      +"\t(Value should be between 0 - 100, Default = 0).",
 	      "V", 1, "-V <percentage size of validation set>"));
     newVector.addElement(new Option(
-	      "\tThe value used to seed the random number generator" +
-	      "\t(Value should be >= 0 and and a long, Default = 0).",
+	      "\tThe value used to seed the random number generator\n"
+	      + "\t(Value should be >= 0 and and a long, Default = 0).",
 	      "S", 1, "-S <seed>"));
     newVector.addElement(new Option(
-	      "\tThe consequetive number of errors allowed for validation" +
-	      " testing before the netwrok terminates." +
-	      "\t(Value should be > 0, Default = 20).",
+	      "\tThe consequetive number of errors allowed for validation\n"
+	      + "\ttesting before the netwrok terminates.\n"
+	      + "\t(Value should be > 0, Default = 20).",
 	      "E", 1, "-E <threshold for number of consequetive errors>"));
     newVector.addElement(new Option(
               "\tGUI will be opened.\n"
@@ -2095,11 +2102,10 @@ public class MultilayerPerceptron
 	      "B", 0,"-B"));
     newVector.addElement(new Option(
 	      "\tThe hidden layers to be created for the network.\n"
-	      +"\t(Value should be a list of comma seperated Natural numbers" +
-	      " or the letters 'a' = (attribs + classes) / 2, 'i'" +
-	      " = attribs, 'o' = classes, 't' = attribs .+ classes)" +
-	      " For wildcard values" +
-	      ",Default = a).",
+	      + "\t(Value should be a list of comma separated Natural \n"
+	      + "\tnumbers or the letters 'a' = (attribs + classes) / 2, \n"
+	      + "\t'i' = attribs, 'o' = classes, 't' = attribs .+ classes)\n"
+	      + "\tfor wildcard values, Default = a).",
 	      "H", 1, "-H <comma seperated numbers for nodes on each layer>"));
     newVector.addElement(new Option(
               "\tNormalizing a numeric class will NOT be done.\n"
@@ -2141,14 +2147,18 @@ public class MultilayerPerceptron
    *  (Default = 500).</pre>
    * 
    * <pre> -V &lt;percentage size of validation set&gt;
-   *  Percentage size of validation set to use to terminate training (if this is non zero it can pre-empt num of epochs.
+   *  Percentage size of validation set to use to terminate
+   *  training (if this is non zero it can pre-empt num of epochs.
    *  (Value should be between 0 - 100, Default = 0).</pre>
    * 
    * <pre> -S &lt;seed&gt;
-   *  The value used to seed the random number generator (Value should be &gt;= 0 and and a long, Default = 0).</pre>
+   *  The value used to seed the random number generator
+   *  (Value should be &gt;= 0 and and a long, Default = 0).</pre>
    * 
    * <pre> -E &lt;threshold for number of consequetive errors&gt;
-   *  The consequetive number of errors allowed for validation testing before the netwrok terminates. (Value should be &gt; 0, Default = 20).</pre>
+   *  The consequetive number of errors allowed for validation
+   *  testing before the netwrok terminates.
+   *  (Value should be &gt; 0, Default = 20).</pre>
    * 
    * <pre> -G
    *  GUI will be opened.
@@ -2164,7 +2174,10 @@ public class MultilayerPerceptron
    * 
    * <pre> -H &lt;comma seperated numbers for nodes on each layer&gt;
    *  The hidden layers to be created for the network.
-   *  (Value should be a list of comma seperated Natural numbers or the letters 'a' = (attribs + classes) / 2, 'i' = attribs, 'o' = classes, 't' = attribs .+ classes) For wildcard values,Default = a).</pre>
+   *  (Value should be a list of comma separated Natural 
+   *  numbers or the letters 'a' = (attribs + classes) / 2, 
+   *  'i' = attribs, 'o' = classes, 't' = attribs .+ classes)
+   *  for wildcard values, Default = a).</pre>
    * 
    * <pre> -C
    *  Normalizing a numeric class will NOT be done.
