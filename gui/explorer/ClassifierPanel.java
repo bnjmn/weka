@@ -126,7 +126,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.91 $
+ * @version $Revision: 1.92 $
  */
 public class ClassifierPanel 
   extends JPanel {
@@ -243,6 +243,9 @@ public class ClassifierPanel
   protected JLabel m_RandomLab = new JLabel("Random seed for XVal / % Split", 
 					    SwingConstants.RIGHT);
 
+  /** Whether randomization is turned off to preserve order */
+  protected JCheckBox m_PreserveOrderBut = new JCheckBox("Preserve order for % Split");
+  
   /** Click to start running the classifier */
   protected JButton m_StartBut = new JButton("Start");
 
@@ -445,7 +448,7 @@ public class ClassifierPanel
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(8, 1));
+	moreOptionsPanel.setLayout(new GridLayout(9, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
@@ -462,6 +465,7 @@ public class ClassifierPanel
 	seedPanel.add(m_RandomLab, BorderLayout.WEST);
 	seedPanel.add(m_RandomSeedText, BorderLayout.EAST);
 	moreOptionsPanel.add(seedPanel);
+	moreOptionsPanel.add(m_PreserveOrderBut);
 
 	JPanel all = new JPanel();
 	all.setLayout(new BorderLayout());	
@@ -1189,14 +1193,16 @@ public class ClassifierPanel
 	      break;
 		
 	      case 2: // Percent split
-	      m_Log.statusMessage("Randomizing instances...");
-	      try {
-		rnd = Integer.parseInt(m_RandomSeedText.getText().trim());
-	      } catch (Exception ex) {
-		m_Log.logMessage("Trouble parsing random seed value");
-		rnd = 1;
+	      if (!m_PreserveOrderBut.isSelected()) {
+		m_Log.statusMessage("Randomizing instances...");
+		try {
+		  rnd = Integer.parseInt(m_RandomSeedText.getText().trim());
+		} catch (Exception ex) {
+		  m_Log.logMessage("Trouble parsing random seed value");
+		  rnd = 1;
+		}
+		inst.randomize(new Random(rnd));
 	      }
-	      inst.randomize(new Random(rnd));
 	      int trainSize = inst.numInstances() * percent / 100;
 	      int testSize = inst.numInstances() - trainSize;
 	      Instances train = new Instances(inst, 0, trainSize);
