@@ -69,7 +69,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class PrincipalComponents 
   extends UnsupervisedAttributeEvaluator 
@@ -603,7 +603,7 @@ public class PrincipalComponents
 	  }
 	  corr = Utils.correlation(att1,att2,m_numInstances);
 	  m_correlation[i][j] = corr;
-	  m_correlation[i][j] = corr;
+	  m_correlation[j][i] = corr;
 	}
       }
     }
