@@ -46,7 +46,7 @@ import  weka.filters.Filter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.25.2.3 $
+ * @version $Revision: 1.25.2.4 $
  */
 public class PrincipalComponents extends UnsupervisedAttributeEvaluator 
   implements AttributeTransformer, OptionHandler {
@@ -579,7 +579,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
 	  }
 	  corr = Utils.correlation(att1,att2,m_numInstances);
 	  m_correlation[i][j] = corr;
-	  m_correlation[i][j] = corr;
+	  m_correlation[j][i] = corr;
 	}
       }
     }
