@@ -95,7 +95,7 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.59 $
  */
 public class PreprocessPanel extends JPanel {
   
@@ -491,9 +491,10 @@ public class PreprocessPanel extends JPanel {
 	SwingUtilities.invokeAndWait(r);
       }
     } catch (Exception ex) {
+      ex.printStackTrace();
       JOptionPane.showMessageDialog(this,
 				    "Problem setting base instances:\n"
-				    + ex.getMessage(),
+				    + ex,
 				    "Instances",
 				    JOptionPane.ERROR_MESSAGE);
     }
