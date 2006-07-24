@@ -20,24 +20,22 @@
  *
  */
 
-
 package weka.experiment;
 
 import weka.core.Utils;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.StringTokenizer;
+
 import java.io.Serializable;
-import java.io.FileInputStream;
-import java.sql.SQLException;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Types;
-import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSetMetaData;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * DatabaseUtils provides utility functions for accessing the experiment
@@ -53,117 +51,200 @@ import java.sql.PreparedStatement;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.4 $
+ * @version $Revision: 1.18.2.5 $
  */
-public class DatabaseUtils implements Serializable {
+public class DatabaseUtils
+  implements Serializable {
 
+  /** for serialization */
+  static final long serialVersionUID = -8252351994547116729L;
+  
   /** The name of the table containing the index to experiments */
   public static final String EXP_INDEX_TABLE = "Experiment_index";
 
   /** The name of the column containing the experiment type (ResultProducer) */
-  public static final String EXP_TYPE_COL    = "Experiment_type";
+  public static final String EXP_TYPE_COL = "Experiment_type";
 
   /** The name of the column containing the experiment setup (parameters) */
-  public static final String EXP_SETUP_COL   = "Experiment_setup";
+  public static final String EXP_SETUP_COL = "Experiment_setup";
   
   /** The name of the column containing the results table name */
-  public static final String EXP_RESULT_COL  = "Result_table";
+  public static final String EXP_RESULT_COL = "Result_table";
 
   /** The prefix for result table names */
   public static final String EXP_RESULT_PREFIX = "Results";
 
   /** The name of the properties file */
-  protected static String PROPERTY_FILE
-    = "weka/experiment/DatabaseUtils.props";
+  public final static String PROPERTY_FILE = "weka/experiment/DatabaseUtils.props";
 
   /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
-  protected Vector DRIVERS = new Vector();
+  protected static Vector DRIVERS = new Vector();
 
   /** Properties associated with the database connection */
-  protected Properties PROPERTIES;
-
-
+  protected static Properties PROPERTIES;
 
   /* Type mapping used for reading experiment results */
+  /** Type mapping for STRING used for reading experiment results */
   public static final int STRING = 0;
+  /** Type mapping for BOOL used for reading experiment results */
   public static final int BOOL = 1;
+  /** Type mapping for DOUBLE used for reading experiment results */
   public static final int DOUBLE = 2;
+  /** Type mapping for BYTE used for reading experiment results */
   public static final int BYTE = 3;
+  /** Type mapping for SHORT used for reading experiment results */
   public static final int SHORT = 4;
+  /** Type mapping for INTEGER used for reading experiment results */
   public static final int INTEGER = 5;
+  /** Type mapping for LONG used for reading experiment results */
   public static final int LONG = 6;
+  /** Type mapping for FLOAT used for reading experiment results */
   public static final int FLOAT = 7;
+  /** Type mapping for DATE used for reading experiment results */
   public static final int DATE = 8; 
- 
   
   /** Database URL */
   protected String m_DatabaseURL;
+ 
+  /** The prepared statement used for database queries. */
+  protected PreparedStatement m_PreparedStatement;
+   
+  /** The database connection */
+  protected Connection m_Connection;
 
+  /** True if debugging output should be printed */
+  protected boolean m_Debug = false;
   
-  /* returns key column headings in their original case. Used for
-     those databases that create uppercase column names. */
+  /** Database username */
+  protected String m_userName = "";
+
+  /** Database Password */
+  protected String m_password = "";
+
+  /* mappings used for creating Tables. Can be overridden in DatabaseUtils.props*/
+  /** string type for the create table statement */
+  protected String m_stringType = "LONGVARCHAR";
+  /** integer type for the create table statement */
+  protected String m_intType = "INT";
+  /** double type for the create table statement */
+  protected String m_doubleType = "DOUBLE";
+
+  /** For databases where Tables and Columns are created in upper case */
+  protected boolean m_checkForUpperCaseNames = false;
+
+  /** For databases where Tables and Columns are created in lower case */
+  protected boolean m_checkForLowerCaseNames = false;
+
+  /** setAutoCommit on the database? */
+  protected boolean m_setAutoCommit = true;
+
+  /** create index on the database? */
+  protected boolean m_createIndex = false;
+
+  /**
+   * Reads properties and sets up the database drivers
+   *
+   * @throws Exception 	if an error occurs
+   */
+  public DatabaseUtils() throws Exception {
+    if (PROPERTIES == null) {
+      try {
+	PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+	
+	// Register the drivers in jdbc DriverManager
+	String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
+	
+	if (drivers == null) {
+	  throw new Exception("No jdbc drivers specified");
+	}
+	// The call to newInstance() is necessary on some platforms
+	// (with some java VM implementations)
+	StringTokenizer st = new StringTokenizer(drivers, ", ");
+	while (st.hasMoreTokens()) {
+	  String driver = st.nextToken();
+	  boolean result;
+	  try {
+	    Class.forName(driver);
+	    DRIVERS.addElement(driver);
+	    result = true;
+	  }
+	  catch (Exception e) {
+	    result = false;
+	  }
+          System.err.println(
+              "Trying to add JDBC driver: " + driver 
+              + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
+	}
+      } catch (Exception ex) {
+	System.err.println("Problem reading properties. Fix before continuing.");
+	System.err.println(ex);
+      }
+    }
+
+    m_DatabaseURL = PROPERTIES.getProperty("jdbcURL", "jdbc:idb=experiments.prp");
+    m_stringType  = PROPERTIES.getProperty("CREATE_STRING", "LONGVARCHAR");
+    m_intType     = PROPERTIES.getProperty("CREATE_INT", "INT");
+    m_doubleType  = PROPERTIES.getProperty("CREATE_DOUBLE", "DOUBLE");
+    m_checkForUpperCaseNames = PROPERTIES.getProperty(
+				"checkUpperCaseNames", "false").equals("true");
+    m_checkForLowerCaseNames = PROPERTIES.getProperty(
+				"checkLowerCaseNames", "false").equals("true");
+    m_setAutoCommit = PROPERTIES.getProperty(
+			"setAutoCommit", "false").equals("true");
+    m_createIndex   = PROPERTIES.getProperty(
+			"createIndex", "false").equals("true");
+  }
+  
+  /** 
+   * returns key column headings in their original case. Used for
+   * those databases that create uppercase column names.
+   * 
+   * @param columnName	the column to retrieve the original case for
+   * @return		the original case
+   */
   protected String attributeCaseFix(String columnName){
-    if (m_checkForUpperCaseNames==false){
-      return(columnName);
+    if (m_checkForUpperCaseNames) {
+      String ucname = columnName.toUpperCase();
+      if (ucname.equals(EXP_TYPE_COL.toUpperCase())) {
+	return EXP_TYPE_COL;
+      } else if (ucname.equals(EXP_SETUP_COL.toUpperCase())) {
+	return EXP_SETUP_COL;
+      } else if (ucname.equals(EXP_RESULT_COL.toUpperCase())) {
+	return EXP_RESULT_COL;
+      } else {
+	return columnName;
+      }
     }
-    String ucname = columnName.toUpperCase();
-    if (ucname.equals(EXP_TYPE_COL.toUpperCase())){
-      return (EXP_TYPE_COL);
-    } else if (ucname.equals(EXP_SETUP_COL.toUpperCase())){
-      return (EXP_SETUP_COL);
-    } else if (ucname.equals(EXP_RESULT_COL.toUpperCase())){
-      return (EXP_RESULT_COL);
-    } else {
-      return(columnName);
+    else if (m_checkForLowerCaseNames) {
+      String ucname = columnName.toLowerCase();
+      if (ucname.equals(EXP_TYPE_COL.toLowerCase())) {
+	return EXP_TYPE_COL;
+      } else if (ucname.equals(EXP_SETUP_COL.toLowerCase())) {
+	return EXP_SETUP_COL;
+      } else if (ucname.equals(EXP_RESULT_COL.toLowerCase())) {
+	return EXP_RESULT_COL;
+      } else {
+	return columnName;
+      }
     }
-    
-    
+    else {
+      return columnName;
+    }
   }
-
-  /** Set the database username 
-   *
-   * @param username Username for Database.
-   */
-  public void setUsername(String username){
-    m_userName=username; 
-  }
-  
-  /** Get the database username 
-   *
-   * @return Database username
-   */
-  public String getUsername(){
-    return(m_userName);
-  }
-
-  /** Set the database password
-   *
-   * @param password Password for Database.
-   */
-  public void setPassword(String password){
-    m_password=password;
-  }
-  
-  /** Get the database password
-   *
-   * @return  Password for Database.
-   */
-  public String getPassword(){
-    return(m_password);
-  }
-
  
   /**
    * translates the column data type string to an integer value that indicates
    * which data type / get()-Method to use in order to retrieve values from the
    * database (see DatabaseUtils.Properties, InstanceQuery()). Blanks in the type 
    * are replaced with underscores "_", since Java property names can't contain blanks.
-   * @param type the column type as retrieved with java.sql.MetaData.getColumnTypeName(int)
-   * @return an integer value that indicates
-   * which data type / get()-Method to use in order to retrieve values from the
+   * 
+   * @param type 	the column type as retrieved with 
+   * 			java.sql.MetaData.getColumnTypeName(int)
+   * @return 		an integer value that indicates
+   * 			which data type / get()-Method to use in order to 
+   * 			retrieve values from the
    */
-  int translateDBColumnType(String type) {
-
+  public static int translateDBColumnType(String type) {
     try {
       // Oracle, e.g., has datatypes like "DOUBLE PRECISION"
       // BUT property names can't have blanks in the name, hence replace blanks
@@ -172,105 +253,7 @@ public class DatabaseUtils implements Serializable {
       return Integer.parseInt(PROPERTIES.getProperty(type));
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException("Unknown data type: " + type + ". Add entry " +
-					 "in weka/experiment/DatabaseUtils.props.");
-    }
-  }
- 
-  /** The prepared statement used for database queries. */
-  protected PreparedStatement m_PreparedStatement;
- 
-   
-  /** The database connection */
-  protected Connection m_Connection;
-
-
-  /** True if debugging output should be printed */
-  protected boolean m_Debug = true;
-  
-  /** Database username */
-  protected String m_userName="";
-
-  /** Database Password */
-  protected String m_password="";
-
-  /** mappings used for creating Tables. Can be overridden in DatabaseUtils.props*/
-  protected String m_stringType="LONGVARCHAR";
-  protected String m_intType="INT";
-  protected String m_doubleType="DOUBLE";
-  
-
-  /* For databases where Tables and Columns are created in upper case */
-  protected boolean m_checkForUpperCaseNames=false;
-
-  /* setAutoCommit on the database? */
-  protected boolean m_setAutoCommit=true;
-
-  /* create index on the database? */
-  protected boolean m_createIndex=false;
-
-
-  /**
-   * Reads properties and sets up the database drivers
-   *
-   * @exception Exception if an error occurs
-   */
-  public DatabaseUtils() throws Exception {
-
-    try {
-      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-   
-      // Register the drivers in jdbc DriverManager
-      String drivers = PROPERTIES.getProperty("jdbcDriver",
-					    "jdbc.idbDriver");
-
-      if (drivers == null) {
-	throw new Exception("No jdbc drivers specified");
-      }
-      // The call to newInstance() is necessary on some platforms
-      // (with some java VM implementations)
-      StringTokenizer st = new StringTokenizer(drivers, ", ");
-      while (st.hasMoreTokens()) {
-	String driver = st.nextToken();
-	boolean result;
-	try {
-	  Class.forName(driver);
-	  DRIVERS.addElement(driver);
-	  result = true;
-	}
-	catch (Exception e) {
-	  result = false;
-	}
-        System.err.println(
-            "Trying to add JDBC driver: " + driver 
-            + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
-      }
-    } catch (Exception ex) {
-      System.err.println("Problem reading properties. Fix before continuing.");
-      System.err.println(ex);
-    }
-
-    m_DatabaseURL = PROPERTIES.getProperty("jdbcURL",
-					   "jdbc:idb=experiments.prp");
-    m_stringType=PROPERTIES.getProperty("CREATE_STRING");
-    m_intType=PROPERTIES.getProperty("CREATE_INT");
-    m_doubleType=PROPERTIES.getProperty("CREATE_DOUBLE");
-    String uctn=PROPERTIES.getProperty("checkUpperCaseNames");
-    if (uctn.equals("true")) {
-      m_checkForUpperCaseNames=true;
-    }else {
-      m_checkForUpperCaseNames=false;
-    }
-    uctn=PROPERTIES.getProperty("setAutoCommit");
-    if (uctn.equals("true")) {
-      m_setAutoCommit=true;
-    } else {
-      m_setAutoCommit=false;
-    }
-    uctn=PROPERTIES.getProperty("createIndex");
-    if (uctn.equals("true")) {
-      m_createIndex=true;
-    } else {
-      m_createIndex=false;
+					 "in " + PROPERTY_FILE + ".");
     }
   }
 
@@ -278,11 +261,10 @@ public class DatabaseUtils implements Serializable {
    * Converts an array of objects to a string by inserting a space
    * between each element. Null elements are printed as ?
    *
-   * @param array the array of objects
-   * @return a value of type 'String'
+   * @param array 	the array of objects
+   * @return 		a value of type 'String'
    */
-  public static String arrayToString(Object [] array) {
-
+  public static String arrayToString(Object[] array) {
     String result = "";
     if (array == null) {
       result = "<null>";
@@ -301,63 +283,63 @@ public class DatabaseUtils implements Serializable {
   /**
    * Returns the name associated with a SQL type.
    *
-   * @param type the SQL type
-   * @return the name of the type
+   * @param type 	the SQL type
+   * @return 		the name of the type
    */
   public static String typeName(int type) {
-  
     switch (type) {
-    case Types.BIGINT :
-      return "BIGINT ";
-    case Types.BINARY:
-      return "BINARY";
-    case Types.BIT:
-      return "BIT";
-    case Types.CHAR:
-      return "CHAR";
-    case Types.DATE:
-      return "DATE";
-    case Types.DECIMAL:
-      return "DECIMAL";
-    case Types.DOUBLE:
-      return "DOUBLE";
-    case Types.FLOAT:
-      return "FLOAT";
-    case Types.INTEGER:
-      return "INTEGER";
-    case Types.LONGVARBINARY:
-      return "LONGVARBINARY";
-    case Types.LONGVARCHAR:
-      return "LONGVARCHAR";
-    case Types.NULL:
-      return "NULL";
-    case Types.NUMERIC:
-      return "NUMERIC";
-    case Types.OTHER:
-      return "OTHER";
-    case Types.REAL:
-      return "REAL";
-    case Types.SMALLINT:
-      return "SMALLINT";
-    case Types.TIME:
-      return "TIME";
-    case Types.TIMESTAMP:
-      return "TIMESTAMP";
-    case Types.TINYINT:
-      return "TINYINT";
-    case Types.VARBINARY:
-      return "VARBINARY";
-    case Types.VARCHAR:
-      return "VARCHAR";
-    default:
-      return "Unknown";
+      case Types.BIGINT :
+	return "BIGINT ";
+      case Types.BINARY:
+	return "BINARY";
+      case Types.BIT:
+	return "BIT";
+      case Types.CHAR:
+	return "CHAR";
+      case Types.DATE:
+	return "DATE";
+      case Types.DECIMAL:
+	return "DECIMAL";
+      case Types.DOUBLE:
+	return "DOUBLE";
+      case Types.FLOAT:
+	return "FLOAT";
+      case Types.INTEGER:
+	return "INTEGER";
+      case Types.LONGVARBINARY:
+	return "LONGVARBINARY";
+      case Types.LONGVARCHAR:
+	return "LONGVARCHAR";
+      case Types.NULL:
+	return "NULL";
+      case Types.NUMERIC:
+	return "NUMERIC";
+      case Types.OTHER:
+	return "OTHER";
+      case Types.REAL:
+	return "REAL";
+      case Types.SMALLINT:
+	return "SMALLINT";
+      case Types.TIME:
+	return "TIME";
+      case Types.TIMESTAMP:
+	return "TIMESTAMP";
+      case Types.TINYINT:
+	return "TINYINT";
+      case Types.VARBINARY:
+	return "VARBINARY";
+      case Types.VARCHAR:
+	return "VARCHAR";
+      default:
+	return "Unknown";
     }
   }
 
   /**
    * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
    */
   public String databaseURLTipText() {
     return "Set the URL to the database.";
@@ -366,30 +348,111 @@ public class DatabaseUtils implements Serializable {
   /**
    * Get the value of DatabaseURL.
    *
-   * @return Value of DatabaseURL.
+   * @return 		Value of DatabaseURL.
    */
   public String getDatabaseURL() {
-    
     return m_DatabaseURL;
   }
   
   /**
    * Set the value of DatabaseURL.
    *
-   * @param newDatabaseURL Value to assign to DatabaseURL.
+   * @param newDatabaseURL 	Value to assign to DatabaseURL.
    */
   public void setDatabaseURL(String newDatabaseURL) {
-    
     m_DatabaseURL = newDatabaseURL;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "Whether debug information is printed.";
+  }
+  
+  /**
+   * Sets whether there should be printed some debugging output to stderr or not
+   * 
+   * @param d 		true if output should be printed
+   */
+  public void setDebug(boolean d) {
+    m_Debug = d;
+  }
+
+  /**
+   * Gets whether there should be printed some debugging output to stderr or not
+   * 
+   * @return 		true if output should be printed
+   */
+  public boolean getDebug() {
+    return m_Debug;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String usernameTipText() {
+    return "The user to use for connecting to the database.";
+  }
+
+  /** 
+   * Set the database username 
+   *
+   * @param username 	Username for Database.
+   */
+  public void setUsername(String username){
+    m_userName = username; 
+  }
+  
+  /** 
+   * Get the database username 
+   *
+   * @return 		Database username
+   */
+  public String getUsername(){
+    return m_userName;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String passwordTipText() {
+    return "The password to use for connecting to the database.";
+  }
+
+  /** 
+   * Set the database password
+   *
+   * @param password 	Password for Database.
+   */
+  public void setPassword(String password){
+    m_password = password;
+  }
+  
+  /** 
+   * Get the database password
+   *
+   * @return  		Password for Database.
+   */
+  public String getPassword(){
+    return m_password;
   }
 
   /**
    * Opens a connection to the database
    *
-   * @exception Exception if an error occurs
+   * @throws Exception 	if an error occurs
    */
   public void connectToDatabase() throws Exception {
-    
     if (m_Debug) {
       System.err.println("Connecting to " + m_DatabaseURL);
     }
@@ -428,20 +491,15 @@ public class DatabaseUtils implements Serializable {
 	}
       }
     }
-    if (m_setAutoCommit){
-      m_Connection.setAutoCommit(true);
-    } else {
-      m_Connection.setAutoCommit(false);
-    }
+    m_Connection.setAutoCommit(m_setAutoCommit);
   }
 
   /**
    * Closes the connection to the database.
    *
-   * @exception Exception if an error occurs
+   * @throws Exception 	if an error occurs
    */
   public void disconnectFromDatabase() throws Exception {
-
     if (m_Debug) {
       System.err.println("Disconnecting from " + m_DatabaseURL);
     }
@@ -454,53 +512,53 @@ public class DatabaseUtils implements Serializable {
   /**
    * Returns true if a database connection is active.
    *
-   * @return a value of type 'boolean'
+   * @return 		a value of type 'boolean'
    */
   public boolean isConnected() {
-
     return (m_Connection != null);
   }
 
   /**
    * Executes a SQL query.
    *
-   * @param query the SQL query
-   * @return true if the query generated results
-   * @exception SQLException if an error occurs
+   * @param query 	the SQL query
+   * @return 		true if the query generated results
+   * @throws SQLException if an error occurs
    */
   public boolean execute(String query) throws SQLException {
- 
-    m_PreparedStatement = m_Connection.prepareStatement(query);
+    m_PreparedStatement = m_Connection.prepareStatement(
+	query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    
     return(m_PreparedStatement.execute());
   }
 
   /**
    * Gets the results generated by a previous query.
    *
-   * @return the result set.
-   * @exception SQLException if an error occurs
+   * @return 		the result set.
+   * @throws SQLException if an error occurs
    */
   public ResultSet getResultSet() throws SQLException {
-
     return m_PreparedStatement.getResultSet();
   }
   
   /**
    * Checks that a given table exists.
    *
-   * @param tableName the name of the table to look for.
-   * @return true if the table exists.
-   * @exception Exception if an error occurs.
+   * @param tableName 	the name of the table to look for.
+   * @return 		true if the table exists.
+   * @throws Exception 	if an error occurs.
    */
   public boolean tableExists(String tableName) throws Exception {
-
     if (m_Debug) {
       System.err.println("Checking if table " + tableName + " exists...");
     }
     DatabaseMetaData dbmd = m_Connection.getMetaData();
     ResultSet rs;
-    if (m_checkForUpperCaseNames == true){
+    if (m_checkForUpperCaseNames) {
       rs = dbmd.getTables (null, null, tableName.toUpperCase(), null);
+    } else if (m_checkForLowerCaseNames) {
+      rs = dbmd.getTables (null, null, tableName.toLowerCase(), null);
     } else {
       rs = dbmd.getTables (null, null, tableName, null);
     }
@@ -518,16 +576,30 @@ public class DatabaseUtils implements Serializable {
     }
     return tableExists;
   }
+
+  /**
+   * processes the string in such a way that it can be stored in the
+   * database, i.e., it changes backslashes into slashes and doubles single 
+   * quotes.
+   * 
+   * @param s		the string to work on
+   * @return		the processed string
+   */
+  public static String processKeyString(String s) {
+    return s.replaceAll("\\\\", "/").replaceAll("'", "''");
+  }
   
   /**
    * Executes a database query to see whether a result for the supplied key
    * is already in the database.           
    *
-   * @param tableName the name of the table to search for the key in
-   * @param rp the ResultProducer who will generate the result if required
-   * @param key the key for the result
-   * @return true if the result with that key is in the database already
-   * @exception Exception if an error occurs
+   * @param tableName 	the name of the table to search for the key in
+   * @param rp 		the ResultProducer who will generate the result if 
+   * 			required
+   * @param key 	the key for the result
+   * @return 		true if the result with that key is in the database 
+   * 			already
+   * @throws Exception 	if an error occurs
    */
   protected boolean isKeyInTable(String tableName,
 				 ResultProducer rp,
@@ -551,7 +623,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += '\'' + key[i].toString() + '\'';
+	  query += "'" + processKeyString(key[i].toString()) + "'";
 	} else {
 	  query += key[i].toString();
 	}
@@ -560,7 +632,6 @@ public class DatabaseUtils implements Serializable {
     boolean retval = false;
     if (execute(query)) {
       ResultSet rs = m_PreparedStatement.getResultSet();
-      int numAttributes = rs.getMetaData().getColumnCount();
       if (rs.next()) {
 	retval = true;
 	if (rs.next()) {
@@ -577,13 +648,15 @@ public class DatabaseUtils implements Serializable {
    * Executes a database query to extract a result for the supplied key
    * from the database.           
    *
-   * @param tableName the name of the table where the result is stored
-   * @param rp the ResultProducer who will generate the result if required
-   * @param key the key for the result
-   * @return true if the result with that key is in the database already
-   * @exception Exception if an error occurs
+   * @param tableName 	the name of the table where the result is stored
+   * @param rp 		the ResultProducer who will generate the result if 
+   * 			required
+   * @param key 	the key for the result
+   * @return 		true if the result with that key is in the database 
+   * 			already
+   * @throws Exception 	if an error occurs
    */
-  public Object [] getResultFromTable(String tableName,
+  public Object[] getResultFromTable(String tableName,
 					 ResultProducer rp,
 					 Object [] key)
     throws Exception {
@@ -612,7 +685,7 @@ public class DatabaseUtils implements Serializable {
 	}
 	query += "Key_" + keyNames[i] + '=';
 	if (key[i] instanceof String) {
-	  query += "'" + key[i].toString() + "'";
+	  query += "'" + processKeyString(key[i].toString()) + "'";
 	} else {
 	  query += key[i].toString();
 	}
@@ -630,31 +703,24 @@ public class DatabaseUtils implements Serializable {
     // Extract the columns for the result
     Object [] result = new Object [numAttributes];
     for(int i = 1; i <= numAttributes; i++) {
-      /* switch (md.getColumnType(i)) {
-      case Types.CHAR:
-      case Types.VARCHAR:
-      case Types.LONGVARCHAR:
-      case Types.BINARY:
-      case Types.VARBINARY:
-      case Types.LONGVARBINARY: */
       switch (translateDBColumnType(md.getColumnTypeName(i))) {
-      case STRING : 
-	result[i - 1] = rs.getString(i);
-	if (rs.wasNull()) {
-	  result[i - 1] = null;
-	}
-	break;
-      case FLOAT:
-      case DOUBLE:
-	result[i - 1] = new Double(rs.getDouble(i));
-	if (rs.wasNull()) {
-	  result[i - 1] = null;
-	}
-	break;
-      default:
-	throw new Exception("Unhandled SQL result type (field " + (i + 1)
-			    + "): "
-			    + DatabaseUtils.typeName(md.getColumnType(i)));
+	case STRING : 
+	  result[i - 1] = rs.getString(i);
+	  if (rs.wasNull()) {
+	    result[i - 1] = null;
+	  }
+	  break;
+	case FLOAT:
+	case DOUBLE:
+	  result[i - 1] = new Double(rs.getDouble(i));
+	  if (rs.wasNull()) {
+	    result[i - 1] = null;
+	  }
+	  break;
+	default:
+	  throw new Exception("Unhandled SQL result type (field " + (i + 1)
+	      + "): "
+	      + DatabaseUtils.typeName(md.getColumnType(i)));
       }
     }
     if (rs.next()) {
@@ -669,12 +735,12 @@ public class DatabaseUtils implements Serializable {
    * Executes a database query to insert a result for the supplied key
    * into the database.           
    *
-   * @param tableName the name of the table where the result is stored
-   * @param rp the ResultProducer who will generate the result if required
-   * @param key the key for the result
-   * @param result the result to store
-   * @return true if the result with that key is in the database already
-   * @exception Exception if an error occurs
+   * @param tableName 	the name of the table where the result is stored
+   * @param rp 		the ResultProducer who will generate the result if 
+   * 			required
+   * @param key 	the key for the result
+   * @param result 	the result to store
+   * @throws Exception 	if an error occurs
    */
   public void putResultInTable(String tableName,
 			       ResultProducer rp,
@@ -691,7 +757,7 @@ public class DatabaseUtils implements Serializable {
       }
       if (key[i] != null) {
 	if (key[i] instanceof String) {
-	  query += '\'' + key[i].toString() + '\'';
+	  query += "'" + processKeyString(key[i].toString()) + "'";
 	} else if (key[i] instanceof Double) {
 	  query += safeDoubleToString((Double)key[i]);
 	} else {
@@ -732,6 +798,9 @@ public class DatabaseUtils implements Serializable {
   /**
    * Inserts a + if the double is in scientific notation.
    * MySQL doesn't understand the number otherwise.
+   * 
+   * @param number	the number to convert
+   * @return		the number as string
    */
   private String safeDoubleToString(Double number) {
     // NaN is treated as NULL
@@ -753,21 +822,19 @@ public class DatabaseUtils implements Serializable {
   /**
    * Returns true if the experiment index exists.
    *
-   * @return true if the index exists
-   * @exception Exception if an error occurs
+   * @return 		true if the index exists
+   * @throws Exception 	if an error occurs
    */
   public boolean experimentIndexExists() throws Exception {
-
     return tableExists(EXP_INDEX_TABLE);
   }
   
   /**
    * Attempts to create the experiment index table
    *
-   * @exception Exception if an error occurs.
+   * @throws Exception 	if an error occurs.
    */
   public void createExperimentIndex() throws Exception {
-
     if (m_Debug) {
       System.err.println("Creating experiment index table...");
     }
@@ -805,9 +872,9 @@ public class DatabaseUtils implements Serializable {
    * Attempts to insert a results entry for the table into the
    * experiment index.
    *
-   * @param rp the ResultProducer generating the results
-   * @return the name of the created results table
-   * @exception Exception if an error occurs.
+   * @param rp 		the ResultProducer generating the results
+   * @return 		the name of the created results table
+   * @throws Exception 	if an error occurs.
    */
   public String createExperimentIndexEntry(ResultProducer rp)
     throws Exception {
@@ -891,13 +958,13 @@ public class DatabaseUtils implements Serializable {
    * Gets the name of the experiment table that stores results from a
    * particular ResultProducer.
    *
-   * @param rp the ResultProducer
-   * @return the name of the table where the results for this ResultProducer
-   * are stored, or null if there is no table for this ResultProducer.
-   * @exception Exception if an error occurs
+   * @param rp 		the ResultProducer
+   * @return 		the name of the table where the results for this 
+   * 			ResultProducer are stored, or null if there is no 
+   * 			table for this ResultProducer.
+   * @throws Exception 	if an error occurs
    */
   public String getResultsTableName(ResultProducer rp) throws Exception {
-
     // Get the experiment table name, or create a new table if necessary.
     if (m_Debug) {
       System.err.println("Getting results table name...");
@@ -911,7 +978,6 @@ public class DatabaseUtils implements Serializable {
     String tableName = null;
     if (execute(query)) {
       ResultSet rs = m_PreparedStatement.getResultSet();
-      int numAttributes = rs.getMetaData().getColumnCount();
       if (rs.next()) {
 	tableName = rs.getString(1);
 	if (rs.next()) {
@@ -933,10 +999,10 @@ public class DatabaseUtils implements Serializable {
   /**
    * Creates a results table for the supplied result producer.
    *
-   * @param rp the ResultProducer generating the results
-   * @param tableName the name of the resultsTable
-   * @return the name of the created results table
-   * @exception Exception if an error occurs.
+   * @param rp 		the ResultProducer generating the results
+   * @param tableName 	the name of the resultsTable
+   * @return 		the name of the created results table
+   * @throws Exception 	if an error occurs.
    */
   public String createResultsTable(ResultProducer rp, String tableName)
     throws Exception {
@@ -1012,7 +1078,8 @@ public class DatabaseUtils implements Serializable {
 	System.err.println("...create returned resultset");
       }
     }
-    System.err.println("table created");
+    if (m_Debug) 
+      System.err.println("table created");
 
 
     if (m_createIndex) {
@@ -1041,6 +1108,4 @@ public class DatabaseUtils implements Serializable {
     }
     return tableName;
   }
-
-
-} // DatabaseUtils
+}
