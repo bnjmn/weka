@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -152,8 +152,7 @@ public class DatabaseLoader
   private String m_idColumn;
   
   /** The property file for the database connection */
-  protected static String PROPERTY_FILE
-    = "weka/experiment/DatabaseUtils.props";
+  protected static String PROPERTY_FILE = DatabaseConnection.PROPERTY_FILE;
   
   /** Properties associated with the database connection */
   protected static Properties PROPERTIES;

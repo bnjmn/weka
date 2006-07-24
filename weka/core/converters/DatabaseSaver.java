@@ -75,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -115,8 +115,7 @@ public class DatabaseSaver
   private boolean m_tabName;
   
   /** The property file for the database connection */
-  protected static String PROPERTY_FILE
-    = "weka/experiment/DatabaseUtils.props";
+  protected static String PROPERTY_FILE = DatabaseConnection.PROPERTY_FILE;
   
   /** Properties associated with the database connection */
   protected static Properties PROPERTIES;
