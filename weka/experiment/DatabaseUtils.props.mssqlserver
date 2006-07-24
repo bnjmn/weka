@@ -1,16 +1,15 @@
-# Database settings for HSQLDB 1.8.x
+# Database settings for Microsoft SQL Server 2000
 #
-# url:     http://hsqldb.sourceforge.net/
-# jdbc:    http://sourceforge.net/projects/hsqldb/
-# howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
-# author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
-# version: $Revision: 1.1.2.1 $
+# url:     http://www.microsoft.com/
+# jdbc:    http://www.microsoft.com/downloads/details.aspx?familyid=07287B11-0502-461A-B138-2AA54BFDC03A
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.2.2.2 $
 
 # JDBC driver (comma-separated list)
-jdbcDriver=org.hsqldb.jdbcDriver
+jdbcDriver=com.microsoft.jdbc.sqlserver.SQLServerDriver
 
 # database URL
-jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
+jdbcURL=jdbc:sqlserver://server_name:1433
 
 # specific data types
 #string,getString()= 0;         -->nominal
@@ -22,12 +21,16 @@ jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
 #long,getLong() = 6;                -->numeric
 #gloat,getFloat() = 7;            -->numeric
 #date,getDate() = 8;                -->date
+varchar=0
+float=2
+tinyint=3
+int=5
 
 # other options
+CREATE_DOUBLE=DOUBLE PRECISION
+CREATE_STRING=VARCHAR(8000)
 CREATE_INT=INT
-CREATE_DOUBLE=DOUBLE
-CREATE_STRING=LONGVARCHAR
-checkUpperCaseNames=true
+checkUpperCaseNames=false
 checkLowerCaseNames=false
 checkForTable=true
 

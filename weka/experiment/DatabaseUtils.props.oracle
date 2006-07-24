@@ -1,16 +1,15 @@
-# Database settings for HSQLDB 1.8.x
+# Database settings for Oracle 10g Express Edition
 #
-# url:     http://hsqldb.sourceforge.net/
-# jdbc:    http://sourceforge.net/projects/hsqldb/
-# howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
-# author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
-# version: $Revision: 1.1.2.1 $
+# url:     http://www.oracle.com/
+# jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.2.2.2 $
 
 # JDBC driver (comma-separated list)
-jdbcDriver=org.hsqldb.jdbcDriver
+jdbcDriver=oracle.jdbc.driver.OracleDriver
 
 # database URL
-jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
+jdbcURL=jdbc:oracle:thin:@server_name:1521:XE
 
 # specific data types
 #string,getString()= 0;         -->nominal
@@ -22,12 +21,15 @@ jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
 #long,getLong() = 6;                -->numeric
 #gloat,getFloat() = 7;            -->numeric
 #date,getDate() = 8;                -->date
+VARCHAR2=0
+NUMBER=2
+DOUBLE_PRECISION=2
+TIMESTAMP=8
 
 # other options
-CREATE_INT=INT
-CREATE_DOUBLE=DOUBLE
-CREATE_STRING=LONGVARCHAR
+CREATE_INT=INTEGER
+CREATE_STRING=VARCHAR2(4000)
+CREATE_DOUBLE=NUMBER
 checkUpperCaseNames=true
-checkLowerCaseNames=false
 checkForTable=true
 

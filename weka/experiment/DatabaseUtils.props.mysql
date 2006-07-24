@@ -1,16 +1,15 @@
-# Database settings for HSQLDB 1.8.x
+# Database settings for MySQL 3.23.x, 4.x
 #
-# url:     http://hsqldb.sourceforge.net/
-# jdbc:    http://sourceforge.net/projects/hsqldb/
-# howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
-# author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
-# version: $Revision: 1.1.2.1 $
+# url:     http://www.mysql.com/
+# jdbc:    http://www.mysql.com/products/connector/j/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.2.2.2 $
 
 # JDBC driver (comma-separated list)
-jdbcDriver=org.hsqldb.jdbcDriver
+jdbcDriver=org.gjt.mm.mysql.Driver
 
 # database URL
-jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
+jdbcURL=jdbc:mysql://server_name:3306/database_name
 
 # specific data types
 #string,getString()= 0;         -->nominal
@@ -24,10 +23,10 @@ jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
 #date,getDate() = 8;                -->date
 
 # other options
-CREATE_INT=INT
 CREATE_DOUBLE=DOUBLE
-CREATE_STRING=LONGVARCHAR
-checkUpperCaseNames=true
+CREATE_STRING=TEXT
+CREATE_INT=INT
+checkUpperCaseNames=false
 checkLowerCaseNames=false
 checkForTable=true
 

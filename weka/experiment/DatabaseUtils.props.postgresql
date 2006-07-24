@@ -1,16 +1,15 @@
-# Database settings for HSQLDB 1.8.x
+# Database settings for PostgreSQL 7.4
 #
-# url:     http://hsqldb.sourceforge.net/
-# jdbc:    http://sourceforge.net/projects/hsqldb/
-# howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
-# author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
-# version: $Revision: 1.1.2.1 $
+# url:     http://www.postgresql.org/
+# jdbc:    http://jdbc.postgresql.org/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.2.2.2 $
 
 # JDBC driver (comma-separated list)
-jdbcDriver=org.hsqldb.jdbcDriver
+jdbcDriver=org.postgresql.Driver
 
 # database URL
-jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
+jdbcURL=jdbc:postgresql://server_name:5432/database_name
 
 # specific data types
 #string,getString()= 0;         -->nominal
@@ -22,12 +21,20 @@ jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
 #long,getLong() = 6;                -->numeric
 #gloat,getFloat() = 7;            -->numeric
 #date,getDate() = 8;                -->date
+varchar=0
+text=0
+float4=2
+float8=2
+int4=5
+oid=5
+timestamp=8
+date=8
 
 # other options
-CREATE_INT=INT
-CREATE_DOUBLE=DOUBLE
-CREATE_STRING=LONGVARCHAR
-checkUpperCaseNames=true
-checkLowerCaseNames=false
+CREATE_DOUBLE=float8
+CREATE_STRING=text
+CREATE_INT=int
+checkUpperCaseNames=false
+checkLowerCaseNames=true
 checkForTable=true
 
