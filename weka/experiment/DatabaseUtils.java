@@ -51,7 +51,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.5 $
+ * @version $Revision: 1.18.2.6 $
  */
 public class DatabaseUtils
   implements Serializable {
@@ -247,13 +247,20 @@ public class DatabaseUtils
   public static int translateDBColumnType(String type) {
     try {
       // Oracle, e.g., has datatypes like "DOUBLE PRECISION"
-      // BUT property names can't have blanks in the name, hence replace blanks
-      // with underscores "_":
-      type = type.replaceAll(" ", "_");
-      return Integer.parseInt(PROPERTIES.getProperty(type));
+      // BUT property names can't have blanks in the name (unless escaped with
+      // a backslash), hence also check for names where the blanks are 
+      // replaced with underscores "_":
+      String value = PROPERTIES.getProperty(type);
+      String typeUnderscore = type.replaceAll(" ", "_");
+      if (value == null)
+	value = PROPERTIES.getProperty(typeUnderscore);
+      return Integer.parseInt(value);
     } catch (NumberFormatException e) {
-      throw new IllegalArgumentException("Unknown data type: " + type + ". Add entry " +
-					 "in " + PROPERTY_FILE + ".");
+      throw new IllegalArgumentException(
+	  "Unknown data type: " + type + ". "
+	  + "Add entry in " + PROPERTY_FILE + ".\n"
+	  + "If the type contains blanks, either escape them with a backslash "
+	  + "or use underscores instead of blanks.");
     }
   }
 
