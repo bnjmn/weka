@@ -59,7 +59,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -892,13 +892,13 @@ public class Capabilities
     }
 
     // class
-    if (testClass && !handles(Capability.NO_CLASS)) {
-      if (data.classIndex() == -1) {
-        m_FailReason = new UnassignedClassException(
-                            createMessage("Class attribute not set!"));
-        return false;
-      }
+    if (!handles(Capability.NO_CLASS) && (data.classIndex() == -1)) {
+      m_FailReason = new UnassignedClassException(
+	  createMessage("Class attribute not set!"));
+      return false;
+    }
       
+    if (testClass && !handles(Capability.NO_CLASS)) {
       att = data.classAttribute();
       if (!test(att, true))
 	return false;
