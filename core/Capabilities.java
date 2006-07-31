@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -59,13 +60,19 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
   
   /** serialversion UID */
   static final long serialVersionUID = -5478590032325567849L;  
+
+  /** the properties file for managing the tests */
+  public final static String PROPERTIES_FILE = "weka/core/Capabilities.props";
+
+  /** the actual properties */
+  protected static Properties PROPERTIES;
   
   /** defines an attribute type */
   private final static int ATTRIBUTE = 1;
@@ -206,6 +213,24 @@ public class Capabilities
 
   /** the minimum number of instances in a dataset */
   protected int m_MinimumNumberInstances = 1;
+
+  /** whether to perform any tests at all */
+  protected boolean m_Test;
+
+  /** whether to perform data based tests */
+  protected boolean m_InstancesTest;
+
+  /** whether to perform attribute based tests */
+  protected boolean m_AttributeTest;
+
+  /** whether to test for missing values */
+  protected boolean m_MissingValuesTest;
+
+  /** whether to test for missing class values */
+  protected boolean m_MissingClassValuesTest;
+
+  /** whether to test for minimum number of instances */
+  protected boolean m_MinimumNumberInstancesTest;
   
   /**
    * initializes the capabilities for the given owner
@@ -218,6 +243,24 @@ public class Capabilities
     setOwner(owner);
     m_Capabilities = new HashSet();
     m_Dependencies = new HashSet();
+
+    // load properties
+    if (PROPERTIES == null) {
+      try {
+        PROPERTIES = Utils.readProperties(PROPERTIES_FILE);
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+	PROPERTIES = new Properties();
+      }
+    }
+    
+    m_Test                       = Boolean.parseBoolean(PROPERTIES.getProperty("Test", "true"));
+    m_InstancesTest              = Boolean.parseBoolean(PROPERTIES.getProperty("InstancesTest", "true")) && m_Test;
+    m_AttributeTest              = Boolean.parseBoolean(PROPERTIES.getProperty("AttributeTest", "true")) && m_Test;
+    m_MissingValuesTest          = Boolean.parseBoolean(PROPERTIES.getProperty("MissingValuesTest", "true")) && m_Test;
+    m_MissingClassValuesTest     = Boolean.parseBoolean(PROPERTIES.getProperty("MissingClassValuesTest", "true")) && m_Test;
+    m_MinimumNumberInstancesTest = Boolean.parseBoolean(PROPERTIES.getProperty("MinimumNumberInstancesTest", "true")) && m_Test;
   }
   
   /**
@@ -699,6 +742,7 @@ public class Capabilities
    * 
    * @param att		the attribute to test
    * @return		true if all the tests succeeded
+   * @see		#test(Attribute, boolean)
    */
   public boolean test(Attribute att) {
     return test(att, false);
@@ -711,6 +755,7 @@ public class Capabilities
    * @param att		the attribute to test
    * @param isClass	whether this attribute is the class attribute
    * @return		true if all the tests succeeded
+   * @see		#m_AttributeTest
    */
   public boolean test(Attribute att, boolean isClass) {
     boolean		result;
@@ -719,6 +764,10 @@ public class Capabilities
     String		errorStr;
     
     result = true;
+    
+    // shall we test the data?
+    if (!m_AttributeTest)
+      return result;
 
     // for exception
     if (isClass)
@@ -832,7 +881,7 @@ public class Capabilities
    *
    * @param data 	the data to test
    * @return		true if all the tests succeeded
-   * @see MultiInstanceCapabilitiesHandler
+   * @see 		#test(Instances, int, int)
    */
   public boolean test(Instances data) {
     return test(data, 0, data.numAttributes() - 1);
@@ -849,7 +898,11 @@ public class Capabilities
    * @param fromIndex	the range of attributes - start (incl.)
    * @param toIndex	the range of attributes - end (incl.)
    * @return		true if all the tests succeeded
-   * @see MultiInstanceCapabilitiesHandler
+   * @see 		MultiInstanceCapabilitiesHandler
+   * @see 		#m_InstancesTest
+   * @see		#m_MissingValuesTest
+   * @see		#m_MissingClassValuesTest
+   * @see		#m_MinimumNumberInstancesTest
    */
   public boolean test(Instances data, int fromIndex, int toIndex) {
     int         i;
@@ -859,6 +912,10 @@ public class Capabilities
     boolean     noClass;
     boolean     tmpResult;
     boolean	testClass;
+    
+    // shall we test the data?
+    if (!m_InstancesTest)
+      return true;
     
     // no Capabilities? -> warning
     if (    (m_Capabilities.size() == 0) 
@@ -917,61 +974,69 @@ public class Capabilities
       }
       
       // missing class labels
-      if (!handles(Capability.MISSING_CLASS_VALUES)) {
-        for (i = 0; i < data.numInstances(); i++) {
-          if (data.instance(i).classIsMissing()) {
-            m_FailReason = new WekaException(
-                createMessage("Cannot handle missing class values!"));
-            return false;
-          }
-        }
-      }
-      else {
-        int hasClass = 0;
-
-        for (i = 0; i < data.numInstances(); i++) {
-          if (!data.instance(i).classIsMissing())
-            hasClass++;
-        }
-        
-        // not enough instances with class labels?
-        if (hasClass < getMinimumNumberInstances()) {
-          m_FailReason = new WekaException(
-                              createMessage("Not enough training instances with class labels (required: " 
-                                          + getMinimumNumberInstances() 
-                                          + ", provided: " 
-                                          + hasClass + ")!"));
-          return false;
-        }
+      if (m_MissingClassValuesTest) {
+	if (!handles(Capability.MISSING_CLASS_VALUES)) {
+	  for (i = 0; i < data.numInstances(); i++) {
+	    if (data.instance(i).classIsMissing()) {
+	      m_FailReason = new WekaException(
+		  createMessage("Cannot handle missing class values!"));
+	      return false;
+	    }
+	  }
+	}
+	else {
+	  if (m_MinimumNumberInstancesTest) {
+	    int hasClass = 0;
+	    
+	    for (i = 0; i < data.numInstances(); i++) {
+	      if (!data.instance(i).classIsMissing())
+		hasClass++;
+	    }
+	    
+	    // not enough instances with class labels?
+	    if (hasClass < getMinimumNumberInstances()) {
+	      m_FailReason = new WekaException(
+		  createMessage("Not enough training instances with class labels (required: " 
+		      + getMinimumNumberInstances() 
+		      + ", provided: " 
+		      + hasClass + ")!"));
+	      return false;
+	    }
+	  }
+	}
       }
     }
 
     // missing values
-    if (!handles(Capability.MISSING_VALUES)) {
-      for (i = 0; i < data.numInstances(); i++) {
-        inst = data.instance(i);
-        for (n = fromIndex; n <= toIndex; n++) {
-          // skip class
-          if (n == inst.classIndex())
-            continue;
-
-          if (inst.isMissing(n)) {
-            m_FailReason = new NoSupportForMissingValuesException(
-                                createMessage("Cannot handle missing values!"));
-            return false;
-          }
-        }
+    if (m_MissingValuesTest) {
+      if (!handles(Capability.MISSING_VALUES)) {
+	for (i = 0; i < data.numInstances(); i++) {
+	  inst = data.instance(i);
+	  for (n = fromIndex; n <= toIndex; n++) {
+	    // skip class
+	    if (n == inst.classIndex())
+	      continue;
+	    
+	    if (inst.isMissing(n)) {
+	      m_FailReason = new NoSupportForMissingValuesException(
+		  createMessage("Cannot handle missing values!"));
+	      return false;
+	    }
+	  }
+	}
       }
     }
     
     // instances
-    if (data.numInstances() < getMinimumNumberInstances()) {
-      m_FailReason = new WekaException(
-                          createMessage("Not enough training instances (required: " 
-                                      + getMinimumNumberInstances() 
-                                      + ", provided: " 
-                                      + data.numInstances() + ")!"));
-      return false;
+    if (m_MinimumNumberInstancesTest) {
+      if (data.numInstances() < getMinimumNumberInstances()) {
+	m_FailReason = new WekaException(
+	    createMessage("Not enough training instances (required: " 
+		+ getMinimumNumberInstances() 
+		+ ", provided: " 
+		+ data.numInstances() + ")!"));
+	return false;
+      }
     }
 
     // Multi-Instance? -> check structure (regardless of attribute range!)
@@ -1020,7 +1085,7 @@ public class Capabilities
    *
    * @param att        	the attribute to test
    * @throws Exception  in case the attribute doesn't pass the tests
-   * @see #test(Attribute,boolean)
+   * @see 		#test(Attribute,boolean)
    */
   public void testWithFail(Attribute att) throws Exception {
     test(att, false);
@@ -1033,7 +1098,7 @@ public class Capabilities
    * @param att        	the attribute to test
    * @param isClass	whether this attribute is the class attribute
    * @throws Exception  in case the attribute doesn't pass the tests
-   * @see #test(Attribute,boolean)
+   * @see 		#test(Attribute,boolean)
    */
   public void testWithFail(Attribute att, boolean isClass) throws Exception {
     if (!test(att, isClass))
@@ -1048,7 +1113,7 @@ public class Capabilities
    * @param fromIndex	the range of attributes - start (incl.)
    * @param toIndex	the range of attributes - end (incl.)
    * @throws Exception  in case the data doesn't pass the tests
-   * @see #test(Instances)
+   * @see 		#test(Instances,int,int)
    */
   public void testWithFail(Instances data, int fromIndex, int toIndex) throws Exception {
     if (!test(data, fromIndex, toIndex))
@@ -1061,7 +1126,7 @@ public class Capabilities
    *
    * @param data        the data to test
    * @throws Exception  in case the data doesn't pass the tests
-   * @see #test(Instances)
+   * @see 		#test(Instances)
    */
   public void testWithFail(Instances data) throws Exception {
     if (!test(data))
