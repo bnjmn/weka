@@ -24,6 +24,8 @@
 
 package weka.filters;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -71,9 +73,10 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
-public abstract class Filter implements Serializable {
+public abstract class Filter
+  implements Serializable, CapabilitiesHandler {
 
   /** The output format for instances */
   private Instances m_OutputFormat = null;
@@ -98,6 +101,22 @@ public abstract class Filter implements Serializable {
 
   /** Record whether the filter is at the start of a batch */
   protected boolean m_NewBatch = true;
+
+  /** 
+   * Returns the Capabilities of this filter. Derived filters have to
+   * override this method to enable capabilities.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities 	result;
+
+    result = new Capabilities(this);
+    result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
 
   /**
    * Sets the format of output instances. The derived class should use this
@@ -319,6 +338,16 @@ public abstract class Filter implements Serializable {
       m_InputFormat.delete();
     }
   }
+  
+  /**
+   * tests the data whether the filter can actually handle it
+   * 
+   * @param instanceInfo	the data to test
+   * @throws Exception		if the test fails
+   */
+  protected void testInputFormat(Instances instanceInfo) throws Exception {
+    getCapabilities().testWithFail(instanceInfo);
+  }
 
   /**
    * Sets the format of the input instances. If the filter is able to
@@ -335,6 +364,8 @@ public abstract class Filter implements Serializable {
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
+    testInputFormat(instanceInfo);
+    
     m_InputFormat = instanceInfo.stringFreeStructure();
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
@@ -886,6 +917,28 @@ public abstract class Filter implements Serializable {
   }
 
   /**
+   * runs the filter instance with the given options.
+   * 
+   * @param filter	the filter to run
+   * @param options	the commandline options
+   */
+  protected static void runFilter(Filter filter, String[] options) {
+    try {
+      if (Utils.getFlag('b', options)) {
+	Filter.batchFilterFile(filter, options);
+      } else {
+	Filter.filterFile(filter, options);
+      }
+    } catch (Exception e) {
+      if (    (e.toString().indexOf("Help requested") == -1) 
+	   && (e.toString().indexOf("Filter options") == -1) )
+	e.printStackTrace();
+      else
+	System.err.println(e.getMessage());
+    }
+  }
+  
+  /**
    * Main method for testing this class.
    *
    * @param args should contain arguments to the filter: use -h for help
@@ -899,22 +952,10 @@ public abstract class Filter implements Serializable {
       String fname = args[0];
       Filter f = (Filter)Class.forName(fname).newInstance();
       args[0] = "";
-      if (Utils.getFlag('b', args)) {
-	Filter.batchFilterFile(f, args);
-      } else {
-	Filter.filterFile(f, args);
-      }
+      runFilter(f, args);
     } catch (Exception ex) {
       ex.printStackTrace();
-      System.out.println(ex.getMessage());
+      System.err.println(ex.getMessage());
     }
   }
 }
-
-
-
-
-
-
-
-
