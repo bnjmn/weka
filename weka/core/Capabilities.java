@@ -60,7 +60,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1232,7 +1232,9 @@ public class Capabilities
     else {
       switch (data.classAttribute().type()) {
 	case Attribute.NOMINAL:
-	  if (data.classAttribute().numValues() == 2)
+	  if (data.classAttribute().numValues() == 1)
+	    result.enable(Capability.UNARY_CLASS);
+	  else if (data.classAttribute().numValues() == 2)
 	    result.enable(Capability.BINARY_CLASS);
 	  else
 	    result.enable(Capability.NOMINAL_CLASS);
@@ -1269,16 +1271,19 @@ public class Capabilities
     
     // attributes
     if (data.checkForAttributeType(Attribute.NOMINAL)) {
-      result.enable(Capability.BINARY_ATTRIBUTES);
+      result.enable(Capability.UNARY_ATTRIBUTES);
       
       for (i = 0; i < data.numAttributes(); i++) {
 	// skip class
 	if (i == data.classIndex())
 	  continue;
 
-	// non-binary attributes?
+	// non-unary attributes?
 	if (data.attribute(i).isNominal()) {
-	  if (data.attribute(i).numValues() != 2) {
+	  if (data.attribute(i).numValues() == 2) {
+	    result.enable(Capability.BINARY_ATTRIBUTES);
+	  }
+	  else if (data.attribute(i).numValues() > 2) {
 	    result.enable(Capability.NOMINAL_ATTRIBUTES);
 	    break;
 	  }
