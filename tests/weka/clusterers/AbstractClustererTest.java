@@ -30,7 +30,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean)
@@ -109,6 +109,9 @@ public abstract class AbstractClustererTest
     checkAttributes(false, false, true,  false, false, false);
     checkAttributes(false, false, false, true,  false, false);
     checkAttributes(false, false, false, false, true,  false);
+
+    // 20% missing values
+    m_handleMissingPredictors = checkMissingPredictors(20, false);
   }
 
   /** Called by JUnit after each test method */
@@ -284,9 +287,10 @@ public abstract class AbstractClustererTest
    * missing predictors
    *
    * @param percent     the percentage of missing predictors
+   * @param allowFail	if true a fail statement may be executed
    * @return            true if the clusterer can handle it
    */
-  protected boolean checkMissingPredictors(int percent) {
+  protected boolean checkMissingPredictors(int percent, boolean allowFail) {
     boolean[]     result;
     
     result = m_Tester.canHandleMissing(
@@ -299,8 +303,10 @@ public abstract class AbstractClustererTest
         true,
         percent);
 
-    if (!result[0] && !result[1])
-      fail("Error handling " + percent + "% missing predictors!");
+    if (allowFail) {
+      if (!result[0] && !result[1])
+	fail("Error handling " + percent + "% missing predictors!");
+    }
     
     return result[0];
   }
@@ -316,11 +322,11 @@ public abstract class AbstractClustererTest
       return;
     
     // 20% missing
-    m_handleMissingPredictors = checkMissingPredictors(20);
+    checkMissingPredictors(20, true);
 
     // 100% missing
     if (m_handleMissingPredictors)
-      checkMissingPredictors(100);
+      checkMissingPredictors(100, true);
   }
 
   /**
