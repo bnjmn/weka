@@ -23,8 +23,7 @@
 
 package weka.filters;
 
-import weka.filters.Filter;
-import weka.filters.AllFilter;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -52,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -129,7 +128,7 @@ public class MultiFilter
       options2    = Utils.splitOptions(tmpStr);
       filter      = options2[0];
       options2[0] = "";
-      filters.add(forName(filter, options2));
+      filters.add(Utils.forName(Filter.class, filter, options2));
     }
 
     // at least one filter
@@ -161,6 +160,19 @@ public class MultiFilter
     }
 
     return (String[]) result.toArray(new String[result.size()]);
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    if (getFilters().length == 0)
+      return super.getCapabilities();
+    else
+      return getFilters()[0].getCapabilities();
   }
 
   /**
@@ -217,32 +229,12 @@ public class MultiFilter
   }
 
   /**
-   * creates, if possible, a filter of the given classname and options
-   * 
-   * @param name        the classname of the filter
-   * @param options     the options for the filter
-   * @return		the completely configured filter
-   * @throws Exception	if something goes wrong
-   */
-  public static Filter forName(String name, String[] options) throws Exception {
-    Filter        result;
-    Class         cls;
-
-    cls    = Class.forName(name);
-    result = (Filter) cls.newInstance();
-    if (result instanceof OptionHandler)
-      ((OptionHandler) result).setOptions(options);
-
-    return result;
-  }
-
-  /**
    * returns the filter classname and the options as one string
    * 
    * @param filter	the filter to get the specs for
    * @return		the classname plus options
    */
-  public static String getFilterSpec(Filter filter) {
+  protected String getFilterSpec(Filter filter) {
     String        result;
 
     if (filter == null) {
@@ -390,14 +382,6 @@ public class MultiFilter
    * @param args should contain arguments for the filter: use -h for help
    */
   public static void main(String[] args) {
-    try {
-      if (Utils.getFlag('b', args))
-        Filter.batchFilterFile(new MultiFilter(), args);
-      else
-        Filter.filterFile(new MultiFilter(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-    }
+    runFilter(new MultiFilter(), args);
   }
 }
