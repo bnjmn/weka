@@ -33,7 +33,7 @@ import java.util.Vector;
  * the content between certain comment tags.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class Javadoc 
   implements OptionHandler {
@@ -52,6 +52,9 @@ public abstract class Javadoc
 
   /** the directory above the class to update */
   protected String m_Dir = "";
+  
+  /** whether to suppress error messages (no printout in the console) */
+  protected boolean m_Silent = false;
   
   /**
    * Returns an enumeration describing the available options.
@@ -72,6 +75,10 @@ public abstract class Javadoc
     result.addElement(new Option(
         "\tThe directory above the package hierarchy of the class.",
         "dir", 1, "-dir <dir>"));
+    
+    result.addElement(new Option(
+        "\tSuppresses printing in the console.",
+        "silent", 0, "-silent"));
     
     return result.elements();
   }
@@ -94,6 +101,8 @@ public abstract class Javadoc
     setUseStars(!Utils.getFlag("nostars", options));
 
     setDir(Utils.getOption("dir", options));
+
+    setSilent(Utils.getFlag("silent", options));
   }
   
   /**
@@ -116,6 +125,9 @@ public abstract class Javadoc
       result.add("-dir");
       result.add(getDir());
     }
+    
+    if (getSilent())
+      result.add("-silent");
     
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -175,6 +187,34 @@ public abstract class Javadoc
   public String getDir() {
     return m_Dir;
   }
+  
+  /**
+   * sets whether to suppress output in the console
+   * 
+   * @param value	true if output is to be suppressed
+   */
+  public void setSilent(boolean value) {
+    m_Silent = value;
+  }
+  
+  /**
+   * whether output in the console is suppressed
+   * 
+   * @return 		true if output is suppressed
+   */
+  public boolean getSilent() {
+    return m_Silent;
+  }
+  
+  /**
+   * prints the given object to System.err
+   * 
+   * @param o		the object to print
+   */
+  protected void println(Object o) {
+    if (!getSilent())
+      System.err.println(o.toString());
+  }
 
   /**
    * returns true if the class can be instantiated, i.e., has a default
@@ -194,7 +234,7 @@ public abstract class Javadoc
     }
     catch (Exception e) {
       result = false;
-      System.err.println("Cannot instantiate '" + getClassname() + "'! Class in CLASSPATH?");
+      println("Cannot instantiate '" + getClassname() + "'! Class in CLASSPATH?");
     }
 
     if (result) {
@@ -203,7 +243,7 @@ public abstract class Javadoc
       }
       catch (Exception e) {
 	result = false;
-	System.err.println("Cannot instantiate '" + getClassname() + "'! Missing default constructor?");
+	println("Cannot instantiate '" + getClassname() + "'! Missing default constructor?");
       }
     }
     
@@ -372,7 +412,7 @@ public abstract class Javadoc
     // start and end tag?
     if (    (content.indexOf(m_StartTag[index]) == -1)
 	   || (content.indexOf(m_EndTag[index]) == -1) ) {
-	System.err.println(
+	println(
 	    "No start and/or end tags found: " 
 	    + m_StartTag[index] + "/" + m_EndTag[index]);
 	return content;
@@ -450,7 +490,7 @@ public abstract class Javadoc
     // non-existing?
     file = new File(getDir() + "/" + getClassname().replaceAll("\\.", "/") + ".java");
     if (!file.exists()) {
-      System.err.println("File '" + file.getAbsolutePath() + "' doesn't exist!");
+      println("File '" + file.getAbsolutePath() + "' doesn't exist!");
       return result;
     }
     
@@ -504,5 +544,36 @@ public abstract class Javadoc
     }
     
     return result;
+  }
+  
+  /**
+   * runs the javadoc producer with the given commandline options
+   * 
+   * @param javadoc	the javadoc producer to execute
+   * @param options	the commandline options
+   */
+  protected static void runJavadoc(Javadoc javadoc, String[] options) {
+    try {
+      try {
+	if (Utils.getFlag('h', options))
+	  throw new Exception("Help requested");
+
+	javadoc.setOptions(options);
+        Utils.checkForRemainingOptions(options);
+
+        // directory is necessary!
+        if (javadoc.getDir().length() == 0)
+          throw new Exception("No directory provided!");
+      } 
+      catch (Exception ex) {
+        String result = "\n" + ex.getMessage() + "\n\n" + javadoc.generateHelp();
+        throw new Exception(result);
+      }
+
+      System.out.println(javadoc.generate() + "\n");
+    } 
+    catch (Exception ex) {
+      System.err.println(ex.getMessage());
+    }
   }
 }
