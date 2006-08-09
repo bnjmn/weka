@@ -22,14 +22,15 @@
 
 package  weka.attributeSelection;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
@@ -67,7 +68,7 @@ import java.util.Hashtable;
  <!-- technical-bibtex-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ConsistencySubsetEval 
   extends SubsetEvaluator
@@ -316,6 +317,28 @@ public class ConsistencySubsetEval
   }
 
   /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
+  /**
    * Generates a attribute evaluator. Has to initialize all fields of the 
    * evaluator that are not being set via options.
    *
@@ -324,23 +347,13 @@ public class ConsistencySubsetEval
    * generated successfully
    */
   public void buildEvaluator (Instances data) throws Exception {
-    if (data.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
+    
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
 
-    m_trainInstances = data;
+    m_trainInstances = new Instances(data);
     m_trainInstances.deleteWithMissingClass();
     m_classIndex = m_trainInstances.classIndex();
-    if (m_classIndex < 0) {
-      throw new Exception("Consistency subset evaluator requires a class "
-			  + "attribute!");
-    }
-
-    if (m_trainInstances.classAttribute().isNumeric()) {
-      throw new Exception("Consistency subset evaluator can't handle a "
-			  +"numeric class attribute!");
-    }
-
     m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
 
@@ -481,14 +494,7 @@ public class ConsistencySubsetEval
    * @param args the options
    */
   public static void main (String[] args) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new ConsistencySubsetEval(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new ConsistencySubsetEval(), args);
   }
 }
 
