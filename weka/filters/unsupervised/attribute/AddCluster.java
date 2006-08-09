@@ -25,6 +25,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.clusterers.Clusterer;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -50,8 +51,9 @@ import java.util.Vector;
  * 
  * <pre> -W &lt;clusterer specification&gt;
  *  Full class name of clusterer to use, followed
- *  by scheme options. (required)
- *  eg: "weka.clusterers.SimpleKMeans -N 3"</pre>
+ *  by scheme options. eg:
+ *   "weka.clusterers.SimpleKMeans -N 3"
+ *  (default: weka.clusterers.SimpleKMeans)</pre>
  * 
  * <pre> -I &lt;att1,att2-att4,...&gt;
  *  The range of attributes the clusterer should ignore.
@@ -60,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AddCluster 
   extends Filter 
@@ -78,6 +80,26 @@ public class AddCluster
   /** Filter for removing attributes */
   protected Filter m_removeAttributes = new Remove();
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    return m_Clusterer.getCapabilities();
+  }
+  
+  /**
+   * tests the data whether the filter can actually handle it
+   * 
+   * @param instanceInfo	the data to test
+   * @throws Exception		if the test fails
+   */
+  protected void testInputFormat(Instances instanceInfo) throws Exception {
+    getCapabilities().testWithFail(removeIgnored(instanceInfo));
+  }
+
   /**
    * Sets the format of the input instances.
    *
@@ -94,6 +116,38 @@ public class AddCluster
 
     return false;
   }
+
+  /**
+   * filters all attributes that should be ignored
+   * 
+   * @param data	the data to filter
+   * @return		the filtered data
+   * @throws Exception	if filtering fails
+   */
+  protected Instances removeIgnored(Instances data) throws Exception {
+    Instances result = data;
+    
+    if (m_IgnoreAttributesRange != null || data.classIndex() >= 0) {
+      m_removeAttributes = new Remove();
+      String rangeString = "";
+      if (m_IgnoreAttributesRange != null) {
+	rangeString += m_IgnoreAttributesRange.getRanges();
+      }
+      if (data.classIndex() >= 0) {
+	if (rangeString.length() > 0) {
+	  rangeString += "," + (data.classIndex() + 1);
+	} else {
+	  rangeString = "" + (data.classIndex() + 1);
+	}
+      }
+      ((Remove) m_removeAttributes).setAttributeIndices(rangeString);
+      ((Remove) m_removeAttributes).setInvertSelection(false);
+      m_removeAttributes.setInputFormat(data);
+      result = Filter.useFilter(data, m_removeAttributes);
+    }
+    
+    return result;
+  }
   
   /**
    * Signify that this batch of input to the filter is finished.
@@ -108,36 +162,8 @@ public class AddCluster
     }
 
     Instances toFilter = getInputFormat();
-    Instances toFilterIgnoringAttributes = toFilter;
-
     // filter out attributes if necessary
-    if (m_IgnoreAttributesRange != null || toFilter.classIndex() >=0) {
-      toFilterIgnoringAttributes = new Instances(toFilter);
-      m_removeAttributes = new Remove();
-      String rangeString = "";
-      if (m_IgnoreAttributesRange != null) {
-	rangeString += m_IgnoreAttributesRange.getRanges();
-      }
-      if (toFilter.classIndex() >= 0) {
-	if (rangeString.length() > 0) {
-	  rangeString += (","+(toFilter.classIndex()+1));	  
-	} else {
-	  rangeString = ""+(toFilter.classIndex()+1);
-	}
-      }
-      ((Remove)m_removeAttributes).setAttributeIndices(rangeString);
-      ((Remove)m_removeAttributes).setInvertSelection(false);
-      m_removeAttributes.setInputFormat(toFilter);
-      for (int i = 0; i < toFilter.numInstances(); i++) {
-	m_removeAttributes.input(toFilter.instance(i));
-      }
-      m_removeAttributes.batchFinished();
-      toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
-      Instance tempInst;
-      while ((tempInst = m_removeAttributes.output()) != null) {
-	toFilterIgnoringAttributes.add(tempInst);
-      }
-    }
+    Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
 
     // build the clusterer
     m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
@@ -245,8 +271,9 @@ public class AddCluster
     
     newVector.addElement(new Option(
 	      "\tFull class name of clusterer to use, followed\n"
-	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.clusterers.SimpleKMeans -N 3\"",
+	      + "\tby scheme options. eg:\n"
+	      + "\t\t\"weka.clusterers.SimpleKMeans -N 3\"\n"
+	      + "\t(default: weka.clusterers.SimpleKMeans)",
 	      "W", 1, "-W <clusterer specification>"));
     
     newVector.addElement(new Option(
@@ -265,8 +292,9 @@ public class AddCluster
    * 
    * <pre> -W &lt;clusterer specification&gt;
    *  Full class name of clusterer to use, followed
-   *  by scheme options. (required)
-   *  eg: "weka.clusterers.SimpleKMeans -N 3"</pre>
+   *  by scheme options. eg:
+   *   "weka.clusterers.SimpleKMeans -N 3"
+   *  (default: weka.clusterers.SimpleKMeans)</pre>
    * 
    * <pre> -I &lt;att1,att2-att4,...&gt;
    *  The range of attributes the clusterer should ignore.
@@ -280,10 +308,8 @@ public class AddCluster
   public void setOptions(String[] options) throws Exception {
 
     String clustererString = Utils.getOption('W', options);
-    if (clustererString.length() == 0) {
-      throw new Exception("A clusterer must be specified"
-			  + " with the -W option.");
-    }
+    if (clustererString.length() == 0)
+      clustererString = weka.clusterers.SimpleKMeans.class.getName();
     String[] clustererSpec = Utils.splitOptions(clustererString);
     if (clustererSpec.length == 0) {
       throw new Exception("Invalid clusterer specification string");
@@ -427,15 +453,6 @@ public class AddCluster
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new AddCluster(), argv); 
-      } else {
-	Filter.filterFile(new AddCluster(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new AddCluster(), argv);
   }
 }
