@@ -30,12 +30,11 @@ import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.datagenerators.ClusterGenerator;
-import weka.datagenerators.DataGenerator;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -145,7 +144,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator
@@ -1494,13 +1493,7 @@ public class BIRCHCluster
    * @param args should contain arguments for the data producer: 
    */
   public static void main(String[] args) {
-    try {
-      DataGenerator.makeData(new BIRCHCluster(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runDataGenerator(new BIRCHCluster(), args);
   }
 }
 

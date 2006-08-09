@@ -28,7 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
-import weka.datagenerators.DataGenerator;
 import weka.filters.unsupervised.attribute.AddExpression;
 
 import java.util.Enumeration;
@@ -85,7 +84,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see     AddExpression
  * @see     MexicanHat
  */
@@ -419,13 +418,7 @@ public class Expression
    * @param args should contain arguments for the data producer: 
    */
   public static void main(String[] args) {
-    try {
-      DataGenerator.makeData(new Expression(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runDataGenerator(new Expression(), args);
   }
 }
 

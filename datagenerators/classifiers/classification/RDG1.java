@@ -29,7 +29,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
 import weka.datagenerators.ClassificationGenerator;
-import weka.datagenerators.DataGenerator;
 import weka.datagenerators.Test;
 
 import java.io.Serializable;
@@ -121,7 +120,7 @@ import java.util.Vector;
  * </pre>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class RDG1 
   extends ClassificationGenerator {
@@ -1203,12 +1202,6 @@ public class RDG1
    * @param args should contain arguments for the data producer: 
    */
   public static void main(String[] args) {
-    try {
-      DataGenerator.makeData(new RDG1(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runDataGenerator(new RDG1(), args);
   }
 }
