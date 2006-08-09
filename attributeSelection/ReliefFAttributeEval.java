@@ -23,16 +23,17 @@
 package weka.attributeSelection;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -124,7 +125,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -556,8 +557,11 @@ public class ReliefFAttributeEval
     options[current++] = "" + getSeed();
     options[current++] = "-K";
     options[current++] = "" + getNumNeighbours();
-    options[current++] = "-A";
-    options[current++] = "" + getSigma();
+    
+    if (getWeightByDistance()) {
+      options[current++] = "-A";
+      options[current++] = "" + getSigma();
+    }
 
     while (current < options.length) {
       options[current++] = "";
@@ -605,6 +609,29 @@ public class ReliefFAttributeEval
     return  text.toString();
   }
 
+  /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
 
   /**
    * Initializes a ReliefF attribute evaluator. 
@@ -615,12 +642,12 @@ public class ReliefFAttributeEval
    */
   public void buildEvaluator (Instances data)
     throws Exception {
+    
     int z, totalInstances;
     Random r = new Random(m_seed);
 
-    if (data.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
 
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
@@ -1306,14 +1333,7 @@ public class ReliefFAttributeEval
    * @param args the options
    */
   public static void main (String[] args) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new ReliefFAttributeEval(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new ReliefFAttributeEval(), args);
   }
 }
 
