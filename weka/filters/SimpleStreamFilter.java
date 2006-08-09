@@ -76,15 +76,7 @@ import weka.core.Instances;
  * with the actual filter classname):
  * <pre>
  *  public static void main(String[] args) {
- *    try {
- *      if (Utils.getFlag('b', args))
- *        Filter.batchFilterFile(new &lt;Filtername&gt;(), args);
- *      else
- *        Filter.filterFile(new &lt;Filtername&gt;(), args);
- *    } 
- *    catch (Exception e) {
- *      e.printStackTrace();
- *    }
+ *    runFilter(new &lt;Filtername&gt;(), args);
  *  }
  * </pre>
  * <p/>
@@ -119,15 +111,7 @@ import weka.core.Instances;
  *   }
  * 
  *   public static void main(String[] args) {
- *     try {
- *       if (Utils.getFlag('b', args))
- *         Filter.batchFilterFile(new SimpleStream(), args);
- *       else
- *         Filter.filterFile(new SimpleStream(), args);
- *     } 
- *     catch (Exception e) {
- *       e.printStackTrace();
- *     }
+ *     runFilter(new &lt;Filtername&gt;(), args);
  *   }
  * }
  * </pre>
@@ -140,7 +124,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see     SimpleBatchFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
