@@ -25,12 +25,13 @@ package weka.attributeSelection;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.rules.ZeroR;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -52,11 +53,11 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -B &lt;classifier&gt;
- *  class name of the classifier to use for
- *  accuracy estimation. Place any
- *  classifier options LAST on the
- *  command line following a "--".
- *  eg. -C weka.classifiers.bayes.NaiveBayes ... -- -K</pre>
+ *  class name of the classifier to use for accuracy estimation.
+ *  Place any classifier options LAST on the command line
+ *  following a "--". eg.:
+ *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
  * 
  * <pre> -T
  *  Use the training data to estimate accuracy.</pre>
@@ -76,7 +77,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -131,20 +132,24 @@ public class ClassifierSubsetEval
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(3);
-    newVector.addElement(new Option("\tclass name of the classifier to use for" 
-				    + "\n\taccuracy estimation. Place any" 
-				    + "\n\tclassifier options LAST on the" 
-				    + "\n\tcommand line following a \"--\"." 
-				    + "\n\teg. -C weka.classifiers.bayes.NaiveBayes ... " 
-				    + "-- -K", "B", 1, "-B <classifier>"));
     
-    newVector.addElement(new Option("\tUse the training data to estimate"
-				    +" accuracy."
-				    ,"T",0,"-T"));
+    newVector.addElement(new Option(
+	"\tclass name of the classifier to use for accuracy estimation.\n"
+	+ "\tPlace any classifier options LAST on the command line\n"
+	+ "\tfollowing a \"--\". eg.:\n"
+	+ "\t\t-B weka.classifiers.bayes.NaiveBayes ... -- -K\n"
+	+ "\t(default: weka.classifiers.rules.ZeroR)", 
+	"B", 1, "-B <classifier>"));
     
-    newVector.addElement(new Option("\tName of the hold out/test set to "
-				    +"\n\testimate accuracy on."
-				    ,"H", 1,"-H <filename>"));
+    newVector.addElement(new Option(
+	"\tUse the training data to estimate"
+	+" accuracy.",
+	"T",0,"-T"));
+    
+    newVector.addElement(new Option(
+	"\tName of the hold out/test set to "
+	+"\n\testimate accuracy on.",
+	"H", 1,"-H <filename>"));
 
     if ((m_Classifier != null) && 
 	(m_Classifier instanceof OptionHandler)) {
@@ -169,11 +174,11 @@ public class ClassifierSubsetEval
    * Valid options are: <p/>
    * 
    * <pre> -B &lt;classifier&gt;
-   *  class name of the classifier to use for
-   *  accuracy estimation. Place any
-   *  classifier options LAST on the
-   *  command line following a "--".
-   *  eg. -C weka.classifiers.bayes.NaiveBayes ... -- -K</pre>
+   *  class name of the classifier to use for accuracy estimation.
+   *  Place any classifier options LAST on the command line
+   *  following a "--". eg.:
+   *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
    * 
    * <pre> -T
    *  Use the training data to estimate accuracy.</pre>
@@ -201,11 +206,8 @@ public class ClassifierSubsetEval
     resetOptions();
 
     optionString = Utils.getOption('B', options);
-    
-    if (optionString.length() == 0) {
-      throw new Exception("A classifier must be specified with -B option");
-    }
-
+    if (optionString.length() == 0)
+      optionString = ZeroR.class.getName();
     setClassifier(Classifier.forName(optionString,
 				     Utils.partitionOptions(options)));
 
@@ -321,15 +323,43 @@ public class ClassifierSubsetEval
       options[current++] = "-T";
     }
     options[current++] = "-H"; options[current++] = getHoldOutFile().getPath();
-    options[current++] = "--";
-    System.arraycopy(classifierOptions, 0, options, current, 
-		     classifierOptions.length);
-    current += classifierOptions.length;
-        while (current < options.length) {
-      options[current++] = "";
+
+    if (classifierOptions.length > 0) {
+      options[current++] = "--";
+      System.arraycopy(classifierOptions, 0, options, current, 
+	  classifierOptions.length);
+      current += classifierOptions.length;
+    }
+
+    while (current < options.length) {
+	options[current++] = "";
     }
 
     return  options;
+  }
+
+  /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
   }
 
   /**
@@ -342,9 +372,9 @@ public class ClassifierSubsetEval
    */
   public void buildEvaluator (Instances data)
     throws Exception {
-    if (data.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
+    
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
 
     m_trainingInstances = data;
     m_classIndex = m_trainingInstances.classIndex();
@@ -657,13 +687,6 @@ public class ClassifierSubsetEval
    * @param args the options
    */
   public static void main (String[] args) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new ClassifierSubsetEval(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new ClassifierSubsetEval(), args);
   }
 }
