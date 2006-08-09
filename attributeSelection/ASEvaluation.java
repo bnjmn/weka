@@ -23,19 +23,22 @@
 
 package weka.attributeSelection;
 
-import java.io.Serializable;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /** 
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-
-public abstract class ASEvaluation implements Serializable {
+public abstract class ASEvaluation
+  implements Serializable, CapabilitiesHandler {
 
   // ===============
   // Public methods.
@@ -108,5 +111,32 @@ public abstract class ASEvaluation implements Serializable {
       evaluators[i] = (ASEvaluation) so.getObject();
     }
     return evaluators;
+  }
+
+  /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    return new Capabilities(this);
+  }
+  
+  /**
+   * runs the evaluator with the given commandline options
+   * 
+   * @param evaluator	the evaluator to run
+   * @param options	the commandline options
+   */
+  protected static void runEvaluator(ASEvaluation evaluator, String[] options) {
+    try {
+      System.out.println(
+	  AttributeSelection.SelectAttributes(evaluator, options));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      System.err.println(e.getMessage());
+    }
   }
 }
