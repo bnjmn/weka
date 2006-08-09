@@ -24,11 +24,12 @@ package weka.attributeSelection;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -62,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator 
@@ -329,6 +330,27 @@ public class OneRAttributeEval
     resetOptions();
   }
 
+  /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
 
   /**
    * Initializes a OneRAttribute attribute evaluator.
@@ -340,19 +362,14 @@ public class OneRAttributeEval
    */
   public void buildEvaluator (Instances data)
     throws Exception {
+    
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
+
     m_trainInstances = data;
-
-    if (m_trainInstances.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
-
     m_classIndex = m_trainInstances.classIndex();
     m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
-
-    if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
-      throw  new Exception("Class must be nominal!");
-    }
   }
 
 
@@ -443,14 +460,6 @@ public class OneRAttributeEval
    * @param args the options
    */
   public static void main (String[] args) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new OneRAttributeEval(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new OneRAttributeEval(), args);
   }
-
 }

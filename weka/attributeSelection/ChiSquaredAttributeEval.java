@@ -22,13 +22,14 @@
 
 package weka.attributeSelection;
 
+import weka.core.Capabilities;
 import weka.core.ContingencyTables;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 import weka.filters.unsupervised.attribute.NumericToBinary;
@@ -57,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class ChiSquaredAttributeEval
   extends AttributeEvaluator
@@ -215,6 +216,27 @@ public class ChiSquaredAttributeEval
     return  m_missing_merge;
   }
 
+  /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
 
   /**
    * Initializes a chi-squared attribute evaluator.
@@ -227,14 +249,10 @@ public class ChiSquaredAttributeEval
   public void buildEvaluator (Instances data)
     throws Exception {
     
-    if (data.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
-    
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
+
     int classIndex = data.classIndex();
-    if (data.attribute(classIndex).isNumeric()) {
-      throw  new Exception("Class must be nominal!");
-    }
     int numInstances = data.numInstances();
     
     if (!m_Binarize) {
@@ -427,13 +445,6 @@ public class ChiSquaredAttributeEval
    * @param args the options
    */
   public static void main (String[] args) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new ChiSquaredAttributeEval(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new ChiSquaredAttributeEval(), args);
   }
 }
