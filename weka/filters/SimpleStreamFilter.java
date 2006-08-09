@@ -60,6 +60,9 @@ import weka.core.Instances;
  *   <li>determineOutputFormat(Instances)</li>
  *   <li>process(Instance)</li>
  * </ul>
+ * <br/>
+ * And the <b>getCapabilities()</b> method must return what kind of
+ * attributes and classes the filter can handle.
  * <p/>
  * 
  * If more options are necessary, then the following methods need to be
@@ -84,6 +87,7 @@ import weka.core.Instances;
  * <b>Example implementation:</b><br/>
  * <pre>
  * import weka.core.*;
+ * import weka.core.Capabilities.*;
  * import weka.filters.*;
  *
  * import java.util.Random;
@@ -93,6 +97,14 @@ import weka.core.Instances;
  *   
  *   public String globalInfo() {
  *     return "A simple stream filter that adds an attribute 'bla' at the end containing a random number.";
+ *   }
+ *     
+ *   public Capabilities getCapabilities() {
+ *     Capabilities result = super.getCapabilities();
+ *     result.enableAllAttributes();
+ *     result.enableAllClasses();
+ *     result.enable(Capability.NO_CLASS);  // filter doesn't need class to be set
+ *     return result;
  *   }
  * 
  *   protected Instances determineOutputFormat(Instances inputFormat) {
@@ -111,7 +123,7 @@ import weka.core.Instances;
  *   }
  * 
  *   public static void main(String[] args) {
- *     runFilter(new &lt;Filtername&gt;(), args);
+ *     runFilter(new SimpleStream(), args);
  *   }
  * }
  * </pre>
@@ -124,7 +136,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see     SimpleBatchFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
