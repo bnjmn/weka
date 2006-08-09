@@ -22,7 +22,6 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.net.ADNode;
 import weka.classifiers.bayes.net.BIFReader;
 import weka.classifiers.bayes.net.ParentSet;
@@ -85,7 +84,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -892,12 +891,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
      * @param argv the options
      */
     public static void main(String[] argv) {
-        try {
-            System.out.println(Evaluation.evaluateModel(new BayesNet(), argv));
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println(e.getMessage());
-        }
+        runClassifier(new BayesNet(), argv);
     } // main
 
     /** get name of the Bayes network

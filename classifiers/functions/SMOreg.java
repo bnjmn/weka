@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.SMOset;
@@ -148,7 +147,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class SMOreg 
   extends Classifier 
@@ -1610,15 +1609,7 @@ public class SMOreg
    * @param argv the commandline options
    */
   public static void main(String[] argv) {
-	
-    Classifier scheme;
-    try {
-      scheme = new SMOreg();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new SMOreg(), argv);
   }
 
 

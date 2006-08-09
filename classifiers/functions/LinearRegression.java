@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -71,7 +70,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class LinearRegression extends Classifier implements OptionHandler,
   WeightedInstancesHandler {
@@ -909,13 +908,6 @@ public class LinearRegression extends Classifier implements OptionHandler,
    * @param argv the options
    */
   public static void main(String argv[]) {
-    
-    try {
-      System.out.println(Evaluation.evaluateModel(new LinearRegression(),
-						  argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runClassifier(new LinearRegression(), argv);
   }
 }

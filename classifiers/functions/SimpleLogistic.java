@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -32,12 +31,12 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -116,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class SimpleLogistic 
   extends Classifier 
@@ -729,12 +728,7 @@ public class SimpleLogistic
      * @param argv commandline options 
      */
     public static void main(String[] argv) {	
-	try {
-	    System.out.println(Evaluation.evaluateModel(new SimpleLogistic(), argv));
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    System.err.println(e.getMessage());
-	}
+        runClassifier(new SimpleLogistic(), argv);
     }
 }
 

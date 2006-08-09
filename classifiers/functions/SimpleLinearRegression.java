@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -48,7 +47,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SimpleLinearRegression extends Classifier 
   implements WeightedInstancesHandler {
@@ -278,12 +277,6 @@ public class SimpleLinearRegression extends Classifier
    * @param argv options
    */
   public static void main(String [] argv){
-
-    try{
-      System.out.println(Evaluation.evaluateModel(new SimpleLinearRegression(), argv));
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClassifier(new SimpleLinearRegression(), argv);
   } 
 }

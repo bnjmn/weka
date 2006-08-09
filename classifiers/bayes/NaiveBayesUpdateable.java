@@ -22,7 +22,6 @@
 
 package weka.classifiers.bayes;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.TechnicalInformation;
 
@@ -68,7 +67,7 @@ import weka.core.TechnicalInformation;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NaiveBayesUpdateable extends NaiveBayes 
   implements UpdateableClassifier {
@@ -122,14 +121,7 @@ public class NaiveBayesUpdateable extends NaiveBayes
    * @param argv the options
    */
   public static void main(String [] argv) {
-    
-    try {
-      System.out.println(Evaluation.evaluateModel(new NaiveBayesUpdateable(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new NaiveBayesUpdateable(), argv);
   }
-
 }
 

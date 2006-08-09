@@ -22,18 +22,17 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -114,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author J. Lindgren (jtlindgr at cs.helsinki.fi)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
 */
 public class Winnow 
   extends Classifier 
@@ -853,11 +852,6 @@ public class Winnow
    * @param argv the commandline options
    */
   public static void main(String[] argv) {
-    
-    try {
-      System.out.println(Evaluation.evaluateModel(new Winnow(), argv));
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-    }
+    runClassifier(new Winnow(), argv);
   }
 }

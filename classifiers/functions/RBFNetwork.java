@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.clusterers.MakeDensityBasedClusterer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Capabilities;
@@ -69,7 +68,7 @@ import java.util.Vector;
  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
@@ -485,11 +484,6 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    * scheme (see Evaluation)
    */
   public static void main(String [] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new RBFNetwork(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new RBFNetwork(), argv);
   }
 }

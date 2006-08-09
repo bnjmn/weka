@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RegOptimizer;
@@ -155,7 +154,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SVMreg 
   extends Classifier 
@@ -800,15 +799,6 @@ public class SVMreg
    * @param args	the commandline options
    */
   public static void main(String[] args) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new SVMreg(), args));
-    }
-    catch (Exception e) {
-      if (    (e.getMessage() != null)
- 	   && (e.getMessage().indexOf("General options") == -1) )
-	e.printStackTrace();
-      else
-	System.out.println(e.getMessage());
-    }
+    runClassifier(new SVMreg(), args);
   }
 }

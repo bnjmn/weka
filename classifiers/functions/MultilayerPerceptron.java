@@ -22,7 +22,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.neural.LinearUnit;
 import weka.classifiers.functions.neural.NeuralConnection;
 import weka.classifiers.functions.neural.NeuralNode;
@@ -141,7 +140,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -156,14 +155,7 @@ public class MultilayerPerceptron
    * @param argv should contain command line options (see setOptions)
    */
   public static void main(String [] argv) {
-    
-    try {
-      System.out.println(Evaluation.evaluateModel(new MultilayerPerceptron(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
-    System.exit(0);
+    runClassifier(new MultilayerPerceptron(), argv);
   }
   
 
@@ -664,7 +656,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   class ControlPanel 
     extends JPanel {

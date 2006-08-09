@@ -23,7 +23,6 @@
 package weka.classifiers.meta.nestedDichotomies;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.rules.ZeroR;
@@ -31,11 +30,11 @@ import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.instance.RemoveWithValues;
@@ -603,13 +602,7 @@ public class ND
    * @param argv the options
    */
   public static void main(String [] argv) {
-	
-    try {
-      System.out.println(Evaluation.evaluateModel(new ND(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new ND(), argv);
   }
 }
 

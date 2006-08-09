@@ -24,7 +24,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.lazy.kstar.KStarCache;
 import weka.classifiers.lazy.kstar.KStarConstants;
@@ -38,11 +37,11 @@ import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -92,7 +91,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class KStar 
   extends Classifier
@@ -620,12 +619,7 @@ public class KStar
    * @param argv should contain command line options (see setOptions)
    */
   public static void main(String [] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new KStar(), argv));
-    } catch (Exception e) {
-      // System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClassifier(new KStar(), argv);
   }
 
   /**
