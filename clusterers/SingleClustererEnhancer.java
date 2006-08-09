@@ -26,6 +26,7 @@ import weka.core.Capabilities;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -34,7 +35,7 @@ import java.util.Vector;
  * Meta-clusterer for enhancing a base clusterer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class SingleClustererEnhancer
   extends Clusterer
@@ -181,10 +182,18 @@ public abstract class SingleClustererEnhancer
    * @return		the capabilities of this clusterer
    */
   public Capabilities getCapabilities() {
+    Capabilities	result;
+    
     if (getClusterer() == null)
-      return super.getCapabilities();
+      result = super.getCapabilities();
     else
-      return getClusterer().getCapabilities();
+      result = getClusterer().getCapabilities();
+    
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
+    
+    return result;
   }
 
   /**
