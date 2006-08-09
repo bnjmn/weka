@@ -44,7 +44,7 @@ import java.lang.reflect.Method;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see #GLOBALINFO_METHOD
  * @see #GLOBALINFO_STARTTAG
  * @see #GLOBALINFO_ENDTAG
@@ -116,26 +116,7 @@ public class GlobalInfoJavadoc
    * @param args	the commandline parameters for the object
    */
   public static void main(String[] args) {
-    try {
-      Javadoc doc = new GlobalInfoJavadoc();
-      
-      try {
-	if (Utils.getFlag('h', args))
-	  throw new Exception("Help requested");
-
-        doc.setOptions(args);
-        Utils.checkForRemainingOptions(args);
-      } 
-      catch (Exception ex) {
-        String result = "\n" + ex.getMessage() + "\n\n" + doc.generateHelp();
-        throw new Exception(result);
-      }
-
-      System.out.println(doc.generate() + "\n");
-    } 
-    catch (Exception ex) {
-      System.err.println(ex.getMessage());
-    }
+    runJavadoc(new GlobalInfoJavadoc(), args);
   }
 }
 

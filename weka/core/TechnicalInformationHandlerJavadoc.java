@@ -47,7 +47,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see #PLAINTEXT_STARTTAG
  * @see #PLAINTEXT_ENDTAG
  * @see #BIBTEX_STARTTAG
@@ -208,26 +208,7 @@ public class TechnicalInformationHandlerJavadoc
    * @param args	the commandline parameters for the object
    */
   public static void main(String[] args) {
-    try {
-      Javadoc doc = new TechnicalInformationHandlerJavadoc();
-      
-      try {
-	if (Utils.getFlag('h', args))
-	  throw new Exception("Help requested");
-
-	doc.setOptions(args);
-        Utils.checkForRemainingOptions(args);
-      } 
-      catch (Exception ex) {
-        String result = "\n" + ex.getMessage() + "\n\n" + doc.generateHelp();
-        throw new Exception(result);
-      }
-
-      System.out.println(doc.generate() + "\n");
-    } 
-    catch (Exception ex) {
-      System.err.println(ex.getMessage());
-    }
+    runJavadoc(new TechnicalInformationHandlerJavadoc(), args);
   }
 }
 

@@ -48,7 +48,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */
@@ -205,25 +205,6 @@ public class OptionHandlerJavadoc
    * @param args	the commandline parameters for the object
    */
   public static void main(String[] args) {
-    try {
-      Javadoc doc = new OptionHandlerJavadoc();
-      
-      try {
-	if (Utils.getFlag('h', args))
-	  throw new Exception("Help requested");
-
-	doc.setOptions(args);
-        Utils.checkForRemainingOptions(args);
-      } 
-      catch (Exception ex) {
-        String result = "\n" + ex.getMessage() + "\n\n" + doc.generateHelp();
-        throw new Exception(result);
-      }
-
-      System.out.println(doc.generate() + "\n");
-    } 
-    catch (Exception ex) {
-      System.err.println(ex.getMessage());
-    }
+    runJavadoc(new OptionHandlerJavadoc(), args);
   }
 }
