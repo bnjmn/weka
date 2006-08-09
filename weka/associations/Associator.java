@@ -35,7 +35,7 @@ import java.io.Serializable;
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public abstract class Associator 
   implements Cloneable, Serializable, CapabilitiesHandler {
@@ -51,11 +51,6 @@ public abstract class Associator
    * generated successfully
    */
   public abstract void buildAssociations(Instances data) throws Exception;
-
-
- 
-   
-
 
   /**
    * Creates a new instance of a associator given it's class name and
@@ -79,6 +74,17 @@ public abstract class Associator
   }
 
   /**
+   * Creates a deep copy of the given associator using serialization.
+   *
+   * @param model the associator to copy
+   * @return a deep copy of the associator
+   * @exception Exception if an error occurs
+   */
+  public static Associator makeCopy(Associator model) throws Exception {
+    return (Associator) new SerializedObject(model).getObject();
+  }
+
+  /**
    * Creates copies of the current associator. Note that this method
    * now uses Serialization to perform a deep copy, so the Associator
    * object must be fully Serializable. Any currently built model will
@@ -89,7 +95,7 @@ public abstract class Associator
    * @return an array of associators.
    * @exception Exception if an error occurs 
    */
-  public static Associator [] makeCopies(Associator model,
+  public static Associator[] makeCopies(Associator model,
 					 int num) throws Exception {
 
     if (model == null) {
@@ -112,5 +118,25 @@ public abstract class Associator
    */
   public Capabilities getCapabilities() {
     return new Capabilities(this);
+  }
+  
+  /**
+   * runs the associator with the given commandline options
+   * 
+   * @param associator	the associator to run
+   * @param options	the commandline options
+   */
+  protected static void runAssociator(Associator associator, String[] options) {
+    try {
+      System.out.println(
+	  AssociatorEvaluation.evaluate(associator, options));
+    }
+    catch (Exception e) {
+      if (    (e.getMessage() != null)
+	   && (e.getMessage().indexOf("General options") == -1) )
+	e.printStackTrace();
+      else
+	System.err.println(e.getMessage());
+    }
   }
 }
