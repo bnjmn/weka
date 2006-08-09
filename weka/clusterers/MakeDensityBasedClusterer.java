@@ -49,8 +49,8 @@ import java.util.Vector;
  *  (default 1e-6)</pre>
  * 
  * <pre> -W &lt;clusterer name&gt;
- *  Clusterer to wrap. (required)
- * </pre>
+ *  Clusterer to wrap.
+ *  (default weka.clusterers.SimpleKMeans)</pre>
  * 
  * <pre> 
  * Options specific to clusterer weka.clusterers.SimpleKMeans:
@@ -64,11 +64,13 @@ import java.util.Vector;
  *  (default 10)</pre>
  * 
  <!-- options-end -->
+ * 
+ * Options after "--" are passed on to the base clusterer.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MakeDensityBasedClusterer 
   extends DensityBasedClusterer
@@ -99,6 +101,7 @@ public class MakeDensityBasedClusterer
    * 
    */  
   public MakeDensityBasedClusterer() {
+    super();
   }
    
   /**
@@ -123,6 +126,15 @@ public class MakeDensityBasedClusterer
       + "within each cluster produced by the wrapped clusterer. Supports the "
       + "NumberOfClustersRequestable interface only if the wrapped Clusterer "
       + "does.";
+  }
+
+  /**
+   * String describing default clusterer.
+   * 
+   * @return 		the default clusterer classname
+   */
+  protected String defaultClustererString() {
+    return SimpleKMeans.class.getName();
   }
 
   /**
@@ -425,29 +437,31 @@ public class MakeDensityBasedClusterer
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    
-    Vector newVector = new Vector(2);
-    newVector.addElement(new Option("\tminimum allowable standard deviation "
-				    +"for normal density computation "
-				    +"\n\t(default 1e-6)"
-				    ,"M",1,"-M <num>"));
-    newVector.addElement(new Option(
-				    "\tClusterer to wrap. (required)\n",
-				    "W", 1,"-W <clusterer name>"));
+    Vector result = new Vector();
+
+    result.addElement(new Option(
+	"\tminimum allowable standard deviation for normal density computation "
+	+"\n\t(default 1e-6)"
+	,"M",1,"-M <num>"));
+	
+    result.addElement(new Option(
+	"\tClusterer to wrap.\n"
+	+ "\t(default " + defaultClustererString() + ")",
+	"W", 1,"-W <clusterer name>"));
 
     if ((m_wrappedClusterer != null) &&
 	(m_wrappedClusterer instanceof OptionHandler)) {
-      newVector.addElement(new Option(
-				      "",
-				      "", 0, "\nOptions specific to clusterer "
-				      + m_wrappedClusterer.getClass().getName() + ":"));
+      result.addElement(new Option(
+	  "",
+	  "", 0, "\nOptions specific to clusterer "
+	  + m_wrappedClusterer.getClass().getName() + ":"));
       Enumeration enu = ((OptionHandler)m_wrappedClusterer).listOptions();
       while (enu.hasMoreElements()) {
-	newVector.addElement(enu.nextElement());
+	result.addElement(enu.nextElement());
       }
     }
     
-    return newVector.elements();
+    return result.elements();
   }
 
   /**
@@ -461,8 +475,8 @@ public class MakeDensityBasedClusterer
    *  (default 1e-6)</pre>
    * 
    * <pre> -W &lt;clusterer name&gt;
-   *  Clusterer to wrap. (required)
-   * </pre>
+   *  Clusterer to wrap.
+   *  (default weka.clusterers.SimpleKMeans)</pre>
    * 
    * <pre> 
    * Options specific to clusterer weka.clusterers.SimpleKMeans:
@@ -488,9 +502,8 @@ public class MakeDensityBasedClusterer
     }
      
     String wString = Utils.getOption('W', options);
-    if (wString.length() == 0) {
-      throw new Exception("A clusterer must be specified with the -W option.");
-    }
+    if (wString.length() == 0)
+      wString = defaultClustererString();
     String[] spec = Utils.splitOptions(wString);
     if (spec.length == 0) {
       throw new IllegalArgumentException("Invalid clusterer specification string");
