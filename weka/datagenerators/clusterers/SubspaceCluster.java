@@ -32,10 +32,9 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.datagenerators.ClusterDefinition;
 import weka.datagenerators.ClusterGenerator;
-import weka.datagenerators.DataGenerator;
 
-import java.util.Random;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -112,7 +111,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class SubspaceCluster 
   extends ClusterGenerator {
@@ -989,12 +988,6 @@ public class SubspaceCluster
    * @param args should contain arguments for the data producer: 
    */
   public static void main(String[] args) {
-    try {
-      DataGenerator.makeData(new SubspaceCluster(), args);
-    } 
-    catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runDataGenerator(new SubspaceCluster(), args);
   }
 }

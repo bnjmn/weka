@@ -30,11 +30,10 @@ import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.datagenerators.DataGenerator;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.datagenerators.ClassificationGenerator;
 
 import java.util.Enumeration;
@@ -102,7 +101,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Agrawal
@@ -925,12 +924,6 @@ public class Agrawal
    * @param args should contain arguments for the data producer: 
    */
   public static void main(String[] args) {
-    try {
-      DataGenerator.makeData(new Agrawal(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runDataGenerator(new Agrawal(), args);
   }
 }

@@ -28,7 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
-import weka.datagenerators.DataGenerator;
 import weka.datagenerators.ClassificationGenerator;
 
 import java.util.Enumeration;
@@ -77,7 +76,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class RandomRBF
@@ -581,12 +580,6 @@ public class RandomRBF
    * @param args should contain arguments for the data producer: 
    */
   public static void main(String[] args) {
-    try {
-      DataGenerator.makeData(new RandomRBF(), args);
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runDataGenerator(new RandomRBF(), args);
   }
 }
