@@ -127,12 +127,7 @@ import java.util.zip.GZIPOutputStream;
  * Example usage as the main of a classifier (called FunkyClassifier):
  * <code> <pre>
  * public static void main(String [] args) {
- *   try {
- *     Classifier scheme = new FunkyClassifier();
- *     System.out.println(Evaluation.evaluateModel(scheme, args));
- *   } catch (Exception e) {
- *     System.err.println(e.getMessage());
- *   }
+ *   runClassifier(new FunkyClassifier(), args);
  * }
  * </pre> </code> 
  * <p/>
@@ -153,7 +148,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.64 $
+ * @version  $Revision: 1.65 $
  */
 public class Evaluation
   implements Summarizable {
@@ -643,7 +638,12 @@ public class Evaluation
       // Get basic options (options the same for all schemes)
       classIndexString = Utils.getOption('c', options);
       if (classIndexString.length() != 0) {
-	classIndex = Integer.parseInt(classIndexString);
+	if (classIndexString.equals("first"))
+	  classIndex = 1;
+	else if (classIndexString.equals("last"))
+	  classIndex = -1;
+	else
+	  classIndex = Integer.parseInt(classIndexString);
       }
       trainFileName = Utils.getOption('t', options); 
       objectInputFileName = Utils.getOption('l', options);
