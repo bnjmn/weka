@@ -23,6 +23,7 @@
 package weka.attributeSelection;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -30,8 +31,8 @@ import weka.core.Matrix;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SparseInstance;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -69,7 +70,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class PrincipalComponents 
   extends UnsupervisedAttributeEvaluator 
@@ -387,11 +388,39 @@ public class PrincipalComponents
   }
 
   /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
+
+  /**
    * Initializes principal components and performs the analysis
    * @param data the instances to analyse/transform
    * @throws Exception if analysis fails
    */
   public void buildEvaluator(Instances data) throws Exception {
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
+
     buildAttributeConstructor(data);
   }
 
@@ -401,11 +430,7 @@ public class PrincipalComponents
     m_attributeFilter = null;
     m_nominalToBinFilter = null;
     m_sumOfEigenValues = 0.0;
-
-    if (data.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
-    m_trainInstances = data;
+    m_trainInstances = new Instances(data);
 
     // make a copy of the training data so that we can get the class
     // column to append to the transformed data (if necessary)
@@ -454,6 +479,9 @@ public class PrincipalComponents
       m_attributeFilter.setInputFormat(m_trainInstances);
       m_trainInstances = Filter.useFilter(m_trainInstances, m_attributeFilter);
     }
+    
+    // can evaluator handle the processed data ? e.g., enough attributes?
+    getCapabilities().testWithFail(m_trainInstances);
 
     m_numInstances = m_trainInstances.numInstances();
     m_numAttribs = m_trainInstances.numAttributes();
@@ -462,7 +490,6 @@ public class PrincipalComponents
 
     double [] d = new double[m_numAttribs]; 
     double [][] v = new double[m_numAttribs][m_numAttribs];
-
 
     Matrix corr = new Matrix(m_correlation);
     corr.eigenvalueDecomposition(v, d);
@@ -915,14 +942,6 @@ public class PrincipalComponents
    * evaluator/transformer (see AttributeSelection)
    */
   public static void main(String [] argv) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new PrincipalComponents(), argv));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new PrincipalComponents(), argv);
   }
-  
 }
