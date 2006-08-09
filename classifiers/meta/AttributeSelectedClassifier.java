@@ -25,9 +25,9 @@ package weka.classifiers.meta;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
-import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
+import weka.core.Capabilities;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -35,6 +35,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -108,7 +109,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class AttributeSelectedClassifier 
   extends SingleClassifierEnhancer
@@ -415,6 +416,26 @@ public class AttributeSelectedClassifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities	result;
+    
+    if (getEvaluator() == null)
+      result = super.getCapabilities();
+    else
+      result = getEvaluator().getCapabilities();
+    
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
+    
+    return result;
+  }
+
+  /**
    * Build the classifier on the dimensionally reduced data.
    *
    * @param data the training data
@@ -646,14 +667,6 @@ public class AttributeSelectedClassifier
    * -t training file [-T test file] [-c class index]
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation
-			 .evaluateModel(new AttributeSelectedClassifier(),
-					argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClassifier(new AttributeSelectedClassifier(), argv);
   }
 }
