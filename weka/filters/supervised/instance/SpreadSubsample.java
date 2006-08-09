@@ -23,6 +23,7 @@
 
 package weka.filters.supervised.instance;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -30,6 +31,7 @@ import weka.core.OptionHandler;
 import weka.core.UnassignedClassException;
 import weka.core.UnsupportedClassTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -67,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  **/
 public class SpreadSubsample 
   extends Filter 
@@ -352,6 +354,25 @@ public class SpreadSubsample
 
     m_RandomSeed = newSeed;
   }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
   
   /**
    * Sets the format of the input instances.
@@ -368,9 +389,6 @@ public class SpreadSubsample
        throws Exception {
 
     super.setInputFormat(instanceInfo);
-    if (instanceInfo.classAttribute().isNominal() == false) {
-      throw new UnsupportedClassTypeException("The class attribute must be nominal.");
-    }
     setOutputFormat(instanceInfo);
     m_FirstBatchDone = false;
     return true;
@@ -539,7 +557,7 @@ public class SpreadSubsample
    * 
    * @return the positions
    */
-  private int []getClassIndices() {
+  private int[] getClassIndices() {
 
     // Create an index of where each class value starts
     int [] classIndices = new int [getInputFormat().numClasses() + 1];
@@ -575,16 +593,6 @@ public class SpreadSubsample
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new SpreadSubsample(), argv);
-      } else {
-	Filter.filterFile(new SpreadSubsample(), argv);
-      }
-    } catch (Exception ex) {
-		ex.printStackTrace();
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new SpreadSubsample(), argv);
   }
 }

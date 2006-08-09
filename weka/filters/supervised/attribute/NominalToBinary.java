@@ -24,6 +24,7 @@
 package weka.filters.supervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -31,11 +32,12 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SparseInstance;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.UnassignedClassException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -79,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class NominalToBinary 
   extends Filter 
@@ -133,6 +135,27 @@ public class NominalToBinary
     result.setValue(Field.YEAR, "1984");
     result.setValue(Field.PUBLISHER, "Wadsworth Inc");
     result.setValue(Field.ISBN, "0412048418");
+    
+    return result;
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.NOMINAL_CLASS);
     
     return result;
   }
@@ -638,15 +661,6 @@ public class NominalToBinary
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new NominalToBinary(), argv);
-      } else {
-	Filter.filterFile(new NominalToBinary(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new NominalToBinary(), argv);
   }
 }

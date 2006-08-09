@@ -24,6 +24,7 @@
 package weka.filters.supervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.ContingencyTables;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -35,10 +36,9 @@ import weka.core.SparseInstance;
 import weka.core.SpecialFunctions;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
-import weka.core.UnassignedClassException;
-import weka.core.UnsupportedClassTypeException;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
@@ -107,7 +107,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Discretize 
   extends Filter 
@@ -250,6 +250,24 @@ public class Discretize
     return options;
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
 
   /**
    * Sets the format of the input instances.
@@ -267,15 +285,6 @@ public class Discretize
     m_DiscretizeCols.setUpper(instanceInfo.numAttributes() - 1);
     m_CutPoints = null;
     
-    if (instanceInfo.classIndex() < 0) {
-      throw new UnassignedClassException("Cannot use class-based discretization: "
-					 + "no class assigned to the dataset");
-    }
-    if (!instanceInfo.classAttribute().isNominal()) {
-      throw new UnsupportedClassTypeException("Supervised discretization not possible:"
-					      + " class is not nominal!");
-    }
-
     // If we implement loading cutfiles, then load 
     //them here and set the output format
     return false;
@@ -1004,15 +1013,6 @@ public class Discretize
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new Discretize(), argv);
-      } else {
-	Filter.filterFile(new Discretize(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new Discretize(), argv);
   }
 }
