@@ -29,7 +29,7 @@ import weka.core.*;
  * Abstract attribute selection search class.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class ASSearch implements Serializable {
 
@@ -43,7 +43,7 @@ public abstract class ASSearch implements Serializable {
    * @param ASEvaluator the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array (not necessarily ordered) of selected attribute indexes
-   * @exception Exception if the search can't be completed
+   * @throws Exception if the search can't be completed
    */
   public abstract int [] search(ASEvaluation ASEvaluator,
 				Instances data) throws Exception;
@@ -58,7 +58,7 @@ public abstract class ASSearch implements Serializable {
    * @param options an array of options suitable for passing to setOptions. May
    * be null.
    * @return the newly created search object, ready for use.
-   * @exception Exception if the search class name is invalid, or the options
+   * @throws Exception if the search class name is invalid, or the options
    * supplied are not acceptable to the search class.
    */
   public static ASSearch forName(String searchName,
@@ -66,5 +66,29 @@ public abstract class ASSearch implements Serializable {
     return (ASSearch)Utils.forName(ASSearch.class,
 				   searchName,
 				   options);
+  }
+
+  /**
+   * Creates copies of the current search scheme. Note that this method
+   * now uses Serialization to perform a deep copy, so the search
+   * object must be fully Serializable. Any currently built model will
+   * now be copied as well.
+   *
+   * @param model an example search scheme to copy
+   * @param num the number of search scheme copies to create.
+   * @return an array of search schemes.
+   * @throws Exception if an error occurs 
+   */
+  public static ASSearch[] makeCopies(ASSearch model, int num) throws Exception {
+
+    if (model == null)
+      throw new Exception("No model search scheme set");
+      
+    ASSearch[] result = new ASSearch[num];
+    SerializedObject so = new SerializedObject(model);
+    for (int i = 0; i < result.length; i++)
+      result[i] = (ASSearch) so.getObject();
+
+    return result;
   }
 }
