@@ -39,11 +39,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -57,7 +57,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -146,7 +145,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class Tertius 
@@ -697,57 +696,73 @@ public class Tertius
    * @return An array of strings suitable for passing to setOptions.
    */
   public String [] getOptions() {
-    
-    String [] options = new String [24];
-    int current = 0;
-    
+    Vector    	result;
+
+    result = new Vector();
+
     /* Pruning options. */
-    options[current++] = "-K"; options[current++] = "" + m_best;
-    options[current++] = "-F"; options[current++] = "" + m_frequencyThreshold;
-    options[current++] = "-C"; options[current++] = "" + m_confirmationThreshold;
-    options[current++] = "-N"; options[current++] = "" + m_noiseThreshold;
+    if (m_best > 0) {
+      result.add("-K");
+      result.add("" + m_best);
+    }
+    
+    result.add("-F");
+    result.add("" + m_frequencyThreshold);
+    
+    if (m_confirmationThreshold > 0) {
+      result.add("-C");
+      result.add("" + m_confirmationThreshold);
+    }
+    
+    result.add("-N");
+    result.add("" + m_noiseThreshold);
+    
     /* Search space and language bias options. */
-    if (m_repeat) {
-      options[current++] = "-R";
-    }
-    options[current++] = "-L"; options[current++] = "" + m_numLiterals;
-    options[current++] = "-G"; options[current++] = "" + m_negation;
-    if (m_classification) {
-      options[current++] = "-S";
-    }
-    options[current++] = "-c"; options[current++] = "" + m_classIndex;
-    if (m_horn) {
-      options[current++] = "-H";
-    }
+    if (m_repeat)
+      result.add("-R");
+    
+    result.add("-L");
+    result.add("" + m_numLiterals);
+    
+    result.add("-G");
+    result.add("" + m_negation);
+    
+    if (m_classification)
+      result.add("-S");
+      
+    result.add("-c");
+    result.add("" + m_classIndex);
+    
+    if (m_horn)
+      result.add("-H");
+
     /* Subsumption tests options. */
-    if (!m_equivalent) {
-      options[current++] = "-E";
-    }
-    if (!m_sameClause) {
-      options[current++] = "-M";
-    }
-    if (!m_subsumption) {
-      options[current++] = "-T";
-    }
+    if (!m_equivalent)
+      result.add("-E");
+    
+    if (!m_sameClause)
+      result.add("-M");
+    
+    if (!m_subsumption)
+      result.add("-T");
 
     /* Missing values options. */
-    options[current++] = "-I"; options[current++] = "" + m_missing;
+    result.add("-I");
+    result.add("" + m_missing);
 
     /* ROC analysis. */
-    if (m_roc) {
-      options[current++] = "-O";
-    }
+    if (m_roc)
+      result.add("-O");
 
     /* Individual-based learning. */
-    options[current++] = "-p"; options[current++] = "" + m_partsString;
+    result.add("-p");
+    result.add("" + m_partsString);
 
     /* Values output. */
-    options[current++] = "-P"; options[current++] = "" + m_printValues;
+    result.add("-P");
+    result.add("" + m_printValues);
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
   /**
@@ -1735,9 +1750,9 @@ public class Tertius
 
     /* Initialization of the search. */
     if (m_parts == null) {
-      m_instances = instances;
+      m_instances = new Instances(instances);
     } else {
-      m_instances = new IndividualInstances(instances, m_parts);
+      m_instances = new IndividualInstances(new Instances(instances), m_parts);
     }    
     m_results = new SimpleLinkedList();
     m_hypotheses = 0;
@@ -1901,6 +1916,14 @@ public class Tertius
     }
   }
 
+  /**
+   * returns the results
+   * 
+   * @return		the results
+   */
+  public SimpleLinkedList getResults() {
+    return m_results;
+  }
 
   /**
    * Print the current best and worst values. 
@@ -1940,8 +1963,6 @@ public class Tertius
   public String toString() {
 
     StringBuffer text = new StringBuffer();
-    SimpleDateFormat dateFormat 
-      = new SimpleDateFormat("mm 'min' ss 's' SSS 'ms'");
     SimpleLinkedList.LinkedListIterator iter = m_results.iterator();
     int size = m_results.size();
     int i = 0;
@@ -1969,7 +1990,6 @@ public class Tertius
  
     text.append("\nNumber of hypotheses considered: " + m_hypotheses);
     text.append("\nNumber of hypotheses explored: " + m_explored);
-    text.append("\nTime: " + dateFormat.format(m_time));
 
     if (m_status == MEMORY) {
       text.append("\n\nNot enough memory to continue the search");
@@ -1986,48 +2006,6 @@ public class Tertius
    * @param args the commandline parameters
    */
   public static void main(String [] args) {
-
-    String trainFileString;
-    Reader reader;
-    Instances instances;
-    Tertius tertius = new Tertius();
-    StringBuffer text = new StringBuffer();
-
-    try {
-      /* Help string giving all the command line options. */
-      text.append("\n\nTertius options:\n\n");
-      text.append("-t <name of training file>\n");
-      text.append("\tSet training file.\n");
-      Enumeration enu = tertius.listOptions();
-      while (enu.hasMoreElements()) {
-	Option option = (Option) enu.nextElement();
-	text.append(option.synopsis() + "\n");
-	text.append(option.description() + "\n");
-      }
-
-      /* Training file. */
-      trainFileString = Utils.getOption('t', args);
-      if (trainFileString.length() == 0) {
-	throw new Exception("No training file given!");
-      }
-      try {
-	reader = new BufferedReader(new FileReader(trainFileString));
-      } catch (Exception e) {
-	throw new Exception("Can't open file " + e.getMessage() + ".");
-      }
-
-      instances = new Instances(reader);
-
-      /* Tertius options. */
-      tertius.setOptions(args);
-      Utils.checkForRemainingOptions(args);
-
-      /* Build the rules and output the results. */
-      tertius.buildAssociations(instances);
-      System.out.println(tertius);
-
-    } catch (Exception e) {
-      System.err.println("\nWeka exception: " + e.getMessage() + text);
-    }
+    runAssociator(new Tertius(), args);
   }
 }
