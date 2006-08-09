@@ -21,12 +21,12 @@
 package weka.filters;
 
 import weka.core.Instances;
-import weka.core.OptionHandler;
 import weka.filters.unsupervised.attribute.Add;
 import weka.filters.unsupervised.attribute.AddExpression;
+import weka.filters.unsupervised.attribute.Center;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 
@@ -35,7 +35,7 @@ import junit.framework.TestSuite;
  * java weka.filters.MultiFilterTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision $
+ * @version $Revision: 1.2 $
  */
 public class MultiFilterTest extends AbstractFilterTest {
   
@@ -63,6 +63,19 @@ public class MultiFilterTest extends AbstractFilterTest {
     return result;
   }
 
+  /** Creates a configured MultiFilter (variant) */
+  public Filter getConfiguredFilterVariant() {
+    MultiFilter result = new MultiFilter();
+    
+    Filter[] filters = new Filter[2];
+    filters[0] = new ReplaceMissingValues();
+    filters[1] = new Center();
+    
+    result.setFilters(filters);
+    
+    return result;
+  }
+
   public void testDefault() {
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
@@ -70,12 +83,26 @@ public class MultiFilterTest extends AbstractFilterTest {
     assertEquals(m_Instances.numInstances(),  result.numInstances());
   }
 
+  /**  
+   * tests Add + AddExpression filter
+   */
   public void testConfigured() {
     m_Filter = getConfiguredFilter();
     Instances result = useFilter();
     // Number of attributes should be 2 more
     assertEquals(m_Instances.numAttributes() + 2, result.numAttributes());
     // Number of instances shouldn't change
+    assertEquals(m_Instances.numInstances(),  result.numInstances());
+  }
+
+  /**  
+   * tests ReplaceMissingValues + Center filter
+   */
+  public void testConfiguredVariant() {
+    m_Filter = getConfiguredFilterVariant();
+    Instances result = useFilter();
+    // Number of atytributes + instances shouldn't change
+    assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(m_Instances.numInstances(),  result.numInstances());
   }
 
