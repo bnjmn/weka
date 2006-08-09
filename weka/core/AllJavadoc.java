@@ -41,7 +41,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AllJavadoc
   extends Javadoc {
@@ -89,6 +89,17 @@ public class AllJavadoc
     for (int i = 0; i < m_Javadocs.size(); i++)
       ((Javadoc) m_Javadocs.get(i)).setUseStars(value);
   }
+  
+  /**
+   * sets whether to suppress output in the console
+   * 
+   * @param value	true if output is to be suppressed
+   */
+  public void setSilent(boolean value) {
+    super.setSilent(value);
+    for (int i = 0; i < m_Javadocs.size(); i++)
+      ((Javadoc) m_Javadocs.get(i)).setSilent(value);
+  }
 
   /**
    * generates and returns the Javadoc for the specified start/end tag pair.
@@ -128,29 +139,6 @@ public class AllJavadoc
    * @param args	the commandline parameters for the object
    */
   public static void main(String[] args) {
-    try {
-      Javadoc doc = new AllJavadoc();
-      
-      try {
-	if (Utils.getFlag('h', args))
-	  throw new Exception("Help requested");
-
-	doc.setOptions(args);
-        Utils.checkForRemainingOptions(args);
-
-        // directory is necessary!
-        if (doc.getDir().length() == 0)
-          throw new Exception("No directory provided!");
-      } 
-      catch (Exception ex) {
-        String result = "\n" + ex.getMessage() + "\n\n" + doc.generateHelp();
-        throw new Exception(result);
-      }
-
-      System.out.println(doc.generate() + "\n");
-    } 
-    catch (Exception ex) {
-      System.err.println(ex.getMessage());
-    }
+    runJavadoc(new AllJavadoc(), args);
   }
 }
