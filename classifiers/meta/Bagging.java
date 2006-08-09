@@ -22,7 +22,6 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Instance;
@@ -30,11 +29,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -122,7 +121,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -644,12 +643,6 @@ public class Bagging
    * @param argv the options
    */
   public static void main(String [] argv) {
-   
-    try {
-      System.out.println(Evaluation.
-			 evaluateModel(new Bagging(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new Bagging(), argv);
   }
 }

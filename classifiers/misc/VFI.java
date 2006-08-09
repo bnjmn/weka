@@ -23,19 +23,18 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -126,7 +125,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class VFI 
   extends Classifier 
@@ -623,11 +622,7 @@ public class VFI
    * (see Evaluation).
    */
   public static void main(String [] args) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new VFI(), args));
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    runClassifier(new VFI(), args);
   }
 }
 

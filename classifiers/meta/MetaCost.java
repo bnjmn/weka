@@ -24,7 +24,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -34,11 +33,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -123,7 +122,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class MetaCost 
   extends RandomizableSingleClassifierEnhancer
@@ -656,15 +655,7 @@ public class MetaCost
    * -t training file [-T test file] [-c class index]
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation
-			 .evaluateModel(new MetaCost(),
-					argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new MetaCost(), argv);
   }
 }
 

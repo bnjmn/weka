@@ -23,7 +23,6 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.AttributeStats;
 import weka.core.Capabilities;
@@ -32,11 +31,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -115,7 +114,7 @@ import java.util.Vector;
  * @author Ioannis N. Athanasiadis
  * @email: ionathan@iti.gr, alias: ionathan@ieee.org
  * @version 5.0
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class FLR
     extends Classifier
@@ -730,12 +729,7 @@ public class FLR
    */
 
   public static void main(String[] args) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new FLR(), args));
-    }
-    catch (Exception e) {
-      System.out.println(e.getMessage());
-    }
+    runClassifier(new FLR(), args);
   }
 
   /**

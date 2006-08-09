@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Capabilities;
 import weka.core.Drawable;
@@ -31,11 +30,11 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.GenericObjectEditor;
@@ -97,7 +96,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -149,15 +148,7 @@ public class UserClassifier
    * @param argv should contain command line options (see setOptions)
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new UserClassifier(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
-    System.exit(0);
-    //System.out.println("im done");
+    runClassifier(new UserClassifier(), argv);
   }
 
   /**

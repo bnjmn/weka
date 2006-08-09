@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.ContingencyTables;
@@ -72,7 +71,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class RandomTree 
   extends Classifier 
@@ -1050,12 +1049,6 @@ public class RandomTree
    * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new RandomTree(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new RandomTree(), argv);
   }
 }

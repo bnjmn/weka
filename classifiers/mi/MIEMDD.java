@@ -22,7 +22,6 @@
 
 package weka.classifiers.mi;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableClassifier;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -94,7 +93,7 @@ import java.util.Vector;
  *     
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class MIEMDD 
   extends RandomizableClassifier 
@@ -739,12 +738,7 @@ public class MIEMDD
    * scheme (see Evaluation)
    */
   public static void main(String[] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new MIEMDD(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new MIEMDD(), argv);
   }
 }
 

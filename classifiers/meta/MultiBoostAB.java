@@ -46,14 +46,13 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -132,7 +131,7 @@ import java.util.Vector;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class MultiBoostAB 
   extends AdaBoostM1
@@ -399,12 +398,7 @@ public class MultiBoostAB
    * @param argv the options
    */
   public static void main(String [] argv) {
-    
-    try {
-      System.out.println(Evaluation.evaluateModel(new MultiBoostAB(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new MultiBoostAB(), argv);
   }
 }
 

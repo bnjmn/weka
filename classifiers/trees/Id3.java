@@ -23,18 +23,17 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.NoSupportForMissingValuesException;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 
@@ -72,7 +71,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class Id3 
   extends Classifier 
@@ -382,11 +381,6 @@ public class Id3
    * @param args the options for the classifier
    */
   public static void main(String[] args) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new Id3(), args));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new Id3(), args);
   }
 }

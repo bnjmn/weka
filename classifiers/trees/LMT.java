@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.trees.j48.C45ModelSelection;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.lmt.LMTNode;
@@ -36,11 +35,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -116,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class LMT 
   extends Classifier 
@@ -788,12 +787,7 @@ public class LMT
    * @param argv the commandline options 
    */
   public static void main (String [] argv) {	
-    try {
-      System.out.println(Evaluation.evaluateModel(new LMT(), argv));
-    } 
-    catch (Exception e) {
-      System.err.println(e.getMessage());
-    } 
+    runClassifier(new LMT(), argv);
   }  
 }
 

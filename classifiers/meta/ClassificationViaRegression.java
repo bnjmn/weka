@@ -23,17 +23,16 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
@@ -97,7 +96,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
 */
 public class ClassificationViaRegression 
   extends SingleClassifierEnhancer
@@ -268,14 +267,6 @@ public class ClassificationViaRegression
    * @param argv the options for the learner
    */
   public static void main(String [] argv){
-
-    Classifier scheme;
-
-    try {
-      scheme = new ClassificationViaRegression();
-      System.out.println(Evaluation.evaluateModel(scheme,argv));
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-    }
+    runClassifier(new ClassificationViaRegression(), argv);
   }
 }
