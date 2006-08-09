@@ -22,16 +22,15 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
  <!-- globalinfo-start -->
@@ -69,7 +68,7 @@ import weka.core.Capabilities.Capability;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class HNB  
   extends Classifier
@@ -374,14 +373,7 @@ public class HNB
    * @param args the options
    */
   public static void main(String[] args) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new HNB(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new HNB(), args);
   }
 }
 

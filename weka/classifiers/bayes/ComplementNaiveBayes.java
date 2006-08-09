@@ -21,20 +21,20 @@
 
 package weka.classifiers.bayes;
 
+import weka.classifiers.Classifier;
 import weka.core.Capabilities;
-import weka.core.Instances;
+import weka.core.FastVector;
 import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.OptionHandler;
-import weka.core.Option;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
-import weka.core.FastVector;
 import weka.core.Capabilities.Capability;
-import weka.classifiers.Classifier;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 
 /**
@@ -78,7 +78,7 @@ import weka.classifiers.Classifier;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -481,12 +481,7 @@ public class ComplementNaiveBayes extends Classifier
      * @param argv the options
      */
     public static void main(String [] argv) {
-	try {
-	    System.out.println(weka.classifiers.Evaluation.evaluateModel(new ComplementNaiveBayes(), argv));
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    System.err.println(e.getMessage());
-	}
+      runClassifier(new ComplementNaiveBayes(), argv);
     }        
 }
 

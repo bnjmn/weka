@@ -21,17 +21,17 @@
 
 package weka.classifiers.bayes;
 
+import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
-import weka.classifiers.Classifier;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
  <!-- globalinfo-start -->
@@ -71,7 +71,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class NaiveBayesMultinomial 
   extends Classifier 
@@ -368,12 +368,7 @@ public class NaiveBayesMultinomial
    * @param argv the options
    */
   public static void main(String [] argv) {
-    try {
-      System.out.println(weka.classifiers.Evaluation.evaluateModel(new NaiveBayesMultinomial(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new NaiveBayesMultinomial(), argv);
   }
 }
 

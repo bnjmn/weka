@@ -23,7 +23,6 @@
 package weka.classifiers.lazy;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -36,12 +35,12 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -108,7 +107,7 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class IBk 
   extends Classifier 
@@ -1005,12 +1004,6 @@ public class IBk
    * @param argv should contain command line options (see setOptions)
    */
   public static void main(String [] argv) {
-
-    try {
-      System.err.println(Evaluation.evaluateModel(new IBk(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new IBk(), argv);
   }
 }

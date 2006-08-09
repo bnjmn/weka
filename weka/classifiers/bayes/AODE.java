@@ -24,7 +24,6 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -32,12 +31,12 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -97,7 +96,7 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class AODE extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
@@ -767,10 +766,6 @@ public class AODE extends Classifier
    * @param argv the options
    */
   public static void main(String [] argv) {
-    try {
-       System.out.println(Evaluation.evaluateModel(new AODE(), argv));
-    } catch (Exception e) {
-       e.printStackTrace();
-    }
+    runClassifier(new AODE(), argv);
   }
 }

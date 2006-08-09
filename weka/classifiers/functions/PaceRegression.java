@@ -21,7 +21,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.pace.ChisqMixture;
 import weka.classifiers.functions.pace.MixtureDistribution;
 import weka.classifiers.functions.pace.NormalMixture;
@@ -35,13 +34,13 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.WekaException;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.IntVector;
 
@@ -120,7 +119,7 @@ import java.util.Vector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PaceRegression 
   extends Classifier 
@@ -773,15 +772,7 @@ public class PaceRegression
    * @param argv the options
    */
   public static void main(String argv[]) {
-    
-    Classifier scheme;
-    try {
-      scheme = new PaceRegression();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      // System.out.println(e.getMessage());
-    }
+    runClassifier(new PaceRegression(), argv);
   }
 }
 

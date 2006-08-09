@@ -23,7 +23,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.SMOset;
@@ -188,7 +187,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.61 $
+ * @version $Revision: 1.62 $
  */
 public class SMO 
   extends Classifier 
@@ -2177,15 +2176,6 @@ public class SMO
    * Main method for testing this class.
    */
   public static void main(String[] argv) {
-
-    Classifier scheme;
-
-    try {
-      scheme = new SMO();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new SMO(), argv);
   }
 }

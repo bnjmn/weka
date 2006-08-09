@@ -24,7 +24,6 @@
 package weka.classifiers.functions;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,10 +31,10 @@ import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 
@@ -145,7 +144,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LibSVM 
   extends Classifier
@@ -1448,12 +1447,6 @@ public class LibSVM
    * @param args the options
    */
   public static void main(String[] args) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new LibSVM(), args));
-    } 
-    catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new LibSVM(), args);
   }
 }

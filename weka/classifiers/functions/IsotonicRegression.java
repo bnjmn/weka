@@ -50,7 +50,7 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -269,13 +269,7 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
    * @param argv options
    */
   public static void main(String [] argv){
-
-    try{
-      System.out.println(Evaluation.evaluateModel(new IsotonicRegression(), argv));
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClassifier(new IsotonicRegression(), argv);
   } 
 }
 

@@ -22,7 +22,6 @@
 
 package weka.classifiers.lazy;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
@@ -32,12 +31,12 @@ import weka.core.LinearNN;
 import weka.core.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -114,7 +113,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
@@ -674,14 +673,6 @@ public class LWL
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(
-	    new LWL(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new LWL(), argv);
   }
 }
-
