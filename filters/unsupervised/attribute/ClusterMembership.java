@@ -25,6 +25,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.clusterers.DensityBasedClusterer;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -48,9 +49,10 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -W &lt;clusterer name&gt;
- *  Full name of clusterer to use (required).
- *  eg: weka.clusterers.EM
- *  Additional options after the '--'.</pre>
+ *  Full name of clusterer to use. eg:
+ *   weka.clusterers.EM
+ *  Additional options after the '--'.
+ *  (default: weka.clusterers.EM)</pre>
  * 
  * <pre> -I &lt;att1,att2-att4,...&gt;
  *  The range of attributes the clusterer should ignore.
@@ -62,7 +64,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -85,6 +87,26 @@ public class ClusterMembership
 
   /** The prior probability for each class */
   protected double[] m_priors;
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    return m_clusterer.getCapabilities();
+  }
+  
+  /**
+   * tests the data whether the filter can actually handle it
+   * 
+   * @param instanceInfo	the data to test
+   * @throws Exception		if the test fails
+   */
+  protected void testInputFormat(Instances instanceInfo) throws Exception {
+    getCapabilities().testWithFail(removeIgnored(instanceInfo));
+  }
   
   /**
    * Sets the format of the input instances.
@@ -102,6 +124,39 @@ public class ClusterMembership
     m_priors = null;
 
     return false;
+  }
+
+  /**
+   * filters all attributes that should be ignored
+   * 
+   * @param data	the data to filter
+   * @return		the filtered data
+   * @throws Exception	if filtering fails
+   */
+  protected Instances removeIgnored(Instances data) throws Exception {
+    Instances result = data;
+    
+    if (m_ignoreAttributesRange != null || data.classIndex() >= 0) {
+      result = new Instances(data);
+      m_removeAttributes = new Remove();
+      String rangeString = "";
+      if (m_ignoreAttributesRange != null) {
+	rangeString += m_ignoreAttributesRange.getRanges();
+      }
+      if (data.classIndex() >= 0) {
+	if (rangeString.length() > 0) {
+	  rangeString += "," + (data.classIndex() + 1);
+	} else {
+	  rangeString = "" + (data.classIndex() + 1);
+	}
+      }
+      ((Remove) m_removeAttributes).setAttributeIndices(rangeString);
+      ((Remove) m_removeAttributes).setInvertSelection(false);
+      m_removeAttributes.setInputFormat(data);
+      result = Filter.useFilter(data, m_removeAttributes);
+    }
+    
+    return result;
   }
 
   /**
@@ -143,27 +198,8 @@ public class ClusterMembership
       }
 
       // filter out attributes if necessary
-      if (m_ignoreAttributesRange != null || toFilter.classIndex() >= 0) {
-	m_removeAttributes = new Remove();
-	String rangeString = "";
-	if (m_ignoreAttributesRange != null) {
-	  rangeString += m_ignoreAttributesRange.getRanges();
-	}
-	if (toFilter.classIndex() >= 0) {
-	  if (rangeString.length() > 0) {
-	    rangeString += (","+(toFilter.classIndex()+1));	  
-	  } else {
-	    rangeString = ""+(toFilter.classIndex()+1);
-	  }
-	}
-	((Remove)m_removeAttributes).setAttributeIndices(rangeString);
-	((Remove)m_removeAttributes).setInvertSelection(false);
-	((Remove)m_removeAttributes).setInputFormat(toFilter);
-	for (int i = 0; i < toFilterIgnoringAttributes.length; i++) {
-	  toFilterIgnoringAttributes[i] = Filter.useFilter(toFilterIgnoringAttributes[i],
-							   m_removeAttributes);
-	}
-      }     
+      for (int i = 0; i < toFilterIgnoringAttributes.length; i++)
+	toFilterIgnoringAttributes[i] = removeIgnored(toFilterIgnoringAttributes[i]);
 
       // build the clusterers
       if ((toFilter.classIndex() <= 0) || !toFilter.classAttribute().isNominal()) {
@@ -308,9 +344,10 @@ public class ClusterMembership
     Vector newVector = new Vector(2);
     
     newVector.
-      addElement(new Option("\tFull name of clusterer to use (required).\n"
-			    + "\teg: weka.clusterers.EM\n"
-			    + "\tAdditional options after the '--'.",
+      addElement(new Option("\tFull name of clusterer to use. eg:\n"
+	                    + "\t\tweka.clusterers.EM\n"
+			    + "\tAdditional options after the '--'.\n"
+			    + "\t(default: weka.clusterers.EM)",
 			    "W", 1, "-W <clusterer name>"));
 
     newVector.
@@ -328,9 +365,10 @@ public class ClusterMembership
    * Valid options are: <p/>
    * 
    * <pre> -W &lt;clusterer name&gt;
-   *  Full name of clusterer to use (required).
-   *  eg: weka.clusterers.EM
-   *  Additional options after the '--'.</pre>
+   *  Full name of clusterer to use. eg:
+   *   weka.clusterers.EM
+   *  Additional options after the '--'.
+   *  (default: weka.clusterers.EM)</pre>
    * 
    * <pre> -I &lt;att1,att2-att4,...&gt;
    *  The range of attributes the clusterer should ignore.
@@ -346,10 +384,8 @@ public class ClusterMembership
   public void setOptions(String[] options) throws Exception {
 
     String clustererString = Utils.getOption('W', options);
-    if (clustererString.length() == 0) {
-      throw new Exception("A clusterer must be specified"
-			  + " with the -W option.");
-    }
+    if (clustererString.length() == 0)
+      clustererString = weka.clusterers.EM.class.getName();
     setDensityBasedClusterer((DensityBasedClusterer)Utils.
 			     forName(DensityBasedClusterer.class, clustererString,
 				     Utils.partitionOptions(options)));
@@ -487,15 +523,6 @@ public class ClusterMembership
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new ClusterMembership(), argv); 
-      } else {
-	Filter.filterFile(new ClusterMembership(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new ClusterMembership(), argv);
   }
 }
