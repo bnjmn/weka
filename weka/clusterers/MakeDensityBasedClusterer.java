@@ -68,7 +68,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MakeDensityBasedClusterer 
   extends DensityBasedClusterer
@@ -539,13 +539,6 @@ public class MakeDensityBasedClusterer
    * @param argv the options
    */
   public static void main(String [] argv) {
-    
-    try {
-      System.out.println(ClusterEvaluation.
-			 evaluateClusterer(new MakeDensityBasedClusterer(), 
-					   argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClusterer(new MakeDensityBasedClusterer(), argv);
   }
 }

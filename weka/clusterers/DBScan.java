@@ -31,11 +31,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -89,7 +89,7 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DBScan 
     extends Clusterer 
@@ -622,11 +622,7 @@ public class DBScan
      *                                   'D' distance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject);
      */
     public static void main(String[] args) {
-        try {
-            System.out.println(ClusterEvaluation.evaluateClusterer(new DBScan(), args));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        runClusterer(new DBScan(), args);
     }
 
     // *****************************************************************************************************************

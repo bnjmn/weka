@@ -59,7 +59,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -692,13 +692,6 @@ public class SimpleKMeans
    * -t training file [-N number of clusters]
    */
   public static void main (String[] argv) {
-    try {
-      System.out.println(ClusterEvaluation.
-			 evaluateClusterer(new SimpleKMeans(), argv));
-    }
-    catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClusterer(new SimpleKMeans(), argv);
   }
 }
