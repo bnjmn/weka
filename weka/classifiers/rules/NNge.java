@@ -23,19 +23,18 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Utils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -89,7 +88,7 @@ import java.util.Vector;
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NNge 
   extends Classifier 
@@ -1709,12 +1708,6 @@ public class NNge
    * (see Evaluation).
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new NNge(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClassifier(new NNge(), argv);
   }
 }

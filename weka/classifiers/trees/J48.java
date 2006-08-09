@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
@@ -41,11 +40,11 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -112,7 +111,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class J48 
   extends Classifier 
@@ -936,11 +935,6 @@ public class J48
    * @param argv the commandline options
    */
   public static void main(String [] argv){
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new J48(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new J48(), argv);
   }
 }

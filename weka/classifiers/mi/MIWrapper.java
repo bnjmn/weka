@@ -22,7 +22,6 @@
 
 package weka.classifiers.mi;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -33,11 +32,11 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MultiInstanceToPropositional;
 
@@ -110,7 +109,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class MIWrapper 
   extends SingleClassifierEnhancer
@@ -538,11 +537,6 @@ public class MIWrapper
    * scheme (see Evaluation)
    */
   public static void main(String[] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new MIWrapper(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new MIWrapper(), argv);
   }
 }

@@ -24,16 +24,15 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 import weka.filters.unsupervised.attribute.Remove;
@@ -95,7 +94,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class StackingC 
   extends Stacking 
@@ -321,12 +320,7 @@ public class StackingC
    * -t training file [-T test file] [-c class index]
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new StackingC(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new StackingC(), argv);
   }
 }
 

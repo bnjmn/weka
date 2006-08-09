@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -81,7 +80,7 @@ import java.util.Random;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class RandomCommittee 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -210,13 +209,6 @@ public class RandomCommittee
    * @param argv the options
    */
   public static void main(String [] argv) {
-   
-    try {
-      System.out.println(Evaluation.
-			 evaluateModel(new RandomCommittee(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new RandomCommittee(), argv);
   }
 }

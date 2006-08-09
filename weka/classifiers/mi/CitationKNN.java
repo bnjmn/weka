@@ -22,7 +22,6 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -30,11 +29,11 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -79,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class CitationKNN 
   extends Classifier 
@@ -863,12 +862,7 @@ public class CitationKNN
    * scheme (see Evaluation)
    */
   public static void main(String[] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new CitationKNN(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new CitationKNN(), argv);
   }
 
   //########################################################################

@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
@@ -94,7 +93,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -814,15 +813,6 @@ public class MultiClassClassifier
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    Classifier scheme;
-
-    try {
-      scheme = new MultiClassClassifier();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClassifier(new MultiClassClassifier(), argv);
   }
 }

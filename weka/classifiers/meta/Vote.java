@@ -22,7 +22,6 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.MultipleClassifiersCombiner;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -49,7 +48,7 @@ import weka.core.Instances;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class Vote extends MultipleClassifiersCombiner {
@@ -141,11 +140,6 @@ public class Vote extends MultipleClassifiersCombiner {
    * -t training file [-T test file] [-c class index]
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new Vote(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new Vote(), argv);
   }
 }

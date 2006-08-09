@@ -23,17 +23,16 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Randomizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Hashtable;
 import java.util.Random;
@@ -152,7 +151,7 @@ import java.util.Random;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class END 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -343,14 +342,7 @@ public class END
    * @param argv the options
    */
   public static void main(String [] argv) {
-    
-    try {
-      System.out.println(Evaluation.
-			 evaluateModel(new END(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new END(), argv);
   }
 }
 

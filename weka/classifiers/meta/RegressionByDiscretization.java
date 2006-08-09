@@ -22,7 +22,6 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -100,7 +99,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer {
@@ -388,12 +387,6 @@ public class RegressionByDiscretization
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(
-			 new RegressionByDiscretization(), argv));
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runClassifier(new RegressionByDiscretization(), argv);
   }
 }

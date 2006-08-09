@@ -22,7 +22,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -33,12 +32,12 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.ClassOrder;
 
@@ -132,7 +131,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class JRip 
   extends Classifier 
@@ -2003,12 +2002,7 @@ public class JRip
    * @param args the options for the classifier
    */
   public static void main(String[] args) {	
-    try {
-      System.out.println(Evaluation.evaluateModel(new JRip(), args));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new JRip(), args);
   } 
 }
 

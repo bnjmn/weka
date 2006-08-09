@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.meta.Bagging;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -33,11 +32,11 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Randomizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -92,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RandomForest 
   extends Classifier 
@@ -523,12 +522,6 @@ public class RandomForest
    * @param argv the options
    */
   public static void main(String[] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new RandomForest(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new RandomForest(), argv);
   }
 }

@@ -22,7 +22,6 @@
 
 package weka.classifiers.mi;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -32,11 +31,11 @@ import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -90,7 +89,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class TLD 
   extends RandomizableClassifier 
@@ -853,12 +852,7 @@ public class TLD
    * @param args the options for the classifier
    */
   public static void main(String[] args) {	
-    try {
-      System.out.println(Evaluation.evaluateModel(new TLD(), args));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new TLD(), args);
   }
 }
 

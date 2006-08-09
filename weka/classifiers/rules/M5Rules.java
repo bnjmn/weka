@@ -21,11 +21,11 @@
 
 package weka.classifiers.rules;
 
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
 import weka.classifiers.trees.m5.M5Base;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
  <!-- globalinfo-start -->
@@ -93,7 +93,7 @@ import weka.classifiers.trees.m5.M5Base;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class M5Rules 
   extends M5Base
@@ -154,14 +154,7 @@ public class M5Rules
    * @param args an array of options
    */
   public static void main(String[] args) {
-    try {
-      System.out.println(weka.classifiers.Evaluation.evaluateModel(
-			 new M5Rules(), 
-			 args));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    } 
+    runClassifier(new M5Rules(), args);
   } 
 }
 

@@ -23,7 +23,6 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -64,7 +63,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class MILR
   extends Classifier 
@@ -814,11 +813,6 @@ public class MILR
    * scheme (see Evaluation)
    */
   public static void main(String[] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(new MILR(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new MILR(), argv);
   }
 }

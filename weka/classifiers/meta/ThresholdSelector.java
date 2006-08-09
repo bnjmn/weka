@@ -22,7 +22,6 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.ThresholdCurve;
@@ -113,7 +112,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $ 
+ * @version $Revision: 1.37 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 
@@ -971,12 +970,6 @@ public class ThresholdSelector
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new ThresholdSelector(), 
-						  argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new ThresholdSelector(), argv);
   }
 }

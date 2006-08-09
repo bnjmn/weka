@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
@@ -54,7 +53,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class DecisionStump 
   extends Classifier 
@@ -725,14 +724,6 @@ public class DecisionStump
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    Classifier scheme;
-
-    try {
-      scheme = new DecisionStump();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new DecisionStump(), argv);
   }
 }

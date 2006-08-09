@@ -23,16 +23,15 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -73,7 +72,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
 */
 public class Prism 
   extends Classifier
@@ -523,11 +522,6 @@ public class Prism
    * @param args the commandline parameters
    */
   public static void main(String[] args) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new Prism(), args));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new Prism(), args);
   }
 }

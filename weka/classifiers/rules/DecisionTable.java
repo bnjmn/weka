@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
@@ -33,12 +32,12 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -97,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -1514,17 +1513,7 @@ public class DecisionTable
    * @param argv the command-line options
    */
   public static void main(String [] argv) {
-    
-    Classifier scheme;
-    
-    try {
-      scheme = new DecisionTable();
-      System.out.println(Evaluation.evaluateModel(scheme,argv));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runClassifier(new DecisionTable(), argv);
   }
 }
 

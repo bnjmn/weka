@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.rules.ZeroR;
@@ -98,7 +97,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class RacedIncrementalLogitBoost 
   extends RandomizableSingleClassifierEnhancer
@@ -1267,12 +1266,6 @@ public class RacedIncrementalLogitBoost
    * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new RacedIncrementalLogitBoost(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new RacedIncrementalLogitBoost(), argv);
   }
 }

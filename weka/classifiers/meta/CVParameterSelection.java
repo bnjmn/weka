@@ -33,10 +33,10 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.io.StreamTokenizer;
@@ -111,7 +111,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.33 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -818,12 +818,6 @@ public class CVParameterSelection
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new CVParameterSelection(), 
-						  argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new CVParameterSelection(), argv);
   }
 }

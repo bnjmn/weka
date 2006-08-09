@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.rules.part.MakeDecList;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.C45ModelSelection;
@@ -36,11 +35,11 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -103,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PART 
   extends Classifier 
@@ -700,14 +699,9 @@ public class PART
   /**
    * Main method for testing this class.
    *
-   * @param String options 
+   * @param argv command line options 
    */
   public static void main(String [] argv){
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new PART(), argv));
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-    }
+    runClassifier(new PART(), argv);
   }
 }

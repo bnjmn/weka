@@ -23,7 +23,6 @@
 package weka.classifiers.misc;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -52,7 +51,7 @@ import java.io.Serializable;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */ 
 public class HyperPipes 
   extends Classifier {
@@ -334,11 +333,6 @@ public class HyperPipes
    * (see Evaluation).
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new HyperPipes(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new HyperPipes(), argv);
   }
 }

@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.trees.adtree.PredictionNode;
 import weka.classifiers.trees.adtree.ReferenceInstances;
@@ -43,12 +42,12 @@ import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -97,7 +96,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ADTree
   extends Classifier 
@@ -1483,13 +1482,7 @@ public class ADTree
    * @param argv the options
    */
   public static void main(String [] argv) {
-    
-    try {
-      System.out.println(Evaluation.evaluateModel(new ADTree(), 
-						  argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new ADTree(), argv);
   }
 }
 

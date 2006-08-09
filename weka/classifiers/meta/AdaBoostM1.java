@@ -108,7 +108,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $ 
+ * @version $Revision: 1.33 $ 
  */
 public class AdaBoostM1 
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -736,13 +736,6 @@ public class AdaBoostM1
    * @param argv the options
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new AdaBoostM1(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new AdaBoostM1(), argv);
   }
 }
-

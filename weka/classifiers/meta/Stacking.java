@@ -23,7 +23,6 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
@@ -34,11 +33,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -96,7 +94,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $ 
+ * @version $Revision: 1.30 $ 
  */
 public class Stacking 
   extends RandomizableMultipleClassifiersCombiner
@@ -333,6 +331,21 @@ public class Stacking
   }
 
   /**
+   * Returns combined capabilities of the base classifiers, i.e., the
+   * capabilities all of them have in common.
+   *
+   * @return      the capabilities of the base classifiers
+   */
+  public Capabilities getCapabilities() {
+    Capabilities      result;
+    
+    result = super.getCapabilities();
+    result.setMinimumNumberInstances(getNumFolds());
+
+    return result;
+  }
+
+  /**
    * Buildclassifier selects a classifier from the set of classifiers
    * by minimising error on the training data.
    *
@@ -506,11 +519,6 @@ public class Stacking
    * -t training file [-T test file] [-c class index]
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new Stacking(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new Stacking(), argv);
   }
 }

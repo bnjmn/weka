@@ -91,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class M5P 
   extends M5Base 
@@ -234,14 +234,7 @@ public class M5P
    * @param args an array of options
    */
   public static void main(String[] args) {
-    try {
-      System.out.println(weka.classifiers.Evaluation.evaluateModel(
-			 new M5P(), 
-			 args));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      e.printStackTrace();
-    } 
+    runClassifier(new M5P(), args);
   } 
 }
 

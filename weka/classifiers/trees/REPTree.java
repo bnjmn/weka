@@ -23,7 +23,6 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
 import weka.classifiers.rules.ZeroR;
 import weka.core.AdditionalMeasureProducer;
@@ -75,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class REPTree 
   extends Classifier 
@@ -1946,11 +1945,6 @@ public class REPTree
    * @param argv the commandline options
    */
   public static void main(String[] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new REPTree(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new REPTree(), argv);
   }
 }

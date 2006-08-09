@@ -23,7 +23,6 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.ContingencyTables;
@@ -89,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class ConjunctiveRule 
   extends Classifier 
@@ -1646,11 +1645,6 @@ public class ConjunctiveRule
    * @param args the options for the classifier
    */
   public static void main(String[] args) {	
-    try {
-      System.out.println(Evaluation.evaluateModel(new ConjunctiveRule(), args));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new ConjunctiveRule(), args);
   }
 }

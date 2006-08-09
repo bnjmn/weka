@@ -23,19 +23,18 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.UnsupportedClassTypeException;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -146,7 +145,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Prem Melville (melville@cs.utexas.edu)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class Decorate 
     extends RandomizableIteratedSingleClassifierEnhancer
@@ -773,12 +772,7 @@ public class Decorate
      * @param argv the options
      */
     public static void main(String [] argv) {
-	
-	try {
-	    System.out.println(Evaluation.evaluateModel(new Decorate(), argv));
-	} catch (Exception e) {
-	    System.err.println(e.getMessage());
-	}
+        runClassifier(new Decorate(), argv);
     }
 }
 

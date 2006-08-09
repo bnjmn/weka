@@ -23,11 +23,10 @@
 package weka.classifiers.mi;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.Logistic;
 import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.mi.supportVector.MIPolyKernel;
 import weka.classifiers.functions.supportVector.SMOset;
+import weka.classifiers.mi.supportVector.MIPolyKernel;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -180,7 +179,7 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class MISMO 
   extends Classifier 
@@ -2103,15 +2102,6 @@ public class MISMO
    * @param argv the commandline parameters
    */
   public static void main(String[] argv) {
-
-    Classifier scheme;
-
-    try {
-      scheme = new MISMO();
-      System.out.println(Evaluation.evaluateModel(scheme, argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new MISMO(), argv);
   }
 }
