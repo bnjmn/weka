@@ -43,11 +43,11 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -A &lt;attribute evaluator&gt;
- *  class name of attribute evaluator to
- *  use for ranking. Place any
- *  evaluator options LAST on the
- *  command line following a "--".
- *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M</pre>
+ *  class name of attribute evaluator to use for ranking. Place any
+ *  evaluator options LAST on the command line following a "--".
+ *  eg.:
+ *   -A weka.attributeSelection.GainRatioAttributeEval ... -- -M
+ * (default: weka.attributeSelection.GainRatioAttributeEval)</pre>
  * 
  * <pre> -S &lt;step size&gt;
  *  number of attributes to be added from the
@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class RankSearch 
   extends ASSearch 
@@ -220,20 +220,24 @@ public class RankSearch
    **/
   public Enumeration listOptions () {
     Vector newVector = new Vector(4);
-    newVector.addElement(new Option("\tclass name of attribute evaluator to" 
-			       + "\n\tuse for ranking. Place any" 
-			       + "\n\tevaluator options LAST on the" 
-			       + "\n\tcommand line following a \"--\"." 
-			       + "\n\teg. -A weka.attributeSelection."
-			       +"GainRatioAttributeEval ... " 
-			       + "-- -M", "A", 1, "-A <attribute evaluator>"));
-    newVector.addElement(new Option("\tnumber of attributes to be added from the"
-                                    +"\n\tranking in each iteration (default = 1).", 
-                                    "S", 1,"-S <step size>"));
-
-    newVector.addElement(new Option("\tpoint in the ranking to start evaluating from. "
-                                    +"\n\t(default = 0, ie. the head of the ranking).", 
-                                    "R", 1,"-R <start point>"));
+    
+    newVector.addElement(new Option(
+	"\tclass name of attribute evaluator to use for ranking. Place any\n" 
+	+ "\tevaluator options LAST on the command line following a \"--\".\n" 
+	+ "\teg.:\n"
+	+ "\t\t-A weka.attributeSelection.GainRatioAttributeEval ... -- -M\n"
+	+ "(default: weka.attributeSelection.GainRatioAttributeEval)", 
+	"A", 1, "-A <attribute evaluator>"));
+    
+    newVector.addElement(new Option(
+	"\tnumber of attributes to be added from the"
+	+"\n\tranking in each iteration (default = 1).", 
+	"S", 1,"-S <step size>"));
+    
+    newVector.addElement(new Option(
+	"\tpoint in the ranking to start evaluating from. "
+	+"\n\t(default = 0, ie. the head of the ranking).", 
+	"R", 1,"-R <start point>"));
 
     if ((m_ASEval != null) && 
 	(m_ASEval instanceof OptionHandler)) {
@@ -259,11 +263,11 @@ public class RankSearch
    * Valid options are: <p/>
    * 
    * <pre> -A &lt;attribute evaluator&gt;
-   *  class name of attribute evaluator to
-   *  use for ranking. Place any
-   *  evaluator options LAST on the
-   *  command line following a "--".
-   *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M</pre>
+   *  class name of attribute evaluator to use for ranking. Place any
+   *  evaluator options LAST on the command line following a "--".
+   *  eg.:
+   *   -A weka.attributeSelection.GainRatioAttributeEval ... -- -M
+   * (default: weka.attributeSelection.GainRatioAttributeEval)</pre>
    * 
    * <pre> -S &lt;step size&gt;
    *  number of attributes to be added from the
@@ -301,12 +305,8 @@ public class RankSearch
     }
 
     optionString = Utils.getOption('A', options);
-
-    if (optionString.length() == 0) {
-      throw  new Exception("An attribute evaluator  must be specified with" 
-			   + "-A option");
-    }
-
+    if (optionString.length() == 0)
+      optionString = GainRatioAttributeEval.class.getName();
     setAttributeEvaluator(ASEvaluation.forName(optionString, 
 				     Utils.partitionOptions(options)));
   }
@@ -336,10 +336,12 @@ public class RankSearch
       options[current++] = getAttributeEvaluator().getClass().getName();
     }
 
-    options[current++] = "--";
-    System.arraycopy(evaluatorOptions, 0, options, current, 
-		     evaluatorOptions.length);
-    current += evaluatorOptions.length;
+    if (evaluatorOptions.length > 0) {
+      options[current++] = "--";
+      System.arraycopy(evaluatorOptions, 0, options, current, 
+	  evaluatorOptions.length);
+      current += evaluatorOptions.length;
+    }
 
     while (current < options.length) {
       options[current++] = "";
