@@ -22,11 +22,11 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
+import weka.core.Capabilities.Capability;
 import weka.filters.UnsupervisedFilter;
 
 /** 
@@ -36,7 +36,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
@@ -62,6 +62,27 @@ public class Normalize
     return "Normalizes all numeric values in the given dataset (apart from the "
       + "class attribute, if set). The resulting values "
       + "are in [0,1] for the data used to compute the normalization intervals. ";
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -238,15 +259,6 @@ public class Normalize
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new Normalize(), argv);
-      } else {
-	Filter.filterFile(new Normalize(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new Normalize(), argv);
   }
 }

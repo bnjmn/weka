@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,10 +33,11 @@ import weka.core.SelectedTag;
 import weka.core.SparseInstance;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -101,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision: 1.6 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 
@@ -537,6 +539,27 @@ public class RandomProjection
       return m_useReplaceMissing;
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
+
   /**
    * Sets the format of the input instances.
    *
@@ -865,15 +888,6 @@ public class RandomProjection
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new RandomProjection(), argv);
-      } else {
-	Filter.filterFile(new RandomProjection(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new RandomProjection(), argv);
   }
 }

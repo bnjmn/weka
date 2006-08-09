@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -31,6 +32,7 @@ import weka.core.OptionHandler;
 import weka.core.RelationalLocator;
 import weka.core.StringLocator;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -58,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see MultiInstanceToPropositional
  */
 public class PropositionalToMultiInstance 
@@ -217,6 +219,30 @@ public class PropositionalToMultiInstance
   public String randomizeTipText() {
     return "Whether the order of the generated data is randomized.";
   }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
   
   /**
    * Sets the format of the input instances.
@@ -231,9 +257,6 @@ public class PropositionalToMultiInstance
   public boolean setInputFormat(Instances instanceInfo) 
     throws Exception {
 
-    if (instanceInfo.attribute(1).isRelationValued()) {
-      throw new Exception("Can only convert propositional instance dataset!");
-    }
     if (instanceInfo.attribute(0).type()!= Attribute.NOMINAL) {
       throw new Exception("The first attribute type of the original propositional instance dataset must be Nominal!");
     }
@@ -390,16 +413,6 @@ public class PropositionalToMultiInstance
    * use -h for help
    */
   public static void main(String[] args) {
-    try {
-      if (Utils.getFlag('b', args)) {
-        Filter.batchFilterFile(new PropositionalToMultiInstance(), args);
-      } 
-      else {
-        Filter.filterFile(new PropositionalToMultiInstance(), args);
-      }
-    } 
-    catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new PropositionalToMultiInstance(), args);
   }
 }

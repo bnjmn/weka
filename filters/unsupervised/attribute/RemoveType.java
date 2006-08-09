@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -31,6 +32,7 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -58,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RemoveType 
   extends Filter
@@ -84,6 +86,31 @@ public class RemoveType
     new Tag(Attribute.DATE, "Delete date attributes"),
     new Tag(Attribute.RELATIONAL, "Delete relational attributes")
   };
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
 
   /**
    * Sets the format of the input instances.
@@ -379,15 +406,6 @@ public class RemoveType
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new RemoveType(), argv); 
-      } else {
-	Filter.filterFile(new RemoveType(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new RemoveType(), argv);
   }
 }

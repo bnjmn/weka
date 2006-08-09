@@ -24,10 +24,11 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -39,7 +40,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Obfuscate 
   extends Filter 
@@ -59,6 +60,27 @@ public class Obfuscate
         "A simple instance filter that renames the relation, all attribute names "
       + "and all nominal (and string) attribute values. For exchanging sensitive "
       + "datasets. Currently doesn't like string or relational attributes.";
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -134,15 +156,6 @@ public class Obfuscate
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    
-    try {
-      if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new Obfuscate(), argv);
-      } else {
-	Filter.filterFile(new Obfuscate(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new Obfuscate(), argv);
   }
 }

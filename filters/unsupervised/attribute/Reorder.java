@@ -15,8 +15,8 @@
  */
 
 /*
- *    Reorder.java
- *    Copyright (C) 2005 FracPete
+ * Reorder.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,6 +33,7 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -60,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Reorder 
   extends Filter 
@@ -225,6 +227,27 @@ public class Reorder
     return result;
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attribute
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.NO_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
+
   /**
    * Sets the format of the input instances.
    *
@@ -385,14 +408,6 @@ public class Reorder
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    try {
-      if (Utils.getFlag('b', argv))
- 	Filter.batchFilterFile(new Reorder(), argv); 
-      else
-	Filter.filterFile(new Reorder(), argv);
-    } 
-    catch (Exception ex) {
-      ex.printStackTrace();
-    }
+    runFilter(new Reorder(), argv);
   }
 }

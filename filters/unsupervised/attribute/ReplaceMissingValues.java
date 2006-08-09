@@ -23,11 +23,12 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.filters.Filter;
+import weka.core.Capabilities.Capability;
 import weka.filters.UnsupervisedFilter;
 
 /** 
@@ -37,7 +38,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ReplaceMissingValues 
   extends PotentialClassIgnorer
@@ -59,6 +60,27 @@ public class ReplaceMissingValues
 
     return "Replaces all missing values for nominal and numeric attributes in a "
       + "dataset with the modes and means from the training data.";
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -244,15 +266,6 @@ public class ReplaceMissingValues
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new ReplaceMissingValues(), argv);
-      } else {
-	Filter.filterFile(new ReplaceMissingValues(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new ReplaceMissingValues(), argv);
   }
 }
