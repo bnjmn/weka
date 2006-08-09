@@ -103,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class GeneticSearch 
   extends ASSearch 
@@ -1046,6 +1046,11 @@ public class GeneticSearch
 	break;
       }
     }
+    
+    // if none was found, take first
+    if (i == m_popSize)
+      i = 0;
+    
     return i;
   }
 
