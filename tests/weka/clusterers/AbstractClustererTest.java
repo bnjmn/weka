@@ -21,6 +21,8 @@
 package weka.clusterers;
 
 import weka.core.Attribute;
+import weka.core.CheckOptionHandler;
+import weka.core.OptionHandler;
 
 import junit.framework.TestCase;
 
@@ -30,7 +32,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean)
@@ -71,6 +73,9 @@ public abstract class AbstractClustererTest
   /** whether clusterer handles missing values */
   protected boolean m_handleMissingPredictors;
   
+  /** the OptionHandler tester */
+  protected CheckOptionHandler m_OptionTester;
+  
   /**
    * Constructs the <code>AbstractClustererTest</code>. Called by subclasses.
    *
@@ -88,11 +93,12 @@ public abstract class AbstractClustererTest
    */
   protected void setUp() throws Exception {
     m_Clusterer = getClusterer();
-    m_Tester     = new CheckClusterer();
+    m_Tester    = new CheckClusterer();
     m_Tester.setSilent(true);
     m_Tester.setClusterer(m_Clusterer);
     m_Tester.setNumInstances(20);
     m_Tester.setDebug(DEBUG);
+    m_OptionTester = getOptionTester();
 
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
@@ -126,6 +132,26 @@ public abstract class AbstractClustererTest
     m_DatePredictors               = false;
     m_RelationalPredictors         = false;
     m_handleMissingPredictors      = false;
+  }
+  
+  /**
+   * Configures the CheckOptionHandler uses for testing the optionhandling.
+   * Sets the scheme to test.
+   * 
+   * @return	the fully configured CheckOptionHandler
+   */
+  protected CheckOptionHandler getOptionTester() {
+    CheckOptionHandler		result;
+    
+    result = new CheckOptionHandler();
+    if (getClusterer() instanceof OptionHandler)
+      result.setOptionHandler((OptionHandler) getClusterer());
+    else
+      result.setOptionHandler(null);
+    result.setUserOptions(new String[0]);
+    result.setSilent(true);
+    
+    return result;
   }
 
   /**
@@ -377,5 +403,58 @@ public abstract class AbstractClustererTest
 
     if (!result[0] && !result[1])
       fail("Training set is altered during training!");
+  }
+  
+  /**
+   * tests the listing of the options
+   */
+  public void testListOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkListOptions())
+	fail("Options cannot be listed via listOptions.");
+    }
+  }
+  
+  /**
+   * tests the setting of the options
+   */
+  public void testSetOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkSetOptions())
+	fail("setOptions method failed.");
+    }
+  }
+  
+  /**
+   * tests whether there are any remaining options
+   */
+  public void testRemainingOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkRemainingOptions())
+	fail("There were 'left-over' options.");
+    }
+  }
+  
+  /**
+   * tests the whether the user-supplied options stay the same after setting.
+   * getting, and re-setting again.
+   * 
+   * @see 	#getOptionTester()
+   */
+  public void testCanonicalUserOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkCanonicalUserOptions())
+	fail("setOptions method failed");
+    }
+  }
+  
+  /**
+   * tests the resetting of the options to the default ones
+   */
+  public void testResettingOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkSetOptions())
+	fail("Resetting of options failed");
+    }
   }
 }
