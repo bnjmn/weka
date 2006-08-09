@@ -118,7 +118,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class FCBFSearch 
   extends ASSearch
@@ -288,6 +288,7 @@ public class FCBFSearch
   /**
    * Returns the threshold so that the AttributeSelection module can
    * discard attributes from the ranking.
+   * @return the threshold
    */
   public double getThreshold() {
     return m_threshold;
@@ -559,7 +560,7 @@ public class FCBFSearch
 
     if (!(ASEval instanceof AttributeSetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName()
-                           + " is not a"
+                           + " is not an "
                            + "Attribute Set evaluator!");
     }
 
