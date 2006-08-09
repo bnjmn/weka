@@ -99,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -593,7 +593,7 @@ public class TestInstances
     result.add("-date");
     result.add("" + getNumDate());
     
-    result.add("-relation");
+    result.add("-relational");
     result.add("" + getNumRelational());
     
     result.add("-num-instances-relational");
