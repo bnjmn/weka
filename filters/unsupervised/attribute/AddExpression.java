@@ -22,27 +22,29 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.AttributeExpression;
 import weka.core.Attribute;
+import weka.core.AttributeExpression;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
-import java.io.Serializable;
 import java.util.Enumeration;
-import java.util.Stack;
-import java.util.StringTokenizer;
 import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * An instance filter that creates a new attribute by applying a mathematical expression to existing attributes. The expression can contain attribute references and numeric constants. Supported opperators are :  +, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil, rint, tan, sin, (, ). Attributes are specified by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1). Example expression : a1^2*a5/log(a7*4.0).
+ * An instance filter that creates a new attribute by applying a mathematical expression to existing attributes. The expression can contain attribute references and numeric constants. Supported operators are :<br/>
+ * +, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil, rint, tan, sin, (, )<br/>
+ * Attributes are specified by prefixing with 'a', eg. a7 is attribute number 7 (starting from 1).<br/>
+ * Example expression : a1^2*a5/log(a7*4.0).
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -52,7 +54,8 @@ import java.util.Vector;
  * <pre> -E &lt;expression&gt;
  *  Specify the expression to apply. Eg a1^2*a5/log(a7*4.0).
  *  Supported opperators: ,+, -, *, /, ^, log, abs, cos, 
- *  exp, sqrt, floor, ceil, rint, tan, sin, (, )</pre>
+ *  exp, sqrt, floor, ceil, rint, tan, sin, (, )
+ *  (default: a1^2)</pre>
  * 
  * <pre> -N &lt;name&gt;
  *  Specify the name for the new attribute. (default is the expression provided with -E)</pre>
@@ -63,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AddExpression 
   extends Filter 
@@ -86,6 +89,25 @@ public class AddExpression
   private AttributeExpression m_attributeExpression = null;
 
   /**
+   * Returns a string describing this filter
+   *
+   * @return 		a description of the filter suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return 
+        "An instance filter that creates a new attribute by applying a "
+      + "mathematical expression to existing attributes. The expression "
+      + "can contain attribute references and numeric constants. Supported "
+      + "operators are :\n"
+      + "+, -, *, /, ^, log, abs, cos, exp, sqrt, floor, ceil, rint, tan, "
+      + "sin, (, )\n"
+      + "Attributes are specified by prefixing with 'a', eg. a7 is "
+      + "attribute number 7 (starting from 1).\n"
+      + "Example expression : a1^2*a5/log(a7*4.0).";
+  }
+  
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
@@ -97,7 +119,8 @@ public class AddExpression
     newVector.addElement(new Option(
 	     "\tSpecify the expression to apply. Eg a1^2*a5/log(a7*4.0)."
 	     +"\n\tSupported opperators: ,+, -, *, /, ^, log, abs, cos, "
-	     +"\n\texp, sqrt, floor, ceil, rint, tan, sin, (, )",
+	     +"\n\texp, sqrt, floor, ceil, rint, tan, sin, (, )"
+	     +"\n\t(default: a1^2)",
 	     "E",1,"-E <expression>"));
 
     newVector.addElement(new Option(
@@ -121,7 +144,8 @@ public class AddExpression
    * <pre> -E &lt;expression&gt;
    *  Specify the expression to apply. Eg a1^2*a5/log(a7*4.0).
    *  Supported opperators: ,+, -, *, /, ^, log, abs, cos, 
-   *  exp, sqrt, floor, ceil, rint, tan, sin, (, )</pre>
+   *  exp, sqrt, floor, ceil, rint, tan, sin, (, )
+   *  (default: a1^2)</pre>
    * 
    * <pre> -N &lt;name&gt;
    *  Specify the name for the new attribute. (default is the expression provided with -E)</pre>
@@ -139,7 +163,7 @@ public class AddExpression
     if (expString.length() != 0) {
       setExpression(expString);
     } else {
-      throw new Exception("Must specify an expression with the -E option");
+      setExpression("a1^2");
     }
 
     String name = Utils.getOption('N',options);
@@ -255,6 +279,27 @@ public class AddExpression
     return m_infixExpression;
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
+
   /**
    * Sets the format of the input instances.
    *
@@ -340,14 +385,6 @@ public class AddExpression
    * @param args should contain arguments to the filter: use -h for help
    */
   public static void main(String [] args) {
-    try {
-      if (Utils.getFlag('b', args)) {
-	Filter.batchFilterFile(new AddExpression(), args);
-      } else {
-	Filter.filterFile(new AddExpression(), args);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new AddExpression(), args);
   }
 }
