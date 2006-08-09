@@ -23,19 +23,19 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Utils;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.WekaException;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
 */
 public class OneR 
   extends Classifier 
@@ -300,6 +300,9 @@ public class OneR
       } catch (Exception ex) {
       }
     }
+    
+    if (noRule)
+      throw new WekaException("No attributes found to work with!");
   }
 
   /**
@@ -561,11 +564,6 @@ public class OneR
    * @param argv the commandline options
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new OneR(), argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new OneR(), argv);
   }
 }
