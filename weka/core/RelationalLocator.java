@@ -26,7 +26,7 @@ package weka.core;
  * This class locates and records the indices of relational attributes, 
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Attribute#RELATIONAL
  */
 public class RelationalLocator
@@ -148,9 +148,14 @@ public class RelationalLocator
     int[] srcIndices  = srcLoc.getLocatorIndices();
     int[] destIndices = destLoc.getLocatorIndices();
     for (int i = 0; i < srcIndices.length; i++) {
+      int index = instSrcCompat
+	         ? srcLoc.getActualIndex(srcIndices[i])
+	         : destLoc.getActualIndex(destIndices[i]);
+      if (instance.isMissing(index))
+	continue;
       Instances rel = instSrcCompat
-      		         ? instance.relationalValue(srcLoc.getActualIndex(srcIndices[i]))
-      		         : instance.relationalValue(destLoc.getActualIndex(destIndices[i]));
+      		         ? instance.relationalValue(index)
+      		         : instance.relationalValue(index);
       AttributeLocator srcRelAttsNew = srcLoc.getLocator(srcIndices[i]);
       Instances srcDatasetNew = srcRelAttsNew.getData();
       AttributeLocator destRelAttsNew = destLoc.getLocator(destIndices[i]);
