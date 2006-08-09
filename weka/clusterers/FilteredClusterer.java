@@ -28,6 +28,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -70,7 +71,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see weka.classifiers.meta.FilteredClassifier
  */
 public class FilteredClusterer
@@ -270,10 +271,18 @@ public class FilteredClusterer
    * @return		the capabilities of this clusterer
    */
   public Capabilities getCapabilities() {
+    Capabilities	result;
+    
     if (getFilter() == null)
-      return super.getCapabilities();
+      result = super.getCapabilities();
     else
-      return getFilter().getCapabilities();
+      result = getFilter().getCapabilities();
+    
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
+    
+    return result;
   }
 
   /**
