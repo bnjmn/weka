@@ -72,12 +72,7 @@ import java.util.Random;
  * Example usage as the main of an attribute evaluator (called FunkyEvaluator):
  * <pre>
  * public static void main(String [] args) {
- *   try {
- *     ASEvaluator eval = new FunkyEvaluator();
- *     System.out.println(SelectAttributes(Evaluator, args));
- *   } catch (Exception e) {
- *     System.err.println(e.getMessage());
- *   }
+ *   runEvaluator(new FunkyEvaluator(), args);
  * }
  * </pre>
  * <p/>
@@ -85,7 +80,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.40 $
+ * @version  $Revision: 1.41 $
  */
 public class AttributeSelection 
   implements Serializable {
