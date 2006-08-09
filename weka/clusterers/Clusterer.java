@@ -22,21 +22,22 @@
 
 package weka.clusterers;
 
-import java.io.Serializable;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+
+import java.io.Serializable;
 
 
 /** 
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public abstract class Clusterer implements Cloneable, Serializable, CapabilitiesHandler {
 
@@ -128,6 +129,17 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
   }
 
   /**
+   * Creates a deep copy of the given clusterer using serialization.
+   *
+   * @param model the clusterer to copy
+   * @return a deep copy of the clusterer
+   * @exception Exception if an error occurs
+   */
+  public static Clusterer makeCopy(Clusterer model) throws Exception {
+    return (Clusterer) new SerializedObject(model).getObject();
+  }
+
+  /**
    * Creates copies of the current clusterer. Note that this method
    * now uses Serialization to perform a deep copy, so the Clusterer
    * object must be fully Serializable. Any currently built model will
@@ -166,6 +178,23 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
     
     return result;
   }
+  
+  /**
+   * runs the clusterer instance with the given options.
+   * 
+   * @param clusterer		the clusterer to run
+   * @param options	the commandline options
+   */
+  protected static void runClusterer(Clusterer clusterer, String[] options) {
+    try {
+      System.out.println(ClusterEvaluation.evaluateClusterer(clusterer, options));
+    } 
+    catch (Exception e) {
+      if (    (e.getMessage() != null)
+	   && (e.getMessage().indexOf("General options") == -1) )
+	e.printStackTrace();
+      else
+	System.err.println(e.getMessage());
+    }
+  }
 }
-
-
