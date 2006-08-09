@@ -4,21 +4,33 @@
 
 package weka.filters;
 
+import weka.core.CheckOptionHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.test.Regression;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
-import weka.test.Regression;
 
 /**
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @authro FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.7 $
  */
-public abstract class AbstractFilterTest extends TestCase {
+public abstract class AbstractFilterTest
+  extends TestCase {
+
+  // TODO: 
+  // * Check that results between incremental and batch use are
+  //   the same
+  // * Check batch operation is OK
+  // * Check memory use between subsequent runs
+  // * Check memory use when multiplying data?
 
   /** Set to true to print out extra info during testing */
   protected static boolean VERBOSE = false;
@@ -28,29 +40,55 @@ public abstract class AbstractFilterTest extends TestCase {
 
   /** A set of instances to test with */
   protected Instances m_Instances;
+  
+  /** the OptionHandler tester */
+  protected CheckOptionHandler m_OptionTester;
 
   /**
    * Constructs the <code>AbstractFilterTest</code>. Called by subclasses.
    *
    * @param name the name of the test class
    */
-  public AbstractFilterTest(String name) { super(name); }
+  public AbstractFilterTest(String name) {
+    super(name);
+  }
 
   /**
    * Called by JUnit before each test method. This implementation creates
    * the default filter to test and loads a test set of Instances.
    *
-   * @exception Exception if an error occurs reading the example instances.
+   * @throws Exception if an error occurs reading the example instances.
    */
   protected void setUp() throws Exception {
     m_Filter = getFilter();
     m_Instances = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/filters/data/FilterTest.arff"))));
+    m_OptionTester = getOptionTester();
   }
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
     m_Filter = null;
     m_Instances = null;
+  }
+  
+  /**
+   * Configures the CheckOptionHandler uses for testing the optionhandling.
+   * Sets the scheme to test.
+   * 
+   * @return	the fully configured CheckOptionHandler
+   */
+  protected CheckOptionHandler getOptionTester() {
+    CheckOptionHandler		result;
+    
+    result = new CheckOptionHandler();
+    if (getFilter() instanceof OptionHandler)
+      result.setOptionHandler((OptionHandler) getFilter());
+    else
+      result.setOptionHandler(null);
+    result.setUserOptions(new String[0]);
+    result.setSilent(true);
+    
+    return result;
   }
 
   /**
@@ -363,12 +401,57 @@ public abstract class AbstractFilterTest extends TestCase {
 
     }
   }
-
-  // TODO: 
-  // * Check that results between incremental and batch use are
-  //   the same
-  // * Check batch operation is OK
-  // * Check memory use between subsequent runs
-  // * Check memory use when multiplying data?
-
+  
+  /**
+   * tests the listing of the options
+   */
+  public void testListOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkListOptions())
+	fail("Options cannot be listed via listOptions.");
+    }
+  }
+  
+  /**
+   * tests the setting of the options
+   */
+  public void testSetOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkSetOptions())
+	fail("setOptions method failed.");
+    }
+  }
+  
+  /**
+   * tests whether there are any remaining options
+   */
+  public void testRemainingOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkRemainingOptions())
+	fail("There were 'left-over' options.");
+    }
+  }
+  
+  /**
+   * tests the whether the user-supplied options stay the same after setting.
+   * getting, and re-setting again.
+   * 
+   * @see 	#getOptionTester()
+   */
+  public void testCanonicalUserOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkCanonicalUserOptions())
+	fail("setOptions method failed");
+    }
+  }
+  
+  /**
+   * tests the resetting of the options to the default ones
+   */
+  public void testResettingOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkSetOptions())
+	fail("Resetting of options failed");
+    }
+  }
 }
