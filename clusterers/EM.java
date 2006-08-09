@@ -81,7 +81,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class EM
   extends DensityBasedClusterer
@@ -1217,13 +1217,6 @@ public class EM
    * -t training file [-T test file] [-N number of clusters] [-S random seed]
    */
   public static void main (String[] argv) {
-    try {
-      System.out.println(ClusterEvaluation.
-			 evaluateClusterer(new EM(), argv));
-    }
-    catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClusterer(new EM(), argv);
   }
 }

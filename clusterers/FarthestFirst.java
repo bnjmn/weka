@@ -30,11 +30,11 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -96,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -653,13 +653,6 @@ public class FarthestFirst
    * -t training file [-N number of clusters]
    */
   public static void main (String[] argv) {
-    try {
-      System.out.println(ClusterEvaluation.
-			 evaluateClusterer(new FarthestFirst(), argv));
-    }
-    catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClusterer(new FarthestFirst(), argv);
   }
 }

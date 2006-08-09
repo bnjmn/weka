@@ -31,11 +31,11 @@ import weka.core.KDTree;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -135,7 +135,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -2155,14 +2155,7 @@ throws Exception{
    * @param argv should contain options 
    */
   public static void main(String[] argv) {
-    try {
-      System.out.println(ClusterEvaluation.
-			 evaluateClusterer(new XMeans(), argv));
-    }
-    catch (Exception e) {
-      System.out.println(e.getMessage());
-      e.printStackTrace();
-    }
+    runClusterer(new XMeans(), argv);
   }
 }
 
