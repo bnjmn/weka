@@ -28,18 +28,16 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TreeSet;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -85,7 +83,7 @@ import java.util.TreeSet;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ */
+ * @version $Revision: 1.8 $ */
 
 public class PredictiveApriori 
   extends Associator 
@@ -478,16 +476,20 @@ public class PredictiveApriori
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
+    Vector    	result;
 
-    String [] options = new String [10];
-    int current = 0;
-    options[current++] = "-N"; options[current++] = "" + (m_numRules-5);
-    options[current++] = "-A"; options[current++] = "" + m_car;
-    options[current++] = "-c"; options[current++] = "" + m_classIndex;
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    result = new Vector();
+
+    result.add("-N");
+    result.add("" + (m_numRules-5));
+    
+    if (m_car)
+      result.add("-A");
+    
+    result.add("-c");
+    result.add("" + m_classIndex);
+
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
 
@@ -756,6 +758,15 @@ public class PredictiveApriori
     }
   }
 
+  /**
+   * returns all the rules
+   *
+   * @return		all the rules
+   * @see		#m_allTheRules
+   */
+  public FastVector[] getAllTheRules() {
+    return m_allTheRules;
+  }
 
   /**
    * Main method.
@@ -763,37 +774,7 @@ public class PredictiveApriori
    * @param args the commandline parameters
    */
   public static void main(String[] args) {
-
-    String trainFileString;
-    StringBuffer text = new StringBuffer();
-    PredictiveApriori apriori = new PredictiveApriori();
-    Reader reader;
-
-    try {
-      text.append("\n\nPredictiveApriori options:\n\n");
-      text.append("-t <training file>\n");
-      text.append("\tThe name of the training file.\n");
-      Enumeration enu = apriori.listOptions();
-      while (enu.hasMoreElements()) {
-	Option option = (Option)enu.nextElement();
-	text.append(option.synopsis()+'\n');
-	text.append(option.description()+'\n');
-      }
-      trainFileString = Utils.getOption('t', args);
-      if (trainFileString.length() == 0) 
-	throw new Exception("No training file given!");
-      apriori.setOptions(args);
-      reader = new BufferedReader(new FileReader(trainFileString));
-      if(!apriori.getCar())
-        apriori.buildAssociations(new Instances(reader));
-      else
-        apriori.mineCARs(new Instances(reader));
-      System.out.println(apriori);
-    } catch(Exception e) {
-      e.printStackTrace();
-      System.out.println("\n"+e.getMessage()+text);
-    }
+    runAssociator(new PredictiveApriori(), args);
   }
-  
 }
 
