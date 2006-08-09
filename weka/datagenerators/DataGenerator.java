@@ -44,7 +44,7 @@ import java.util.Vector;
  * classifiers and clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable {
@@ -762,5 +762,23 @@ public abstract class DataGenerator
     if (generator.defaultOutput() != null)
       System.out.println(generator.defaultOutput().toString());
   }
+  
+  /**
+   * runs the datagenerator instance with the given options.
+   * 
+   * @param datagenerator		the datagenerator to run
+   * @param options	the commandline options
+   */
+  protected static void runDataGenerator(DataGenerator datagenerator, String[] options) {
+    try {
+      DataGenerator.makeData(datagenerator, options);
+    } 
+    catch (Exception e) {
+      if (    (e.getMessage() != null)
+	   && (e.getMessage().indexOf("Data Generator options") == -1) )
+	e.printStackTrace();
+      else
+	System.err.println(e.getMessage());
+    }
+  }
 }
-
