@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -33,7 +34,7 @@ import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.filters.Filter;
+import weka.core.Capabilities.Capability;
 import weka.filters.UnsupervisedFilter;
 
 import java.util.Enumeration;
@@ -80,7 +81,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Discretize 
   extends PotentialClassIgnorer 
@@ -285,6 +286,28 @@ public class Discretize
       options[current++] = "";
     }
     return options;
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    if (!getMakeBinary())
+      result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -1020,16 +1043,6 @@ public class Discretize
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new Discretize(), argv);
-      } else {
-	Filter.filterFile(new Discretize(), argv);
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new Discretize(), argv);
   }
 }

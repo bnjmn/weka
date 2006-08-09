@@ -23,12 +23,12 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.filters.Filter;
+import weka.core.Capabilities.Capability;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
@@ -39,7 +39,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class NumericToBinary 
   extends PotentialClassIgnorer
@@ -62,6 +62,27 @@ public class NumericToBinary
       + "value of the numeric attribute is missing, the value of the new "
       + "attribute will be missing. Otherwise, the value of the new "
       + "attribute will be one. The new attributes will be nominal.";
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -186,15 +207,6 @@ public class NumericToBinary
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new NumericToBinary(), argv);
-      } else {
-	Filter.filterFile(new NumericToBinary(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new NumericToBinary(), argv);
   }
 }

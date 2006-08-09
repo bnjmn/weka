@@ -23,12 +23,12 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
-import weka.filters.Filter;
+import weka.core.Capabilities.Capability;
 
 /** 
  <!-- globalinfo-start -->
@@ -59,7 +59,7 @@ import weka.filters.Filter;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TimeSeriesTranslate 
   extends AbstractTimeSeries {
@@ -78,6 +78,27 @@ public class TimeSeriesTranslate
       + "attribute attribute values of some previous (or future) instance. For "
       + "instances where the desired value is unknown either the instance may "
       + " be dropped, or missing values used. Skips the class attribute if it is set.";
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -159,15 +180,6 @@ public class TimeSeriesTranslate
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new TimeSeriesTranslate(), argv); 
-      } else {
-	Filter.filterFile(new TimeSeriesTranslate(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new TimeSeriesTranslate(), argv);
   }
 }

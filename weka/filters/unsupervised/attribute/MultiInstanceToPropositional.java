@@ -23,8 +23,10 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RelationalLocator;
@@ -32,6 +34,7 @@ import weka.core.SelectedTag;
 import weka.core.StringLocator;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -63,12 +66,12 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
   extends Filter 
-  implements OptionHandler, UnsupervisedFilter {
+  implements OptionHandler, UnsupervisedFilter, MultiInstanceCapabilitiesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4102847628883002530L;
@@ -228,6 +231,53 @@ public class MultiInstanceToPropositional
       + "attribute and refers to the bagId.";
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.disableAllAttributes();
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    // other
+    result.enable(Capability.ONLY_MULTIINSTANCE);
+    
+    return result;
+  }
+
+  /**
+   * Returns the capabilities of this multi-instance filter for the
+   * relational data (i.e., the bags).
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getMultiInstanceCapabilities() {
+    Capabilities result = new Capabilities(this);
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
+
   /**
    * Sets the format of the input instances.
    *
@@ -382,16 +432,6 @@ public class MultiInstanceToPropositional
    * use -h for help
    */
   public static void main(String[] args) {
-    try {
-      if (Utils.getFlag('b', args)) {
-        Filter.batchFilterFile(new MultiInstanceToPropositional(), args);
-      } 
-      else {
-        Filter.filterFile(new MultiInstanceToPropositional(), args);
-      }
-    } 
-    catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new MultiInstanceToPropositional(), args);
   }
 }

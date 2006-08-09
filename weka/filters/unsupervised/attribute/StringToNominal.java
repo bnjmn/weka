@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,6 +33,7 @@ import weka.core.OptionHandler;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -53,7 +55,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class StringToNominal 
   extends Filter 
@@ -76,6 +78,27 @@ public class StringToNominal
     return "Converts a string attribute (i.e. unspecified number of values) to nominal "
       + "(i.e. set number of values). You should ensure that all string values that "
       + "will appear are represented in the first batch of the data.";
+  }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
 
   /**
@@ -299,15 +322,6 @@ public class StringToNominal
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new StringToNominal(), argv);
-      } else {
-	Filter.filterFile(new StringToNominal(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new StringToNominal(), argv);
   }
 }

@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -32,6 +33,7 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -65,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class NominalToBinary 
   extends Filter 
@@ -76,9 +78,6 @@ public class NominalToBinary
 
   /** Stores which columns to act on */
   protected Range m_Columns = new Range();
-
-  /** The sorted indices of the attribute values. */
-  private int[][] m_Indices = null;
 
   /** Are the new attributes going to be nominal or numeric ones? */
   private boolean m_Numeric = true;
@@ -108,6 +107,27 @@ public class NominalToBinary
       + "this filter.";
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
+
   /**
    * Sets the format of the input instances.
    *
@@ -126,7 +146,6 @@ public class NominalToBinary
     m_Columns.setUpper(instanceInfo.numAttributes() - 1);
 
     setOutputFormat();
-    m_Indices = null;
     return true;
   }
 
@@ -509,15 +528,6 @@ public class NominalToBinary
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new NominalToBinary(), argv);
-      } else {
-	Filter.filterFile(new NominalToBinary(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new NominalToBinary(), argv);
   }
 }
