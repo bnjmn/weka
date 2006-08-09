@@ -50,7 +50,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ExhaustiveSearch 
   extends ASSearch 
@@ -216,6 +216,7 @@ public class ExhaustiveSearch
      
      BigInteger space = BigInteger.ZERO;
 
+     m_evaluations = 0;
      m_numAttribs = data.numAttributes();
      m_bestGroup = new BitSet(m_numAttribs);
      
