@@ -22,7 +22,7 @@ package weka.classifiers.bayes;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
-import weka.classifiers.CheckClassifier.PostProcessor;
+import weka.core.CheckScheme.PostProcessor;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.bayes.ComplementNaiveBayesTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ComplementNaiveBayesTest 
   extends AbstractClassifierTest {
