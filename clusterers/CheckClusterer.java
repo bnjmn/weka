@@ -22,15 +22,16 @@
 
 package weka.clusterers;
 
+import weka.core.CheckScheme;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TestInstances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
-import weka.core.MultiInstanceCapabilitiesHandler;
 
 import java.util.Enumeration;
 import java.util.Random;
@@ -83,7 +84,7 @@ import java.util.Vector;
  *      </ul>
  *    </li>
  * </ul>
- * Running CheckClassifier with the debug option set will output the 
+ * Running CheckClusterer with the debug option set will output the 
  * training and test datasets for any failed tests.<p/>
  *
  * The <code>weka.clusterers.AbstractClustererTest</code> uses this
@@ -123,11 +124,11 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see TestInstances
  */
 public class CheckClusterer 
-  implements OptionHandler {
+  extends CheckScheme {
 
   /*
    * Note about test methods:
@@ -141,20 +142,14 @@ public class CheckClusterer
   /*** The clusterer to be examined */
   protected Clusterer m_Clusterer = new SimpleKMeans();
   
-  /** The options to be passed to the base clusterer. */
-  protected String[] m_ClustererOptions;
-  
-  /** The results of the analysis as a string */
-  protected String m_AnalysisResults;
-  
-  /** Debugging mode, gives extra output if true */
-  protected boolean m_Debug = false;
-  
-  /** Silent mode, for no output at all to stdout */
-  protected boolean m_Silent = false;
-  
-  /** The number of instances in the datasets */
-  protected int m_NumInstances = 40;
+  /**
+   * default constructor
+   */
+  public CheckClusterer() {
+    super();
+    
+    setNumInstances(40);
+  }
   
   /**
    * Returns an enumeration describing the available options.
@@ -162,38 +157,29 @@ public class CheckClusterer
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
+    Vector result = new Vector();
     
-    Vector newVector = new Vector(2);
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
     
-    newVector.addElement(new Option(
-        "\tTurn on debugging output.",
-        "D", 0, "-D"));
-    
-    newVector.addElement(new Option(
-        "\tSilent mode - prints nothing to stdout.",
-        "S", 0, "-S"));
-    
-    newVector.addElement(new Option(
-        "\tThe number of instances in the datasets (default 40).",
-        "N", 1, "-N <num>"));
-    
-    newVector.addElement(new Option(
+    result.addElement(new Option(
         "\tFull name of the clusterer analyzed.\n"
         +"\teg: weka.clusterers.SimpleKMeans",
         "W", 1, "-W"));
     
     if ((m_Clusterer != null) 
         && (m_Clusterer instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0, 
+      result.addElement(new Option("", "", 0, 
           "\nOptions specific to clusterer "
           + m_Clusterer.getClass().getName()
           + ":"));
       Enumeration enu = ((OptionHandler)m_Clusterer).listOptions();
       while (enu.hasMoreElements())
-        newVector.addElement(enu.nextElement());
+        result.addElement(enu.nextElement());
     }
     
-    return newVector.elements();
+    return result.elements();
   }
   
   /**
@@ -234,20 +220,24 @@ public class CheckClusterer
   public void setOptions(String[] options) throws Exception {
     String      tmpStr;
     
-    setDebug(Utils.getFlag('D', options));
-    
-    setSilent(Utils.getFlag('S', options));
-    
     tmpStr = Utils.getOption('N', options);
+    
+    super.setOptions(options);
+    
     if (tmpStr.length() != 0)
       setNumInstances(Integer.parseInt(tmpStr));
     else
       setNumInstances(40);
-    
+
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
       throw new Exception("A clusterer must be specified with the -W option.");
-    setClusterer(Clusterer.forName(tmpStr, Utils.partitionOptions(options)));
+    setClusterer(
+	(Clusterer) forName(
+	    "weka.clusterers", 
+	    Clusterer.class, 
+	    tmpStr, 
+	    Utils.partitionOptions(options)));
   }
   
   /**
@@ -262,14 +252,9 @@ public class CheckClusterer
     
     result = new Vector();
     
-    if (getDebug())
-      result.add("-D");
-    
-    if (getSilent())
-      result.add("-S");
-    
-    result.add("-N");
-    result.add("" + getNumInstances());
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
     
     if (getClusterer() != null) {
       result.add("-W");
@@ -311,64 +296,6 @@ public class CheckClusterer
   }
   
   /**
-   * Set debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-    m_Debug = debug;
-    // disable silent mode, if necessary
-    if (getDebug())
-      setSilent(false);
-  }
-  
-  /**
-   * Get whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-    return m_Debug;
-  }
-  
-  /**
-   * Set slient mode, i.e., no output at all to stdout
-   *
-   * @param value whether silent mode is active or not
-   */
-  public void setSilent(boolean value) {
-    m_Silent = value;
-  }
-  
-  /**
-   * Get whether silent mode is turned on
-   *
-   * @return true if silent mode is on
-   */
-  public boolean getSilent() {
-    return m_Silent;
-  }
-  
-  /**
-   * Sets the number of instances to use in the datasets (some clusterers
-   * might require more instances).
-   *
-   * @param value the number of instances to use
-   */
-  public void setNumInstances(int value) {
-    m_NumInstances = value;
-  }
-  
-  /**
-   * Gets the current number of instances to use for the datasets.
-   *
-   * @return the number of instances
-   */
-  public int getNumInstances() {
-    return m_NumInstances;
-  }
-  
-  /**
    * Set the clusterer for testing. 
    *
    * @param newClusterer the Clusterer to use.
@@ -384,32 +311,6 @@ public class CheckClusterer
    */
   public Clusterer getClusterer() {
     return m_Clusterer;
-  }
-  
-  /**
-   * prints the given message to stdout, if not silent mode
-   * 
-   * @param msg         the text to print to stdout
-   */
-  protected void print(Object msg) {
-    if (!getSilent())
-      System.out.print(msg);
-  }
-  
-  /**
-   * prints the given message (+ LF) to stdout, if not silent mode
-   * 
-   * @param msg         the message to println to stdout
-   */
-  protected void println(Object msg) {
-    print(msg + "\n");
-  }
-  
-  /**
-   * prints a LF to stdout, if not silent mode
-   */
-  protected void println() {
-    print("\n");
   }
   
   /**
@@ -546,6 +447,8 @@ public class CheckClusterer
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance);
     print("...");
     FastVector accepts = new FastVector();
+    accepts.addElement("unary");
+    accepts.addElement("binary");
     accepts.addElement("nominal");
     accepts.addElement("numeric");
     accepts.addElement("string");
@@ -608,12 +511,11 @@ public class CheckClusterer
   /**
    * Checks whether the scheme correctly initialises models when 
    * buildClusterer is called. This test calls buildClusterer with
-   * one training dataset and records performance on a test set. 
-   * buildClusterer is then called on a training set with different
-   * structure, and then again with the original training set. The
-   * performance on the test set is compared with the original results
-   * and any performance difference noted as incorrect build initialisation.
-   *
+   * one training dataset. buildClusterer is then called on a training set 
+   * with different structure, and then again with the original training set. 
+   * If the equals method of the ClusterEvaluation class returns 
+   * false, this is noted as incorrect build initialisation.
+   * 
    * @param nominalPredictor if true use nominal predictor attributes
    * @param numericPredictor if true use numeric predictor attributes
    * @param stringPredictor if true use string predictor attributes
@@ -636,13 +538,11 @@ public class CheckClusterer
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), missingLevel = 0;
+    int numTrain = getNumInstances(), missingLevel = 0;
     boolean predictorMissing = false;
     
     Instances train1 = null;
-    Instances test1 = null;
     Instances train2 = null;
-    Instances test2 = null;
     Clusterer clusterer = null;
     ClusterEvaluation evaluation1A = null;
     ClusterEvaluation evaluation1B = null;
@@ -654,44 +554,26 @@ public class CheckClusterer
       // Make two sets of train/test splits with different 
       // numbers of attributes
       train1 = makeTestDataset(42, numTrain, 
-                               nominalPredictor ? 2 : 0,
-                               numericPredictor ? 1 : 0, 
-                               stringPredictor ? 1 : 0, 
-                               datePredictor ? 1 : 0, 
-                               relationalPredictor ? 1 : 0, 
+                               nominalPredictor    ? getNumNominal()    : 0,
+                               numericPredictor    ? getNumNumeric()    : 0, 
+                               stringPredictor     ? getNumString()     : 0, 
+                               datePredictor       ? getNumDate()       : 0, 
+                               relationalPredictor ? getNumRelational() : 0, 
                                multiInstance);
       train2 = makeTestDataset(84, numTrain, 
-                               nominalPredictor ? 3 : 0,
-                               numericPredictor ? 2 : 0, 
-                               stringPredictor ? 1 : 0, 
-                               datePredictor ? 1 : 0, 
-                               relationalPredictor ? 1 : 0, 
+                               nominalPredictor    ? getNumNominal() + 1 : 0,
+                               numericPredictor    ? getNumNumeric() + 1 : 0, 
+                               stringPredictor     ? getNumString()      : 0, 
+                               datePredictor       ? getNumDate()        : 0, 
+                               relationalPredictor ? getNumRelational()  : 0, 
                                multiInstance);
-      test1 = makeTestDataset(24, numTest,
-                              nominalPredictor ? 2 : 0,
-                              numericPredictor ? 1 : 0, 
-                              stringPredictor ? 1 : 0, 
-                              datePredictor ? 1 : 0, 
-                              relationalPredictor ? 1 : 0, 
-                              multiInstance);
-      test2 = makeTestDataset(48, numTest,
-                              nominalPredictor ? 3 : 0,
-                              numericPredictor ? 2 : 0, 
-                              stringPredictor ? 1 : 0, 
-                              datePredictor ? 1 : 0, 
-                              relationalPredictor ? 1 : 0, 
-                              multiInstance);
       if (nominalPredictor && !multiInstance) {
         train1.deleteAttributeAt(0);
-        test1.deleteAttributeAt(0);
         train2.deleteAttributeAt(0);
-        test2.deleteAttributeAt(0);
       }
       if (missingLevel > 0) {
         addMissing(train1, missingLevel, predictorMissing);
-        addMissing(test1, Math.min(missingLevel,50), predictorMissing);
         addMissing(train2, missingLevel, predictorMissing);
-        addMissing(test2, Math.min(missingLevel,50), predictorMissing);
       }
       
       clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
@@ -773,12 +655,8 @@ public class CheckClusterer
         println("here are the datasets:\n");
         println("=== Train1 Dataset ===\n"
             + train1.toString() + "\n");
-        println("=== Test1 Dataset ===\n"
-            + test1.toString() + "\n\n");
         println("=== Train2 Dataset ===\n"
             + train2.toString() + "\n");
-        println("=== Test2 Dataset ===\n"
-            + test2.toString() + "\n\n");
       }
     }
     
@@ -866,12 +744,11 @@ public class CheckClusterer
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance);
     print("...");
-    int numTrain = 2*getNumInstances(), numTest = getNumInstances(), missingLevel = 0;
+    int numTrain = 2*getNumInstances(), missingLevel = 0;
     boolean predictorMissing = false;
     
     boolean[] result = new boolean[2];
     Instances train = null;
-    Instances test = null;
     Clusterer [] clusterers = null;
     ClusterEvaluation evaluationB = null;
     ClusterEvaluation evaluationI = null;
@@ -879,27 +756,16 @@ public class CheckClusterer
     boolean evalFail = false;
     try {
       train = makeTestDataset(42, numTrain, 
-                              nominalPredictor ? 3 : 0,
-                              numericPredictor ? 2 : 0, 
-                              stringPredictor ? 1 : 0, 
-                              datePredictor ? 1 : 0, 
-                              relationalPredictor ? 1 : 0, 
+                              nominalPredictor    ? getNumNominal() + 1 : 0,
+                              numericPredictor    ? getNumNumeric() + 1 : 0, 
+                              stringPredictor     ? getNumString()      : 0, 
+                              datePredictor       ? getNumDate()        : 0, 
+                              relationalPredictor ? getNumRelational()  : 0, 
                               multiInstance);
-      test = makeTestDataset(24, numTest,
-                             nominalPredictor ? 3 : 0,
-                             numericPredictor ? 2 : 0, 
-                             stringPredictor ? 1 : 0, 
-                             datePredictor ? 1 : 0, 
-                             relationalPredictor ? 1 : 0, 
-                             multiInstance);
-      if (nominalPredictor && !multiInstance) {
+      if (nominalPredictor && !multiInstance)
         train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
-      if (missingLevel > 0) {
+      if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing);
-      }
       clusterers = Clusterer.makeCopies(getClusterer(), 2);
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
@@ -951,7 +817,7 @@ public class CheckClusterer
           }
           println(": " + ex.getMessage() + "\n");
         }
-        println("Here are the datasets:\n");
+        println("Here is the dataset:\n");
         println("=== Train Dataset ===\n"
             + train.toString() + "\n");
         println("=== Train Weights ===\n");
@@ -959,9 +825,6 @@ public class CheckClusterer
           println(" " + (i + 1) 
               + "    " + train.instance(i).weight());
         }
-        println("=== Test Dataset ===\n"
-            + test.toString() + "\n\n");	
-        println("(test weights all 1.0\n");
       }
     }
     
@@ -998,47 +861,31 @@ public class CheckClusterer
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), missingLevel = 20;
+    int numTrain = getNumInstances(), missingLevel = 20;
     
     boolean[] result = new boolean[2];
     Instances train = null;
-    Instances test = null;
     Clusterer clusterer = null;
-    boolean built = false;
     try {
       train = makeTestDataset(42, numTrain, 
-                              nominalPredictor ? 2 : 0,
-                              numericPredictor ? 1 : 0, 
-                              stringPredictor ? 1 : 0, 
-                              datePredictor ? 1 : 0, 
-                              relationalPredictor ? 1 : 0, 
+                              nominalPredictor    ? getNumNominal()    : 0,
+                              numericPredictor    ? getNumNumeric()    : 0, 
+                              stringPredictor     ? getNumString()     : 0, 
+                              datePredictor       ? getNumDate()       : 0, 
+                              relationalPredictor ? getNumRelational() : 0, 
                               multiInstance);
-      test = makeTestDataset(24, numTest,
-                             nominalPredictor ? 2 : 0,
-                             numericPredictor ? 1 : 0, 
-                             stringPredictor ? 1 : 0, 
-                             datePredictor ? 1 : 0, 
-                             relationalPredictor ? 1 : 0, 
-                             multiInstance);
-      if (nominalPredictor && !multiInstance) {
+      if (nominalPredictor && !multiInstance)
         train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
-      if (missingLevel > 0) {
+      if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing);
-      }
       clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
       Instances trainCopy = new Instances(train);
-      Instances testCopy = new Instances(test);
       clusterer.buildClusterer(trainCopy);
       compareDatasets(train, trainCopy);
-      built = true;
-      compareDatasets(test, testCopy);
       
       println("yes");
       result[0] = true;
@@ -1048,18 +895,11 @@ public class CheckClusterer
       
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during training");
         println(": " + ex.getMessage() + "\n");
-        println("Here are the datasets:\n");
+        println("Here is the dataset:\n");
         println("=== Train Dataset ===\n"
             + train.toString() + "\n");
-        println("=== Test Dataset ===\n"
-            + test.toString() + "\n\n");
       }
     }
     
@@ -1098,32 +938,19 @@ public class CheckClusterer
     
     boolean[] result = new boolean[2];
     Instances train = null;
-    Instances test = null;
     Clusterer clusterer = null;
-    boolean built = false;
     try {
       train = makeTestDataset(42, numTrain, 
-                              nominalPredictor     ? 2 : 0,
-                              numericPredictor     ? 1 : 0, 
-                              stringPredictor      ? 1 : 0,
-                              datePredictor        ? 1 : 0,
-                              relationalPredictor  ? 1 : 0,
+                              nominalPredictor    ? getNumNominal()    : 0,
+                              numericPredictor    ? getNumNumeric()    : 0, 
+                              stringPredictor     ? getNumString()     : 0,
+                              datePredictor       ? getNumDate()       : 0,
+                              relationalPredictor ? getNumRelational() : 0,
                               multiInstance);
-      test = makeTestDataset(24, numTest,
-                             nominalPredictor     ? 2 : 0,
-                             numericPredictor     ? 1 : 0, 
-                             stringPredictor      ? 1 : 0,
-                             datePredictor        ? 1 : 0,
-                             relationalPredictor  ? 1 : 0,
-                             multiInstance);
-      if (nominalPredictor && !multiInstance) {
+      if (nominalPredictor && !multiInstance)
         train.deleteAttributeAt(0);
-        test.deleteAttributeAt(0);
-      }
-      if (missingLevel > 0) {
+      if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing);
-      }
       clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -1131,8 +958,6 @@ public class CheckClusterer
     }
     try {
       clusterer.buildClusterer(train);
-      built = true;
-      
       println("yes");
       result[0] = true;
     } 
@@ -1150,12 +975,7 @@ public class CheckClusterer
       
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during training");
         println(": " + ex.getMessage() + "\n");
         if (!acceptable) {
           if (accepts.size() > 0) {
@@ -1167,49 +987,14 @@ public class CheckClusterer
               print('"' + (String)accepts.elementAt(i) + '"');
             }
           }
-          println("here are the datasets:\n");
+          println("here is the dataset:\n");
           println("=== Train Dataset ===\n"
               + train.toString() + "\n");
-          println("=== Test Dataset ===\n"
-              + test.toString() + "\n\n");
         }
       }
     }
     
     return result;
-  }
-  
-  /**
-   * Compare two datasets to see if they differ.
-   *
-   * @param data1 one set of instances
-   * @param data2 the other set of instances
-   * @throws Exception if the datasets differ
-   */
-  protected void compareDatasets(Instances data1, Instances data2)
-  throws Exception {
-    if (!data2.equalHeaders(data1)) {
-      throw new Exception("header has been modified");
-    }
-    if (!(data2.numInstances() == data1.numInstances())) {
-      throw new Exception("number of instances has changed");
-    }
-    for (int i = 0; i < data2.numInstances(); i++) {
-      Instance orig = data1.instance(i);
-      Instance copy = data2.instance(i);
-      for (int j = 0; j < orig.numAttributes(); j++) {
-        if (orig.isMissing(j)) {
-          if (!copy.isMissing(j)) {
-            throw new Exception("instances have changed");
-          }
-        } else if (orig.value(j) != copy.value(j)) {
-          throw new Exception("instances have changed");
-        }
-        if (orig.weight() != copy.weight()) {
-          throw new Exception("instance weights have changed");
-        }	  
-      }
-    }
   }
   
   /**
@@ -1330,25 +1115,6 @@ public class CheckClusterer
    * @param args the commandline options
    */
   public static void main(String [] args) {
-    try {
-      CheckClusterer check = new CheckClusterer();
-      
-      try {
-        check.setOptions(args);
-        Utils.checkForRemainingOptions(args);
-      } catch (Exception ex) {
-        String result = ex.getMessage() + "\n\n" + check.getClass().getName().replaceAll(".*\\.", "") + " Options:\n\n";
-        Enumeration enu = check.listOptions();
-        while (enu.hasMoreElements()) {
-          Option option = (Option) enu.nextElement();
-          result += option.synopsis() + "\n" + option.description() + "\n";
-        }
-        throw new Exception(result);
-      }
-      
-      check.doTests();
-    } catch (Exception ex) {
-      System.err.println(ex.getMessage());
-    }
+    runCheckScheme(new CheckClusterer(), args);
   }
 }
