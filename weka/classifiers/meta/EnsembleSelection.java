@@ -186,7 +186,7 @@ import java.util.zip.GZIPOutputStream;
  * 
  * @author Robert Jung
  * @author David Michael
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EnsembleSelection 
   extends RandomizableClassifier 
@@ -1776,7 +1776,11 @@ public class EnsembleSelection
 	  new EnsembleSelection(), argv));
       
     } catch (Exception e) {
-      System.err.println(e.getMessage());
+      if (    (e.getMessage() != null)
+ 	   && (e.getMessage().indexOf("General options") == -1) )
+	e.printStackTrace();
+      else
+	System.err.println(e.getMessage());
     }
   }
 }
