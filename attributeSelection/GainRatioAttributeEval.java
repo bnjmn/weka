@@ -22,13 +22,14 @@
 
 package weka.attributeSelection;
 
+import weka.core.Capabilities;
 import weka.core.ContingencyTables;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
@@ -54,7 +55,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class GainRatioAttributeEval
   extends AttributeEvaluator
@@ -183,6 +184,27 @@ public class GainRatioAttributeEval
     return  options;
   }
 
+  /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
+  }
 
   /**
    * Initializes a gain ratio attribute evaluator.
@@ -194,19 +216,14 @@ public class GainRatioAttributeEval
    */
   public void buildEvaluator (Instances data)
     throws Exception {
-    if (data.checkForStringAttributes()) {
-      throw  new UnsupportedAttributeTypeException("Can't handle string attributes!");
-    }
+    
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
 
     m_trainInstances = data;
     m_classIndex = m_trainInstances.classIndex();
     m_numAttribs = m_trainInstances.numAttributes();
     m_numInstances = m_trainInstances.numInstances();
-
-    if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
-      throw  new Exception("Class must be nominal!");
-    }
-
     Discretize disTransform = new Discretize();
     disTransform.setUseBetterEncoding(true);
     disTransform.setInputFormat(m_trainInstances);
@@ -398,14 +415,6 @@ public class GainRatioAttributeEval
    * -t training file
    */
   public static void main (String[] args) {
-    try {
-      System.out.println(AttributeSelection.
-			 SelectAttributes(new GainRatioAttributeEval(), args));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new GainRatioAttributeEval(), args);
   }
-
 }
