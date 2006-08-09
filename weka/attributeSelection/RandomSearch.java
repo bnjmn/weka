@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class RandomSearch 
   extends ASSearch 
@@ -264,6 +264,33 @@ public class RandomSearch
   }
 
   /**
+   * Gets the current settings of RandomSearch.
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String[] getOptions () {
+    String[] options = new String[5];
+    int current = 0;
+
+    if (m_verbose) {
+      options[current++] = "-V";
+    }
+
+    if (!(getStartSet().equals(""))) {
+      options[current++] = "-P";
+      options[current++] = "" + startSetToString();
+    }
+
+    options[current++] = "-F";
+    options[current++] = "" + getSearchPercent();
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+
+    return  options;
+  }
+
+  /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -356,34 +383,7 @@ public class RandomSearch
    * @return the percent of the search space explored
    */
   public double getSearchPercent() {
-    return m_searchSize;
-  }
-
-  /**
-   * Gets the current settings of RandomSearch.
-   * @return an array of strings suitable for passing to setOptions()
-   */
-  public String[] getOptions () {
-    String[] options = new String[5];
-    int current = 0;
-
-    if (m_verbose) {
-      options[current++] = "-V";
-    }
-
-    if (!(getStartSet().equals(""))) {
-      options[current++] = "-P";
-      options[current++] = ""+startSetToString();
-    }
-
-    options[current++] = "-F";
-    options[current++] = "" + m_searchSize;
-
-    while (current < options.length) {
-      options[current++] = "";
-    }
-
-    return  options;
+    return m_searchSize * 100;
   }
 
   /**
