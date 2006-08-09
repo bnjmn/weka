@@ -22,14 +22,15 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.SingleClassifierEnhancer;
+import weka.core.Capabilities;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 
 import java.util.Enumeration;
@@ -47,7 +48,7 @@ import java.util.Vector;
  * <pre> -F &lt;filter specification&gt;
  *  Full class name of filter to use, followed
  *  by filter options.
- *  eg: "weka.filters.AttributeFilter -V -R 1,2"</pre>
+ *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"</pre>
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -98,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
@@ -183,7 +184,7 @@ public class FilteredClassifier
     newVector.addElement(new Option(
 	      "\tFull class name of filter to use, followed\n"
 	      + "\tby filter options.\n"
-	      + "\teg: \"weka.filters.AttributeFilter -V -R 1,2\"",
+	      + "\teg: \"weka.filters.unsupervised.attribute.Remove -V -R 1,2\"",
 	      "F", 1, "-F <filter specification>"));
 
     Enumeration enu = super.listOptions();
@@ -203,7 +204,7 @@ public class FilteredClassifier
    * <pre> -F &lt;filter specification&gt;
    *  Full class name of filter to use, followed
    *  by filter options.
-   *  eg: "weka.filters.AttributeFilter -V -R 1,2"</pre>
+   *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"</pre>
    * 
    * <pre> -D
    *  If set, classifier is run in debug mode and
@@ -340,6 +341,26 @@ public class FilteredClassifier
   }
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities	result;
+    
+    if (getFilter() == null)
+      result = super.getCapabilities();
+    else
+      result = getFilter().getCapabilities();
+    
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
+    
+    return result;
+  }
+
+  /**
    * Build the classifier on the filtered data.
    *
    * @param data the training data
@@ -361,12 +382,12 @@ public class FilteredClassifier
     util.Timer t = util.Timer.getTimer("FilteredClassifier::" + fname);
     t.start();
     */
-    m_Filter.setInputFormat(data);
+    m_Filter.setInputFormat(data);  // filter capabilities are checked here
     data = Filter.useFilter(data, m_Filter);
     //t.stop();
 
     // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    getClassifier().getCapabilities().testWithFail(data);
 
     m_FilteredInstances = data.stringFreeStructure();
     m_Classifier.buildClassifier(data);
@@ -442,12 +463,6 @@ public class FilteredClassifier
    * -t training file [-T test file] [-c class index]
    */
   public static void main(String [] argv) {
-
-    try {
-      System.out.println(Evaluation.evaluateModel(new FilteredClassifier(),
-						  argv));
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-    }
+    runClassifier(new FilteredClassifier(), argv);
   }
 }
