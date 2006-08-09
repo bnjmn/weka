@@ -31,17 +31,14 @@ import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
-import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Reader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -128,7 +125,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class Apriori 
   extends Associator 
@@ -1423,38 +1420,22 @@ public class Apriori
   }
 
   /**
+   * returns all the rules
+   *
+   * @return		all the rules
+   * @see		#m_allTheRules
+   */
+  public FastVector[] getAllTheRules() {
+    return m_allTheRules;
+  }
+
+  /**
    * Main method.
    * 
    * @param args the commandline options
    */
   public static void main(String[] args) {
-
-    String trainFileString;
-    StringBuffer text = new StringBuffer();
-    Apriori apriori = new Apriori();
-    Reader reader;
-
-    try {
-      text.append("\n\nApriori options:\n\n");
-      text.append("-t <training file>\n");
-      text.append("\tThe name of the training file.\n");
-      Enumeration enu = apriori.listOptions();
-      while (enu.hasMoreElements()) {
-	Option option = (Option)enu.nextElement();
-	text.append(option.synopsis()+'\n');
-	text.append(option.description()+'\n');
-      }
-      trainFileString = Utils.getOption('t', args);
-      if (trainFileString.length() == 0) 
-	throw new Exception("No training file given!");
-      apriori.setOptions(args);
-      reader = new BufferedReader(new FileReader(trainFileString));
-      apriori.buildAssociations(new Instances(reader));
-      System.out.println(apriori);
-    } catch(Exception e) {
-      e.printStackTrace();
-      System.out.println("\n"+e.getMessage()+text);
-    }
+    runAssociator(new Apriori(), args);
   }
 }
 
