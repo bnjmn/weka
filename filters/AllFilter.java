@@ -23,18 +23,22 @@
 
 package weka.filters;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Capabilities;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Capabilities.Capability;
 
 /** 
  * A simple instance filter that passes all instances directly
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AllFilter extends Filter {
+
+  /** for serialization */
+  static final long serialVersionUID = 5022109283147503266L;
 
   /**
    * Returns a string describing this filter
@@ -47,13 +51,36 @@ public class AllFilter extends Filter {
       + " Primarily for testing purposes.";
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
+
   /**
    * Sets the format of the input instances.
    *
-   * @param instanceInfo an Instances object containing the input instance
-   * structure (any instances contained in the object are ignored - only the
-   * structure is required).
-   * @return true if the outputFormat may be collected immediately
+   * @param instanceInfo 	an Instances object containing the input 
+   * 				instance structure (any instances contained 
+   * 				in the object are ignored - only the structure 
+   * 				is required).
+   * @return true 		if the outputFormat may be collected immediately
+   * @throws Exception 		if something goes wrong
    */
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
@@ -71,7 +98,7 @@ public class AllFilter extends Filter {
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @exception IllegalStateException if no input format has been defined.
+   * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) {
 
@@ -92,15 +119,6 @@ public class AllFilter extends Filter {
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    
-    try {
-      if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new AllFilter(), argv);
-      } else {
-	Filter.filterFile(new AllFilter(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new AllFilter(), argv);
   }
 }
