@@ -22,12 +22,14 @@
 package weka.filters.supervised.attribute;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -58,7 +60,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassOrder 
   extends Filter 
@@ -258,6 +260,25 @@ public class ClassOrder
   public void setClassOrder(int order){
     m_ClassOrder = order;
   }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
     
   /**
    * Sets the format of the input instances.
@@ -271,12 +292,7 @@ public class ClassOrder
   public boolean setInputFormat(Instances instanceInfo) throws Exception {     
 
     super.setInputFormat(new Instances(instanceInfo, 0));	
-    if (instanceInfo.classIndex() < 0) {
-      throw new IllegalArgumentException("ClassOrder: No class index set.");
-    }
-    if (!instanceInfo.classAttribute().isNominal()) {
-      throw new IllegalArgumentException("ClassOrder: Class must be nominal.");
-    }
+
     m_ClassAttribute = instanceInfo.classAttribute();	
     m_Random = new Random(m_Seed);
     m_Converter = null;
@@ -489,15 +505,6 @@ public class ClassOrder
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-	
-    try {
-      if (Utils.getFlag('b', argv)) {
-	Filter.batchFilterFile(new ClassOrder(), argv);
-      } else {
-	Filter.filterFile(new ClassOrder(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new ClassOrder(), argv);
   }
 }

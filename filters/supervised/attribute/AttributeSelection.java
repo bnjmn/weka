@@ -31,6 +31,7 @@ import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.Ranker;
 import weka.attributeSelection.UnsupervisedAttributeEvaluator;
 import weka.attributeSelection.UnsupervisedSubsetEvaluator;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -38,6 +39,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -95,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeSelection 
   extends Filter
@@ -376,6 +378,29 @@ public class AttributeSelection
       return m_ASSearch;
   }
 
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities	result;
+    
+    if (m_ASEvaluator == null) {
+      result = super.getCapabilities();
+    }
+    else {
+      result = m_ASEvaluator.getCapabilities();
+      // class index will be set if necessary, so we always allow the dataset
+      // to have no class attribute set. see the following method:
+      //   weka.attributeSelection.AttributeSelection.SelectAttributes(Instances)
+      result.enable(Capability.NO_CLASS);
+    }
+    
+    return result;
+  }
+
   /**
    * Input an instance for filtering. Ordinarily the instance is processed
    * and made available for output immediately. Some filters require all
@@ -536,15 +561,6 @@ public class AttributeSelection
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-    
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new AttributeSelection(), argv);
-      } else {
-	Filter.filterFile(new AttributeSelection(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new AttributeSelection(), argv);
   }
 }

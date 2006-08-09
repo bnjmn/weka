@@ -23,11 +23,13 @@
 
 package weka.filters.supervised.instance;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -59,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class Resample
   extends Filter 
@@ -293,6 +295,25 @@ public class Resample
 
     m_SampleSizePercent = newSampleSizePercent;
   }
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    
+    return result;
+  }
   
   /**
    * Sets the format of the input instances.
@@ -306,10 +327,6 @@ public class Resample
    */
   public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
-
-    if (instanceInfo.classIndex() < 0 || !instanceInfo.classAttribute().isNominal()) {
-      throw new IllegalArgumentException("Supervised resample requires nominal class");
-    }
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
@@ -447,15 +464,6 @@ public class Resample
    * use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new Resample(), argv);
-      } else {
-	Filter.filterFile(new Resample(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new Resample(), argv);
   }
 }
