@@ -134,7 +134,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class RaceSearch 
   extends ASSearch 
@@ -845,7 +845,7 @@ public class RaceSearch
 			  +"(RaceSearch)");
     }
 
-    m_Instances = data;
+    m_Instances = new Instances(data);
     m_Instances.deleteWithMissingClass();
     if (m_Instances.numInstances() == 0) {
       throw new Exception("All instances have missing class! (RaceSearch)");
@@ -864,25 +864,25 @@ public class RaceSearch
     }
 
     if (m_xvalType == LEAVE_ONE_OUT) {
-      m_numFolds = data.numInstances();
+      m_numFolds = m_Instances.numInstances();
     } else {
       m_numFolds = 10;
     }
 
     Random random = new Random(1); // I guess this should really be a parameter?
-    data.randomize(random);
+    m_Instances.randomize(random);
     int [] bestSubset=null;
 
     switch (m_raceType) {
     case FORWARD_RACE:
     case BACKWARD_RACE: 
-      bestSubset = hillclimbRace(data, random);
+      bestSubset = hillclimbRace(m_Instances, random);
       break;
     case SCHEMATA_RACE:
-      bestSubset = schemataRace(data, random);
+      bestSubset = schemataRace(m_Instances, random);
       break;
     case RANK_RACE:
-      bestSubset = rankRace(data, random);
+      bestSubset = rankRace(m_Instances, random);
       break;
     }
 
