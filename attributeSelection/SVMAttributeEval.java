@@ -24,15 +24,17 @@
 package weka.attributeSelection;
 
 import weka.classifiers.functions.SMO;
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
@@ -115,7 +117,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator
@@ -614,6 +616,16 @@ public class SVMAttributeEval
   //________________________________________________________________________
 
   /**
+   * Returns the capabilities of this evaluator.
+   *
+   * @return            the capabilities of this evaluator
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    return new SMO().getCapabilities();
+  }
+
+  /**
    * Initializes the evaluator.
    *
    * @param data set of instances serving as training data 
@@ -621,18 +633,10 @@ public class SVMAttributeEval
    * generated successfully
    */
   public void buildEvaluator(Instances data) throws Exception {
-    if (data.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
-    if (!data.classAttribute().isNominal()) {
-      throw new Exception("Class must be nominal!");
-    }
-    for (int i = 0; i < data.numAttributes(); i++) {
-      if (data.attribute(i).isNominal() && (data.attribute(i).numValues() != 2) && !(i==data.classIndex()) ) {
-	throw new Exception("All nominal attributes must be binary!");
-      }
-    }
-    System.out.println("Class attribute: " + data.attribute(data.classIndex()).name());
+    // can evaluator handle data?
+    getCapabilities().testWithFail(data);
+
+    //System.out.println("Class attribute: " + data.attribute(data.classIndex()).name());
     // Check settings		
     m_numToEliminate = (m_numToEliminate > 1) ? m_numToEliminate : 1;
     m_percentToEliminate = (m_percentToEliminate < 100) ? m_percentToEliminate : 100;
@@ -803,11 +807,6 @@ public class SVMAttributeEval
    * @param args the options
    */
   public static void main(String[] args) {
-    try {
-      System.out.println(AttributeSelection.SelectAttributes(new SVMAttributeEval(), args));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.out.println(e.getMessage());
-    }
+    runEvaluator(new SVMAttributeEval(), args);
   }
 }
