@@ -20,13 +20,13 @@
 
 package weka.classifiers;
 
-import weka.classifiers.CheckClassifier.PostProcessor;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.core.Attribute;
 import weka.core.CheckOptionHandler;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.CheckScheme.PostProcessor;
 import weka.test.Regression;
 
 import junit.framework.TestCase;
@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -66,7 +66,7 @@ public abstract class AbstractClassifierTest
      * @param data	the data to process
      * @return		the processed data
      */
-    protected Instances process(Instances data) {
+    public Instances process(Instances data) {
       Instances	result;
       int		i;
       int		n;
@@ -236,6 +236,17 @@ public abstract class AbstractClassifierTest
     checkAttributes(false, false, true,  false, false, false);
     checkAttributes(false, false, false, true,  false, false);
     checkAttributes(false, false, false, false, true,  false);
+    
+    // initialize missing values handling
+    for (int i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+      // does the scheme support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      // 20% missing
+      m_handleMissingPredictors[i] = checkMissingPredictors(i, 20, false);
+      m_handleMissingClass[i]      = checkMissingClass(i, 20, false);
+    }
   }
 
   /** Called by JUnit after each test method */
@@ -525,9 +536,10 @@ public abstract class AbstractClassifierTest
    *
    * @param type        the class type
    * @param percent     the percentage of missing predictors
+   * @param allowFail	if true a fail statement may be executed
    * @return            true if the classifier can handle it
    */
-  protected boolean checkMissingPredictors(int type, int percent) {
+  protected boolean checkMissingPredictors(int type, int percent, boolean allowFail) {
     boolean[]     result;
     
     result = m_Tester.canHandleMissing(
@@ -542,9 +554,11 @@ public abstract class AbstractClassifierTest
         false,
         percent);
 
-    if (!result[0] && !result[1])
-      fail("Error handling " + percent + "% missing predictors (" 
-          + getClassTypeString(type) + " class)!");
+    if (allowFail) {
+      if (!result[0] && !result[1])
+	fail("Error handling " + percent + "% missing predictors (" 
+	    + getClassTypeString(type) + " class)!");
+    }
     
     return result[0];
   }
@@ -564,11 +578,11 @@ public abstract class AbstractClassifierTest
         continue;
       
       // 20% missing
-      m_handleMissingPredictors[i] = checkMissingPredictors(i, 20);
+      checkMissingPredictors(i, 20, true);
 
       // 100% missing
       if (m_handleMissingPredictors[i])
-        checkMissingPredictors(i, 100);
+        checkMissingPredictors(i, 100, true);
     }
   }
 
@@ -578,9 +592,10 @@ public abstract class AbstractClassifierTest
    *
    * @param type        the class type
    * @param percent     the percentage of missing class labels
+   * @param allowFail	if true a fail statement may be executed
    * @return            true if the classifier can handle it
    */
-  protected boolean checkMissingClass(int type, int percent) {
+  protected boolean checkMissingClass(int type, int percent, boolean allowFail) {
     boolean[]     result;
     
     result = m_Tester.canHandleMissing(
@@ -595,9 +610,11 @@ public abstract class AbstractClassifierTest
         true,
         percent);
 
-    if (!result[0] && !result[1])
-      fail("Error handling " + percent + "% missing class labels (" 
-          + getClassTypeString(type) + " class)!");
+    if (allowFail) {
+      if (!result[0] && !result[1])
+	fail("Error handling " + percent + "% missing class labels (" 
+	    + getClassTypeString(type) + " class)!");
+    }
     
     return result[0];
   }
@@ -618,11 +635,11 @@ public abstract class AbstractClassifierTest
         continue;
       
       // 20% missing
-      m_handleMissingClass[i] = checkMissingClass(i, 20);
+      checkMissingClass(i, 20, true);
 
       // 100% missing
       if (m_handleMissingClass[i])
-        checkMissingClass(i, 100);
+        checkMissingClass(i, 100, true);
     }
   }
 
