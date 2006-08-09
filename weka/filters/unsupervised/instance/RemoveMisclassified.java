@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.instance;
 
 import weka.classifiers.Classifier;
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -45,8 +46,9 @@ import java.util.Vector;
  * 
  * <pre> -W &lt;classifier specification&gt;
  *  Full class name of classifier to use, followed
- *  by scheme options. (required)
- *  eg: "weka.classifiers.bayes.NaiveBayes -D"</pre>
+ *  by scheme options. eg:
+ *   "weka.classifiers.bayes.NaiveBayes -D"
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
  * 
  * <pre> -C &lt;class index&gt;
  *  Attribute on which misclassifications are based.
@@ -72,7 +74,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RemoveMisclassified 
   extends Filter 
@@ -101,6 +103,19 @@ public class RemoveMisclassified
 
   /** Have we processed the first batch (i.e. training data)? */
   protected boolean m_firstBatchFinished = false;
+
+  /** 
+   * Returns the Capabilities of this filter.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    if (getClassifier() == null)
+      return super.getCapabilities();
+    else
+      return getClassifier().getCapabilities();
+  }
 
   /**
    * Sets the format of the input instances.
@@ -336,8 +351,9 @@ public class RemoveMisclassified
     
     newVector.addElement(new Option(
 	      "\tFull class name of classifier to use, followed\n"
-	      + "\tby scheme options. (required)\n"
-	      + "\teg: \"weka.classifiers.bayes.NaiveBayes -D\"",
+	      + "\tby scheme options. eg:\n"
+	      + "\t\t\"weka.classifiers.bayes.NaiveBayes -D\"\n"
+	      + "\t(default: weka.classifiers.rules.ZeroR)",
 	      "W", 1, "-W <classifier specification>"));
     newVector.addElement(new Option(
 	      "\tAttribute on which misclassifications are based.\n"
@@ -371,8 +387,9 @@ public class RemoveMisclassified
    * 
    * <pre> -W &lt;classifier specification&gt;
    *  Full class name of classifier to use, followed
-   *  by scheme options. (required)
-   *  eg: "weka.classifiers.bayes.NaiveBayes -D"</pre>
+   *  by scheme options. eg:
+   *   "weka.classifiers.bayes.NaiveBayes -D"
+   *  (default: weka.classifiers.rules.ZeroR)</pre>
    * 
    * <pre> -C &lt;class index&gt;
    *  Attribute on which misclassifications are based.
@@ -402,10 +419,8 @@ public class RemoveMisclassified
   public void setOptions(String[] options) throws Exception {
 
     String classifierString = Utils.getOption('W', options);
-    if (classifierString.length() == 0) {
-      throw new Exception("A classifier must be specified"
-			  + " with the -W option.");
-    }
+    if (classifierString.length() == 0)
+      classifierString = weka.classifiers.rules.ZeroR.class.getName();
     String[] classifierSpec = Utils.splitOptions(classifierString);
     if (classifierSpec.length == 0) {
       throw new Exception("Invalid classifier specification string");
@@ -702,15 +717,6 @@ public class RemoveMisclassified
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String [] argv) {
-
-    try {
-      if (Utils.getFlag('b', argv)) {
- 	Filter.batchFilterFile(new RemoveMisclassified(), argv); 
-      } else {
-	Filter.filterFile(new RemoveMisclassified(), argv);
-      }
-    } catch (Exception ex) {
-      System.out.println(ex.getMessage());
-    }
+    runFilter(new RemoveMisclassified(), argv);
   }
 }
