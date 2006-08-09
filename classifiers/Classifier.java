@@ -22,18 +22,19 @@
 
 package weka.classifiers;
 
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-import weka.core.Instance;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.Instances;
-import weka.core.Attribute;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import weka.core.Option;
 
 /** 
  * Abstract classifier. All schemes for numeric or nominal prediction in
@@ -42,7 +43,7 @@ import weka.core.Option;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
@@ -278,6 +279,25 @@ public abstract class Classifier
    */
   public Capabilities getCapabilities() {
     return new Capabilities(this);
+  }
+  
+  /**
+   * runs the classifier instance with the given options.
+   * 
+   * @param classifier		the classifier to run
+   * @param options	the commandline options
+   */
+  protected static void runClassifier(Classifier classifier, String[] options) {
+    try {
+      System.out.println(Evaluation.evaluateModel(classifier, options));
+    } 
+    catch (Exception e) {
+      if (    (e.getMessage() != null)
+	   && (e.getMessage().indexOf("General options") == -1) )
+	e.printStackTrace();
+      else
+	System.err.println(e.getMessage());
+    }
   }
 }
 
