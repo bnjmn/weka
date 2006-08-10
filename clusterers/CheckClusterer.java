@@ -101,11 +101,39 @@ import java.util.Vector;
  *  Silent mode - prints nothing to stdout.</pre>
  * 
  * <pre> -N &lt;num&gt;
- *  The number of instances in the datasets (default 40).</pre>
+ *  The number of instances in the datasets (default 20).</pre>
+ * 
+ * <pre> -nominal &lt;num&gt;
+ *  The number of nominal attributes (default 2).</pre>
+ * 
+ * <pre> -nominal-values &lt;num&gt;
+ *  The number of values for nominal attributes (default 1).</pre>
+ * 
+ * <pre> -numeric &lt;num&gt;
+ *  The number of numeric attributes (default 1).</pre>
+ * 
+ * <pre> -string &lt;num&gt;
+ *  The number of string attributes (default 1).</pre>
+ * 
+ * <pre> -date &lt;num&gt;
+ *  The number of date attributes (default 1).</pre>
+ * 
+ * <pre> -relational &lt;num&gt;
+ *  The number of relational attributes (default 1).</pre>
+ * 
+ * <pre> -num-instances-relational &lt;num&gt;
+ *  The number of instances in relational/bag attributes (default 10).</pre>
+ * 
+ * <pre> -words &lt;comma-separated-list&gt;
+ *  The words to use in string attributes.</pre>
+ * 
+ * <pre> -word-separators &lt;chars&gt;
+ *  The word separators to use in string attributes.</pre>
  * 
  * <pre> -W
  *  Full name of the clusterer analyzed.
- *  eg: weka.clusterers.SimpleKMeans</pre>
+ *  eg: weka.clusterers.SimpleKMeans
+ *  (default weka.clusterers.SimpleKMeans)</pre>
  * 
  * <pre> 
  * Options specific to clusterer weka.clusterers.SimpleKMeans:
@@ -124,7 +152,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -165,7 +193,8 @@ public class CheckClusterer
     
     result.addElement(new Option(
         "\tFull name of the clusterer analyzed.\n"
-        +"\teg: weka.clusterers.SimpleKMeans",
+        +"\teg: weka.clusterers.SimpleKMeans\n"
+        + "\t(default weka.clusterers.SimpleKMeans)",
         "W", 1, "-W"));
     
     if ((m_Clusterer != null) 
@@ -195,11 +224,39 @@ public class CheckClusterer
    *  Silent mode - prints nothing to stdout.</pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  The number of instances in the datasets (default 40).</pre>
+   *  The number of instances in the datasets (default 20).</pre>
+   * 
+   * <pre> -nominal &lt;num&gt;
+   *  The number of nominal attributes (default 2).</pre>
+   * 
+   * <pre> -nominal-values &lt;num&gt;
+   *  The number of values for nominal attributes (default 1).</pre>
+   * 
+   * <pre> -numeric &lt;num&gt;
+   *  The number of numeric attributes (default 1).</pre>
+   * 
+   * <pre> -string &lt;num&gt;
+   *  The number of string attributes (default 1).</pre>
+   * 
+   * <pre> -date &lt;num&gt;
+   *  The number of date attributes (default 1).</pre>
+   * 
+   * <pre> -relational &lt;num&gt;
+   *  The number of relational attributes (default 1).</pre>
+   * 
+   * <pre> -num-instances-relational &lt;num&gt;
+   *  The number of instances in relational/bag attributes (default 10).</pre>
+   * 
+   * <pre> -words &lt;comma-separated-list&gt;
+   *  The words to use in string attributes.</pre>
+   * 
+   * <pre> -word-separators &lt;chars&gt;
+   *  The word separators to use in string attributes.</pre>
    * 
    * <pre> -W
    *  Full name of the clusterer analyzed.
-   *  eg: weka.clusterers.SimpleKMeans</pre>
+   *  eg: weka.clusterers.SimpleKMeans
+   *  (default weka.clusterers.SimpleKMeans)</pre>
    * 
    * <pre> 
    * Options specific to clusterer weka.clusterers.SimpleKMeans:
@@ -231,7 +288,7 @@ public class CheckClusterer
 
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      throw new Exception("A clusterer must be specified with the -W option.");
+      tmpStr = weka.clusterers.SimpleKMeans.class.getName();
     setClusterer(
 	(Clusterer) forName(
 	    "weka.clusterers", 
@@ -1115,6 +1172,6 @@ public class CheckClusterer
    * @param args the commandline options
    */
   public static void main(String [] args) {
-    runCheckScheme(new CheckClusterer(), args);
+    runCheck(new CheckClusterer(), args);
   }
 }
