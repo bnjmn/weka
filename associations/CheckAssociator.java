@@ -105,6 +105,27 @@ import java.util.Vector;
  * <pre> -N &lt;num&gt;
  *  The number of instances in the datasets (default 20).</pre>
  * 
+ * <pre> -nominal &lt;num&gt;
+ *  The number of nominal attributes (default 2).</pre>
+ * 
+ * <pre> -nominal-values &lt;num&gt;
+ *  The number of values for nominal attributes (default 1).</pre>
+ * 
+ * <pre> -numeric &lt;num&gt;
+ *  The number of numeric attributes (default 1).</pre>
+ * 
+ * <pre> -string &lt;num&gt;
+ *  The number of string attributes (default 1).</pre>
+ * 
+ * <pre> -date &lt;num&gt;
+ *  The number of date attributes (default 1).</pre>
+ * 
+ * <pre> -relational &lt;num&gt;
+ *  The number of relational attributes (default 1).</pre>
+ * 
+ * <pre> -num-instances-relational &lt;num&gt;
+ *  The number of instances in relational/bag attributes (default 10).</pre>
+ * 
  * <pre> -words &lt;comma-separated-list&gt;
  *  The words to use in string attributes.</pre>
  * 
@@ -113,7 +134,8 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of the associator analysed.
- *  eg: weka.associations.Apriori</pre>
+ *  eg: weka.associations.Apriori
+ *  (default weka.associations.Apriori)</pre>
  * 
  * <pre> 
  * Options specific to associator weka.associations.Apriori:
@@ -163,7 +185,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see TestInstances
  */
 public class CheckAssociator
@@ -196,7 +218,8 @@ public class CheckAssociator
     
     result.addElement(new Option(
         "\tFull name of the associator analysed.\n"
-        +"\teg: weka.associations.Apriori",
+        +"\teg: weka.associations.Apriori\n"
+        + "\t(default weka.associations.Apriori)",
         "W", 1, "-W"));
     
     if ((m_Associator != null) 
@@ -228,6 +251,27 @@ public class CheckAssociator
    * <pre> -N &lt;num&gt;
    *  The number of instances in the datasets (default 20).</pre>
    * 
+   * <pre> -nominal &lt;num&gt;
+   *  The number of nominal attributes (default 2).</pre>
+   * 
+   * <pre> -nominal-values &lt;num&gt;
+   *  The number of values for nominal attributes (default 1).</pre>
+   * 
+   * <pre> -numeric &lt;num&gt;
+   *  The number of numeric attributes (default 1).</pre>
+   * 
+   * <pre> -string &lt;num&gt;
+   *  The number of string attributes (default 1).</pre>
+   * 
+   * <pre> -date &lt;num&gt;
+   *  The number of date attributes (default 1).</pre>
+   * 
+   * <pre> -relational &lt;num&gt;
+   *  The number of relational attributes (default 1).</pre>
+   * 
+   * <pre> -num-instances-relational &lt;num&gt;
+   *  The number of instances in relational/bag attributes (default 10).</pre>
+   * 
    * <pre> -words &lt;comma-separated-list&gt;
    *  The words to use in string attributes.</pre>
    * 
@@ -236,7 +280,8 @@ public class CheckAssociator
    * 
    * <pre> -W
    *  Full name of the associator analysed.
-   *  eg: weka.associations.Apriori</pre>
+   *  eg: weka.associations.Apriori
+   *  (default weka.associations.Apriori)</pre>
    * 
    * <pre> 
    * Options specific to associator weka.associations.Apriori:
@@ -292,7 +337,7 @@ public class CheckAssociator
     
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      throw new Exception("An associator must be specified with the -W option.");
+      tmpStr = weka.associations.Apriori.class.getName();
     setAssociator(
 	(Associator) forName(
 	    "weka.associations", 
@@ -1443,6 +1488,6 @@ public class CheckAssociator
    * @param args the commandline parameters
    */
   public static void main(String [] args) {
-    runCheckScheme(new CheckAssociator(), args);
+    runCheck(new CheckAssociator(), args);
   }
 }
