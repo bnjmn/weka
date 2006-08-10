@@ -111,6 +111,27 @@ import java.util.Vector;
  * <pre> -N &lt;num&gt;
  *  The number of instances in the datasets (default 20).</pre>
  * 
+ * <pre> -nominal &lt;num&gt;
+ *  The number of nominal attributes (default 2).</pre>
+ * 
+ * <pre> -nominal-values &lt;num&gt;
+ *  The number of values for nominal attributes (default 1).</pre>
+ * 
+ * <pre> -numeric &lt;num&gt;
+ *  The number of numeric attributes (default 1).</pre>
+ * 
+ * <pre> -string &lt;num&gt;
+ *  The number of string attributes (default 1).</pre>
+ * 
+ * <pre> -date &lt;num&gt;
+ *  The number of date attributes (default 1).</pre>
+ * 
+ * <pre> -relational &lt;num&gt;
+ *  The number of relational attributes (default 1).</pre>
+ * 
+ * <pre> -num-instances-relational &lt;num&gt;
+ *  The number of instances in relational/bag attributes (default 10).</pre>
+ * 
  * <pre> -words &lt;comma-separated-list&gt;
  *  The words to use in string attributes.</pre>
  * 
@@ -119,7 +140,8 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of the classifier analysed.
- *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+ *  eg: weka.classifiers.bayes.NaiveBayes
+ *  (default weka.classifiers.rules.ZeroR)</pre>
  * 
  * <pre> 
  * Options specific to classifier weka.classifiers.rules.ZeroR:
@@ -135,7 +157,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  * @see TestInstances
  */
 public class CheckClassifier
@@ -168,7 +190,8 @@ public class CheckClassifier
     
     result.addElement(new Option(
         "\tFull name of the classifier analysed.\n"
-        +"\teg: weka.classifiers.bayes.NaiveBayes",
+        +"\teg: weka.classifiers.bayes.NaiveBayes\n"
+        + "\t(default weka.classifiers.rules.ZeroR)",
         "W", 1, "-W"));
     
     if ((m_Classifier != null) 
@@ -200,6 +223,27 @@ public class CheckClassifier
    * <pre> -N &lt;num&gt;
    *  The number of instances in the datasets (default 20).</pre>
    * 
+   * <pre> -nominal &lt;num&gt;
+   *  The number of nominal attributes (default 2).</pre>
+   * 
+   * <pre> -nominal-values &lt;num&gt;
+   *  The number of values for nominal attributes (default 1).</pre>
+   * 
+   * <pre> -numeric &lt;num&gt;
+   *  The number of numeric attributes (default 1).</pre>
+   * 
+   * <pre> -string &lt;num&gt;
+   *  The number of string attributes (default 1).</pre>
+   * 
+   * <pre> -date &lt;num&gt;
+   *  The number of date attributes (default 1).</pre>
+   * 
+   * <pre> -relational &lt;num&gt;
+   *  The number of relational attributes (default 1).</pre>
+   * 
+   * <pre> -num-instances-relational &lt;num&gt;
+   *  The number of instances in relational/bag attributes (default 10).</pre>
+   * 
    * <pre> -words &lt;comma-separated-list&gt;
    *  The words to use in string attributes.</pre>
    * 
@@ -208,7 +252,8 @@ public class CheckClassifier
    * 
    * <pre> -W
    *  Full name of the classifier analysed.
-   *  eg: weka.classifiers.bayes.NaiveBayes</pre>
+   *  eg: weka.classifiers.bayes.NaiveBayes
+   *  (default weka.classifiers.rules.ZeroR)</pre>
    * 
    * <pre> 
    * Options specific to classifier weka.classifiers.rules.ZeroR:
@@ -230,7 +275,7 @@ public class CheckClassifier
     
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      throw new Exception("A classifier must be specified with the -W option.");
+      tmpStr = weka.classifiers.rules.ZeroR.class.getName();
     setClassifier(
 	(Classifier) forName(
 	    "weka.classifiers", 
@@ -1812,6 +1857,6 @@ public class CheckClassifier
    * @param args the commandline parameters
    */
   public static void main(String [] args) {
-    runCheckScheme(new CheckClassifier(), args);
+    runCheck(new CheckClassifier(), args);
   }
 }
