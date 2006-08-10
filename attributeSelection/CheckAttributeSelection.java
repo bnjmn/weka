@@ -99,7 +99,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see TestInstances
  */
 public class CheckAttributeSelection 
@@ -1480,6 +1480,6 @@ public class CheckAttributeSelection
    * @param args the commandline parameters
    */
   public static void main(String [] args) {
-    runCheckScheme(new CheckAttributeSelection(), args);
+    runCheck(new CheckAttributeSelection(), args);
   }
 }
