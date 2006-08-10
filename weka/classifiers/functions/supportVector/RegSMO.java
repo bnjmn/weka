@@ -72,7 +72,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RegSMO 
   extends RegOptimizer
@@ -331,8 +331,8 @@ public class RegSMO
 	  (alpha1 > 0 || (alpha1Star == 0 && deltaPhi > 0)) && 
 	  (alpha2 > 0 || (alpha2Star == 0 && deltaPhi < 0))) {
 	// compute L, H (wrt. alpha1, alpha2) 
-	double L = Math.max(0, gamma - C2);
-	double H = Math.min(C1, gamma);
+	double L = Math.max(0, gamma - C1);
+	double H = Math.min(C2, gamma);
 	if (L < H) {
 	  double a2 = alpha2 - deltaPhi / eta;
 	  a2 = Math.min(a2, H);
@@ -382,7 +382,7 @@ public class RegSMO
 	  && (alpha2Star > 0 || (alpha2 == 0 && deltaPhi > 2 * m_epsilon))) {
 	// compute L, H (wrt. alpha1, alpha2*) 
 	double L = Math.max(0, -gamma);
-	double H = Math.min(C1, -gamma + C2);
+	double H = Math.min(C2, -gamma + C1);
 	if (L < H) {
 	  double a2 = alpha2Star + (deltaPhi - 2 * m_epsilon) / eta;
 	  a2 = Math.min(a2, H);
@@ -432,7 +432,7 @@ public class RegSMO
 	  && (alpha2 > 0 || (alpha2Star == 0 && deltaPhi < - 2 * m_epsilon))) {
 	// compute L, H (wrt. alpha1*, alpha2)
 	double L = Math.max(0, gamma);
-	double H = Math.min(C1, C2 + gamma);
+	double H = Math.min(C2, C1 + gamma);
 	if (L < H) {
 	  // note Smola's psuedocode has a minus, where there should be a plus in the following line, Keerthi's is correct
 	  double a2 = alpha2 - (deltaPhi + 2 * m_epsilon) / eta;
@@ -484,8 +484,8 @@ public class RegSMO
 	  (alpha1Star > 0 || (alpha1 == 0 && deltaPhi < 0)) && 
 	  (alpha2Star > 0 || (alpha2 == 0 && deltaPhi > 0))) {
 	// compute L, H (wrt. alpha1*, alpha2*) 
-	double L = Math.max(0, -gamma - C2);
-	double H = Math.min(C1, -gamma);
+	double L = Math.max(0, -gamma - C1);
+	double H = Math.min(C2, -gamma);
 	if (L < H) {
 	  double a2 = alpha2Star + deltaPhi / eta;
 	  a2 = Math.min(a2, H);
