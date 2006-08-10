@@ -52,13 +52,15 @@ import java.util.Vector;
  * 
  * <pre> -E &lt;attribute evaluator specification&gt;
  *  Full class name of attribute evaluator, followed
- *  by its options. (required)
- *  eg: "weka.attributeSelection.CfsSubsetEval -L"</pre>
+ *  by its options.
+ *  eg: "weka.attributeSelection.CfsSubsetEval -L"
+ *  (default weka.attributeSelection.CfsSubsetEval)</pre>
  * 
  * <pre> -S &lt;search method specification&gt;
  *  Full class name of search method, followed
- *  by its options. (required)
- *  eg: "weka.attributeSelection.BestFirst -D 1"</pre>
+ *  by its options.
+ *  eg: "weka.attributeSelection.BestFirst -D 1"
+ *  (default weka.attributeSelection.BestFirst)</pre>
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -109,7 +111,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class AttributeSelectedClassifier 
   extends SingleClassifierEnhancer
@@ -182,14 +184,16 @@ public class AttributeSelectedClassifier
     
     newVector.addElement(new Option(
 	      "\tFull class name of attribute evaluator, followed\n"
-	      + "\tby its options. (required)\n"
-	      + "\teg: \"weka.attributeSelection.CfsSubsetEval -L\"",
+	      + "\tby its options.\n"
+	      + "\teg: \"weka.attributeSelection.CfsSubsetEval -L\"\n"
+	      + "\t(default weka.attributeSelection.CfsSubsetEval)",
 	      "E", 1, "-E <attribute evaluator specification>"));
 
     newVector.addElement(new Option(
 	      "\tFull class name of search method, followed\n"
-	      + "\tby its options. (required)\n"
-	      + "\teg: \"weka.attributeSelection.BestFirst -D 1\"",
+	      + "\tby its options.\n"
+	      + "\teg: \"weka.attributeSelection.BestFirst -D 1\"\n"
+	      + "\t(default weka.attributeSelection.BestFirst)",
 	      "S", 1, "-S <search method specification>"));
     
     Enumeration enu = super.listOptions();
@@ -207,13 +211,15 @@ public class AttributeSelectedClassifier
    * 
    * <pre> -E &lt;attribute evaluator specification&gt;
    *  Full class name of attribute evaluator, followed
-   *  by its options. (required)
-   *  eg: "weka.attributeSelection.CfsSubsetEval -L"</pre>
+   *  by its options.
+   *  eg: "weka.attributeSelection.CfsSubsetEval -L"
+   *  (default weka.attributeSelection.CfsSubsetEval)</pre>
    * 
    * <pre> -S &lt;search method specification&gt;
    *  Full class name of search method, followed
-   *  by its options. (required)
-   *  eg: "weka.attributeSelection.BestFirst -D 1"</pre>
+   *  by its options.
+   *  eg: "weka.attributeSelection.BestFirst -D 1"
+   *  (default weka.attributeSelection.BestFirst)</pre>
    * 
    * <pre> -D
    *  If set, classifier is run in debug mode and
@@ -270,10 +276,8 @@ public class AttributeSelectedClassifier
 
     // same for attribute evaluator
     String evaluatorString = Utils.getOption('E', options);
-    if (evaluatorString.length() == 0) {
-      throw new Exception("An attribute evaluator must be specified"
-			  + " with the -E option.");
-    }
+    if (evaluatorString.length() == 0)
+      evaluatorString = weka.attributeSelection.CfsSubsetEval.class.getName();
     String [] evaluatorSpec = Utils.splitOptions(evaluatorString);
     if (evaluatorSpec.length == 0) {
       throw new Exception("Invalid attribute evaluator specification string");
@@ -284,10 +288,8 @@ public class AttributeSelectedClassifier
 
     // same for search method
     String searchString = Utils.getOption('S', options);
-    if (searchString.length() == 0) {
-      throw new Exception("A search method must be specified"
-			  + " with the -S option.");
-    }
+    if (searchString.length() == 0)
+      searchString = weka.attributeSelection.BestFirst.class.getName();
     String [] searchSpec = Utils.splitOptions(searchString);
     if (searchSpec.length == 0) {
       throw new Exception("Invalid search specification string");
