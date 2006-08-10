@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ */
+ * @version $Revision: 1.9 $ */
 
 public class PredictiveApriori 
   extends Associator 
@@ -458,15 +458,17 @@ public class PredictiveApriori
   public void setOptions(String[] options) throws Exception {
     
     resetOptions();
-    String numRulesString = Utils.getOption('N', options),
-           classIndexString = Utils.getOption('c',options);
     
+    String numRulesString = Utils.getOption('N', options);
     if (numRulesString.length() != 0) 
-	m_numRules = Integer.parseInt(numRulesString)+5;
+      m_numRules = Integer.parseInt(numRulesString)+5;
     else
-        m_numRules = Integer.MAX_VALUE;
+      m_numRules = Integer.MAX_VALUE;
+
+    String classIndexString = Utils.getOption('c',options);
     if (classIndexString.length() != 0) 
-	m_classIndex = Integer.parseInt(numRulesString);
+      m_classIndex = Integer.parseInt(classIndexString);
+
     m_car = Utils.getFlag('A', options);
   }
 
