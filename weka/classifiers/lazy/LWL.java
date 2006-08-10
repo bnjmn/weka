@@ -113,7 +113,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
@@ -283,7 +283,7 @@ public class LWL
     if (knnString.length() != 0) {
       setKNN(Integer.parseInt(knnString));
     } else {
-      setKNN(0);
+      setKNN(-1);
     }
 
     String weightString = Utils.getOption('U', options);
@@ -328,7 +328,12 @@ public class LWL
     int current = 0;
 
     options[current++] = "-U"; options[current++] = "" + getWeightingKernel();
-    options[current++] = "-K"; options[current++] = "" + getKNN();
+    if ( (getKNN() == 0) && m_UseAllK) {
+      options[current++] = "-K"; options[current++] = "-1";
+    }
+    else {
+      options[current++] = "-K"; options[current++] = "" + getKNN();
+    }
     options[current++] = "-A";
     options[current++] = m_NNSearch.getClass().getName()+" "+Utils.joinOptions(m_NNSearch.getOptions()); 
 
