@@ -251,7 +251,7 @@ import java.util.Vector;
  *
  * @author Florian Kleedorfer (kleedorfer@austria.fm)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class StringKernel 
   extends Kernel
@@ -300,7 +300,7 @@ public class StringKernel
   private int m_subsequenceLength = 3;
 
   /** The maximum substring length for lambda pruning */
-  private int m_maxSubsequenceLength = 3;
+  private int m_maxSubsequenceLength = 9;
 
   /** powers of lambda are prepared prior to kernel evaluations.
    * all powers between 0 and this value are precalculated */
@@ -1464,4 +1464,3 @@ public class StringKernel
     super.buildKernel(data);
   }
 }
-
