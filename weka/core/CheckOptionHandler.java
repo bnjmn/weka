@@ -44,7 +44,16 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of the OptionHandler analysed.
- *  eg: weka.classifiers.rules.ZeroR</pre>
+ *  eg: weka.classifiers.rules.ZeroR
+ *  (default weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> 
+ * Options specific to option handler weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
  *
@@ -53,22 +62,19 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class CheckOptionHandler
-  implements OptionHandler {
-
-  /** additional debug information can be printed */
-  protected boolean m_Debug = false;
-
-  /** silences the testing, i.e., not output to stdout */
-  protected boolean m_Silent = false;
+  extends Check {
 
   /** the optionhandler to test */
   protected OptionHandler m_OptionHandler = new weka.classifiers.rules.ZeroR();
 
   /** the user-supplied options */
   protected String[] m_UserOptions = new String[0];
+  
+  /** whether the tests were successful */
+  protected boolean m_Success;
   
   /**
    * Returns an enumeration describing the available options.
@@ -78,17 +84,14 @@ public class CheckOptionHandler
   public Enumeration listOptions() {
     Vector result = new Vector();
     
-    result.addElement(new Option(
-        "\tTurn on debugging output.",
-        "D", 0, "-D"));
-    
-    result.addElement(new Option(
-        "\tSilent mode - prints nothing to stdout.",
-        "S", 0, "-S"));
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
     
     result.addElement(new Option(
         "\tFull name of the OptionHandler analysed.\n"
-        +"\teg: weka.classifiers.rules.ZeroR",
+        +"\teg: weka.classifiers.rules.ZeroR\n"
+        + "\t(default weka.classifiers.rules.ZeroR)",
         "W", 1, "-W"));
     
     if (m_OptionHandler != null) {
@@ -119,7 +122,16 @@ public class CheckOptionHandler
    * 
    * <pre> -W
    *  Full name of the OptionHandler analysed.
-   *  eg: weka.classifiers.rules.ZeroR</pre>
+   *  eg: weka.classifiers.rules.ZeroR
+   *  (default weka.classifiers.rules.ZeroR)</pre>
+   * 
+   * <pre> 
+   * Options specific to option handler weka.classifiers.rules.ZeroR:
+   * </pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
    * 
    <!-- options-end -->
    *
@@ -129,15 +141,12 @@ public class CheckOptionHandler
   public void setOptions(String[] options) throws Exception {
     String      tmpStr;
     
-    setDebug(Utils.getFlag('D', options));
-    
-    setSilent(Utils.getFlag('S', options));
+    super.setOptions(options);
     
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() == 0)
-      setUserOptions(new String[]{weka.classifiers.rules.ZeroR.class.getName()});
-    else
-      setUserOptions(Utils.partitionOptions(options));
+      tmpStr = weka.classifiers.rules.ZeroR.class.getName();
+    setUserOptions(Utils.partitionOptions(options));
     setOptionHandler(
 	(OptionHandler) Utils.forName(
 	    OptionHandler.class, tmpStr, null));
@@ -155,11 +164,9 @@ public class CheckOptionHandler
     
     result = new Vector();
     
-    if (getDebug())
-      result.add("-D");
-    
-    if (getSilent())
-      result.add("-S");
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
     
     if (getOptionHandler() != null) {
       result.add("-W");
@@ -174,45 +181,6 @@ public class CheckOptionHandler
     }
     
     return (String[]) result.toArray(new String[result.size()]);
-  }
-  
-  /**
-   * Set debugging mode
-   *
-   * @param debug true if debug output should be printed
-   */
-  public void setDebug(boolean debug) {
-    m_Debug = debug;
-    // disable silent mode, if necessary
-    if (getDebug())
-      setSilent(false);
-  }
-  
-  /**
-   * Get whether debugging is turned on
-   *
-   * @return true if debugging output is on
-   */
-  public boolean getDebug() {
-    return m_Debug;
-  }
-  
-  /**
-   * Set slient mode, i.e., no output at all to stdout
-   *
-   * @param value whether silent mode is active or not
-   */
-  public void setSilent(boolean value) {
-    m_Silent = value;
-  }
-  
-  /**
-   * Get whether silent mode is turned on
-   *
-   * @return true if silent mode is on
-   */
-  public boolean getSilent() {
-    return m_Silent;
   }
   
   /**
@@ -252,23 +220,12 @@ public class CheckOptionHandler
   }
   
   /**
-   * prints the given object to stdout
+   * returns the success of the tests
    * 
-   * @param o		the object to print
+   * @return		true if the tests were successful
    */
-  protected void print(Object o) {
-    if (!getSilent())
-      System.out.print(o);
-  }
-
-  /**
-   * prints the given object to stdout, plus linefeed
-   * 
-   * @param o		the object to print
-   */
-  protected void println(Object o) {
-    if (!getSilent())
-      System.out.println(o);
+  public boolean getSuccess() {
+    return m_Success;
   }
   
   /**
@@ -556,12 +513,8 @@ public class CheckOptionHandler
   /**
    * Runs some diagnostic tests on an optionhandler object. Output is
    * printed to System.out (if not silent).
-   * 
-   * @return	true if all tests passed
    */
-  public boolean doTests() {
-    boolean	result;    
-    
+  public void doTests() {
     println("OptionHandler: " + m_OptionHandler.getClass().getName() + "\n");
 
     if (getDebug()) {
@@ -573,49 +526,32 @@ public class CheckOptionHandler
     }
 
     println("--> Tests");
-    result = checkListOptions();
+    m_Success = checkListOptions();
 
-    if (result)
-      result = checkSetOptions();
+    if (m_Success)
+      m_Success = checkSetOptions();
     
-    if (result)
-      result = checkRemainingOptions();
+    if (m_Success)
+      m_Success = checkRemainingOptions();
 
-    if (result)
-      result = checkCanonicalUserOptions();
+    if (m_Success)
+      m_Success = checkCanonicalUserOptions();
 
-    if (result)
-      result = checkResettingOptions();
-    
-    return result;
+    if (m_Success)
+      m_Success = checkResettingOptions();
   }
   
   /** 
    * Main method for using the CheckOptionHandler.
    *
-   * @param args the options to the CheckOptionHandler
+   * @param args 	the options to the CheckOptionHandler
    */
   public static void main(String[] args) {
-    try {
-      CheckOptionHandler check = new CheckOptionHandler();
-      
-      try {
-        check.setOptions(args);
-      } 
-      catch (Exception ex) {
-        String result = ex.getMessage() + "\n\n" + check.getClass().getName().replaceAll(".*\\.", "") + " Options:\n\n";
-        Enumeration enu = check.listOptions();
-        while (enu.hasMoreElements()) {
-          Option option = (Option) enu.nextElement();
-          result += option.synopsis() + "\n" + option.description() + "\n";
-        }
-        throw new Exception(result);
-      }
-      
-      check.doTests();
-    } 
-    catch (Exception ex) {
-      System.err.println(ex.getMessage());
-    }
+    CheckOptionHandler check = new CheckOptionHandler();
+    runCheck(check, args);
+    if (check.getSuccess())
+      System.exit(0);
+    else
+      System.exit(1);
   }
 }
