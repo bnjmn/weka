@@ -139,7 +139,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see     SimpleStreamFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -209,9 +209,8 @@ public abstract class SimpleBatchFilter
       throw new IllegalStateException("No input instance format defined");
 
     try {
-      // get data, clear input queue
+      // get data
       inst = new Instances(getInputFormat());
-      flushInput();
 
       // if output format hasn't been set yet, do it now
       if (!hasImmediateOutputFormat() && !isFirstBatchDone())
@@ -219,6 +218,9 @@ public abstract class SimpleBatchFilter
 
       // process data
       inst = process(inst);
+
+      // clear input queue
+      flushInput();
 
       // move it to the output
       for (i = 0; i < inst.numInstances(); i++)
