@@ -40,7 +40,7 @@ import java.util.logging.SimpleFormatter;
  * A helper class for debug output, logging, clocking, etc.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Debug
   implements Serializable {
@@ -81,7 +81,7 @@ public class Debug
    * CPU time if possible, otherwise it's just based on the system time.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $ 
+   * @version $Revision: 1.2 $ 
    * @see ThreadMXBean#isThreadCpuTimeEnabled()
    */
   public static class Clock 
@@ -382,7 +382,7 @@ public class Debug
    * formatting options, see java.text.SimpleDateFormat.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $ 
+   * @version $Revision: 1.2 $ 
    * @see SimpleDateFormat
    */
   public static class Timestamp
@@ -596,7 +596,7 @@ public class Debug
    * Debug.SimpleLog class.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $ 
+   * @version $Revision: 1.2 $ 
    * @see Debug.SimpleLog
    */
   public static class Log
@@ -813,7 +813,7 @@ public class Debug
    * INFO).
    *
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    * @see #setLog(Log)
    */
   public static class Random
@@ -1084,6 +1084,155 @@ public class Debug
     public String toString() {
       return this.getClass().getName() + ": " + getID();
     }
+  }
+  /**
+   * contains static debug methods
+   *
+   * @author Gabi Schmidberger (gabi at cs dot waikato dot ac dot nz)
+   * @version $Revision: 1.2 $
+   */
+  public static class DBO 
+    implements Serializable {
+
+    /** for serialization */
+    static final long serialVersionUID = -5245628124742606784L;  
+
+    public boolean m_verboseOn = false;
+
+    /** range of outputtyp */
+    public Range m_outputTypes = new Range();
+
+    /** 
+     * Set the verbose on flag on
+     * 
+     * @param upper upper limit
+     */
+    public void setVerboseOn() {
+      m_verboseOn = true;
+    }
+
+    /** 
+     * Initialize ranges, upper limit must be set
+     * 
+     * @param upper upper limit
+     */
+    public void initializeRanges(int upper) {
+      m_outputTypes.setUpper(upper);
+    }
+
+    /**
+     * Return true if the outputtype is set
+     * 
+     * @param num value that is reserved for a specific outputtype
+     * @return return true if the output type is set
+     */
+    public boolean outputTypeSet(int num) {
+      return (m_outputTypes.isInRange(num));
+    }
+
+     /**
+     * Return true if the debug level is set
+     * same method as outpuTypeSet but better name
+     * 
+     * @param num value that is reserved for a specific outputtype
+     * @return return true if the debug level is set
+     */
+    public boolean dl(int num) {
+      return (outputTypeSet(num));
+    }
+
+   /**
+     * Switches the outputs on that are requested from the option O
+     * 
+     * @param list list of integers, all are used for an output type
+     */
+    public void setOutputTypes(String list) {
+      if (list.length() > 0) {
+        m_verboseOn = true; 
+
+        m_outputTypes.setRanges(list);
+        m_outputTypes.setUpper(30);
+      }
+    }
+
+    /**
+     * Gets the current output type selection
+     *
+     * @return a string containing a comma separated list of ranges
+     */
+    public String getOutputTypes() {
+      return m_outputTypes.getRanges();
+    }
+
+    /**
+     * prints out text + endofline if verbose is on.
+     * helps to make debug output commands more visible in text
+     * 
+     * @param text the text to print
+     */
+    public void dpln(String text) {
+      if (m_verboseOn) {
+        System.out.println(text);
+      }
+    } 
+
+    /**
+     * prints out text + endofline but only if parameter debug type is set.
+     * helps to make debug output commands more visible in text
+     *
+     * @param debugType the type of the output
+     * @param text the text to print
+     */
+    public void dpln(int debugType, String text) {
+      if (outputTypeSet(debugType)) {
+        System.out.println(text);
+      }
+    } 
+
+     /**
+     * prints out text  if verbose is on.
+     * helps to make debug output commands more visible in text
+     * 
+     * @param text the text to print
+     */
+    public void dp(String text) {
+      if (m_verboseOn) {
+        System.out.print(text);
+      }
+    } 
+
+   /**
+     * prints out text but only if debug level is set.
+     * helps to make debug output commands more visible in text
+     *
+     * @param debugType the type of the output
+     * @param text the text to print
+     */
+    public void dp(int debugType, String text) {
+     if (outputTypeSet(debugType)) {
+        System.out.print(text);
+      }
+    } 
+
+    /**
+     * prints out text + endofline.
+     * helps to make debug output commands more visible in text
+     * 
+     * @param text the text to print
+     */
+    public static void pln(String text) {
+      System.out.println(text);
+    } 
+
+    /**
+     * prints out text.
+     * helps to make debug output commands more visible in text
+     * 
+     * @param text the text to print
+     */
+    public static void p (String text) {
+      System.out.print(text);
+    } 
   }
   
   /**
