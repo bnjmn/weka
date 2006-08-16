@@ -22,35 +22,40 @@
 
 package weka.estimators;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Capabilities.Capability;
+import weka.core.matrix.Matrix;
+import weka.core.Capabilities;
+import weka.core.Utils;
 
 /** 
  * Simple probability estimator that places a single normal distribution
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class MahalanobisEstimator implements Estimator {
-
+public class MahalanobisEstimator extends Estimator implements IncrementalEstimator {
+  
+  /** for serialization  */
+  private static final long serialVersionUID = 8950225468990043868L;
+  
   /** The inverse of the covariance matrix */
   private Matrix m_CovarianceInverse;
-
+  
   /** The determinant of the covariance matrix */
   private double m_Determinant;
-
+  
   /**
    * The difference between the conditioning value and the conditioning mean
    */
   private double m_ConstDelta;
-
+  
   /** The mean of the values */
   private double m_ValueMean;
-
+  
   /** 2 * PI */
   private static double TWO_PI = 2 * Math.PI;
-
+  
   /**
    * Returns value for normal kernel
    *
@@ -61,11 +66,11 @@ public class MahalanobisEstimator implements Estimator {
   private double normalKernel(double x) {
     
     Matrix thisPoint = new Matrix(1, 2);
-    thisPoint.setElement(0, 0, x);
-    thisPoint.setElement(0, 1, m_ConstDelta);
-    return Math.exp(-thisPoint.multiply(m_CovarianceInverse).
-		    multiply(thisPoint.transpose()).getElement(0, 0) 
-		    / 2) / (Math.sqrt(TWO_PI) * m_Determinant);
+    thisPoint.set(0, 0, x);
+    thisPoint.set(0, 1, m_ConstDelta);
+    return Math.exp(-thisPoint.times(m_CovarianceInverse).
+        times(thisPoint.transpose()).get(0, 0) 
+        / 2) / (Math.sqrt(TWO_PI) * m_Determinant);
   }
   
   /**
@@ -74,38 +79,38 @@ public class MahalanobisEstimator implements Estimator {
    * @param the number of possible symbols
    */
   public MahalanobisEstimator(Matrix covariance, double constDelta,
-			      double valueMean) {
+      double valueMean) {
     
     m_CovarianceInverse = null;
-    if ((covariance.numRows() == 2) && (covariance.numColumns() == 2)) {
-      double a = covariance.getElement(0, 0);
-      double b = covariance.getElement(0, 1);
-      double c = covariance.getElement(1, 0);
-      double d = covariance.getElement(1, 1);
+    if ((covariance.getRowDimension() == 2) && (covariance.getColumnDimension() == 2)) {
+      double a = covariance.get(0, 0);
+      double b = covariance.get(0, 1);
+      double c = covariance.get(1, 0);
+      double d = covariance.get(1, 1);
       if (a == 0) {
-	a = c; c = 0;
-	double temp = b;
-	b = d; d = temp;
+        a = c; c = 0;
+        double temp = b;
+        b = d; d = temp;
       }
       if (a == 0) {
-	return;
+        return;
       }
       double denom = d - c * b / a;
       if (denom == 0) {
-	return;
+        return;
       }
-      m_Determinant = covariance.getElement(0, 0) * covariance.getElement(1, 1)
-	- covariance.getElement(1, 0) * covariance.getElement(0, 1);
+      m_Determinant = covariance.get(0, 0) * covariance.get(1, 1)
+      - covariance.get(1, 0) * covariance.get(0, 1);
       m_CovarianceInverse = new Matrix(2, 2);
-      m_CovarianceInverse.setElement(0, 0, 1.0 / a + b * c / a / a / denom);
-      m_CovarianceInverse.setElement(0, 1, -b / a / denom);
-      m_CovarianceInverse.setElement(1, 0, -c / a / denom);
-      m_CovarianceInverse.setElement(1, 1, 1.0 / denom);
+      m_CovarianceInverse.set(0, 0, 1.0 / a + b * c / a / a / denom);
+      m_CovarianceInverse.set(0, 1, -b / a / denom);
+      m_CovarianceInverse.set(1, 0, -c / a / denom);
+      m_CovarianceInverse.set(1, 1, 1.0 / denom);
       m_ConstDelta = constDelta;
       m_ValueMean = valueMean;
-   }
+    }
   }
-
+  
   /**
    * Add a new data value to the current estimator. Does nothing because the
    * data is provided in the constructor.
@@ -116,7 +121,7 @@ public class MahalanobisEstimator implements Estimator {
   public void addValue(double data, double weight) {
     
   }
-
+  
   /**
    * Get a probability estimate for a value
    *
@@ -131,7 +136,7 @@ public class MahalanobisEstimator implements Estimator {
     }
     return normalKernel(delta);
   }
-
+  
   /** Display a representation of this estimator */
   public String toString() {
     
@@ -139,13 +144,27 @@ public class MahalanobisEstimator implements Estimator {
       return "No covariance inverse\n";
     }
     return "Mahalanovis Distribution. Mean = "
-      + Utils.doubleToString(m_ValueMean, 4, 2)
-      + "  ConditionalOffset = "
-      + Utils.doubleToString(m_ConstDelta, 4, 2) + "\n"
-      + "Covariance Matrix: Determinant = " + m_Determinant 
-      + "  Inverse:\n" + m_CovarianceInverse;
+    + Utils.doubleToString(m_ValueMean, 4, 2)
+    + "  ConditionalOffset = "
+    + Utils.doubleToString(m_ConstDelta, 4, 2) + "\n"
+    + "Covariance Matrix: Determinant = " + m_Determinant 
+    + "  Inverse:\n" + m_CovarianceInverse;
   }
-
+  
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    return result;
+  }
+  
+  
   /**
    * Main method for testing this class.
    *
@@ -159,42 +178,42 @@ public class MahalanobisEstimator implements Estimator {
       double lower = 0;
       double upper = 10;
       Matrix covariance = new Matrix(2, 2);
-      covariance.setElement(0, 0, 2);
-      covariance.setElement(0, 1, -3);
-      covariance.setElement(1, 0, -4);
-      covariance.setElement(1, 1, 5);
+      covariance.set(0, 0, 2);
+      covariance.set(0, 1, -3);
+      covariance.set(1, 0, -4);
+      covariance.set(1, 1, 5);
       if (argv.length > 0) {
-	covariance.setElement(0, 0, Double.valueOf(argv[0]).doubleValue());
+        covariance.set(0, 0, Double.valueOf(argv[0]).doubleValue());
       }
       if (argv.length > 1) {
-	covariance.setElement(0, 1, Double.valueOf(argv[1]).doubleValue());
+        covariance.set(0, 1, Double.valueOf(argv[1]).doubleValue());
       }
       if (argv.length > 2) {
-	covariance.setElement(1, 0, Double.valueOf(argv[2]).doubleValue());
+        covariance.set(1, 0, Double.valueOf(argv[2]).doubleValue());
       }
       if (argv.length > 3) {
-	covariance.setElement(1, 1, Double.valueOf(argv[3]).doubleValue());
+        covariance.set(1, 1, Double.valueOf(argv[3]).doubleValue());
       }
       if (argv.length > 4) {
-	delta = Double.valueOf(argv[4]).doubleValue();
+        delta = Double.valueOf(argv[4]).doubleValue();
       }
       if (argv.length > 5) {
-	xmean = Double.valueOf(argv[5]).doubleValue();
+        xmean = Double.valueOf(argv[5]).doubleValue();
       }
       
       MahalanobisEstimator newEst = new MahalanobisEstimator(covariance,
-							     delta, xmean);
+          delta, xmean);
       if (argv.length > 6) {
-	lower = Double.valueOf(argv[6]).doubleValue();
-	if (argv.length > 7) {
-	  upper = Double.valueOf(argv[7]).doubleValue();
-	}
-	double increment = (upper - lower) / 50;
-	for(double current = lower; current <= upper; current+= increment)
-	  System.out.println(current + "  " + newEst.getProbability(current));
+        lower = Double.valueOf(argv[6]).doubleValue();
+        if (argv.length > 7) {
+          upper = Double.valueOf(argv[7]).doubleValue();
+        }
+        double increment = (upper - lower) / 50;
+        for(double current = lower; current <= upper; current+= increment)
+          System.out.println(current + "  " + newEst.getProbability(current));
       } else {
-	System.out.println("Covariance Matrix\n" + covariance);
-	System.out.println(newEst);
+        System.out.println("Covariance Matrix\n" + covariance);
+        System.out.println(newEst);
       }
     } catch (Exception e) {
       System.out.println(e.getMessage());
