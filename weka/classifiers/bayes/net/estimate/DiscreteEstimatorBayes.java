@@ -32,10 +32,10 @@ import weka.estimators.Estimator;
  * Symbolic probability estimator based on symbol counts and a prior.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class DiscreteEstimatorBayes 
-  implements Estimator, Scoreable {
+public class DiscreteEstimatorBayes extends Estimator
+  implements  Scoreable {
 
   /** for serialization */
   static final long serialVersionUID = 4215400230843212684L;
