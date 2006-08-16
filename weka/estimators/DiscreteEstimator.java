@@ -22,24 +22,28 @@
 
 package weka.estimators;
 
+import weka.core.Capabilities.Capability;
+import weka.core.Capabilities;
 import weka.core.Utils;
-
 
 /** 
  * Simple symbolic probability estimator based on symbol counts.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class DiscreteEstimator implements Estimator {
+public class DiscreteEstimator extends Estimator implements IncrementalEstimator {
+  
+  /** for serialization */
+  private static final long serialVersionUID = -5526486742612434779L;
 
   /** Hold the counts */
   private double [] m_Counts;
-
+  
   /** Hold the sum of counts */
   private double m_SumOfCounts;
-
-
+  
+  
   /**
    * Constructor
    *
@@ -52,12 +56,12 @@ public class DiscreteEstimator implements Estimator {
     m_SumOfCounts = 0;
     if (laplace) {
       for(int i = 0; i < numSymbols; i++) {
-	m_Counts[i] = 1;
+        m_Counts[i] = 1;
       }
       m_SumOfCounts = (double)numSymbols;
     }
   }
-
+  
   /**
    * Constructor
    *
@@ -65,14 +69,14 @@ public class DiscreteEstimator implements Estimator {
    * @param fPrior value with which counts will be initialised
    */
   public DiscreteEstimator(int nSymbols, double fPrior) {    
-
+    
     m_Counts = new double [nSymbols];
     for(int iSymbol = 0; iSymbol < nSymbols; iSymbol++) {
       m_Counts[iSymbol] = fPrior;
     }
     m_SumOfCounts = fPrior * (double) nSymbols;
   }
-
+  
   /**
    * Add a new data value to the current estimator.
    *
@@ -84,7 +88,7 @@ public class DiscreteEstimator implements Estimator {
     m_Counts[(int)data] += weight;
     m_SumOfCounts += weight;
   }
-
+  
   /**
    * Get a probability estimate for a value
    *
@@ -98,18 +102,18 @@ public class DiscreteEstimator implements Estimator {
     }
     return (double)m_Counts[(int)data] / m_SumOfCounts;
   }
-
+  
   /**
    * Gets the number of symbols this estimator operates with
    *
    * @return the number of estimator symbols
    */
   public int getNumSymbols() {
-
+    
     return (m_Counts == null) ? 0 : m_Counts.length;
   }
-
-
+  
+  
   /**
    * Get the count for a value
    *
@@ -123,7 +127,7 @@ public class DiscreteEstimator implements Estimator {
     }
     return m_Counts[(int)data];
   }
-
+  
   
   /**
    * Get the sum of all the counts
@@ -131,11 +135,11 @@ public class DiscreteEstimator implements Estimator {
    * @return the total sum of counts
    */
   public double getSumOfCounts() {
-
+    
     return m_SumOfCounts;
   }
-
-
+  
+  
   /**
    * Display a representation of this estimator
    */
@@ -156,9 +160,19 @@ public class DiscreteEstimator implements Estimator {
     }
     return result.toString();
   }
-
   
-  
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    return result;
+  }
   
   /**
    * Main method for testing this class.
@@ -170,24 +184,24 @@ public class DiscreteEstimator implements Estimator {
     
     try {
       if (argv.length == 0) {
-	System.out.println("Please specify a set of instances.");
-	return;
+        System.out.println("Please specify a set of instances.");
+        return;
       }
       int current = Integer.parseInt(argv[0]);
       int max = current;
       for(int i = 1; i < argv.length; i++) {
-	current = Integer.parseInt(argv[i]);
-	if (current > max) {
-	  max = current;
-	}
+        current = Integer.parseInt(argv[i]);
+        if (current > max) {
+          max = current;
+        }
       }
       DiscreteEstimator newEst = new DiscreteEstimator(max + 1, true);
       for(int i = 0; i < argv.length; i++) {
-	current = Integer.parseInt(argv[i]);
-	System.out.println(newEst);
-	System.out.println("Prediction for " + current 
-			   + " = " + newEst.getProbability(current));
-	newEst.addValue(current, 1);
+        current = Integer.parseInt(argv[i]);
+        System.out.println(newEst);
+        System.out.println("Prediction for " + current 
+            + " = " + newEst.getProbability(current));
+        newEst.addValue(current, 1);
       }
     } catch (Exception e) {
       System.out.println(e.getMessage());
