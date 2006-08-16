@@ -22,17 +22,22 @@
 
 package weka.estimators;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Capabilities.Capability;
+import weka.core.Capabilities;
+import weka.core.Utils;
+import weka.core.Statistics;
 
 /** 
  * Simple kernel density estimator. Uses one gaussian kernel per observed
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class KernelEstimator implements Estimator {
+public class KernelEstimator extends Estimator implements IncrementalEstimator {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3646923563367683925L;
 
   /** Vector containing all of the values seen */
   private double [] m_Values;
@@ -128,7 +133,7 @@ public class KernelEstimator implements Estimator {
    * @param weight the weight assigned to the data value 
    */
   public void addValue(double data, double weight) {
-
+    
     if (weight == 0) {
       return;
     }
@@ -136,33 +141,33 @@ public class KernelEstimator implements Estimator {
     int insertIndex = findNearestValue(data);
     if ((m_NumValues <= insertIndex) || (m_Values[insertIndex] != data)) {
       if (m_NumValues < m_Values.length) {
-	int left = m_NumValues - insertIndex; 
-	System.arraycopy(m_Values, insertIndex, 
-			 m_Values, insertIndex + 1, left);
-	System.arraycopy(m_Weights, insertIndex, 
-			 m_Weights, insertIndex + 1, left);
-
-	m_Values[insertIndex] = data;
-	m_Weights[insertIndex] = weight;
-	m_NumValues++;
+        int left = m_NumValues - insertIndex; 
+        System.arraycopy(m_Values, insertIndex, 
+            m_Values, insertIndex + 1, left);
+        System.arraycopy(m_Weights, insertIndex, 
+            m_Weights, insertIndex + 1, left);
+        
+        m_Values[insertIndex] = data;
+        m_Weights[insertIndex] = weight;
+        m_NumValues++;
       } else {
-	double [] newValues = new double [m_Values.length * 2];
-	double [] newWeights = new double [m_Values.length * 2];
-	int left = m_NumValues - insertIndex; 
-	System.arraycopy(m_Values, 0, newValues, 0, insertIndex);
-	System.arraycopy(m_Weights, 0, newWeights, 0, insertIndex);
-	newValues[insertIndex] = data;
-	newWeights[insertIndex] = weight;
-	System.arraycopy(m_Values, insertIndex, 
-			 newValues, insertIndex + 1, left);
-	System.arraycopy(m_Weights, insertIndex, 
-			 newWeights, insertIndex + 1, left);
-	m_NumValues++;
-	m_Values = newValues;
-	m_Weights = newWeights;
+        double [] newValues = new double [m_Values.length * 2];
+        double [] newWeights = new double [m_Values.length * 2];
+        int left = m_NumValues - insertIndex; 
+        System.arraycopy(m_Values, 0, newValues, 0, insertIndex);
+        System.arraycopy(m_Weights, 0, newWeights, 0, insertIndex);
+        newValues[insertIndex] = data;
+        newWeights[insertIndex] = weight;
+        System.arraycopy(m_Values, insertIndex, 
+            newValues, insertIndex + 1, left);
+        System.arraycopy(m_Weights, insertIndex, 
+            newWeights, insertIndex + 1, left);
+        m_NumValues++;
+        m_Values = newValues;
+        m_Weights = newWeights;
       }
       if (weight != 1) {
-	m_AllWeightsOne = false;
+        m_AllWeightsOne = false;
       }
     } else {
       m_Weights[insertIndex] += weight;
@@ -172,11 +177,11 @@ public class KernelEstimator implements Estimator {
     double range = m_Values[m_NumValues - 1] - m_Values[0];
     if (range > 0) {
       m_StandardDev = Math.max(range / Math.sqrt(m_SumOfWeights), 
-			       // allow at most 3 sds within one interval
-			       m_Precision / (2 * 3));
+          // allow at most 3 sds within one interval
+          m_Precision / (2 * 3));
     }
   }
-
+  
   /**
    * Get a probability estimate for a value.
    *
@@ -249,6 +254,19 @@ public class KernelEstimator implements Estimator {
       }
     }
     return result + "\n";
+  }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    return result;
   }
 
   /**

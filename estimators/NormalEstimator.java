@@ -22,17 +22,19 @@
 
 package weka.estimators;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Capabilities.Capability;
+import weka.core.Capabilities;
+import weka.core.Statistics;
+import weka.core.Utils;
 
 /** 
  * Simple probability estimator that places a single normal distribution
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class NormalEstimator implements Estimator {
+public class NormalEstimator extends Estimator implements IncrementalEstimator {
 
   /** The sum of the weights */
   private double m_SumOfWeights;
@@ -62,7 +64,6 @@ public class NormalEstimator implements Estimator {
 
     return Math.rint(data / m_Precision) * m_Precision;
   }
-
   
   // ===============
   // Public methods.
@@ -140,6 +141,19 @@ public class NormalEstimator implements Estimator {
       + " StandardDev = " + Utils.doubleToString(m_StandardDev, 4)
       + " WeightSum = " + Utils.doubleToString(m_SumOfWeights, 4)
       + " Precision = " + m_Precision + "\n";
+  }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return      the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    return result;
   }
 
   /**
