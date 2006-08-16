@@ -22,15 +22,12 @@
 
 package weka.estimators;
 
-import java.util.*;
-import weka.core.*;
-
 /** 
  * Conditional probability estimator for a discrete domain conditional upon
  * a numeric domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class DNConditionalEstimator implements ConditionalEstimator {
 
