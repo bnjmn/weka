@@ -135,13 +135,12 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
- * @see Clusterer
- * @see OptionHandler
+ * @version $Revision: 1.16 $
+ * @see RandomizableClusterer
  */
 public class XMeans 
-  extends Clusterer 
-  implements OptionHandler, TechnicalInformationHandler {
+  extends RandomizableClusterer
+  implements TechnicalInformationHandler {
 
   /*
    * major TODOS:
@@ -232,11 +231,6 @@ public class XMeans
   double m_CutOffFactor = 0.5;
 
   /**
-   * random seed
-   */
-  private int m_Seed = 10;
-
-  /**
    * Index in ranges for LOW and HIGH and WIDTH
    */
   public static int R_LOW = 0;
@@ -288,7 +282,17 @@ public class XMeans
   /** Flag: I'm debugging */
   public boolean m_CurrDebugFlag = true;
 
-   /**
+  /**
+   * the default constructor
+   */
+  public XMeans() {
+    super();
+    
+    m_SeedDefault = 10;
+    setSeed(m_SeedDefault);
+  }
+  
+  /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
@@ -1463,62 +1467,73 @@ throws Exception{
    * @return an enumeration of all the available options
    **/
   public Enumeration listOptions() {
-    Vector newVector = new Vector(4);
+    Vector result = new Vector(4);
 
-     newVector.addElement(new Option(
+     result.addElement(new Option(
        "\tmaximum number of overall iterations\n" +
-       "\t(default = 1).", 
+       "\t(default 1).", 
        "I", 1, "-I <num>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tmaximum number of iterations in the kMeans loop in\n" +
        "\tthe Improve-Parameter part \n"+
-       "\t(default = 1000).", 
+       "\t(default 1000).", 
        "M", 1, "-M <num>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tmaximum number of iterations in the kMeans loop\n" +
        "\tfor the splitted centroids in the Improve-Structure part \n"+
-       "\t(default = 1000).",
+       "\t(default 1000).",
        "J", 1, "-J <num>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tminimum number of clusters\n" +
-       "\t(default = 2).", 
+       "\t(default 2).", 
        "L", 1, "-L <num>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tmaximum number of clusters\n" +
-       "\t(default = 4).",
+       "\t(default 4).",
        "H", 1, "-H <num>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tdistance value for binary attributes\n" +
-       "\t(default = 1.0).",
+       "\t(default 1.0).",
        "V", 1, "-V <value>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tFull class name of KDTree class to use, followed\n" +
        "\tby scheme options.\n" +
        "\teg: \"weka.core.KDTree -P\"\n" +
-       "\t(default = no KDTree class used).",
+       "\t(default no KDTree class used).",
        "K", 1, "-K <KDTree class specification>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tcutoff factor, takes the given percentage of the splitted \n" +
        "\tcentroids if none of the children win\n" +
-       "\t(default = 0.0).",
+       "\t(default 0.0).",
        "C", 1, "-C <value>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tFull class name of Distance function class to use, followed\n" +
        "\tby scheme options.\n" +
        "\teg: \"weka.core.MahalanobisDistance\"\n" +
-       "\t(default = weka.core.EuclideanDistance).",
+       "\t(default weka.core.EuclideanDistance).",
        "K", 1, "-K <distance function class specification>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tfile to read starting centers from (ARFF format).",
        "N", 1, "-N <file name>"));
-     newVector.addElement(new Option(
+     
+     result.addElement(new Option(
        "\tfile to write centers to (ARFF format).",
        "O", 1, "-O <file name>"));
-     newVector.addElement(new Option(
-       "\trandom number seed (default 10).",
-       "S", 1, "-S <num>"));
 
-     return  newVector.elements();
+     Enumeration en = super.listOptions();
+     while (en.hasMoreElements())
+       result.addElement(en.nextElement());
+     
+     return result.elements();
   }
 
   /**
@@ -1819,31 +1834,6 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property.
-   * @return tip text for this property 
-   */
-  public String seedTipText() {
-    return "random number seed";
-  }
-
-  /**
-   * Sets the random number seed.
-   * @param s the seed
-   */
-  public void setSeed(int s) {
-    m_Seed = s;
-  }
-
-
-  /**
-   * Gets the random number seed.
-   * @return the seed
-   */
-  public int getSeed() {
-    return  m_Seed;
-  }
-
-  /**
    * Checks the instances.
    * No checks in this KDTree but it calls the check of the distance function.
    */
@@ -1983,12 +1973,6 @@ throws Exception{
       m_CenterOutput = new PrintWriter(new FileOutputStream(optionString));
     }
 
-    optionString = Utils.getOption('S', options);
-    if (optionString.length() != 0) {
-      setSeed(Integer.parseInt(optionString));
-    }
-
-
     optionString = Utils.getOption('U', options);
     int debugLevel = 0;
     if (optionString.length() != 0) {
@@ -2005,6 +1989,8 @@ throws Exception{
     if (optionString.length() != 0) {
       setDebugVektorsFile(optionString);
     }
+    
+    super.setOptions(options);
   }
   
   /**
@@ -2012,52 +1998,64 @@ throws Exception{
    * @return an array of strings suitable for passing to setOptions
    */
   public String[] getOptions() {
-    String[] options = new String[27];
-    int current = 0;
+    int       	i;
+    Vector    	result;
+    String[]  	options;
+
+    result = new Vector();
+
+    result.add("-I");
+    result.add("" + getMaxIterations());
     
-    options[current++] = "-I";
-    options[current++] = "" + getMaxIterations();
-    options[current++] = "-M";
-    options[current++] = "" + getMaxKMeans();
-    options[current++] = "-J";
-    options[current++] = "" + getMaxKMeansForChildren();
-    options[current++] = "-L";
-    options[current++] = "" + getMinNumClusters();
-    options[current++] = "-H";
-    options[current++] = "" + getMaxNumClusters();
-    options[current++] = "-B";
-    options[current++] = "" + getBinValue();
+    result.add("-M");
+    result.add("" + getMaxKMeans());
+    
+    result.add("-J");
+    result.add("" + getMaxKMeansForChildren());
+    
+    result.add("-L");
+    result.add("" + getMinNumClusters());
+    
+    result.add("-H");
+    result.add("" + getMaxNumClusters());
+    
+    result.add("-B");
+    result.add("" + getBinValue());
+    
     if (getKDTree() != null) {
-      options[current++] = "-K";
-      options[current++] = "" + getKDTreeSpec();
+      result.add("-K");
+      result.add("" + getKDTreeSpec());
     }
-    options[current++] = "-C";
-    options[current++] = "" + getCutOffFactor();
+    
+    result.add("-C");
+    result.add("" + getCutOffFactor());
+    
     if (getDistanceF() != null) {
-      options[current++] = "-D";
-      options[current++] = "" + getDistanceFSpec();
+      result.add("-D");
+      result.add("" + getDistanceFSpec());
     }
     
     if (getInputCenterFile() != null) {
-      options[current++] = "-N";
-      options[current++] = "" + getInputCenterFile();
+      result.add("-N");
+      result.add("" + getInputCenterFile());
     }
+    
     if (getOutputCenterFile() != null) {
-      options[current++] = "-O";
-      options[current++] = "" + getOutputCenterFile();
+      result.add("-O");
+      result.add("" + getOutputCenterFile());
     }
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
+    
     int dL = getDebugLevel();
     if (dL > 0) {
-      options[current++] = "-U";
-      options[current++] = "" + getDebugLevel();
-    }
-    while (current < options.length) {
-      options[current++] = "";
+      result.add("-U");
+      result.add("" + getDebugLevel());
     }
 
-    return  options;
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
   /**
