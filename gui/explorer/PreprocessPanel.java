@@ -22,49 +22,14 @@
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.io.*;
-import java.net.URL;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JComboBox;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-
-import weka.core.Instances;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instance;
-import weka.core.SerializedObject;
-import weka.core.converters.Loader;
-import weka.core.converters.CSVLoader;
+import weka.core.Instances;
+import weka.core.Capabilities.Capability;
 import weka.core.converters.C45Loader;
+import weka.core.converters.CSVLoader;
+import weka.core.converters.Loader;
 import weka.datagenerators.DataGenerator;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
@@ -72,20 +37,64 @@ import weka.filters.SupervisedFilter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.AttributeSelectionPanel;
 import weka.gui.AttributeSummaryPanel;
+import weka.gui.AttributeVisualizationPanel;
 import weka.gui.ExtensionFileFilter;
-import weka.gui.FileEditor;
-import weka.gui.GenericArrayEditor;
 import weka.gui.GenericObjectEditor;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.Logger;
 import weka.gui.PropertyDialog;
+import weka.gui.PropertyPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
-import weka.gui.PropertyPanel;
-import weka.gui.AttributeVisualizationPanel;
 import weka.gui.ViewerDialog;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.sql.SqlViewerDialog;
-import weka.core.UnassignedClassException;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.URL;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
 /** 
  * This panel controls simple preprocessing of instances. Summary
@@ -95,9 +104,11 @@ import weka.core.UnassignedClassException;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.59 $
+ * @version $Revision: 1.60 $
  */
-public class PreprocessPanel extends JPanel {
+public class PreprocessPanel
+  extends JPanel 
+  implements CapabilitiesFilterChangeListener {
   
   /** Displays simple stats on the working instances */
   protected InstancesSummaryPanel m_InstSummaryPanel =
@@ -198,6 +209,9 @@ public class PreprocessPanel extends JPanel {
 
   /** The message logger */
   protected Logger m_Log = new SysErrLog();
+
+  /** the parent frame */
+  protected Explorer m_Explorer = null;
   
   static {
      GenericObjectEditor.registerEditors();
@@ -210,6 +224,8 @@ public class PreprocessPanel extends JPanel {
 
     // Create/Configure/Connect components
     m_FilterEditor.setClassType(weka.filters.Filter.class);
+    if (ExplorerDefaults.getFilter() != null)
+      m_FilterEditor.setValue(ExplorerDefaults.getFilter());
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
@@ -483,6 +499,18 @@ public class PreprocessPanel extends JPanel {
 	  m_Log.statusMessage("OK");
 	  // Fire a propertychange event
 	  m_Support.firePropertyChange("", null, null);
+	  
+	  // notify GOEs about change
+	  if (ExplorerDefaults.getInitGenericObjectEditorFilter()) {
+	    try {
+	      getExplorer().notifyCapabilitiesFilterListener(
+		  Capabilities.forInstances(m_Instances));
+	    }
+	    catch (Exception e) {
+	      e.printStackTrace();
+	      m_Log.logMessage(e.toString());
+	    }
+	  }
 	}
       };
       if (SwingUtilities.isEventDispatchThread()) {
@@ -1409,6 +1437,55 @@ public class PreprocessPanel extends JPanel {
         newInstances.setClassIndex(-1);
       setInstances(newInstances);
     }
+  }
+
+  /**
+   * Sets the Explorer to use as parent frame (used for sending notifications
+   * about changes in the data)
+   * 
+   * @param parent	the parent frame
+   */
+  public void setExplorer(Explorer parent) {
+    m_Explorer = parent;
+  }
+  
+  /**
+   * returns the parent Explorer frame
+   * 
+   * @return		the parent
+   */
+  public Explorer getExplorer() {
+    return m_Explorer;
+  }
+  
+  /**
+   * updates the capabilities filter of the GOE
+   * 
+   * @param filter	the new filter to use
+   */
+  protected void updateCapabilitiesFilter(Capabilities filter) {
+    if (filter == null) {
+      m_FilterEditor.setCapabilitiesFilter(new Capabilities(null));
+      return;
+    }
+    
+    // class index is never set in Explorer!
+    filter.disable(Capability.NO_CLASS);
+    filter.disableAllClasses();
+
+    // we don't get notified if the class gets changed in the 
+    // AttributeVisualizePanel, so we don't bother setting it here
+    
+    m_FilterEditor.setCapabilitiesFilter(filter);
+  }
+  
+  /**
+   * method gets called in case of a change event
+   * 
+   * @param e		the associated change event
+   */
+  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
+    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
   
   /**

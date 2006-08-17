@@ -26,6 +26,7 @@ package weka.gui.explorer;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -46,6 +47,8 @@ import weka.gui.SaveBuffer;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.Plot2D;
@@ -114,10 +117,11 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.51 $
+ * @version $Revision: 1.52 $
  */
 public class ClustererPanel
-  extends JPanel {
+  extends JPanel
+  implements CapabilitiesFilterChangeListener {
 
   /** for serialization */
   static final long serialVersionUID = -2474932792950820990L;
@@ -255,7 +259,7 @@ public class ClustererPanel
     });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
     m_ClustererEditor.setClassType(Clusterer.class);
-    m_ClustererEditor.setValue(new weka.clusterers.EM());
+    m_ClustererEditor.setValue(ExplorerDefaults.getClusterer());
     m_ClustererEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	repaint();
@@ -286,8 +290,11 @@ public class ClustererPanel
     m_ClassCombo.setMinimumSize(COMBO_SIZE);
     m_ClassCombo.setEnabled(false);
 
-    m_TrainBut.setSelected(true);
-    m_StorePredictionsBut.setSelected(true);
+    m_PercentBut.setSelected(ExplorerDefaults.getClustererTestMode() == 2);
+    m_TrainBut.setSelected(ExplorerDefaults.getClustererTestMode() == 3);
+    m_TestSplitBut.setSelected(ExplorerDefaults.getClustererTestMode() == 4);
+    m_ClassesToClustersBut.setSelected(ExplorerDefaults.getClustererTestMode() == 5);
+    m_StorePredictionsBut.setSelected(ExplorerDefaults.getClustererStoreClustersForVis());
     updateRadioLinks();
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_TrainBut);
@@ -340,6 +347,12 @@ public class ClustererPanel
 	  }
 	}
       });
+    
+    m_ClassCombo.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	updateCapabilitiesFilter(m_ClustererEditor.getCapabilitiesFilter());
+      }
+    });
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -1539,7 +1552,31 @@ public class ClustererPanel
       m_RunThread.start();
     }
   }
-
+  
+  /**
+   * updates the capabilities filter of the GOE
+   * 
+   * @param filter	the new filter to use
+   */
+  protected void updateCapabilitiesFilter(Capabilities filter) {
+    if (filter == null) {
+      m_ClustererEditor.setCapabilitiesFilter(new Capabilities(null));
+      return;
+    }
+    
+    // clusterer don't need the class attribute, so we can skip that here
+    
+    m_ClustererEditor.setCapabilitiesFilter(filter);
+  }
+  
+  /**
+   * method gets called in case of a change event
+   * 
+   * @param e		the associated change event
+   */
+  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
+    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+  }
 
   /**
    * Tests out the clusterer panel from the command line.

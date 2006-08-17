@@ -30,10 +30,12 @@ import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.AttributeTransformer;
 import weka.attributeSelection.Ranker;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
@@ -42,6 +44,8 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.visualize.MatrixPanel;
 
 import java.awt.BorderLayout;
@@ -96,10 +100,11 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class AttributeSelectionPanel 
-  extends JPanel {
+  extends JPanel
+  implements CapabilitiesFilterChangeListener {
   
   /** for serialization */
   static final long serialVersionUID = 5627185966993476142L;
@@ -204,8 +209,7 @@ public class AttributeSelectionPanel
     });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
     m_AttributeEvaluatorEditor.setClassType(ASEvaluation.class);
-    m_AttributeEvaluatorEditor.setValue(new weka.attributeSelection.
-					CfsSubsetEval());
+    m_AttributeEvaluatorEditor.setValue(ExplorerDefaults.getASEvaluator());
     m_AttributeEvaluatorEditor.
       addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
@@ -254,7 +258,7 @@ public class AttributeSelectionPanel
     });
 
     m_AttributeSearchEditor.setClassType(ASSearch.class);
-    m_AttributeSearchEditor.setValue(new weka.attributeSelection.BestFirst());
+    m_AttributeSearchEditor.setValue(ExplorerDefaults.getASSearch());
     m_AttributeSearchEditor.
       addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
@@ -301,6 +305,12 @@ public class AttributeSelectionPanel
 	  repaint();
 	}
       });
+    
+    m_ClassCombo.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	updateCapabilitiesFilter(m_AttributeEvaluatorEditor.getCapabilitiesFilter());
+      }
+    });
 
     m_ClassCombo.setToolTipText("Select the attribute to use as the class");
     m_TrainBut.setToolTipText("select attributes using the full training "
@@ -318,7 +328,8 @@ public class AttributeSelectionPanel
     m_History.setMinimumSize(COMBO_SIZE);
     
     m_ClassCombo.setEnabled(false);
-    m_TrainBut.setSelected(true);
+    m_TrainBut.setSelected(ExplorerDefaults.getASTestMode() == 0);
+    m_CVBut.setSelected(ExplorerDefaults.getASTestMode() == 1);
     updateRadioLinks();
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_TrainBut);
@@ -327,6 +338,9 @@ public class AttributeSelectionPanel
     m_TrainBut.addActionListener(m_RadioListener);
     m_CVBut.addActionListener(m_RadioListener);
 
+    m_CVText.setText("" + ExplorerDefaults.getASCrossvalidationFolds());
+    m_SeedText.setText("" + ExplorerDefaults.getASRandomSeed());
+    
     m_StartBut.setEnabled(false);
     m_StopBut.setEnabled(false);
 
@@ -972,6 +986,54 @@ public class AttributeSelectionPanel
     }
     
     resultListMenu.show(m_History.getList(), x, y);
+  }
+  
+  /**
+   * updates the capabilities filter of the GOE
+   * 
+   * @param filter	the new filter to use
+   */
+  protected void updateCapabilitiesFilter(Capabilities filter) {
+    Instances 		tempInst;
+    Capabilities 	filterClass;
+    Capabilities	filterMerged;
+
+    if (filter == null) {
+      m_AttributeEvaluatorEditor.setCapabilitiesFilter(new Capabilities(null));
+      m_AttributeSearchEditor.setCapabilitiesFilter(new Capabilities(null));
+      return;
+    }
+    
+    // class index is never set in Explorer!
+    filter.disable(Capability.NO_CLASS);
+    filter.disableAllClasses();
+
+    // determine class attribute (will miss missing class values, but for
+    // efficiency reasons we don't examine the complete dataset again!)
+    tempInst = new Instances(m_Instances, 0);
+    tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
+    filterClass = null;
+    try {
+      filterClass = Capabilities.forInstances(tempInst);
+    }
+    catch (Exception e) {
+      filterClass = new Capabilities(null);
+    }
+    
+    // generate and set new filter
+    filterMerged = (Capabilities) filter.clone();
+    filterMerged.or(filterClass);
+    m_AttributeEvaluatorEditor.setCapabilitiesFilter(filterMerged);
+    m_AttributeSearchEditor.setCapabilitiesFilter(filterMerged);
+  }
+  
+  /**
+   * method gets called in case of a change event
+   * 
+   * @param e		the associated change event
+   */
+  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
+    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**
