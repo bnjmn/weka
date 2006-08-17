@@ -99,7 +99,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see TestInstances
  */
 public class CheckAttributeSelection 
@@ -757,7 +757,6 @@ public class CheckAttributeSelection
     ASEvaluation evaluation2 = null;
     AttributeSelection attsel1A = null;
     AttributeSelection attsel1B = null;
-    boolean built = false;
     int stage = 0;
     try {
       
@@ -838,12 +837,7 @@ public class CheckAttributeSelection
       result[0] = false;
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during  training");
         switch (stage) {
           case 0:
             print(" of dataset 1");
@@ -975,7 +969,6 @@ public class CheckAttributeSelection
     ASEvaluation evaluationI = null;
     AttributeSelection attselB = null;
     AttributeSelection attselI = null;
-    boolean built = false;
     boolean evalFail = false;
     try {
       train = makeTestDataset(42, numTrain, 
@@ -1031,12 +1024,7 @@ public class CheckAttributeSelection
           println("\nboth methods\n");
           println(evaluationB.toString());
         } else {
-          print("Problem during");
-          if (built) {
-            print(" testing");
-          } else {
-            print(" training");
-          }
+          print("Problem during training");
           println(": " + ex.getMessage() + "\n");
         }
         println("Here is the dataset:\n");
@@ -1096,7 +1084,6 @@ public class CheckAttributeSelection
     Instances trainCopy = null;
     ASSearch search = null;
     ASEvaluation evaluation = null;
-    boolean built = false;
     try {
       train = makeTestDataset(42, numTrain, 
                               nominalPredictor    ? getNumNominal()    : 0,
@@ -1127,12 +1114,7 @@ public class CheckAttributeSelection
       
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during training");
         println(": " + ex.getMessage() + "\n");
         println("Here are the datasets:\n");
         println("=== Train Dataset (original) ===\n"
@@ -1241,7 +1223,6 @@ public class CheckAttributeSelection
     Instances train = null;
     ASSearch search = null;
     ASEvaluation evaluation = null;
-    boolean built = false;
     try {
       train = makeTestDataset(42, numTrain, 
                               nominalPredictor    ? getNumNominal()    : 0,
@@ -1263,7 +1244,6 @@ public class CheckAttributeSelection
     }
     try {
       search(search, evaluation, train);
-      built = true;
       println("yes");
       result[0] = true;
     } 
@@ -1287,12 +1267,7 @@ public class CheckAttributeSelection
       
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during training");
         println(": " + ex.getMessage() + "\n");
         if (!acceptable) {
           if (accepts.size() > 0) {
