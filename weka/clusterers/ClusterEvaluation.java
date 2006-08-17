@@ -43,6 +43,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.Vector;
 
 /**
  * Class for evaluating clustering models.<p>
@@ -77,16 +78,13 @@ import java.util.Random;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.30 $
+ * @version  $Revision: 1.31 $
  */
 public class ClusterEvaluation 
   implements Serializable {
 
   /** for serialization */
   static final long serialVersionUID = -830188327319128005L;
-  
-  /** the instances to cluster */
-  private Instances m_trainInstances;
   
   /** the clusterer */
   private Clusterer m_Clusterer;
@@ -168,7 +166,6 @@ public class ClusterEvaluation
    */
   public ClusterEvaluation () {
     setClusterer(new EM());
-    m_trainInstances = null;
     m_clusteringResults = new StringBuffer();
     m_clusterAssignments = null;
   }
@@ -177,36 +174,92 @@ public class ClusterEvaluation
    * Evaluate the clusterer on a set of instances. Calculates clustering
    * statistics and stores cluster assigments for the instances in
    * m_clusterAssignments
+   * 
    * @param test the set of instances to cluster
    * @throws Exception if something goes wrong
    */
   public void evaluateClusterer(Instances test) throws Exception {
+    evaluateClusterer(test, "");
+  }
+
+  /**
+   * Evaluate the clusterer on a set of instances. Calculates clustering
+   * statistics and stores cluster assigments for the instances in
+   * m_clusterAssignments
+   * 
+   * @param test the set of instances to cluster
+   * @param testFileName the name of the test file for incremental testing, 
+   * if "" or null then not used
+   * @throws Exception if something goes wrong
+   */
+  public void evaluateClusterer(Instances test, String testFileName) throws Exception {
     int i = 0;
     int cnum;
     double loglk = 0.0;
     int cc = m_Clusterer.numberOfClusters();
     m_numClusters = cc;
-    int numInstFieldWidth = (int)((Math.log(test.numInstances())/
-				   Math.log(10))+1);
     double[] instanceStats = new double[cc];
-    m_clusterAssignments = new double [test.numInstances()];
-    Instances testCopy = test;
-    boolean hasClass = (testCopy.classIndex() >= 0);
+    Instances testCopy = null;
+    Instances testRaw = null;
+    boolean hasClass = (test.classIndex() >= 0);
     int unclusteredInstances = 0;
+    Vector<Double> clusterAssignments = new Vector<Double>();
+    Remove removeClass = null;
+    BufferedReader testReader = null;
 
+    if (testFileName == null)
+      testFileName = "";
+    
+    if (testFileName.length() != 0) {
+      testReader = new BufferedReader(new FileReader(testFileName));
+      testRaw    = new Instances(testReader, 1);
+      testRaw.setClassIndex(test.classIndex());
+    }
+    else {
+      testRaw = test;
+    }
+    
     // If class is set then do class based evaluation as well
     if (hasClass) {
-      if (testCopy.classAttribute().isNumeric()) {
+      if (testRaw.classAttribute().isNumeric()) {
 	throw new Exception("ClusterEvaluation: Class must be nominal!");
       }
-      Remove removeClass = new Remove();
-      removeClass.setAttributeIndices(""+(testCopy.classIndex()+1));
+      removeClass = new Remove();
+      removeClass.setAttributeIndices("" + (testRaw.classIndex() + 1));
       removeClass.setInvertSelection(false);
-      removeClass.setInputFormat(testCopy);
-      testCopy = Filter.useFilter(testCopy, removeClass);
+      removeClass.setInputFormat(testRaw);
+      testCopy = Filter.useFilter(testRaw, removeClass);
     }
+    else {
+      testCopy = testRaw;
+    }
+    
+    boolean finished = false;
+    i = 0;
+    while (true) {
+      // read data
+      if (testFileName.length() != 0) {
+	if (testRaw.numInstances() > 0) {
+	  testRaw.delete(0);
+	  testCopy.delete(0);
+	}
+	finished = !testRaw.readInstance(testReader);
+	if (hasClass) {
+	  removeClass.input(testRaw.instance(0));
+	  removeClass.batchFinished();
+	  testCopy.add(removeClass.output());
+	}
+	else {
+	  testCopy.add(testRaw.instance(0));
+	}
+      }
+      else {
+	finished = (i == testCopy.numInstances());
+	i++;
+      }
+      if (finished)
+	break;
 
-    for (i=0;i<testCopy.numInstances();i++) {
       cnum = -1;
       try {
 	if (m_Clusterer instanceof DensityBasedClusterer) {
@@ -217,13 +270,14 @@ public class ClusterEvaluation
 	  //	  Utils.normalize(dist);
 	  cnum = m_Clusterer.clusterInstance(testCopy.instance(i)); 
 	  // Utils.maxIndex(dist);
-	  m_clusterAssignments[i] = (double)cnum;
+	  clusterAssignments.add((double) cnum);
 	} else {
 	  cnum = m_Clusterer.clusterInstance(testCopy.instance(i));
-	  m_clusterAssignments[i] = (double)cnum;
+	  clusterAssignments.add((double) cnum);
 	}
       }
       catch (Exception e) {
+	clusterAssignments.add(0.0);
 	unclusteredInstances++;
       }
       
@@ -232,34 +286,14 @@ public class ClusterEvaluation
       }
     }
 
-    /* // count the actual number of used clusters
-    int count = 0;
-    for (i = 0; i < cc; i++) {
-      if (instanceStats[i] > 0) {
-	count++;
-      }
-    }
-    if (count > 0) {
-      double [] tempStats = new double [count];
-      double [] map = new double [m_clusterAssignments.length];
-      count=0;
-      for (i=0;i<cc;i++) {
-	if (instanceStats[i] > 0) {
-	  tempStats[count] = instanceStats[i];
-	  map[i] = count;
-	  count++;
-	}
-      }
-      instanceStats = tempStats;
-      cc = instanceStats.length;
-      for (i=0;i<m_clusterAssignments.length;i++) {
-	m_clusterAssignments[i] = map[(int)m_clusterAssignments[i]];
-      }
-      } */ 
-
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
     m_logL = loglk;
+    m_clusterAssignments = new double [clusterAssignments.size()];
+    for (i = 0; i < clusterAssignments.size(); i++)
+      m_clusterAssignments[i] = clusterAssignments.get(i);
+    int numInstFieldWidth = (int)((Math.log(clusterAssignments.size())/
+	   Math.log(10))+1);
     
     m_clusteringResults.append(m_Clusterer.toString());
     m_clusteringResults.append("Clustered Instances\n\n");
@@ -290,7 +324,7 @@ public class ClusterEvaluation
     }
     
     if (hasClass) {
-      evaluateClustersWithRespectToClass(test);
+      evaluateClustersWithRespectToClass(test, testFileName);
     }
   }
 
@@ -298,20 +332,41 @@ public class ClusterEvaluation
    * Evaluates cluster assignments with respect to actual class labels.
    * Assumes that m_Clusterer has been trained and tested on 
    * inst (minus the class).
+   * 
    * @param inst the instances (including class) to evaluate with respect to
+   * @param fileName the name of the test file for incremental testing, 
+   * if "" or null then not used
    * @throws Exception if something goes wrong
    */
-  private void evaluateClustersWithRespectToClass(Instances inst)
+  private void evaluateClustersWithRespectToClass(Instances inst, String fileName)
     throws Exception {
+    
     int numClasses = inst.classAttribute().numValues();
     int [][] counts = new int [m_numClusters][numClasses];
     int [] clusterTotals = new int[m_numClusters];
     double [] best = new double[m_numClusters+1];
     double [] current = new double[m_numClusters+1];
 
-    for (int i = 0; i < inst.numInstances(); i++) {
-      counts[(int)m_clusterAssignments[i]][(int)inst.instance(i).classValue()]++;
-      clusterTotals[(int)m_clusterAssignments[i]]++;
+    if (fileName == null)
+      fileName = "";
+    
+    if (fileName.length() != 0) {
+      BufferedReader reader = new BufferedReader(new FileReader(fileName));
+      Instances incInst = new Instances(reader, 1);
+      incInst.setClassIndex(inst.classIndex());
+      int i = 0;
+      while (incInst.readInstance(reader)) {
+	counts[(int)m_clusterAssignments[i]][(int)incInst.instance(0).classValue()]++;
+	clusterTotals[(int)m_clusterAssignments[i]]++;
+	incInst.delete(0);
+	i++;
+      }
+    }
+    else {
+      for (int i = 0; i < inst.numInstances(); i++) {
+	counts[(int)m_clusterAssignments[i]][(int)inst.instance(i).classValue()]++;
+	clusterTotals[(int)m_clusterAssignments[i]]++;
+      }
     }
     
     best[m_numClusters] = Double.MAX_VALUE;
@@ -321,7 +376,7 @@ public class ClusterEvaluation
 			+inst.classAttribute().name()
 			+"\n");
     m_clusteringResults.append("Classes to Clusters:\n");
-    String matrixString = toMatrixString(counts, clusterTotals, inst);
+    String matrixString = toMatrixString(counts, clusterTotals, new Instances(inst, 0));
     m_clusteringResults.append(matrixString).append("\n");
 
     int Cwidth = 1 + (int)(Math.log(m_numClusters) / Math.log(10));
@@ -475,9 +530,9 @@ public class ClusterEvaluation
    * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results 
    */
-  public static String evaluateClusterer (Clusterer clusterer, 
-					  String[] options)
+  public static String evaluateClusterer(Clusterer clusterer, String[] options)
     throws Exception {
+    
     int seed = 1, folds = 10;
     boolean doXval = false;
     Instances train = null;
@@ -491,6 +546,8 @@ public class ClusterEvaluation
     ObjectOutputStream objectOutputStream = null;
     StringBuffer text = new StringBuffer();
     int theClass = -1; // class based evaluation of clustering
+    boolean updateable = (clusterer instanceof UpdateableClusterer);
+    BufferedReader trainReader = null;
 
     try {
       if (Utils.getFlag('h', options)) {
@@ -558,7 +615,11 @@ public class ClusterEvaluation
 
     try {
       if (trainFileName.length() != 0) {
-	train = new Instances(new BufferedReader(new FileReader(trainFileName)));
+	trainReader = new BufferedReader(new FileReader(trainFileName));
+	if (updateable)
+	  train = new Instances(trainReader, 1);
+	else
+	  train = new Instances(trainReader);
 
 	String classString = Utils.getOption('c',options);
 	if (classString.length() != 0) {
@@ -630,17 +691,40 @@ public class ClusterEvaluation
     else {
       // Build the clusterer if no object file provided
       if (theClass == -1) {
-	clusterer.buildClusterer(train);
+	if (updateable) {
+	  while (train.readInstance(trainReader)) {
+	    ((UpdateableClusterer) clusterer).updateClusterer(train.instance(0));
+	    train.delete(0);
+	  }
+	  trainReader.close();
+	}
+	else {
+	  clusterer.buildClusterer(train);
+	}
       } else {
 	Remove removeClass = new Remove();
 	removeClass.setAttributeIndices(""+theClass);
 	removeClass.setInvertSelection(false);
 	removeClass.setInputFormat(train);
-	Instances clusterTrain = Filter.useFilter(train, removeClass);
-	clusterer.buildClusterer(clusterTrain);
+	if (updateable) {
+	  Instances clusterTrain = Filter.useFilter(train, removeClass);
+	  clusterer.buildClusterer(clusterTrain);
+	  while (train.readInstance(trainReader)) {
+	    removeClass.input(train.instance(0));
+	    removeClass.batchFinished();
+	    Instance clusterTrainInst = removeClass.output();
+	    ((UpdateableClusterer) clusterer).updateClusterer(clusterTrainInst);
+	    train.delete(0);
+	  }
+	  trainReader.close();
+	}
+	else {
+	  Instances clusterTrain = Filter.useFilter(train, removeClass);
+	  clusterer.buildClusterer(clusterTrain);
+	}
 	ClusterEvaluation ce = new ClusterEvaluation();
 	ce.setClusterer(clusterer);
-	ce.evaluateClusterer(train);
+	ce.evaluateClusterer(train, trainFileName);
 	
 	return "\n\n=== Clustering stats for training data ===\n\n" +
 	  ce.clusterResultsToString();
@@ -650,7 +734,7 @@ public class ClusterEvaluation
     /* Output cluster predictions only (for the test data if specified,
        otherwise for the training data */
     if (printClusterAssignments) {
-      return  printClusterings(clusterer, train, testFileName, attributesToOutput);
+      return printClusterings(clusterer, trainFileName, testFileName, attributesToOutput);
     }
 
     text.append(clusterer.toString());
@@ -918,66 +1002,49 @@ public class ClusterEvaluation
    * or the testing data.
    *
    * @param clusterer the clusterer to use for cluster assignments
+   * @param trainFileName the train file
+   * @param testFileName an optional test file
+   * @param attributesToOutput the attributes to print
    * @return a string containing the instance indexes and cluster assigns.
    * @throws if cluster assignments can't be printed
    */
-  private static String printClusterings (Clusterer clusterer, Instances train,
+  private static String printClusterings (Clusterer clusterer, String trainFileName,
 					  String testFileName, Range attributesToOutput)
     throws Exception {
     StringBuffer text = new StringBuffer();
     int i = 0;
     int cnum;
-
-    if (testFileName.length() != 0) {
-      BufferedReader testStream = null;
-
-      try {
+    BufferedReader testStream = null;
+    
+    try {
+      if (testFileName.length() != 0)
 	testStream = new BufferedReader(new FileReader(testFileName));
+      else
+	testStream = new BufferedReader(new FileReader(trainFileName));
+    }
+    catch (Exception e) {
+      throw  new Exception("Can't open file " + e.getMessage() + '.');
+    }
+
+    Instances test = new Instances(testStream, 1);
+    
+    while (test.readInstance(testStream)) {
+      try {
+	cnum = clusterer.clusterInstance(test.instance(0));
+	
+	text.append(i + " " + cnum + " "
+	    + attributeValuesString(test.instance(0), attributesToOutput) + "\n");
       }
       catch (Exception e) {
-	throw  new Exception("Can't open file " + e.getMessage() + '.');
+	/*	  throw  new Exception('\n' + "Unable to cluster instance\n" 
+	 + e.getMessage()); */
+	text.append(i + " Unclustered "
+	    + attributeValuesString(test.instance(0), attributesToOutput) + "\n");
       }
-
-      Instances test = new Instances(testStream, 1);
-
-      while (test.readInstance(testStream)) {
-	try {
-	  cnum = clusterer.clusterInstance(test.instance(0));
-	
-	  text.append(i + " " + cnum + " "
-		      + attributeValuesString(test.instance(0), attributesToOutput) + "\n");
-	}
-	catch (Exception e) {
-	  /*	  throw  new Exception('\n' + "Unable to cluster instance\n" 
-		  + e.getMessage()); */
-	  text.append(i + " Unclustered "
-		      + attributeValuesString(test.instance(0), attributesToOutput) + "\n");
-	}
-	test.delete(0);
-	i++;
-      }
+      test.delete(0);
+      i++;
     }
-    else// output for training data
-      {
-	for (i = 0; i < train.numInstances(); i++) {
-	  try {
-	    cnum = clusterer.clusterInstance(train.instance(i));
-	 
-	    text.append(i + " " + cnum + " "
-			+ attributeValuesString(train.instance(i), attributesToOutput)
-			+ "\n");
-	  }
-	  catch (Exception e) {
-	    /*  throw  new Exception('\n' 
-				 + "Unable to cluster instance\n" 
-				 + e.getMessage()); */
-	    text.append(i + " Unclustered "
-			+ attributeValuesString(train.instance(i), attributesToOutput)
-			+ "\n");
-	  }
-	}
-      }
-
+    
     return  text.toString();
   }
 
