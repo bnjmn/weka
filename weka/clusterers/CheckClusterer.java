@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -346,10 +346,13 @@ public class CheckClusterer
         + " ===\n");
     
     // Start tests
+    println("--> Checking for interfaces");
     canTakeOptions();
+    boolean updateable = updateableClusterer()[0];
     boolean weightedInstancesHandler = weightedInstancesHandler()[0];
     boolean multiInstanceHandler = multiInstanceHandler()[0];
-    runTests(weightedInstancesHandler, multiInstanceHandler);
+    println("--> Clusterer tests");
+    runTests(weightedInstancesHandler, multiInstanceHandler, updateable);
   }
   
   /**
@@ -375,8 +378,9 @@ public class CheckClusterer
    *
    * @param weighted true if the clusterer says it handles weights
    * @param multiInstance true if the clusterer is a multi-instance clusterer
+   * @param updateable true if the classifier is updateable
    */
-  protected void runTests(boolean weighted, boolean multiInstance) {
+  protected void runTests(boolean weighted, boolean multiInstance, boolean updateable) {
     
     boolean PNom = canPredict(true,  false, false, false, false, multiInstance)[0];
     boolean PNum = canPredict(false, true,  false, false, false, multiInstance)[0];
@@ -400,6 +404,8 @@ public class CheckClusterer
       
       correctBuildInitialisation(PNom, PNum, PStr, PDat, PRel, multiInstance);
       datasetIntegrity(PNom, PNum, PStr, PDat, PRel, multiInstance, handleMissingPredictors);
+      if (updateable)
+        updatingEquality(PNom, PNum, PStr, PDat, PRel, multiInstance);
     }
   }
   
@@ -425,6 +431,28 @@ public class CheckClusterer
         }
         println("\n");
       }
+      result[0] = true;
+    }
+    else {
+      println("no");
+      result[0] = false;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Checks whether the scheme can build models incrementally.
+   *
+   * @return index 0 is true if the clusterer can train incrementally
+   */
+  protected boolean[] updateableClusterer() {
+    
+    boolean[] result = new boolean[2];
+    
+    print("updateable clusterer...");
+    if (m_Clusterer instanceof UpdateableClusterer) {
+      println("yes");
       result[0] = true;
     }
     else {
@@ -827,6 +855,7 @@ public class CheckClusterer
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
       clusterers[0].buildClusterer(train);
+      evaluationB.setClusterer(clusterers[0]);
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
@@ -843,6 +872,7 @@ public class CheckClusterer
         train.instance(inst).setWeight(weight);
       }
       clusterers[1].buildClusterer(train);
+      evaluationI.setClusterer(clusterers[1]);
       built = true;
       if (evaluationB.equals(evaluationI)) {
         //	println("no");
@@ -958,6 +988,118 @@ public class CheckClusterer
         println("=== Train Dataset ===\n"
             + train.toString() + "\n");
       }
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Checks whether an updateable scheme produces the same model when
+   * trained incrementally as when batch trained. The model itself
+   * cannot be compared, so we compare the evaluation on test data
+   * for both models. It is possible to get a false positive on this
+   * test (likelihood depends on the classifier).
+   *
+   * @param nominalPredictor if true use nominal predictor attributes
+   * @param numericPredictor if true use numeric predictor attributes
+   * @param stringPredictor if true use string predictor attributes
+   * @param datePredictor if true use date predictor attributes
+   * @param relationalPredictor if true use relational predictor attributes
+   * @param multiInstance whether multi-instance is needed
+   * @return index 0 is true if the test was passed
+   */
+  protected boolean[] updatingEquality(
+      boolean nominalPredictor,
+      boolean numericPredictor, 
+      boolean stringPredictor, 
+      boolean datePredictor,
+      boolean relationalPredictor,
+      boolean multiInstance) {
+    
+    print("incremental training produces the same results"
+        + " as batch training");
+    printAttributeSummary(
+        nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance);
+    print("...");
+    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    missingLevel = 0;
+    boolean predictorMissing = false, classMissing = false;
+    
+    boolean[] result = new boolean[2];
+    Instances train = null;
+    Instances test = null;
+    Clusterer[] clusterers = null;
+    ClusterEvaluation evaluationB = null;
+    ClusterEvaluation evaluationI = null;
+    boolean built = false;
+    try {
+      train = makeTestDataset(42, numTrain, 
+                              nominalPredictor    ? getNumNominal()    : 0,
+                              numericPredictor    ? getNumNumeric()    : 0, 
+                              stringPredictor     ? getNumString()     : 0, 
+                              datePredictor       ? getNumDate()       : 0, 
+                              relationalPredictor ? getNumRelational() : 0, 
+                              multiInstance);
+      test = makeTestDataset(24, numTest,
+                             nominalPredictor    ? getNumNominal()    : 0,
+                             numericPredictor    ? getNumNumeric()    : 0, 
+                             stringPredictor     ? getNumString()     : 0, 
+                             datePredictor       ? getNumDate()       : 0, 
+                             relationalPredictor ? getNumRelational() : 0, 
+                             multiInstance);
+      if (missingLevel > 0) {
+        addMissing(train, missingLevel, predictorMissing, classMissing);
+        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
+            classMissing);
+      }
+      clusterers = Clusterer.makeCopies(getClusterer(), 2);
+      evaluationB = new ClusterEvaluation();
+      evaluationI = new ClusterEvaluation();
+      clusterers[0].buildClusterer(train);
+      evaluationB.setClusterer(clusterers[0]);
+    } catch (Exception ex) {
+      throw new Error("Error setting up for tests: " + ex.getMessage());
+    }
+    try {
+      clusterers[1].buildClusterer(new Instances(train, 0));
+      for (int i = 0; i < train.numInstances(); i++) {
+        ((UpdateableClusterer)clusterers[1]).updateClusterer(
+            train.instance(i));
+      }
+      built = true;
+      evaluationI.setClusterer(clusterers[1]);
+      if (!evaluationB.equals(evaluationI)) {
+        println("no");
+        result[0] = false;
+        
+        if (m_Debug) {
+          println("\n=== Full Report ===");
+          println("Results differ between batch and "
+              + "incrementally built models.\n"
+              + "Depending on the classifier, this may be OK");
+          println("Here are the results:\n");
+          println("\nbatch built results\n" + evaluationB.clusterResultsToString());
+          println("\nincrementally built results\n" + evaluationI.clusterResultsToString());
+          println("Here are the datasets:\n");
+          println("=== Train Dataset ===\n"
+              + train.toString() + "\n");
+          println("=== Test Dataset ===\n"
+              + test.toString() + "\n\n");
+        }
+      }
+      else {
+        println("yes");
+        result[0] = true;
+      }
+    } catch (Exception ex) {
+      result[0] = false;
+      
+      print("Problem during");
+      if (built)
+        print(" testing");
+      else
+        print(" training");
+      println(": " + ex.getMessage() + "\n");
     }
     
     return result;
