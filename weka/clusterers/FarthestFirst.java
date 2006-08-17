@@ -18,7 +18,7 @@
  *    FarthestFirst.java
  *    Copyright (C) 2002 Bernhard Pfahringer
  *    based on SimpleKMeans which is 
- *     Copyright (C) 2000 Mark Hall (mhall@cs.waikato.ac.nz)
+ *    Copyright (C) 2000 Mark Hall (mhall@cs.waikato.ac.nz)
  *
  */
 package weka.clusterers;
@@ -28,7 +28,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -90,22 +89,21 @@ import java.util.Vector;
  *  number of clusters. (default = 2).</pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed.
- *  (default 10)</pre>
+ *  Random number seed.
+ *  (default 1)</pre>
  * 
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
- * @see Clusterer
- * @see OptionHandler
+ * @version $Revision: 1.7 $
+ * @see RandomizableClusterer
  */
-
-// Todo: rewrite to be fully incremental
-//       cleanup, like deleting m_instances 
 public class FarthestFirst 
-  extends Clusterer 
-  implements OptionHandler, TechnicalInformationHandler {
+  extends RandomizableClusterer 
+  implements TechnicalInformationHandler {
+
+  //Todo: rewrite to be fully incremental
+  //      cleanup, like deleting m_instances 
 
   /** for serialization */
   static final long serialVersionUID = 7499838100631329509L;
@@ -140,11 +138,6 @@ public class FarthestFirst
    * attribute max values
    */
   private double [] m_Max;
-
-  /**
-   * random seed
-   */
-  protected int m_Seed = 1;
 
   /**
    * Returns a string describing this clusterer
@@ -232,7 +225,7 @@ public class FarthestFirst
     m_ClusterCentroids = new Instances(m_instances, m_NumClusters);
 
     int n = m_instances.numInstances();
-    Random r = new Random(m_Seed);
+    Random r = new Random(getSeed());
     boolean[] selected = new boolean[n];
     double[] minDistance = new double[n];
 
@@ -479,30 +472,22 @@ public class FarthestFirst
   }
 
   /**
-   * Returns an enumeration describing the available options.. <p>
-   *
-   * Valid options are:<p>
-   *
-   * -N number of clusters <br>
-   * Specify the number of clusters to generate. If omitted,
-   * FarthestFirst will use cross validation to select the number of clusters
-   * automatically. <p>
-   *
-   * -S seed <br>
-   * Specify random number seed. <p>
-   *
+   * Returns an enumeration describing the available options.
+   * 
    * @return an enumeration of all the available options.
-   *
-   **/
+   */
   public Enumeration listOptions () {
-    Vector newVector = new Vector(2);
-
-     newVector.addElement(new Option("\tnumber of clusters. (default = 2)." 
-				    , "N", 1, "-N <num>"));
-     newVector.addElement(new Option("\trandom number seed.\n (default 10)"
-				     , "S", 1, "-S <num>"));
-
-     return  newVector.elements();
+    Vector result = new Vector();
+    
+    result.addElement(new Option(
+	"\tnumber of clusters. (default = 2).", 
+	"N", 1, "-N <num>"));
+    
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
+    
+    return  result.elements();
   }
 
   /**
@@ -535,35 +520,6 @@ public class FarthestFirst
   public int getNumClusters() {
     return m_NumClusters;
   }
-    
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-    return "random number seed";
-  }
-
-
-  /**
-   * Set the random number seed
-   *
-   * @param s the seed
-   */
-  public void setSeed (int s) {
-    m_Seed = s;
-  }
-
-
-  /**
-   * Get the random number seed
-   *
-   * @return the seed
-   */
-  public int getSeed () {
-    return  m_Seed;
-  }
 
   /**
    * Parses a given list of options. <p/>
@@ -575,8 +531,8 @@ public class FarthestFirst
    *  number of clusters. (default = 2).</pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed.
-   *  (default 10)</pre>
+   *  Random number seed.
+   *  (default 1)</pre>
    * 
    <!-- options-end -->
    *
@@ -591,12 +547,8 @@ public class FarthestFirst
     if (optionString.length() != 0) {
       setNumClusters(Integer.parseInt(optionString));
     }
-
-    optionString = Utils.getOption('S', options);
     
-    if (optionString.length() != 0) {
-      setSeed(Integer.parseInt(optionString));
-    }
+    super.setOptions(options);
   }
 
   /**
@@ -605,19 +557,20 @@ public class FarthestFirst
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[4];
-    int current = 0;
-    
-    options[current++] = "-N";
-    options[current++] = "" + getNumClusters();
-    options[current++] = "-S";
-    options[current++] = "" + getSeed();
-    
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    int       	i;
+    Vector    	result;
+    String[]  	options;
 
-    return  options;
+    result = new Vector();
+
+    result.add("-N");
+    result.add("" + getNumClusters());
+
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
   /**
