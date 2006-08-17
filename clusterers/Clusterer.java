@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public abstract class Clusterer implements Cloneable, Serializable, CapabilitiesHandler {
 
@@ -190,8 +190,9 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
       System.out.println(ClusterEvaluation.evaluateClusterer(clusterer, options));
     } 
     catch (Exception e) {
-      if (    (e.getMessage() != null)
-	   && (e.getMessage().indexOf("General options") == -1) )
+      if (    (e.getMessage() == null)
+	   || (    (e.getMessage() != null)
+	        && (e.getMessage().indexOf("General options") == -1) ) )
 	e.printStackTrace();
       else
 	System.err.println(e.getMessage());
