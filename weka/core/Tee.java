@@ -48,10 +48,12 @@ import java.util.Vector;
 * </pre>
 *
 * @author   FracPete (fracpete at waikato dot ac dot nz)
-* @version  $Revision: 1.2 $
+* @version  $Revision: 1.3 $
 */
 
-public class Tee extends PrintStream {
+public class Tee
+  extends PrintStream {
+  
   /** the different PrintStreams */
   protected Vector m_Streams = new Vector();
   
@@ -74,6 +76,7 @@ public class Tee extends PrintStream {
   /**
    * initializes the object with the given default printstream, e.g.,
    * System.out.
+   * 
    * @param def     the default printstream, remains also after calling clear()
    */
   public Tee(PrintStream def) {
@@ -86,7 +89,8 @@ public class Tee extends PrintStream {
   /**
    * removes all streams and places the default printstream, if any, again in
    * the list
-   * @see getDefault()
+   * 
+   * @see #getDefault()
    */
   public void clear() {
     m_Streams.clear();
@@ -99,6 +103,8 @@ public class Tee extends PrintStream {
 
   /**
    * returns the default printstrean, can be NULL
+   * 
+   * @return the default printstream
    * @see #m_Default
    */
   public PrintStream getDefault() {
@@ -108,6 +114,7 @@ public class Tee extends PrintStream {
   /**
    * adds the given PrintStream to the list of streams, with NO timestamp and
    * NO prefix
+   * 
    * @param p       the printstream to add
    */
   public void add(PrintStream p) {
@@ -116,6 +123,7 @@ public class Tee extends PrintStream {
 
   /**
    * adds the given PrintStream to the list of streams, with NO prefix
+   * 
    * @param p           the printstream to add
    * @param timestamp   whether to use timestamps or not
    */
@@ -125,6 +133,7 @@ public class Tee extends PrintStream {
 
   /**
    * adds the given PrintStream to the list of streams
+   * 
    * @param p           the printstream to add
    * @param timestamp   whether to use timestamps or not
    * @param prefix      the prefix to use
@@ -144,6 +153,9 @@ public class Tee extends PrintStream {
 
   /**
    * returns the specified PrintStream from the list
+   * 
+   * @param index the index of the PrintStream to return
+   * @return the specified PrintStream, or null if invalid index
    */
   public PrintStream get(int index) {
     if ( (index >= 0) && (index < size()) )
@@ -154,6 +166,9 @@ public class Tee extends PrintStream {
 
   /**
    * removes the given PrintStream from the list
+   * 
+   * @param p the PrintStream to remove
+   * @return returns the removed PrintStream if it could be removed, null otherwise
    */
   public PrintStream remove(PrintStream p) {
     int         index;
@@ -171,6 +186,9 @@ public class Tee extends PrintStream {
 
   /**
    * removes the given PrintStream from the list
+   * 
+   * @param index the index of the PrintStream to remove
+   * @return returns the removed PrintStream if it could be removed, null otherwise
    */
   public PrintStream remove(int index) {
     if ( (index >= 0) && (index < size()) ) {
@@ -185,6 +203,9 @@ public class Tee extends PrintStream {
 
   /**
    * checks whether the given PrintStream is already in the list
+   * 
+   * @param p the PrintStream to look for
+   * @return true if the PrintStream is in the list
    */
   public boolean contains(PrintStream p) {
     return m_Streams.contains(p);
@@ -192,6 +213,8 @@ public class Tee extends PrintStream {
 
   /**
    * returns the number of streams currently in the list
+   * 
+   * @return the number of streams in the list
    */
   public int size() {
     return m_Streams.size();
@@ -223,6 +246,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given int to the streams
+   * 
+   * @param x the object to print
    */
   public void print(int x) {
     printHeader();
@@ -233,6 +258,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given boolean to the streams
+   * 
+   * @param x the object to print
    */
   public void print(boolean x) {
     printHeader();
@@ -243,6 +270,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given string to the streams
+   * 
+   * @param x the object to print
    */
   public void print(String x) {
     printHeader();
@@ -253,6 +282,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given object to the streams
+   * 
+   * @param x the object to print
    */
   public void print(Object x) {
     printHeader();
@@ -273,6 +304,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given int to the streams
+   * 
+   * @param x the object to print
    */
   public void println(int x) {
     printHeader();
@@ -283,6 +316,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given boolean to the streams
+   * 
+   * @param x the object to print
    */
   public void println(boolean x) {
     printHeader();
@@ -293,6 +328,8 @@ public class Tee extends PrintStream {
 
   /**
    * prints the given string to the streams
+   * 
+   * @param x the object to print
    */
   public void println(String x) {
     printHeader();
@@ -304,6 +341,8 @@ public class Tee extends PrintStream {
   /**
    * prints the given object to the streams (for Throwables we print the stack
    * trace)
+   * 
+   * @param x the object to print
    */
   public void println(Object x) {
     String                  line;
@@ -327,7 +366,9 @@ public class Tee extends PrintStream {
   }
 
   /**
-   * returns only the classname
+   * returns only the classname and the number of streams
+   * 
+   * @return only the classname and the number of streams
    */
   public String toString() {
     return this.getClass().getName() + ": " + m_Streams.size();
