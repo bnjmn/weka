@@ -77,7 +77,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -345,19 +345,16 @@ public class ClassifierSubsetEval
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
+    Capabilities	result;
     
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
+    if (getClassifier() == null)
+      result = super.getCapabilities();
+    else
+      result = getClassifier().getCapabilities();
     
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
+    // set dependencies
+    for (Capability cap: Capability.values())
+      result.enableDependency(cap);
     
     return result;
   }
