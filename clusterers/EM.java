@@ -26,7 +26,6 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.estimators.DiscreteEstimator;
@@ -58,35 +57,34 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters. If omitted or
- *  -1 specified, then cross validation is used to
- *  select the number of clusters.</pre>
+ *  number of clusters. If omitted or -1 specified, then 
+ *  cross validation is used to select the number of clusters.</pre>
  * 
  * <pre> -I &lt;num&gt;
  *  max iterations.
  * (default 100)</pre>
  * 
- * <pre> -S &lt;num&gt;
- *  random number seed.
- * (default 1)</pre>
- * 
  * <pre> -V
  *  verbose.</pre>
  * 
  * <pre> -M &lt;num&gt;
- *  minimum allowable standard deviation for normal density computation 
+ *  minimum allowable standard deviation for normal density
+ *  computation
  *  (default 1e-6)</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public class EM
-  extends DensityBasedClusterer
-  implements NumberOfClustersRequestable,
-	     OptionHandler, WeightedInstancesHandler {
+  extends RandomizableDensityBasedClusterer
+  implements NumberOfClustersRequestable, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 8348181483812829475L;
@@ -138,9 +136,6 @@ public class EM
 
   /** random number generator */
   private Random m_rr;
-  
-  /** the seed value for the random number generator */
-  private int m_rseed;
 
   /** Verbose? */
   private boolean m_verbose;
@@ -179,22 +174,33 @@ public class EM
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions () {
-    Vector newVector = new Vector(6);
-    newVector.addElement(new Option("\tnumber of clusters. If omitted or" 
-				    + "\n\t-1 specified, then cross " 
-				    + "validation is used to\n\tselect the " 
-				    + "number of clusters.", "N", 1
-				    , "-N <num>"));
-    newVector.addElement(new Option("\tmax iterations.\n(default 100)", "I"
-				    , 1, "-I <num>"));
-    newVector.addElement(new Option("\trandom number seed.\n(default 1)"
-				    , "S", 1, "-S <num>"));
-    newVector.addElement(new Option("\tverbose.", "V", 0, "-V"));
-    newVector.addElement(new Option("\tminimum allowable standard deviation "
-				    +"for normal density computation "
-				    +"\n\t(default 1e-6)"
-				    ,"M",1,"-M <num>"));
-    return  newVector.elements();
+    Vector result = new Vector();
+    
+    result.addElement(new Option(
+	"\tnumber of clusters. If omitted or -1 specified, then \n"
+	+ "\tcross validation is used to select the number of clusters.", 
+	"N", 1, "-N <num>"));
+
+    result.addElement(new Option(
+	"\tmax iterations."
+	+ "\n(default 100)", 
+	"I", 1, "-I <num>"));
+    
+    result.addElement(new Option(
+	"\tverbose.",
+	"V", 0, "-V"));
+    
+    result.addElement(new Option(
+	"\tminimum allowable standard deviation for normal density\n"
+	+ "\tcomputation\n"
+	+ "\t(default 1e-6)",
+	"M",1,"-M <num>"));
+
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
+    
+    return  result.elements();
   }
 
 
@@ -205,24 +211,24 @@ public class EM
    * Valid options are: <p/>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters. If omitted or
-   *  -1 specified, then cross validation is used to
-   *  select the number of clusters.</pre>
+   *  number of clusters. If omitted or -1 specified, then 
+   *  cross validation is used to select the number of clusters.</pre>
    * 
    * <pre> -I &lt;num&gt;
    *  max iterations.
    * (default 100)</pre>
    * 
-   * <pre> -S &lt;num&gt;
-   *  random number seed.
-   * (default 1)</pre>
-   * 
    * <pre> -V
    *  verbose.</pre>
    * 
    * <pre> -M &lt;num&gt;
-   *  minimum allowable standard deviation for normal density computation 
+   *  minimum allowable standard deviation for normal density
+   *  computation
    *  (default 1e-6)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
    * 
    <!-- options-end -->
    * 
@@ -240,21 +246,16 @@ public class EM
     }
 
     optionString = Utils.getOption('N', options);
-
     if (optionString.length() != 0) {
       setNumClusters(Integer.parseInt(optionString));
-    }
-
-    optionString = Utils.getOption('S', options);
-
-    if (optionString.length() != 0) {
-      setSeed(Integer.parseInt(optionString));
     }
 
     optionString = Utils.getOption('M', options);
     if (optionString.length() != 0) {
       setMinStdDev((new Double(optionString)).doubleValue());
     }
+    
+    super.setOptions(options);
   }
 
   /**
@@ -288,35 +289,6 @@ public class EM
    */
   public double getMinStdDev() {
     return m_minStdDev;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-    return "random number seed";
-  }
-
-
-  /**
-   * Set the random number seed
-   *
-   * @param s the seed
-   */
-  public void setSeed (int s) {
-    m_rseed = s;
-  }
-
-
-  /**
-   * Get the random number seed
-   *
-   * @return the seed
-   */
-  public int getSeed () {
-    return  m_rseed;
   }
 
   /**
@@ -424,27 +396,24 @@ public class EM
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions () {
-    String[] options = new String[9];
-    int current = 0;
+    int       	i;
+    Vector    	result;
+    String[]  	options;
 
-    if (m_verbose) {
-      options[current++] = "-V";
-    }
+    result = new Vector();
 
-    options[current++] = "-I";
-    options[current++] = "" + m_max_iterations;
-    options[current++] = "-N";
-    options[current++] = "" + getNumClusters();
-    options[current++] = "-S";
-    options[current++] = "" + m_rseed;
-    options[current++] = "-M";
-    options[current++] = ""+getMinStdDev();
+    result.add("-I");
+    result.add("" + m_max_iterations);
+    result.add("-N");
+    result.add("" + getNumClusters());
+    result.add("-M");
+    result.add("" + getMinStdDev());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
-    return  options;
+    return (String[]) result.toArray(new String[result.size()]);	  
   }
 
   /**
@@ -714,6 +683,9 @@ public class EM
    *
    **/
   public EM () {
+    super();
+    
+    m_SeedDefault = 100;
     resetOptions();
   }
 
@@ -724,7 +696,7 @@ public class EM
   protected void resetOptions () {
     m_minStdDev = 1e-6;
     m_max_iterations = 100;
-    m_rseed = 100;
+    m_Seed = m_SeedDefault;
     m_num_clusters = -1;
     m_initialNumClusters = -1;
     m_verbose = false;
@@ -856,13 +828,13 @@ public class EM
       : 10;
 
     boolean ok = true;
-    int seed = m_rseed;
+    int seed = getSeed();
     int restartCount = 0;
     CLUSTER_SEARCH: while (CVincreased) {
       // theInstances.stratify(10);
         
       CVincreased = false;
-      cvr = new Random(m_rseed);
+      cvr = new Random(getSeed());
       trainCopy = new Instances(m_theInstances);
       trainCopy.randomize(cvr);
       templl = 0.0;
@@ -916,7 +888,7 @@ public class EM
 
       if (ok) {
         restartCount = 0;
-        seed = m_rseed;
+        seed = getSeed();
         templl /= (double)numFolds;
         
         if (m_verbose) {
@@ -1102,10 +1074,10 @@ public class EM
     throws Exception {
     
     if (m_verbose) {
-      System.out.println("Seed: " + m_rseed);
+      System.out.println("Seed: " + getSeed());
     }
 
-    m_rr = new Random(m_rseed);
+    m_rr = new Random(getSeed());
 
     // throw away numbers to avoid problem of similar initial numbers
     // from a similar seed
@@ -1127,7 +1099,7 @@ public class EM
     if (m_initialNumClusters == -1) {
       if (m_theInstances.numInstances() > 9) {
 	CVClusters();
-	m_rr = new Random(m_rseed);
+	m_rr = new Random(getSeed());
 	for (int i=0; i<10; i++) m_rr.nextDouble();
       } else {
 	m_num_clusters = 1;
@@ -1161,7 +1133,7 @@ public class EM
     }
 
     boolean ok = false;
-    int seed = m_rseed;
+    int seed = getSeed();
     int restartCount = 0;
     while (!ok) {
       try {
