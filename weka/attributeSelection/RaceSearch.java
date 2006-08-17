@@ -134,7 +134,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class RaceSearch 
   extends ASSearch 
@@ -848,7 +848,7 @@ public class RaceSearch
     m_Instances = new Instances(data);
     m_Instances.deleteWithMissingClass();
     if (m_Instances.numInstances() == 0) {
-      throw new Exception("All instances have missing class! (RaceSearch)");
+      throw new Exception("All train instances have missing class! (RaceSearch)");
     }
     if (m_rankingRequested && m_numToSelect > m_Instances.numAttributes()-1) {
       throw new Exception("More attributes requested than exist in the data "
