@@ -25,6 +25,7 @@ package weka.gui.explorer;
 
 import weka.associations.Associator;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -35,6 +36,8 @@ import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -68,10 +71,11 @@ import javax.swing.event.ChangeListener;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class AssociationsPanel 
-  extends JPanel {
+  extends JPanel
+  implements CapabilitiesFilterChangeListener {
   
   /** for serialization */
   static final long serialVersionUID = -6867871711865476971L;
@@ -151,7 +155,7 @@ public class AssociationsPanel
       });
 
     m_AssociatorEditor.setClassType(Associator.class);
-    m_AssociatorEditor.setValue(new weka.associations.Apriori());
+    m_AssociatorEditor.setValue(ExplorerDefaults.getAssociator());
     m_AssociatorEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	repaint();
@@ -456,6 +460,24 @@ public class AssociationsPanel
     resultListMenu.add(deleteOutput);
 
     resultListMenu.show(m_History.getList(), x, y);
+  }
+  
+  /**
+   * updates the capabilities filter of the GOE
+   * 
+   * @param filter	the new filter to use
+   */
+  protected void updateCapabilitiesFilter(Capabilities filter) {
+    m_AssociatorEditor.setCapabilitiesFilter(filter);
+  }
+  
+  /**
+   * method gets called in case of a change event
+   * 
+   * @param e		the associated change event
+   */
+  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
+    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**

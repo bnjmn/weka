@@ -23,45 +23,37 @@
 
 package weka.gui.explorer;
 
+import weka.core.Capabilities;
 import weka.core.Memory;
-import weka.core.Utils;
 import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
 import weka.gui.visualize.MatrixPanel;
-import weka.gui.visualize.PlotData2D;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Date;
+import java.io.File;
 import java.text.SimpleDateFormat;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-import javax.swing.JPanel;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.JOptionPane;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
+import java.util.Date;
+import java.util.EventListener;
+import java.util.HashSet;
 
-import java.awt.*;
-import java.awt.image.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
 
 /** 
  * The main class for the Weka explorer. Lets the user create,
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class Explorer extends JPanel {
 
@@ -90,6 +82,56 @@ public class Explorer extends JPanel {
   
   /** The panel for log and status messages */
   protected LogPanel m_LogPanel = new LogPanel(new WekaTaskMonitor());
+  
+  /** the listeners that listen to filter changes */
+  protected HashSet<CapabilitiesFilterChangeListener> m_CapabilitiesFilterChangeListeners = new HashSet<CapabilitiesFilterChangeListener>();
+
+  /**
+   * Interface for classes that listen to filter changes.
+   */
+  public static interface CapabilitiesFilterChangeListener 
+    extends EventListener {
+    
+    /**
+     * method gets called in case of a change event
+     * 
+     * @param e		the associated change event
+     */
+    public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e);
+  }
+
+  /**
+   * This event can be fired in case the capabilities filter got changed 
+   */
+  public static class CapabilitiesFilterChangeEvent
+    extends ChangeEvent {
+
+    /** for serialization */
+    private static final long serialVersionUID = 1194260517270385559L;
+    
+    /** the capabilities filter */
+    protected Capabilities m_Filter;
+    
+    /**
+     * Constructs a GOECapabilitiesFilterChangeEvent object.
+     * 
+     * @param source	the Object that is the source of the event
+     * @param filter	the responsible capabilities filter
+     */
+    public CapabilitiesFilterChangeEvent(Object source, Capabilities filter) {
+      super(source);
+      m_Filter = filter;
+    }
+    
+    /**
+     * returns the associated Capabilities filter
+     * 
+     * @return		the filter
+     */
+    public Capabilities getFilter() {
+      return m_Filter;
+    }
+  }
 
 
   /**
@@ -149,6 +191,52 @@ public class Explorer extends JPanel {
     add(m_TabbedPane, BorderLayout.CENTER);
    
     add(m_LogPanel, BorderLayout.SOUTH);
+
+    // add listeners
+    m_PreprocessPanel.setExplorer(this);
+    addCapabilitiesFilterListener(m_PreprocessPanel);
+    addCapabilitiesFilterListener(m_ClassifierPanel);
+    addCapabilitiesFilterListener(m_ClustererPanel);
+    addCapabilitiesFilterListener(m_AssociationPanel);
+    addCapabilitiesFilterListener(m_AttributeSelectionPanel);
+  }
+  
+  /**
+   * adds the listener to the list of objects that listen for changes of the
+   * CapabilitiesFilter
+   * 
+   * @param l		the listener to add
+   * @see		#m_CapabilitiesFilter
+   */
+  public void addCapabilitiesFilterListener(CapabilitiesFilterChangeListener l) {
+    m_CapabilitiesFilterChangeListeners.add(l);
+  }
+
+  /**
+   * Removes the specified listener from the set of listeners if it is present.
+   * 
+   * @param l		the listener to remove
+   * @return		true if the listener was registered
+   */
+  public boolean removeCapabilitiesFilterListener(CapabilitiesFilterChangeListener l) {
+    return m_CapabilitiesFilterChangeListeners.remove(l);
+  }
+  
+  /**
+   * notifies all the listeners of a change, but only if ExplorerDefaults are
+   * enabled ("InitGenericObjectEditorFilter")
+   * 
+   * @param filter	the affected filter
+   */
+  public void notifyCapabilitiesFilterListener(Capabilities filter) {
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+      return;
+    
+    for (CapabilitiesFilterChangeListener l: m_CapabilitiesFilterChangeListeners) {
+      if (l == this)
+	continue;
+      l.capabilitiesFilterChanged(new CapabilitiesFilterChangeEvent(this, filter));
+    }
   }
   
   /** variable for the Explorer class which would be set to null by the memory 

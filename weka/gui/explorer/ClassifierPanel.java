@@ -30,6 +30,7 @@ import weka.classifiers.evaluation.CostCurve;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.ClassDiscovery;
 import weka.core.Drawable;
 import weka.core.FastVector;
@@ -39,11 +40,11 @@ import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Version;
-import weka.core.converters.*;
+import weka.core.Capabilities.Capability;
+import weka.core.converters.Loader;
 import weka.gui.CostMatrixEditor;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
-import weka.gui.InstancesSummaryPanel;
 import weka.gui.Logger;
 import weka.gui.PropertyDialog;
 import weka.gui.PropertyPanel;
@@ -52,6 +53,8 @@ import weka.gui.SaveBuffer;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
+import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.graphvisualizer.BIFFormatException;
 import weka.gui.graphvisualizer.GraphVisualizer;
 import weka.gui.treevisualizer.PlaceNode2;
@@ -126,10 +129,11 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.92 $
+ * @version $Revision: 1.93 $
  */
 public class ClassifierPanel 
-  extends JPanel {
+  extends JPanel
+  implements CapabilitiesFilterChangeListener {
    
   /** for serialization */
   static final long serialVersionUID = 6959973704963624003L;
@@ -303,7 +307,7 @@ public class ClassifierPanel
     });
     m_History.setBorder(BorderFactory.createTitledBorder("Result list (right-click for options)"));
     m_ClassifierEditor.setClassType(Classifier.class);
-    m_ClassifierEditor.setValue(new weka.classifiers.rules.ZeroR());
+    m_ClassifierEditor.setValue(ExplorerDefaults.getClassifier());
     m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
 	repaint();
@@ -338,16 +342,28 @@ public class ClassifierPanel
     m_FileChooser.setFileFilter(m_ModelFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-    m_StorePredictionsBut.setSelected(true);
-    m_OutputModelBut.setSelected(true);
-    m_OutputPerClassBut.setSelected(true);
-    m_OutputConfusionBut.setSelected(true);
+    m_StorePredictionsBut.setSelected(ExplorerDefaults.getClassifierStorePredictionsForVis());
+    m_OutputModelBut.setSelected(ExplorerDefaults.getClassifierOutputModel());
+    m_OutputPerClassBut.setSelected(ExplorerDefaults.getClassifierOutputPerClassStats());
+    m_OutputConfusionBut.setSelected(ExplorerDefaults.getClassifierOutputConfusionMatrix());
+    m_EvalWRTCostsBut.setSelected(ExplorerDefaults.getClassifierCostSensitiveEval());
+    m_OutputEntropyBut.setSelected(ExplorerDefaults.getClassifierOutputEntropyEvalMeasures());
+    m_OutputPredictionsTextBut.setSelected(ExplorerDefaults.getClassifierOutputPredictions());
+    m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed() + "      ");
+    m_PreserveOrderBut.setSelected(ExplorerDefaults.getClassifierPreserveOrder());
     m_ClassCombo.setEnabled(false);
     m_ClassCombo.setPreferredSize(COMBO_SIZE);
     m_ClassCombo.setMaximumSize(COMBO_SIZE);
     m_ClassCombo.setMinimumSize(COMBO_SIZE);
 
     m_CVBut.setSelected(true);
+    // see "testMode" variable in startClassifier
+    m_CVBut.setSelected(ExplorerDefaults.getClassifierTestMode() == 1);
+    m_PercentBut.setSelected(ExplorerDefaults.getClassifierTestMode() == 2);
+    m_TrainBut.setSelected(ExplorerDefaults.getClassifierTestMode() == 3);
+    m_TestSplitBut.setSelected(ExplorerDefaults.getClassifierTestMode() == 4);
+    m_PercentText.setText("" + ExplorerDefaults.getClassifierPercentageSplit());
+    m_CVText.setText("" + ExplorerDefaults.getClassifierCrossvalidationFolds());
     updateRadioLinks();
     ButtonGroup bg = new ButtonGroup();
     bg.add(m_TrainBut);
@@ -423,6 +439,7 @@ public class ClassifierPanel
 	  m_OutputPerClassBut.setEnabled(isNominal);
 	  m_OutputConfusionBut.setEnabled(isNominal);	
 	}
+	updateCapabilitiesFilter(m_ClassifierEditor.getCapabilitiesFilter());
       }
     });
 
@@ -2214,6 +2231,52 @@ public class ClassifierPanel
       m_RunThread.setPriority(Thread.MIN_PRIORITY);
       m_RunThread.start();
     }
+  }
+  
+  /**
+   * updates the capabilities filter of the GOE
+   * 
+   * @param filter	the new filter to use
+   */
+  protected void updateCapabilitiesFilter(Capabilities filter) {
+    Instances 		tempInst;
+    Capabilities 	filterClass;
+    Capabilities	filterMerged;
+
+    if (filter == null) {
+      m_ClassifierEditor.setCapabilitiesFilter(new Capabilities(null));
+      return;
+    }
+    
+    // class index is never set in Explorer!
+    filter.disable(Capability.NO_CLASS);
+    filter.disableAllClasses();
+
+    // determine class attribute (will miss missing class values, but for
+    // efficiency reasons we don't examine the complete dataset again!)
+    tempInst = new Instances(m_Instances, 0);
+    tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
+    filterClass = null;
+    try {
+      filterClass = Capabilities.forInstances(tempInst);
+    }
+    catch (Exception e) {
+      filterClass = new Capabilities(null);
+    }
+    
+    // generate and set new filter
+    filterMerged = (Capabilities) filter.clone();
+    filterMerged.or(filterClass);
+    m_ClassifierEditor.setCapabilitiesFilter(filterMerged);
+  }
+  
+  /**
+   * method gets called in case of a change event
+   * 
+   * @param e		the associated change event
+   */
+  public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
+    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
   
   /**
