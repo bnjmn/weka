@@ -22,7 +22,9 @@ package weka.clusterers;
 
 import weka.core.Attribute;
 import weka.core.CheckOptionHandler;
+import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.test.Regression;
 
 import junit.framework.TestCase;
 
@@ -32,10 +34,10 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  *
  * @see CheckClusterer
- * @see CheckClusterer#runTests(boolean, boolean)
+ * @see CheckClusterer#runTests(boolean, boolean, boolean)
  */
 public abstract class AbstractClustererTest 
   extends TestCase {
@@ -45,6 +47,9 @@ public abstract class AbstractClustererTest
 
   /** For testing the clusterer */
   protected CheckClusterer m_Tester;
+  
+  /** whether classifier is updateable */
+  protected boolean m_updateableClusterer;
 
   /** whether clusterer handles weighted instances */
   protected boolean m_weightedInstancesHandler;
@@ -73,6 +78,9 @@ public abstract class AbstractClustererTest
   /** whether clusterer handles missing values */
   protected boolean m_handleMissingPredictors;
   
+  /** the result of the regression test */
+  protected String m_RegressionResults;
+  
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
   
@@ -100,6 +108,7 @@ public abstract class AbstractClustererTest
     m_Tester.setDebug(DEBUG);
     m_OptionTester = getOptionTester();
 
+    m_updateableClusterer         = m_Tester.updateableClusterer()[0];
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
     m_NominalPredictors            = false;
@@ -108,6 +117,7 @@ public abstract class AbstractClustererTest
     m_DatePredictors               = false;
     m_RelationalPredictors         = false;
     m_handleMissingPredictors      = false;
+    m_RegressionResults            = "";
 
     // initialize attributes
     checkAttributes(true,  false, false, false, false, false);
@@ -125,6 +135,7 @@ public abstract class AbstractClustererTest
     m_Clusterer = null;
     m_Tester     = null;
 
+    m_updateableClusterer          = false;
     m_weightedInstancesHandler     = false;
     m_NominalPredictors            = false;
     m_NumericPredictors            = false;
@@ -132,6 +143,7 @@ public abstract class AbstractClustererTest
     m_DatePredictors               = false;
     m_RelationalPredictors         = false;
     m_handleMissingPredictors      = false;
+    m_RegressionResults            = "";
   }
   
   /**
@@ -201,7 +213,7 @@ public abstract class AbstractClustererTest
    * @param rel         to check for relational attributes
    * @param allowFail   whether a junit fail can be executed
    * @see CheckClusterer#canPredict(boolean, boolean, boolean, boolean, boolean, boolean)
-   * @see CheckClusterer#runTests(boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
    */
   protected void checkAttributes(boolean nom, boolean num, boolean str, 
                                  boolean dat, boolean rel,
@@ -262,7 +274,7 @@ public abstract class AbstractClustererTest
    * tests whether the clusterer handles instance weights correctly
    *
    * @see CheckClusterer#instanceWeights(boolean, boolean, boolean, boolean, boolean, boolean)
-   * @see CheckClusterer#runTests(boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
    */
   public void testInstanceWeights() {
     boolean[]     result;
@@ -288,7 +300,7 @@ public abstract class AbstractClustererTest
    * tests whether the clusterer can handle zero training instances
    *
    * @see CheckClusterer#canHandleZeroTraining(boolean, boolean, boolean, boolean, boolean, boolean)
-   * @see CheckClusterer#runTests(boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
    */
   public void testZeroTraining() {
     boolean[]     result;
@@ -341,7 +353,7 @@ public abstract class AbstractClustererTest
    * tests whether the clusterer can handle missing predictors (20% and 100%)
    *
    * @see CheckClusterer#canHandleMissing(boolean, boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClusterer#runTests(boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
    */
   public void testMissingPredictors() {
     if (!canPredict())
@@ -360,7 +372,7 @@ public abstract class AbstractClustererTest
    * buildClusterer method
    *
    * @see CheckClusterer#correctBuildInitialisation(boolean, boolean, boolean, boolean, boolean, boolean)
-   * @see CheckClusterer#runTests(boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
    */
   public void testBuildInitialization() {
     boolean[]     result;
@@ -384,7 +396,7 @@ public abstract class AbstractClustererTest
    * tests whether the clusterer alters the training set during training.
    *
    * @see CheckClusterer#datasetIntegrity(boolean, boolean, boolean, boolean, boolean, boolean, boolean)
-   * @see CheckClusterer#runTests(boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
    */
   public void testDatasetIntegrity() {
     boolean[]     result;
@@ -403,6 +415,130 @@ public abstract class AbstractClustererTest
 
     if (!result[0] && !result[1])
       fail("Training set is altered during training!");
+  }
+
+  /**
+   * tests whether the classifier produces the same model when trained
+   * incrementally as when batch trained.
+   *
+   * @see CheckClusterer#updatingEquality(boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClusterer#runTests(boolean, boolean, boolean)
+   */
+  public void testUpdatingEquality() {
+    boolean[]     result;
+    
+    if (m_updateableClusterer) {
+        result = m_Tester.updatingEquality(
+            m_NominalPredictors, 
+            m_NumericPredictors, 
+            m_StringPredictors, 
+            m_DatePredictors, 
+            m_RelationalPredictors, 
+            m_multiInstanceHandler);
+
+        if (!result[0])
+          System.err.println(
+              "Incremental training does not produce same result as batch training!");
+    }
+  }
+
+  /**
+   * Builds a model using the current Clusterer using the given data and 
+   * returns the produced cluster assignments.
+   * 
+   * @param data 	the instances to test the Clusterer on
+   * @return 		a String containing the cluster assignments.
+   */
+  protected String useClusterer(Instances data) throws Exception {
+    String	result;
+    Clusterer 	clusterer;
+    int		i;
+    double	cluster;
+    
+    try {
+      clusterer = Clusterer.makeCopy(m_Clusterer);
+    } 
+    catch (Exception e) {
+      clusterer = null;
+      e.printStackTrace();
+      fail("Problem setting up to use Clusterer: " + e);
+    }
+
+    clusterer.buildClusterer(data);
+    
+    // generate result
+    result = "";
+    for (i = 0; i < data.numInstances(); i++) {
+      if (i > 0)
+	result += "\n";
+      try {
+	cluster = clusterer.clusterInstance(data.instance(i));
+	result += "" + (i+1) + ": " + cluster;
+      }
+      catch (Exception e) {
+	result += "" + (i+1) + ": " + e.toString();
+      }
+    }
+    
+    return result;
+  }
+
+  /**
+   * Runs a regression test -- this checks that the output of the tested
+   * object matches that in a reference version. When this test is
+   * run without any pre-existing reference output, the reference version
+   * is created.
+   */
+  public void testRegression() throws Exception {
+    boolean	succeeded;
+    Regression 	reg;
+    Instances   train;
+    
+    // don't bother if not working correctly
+    if (m_Tester.hasClasspathProblems())
+      return;
+    
+    reg       = new Regression(this.getClass());
+    train     = null;
+    succeeded = false;
+    
+    train = m_Tester.makeTestDataset(
+	42, m_Tester.getNumInstances(), 
+	m_NominalPredictors ? 2 : 0,
+	m_NumericPredictors ? 1 : 0, 
+	m_StringPredictors ? 1 : 0,
+	m_DatePredictors ? 1 : 0,
+	m_RelationalPredictors ? 1 : 0,
+	m_multiInstanceHandler);
+    
+    try {
+      m_RegressionResults = useClusterer(train);
+      succeeded = true;
+      reg.println(m_RegressionResults);
+    }
+    catch (Exception e) {
+      String msg = e.getMessage().toLowerCase();
+      if (msg.indexOf("not in classpath") > -1)
+	return;
+      
+      m_RegressionResults = null;
+    }
+    
+    if (!succeeded) {
+      fail("Problem during regression testing: no successful output generated");
+    }
+
+    try {
+      String diff = reg.diff();
+      if (diff == null) {
+        System.err.println("Warning: No reference available, creating."); 
+      } else if (!diff.equals("")) {
+        fail("Regression test failed. Difference:\n" + diff);
+      }
+    } 
+    catch (java.io.IOException ex) {
+      fail("Problem during regression testing.\n" + ex);
+    }
   }
   
   /**
