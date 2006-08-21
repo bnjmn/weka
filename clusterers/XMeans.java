@@ -80,46 +80,46 @@ import java.util.Vector;
  * 
  * <pre> -I &lt;num&gt;
  *  maximum number of overall iterations
- *  (default = 1).</pre>
+ *  (default 1).</pre>
  * 
  * <pre> -M &lt;num&gt;
  *  maximum number of iterations in the kMeans loop in
  *  the Improve-Parameter part 
- *  (default = 1000).</pre>
+ *  (default 1000).</pre>
  * 
  * <pre> -J &lt;num&gt;
  *  maximum number of iterations in the kMeans loop
  *  for the splitted centroids in the Improve-Structure part 
- *  (default = 1000).</pre>
+ *  (default 1000).</pre>
  * 
  * <pre> -L &lt;num&gt;
  *  minimum number of clusters
- *  (default = 2).</pre>
+ *  (default 2).</pre>
  * 
  * <pre> -H &lt;num&gt;
  *  maximum number of clusters
- *  (default = 4).</pre>
+ *  (default 4).</pre>
  * 
  * <pre> -V &lt;value&gt;
  *  distance value for binary attributes
- *  (default = 1.0).</pre>
+ *  (default 1.0).</pre>
  * 
  * <pre> -K &lt;KDTree class specification&gt;
  *  Full class name of KDTree class to use, followed
  *  by scheme options.
  *  eg: "weka.core.KDTree -P"
- *  (default = no KDTree class used).</pre>
+ *  (default no KDTree class used).</pre>
  * 
  * <pre> -C &lt;value&gt;
  *  cutoff factor, takes the given percentage of the splitted 
  *  centroids if none of the children win
- *  (default = 0.0).</pre>
+ *  (default 0.0).</pre>
  * 
- * <pre> -K &lt;distance function class specification&gt;
+ * <pre> -D &lt;distance function class specification&gt;
  *  Full class name of Distance function class to use, followed
  *  by scheme options.
  *  eg: "weka.core.MahalanobisDistance"
- *  (default = weka.core.EuclideanDistance).</pre>
+ *  (default weka.core.EuclideanDistance).</pre>
  * 
  * <pre> -N &lt;file name&gt;
  *  file to read starting centers from (ARFF format).</pre>
@@ -128,14 +128,15 @@ import java.util.Vector;
  *  file to write centers to (ARFF format).</pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed (default 10).</pre>
+ *  Random number seed.
+ *  (default 10)</pre>
  * 
  <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -1519,7 +1520,7 @@ throws Exception{
        "\tby scheme options.\n" +
        "\teg: \"weka.core.MahalanobisDistance\"\n" +
        "\t(default weka.core.EuclideanDistance).",
-       "K", 1, "-K <distance function class specification>"));
+       "D", 1, "-D <distance function class specification>"));
      
      result.addElement(new Option(
        "\tfile to read starting centers from (ARFF format).",
@@ -1850,46 +1851,46 @@ throws Exception{
    * 
    * <pre> -I &lt;num&gt;
    *  maximum number of overall iterations
-   *  (default = 1).</pre>
+   *  (default 1).</pre>
    * 
    * <pre> -M &lt;num&gt;
    *  maximum number of iterations in the kMeans loop in
    *  the Improve-Parameter part 
-   *  (default = 1000).</pre>
+   *  (default 1000).</pre>
    * 
    * <pre> -J &lt;num&gt;
    *  maximum number of iterations in the kMeans loop
    *  for the splitted centroids in the Improve-Structure part 
-   *  (default = 1000).</pre>
+   *  (default 1000).</pre>
    * 
    * <pre> -L &lt;num&gt;
    *  minimum number of clusters
-   *  (default = 2).</pre>
+   *  (default 2).</pre>
    * 
    * <pre> -H &lt;num&gt;
    *  maximum number of clusters
-   *  (default = 4).</pre>
+   *  (default 4).</pre>
    * 
    * <pre> -V &lt;value&gt;
    *  distance value for binary attributes
-   *  (default = 1.0).</pre>
+   *  (default 1.0).</pre>
    * 
    * <pre> -K &lt;KDTree class specification&gt;
    *  Full class name of KDTree class to use, followed
    *  by scheme options.
    *  eg: "weka.core.KDTree -P"
-   *  (default = no KDTree class used).</pre>
+   *  (default no KDTree class used).</pre>
    * 
    * <pre> -C &lt;value&gt;
    *  cutoff factor, takes the given percentage of the splitted 
    *  centroids if none of the children win
-   *  (default = 0.0).</pre>
+   *  (default 0.0).</pre>
    * 
-   * <pre> -K &lt;distance function class specification&gt;
+   * <pre> -D &lt;distance function class specification&gt;
    *  Full class name of Distance function class to use, followed
    *  by scheme options.
    *  eg: "weka.core.MahalanobisDistance"
-   *  (default = weka.core.EuclideanDistance).</pre>
+   *  (default weka.core.EuclideanDistance).</pre>
    * 
    * <pre> -N &lt;file name&gt;
    *  file to read starting centers from (ARFF format).</pre>
@@ -1898,7 +1899,8 @@ throws Exception{
    *  file to write centers to (ARFF format).</pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed (default 10).</pre>
+   *  Random number seed.
+   *  (default 10)</pre>
    * 
    <!-- options-end -->
    * 
@@ -2065,7 +2067,7 @@ throws Exception{
   public String toString() {
     StringBuffer temp = new StringBuffer();
 
-    temp.append("\nkMeans\n======\n");
+    temp.append("\nXMeans\n======\n");
 
     temp.append("Requested iterations            : " + m_MaxIterations + "\n");
     temp.append("Iterations performed            : " + m_IterationCount+ "\n");
@@ -2156,4 +2158,3 @@ throws Exception{
     runClusterer(new XMeans(), argv);
   }
 }
-
