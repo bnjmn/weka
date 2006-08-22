@@ -23,8 +23,14 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.Filter;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This filter should be extended by other unsupervised attribute
@@ -34,15 +40,60 @@ import weka.core.Instances;
  * attribute that is originally the class attribute !
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
-public abstract class PotentialClassIgnorer extends Filter {
+public abstract class PotentialClassIgnorer
+  extends Filter
+  implements OptionHandler {
 
   /** True if the class is to be unset */
   protected boolean m_IgnoreClass = false;
 
   /** Storing the class index */
   protected int m_ClassIndex = -1;
+
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return 		an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector result = new Vector();
+      
+    result.addElement(new Option(
+	"\tUnsets the class index temporarily before the filter is\n"
+	+ "\tapplied to the data.\n"
+	+ "\t(default: no)",
+	"unset-class-temporarily", 1, "-unset-class-temporarily"));
+
+    return result.elements();
+  }
+
+  /**
+   * Parses a list of options for this object.
+   *
+   * @param options 	the list of options as an array of strings
+   * @throws Exception 	if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    setIgnoreClass(Utils.getFlag("unset-class-temporarily", options));
+  }
+
+  /**
+   * Gets the current settings of the filter.
+   *
+   * @return 		an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector        result;
+
+    result = new Vector();
+
+    if (getIgnoreClass())
+      result.add("-unset-class-temporarily");
+
+    return (String[]) result.toArray(new String[result.size()]);
+  }
 
   /**
    * Sets the format of the input instances. If the filter is able to
@@ -87,14 +138,32 @@ public abstract class PotentialClassIgnorer extends Filter {
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String ignoreClassTipText() {
+    return "The class index will be unset temporarily before the filter is applied.";
+  }
+
+  /**
    * Set the IgnoreClass value. Set this to true if the
    * class index is to be unset before the filter is applied.
+   * 
    * @param newIgnoreClass The new IgnoreClass value.
    */
   public void setIgnoreClass(boolean newIgnoreClass) {
-
     m_IgnoreClass = newIgnoreClass;
   }
-}
   
-   
+  /**
+   * Gets the IgnoreClass value. If this to true then the
+   * class index is to unset before the filter is applied.
+   * 
+   * @return the current IgnoreClass value.
+   */
+  public boolean getIgnoreClass() {
+    return m_IgnoreClass;
+  }
+}
