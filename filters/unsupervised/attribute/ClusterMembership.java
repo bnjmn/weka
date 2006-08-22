@@ -64,7 +64,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -95,7 +95,11 @@ public class ClusterMembership
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    return m_clusterer.getCapabilities();
+    Capabilities result = m_clusterer.getCapabilities();
+    
+    result.setMinimumNumberInstances(0);
+    
+    return result;
   }
   
   /**

@@ -97,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AttributeSelection 
   extends Filter
@@ -397,6 +397,8 @@ public class AttributeSelection
       //   weka.attributeSelection.AttributeSelection.SelectAttributes(Instances)
       result.enable(Capability.NO_CLASS);
     }
+    
+    result.setMinimumNumberInstances(0);
     
     return result;
   }
