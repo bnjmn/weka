@@ -51,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -70,8 +70,8 @@ public class MultiFilter
   protected boolean m_StreamableChecked = false;
   
   /**
-   * Returns a string describing this classifier
-   * @return 		a description of the classifier suitable for
+   * Returns a string describing this filter
+   * @return 		a description of the filter suitable for
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
