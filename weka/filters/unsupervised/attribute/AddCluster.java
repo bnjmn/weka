@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AddCluster 
   extends Filter 
@@ -87,7 +87,11 @@ public class AddCluster
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    return m_Clusterer.getCapabilities();
+    Capabilities result = m_Clusterer.getCapabilities();
+    
+    result.setMinimumNumberInstances(0);
+    
+    return result;
   }
   
   /**

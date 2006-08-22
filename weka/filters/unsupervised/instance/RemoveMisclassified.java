@@ -74,7 +74,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RemoveMisclassified 
   extends Filter 
@@ -111,10 +111,16 @@ public class RemoveMisclassified
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
+    Capabilities 	result;
+    
     if (getClassifier() == null)
-      return super.getCapabilities();
+      result = super.getCapabilities();
     else
-      return getClassifier().getCapabilities();
+      result = getClassifier().getCapabilities();
+    
+    result.setMinimumNumberInstances(0);
+    
+    return result;
   }
 
   /**
