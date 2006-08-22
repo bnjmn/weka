@@ -63,6 +63,11 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
  * <pre> -R &lt;col1,col2-col4,...&gt;
  *  Specifies list of columns to Discretize. First and last are valid indexes.
  *  (default: first-last)</pre>
@@ -76,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PKIDiscretize 
   extends Discretize
@@ -130,24 +135,29 @@ public class PKIDiscretize
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-
-    Vector newVector = new Vector(7);
-
-    newVector.addElement(new Option(
-              "\tSpecifies list of columns to Discretize. First"
-	      + " and last are valid indexes.\n"
-	      + "\t(default: first-last)",
-              "R", 1, "-R <col1,col2-col4,...>"));
-
-    newVector.addElement(new Option(
-              "\tInvert matching sense of column indexes.",
-              "V", 0, "-V"));
-
-    newVector.addElement(new Option(
-              "\tOutput binary attributes for discretized attributes.",
-              "D", 0, "-D"));
-
-    return newVector.elements();
+    Vector result = new Vector();
+    
+    result.addElement(new Option(
+	"\tUnsets the class index temporarily before the filter is\n"
+	+ "\tapplied to the data.\n"
+	+ "\t(default: no)",
+	"unset-class-temporarily", 1, "-unset-class-temporarily"));
+    
+    result.addElement(new Option(
+	"\tSpecifies list of columns to Discretize. First"
+	+ " and last are valid indexes.\n"
+	+ "\t(default: first-last)",
+	"R", 1, "-R <col1,col2-col4,...>"));
+    
+    result.addElement(new Option(
+	"\tInvert matching sense of column indexes.",
+	"V", 0, "-V"));
+    
+    result.addElement(new Option(
+	"\tOutput binary attributes for discretized attributes.",
+	"D", 0, "-D"));
+    
+    return result.elements();
   }
 
 
@@ -156,6 +166,11 @@ public class PKIDiscretize
    * 
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -unset-class-temporarily
+   *  Unsets the class index temporarily before the filter is
+   *  applied to the data.
+   *  (default: no)</pre>
    * 
    * <pre> -R &lt;col1,col2-col4,...&gt;
    *  Specifies list of columns to Discretize. First and last are valid indexes.
@@ -174,6 +189,7 @@ public class PKIDiscretize
    */
   public void setOptions(String[] options) throws Exception {
 
+    setIgnoreClass(Utils.getFlag("unset-class-temporarily", options));
     setMakeBinary(Utils.getFlag('D', options));
     setInvertSelection(Utils.getFlag('V', options));
     
@@ -193,24 +209,23 @@ public class PKIDiscretize
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  public String[] getOptions() {
+    Vector        result;
 
-    String [] options = new String [12];
-    int current = 0;
+    result = new Vector();
 
-    if (getMakeBinary()) {
-      options[current++] = "-D";
-    }
-    if (getInvertSelection()) {
-      options[current++] = "-V";
-    }
+    if (getMakeBinary())
+      result.add("-D");
+    
+    if (getInvertSelection())
+      result.add("-V");
+    
     if (!getAttributeIndices().equals("")) {
-      options[current++] = "-R"; options[current++] = getAttributeIndices();
+      result.add("-R");
+      result.add(getAttributeIndices());
     }
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
