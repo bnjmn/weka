@@ -37,9 +37,19 @@ import weka.filters.UnsupervisedFilter;
  * Converts all numeric attributes into binary attributes (apart from the class attribute, if set): if the value of the numeric attribute is exactly zero, the value of the new attribute will be zero. If the value of the numeric attribute is missing, the value of the new attribute will be missing. Otherwise, the value of the new attribute will be one. The new attributes will be nominal.
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class NumericToBinary 
   extends PotentialClassIgnorer
