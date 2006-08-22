@@ -28,7 +28,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MathematicalExpression;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
@@ -48,6 +47,11 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
  * <pre> -E &lt;expression&gt;
  *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
  *  Supported operators are +, -, *, /, pow, log,
@@ -65,12 +69,12 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see MathematicalExpression
  */
 public class MathExpression 
   extends PotentialClassIgnorer 
-  implements UnsupervisedFilter, OptionHandler {
+  implements UnsupervisedFilter {
   
   /** for serialization */
   static final long serialVersionUID = -3713222714671997901L;
@@ -94,7 +98,8 @@ public class MathExpression
    * Constructor
    */
   public MathExpression() {
-      setInvertSelection(false);
+    super();
+    setInvertSelection(false);
   }  
   
   /**
@@ -305,6 +310,11 @@ public class MathExpression
    <!-- options-start -->
    * Valid options are: <p/>
    * 
+   * <pre> -unset-class-temporarily
+   *  Unsets the class index temporarily before the filter is
+   *  applied to the data.
+   *  (default: no)</pre>
+   * 
    * <pre> -E &lt;expression&gt;
    *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
    *  Supported operators are +, -, *, /, pow, log,
@@ -324,6 +334,8 @@ public class MathExpression
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+    super.setOptions(options);
+
     String expString = Utils.getOption('E', options);
     if (expString.length() != 0) {
       setExpression(expString);
@@ -345,21 +357,28 @@ public class MathExpression
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
 
-    String [] options = new String [5];
-    int current = 0;
+    result = new Vector();
+
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    result.add("-E");
+    result.add(getExpression());
     
-    options[current++] = "-E"; options[current++] = getExpression();
-    if (getInvertSelection()) {
-      options[current++] = "-V";
-    }
+    if (getInvertSelection())
+      result.add("-V");
+
     if (!getIgnoreRange().equals("")) {
-      options[current++] = "-R"; options[current++] = getIgnoreRange();
+      result.add("-R");
+      result.add(getIgnoreRange());
     }
-    while(current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+
+    return (String[]) result.toArray(new String[result.size()]);
   }
   
   /**
@@ -368,21 +387,28 @@ public class MathExpression
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
-    Vector newVector = new Vector(3);
-    newVector.addElement(new Option(
-	     "\tSpecify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)"
-	     +"\n\tSupported operators are +, -, *, /, pow, log,"
-	     +"\n\tabs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), "
-             +"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse",
-	     "E",1,"-E <expression>"));
-    newVector.addElement(new Option(
-              "\tSpecify list of columns to ignore. First and last are valid\n"
-	      +"\tindexes. (default none)",
-              "R", 1, "-R <index1,index2-index4,...>"));    
-    newVector.addElement(new Option(
-	      "\tInvert matching sense (i.e. only modify specified columns)",
-              "V", 0, "-V"));
-    return newVector.elements();
+    Vector result = new Vector();
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.add(enm.nextElement());
+      
+    result.addElement(new Option(
+	"\tSpecify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)"
+	+"\n\tSupported operators are +, -, *, /, pow, log,"
+	+"\n\tabs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), "
+	+"\n\tMEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse",
+	"E",1,"-E <expression>"));
+    
+    result.addElement(new Option(
+	"\tSpecify list of columns to ignore. First and last are valid\n"
+	+"\tindexes. (default none)",
+	"R", 1, "-R <index1,index2-index4,...>"));
+    
+    result.addElement(new Option(
+	"\tInvert matching sense (i.e. only modify specified columns)",
+	"V", 0, "-V"));
+    
+    return result.elements();
   }
   
   /**

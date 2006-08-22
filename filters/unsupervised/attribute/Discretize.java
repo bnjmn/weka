@@ -29,7 +29,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SparseInstance;
 import weka.core.Utils;
@@ -48,6 +47,11 @@ import java.util.Vector;
  * 
  <!-- options-start -->
  * Valid options are: <p/>
+ * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
  * 
  * <pre> -B &lt;num&gt;
  *  Specifies the (maximum) number of bins to divide numeric attributes into.
@@ -81,11 +85,11 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Discretize 
   extends PotentialClassIgnorer 
-  implements UnsupervisedFilter, OptionHandler, WeightedInstancesHandler {
+  implements UnsupervisedFilter, WeightedInstancesHandler {
   
   /** for serialization */
   static final long serialVersionUID = -1358531742174527279L;
@@ -138,47 +142,49 @@ public class Discretize
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
+    Vector result = new Vector();
+    Enumeration enm = super.listOptions();
+    while (enm.hasMoreElements())
+      result.add(enm.nextElement());
+      
+    result.addElement(new Option(
+	"\tSpecifies the (maximum) number of bins to divide numeric"
+	+ " attributes into.\n"
+	+ "\t(default = 10)",
+	"B", 1, "-B <num>"));
+    
+    result.addElement(new Option(
+	"\tSpecifies the desired weight of instances per bin for\n"
+	+ "\tequal-frequency binning. If this is set to a positive\n"
+	+ "\tnumber then the -B option will be ignored.\n"
+	+ "\t(default = -1)",
+	"M", 1, "-M <num>"));
+    
+    result.addElement(new Option(
+	"\tUse equal-frequency instead of equal-width discretization.",
+	"F", 0, "-F"));
+    
+    result.addElement(new Option(
+	"\tOptimize number of bins using leave-one-out estimate\n"+
+	"\tof estimated entropy (for equal-width discretization).\n"+
+	"\tIf this is set then the -B option will be ignored.",
+	"O", 0, "-O"));
+    
+    result.addElement(new Option(
+	"\tSpecifies list of columns to Discretize. First"
+	+ " and last are valid indexes.\n"
+	+ "\t(default: first-last)",
+	"R", 1, "-R <col1,col2-col4,...>"));
+    
+    result.addElement(new Option(
+	"\tInvert matching sense of column indexes.",
+	"V", 0, "-V"));
+    
+    result.addElement(new Option(
+	"\tOutput binary attributes for discretized attributes.",
+	"D", 0, "-D"));
 
-    Vector newVector = new Vector(7);
-
-    newVector.addElement(new Option(
-              "\tSpecifies the (maximum) number of bins to divide numeric"
-	      + " attributes into.\n"
-	      + "\t(default = 10)",
-              "B", 1, "-B <num>"));
-
-    newVector.addElement(new Option(
-              "\tSpecifies the desired weight of instances per bin for\n"
-	      + "\tequal-frequency binning. If this is set to a positive\n"
-	      + "\tnumber then the -B option will be ignored.\n"
-	      + "\t(default = -1)",
-              "M", 1, "-M <num>"));
-
-    newVector.addElement(new Option(
-              "\tUse equal-frequency instead of equal-width discretization.",
-              "F", 0, "-F"));
-
-    newVector.addElement(new Option(
-              "\tOptimize number of bins using leave-one-out estimate\n"+
-	      "\tof estimated entropy (for equal-width discretization).\n"+
-	      "\tIf this is set then the -B option will be ignored.",
-              "O", 0, "-O"));
-
-    newVector.addElement(new Option(
-              "\tSpecifies list of columns to Discretize. First"
-	      + " and last are valid indexes.\n"
-	      + "\t(default: first-last)",
-              "R", 1, "-R <col1,col2-col4,...>"));
-
-    newVector.addElement(new Option(
-              "\tInvert matching sense of column indexes.",
-              "V", 0, "-V"));
-
-    newVector.addElement(new Option(
-              "\tOutput binary attributes for discretized attributes.",
-              "D", 0, "-D"));
-
-    return newVector.elements();
+    return result.elements();
   }
 
 
@@ -187,6 +193,11 @@ public class Discretize
    * 
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -unset-class-temporarily
+   *  Unsets the class index temporarily before the filter is
+   *  applied to the data.
+   *  (default: no)</pre>
    * 
    * <pre> -B &lt;num&gt;
    *  Specifies the (maximum) number of bins to divide numeric attributes into.
@@ -222,6 +233,8 @@ public class Discretize
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+
+    super.setOptions(options);
 
     setMakeBinary(Utils.getFlag('D', options));
     setUseEqualFrequency(Utils.getFlag('F', options));
@@ -260,32 +273,40 @@ public class Discretize
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
 
-    String [] options = new String [10];
-    int current = 0;
+    result = new Vector();
 
-    if (getMakeBinary()) {
-      options[current++] = "-D";
-    }
-    if (getUseEqualFrequency()) {
-      options[current++] = "-F";
-    }
-    if (getFindNumBins()) {
-      options[current++] = "-O";
-    }
-    if (getInvertSelection()) {
-      options[current++] = "-V";
-    }
-    options[current++] = "-B"; options[current++] = "" + getBins();
-    options[current++] = "-M"; 
-    options[current++] = "" + getDesiredWeightOfInstancesPerInterval();
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
+    if (getMakeBinary())
+      result.add("-D");
+    
+    if (getUseEqualFrequency())
+      result.add("-F");
+    
+    if (getFindNumBins())
+      result.add("-O");
+    
+    if (getInvertSelection())
+      result.add("-V");
+    
+    result.add("-B");
+    result.add("" + getBins());
+    
+    result.add("-M");
+    result.add("" + getDesiredWeightOfInstancesPerInterval());
+    
     if (!getAttributeIndices().equals("")) {
-      options[current++] = "-R"; options[current++] = getAttributeIndices();
+      result.add("-R");
+      result.add(getAttributeIndices());
     }
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /** 
