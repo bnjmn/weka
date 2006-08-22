@@ -34,10 +34,20 @@ import weka.filters.UnsupervisedFilter;
  * Centers all numeric attributes in the given dataset to have zero mean (apart from the class attribute, if set).
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Center 
   extends PotentialClassIgnorer 
@@ -47,7 +57,7 @@ public class Center
   private static final long serialVersionUID = -9101338448900581023L;
   
   /** The means */
-  private double [] m_Means;
+  private double[] m_Means;
 
   /**
    * Returns a string describing this filter

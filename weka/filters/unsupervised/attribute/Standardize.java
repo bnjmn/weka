@@ -34,9 +34,19 @@ import weka.filters.UnsupervisedFilter;
  * Standardizes all numeric attributes in the given dataset to have zero mean and unit variance (apart from the class attribute, if set).
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 

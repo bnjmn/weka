@@ -34,9 +34,19 @@ import weka.filters.UnsupervisedFilter;
  * Normalizes all numeric values in the given dataset (apart from the class attribute, if set). The resulting values are in [0,1] for the data used to compute the normalization intervals.
  * <p/>
  <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
