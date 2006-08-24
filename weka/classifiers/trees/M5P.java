@@ -91,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class M5P 
   extends M5Base 
@@ -131,6 +131,18 @@ public class M5P
     temp.topOfTree().graph(text);
     text.append("}\n");
     return text.toString();
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String saveInstancesTipText() {
+    return 
+        "Whether to save instance data at each node in the tree for "
+      + "visualization purposes.";
   }
 
   /**
