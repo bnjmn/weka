@@ -44,7 +44,7 @@ import java.util.logging.SimpleFormatter;
  * A helper class for debug output, logging, clocking, etc.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Debug
   implements Serializable {
@@ -85,7 +85,7 @@ public class Debug
    * CPU time if possible, otherwise it's just based on the system time.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $ 
+   * @version $Revision: 1.4 $ 
    * @see ThreadMXBean#isThreadCpuTimeEnabled()
    */
   public static class Clock 
@@ -386,7 +386,7 @@ public class Debug
    * formatting options, see java.text.SimpleDateFormat.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $ 
+   * @version $Revision: 1.4 $ 
    * @see SimpleDateFormat
    */
   public static class Timestamp
@@ -600,7 +600,7 @@ public class Debug
    * Debug.SimpleLog class.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $ 
+   * @version $Revision: 1.4 $ 
    * @see Debug.SimpleLog
    */
   public static class Log
@@ -817,7 +817,7 @@ public class Debug
    * INFO).
    *
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    * @see #setLog(Log)
    */
   public static class Random
@@ -1090,10 +1090,10 @@ public class Debug
     }
   }
   /**
-   * contains static debug methods
+   * contains debug methods
    *
    * @author Gabi Schmidberger (gabi at cs dot waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   public static class DBO 
     implements Serializable {
@@ -1101,6 +1101,7 @@ public class Debug
     /** for serialization */
     static final long serialVersionUID = -5245628124742606784L;  
 
+    /** enables/disables output of debug information */
     public boolean m_verboseOn = false;
 
     /** range of outputtyp */
@@ -1108,8 +1109,6 @@ public class Debug
 
     /** 
      * Set the verbose on flag on
-     * 
-     * @param upper upper limit
      */
     public void setVerboseOn() {
       m_verboseOn = true;
