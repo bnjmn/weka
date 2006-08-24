@@ -65,7 +65,7 @@ import java.util.Vector;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public abstract class M5Base 
   extends Classifier 
@@ -258,6 +258,16 @@ public abstract class M5Base
   } 
 
   /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String unprunedTipText() {
+    return "Whether unpruned tree/rules are to be generated.";
+  }
+
+  /**
    * Use unpruned tree/rules
    *
    * @param unpruned true if unpruned tree/rules are to be generated
@@ -273,6 +283,16 @@ public abstract class M5Base
    */
   public boolean getUnpruned() {
     return m_useUnpruned;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String generateRulesTipText() {
+    return "Whether to generate rules (decision list) rather than a tree.";
   }
 
   /**
@@ -294,6 +314,16 @@ public abstract class M5Base
   } 
 
   /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String useUnsmoothedTipText() {
+    return "Whether to use unsmoothed predictions.";
+  }
+
+  /**
    * Use unsmoothed predictions
    * 
    * @param s true if unsmoothed predictions are to be used
@@ -310,6 +340,16 @@ public abstract class M5Base
   public boolean getUseUnsmoothed() {
     return m_unsmoothedPredictions;
   } 
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String buildRegressionTreeTipText() {
+    return "Whether to generate a regression tree/rule instead of a model tree/rule.";
+  }
 
   /**
    * Get the value of regressionTree.
@@ -332,7 +372,17 @@ public abstract class M5Base
   }
 
   /**
-   * Set the minumum number of instances to allow at a leaf node
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String minNumInstancesTipText() {
+    return "The minimum number of instances to allow at a leaf node.";
+  }
+
+  /**
+   * Set the minimum number of instances to allow at a leaf node
    *
    * @param minNum the minimum number of instances
    */
