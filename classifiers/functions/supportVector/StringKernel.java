@@ -251,7 +251,7 @@ import java.util.Vector;
  *
  * @author Florian Kleedorfer (kleedorfer@austria.fm)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class StringKernel 
   extends Kernel
@@ -274,7 +274,7 @@ public class StringKernel
   private long[] m_keys;
 
   /** Counts the number of kernel evaluations. */
-  private int m_kernelEvals = 0;
+  private int m_kernelEvals;
 
   /** The number of instance in the dataset */
   private int m_numInsts;
@@ -1431,6 +1431,7 @@ public class StringKernel
   protected void initVars(Instances data) {
     super.initVars(data);
 
+    m_kernelEvals    = 0;
     m_strAttr        = 1 - data.classIndex();
     m_numInsts       = m_data.numInstances();
     m_storage        = new double[m_cacheSize];
