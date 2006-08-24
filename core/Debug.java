@@ -22,10 +22,14 @@
 package weka.core;
 
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.text.SimpleDateFormat;
@@ -40,7 +44,7 @@ import java.util.logging.SimpleFormatter;
  * A helper class for debug output, logging, clocking, etc.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Debug
   implements Serializable {
@@ -81,7 +85,7 @@ public class Debug
    * CPU time if possible, otherwise it's just based on the system time.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $ 
+   * @version $Revision: 1.3 $ 
    * @see ThreadMXBean#isThreadCpuTimeEnabled()
    */
   public static class Clock 
@@ -382,7 +386,7 @@ public class Debug
    * formatting options, see java.text.SimpleDateFormat.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $ 
+   * @version $Revision: 1.3 $ 
    * @see SimpleDateFormat
    */
   public static class Timestamp
@@ -596,7 +600,7 @@ public class Debug
    * Debug.SimpleLog class.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $ 
+   * @version $Revision: 1.3 $ 
    * @see Debug.SimpleLog
    */
   public static class Log
@@ -813,7 +817,7 @@ public class Debug
    * INFO).
    *
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    * @see #setLog(Log)
    */
   public static class Random
@@ -1089,7 +1093,7 @@ public class Debug
    * contains static debug methods
    *
    * @author Gabi Schmidberger (gabi at cs dot waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   public static class DBO 
     implements Serializable {
@@ -1503,6 +1507,55 @@ public class Debug
     }
     catch (Exception e) {
       result = false;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * writes the serialized object to the speicified file
+   * 
+   * @param filename	the file to serialize the object to
+   * @param o		the object to serialize
+   * @return		true if writing was successful
+   */
+  public static boolean saveToFile(String filename, Object o) {
+    boolean 		result;
+    ObjectOutputStream 	oos;
+    
+    try {
+      oos = new ObjectOutputStream(new FileOutputStream(filename));
+      oos.writeObject(o);
+      oos.flush();
+      oos.close();
+      
+      result = true;
+    }
+    catch (Exception e) {
+      result = false;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * deserializes the content of the file and returns it, null if an error
+   * occurred.
+   * 
+   * @param filename	the name of the file to deserialize
+   * @return		the deserialized content, null if problem occurred
+   */
+  public static Object loadFromFile(String filename) {
+    Object		result;
+    ObjectInputStream 	ois;
+    
+    try {
+      ois    = new ObjectInputStream(new FileInputStream(filename));
+      result = ois.readObject();
+      ois.close();
+    }
+    catch (Exception e) {
+      result = null;
     }
     
     return result;
