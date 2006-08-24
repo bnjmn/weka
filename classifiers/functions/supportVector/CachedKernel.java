@@ -35,16 +35,16 @@ import java.util.Vector;
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Steven Hugg (hugg@fasterlight.com) (refactored, LRU cache)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz) (full cache)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class CachedKernel 
   extends Kernel {
     
   /** Counts the number of kernel evaluations. */
-  protected int m_kernelEvals = 0;
+  protected int m_kernelEvals;
 
   /** Counts the number of kernel cache hits. */
-  protected int m_cacheHits = 0;
+  protected int m_cacheHits;
 
   /** The size of the cache (a prime number) */
   protected int m_cacheSize = 250007;
@@ -101,7 +101,8 @@ public abstract class CachedKernel
       result.addElement(en.nextElement());
 
     result.addElement(new Option(
-	"\tThe size of the cache (a prime number).\n"
+	"\tThe size of the cache (a prime number), 0 for full cache and \n"
+	+ "\t-1 to turn it off.\n"
 	+ "\t(default: 250007)",
 	"C", 1, "-C <num>"));
 
@@ -175,8 +176,9 @@ public abstract class CachedKernel
     long key = -1;
     int location = -1;
 
-    // we can only cache if we know the indexes
-    if (id1 >= 0) {
+    // we can only cache if we know the indexes and caching is not 
+    // disbled (m_cacheSize == -1)
+    if ( (id1 >= 0) && (m_cacheSize != -1) ) {
 
       // Use full cache?
       if (m_cacheSize == 0) {
@@ -230,7 +232,7 @@ public abstract class CachedKernel
     m_kernelEvals++;
 
     // store result in cache
-    if (key != -1) {
+    if ( (key != -1) && (m_cacheSize != -1) ) {
       // move all cache slots forward one array index
       // to make room for the new entry
       System.arraycopy(m_keys, location, m_keys, location + 1,
@@ -311,13 +313,13 @@ public abstract class CachedKernel
    * @param value	the size of the cache
    */
   public void setCacheSize(int value) {
-    if (value >= 0) {
+    if (value >= -1) {
       m_cacheSize = value;
       clean();
     }
     else {
       System.out.println(
-	  "Cache size cannot be smaller than 0 (provided: " + value + ")!");
+	  "Cache size cannot be smaller than -1 (provided: " + value + ")!");
     }
   }
   
@@ -337,7 +339,7 @@ public abstract class CachedKernel
    * 			displaying in the explorer/experimenter gui
    */
   public String cacheSizeTipText() {
-    return "The size of the cache (a prime number).";
+    return "The size of the cache (a prime number), 0 for full cache and -1 to turn it off.";
   }
 
   /**
@@ -348,13 +350,20 @@ public abstract class CachedKernel
   protected void initVars(Instances data) {
     super.initVars(data);
     
-    m_numInsts = m_data.numInstances();
+    m_kernelEvals = 0;
+    m_cacheHits   = 0;
+    m_numInsts    = m_data.numInstances();
 
     if (getCacheSize() > 0) {
       // Use LRU cache
       m_storage = new double[m_cacheSize * m_cacheSlots];
       m_keys    = new long[m_cacheSize * m_cacheSlots];
     } 
+    else {
+      m_storage      = null;
+      m_keys         = null;
+      m_kernelMatrix = null;
+    }
   }
   
   /**
