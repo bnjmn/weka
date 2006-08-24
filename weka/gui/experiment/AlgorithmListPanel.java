@@ -23,69 +23,79 @@
 
 package weka.gui.experiment;
 
-import weka.core.OptionHandler;
-import weka.core.Utils;
-
 import weka.classifiers.Classifier;
-
+import weka.classifiers.xml.XMLClassifier;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.JListHelper;
 import weka.gui.PropertyDialog;
 
-import weka.classifiers.xml.XMLClassifier;
-import weka.core.Instances;
-import weka.core.SerializedObject;
-import weka.experiment.Experiment;
-
-import java.util.Vector;
-import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
-import javax.swing.JButton;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.filechooser.FileFilter;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyEditor;
 import java.io.File;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
 /** 
  * This panel controls setting a list of algorithms for an experiment to
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class AlgorithmListPanel extends JPanel implements ActionListener {
+public class AlgorithmListPanel
+  extends JPanel
+  implements ActionListener {
 
-  /* Class required to show the Classifiers nicely in the list */
-  public class ObjectCellRenderer extends DefaultListCellRenderer {
+  /**
+   * Class required to show the Classifiers nicely in the list
+   */
+  public class ObjectCellRenderer
+    extends DefaultListCellRenderer {
+    
+    /**
+     * Return a component that has been configured to display the specified 
+     * value. That component's paint method is then called to "render" the 
+     * cell. If it is necessary to compute the dimensions of a list because 
+     * the list cells do not have a fixed size, this method is called to 
+     * generate a component on which getPreferredSize can be invoked.
+     * 
+     * @param list 		The JList we're painting.
+     * @param value		The value returned by 
+     * 				list.getModel().getElementAt(index).
+     * @param index		The cells index.
+     * @param isSelected	True if the specified cell was selected.
+     * @param cellHasFocus	True if the specified cell has the focus.
+     * @return			A component whose paint() method will render 
+     * 				the specified value.
+     */
     public Component getListCellRendererComponent(JList list,
 						  Object value,
 						  int index,
@@ -306,6 +316,8 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
 
   /**
    * Add a new algorithm to the list.
+   * 
+   * @param newScheme	the new scheme to add
    */
   private void addNewAlgorithm(Classifier newScheme) {
 
@@ -324,6 +336,8 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   /**
    * sets the state of the buttons according to the selection state of the
    * JList
+   * 
+   * @param e		the event
    */
   private void setButtons(ListSelectionEvent e) {
     if (e.getSource() == m_List) {
@@ -431,9 +445,21 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     } 
     else if (e.getSource() == m_UpBut) {
       JListHelper.moveUp(m_List);
+      
+      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
+      for (int i=0; i<cArray.length; i++) {
+	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
+      }
+      m_Exp.setPropertyArray(cArray); 
     }
     else if (e.getSource() == m_DownBut) {
       JListHelper.moveDown(m_List);
+
+      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
+      for (int i=0; i<cArray.length; i++) {
+	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
+      }
+      m_Exp.setPropertyArray(cArray); 
     }
   }
 
