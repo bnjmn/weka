@@ -25,13 +25,11 @@ package weka.test;
 import weka.core.ClassDiscovery;
 import weka.gui.GenericPropertiesCreator;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -39,7 +37,7 @@ import junit.framework.TestSuite;
  * automatic generation of a series of tests.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see     GenericPropertiesCreator
  * @see     ClassDiscovery
  */
@@ -129,7 +127,10 @@ public class WekaTestSuite
    * @return            the classname of the test
    */
   protected static String getTestClassname(String classname) {
-    return classname + "Test";
+    if (!classname.endsWith("Test"))
+      return classname + "Test";
+    else
+      return classname;
   }
 
   /**
