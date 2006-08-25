@@ -26,23 +26,43 @@ import java.util.Vector;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  * Test class for all core classes. Run from the command line with: <p/>
  * java weka.core.AllTests
  *
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AllTests 
   extends WekaTestSuite {
 
+  /**
+   * generates all the tests
+   * 
+   * @return		all the tests
+   */
   public static Test suite() {
+    TestSuite suite = new TestSuite();
+    
+    // all test in core package
     Vector packages = new Vector();
     packages.add("weka.core");
-    return suite(TestCase.class.getName(), packages);
+    suite.addTest(suite(TestCase.class.getName(), packages));
+
+    // all OptionHandler's
+    // TODO: fix all errors
+    //suite.addTest(OptionHandlersTest.suite());
+    
+    return suite;
   }
 
+  /**
+   * for running the tests from commandline
+   * 
+   * @param args	the commandline arguments - ignored
+   */
   public static void main(String []args) {
     junit.textui.TestRunner.run(suite());
   }
