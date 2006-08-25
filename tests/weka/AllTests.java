@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AllTests extends TestSuite {
 
@@ -19,12 +19,8 @@ public class AllTests extends TestSuite {
     TestSuite suite = new TestSuite();
 
     // Core components
-//      suite.addTest(weka.core.AllTests.suite());
-//      suite.addTest(weka.estimators.AllTests.suite());
-    suite.addTest(weka.filters.AllTests.suite());
+    suite.addTest(weka.core.AllTests.suite());
 
-
-    // The main ML components
     // associators
     suite.addTest(weka.associations.AllTests.suite());
 
@@ -40,9 +36,15 @@ public class AllTests extends TestSuite {
     // data generators
     suite.addTest(weka.datagenerators.AllTests.suite());
 
+    // estimators
+    //suite.addTest(weka.estimators.AllTests.suite());
+
+    // filters
+    suite.addTest(weka.filters.AllTests.suite());
+
     // High level applications
-//      suite.addTest(weka.experiment.AllTests.suite());
-//      suite.addTest(weka.gui.AllTests.suite());
+    //suite.addTest(weka.experiment.AllTests.suite());
+    //suite.addTest(weka.gui.AllTests.suite());
 
     return suite;
   }
