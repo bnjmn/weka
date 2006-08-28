@@ -85,7 +85,7 @@ import java.util.Vector;
  *    </li>
  * </ul>
  * Running CheckClusterer with the debug option set will output the 
- * training and test datasets for any failed tests.<p/>
+ * training dataset for any failed tests.<p/>
  *
  * The <code>weka.clusterers.AbstractClustererTest</code> uses this
  * class to test all the clusterers. Any changes here, have to be 
@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -541,15 +541,14 @@ public class CheckClusterer
     accepts.addElement("relational");
     accepts.addElement("multi-instance");
     accepts.addElement("not in classpath");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    missingLevel = 0;
+    int numTrain = getNumInstances(), missingLevel = 0;
     boolean predictorMissing = false;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
         datePredictor, relationalPredictor, 
         multiInstance,
         missingLevel, predictorMissing, 
-        numTrain, numTest, 
+        numTrain, 
         accepts);
   }
   
@@ -580,8 +579,7 @@ public class CheckClusterer
     FastVector accepts = new FastVector();
     accepts.addElement("train");
     accepts.addElement("value");
-    int numTrain = 0, numTest = getNumInstances(), 
-    missingLevel = 0;
+    int numTrain = 0, missingLevel = 0;
     boolean predictorMissing = false;
     
     return runBasicTest(
@@ -589,7 +587,7 @@ public class CheckClusterer
               datePredictor, relationalPredictor, 
               multiInstance,
               missingLevel, predictorMissing,
-              numTrain, numTest, 
+              numTrain, 
               accepts);
   }
   
@@ -636,8 +634,7 @@ public class CheckClusterer
     int stage = 0;
     try {
       
-      // Make two sets of train/test splits with different 
-      // numbers of attributes
+      // Make two train sets with different numbers of attributes
       train1 = makeTestDataset(42, numTrain, 
                                nominalPredictor    ? getNumNominal()    : 0,
                                numericPredictor    ? getNumNumeric()    : 0, 
@@ -671,23 +668,23 @@ public class CheckClusterer
     try {
       stage = 0;
       clusterer.buildClusterer(train1);
+      built = true;
       evaluation1A.setClusterer(clusterer);
       evaluation1A.evaluateClusterer(train1);
-      built = true;
       
       stage = 1;
       built = false;
       clusterer.buildClusterer(train2);
+      built = true;
       evaluation2.setClusterer(clusterer);
       evaluation2.evaluateClusterer(train2);
-      built = true;
       
       stage = 2;
       built = false;
       clusterer.buildClusterer(train1);
+      built = true;
       evaluation1B.setClusterer(clusterer);
       evaluation1B.evaluateClusterer(train1);
-      built = true;
       
       stage = 3;
       if (!evaluation1A.equals(evaluation1B)) {
@@ -789,13 +786,13 @@ public class CheckClusterer
     accepts.addElement("missing");
     accepts.addElement("value");
     accepts.addElement("train");
-    int numTrain = getNumInstances(), numTest = getNumInstances();
+    int numTrain = getNumInstances();
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
         datePredictor, relationalPredictor, 
         multiInstance,
         missingLevel, predictorMissing,
-        numTrain, numTest, 
+        numTrain, 
         accepts);
   }
   
@@ -872,8 +869,8 @@ public class CheckClusterer
         train.instance(inst).setWeight(weight);
       }
       clusterers[1].buildClusterer(train);
-      evaluationI.setClusterer(clusterers[1]);
       built = true;
+      evaluationI.setClusterer(clusterers[1]);
       if (evaluationB.equals(evaluationI)) {
         //	println("no");
         evalFail = true;
@@ -1021,13 +1018,11 @@ public class CheckClusterer
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    missingLevel = 0;
+    int numTrain = getNumInstances(), missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     boolean[] result = new boolean[2];
     Instances train = null;
-    Instances test = null;
     Clusterer[] clusterers = null;
     ClusterEvaluation evaluationB = null;
     ClusterEvaluation evaluationI = null;
@@ -1040,18 +1035,8 @@ public class CheckClusterer
                               datePredictor       ? getNumDate()       : 0, 
                               relationalPredictor ? getNumRelational() : 0, 
                               multiInstance);
-      test = makeTestDataset(24, numTest,
-                             nominalPredictor    ? getNumNominal()    : 0,
-                             numericPredictor    ? getNumNumeric()    : 0, 
-                             stringPredictor     ? getNumString()     : 0, 
-                             datePredictor       ? getNumDate()       : 0, 
-                             relationalPredictor ? getNumRelational() : 0, 
-                             multiInstance);
-      if (missingLevel > 0) {
+      if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing, classMissing);
-        addMissing(test, Math.min(missingLevel, 50), predictorMissing, 
-            classMissing);
-      }
       clusterers = Clusterer.makeCopies(getClusterer(), 2);
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
@@ -1083,8 +1068,6 @@ public class CheckClusterer
           println("Here are the datasets:\n");
           println("=== Train Dataset ===\n"
               + train.toString() + "\n");
-          println("=== Test Dataset ===\n"
-              + test.toString() + "\n\n");
         }
       }
       else {
@@ -1118,7 +1101,6 @@ public class CheckClusterer
    * @param predictorMissing true if the missing values may be in 
    * the predictors
    * @param numTrain the number of instances in the training set
-   * @param numTest the number of instaces in the test set
    * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
    *         was acceptable
@@ -1132,7 +1114,6 @@ public class CheckClusterer
       int missingLevel,
       boolean predictorMissing,
       int numTrain,
-      int numTest,
       FastVector accepts) {
     
     boolean[] result = new boolean[2];
