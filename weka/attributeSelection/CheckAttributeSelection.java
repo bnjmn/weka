@@ -88,18 +88,95 @@ import java.util.Vector;
  *    </li>
  * </ul>
  * Running CheckAttributeSelection with the debug option set will output the 
- * training and test datasets for any failed tests.<p/>
+ * training dataset for any failed tests.<p/>
  *
  * The <code>weka.attributeSelection.AbstractAttributeSelectionTest</code> 
  * uses this class to test all the schemes. Any changes here, have to be 
  * checked in that abstract test class, too. <p/>
  *
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -D
+ *  Turn on debugging output.</pre>
+ * 
+ * <pre> -S
+ *  Silent mode - prints nothing to stdout.</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  The number of instances in the datasets (default 20).</pre>
+ * 
+ * <pre> -nominal &lt;num&gt;
+ *  The number of nominal attributes (default 2).</pre>
+ * 
+ * <pre> -nominal-values &lt;num&gt;
+ *  The number of values for nominal attributes (default 1).</pre>
+ * 
+ * <pre> -numeric &lt;num&gt;
+ *  The number of numeric attributes (default 1).</pre>
+ * 
+ * <pre> -string &lt;num&gt;
+ *  The number of string attributes (default 1).</pre>
+ * 
+ * <pre> -date &lt;num&gt;
+ *  The number of date attributes (default 1).</pre>
+ * 
+ * <pre> -relational &lt;num&gt;
+ *  The number of relational attributes (default 1).</pre>
+ * 
+ * <pre> -num-instances-relational &lt;num&gt;
+ *  The number of instances in relational/bag attributes (default 10).</pre>
+ * 
+ * <pre> -words &lt;comma-separated-list&gt;
+ *  The words to use in string attributes.</pre>
+ * 
+ * <pre> -word-separators &lt;chars&gt;
+ *  The word separators to use in string attributes.</pre>
+ * 
+ * <pre> -eval name [options]
+ *  Full name and options of the evaluator analyzed.
+ *  eg: weka.attributeSelection.CfsSubsetEval</pre>
+ * 
+ * <pre> -search name [options]
+ *  Full name and options of the search method analyzed.
+ *  eg: weka.attributeSelection.Ranker</pre>
+ * 
+ * <pre> -test &lt;eval|search&gt;
+ *  The scheme to test, either the evaluator or the search method.
+ *  (Default: eval)</pre>
+ * 
+ * <pre> 
+ * Options specific to evaluator weka.attributeSelection.CfsSubsetEval:
+ * </pre>
+ * 
+ * <pre> -M
+ *  Treat missing values as a seperate
+ *  value.</pre>
+ * 
+ * <pre> -L
+ *  Don't include locally predictive attributes.</pre>
+ * 
+ * <pre> 
+ * Options specific to search method weka.attributeSelection.Ranker:
+ * </pre>
+ * 
+ * <pre> -P &lt;start set&gt;
+ *  Specify a starting set of attributes.
+ *  Eg. 1,3,5-7. 
+ * Any starting attributes specified are 
+ * ignored during the ranking.</pre>
+ * 
+ * <pre> -T &lt;threshold&gt;
+ *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+ * 
+ * <pre> -N &lt;num to select&gt;
+ *  Specify number of attributes to select</pre>
+ * 
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see TestInstances
  */
 public class CheckAttributeSelection 
@@ -177,6 +254,83 @@ public class CheckAttributeSelection
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -D
+   *  Turn on debugging output.</pre>
+   * 
+   * <pre> -S
+   *  Silent mode - prints nothing to stdout.</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  The number of instances in the datasets (default 20).</pre>
+   * 
+   * <pre> -nominal &lt;num&gt;
+   *  The number of nominal attributes (default 2).</pre>
+   * 
+   * <pre> -nominal-values &lt;num&gt;
+   *  The number of values for nominal attributes (default 1).</pre>
+   * 
+   * <pre> -numeric &lt;num&gt;
+   *  The number of numeric attributes (default 1).</pre>
+   * 
+   * <pre> -string &lt;num&gt;
+   *  The number of string attributes (default 1).</pre>
+   * 
+   * <pre> -date &lt;num&gt;
+   *  The number of date attributes (default 1).</pre>
+   * 
+   * <pre> -relational &lt;num&gt;
+   *  The number of relational attributes (default 1).</pre>
+   * 
+   * <pre> -num-instances-relational &lt;num&gt;
+   *  The number of instances in relational/bag attributes (default 10).</pre>
+   * 
+   * <pre> -words &lt;comma-separated-list&gt;
+   *  The words to use in string attributes.</pre>
+   * 
+   * <pre> -word-separators &lt;chars&gt;
+   *  The word separators to use in string attributes.</pre>
+   * 
+   * <pre> -eval name [options]
+   *  Full name and options of the evaluator analyzed.
+   *  eg: weka.attributeSelection.CfsSubsetEval</pre>
+   * 
+   * <pre> -search name [options]
+   *  Full name and options of the search method analyzed.
+   *  eg: weka.attributeSelection.Ranker</pre>
+   * 
+   * <pre> -test &lt;eval|search&gt;
+   *  The scheme to test, either the evaluator or the search method.
+   *  (Default: eval)</pre>
+   * 
+   * <pre> 
+   * Options specific to evaluator weka.attributeSelection.CfsSubsetEval:
+   * </pre>
+   * 
+   * <pre> -M
+   *  Treat missing values as a seperate
+   *  value.</pre>
+   * 
+   * <pre> -L
+   *  Don't include locally predictive attributes.</pre>
+   * 
+   * <pre> 
+   * Options specific to search method weka.attributeSelection.Ranker:
+   * </pre>
+   * 
+   * <pre> -P &lt;start set&gt;
+   *  Specify a starting set of attributes.
+   *  Eg. 1,3,5-7. 
+   * Any starting attributes specified are 
+   * ignored during the ranking.</pre>
+   * 
+   * <pre> -T &lt;threshold&gt;
+   *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+   * 
+   * <pre> -N &lt;num to select&gt;
+   *  Specify number of attributes to select</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -566,8 +720,7 @@ public class CheckAttributeSelection
     accepts.addElement("relational");
     accepts.addElement("multi-instance");
     accepts.addElement("not in classpath");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    numClasses = 2, missingLevel = 0;
+    int numTrain = getNumInstances(), numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
@@ -575,7 +728,7 @@ public class CheckAttributeSelection
         multiInstance,
         classType, 
         missingLevel, predictorMissing, classMissing,
-        numTrain, numTest, numClasses, 
+        numTrain, numClasses, 
         accepts);
   }
   
@@ -610,8 +763,7 @@ public class CheckAttributeSelection
     FastVector accepts = new FastVector();
     accepts.addElement("number");
     accepts.addElement("class");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    missingLevel = 0;
+    int numTrain = getNumInstances(), missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
@@ -619,7 +771,7 @@ public class CheckAttributeSelection
                         multiInstance,
                         Attribute.NOMINAL,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, numClasses, 
+                        numTrain, numClasses, 
                         accepts);
   }
   
@@ -656,8 +808,7 @@ public class CheckAttributeSelection
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
     FastVector accepts = new FastVector();
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, 
-    missingLevel = 0;
+    int numTrain = getNumInstances(), numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
@@ -666,7 +817,7 @@ public class CheckAttributeSelection
                         classType,
                         classIndex,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, numClasses, 
+                        numTrain, numClasses, 
                         accepts);
   }
   
@@ -699,8 +850,7 @@ public class CheckAttributeSelection
     FastVector accepts = new FastVector();
     accepts.addElement("train");
     accepts.addElement("value");
-    int numTrain = 0, numTest = getNumInstances(), numClasses = 2, 
-    missingLevel = 0;
+    int numTrain = 0, numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(
@@ -709,7 +859,7 @@ public class CheckAttributeSelection
               multiInstance,
               classType, 
               missingLevel, predictorMissing, classMissing,
-              numTrain, numTest, numClasses, 
+              numTrain, numClasses, 
               accepts);
   }
   
@@ -760,8 +910,7 @@ public class CheckAttributeSelection
     int stage = 0;
     try {
       
-      // Make two sets of train/test splits with different 
-      // numbers of attributes
+      // Make two train sets with different numbers of attributes
       train1 = makeTestDataset(42, numTrain, 
                                nominalPredictor    ? getNumNominal()    : 0,
                                numericPredictor    ? getNumNumeric()    : 0, 
@@ -914,15 +1063,14 @@ public class CheckAttributeSelection
     accepts.addElement("value");
     accepts.addElement("train");
     accepts.addElement("no attributes");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    numClasses = 2;
+    int numTrain = getNumInstances(), numClasses = 2;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
         datePredictor, relationalPredictor, 
         multiInstance,
         classType, 
         missingLevel, predictorMissing, classMissing,
-        numTrain, numTest, numClasses, 
+        numTrain, numClasses, 
         accepts);
   }
   
@@ -1142,7 +1290,6 @@ public class CheckAttributeSelection
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param numTrain the number of instances in the training set
-   * @param numTest the number of instaces in the test set
    * @param numClasses the number of classes
    * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
@@ -1159,7 +1306,6 @@ public class CheckAttributeSelection
       boolean predictorMissing,
       boolean classMissing,
       int numTrain,
-      int numTest,
       int numClasses,
       FastVector accepts) {
     
@@ -1176,7 +1322,6 @@ public class CheckAttributeSelection
 		predictorMissing,
 		classMissing,
 		numTrain,
-		numTest,
 		numClasses,
 		accepts);
   }
@@ -1197,7 +1342,6 @@ public class CheckAttributeSelection
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param numTrain the number of instances in the training set
-   * @param numTest the number of instaces in the test set
    * @param numClasses the number of classes
    * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
@@ -1215,7 +1359,6 @@ public class CheckAttributeSelection
       boolean predictorMissing,
       boolean classMissing,
       int numTrain,
-      int numTest,
       int numClasses,
       FastVector accepts) {
     
