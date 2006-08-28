@@ -22,8 +22,7 @@
 
 package weka.core;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
 
 /** 
  * Class representing a single cardinal number. The number is set by a 
@@ -39,9 +38,13 @@ import java.util.*;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class SingleIndex implements Serializable {
+public class SingleIndex
+  implements Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = 5285169134430839303L;
 
   /** Record the string representation of the number */
   protected /*@non_null spec_public@*/ String m_IndexString = "";
@@ -66,8 +69,8 @@ public class SingleIndex implements Serializable {
   /**
    * Constructor to set initial index.
    *
-   * @param rangeList the initial index
-   * @exception IllegalArgumentException if the index is invalid
+   * @param index the initial index
+   * @throws IllegalArgumentException if the index is invalid
    */
   //@ assignable m_IndexString, m_SelectedIndex, m_Upper;
   //@ ensures m_IndexString == index;
@@ -110,7 +113,7 @@ public class SingleIndex implements Serializable {
    * must be called for the value to be actually set
    *
    * @param index the index set
-   * @exception IllegalArgumentException if the index was not well formed
+   * @throws IllegalArgumentException if the index was not well formed
    */
   //@ assignable m_IndexString, m_SelectedIndex;
   //@ ensures m_IndexString == index;
@@ -144,7 +147,7 @@ public class SingleIndex implements Serializable {
    * Gets the selected index
    *
    * @return the selected index
-   * @exception RuntimeException if the upper limit of the index hasn't been defined
+   * @throws RuntimeException if the upper limit of the index hasn't been defined
    */
   //@ requires m_Upper >= 0;
   //@ requires m_IndexString.length() > 0;
@@ -163,9 +166,10 @@ public class SingleIndex implements Serializable {
   /**
    * Creates a string representation of the given index.
    *
-   * @param indices an array containing indices to select.
-   * Since the array will typically come from a program, indices are assumed
+   * @param index the index to turn into a string.
+   * Since the index will typically come from a program, indices are assumed
    * from 0, and thus will have 1 added in the String representation.
+   * @return the string representation
    */
   //@ requires index >= 0;
   public static /*@pure non_null@*/ String indexToString(int index) {
@@ -175,9 +179,6 @@ public class SingleIndex implements Serializable {
 
   /**
    * Translates a single string selection into it's internal 0-based equivalent
-   *
-   * @param single the string representing the selection (eg: 1 first last)
-   * @return the number corresponding to the selected value
    */
   //@ assignable m_SelectedIndex, m_IndexString;
   protected void setValue() {
