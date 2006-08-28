@@ -60,7 +60,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -938,13 +938,12 @@ public class Capabilities
    * @see		#m_MinimumNumberInstancesTest
    */
   public boolean test(Instances data, int fromIndex, int toIndex) {
-    int         i;
-    int         n;
-    Attribute   att;
-    Instance    inst;
-    boolean     noClass;
-    boolean     tmpResult;
-    boolean	testClass;
+    int         	i;
+    int         	n;
+    Attribute   	att;
+    Instance    	inst;
+    boolean		testClass;
+    Capabilities	cap;
     
     // shall we test the data?
     if (!m_InstancesTest)
@@ -995,14 +994,13 @@ public class Capabilities
 
       // special handling of RELATIONAL class
       if (att.type() == Attribute.RELATIONAL) {
-	// test recursively (but add ability to handle NO_CLASS)
-	noClass = handles(Capability.NO_CLASS);
-	if (!noClass)
-	  enable(Capability.NO_CLASS);
-	tmpResult = test(att.relation());
-	if (!noClass) 
-	  disable(Capability.NO_CLASS);
-	if (!tmpResult)
+	// test recursively (but add ability to handle NO_CLASS and set # of
+	// instances to 0)
+	cap = (Capabilities) this.clone();
+	cap.enable(Capability.NO_CLASS);
+	cap.disable(Capability.ONLY_MULTIINSTANCE);
+	cap.setMinimumNumberInstances(0);
+	if (!cap.test(att.relation()))
 	  return false;
       }
       
@@ -1093,7 +1091,7 @@ public class Capabilities
       // check data immediately
       if (getOwner() instanceof MultiInstanceCapabilitiesHandler) {
 	MultiInstanceCapabilitiesHandler handler = (MultiInstanceCapabilitiesHandler) getOwner();
-	Capabilities cap = handler.getMultiInstanceCapabilities();
+	cap = handler.getMultiInstanceCapabilities();
 	boolean result;
 	if (data.numInstances() > 0)
 	  result = cap.test(data.attribute(1).relation(1));
