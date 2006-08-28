@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * Class for evaluating Associaters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AssociatorEvaluation {
 
@@ -81,6 +81,28 @@ public class AssociatorEvaluation {
     }
     
     return text.toString();
+  }
+
+  /**
+   * Evaluates an associator with the options given in an array of strings.
+   *
+   * @param associatorString 	class of associator as a string
+   * @param options 		the array of string containing the options
+   * @throws Exception 		if model could not be evaluated successfully
+   * @return 			a string describing the results 
+   */
+  public static String evaluate(String associatorString, String[] options) throws Exception {
+    Associator associator;	 
+
+    // Create associator
+    try {
+      associator = (Associator) Class.forName(associatorString).newInstance();
+    }
+    catch (Exception e) {
+      throw new Exception("Can't find class with name " + associatorString + '.');
+    }
+    
+    return evaluate(associator, options);
   }
   
   /**
@@ -214,5 +236,28 @@ public class AssociatorEvaluation {
    */
   public String toString() {
     return toSummaryString();
+  }
+
+  /**
+   * A test method for this class. Just extracts the first command line
+   * argument as an associator class name and calls evaluate.
+   * 
+   * @param args 	an array of command line arguments, the first of which
+   * 			must be the class name of an associator.
+   */
+  public static void main(String[] args) {
+    try {
+      if (args.length == 0) {
+	throw new Exception(
+	    "The first argument must be the class name of a kernel");
+      }
+      String associator = args[0];
+      args[0] = "";
+      System.out.println(evaluate(associator, args));
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
+    }
   }
 }
