@@ -157,7 +157,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  * @see TestInstances
  */
 public class CheckClassifier
@@ -864,8 +864,8 @@ public class CheckClassifier
       String msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("worse than zeror") >= 0) {
         println("warning: performs worse than ZeroR");
-        result[0] = true;
-        result[1] = true;
+        result[0] = (stage < 1);
+        result[1] = (stage < 1);
       } else {
         println("no");
         result[0] = false;
