@@ -87,9 +87,9 @@ import java.util.Vector;
  *    </li>
  * </ul>
  * Running CheckAssociator with the debug option set will output the 
- * training and test datasets for any failed tests.<p/>
+ * training dataset for any failed tests.<p/>
  *
- * The <code>weka.assoications.AbstractAssociatorTest</code> uses this
+ * The <code>weka.associations.AbstractAssociatorTest</code> uses this
  * class to test all the associators. Any changes here, have to be 
  * checked in that abstract test class, too. <p/>
  *
@@ -185,7 +185,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see TestInstances
  */
 public class CheckAssociator
@@ -196,7 +196,6 @@ public class CheckAssociator
    * - methods return array of booleans
    * - first index: success or not
    * - second index: acceptable or not (e.g., Exception is OK)
-   * - in case the performance is worse than that of ZeroR both indices are true
    *
    * FracPete (fracpete at waikato dot ac dot nz)
    */
@@ -590,8 +589,7 @@ public class CheckAssociator
     accepts.addElement("relational");
     accepts.addElement("multi-instance");
     accepts.addElement("not in classpath");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    numClasses = 2, missingLevel = 0;
+    int numTrain = getNumInstances(), numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
@@ -599,7 +597,7 @@ public class CheckAssociator
         multiInstance,
         classType, 
         missingLevel, predictorMissing, classMissing,
-        numTrain, numTest, numClasses, 
+        numTrain, numClasses, 
         accepts);
   }
   
@@ -634,8 +632,7 @@ public class CheckAssociator
     FastVector accepts = new FastVector();
     accepts.addElement("number");
     accepts.addElement("class");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    missingLevel = 0;
+    int numTrain = getNumInstances(), missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
@@ -643,7 +640,7 @@ public class CheckAssociator
                         multiInstance,
                         Attribute.NOMINAL,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, numClasses, 
+                        numTrain, numClasses, 
                         accepts);
   }
   
@@ -680,7 +677,7 @@ public class CheckAssociator
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
     FastVector accepts = new FastVector();
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, 
+    int numTrain = getNumInstances(), numClasses = 2, 
     missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
@@ -690,7 +687,7 @@ public class CheckAssociator
                         classType,
                         classIndex,
                         missingLevel, predictorMissing, classMissing,
-                        numTrain, numTest, numClasses, 
+                        numTrain, numClasses, 
                         accepts);
   }
   
@@ -723,8 +720,7 @@ public class CheckAssociator
     FastVector accepts = new FastVector();
     accepts.addElement("train");
     accepts.addElement("value");
-    int numTrain = 0, numTest = getNumInstances(), numClasses = 2, 
-    missingLevel = 0;
+    int numTrain = 0, numClasses = 2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
     
     return runBasicTest(
@@ -733,7 +729,7 @@ public class CheckAssociator
               multiInstance,
               classType, 
               missingLevel, predictorMissing, classMissing,
-              numTrain, numTest, numClasses, 
+              numTrain, numClasses, 
               accepts);
   }
   
@@ -752,9 +748,7 @@ public class CheckAssociator
    * @param relationalPredictor if true use relational predictor attributes
    * @param multiInstance whether multi-instance is needed
    * @param classType the class type (NUMERIC, NOMINAL, etc.)
-   * @return index 0 is true if the test was passed, index 1 is true if the
-   *         scheme performs worse than ZeroR, but without error (index 0 is
-   *         false)
+   * @return index 0 is true if the test was passed
    */
   protected boolean[] correctBuildInitialisation(
       boolean nominalPredictor,
@@ -784,8 +778,7 @@ public class CheckAssociator
     int stage = 0;
     try {
       
-      // Make two sets of train/test splits with different 
-      // numbers of attributes
+      // Make two train sets with different numbers of attributes
       train1 = makeTestDataset(42, numTrain, 
                                nominalPredictor    ? getNumNominal()    : 0,
                                numericPredictor    ? getNumNumeric()    : 0, 
@@ -851,18 +844,12 @@ public class CheckAssociator
       }
     } 
     catch (Exception ex) {
-      String msg = ex.getMessage().toLowerCase();
-      if (msg.indexOf("worse than zeror") >= 0) {
-        println("warning: performs worse than ZeroR");
-        result[0] = true;
-        result[1] = true;
-      } else {
-        println("no");
-        result[0] = false;
-      }
+      println("no");
+      result[0] = false;
+        
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during training");
+        print("Problem during building");
         switch (stage) {
           case 0:
             print(" of dataset 1");
@@ -938,15 +925,14 @@ public class CheckAssociator
     accepts.addElement("missing");
     accepts.addElement("value");
     accepts.addElement("train");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), 
-    numClasses = 2;
+    int numTrain = getNumInstances(), numClasses = 2;
     
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor, 
         datePredictor, relationalPredictor, 
         multiInstance,
         classType, 
         missingLevel, predictorMissing, classMissing,
-        numTrain, numTest, numClasses, 
+        numTrain, numClasses, 
         accepts);
   }
   
@@ -1045,7 +1031,7 @@ public class CheckAssociator
           println("Here are the results:\n");
           println(evaluationB.toSummaryString("\nboth methods\n"));
         } else {
-          print("Problem during training");
+          print("Problem during building");
           println(": " + ex.getMessage() + "\n");
         }
         println("Here is the dataset:\n");
@@ -1102,7 +1088,6 @@ public class CheckAssociator
     boolean[] result = new boolean[2];
     Instances train = null;
     Associator associator = null;
-    boolean built = false;
     try {
       train = makeTestDataset(42, numTrain, 
                               nominalPredictor    ? getNumNominal()    : 0,
@@ -1123,7 +1108,6 @@ public class CheckAssociator
       Instances trainCopy = new Instances(train);
       associator.buildAssociations(trainCopy);
       compareDatasets(train, trainCopy);
-      built = true;
       
       println("yes");
       result[0] = true;
@@ -1133,12 +1117,7 @@ public class CheckAssociator
       
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during building");
         println(": " + ex.getMessage() + "\n");
         println("Here is the dataset:\n");
         println("=== Train Dataset ===\n"
@@ -1164,7 +1143,6 @@ public class CheckAssociator
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param numTrain the number of instances in the training set
-   * @param numTest the number of instaces in the test set
    * @param numClasses the number of classes
    * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
@@ -1181,7 +1159,6 @@ public class CheckAssociator
       boolean predictorMissing,
       boolean classMissing,
       int numTrain,
-      int numTest,
       int numClasses,
       FastVector accepts) {
     
@@ -1198,7 +1175,6 @@ public class CheckAssociator
 		predictorMissing,
 		classMissing,
 		numTrain,
-		numTest,
 		numClasses,
 		accepts);
   }
@@ -1219,7 +1195,6 @@ public class CheckAssociator
    * the predictors
    * @param classMissing true if the missing values may be in the class
    * @param numTrain the number of instances in the training set
-   * @param numTest the number of instaces in the test set
    * @param numClasses the number of classes
    * @param accepts the acceptable string in an exception
    * @return index 0 is true if the test was passed, index 1 is true if test 
@@ -1237,14 +1212,12 @@ public class CheckAssociator
       boolean predictorMissing,
       boolean classMissing,
       int numTrain,
-      int numTest,
       int numClasses,
       FastVector accepts) {
     
     boolean[] result = new boolean[2];
     Instances train = null;
     Associator associator = null;
-    boolean built = false;
     try {
       train = makeTestDataset(42, numTrain, 
                               nominalPredictor     ? getNumNominal()    : 0,
@@ -1265,7 +1238,6 @@ public class CheckAssociator
     }
     try {
       associator.buildAssociations(train);
-      built = true;
       println("yes");
       result[0] = true;
     } 
@@ -1278,29 +1250,19 @@ public class CheckAssociator
         msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("not in classpath") > -1)
 	m_ClasspathProblems = true;
-      if (msg.indexOf("worse than zeror") >= 0) {
-        println("warning: performs worse than ZeroR");
-        result[0] = true;
-        result[1] = true;
-      } else {
-        for (int i = 0; i < accepts.size(); i++) {
-          if (msg.indexOf((String)accepts.elementAt(i)) >= 0) {
-            acceptable = true;
-          }
-        }
-        
-        println("no" + (acceptable ? " (OK error message)" : ""));
-        result[1] = acceptable;
+      
+      for (int i = 0; i < accepts.size(); i++) {
+	if (msg.indexOf((String)accepts.elementAt(i)) >= 0) {
+	  acceptable = true;
+	}
       }
+      
+      println("no" + (acceptable ? " (OK error message)" : ""));
+      result[1] = acceptable;
       
       if (m_Debug) {
         println("\n=== Full Report ===");
-        print("Problem during");
-        if (built) {
-          print(" testing");
-        } else {
-          print(" training");
-        }
+        print("Problem during building");
         println(": " + ex.getMessage() + "\n");
         if (!acceptable) {
           if (accepts.size() > 0) {
