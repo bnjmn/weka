@@ -1,5 +1,6 @@
 package weka.classifiers.functions.supportVector;
 
+import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -7,11 +8,11 @@ import weka.core.Option;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformationHandler;
+import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -251,7 +252,7 @@ import java.util.Vector;
  *
  * @author Florian Kleedorfer (kleedorfer@austria.fm)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class StringKernel 
   extends Kernel
@@ -1432,7 +1433,16 @@ public class StringKernel
     super.initVars(data);
 
     m_kernelEvals    = 0;
-    m_strAttr        = 1 - data.classIndex();
+    // take the first string attribute
+    m_strAttr        = -1;
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (i == data.classIndex())
+	continue;
+      if (data.attribute(i).type() == Attribute.STRING) {
+	m_strAttr = i;
+	break;
+      }
+    }
     m_numInsts       = m_data.numInstances();
     m_storage        = new double[m_cacheSize];
     m_keys           = new long[m_cacheSize];
