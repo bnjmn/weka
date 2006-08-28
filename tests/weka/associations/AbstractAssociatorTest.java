@@ -35,7 +35,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  * @see CheckAssociator
  * @see CheckAssociator#testsPerClassType(int, boolean, boolean)
@@ -236,6 +236,8 @@ public abstract class AbstractAssociatorTest
    * given class type
    *
    * @param type      the class type to check for
+   * @return          true if at least one attribute type can be predicted with
+   *                  the given class
    */
   protected boolean canPredict(int type) {
     return    m_NominalPredictors[type]
@@ -247,20 +249,12 @@ public abstract class AbstractAssociatorTest
 
   /** 
    * returns a string for the class type
+   * 
+   * @param type        the class type
+   * @return            the class type as string
    */
   protected String getClassTypeString(int type) {
-    if (type == Attribute.NOMINAL)
-      return "Nominal";
-    else if (type == Attribute.NUMERIC)
-      return "Numeric";
-    else if (type == Attribute.STRING)
-      return "String";
-    else if (type == Attribute.DATE)
-      return "Date";
-    else if (type == Attribute.RELATIONAL)
-      return "Relational";
-    else
-      throw new IllegalArgumentException("Class type '" + type + "' unknown!");
+    return CheckAssociator.attributeTypeToString(type);
   }
 
   /**

@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -281,6 +281,8 @@ public abstract class AbstractClassifierTest
    * given class type
    *
    * @param type      the class type to check for
+   * @return          true if at least one attribute type can be predicted with
+   *                  the given class
    */
   protected boolean canPredict(int type) {
     return    m_NominalPredictors[type]
@@ -292,20 +294,12 @@ public abstract class AbstractClassifierTest
 
   /** 
    * returns a string for the class type
+   * 
+   * @param type        the class type
+   * @return            the class type as string
    */
   protected String getClassTypeString(int type) {
-    if (type == Attribute.NOMINAL)
-      return "Nominal";
-    else if (type == Attribute.NUMERIC)
-      return "Numeric";
-    else if (type == Attribute.STRING)
-      return "String";
-    else if (type == Attribute.DATE)
-      return "Date";
-    else if (type == Attribute.RELATIONAL)
-      return "Relational";
-    else
-      throw new IllegalArgumentException("Class type '" + type + "' unknown!");
+    return CheckClassifier.attributeTypeToString(type);
   }
 
   /**
