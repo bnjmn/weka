@@ -22,15 +22,15 @@
 
 package weka.core;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  * Class representing a range of cardinal numbers. The range is set by a 
  * string representation such as: <P>
  *
  * <code>
- *   all
  *   first-last
  *   1,2,3,4
  * </code> <P>
@@ -39,9 +39,13 @@ import java.util.*;
  * format should use 0-based numbers).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class Range implements Serializable {
+public class Range
+  implements Serializable {
+  
+  /** for serialization */
+  static final long serialVersionUID = 3667337062176835900L;
 
   /** Record the string representations of the columns to delete */
   /*@non_null spec_public@*/Vector m_RangeStrings = new Vector();
@@ -65,7 +69,7 @@ public class Range implements Serializable {
    * Constructor to set initial range.
    *
    * @param rangeList the initial range
-   * @exception IllegalArgumentException if the range list is invalid
+   * @throws IllegalArgumentException if the range list is invalid
    */
   public Range(/*@non_null@*/ String rangeList) {
 
@@ -113,7 +117,6 @@ public class Range implements Serializable {
    *
    * @return the range selection string
    */
-
   public /*@non_null pure@*/String getRanges() {
 
     StringBuffer result = new StringBuffer(m_RangeStrings.size()*4);
@@ -136,7 +139,7 @@ public class Range implements Serializable {
    *
    * @param rangeList the comma separated list of ranges. The empty
    * string sets the range to empty.
-   * @exception IllegalArgumentException if the rangeList was not well formed
+   * @throws IllegalArgumentException if the rangeList was not well formed
    */
   //@requires rangeList != null;
   //@assignable m_RangeStrings,m_SelectFlags;
@@ -168,7 +171,7 @@ public class Range implements Serializable {
    *
    * @param index the number of interest
    * @return true if index is in the current range
-   * @exception RuntimeException if the upper limit of the range hasn't been defined
+   * @throws RuntimeException if the upper limit of the range hasn't been defined
    */
   //@requires m_Upper >= 0;
   //@requires 0 <= index && index < m_SelectFlags.length;
@@ -232,7 +235,7 @@ public class Range implements Serializable {
    * that they were selected (or ascending order if range inversion is on)
    *
    * @return the array of selected values
-   * @exception RuntimeException if the upper limit of the range hasn't been defined
+   * @throws RuntimeException if the upper limit of the range hasn't been defined
    */
   //@requires m_Upper >= 0;
   public /*@non_null@*/ int [] getSelection() {
@@ -275,6 +278,7 @@ public class Range implements Serializable {
    * @param indices an array containing indices to select.
    * Since the array will typically come from a program, indices are assumed
    * from 0, and thus will have 1 added in the String representation.
+   * @return the string representation of the indices
    */
   public static /*@non_null pure@*/String indicesToRangeList(/*@non_null@*/ int []indices) {
 
@@ -382,7 +386,7 @@ public class Range implements Serializable {
    * Examples: <code>first  last   2   first-last  first-4  4-last</code>
    * Doesn't check that a < b for a-b
    *
-   * @param range
+   * @param range the string to check
    * @return true if the range is valid
    */
   protected boolean isValidRange(String range) {
