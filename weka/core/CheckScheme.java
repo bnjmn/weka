@@ -32,7 +32,7 @@ import java.util.Vector;
  * also used for JUnit tests.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see TestInstances
  */
 public abstract class CheckScheme
@@ -446,6 +446,43 @@ public abstract class CheckScheme
       if (i > 0)
 	result += ",";
       result += value[i];
+    }
+    
+    return result;
+  }
+  
+  /**
+   * returns a string representation of the attribute type
+   * 
+   * @param type	the attribute type to get a string rerpresentation for
+   * @return		the string representation
+   */
+  public static String attributeTypeToString(int type) {
+    String	result;
+    
+    switch (type) {
+      case Attribute.NUMERIC:
+	result = "numeric";
+	break;
+	
+      case Attribute.NOMINAL:
+	result = "nominal";
+	break;
+	
+      case Attribute.STRING:
+	result = "string";
+	break;
+	
+      case Attribute.DATE:
+	result = "date";
+	break;
+	
+      case Attribute.RELATIONAL:
+	result = "relational";
+	break;
+
+      default:
+	result = "???";
     }
     
     return result;
