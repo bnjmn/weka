@@ -42,7 +42,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class Kernel 
   implements Serializable, OptionHandler, CapabilitiesHandler {
@@ -256,6 +256,27 @@ public abstract class Kernel
    */
   public static Kernel makeCopy(Kernel kernel) throws Exception {
     return (Kernel) new SerializedObject(kernel).getObject();
+  }
+
+  /**
+   * Creates a given number of deep copies of the given kernel using 
+   * serialization.
+   * 
+   * @param model 	the kernel to copy
+   * @param num 	the number of kernel copies to create.
+   * @return 		an array of kernels.
+   * @throws Exception 	if an error occurs
+   */
+  public static Kernel[] makeCopies(Kernel model, int num) throws Exception {
+    if (model == null)
+      throw new Exception("No model kernel set");
+
+    Kernel[] kernels = new Kernel[num];
+    SerializedObject so = new SerializedObject(model);
+    for (int i = 0; i < kernels.length; i++)
+      kernels[i] = (Kernel) so.getObject();
+
+    return kernels;
   }
   
   /**
