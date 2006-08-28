@@ -20,7 +20,6 @@
 
 package weka.clusterers;
 
-import weka.core.Attribute;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -34,7 +33,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean, boolean)
@@ -175,6 +174,8 @@ public abstract class AbstractClustererTest
 
   /**
    * checks whether at least one attribute type can be handled
+   * 
+   * @return            true if at least one attribute type can be handled
    */
   protected boolean canPredict() {
     return    m_NominalPredictors
@@ -182,24 +183,6 @@ public abstract class AbstractClustererTest
            || m_StringPredictors
            || m_DatePredictors
            || m_RelationalPredictors;
-  }
-
-  /** 
-   * returns a string for the class type
-   */
-  protected String getClassTypeString(int type) {
-    if (type == Attribute.NOMINAL)
-      return "Nominal";
-    else if (type == Attribute.NUMERIC)
-      return "Numeric";
-    else if (type == Attribute.STRING)
-      return "String";
-    else if (type == Attribute.DATE)
-      return "Date";
-    else if (type == Attribute.RELATIONAL)
-      return "Relational";
-    else
-      throw new IllegalArgumentException("Class type '" + type + "' unknown!");
   }
 
   /**
