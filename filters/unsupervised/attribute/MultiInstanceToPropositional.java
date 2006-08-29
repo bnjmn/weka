@@ -66,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
@@ -274,6 +274,9 @@ public class MultiInstanceToPropositional
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
+    
+    // other
+    result.setMinimumNumberInstances(0);
     
     return result;
   }
