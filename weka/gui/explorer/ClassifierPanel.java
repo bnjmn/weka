@@ -129,7 +129,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.93 $
+ * @version $Revision: 1.94 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -2077,6 +2077,7 @@ public class ClassifierPanel
               m_Log.logMessage("Re-evaluating classifier (" + name 
                                + ") on test set");
               eval = new Evaluation(userTestStructure, costMatrix);
+              eval.useNoPriors();
       
               // set up the structure of the plottable instances for 
               // visualization
