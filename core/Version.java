@@ -33,7 +33,7 @@ import java.io.*;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class Version implements Comparable {
   
@@ -202,6 +202,15 @@ public class Version implements Comparable {
    */
   public boolean isNewer(Object o) {
     return (compareTo(o) == 1);
+  }
+  
+  /**
+   * returns the current version as string
+   * 
+   * @return        the current version
+   */
+  public String toString() {
+    return MAJOR + "." + MINOR + "." + REVISION;
   }
   
   /**
