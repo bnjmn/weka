@@ -110,6 +110,10 @@ import java.util.zip.GZIPOutputStream;
  * Outputs predictions for test instances, along with the attributes in 
  * the specified range (and nothing else). Use '-p 0' if no attributes are
  * desired. <p/>
+ * 
+ * -distribution <br/>
+ * Outputs the distribution instead of only the prediction
+ * in conjunction with the '-p' option (only nominal classes). <p/>
  *
  * -r <br/>
  * Outputs cumulative margin distribution (and nothing else). <p/>
@@ -148,7 +152,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.65 $
+ * @version  $Revision: 1.66 $
  */
 public class Evaluation
   implements Summarizable {
@@ -264,12 +268,21 @@ public class Evaluation
   /** The list of predictions that have been generated (for computing AUC) */
   private FastVector m_Predictions;
 
+  /** enables/disables the use of priors, e.g., if no training set is
+   * present in case of de-serialized schemes */
+  protected boolean m_NoPriors = false;
+  
   /**
-   * Initializes all the counters for the evaluation.
+   * Initializes all the counters for the evaluation. 
+   * Use <code>useNoPriors()</code> if the dataset is the test set and you
+   * can't initialize with the priors from the training set via 
+   * <code>setPriors(Instances)</code>.
    *
-   * @param data set of training instances, to get some header 
-   * information and prior class distribution information
-   * @throws Exception if the class is not defined
+   * @param data 	set of training instances, to get some header 
+   * 			information and prior class distribution information
+   * @throws Exception 	if the class is not defined
+   * @see 		#useNoPriors()
+   * @see 		#setPriors(Instances)
    */
   public Evaluation(Instances data) throws Exception {
 
@@ -279,11 +292,17 @@ public class Evaluation
   /**
    * Initializes all the counters for the evaluation and also takes a
    * cost matrix as parameter.
+   * Use <code>useNoPriors()</code> if the dataset is the test set and you
+   * can't initialize with the priors from the training set via 
+   * <code>setPriors(Instances)</code>.
    *
-   * @param data set of instances, to get some header information
-   * @param costMatrix the cost matrix---if null, default costs will be used
-   * @throws Exception if cost matrix is not compatible with 
-   * data, the class is not defined or the class is numeric
+   * @param data 	set of training instances, to get some header 
+   * 			information and prior class distribution information
+   * @param costMatrix 	the cost matrix---if null, default costs will be used
+   * @throws Exception 	if cost matrix is not compatible with 
+   * 			data, the class is not defined or the class is numeric
+   * @see 		#useNoPriors()
+   * @see 		#setPriors(Instances)
    */
   public Evaluation(Instances data, CostMatrix costMatrix) 
        throws Exception {
@@ -465,6 +484,10 @@ public class Evaluation
    * the specified range (and nothing else). Use '-p 0' if no attributes are
    * desired. <p/>
    *
+   * -distribution <br/>
+   * Outputs the distribution instead of only the prediction
+   * in conjunction with the '-p' option (only nominal classes). <p/>
+   *
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else). <p/>
    *
@@ -571,6 +594,10 @@ public class Evaluation
    * -p <br/>
    * Outputs predictions for test instances (and nothing else). <p/>
    *
+   * -distribution <br/>
+   * Outputs the distribution instead of only the prediction
+   * in conjunction with the '-p' option (only nominal classes). <p/>
+   *
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else). <p/>
    *
@@ -612,6 +639,7 @@ public class Evaluation
     String xml = "";
     String[] optionsTmp = null;
     Classifier classifierBackup;
+    boolean printDistribution = false;
 
     try {
       // do we get the input from XML instead of normal parameters?
@@ -720,7 +748,6 @@ public class Evaluation
 	if (classIndex > train.numAttributes()) {
 	  throw new Exception("Index of class attribute too large.");
 	}
-	//train = new Instances(train);
       }
       if (template == null) {
         throw new Exception("No actual dataset provided to use as template");
@@ -743,6 +770,7 @@ public class Evaluation
       printGraph = Utils.getFlag('g', options);
       sourceClass = Utils.getOption('z', options);
       printSource = (sourceClass.length() != 0);
+      printDistribution = Utils.getFlag("distribution", options);
 
       // Check -p option
       try {
@@ -754,11 +782,22 @@ public class Evaluation
 			    "to list with the predictions. Use '-p 0' for none.");
       }
       if (attributeRangeString.length() != 0) {
+	// if no test file given, we cannot print predictions
+	if (testFileName.length() == 0)
+	  throw new Exception("Cannot print predictions ('-p') without test file ('-T')!");
+	
 	printClassifications = true;
 	if (!attributeRangeString.equals("0")) 
 	  attributesToOutput = new Range(attributeRangeString);
       }
+      
+      if (!printClassifications && printDistribution)
+	throw new Exception("Cannot print distribution without '-p' option!");
 
+      // if no training file given, we don't have any priors
+      if ( (trainFileName.length() == 0) && (printComplexityStatistics) )
+	throw new Exception("Cannot print complexity statistics ('-k') without training file ('-t')!");
+      
       // If a model file is given, we can't process 
       // scheme-specific options
       if (objectInputFileName.length() != 0) {
@@ -788,13 +827,15 @@ public class Evaluation
 			   + makeOptionString(classifier));
     }
 
-
     // Setup up evaluation objects
     Evaluation trainingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
 
+    // disable use of priors if no training file given
+    if (trainFileName.length() == 0)
+      testingEvaluation.useNoPriors();
+    
     if (objectInputFileName.length() != 0) {
-
       // Load classifier from file
       if (objectInputStream != null) {
          classifier = (Classifier) objectInputStream.readObject();
@@ -888,7 +929,8 @@ public class Evaluation
     // Output test instance predictions only
     if (printClassifications) {
       return printClassifications(classifier, new Instances(template, 0),
-				  testFileName, classIndex, attributesToOutput);
+				  testFileName, classIndex, attributesToOutput,
+				  printDistribution);
     }
 
     // Output model
@@ -970,10 +1012,9 @@ public class Evaluation
     if (testFileName.length() != 0) {
       // Testing is on the supplied test data
       while (test.readInstance(testReader)) {
-
-        testingEvaluation.evaluateModelOnce((Classifier)classifier, 
-                                            test.instance(0));
-        test.delete(0);
+	testingEvaluation.evaluateModelOnce((Classifier)classifier, 
+	    test.instance(0));
+	test.delete(0);
       }
       testReader.close();
 
@@ -1006,6 +1047,7 @@ public class Evaluation
       }
       text.append("\n\n" + testingEvaluation.toMatrixString());
     }
+    
     return text.toString();
   }
 
@@ -1089,6 +1131,7 @@ public class Evaluation
       predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier, 
 							    data.instance(i));
     }
+    
     return predictions;
   }
 
@@ -1493,6 +1536,9 @@ public class Evaluation
    */
   public final double meanPriorAbsoluteError() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorAbsErr / m_WithClass;
   }
 
@@ -1504,6 +1550,9 @@ public class Evaluation
    */
   public final double relativeAbsoluteError() throws Exception {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return 100 * meanAbsoluteError() / meanPriorAbsoluteError();
   }
 
@@ -1524,6 +1573,9 @@ public class Evaluation
    */
   public final double rootMeanPriorSquaredError() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return Math.sqrt(m_SumPriorSqrErr / m_WithClass);
   }
 
@@ -1534,6 +1586,9 @@ public class Evaluation
    */
   public final double rootRelativeSquaredError() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return 100.0 * rootMeanSquaredError() / 
       rootMeanPriorSquaredError();
   }
@@ -1552,6 +1607,9 @@ public class Evaluation
 		      "class numeric!");
     }
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     double entropy = 0;
     for(int i = 0; i < m_NumClasses; i++) {
       entropy -= m_ClassPriors[i] / m_ClassPriorsSum 
@@ -1573,6 +1631,10 @@ public class Evaluation
 	new Exception("Can't compute K&B Info score: " + 
 		      "class numeric!");
     }
+
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumKBInfo;
   }
 
@@ -1590,6 +1652,10 @@ public class Evaluation
 	new Exception("Can't compute K&B Info score: "
 		       + "class numeric!");
     }
+
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumKBInfo / m_WithClass;
   }
 
@@ -1606,6 +1672,10 @@ public class Evaluation
 	new Exception("Can't compute K&B Info score: " + 
 		      "class numeric!");
     }
+
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return 100.0 * KBInformation() / priorEntropy();
   }
 
@@ -1616,6 +1686,9 @@ public class Evaluation
    */
   public final double SFPriorEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorEntropy;
   }
 
@@ -1626,6 +1699,9 @@ public class Evaluation
    */
   public final double SFMeanPriorEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorEntropy / m_WithClass;
   }
 
@@ -1636,6 +1712,9 @@ public class Evaluation
    */
   public final double SFSchemeEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumSchemeEntropy;
   }
 
@@ -1646,6 +1725,9 @@ public class Evaluation
    */
   public final double SFMeanSchemeEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumSchemeEntropy / m_WithClass;
   }
 
@@ -1657,6 +1739,9 @@ public class Evaluation
    */
   public final double SFEntropyGain() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorEntropy - m_SumSchemeEntropy;
   }
 
@@ -1668,6 +1753,9 @@ public class Evaluation
    */
   public final double SFMeanEntropyGain() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return (m_SumPriorEntropy - m_SumSchemeEntropy) / m_WithClass;
   }
 
@@ -1741,6 +1829,11 @@ public class Evaluation
 
     StringBuffer text = new StringBuffer();
 
+    if (printComplexityStatistics && m_NoPriors) {
+      printComplexityStatistics = false;
+      System.err.println("Priors disabled, cannot print complexity statistics!");
+    }
+    
     text.append(title + "\n");
     try {
       if (m_WithClass > 0) {
@@ -1802,12 +1895,14 @@ public class Evaluation
 	text.append(Utils.
 		    doubleToString(rootMeanSquaredError(), 12, 4) 
 		    + "\n");
-	text.append("Relative absolute error            ");
-	text.append(Utils.doubleToString(relativeAbsoluteError(), 
-					 12, 4) + " %\n");
-	text.append("Root relative squared error        ");
-	text.append(Utils.doubleToString(rootRelativeSquaredError(), 
-					 12, 4) + " %\n");
+	if (!m_NoPriors) {
+	  text.append("Relative absolute error            ");
+	  text.append(Utils.doubleToString(relativeAbsoluteError(), 
+	 				   12, 4) + " %\n");
+	  text.append("Root relative squared error        ");
+	  text.append(Utils.doubleToString(rootRelativeSquaredError(), 
+					   12, 4) + " %\n");
+	}
       }
       if (Utils.gr(unclassified(), 0)) {
 	text.append("UnClassified Instances             ");
@@ -2259,7 +2354,8 @@ public class Evaluation
    * set
    */
   public void setPriors(Instances train) throws Exception {
-
+    m_NoPriors = false;
+    
     if (!m_ClassIsNominal) {
 
       m_NumTrainClassVals = 0;
@@ -2312,6 +2408,15 @@ public class Evaluation
 	m_ClassPriorsSum += instance.weight();
       }
     }    
+  }
+  
+  /**
+   * disables the use of priors, e.g., in case of de-serialized schemes
+   * that have no access to the original training set, but are evaluated
+   * on a set set.
+   */
+  public void useNoPriors() {
+    m_NoPriors = true;
   }
 
   /**
@@ -2374,6 +2479,29 @@ public class Evaluation
 					     String testFileName,
 					     int classIndex,
 					     Range attributesToOutput) throws Exception {
+    return printClassifications(
+	classifier, train, testFileName, classIndex, attributesToOutput, false);
+  }
+
+  /**
+   * Prints the predictions for the given dataset into a String variable.
+   * 
+   * @param classifier		the classifier to use
+   * @param train		the training data
+   * @param testFileName	the name of the test file
+   * @param classIndex		the class index
+   * @param attributesToOutput	the indices of the attributes to output
+   * @param printDistribution	prints the complete distribution for nominal 
+   * 				classes, not just the predicted value
+   * @return			the generated predictions for the attribute range
+   * @throws Exception 		if test file cannot be opened
+   */
+  protected static String printClassifications(Classifier classifier, 
+					     Instances train,
+					     String testFileName,
+					     int classIndex,
+					     Range attributesToOutput,
+					     boolean printDistribution) throws Exception {
 
     StringBuffer text = new StringBuffer();
     if (testFileName.length() != 0) {
@@ -2389,47 +2517,138 @@ public class Evaluation
       } else {
 	test.setClassIndex(test.numAttributes() - 1);
       }
+      
+      // print header
+      if (test.classAttribute().isNominal())
+	if (printDistribution)
+	  text.append(" inst#     actual  predicted error distribution");
+	else
+	  text.append(" inst#     actual  predicted error prediction");
+      else
+	text.append(" inst#     actual  predicted      error");
+      if (attributesToOutput != null) {
+	attributesToOutput.setUpper(test.numAttributes() - 1);
+	text.append(" (");
+	boolean first = true;
+	for (int i = 0; i < test.numAttributes(); i++) {
+	  if (i == test.classIndex())
+	    continue;
+	  
+	  if (attributesToOutput.isInRange(i)) {
+	    if (!first)
+	      text.append(",");
+	    text.append(test.attribute(i).name());
+	    first = false;
+	  }
+	}
+	text.append(")");
+      }
+      text.append("\n");
+      
+      // print predictions
       int i = 0;
       while (test.readInstance(testReader)) {
-	Instance instance = test.instance(0);    
-	Instance withMissing = (Instance)instance.copy();
-	withMissing.setDataset(test);
-	double predValue = 
-	  ((Classifier)classifier).classifyInstance(withMissing);
-	if (test.classAttribute().isNumeric()) {
-	  if (Instance.isMissingValue(predValue)) {
-	    text.append(i + " missing ");
-	  } else {
-	    text.append(i + " " + predValue + " ");
-	  }
-	  if (instance.classIsMissing()) {
-	    text.append("missing");
-	  } else {
-	    text.append(instance.classValue());
-	  }
-	  text.append(" " + attributeValuesString(withMissing, attributesToOutput) + "\n");
-	} else {
-	  if (Instance.isMissingValue(predValue)) {
-	    text.append(i + " missing ");
-	  } else {
-	    text.append(i + " "
-			+ test.classAttribute().value((int)predValue) + " ");
-	  }
-	  if (Instance.isMissingValue(predValue)) {
-	    text.append("missing ");
-	  } else {
-	    text.append(classifier.distributionForInstance(withMissing)
-			[(int)predValue] + " ");
-	  }
-	  text.append(instance.toString(instance.classIndex()) + " "
-		      + attributeValuesString(withMissing, attributesToOutput) + "\n");
-	}
+	Instance inst = test.instance(0);    
+	text.append(
+	    predictionText(
+		classifier, inst, i, attributesToOutput, printDistribution));
 	test.delete(0);
 	i++;
       }
       testReader.close();
     }
     return text.toString();
+  }
+
+  /**
+   * returns the prediction made by the classifier as a string
+   * 
+   * @param classifier		the classifier to use
+   * @param inst		the instance to generate text from
+   * @param instNum		the index in the dataset
+   * @param attributesToOutput	the indices of the attributes to output
+   * @param printDistribution	prints the complete distribution for nominal 
+   * 				classes, not just the predicted value
+   * @return			the generated text
+   * @throws Exception		if something goes wrong
+   * @see			#printClassifications(Classifier, Instances, String, int, Range, boolean)
+   */
+  protected static String predictionText(Classifier classifier, 
+      				  	 Instance inst, 
+      				  	 int instNum,
+      				  	 Range attributesToOutput,
+      				  	 boolean printDistribution) 
+    throws Exception {
+
+    StringBuffer result = new StringBuffer();
+    int width = 10;
+    int prec = 3;
+    
+    Instance withMissing = (Instance)inst.copy();
+    withMissing.setDataset(inst.dataset());
+    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
+    
+    // index
+    result.append(Utils.padLeft("" + instNum, 6));
+    
+    if (inst.dataset().classAttribute().isNumeric()) {
+      // actual
+      if (inst.classIsMissing())
+	result.append(" " + Utils.padLeft("?", width));
+      else
+	result.append(" " + Utils.doubleToString(inst.classValue(), width, prec));
+      // predicted
+      if (Instance.isMissingValue(predValue))
+	result.append(" " + Utils.padLeft("?", width));
+      else
+	result.append(" " + Utils.doubleToString(predValue, width, prec));
+      // error
+      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
+	result.append(" " + Utils.padLeft("?", width));
+      else
+	result.append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
+    } else {
+      // actual
+      result.append(" " + Utils.padLeft(((int) inst.classValue()) + ":" + inst.toString(inst.classIndex()), width));
+      // predicted
+      if (Instance.isMissingValue(predValue))
+	result.append(" " + Utils.padLeft("?", width));
+      else
+	result.append(" " + Utils.padLeft(((int) predValue) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
+      // error?
+      if ((int) predValue != (int) inst.classValue())
+	result.append(" " + "  +  ");
+      else
+	result.append(" " + "     ");
+      // prediction/distribution
+      if (printDistribution) {
+	if (Instance.isMissingValue(predValue)) {
+	  result.append(" " + "?");
+	}
+	else {
+	  result.append(" ");
+	  double[] dist = classifier.distributionForInstance(withMissing);
+	  for (int n = 0; n < dist.length; n++) {
+	    if (n > 0)
+	      result.append(",");
+	    if (n == (int) predValue)
+	      result.append("*");
+	    result.append(Utils.doubleToString(dist[n], prec));
+	  }
+	}
+      }
+      else {
+	if (Instance.isMissingValue(predValue))
+	  result.append(" " + "?");
+	else
+	  result.append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
+      }
+    }
+    
+    // attributes
+    result.append(" " + attributeValuesString(withMissing, attributesToOutput) + "\n");
+    
+    return result.toString();
   }
 
   /**
@@ -2502,6 +2721,9 @@ public class Evaluation
     optionsText.append("-p <attribute range>\n");
     optionsText.append("\tOnly outputs predictions for test instances, along with attributes "
 		       + "(0 for none).\n");
+    optionsText.append("-distribution\n");
+    optionsText.append("\tOutputs the distribution instead of only the prediction\n");
+    optionsText.append("\tin conjunction with the '-p' option (only nominal classes).\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
     if (classifier instanceof Sourcable) {
