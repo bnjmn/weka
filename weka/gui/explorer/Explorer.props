@@ -6,11 +6,15 @@
 #   is read).
 #
 # Author  FracPete (fracpete at waikato dot ac dot nz)
-# Version $Revision: 1.1 $
+# Version $Revision: 1.2 $
 
 # if set to true the Capabilities filters in the GOE will be initialized
-# based on the data that has been loaded into the Explorer (true|false)
-# Note: can be slow on big datasets, hence disabled by default
+# based on the full dataset that has been loaded into the Explorer 
+# otherwise only the header (true|false)
+# Note: The tabs in the Explorer have their own class combobox, which means 
+#       that the data has to be inspected several times (changing the class
+#       combobox only leads to an inspection of the data in the current tab), 
+#       which can be slow on big datasets. Hence it is false by default
 InitGenericObjectEditorFilter=False
 
 # the default filter, including options (can be left empty)

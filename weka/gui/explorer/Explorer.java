@@ -53,7 +53,7 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public class Explorer extends JPanel {
 
@@ -223,15 +223,11 @@ public class Explorer extends JPanel {
   }
   
   /**
-   * notifies all the listeners of a change, but only if ExplorerDefaults are
-   * enabled ("InitGenericObjectEditorFilter")
+   * notifies all the listeners of a change
    * 
    * @param filter	the affected filter
    */
   public void notifyCapabilitiesFilterListener(Capabilities filter) {
-    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
-      return;
-    
     for (CapabilitiesFilterChangeListener l: m_CapabilitiesFilterChangeListeners) {
       if (l == this)
 	continue;

@@ -129,7 +129,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.94 $
+ * @version $Revision: 1.95 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -2255,7 +2255,10 @@ public class ClassifierPanel
 
     // determine class attribute (will miss missing class values, but for
     // efficiency reasons we don't examine the complete dataset again!)
-    tempInst = new Instances(m_Instances, 0);
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+      tempInst = new Instances(m_Instances, 0);
+    else
+      tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
     filterClass = null;
     try {
