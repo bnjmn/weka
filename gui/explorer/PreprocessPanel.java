@@ -104,7 +104,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $
+ * @version $Revision: 1.61 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -501,15 +501,17 @@ public class PreprocessPanel
 	  m_Support.firePropertyChange("", null, null);
 	  
 	  // notify GOEs about change
-	  if (ExplorerDefaults.getInitGenericObjectEditorFilter()) {
-	    try {
+	  try {
+	    if (ExplorerDefaults.getInitGenericObjectEditorFilter())
 	      getExplorer().notifyCapabilitiesFilterListener(
 		  Capabilities.forInstances(m_Instances));
-	    }
-	    catch (Exception e) {
-	      e.printStackTrace();
-	      m_Log.logMessage(e.toString());
-	    }
+	    else
+	      getExplorer().notifyCapabilitiesFilterListener(
+		  Capabilities.forInstances(new Instances(m_Instances, 0)));
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	    m_Log.logMessage(e.toString());
 	  }
 	}
       };

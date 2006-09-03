@@ -100,7 +100,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -1010,7 +1010,10 @@ public class AttributeSelectionPanel
 
     // determine class attribute (will miss missing class values, but for
     // efficiency reasons we don't examine the complete dataset again!)
-    tempInst = new Instances(m_Instances, 0);
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+      tempInst = new Instances(m_Instances, 0);
+    else
+      tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
     filterClass = null;
     try {
