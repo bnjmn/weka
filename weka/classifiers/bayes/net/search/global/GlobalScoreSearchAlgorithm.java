@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class GlobalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -479,7 +479,7 @@ public class GlobalScoreSearchAlgorithm
 				break;
 		}
 		
-		if (getUseProb()) {
+		if (!getUseProb()) {
 		  options[current++] = "-Q";
 		}
 
