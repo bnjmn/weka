@@ -15,8 +15,8 @@
  */
 
 /*
- *    LinearRegression.java
- *    Copyright (C) 1999 Eibe Frank,Len Trigg
+ * GaussianProcesses.java
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -80,10 +80,12 @@ import java.util.Vector;
  *  may output additional info to the console</pre>
  * 
  * <pre> -L &lt;double&gt;
- *  Level of Gaussian Noise. (default 0.1)</pre>
+ *  Level of Gaussian Noise.
+ *  (default: 1.0)</pre>
  * 
  * <pre> -N
- *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ *  Whether to 0=normalize/1=standardize/2=neither.
+ *  (default: 0=normalize)</pre>
  * 
  * <pre> -K &lt;classname and parameters&gt;
  *  The Kernel to use.
@@ -102,7 +104,8 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
  *  (default: 250007)</pre>
  * 
  * <pre> -G &lt;num&gt;
@@ -112,7 +115,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -537,13 +540,13 @@ public class GaussianProcesses
       result.addElement(enm.nextElement());
 
     result.addElement(new Option(
-	"\tLevel of Gaussian Noise."
-	+ " (default 0.1)",
+	"\tLevel of Gaussian Noise.\n"
+	+ "\t(default: 1.0)",
 	"L", 1, "-L <double>"));
     
     result.addElement(new Option(
-	"\tWhether to 0=normalize/1=standardize/2=neither. " +
-	"(default 0=normalize)",
+	"\tWhether to 0=normalize/1=standardize/2=neither.\n"
+	+ "\t(default: 0=normalize)",
 	"N", 1, "-N"));
     
     result.addElement(new Option(
@@ -575,10 +578,12 @@ public class GaussianProcesses
    *  may output additional info to the console</pre>
    * 
    * <pre> -L &lt;double&gt;
-   *  Level of Gaussian Noise. (default 0.1)</pre>
+   *  Level of Gaussian Noise.
+   *  (default: 1.0)</pre>
    * 
    * <pre> -N
-   *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+   *  Whether to 0=normalize/1=standardize/2=neither.
+   *  (default: 0=normalize)</pre>
    * 
    * <pre> -K &lt;classname and parameters&gt;
    *  The Kernel to use.
@@ -597,7 +602,8 @@ public class GaussianProcesses
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number).
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
    *  (default: 250007)</pre>
    * 
    * <pre> -G &lt;num&gt;
@@ -617,7 +623,7 @@ public class GaussianProcesses
     if (tmpStr.length() != 0)
       setNoise(Double.parseDouble(tmpStr));
     else
-      setNoise(0.1);
+      setNoise(1.0);
 
     tmpStr = Utils.getOption('N', options);
     if (tmpStr.length() != 0)
