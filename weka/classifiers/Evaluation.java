@@ -30,63 +30,63 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Class for evaluating machine learning models. <p>
+ * Class for evaluating machine learning models. <p/>
  *
- * ------------------------------------------------------------------- <p>
+ * ------------------------------------------------------------------- <p/>
  *
- * General options when evaluating a learning scheme from the command-line: <p>
+ * General options when evaluating a learning scheme from the command-line: <p/>
  *
- * -t filename <br>
- * Name of the file with the training data. (required) <p>
+ * -t filename <br/>
+ * Name of the file with the training data. (required) <p/>
  *
- * -T filename <br>
+ * -T filename <br/>
  * Name of the file with the test data. If missing a cross-validation 
- * is performed. <p>
+ * is performed. <p/>
  *
- * -c index <br>
- * Index of the class attribute (1, 2, ...; default: last). <p>
+ * -c index <br/>
+ * Index of the class attribute (1, 2, ...; default: last). <p/>
  *
- * -x number <br>
- * The number of folds for the cross-validation (default: 10). <p>
+ * -x number <br/>
+ * The number of folds for the cross-validation (default: 10). <p/>
  *
- * -s seed <br>
- * Random number seed for the cross-validation (default: 1). <p>
+ * -s seed <br/>
+ * Random number seed for the cross-validation (default: 1). <p/>
  *
- * -m filename <br>
- * The name of a file containing a cost matrix. <p>
+ * -m filename <br/>
+ * The name of a file containing a cost matrix. <p/>
  *
- * -l filename <br>
- * Loads classifier from the given file. <p>
+ * -l filename <br/>
+ * Loads classifier from the given file. <p/>
  *
- * -d filename <br>
- * Saves classifier built from the training data into the given file. <p>
+ * -d filename <br/>
+ * Saves classifier built from the training data into the given file. <p/>
  *
- * -v <br>
- * Outputs no statistics for the training data. <p>
+ * -v <br/>
+ * Outputs no statistics for the training data. <p/>
  *
- * -o <br>
- * Outputs statistics only, not the classifier. <p>
+ * -o <br/>
+ * Outputs statistics only, not the classifier. <p/>
  * 
- * -i <br>
- * Outputs information-retrieval statistics per class. <p>
+ * -i <br/>
+ * Outputs information-retrieval statistics per class. <p/>
  *
- * -k <br>
- * Outputs information-theoretic statistics. <p>
+ * -k <br/>
+ * Outputs information-theoretic statistics. <p/>
  *
- * -p range <br>
+ * -p range <br/>
  * Outputs predictions for test instances, along with the attributes in 
  * the specified range (and nothing else). Use '-p 0' if no attributes are
- * desired. <p>
+ * desired. <p/>
  *
- * -r <br>
- * Outputs cumulative margin distribution (and nothing else). <p>
+ * -r <br/>
+ * Outputs cumulative margin distribution (and nothing else). <p/>
  *
- * -g <br> 
+ * -g <br/> 
  * Only for classifiers that implement "Graphable." Outputs
  * the graph representation of the classifier (and nothing
- * else). <p>
+ * else). <p/>
  *
- * ------------------------------------------------------------------- <p>
+ * ------------------------------------------------------------------- <p/>
  *
  * Example usage as the main of a classifier (called FunkyClassifier):
  * <code> <pre>
@@ -99,9 +99,9 @@ import java.util.zip.GZIPOutputStream;
  *   }
  * }
  * </pre> </code> 
- * <p>
+ * <p/>
  *
- * ------------------------------------------------------------------ <p>
+ * ------------------------------------------------------------------ <p/>
  *
  * Example usage from within an application:
  * <code> <pre>
@@ -117,7 +117,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.53.2.4 $
+ * @version  $Revision: 1.53.2.5 $
   */
 public class Evaluation implements Summarizable {
 
@@ -228,13 +228,22 @@ public class Evaluation implements Summarizable {
   
   /** Total entropy of scheme predictions */
   protected double m_SumSchemeEntropy;
+
+  /** enables/disables the use of priors, e.g., if no training set is
+   * present in case of de-serialized schemes */
+  protected boolean m_NoPriors = false;
   
   /**
    * Initializes all the counters for the evaluation.
+   * Use <code>useNoPriors()</code> if the dataset is the test set and you
+   * can't initialize with the priors from the training set via 
+   * <code>setPriors(Instances)</code>.
    *
-   * @param data set of training instances, to get some header 
-   * information and prior class distribution information
-   * @exception Exception if the class is not defined
+   * @param data 	set of training instances, to get some header 
+   * 			information and prior class distribution information
+   * @throws Exception 	if the class is not defined
+   * @see 		#useNoPriors()
+   * @see 		#setPriors(Instances)
    */
   public Evaluation(Instances data) throws Exception {
     
@@ -244,11 +253,17 @@ public class Evaluation implements Summarizable {
   /**
    * Initializes all the counters for the evaluation and also takes a
    * cost matrix as parameter.
+   * Use <code>useNoPriors()</code> if the dataset is the test set and you
+   * can't initialize with the priors from the training set via 
+   * <code>setPriors(Instances)</code>.
    *
-   * @param data set of instances, to get some header information
-   * @param costMatrix the cost matrix---if null, default costs will be used
-   * @exception Exception if cost matrix is not compatible with 
-   * data, the class is not defined or the class is numeric
+   * @param data 	set of training instances, to get some header 
+   * 			information and prior class distribution information
+   * @param costMatrix 	the cost matrix---if null, default costs will be used
+   * @throws Exception 	if cost matrix is not compatible with 
+   * 			data, the class is not defined or the class is numeric
+   * @see 		#useNoPriors()
+   * @see 		#setPriors(Instances)
    */
   public Evaluation(Instances data, CostMatrix costMatrix) 
        throws Exception {
@@ -298,14 +313,17 @@ public class Evaluation implements Summarizable {
 
   /**
    * Performs a (stratified if class is nominal) cross-validation 
-   * for a classifier on a set of instances.
+   * for a classifier on a set of instances. Now performs
+   * a deep copy of the classifier before each call to 
+   * buildClassifier() (just in case the classifier is not
+   * initialized properly).
    *
    * @param classifier the classifier with any options set.
    * @param data the data on which the cross-validation is to be 
    * performed 
    * @param numFolds the number of folds for the cross-validation
    * @param random random number generator for randomization 
-   * @exception Exception if a classifier could not be generated 
+   * @throws Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
   public void crossValidateModel(Classifier classifier,
@@ -334,14 +352,14 @@ public class Evaluation implements Summarizable {
    * Performs a (stratified if class is nominal) cross-validation 
    * for a classifier on a set of instances.
    *
-   * @param classifier a string naming the class of the classifier
+   * @param classifierString a string naming the class of the classifier
    * @param data the data on which the cross-validation is to be 
    * performed 
    * @param numFolds the number of folds for the cross-validation
    * @param options the options to the classifier. Any options
    * @param random the random number generator for randomizing the data
    * accepted by the classifier will be removed from this array.
-   * @exception Exception if a classifier could not be generated 
+   * @throws Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
   public void crossValidateModel(String classifierString,
@@ -355,63 +373,63 @@ public class Evaluation implements Summarizable {
 
   /**
    * Evaluates a classifier with the options given in an array of
-   * strings. <p>
+   * strings. <p/>
    *
-   * Valid options are: <p>
+   * Valid options are: <p/>
    *
-   * -t filename <br>
-   * Name of the file with the training data. (required) <p>
+   * -t filename <br/>
+   * Name of the file with the training data. (required) <p/>
    *
-   * -T filename <br>
+   * -T filename <br/>
    * Name of the file with the test data. If missing a cross-validation 
-   * is performed. <p>
+   * is performed. <p/>
    *
-   * -c index <br>
-   * Index of the class attribute (1, 2, ...; default: last). <p>
+   * -c index <br/>
+   * Index of the class attribute (1, 2, ...; default: last). <p/>
    *
-   * -x number <br>
-   * The number of folds for the cross-validation (default: 10). <p>
+   * -x number <br/>
+   * The number of folds for the cross-validation (default: 10). <p/>
    *
-   * -s seed <br>
-   * Random number seed for the cross-validation (default: 1). <p>
+   * -s seed <br/>
+   * Random number seed for the cross-validation (default: 1). <p/>
    *
-   * -m filename <br>
-   * The name of a file containing a cost matrix. <p>
+   * -m filename <br/>
+   * The name of a file containing a cost matrix. <p/>
    *
-   * -l filename <br>
-   * Loads classifier from the given file. <p>
+   * -l filename <br/>
+   * Loads classifier from the given file. <p/>
    *
-   * -d filename <br>
-   * Saves classifier built from the training data into the given file. <p>
+   * -d filename <br/>
+   * Saves classifier built from the training data into the given file. <p/>
    *
-   * -v <br>
-   * Outputs no statistics for the training data. <p>
+   * -v <br/>
+   * Outputs no statistics for the training data. <p/>
    *
-   * -o <br>
-   * Outputs statistics only, not the classifier. <p>
+   * -o <br/>
+   * Outputs statistics only, not the classifier. <p/>
    * 
-   * -i <br>
-   * Outputs detailed information-retrieval statistics per class. <p>
+   * -i <br/>
+   * Outputs detailed information-retrieval statistics per class. <p/>
    *
-   * -k <br>
-   * Outputs information-theoretic statistics. <p>
+   * -k <br/>
+   * Outputs information-theoretic statistics. <p/>
    *
-   * -p range <br>
+   * -p range <br/>
    * Outputs predictions for test instances, along with the attributes in 
    * the specified range (and nothing else). Use '-p 0' if no attributes are
-   * desired. <p>
+   * desired. <p/>
    *
-   * -r <br>
-   * Outputs cumulative margin distribution (and nothing else). <p>
+   * -r <br/>
+   * Outputs cumulative margin distribution (and nothing else). <p/>
    *
-   * -g <br> 
+   * -g <br/> 
    * Only for classifiers that implement "Graphable." Outputs
    * the graph representation of the classifier (and nothing
-   * else). <p>
+   * else). <p/>
    *
    * @param classifierString class of machine learning classifier as a string
    * @param options the array of string containing the options
-   * @exception Exception if model could not be evaluated successfully
+   * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results 
    */
   public static String evaluateModel(String classifierString, 
@@ -454,61 +472,61 @@ public class Evaluation implements Summarizable {
 
   /**
    * Evaluates a classifier with the options given in an array of
-   * strings. <p>
+   * strings. <p/>
    *
-   * Valid options are: <p>
+   * Valid options are: <p/>
    *
-   * -t name of training file <br>
-   * Name of the file with the training data. (required) <p>
+   * -t name of training file <br/>
+   * Name of the file with the training data. (required) <p/>
    *
-   * -T name of test file <br>
+   * -T name of test file <br/>
    * Name of the file with the test data. If missing a cross-validation 
-   * is performed. <p>
+   * is performed. <p/>
    *
-   * -c class index <br>
-   * Index of the class attribute (1, 2, ...; default: last). <p>
+   * -c class index <br/>
+   * Index of the class attribute (1, 2, ...; default: last). <p/>
    *
-   * -x number of folds <br>
-   * The number of folds for the cross-validation (default: 10). <p>
+   * -x number of folds <br/>
+   * The number of folds for the cross-validation (default: 10). <p/>
    *
-   * -s random number seed <br>
-   * Random number seed for the cross-validation (default: 1). <p>
+   * -s random number seed <br/>
+   * Random number seed for the cross-validation (default: 1). <p/>
    *
-   * -m file with cost matrix <br>
-   * The name of a file containing a cost matrix. <p>
+   * -m file with cost matrix <br/>
+   * The name of a file containing a cost matrix. <p/>
    *
-   * -l name of model input file <br>
-   * Loads classifier from the given file. <p>
+   * -l name of model input file <br/>
+   * Loads classifier from the given file. <p/>
    *
-   * -d name of model output file <br>
-   * Saves classifier built from the training data into the given file. <p>
+   * -d name of model output file <br/>
+   * Saves classifier built from the training data into the given file. <p/>
    *
-   * -v <br>
-   * Outputs no statistics for the training data. <p>
+   * -v <br/>
+   * Outputs no statistics for the training data. <p/>
    *
-   * -o <br>
-   * Outputs statistics only, not the classifier. <p>
+   * -o <br/>
+   * Outputs statistics only, not the classifier. <p/>
    * 
-   * -i <br>
-   * Outputs detailed information-retrieval statistics per class. <p>
+   * -i <br/>
+   * Outputs detailed information-retrieval statistics per class. <p/>
    *
-   * -k <br>
-   * Outputs information-theoretic statistics. <p>
+   * -k <br/>
+   * Outputs information-theoretic statistics. <p/>
    *
-   * -p <br>
-   * Outputs predictions for test instances (and nothing else). <p>
+   * -p <br/>
+   * Outputs predictions for test instances (and nothing else). <p/>
    *
-   * -r <br>
-   * Outputs cumulative margin distribution (and nothing else). <p>
+   * -r <br/>
+   * Outputs cumulative margin distribution (and nothing else). <p/>
    *
-   * -g <br> 
+   * -g <br/> 
    * Only for classifiers that implement "Graphable." Outputs
    * the graph representation of the classifier (and nothing
-   * else). <p>
+   * else). <p/>
    *
    * @param classifier machine learning classifier
    * @param options the array of string containing the options
-   * @exception Exception if model could not be evaluated successfully
+   * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results */
   public static String evaluateModel(Classifier classifier,
 				     String [] options) throws Exception {
@@ -537,7 +555,12 @@ public class Evaluation implements Summarizable {
       // Get basic options (options the same for all schemes)
       classIndexString = Utils.getOption('c', options);
       if (classIndexString.length() != 0) {
-	classIndex = Integer.parseInt(classIndexString);
+	if (classIndexString.equals("first"))
+	  classIndex = 1;
+	else if (classIndexString.equals("last"))
+	  classIndex = -1;
+	else
+	  classIndex = Integer.parseInt(classIndexString);
       }
       trainFileName = Utils.getOption('t', options); 
       objectInputFileName = Utils.getOption('l', options);
@@ -606,7 +629,6 @@ public class Evaluation implements Summarizable {
 	if (classIndex > train.numAttributes()) {
 	  throw new Exception("Index of class attribute too large.");
 	}
-	//train = new Instances(train);
       }
       if (template == null) {
         throw new Exception("No actual dataset provided to use as template");
@@ -640,11 +662,19 @@ public class Evaluation implements Summarizable {
 			    "to list with the predictions. Use '-p 0' for none.");
       }
       if (attributeRangeString.length() != 0) {
+	// if no test file given, we cannot print predictions
+	if (testFileName.length() == 0)
+	  throw new Exception("Cannot print predictions ('-p') without test file ('-T')!");
+
 	printClassifications = true;
 	if (!attributeRangeString.equals("0")) 
 	  attributesToOutput = new Range(attributeRangeString);
       }
 
+      // if no training file given, we don't have any priors
+      if ( (trainFileName.length() == 0) && (printComplexityStatistics) )
+	throw new Exception("Cannot print complexity statistics ('-k') without training file ('-t')!");
+      
       // If a model file is given, we can't process 
       // scheme-specific options
       if (objectInputFileName.length() != 0) {
@@ -680,6 +710,7 @@ public class Evaluation implements Summarizable {
     Evaluation testingEvaluation = new Evaluation(new Instances(template, 0), costMatrix);
     
     if (objectInputFileName.length() != 0) {
+      testingEvaluation.useNoPriors();
       
       // Load classifier from file
       classifier = (Classifier) objectInputStream.readObject();
@@ -878,7 +909,7 @@ public class Evaluation implements Summarizable {
    * @param numClasses the number of classes that should be in the cost matrix
    * (only used if the cost file is in old format).
    * @return a <code>CostMatrix</code> value, or null if costFileName is empty
-   * @exception Exception if an error occurs.
+   * @throws Exception if an error occurs.
    */
   protected static CostMatrix handleCostOption(String costFileName, 
                                              int numClasses) 
@@ -936,7 +967,8 @@ public class Evaluation implements Summarizable {
    *
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
-   * @exception Exception if model could not be evaluated 
+   * @return the predictions
+   * @throws Exception if model could not be evaluated 
    * successfully 
    */
   public double[] evaluateModel(Classifier classifier,
@@ -957,7 +989,7 @@ public class Evaluation implements Summarizable {
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @return the prediction made by the clasifier
-   * @exception Exception if model could not be evaluated 
+   * @throws Exception if model could not be evaluated 
    * successfully or the data contains string attributes
    */
   public double evaluateModelOnce(Classifier classifier,
@@ -986,7 +1018,8 @@ public class Evaluation implements Summarizable {
    *
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
-   * @exception Exception if model could not be evaluated 
+   * @return the prediction
+   * @throws Exception if model could not be evaluated 
    * successfully
    */
   public double evaluateModelOnce(double [] dist, 
@@ -1010,7 +1043,7 @@ public class Evaluation implements Summarizable {
    *
    * @param prediction the supplied prediction
    * @param instance the test instance to be classified
-   * @exception Exception if model could not be evaluated 
+   * @throws Exception if model could not be evaluated 
    * successfully
    */
   public void evaluateModelOnce(double prediction,
@@ -1033,6 +1066,7 @@ public class Evaluation implements Summarizable {
    * @param className the name to give to the source code class
    * @return the source for a static classifier that can be tested with
    * weka libraries.
+   * @throws Exception if code-generation fails
    */
   protected static String wekaStaticWrapper(Sourcable classifier, 
                                             String className) 
@@ -1040,7 +1074,7 @@ public class Evaluation implements Summarizable {
     
     //String className = "StaticClassifier";
     String staticClassifier = classifier.toSource(className);
-    return "package weka.classifiers;\n"
+    return "package weka.classifiers;\n\n"
     +"import weka.core.Attribute;\n"
     +"import weka.core.Instance;\n"
     +"import weka.core.Instances;\n"
@@ -1226,7 +1260,7 @@ public class Evaluation implements Summarizable {
    * Returns the correlation coefficient if the class is numeric.
    *
    * @return the correlation coefficient
-   * @exception Exception if class is not numeric
+   * @throws Exception if class is not numeric
    */
   public final double correlationCoefficient() throws Exception {
 
@@ -1273,6 +1307,9 @@ public class Evaluation implements Summarizable {
    */
   public final double meanPriorAbsoluteError() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorAbsErr / m_WithClass;
   }
 
@@ -1280,10 +1317,13 @@ public class Evaluation implements Summarizable {
    * Returns the relative absolute error.
    *
    * @return the relative absolute error 
-   * @exception Exception if it can't be computed
+   * @throws Exception if it can't be computed
    */
   public final double relativeAbsoluteError() throws Exception {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return 100 * meanAbsoluteError() / meanPriorAbsoluteError();
   }
   
@@ -1304,6 +1344,9 @@ public class Evaluation implements Summarizable {
    */
   public final double rootMeanPriorSquaredError() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return Math.sqrt(m_SumPriorSqrErr / m_WithClass);
   }
   
@@ -1314,6 +1357,9 @@ public class Evaluation implements Summarizable {
    */
   public final double rootRelativeSquaredError() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return 100.0 * rootMeanSquaredError() / 
       rootMeanPriorSquaredError();
   }
@@ -1322,7 +1368,7 @@ public class Evaluation implements Summarizable {
    * Calculate the entropy of the prior distribution
    *
    * @return the entropy of the prior distribution
-   * @exception Exception if the class is not nominal
+   * @throws Exception if the class is not nominal
    */
   public final double priorEntropy() throws Exception {
 
@@ -1332,6 +1378,9 @@ public class Evaluation implements Summarizable {
 		      "class numeric!");
     }
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     double entropy = 0;
     for(int i = 0; i < m_NumClasses; i++) {
       entropy -= m_ClassPriors[i] / m_ClassPriorsSum 
@@ -1345,7 +1394,7 @@ public class Evaluation implements Summarizable {
    * Return the total Kononenko & Bratko Information score in bits
    *
    * @return the K&B information score
-   * @exception Exception if the class is not nominal
+   * @throws Exception if the class is not nominal
    */
   public final double KBInformation() throws Exception {
 
@@ -1354,6 +1403,10 @@ public class Evaluation implements Summarizable {
 	new Exception("Can't compute K&B Info score: " + 
 		      "class numeric!");
     }
+
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumKBInfo;
   }
 
@@ -1362,7 +1415,7 @@ public class Evaluation implements Summarizable {
    * instance.
    *
    * @return the K&B information score
-   * @exception Exception if the class is not nominal
+   * @throws Exception if the class is not nominal
    */
   public final double KBMeanInformation() throws Exception {
 
@@ -1371,6 +1424,10 @@ public class Evaluation implements Summarizable {
 	new Exception("Can't compute K&B Info score: "
 		       + "class numeric!");
     }
+
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumKBInfo / m_WithClass;
   }
 
@@ -1378,7 +1435,7 @@ public class Evaluation implements Summarizable {
    * Return the Kononenko & Bratko Relative Information score
    *
    * @return the K&B relative information score
-   * @exception Exception if the class is not nominal
+   * @throws Exception if the class is not nominal
    */
   public final double KBRelativeInformation() throws Exception {
 
@@ -1387,6 +1444,10 @@ public class Evaluation implements Summarizable {
 	new Exception("Can't compute K&B Info score: " + 
 		      "class numeric!");
     }
+
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return 100.0 * KBInformation() / priorEntropy();
   }
 
@@ -1397,6 +1458,9 @@ public class Evaluation implements Summarizable {
    */
   public final double SFPriorEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorEntropy;
   }
 
@@ -1407,6 +1471,9 @@ public class Evaluation implements Summarizable {
    */
   public final double SFMeanPriorEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorEntropy / m_WithClass;
   }
 
@@ -1417,6 +1484,9 @@ public class Evaluation implements Summarizable {
    */
   public final double SFSchemeEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumSchemeEntropy;
   }
 
@@ -1427,6 +1497,9 @@ public class Evaluation implements Summarizable {
    */
   public final double SFMeanSchemeEntropy() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumSchemeEntropy / m_WithClass;
   }
 
@@ -1438,6 +1511,9 @@ public class Evaluation implements Summarizable {
    */
   public final double SFEntropyGain() {
 
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return m_SumPriorEntropy - m_SumSchemeEntropy;
   }
 
@@ -1449,6 +1525,9 @@ public class Evaluation implements Summarizable {
    */
   public final double SFMeanEntropyGain() {
     
+    if (m_NoPriors)
+      return Double.NaN;
+    
     return (m_SumPriorEntropy - m_SumSchemeEntropy) / m_WithClass;
   }
 
@@ -1457,7 +1536,7 @@ public class Evaluation implements Summarizable {
    * for input for gnuplot or similar package.
    *
    * @return the cumulative margin distribution
-   * @exception Exception if the class attribute is nominal
+   * @throws Exception if the class attribute is nominal
    */
   public String toCumulativeMarginDistributionString() throws Exception {
 
@@ -1498,6 +1577,7 @@ public class Evaluation implements Summarizable {
    *
    * @param printComplexityStatistics if true, complexity statistics are
    * returned as well
+   * @return the summary string
    */
   public String toSummaryString(boolean printComplexityStatistics) {
     
@@ -1519,7 +1599,6 @@ public class Evaluation implements Summarizable {
   public String toSummaryString(String title, 
 				boolean printComplexityStatistics) { 
     
-    double mae, mad = 0;
     StringBuffer text = new StringBuffer();
 
     text.append(title + "\n");
@@ -1583,12 +1662,14 @@ public class Evaluation implements Summarizable {
 	text.append(Utils.
 		    doubleToString(rootMeanSquaredError(), 12, 4) 
 		    + "\n");
-	text.append("Relative absolute error            ");
-	text.append(Utils.doubleToString(relativeAbsoluteError(), 
-					 12, 4) + " %\n");
-	text.append("Root relative squared error        ");
-	text.append(Utils.doubleToString(rootRelativeSquaredError(), 
-					 12, 4) + " %\n");
+	if (!m_NoPriors) {
+	  text.append("Relative absolute error            ");
+	  text.append(Utils.doubleToString(relativeAbsoluteError(), 
+					   12, 4) + " %\n");
+	  text.append("Root relative squared error        ");
+	  text.append(Utils.doubleToString(rootRelativeSquaredError(), 
+	 				   12, 4) + " %\n");
+	}
       }
       if (Utils.gr(unclassified(), 0)) {
 	text.append("UnClassified Instances             ");
@@ -1615,7 +1696,7 @@ public class Evaluation implements Summarizable {
    * Calls toMatrixString() with a default title.
    *
    * @return the confusion matrix as a string
-   * @exception Exception if the class is numeric
+   * @throws Exception if the class is numeric
    */
   public String toMatrixString() throws Exception {
 
@@ -1629,7 +1710,7 @@ public class Evaluation implements Summarizable {
    *
    * @param title the title for the confusion matrix
    * @return the confusion matrix as a String
-   * @exception Exception if the class is numeric
+   * @throws Exception if the class is numeric
    */
   public String toMatrixString(String title) throws Exception {
 
@@ -1691,6 +1772,15 @@ public class Evaluation implements Summarizable {
     return text.toString();
   }
 
+  /**
+   * Generates a breakdown of the accuracy for each class (with default title),
+   * incorporating various information-retrieval statistics, such as
+   * true/false positive rate, precision/recall/F-Measure.  Should be
+   * useful for ROC curves, recall/precision curves.  
+   * 
+   * @return the statistics presented as a string
+   * @throws Exception if class is not nominal
+   */
   public String toClassDetailsString() throws Exception {
 
     return toClassDetailsString("=== Detailed Accuracy By Class ===\n");
@@ -1704,6 +1794,7 @@ public class Evaluation implements Summarizable {
    * 
    * @param title the title to prepend the stats string with 
    * @return the statistics presented as a string
+   * @throws Exception if class is not nominal
    */
   public String toClassDetailsString(String title) throws Exception {
 
@@ -1732,7 +1823,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the number of true positives with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * correctly classified positives
    * </pre>
@@ -1753,7 +1844,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the true positive rate with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * correctly classified positives
    * ------------------------------
@@ -1780,7 +1871,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the number of true negatives with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * correctly classified negatives
    * </pre>
@@ -1805,7 +1896,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the true negative rate with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * correctly classified negatives
    * ------------------------------
@@ -1836,7 +1927,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate number of false positives with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * incorrectly classified negatives
    * </pre>
@@ -1861,7 +1952,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the false positive rate with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * incorrectly classified negatives
    * --------------------------------
@@ -1892,7 +1983,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate number of false negatives with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * incorrectly classified positives
    * </pre>
@@ -1917,7 +2008,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the false negative rate with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * incorrectly classified positives
    * --------------------------------
@@ -1948,12 +2039,12 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the recall with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * correctly classified positives
    * ------------------------------
    *       total positives
-   * </pre><p>
+   * </pre><p/>
    * (Which is also the same as the truePositiveRate.)
    *
    * @param classIndex the index of the class to consider as "positive"
@@ -1966,7 +2057,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the precision with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * correctly classified positives
    * ------------------------------
@@ -1993,7 +2084,7 @@ public class Evaluation implements Summarizable {
 
   /**
    * Calculate the F-Measure with respect to a particular class. 
-   * This is defined as<p>
+   * This is defined as<p/>
    * <pre>
    * 2 * recall * precision
    * ----------------------
@@ -2018,10 +2109,11 @@ public class Evaluation implements Summarizable {
    *
    * @param train the training instances used to determine
    * the prior probabilities
-   * @exception Exception if the class attribute of the instances is not
+   * @throws Exception if the class attribute of the instances is not
    * set
    */
   public void setPriors(Instances train) throws Exception {
+    m_NoPriors = false;
 
     if (!m_ClassIsNominal) {
 
@@ -2059,7 +2151,7 @@ public class Evaluation implements Summarizable {
    * training)
    *
    * @param instance the new training instance seen
-   * @exception Exception if the class of the instance is not
+   * @throws Exception if the class of the instance is not
    * set
    */
   public void updatePriors(Instance instance) throws Exception {
@@ -2075,6 +2167,15 @@ public class Evaluation implements Summarizable {
 	m_ClassPriorsSum += instance.weight();
       }
     }    
+  }
+  
+  /**
+   * disables the use of priors, e.g., in case of de-serialized schemes
+   * that have no access to the original training set, but are evaluated
+   * on a set set.
+   */
+  public void useNoPriors() {
+    m_NoPriors = true;
   }
 
   /**
@@ -2123,6 +2224,14 @@ public class Evaluation implements Summarizable {
 
   /**
    * Prints the predictions for the given dataset into a String variable.
+   * 
+   * @param classifier		the classifier to use
+   * @param train		the training data
+   * @param testFileName	the name of the test file
+   * @param classIndex		the class index
+   * @param attributesToOutput	the indices of the attributes to output
+   * @return			the generated predictions for the attribute range
+   * @throws Exception 		if test file cannot be opened
    */
   protected static String printClassifications(Classifier classifier, 
 					     Instances train,
@@ -2192,7 +2301,7 @@ public class Evaluation implements Summarizable {
    * separated by commas and enclosed in brackets.
    *
    * @param instance the instance to print the values from
-   * @param attributes the range of the attributes to list
+   * @param attRange the range of the attributes to list
    * @return a string listing values of the attributes in the range
    */
   protected static String attributeValuesString(Instance instance, Range attRange) {
@@ -2286,8 +2395,10 @@ public class Evaluation implements Summarizable {
   /**
    * Method for generating indices for the confusion matrix.
    *
-   * @param num integer to format
-   * @return the formatted integer as a string
+   * @param num 	integer to format
+   * @param IDChars	the characters to use
+   * @param IDWidth	the width of the entry
+   * @return 		the formatted integer as a string
    */
   protected String num2ShortID(int num,char [] IDChars,int IDWidth) {
     
@@ -2338,7 +2449,7 @@ public class Evaluation implements Summarizable {
    * @param predictedDistribution the probabilities assigned to 
    * each class
    * @param instance the instance to be classified
-   * @exception Exception if the class of the instance is not
+   * @throws Exception if the class of the instance is not
    * set
    */
   protected void updateStatsForClassifier(double [] predictedDistribution,
@@ -2346,7 +2457,6 @@ public class Evaluation implements Summarizable {
        throws Exception {
 
     int actualClass = (int)instance.classValue();
-    double costFactor = 1;
 
     if (!instance.classIsMissing()) {
       updateMargins(predictedDistribution, actualClass, instance.weight());
@@ -2426,7 +2536,7 @@ public class Evaluation implements Summarizable {
    *
    * @param predictedValue the numeric value the classifier predicts
    * @param instance the instance to be classified
-   * @exception Exception if the class of the instance is not
+   * @throws Exception if the class of the instance is not
    * set
    */
   protected void updateStatsForPredictor(double predictedValue,
@@ -2570,7 +2680,7 @@ public class Evaluation implements Summarizable {
       System.arraycopy(m_TrainClassVals, 0, temp, 0, m_NumTrainClassVals);
       int [] index = Utils.sort(temp);
       double lastVal = temp[index[0]];
-      double currentVal, deltaSum = 0;
+      double deltaSum = 0;
       int distinct = 0;
       for (int i = 1; i < temp.length; i++) {
 	double current = temp[index[i]];
