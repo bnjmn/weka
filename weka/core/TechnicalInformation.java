@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -469,7 +469,10 @@ public class TechnicalInformation {
 	  result += ", ";
 	result += authors[i];
       }
-      result += " (" + getValue(Field.YEAR) + ").";
+      if (exists(Field.YEAR))
+	result += " (" + getValue(Field.YEAR) + ").";
+      else
+	result += ".";
       result += " " + getValue(Field.TITLE) + ".";
       result += " " + getValue(Field.PUBLISHER);
       if (exists(Field.ADDRESS))
@@ -483,7 +486,10 @@ public class TechnicalInformation {
 	  result += ", ";
 	result += authors[i];
       }
-      result += " (" + getValue(Field.YEAR) + ").";
+      if (exists(Field.YEAR))
+	result += " (" + getValue(Field.YEAR) + ").";
+      else
+	result += ".";
       result += " " + getValue(Field.TITLE) + ".";
       
       // journal
@@ -521,7 +527,10 @@ public class TechnicalInformation {
       if (exists(Field.PAGES))
 	result += ", " + getValue(Field.PAGES);
 	
-      result += ", " + getValue(Field.YEAR) + ".";
+      if (exists(Field.YEAR))
+	result += ", " + getValue(Field.YEAR) + ".";
+      else
+	result += ".";
     }
     // INCOLLECTION
     else if (getType() == Type.INCOLLECTION) {
@@ -541,7 +550,10 @@ public class TechnicalInformation {
       if (exists(Field.PAGES))
 	result += ", " + getValue(Field.PAGES);
 	
-      result += ", " + getValue(Field.YEAR) + ".";
+      if (exists(Field.YEAR))
+	result += ", " + getValue(Field.YEAR) + ".";
+      else
+	result += ".";
     }
     // default
     else {
@@ -550,7 +562,10 @@ public class TechnicalInformation {
 	  result += ", ";
 	result += authors[i];
       }
-      result += " (" + getValue(Field.YEAR) + ").";
+      if (exists(Field.YEAR))
+	result += " (" + getValue(Field.YEAR) + ").";
+      else
+	result += ".";
       result += " " + getValue(Field.TITLE) + ".";
       if (exists(Field.ADDRESS))
 	result += " " + getValue(Field.ADDRESS) + ".";
