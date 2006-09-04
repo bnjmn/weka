@@ -39,7 +39,7 @@ import java.beans.EventSetDescriptor;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassAssigner extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
@@ -165,7 +165,7 @@ public class ClassAssigner extends JPanel
       dataSet.setClassIndex(0);
     } else {
       classCol = Integer.parseInt(m_classColumn) - 1;
-      if (classCol < 0 || classCol > dataSet.numAttributes()-1) {
+      if (/*classCol < 0 ||*/ classCol > dataSet.numAttributes()-1) {
 	if (m_logger != null) {
 	  m_logger.logMessage("Class column outside range of data "
 			      +"(ClassAssigner)");
