@@ -29,6 +29,8 @@ import weka.core.Instances;
 import weka.core.Capabilities.Capability;
 import weka.core.converters.C45Loader;
 import weka.core.converters.CSVLoader;
+import weka.core.converters.LibSVMLoader;
+import weka.core.converters.LibSVMSaver;
 import weka.core.converters.Loader;
 import weka.datagenerators.DataGenerator;
 import weka.experiment.InstanceQuery;
@@ -104,7 +106,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.61 $
+ * @version $Revision: 1.62 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -159,22 +161,36 @@ public class PreprocessPanel
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  /** File filters for various file types */
+  // File filters for various file types
+  /** serialized instances */
   protected ExtensionFileFilter m_bsiFileFilter = 
-    new ExtensionFileFilter(Instances.SERIALIZED_OBJ_FILE_EXTENSION,
-			    "Binary serialized instances");
+    new ExtensionFileFilter(
+	Instances.SERIALIZED_OBJ_FILE_EXTENSION,
+	"Binary serialized instances (*" + Instances.SERIALIZED_OBJ_FILE_EXTENSION + ")");
 
+  /** C4.5 files */
   protected ExtensionFileFilter m_c45FileFilter = 
-    new ExtensionFileFilter(C45Loader.FILE_EXTENSION,
-			    "C45 names files");
+    new ExtensionFileFilter(
+	C45Loader.FILE_EXTENSION,
+	"C45 names files (*" + C45Loader.FILE_EXTENSION + ")");
 
+  /** CSV files */
   protected ExtensionFileFilter m_csvFileFilter = 
-    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION,
-			    "CSV data files");
+    new ExtensionFileFilter(
+	CSVLoader.FILE_EXTENSION,
+	"CSV data files (*" + CSVLoader.FILE_EXTENSION + ")");
 
+  /** ARFF files (default) */
   protected ExtensionFileFilter m_arffFileFilter = 
-    new ExtensionFileFilter(Instances.FILE_EXTENSION,
-			    "Arff data files");
+    new ExtensionFileFilter(
+	Instances.FILE_EXTENSION,
+	"Arff data files (*" + Instances.FILE_EXTENSION + ")");
+
+  /** LibSVM files */
+  protected ExtensionFileFilter m_libsvmFileFilter = 
+    new ExtensionFileFilter(
+	LibSVMLoader.FILE_EXTENSION,
+	"libsvm data files (*" + LibSVMLoader.FILE_EXTENSION + ")");
 
   /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
@@ -235,14 +251,12 @@ public class PreprocessPanel
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
 
-    m_FileChooser.
-      addChoosableFileFilter(m_bsiFileFilter);
-    m_FileChooser.
-      addChoosableFileFilter(m_c45FileFilter);
-    m_FileChooser.
-      addChoosableFileFilter(m_csvFileFilter);
-    m_FileChooser.
-      addChoosableFileFilter(m_arffFileFilter);
+    m_FileChooser.addChoosableFileFilter(m_arffFileFilter);
+    m_FileChooser.addChoosableFileFilter(m_csvFileFilter);
+    m_FileChooser.addChoosableFileFilter(m_c45FileFilter);
+    m_FileChooser.addChoosableFileFilter(m_bsiFileFilter);
+    m_FileChooser.addChoosableFileFilter(m_libsvmFileFilter);
+    m_FileChooser.setFileFilter(m_arffFileFilter);
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -668,6 +682,13 @@ public class PreprocessPanel
 	  }
 	  File selected = sFile;
 	  saveSerializedInstancesToFile(selected, m_Instances);
+	} else if (m_FileChooser.getFileFilter() == m_libsvmFileFilter) {
+	  if (!sFile.getName().toLowerCase().endsWith(LibSVMLoader.FILE_EXTENSION)) {
+	    sFile = new File(sFile.getParent(), sFile.getName() 
+			     + LibSVMLoader.FILE_EXTENSION);
+	  }
+	  File selected = sFile;
+	  saveInstancesToLibSVMFile(selected, m_Instances);
 	}
       }
       FileFilter temp = m_FileChooser.getFileFilter();
@@ -1080,6 +1101,44 @@ public class PreprocessPanel
   }
 
   /**
+   * Saves the current instances in libsvm format to a file
+   *
+   * @param f a value of type 'File'
+   * @param inst the instances to save
+   */
+  protected void saveInstancesToLibSVMFile(final File f, final Instances inst) {
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	  public void run() {
+	    try {
+	      m_Log.statusMessage("Saving to file...");
+
+	      LibSVMSaver saver = new LibSVMSaver();
+	      saver.setInstances(inst);
+	      saver.setFile(f);
+	      saver.setDestination(f);
+	      saver.writeBatch();
+	      
+	      m_Log.statusMessage("OK");
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	      m_Log.logMessage(ex.getMessage());
+	    }
+	    m_IOThread = null;
+	  }
+	};
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    } else {
+      JOptionPane.showMessageDialog(this,
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Save binary serialized instances",
+				    JOptionPane.WARNING_MESSAGE);
+    } 
+  }
+
+  /**
    * Saves the current instances to the supplied file.
    *
    * @param f a value of type 'File'
@@ -1230,6 +1289,12 @@ public class PreprocessPanel
 		new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
 	      setInstances((Instances)ois.readObject());
 	      ois.close();
+	    } else if (f.getName().toLowerCase().endsWith(LibSVMLoader.FILE_EXTENSION)) {
+	      fileType = "libsvm";
+	      LibSVMLoader cnv = new LibSVMLoader();
+	      cnv.setSource(f);
+	      Instances inst = cnv.getDataSet();
+	      setInstances(inst);
 	    } else {
 	      throw new Exception("Unrecognized file type");
 	    }
