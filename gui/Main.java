@@ -25,12 +25,14 @@ package weka.gui;
 import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Instances;
+import weka.core.Memory;
 import weka.core.SystemInfo;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.gui.arffviewer.ArffViewerMainPanel;
 import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.beans.StartUpListener;
 import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
@@ -89,7 +91,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Main
   extends JFrame {
@@ -101,7 +103,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -137,6 +139,9 @@ public class Main
       super.paintComponent(g);
      
       if (m_Background != null) {
+	g.setColor(Color.WHITE);
+	g.clearRect(0, 0, getWidth(), getHeight());
+	
 	int width  = m_Background.getWidth(null);
 	int height = m_Background.getHeight(null);
 	int x = (getWidth() - width) / 2;
@@ -150,7 +155,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -220,6 +225,20 @@ public class Main
   
   /** the frame itself */
   protected Main m_Self;
+  
+  /** variable for the Main class which would be set to null by the memory 
+   *  monitoring thread to free up some memory if we running out of memory */
+  protected static Main m_MainCommandline;
+  
+  /** singleton instance of the GUI */
+  protected static Main m_MainSingleton;
+
+  /** list of things to be notified when the startup process of
+   *  the KnowledgeFlow is complete */
+  protected static Vector m_StartupListeners = new Vector();
+
+  /** for monitoring the Memory consumption */
+  protected static Memory m_Memory = new Memory(true);
   
   /** contains the child frames (title &lt;-&gt; object) */
   protected HashSet<ChildFrame> m_ChildFrames = new HashSet<ChildFrame>();
@@ -1234,12 +1253,105 @@ public class Main
   }
   
   /**
+   * Create the singleton instance of the Main GUI
+   * 
+   * @param args 	ignored at present
+   */
+  public static void createSingleton(String[] args) {
+    if (m_MainSingleton == null)
+      m_MainSingleton = new Main();
+
+    // notify listeners (if any)
+    for (int i = 0; i < m_StartupListeners.size(); i++)
+      ((StartUpListener) m_StartupListeners.elementAt(i)).startUpComplete();
+  }
+
+  /**
+   * Return the singleton instance of the Main GUI
+   *
+   * @return the singleton instance
+   */
+  public static Main getSingleton() {
+    return m_MainSingleton;
+  }
+
+  /**
+   * Add a listener to be notified when startup is complete
+   * 
+   * @param s 		a listener to add
+   */
+  public static void addStartupListener(StartUpListener s) {
+    m_StartupListeners.add(s);
+  }
+  
+  /**
    * starts the application
    * 
    * @param args	the commandline arguments - ignored
    */
   public static void main(String[] args) {
-    Main inst = new Main();
-    inst.setVisible(true);
+    LookAndFeel.setLookAndFeel();
+    
+    try {
+      // uncomment the following line to disable the memory management:
+      //m_Memory.setEnabled(false);
+
+      // setup splash screen
+      Main.addStartupListener(new weka.gui.beans.StartUpListener() {
+        public void startUpComplete() {
+          m_MainCommandline = Main.getSingleton();
+          m_MainCommandline.setVisible(true);
+        }
+      });
+      Main.addStartupListener(new StartUpListener() {
+        public void startUpComplete() {
+          SplashWindow.disposeSplash();
+        }
+      });
+      SplashWindow.splash(ClassLoader.getSystemResource("weka/gui/images/weka_splash.gif"));
+
+      // start GUI
+      Thread nt = new Thread() {
+	public void run() {
+	  weka.gui.SplashWindow.invokeMethod(
+	      "weka.gui.Main", "createSingleton", new String [1]);
+	}
+      };
+      nt.start();
+      
+      Thread memMonitor = new Thread() {
+	public void run() {
+	  while(true) {
+	    try {
+	      Thread.sleep(4000);
+	      System.gc();
+	      
+	      if (m_Memory.isOutOfMemory()) {
+		// clean up
+		m_MainCommandline = null;
+		System.gc();
+		
+		// stop threads
+		m_Memory.stopThreads();
+		
+		// display error
+		System.err.println("\ndisplayed message:");
+		m_Memory.showOutOfMemory();
+		System.err.println("\nexiting");
+		System.exit(-1);
+	      }
+	      
+	    } catch(InterruptedException ex) { ex.printStackTrace(); }
+	  }
+	}
+      };
+      
+      memMonitor.setPriority(Thread.MAX_PRIORITY);
+      memMonitor.start();
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      System.err.println(ex.getMessage());
+    }
   }
 }
