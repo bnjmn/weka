@@ -22,15 +22,18 @@
 
 package weka.core.converters;
 
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.OptionHandler;
 import weka.core.FastVector;
 import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.Utils;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Enumeration;
-import java.io.*;
 
 /**
  * Abstract class for Savers that save to a file
@@ -46,7 +49,7 @@ import java.io.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractFileSaver extends AbstractSaver implements OptionHandler, FileSourcedConverter{
   
@@ -186,13 +189,15 @@ public abstract class AbstractFileSaver extends AbstractSaver implements OptionH
    */
   public Enumeration listOptions() {
 
-    FastVector newVector = new FastVector(2);
+    FastVector newVector = new FastVector();
 
-    newVector.addElement(new Option("The input file", "i", 1, 
-				    "-i <the input file>"));
+    newVector.addElement(new Option(
+	"\tThe input file", 
+	"i", 1, "-i <the input file>"));
     
-    newVector.addElement(new Option("The output file", "o", 1, 
-				    "-o <the output file>"));
+    newVector.addElement(new Option(
+	"\tThe output file", 
+	"o", 1, "-o <the output file>"));
     
     return newVector.elements();
   }
