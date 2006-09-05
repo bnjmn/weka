@@ -32,10 +32,13 @@ import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.Collections;
@@ -45,6 +48,7 @@ import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -62,7 +66,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -85,7 +89,7 @@ public class ArffViewerMainPanel
   /** default height */
   public final static int    HEIGHT            = 600;
 
-  protected JFrame                parent;
+  protected Component             parent;
   protected JTabbedPane           tabbedPane;
   protected JMenuBar              menuBar;
   protected JMenu                 menuFile;
@@ -127,9 +131,9 @@ public class ArffViewerMainPanel
   /**
    * initializes the object
    * 
-   * @param parentFrame		the parent frame
+   * @param parentFrame		the parent frame (JFrame or JInternalFrame)
    */
-  public ArffViewerMainPanel(JFrame parentFrame) {
+  public ArffViewerMainPanel(Component parentFrame) {
     parent     = parentFrame;
     frameTitle = "ARFF-Viewer"; 
     createPanel();
@@ -257,6 +261,30 @@ public class ArffViewerMainPanel
   }
   
   /**
+   * returns the parent frame, if it's a JFrame, otherwise null
+   * 
+   * @return		the parent frame
+   */
+  public JFrame getParentFrame() {
+    if (parent instanceof JFrame)
+      return (JFrame) parent;
+    else
+      return null;
+  }
+  
+  /**
+   * returns the parent frame, if it's a JInternalFrame, otherwise null
+   * 
+   * @return		the parent frame
+   */
+  public JInternalFrame getParentInternalFrame() {
+    if (parent instanceof JInternalFrame)
+      return (JInternalFrame) parent;
+    else
+      return null;
+  }
+  
+  /**
    * returns the menu bar to be added in a frame
    * 
    * @return		the menu bar
@@ -334,8 +362,10 @@ public class ArffViewerMainPanel
    * sets the title of the parent frame, if one was provided
    */
   public void updateFrameTitle() {
-    if (parent != null)
-      parent.setTitle(getFrameTitle());
+    if (getParentFrame() != null)
+      getParentFrame().setTitle(getFrameTitle());
+    if (getParentInternalFrame() != null)
+      getParentInternalFrame().setTitle(getFrameTitle());
   }
   
   /**
@@ -739,7 +769,7 @@ public class ArffViewerMainPanel
     props.add("Class attribute: " + inst.classAttribute().name());
     props.add("# of class labels: " + inst.numClasses());
     
-    dialog = new ListSelectorDialog(parent, new JList(props));
+    dialog = new ListSelectorDialog(getParentFrame(), new JList(props));
     dialog.showDialog();
   }
   
@@ -748,8 +778,12 @@ public class ArffViewerMainPanel
    * the WindowListener interface it calls the windowClosing method
    */
   public void close() {
-    if ( (parent != null) && (parent instanceof WindowListener) )
-      ((WindowListener) parent).windowClosing(null);
+    if (getParentInternalFrame() != null)
+      getParentInternalFrame().doDefaultCloseAction();
+    else if (getParentFrame() != null)
+      ((Window) getParentFrame()).dispatchEvent(
+	  new WindowEvent(
+	      (Window) getParentFrame(), WindowEvent.WINDOW_CLOSING));
   }
   
   /**
@@ -870,7 +904,7 @@ public class ArffViewerMainPanel
       return null;
     
     list   = new JList(getCurrentPanel().getAttributes());
-    dialog = new ListSelectorDialog(parent, list);
+    dialog = new ListSelectorDialog(getParentFrame(), list);
     result = dialog.showDialog();
     
     if (result == ListSelectorDialog.APPROVE_OPTION) {
@@ -932,7 +966,7 @@ public class ArffViewerMainPanel
       items.add(iter.next());
     Collections.sort(items);
     
-    dialog = new ListSelectorDialog(parent, new JList(items));
+    dialog = new ListSelectorDialog(getParentFrame(), new JList(items));
     dialog.showDialog();
   }
   
