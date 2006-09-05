@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.31 $
+   $Revision: 1.32 $
   ===========================================================================
 -->
 
@@ -21,6 +21,7 @@
   <property name="reports"  value="reports"/>
   <property name="path_modifier" value=""/>
   <property name="cvsroot_anon" value=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"/>
+  <property name="javac_max_memory" value="256m"/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -46,6 +47,7 @@
   <target name="compile_inline" depends="init_all"
    description="Compile weka and leave class files in the source tree">
      <javac srcdir="${path_modifier}weka"
+       fork="yes" memoryMaximumSize="${javac_max_memory}"
        destdir="${path_modifier}"
        source="1.5" target="1.5"/>
       <rmic base="${path_modifier}" 
@@ -64,6 +66,7 @@
      <javac srcdir="${path_modifier}weka"
       destdir="${path_modifier}"
       deprecation="on" 
+      fork="yes" memoryMaximumSize="${javac_max_memory}"
       source="1.5" target="1.5"/>
      <rmic base="${path_modifier}" 
       classname="weka.experiment.RemoteEngine"/>
@@ -73,6 +76,7 @@
   <target name="compile" depends="init_compile" 
    description="Compile weka and deposit class files in ${path_modifier}/build/classes">
     <javac srcdir="${path_modifier}weka" 
+      fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${path_modifier}${build}/classes"
       source="1.5" target="1.5"/>
     <copy todir="${path_modifier}${build}/classes" >
@@ -125,6 +129,7 @@
   <target name="compile_tests" depends="init_tests, compile" 
    description="Compile unit tests into ${path_modifier}/build/testcases">
      <javac srcdir="${path_modifier}tests" 
+       fork="yes" memoryMaximumSize="${javac_max_memory}"
        destdir="${path_modifier}${build}/testcases"
        source="1.5" target="1.5">
         <classpath>
@@ -198,7 +203,7 @@
   <!-- Put everything in ${path_modifier}${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
    description="Create an executable jar file in ${path_modifier}/dist">
-    <echo message="Main-Class: weka.gui.GUIChooser" 
+    <echo message="Main-Class: weka.gui.Main" 
      file="${path_modifier}${build}/classes/manifest.tmp"/>
     <jar jarfile="${path_modifier}${dist}/weka.jar" 
      basedir="${path_modifier}${build}/classes"
