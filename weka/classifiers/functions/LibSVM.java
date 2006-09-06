@@ -50,6 +50,7 @@ import java.util.Vector;
  * - complete overhaul to make it useable in Weka
  * - accesses libsvm classes only via Reflection to make Weka compile without
  *   the libsvm classes
+ * - uses more efficient code to transfer the data into the libsvm sparse format
  */
 
 /** 
@@ -90,7 +91,7 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -S &lt;int&gt;
- *   set type of SVM (default 0)
+ *  Set type of SVM (default: 0)
  *    0 = C-SVC
  *    1 = nu-SVC
  *    2 = one-class SVM
@@ -98,53 +99,62 @@ import java.util.Vector;
  *    4 = nu-SVR</pre>
  * 
  * <pre> -K &lt;int&gt;
- *   set type of kernel function (default 2)
+ *  Set type of kernel function (default: 2)
  *    0 = linear: u'*v
  *    1 = polynomial: (gamma*u'*v + coef0)^degree
  *    2 = radial basis function: exp(-gamma*|u-v|^2)
  *    3 = sigmoid: tanh(gamma*u'*v + coef0)</pre>
  * 
  * <pre> -D &lt;int&gt;
- *   set degree in kernel function (default 3)</pre>
+ *  Set degree in kernel function (default: 3)</pre>
  * 
  * <pre> -G &lt;double&gt;
- *   set gamma in kernel function (default 1/k)</pre>
+ *  Set gamma in kernel function (default: 1/k)</pre>
  * 
  * <pre> -R &lt;double&gt;
- *   set coef0 in kernel function (default 0)</pre>
+ *  Set coef0 in kernel function (default: 0)</pre>
  * 
  * <pre> -C &lt;double&gt;
- *   set the parameter C of C-SVC, epsilon-SVR, and nu-SVR
- *   (default 1)</pre>
+ *  Set the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+ *   (default: 1)</pre>
  * 
  * <pre> -N &lt;double&gt;
- *   set the parameter nu of nu-SVC, one-class SVM, and nu-SVR
- *   (default 0.5)</pre>
+ *  Set the parameter nu of nu-SVC, one-class SVM, and nu-SVR
+ *   (default: 0.5)</pre>
  * 
  * <pre> -Z
- *   turns on normalization of input data (default off)</pre>
+ *  Turns on normalization of input data (default: off)</pre>
  * 
  * <pre> -P &lt;double&gt;
- *   set the epsilon in loss function of epsilon-SVR (default 0.1)</pre>
+ *  Set the epsilon in loss function of epsilon-SVR (default: 0.1)</pre>
  * 
  * <pre> -M &lt;double&gt;
- *   set cache memory size in MB (default 40)</pre>
+ *  Set cache memory size in MB (default: 40)</pre>
  * 
  * <pre> -E &lt;double&gt;
- *   set tolerance of termination criterion (default 0.001)</pre>
+ *  Set tolerance of termination criterion (default: 0.001)</pre>
  * 
  * <pre> -H
- *   turns the shrinking heuristics off (default on)</pre>
+ *  Turns the shrinking heuristics off (default: on)</pre>
  * 
  * <pre> -W &lt;double&gt;
- *   set the parameters C of class i to weight[i]*C, for C-SVC
- *   (default 1)</pre>
+ *  Set the parameters C of class i to weight[i]*C, for C-SVC
+ *   (default: 1)</pre>
+ * 
+ * <pre> -B
+ *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
+ * @see     weka.core.converters.LibSVMLoader
+ * @see     weka.core.converters.LibSVMSaver
  */
 public class LibSVM 
   extends Classifier
@@ -177,23 +187,23 @@ public class LibSVM
   /** normalize input data */
   protected boolean m_Normalize = false;
   
-  /** SVM type C-SVC */
+  /** SVM type C-SVC (classification) */
   public static final int SVMTYPE_C_SVC = 0;
-  /** SVM type nu-SVC */
+  /** SVM type nu-SVC (classification) */
   public static final int SVMTYPE_NU_SVC = 1;
-  /** SVM type one-class SVM */
+  /** SVM type one-class SVM (classification) */
   public static final int SVMTYPE_ONE_CLASS_SVM = 2;
-  /** SVM type epsilon-SVR */
+  /** SVM type epsilon-SVR (regression) */
   public static final int SVMTYPE_EPSILON_SVR = 3;
-  /** SVM type nu-SVR */
+  /** SVM type nu-SVR (regression) */
   public static final int SVMTYPE_NU_SVR = 4;
   /** SVM types */
   public static final Tag[] TAGS_SVMTYPE = {
-    new Tag(SVMTYPE_C_SVC, "C-SVC"),
-    new Tag(SVMTYPE_NU_SVC, "nu-SVC"),
-    new Tag(SVMTYPE_ONE_CLASS_SVM, "one-class SVM"),
-    new Tag(SVMTYPE_EPSILON_SVR, "epsilon-SVR"),
-    new Tag(SVMTYPE_NU_SVR, "nu-SVR")
+    new Tag(SVMTYPE_C_SVC, "C-SVC (classification)"),
+    new Tag(SVMTYPE_NU_SVC, "nu-SVC (classification)"),
+    new Tag(SVMTYPE_ONE_CLASS_SVM, "one-class SVM (classification)"),
+    new Tag(SVMTYPE_EPSILON_SVR, "epsilon-SVR (regression)"),
+    new Tag(SVMTYPE_NU_SVR, "nu-SVR (regression)")
   };
   
   /** the SVM type */
@@ -255,8 +265,9 @@ public class LibSVM
   /** use the shrinking heuristics */
   protected boolean m_Shrinking = true;	
   
-  /** YASSER: don't predict probabilities */
-  protected boolean m_predict_probability = false;
+  /** whether to generate probability estimates instead of +1/-1 in case of 
+   * classification problems */
+  protected boolean m_ProbabilityEstimates = false;
     
   /** whether the libsvm classes are in the Classpath */
   protected static boolean m_Present = false;
@@ -331,7 +342,7 @@ public class LibSVM
     
     result.addElement(
         new Option(
-            "\t set type of SVM (default 0)\n"
+            "\tSet type of SVM (default: 0)\n"
             + "\t\t 0 = C-SVC\n" 
             + "\t\t 1 = nu-SVC\n"
             + "\t\t 2 = one-class SVM\n" 
@@ -341,7 +352,7 @@ public class LibSVM
     
     result.addElement(
         new Option(
-            "\t set type of kernel function (default 2)\n"
+            "\tSet type of kernel function (default: 2)\n"
             + "\t\t 0 = linear: u'*v\n"
             + "\t\t 1 = polynomial: (gamma*u'*v + coef0)^degree\n"
             + "\t\t 2 = radial basis function: exp(-gamma*|u-v|^2)\n"
@@ -350,61 +361,70 @@ public class LibSVM
     
     result.addElement(
         new Option(
-            "\t set degree in kernel function (default 3)", 
+            "\tSet degree in kernel function (default: 3)", 
             "D", 1, "-D <int>"));
     
     result.addElement(
         new Option(
-            "\t set gamma in kernel function (default 1/k)", 
+            "\tSet gamma in kernel function (default: 1/k)", 
             "G", 1, "-G <double>"));
     
     result.addElement(
         new Option(
-            "\t set coef0 in kernel function (default 0)", 
+            "\tSet coef0 in kernel function (default: 0)", 
             "R", 1, "-R <double>"));
     
     result.addElement(
         new Option(
-            "\t set the parameter C of C-SVC, epsilon-SVR, and nu-SVR\n"
-            + "\t (default 1)",
+            "\tSet the parameter C of C-SVC, epsilon-SVR, and nu-SVR\n"
+            + "\t (default: 1)",
             "C", 1, "-C <double>"));
     
     result.addElement(
         new Option(
-            "\t set the parameter nu of nu-SVC, one-class SVM, and nu-SVR\n"
-            + "\t (default 0.5)",
+            "\tSet the parameter nu of nu-SVC, one-class SVM, and nu-SVR\n"
+            + "\t (default: 0.5)",
             "N", 1, "-N <double>"));
     
     result.addElement(
         new Option(
-            "\t turns on normalization of input data (default off)", 
+            "\tTurns on normalization of input data (default: off)", 
             "Z", 0, "-Z"));
     
     result.addElement(
         new Option(
-            "\t set the epsilon in loss function of epsilon-SVR (default 0.1)",
+            "\tSet the epsilon in loss function of epsilon-SVR (default: 0.1)",
             "P", 1, "-P <double>"));
     
     result.addElement(
         new Option(
-            "\t set cache memory size in MB (default 40)", 
+            "\tSet cache memory size in MB (default: 40)", 
             "M", 1, "-M <double>"));
     
     result.addElement(
         new Option(
-            "\t set tolerance of termination criterion (default 0.001)",
+            "\tSet tolerance of termination criterion (default: 0.001)",
             "E", 1, "-E <double>"));
     
     result.addElement(
         new Option(
-            "\t turns the shrinking heuristics off (default on)",
+            "\tTurns the shrinking heuristics off (default: on)",
             "H", 0, "-H"));
     
     result.addElement(
         new Option(
-            "\t set the parameters C of class i to weight[i]*C, for C-SVC\n" 
-            + "\t (default 1)",
+            "\tSet the parameters C of class i to weight[i]*C, for C-SVC\n" 
+            + "\t (default: 1)",
             "W", 1, "-W <double>"));
+    
+    result.addElement(
+        new Option(
+            "\tTrains a SVC model instead of a SVR one (default: SVR)",
+            "B", 0, "-B"));
+
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
     
     return result.elements();
   }
@@ -416,7 +436,7 @@ public class LibSVM
    * Valid options are: <p/>
    * 
    * <pre> -S &lt;int&gt;
-   *   set type of SVM (default 0)
+   *  Set type of SVM (default: 0)
    *    0 = C-SVC
    *    1 = nu-SVC
    *    2 = one-class SVM
@@ -424,47 +444,54 @@ public class LibSVM
    *    4 = nu-SVR</pre>
    * 
    * <pre> -K &lt;int&gt;
-   *   set type of kernel function (default 2)
+   *  Set type of kernel function (default: 2)
    *    0 = linear: u'*v
    *    1 = polynomial: (gamma*u'*v + coef0)^degree
    *    2 = radial basis function: exp(-gamma*|u-v|^2)
    *    3 = sigmoid: tanh(gamma*u'*v + coef0)</pre>
    * 
    * <pre> -D &lt;int&gt;
-   *   set degree in kernel function (default 3)</pre>
+   *  Set degree in kernel function (default: 3)</pre>
    * 
    * <pre> -G &lt;double&gt;
-   *   set gamma in kernel function (default 1/k)</pre>
+   *  Set gamma in kernel function (default: 1/k)</pre>
    * 
    * <pre> -R &lt;double&gt;
-   *   set coef0 in kernel function (default 0)</pre>
+   *  Set coef0 in kernel function (default: 0)</pre>
    * 
    * <pre> -C &lt;double&gt;
-   *   set the parameter C of C-SVC, epsilon-SVR, and nu-SVR
-   *   (default 1)</pre>
+   *  Set the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+   *   (default: 1)</pre>
    * 
    * <pre> -N &lt;double&gt;
-   *   set the parameter nu of nu-SVC, one-class SVM, and nu-SVR
-   *   (default 0.5)</pre>
+   *  Set the parameter nu of nu-SVC, one-class SVM, and nu-SVR
+   *   (default: 0.5)</pre>
    * 
    * <pre> -Z
-   *   turns on normalization of input data (default off)</pre>
+   *  Turns on normalization of input data (default: off)</pre>
    * 
    * <pre> -P &lt;double&gt;
-   *   set the epsilon in loss function of epsilon-SVR (default 0.1)</pre>
+   *  Set the epsilon in loss function of epsilon-SVR (default: 0.1)</pre>
    * 
    * <pre> -M &lt;double&gt;
-   *   set cache memory size in MB (default 40)</pre>
+   *  Set cache memory size in MB (default: 40)</pre>
    * 
    * <pre> -E &lt;double&gt;
-   *   set tolerance of termination criterion (default 0.001)</pre>
+   *  Set tolerance of termination criterion (default: 0.001)</pre>
    * 
    * <pre> -H
-   *   turns the shrinking heuristics off (default on)</pre>
+   *  Turns the shrinking heuristics off (default: on)</pre>
    * 
    * <pre> -W &lt;double&gt;
-   *   set the parameters C of class i to weight[i]*C, for C-SVC
-   *   (default 1)</pre>
+   *  Set the parameters C of class i to weight[i]*C, for C-SVC
+   *   (default: 1)</pre>
+   * 
+   * <pre> -B
+   *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
    * 
    <!-- options-end -->
    *
@@ -543,6 +570,8 @@ public class LibSVM
     setShrinking(!Utils.getFlag('H', options));
     
     setWeights(Utils.getOption('W', options));
+    
+    setProbabilityEstimates(Utils.getFlag('B', options));
   }
   
   /**
@@ -595,6 +624,9 @@ public class LibSVM
       result.add("-W");
       result.add("" + getWeights());
     }
+    
+    if (getProbabilityEstimates())
+      result.add("-B");
     
     return (String[]) result.toArray(new String[result.size()]);
   }
@@ -1005,6 +1037,36 @@ public class LibSVM
   }
   
   /**
+   * Returns whether probability estimates are generated instead of -1/+1 for 
+   * classification problems.
+   * 
+   * @param value       whether to predict probabilities
+   */
+  public void setProbabilityEstimates(boolean value) {
+    m_ProbabilityEstimates = value;
+  }
+  
+  /**
+   * Sets whether to generate probability estimates instead of -1/+1 for 
+   * classification problems.
+   * 
+   * @return            true, if probability estimates should be returned
+   */
+  public boolean getProbabilityEstimates() {
+    return m_ProbabilityEstimates;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String probabilityEstimatesTipText() {
+    return "Whether to generate probability estimates instead of -1/+1 for classification problems.";
+  }
+  
+  /**
    * sets the specified field
    * 
    * @param o           the object to set the field for
@@ -1149,6 +1211,7 @@ public class LibSVM
       setField(result, "p", new Double(m_Loss));
       setField(result, "shrinking", new Integer(m_Shrinking ? 1 : 0));
       setField(result, "nr_weight", new Integer(m_Weight.length));
+      setField(result, "probability", new Integer(m_ProbabilityEstimates ? 1 : 0));
       
       newArray(result, "weight", Double.TYPE, m_Weight.length);
       newArray(result, "weight_label", Integer.TYPE, m_Weight.length);
@@ -1186,7 +1249,7 @@ public class LibSVM
       
       newArray(result, "y", Double.TYPE, vy.size());
       for (int i = 0; i < vy.size(); i++)
-        setField(result, "y", i, new Double((String) vy.elementAt(i)));
+        setField(result, "y", i, vy.elementAt(i));
     }
     catch (Exception e) {
       e.printStackTrace();
@@ -1197,69 +1260,89 @@ public class LibSVM
   }
   
   /**
-   * Converts and ARFF Instance into a string in the sparse format accepted by
-   * LIBSVM
+   * returns an instance into a sparse libsvm array
    * 
-   * @param instance            the instance to turn into sparse format
-   * @return                    the sparse String representation
+   * @param instance	the instance to work on
+   * @return		the libsvm array
+   * @throws Exception	if setup of array fails
    */
-  protected String instanceToSparse(Instance instance) {
-    String line = new String();
-    int c = (int) instance.classValue();
-    if (c == 0)
-      c = -1;
-    line = c + " ";
-    for (int j = 1; j < instance.numAttributes(); j++) {
-      if (instance.value(j - 1) != 0)
-        line += " " + j + ":" + instance.value(j - 1);
+  protected Object instanceToArray(Instance instance) throws Exception {
+    int		index;
+    int		count;
+    int 	i;
+    Object 	result;
+    
+    // determine number of non-zero attributes
+    count = 0;
+    for (i = 0; i < instance.numAttributes(); i++) {
+      if (i == instance.classIndex())
+	continue;
+      if (instance.value(i) != 0)
+	count++;
+    }
+
+    // fill array
+    result = Array.newInstance(Class.forName(CLASS_SVMNODE), count);
+    index  = 0;
+    for (i = 0; i < instance.numAttributes(); i++) {
+      if (i == instance.classIndex())
+	continue;
+      if (instance.value(i) == 0)
+	continue;
+
+      index++;
+      Array.set(result, index - 1, Class.forName(CLASS_SVMNODE).newInstance());
+      setField(Array.get(result, index - 1), "index", new Integer(index));
+      setField(Array.get(result, index - 1), "value", new Double(instance.value(i)));
     }
     
-    return (line + "\n");
-  }
-  
-  /**
-   * converts an ARFF dataset into sparse format
-   * 
-   * @param data                the dataset to process
-   * @return                    the processed data
-   */
-  protected Vector dataToSparse(Instances data) {
-    Vector sparse = new Vector(data.numInstances() + 1);
-    
-    for (int i = 0; i < data.numInstances(); i++)
-      sparse.add(instanceToSparse(data.instance(i)));
-    
-    return sparse;
+    return result;
   }
   
   /**
    * classifies the given instance
    * 
    * @param instance            the instance to classify
-   * @return                    the class label
+   * @return                    the classification
    * @throws Exception          if an error occurs
    */
   public double classifyInstance(Instance instance) throws Exception {
+    if (m_Filter != null) {
+      m_Filter.input(instance);
+      m_Filter.batchFinished();
+      instance = m_Filter.output();
+    }
     
+    Object x = instanceToArray(instance);
+    double v = ((Double) invokeMethod(
+	Class.forName(CLASS_SVM).newInstance(),
+	"svm_predict",
+	new Class[]{
+	  Class.forName(CLASS_SVMMODEL), 
+	  Array.newInstance(Class.forName(CLASS_SVMNODE), Array.getLength(x)).getClass()},
+	  new Object[]{
+	  m_Model, 
+	  x})).doubleValue();
+    
+    return v;
+  }
+  
+  /**
+   * Computes the distribution for a given instance
+   *
+   * @param instance 		the instance for which distribution is computed
+   * @return 			the distribution
+   * @throws Exception 		if the distribution can't be computed successfully
+   */
+  public double[] distributionForInstance (Instance instance) throws Exception {	
     int[] labels = new int[instance.numClasses()];
     double[] prob_estimates = null;
-    
-    // FracPete: the following block is NOT tested!
-    if (m_predict_probability) {
-      if (    (m_SVMType == SVMTYPE_EPSILON_SVR)
-           || (m_SVMType == SVMTYPE_NU_SVR) ) {
-        
-        double prob = ((Double) invokeMethod(
-            Class.forName(CLASS_SVM).newInstance(),
-            "svm_get_svr_probability",
-            new Class[]{Class.forName(CLASS_SVMMODEL)},
-            new Object[]{m_Model})).doubleValue();
 
-        System.out.print(
-            "Prob. model for test data: target value = predicted value + z,\n"
-            + "z: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma="
-            + prob + "\n");
-      } 
+    if (m_ProbabilityEstimates) {
+      if (    (m_SVMType == SVMTYPE_EPSILON_SVR)
+	   || (m_SVMType == SVMTYPE_NU_SVR) ) {
+        throw new Exception("Do not use distributionForInstance for regression models!");
+      }
       else {
         invokeMethod(
             Class.forName(CLASS_SVM).newInstance(),
@@ -1270,34 +1353,22 @@ public class LibSVM
             new Object[]{
               m_Model, 
               labels});
-
+        
         prob_estimates = new double[instance.numClasses()];
       }
     }
-    
+
     if (m_Filter != null) {
       m_Filter.input(instance);
       m_Filter.batchFinished();
       instance = m_Filter.output();
     }
-    
-    String line = instanceToSparse(instance);
-    
-    StringTokenizer st = new StringTokenizer(line, " \t\n\r\f:");
-    
-    st.nextToken();   // skip class
-    int m = st.countTokens() / 2;
-    Object x = Array.newInstance(Class.forName(CLASS_SVMNODE), m);
-    for (int j = 0; j < m; j++) {
-      Array.set(x, j, Class.forName(CLASS_SVMNODE).newInstance());
-      setField(Array.get(x, j), "index", new Integer(st.nextToken()));
-      setField(Array.get(x, j), "value", new Double(st.nextToken()));
-    }
-    
+
+    Object x = instanceToArray(instance);
     double v;
-    if (    m_predict_probability
-         && (    (m_SVMType == SVMTYPE_C_SVC) 
-              || (m_SVMType == SVMTYPE_NU_SVC) ) ) {
+    double[] result = new double[instance.numClasses()];
+    if (    m_ProbabilityEstimates 
+	 && ((m_SVMType == SVMTYPE_C_SVC) || (m_SVMType == SVMTYPE_NU_SVC)) ) {
       v = ((Double) invokeMethod(
           Class.forName(CLASS_SVM).newInstance(),
           "svm_predict_probability",
@@ -1309,8 +1380,14 @@ public class LibSVM
             m_Model, 
             x,
             prob_estimates})).doubleValue();
-    } 
-    else {
+
+      // Return order of probabilities to canonical weka attribute order
+      for (int k = 0; k < prob_estimates.length; k++) {
+        if (labels[k] == -1) 
+          labels[k] = 0;
+        result[labels[k]] = prob_estimates[k];
+      }
+    } else {
       v = ((Double) invokeMethod(
           Class.forName(CLASS_SVM).newInstance(),
           "svm_predict",
@@ -1320,13 +1397,18 @@ public class LibSVM
           new Object[]{
             m_Model, 
             x})).doubleValue();
+      
+      if (instance.classAttribute().isNominal()) {
+	if (v == -1) 
+	  v = 0;
+	result[(int) v] = 1;
+      }
+      else {
+	result[0] = v;
+      }
     }
 
-    // transform frist class label into Weka format
-    if (v == -1)
-      v = 0;
-    
-    return v;
+    return result;                
   }
 
   /**
@@ -1341,12 +1423,28 @@ public class LibSVM
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
 
     // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.NUMERIC_CLASS);
-    result.enable(Capability.DATE_CLASS);
+    switch (m_SVMType) {
+      case SVMTYPE_C_SVC:
+      case SVMTYPE_NU_SVC:
+	//result.enable(Capability.BINARY_CLASS);
+	result.enable(Capability.NOMINAL_CLASS);
+	break;
+	
+      case SVMTYPE_ONE_CLASS_SVM:
+	result.enable(Capability.UNARY_CLASS);
+	break;
+	
+      case SVMTYPE_EPSILON_SVR:
+      case SVMTYPE_NU_SVR:
+	result.enable(Capability.NUMERIC_CLASS);
+	result.enable(Capability.DATE_CLASS);
+	break;
+	
+      default:
+	throw new IllegalArgumentException("SVMType " + m_SVMType + " is not supported!");
+    }
     result.enable(Capability.MISSING_CLASS_VALUES);
     
     return result;
@@ -1377,27 +1475,21 @@ public class LibSVM
       insts = Filter.useFilter(insts, m_Filter);
     }
     
-    Vector sparseData = dataToSparse(insts);
     Vector vy = new Vector();
     Vector vx = new Vector();
     int max_index = 0;
     
-    for (int d = 0; d < sparseData.size(); d++) {
-      String line = (String) sparseData.get(d);
-      
-      StringTokenizer st = new StringTokenizer(line, " \t\n\r\f:");
-      
-      vy.addElement(st.nextToken());
-      int m = st.countTokens() / 2;
-      Object x = Array.newInstance(Class.forName(CLASS_SVMNODE), m);
-      for (int j = 0; j < m; j++) {
-        Array.set(x, j, Class.forName(CLASS_SVMNODE).newInstance());
-        setField(Array.get(x, j), "index", new Integer(st.nextToken()));
-        setField(Array.get(x, j), "value", new Double(st.nextToken()));
-      }
+    for (int d = 0; d < insts.numInstances(); d++) {
+      Instance inst = insts.instance(d);
+      Object x = instanceToArray(inst);
+      int m = Array.getLength(x);
       if (m > 0)
         max_index = Math.max(max_index, ((Integer) getField(Array.get(x, m - 1), "index")).intValue());
       vx.addElement(x);
+      if ( (m_SVMType == SVMTYPE_C_SVC) || (m_SVMType == SVMTYPE_NU_SVC) )
+	vy.addElement(new Double(inst.classValue() == 0 ? -1.0 : +1.0));
+      else
+	vy.addElement(new Double(inst.classValue()));
     }
     
     // calculate actual gamma
