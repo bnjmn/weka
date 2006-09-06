@@ -28,12 +28,13 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.RemoveUseless;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.util.Enumeration;
@@ -65,7 +66,7 @@ import java.util.Vector;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public abstract class M5Base 
   extends Classifier 
@@ -102,6 +103,11 @@ public abstract class M5Base
    * filter to convert nominal attributes to binary
    */
   private NominalToBinary      m_nominalToBinary;
+  
+  /**
+   * for removing useless attributes 
+   */
+  private RemoveUseless m_removeUseless;
 
   /**
    * Save instances at each node in an M5 tree for visualization purposes.
@@ -433,6 +439,10 @@ public abstract class M5Base
     m_nominalToBinary.setInputFormat(m_instances);
     m_instances = Filter.useFilter(m_instances, m_nominalToBinary);
 
+    m_removeUseless = new RemoveUseless();
+    m_removeUseless.setInputFormat(m_instances);
+    m_instances = Filter.useFilter(m_instances, m_removeUseless);
+    
     m_instances.randomize(new Random(1));
 
     m_ruleSet = new FastVector();
@@ -497,6 +507,8 @@ public abstract class M5Base
     inst = m_replaceMissing.output();
     m_nominalToBinary.input(inst);
     inst = m_nominalToBinary.output();
+    m_removeUseless.input(inst);
+    inst = m_removeUseless.output();
 
     if (m_ruleSet == null) {
       throw new Exception("Classifier has not been built yet!");
