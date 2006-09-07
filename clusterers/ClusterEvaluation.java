@@ -78,7 +78,7 @@ import java.util.Vector;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.31 $
+ * @version  $Revision: 1.32 $
  */
 public class ClusterEvaluation 
   implements Serializable {
@@ -285,6 +285,9 @@ public class ClusterEvaluation
 	instanceStats[cnum]++;
       }
     }
+    
+    if (testFileName.length() != 0)
+      testReader.close();
 
     double sum = Utils.sum(instanceStats);
     loglk /= sum;
@@ -1014,21 +1017,21 @@ public class ClusterEvaluation
     StringBuffer text = new StringBuffer();
     int i = 0;
     int cnum;
-    BufferedReader testStream = null;
+    BufferedReader testReader = null;
     
     try {
       if (testFileName.length() != 0)
-	testStream = new BufferedReader(new FileReader(testFileName));
+	testReader = new BufferedReader(new FileReader(testFileName));
       else
-	testStream = new BufferedReader(new FileReader(trainFileName));
+	testReader = new BufferedReader(new FileReader(trainFileName));
     }
     catch (Exception e) {
       throw  new Exception("Can't open file " + e.getMessage() + '.');
     }
 
-    Instances test = new Instances(testStream, 1);
+    Instances test = new Instances(testReader, 1);
     
-    while (test.readInstance(testStream)) {
+    while (test.readInstance(testReader)) {
       try {
 	cnum = clusterer.clusterInstance(test.instance(0));
 	
@@ -1044,6 +1047,8 @@ public class ClusterEvaluation
       test.delete(0);
       i++;
     }
+    
+    testReader.close();
     
     return  text.toString();
   }
