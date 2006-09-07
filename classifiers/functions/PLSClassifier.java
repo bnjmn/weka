@@ -37,7 +37,7 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * A wrapper classifier for the PLSFilter.
+ * A wrapper classifier for the PLSFilter, utilizing the PLSFilter's ability to perform predictions.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -63,32 +63,26 @@ import java.util.Vector;
  *  The number of components to compute.
  *  (default: 20)</pre>
  * 
- * <pre> -P
+ * <pre> -U
  *  Updates the class attribute as well.
+ *  (default: off)</pre>
+ * 
+ * <pre> -M
+ *  Turns replacing of missing values on.
  *  (default: off)</pre>
  * 
  * <pre> -A &lt;SIMPLS|PLS1&gt;
  *  The algorithm to use.
  *  (default: PLS1)</pre>
  * 
- * <pre> -F &lt;filter specification&gt;
- *  The filter to use as preprocessing step (classname and options).
- *  (default: MultiFilter with ReplaceMissingValues and Center)</pre>
- * 
- * <pre> 
- * Options specific to filter weka.filters.MultiFilter ('-F'):
- * </pre>
- * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
- * 
- * <pre> -F &lt;classname [options]&gt;
- *  A filter to apply (can be specified multiple times).</pre>
+ * <pre> -P &lt;none|center|standardize&gt;
+ *  The type of preprocessing that is applied to the data.
+ *  (default: center)</pre>
  * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PLSClassifier
   extends Classifier {
@@ -110,7 +104,8 @@ public class PLSClassifier
    */
   public String globalInfo() {
     return 
-      "A wrapper classifier for the PLSFilter.";
+        "A wrapper classifier for the PLSFilter, utilizing the PLSFilter's "
+      + "ability to perform predictions.";
   }
 
   /**
@@ -202,27 +197,21 @@ public class PLSClassifier
    *  The number of components to compute.
    *  (default: 20)</pre>
    * 
-   * <pre> -P
+   * <pre> -U
    *  Updates the class attribute as well.
+   *  (default: off)</pre>
+   * 
+   * <pre> -M
+   *  Turns replacing of missing values on.
    *  (default: off)</pre>
    * 
    * <pre> -A &lt;SIMPLS|PLS1&gt;
    *  The algorithm to use.
    *  (default: PLS1)</pre>
    * 
-   * <pre> -F &lt;filter specification&gt;
-   *  The filter to use as preprocessing step (classname and options).
-   *  (default: MultiFilter with ReplaceMissingValues and Center)</pre>
-   * 
-   * <pre> 
-   * Options specific to filter weka.filters.MultiFilter ('-F'):
-   * </pre>
-   * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
-   * 
-   * <pre> -F &lt;classname [options]&gt;
-   *  A filter to apply (can be specified multiple times).</pre>
+   * <pre> -P &lt;none|center|standardize&gt;
+   *  The type of preprocessing that is applied to the data.
+   *  (default: center)</pre>
    * 
    <!-- options-end -->
    *
@@ -343,8 +332,10 @@ public class PLSClassifier
     
     result =   this.getClass().getName() + "\n" 
              + this.getClass().getName().replaceAll(".", "=") + "\n\n";
-    result += "# Components: " + m_Filter.getNumComponents() + "\n";
-    result += "Algorithm...: " + m_Filter.getAlgorithm().getSelectedTag().getReadable() + "\n";
+    result += "# Components..........: " + m_Filter.getNumComponents() + "\n";
+    result += "Algorithm.............: " + m_Filter.getAlgorithm().getSelectedTag().getReadable() + "\n";
+    result += "Replace missing values: " + (m_Filter.getReplaceMissing() ? "yes" : "no") + "\n";
+    result += "Preprocessing.........: " + m_Filter.getPreprocessing().getSelectedTag().getReadable() + "\n";
     
     return result;
   }
