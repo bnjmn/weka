@@ -28,7 +28,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -40,9 +39,11 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.matrix.EigenvalueDecomposition;
 import weka.core.matrix.Matrix;
 import weka.filters.Filter;
-import weka.filters.MultiFilter;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.SupervisedFilter;
+import weka.filters.unsupervised.attribute.Center;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Standardize;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -50,14 +51,15 @@ import java.util.Vector;
 /** 
  <!-- globalinfo-start -->
  * Runs Partial Least Square Regression over the given instances and computes the resulting beta matrix for prediction.<br/>
+ * By default it replaces missing values and centers the data.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
  * Tormod Naes, Tomas Isaksson, Tom Fearn, Tony Davies (2002). A User Friendly Guide to Multivariate Calibration and Classification. NIR Publications.<br/>
  * <br/>
- * StatSoft, Inc. (). Partial Least Squares (PLS).<br/>
+ * StatSoft, Inc.. Partial Least Squares (PLS).<br/>
  * <br/>
- * Bent Jorgensen, Yuri Goegebeur (). Module 7: Partial least squares regression I.<br/>
+ * Bent Jorgensen, Yuri Goegebeur. Module 7: Partial least squares regression I.<br/>
  * <br/>
  * S. de Jong (1993). SIMPLS: an alternative approach to partial least squares regression. Chemometrics and Intelligent Laboratory Systems. 18:251-263.
  * <p/>
@@ -110,32 +112,26 @@ import java.util.Vector;
  *  The number of components to compute.
  *  (default: 20)</pre>
  * 
- * <pre> -P
+ * <pre> -U
  *  Updates the class attribute as well.
+ *  (default: off)</pre>
+ * 
+ * <pre> -M
+ *  Turns replacing of missing values on.
  *  (default: off)</pre>
  * 
  * <pre> -A &lt;SIMPLS|PLS1&gt;
  *  The algorithm to use.
  *  (default: PLS1)</pre>
  * 
- * <pre> -F &lt;filter specification&gt;
- *  The filter to use as preprocessing step (classname and options).
- *  (default: MultiFilter with ReplaceMissingValues and Center)</pre>
- * 
- * <pre> 
- * Options specific to filter weka.filters.MultiFilter ('-F'):
- * </pre>
- * 
- * <pre> -D
- *  Turns on output of debugging information.</pre>
- * 
- * <pre> -F &lt;classname [options]&gt;
- *  A filter to apply (can be specified multiple times).</pre>
+ * <pre> -P &lt;none|center|standardize&gt;
+ *  The type of preprocessing that is applied to the data.
+ *  (default: center)</pre>
  * 
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PLSFilter
   extends SimpleBatchFilter 
@@ -154,11 +150,21 @@ public class PLSFilter
     new Tag(ALGORITHM_PLS1, "PLS1")
   };
 
+  /** the type of preprocessing: None */
+  public static final int PREPROCESSING_NONE = 0;
+  /** the type of preprocessing: Center */
+  public static final int PREPROCESSING_CENTER = 1;
+  /** the type of preprocessing: Standardize */
+  public static final int PREPROCESSING_STANDARDIZE = 2;
+  /** the types of preprocessing */
+  public static final Tag[] TAGS_PREPROCESSING = {
+    new Tag(PREPROCESSING_NONE, "none"),
+    new Tag(PREPROCESSING_CENTER, "center"),
+    new Tag(PREPROCESSING_STANDARDIZE, "standardize")
+  };
+
   /** the maximum number of components to generate */
   protected int m_NumComponents = 20;
-
-  /** an optional filter for preprocessing of the data */
-  protected Filter m_Filter = null;
   
   /** the type of algorithm */
   protected int m_Algorithm = ALGORITHM_PLS1;
@@ -183,6 +189,24 @@ public class PLSFilter
   
   /** whether to include the prediction, i.e., modifying the class attribute */
   protected boolean m_PerformPrediction = false;
+
+  /** for replacing missing values */
+  protected Filter m_Missing = null;
+  
+  /** whether to replace missing values */
+  protected boolean m_ReplaceMissing = true;
+  
+  /** for centering the data */
+  protected Filter m_Filter = null;
+  
+  /** the type of preprocessing */
+  protected int m_Preprocessing = PREPROCESSING_CENTER;
+
+  /** the mean of the class */
+  protected double m_ClassMean = 0;
+
+  /** the standard deviation of the class */
+  protected double m_ClassStdDev = 0;
   
   /**
    * default constructor
@@ -190,12 +214,9 @@ public class PLSFilter
   public PLSFilter() {
     super();
     
-    m_Filter = new MultiFilter();
-    ((MultiFilter) m_Filter).setFilters(
-	new Filter[]{
-	    new weka.filters.unsupervised.attribute.ReplaceMissingValues(),
-	    new weka.filters.unsupervised.attribute.Center()
-	    });
+    // setup pre-processing
+    m_Missing = new ReplaceMissingValues();
+    m_Filter  = new Center();
   }
   
   /**
@@ -207,7 +228,8 @@ public class PLSFilter
   public String globalInfo() {
     return 
         "Runs Partial Least Square Regression over the given instances "
-      + "and computes the resulting beta matrix for prediction.\n\n"
+      + "and computes the resulting beta matrix for prediction.\n"
+      + "By default it replaces missing values and centers the data.\n\n"
       + "For more information see:\n\n"
       + getTechnicalInformation().toString();
   }
@@ -279,7 +301,12 @@ public class PLSFilter
     result.addElement(new Option(
 	"\tUpdates the class attribute as well.\n"
 	+ "\t(default: off)",
-	"P", 0, "-P"));
+	"U", 0, "-U"));
+
+    result.addElement(new Option(
+	"\tTurns replacing of missing values on.\n"
+	+ "\t(default: off)",
+	"M", 0, "-M"));
 
     param = "";
     for (i = 0; i < TAGS_ALGORITHM.length; i++) {
@@ -293,21 +320,17 @@ public class PLSFilter
 	+ "\t(default: PLS1)",
 	"A", 1, "-A <" + param + ">"));
 
-    result.addElement(new Option(
-	"\tThe filter to use as preprocessing step (classname and options).\n"
-	+ "\t(default: MultiFilter with ReplaceMissingValues and Center)",
-	"F", 1, "-F <filter specification>"));
-
-    if (getFilter() instanceof OptionHandler) {
-      result.addElement(new Option(
-	  "",
-	  "", 0, "\nOptions specific to filter "
-	  + getFilter().getClass().getName() + " ('-F'):"));
-      
-      enm = ((OptionHandler) getFilter()).listOptions();
-      while (enm.hasMoreElements())
-	result.addElement(enm.nextElement());
+    param = "";
+    for (i = 0; i < TAGS_PREPROCESSING.length; i++) {
+      if (i > 0)
+	param += "|";
+      tag = new SelectedTag(TAGS_PREPROCESSING[i].getID(), TAGS_PREPROCESSING);
+      param += tag.getSelectedTag().getReadable();
     }
+    result.addElement(new Option(
+	"\tThe type of preprocessing that is applied to the data.\n"
+	+ "\t(default: center)",
+	"P", 1, "-P <" + param + ">"));
 
     return result.elements();
   }
@@ -331,20 +354,16 @@ public class PLSFilter
     result.add("" + getNumComponents());
 
     if (getPerformPrediction())
-      result.add("-P");
+      result.add("-U");
+    
+    if (getReplaceMissing())
+      result.add("-M");
     
     result.add("-A");
     result.add("" + getAlgorithm().getSelectedTag().getReadable());
 
-    result.add("-F");
-    if (getFilter() instanceof OptionHandler)
-      result.add(
-	  getFilter().getClass().getName() 
-	+ " " 
-	+ Utils.joinOptions(((OptionHandler) getFilter()).getOptions()));
-    else
-      result.add(
-	  getFilter().getClass().getName());
+    result.add("-P");
+    result.add("" + getPreprocessing().getSelectedTag().getReadable());
 
     return (String[]) result.toArray(new String[result.size()]);	  
   }
@@ -362,27 +381,21 @@ public class PLSFilter
    *  The number of components to compute.
    *  (default: 20)</pre>
    * 
-   * <pre> -P
+   * <pre> -U
    *  Updates the class attribute as well.
+   *  (default: off)</pre>
+   * 
+   * <pre> -M
+   *  Turns replacing of missing values on.
    *  (default: off)</pre>
    * 
    * <pre> -A &lt;SIMPLS|PLS1&gt;
    *  The algorithm to use.
    *  (default: PLS1)</pre>
    * 
-   * <pre> -F &lt;filter specification&gt;
-   *  The filter to use as preprocessing step (classname and options).
-   *  (default: MultiFilter with ReplaceMissingValues and Center)</pre>
-   * 
-   * <pre> 
-   * Options specific to filter weka.filters.MultiFilter ('-F'):
-   * </pre>
-   * 
-   * <pre> -D
-   *  Turns on output of debugging information.</pre>
-   * 
-   * <pre> -F &lt;classname [options]&gt;
-   *  A filter to apply (can be specified multiple times).</pre>
+   * <pre> -P &lt;none|center|standardize&gt;
+   *  The type of preprocessing that is applied to the data.
+   *  (default: center)</pre>
    * 
    <!-- options-end -->
    *
@@ -391,8 +404,6 @@ public class PLSFilter
    */
   public void setOptions(String[] options) throws Exception {
     String	tmpStr;
-    String[]	tmpOptions;
-    Filter	filter;
 
     super.setOptions(options);
 
@@ -402,30 +413,21 @@ public class PLSFilter
     else
       setNumComponents(20);
 
-    setPerformPrediction(Utils.getFlag("P", options));
+    setPerformPrediction(Utils.getFlag("U", options));
+    
+    setReplaceMissing(Utils.getFlag("M", options));
     
     tmpStr = Utils.getOption("A", options);
     if (tmpStr.length() != 0)
       setAlgorithm(new SelectedTag(tmpStr, TAGS_ALGORITHM));
     else
       setAlgorithm(new SelectedTag(ALGORITHM_PLS1, TAGS_ALGORITHM));
-
-    tmpStr     = Utils.getOption("F", options);
-    tmpOptions = Utils.splitOptions(tmpStr);
-    if (tmpOptions.length != 0) {
-      tmpStr        = tmpOptions[0];
-      tmpOptions[0] = "";
-      setFilter((Filter) Utils.forName(Filter.class, tmpStr, tmpOptions));
-    }
-    else {
-      filter = new MultiFilter();
-      ((MultiFilter) filter).setFilters(
-	  new Filter[]{
-	      new weka.filters.unsupervised.attribute.ReplaceMissingValues(),
-	      new weka.filters.unsupervised.attribute.Center()
-	      });
-      setFilter(filter);
-    }
+    
+    tmpStr = Utils.getOption("P", options);
+    if (tmpStr.length() != 0)
+      setPreprocessing(new SelectedTag(tmpStr, TAGS_PREPROCESSING));
+    else
+      setPreprocessing(new SelectedTag(PREPROCESSING_CENTER, TAGS_PREPROCESSING));
   }
 
   /**
@@ -484,42 +486,6 @@ public class PLSFilter
   public boolean getPerformPrediction() {
     return m_PerformPrediction;
   }
-  
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return 		tip text for this property suitable for
-   * 			displaying in the explorer/experimenter gui
-   */
-  public String filterTipText() {
-    return "The preprocessing filter to use.";
-  }
-
-  /**
-   * Set the preprocessing filter (only used for setup), must handle at
-   * least numeric/date classes.
-   *
-   * @param value	the preprocessing filter.
-   */
-  public void setFilter(Filter value) {
-    Capabilities caps = value.getCapabilities();
-    
-    if (    caps.handles(Capability.NUMERIC_CLASS) 
-	 || caps.handles(Capability.DATE_CLASS) )
-      m_Filter = value;
-    else
-      throw new IllegalArgumentException(
-	  "Filter must handle numeric or data class!");
-  }
-
-  /**
-   * Get the preprocessing filter.
-   *
-   * @return 		the preprocessing filter
-   */
-  public Filter getFilter() {
-    return m_Filter;
-  }
 
   /**
    * Returns the tip text for this property
@@ -552,6 +518,66 @@ public class PLSFilter
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String replaceMissingTipText() {
+    return "Whether to replace missing values.";
+  }
+
+  /**
+   * Sets whether to replace missing values.
+   * 
+   * @param value	if true missing values are replaced with the
+   * 			ReplaceMissingValues filter.
+   */
+  public void setReplaceMissing(boolean value) {
+    m_ReplaceMissing = value;
+  }
+
+  /**
+   * Gets whether missing values are replace.
+   * 
+   * @return		true if missing values are replaced with the 
+   * 			ReplaceMissingValues filter
+   */
+  public boolean getReplaceMissing() {
+    return m_ReplaceMissing;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String preprocessingTipText() {
+    return "Sets the type of preprocessing to use.";
+  }
+
+  /**
+   * Sets the type of preprocessing to use 
+   *
+   * @param value 	the preprocessing type
+   */
+  public void setPreprocessing(SelectedTag value) {
+    if (value.getTags() == TAGS_PREPROCESSING) {
+      m_Preprocessing = value.getSelectedTag().getID();
+    }
+  }
+
+  /**
+   * Gets the type of preprocessing to use 
+   *
+   * @return 		the current preprocessing type.
+   */
+  public SelectedTag getPreprocessing() {
+    return new SelectedTag(m_Preprocessing, TAGS_PREPROCESSING);
+  }
+
+  /**
    * Determines the output format based on the input format and returns 
    * this. In case the output format cannot be returned immediately, i.e.,
    * immediateOutputFormat() returns false, then this method will be called
@@ -576,23 +602,6 @@ public class PLSFilter
     result.setClassIndex(result.numAttributes() - 1);
     
     return result;
-  }
-
-  /**
-   * Runs the given instance through the filters used before the PLS regression
-   * is done.
-   * Note: process (or batchFinished()) must have been called first to
-   * initialize the filters.
-   * @param instance	the data to filter
-   * @return		the filtered instance
-   * @throws Exception	in case processing goes wrong
-   */
-  public Instance preprocess(Instance instance) throws Exception{
-    m_Filter.input(instance);
-    m_Filter.batchFinished();
-    instance = m_Filter.output();
-
-    return instance;
   }
   
   /**
@@ -1033,21 +1042,18 @@ public class PLSFilter
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities	result;
-    
-    result = getFilter().getCapabilities();
-    result.disableAllClasses();
-    
-    // set dependencies
-    for (Capability cap: Capability.values()) {
-      if (result.handles(cap))
-	result.enableDependency(cap);
-    }
+    Capabilities result = super.getCapabilities();
 
+    // attributes
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
-    result.disable(Capability.NO_CLASS);
-    
+
+    // other
     result.setMinimumNumberInstances(1);
     
     return result;
@@ -1063,19 +1069,77 @@ public class PLSFilter
    * @see               #batchFinished()
    */
   protected Instances process(Instances instances) throws Exception {
-    if (!isFirstBatchDone())
-      m_Filter.setInputFormat(instances);
-    instances = Filter.useFilter(instances, m_Filter);
+    Instances	result;
+    int		i;
+    double	clsValue;
+    double[]	clsValues;
+    
+    result = null;
+
+    // save original class values if no prediction is performed
+    if (!getPerformPrediction())
+      clsValues = instances.attributeToDoubleArray(instances.classIndex());
+    else
+      clsValues = null;
+    
+    if (!isFirstBatchDone()) {
+      // init filters
+      if (m_ReplaceMissing)
+	m_Missing.setInputFormat(instances);
+      
+      switch (m_Preprocessing) {
+	case PREPROCESSING_CENTER:
+	  m_ClassMean   = instances.meanOrMode(instances.classIndex());
+	  m_ClassStdDev = 1;
+	  m_Filter      = new Center();
+	  ((Center) m_Filter).setIgnoreClass(true);
+      	  break;
+	case PREPROCESSING_STANDARDIZE:
+	  m_ClassMean   = instances.meanOrMode(instances.classIndex());
+	  m_ClassStdDev = StrictMath.sqrt(instances.variance(instances.classIndex()));
+	  m_Filter      = new Standardize();
+	  ((Standardize) m_Filter).setIgnoreClass(true);
+      	  break;
+	default:
+  	  m_ClassMean   = 0;
+	  m_ClassStdDev = 1;
+	  m_Filter      = null;
+      }
+      if (m_Filter != null)
+	m_Filter.setInputFormat(instances);
+    }
+    
+    // filter data
+    if (m_ReplaceMissing)
+      instances = Filter.useFilter(instances, m_Missing);
+    if (m_Filter != null)
+      instances = Filter.useFilter(instances, m_Filter);
     
     switch (m_Algorithm) {
       case ALGORITHM_SIMPLS:
-	return processSIMPLS(instances);
+	result = processSIMPLS(instances);
+	break;
       case ALGORITHM_PLS1:
-	return processPLS1(instances);
+	result = processPLS1(instances);
+	break;
       default:
 	throw new IllegalStateException(
 	    "Algorithm type '" + m_Algorithm + "' is not recognized!");
     }
+
+    // add the mean to the class again if predictions are to be performed,
+    // otherwise restore original class values
+    for (i = 0; i < result.numInstances(); i++) {
+      if (!getPerformPrediction()) {
+	result.instance(i).setClassValue(clsValues[i]);
+      }
+      else {
+	clsValue = result.instance(i).classValue();
+	result.instance(i).setClassValue(clsValue*m_ClassStdDev + m_ClassMean);
+      }
+    }
+    
+    return result;
   }
 
   /**
