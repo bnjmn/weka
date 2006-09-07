@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.functions.SVMreg
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SVMregTest 
   extends AbstractClassifierTest {
@@ -43,12 +43,7 @@ public class SVMregTest
 
   /** Creates a default SVMreg */
   public Classifier getClassifier() {
-    SVMreg result = new SVMreg();
-    
-    // if tolerance is too small, we'll end up in an endless loop!
-    ((RegSMOImproved) result.getRegOptimizer()).setTolerance(0.1);
-    
-    return result;
+    return new SVMreg();
   }
 
   public static Test suite() {
