@@ -89,7 +89,7 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DBScan 
     extends Clusterer 
@@ -186,6 +186,7 @@ public class DBScan
 
         long time_1 = System.currentTimeMillis();
 
+        processed_InstanceID = 0;
         numberOfGeneratedClusters = 0;
         clusterID = 0;
 
