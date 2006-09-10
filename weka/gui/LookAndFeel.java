@@ -36,12 +36,13 @@ import javax.swing.UIManager.LookAndFeelInfo;
  * Linux/Gnome).
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 
 public class LookAndFeel {
+
   /** The name of the properties file */
-  protected static String PROPERTY_FILE = "weka/gui/LookAndFeel.props";
+  public static String PROPERTY_FILE = "weka/gui/LookAndFeel.props";
 
   /** Contains the look and feel properties */
   protected static Properties LOOKANDFEEL_PROPERTIES;
@@ -65,6 +66,7 @@ public class LookAndFeel {
 
   /**
    * sets the look and feel to the specified class
+   *
    * @param classname      the look and feel to use
    * @return               whether setting was successful   
    */
@@ -86,20 +88,31 @@ public class LookAndFeel {
   /**
    * sets the look and feel to the one in the props-file or if not set the 
    * default one of the system
+   *
    * @return               whether setting was successful
    */
   public static boolean setLookAndFeel() {
     String           classname;
 
     classname = LOOKANDFEEL_PROPERTIES.getProperty("Theme", "");
-    if (classname.equals("")) 
-      classname = getSystemLookAndFeel();
+    if (classname.equals("")) {
+      // Java 1.5 crashes under Gnome if one sets it to the GTKLookAndFeel 
+      // theme, hence we don't set any theme by default if we're on a Linux 
+      // box.
+      if (System.getProperty("os.name").equalsIgnoreCase("linux")) {
+	return true;
+      }
+      else {
+	classname = getSystemLookAndFeel();
+      }
+    }
 
     return setLookAndFeel(classname);
   }
 
   /**
    * returns the system LnF classname
+   *
    * @return               the name of the System LnF class
    */
   public static String getSystemLookAndFeel() {
@@ -108,6 +121,7 @@ public class LookAndFeel {
 
   /**
    * returns an array with the classnames of all the installed LnFs
+   *
    * @return               the installed LnFs
    */
   public static String[] getInstalledLookAndFeels() {
@@ -121,5 +135,22 @@ public class LookAndFeel {
       result[i] = laf[i].getClassName();
 
     return result;
+  }
+  
+  /**
+   * prints all the available LnFs to stdout
+   * 
+   * @param args	the commandline options
+   */
+  public static void main(String[] args) {
+    String[]	list;
+    int		i;
+    
+    System.out.println("\nInstalled Look and Feel themes:");
+    list = getInstalledLookAndFeels();
+    for (i = 0; i < list.length; i++)
+      System.out.println((i+1) + ". " + list[i]);
+
+    System.out.println("\nNote: a theme can be set in '" + PROPERTY_FILE + "'.");
   }
 }
