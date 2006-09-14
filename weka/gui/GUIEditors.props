@@ -8,7 +8,7 @@
 # - full classname has to be provided
 #
 # author:  FracPete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.2 $
+# version: $Revision: 1.3 $
 
 # general
 java.lang.Object[]=weka.gui.GenericArrayEditor
@@ -18,6 +18,7 @@ java.text.SimpleDateFormat=weka.gui.SimpleDateFormatEditor
 # core
 weka.core.SelectedTag=weka.gui.SelectedTagEditor
 weka.core.NearestNeighbourSearch=weka.gui.GenericObjectEditor
+weka.core.KDTree=weka.gui.GenericObjectEditor
 weka.core.DistanceFunction=weka.gui.GenericObjectEditor
 weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
 weka.core.converters.Loader=weka.gui.GenericObjectEditor
