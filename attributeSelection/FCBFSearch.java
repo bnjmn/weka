@@ -19,7 +19,7 @@
  *    
  *    FCBF algorithm:
  *      Template obtained from Weka
- *      Developped for Weka by Zheng Alan Zhao   
+ *      Developed for Weka by Zheng Alan Zhao   
  *      December 27, 2004
  *
  *    FCBF algorithm is a feature selection method based on Symmetrical Uncertainty Measurement for 
@@ -101,16 +101,17 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -D &lt;create dataset&gt;
- *  Specify Whether the selector generate a new dataset.</pre>
+ *  Specify Whether the selector generates a new dataset.</pre>
  * 
  * <pre> -P &lt;start set&gt;
  *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7. 
- * Any starting attributes specified are 
- * ignored during the ranking.</pre>
+ *   Eg. 1,3,5-7.
+ *  Any starting attributes specified are
+ *  ignored during the ranking.</pre>
  * 
  * <pre> -T &lt;threshold&gt;
- *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+ *  Specify a theshold by which attributes
+ *  may be discarded from the ranking.</pre>
  * 
  * <pre> -N &lt;num to select&gt;
  *  Specify number of attributes to select</pre>
@@ -118,7 +119,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class FCBFSearch 
   extends ASSearch
@@ -395,27 +396,25 @@ public class FCBFSearch
   public Enumeration listOptions () {
     Vector newVector = new Vector(4);
 
-    newVector
-      .addElement(new Option("\tSpecify Whether the selector generate a new dataset."
-                             ,"D",1
-                             , "-D <create dataset>"));
+    newVector.addElement(new Option(
+	"\tSpecify Whether the selector generates a new dataset.",
+	"D", 1, "-D <create dataset>"));
 
-    newVector
-      .addElement(new Option("\tSpecify a starting set of attributes."
-                             + "\n\tEg. 1,3,5-7."
-                             +"\t\nAny starting attributes specified are"
-                             +"\t\nignored during the ranking."
-                             ,"P",1
-                             , "-P <start set>"));
-    newVector
-      .addElement(new Option("\tSpecify a theshold by which attributes"
-                             + "\tmay be discarded from the ranking.","T",1
-                             , "-T <threshold>"));
+    newVector.addElement(new Option(
+	"\tSpecify a starting set of attributes.\n"
+	+ "\t\tEg. 1,3,5-7.\n"
+	+ "\tAny starting attributes specified are\n"
+	+ "\tignored during the ranking.",
+	"P", 1 , "-P <start set>"));
 
-    newVector
-      .addElement(new Option("\tSpecify number of attributes to select"
-                             ,"N",1
-                             , "-N <num to select>"));
+    newVector.addElement(new Option(
+	"\tSpecify a theshold by which attributes\n"
+	+ "\tmay be discarded from the ranking.",
+	"T", 1, "-T <threshold>"));
+
+    newVector.addElement(new Option(
+	"\tSpecify number of attributes to select",
+	"N", 1, "-N <num to select>"));
 
     return newVector.elements();
 
@@ -428,16 +427,17 @@ public class FCBFSearch
    * Valid options are: <p/>
    * 
    * <pre> -D &lt;create dataset&gt;
-   *  Specify Whether the selector generate a new dataset.</pre>
+   *  Specify Whether the selector generates a new dataset.</pre>
    * 
    * <pre> -P &lt;start set&gt;
    *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7. 
-   * Any starting attributes specified are 
-   * ignored during the ranking.</pre>
+   *   Eg. 1,3,5-7.
+   *  Any starting attributes specified are
+   *  ignored during the ranking.</pre>
    * 
    * <pre> -T &lt;threshold&gt;
-   *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+   *  Specify a theshold by which attributes
+   *  may be discarded from the ranking.</pre>
    * 
    * <pre> -N &lt;num to select&gt;
    *  Specify number of attributes to select</pre>
@@ -860,4 +860,3 @@ public class FCBFSearch
     }
   }
 }
-
