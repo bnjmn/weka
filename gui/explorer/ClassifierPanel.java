@@ -41,6 +41,7 @@ import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.core.Capabilities.Capability;
+import weka.core.converters.IncrementalConverter;
 import weka.core.converters.Loader;
 import weka.gui.CostMatrixEditor;
 import weka.gui.ExtensionFileFilter;
@@ -129,7 +130,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.95 $
+ * @version $Revision: 1.96 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -733,7 +734,10 @@ public class ClassifierPanel
     }
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
     if (attribNames.length > 0) {
-      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+      if (inst.classIndex() == -1)
+	m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+      else
+	m_ClassCombo.setSelectedIndex(inst.classIndex());
       m_ClassCombo.setEnabled(true);
       m_StartBut.setEnabled(m_RunThread == null);
       m_StopBut.setEnabled(m_RunThread != null);
@@ -956,11 +960,15 @@ public class ClassifierPanel
 	  // for timing
 	  long trainTimeStart = 0, trainTimeElapsed = 0;
 
+          boolean incrementalLoader = (m_TestLoader instanceof IncrementalConverter);
           try {
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
               m_TestLoader.reset();
               userTest = m_TestLoader;
-              userTestStructure = userTest.getStructure();
+              if (incrementalLoader)
+        	userTestStructure = userTest.getStructure();
+              else
+        	userTestStructure = userTest.getDataSet();
             }
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -1062,19 +1070,23 @@ public class ClassifierPanel
 	    outBuff.append("Test mode:    ");
 	    switch (testMode) {
 	      case 3: // Test on training
-	      outBuff.append("evaluate on training data\n");
-	      break;
+		outBuff.append("evaluate on training data\n");
+		break;
 	      case 1: // CV mode
-	      outBuff.append("" + numFolds + "-fold cross-validation\n");
-	      break;
+		outBuff.append("" + numFolds + "-fold cross-validation\n");
+		break;
 	      case 2: // Percent split
-	      outBuff.append("split " + percent
-			       + "% train, remainder test\n");
-	      break;
+		outBuff.append("split " + percent
+		    + "% train, remainder test\n");
+		break;
 	      case 4: // Test on user split
-	      outBuff.append("user supplied test set: "
-			     + " size unknown (reading incrementally)\n");
-	      break;
+		if (incrementalLoader)
+		  outBuff.append("user supplied test set: "
+		      + " size unknown (reading incrementally)\n");
+		else
+		  outBuff.append("user supplied test set: "
+		      + userTestStructure.numInstances() + " instances\n");
+		break;
 	    }
             if (costMatrix != null) {
                outBuff.append("Evaluation cost matrix:\n")
@@ -1275,20 +1287,37 @@ public class ClassifierPanel
 		outBuff.append("\n");
 	      }
 
-              Instance incremental;
-              int jj = 0;
-              while ((incremental = userTest.getNextInstance()) != null) {
-                //	      for (int jj=0;jj<userTest.numInstances();jj++) {
-                incremental.setDataset(userTestStructure);
-		processClassifierPrediction(incremental, classifier,
-					    eval, predInstances, plotShape,
-					    plotSize);
-		if (outputPredictionsText) { 
-		  outBuff.append(predictionText(classifier, incremental, jj+1));
+	      Instance incremental;
+	      int jj = 0;
+	      // incremental?
+	      if (incrementalLoader) {
+		while ((incremental = userTest.getNextInstance()) != null) {
+		  incremental.setDataset(userTestStructure);
+		  processClassifierPrediction(incremental, classifier,
+		      eval, predInstances, plotShape,
+		      plotSize);
+		  if (outputPredictionsText) { 
+		    outBuff.append(predictionText(classifier, incremental, jj+1));
+		  }
+		  if ((++jj % 100) == 0) {
+		    m_Log.statusMessage("Evaluating on test data. Processed "
+			+jj+" instances...");
+		  }
 		}
-		if ((++jj % 100) == 0) {
-		  m_Log.statusMessage("Evaluating on test data. Processed "
-				      +jj+" instances...");
+	      }
+	      else {
+		for (jj = 0; jj < userTestStructure.numInstances(); jj++) {
+		  incremental = userTestStructure.instance(jj);
+		  processClassifierPrediction(incremental, classifier,
+		      eval, predInstances, plotShape,
+		      plotSize);
+		  if (outputPredictionsText) { 
+		    outBuff.append(predictionText(classifier, incremental, jj+1));
+		  }
+		  if ((jj % 100) == 0) {
+		    m_Log.statusMessage("Evaluating on test data. Processed "
+			+jj+" instances...");
+		  }
 		}
 	      }
 	      if (outputPredictionsText) {
@@ -2047,10 +2076,14 @@ public class ClassifierPanel
 
             try {
 
+              boolean incrementalLoader = (m_TestLoader instanceof IncrementalConverter);
               if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
                 m_TestLoader.reset();
                 userTest = m_TestLoader;
-                userTestStructure = userTest.getStructure();
+                if (incrementalLoader)
+                  userTestStructure = userTest.getStructure();
+                else
+                  userTestStructure = userTest.getDataSet();
               }
               // Check the test instance compatibility
               if (userTest == null) {
@@ -2088,12 +2121,13 @@ public class ClassifierPanel
               outBuff.append("User supplied test set\n");  
               outBuff.append("Relation:     " 
                              + userTestStructure.relationName() + '\n');
-              outBuff.
-                append("Instances:     unknown (yet). Reading incrementally"  
-                       + '\n');
+              if (incrementalLoader)
+        	outBuff.append("Instances:     unknown (yet). Reading incrementally\n");
+              else
+        	outBuff.append("Instances:    " + userTestStructure.numInstances() + "\n");
               outBuff.append("Attributes:   " 
-                             + userTestStructure.numAttributes() 
-                             + "\n\n");
+        	  + userTestStructure.numAttributes() 
+        	  + "\n\n");
               if (trainHeader == null)
                 outBuff.append("NOTE - if test set is not compatible then results are "
                                + "unpredictable\n\n");
@@ -2109,20 +2143,36 @@ public class ClassifierPanel
 
               Instance incremental;
               int jj = 0;
-              //      for (int jj=0;jj<userTest.numInstances();jj++) {
-              while ((incremental = userTest.getNextInstance()) != null) {
-                incremental.setDataset(userTestStructure);
-                processClassifierPrediction(incremental, classifier,
-                                            eval, predInstances, plotShape,
-                                            plotSize);
-                if (outputPredictionsText) { 
-                  outBuff.append(predictionText(classifier, incremental, jj+1));
-                }
-                if ((++jj % 100) == 0) {
-                  //                  System.err.println("Here");
-                  m_Log.statusMessage("Evaluating on test data. Processed "
-                                      +jj+" instances...");
-                }
+              // incremental?
+              if (incrementalLoader) {
+        	while ((incremental = userTest.getNextInstance()) != null) {
+        	  incremental.setDataset(userTestStructure);
+        	  processClassifierPrediction(incremental, classifier,
+        	      eval, predInstances, plotShape,
+        	      plotSize);
+        	  if (outputPredictionsText) { 
+        	    outBuff.append(predictionText(classifier, incremental, jj+1));
+        	  }
+        	  if ((++jj % 100) == 0) {
+        	    m_Log.statusMessage("Evaluating on test data. Processed "
+        		+jj+" instances...");
+        	  }
+        	}
+              }
+              else {
+        	for (jj = 0; jj < userTestStructure.numInstances(); jj++) {
+        	  incremental = userTestStructure.instance(jj);
+        	  processClassifierPrediction(incremental, classifier,
+        	      eval, predInstances, plotShape,
+        	      plotSize);
+        	  if (outputPredictionsText) { 
+        	    outBuff.append(predictionText(classifier, incremental, jj+1));
+        	  }
+        	  if ((jj % 100) == 0) {
+        	    m_Log.statusMessage("Evaluating on test data. Processed "
+        		+jj+" instances...");
+        	  }
+        	}
               }
 
               if (outputPredictionsText) {
