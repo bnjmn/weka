@@ -27,8 +27,6 @@ import weka.core.Instances;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -42,32 +40,18 @@ import java.net.URL;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class ArffLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, 
-             BatchConverter, 
-             IncrementalConverter,
-             URLSourcedLoader {
+  extends AbstractFileLoader 
+  implements BatchConverter, IncrementalConverter, URLSourcedLoader {
 
   /** for serialization */
   static final long serialVersionUID = 2726929550544048587L;
   
   /** the file extension */
   public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
-
-  /**
-   * Holds the determined structure (header) of the data set.
-   */
-  //@ protected depends: model_structureDetermined -> m_structure;
-  //@ protected represents: model_structureDetermined <- (m_structure != null);
-  protected transient Instances m_structure = null;
-
-  /** the file */
-  protected String m_File = 
-    (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
   /** the url */
   protected String m_URL = "http://";
@@ -97,6 +81,15 @@ public class ArffLoader
   }
 
   /**
+   * Gets all the file extensions used for this type of file
+   *
+   * @return the file extensions
+   */
+  public String[] getFileExtensions() {
+    return new String[]{getFileExtension()};
+  }
+
+  /**
    * Returns a description of the file type.
    *
    * @return a short file description
@@ -108,13 +101,12 @@ public class ArffLoader
   /**
    * Resets the Loader ready to read a new data set
    * 
-   * @throws Exception if something goes wrong
+   * @throws IOException if something goes wrong
    */
-  public void reset() throws Exception {
-
+  public void reset() throws IOException {
     m_structure = null;
-    //    m_sourceReader = null;
     setRetrieval(NONE);
+    
     if (m_File != null && (new File(m_File)).isFile()) {
       setFile(new File(m_File));
     } else if (m_URL != null & !m_URL.equals("http://")) {
@@ -124,36 +116,12 @@ public class ArffLoader
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
-   *
-   * @param file the source file.
-   * @exception IOException if an error occurs
-   */
-  public void setSource(File file) throws IOException {
-    
-    m_structure = null;
-    setRetrieval(NONE);
-
-    if (file == null) {
-      throw new IOException("Source file object is null!");
-    }
-
-    try {
-      setSource(new FileInputStream(file));
-    } catch (FileNotFoundException ex) {
-      throw new IOException("File not found");
-    }
-    m_File = file.getAbsolutePath();
-  }
-
-  /**
-   * Resets the Loader object and sets the source of the data set to be 
    * the supplied url.
    *
    * @param url the source url.
-   * @exception Exception if an error occurs
+   * @throws IOException if an error occurs
    */
-  public void setSource(URL url) throws Exception {
+  public void setSource(URL url) throws IOException {
     m_structure = null;
     setRetrieval(NONE);
     
@@ -176,7 +144,7 @@ public class ArffLoader
    * sets the source File
    *
    * @param file the source file
-   * @exception IOException if an error occurs
+   * @throws IOException if an error occurs
    */
   public void setFile(File file) throws IOException {
     m_File = file.getAbsolutePath();
@@ -187,9 +155,9 @@ public class ArffLoader
    * Set the url to load from
    *
    * @param url the url to load from
-   * @exception Exception if the url can't be set.
+   * @throws IOException if the url can't be set.
    */
-  public void setURL(String url) throws Exception {
+  public void setURL(String url) throws IOException {
     m_URL = url;
     setSource(new URL(url));
   }
@@ -208,7 +176,7 @@ public class ArffLoader
    * the supplied InputStream.
    *
    * @param in the source InputStream.
-   * @exception IOException always thrown.
+   * @throws IOException always thrown.
    */
   public void setSource(InputStream in) throws IOException {
     // m_File = null;
@@ -224,7 +192,7 @@ public class ArffLoader
    * header) of the data set as an empty set of instances.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @exception IOException if an error occurs
+   * @throws IOException if an error occurs
    */
   public Instances getStructure() throws IOException {
 
@@ -249,7 +217,7 @@ public class ArffLoader
    * the rest of the data set.
    *
    * @return the structure of the data set as an empty set of Instances
-   * @exception IOException if there is no source or parsing fails
+   * @throws IOException if there is no source or parsing fails
    */
   public Instances getDataSet() throws IOException {
 
@@ -290,7 +258,7 @@ public class ArffLoader
    *
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
-   * @exception IOException if there is an error during parsing
+   * @throws IOException if there is an error during parsing
    */
   public Instance getNextInstance() throws IOException {
 
@@ -331,25 +299,6 @@ public class ArffLoader
    * @param args should contain the name of an input file.
    */
   public static void main(String [] args) {
-    if (args.length > 0) {
-      File inputfile;
-      inputfile = new File(args[0]);
-      try {
-	ArffLoader atf = new ArffLoader();
-	atf.setSource(inputfile);
-	System.out.println(atf.getStructure());
-	Instance temp;
-	do {
-	  temp = atf.getNextInstance();
-	  if (temp != null) {
-	    System.out.println(temp);
-	  }
-	} while (temp != null);
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	}
-    } else {
-      System.err.println("Usage:\n\tArffLoader <file.arff>\n");
-    }
+    runFileLoader(new ArffLoader(), args);
   }
 }
