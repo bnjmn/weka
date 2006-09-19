@@ -88,7 +88,7 @@ import org.w3c.dom.Element;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
@@ -103,10 +103,10 @@ public class XMLSerialization {
    public final static String TAG_OBJECT = "object";
    
    /** the version attribute */
-   public final static String ATT_VERSION = "version";
+   public final static String ATT_VERSION = XMLDocument.ATT_VERSION;
   
    /** the tag for the name */
-   public final static String ATT_NAME = "name";
+   public final static String ATT_NAME = XMLDocument.ATT_NAME;
    
    /** the tag for the class */
    public final static String ATT_CLASS = "class";
@@ -121,10 +121,10 @@ public class XMLSerialization {
    public final static String ATT_NULL = "null";
    
    /** the value "yes" for the primitive and array attribute */
-   public final static String VAL_YES = "yes";
+   public final static String VAL_YES = XMLDocument.VAL_YES;
    
    /** the value "no" for the primitive and array attribute */
-   public final static String VAL_NO = "no";
+   public final static String VAL_NO = XMLDocument.VAL_NO;
    
    /** the value of the name for the root node */
    public final static String VAL_ROOT = "__root__";
@@ -146,15 +146,15 @@ public class XMLSerialization {
    
    /** the DOCTYPE for the serialization */
    public final static String DOCTYPE = 
-        "<!DOCTYPE " + ROOT_NODE + "\n"
+        "<!" + XMLDocument.DTD_DOCTYPE + " " + ROOT_NODE + "\n"
       + "[\n"
-      + "   <!ELEMENT " + TAG_OBJECT + " (#PCDATA | " + TAG_OBJECT + ")*>\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_NAME + "      CDATA #REQUIRED>\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_CLASS + "     CDATA #REQUIRED>\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_PRIMITIVE + " CDATA \"" + ATT_PRIMITIVE_DEFAULT + "\">\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_ARRAY + "     CDATA \"" + ATT_ARRAY_DEFAULT + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_NULL + "      CDATA \"" + ATT_NULL_DEFAULT + "\">\n"
-      + "   <!ATTLIST " + TAG_OBJECT + " " + ATT_VERSION + "   CDATA \"" + Version.VERSION + "\">\n"
+      + "   <!" + XMLDocument.DTD_ELEMENT + " " + TAG_OBJECT + " (" + XMLDocument.DTD_PCDATA + XMLDocument.DTD_SEPARATOR + TAG_OBJECT + ")" + XMLDocument.DTD_ZERO_OR_MORE + ">\n"
+      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NAME + "      " + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n"
+      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_CLASS + "     " + XMLDocument.DTD_CDATA + " " + XMLDocument.DTD_REQUIRED + ">\n"
+      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_PRIMITIVE + " " + XMLDocument.DTD_CDATA + " \"" + ATT_PRIMITIVE_DEFAULT + "\">\n"
+      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_ARRAY + "     " + XMLDocument.DTD_CDATA + " \"" + ATT_ARRAY_DEFAULT + "\">   <!-- the dimensions of the array; no=0, yes=1 -->\n"
+      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_NULL + "      " + XMLDocument.DTD_CDATA + " \"" + ATT_NULL_DEFAULT + "\">\n"
+      + "   <!" + XMLDocument.DTD_ATTLIST + " " + TAG_OBJECT + " " + ATT_VERSION + "   " + XMLDocument.DTD_CDATA + " \"" + Version.VERSION + "\">\n"
       + "]\n"
       + ">";
    
