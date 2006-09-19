@@ -87,7 +87,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class Attribute
   implements Copyable, Serializable {
@@ -654,6 +654,20 @@ public class Attribute
 
     return m_Type;
   }
+  
+  /**
+   * Returns the Date format pattern in case this attribute is of type DATE,
+   * otherwise an empty string.
+   * 
+   * @return the date format pattern
+   * @see SimpleDateFormat
+   */
+  public final String getDateFormat() {
+    if (isDate())
+      return m_DateFormat.toPattern();
+    else
+      return "";
+  }
 
   /**
    * Returns a value of a nominal or string attribute.  Returns an
@@ -1161,6 +1175,30 @@ public class Attribute
     return m_Weight;
   }
 
+  /**
+   * Sets the new attribute's weight
+   * 
+   * @param value	the new weight
+   */
+  public void setWeight(double value) {
+    Properties	props;
+    Enumeration names;
+    String	name;
+    
+    m_Weight = value;
+
+    // generate new metadata object
+    props = new Properties();
+    names = m_Metadata.propertyNames();
+    while (names.hasMoreElements()) {
+      name = (String) names.nextElement();
+      if (!name.equals("weight"))
+	props.setProperty(name, m_Metadata.getProperty(name));
+    }
+    props.setProperty("weight", "" + m_Weight);
+    m_Metadata = new ProtectedProperties(props);
+  }
+  
   /**
    * Returns the lower bound of a numeric attribute.
    *
