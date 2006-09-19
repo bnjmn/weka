@@ -42,37 +42,18 @@ import java.io.StreamTokenizer;
  <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Loader
  */
 public class C45Loader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter, IncrementalConverter {
+  extends AbstractFileLoader 
+  implements BatchConverter, IncrementalConverter {
 
   /** for serialization */
   static final long serialVersionUID = 5454329403218219L;
   
   /** the file extension */
   public static String FILE_EXTENSION = ".names";
-
-  /** the file */
-  protected String m_File = 
-    (new File(System.getProperty("user.dir"))).getAbsolutePath();
-  
-  /**
-   * Holds the determined structure (header) of the data set.
-   */
-  //@ protected depends: model_structureDetermined -> m_structure;
-  //@ protected represents: model_structureDetermined <- (m_structure != null);
-  protected Instances m_structure = null;
-
-  /**
-   * Holds the source of the data set. In this case the names file of the
-   * data set. m_sourceFileData is the data file.
-   */
-  //@ protected depends: model_sourceSupplied -> m_sourceFile;
-  //@ protected represents: model_sourceSupplied <- (m_sourceFile != null);
-  protected File m_sourceFile = null;
 
   /**
    * Describe variable <code>m_sourceFileData</code> here.
@@ -120,11 +101,12 @@ public class C45Loader
   /**
    * Resets the Loader ready to read a new data set
    * 
-   * @throws Exception if something goes wrong
+   * @throws IOException if something goes wrong
    */
-  public void reset() throws Exception {
+  public void reset() throws IOException {
     m_structure = null;
     setRetrieval(NONE);
+    
     if (m_File != null) {
       setFile(new File(m_File));
     }
@@ -140,32 +122,21 @@ public class C45Loader
   }
 
   /**
+   * Gets all the file extensions used for this type of file
+   *
+   * @return the file extensions
+   */
+  public String[] getFileExtensions() {
+    return new String[]{".names", ".data"};
+  }
+
+  /**
    * Returns a description of the file type.
    *
    * @return a short file description
    */
   public String getFileDescription() {
     return "C4.5 data files";
-  }
-
-  /**
-   * get the File specified as the source
-   *
-   * @return the source file
-   */
-  public File retrieveFile() {
-    return new File(m_File);
-  }
-
-  /**
-   * sets the source File
-   *
-   * @param file the source file
-   * @exception IOException if an error occurs
-   */
-  public void setFile(File file) throws IOException {
-    m_File = file.getAbsolutePath();
-    setSource(file);
   }
 
   /**
@@ -176,7 +147,6 @@ public class C45Loader
    * @exception IOException if an error occurs
    */
   public void setSource(File file) throws IOException {
-    
     m_structure = null;
     setRetrieval(NONE);
 
@@ -527,23 +497,6 @@ public class C45Loader
    * @param args should contain &lt;filestem&gt;[.names | data]
    */
   public static void main (String [] args) {
-    if (args.length > 0) {
-      File inputfile;
-      inputfile = new File(args[0]);
-      try {
-	C45Loader cta = new C45Loader();
-	cta.setSource(inputfile);
-	System.out.println(cta.getStructure());
-	Instance temp = cta.getNextInstance();
-	while (temp != null) {
-	  System.out.println(temp);
-	  temp = cta.getNextInstance();
-	}
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
-    } else {
-      System.err.println("Usage:\n\tC45Loader <filestem>[.names | data]\n");
-    }
+    runFileLoader(new C45Loader(), args);
   }
 }

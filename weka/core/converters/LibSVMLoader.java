@@ -29,8 +29,6 @@ import weka.core.Instances;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,28 +48,18 @@ import java.util.Vector;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Loader
  */
 public class LibSVMLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, 
-             BatchConverter, 
-             URLSourcedLoader {
+  extends AbstractFileLoader 
+  implements BatchConverter, URLSourcedLoader {
 
   /** for serialization */
   private static final long serialVersionUID = 4988360125354664417L;
 
   /** the file extension */
   public static String FILE_EXTENSION = ".libsvm";
-
-  /**
-   * Holds the determined structure (header) of the data set.
-   */
-  protected transient Instances m_structure = null;
-
-  /** the file */
-  protected String m_File = (new File(System.getProperty("user.dir"))).getAbsolutePath();
 
   /** the url */
   protected String m_URL = "http://";
@@ -105,6 +93,15 @@ public class LibSVMLoader
   }
 
   /**
+   * Gets all the file extensions used for this type of file
+   *
+   * @return the file extensions
+   */
+  public String[] getFileExtensions() {
+    return new String[]{getFileExtension()};
+  }
+
+  /**
    * Returns a description of the file type.
    *
    * @return 		a short file description
@@ -116,13 +113,14 @@ public class LibSVMLoader
   /**
    * Resets the Loader ready to read a new data set
    * 
-   * @throws Exception 	if something goes wrong
+   * @throws IOException 	if something goes wrong
    */
-  public void reset() throws Exception {
+  public void reset() throws IOException {
     m_structure = null;
     m_Buffer    = null;
     
     setRetrieval(NONE);
+    
     if ((m_File != null) && (new File(m_File)).isFile()) {
       setFile(new File(m_File));
     }
@@ -133,37 +131,12 @@ public class LibSVMLoader
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
-   *
-   * @param file 		the source file.
-   * @throws IOException 	if an error occurs
-   */
-  public void setSource(File file) throws IOException {
-    m_structure = null;
-    m_Buffer    = null;
-    
-    setRetrieval(NONE);
-
-    if (file == null)
-      throw new IOException("Source file object is null!");
-
-    try {
-      setSource(new FileInputStream(file));
-    }
-    catch (FileNotFoundException ex) {
-      throw new IOException("File not found");
-    }
-    m_File = file.getAbsolutePath();
-  }
-
-  /**
-   * Resets the Loader object and sets the source of the data set to be 
    * the supplied url.
    *
    * @param url 	the source url.
-   * @throws Exception 	if an error occurs
+   * @throws IOException 	if an error occurs
    */
-  public void setSource(URL url) throws Exception {
+  public void setSource(URL url) throws IOException {
     m_structure = null;
     m_Buffer    = null;
     
@@ -173,35 +146,14 @@ public class LibSVMLoader
 
     m_URL = url.toString();
   }
-  
-
-  /**
-   * get the File specified as the source
-   *
-   * @return 		the source file
-   */
-  public File retrieveFile() {
-    return new File(m_File);
-  }
-
-  /**
-   * sets the source File
-   *
-   * @param file 		the source file
-   * @throws IOException 	if an error occurs
-   */
-  public void setFile(File file) throws IOException {
-    m_File = file.getAbsolutePath();
-    setSource(file);
-  }
 
   /**
    * Set the url to load from
    *
    * @param url 		the url to load from
-   * @throws Exception 		if the url can't be set.
+   * @throws IOException 		if the url can't be set.
    */
-  public void setURL(String url) throws Exception {
+  public void setURL(String url) throws IOException {
     m_URL = url;
     setSource(new URL(url));
   }
@@ -428,20 +380,6 @@ public class LibSVMLoader
    * @param args 	should contain the name of an input file.
    */
   public static void main(String[] args) {
-    if (args.length > 0) {
-      File inputfile;
-      inputfile = new File(args[0]);
-      try {
-	LibSVMLoader loader = new LibSVMLoader();
-	loader.setSource(inputfile);
-	System.out.println(loader.getDataSet());
-      }
-      catch (Exception ex) {
-	ex.printStackTrace();
-      }
-    }
-    else {
-      System.err.println("Usage:\n\tLibSVMLoader <file.libsvm>\n");
-    }
+    runFileLoader(new LibSVMLoader(), args);
   }
 }

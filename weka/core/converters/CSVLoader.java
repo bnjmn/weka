@@ -28,10 +28,10 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StreamTokenizer;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -43,41 +43,18 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see Loader
  */
 public class CSVLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter {
+  extends AbstractFileLoader 
+  implements BatchConverter {
 
   /** for serialization */
   static final long serialVersionUID = 5607529739745491340L;
   
   /** the file extension */
   public static String FILE_EXTENSION = ".csv";
-
-  /** the file */
-  protected String m_File = 
-    (new File(System.getProperty("user.dir"))).getAbsolutePath();
-
-  /**
-   * Holds the determined structure (header) of the data set.
-   */
-  //@ protected depends: model_structureDetermined -> m_structure;
-  //@ protected represents: model_structureDetermined <- (m_structure != null);
-  protected Instances m_structure = null;
-
-  /**
-   * Holds the source of the data set.
-   */
-  //@ protected depends: model_sourceSupplied -> m_sourceFile;
-  //@ protected represents: model_sourceSupplied <- (m_sourceFile != null);
-  protected File m_sourceFile = null;
-
-  /**
-   * Describe variable <code>m_tokenizer</code> here.
-   */
-  //  private StreamTokenizer m_tokenizer = null;
 
   /**
    * A list of hash tables for accumulating nominal values during parsing.
@@ -116,23 +93,12 @@ public class CSVLoader
   }
 
   /**
-   * get the File specified as the source
+   * Gets all the file extensions used for this type of file
    *
-   * @return the source file
+   * @return the file extensions
    */
-  public File retrieveFile() {
-    return new File(m_File);
-  }
-
-  /**
-   * sets the source File
-   *
-   * @param file the source file
-   * @exception IOException if an error occurs
-   */
-  public void setFile(File file) throws IOException {
-    m_File = file.getAbsolutePath();
-    setSource(file);
+  public String[] getFileExtensions() {
+    return new String[]{getFileExtension()};
   }
 
   /**
@@ -147,34 +113,13 @@ public class CSVLoader
   }
   
   /**
-   * Resets the loader ready to read a new data set
-   */
-  public void reset() {
-    m_structure = null;
-    setRetrieval(NONE);
-  }
-
-  /**
-   * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
+   * Is ignored and doesn't throw an Exception.
    *
-   * @param file the source file.
-   * @exception IOException if an error occurs
+   * @param input the input stream - ignored
+   * @exception IOException always
    */
-  public void setSource(File file) throws IOException {
-    reset();
-
-    if (file == null) {
-      throw new IOException("Source file object is null!");
-    }
-
-    m_sourceFile = file;
-    try {
-      BufferedReader br = new BufferedReader(new FileReader(file));
-      br.close();
-    } catch (FileNotFoundException ex) {
-      throw new IOException("File not found");
-    }
+  public void setSource(InputStream input) throws IOException {
+    // ignored
   }
 
   /**
@@ -542,18 +487,6 @@ public class CSVLoader
    * @param args should contain the name of an input file.
    */
   public static void main(String [] args) {
-    if (args.length > 0) {
-      File inputfile;
-      inputfile = new File(args[0]);
-      try {
-	CSVLoader atf = new CSVLoader();
-	atf.setSource(inputfile);
-	System.out.println(atf.getDataSet());
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	}
-    } else {
-      System.err.println("Usage:\n\tCSVLoader <file.csv>\n");
-    }
+    runFileLoader(new CSVLoader(), args);
   }
 }
