@@ -22,20 +22,26 @@
 
 package weka.core;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 
 /**
  * This class contains the version number of the current WEKA release and some
  * methods for comparing another version string. The normal layout of a
  * version string is "MAJOR.MINOR.REVISION", but it can also handle partial
- * version strings, e.g. "3.4".<br>
+ * version strings, e.g. "3.4". <br/>
  * Should be used e.g. in exports to XML for keeping track, with which version 
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
-public class Version implements Comparable {
+public class Version
+  implements Comparable {
+  
+  /** the version file */
+  public final static String VERSION_FILE = "weka/core/version.txt";
   
   /** the major version */
   public static int MAJOR = 3; 
@@ -48,30 +54,37 @@ public class Version implements Comparable {
 
   static {
     try {
-      InputStream inR = 
-        ClassLoader.getSystemResourceAsStream("weka/core/version.txt");
+      InputStream inR = ClassLoader.getSystemResourceAsStream(VERSION_FILE);
       LineNumberReader lnr = new LineNumberReader(new InputStreamReader(inR));
       
       String line = lnr.readLine();
-      int [] maj = new int[1];
-      int [] min = new int[1];
-      int [] rev = new int[1];
+      int[] maj = new int[1];
+      int[] min = new int[1];
+      int[] rev = new int[1];
       parseVersion(line, maj, min, rev);
-      MAJOR = maj[0];
-      MINOR = min[0];
+      MAJOR    = maj[0];
+      MINOR    = min[0];
       REVISION = rev[0];
       lnr.close();
-    } catch (Exception ex) {
-      System.err.println("weka.core.Version: Unable to load version information!");
+    }
+    catch (Exception e) {
+      System.err.println(
+	  Version.class.getName() + ": Unable to load version information!");
     }
   }
 
   /** the complete version */
   public static String VERSION = MAJOR + "." + MINOR + "." + REVISION;
 
-
-  private static void parseVersion(String version, int [] maj, int [] min,
-                                   int [] rev) {
+  /**
+   * parses the version and stores the result in the arrays
+   * 
+   * @param version	the version string to parse (contains "-" instead of "."!)
+   * @param maj		the major version
+   * @param min		the minor version
+   * @param rev		the revision version
+   */
+  private static void parseVersion(String version, int[] maj, int[] min, int[] rev) {
     int major = 0;
     int minor = 0;
     int revision = 0;
@@ -117,6 +130,7 @@ public class Version implements Comparable {
 
   /**
    * checks the version of this class against the given version-string
+   * 
    * @param o     the version-string to compare with
    * @return      -1 if this version is less, 0 if equal and +1 if greater
    *              than the provided version 
@@ -129,7 +143,6 @@ public class Version implements Comparable {
     int       [] maj = new int [1];
     int       [] min = new int [1];
     int       [] rev = new int [1];
-    String    tmpStr;
    
     
     // do we have a string?
@@ -177,6 +190,7 @@ public class Version implements Comparable {
   
   /**
    * whether the given version string is equal to this version
+   * 
    * @param o       the version-string to compare to
    * @return        TRUE if the version-string is equals to its own
    */
@@ -187,6 +201,7 @@ public class Version implements Comparable {
   /**
    * checks whether this version is older than the one from the given 
    * version string
+   * 
    * @param o       the version-string to compare with
    * @return        TRUE if this version is older than the given one
    */
@@ -197,6 +212,7 @@ public class Version implements Comparable {
   /**
    * checks whether this version is newer than the one from the given 
    * version string
+   * 
    * @param o       the version-string to compare with
    * @return        TRUE if this version is newer than the given one
    */
@@ -210,11 +226,13 @@ public class Version implements Comparable {
    * @return        the current version
    */
   public String toString() {
-    return MAJOR + "." + MINOR + "." + REVISION;
+    return VERSION;
   }
   
   /**
    * only for testing
+   * 
+   * @param args	the commandline arguments - ignored
    */
   public static void main(String[] args) {
     Version       v;
