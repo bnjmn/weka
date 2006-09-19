@@ -117,7 +117,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.52 $
+ * @version $Revision: 1.53 $
  */
 public class ClustererPanel
   extends JPanel
@@ -568,7 +568,10 @@ public class ClustererPanel
     m_StopBut.setEnabled(m_RunThread != null);
     m_ignoreBut.setEnabled(true);
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
-    m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+    if (inst.classIndex() == -1)
+      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+    else
+      m_ClassCombo.setSelectedIndex(inst.classIndex());
     updateRadioLinks();
   }
 
