@@ -23,55 +23,47 @@
 
 package weka.gui.visualize;
 
-import java.io.IOException;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.lang.ref.SoftReference;
-import java.util.Random;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.gui.ExtensionFileFilter;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
-import java.awt.event.ComponentAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Random;
 
-import javax.swing.JPanel;
-import javax.swing.JDialog;
-import javax.swing.JSplitPane;
-import javax.swing.ButtonGroup;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-import javax.swing.JComboBox;
-import javax.swing.JRadioButton;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.event.ChangeListener;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
-
-import weka.gui.*;
-import weka.gui.visualize.*;
-import weka.core.*;
+import javax.swing.event.ChangeListener;
 
 /** 
  * This panel displays a plot matrix of the user selected attributes
@@ -84,10 +76,8 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-
-
 public class MatrixPanel extends JPanel{
 
   /** The that panel contains the actual matrix */
@@ -332,22 +322,22 @@ public class MatrixPanel extends JPanel{
 	  GridBagLayout gbl = new GridBagLayout();
 	  GridBagConstraints gbc = new GridBagConstraints();
 	  JPanel p1 = new JPanel( gbl );		
-	  gbc.anchor = gbc.WEST; gbc.fill = gbc.HORIZONTAL;
+	  gbc.anchor = GridBagConstraints.WEST; gbc.fill = GridBagConstraints.HORIZONTAL;
 	  gbc.insets = new Insets(0,2,2,2);
-	  gbc.gridwidth = gbc.RELATIVE;
+	  gbc.gridwidth = GridBagConstraints.RELATIVE;
 	  p1.add(rseedLb, gbc); gbc.weightx = 0;
-	  gbc.gridwidth = gbc.REMAINDER; gbc.weightx=1;
+	  gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.weightx=1;
 	  p1.add(rseedTxt, gbc);
 	  gbc.insets = new Insets(8,2,0,2); gbc.weightx=0;
 	  p1.add(percentLb, gbc);
-	  gbc.insets = new Insets(0,2,2,2); gbc.gridwidth = gbc.RELATIVE;
+	  gbc.insets = new Insets(0,2,2,2); gbc.gridwidth = GridBagConstraints.RELATIVE;
 	  p1.add(percent2Lb, gbc);
-	  gbc.gridwidth = gbc.REMAINDER; gbc.weightx=1;
+	  gbc.gridwidth = GridBagConstraints.REMAINDER; gbc.weightx=1;
 	  p1.add(percentTxt, gbc);
 	  gbc.insets = new Insets(8,2,2,2);
 
 	  JPanel p3 = new JPanel( gbl );
-	  gbc.fill = gbc.HORIZONTAL; gbc.gridwidth = gbc.REMAINDER;
+	  gbc.fill = GridBagConstraints.HORIZONTAL; gbc.gridwidth = GridBagConstraints.REMAINDER;
 	  gbc.weightx = 1;  gbc.weighty = 0;
 	  p3.add(p1, gbc);
 	  gbc.insets = new Insets(8,4,8,4);
@@ -374,43 +364,43 @@ public class MatrixPanel extends JPanel{
     m_pointSizeLb.setPreferredSize( m_pointLBSizeD );
     m_resampleBt.setPreferredSize( m_selAttrib.getPreferredSize() );
 
-    gbc.fill = gbc.HORIZONTAL;
-    gbc.anchor = gbc.NORTHWEST;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(2,2,2,2);
     p4.add(m_plotSizeLb, gbc);
-    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
+    gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
     p4.add(m_plotSize, gbc);
-    gbc.weightx=0; gbc.gridwidth = gbc.RELATIVE;
+    gbc.weightx=0; gbc.gridwidth = GridBagConstraints.RELATIVE;
     p4.add(m_pointSizeLb, gbc);
-    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
+    gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
     p4.add(m_pointSize, gbc);
-    gbc.weightx=0; gbc.gridwidth = gbc.RELATIVE;
+    gbc.weightx=0; gbc.gridwidth = GridBagConstraints.RELATIVE;
     p4.add( new JLabel("Jitter: "), gbc);
-    gbc.weightx=1; gbc.gridwidth = gbc.REMAINDER;
+    gbc.weightx=1; gbc.gridwidth = GridBagConstraints.REMAINDER;
     p4.add(m_jitter, gbc);
     p4.add(m_classAttrib, gbc);
       
-    gbc.gridwidth = gbc.REMAINDER;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.weightx=1;
-    gbc.fill = gbc.NONE;
+    gbc.fill = GridBagConstraints.NONE;
     p3.add(m_updateBt, gbc);
     p3.add(m_selAttrib, gbc);
-    gbc.gridwidth = gbc.RELATIVE;
+    gbc.gridwidth = GridBagConstraints.RELATIVE;
     gbc.weightx = 0;
-    gbc.fill = gbc.VERTICAL;
-    gbc.anchor = gbc.WEST;
+    gbc.fill = GridBagConstraints.VERTICAL;
+    gbc.anchor = GridBagConstraints.WEST;
     p3.add(m_resampleBt, gbc);
-    gbc.gridwidth = gbc.REMAINDER;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     p3.add(m_resamplePercent, gbc);
     
     p2.setBorder(BorderFactory.createTitledBorder("Class Colour"));
     p2.add(m_cp, BorderLayout.SOUTH);
 
     gbc.insets = new Insets(8,5,2,5);
-    gbc.anchor = gbc.SOUTHWEST; gbc.fill = gbc.HORIZONTAL; gbc.weightx=1;
-    gbc.gridwidth = gbc.RELATIVE;
+    gbc.anchor = GridBagConstraints.SOUTHWEST; gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx=1;
+    gbc.gridwidth = GridBagConstraints.RELATIVE;
     optionsPanel.add(p4, gbc);
-    gbc.gridwidth = gbc.REMAINDER;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     optionsPanel.add(p3, gbc);
     optionsPanel.add(p2, gbc);
 
@@ -650,7 +640,10 @@ public class MatrixPanel extends JPanel{
       tempAttribNames[i] = new String("Colour: "+m_data.attribute(i).name()+" "+type);
       m_classAttrib.addItem(tempAttribNames[i]);
     }
-    m_classAttrib.setSelectedIndex( tempAttribNames.length-1 );
+    if (m_data.classIndex() == -1)
+      m_classAttrib.setSelectedIndex(tempAttribNames.length - 1);
+    else
+      m_classAttrib.setSelectedIndex(m_data.classIndex());
     m_attribList.setListData(tempAttribNames);
     m_attribList.setSelectionInterval(0, tempAttribNames.length-1);
   }
@@ -815,7 +808,7 @@ public class MatrixPanel extends JPanel{
           g.fillRect(r.x, r.y, r.width, r.height);
           g.setFont( f );
           fm = g.getFontMetrics();
-          int xpos = 0, ypos = 0, attribWidth=0;
+          int xpos = 0, ypos = 0;
           
           g.setColor(fontColor);
           xpos = extpad;
@@ -1023,7 +1016,7 @@ public class MatrixPanel extends JPanel{
       g.fillRect(r.x, r.y, r.width, r.height);
       g.setColor( fontColor );
       
-      int xpos = 0, ypos = 0, attribWidth=0;
+      int xpos = 0, ypos = 0;
       
       xpos = extpad;
       ypos=extpad;
