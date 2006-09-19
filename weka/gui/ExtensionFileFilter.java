@@ -33,15 +33,17 @@ import javax.swing.filechooser.FileFilter;
  * javax.swing.filechooser.FileFilter (why there are two I have no idea).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
+public class ExtensionFileFilter
+  extends FileFilter
+  implements FilenameFilter {
 
   /** The text description of the types of files accepted */
   protected String m_Description;
 
   /** The filename extensions of accepted files */
-  protected String [] m_Extension;
+  protected String[] m_Extension;
 
   /**
    * Creates the ExtensionFileFilter
@@ -78,6 +80,15 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
   }
   
   /**
+   * Returns a copy of the acceptable extensions.
+   * 
+   * @return the accepted extensions
+   */
+  public String[] getExtensions() {
+    return (String[]) m_Extension.clone();
+  }
+  
+  /**
    * Returns true if the supplied file should be accepted (i.e.: if it
    * has the required extension or is a directory).
    *
@@ -109,4 +120,4 @@ public class ExtensionFileFilter extends FileFilter implements FilenameFilter {
   public boolean accept(File dir, String name) {
     return accept(new File(dir, name));
   }
-} // ExtensionFileFilter
+}
