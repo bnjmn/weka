@@ -38,7 +38,7 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see StringCompare
  */
 public class ClassDiscovery {
@@ -50,6 +50,23 @@ public class ClassDiscovery {
   static {
     if (VERBOSE)
       System.err.println(ClassDiscovery.class.getName() + ": VERBOSE ON");
+  }
+  
+  /**
+   * Checks whether the "otherclass" is a subclass of the given "superclass".
+   * 
+   * @param superclass      the superclass to check against
+   * @param otherclass      this class is checked whether it is a subclass
+   *                        of the the superclass
+   * @return                TRUE if "otherclass" is a true subclass
+   */
+  public static boolean isSubclass(String superclass, String otherclass) {
+    try {
+      return isSubclass(Class.forName(superclass), Class.forName(otherclass));
+    }
+    catch (Exception e) {
+      return false;
+    }
   }
   
   /**
@@ -79,6 +96,22 @@ public class ClassDiscovery {
     while (!result);
     
     return result;
+  }
+  
+  /**
+   * Checks whether the given class implements the given interface.
+   * 
+   * @param intf      the interface to look for in the given class
+   * @param cls       the class to check for the interface
+   * @return          TRUE if the class contains the interface 
+   */
+  public static boolean hasInterface(String intf, String cls) {
+    try {
+      return hasInterface(Class.forName(intf), Class.forName(cls));
+    }
+    catch (Exception e) {
+      return false;
+    }
   }
   
   /**
@@ -398,6 +431,8 @@ public class ClassDiscovery {
    *    <li>packagename(s) [comma-separated list]</li>
    * </ol>
    * Prints the classes it found.
+   * 
+   * @param args	the commandline arguments
    */
   public static void main(String[] args) {
     Vector      	list;
@@ -445,6 +480,10 @@ public class ClassDiscovery {
 
     /**
      * appends blanks to the string if its shorter than <code>len</code>
+     * 
+     * @param s		the string to pad
+     * @param len	the minimum length for the string to have
+     * @return		the padded string
      */
     private String fillUp(String s, int len) {
       while (s.length() < len)
@@ -454,6 +493,9 @@ public class ClassDiscovery {
     
     /**
      * returns the group of the character: 0=special char, 1=number, 2=letter 
+     * 
+     * @param c		the character to check
+     * @return		the group
      */
     private int charGroup(char c) {
       int         result;
@@ -470,6 +512,10 @@ public class ClassDiscovery {
     
     /**
      * Compares its two arguments for order.
+     * 
+     * @param o1	the first object
+     * @param o2	the second object
+     * @return		-1 if o1&lt;o2, 0 if o1=o2 and 1 if o1&;gt;o2
      */    
     public int compare(Object o1, Object o2) {
       String        s1;
@@ -521,6 +567,9 @@ public class ClassDiscovery {
     
     /**
      * Indicates whether some other object is "equal to" this Comparator. 
+     * 
+     * @param obj	the object to compare with this Comparator
+     * @return		true if the object is a StringCompare object as well
      */
     public boolean equals(Object obj) {
       return (obj instanceof StringCompare);
