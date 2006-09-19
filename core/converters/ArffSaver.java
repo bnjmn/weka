@@ -22,13 +22,13 @@
 
 package weka.core.converters;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
+import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Enumeration;
 
 /**
  * Writes to a destination in arff text format. <p/>
@@ -45,7 +45,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Saver
  */
 public class ArffSaver 
@@ -91,7 +91,26 @@ public class ArffSaver
     setFileExtension(".arff");
   }
 
-
+  /** 
+   * Returns the Capabilities of this saver.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
   
   /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
@@ -197,40 +216,9 @@ public class ArffSaver
   /**
    * Main method.
    *
-   * @param options should contain the options of a Saver.
+   * @param args should contain the options of a Saver.
    */
-  public static void main(String [] options) {
-      
-      StringBuffer text = new StringBuffer();
-      try{
-        ArffSaver asv = new ArffSaver();
-        text.append("\n\nArffSaver options:\n\n");
-        Enumeration enumi = asv.listOptions();
-        while (enumi.hasMoreElements()) {
-            Option option = (Option)enumi.nextElement();
-            text.append(option.synopsis()+'\n');
-            text.append(option.description()+'\n');
-        }
-        try {
-          asv.setOptions(options);  
-        } catch (Exception ex) {
-            System.out.println("\n"+text);
-            System.exit(1);
-	}
-        //incremental
-        /*asv.setRetrieval(INCREMENTAL);
-        Instances instances = asv.getInstances();
-        asv.setStructure(instances);
-        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
-            asv.writeIncremental(instances.instance(i));
-        }
-        asv.writeIncremental(null);*/
-        
-        //batch
-        asv.writeBatch();
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	}
-      
-    }
+  public static void main(String[] args) {
+    runFileSaver(new ArffSaver(), args);
+  }
 }
