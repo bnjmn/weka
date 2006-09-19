@@ -60,7 +60,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -742,11 +742,20 @@ public class Capabilities
   }
 
   /**
+   * returns the reason why the tests failed, is null if tests succeeded
+   * 
+   * @return		the reason why the tests failed
+   */
+  public Exception getFailReason() {
+    return m_FailReason;
+  }
+  
+  /**
    * Generates the message for, e.g., an exception. Adds the classname before the
    * actual message and returns that string.
    * 
-   * @param msg       the actual content of the message, e.g., exception
-   * @return          the new message
+   * @param msg		the actual content of the message, e.g., exception
+   * @return		the new message
    */
   protected String createMessage(String msg) {
     String	result;
