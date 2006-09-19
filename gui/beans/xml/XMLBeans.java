@@ -21,6 +21,7 @@
 
 package weka.gui.beans.xml;
 
+import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.gui.beans.BeanConnection;
@@ -33,10 +34,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Point;
-import java.beans.beancontext.BeanContextSupport;
 import java.beans.BeanInfo;
 import java.beans.EventSetDescriptor;
 import java.beans.Introspector;
+import java.beans.beancontext.BeanContextSupport;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -57,7 +58,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -88,6 +89,12 @@ public class XMLBeans
   
   /** the value of the file property */
   public final static String VAL_FILE = "file";
+  
+  /** the value of the dir property */
+  public final static String VAL_DIR = "dir";
+  
+  /** the value of the prefix property */
+  public final static String VAL_PREFIX = "prefix";
   
   /** the value of the options property */
   public final static String VAL_OPTIONS = "options";
@@ -272,6 +279,9 @@ public class XMLBeans
    * @throws Exception if something goes wrong
    */
   public void clear() throws Exception {
+    Vector<String>	classnames;
+    int			i;
+    
     super.clear();
     
     // ignore: suppress unnecessary GUI stuff 
@@ -333,6 +343,7 @@ public class XMLBeans
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
     m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class, "options");
+    m_Properties.addAllowed(weka.core.converters.TextDirectoryLoader.class, "options");
 
     // we assume that classes implementing SplitEvaluator also implement OptionHandler
     m_Properties.addAllowed(weka.experiment.SplitEvaluator.class, "options");
@@ -352,15 +363,13 @@ public class XMLBeans
     m_CustomMethods.register(this, weka.gui.beans.BeanVisual.class, "BeanVisual");
     m_CustomMethods.register(this, weka.gui.beans.Saver.class, "BeanSaver");
     m_CustomMethods.register(this, weka.gui.beans.MetaBean.class, "MetaBean");
-    
-    m_CustomMethods.register(this, weka.core.converters.ArffLoader.class, "Loader");
-    m_CustomMethods.register(this, weka.core.converters.ArffSaver.class, "Saver");
-    m_CustomMethods.register(this, weka.core.converters.C45Loader.class, "Loader");
-    m_CustomMethods.register(this, weka.core.converters.C45Saver.class, "Saver");
-    m_CustomMethods.register(this, weka.core.converters.CSVLoader.class, "Loader");
-    m_CustomMethods.register(this, weka.core.converters.CSVSaver.class, "Saver");
-    m_CustomMethods.register(this, weka.core.converters.SerializedInstancesLoader.class, "Loader");
-    m_CustomMethods.register(this, weka.core.converters.SerializedInstancesSaver.class, "Saver");
+
+    classnames = ConverterUtils.getFileLoaders();
+    for (i = 0; i < classnames.size(); i++)
+      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Loader");
+    classnames = ConverterUtils.getFileSavers();
+    for (i = 0; i < classnames.size(); i++)
+      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Saver");
     
     // other variables
     m_BeanInstances          = null;
@@ -1534,14 +1543,8 @@ public class XMLBeans
     file   = null;
 
     // file
-    if (loader instanceof weka.core.converters.ArffLoader)
-      file = ((weka.core.converters.ArffLoader) loader).retrieveFile();
-    else if (loader instanceof weka.core.converters.C45Loader)
-      file = ((weka.core.converters.C45Loader) loader).retrieveFile();
-    else if (loader instanceof weka.core.converters.CSVLoader)
-      file = ((weka.core.converters.CSVLoader) loader).retrieveFile();
-    else if (loader instanceof weka.core.converters.SerializedInstancesLoader)
-      file = ((weka.core.converters.SerializedInstancesLoader) loader).retrieveFile();
+    if (loader instanceof weka.core.converters.AbstractFileLoader)
+      file = ((weka.core.converters.AbstractFileLoader) loader).retrieveFile();
     else
       known = false;
 
@@ -1600,7 +1603,7 @@ public class XMLBeans
     if (file != null) {
       fl = new File(file);
       if (fl.exists())
-        ((weka.core.converters.AbstractLoader) result).setSource(fl);
+        ((weka.core.converters.AbstractFileLoader) result).setSource(fl);
       else
         System.out.println("WARNING: The file '" + file + "' does not exist!");
     }
@@ -1623,6 +1626,8 @@ public class XMLBeans
     Element                     node;
     weka.core.converters.Saver  saver;
     File                        file;
+    String			prefix;
+    String			dir;
     boolean                     known;
 
     // for debugging only
@@ -1631,31 +1636,37 @@ public class XMLBeans
     
     m_CurrentNode = parent;
     
-    saver = (weka.core.converters.Saver) o;
+    saver  = (weka.core.converters.Saver) o;
     node   = addElement(parent, name, saver.getClass().getName(), false);
-    known = true;
-    file  = null;
+    known  = true;
+    file   = null;
+    prefix = "";
+    dir    = "";
 
     // file
-    if (saver instanceof weka.core.converters.ArffSaver)
-      file = ((weka.core.converters.ArffSaver) saver).retrieveFile();
-    else if (saver instanceof weka.core.converters.C45Saver)
-      file = ((weka.core.converters.C45Saver) saver).retrieveFile();
-    else if (saver instanceof weka.core.converters.CSVSaver)
-      file = ((weka.core.converters.CSVSaver) saver).retrieveFile();
-    else if (saver instanceof weka.core.converters.SerializedInstancesSaver)
-      file = ((weka.core.converters.SerializedInstancesSaver) saver).retrieveFile();
-    else
+    if (saver instanceof weka.core.converters.AbstractFileSaver) {
+      file   = ((weka.core.converters.AbstractFileSaver) saver).retrieveFile();
+      prefix = ((weka.core.converters.AbstractFileSaver) saver).filePrefix();
+      dir    = ((weka.core.converters.AbstractFileSaver) saver).retrieveDir();
+    }
+    else {
       known = false;
+    }
     
     if (!known)
       System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
     
     // only save it, if it's a real file!
-    if ( (file == null) || (file.isDirectory()) )
-      invokeWriteToXML(node, "", VAL_FILE);
-    else
+    if ( (file == null) || (file.isDirectory()) ) {
+      invokeWriteToXML(node, "",     VAL_FILE);
+      invokeWriteToXML(node, dir,    VAL_DIR);
+      invokeWriteToXML(node, prefix, VAL_PREFIX);
+    }
+    else {
       invokeWriteToXML(node, file.getAbsolutePath(), VAL_FILE);
+      invokeWriteToXML(node, "", VAL_DIR);
+      invokeWriteToXML(node, "", VAL_PREFIX);
+    }
     
     return node;
   }
@@ -1674,6 +1685,8 @@ public class XMLBeans
     int         i;
     String      name;
     String      file;
+    String	dir;
+    String	prefix;
 
     // for debugging only
     if (DEBUG)
@@ -1683,7 +1696,9 @@ public class XMLBeans
     
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
-    file     = "";
+    file     = null;
+    dir      = null;
+    prefix   = null;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
@@ -1691,16 +1706,23 @@ public class XMLBeans
 
       if (name.equals(VAL_FILE))
         file = (String) invokeReadFromXML(child);
+      else if (name.equals(VAL_DIR))
+        dir = (String) invokeReadFromXML(child);
+      else if (name.equals(VAL_PREFIX))
+        prefix = (String) invokeReadFromXML(child);
       else
         readFromXML(result, name, child);
     }
 
-    if (file.equals(""))
+    if ( (file != null) && (file.length() == 0) )
       file = null;
     
     if (file != null) {
-      ((weka.core.converters.AbstractSaver) result).setFile(new File(file));
-      ((weka.core.converters.AbstractSaver) result).setDestination(new File(file));
+      ((weka.core.converters.AbstractFileSaver) result).setFile(new File(file));
+    }
+    else if ( (dir != null) && (prefix != null) ) {
+      ((weka.core.converters.AbstractFileSaver) result).setDir(dir);
+      ((weka.core.converters.AbstractFileSaver) result).setFilePrefix(prefix);
     }
     
     return result;
