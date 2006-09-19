@@ -28,7 +28,7 @@ import java.io.IOException;
  * Interface to a loader/saver that loads/saves from a file source.
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface FileSourcedConverter {
 
@@ -37,14 +37,21 @@ public interface FileSourcedConverter {
    *
    * @return the file extension
    */
-  String getFileExtension();
+  public String getFileExtension();
+
+  /**
+   * Gets all the file extensions used for this type of file
+   *
+   * @return the file extensions
+   */
+  public String[] getFileExtensions();
 
   /**
    * Get a one line description of the type of file
    *
    * @return a description of the file type
    */
-  String getFileDescription();
+  public String getFileDescription();
 
   /**
    * Set the file to load from/ to save in
@@ -52,13 +59,13 @@ public interface FileSourcedConverter {
    * @param file the file to load from
    * @exception IOException if an error occurs
    */
-   void setFile(File file) throws IOException;
+  public void setFile(File file) throws IOException;
 
   /**
    * Return the current source file/ destination file
    *
    * @return a <code>File</code> value
    */
-  File retrieveFile();
+  public File retrieveFile();
 
 }
