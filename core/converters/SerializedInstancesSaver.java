@@ -22,14 +22,13 @@
 
 package weka.core.converters;
 
-import weka.core.Option;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.Enumeration;
 
 /**
  <!-- globalinfo-start -->
@@ -49,12 +48,12 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Saver
  */
 public class SerializedInstancesSaver 
   extends AbstractFileSaver 
-  implements BatchConverter, IncrementalConverter {
+  implements BatchConverter {
 
   /** for serialization */
   static final long serialVersionUID = -7717010648500658872L;
@@ -80,7 +79,7 @@ public class SerializedInstancesSaver
    * @return a short file description
    */
   public String getFileDescription() {
-    return "Serializes the instaces to a file";
+    return "Binary serialized instances";
   }
 
   /**
@@ -92,43 +91,25 @@ public class SerializedInstancesSaver
     setFileExtension(".bsi");
   }
 
-  /**
-   * Sets the destination file (and directories if necessary).
+  /** 
+   * Returns the Capabilities of this saver.
    *
-   * @param file the File
-   * @throws IOException always
+   * @return            the capabilities of this object
+   * @see               Capabilities
    */
-  public void setDestination(File file) throws IOException {
-
-    boolean success = false;
-    String out = file.getAbsolutePath();
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
     
-    if(retrieveFile() != null){
-        try{
-            if(out.lastIndexOf(File.separatorChar) == -1)
-                success = file.createNewFile();
-            else{
-                String outPath = out.substring(0,out.lastIndexOf(File.separatorChar));
-                File dir = new File(outPath);
-                if(dir.exists())
-                    success = file.createNewFile();
-                else{
-                    dir.mkdirs();
-                    success = file.createNewFile();
-                }
-            }
-            if(success){ 
-                setFile(file);
-            }
-        } catch(Exception ex){
-            throw new IOException("Cannot create a new output file. Standard out is used.");
-        } finally{
-            if(!success){
-                System.err.println("Cannot create a new output file. Standard out is used.");
-                setFile(null); //use standard out
-            }
-        }
-    }
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
   
   /** 
@@ -166,29 +147,9 @@ public class SerializedInstancesSaver
   /**
    * Main method.
    *
-   * @param options should contain the options of a Saver.
+   * @param args should contain the options of a Saver.
    */
-  public static void main(String [] options) {
-      
-      StringBuffer text = new StringBuffer();
-      try {
-	SerializedInstancesSaver ssv = new SerializedInstancesSaver();
-        text.append("\n\nSerializedInstancesSaver options:\n\n");
-        Enumeration enumi = ssv.listOptions();
-        while (enumi.hasMoreElements()) {
-            Option option = (Option)enumi.nextElement();
-            text.append(option.synopsis()+'\n');
-            text.append(option.description()+'\n');
-        }
-        try {
-          ssv.setOptions(options);  
-        } catch (Exception ex) {
-            System.out.println("\n"+text);
-            System.exit(1);
-	}
-        ssv.writeBatch();
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	}
-    }
+  public static void main(String[] args) {
+    runFileSaver(new SerializedInstancesSaver(), args);
+  }
 }
