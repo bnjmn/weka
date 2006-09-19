@@ -23,41 +23,33 @@
 
 package weka.gui.experiment;
 
-import weka.core.Instances;
 import weka.core.ClassDiscovery;
 import weka.experiment.Experiment;
-import weka.gui.ExtensionFileFilter;
+import weka.gui.ConverterFileChooser;
 import weka.gui.JListHelper;
 
-import java.io.File;
-import java.util.Vector;
-import java.util.Collections;
-import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.io.File;
+import java.util.Collections;
+import java.util.Vector;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JList;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.JCheckBox;
 
 
 /** 
@@ -65,7 +57,7 @@ import javax.swing.JCheckBox;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -90,16 +82,12 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   /** Make file paths relative to the user (start) directory */
   protected JCheckBox m_relativeCheck = new JCheckBox("Use relative paths");
 
-  /** A filter to ensure only arff files get selected */
-  protected FileFilter m_ArffFilter =
-    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
-
   /** The user (start) directory */
   protected File m_UserDir = new File(System.getProperty("user.dir"));
 
   /** The file chooser component */
-  protected JFileChooser m_FileChooser = new
-    JFileChooser(ExperimenterDefaults.getInitialDatasetsDirectory());
+  protected ConverterFileChooser m_FileChooser = 
+    new ConverterFileChooser(ExperimenterDefaults.getInitialDatasetsDirectory());
 
   
   /**
@@ -125,7 +113,6 @@ public class DatasetListPanel extends JPanel implements ActionListener {
         }
       });
     
-    m_FileChooser.setFileFilter(m_ArffFilter);
     // Multiselection isn't handled by the current implementation of the
     // swing look and feels.
     // m_FileChooser.setMultiSelectionEnabled(true);
