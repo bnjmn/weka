@@ -22,16 +22,14 @@
 
 package weka.gui.explorer;
 
-import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Capabilities.Capability;
-import weka.core.converters.C45Loader;
-import weka.core.converters.CSVLoader;
-import weka.core.converters.LibSVMLoader;
-import weka.core.converters.LibSVMSaver;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ConverterUtils;
 import weka.core.converters.Loader;
+import weka.core.converters.URLSourcedLoader;
 import weka.datagenerators.DataGenerator;
 import weka.experiment.InstanceQuery;
 import weka.filters.Filter;
@@ -40,7 +38,7 @@ import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.AttributeSelectionPanel;
 import weka.gui.AttributeSummaryPanel;
 import weka.gui.AttributeVisualizationPanel;
-import weka.gui.ExtensionFileFilter;
+import weka.gui.ConverterFileChooser;
 import weka.gui.GenericObjectEditor;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.Logger;
@@ -65,20 +63,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.URL;
 
 import javax.swing.BorderFactory;
@@ -106,7 +96,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.62 $
+ * @version $Revision: 1.63 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -158,39 +148,8 @@ public class PreprocessPanel
   protected JButton m_ApplyFilterBut = new JButton("Apply");
 
   /** The file chooser for selecting arff files */
-  protected JFileChooser m_FileChooser 
-    = new JFileChooser(new File(System.getProperty("user.dir")));
-
-  // File filters for various file types
-  /** serialized instances */
-  protected ExtensionFileFilter m_bsiFileFilter = 
-    new ExtensionFileFilter(
-	Instances.SERIALIZED_OBJ_FILE_EXTENSION,
-	"Binary serialized instances (*" + Instances.SERIALIZED_OBJ_FILE_EXTENSION + ")");
-
-  /** C4.5 files */
-  protected ExtensionFileFilter m_c45FileFilter = 
-    new ExtensionFileFilter(
-	C45Loader.FILE_EXTENSION,
-	"C45 names files (*" + C45Loader.FILE_EXTENSION + ")");
-
-  /** CSV files */
-  protected ExtensionFileFilter m_csvFileFilter = 
-    new ExtensionFileFilter(
-	CSVLoader.FILE_EXTENSION,
-	"CSV data files (*" + CSVLoader.FILE_EXTENSION + ")");
-
-  /** ARFF files (default) */
-  protected ExtensionFileFilter m_arffFileFilter = 
-    new ExtensionFileFilter(
-	Instances.FILE_EXTENSION,
-	"Arff data files (*" + Instances.FILE_EXTENSION + ")");
-
-  /** LibSVM files */
-  protected ExtensionFileFilter m_libsvmFileFilter = 
-    new ExtensionFileFilter(
-	LibSVMLoader.FILE_EXTENSION,
-	"libsvm data files (*" + LibSVMLoader.FILE_EXTENSION + ")");
+  protected ConverterFileChooser m_FileChooser 
+    = new ConverterFileChooser(new File(System.getProperty("user.dir")));
 
   /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
@@ -250,13 +209,6 @@ public class PreprocessPanel
     m_EditBut.setToolTipText("Open the current dataset in a Viewer for editing");
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
-
-    m_FileChooser.addChoosableFileFilter(m_arffFileFilter);
-    m_FileChooser.addChoosableFileFilter(m_csvFileFilter);
-    m_FileChooser.addChoosableFileFilter(m_c45FileFilter);
-    m_FileChooser.addChoosableFileFilter(m_bsiFileFilter);
-    m_FileChooser.addChoosableFileFilter(m_libsvmFileFilter);
-    m_FileChooser.setFileFilter(m_arffFileFilter);
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -600,7 +552,7 @@ public class PreprocessPanel
 	      Instances copy = new Instances(m_Instances);
 	      copy.setClassIndex(classIndex);
 	      filter.setInputFormat(copy);
-	      Instances newInstances = filter.useFilter(copy, filter);
+	      Instances newInstances = Filter.useFilter(copy, filter);
 	      if (newInstances == null || newInstances.numAttributes() < 1) {
 		throw new Exception("Dataset is empty.");
 	      }
@@ -653,54 +605,62 @@ public class PreprocessPanel
   public void saveWorkingInstancesToFileQ() {
     
     if (m_IOThread == null) {
+      m_FileChooser.setCapabilitiesFilter(m_FilterEditor.getCapabilitiesFilter());
       m_FileChooser.setAcceptAllFileFilterUsed(false);
       int returnVal = m_FileChooser.showSaveDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File sFile = m_FileChooser.getSelectedFile();
-	if (m_FileChooser.getFileFilter() == m_arffFileFilter) {
-	  if (!sFile.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {
-	    sFile = new File(sFile.getParent(), sFile.getName() 
-			     + Instances.FILE_EXTENSION);
-	  }
-	  File selected = sFile;
-	  saveInstancesToFile(selected, m_Instances, true);
-	} else if (m_FileChooser.getFileFilter() == m_csvFileFilter) {
-	  if (!sFile.getName().toLowerCase().endsWith(CSVLoader.FILE_EXTENSION)) {
-	    sFile = new File(sFile.getParent(), sFile.getName() 
-			     + CSVLoader.FILE_EXTENSION);
-	  }
-	  File selected = sFile;
-	  saveInstancesToFile(selected, m_Instances, false);
-	} else if (m_FileChooser.getFileFilter() == m_c45FileFilter) {	 
-	  File selected = sFile;
-	  saveInstancesToC45File(selected, m_Instances);
-	} else if (m_FileChooser.getFileFilter() == m_bsiFileFilter) {
-	  if (!sFile.getName().toLowerCase().
-	      endsWith(Instances.SERIALIZED_OBJ_FILE_EXTENSION)) {
-	    sFile = new File(sFile.getParent(), sFile.getName() 
-			     + Instances.SERIALIZED_OBJ_FILE_EXTENSION);
-	  }
-	  File selected = sFile;
-	  saveSerializedInstancesToFile(selected, m_Instances);
-	} else if (m_FileChooser.getFileFilter() == m_libsvmFileFilter) {
-	  if (!sFile.getName().toLowerCase().endsWith(LibSVMLoader.FILE_EXTENSION)) {
-	    sFile = new File(sFile.getParent(), sFile.getName() 
-			     + LibSVMLoader.FILE_EXTENSION);
-	  }
-	  File selected = sFile;
-	  saveInstancesToLibSVMFile(selected, m_Instances);
-	}
+	Instances inst = new Instances(m_Instances);
+	inst.setClassIndex(m_AttVisualizePanel.getColoringIndex());
+	saveInstancesToFile(m_FileChooser.getSaver(), inst);
       }
       FileFilter temp = m_FileChooser.getFileFilter();
       m_FileChooser.setAcceptAllFileFilterUsed(true);
       m_FileChooser.setFileFilter(temp);
-    } else {
+    }
+    else {
       JOptionPane.showMessageDialog(this,
 				    "Can't save at this time,\n"
 				    + "currently busy with other IO",
 				    "Save Instances",
 				    JOptionPane.WARNING_MESSAGE);
     }
+  }
+  
+  /**
+   * saves the data with the specified saver
+   * 
+   * @param saver	the saver to use for storing the data
+   * @param inst	the data to save
+   */
+  public void saveInstancesToFile(final AbstractFileSaver saver, final Instances inst) {
+    if (m_IOThread == null) {
+      m_IOThread = new Thread() {
+	  public void run() {
+	    try {
+	      m_Log.statusMessage("Saving to file...");
+
+	      saver.setInstances(inst);
+	      saver.writeBatch();
+	      
+	      m_Log.statusMessage("OK");
+	    }
+	    catch (Exception ex) {
+	      ex.printStackTrace();
+	      m_Log.logMessage(ex.getMessage());
+	    }
+	    m_IOThread = null;
+	  }
+	};
+      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
+      m_IOThread.start();
+    }
+    else {
+      JOptionPane.showMessageDialog(this,
+				    "Can't save at this time,\n"
+				    + "currently busy with other IO",
+				    "Saving instances",
+				    JOptionPane.WARNING_MESSAGE);
+    } 
   }
   
   /**
@@ -713,11 +673,10 @@ public class PreprocessPanel
     if (m_IOThread == null) {
       int returnVal = m_FileChooser.showOpenDialog(this);
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-	File selected = m_FileChooser.getSelectedFile();
 	try {
 	  addUndoPoint();
 	} catch (Exception ignored) {}
-	setInstancesFromFile(selected);
+	setInstancesFromFile(m_FileChooser.getLoader());
       }
     } else {
       JOptionPane.showMessageDialog(this,
@@ -954,245 +913,6 @@ public class PreprocessPanel
   }
 
   /**
-   * Saves the current instances in C45 names and data file format
-   *
-   * @param f a value of type 'File'
-   * @param inst the instances to save
-   */
-  protected void saveInstancesToC45File(final File f, final Instances inst) {
-    if (m_IOThread == null) {
-      final int classIndex = m_AttVisualizePanel.getColoringIndex();
-      if (inst.attribute(classIndex).isNumeric()) {	      
-	JOptionPane.showMessageDialog(this,
-				      "Can't save in C45 format,\n"
-				      + "as the selected class is numeric.",
-				      "Save Instances",
-				      JOptionPane.ERROR_MESSAGE);
-	return;
-      }
-      m_IOThread = new Thread() {
-	  public void run() {
-	    try {
-	      m_Log.statusMessage("Saving to file...");
-	      String name = f.getAbsolutePath();
-	      if (name.lastIndexOf('.') != -1) {
-		name = name.substring(0, name.lastIndexOf('.'));
-	      }
-	      File fData = new File(name+".data");
-	      File fNames = new File(name+".names");
-	      Writer w = new BufferedWriter(new FileWriter(fNames));
-	      Writer w2 =  new BufferedWriter(new FileWriter(fData));	      
-	      
-	      // write the names file
-	      for (int i = 0; i < inst.attribute(classIndex).numValues(); i++) {
-		w.write(inst.attribute(classIndex).value(i));
-		if (i < inst.attribute(classIndex).numValues()-1) {
-		  w.write(",");
-		} else {
-		  w.write(".\n");
-		}
-	      }
-	      for (int i = 0; i < inst.numAttributes(); i++) {
-		if (i != classIndex) {
-		  w.write(inst.attribute(i).name()+": ");
-		  if (inst.attribute(i).isNumeric() || inst.attribute(i).isDate()) {
-		    w.write("continuous.\n");
-		  } else {
-		    Attribute temp = inst.attribute(i);
-		    for (int j = 0; j < temp.numValues(); j++) {
-		      w.write(temp.value(j));
-		      if (j < temp.numValues()-1) {
-			w.write(",");
-		      } else {
-			w.write(".\n");
-		      }
-		    }
-		  }
-		}
-	      }
-	      w.close();
-	      
-	      // write the data file
-	      for (int i = 0; i < inst.numInstances(); i++) {
-		Instance tempI = inst.instance(i);
-		for (int j = 0; j < inst.numAttributes(); j++) {
-		  if (j != classIndex) {
-		    if (tempI.isMissing(j)) {
-		      w2.write("?,");
-		    } else if (inst.attribute(j).isNominal() || 
-			       inst.attribute(j).isString()) {
-		      w2.write(inst.attribute(j).value((int)tempI.value(j))+",");
-		    } else {
-		      w2.write(""+tempI.value(j)+",");
-		    }
-		  }
-		}
-		//		w2.write(inst.instance(i).toString());
-		// write the class value
-		if (tempI.isMissing(classIndex)) {
-		  w2.write("?");
-		} else {
-		  w2.write(inst.attribute(classIndex).
-			   value((int)tempI.value(classIndex)));
-		}
-		w2.write("\n");
-	      }
-	      w2.close();
-	      m_Log.statusMessage("OK");
-	 
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	      m_Log.logMessage(ex.getMessage());
-	    }
-	    m_IOThread = null;
-	  }
-	};
-      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-      m_IOThread.start();
-    } else {
-      JOptionPane.showMessageDialog(this,
-				    "Can't save at this time,\n"
-				    + "currently busy with other IO",
-				    "Save c45 format",
-				    JOptionPane.WARNING_MESSAGE);
-    }
-  }
-
-  /**
-   * Saves the current instances in binary serialized form to a file
-   *
-   * @param f a value of type 'File'
-   * @param inst the instances to save
-   */
-  protected void saveSerializedInstancesToFile(final File f, 
-					       final Instances inst) {
-    if (m_IOThread == null) {
-      m_IOThread = new Thread() {
-	  public void run() {
-	    try {
-	      m_Log.statusMessage("Saving to file...");
-
-	      ObjectOutputStream oos = 
-		  new ObjectOutputStream(
-		  new BufferedOutputStream(
-		  new FileOutputStream(f)));
-
-	      oos.writeObject(inst);
-	      oos.flush();
-	      oos.close();
-
-	      m_Log.statusMessage("OK");
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	      m_Log.logMessage(ex.getMessage());
-	    }
-	    m_IOThread = null;
-	  }
-	};
-      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-      m_IOThread.start();
-    } else {
-      JOptionPane.showMessageDialog(this,
-				    "Can't save at this time,\n"
-				    + "currently busy with other IO",
-				    "Save binary serialized instances",
-				    JOptionPane.WARNING_MESSAGE);
-    } 
-  }
-
-  /**
-   * Saves the current instances in libsvm format to a file
-   *
-   * @param f a value of type 'File'
-   * @param inst the instances to save
-   */
-  protected void saveInstancesToLibSVMFile(final File f, final Instances inst) {
-    if (m_IOThread == null) {
-      m_IOThread = new Thread() {
-	  public void run() {
-	    try {
-	      m_Log.statusMessage("Saving to file...");
-
-	      LibSVMSaver saver = new LibSVMSaver();
-	      saver.setInstances(inst);
-	      saver.setFile(f);
-	      saver.setDestination(f);
-	      saver.writeBatch();
-	      
-	      m_Log.statusMessage("OK");
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	      m_Log.logMessage(ex.getMessage());
-	    }
-	    m_IOThread = null;
-	  }
-	};
-      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-      m_IOThread.start();
-    } else {
-      JOptionPane.showMessageDialog(this,
-				    "Can't save at this time,\n"
-				    + "currently busy with other IO",
-				    "Save binary serialized instances",
-				    JOptionPane.WARNING_MESSAGE);
-    } 
-  }
-
-  /**
-   * Saves the current instances to the supplied file.
-   *
-   * @param f a value of type 'File'
-   * @param inst the instances to save
-   * @param saveHeader true to save in arff format, false to save in csv
-   */
-  protected void saveInstancesToFile(final File f, final Instances inst,
-				     final boolean saveHeader) {
-      
-    if (m_IOThread == null) {
-      m_IOThread = new Thread() {
-	public void run() {
-	  try {
-	    m_Log.statusMessage("Saving to file...");
-	    Writer w = new BufferedWriter(new FileWriter(f));
-	    if (saveHeader) {
-	      Instances h = new Instances(inst, 0);
-	      w.write(h.toString());
-	      w.write("\n");
-	    } else {
-	      // csv - write attribute names as first row
-	      for (int i = 0; i < inst.numAttributes(); i++) {
-		w.write(inst.attribute(i).name());
-		if (i < inst.numAttributes()-1) {
-		  w.write(",");
-		}
-	      }
-	      w.write("\n");
-	    }
-	    for (int i = 0; i < inst.numInstances(); i++) {
-	      w.write(inst.instance(i).toString());
-	      w.write("\n");
-	    }
-	    w.close();
-	    m_Log.statusMessage("OK");
-	  } catch (Exception ex) {
-	    ex.printStackTrace();
-	    m_Log.logMessage(ex.getMessage());
-	  }
-	  m_IOThread = null;
-	}
-      };
-      m_IOThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
-      m_IOThread.start();
-    } else {
-      JOptionPane.showMessageDialog(this,
-				    "Can't save at this time,\n"
-				    + "currently busy with other IO",
-				    "Save Instances",
-				    JOptionPane.WARNING_MESSAGE);
-    }
-  }
-
-  /**
    * Pops up generic object editor with list of conversion filters
    *
    * @param f the File
@@ -1251,61 +971,32 @@ public class PreprocessPanel
   }
 
   /**
-   * Loads results from a set of instances contained in the supplied
-   * file. This is started in the IO thread, and a dialog is popped up
+   * Loads results from a set of instances retrieved with the supplied loader. 
+   * This is started in the IO thread, and a dialog is popped up
    * if there's a problem.
    *
-   * @param f a value of type 'File'
+   * @param loader	the loader to use
    */
-  public void setInstancesFromFile(final File f) {
+  public void setInstancesFromFile(final AbstractFileLoader loader) {
       
     if (m_IOThread == null) {
       m_IOThread = new Thread() {
 	public void run() {
-	  String fileType = f.getName();
 	  try {
 	    m_Log.statusMessage("Reading from file...");
-	    if (f.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {	    
-	      fileType = "arff";
-	      Reader r = new BufferedReader(new FileReader(f));
-	      setInstances(new Instances(r));
-	      r.close();
-	    } else if (f.getName().toLowerCase().endsWith(CSVLoader.FILE_EXTENSION)) {
-	      fileType = "csv";
-	      CSVLoader cnv = new CSVLoader();
-	      cnv.setSource(f);
-	      Instances inst = cnv.getDataSet();
-	      setInstances(inst);
-	    } else if (f.getName().toLowerCase().endsWith(C45Loader.FILE_EXTENSION)) {
-	      fileType = "C45 names";
-	      C45Loader cnv = new C45Loader();
-	      cnv.setSource(f);
-	      Instances inst = cnv.getDataSet();
-	      setInstances(inst);
-	    } else if (f.getName().toLowerCase().
-		       endsWith(Instances.SERIALIZED_OBJ_FILE_EXTENSION)
-		       || f.getName().toLowerCase().endsWith(".tmp")) {
-	      ObjectInputStream ois = 
-		new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
-	      setInstances((Instances)ois.readObject());
-	      ois.close();
-	    } else if (f.getName().toLowerCase().endsWith(LibSVMLoader.FILE_EXTENSION)) {
-	      fileType = "libsvm";
-	      LibSVMLoader cnv = new LibSVMLoader();
-	      cnv.setSource(f);
-	      Instances inst = cnv.getDataSet();
-	      setInstances(inst);
-	    } else {
-	      throw new Exception("Unrecognized file type");
-	    }
-	  } catch (Exception ex) {
-	    m_Log.statusMessage("File '" + f.getName() + "' not recognised as an "
-				+fileType+" file.");
+	    Instances inst = loader.getDataSet();
+	    setInstances(inst);
+	  }
+	  catch (Exception ex) {
+	    m_Log.statusMessage(
+		"File '" + loader.retrieveFile() + "' not recognised as an '"
+		+ loader.getFileDescription() + "' file.");
 	    m_IOThread = null;
 	    if (JOptionPane.showOptionDialog(PreprocessPanel.this,
-					     "File '" + f.getName()
-					     + "' not recognised as an "
-					     +fileType+" file.\n"
+					     "File '" + loader.retrieveFile()
+					     + "' not recognised as an '"
+					     + loader.getFileDescription() 
+					     + "' file.\n"
 					     + "Reason:\n" + ex.getMessage(),
 					     "Load Instances",
 					     0,
@@ -1314,7 +1005,7 @@ public class PreprocessPanel
 					     new String[] {"OK", "Use Converter"},
 					     null) == 1) {
 	    
-	      converterQuery(f);
+	      converterQuery(loader.retrieveFile());
 	    }
 	  }
 	  m_IOThread = null;
@@ -1388,10 +1079,11 @@ public class PreprocessPanel
 
 	  try {
 	    m_Log.statusMessage("Reading from URL...");
-	    Reader r = new BufferedReader(
-		       new InputStreamReader(u.openStream()));
-	    setInstances(new Instances(r));
-	    r.close();
+	    AbstractFileLoader loader = ConverterUtils.getURLLoaderForFile(u.toString());
+	    if (loader == null)
+	      throw new Exception("No suitable URLSourcedLoader found for URL!\n" + u);
+	    ((URLSourcedLoader) loader).setURL(u.toString());
+	    setInstances(loader.getDataSet());
 	  } catch (Exception ex) {
 	    ex.printStackTrace();
 	    m_Log.statusMessage("Problem reading " + u);
@@ -1463,7 +1155,7 @@ public class PreprocessPanel
     
     if (m_tempUndoFiles[m_tempUndoIndex] != null) {
       // load instances from the temporary file
-      setInstancesFromFile(m_tempUndoFiles[m_tempUndoIndex]);
+      setInstancesFromFile(ConverterUtils.getLoaderForFile(m_tempUndoFiles[m_tempUndoIndex]));
 
       // update undo file list
       m_tempUndoFiles[m_tempUndoIndex] = null;
