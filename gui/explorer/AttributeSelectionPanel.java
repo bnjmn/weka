@@ -100,7 +100,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -578,7 +578,10 @@ public class AttributeSelectionPanel
     m_StartBut.setEnabled(m_RunThread == null);
     m_StopBut.setEnabled(m_RunThread != null);
     m_ClassCombo.setModel(new DefaultComboBoxModel(attribNames));
-    m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+    if (inst.classIndex() == -1)
+      m_ClassCombo.setSelectedIndex(attribNames.length - 1);
+    else
+      m_ClassCombo.setSelectedIndex(inst.classIndex());
     m_ClassCombo.setEnabled(true);
   }
   
