@@ -18,22 +18,21 @@
  * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core;
+package weka.core.converters;
 
 import weka.test.WekaTestSuite;
 
 import java.util.Vector;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Test class for all core classes. Run from the command line with: <p/>
- * java weka.core.AllTests
+ * Test class for converter classes. Run from the command line with: <p/>
+ * java weka.core.converter.AllTests
  *
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.1 $
  */
 public class AllTests 
   extends WekaTestSuite {
@@ -46,17 +45,11 @@ public class AllTests
   public static Test suite() {
     TestSuite suite = new TestSuite();
     
-    // all test in core package
+    // all tests in converter package
     Vector packages = new Vector();
-    packages.add("weka.core");
-    suite.addTest(suite(TestCase.class.getName(), packages));
-
-    // all OptionHandler's
-    // TODO: fix all errors
-    //suite.addTest(OptionHandlersTest.suite());
+    packages.add("weka.core.converters");
+    suite.addTest(suite(AbstractConverterTest.class.getName(), packages));
     
-    suite.addTest(weka.core.converters.AllTests.suite());
-
     return suite;
   }
 
@@ -69,3 +62,4 @@ public class AllTests
     junit.textui.TestRunner.run(suite());
   }
 }
+

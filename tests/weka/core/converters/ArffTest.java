@@ -18,54 +18,64 @@
  * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core;
-
-import weka.test.WekaTestSuite;
-
-import java.util.Vector;
+package weka.core.converters;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Test class for all core classes. Run from the command line with: <p/>
- * java weka.core.AllTests
+ * Tests ArffLoader/ArffSaver. Run from the command line with:<p/>
+ * java weka.core.converters.ArffTest
  *
- * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.1 $
  */
-public class AllTests 
-  extends WekaTestSuite {
+public class ArffTest 
+  extends AbstractFileConverterTest {
 
   /**
-   * generates all the tests
-   * 
-   * @return		all the tests
+   * Constructs the <code>ArffTest</code>.
+   *
+   * @param name the name of the test class
    */
-  public static Test suite() {
-    TestSuite suite = new TestSuite();
-    
-    // all test in core package
-    Vector packages = new Vector();
-    packages.add("weka.core");
-    suite.addTest(suite(TestCase.class.getName(), packages));
-
-    // all OptionHandler's
-    // TODO: fix all errors
-    //suite.addTest(OptionHandlersTest.suite());
-    
-    suite.addTest(weka.core.converters.AllTests.suite());
-
-    return suite;
+  public ArffTest(String name) { 
+    super(name);  
   }
 
   /**
-   * for running the tests from commandline
+   * returns the loader used in the tests
    * 
-   * @param args	the commandline arguments - ignored
+   * @return the configured loader
    */
-  public static void main(String []args) {
+  public AbstractLoader getLoader() {
+    return new ArffLoader();
+  }
+
+  /**
+   * returns the saver used in the tests
+   * 
+   * @return the configured saver
+   */
+  public AbstractSaver getSaver() {
+    return new ArffSaver();
+  }
+
+  /**
+   * returns a test suite
+   * 
+   * @return the test suite
+   */
+  public static Test suite() {
+    return new TestSuite(ArffTest.class);
+  }
+
+  /**
+   * for running the test from commandline
+   * 
+   * @param args the commandline arguments - ignored
+   */
+  public static void main(String[] args){
     junit.textui.TestRunner.run(suite());
   }
 }
+
