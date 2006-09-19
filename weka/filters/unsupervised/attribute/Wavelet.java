@@ -109,7 +109,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Wavelet
   extends SimpleBatchFilter 
@@ -577,23 +577,6 @@ public class Wavelet
     throws Exception {
 
     return pad(new Instances(inputFormat, 0));
-  }
-
-  /**
-   * Runs the given instance through the filters used before the PLS regression
-   * is done.
-   * Note: process (or batchFinished()) must have been called first to
-   * initialize the filters.
-   * @param instance	the data to filter
-   * @return			the filtered instance
-   * @throws Exception	in case processing goes wrong
-   */
-  public Instance preprocess(Instance instance) throws Exception{
-    m_Filter.input(instance);
-    m_Filter.batchFinished();
-    instance = m_Filter.output();
-
-    return instance;
   }
   
   /**
