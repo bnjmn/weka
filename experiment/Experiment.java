@@ -29,6 +29,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.experiment.xml.XMLExperiment;
@@ -36,14 +38,11 @@ import weka.experiment.xml.XMLExperiment;
 import java.beans.PropertyDescriptor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -145,7 +144,7 @@ import javax.swing.DefaultListModel;
  * All options after -- will be passed to the result producer. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class Experiment 
   implements Serializable, OptionHandler {
@@ -520,12 +519,16 @@ public class Experiment
     
     if (m_CurrentInstances == null) {
       File currentFile = (File) getDatasets().elementAt(m_DatasetNumber);
-      Reader reader = new FileReader(currentFile);
-      Instances data = new Instances(new BufferedReader(reader));
-      if (m_ClassFirst) {
-	data.setClassIndex(0);
-      } else {
-	data.setClassIndex(data.numAttributes() - 1);
+      AbstractFileLoader loader = ConverterUtils.getLoaderForFile(currentFile);
+      loader.setFile(currentFile);
+      Instances data = new Instances(loader.getDataSet());
+      // only set class attribute if not already done by loader
+      if (data.classIndex() == -1) {
+	if (m_ClassFirst) {
+	  data.setClassIndex(0);
+	} else {
+	  data.setClassIndex(data.numAttributes() - 1);
+	}
       }
       m_CurrentInstances = data;
       m_ResultProducer.setInstances(m_CurrentInstances);
