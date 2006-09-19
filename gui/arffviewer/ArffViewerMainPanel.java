@@ -22,12 +22,11 @@
 
 package weka.gui.arffviewer;
 
+import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.converters.AbstractSaver;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.CSVSaver;
 import weka.gui.ComponentHelper;
-import weka.gui.ExtensionFileFilter;
+import weka.gui.ConverterFileChooser;
 import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
 
@@ -39,7 +38,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
@@ -66,7 +64,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -117,9 +115,7 @@ public class ArffViewerMainPanel
   protected JMenuItem             menuViewValues;
   protected JMenuItem             menuViewOptimalColWidths;
   
-  protected FileChooser           fileChooser;
-  protected ExtensionFileFilter   arffFilter;
-  protected ExtensionFileFilter   csvFilter;
+  protected ConverterFileChooser  fileChooser;
   protected String                frameTitle;
   protected boolean               confirmExit;
   protected int                   width;
@@ -150,13 +146,8 @@ public class ArffViewerMainPanel
     setLayout(new BorderLayout());
     
     // file dialog
-    arffFilter              = new ExtensionFileFilter("arff", "ARFF-Files");
-    csvFilter               = new ExtensionFileFilter("csv", "CSV-File");
-    fileChooser             = new FileChooser(new File(System.getProperty("user.dir")));
+    fileChooser = new ConverterFileChooser(new File(System.getProperty("user.dir")));
     fileChooser.setMultiSelectionEnabled(true);
-    fileChooser.addChoosableFileFilter(arffFilter);
-    fileChooser.addChoosableFileFilter(csvFilter);
-    fileChooser.setFileFilter(arffFilter);
     
     // menu
     menuBar        = new JMenuBar();
@@ -615,7 +606,7 @@ public class ArffViewerMainPanel
     String            filename;
     
     retVal = fileChooser.showOpenDialog(this);
-    if (retVal != FileChooser.APPROVE_OPTION)
+    if (retVal != ConverterFileChooser.APPROVE_OPTION)
       return;
     
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -646,26 +637,15 @@ public class ArffViewerMainPanel
       saveFileAs();
     }
     else {
-      if (fileChooser.getFileFilter() == arffFilter)
-        saver = new ArffSaver();
-      else if (fileChooser.getFileFilter() == csvFilter)
-        saver = new CSVSaver();
-      else
-        saver = null;
-      
-      if (saver != null) {
-        try {
-          saver.setRetrieval(AbstractSaver.BATCH);
-          saver.setInstances(panel.getInstances());
-          saver.setFile(fileChooser.getSelectedFile());
-          saver.setDestination(fileChooser.getSelectedFile());
-          saver.writeBatch();
-          panel.setChanged(false);
-          setCurrentFilename(filename);
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
+      saver = fileChooser.getSaver();
+      try {
+	saver.setInstances(panel.getInstances());
+	saver.writeBatch();
+	panel.setChanged(false);
+	setCurrentFilename(filename);
+      }
+      catch (Exception e) {
+	e.printStackTrace();
       }
     }
   }
@@ -693,8 +673,16 @@ public class ArffViewerMainPanel
       }
     }
     
+    // set filter for savers
+    try {
+      fileChooser.setCapabilitiesFilter(Capabilities.forInstances(panel.getInstances()));
+    }
+    catch (Exception e) {
+      fileChooser.setCapabilitiesFilter(null);
+    }
+
     retVal = fileChooser.showSaveDialog(this);
-    if (retVal != FileChooser.APPROVE_OPTION)
+    if (retVal != ConverterFileChooser.APPROVE_OPTION)
       return;
     
     panel.setChanged(false);
