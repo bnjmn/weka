@@ -22,11 +22,13 @@
 
 package weka.core.converters;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.SingleIndex;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -46,20 +48,20 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -C &lt;int&gt;
- *  The class index
- *  (default: last)</pre>
- * 
  * <pre> -i &lt;the input file&gt;
  *  The input file</pre>
  * 
  * <pre> -o &lt;the output file&gt;
  *  The output file</pre>
  * 
+ * <pre> -c &lt;class index&gt;
+ *  The class index
+ *  (default: last)</pre>
+ * 
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
 public class LibSVMSaver 
@@ -105,15 +107,15 @@ public class LibSVMSaver
     
     result = new Vector();
     
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
+    
     result.addElement(
         new Option(
             "\tThe class index\n"
             + "\t(default: last)",
-            "C", 1, "-C <int>"));
-    
-    Enumeration en = super.listOptions();
-    while (en.hasMoreElements())
-      result.addElement(en.nextElement());
+            "c", 1, "-c <class index>"));
     
     return result.elements();
   }
@@ -130,7 +132,7 @@ public class LibSVMSaver
 
     result = new Vector();
 
-    result.add("-C");
+    result.add("-c");
     result.add(getClassIndex());
 
     options = super.getOptions();
@@ -146,15 +148,15 @@ public class LibSVMSaver
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -C &lt;int&gt;
-   *  The class index
-   *  (default: last)</pre>
-   * 
    * <pre> -i &lt;the input file&gt;
    *  The input file</pre>
    * 
    * <pre> -o &lt;the output file&gt;
    *  The output file</pre>
+   * 
+   * <pre> -c &lt;class index&gt;
+   *  The class index
+   *  (default: last)</pre>
    * 
    <!-- options-end -->
    *
@@ -166,7 +168,7 @@ public class LibSVMSaver
     
     super.setOptions(options);
 
-    tmpStr = Utils.getOption('C', options);
+    tmpStr = Utils.getOption('c', options);
     if (tmpStr.length() != 0)
       setClassIndex(tmpStr);
     else
@@ -216,6 +218,28 @@ public class LibSVMSaver
    */
   public void setClassIndex(String value) {
     m_ClassIndex.setSingleIndex(value);
+  }
+
+  /** 
+   * Returns the Capabilities of this saver.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    
+    return result;
   }
   
   /**
@@ -372,33 +396,7 @@ public class LibSVMSaver
    *
    * @param args 	should contain the options of a Saver.
    */
-  public static void main(String [] args) {
-    StringBuffer text = new StringBuffer();
-    try{
-      LibSVMSaver saver = new LibSVMSaver();
-      text.append(
-	  "\n\n" 
-	  + saver.getClass().getName().replaceAll(".*\\.", "") 
-	  + " options:\n\n");
-      Enumeration enm = saver.listOptions();
-      while (enm.hasMoreElements()) {
-	Option option = (Option) enm.nextElement();
-	text.append(option.synopsis() + "\n");
-	text.append(option.description() + "\n");
-      }
-      
-      try {
-	saver.setOptions(args);  
-      }
-      catch (Exception e) {
-	System.out.println("\n" + text);
-	System.exit(1);
-      }
-      
-      saver.writeBatch();
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
+  public static void main(String[] args) {
+    runFileSaver(new LibSVMSaver(), args);
   }
 }
