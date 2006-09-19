@@ -26,9 +26,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -40,12 +37,12 @@ import java.io.ObjectInputStream;
  <!-- globalinfo-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see Loader
  */
 public class SerializedInstancesLoader 
-  extends AbstractLoader 
-  implements FileSourcedConverter, BatchConverter, IncrementalConverter {
+  extends AbstractFileLoader 
+  implements BatchConverter, IncrementalConverter {
 
   /** for serialization */
   static final long serialVersionUID = 2391085836269030715L;
@@ -53,10 +50,6 @@ public class SerializedInstancesLoader
   /** the file extension */
   public static String FILE_EXTENSION = 
     Instances.SERIALIZED_OBJ_FILE_EXTENSION;
-
-  /** the file */
-  protected String m_File = 
-    (new File(System.getProperty("user.dir"))).getAbsolutePath();
   
   /** Holds the structure (header) of the data set. */
   protected Instances m_Dataset = null;
@@ -91,54 +84,21 @@ public class SerializedInstancesLoader
   }
 
   /**
+   * Gets all the file extensions used for this type of file
+   *
+   * @return the file extensions
+   */
+  public String[] getFileExtensions() {
+    return new String[]{getFileExtension()};
+  }
+
+  /**
    * Returns a description of the file type.
    *
    * @return a short file description
    */
   public String getFileDescription() {
     return "Binary serialized instances";
-  }
-
-  /**
-   * get the File specified as the source
-   *
-   * @return the source file
-   */
-  public File retrieveFile() {
-    return new File(m_File);
-  }
-
-  /**
-   * sets the source File
-   *
-   * @param file the source file
-   * @throws IOException if an error occurs
-   */
-  public void setFile(File file) throws IOException {
-    m_File = file.getAbsolutePath();
-    setSource(file);
-  }
-
-  /**
-   * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
-   *
-   * @param file the source file.
-   * @throws IOException if an error occurs
-   */
-  public void setSource(File file) throws IOException {
-
-    reset();
-
-    if (file == null) {
-      throw new IOException("Source file object is null!");
-    }
-
-    try {
-      setSource(new FileInputStream(file));
-    } catch (FileNotFoundException ex) {
-      throw new IOException("File not found");
-    }
   }
 
   /**
@@ -224,27 +184,7 @@ public class SerializedInstancesLoader
    *
    * @param args should contain the name of an input file.
    */
-  public static void main(String [] args) {
-
-    if (args.length > 0) {
-      File inputfile;
-      inputfile = new File(args[0]);
-      try {
-	SerializedInstancesLoader lo = new SerializedInstancesLoader();
-	lo.setSource(inputfile);
-	System.out.println(lo.getStructure());
-	Instance temp;
-	do {
-	  temp = lo.getNextInstance();
-	  if (temp != null) {
-	    System.out.println(temp);
-	  }
-	} while (temp != null);
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
-    } else {
-      System.err.println("Usage:\n\tSerializedInstancesLoader <file>\n");
-    }
+  public static void main(String[] args) {
+    runFileLoader(new SerializedInstancesLoader(), args);
   }
 }
