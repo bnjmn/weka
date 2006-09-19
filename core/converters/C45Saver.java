@@ -23,12 +23,14 @@
 package weka.core.converters;
 
 import weka.core.Attribute;
+import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +59,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Saver
  */
 public class C45Saver 
@@ -99,6 +101,30 @@ public class C45Saver
 
     super.resetOptions();
     setFileExtension(".names");
+  }
+
+  /** 
+   * Returns the Capabilities of this saver.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
+    return result;
   }
 
   /** Saves an instances incrementally. Structure has to be set by using the
@@ -184,7 +210,6 @@ public class C45Saver
           File namesFile = new File(out);
           try{
             setFile(namesFile);
-            setDestination(namesFile);
           } catch(Exception ex){
             throw new IOException("Cannot create data file, only names file created.");
           }
@@ -305,9 +330,8 @@ public class C45Saver
       File namesFile = new File(out);
       try{
         setFile(namesFile);
-        setDestination(retrieveFile());
       } catch(Exception ex){
-          throw new IOException("Cannot create data file, only names file created.");
+          throw new IOException("Cannot create data file, only names file created (Reason: " + ex.toString() + ").");
       }
       if(retrieveFile() == null || getWriter() == null){
           throw new IOException("Cannot create data file, only names file created.");
@@ -353,19 +377,17 @@ public class C45Saver
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
+    FastVector result = new FastVector();
 
-    FastVector newVector = new FastVector(3);
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
 
-    newVector.addElement(new Option("The input file", "i", 1, 
-				    "-i <the input file>"));
+    result.addElement(new Option(
+	"The class index", 
+	"c", 1, "-c <the class index>"));
     
-    newVector.addElement(new Option("The output file", "o", 1, 
-				    "-o <the output file>"));
-    
-    newVector.addElement(new Option("The class index", "c", 1, 
-				    "-c <the class index>"));
-    
-    return newVector.elements();
+    return result.elements();
   }
 
  
@@ -398,53 +420,56 @@ public class C45Saver
     ArffLoader loader = new ArffLoader();
     
     resetOptions();
-    
-    if(inputString.length() != 0){
-        try{
-            File input = new File(inputString);
-            loader.setFile(input);
-            setInstances(loader.getDataSet());
-        } catch(Exception ex){
-            throw new IOException("No data set loaded. Data set has to be arff format.");
-        }
-    }
-    else
-        throw new IOException("No data set to save.");
-    if (outputString.length() != 0){ 
-        //add appropriate file extension
-        if(!outputString.endsWith(getFileExtension())){
-            if(outputString.lastIndexOf('.') != -1)
-                outputString = (outputString.substring(0,outputString.lastIndexOf('.'))) + getFileExtension();
-            else
-                outputString = outputString + getFileExtension();
-        }
-        try{
-            File output = new File(outputString);
-            setFile(output);
-        } catch(Exception ex){
-            throw new IOException("Cannot create output file.");
-        } finally{
-            setDestination(retrieveFile());
-        }
-    }
-    if(indexString.length() != 0){
-        if(indexString.equals("first"))
-            getInstances().setClassIndex(0);
-        else{
-            if(indexString.equals("last"))
-                getInstances().setClassIndex(getInstances().numAttributes()-1);
-            else{
-                int classIndex = Integer.parseInt(indexString);
-                if(classIndex >=0 && classIndex < getInstances().numAttributes())
-                    getInstances().setClassIndex(classIndex);
-                else
-                    throw new IOException("Invalid class index");
-            }
-        }
-    }
-    else
-        getInstances().setClassIndex(getInstances().numAttributes()-1);
 
+    // parse index
+    int index = -1;
+    if (indexString.length() != 0){
+      if(indexString.equals("first"))
+	index = 0;
+      else {
+	if (indexString.equals("last"))
+	  index = -1;
+	else
+	  index = Integer.parseInt(indexString);
+      }
+    }
+    
+    if (inputString.length() != 0){
+      try {
+	File input = new File(inputString);
+	loader.setFile(input);
+	Instances inst = loader.getDataSet();
+	if (index == -1)
+	  inst.setClassIndex(inst.numAttributes() - 1);
+	else
+	  inst.setClassIndex(index);
+	setInstances(inst);
+      } catch(Exception ex){
+	throw new IOException("No data set loaded. Data set has to be arff format (Reason: " + ex.toString() + ").");
+      }
+    }
+    else
+      throw new IOException("No data set to save.");
+
+    if (outputString.length() != 0){ 
+      //add appropriate file extension
+      if (!outputString.endsWith(getFileExtension())){
+	if (outputString.lastIndexOf('.') != -1)
+	  outputString = (outputString.substring(0,outputString.lastIndexOf('.'))) + getFileExtension();
+	else
+	  outputString = outputString + getFileExtension();
+      }
+      try {
+	File output = new File(outputString);
+	setFile(output);
+      } catch(Exception ex){
+	throw new IOException("Cannot create output file.");
+      }
+    }
+
+    if (index == -1)
+      index = getInstances().numAttributes() - 1;
+    getInstances().setClassIndex(index);
   }
 
   /**
@@ -481,42 +506,9 @@ public class C45Saver
   /**
    * Main method.
    *
-   * @param options should contain the options of a Saver.
+   * @param args should contain the options of a Saver.
    */
-  public static void main(String [] options) {
-      
-      StringBuffer text = new StringBuffer();
-      try {
-	C45Saver csv = new C45Saver();
-        text.append("\n\nC45Saver options:\n\n");
-        Enumeration enumi = csv.listOptions();
-        while (enumi.hasMoreElements()) {
-            Option option = (Option)enumi.nextElement();
-            text.append(option.synopsis()+'\n');
-            text.append(option.description()+'\n');
-        }
-        try {
-          csv.setOptions(options);  
-        } catch (Exception ex) {
-            System.out.println("\n"+text);
-            System.exit(1);
-	}
-        //incremental
-        /*
-        csv.setRetrieval(INCREMENTAL);
-        Instances instances = csv.getInstances();
-        csv.setStructure(instances);
-        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
-            csv.writeIncremental(instances.instance(i));
-        }
-        csv.writeIncremental(null);
-        */
-        
-        //batch
-        csv.writeBatch();
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	}
-      
-    }
+  public static void main(String[] args) {
+    runFileSaver(new C45Saver(), args);
+  }
 }
