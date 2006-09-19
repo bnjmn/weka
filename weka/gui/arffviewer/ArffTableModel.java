@@ -22,13 +22,12 @@
 
 package weka.gui.arffviewer;
 
-import weka.core.converters.AbstractLoader;
-import weka.core.converters.ArffLoader;
-import weka.core.converters.CSVLoader;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Undoable;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Reorder;
 import weka.gui.ComponentHelper;
@@ -41,21 +40,21 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
-import javax.swing.table.TableModel;
-import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 /**
  * The model for the Arff-Viewer.
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class ArffTableModel 
   implements TableModel, Undoable {
@@ -152,18 +151,13 @@ public class ArffTableModel
    * @param filename	the file to load
    */
   private void loadFile(String filename) {
-    AbstractLoader          loader;
+    AbstractFileLoader          loader;
     
-    if (filename.toLowerCase().endsWith(".arff"))
-      loader = new ArffLoader();
-    else if (filename.toLowerCase().endsWith(".csv"))
-      loader = new CSVLoader();
-    else
-      loader = null;
+    loader = ConverterUtils.getLoaderForFile(filename);
     
     if (loader != null) {
       try {
-        loader.setSource(new File(filename));
+        loader.setFile(new File(filename));
         data = loader.getDataSet();
       }
       catch (Exception e) {
