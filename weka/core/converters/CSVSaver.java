@@ -22,13 +22,13 @@
 
 package weka.core.converters;
 
+import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Option;
+import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Enumeration;
 
 /**
  <!-- globalinfo-start -->
@@ -48,7 +48,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Saver
  */
 public class CSVSaver 
@@ -92,6 +92,32 @@ public class CSVSaver
     setFileExtension(".csv");
   }
 
+  /** 
+   * Returns the Capabilities of this saver.
+   *
+   * @return            the capabilities of this object
+   * @see               Capabilities
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    
+    // attributes
+    result.enable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
+    
+    // class
+    result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.STRING_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
+  }
 
   /** Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method.
@@ -234,42 +260,9 @@ public class CSVSaver
   /**
    * Main method.
    *
-   * @param options should contain the options of a Saver.
+   * @param args should contain the options of a Saver.
    */
-  public static void main(String [] options) {
-      
-      StringBuffer text = new StringBuffer();
-      try {
-	CSVSaver csv = new CSVSaver();
-        text.append("\n\nCSVSaver options:\n\n");
-        Enumeration enumi = csv.listOptions();
-        while (enumi.hasMoreElements()) {
-            Option option = (Option)enumi.nextElement();
-            text.append(option.synopsis()+'\n');
-            text.append(option.description()+'\n');
-        }
-        try {
-          csv.setOptions(options);  
-        } catch (Exception ex) {
-            System.out.println("\n"+text);
-            System.exit(1);
-	}
-        //incremental
-        /*
-        csv.setRetrieval(INCREMENTAL);
-        Instances instances = csv.getInstances();
-        csv.setStructure(instances);
-        for(int i = 0; i < instances.numInstances(); i++){ //last instance is null and finishes incremental saving
-            csv.writeIncremental(instances.instance(i));
-        }
-        csv.writeIncremental(null);
-        */
-        
-        //batch
-        csv.writeBatch();
-      } catch (Exception ex) {
-	ex.printStackTrace();
-	}
-      
-    }
+  public static void main(String[] args) {
+    runFileSaver(new CSVSaver(), args);
+  }
 }
