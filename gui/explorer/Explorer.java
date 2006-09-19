@@ -25,6 +25,7 @@ package weka.gui.explorer;
 
 import weka.core.Capabilities;
 import weka.core.Memory;
+import weka.core.converters.ConverterUtils;
 import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
@@ -37,7 +38,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EventListener;
@@ -53,7 +53,7 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class Explorer extends JPanel {
 
@@ -275,7 +275,7 @@ public class Explorer extends JPanel {
 
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
-        m_explorer.m_PreprocessPanel.setInstancesFromFile(new File(args[0]));
+        m_explorer.m_PreprocessPanel.setInstancesFromFile(ConverterUtils.getLoaderForFile(args[0]));
       }
 
       Thread memMonitor = new Thread() {
