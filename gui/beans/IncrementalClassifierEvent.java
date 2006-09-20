@@ -22,16 +22,17 @@
 
 package weka.gui.beans;
 
-import weka.core.Instances;
-import weka.core.Instance;
 import weka.classifiers.Classifier;
+import weka.core.Instance;
+import weka.core.Instances;
+
 import java.util.EventObject;
 
 /**
  * Class encapsulating an incrementally built classifier and current instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see EventObject
  */
@@ -51,7 +52,8 @@ public class IncrementalClassifierEvent extends EventObject {
    *
    * @param source the source of the event
    * @param scheme the classifier
-   * @param tstI the current instance
+   * @param currentI the current instance
+   * @param status the status
    */
   public IncrementalClassifierEvent(Object source, Classifier scheme,
 			 Instance currentI, int status) {

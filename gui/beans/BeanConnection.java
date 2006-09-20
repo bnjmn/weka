@@ -22,24 +22,23 @@
 
 package weka.gui.beans;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.BeanInfo;
+import java.beans.EventSetDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Vector;
-import java.beans.Beans;
-import java.beans.EventSetDescriptor;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.IntrospectionException;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Color;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+
 import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
 
@@ -48,7 +47,7 @@ import javax.swing.SwingConstants;
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class BeanConnection implements Serializable {
 
@@ -567,7 +566,6 @@ public class BeanConnection implements Serializable {
    * @param source the source bean
    * @param target the target bean
    * @param esd the EventSetDescriptor for the connection
-   * @param displayComponent the component on which the connection will
    * be displayed
    */
   public BeanConnection(BeanInstance source, BeanInstance target,

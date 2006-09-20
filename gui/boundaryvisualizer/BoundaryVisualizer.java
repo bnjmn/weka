@@ -22,36 +22,51 @@
 
 package weka.gui.boundaryvisualizer;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import javax.swing.JPanel;
-import javax.swing.JComboBox;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JTextField;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JLabel;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
-import javax.swing.BoxLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.util.Vector;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-
-import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.gui.visualize.ClassPanel;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
-import weka.gui.ExtensionFileFilter;
+import weka.gui.visualize.ClassPanel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 
 /**
  * BoundaryVisualizer. Allows the visualization of classifier decision
@@ -76,7 +91,7 @@ import java.awt.Dimension;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.0
  * @see JPanel 
  */
@@ -963,9 +978,9 @@ public class BoundaryVisualizer extends JPanel {
   }
   
   /** Sets up the BoundaryPanel object so that it is ready for plotting.
-   *	@returns an error code:
-   *		0 - SUCCESS
-   *		1 - ERROR - Kernel bandwidth < 0
+   * @return an error code:<br/>
+   *		0 - SUCCESS<br/>
+   *		1 - ERROR - Kernel bandwidth < 0<br/>
    *		2 - ERROR - Kernel bandwidth >= number of training instances.
    */
   public int setUpBoundaryPanel() throws Exception {
