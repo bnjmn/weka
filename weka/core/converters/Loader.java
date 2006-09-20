@@ -34,7 +34,7 @@ import weka.core.Instance;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public interface Loader extends Serializable {
 
@@ -43,7 +43,7 @@ public interface Loader extends Serializable {
    * If there is an existing source, implementations should
    * attempt to reset in such a fashion as to be able to
    * load from the beginning of the source.
-   * @exception if Loader can't be reset for some reason.
+   * @exception Exception if Loader can't be reset for some reason.
    */
   void reset() throws Exception;
 

@@ -144,7 +144,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -1165,7 +1165,7 @@ public class XMeans
    * @param variance variance of the cluster 
    * @param model data model valid
    * @return a pair of new centers
-   * @throws something in AlgVector goes wrong
+   * @throws Exception something in AlgVector goes wrong
    */
   protected Instances splitCenter(Random random,
 			        Instance center,
@@ -1457,7 +1457,7 @@ throws Exception{
    * @param instance the instance to be assigned to a cluster
    * @return the number of the assigned cluster as an integer
    * if the class is enumerated, otherwise the predicted value
-   * @throws if instance could not be classified
+   * @throws Exception if instance could not be classified
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
@@ -1739,9 +1739,9 @@ throws Exception{
   }
 
   /**
-   * Sets the distance e value between true and false of binary attributes 
+   * Sets the distance value between true and false of binary attributes 
    * and  "same" and "different" of nominal attributes    
-   * @param double value
+   * @param value the distance
    */
   public void setBinValue(double value) {
     m_BinValue = value;
@@ -2326,7 +2326,6 @@ throws Exception{
   /**
    * Print centers for debug.
    * @param debugLevel level that gives according messages
-   * @return true if debug level is set
    */
   protected void PrCentersFD(int debugLevel) {
     if (debugLevel == m_DebugLevel) {
@@ -2356,7 +2355,6 @@ throws Exception{
   }
   /**
    * Does debug printouts.
-   * @param debugLevel level that gives according messages
    * @param output string that is printed
    */
   protected void PFD_CURR(String output) {

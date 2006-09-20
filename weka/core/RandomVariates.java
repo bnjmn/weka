@@ -29,7 +29,7 @@ import java.util.Random;
  * Class implementing some simple random variates generator.
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public final class RandomVariates extends Random{
     
@@ -75,7 +75,7 @@ public final class RandomVariates extends Random{
      *
      * @param a the shape parameter, must be no less than 1
      * @return a value of the variate
-     * @exception if parameter less than 1
+     * @exception Exception if parameter less than 1
      */
     public double nextErlang(int a) throws Exception{
 	if(a<1)
@@ -106,7 +106,7 @@ public final class RandomVariates extends Random{
      *
      * @param a the shape parameter, must be greater than 1
      * @return a value of the variate
-     * @exception if parameter not greater than 1
+     * @exception Exception if parameter not greater than 1
      */
     public double nextGamma(double a) throws Exception{
 	if(a<=0.0)

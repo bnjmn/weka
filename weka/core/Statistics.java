@@ -17,7 +17,7 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Statistics {
 
@@ -130,7 +130,7 @@ public class Statistics {
    * will be greater than x for the given degrees of freedom.)
    *
    * @param x the value
-   * @param df the number of degrees of freedom
+   * @param v the number of degrees of freedom
    * @return the chi-squared probability
    */
   public static double chiSquaredProbability(double x, double v) { 

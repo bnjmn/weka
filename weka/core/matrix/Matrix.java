@@ -77,7 +77,7 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
 */
 
 public class Matrix 
@@ -127,7 +127,7 @@ public class Matrix
   /** 
    * Construct a matrix from a 2-D array.
    * @param A    Two-dimensional array of doubles.
-   * @exception  IllegalArgumentException All rows must have the same length
+   * @throws  IllegalArgumentException All rows must have the same length
    * @see        #constructWithCopy
    */
   public Matrix(double[][] A) {
@@ -158,7 +158,7 @@ public class Matrix
    * @param vals One-dimensional array of doubles, packed by columns (ala
    * Fortran).
    * @param m    Number of rows.
-   * @exception  IllegalArgumentException Array length must be a multiple of m.
+   * @throws  IllegalArgumentException Array length must be a multiple of m.
    */
   public Matrix(double vals[], int m) {
     this.m = m;
@@ -178,11 +178,11 @@ public class Matrix
    * Reads a matrix from a reader. The first line in the file should
    * contain the number of rows and columns. Subsequent lines
    * contain elements of the matrix.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     r the reader containing the matrix
    * @throws    Exception if an error occurs
    * @see       #write(Writer)
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public Matrix(Reader r) throws Exception {
     LineNumberReader lnr = new LineNumberReader(r);
@@ -241,7 +241,7 @@ public class Matrix
   /** 
    * Construct a matrix from a copy of a 2-D array.
    * @param A    Two-dimensional array of doubles.
-   * @exception  IllegalArgumentException All rows must have the same length
+   * @throws  IllegalArgumentException All rows must have the same length
    */
   public static Matrix constructWithCopy(double[][] A) {
     int m = A.length;
@@ -352,7 +352,7 @@ public class Matrix
    * @param i    Row index.
    * @param j    Column index.
    * @return     A(i,j)
-   * @exception  ArrayIndexOutOfBoundsException
+   * @throws  ArrayIndexOutOfBoundsException
    */
   public double get(int i, int j) {
     return A[i][j];
@@ -365,7 +365,7 @@ public class Matrix
    * @param j0   Initial column index
    * @param j1   Final column index
    * @return     A(i0:i1,j0:j1)
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int i0, int i1, int j0, int j1) {
     Matrix X = new Matrix(i1-i0+1,j1-j0+1);
@@ -387,7 +387,7 @@ public class Matrix
    * @param r    Array of row indices.
    * @param c    Array of column indices.
    * @return     A(r(:),c(:))
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int[] r, int[] c) {
     Matrix X = new Matrix(r.length,c.length);
@@ -410,7 +410,7 @@ public class Matrix
    * @param i1   Final row index
    * @param c    Array of column indices.
    * @return     A(i0:i1,c(:))
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int i0, int i1, int[] c) {
     Matrix X = new Matrix(i1-i0+1,c.length);
@@ -430,10 +430,10 @@ public class Matrix
   /** 
    * Get a submatrix.
    * @param r    Array of row indices.
-   * @param i0   Initial column index
-   * @param i1   Final column index
+   * @param j0   Initial column index
+   * @param j1   Final column index
    * @return     A(r(:),j0:j1)
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public Matrix getMatrix(int[] r, int j0, int j1) {
     Matrix X = new Matrix(r.length,j1-j0+1);
@@ -455,7 +455,7 @@ public class Matrix
    * @param i    Row index.
    * @param j    Column index.
    * @param s    A(i,j).
-   * @exception  ArrayIndexOutOfBoundsException
+   * @throws  ArrayIndexOutOfBoundsException
    */
   public void set(int i, int j, double s) {
     A[i][j] = s;
@@ -468,7 +468,7 @@ public class Matrix
    * @param j0   Initial column index
    * @param j1   Final column index
    * @param X    A(i0:i1,j0:j1)
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int i0, int i1, int j0, int j1, Matrix X) {
     try {
@@ -487,7 +487,7 @@ public class Matrix
    * @param r    Array of row indices.
    * @param c    Array of column indices.
    * @param X    A(r(:),c(:))
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int[] r, int[] c, Matrix X) {
     try {
@@ -507,7 +507,7 @@ public class Matrix
    * @param j0   Initial column index
    * @param j1   Final column index
    * @param X    A(r(:),j0:j1)
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int[] r, int j0, int j1, Matrix X) {
     try {
@@ -527,7 +527,7 @@ public class Matrix
    * @param i1   Final row index
    * @param c    Array of column indices.
    * @param X    A(i0:i1,c(:))
-   * @exception  ArrayIndexOutOfBoundsException Submatrix indices
+   * @throws  ArrayIndexOutOfBoundsException Submatrix indices
    */
   public void setMatrix(int i0, int i1, int[] c, Matrix X) {
     try {
@@ -543,9 +543,9 @@ public class Matrix
   
   /**
    * Returns true if the matrix is symmetric.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @return boolean true if matrix is symmetric.
-   * @author FracPete, taken from old weka.core.Matrix class
    */
   public boolean isSymmetric() {
     int nr = A.length, nc = A[0].length;
@@ -565,7 +565,6 @@ public class Matrix
    * returns whether the matrix is a square matrix or not.
    *
    * @return true if the matrix is a square matrix
-   * @author FracPete
    */
   public boolean isSquare() {
     return (getRowDimension() == getColumnDimension());
@@ -849,7 +848,7 @@ public class Matrix
    * Linear algebraic matrix multiplication, A * B
    * @param B    another matrix
    * @return     Matrix product, A * B
-   * @exception  IllegalArgumentException Matrix inner dimensions must agree.
+   * @throws  IllegalArgumentException Matrix inner dimensions must agree.
    */
   public Matrix times(Matrix B) {
     if (B.m != n) {
@@ -1000,7 +999,6 @@ public class Matrix
    * </ol>
    *
    * @return    sqrt(A)
-   * @author    FracPete
    */
   public Matrix sqrt() {
     EigenvalueDecomposition   evd;
@@ -1062,12 +1060,12 @@ public class Matrix
 
   /**
    * Performs a (ridged) linear regression.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     y the dependent variable vector
    * @param     ridge the ridge parameter
    * @return    the coefficients 
    * @throws    IllegalArgumentException if not successful
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public LinearRegression regression(Matrix y, double ridge) {
     return new LinearRegression(this, y, ridge);
@@ -1075,6 +1073,7 @@ public class Matrix
 
   /**
    * Performs a weighted (ridged) linear regression. 
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     y the dependent variable vector
    * @param     w the array of data point weights
@@ -1082,7 +1081,6 @@ public class Matrix
    * @return    the coefficients 
    * @throws    IllegalArgumentException if the wrong number of weights were
    *            provided.
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public final LinearRegression regression(Matrix y, double[] w, double ridge) {
     return new LinearRegression(this, y, w, ridge);
@@ -1242,7 +1240,7 @@ public class Matrix
    * is used (from the original weka.core.Matrix class).
    *
    * @param input the input stream.
-   * @see Matrix(Reader)
+   * @see #Matrix(Reader)
    * @see #write(Writer)
    */
   public static Matrix read(BufferedReader input) throws java.io.IOException {
@@ -1305,11 +1303,11 @@ public class Matrix
   /**
    * Writes out a matrix. The format can be read via the Matrix(Reader)
    * constructor.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     w the output Writer
    * @throws    Exception if an error occurs
-   * @see       Matrix(Reader)
-   * @author    FracPete, taken from old weka.core.Matrix class
+   * @see       #Matrix(Reader)
    */
   public void write(Writer w) throws Exception {
     w.write("% Rows\tColumns\n");
@@ -1324,10 +1322,10 @@ public class Matrix
   }
 
   /** 
-   * Converts a matrix to a string
+   * Converts a matrix to a string.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @return    the converted string
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public String toString() {
     // Determine the width required for the maximum element,

@@ -32,7 +32,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MahalanobisEstimator extends Estimator implements IncrementalEstimator {
   
@@ -76,7 +76,9 @@ public class MahalanobisEstimator extends Estimator implements IncrementalEstima
   /**
    * Constructor
    *
-   * @param the number of possible symbols
+   * @param covariance
+   * @param constDelta
+   * @param valueMean
    */
   public MahalanobisEstimator(Matrix covariance, double constDelta,
       double valueMean) {

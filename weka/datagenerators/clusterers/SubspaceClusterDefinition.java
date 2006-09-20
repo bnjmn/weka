@@ -66,7 +66,7 @@ import java.util.Vector;
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see SubspaceCluster
  */
 public class SubspaceClusterDefinition 
@@ -739,7 +739,7 @@ public class SubspaceClusterDefinition
    *
    * @param fromToList the string containing the upper and lower boundary for
    * instances per cluster separated by ..
-   * @throws if values are not correct in number or value
+   * @throws Exception if values are not correct in number or value
    */
   public void setValuesList(String fromToList) throws Exception {
     m_minValue = new double [m_numClusterAttributes];
@@ -821,7 +821,7 @@ public class SubspaceClusterDefinition
    *
    * @param meanstddev the string containing the upper and lower boundary for
    * instances per cluster separated by ..
-   * @throws if values are not correct in number or value
+   * @throws Exception if values are not correct in number or value
    */
   public void setMeanStddev(String meanstddev) throws Exception {
     m_meanValue   = new double [m_numClusterAttributes];
@@ -866,7 +866,7 @@ public class SubspaceClusterDefinition
    * @param first the "from's"
    * @param second the "to's"
    * @param optionLetter the option, from which the list came
-   * @throws if values are not correct in number or value
+   * @throws Exception if values are not correct in number or value
    */
   public void setValuesList(String fromToList, double[] first, double[] second, 
       String optionLetter) throws Exception {

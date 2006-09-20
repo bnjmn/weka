@@ -35,7 +35,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class EigenvalueDecomposition 
@@ -879,8 +879,7 @@ public class EigenvalueDecomposition
   /** 
    * Check for symmetry, then construct the eigenvalue decomposition
    *
-   * @param A    Square matrix
-   * @return     Structure to access D and V.
+   * @param Arg    Square matrix
    */
   public EigenvalueDecomposition(Matrix Arg) {
     double[][] A = Arg.getArray();

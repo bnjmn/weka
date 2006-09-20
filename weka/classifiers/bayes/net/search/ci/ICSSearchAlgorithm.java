@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */ 
 public class ICSSearchAlgorithm 
     extends CISearchAlgorithm {
@@ -135,7 +135,6 @@ public class ICSSearchAlgorithm
 	 * Search for Bayes network structure using ICS algorithm
 	 * @param bayesNet datastructure to build network structure for
 	 * @param instances data set to learn from
-	 * @see weka.classifiers.bayes.SearchAlgorithm#search(BayesNet, Instances)
 	 * @throws Exception if something goes wrong
 	 */
 	protected void search(BayesNet bayesNet, Instances instances) throws Exception {

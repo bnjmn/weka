@@ -63,7 +63,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.65 $ 
+ * @version $Revision: 1.66 $ 
  */
 public class Instances 
   implements Serializable {
@@ -463,7 +463,6 @@ public class Instances
    * @param attType the attribute type to delete
    * @throws IllegalArgumentException if attribute couldn't be 
    * successfully deleted (probably because it is the class attribute).
-   * @see #deleteStringAttribute(int)
    */
   public void deleteAttributeType(int attType) {
     int i = 0;
@@ -1964,7 +1963,7 @@ public class Instances
    *
    * @param theMsg the error message to be thrown
    * @param tokenizer the stream tokenizer
-   * @throws IOExcpetion containing the error message
+   * @throws IOException containing the error message
    */
   protected void errms(StreamTokenizer tokenizer, String theMsg) 
        throws IOException {
@@ -2097,8 +2096,8 @@ public class Instances
    * kthSmallestValue.
    *
    * @param attIndex the attribute's index (index starts with 0)
-   * @param left the first index of the subset (index starts with 0)
-   * @param right the last index of the subset (index starts with 0)
+   * @param l the first index of the subset (index starts with 0)
+   * @param r the last index of the subset (index starts with 0)
    *
    * @return the index of the middle element
    */
@@ -2477,7 +2476,7 @@ public class Instances
    * Main method for this class -- just prints a summary of a set
    * of instances.
    *
-   * @param argv should contain one element: the name of an ARFF file
+   * @param args should contain one element: the name of an ARFF file
    */
   public static void main(String [] args) {
 

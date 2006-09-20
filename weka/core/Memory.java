@@ -32,7 +32,7 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.4 $
+ * @version   $Revision: 1.5 $
  * @see       #setEnabled(boolean)
  */
 public class Memory {
@@ -150,7 +150,7 @@ public class Memory {
    * otherwise nothing happens. isOutOfMemory() has to be called beforehand,
    * since it sets all the memory parameters.
    * @see #isOutOfMemory()
-   * @see #ENABLED
+   * @see #m_Enabled
    */
   public void showOutOfMemory() {
     double        MB;

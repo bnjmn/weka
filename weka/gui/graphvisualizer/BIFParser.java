@@ -40,7 +40,7 @@ import org.w3c.dom.Element;
  * that are passed to it through the constructor.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.6 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public class BIFParser implements GraphConstants {
   
@@ -84,14 +84,14 @@ public class BIFParser implements GraphConstants {
    * This method parses the string or the InputStream that we
    * passed in through the constructor and builds up the
    * m_nodes and m_edges vectors
-   * @exception - Exception if both the inString and inStream are
+   * @exception Exception if both the inString and inStream are
    *              null, i.e. no input has been provided
-   * @exception - BIFFormatException if there is format of the
+   * @exception BIFFormatException if there is format of the
    *              input is not correct. The format should conform to
    *              XMLBIF version 0.3
-   * @exception - NumberFormatException if there is an invalid
+   * @exception NumberFormatException if there is an invalid
    *              char in the probability table of a node.
-   * @return    - returns the name of the graph
+   * @return    returns the name of the graph
    */
   public String parse() throws Exception {
     Document dc=null;
@@ -271,11 +271,11 @@ public class BIFParser implements GraphConstants {
    * However, if is reloaded in GraphVisualizer we would need to layout
    * the graph again to display it correctly.
    *
-   * @param filename  - The name of the file to write in. (will overwrite)
-   * @param graphName - The name of the graph. (will be the name of network
+   * @param filename  The name of the file to write in. (will overwrite)
+   * @param graphName The name of the graph. (will be the name of network
    * tag in XMLBIF)
-   * @param nodes     - Vector containing all the nodes
-   * @param edges     - Vector containing all the edges
+   * @param nodes     Vector containing all the nodes
+   * @param edges     Vector containing all the edges
    */
   public static void writeXMLBIF03(String filename, String graphName,
   FastVector nodes, FastVector edges) {

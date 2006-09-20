@@ -23,13 +23,12 @@
 
 package weka.experiment;
 
-import java.io.File;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
-import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * OutputZipper writes output to either gzipped files or to a
@@ -40,7 +39,7 @@ import java.util.zip.ZipEntry;
  * finished() is called to close the file.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class OutputZipper {
   
@@ -50,8 +49,9 @@ public class OutputZipper {
 
   /**
    * Constructor.
-   * @param a destination file or directory
-   * @exception Exception if something goes wrong.
+   * 
+   * @param destination a destination file or directory
+   * @throws Exception if something goes wrong.
    */
   public OutputZipper(File destination) throws Exception { 
 
@@ -68,9 +68,10 @@ public class OutputZipper {
   /**
    * Saves a string to either an individual gzipped file or as
    * an entry in a zip file.
+   * 
    * @param outString the output string to save
-   * @param the name of the file/entry to save it to
-   * @exception Exception if something goes wrong
+   * @param name the name of the file/entry to save it to
+   * @throws Exception if something goes wrong
    */
   public void zipit(String outString, String name) throws Exception {
     File saveFile;
@@ -94,7 +95,8 @@ public class OutputZipper {
 
   /**
    * Closes the zip file.
-   * @exception Exception if something goes wrong
+   * 
+   * @throws Exception if something goes wrong
    */
   public void finished() throws Exception {
     if (m_zipOut != null) {

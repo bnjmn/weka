@@ -306,7 +306,7 @@ public class XMLDocument {
    * DOM Document
    * @param xml the xml to parse (if "<?xml" is not found then it is considered a file)
    * @return the parsed DOM document
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public Document read(String xml) throws Exception {
     if (xml.toLowerCase().indexOf("<?xml") > -1)
@@ -319,7 +319,7 @@ public class XMLDocument {
    * parses the given file and returns a DOM document
    * @param file the XML file to parse
    * @return the parsed DOM document
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public Document read(File file) throws Exception {
     m_Document = getBuilder().parse(file);
@@ -330,7 +330,7 @@ public class XMLDocument {
    * parses the given stream and returns a DOM document
    * @param stream the XML stream to parse
    * @return the parsed DOM document
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public Document read(InputStream stream) throws Exception {
     m_Document = getBuilder().parse(stream);
@@ -341,7 +341,7 @@ public class XMLDocument {
    * parses the given reader and returns a DOM document
    * @param reader the XML reader to parse
    * @return the parsed DOM document
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public Document read(Reader reader) throws Exception {
     m_Document = getBuilder().parse(new InputSource(reader));
@@ -352,7 +352,7 @@ public class XMLDocument {
   /**
    * writes the current DOM document into the given file
    * @param file the filename to write to
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public void write(String file) throws Exception {
     write(new File(file));
@@ -361,7 +361,7 @@ public class XMLDocument {
   /**
    * writes the current DOM document into the given file
    * @param file the filename to write to
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public void write(File file) throws Exception {
     write(new BufferedWriter(new FileWriter(file)));
@@ -370,7 +370,7 @@ public class XMLDocument {
   /**
    * writes the current DOM document into the given stream
    * @param stream the filename to write to
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public void write(OutputStream stream) throws Exception {
     String		xml;
@@ -383,7 +383,7 @@ public class XMLDocument {
   /**
    * writes the current DOM document into the given writer
    * @param writer the filename to write to
-   * @throws if something goes wrong with the parsing
+   * @throws Exception if something goes wrong with the parsing
    */
   public void write(Writer writer) throws Exception {
     writer.write(toString());

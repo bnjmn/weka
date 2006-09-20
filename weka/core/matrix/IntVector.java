@@ -27,13 +27,15 @@ import java.util.Arrays;
  * A vector specialized on integers.
  * 
  * @author Yong Wang
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class  IntVector implements Cloneable {
 
-  int[]  V; // Array for internal storage of elements.
+  /** Array for internal storage of elements. */
+  int[]  V;
 
-  private int  sizeOfVector;      // size of the vector
+  /** size of the vector */
+  private int  sizeOfVector;
 
 
   /* ------------------------
@@ -88,9 +90,11 @@ public class  IntVector implements Cloneable {
     return sizeOfVector;
   }
     
-  /** Sets the size of the vector. The provided size can't be greater than
-   *  the capacity of the vector.
-   *  @return Size.  */
+  /** 
+   * Sets the size of the vector. The provided size can't be greater than
+   * the capacity of the vector.
+   * @param size the new Size.
+   */
   public void  setSize( int size ){
     if( size > capacity() ) 
       throw new IllegalArgumentException("insufficient capacity");
@@ -235,8 +239,7 @@ public class  IntVector implements Cloneable {
   }
 
   /** Returns a subvector as indexed by an IntVector.
-   *  @param i0   the index of the first element
-   *  @param i1   the index of the last element
+   *  @param index   the index
    *  @return the subvector
   */
   public IntVector  subvector( IntVector index ) {
@@ -277,8 +280,8 @@ public class  IntVector implements Cloneable {
   /** 
    *  Shifts an element to the end of the vector. Elements between them are
    *  shifted one position left.
-   *  @param i the index of the element
-   *  @param j the index of the new position */
+   *  @param j the index of the element
+   */
   public void  shiftToEnd( int j ){
     shift( j, size()-1 );
   }

@@ -22,9 +22,9 @@
 
 package weka.gui;
 
-import java.util.*;
-import java.lang.*;
-import java.io.*;
+import java.io.Serializable;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 
 /**
@@ -42,7 +42,7 @@ import java.io.*;
  * goToXXX() and information accessing functions).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class HierarchyPropertyParser implements Serializable{
 
@@ -406,7 +406,7 @@ public class HierarchyPropertyParser implements Serializable{
      * according to the given position <br>
      *
      * @param pos the position of the given child
-     * @exception if the position is out of range or leaf is reached
+     * @exception Exception if the position is out of range or leaf is reached
      */
     public synchronized void goToChild(int pos) throws Exception {
 	if((m_Current.children == null) || 

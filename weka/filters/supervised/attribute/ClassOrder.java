@@ -60,7 +60,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ClassOrder 
   extends Filter 
@@ -485,7 +485,7 @@ public class ClassOrder
    *
    * @param value the given value
    * @return the original internal value, -1 if not found
-   * @throws if the coverter table is not set yet
+   * @throws Exception if the coverter table is not set yet
    */
   public double originalValue(double value)throws Exception{
 

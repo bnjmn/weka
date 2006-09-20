@@ -89,7 +89,7 @@ import weka.core.Utils;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class Estimator 
 implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
@@ -147,7 +147,7 @@ implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
    *
    * @param data the dataset used to build this estimator 
    * @param attrIndex attribute the estimator is for
-   * @exception if building of estimator goes wrong
+   * @exception Exception if building of estimator goes wrong
    */
   public void addValues(Instances data, int attrIndex) throws Exception {
     // can estimator handle the data?
@@ -178,7 +178,7 @@ implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
    * @param min minimal border of range
    * @param max maximal border of range
    * @param factor number of instances has been reduced to that factor
-   * @exception if building of estimator goes wrong
+   * @exception Exception if building of estimator goes wrong
    */
   public void addValues(Instances data, int attrIndex,
 			double min, double max, double factor) throws Exception {
@@ -200,7 +200,7 @@ implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
    * @param attrIndex attribute the estimator is for
    * @param classIndex index of the class attribute
    * @param classValue the class value 
-   * @exception if building of estimator goes wrong
+   * @exception Exception if building of estimator goes wrong
    */
   public void addValues(Instances data, int attrIndex,
 			int classIndex, int classValue) throws Exception{
@@ -243,7 +243,7 @@ implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
    * @param classValue the class value 
    * @param min minimal value of this attribute
    * @param max maximal value of this attribute
-   * @exception if building of estimator goes wrong
+   * @exception Exception if building of estimator goes wrong
    */
   public void addValues(Instances data, int attrIndex,
       int classIndex, int classValue,

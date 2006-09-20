@@ -1,4 +1,3 @@
-//17.11 lap
 /*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -32,7 +31,7 @@ import weka.core.*;
  * Contains static utility functions for Estimators.<p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EstimatorUtils {
   
@@ -76,7 +75,7 @@ public class EstimatorUtils {
    * @param attrIndex index of the attribute
    * @param minMax the array to return minimum and maximum in
    * @return number of not missing values
-   * @exception if parameter minMax wasn't initialized properly
+   * @exception Exception if parameter minMax wasn't initialized properly
    */
   public static int getMinMax(Instances inst, int attrIndex, double [] minMax) 
     throws Exception {
@@ -178,10 +177,13 @@ public class EstimatorUtils {
    * Output of an n points of a density curve.
    * Filename is parameter f + ".curv".
    *
-   *@param f string to build filename
-   *@param bins vector of bins
+   * @param f string to build filename
+   * @param est
+   * @param min
+   * @param max
+   * @param numPoints
+   * @throws Exception if something goes wrong
    */
-
   public static void writeCurve(String f, Estimator est, 
 				double min, double max,
 				int numPoints) throws Exception {
@@ -221,8 +223,14 @@ public class EstimatorUtils {
    * Output of an n points of a density curve.
    * Filename is parameter f + ".curv".
    *
-   *@param f string to build filename
-   *@param bins vector of bins
+   * @param f string to build filename
+   * @param est
+   * @param classEst
+   * @param classIndex
+   * @param min
+   * @param max
+   * @param numPoints
+   * @throws Exception if something goes wrong
    */
   public static void writeCurve(String f, Estimator est, 
 				Estimator classEst,

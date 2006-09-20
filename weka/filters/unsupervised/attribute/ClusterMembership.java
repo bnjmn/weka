@@ -64,7 +64,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -303,7 +303,7 @@ public class ClusterMembership
    * the end of the output queue.
    *
    * @param instance the instance to convert
-   * @throws Execption if something goes wrong
+   * @throws Exception if something goes wrong
    */
   protected void convertInstance(Instance instance) throws Exception {
     

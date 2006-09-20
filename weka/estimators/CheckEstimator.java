@@ -1,4 +1,4 @@
-/*pc 4.April06
+/*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -135,7 +135,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see TestInstances
  */
 public class CheckEstimator implements OptionHandler {
@@ -151,7 +151,7 @@ public class CheckEstimator implements OptionHandler {
    */
   
   /** a class for postprocessing the test-data 
-   * @see #makeTestDataset(int, int, int, int, int, int, int, int, int, int, boolean) */
+   */
   public class PostProcessor {
     /**
      * Provides a hook for derived classes to further modify the data. Currently,
@@ -575,7 +575,7 @@ public class CheckEstimator implements OptionHandler {
    * Run a battery of tests for a given class attribute type
    *
    * @param classType true if the class attribute should be numeric
-   * @param esttypes types the estimator is, like incremental, weighted, supervised etc
+   * @param estTypes types the estimator is, like incremental, weighted, supervised etc
    * @return attribute types estimator can work with
    */
   protected AttrTypes testsPerClassType(int classType, EstTypes estTypes) {
@@ -790,7 +790,7 @@ public class CheckEstimator implements OptionHandler {
    * Checks basic estimation of one attribute of the scheme, for simple non-troublesome
    * datasets.
    *
-   * @param attrTypes the types the estimator can work with
+   * @param attrType the type of the estimator
    * @param classType the class type (NOMINAL, NUMERIC, etc.)
    * @return index 0 is true if the test was passed, index 1 is true if test 
    *         was acceptable
@@ -1872,7 +1872,7 @@ public class CheckEstimator implements OptionHandler {
    * Gets the minimum and maximum of the values a the first attribute
    * of the given data set
    *
-   * @param train the training data set
+   * @param inst the instance
    * @param attrIndex the index of the attribut to find min and max
    * @return the array with the minimum value on index 0 and the max on index 1
    */
@@ -1898,7 +1898,7 @@ public class CheckEstimator implements OptionHandler {
    * @param attrIndex index of the attribute
    * @param minMax the array to return minimum and maximum in
    * @return number of not missing values
-   * @exception if parameter minMax wasn't initialized properly
+   * @exception Exception if parameter minMax wasn't initialized properly
    */
   public static int getMinMax(Instances inst, int attrIndex, double [] minMax) 
     throws Exception {
