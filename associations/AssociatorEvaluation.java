@@ -25,16 +25,15 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.converters.ConverterUtils.DataSource;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.Enumeration;
 
 /**
  * Class for evaluating Associaters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AssociatorEvaluation {
 
@@ -118,8 +117,8 @@ public class AssociatorEvaluation {
     throws Exception {
 
     String trainFileString = "";
-    BufferedReader reader;
     AssociatorEvaluation eval;
+    DataSource loader;
 
     // help?
     if (Utils.getFlag('h', options))
@@ -130,7 +129,7 @@ public class AssociatorEvaluation {
       trainFileString = Utils.getOption('t', options);
       if (trainFileString.length() == 0) 
 	throw new Exception("No training file given!");
-      reader = new BufferedReader(new FileReader(trainFileString));
+      loader = new DataSource(trainFileString);
 
       // associator specific options
       if (associator instanceof OptionHandler) {
@@ -149,7 +148,7 @@ public class AssociatorEvaluation {
     
     // load file and build associations
     eval = new AssociatorEvaluation();
-    return eval.evaluate(associator, new Instances(reader));
+    return eval.evaluate(associator, new Instances(loader.getDataSet()));
   }
   
   /**
