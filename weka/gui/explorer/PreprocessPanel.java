@@ -29,6 +29,7 @@ import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.Loader;
+import weka.core.converters.SerializedInstancesLoader;
 import weka.core.converters.URLSourcedLoader;
 import weka.datagenerators.DataGenerator;
 import weka.experiment.InstanceQuery;
@@ -96,7 +97,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.63 $
+ * @version $Revision: 1.64 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -1116,7 +1117,7 @@ public class PreprocessPanel
     
     if (m_Instances != null) {
       // create temporary file
-      File tempFile = File.createTempFile("weka", null);
+      File tempFile = File.createTempFile("weka", SerializedInstancesLoader.FILE_EXTENSION);
       tempFile.deleteOnExit();
 
       ObjectOutputStream oos = 
@@ -1155,7 +1156,19 @@ public class PreprocessPanel
     
     if (m_tempUndoFiles[m_tempUndoIndex] != null) {
       // load instances from the temporary file
-      setInstancesFromFile(ConverterUtils.getLoaderForFile(m_tempUndoFiles[m_tempUndoIndex]));
+      AbstractFileLoader loader = ConverterUtils.getLoaderForFile(m_tempUndoFiles[m_tempUndoIndex]);
+      try {
+	loader.setFile(m_tempUndoFiles[m_tempUndoIndex]);
+	setInstancesFromFile(loader);
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+	m_Log.logMessage(e.toString());
+	JOptionPane.showMessageDialog(PreprocessPanel.this,
+	    "Cannot perform undo operation!\n" + e.toString(),
+	    "Undo",
+	    JOptionPane.ERROR_MESSAGE);
+      }
 
       // update undo file list
       m_tempUndoFiles[m_tempUndoIndex] = null;
