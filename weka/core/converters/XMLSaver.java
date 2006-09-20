@@ -53,7 +53,7 @@ import java.util.zip.GZIPOutputStream;
  * <pre> -o &lt;the output file&gt;
  *  The output file</pre>
  * 
- * <pre> -C &lt;int&gt;
+ * <pre> -c &lt;class index&gt;
  *  The class index (first and last are valid as well).
  *  (default: last)</pre>
  * 
@@ -64,7 +64,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
 public class XMLSaver 
@@ -171,7 +171,7 @@ public class XMLSaver
    * <pre> -o &lt;the output file&gt;
    *  The output file</pre>
    * 
-   * <pre> -C &lt;int&gt;
+   * <pre> -c &lt;class index&gt;
    *  The class index (first and last are valid as well).
    *  (default: last)</pre>
    * 
