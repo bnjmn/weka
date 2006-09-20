@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class TLD 
   extends RandomizableClassifier 
@@ -225,7 +225,7 @@ public class TLD
   /**
    *
    * @param exs the training exemplars
-   * @throws if the model cannot be built properly
+   * @throws Exception if the model cannot be built properly
    */    
   public void buildClassifier(Instances exs)throws Exception{
     // can classifier handle the data?

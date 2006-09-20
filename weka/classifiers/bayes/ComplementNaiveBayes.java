@@ -78,7 +78,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -412,7 +412,7 @@ public class ComplementNaiveBayes extends Classifier
      *
      * @param instance the instance to classify
      * @return the index of the class the instance is most likely to belong.
-     * @throws if the classifier has not been built yet.
+     * @throws Exception if the classifier has not been built yet.
      */
     public double classifyInstance(Instance instance) throws Exception {
 

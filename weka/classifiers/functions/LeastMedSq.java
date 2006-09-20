@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class LeastMedSq 
   extends Classifier 
@@ -396,7 +396,7 @@ public class LeastMedSq
    * Builds a new LinearRegression without the 'bad' data
    * found by buildWeight
    *
-   * @throws if building fails
+   * @throws Exception if building fails
    */
   private void buildRLSRegression()throws Exception{
 

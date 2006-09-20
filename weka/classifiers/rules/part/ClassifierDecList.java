@@ -34,7 +34,7 @@ import java.io.*;
  * Class for handling a rule (partial tree) for a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ClassifierDecList implements Serializable {
 
@@ -352,7 +352,7 @@ public class ClassifierDecList implements Serializable {
   /**
    * Dumps the partial tree (only used for debugging)
    *
-   * @exception exception Exception if something goes wrong
+   * @exception Exception Exception if something goes wrong
    */
   private void dumpTree(int depth,StringBuffer text)
        throws Exception {
@@ -379,7 +379,7 @@ public class ClassifierDecList implements Serializable {
    * Help method for computing class probabilities of 
    * a given instance.
    *
-   * @exception exception Exception if something goes wrong
+   * @exception Exception Exception if something goes wrong
    */
   private double getProbs(int classIndex,Instance instance,
 			  double weight) throws Exception {

@@ -71,7 +71,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class RandomTree 
   extends Classifier 
@@ -918,10 +918,11 @@ public class RandomTree
   /**
    * Computes class distribution for an attribute.
    * 
-   * @param probs
+   * @param props
    * @param dists
    * @param att the attribute index
    * @param sortedIndices the sorted indices of the data
+   * @param weights
    * @param data the data to work with
    * @throws Exception if something goes wrong
    */

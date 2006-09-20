@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class BayesNetGenerator extends BayesNet {
     /** the seed value */
@@ -344,7 +344,7 @@ public class BayesNetGenerator extends BayesNet {
 	} // GenerateInstances
 
     /**
-     * @throws Execption if there's a cycle in the graph
+     * @throws Exception if there's a cycle in the graph
      */	
     int [] getOrder() throws Exception {
 	int nNrOfAtts = m_Instances.numAttributes();

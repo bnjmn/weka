@@ -44,7 +44,7 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CostMatrix implements Serializable {
 
@@ -462,12 +462,12 @@ public class CostMatrix implements Serializable {
   /**
    * Reads a matrix from a reader. The first line in the file should
    * contain the number of rows and columns. Subsequent lines
-   * contain elements of the matrix.
+   * contain elements of the matrix. 
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     reader the reader containing the matrix
    * @throws    Exception if an error occurs
    * @see       #write(Writer)
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public CostMatrix(Reader reader) throws Exception {
     LineNumberReader lnr = new LineNumberReader(reader);
@@ -548,10 +548,10 @@ public class CostMatrix implements Serializable {
   /**
    * Writes out a matrix. The format can be read via the 
    * CostMatrix(Reader) constructor.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @param     w the output Writer
    * @throws    Exception if an error occurs
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public void write(Writer w) throws Exception {
     w.write("% Rows\tColumns\n");
@@ -683,10 +683,10 @@ public class CostMatrix implements Serializable {
   }
 
   /** 
-   * Converts a matrix to a string
+   * Converts a matrix to a string.
+   * (FracPete: taken from old weka.core.Matrix class)
    *
    * @return    the converted string
-   * @author    FracPete, taken from old weka.core.Matrix class
    */
   public String toString() {
     // Determine the width required for the maximum element,

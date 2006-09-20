@@ -66,7 +66,7 @@ import java.util.Vector;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public abstract class M5Base 
   extends Classifier 
@@ -496,7 +496,7 @@ public abstract class M5Base
    * 
    * @param inst the instance whos class value is to be predicted
    * @return the prediction
-   * @throws if a prediction can't be made.
+   * @throws Exception if a prediction can't be made.
    */
   public double classifyInstance(Instance inst) throws Exception {
     Rule   temp;
@@ -600,7 +600,7 @@ public abstract class M5Base
 
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @throws Exception if the named measure is not supported
    */

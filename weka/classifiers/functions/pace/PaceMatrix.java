@@ -43,7 +43,7 @@ import java.text.DecimalFormat;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PaceMatrix 
   extends Matrix {
@@ -355,11 +355,10 @@ public class PaceMatrix
   }
   
   /** Decimal format for converting a matrix into a string
-   *  @param digits the number of digits
    *  @param i0
    *  @param i1
    *  @param j
-   *  @param digits
+   *  @param digits the number of digits
    *  @param trailing
    *  @return the decimal format
    */
@@ -373,12 +372,12 @@ public class PaceMatrix
   }
   
   /** Decimal format for converting a matrix into a string
-   *  @param digits the number of digits
    *  @param i0
    *  @param i1
-   *  @param j
+   *  @param j0
+   *  @param j1
    *  @param trailing
-   *  @param digits
+   *  @param digits the number of digits
    *  @return the decimal format
    */
   protected DecimalFormat []  format(int i0, int i1, int j0, int j1, 

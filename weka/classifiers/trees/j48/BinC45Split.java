@@ -22,14 +22,17 @@
 
 package weka.classifiers.trees.j48;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.util.Enumeration;
 
 /**
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class BinC45Split extends ClassifierSplitModel{
@@ -313,8 +316,10 @@ public class BinC45Split extends ClassifierSplitModel{
   }
 
   /**
-   * Prints left side of condition..
-   * @param index of subset and training set.
+   * Prints left side of condition.
+   * 
+   * @param data the data to get the attribute name from.
+   * @return the attribute name
    */
   public final String leftSide(Instances data){
 

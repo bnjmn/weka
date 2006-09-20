@@ -62,7 +62,7 @@ class CompareNode
  * 
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LMTNode 
     extends LogisticBase {   
@@ -371,9 +371,8 @@ public class LMTNode
      * @param alphas array to hold the generated alpha-values
      * @param errors array to hold the corresponding error estimates
      * @param test test set of that fold (to obtain error estimates)
-     * @throws if something goes wrong
+     * @throws Exception if something goes wrong
      */
-
     public int prune(double[] alphas, double[] errors, Instances test) throws Exception {
 	
 	Vector nodeList; 
@@ -454,7 +453,7 @@ public class LMTNode
      *regression function on the training data. Used for the heuristic that avoids cross-validating this
      *number again at every node.
      *@param data training instances for the logistic model
-     *@throws if something goes wrong
+     *@throws Exception if something goes wrong
      */
     protected int tryLogistic(Instances data) throws Exception{
 	
