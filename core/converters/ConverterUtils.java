@@ -23,12 +23,15 @@
 package weka.core.converters;
 
 import weka.core.ClassDiscovery;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.gui.GenericPropertiesCreator;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StreamTokenizer;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -40,7 +43,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -48,6 +51,313 @@ public class ConverterUtils
 
   /** for serialization */
   static final long serialVersionUID = -2460855349276148760L;
+
+  /**
+   * Helper class for loading data from files and URLs. Via the ConverterUtils
+   * class it determines which converter to use for loading the data into 
+   * memory. If the chosen converter is an incremental one, then the data
+   * will be loaded incrementally, otherwise as batch. In both cases the 
+   * same interface will be used (<code>hasMoreElements</code>, 
+   * <code>nextElement</code>). Before the
+   * data can be read again, one has to call the <code>reset</code> method.
+   * The data source can also be initialized with an Instances object, in 
+   * order to provide a unified interface to files and already loaded datasets.
+   * 
+   * @author FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.6 $
+   * @see #hasMoreElements()
+   * @see #nextElement()
+   * @see #reset()
+   */
+  public static class DataSource
+    implements Serializable, Enumeration {
+    
+    /** for serialization */
+    private static final long serialVersionUID = -613122395928757332L;
+
+    /** the file to load */
+    protected File m_File;
+    
+    /** the URL to load */
+    protected URL m_URL;
+    
+    /** the loader */
+    protected AbstractFileLoader m_FileLoader;
+    
+    /** whether the loader is incremental */
+    protected boolean m_Incremental;
+    
+    /** the instance counter for the batch case */
+    protected int m_BatchCounter;
+
+    /** the last internally read instance */
+    protected Instance m_IncrementalBuffer;
+    
+    /** the batch buffer */
+    protected Instances m_BatchBuffer;
+    
+    /**
+     * Tries to load the data from the file. Can be either a regular file or
+     * a web location (http://, https://, ftp:// or file://).
+     * 
+     * @param location		the name of the file to load
+     * @throws Exception	if initialization fails
+     */
+    public DataSource(String location) throws Exception {
+      super();
+      
+      initialize(location);
+    }
+    
+    /**
+     * Initializes the datasource with the given dataset
+     * 
+     * @param inst		the dataset to use
+     */
+    public DataSource(Instances inst) {
+      super();
+      
+      m_BatchBuffer = inst;
+      m_FileLoader  = null;
+      m_File        = null;
+      m_URL         = null;
+      m_Incremental = false;
+    }
+    
+    /**
+     * initializes the loader, tries to determine which converter to use, etc.
+     * 
+     * @param location		the location of the file to load
+     * @throws Exception 	if no suitable converter can be found
+     */
+    protected void initialize(String location) throws Exception {
+      // file or URL?
+      if (    location.startsWith("http://")
+	   || location.startsWith("https://")
+	   || location.startsWith("ftp://")
+	   || location.startsWith("file://") )
+	m_URL = new URL(location);
+      else
+	m_File = new File(location);
+      
+      // quick check: is it ARFF?
+      if (isArff(location)) {
+	m_FileLoader = new ArffLoader();
+      }
+      else {
+	if (m_File != null)
+	  m_FileLoader = ConverterUtils.getLoaderForFile(location);
+	else
+	  m_FileLoader = ConverterUtils.getURLLoaderForFile(location);
+	
+	// do we have a converter?
+	if (m_FileLoader == null)
+	  throw new IllegalArgumentException("No suitable converter found for '" + location + "'!");
+      }
+      
+      // incremental loader?
+      m_Incremental = (m_FileLoader instanceof IncrementalConverter);
+      
+      reset();
+    }
+    
+    /**
+     * returns whether the extension of the location is likely to be of ARFF
+     * format, i.e., ending in ".arff" or ".arff.gz" (case-insensitive)
+     * 
+     * @param location		the file location to check
+     * @return			true if the location seems to be of ARFF format
+     */
+    protected boolean isArff(String location) {
+      if (    location.toLowerCase().endsWith(ArffLoader.FILE_EXTENSION.toLowerCase())
+	   || location.toLowerCase().endsWith(ArffLoader.FILE_EXTENSION_COMPRESSED.toLowerCase()) )
+	return true;
+      else
+	return false;
+    }
+    
+    /**
+     * returns whether the loader is an incremental one
+     * 
+     * @return		true if the loader is a true incremental one
+     */
+    public boolean isIncremental() {
+      return m_Incremental;
+    }
+    
+    /**
+     * returns the determined loader, null if the DataSource was initialized
+     * with data alone and not a file/URL.
+     * 
+     * @return		the loader used for retrieving the data
+     */
+    public AbstractFileLoader getLoader() {
+      return m_FileLoader;
+    }
+    
+    /**
+     * returns the full dataset, can be null in case of an error
+     * 
+     * @return			the full dataset
+     * @throws Exception 	if resetting of loader fails
+     */
+    public Instances getDataSet() throws Exception {
+      Instances		result;
+      
+      result = null;
+      
+      // reset the loader
+      reset();
+      
+      try {
+	if (m_FileLoader != null)
+	  result = m_FileLoader.getDataSet();
+	else
+	  result = m_BatchBuffer;
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+	result = null;
+      }
+      
+      return result;
+    }
+    
+    /**
+     * resets the loader
+     * 
+     * @throws Exception	if resetting fails
+     */
+    public void reset() throws Exception {
+      if (m_File != null)
+	m_FileLoader.setFile(m_File);
+      else if (m_URL != null)
+	((URLSourcedLoader) m_FileLoader).setURL(m_URL.toString());
+      
+      m_BatchCounter      = 0;
+      m_IncrementalBuffer = null;
+
+      if (m_FileLoader != null) {
+	if (!isIncremental())
+	  m_BatchBuffer = m_FileLoader.getDataSet();
+	else
+	  m_BatchBuffer = null;
+      }
+    }
+
+    /**
+     * returns the structure of the data
+     * 
+     * @return			the structure of the data
+     * @throws Exception	if something goes wrong
+     */
+    public Instances getStructure() throws Exception {
+      if (m_FileLoader != null)
+	return m_FileLoader.getStructure();
+      else
+	return new Instances(m_BatchBuffer, 0);
+    }
+    
+    /**
+     * returns whether there are more Instance objects in the data
+     * 
+     * @return		true if there are more Instance objects 
+     * 			available
+     * @see		#nextElement()
+     */
+    public boolean hasMoreElements() {
+      boolean	result;
+      
+      result = false;
+      
+      if (isIncremental()) {
+	// user still hasn't collected the last one?
+	if (m_IncrementalBuffer != null) {
+	  result = true;
+	}
+	else {
+	  try {
+	    m_IncrementalBuffer = m_FileLoader.getNextInstance();
+	    result              = (m_IncrementalBuffer != null);
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	    result = false;
+	  }
+	}
+      }
+      else {
+	result = (m_BatchCounter < m_BatchBuffer.numInstances());
+      }
+      
+      return result;
+    }
+    
+    /**
+     * returns the next element, null if none available
+     * 
+     * @return		the next Instance
+     */
+    public Instance nextElement() {
+      Instance	result;
+      
+      result = null;
+      
+      if (isIncremental()) {
+	// is there still an instance in the buffer?
+	if (m_IncrementalBuffer != null) {
+	  result              = m_IncrementalBuffer;
+	  m_IncrementalBuffer = null;
+	}
+	else {
+	  try {
+	    result = m_FileLoader.getNextInstance();
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	    result = null;
+	  }
+	}
+      }
+      else {
+	if (m_BatchCounter < m_BatchBuffer.numInstances()) {
+	  result = m_BatchBuffer.instance(m_BatchCounter);
+	  m_BatchCounter++;
+	}
+      }
+
+      return result;
+    }
+    
+    /**
+     * for testing only - takes a data file as input
+     * 
+     * @param args		the commandline arguments
+     * @throws Exception 	if something goes wrong
+     */
+    public static void main(String[] args) throws Exception {
+      if (args.length != 1) {
+	System.out.println("\nUsage: " + DataSource.class.getName() + " <file>\n");
+	System.exit(1);
+      }
+      
+      DataSource loader = new DataSource(args[0]);
+      
+      System.out.println("Incremental? " + loader.isIncremental());
+      System.out.println("Loader: " + loader.getLoader().getClass().getName());
+      System.out.println("Data:\n");
+      System.out.println(loader.getStructure());
+      while (loader.hasMoreElements())
+	System.out.println(loader.nextElement());
+      
+      Instances inst = loader.getDataSet();
+      loader = new DataSource(inst);
+      System.out.println("\n\nProxy-Data:\n");
+      System.out.println(loader.getStructure());
+      while (loader.hasMoreElements())
+	System.out.println(loader.nextElement());
+    }
+  }
   
   /** all available loaders (extension &lt;-&gt; classname) */
   protected static Hashtable<String,String> m_FileLoaders;
@@ -232,7 +542,7 @@ public class ConverterUtils
    *
    * @param theMsg 		the error message to be thrown
    * @param tokenizer 		the stream tokenizer
-   * @throws IOExcpetion 	containing the error message
+   * @throws IOException 	containing the error message
    */
   public static void errms(StreamTokenizer tokenizer, String theMsg) 
     throws IOException {
