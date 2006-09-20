@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public abstract class Clusterer implements Cloneable, Serializable, CapabilitiesHandler {
 
@@ -114,7 +114,7 @@ public abstract class Clusterer implements Cloneable, Serializable, Capabilities
    * clusterer implements OptionHandler and the options parameter is
    * non-null, the clusterer will have it's options set.
    *
-   * @param searchName the fully qualified class name of the clusterer
+   * @param clustererName the fully qualified class name of the clusterer
    * @param options an array of options suitable for passing to setOptions. May
    * be null.
    * @return the newly created search object, ready for use.

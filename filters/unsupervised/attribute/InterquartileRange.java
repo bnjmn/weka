@@ -100,7 +100,7 @@ import java.util.Vector;
  *
  * @author  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class InterquartileRange
   extends SimpleBatchFilter {
@@ -600,7 +600,6 @@ public class InterquartileRange
    * @throws Exception      in case the determination goes wrong
    * @see                   #hasImmediateOutputFormat()
    * @see                   #batchFinished()
-   * @see                   #preprocess(Instances)
    */
   protected Instances determineOutputFormat(Instances inputFormat)
       throws Exception {
@@ -864,7 +863,6 @@ public class InterquartileRange
    * @return            the modified data
    * @throws Exception  in case the processing goes wrong
    * @see               #batchFinished()
-   * @see               #process(Instance)
    */
   protected Instances process(Instances instances) throws Exception {
     Instances	result;

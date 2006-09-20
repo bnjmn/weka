@@ -32,7 +32,7 @@ import java.io.InputStream;
  * unable to be modified.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ProtectedProperties extends Properties {
 
@@ -60,7 +60,7 @@ public class ProtectedProperties extends Properties {
    * Overrides a method to prevent the properties from being modified.
    *
    * @return never returns without throwing an exception.
-   * @exception UnsupportedOperationException always.
+   * @throws UnsupportedOperationException always.
    */
   public Object setProperty(String key, String value)
     {
@@ -74,8 +74,7 @@ public class ProtectedProperties extends Properties {
   /**
    * Overrides a method to prevent the properties from being modified.
    *
-   * @return never returns without throwing an exception.
-   * @exception UnsupportedOperationException always.
+   * @throws UnsupportedOperationException always.
    */  
   public void load(InputStream inStream) {
     
@@ -86,8 +85,7 @@ public class ProtectedProperties extends Properties {
   /**
    * Overrides a method to prevent the properties from being modified.
    *
-   * @return never returns without throwing an exception.
-   * @exception UnsupportedOperationException always.
+   * @throws UnsupportedOperationException always.
    */
   public void clear() {
     
@@ -99,7 +97,7 @@ public class ProtectedProperties extends Properties {
    * Overrides a method to prevent the properties from being modified.
    *
    * @return never returns without throwing an exception.
-   * @exception UnsupportedOperationException always.
+   * @throws UnsupportedOperationException always.
    */
   public Object put(Object key,
 		    Object value) {
@@ -113,8 +111,7 @@ public class ProtectedProperties extends Properties {
   /**
    * Overrides a method to prevent the properties from being modified.
    *
-   * @return never returns without throwing an exception.
-   * @exception UnsupportedOperationException always.
+   * @throws UnsupportedOperationException always.
    */
   public void putAll(Map t) {
     
@@ -126,7 +123,7 @@ public class ProtectedProperties extends Properties {
    * Overrides a method to prevent the properties from being modified.
    *
    * @return never returns without throwing an exception.
-   * @exception UnsupportedOperationException always.
+   * @throws UnsupportedOperationException always.
    */
   public Object remove(Object key) {
 

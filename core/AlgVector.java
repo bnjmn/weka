@@ -30,7 +30,7 @@ import java.io.Serializable;
  * of floating-point values.
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AlgVector 
   implements Cloneable, Serializable {
@@ -68,7 +68,9 @@ public class AlgVector
    * The other attributes (nominal, string) are ignored.
    * Random is used to initialize the attributes.
    *
-   * @param array the values of the matrix
+   * @param format the data format to use
+   * @param random for initializing the attributes
+   * @throws Exception if something goes wrong
    */
   public AlgVector(Instances format, Random random) throws Exception {
     
@@ -88,7 +90,7 @@ public class AlgVector
    * The other attributes (nominal, string) are ignored.
    *
    * @param instance with numeric attributes, that AlgVector gets build from
-   * @exception if instance doesn't have access to the data format
+   * @exception Exception if instance doesn't have access to the data format
    */
   public AlgVector(Instance instance) throws Exception {
     
@@ -207,7 +209,7 @@ public class AlgVector
    *
    * !! NON-numeric data is ignored sofar
    * @return an array of doubles
-   * @exception if length of vector is not number of numerical attributes
+   * @exception Exception if length of vector is not number of numerical attributes
    */
   public Instance getAsInstance(Instances model, Random random) 
     throws Exception {
@@ -341,8 +343,7 @@ public class AlgVector
   /**
    * Changes the length of a vector.
    *
-   * @param the new length of the vector
-   * @return the norm of the vector
+   * @param len the new length of the vector
    */
   public void changeLength(double len) {
    

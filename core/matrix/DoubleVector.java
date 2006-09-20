@@ -28,7 +28,7 @@ import java.util.Arrays;
  * A vector specialized on doubles.
  * 
  * @author Yong Wang
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class  DoubleVector implements Cloneable {
 
@@ -112,7 +112,7 @@ public class  DoubleVector implements Cloneable {
    *  @param i0 the index of the first element
    *  @param i1 the index of the second element
    *  @param j0 the index of the starting element in the 2-D array
-   *  @param s the value 
+   *  @param v the values
    */
   public void  set( int i0, int i1, double [] v, int j0){
     for(int i = i0; i<= i1; i++)

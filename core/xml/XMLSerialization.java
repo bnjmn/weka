@@ -88,7 +88,7 @@ import org.w3c.dom.Element;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class XMLSerialization {
    /** for debugging purposes only */
@@ -1557,7 +1557,7 @@ public class XMLSerialization {
     * 
     * @param document the parsed DOM document representing the object
     * @return the XML as object 
-    * @throws if object instantiation fails
+    * @throws Exception if object instantiation fails
     */
    public Object fromXML(Document document) throws Exception {
       if (!document.getDocumentElement().getNodeName().equals(ROOT_NODE))
@@ -1573,7 +1573,7 @@ public class XMLSerialization {
     * 
     * @param xml the xml to parse (if "<?xml" is not found then it is considered a file)
     * @return the generated instance
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public Object read(String xml) throws Exception {
       return fromXML(m_Document.read(xml));
@@ -1584,7 +1584,7 @@ public class XMLSerialization {
     * 
     * @param file the XML file to parse
     * @return the parsed DOM document
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public Object read(File file) throws Exception {
       return fromXML(m_Document.read(file));
@@ -1595,7 +1595,7 @@ public class XMLSerialization {
     * 
     * @param stream the XML stream to parse
     * @return the parsed DOM document
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public Object read(InputStream stream) throws Exception {
       return fromXML(m_Document.read(stream));
@@ -1606,7 +1606,7 @@ public class XMLSerialization {
     * 
     * @param reader the XML reader to parse
     * @return the parsed DOM document
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public Object read(Reader reader) throws Exception {
       return fromXML(m_Document.read(reader));
@@ -1618,7 +1618,7 @@ public class XMLSerialization {
     * 
     * @param file the filename to write to
     * @param o the object to serialize as XML
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public void write(String file, Object o) throws Exception {
       toXML(o).write(file);
@@ -1629,7 +1629,7 @@ public class XMLSerialization {
     * 
     * @param file the filename to write to
     * @param o the object to serialize as XML
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public void write(File file, Object o) throws Exception {
       toXML(o).write(file);
@@ -1640,7 +1640,7 @@ public class XMLSerialization {
     * 
     * @param stream the filename to write to
     * @param o the object to serialize as XML
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public void write(OutputStream stream, Object o) throws Exception {
       toXML(o).write(stream);
@@ -1651,7 +1651,7 @@ public class XMLSerialization {
     * 
     * @param writer the filename to write to
     * @param o the object to serialize as XML
-    * @throws if something goes wrong with the parsing
+    * @throws Exception if something goes wrong with the parsing
     */
    public void write(Writer writer, Object o) throws Exception {
       toXML(o).write(writer);

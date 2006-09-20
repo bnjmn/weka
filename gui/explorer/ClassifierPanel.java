@@ -130,7 +130,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.96 $
+ * @version $Revision: 1.97 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -902,7 +902,7 @@ public class ClassifierPanel
    * Sets up the structure for the visualizable instances. This dataset
    * contains the original attributes plus the classifier's predictions
    * for the class as an attribute called "predicted+WhateverTheClassIsCalled".
-   * @param trainInstancs the instances that the classifier is trained on
+   * @param trainInstances the instances that the classifier is trained on
    * @return a new set of instances containing one more attribute (predicted
    * class) than the trainInstances
    */

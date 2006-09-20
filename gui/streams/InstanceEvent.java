@@ -29,7 +29,7 @@ import java.util.EventObject;
  * An event encapsulating an instance stream event.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InstanceEvent extends EventObject {
   
@@ -49,7 +49,7 @@ public class InstanceEvent extends EventObject {
    * type
    *
    * @param source the object generating the InstanceEvent
-   * @param the type of the InstanceEvent
+   * @param ID the type of the InstanceEvent
    */
   public InstanceEvent(Object source, int ID) {
 

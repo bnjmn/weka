@@ -27,7 +27,7 @@ package weka.estimators;
  * a numeric domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DKConditionalEstimator implements ConditionalEstimator {
 
@@ -70,7 +70,6 @@ public class DKConditionalEstimator implements ConditionalEstimator {
   /**
    * Get a probability estimator for a value
    *
-   * @param data the value to estimate the probability of
    * @param given the new value that data is conditional upon 
    * @return the estimator for the supplied value given the condition
    */

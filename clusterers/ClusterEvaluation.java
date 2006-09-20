@@ -78,7 +78,7 @@ import java.util.Vector;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.32 $
+ * @version  $Revision: 1.33 $
  */
 public class ClusterEvaluation 
   implements Serializable {
@@ -904,7 +904,7 @@ public class ClusterEvaluation
    * @param clusterer the clusterer to use for generating statistics.
    * @param fileName the file to load
    * @return a string containing cluster statistics.
-   * @throws if statistics can't be generated.
+   * @throws Exception if statistics can't be generated.
    */
   private static String printClusterStats (Clusterer clusterer, 
 					   String fileName)
@@ -1009,7 +1009,7 @@ public class ClusterEvaluation
    * @param testFileName an optional test file
    * @param attributesToOutput the attributes to print
    * @return a string containing the instance indexes and cluster assigns.
-   * @throws if cluster assignments can't be printed
+   * @throws Exception if cluster assignments can't be printed
    */
   private static String printClusterings (Clusterer clusterer, String trainFileName,
 					  String testFileName, Range attributesToOutput)

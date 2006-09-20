@@ -31,7 +31,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
 */
 public class QRDecomposition 
   implements Serializable {
@@ -58,8 +58,6 @@ public class QRDecomposition
   /** 
    * QR Decomposition, computed by Householder reflections.
    * @param A    Rectangular matrix
-   * @return     Structure to access R and the Householder vectors and compute
-   * Q.
    */
   public QRDecomposition(Matrix A) {
     // Initialize.

@@ -28,7 +28,7 @@ package weka.core;
  <!-- globalinfo-end -->
  * 
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LinearNN
   extends NearestNeighbourSearch {
@@ -357,7 +357,7 @@ public class LinearNN
    *         nearestNeighbours. The length and ordering of the array is the 
    *         same as that of the instances returned by nearestNeighbour 
    *         functions.
-   * @throws Throws an exception if called before calling kNearestNeighbours
+   * @throws Exception if called before calling kNearestNeighbours
    *            or nearestNeighbours.
    */
   public double[] getDistances() throws Exception {

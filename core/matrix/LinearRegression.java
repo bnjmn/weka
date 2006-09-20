@@ -20,7 +20,7 @@ import weka.core.Utils;
  * Class for performing (ridged) linear regression.
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
  
 public class LinearRegression {
@@ -34,7 +34,6 @@ public class LinearRegression {
    * @param a the matrix to perform the regression on
    * @param y the dependent variable vector
    * @param ridge the ridge parameter
-   * @return the coefficients 
    * @throws IllegalArgumentException if not successful
    */
   public LinearRegression(Matrix a, Matrix y, double ridge) {
@@ -48,7 +47,6 @@ public class LinearRegression {
    * @param y the dependent variable vector
    * @param w the array of data point weights
    * @param ridge the ridge parameter
-   * @return the coefficients 
    * @throws IllegalArgumentException if the wrong number of weights were
    * provided.
    */
@@ -75,7 +73,6 @@ public class LinearRegression {
    * @param a the matrix to perform the regression on
    * @param y the dependent variable vector
    * @param ridge the ridge parameter
-   * @return the coefficients 
    * @throws IllegalArgumentException if not successful
    */
   protected void calculate(Matrix a, Matrix y, double ridge) {

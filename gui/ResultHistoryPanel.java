@@ -61,7 +61,7 @@ import javax.swing.text.JTextComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class ResultHistoryPanel
   extends JPanel {
@@ -241,7 +241,7 @@ public class ResultHistoryPanel
 
   /**
    * Get the named object from the list
-   * @param index the index of the item to retrieve the stored object
+   * @param name the name of the item to retrieve the stored object
    * for
    * @return the object or null if there is no object at this index
    */

@@ -34,7 +34,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SingularValueDecomposition 
   implements Serializable {
@@ -61,8 +61,7 @@ public class SingularValueDecomposition
 
   /** 
    * Construct the singular value decomposition
-   * @param A    Rectangular matrix
-   * @return     Structure to access U, S and V.
+   * @param Arg    Rectangular matrix
    */
   public SingularValueDecomposition(Matrix Arg) {
 

@@ -76,7 +76,7 @@ import javax.swing.event.ChangeListener;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class MatrixPanel extends JPanel{
 
@@ -201,9 +201,9 @@ public class MatrixPanel extends JPanel{
 
 
 
-  /** Constructor
-      @param ins The instances object for the matrix
-  */
+  /** 
+   * Constructor
+   */
   public MatrixPanel() {
     m_rseed.setText("1");
 

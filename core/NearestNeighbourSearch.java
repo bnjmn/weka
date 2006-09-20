@@ -33,7 +33,7 @@ import weka.core.Instances;
  * do nearest neighbour search should extend this class. 
  *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class NearestNeighbourSearch implements Serializable{
   
@@ -51,7 +51,7 @@ public abstract class NearestNeighbourSearch implements Serializable{
   }
   
   /** Constructor 
-   *  @param insts - The set of instances that constitute the neighbourhood.
+   *  @param insts The set of instances that constitute the neighbourhood.
    */
   public NearestNeighbourSearch(Instances insts) {
     m_Instances = insts;
@@ -59,24 +59,24 @@ public abstract class NearestNeighbourSearch implements Serializable{
 
   /** Returns the nearest instance in the current neighbourhood to the supplied
    *  instance.
-   * @param target - The instance to find the nearest neighbour for.
-   * @exception - Throws an exception if the nearest neighbour could not be 
+   * @param target The instance to find the nearest neighbour for.
+   * @exception Exception if the nearest neighbour could not be 
    *              found.
    */
   public abstract Instance nearestNeighbour(Instance target) throws Exception;
   
   /** Returns k nearest instances in the current neighbourhood to the supplied
    *  instance.
-   * @param target - The instance to find the k nearest neighbours for.
-   * @param k - The number of nearest neighbours to find.
-   * @exception - Throws an exception if the neighbours could not be found.
+   * @param target The instance to find the k nearest neighbours for.
+   * @param k The number of nearest neighbours to find.
+   * @exception Exception if the neighbours could not be found.
    */
   public abstract Instances kNearestNeighbours(Instance target, int k) throws Exception;
  
   /** Returns the distances of the k nearest neighbours. The kNearestNeighbours
    *  or nearestNeighbour needs to be called first for this to work.
    *
-   * @exception Throws an exception if called before calling kNearestNeighbours
+   * @exception Exception if called before calling kNearestNeighbours
    *            or nearestNeighbours.
    */
   public abstract double[] getDistances() throws Exception;
@@ -174,8 +174,8 @@ public abstract class NearestNeighbourSearch implements Serializable{
 
   /** 
    * sorts the two given arrays.
-   * @param arrayToSort - The array sorting should be based on.
-   * @param linkedArray - The array that should have the same ordering as 
+   * @param arrayToSort The array sorting should be based on.
+   * @param linkedArray The array that should have the same ordering as 
    * arrayToSort.
    */
   public static void combSort11(double arrayToSort[], int linkedArray[]) {

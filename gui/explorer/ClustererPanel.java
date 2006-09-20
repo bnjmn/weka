@@ -117,7 +117,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.53 $
+ * @version $Revision: 1.54 $
  */
 public class ClustererPanel
   extends JPanel
@@ -609,7 +609,8 @@ public class ClustererPanel
   /**
    * Sets up the structure for the visualizable instances. This dataset
    * contains the original attributes plus the clusterer's cluster assignments
-   * @param testInstancs the instances that the clusterer has clustered
+   * @param testInstances the instances that the clusterer has clustered
+   * @param eval the evaluation to use
    * @return a PlotData2D object encapsulating the visualizable instances. The    
    * instances contain one more attribute (predicted
    * cluster) than the testInstances
@@ -1431,7 +1432,9 @@ public class ClustererPanel
    * things will happen if the data set is not compatible with the clusterer.
    *
    * @param name the name of the clusterer entry
-   * @param classifier the clusterer to evaluate
+   * @param clusterer the clusterer to evaluate
+   * @param trainHeader the header of the training set
+   * @param ignoredAtts ignored attributes
    */
   protected void reevaluateModel(final String name, 
                                  final Clusterer clusterer,

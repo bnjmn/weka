@@ -22,11 +22,13 @@
 
 package weka.core;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import java.io.Serializable;
-import java.io.*;
 
 /**
  * Implementing Euclidean distance (or similarity) function.
@@ -39,7 +41,7 @@ import java.io.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class EuclideanDistance implements DistanceFunction, Cloneable, 
 					  Serializable {
@@ -56,7 +58,6 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
 
   /**
    * Constructs an Euclidean Distance object.
-   * @param data the instances the distance function should work on
    */
   public EuclideanDistance() {
   }
@@ -176,7 +177,7 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
    *
    * @param first the first instance
    * @param second the second instance
-   * @param If the distance being calculated becomes larger than cutOffValue 
+   * @param cutOffValue If the distance being calculated becomes larger than cutOffValue 
    *        then the rest of the calculation is skipped and Double.MAX_VALUE is 
    *        returned. Otherwise the correct disntance is returned. 
    * @return the distance between the two given instances or Double.MAX_VALUE.
@@ -344,7 +345,7 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
   
   /**
    * Returns value in the middle of the two parameter values.
-   * @param range the ranges to this dimension
+   * @param ranges the ranges to this dimension
    * @return the middle value
    */
   public double getMiddle(double[] ranges) {
@@ -358,9 +359,9 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
    * Index is index in Instances object that is the second parameter.
    *
    * @param instance the instance to assign a cluster to
-   * @param centers all centers
-   * @param centList the centers to cluster the instance to
-   * @return a cluster index
+   * @param allPoints all points
+   * @param pointList the list of points
+   * @return the index of the closest point
    */
   public int closestPoint(Instance instance, Instances allPoints, 
                           int [] pointList) throws Exception {
@@ -381,7 +382,7 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
    * value to be compared with.
    * @param instance the instance where the value should be taken of
    * @param dim the dimension of the value
-   * @param the value to compare with
+   * @param value the value to compare with
    * @return true is value of instance is smaller or equal value
    */
   public boolean valueIsSmallerEqual(Instance instance, int dim,
@@ -650,8 +651,7 @@ public class EuclideanDistance implements DistanceFunction, Cloneable,
   
   /**
    * prints the ranges.
-   * @param instance the new instance
-   * @param numAtt number of attributes in the model
+   * 
    * @param ranges low, high and width values for all attributes
    */  //Not being used in any other class. Not even being used in this class.
   public void printRanges(double [][] ranges) {

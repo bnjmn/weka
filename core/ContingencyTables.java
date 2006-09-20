@@ -26,7 +26,7 @@ package weka.core;
  * Class implementing some statistical routines for contingency tables.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ContingencyTables {
 
@@ -52,7 +52,7 @@ public class ContingencyTables {
    * Computes chi-squared statistic for a contingency table.
    *
    * @param matrix the contigency table
-   * @param yates is Yates' correction to be used?
+   * @param useYates is Yates' correction to be used?
    * @return the value of the chi-squared statistic
    */
   public static double chiVal(double [][] matrix, boolean useYates) {
@@ -256,7 +256,7 @@ public class ContingencyTables {
    *
    * @param train the train matrix 
    * @param test the test matrix
-   * @param the number of symbols for Laplace
+   * @param numClasses the number of symbols for Laplace
    * @return the entropy
    */
   public static double entropyConditionedOnRows(double[][] train, 
@@ -407,7 +407,7 @@ public class ContingencyTables {
    * Reduces a matrix by deleting all zero rows and columns.
    *
    * @param matrix the matrix to be reduced
-   * @param the matrix with all zero rows and columns deleted
+   * @return the matrix with all zero rows and columns deleted
    */
   public static double[][] reduceMatrix(double[][] matrix) {
 
@@ -497,7 +497,7 @@ public class ContingencyTables {
    * Computes Goodman and Kruskal's tau-value for a contingency table.
    *
    * @param matrix the contingency table
-   * @param Goodman and Kruskal's tau-value
+   * @return Goodman and Kruskal's tau-value
    */
   public static double tauVal(double[][] matrix) {
     
