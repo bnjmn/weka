@@ -27,11 +27,14 @@ import weka.core.Instances;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
 
 /**
  <!-- globalinfo-start -->
@@ -40,7 +43,7 @@ import java.net.URL;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see Loader
  */
 public class ArffLoader 
@@ -52,6 +55,9 @@ public class ArffLoader
   
   /** the file extension */
   public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
+
+  /** the extension for compressed files */
+  public static String FILE_EXTENSION_COMPRESSED = FILE_EXTENSION + ".gz";
 
   /** the url */
   protected String m_URL = "http://";
@@ -86,7 +92,7 @@ public class ArffLoader
    * @return the file extensions
    */
   public String[] getFileExtensions() {
-    return new String[]{getFileExtension()};
+    return new String[]{FILE_EXTENSION, FILE_EXTENSION_COMPRESSED};
   }
 
   /**
@@ -149,6 +155,35 @@ public class ArffLoader
   public void setFile(File file) throws IOException {
     m_File = file.getAbsolutePath();
     setSource(file);
+  }
+
+  /**
+   * Resets the Loader object and sets the source of the data set to be 
+   * the supplied File object.
+   *
+   * @param file 		the source file.
+   * @throws IOException 	if an error occurs
+   */
+  public void setSource(File file) throws IOException {
+    m_structure    = null;
+    
+    setRetrieval(NONE);
+
+    if (file == null)
+      throw new IOException("Source file object is null!");
+
+    try {
+      if (file.getName().endsWith(FILE_EXTENSION_COMPRESSED))
+	setSource(new GZIPInputStream(new FileInputStream(file)));
+      else
+	setSource(new FileInputStream(file));
+    }
+    catch (FileNotFoundException ex) {
+      throw new IOException("File not found");
+    }
+    
+    m_sourceFile = file;
+    m_File       = file.getAbsolutePath();
   }
 
   /**
