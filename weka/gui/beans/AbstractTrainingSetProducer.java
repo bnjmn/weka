@@ -22,15 +22,12 @@
 
 package weka.gui.beans;
 
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
 import java.io.Serializable;
 import java.util.Vector;
+
 import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import javax.swing.SwingConstants;
-import java.awt.*;
-import java.beans.EventSetDescriptor;
 
 /**
  * Abstract class for TrainingSetProducers that contains default
@@ -38,10 +35,9 @@ import java.beans.EventSetDescriptor;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see TrainingSetProducer
- * @see DataSetListener
  */
 public abstract class AbstractTrainingSetProducer extends JPanel
   implements TrainingSetProducer, Visible, 

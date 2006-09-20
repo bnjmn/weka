@@ -23,11 +23,8 @@
 
 package weka.gui.visualize;
 
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Utils;
+import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 
@@ -39,7 +36,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class PlotData2D {
 
@@ -198,7 +195,7 @@ public class PlotData2D {
 
   /**
    * Set the shape sizes for the plot data
-   * @param st an array of integers specifying the size of data points
+   * @param ss an array of integers specifying the size of data points
    */
   public void setShapeSize(int [] ss) throws Exception {
     m_shapeSize = ss;
@@ -210,7 +207,7 @@ public class PlotData2D {
   
   /**
    * Set the shape sizes for the plot data
-   * @param st a FastVector of integers specifying the size of data points
+   * @param ss a FastVector of integers specifying the size of data points
    */
   public void setShapeSize(FastVector ss) throws Exception {
     if (ss.size() != m_plotInstances.numInstances()) {

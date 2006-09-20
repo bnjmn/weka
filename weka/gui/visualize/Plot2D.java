@@ -23,48 +23,33 @@
 
 package weka.gui.visualize;
 
-import weka.gui.*;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
 import weka.core.FastVector;
+import weka.core.Instances;
 import weka.core.Utils;
 
-import java.util.Random;
-
-import java.awt.Insets;
-import java.awt.Font;
-import java.awt.event.InputEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.Dimension;
 import java.awt.BorderLayout;
-
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JViewport;
-import javax.swing.JSlider;
-
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Random;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * This class plots datasets in two dimensions. It can also plot
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class Plot2D extends JPanel {
 
@@ -408,7 +393,7 @@ public class Plot2D extends JPanel {
   /**
    * Sets the master plot from a set of instances
    * @param inst the instances
-   * @exception exception Exception if instances could not be set
+   * @exception Exception if instances could not be set
    */
   public void setInstances(Instances inst) throws Exception {
     //System.err.println("Setting Instances");

@@ -22,16 +22,20 @@
 
 package weka.gui.boundaryvisualizer;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.io.Serializable;
 import java.util.Random;
-import java.io.*;
 
 /**
  * KDDataGenerator. Class that uses kernels to generate new random
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see DataGenerator
  * @see Serializable
@@ -87,7 +91,7 @@ public class KDDataGenerator implements DataGenerator, Serializable {
    * Initialize the generator using the supplied instances
    *
    * @param inputInstances the instances to use as the basis of the kernels
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public void buildGenerator(Instances inputInstances) throws Exception {
     m_random = new Random(m_seed);
@@ -180,9 +184,8 @@ public class KDDataGenerator implements DataGenerator, Serializable {
    * Generates a new instance using one kernel estimator. Each successive
    * call to this method incremets the index of the kernel to use.
    *
-   * @param fast generate the instance quickly
    * @return the new random instance
-   * @exception Exception if an error occurs
+   * @throws Exception if an error occurs
    */
   public double [][] generateInstances(int [] indices) throws Exception {
     
