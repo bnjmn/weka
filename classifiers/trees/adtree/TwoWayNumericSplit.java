@@ -22,15 +22,18 @@
 
 package weka.classifiers.trees.adtree;
 
-import weka.core.*;
-import java.util.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.util.Enumeration;
 
 /**
  * Class representing a two-way split on a numeric attribute, of the form:
  * either 'is < some_value' or 'is >= some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class TwoWayNumericSplit extends Splitter {
 
@@ -70,7 +73,7 @@ public class TwoWayNumericSplit extends Splitter {
    * Gets the index of the branch that an instance applies to. Returns -1 if no branches
    * apply.
    *
-   * @param i the instance
+   * @param inst the instance
    * @return the branch index
    */
   public int branchInstanceGoesDown(Instance inst) {
@@ -86,7 +89,7 @@ public class TwoWayNumericSplit extends Splitter {
    * any branch.
    *
    * @param branch the index of the branch
-   * @param sourceInstances the instances from which to find the subset 
+   * @param instances the instances from which to find the subset 
    * @return the set of instances that apply
    */
   public ReferenceInstances instancesDownBranch(int branch, Instances instances) {

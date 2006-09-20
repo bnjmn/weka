@@ -96,7 +96,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -1032,7 +1032,7 @@ public class UserClassifier
     /**
      * This function gets called to set the node to use a linear regression
      * and attribute filter.
-     * @throws If can't set a default linear egression model.
+     * @throws Exception If can't set a default linear egression model.
      */
     private void setLinear() throws Exception {
       //then set default behaviour for node.

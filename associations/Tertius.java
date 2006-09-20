@@ -145,7 +145,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Tertius 
@@ -1435,7 +1435,8 @@ public class Tertius
   /**
    * Build the predicates to use in the rules.
    *
-   * @throws If the predicates could not be built 
+   * @return the predicates
+   * @throws Exception If the predicates could not be built 
    * (numeric attribute).
    */
   private ArrayList buildPredicates() throws Exception {

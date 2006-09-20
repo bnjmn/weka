@@ -86,7 +86,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class MINND 
   extends Classifier 
@@ -250,7 +250,7 @@ public class MINND
    * There is actually no need to store the exemplars themselves.
    *
    * @param exs the training exemplars
-   * @throws if the model cannot be built properly
+   * @throws Exception if the model cannot be built properly
    */    
   public void buildClassifier(Instances exs)throws Exception{
     // can classifier handle the data?
@@ -348,7 +348,7 @@ public class MINND
    * @param data the whole exemplars
    * @param pos the position of given exemplar in data
    * @return the processed exemplar
-   * @throws if the returned exemplar is wrong 
+   * @throws Exception if the returned exemplar is wrong 
    */
   public Instance preprocess(Instances data, int pos)
     throws Exception{
@@ -496,7 +496,7 @@ public class MINND
    * 
    * @param before the given exemplar
    * @return the resultant exemplar after scaling
-   * @throws if given exampler cannot be scaled properly
+   * @throws Exception if given exampler cannot be scaled properly
    */
   private Instance scale(Instance before) throws Exception{
 
@@ -530,7 +530,7 @@ public class MINND
    * or not in the matrix.
    * 
    * @param row the given row index
-   * @return the result after gradient descent
+   * @param mean
    */
   public void findWeights(int row, double[][] mean){
 
@@ -724,7 +724,7 @@ search:
    *
    * @param before the given exemplar
    * @return the processed exemplar
-   * @throws if the returned exemplar is wrong 
+   * @throws Exception if the returned exemplar is wrong 
    */
   public Instance cleanse(Instance before) throws Exception{
 

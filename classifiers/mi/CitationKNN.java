@@ -78,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class CitationKNN 
   extends Classifier 
@@ -560,9 +560,7 @@ public class CitationKNN
   /**
    * Calculates the distance between two instances
    * @param first instance
-   * @param firstBag
    * @param second instance
-   * @param secondBag
    * @return the distance value
    */
   public double distanceSet(Instance first, Instance second){

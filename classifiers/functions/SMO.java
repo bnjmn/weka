@@ -187,7 +187,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.62 $
+ * @version $Revision: 1.63 $
  */
 public class SMO 
   extends Classifier 
@@ -1346,7 +1346,7 @@ public class SMO
    * Estimates class probabilities for given instance.
    * 
    * @param inst the instance to compute the probabilities for
-   * @throws Execption in case of an error
+   * @throws Exception in case of an error
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
 

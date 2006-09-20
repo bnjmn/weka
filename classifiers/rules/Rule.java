@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public abstract class Rule 
@@ -58,7 +58,7 @@ public abstract class Rule
      * Build this rule
      *
      * @param data the data used to build the rule
-     * @exception if rule cannot be built
+     * @exception Exception if rule cannot be built
      */    
     public abstract void grow(Instances data) throws Exception;    
 

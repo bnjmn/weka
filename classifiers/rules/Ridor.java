@@ -118,7 +118,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  */
 public class Ridor 
   extends Classifier
@@ -376,7 +376,7 @@ public class Ridor
      *                   yet covered by the ruleset
      * @param ruleset the ruleset to be built
      * @return the weighted accuracy rate of the ruleset
-     * @throws if the rules cannot be built properly
+     * @throws Exception if the rules cannot be built properly
      */
     private double buildRuleset(Instances insts, double classCount, Vector ruleset) 
       throws Exception {	    
@@ -1282,7 +1282,7 @@ public class Ridor
   /**
    * Builds a ripple-down manner rule learner.
    *
-   * @param data the training data
+   * @param instances the training data
    * @throws Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
@@ -1329,7 +1329,7 @@ public class Ridor
   /**
    * Classify the test instance with the rule learner 
    *
-   * @param instance the instance to be classified
+   * @param datum the instance to be classified
    * @return the classification
    */
   public double classifyInstance(Instance datum){
@@ -1340,7 +1340,7 @@ public class Ridor
    * Classify the test instance with one node of Ridor 
    *
    * @param node the node of Ridor to classify the test instance
-   * @param instance the instance to be classified
+   * @param datum the instance to be classified
    * @return the classification
    */
   private double classify(Ridor_node node, Instance datum){
@@ -1588,7 +1588,7 @@ public class Ridor
     
   /**
    * Returns the value of the named measure
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
    */

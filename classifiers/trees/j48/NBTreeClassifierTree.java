@@ -33,7 +33,7 @@ import weka.core.Capabilities.Capability;
  * classification.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */ 
 
 public class NBTreeClassifierTree extends ClassifierTree {
@@ -110,7 +110,7 @@ public class NBTreeClassifierTree extends ClassifierTree {
   /**
    * Returns a newly created tree.
    *
-   * @param data the training data
+   * @param train the training data
    * @param test the pruning data.
    * @exception Exception if something goes wrong
    */

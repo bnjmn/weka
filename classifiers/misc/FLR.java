@@ -111,10 +111,9 @@ import java.util.Vector;
  * 
  * For further information contact I.N.Athanasiadis (ionathan@iti.gr)
  *
- * @author Ioannis N. Athanasiadis
- * @email: ionathan@iti.gr, alias: ionathan@ieee.org
+ * @author Ioannis N. Athanasiadis (email: ionathan@iti.gr, alias: ionathan@ieee.org)
  * @version 5.0
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class FLR
     extends Classifier

@@ -140,7 +140,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -656,7 +656,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    */
   class ControlPanel 
     extends JPanel {
@@ -1694,7 +1694,7 @@ public class MultilayerPerceptron
    * Call this function to build and train a neural network for the training
    * data provided.
    * @param i The training data.
-   * @throws Throws exception if can't build classification properly.
+   * @throws Exception if can't build classification properly.
    */
   public void buildClassifier(Instances i) throws Exception {
 
@@ -1989,7 +1989,7 @@ public class MultilayerPerceptron
    * classification model has been built with the buildClassifier call.
    * @param i The instance to classify.
    * @return A double array filled with the probabilities of each class type.
-   * @throws if can't classify instance.
+   * @throws Exception if can't classify instance.
    */
   public double[] distributionForInstance(Instance i) throws Exception {
 

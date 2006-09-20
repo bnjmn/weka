@@ -131,7 +131,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class JRip 
   extends Classifier 
@@ -1153,7 +1153,7 @@ public class JRip
      * Build one rule using the growing data
      *
      * @param data the growing data used to build the rule
-     * @throws if the consequent is not set yet
+     * @throws Exception if the consequent is not set yet
      */    
       public void grow(Instances data) throws Exception {
       if(m_Consequent == -1)
@@ -1556,7 +1556,7 @@ public class JRip
    * @param data the given data
    * @param classIndex the given class index
    * @param defDL the default DL in the data
-   * @throws if the ruleset can be built properly
+   * @throws Exception if the ruleset can be built properly
    */
   protected Instances rulesetForOneClass(double expFPRate, 
 					 Instances data, 
