@@ -22,9 +22,13 @@
 
 package weka.associations;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * Class for storing a set of items. Item sets are stored in a lexicographic
@@ -35,10 +39,14 @@ import weka.core.*;
  * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class ItemSet implements Serializable {
+public class ItemSet
+  implements Serializable {
 
+  /** for serialization */
+  private static final long serialVersionUID = 2724000045282835791L;
+  
   /** The items stored as an array of of ints. */
   protected int[] m_items;
 
@@ -47,11 +55,6 @@ public class ItemSet implements Serializable {
 
   /** The total number of transactions */
   protected int m_totalTransactions;
-
- 
-    
-
-    
 
   /**
    * Constructor
@@ -88,7 +91,7 @@ public class ItemSet implements Serializable {
    * @param instance the instance to be tested
    * @return true if the given instance contains this item set
    */
-  public final boolean containedBy(Instance instance) {
+  public boolean containedBy(Instance instance) {
     
     for (int i = 0; i < instance.numAttributes(); i++) 
       if (m_items[i] > -1) {
@@ -163,7 +166,7 @@ public class ItemSet implements Serializable {
    *
    * @return a hash code for a set of items
    */
-  public final int hashCode() {
+  public int hashCode() {
 
     long result = 0;
 
@@ -284,10 +287,6 @@ public class ItemSet implements Serializable {
     rules[1] = newConsequences;
     rules[2] = newConf;
   }
-  
-  
- 
-  
 
   /**
    * Converts the header info of the given set of instances into a set 
@@ -347,8 +346,6 @@ public class ItemSet implements Serializable {
     text.append(m_counter);
     return text.toString();
   }
-
-
 
   /**
    * Updates counter of item set with respect to given transaction.
@@ -425,14 +422,4 @@ public class ItemSet implements Serializable {
       
       m_items[k] = value;
   }
-  
 }
-
-
-
-
-
-
-
-
-
