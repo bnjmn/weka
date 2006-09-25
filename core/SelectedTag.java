@@ -22,6 +22,8 @@
 
 package weka.core;
 
+import java.util.HashSet;
+
 /**
  * Represents a selected value from a finite set of values, where each
  * value is a Tag (i.e. has some string associated with it). Primarily
@@ -29,7 +31,7 @@ package weka.core;
  * associating names with the alternative behaviours.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SelectedTag {
   
@@ -37,17 +39,29 @@ public class SelectedTag {
   protected int m_Selected;
   
   /** The set of tags to choose from */
-  protected Tag [] m_Tags;
+  protected Tag[] m_Tags;
   
   /**
    * Creates a new <code>SelectedTag</code> instance.
    *
    * @param tagID the id of the selected tag.
    * @param tags an array containing the possible valid Tags.
-   * @exception IllegalArgumentException if the selected tag isn't in the array
-   * of valid values.
+   * @throws IllegalArgumentException if the selected tag isn't in the array
+   * of valid values or the IDs/IDStrs are not unique.
    */
-  public SelectedTag(int tagID, Tag [] tags) {
+  public SelectedTag(int tagID, Tag[] tags) {
+    // are IDs unique?
+    HashSet ID = new HashSet();
+    HashSet IDStr = new HashSet();
+    for (int i = 0; i < tags.length; i++) {
+      ID.add(new Integer(tags[i].getID()));
+      IDStr.add(tags[i].getIDStr());
+    }
+    if (ID.size() != tags.length)
+      throw new IllegalArgumentException("The IDs are not unique!");
+    if (IDStr.size() != tags.length)
+      throw new IllegalArgumentException("The ID strings are not unique!");
+
     for (int i = 0; i < tags.length; i++) {
       if (tags[i].getID() == tagID) {
 	m_Selected = i;
@@ -55,6 +69,7 @@ public class SelectedTag {
 	return;
       }
     }
+    
     throw new IllegalArgumentException("Selected tag is not valid");
   }
   
@@ -63,12 +78,13 @@ public class SelectedTag {
    *
    * @param tagText the text of the selected tag (case-insensitive).
    * @param tags an array containing the possible valid Tags.
-   * @exception IllegalArgumentException if the selected tag isn't in the array
+   * @throws IllegalArgumentException if the selected tag isn't in the array
    * of valid values.
    */
-  public SelectedTag(String tagText, Tag [] tags) {
+  public SelectedTag(String tagText, Tag[] tags) {
     for (int i = 0; i < tags.length; i++) {
-      if (tags[i].getReadable().equalsIgnoreCase(tagText)) {
+      if (    tags[i].getReadable().equalsIgnoreCase(tagText)
+	   || tags[i].getIDStr().equalsIgnoreCase(tagText) ) {
         m_Selected = i;
         m_Tags = tags;
         return;
@@ -77,7 +93,12 @@ public class SelectedTag {
     throw new IllegalArgumentException("Selected tag is not valid");
   }
   
-  /** Returns true if this SelectedTag equals another object */
+  /**
+   * Returns true if this SelectedTag equals another object
+   * 
+   * @param o the object to compare with
+   * @return true if the tags and the selected tag are the same
+   */
   public boolean equals(Object o) {
     if ((o == null) || !(o.getClass().equals(this.getClass()))) {
       return false;
@@ -106,7 +127,16 @@ public class SelectedTag {
    *
    * @return an array containing the valid Tags.
    */
-  public Tag [] getTags() {
+  public Tag[] getTags() {
     return m_Tags;
+  }
+  
+  /**
+   * returns the selected tag in string representation
+   * 
+   * @return the selected tag as string
+   */
+  public String toString() {
+    return getSelectedTag().toString();
   }
 }
