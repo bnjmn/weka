@@ -29,9 +29,11 @@ import weka.gui.GenericPropertiesCreator;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.StreamTokenizer;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -43,7 +45,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -64,7 +66,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    * @see #hasMoreElements()
    * @see #nextElement()
    * @see #reset()
@@ -82,7 +84,7 @@ public class ConverterUtils
     protected URL m_URL;
     
     /** the loader */
-    protected AbstractFileLoader m_FileLoader;
+    protected Loader m_Loader;
     
     /** whether the loader is incremental */
     protected boolean m_Incremental;
@@ -106,31 +108,6 @@ public class ConverterUtils
     public DataSource(String location) throws Exception {
       super();
       
-      initialize(location);
-    }
-    
-    /**
-     * Initializes the datasource with the given dataset
-     * 
-     * @param inst		the dataset to use
-     */
-    public DataSource(Instances inst) {
-      super();
-      
-      m_BatchBuffer = inst;
-      m_FileLoader  = null;
-      m_File        = null;
-      m_URL         = null;
-      m_Incremental = false;
-    }
-    
-    /**
-     * initializes the loader, tries to determine which converter to use, etc.
-     * 
-     * @param location		the location of the file to load
-     * @throws Exception 	if no suitable converter can be found
-     */
-    protected void initialize(String location) throws Exception {
       // file or URL?
       if (    location.startsWith("http://")
 	   || location.startsWith("https://")
@@ -142,23 +119,75 @@ public class ConverterUtils
       
       // quick check: is it ARFF?
       if (isArff(location)) {
-	m_FileLoader = new ArffLoader();
+	m_Loader = new ArffLoader();
       }
       else {
 	if (m_File != null)
-	  m_FileLoader = ConverterUtils.getLoaderForFile(location);
+	  m_Loader = ConverterUtils.getLoaderForFile(location);
 	else
-	  m_FileLoader = ConverterUtils.getURLLoaderForFile(location);
+	  m_Loader = ConverterUtils.getURLLoaderForFile(location);
 	
 	// do we have a converter?
-	if (m_FileLoader == null)
+	if (m_Loader == null)
 	  throw new IllegalArgumentException("No suitable converter found for '" + location + "'!");
       }
       
       // incremental loader?
-      m_Incremental = (m_FileLoader instanceof IncrementalConverter);
+      m_Incremental = (m_Loader instanceof IncrementalConverter);
       
       reset();
+    }
+    
+    /**
+     * Initializes the datasource with the given dataset
+     * 
+     * @param inst		the dataset to use
+     */
+    public DataSource(Instances inst) {
+      super();
+      
+      m_BatchBuffer = inst;
+      m_Loader      = null;
+      m_File        = null;
+      m_URL         = null;
+      m_Incremental = false;
+    }
+    
+    /**
+     * Initializes the datasource with the given Loader
+     * 
+     * @param loader		the Loader to use
+     */
+    public DataSource(Loader loader) {
+      super();
+      
+      m_BatchBuffer = null;
+      m_Loader      = loader;
+      m_File        = null;
+      m_URL         = null;
+      m_Incremental = (m_Loader instanceof IncrementalConverter);
+    }
+
+    /**
+     * Initializes the datasource with the given input stream. This stream
+     * is always interpreted as ARFF.
+     * 
+     * @param stream		the stream to use
+     */
+    public DataSource(InputStream stream) {
+      super();
+      
+      m_BatchBuffer = null;
+      m_Loader      = new ArffLoader();
+      try {
+	m_Loader.setSource(stream);
+      }
+      catch (Exception e) {
+	m_Loader = null;
+      }
+      m_File        = null;
+      m_URL         = null;
+      m_Incremental = (m_Loader instanceof IncrementalConverter);
     }
     
     /**
@@ -191,8 +220,8 @@ public class ConverterUtils
      * 
      * @return		the loader used for retrieving the data
      */
-    public AbstractFileLoader getLoader() {
-      return m_FileLoader;
+    public Loader getLoader() {
+      return m_Loader;
     }
     
     /**
@@ -210,8 +239,8 @@ public class ConverterUtils
       reset();
       
       try {
-	if (m_FileLoader != null)
-	  result = m_FileLoader.getDataSet();
+	if (m_Loader != null)
+	  result = m_Loader.getDataSet();
 	else
 	  result = m_BatchBuffer;
       }
@@ -230,16 +259,18 @@ public class ConverterUtils
      */
     public void reset() throws Exception {
       if (m_File != null)
-	m_FileLoader.setFile(m_File);
+	((AbstractFileLoader) m_Loader).setFile(m_File);
       else if (m_URL != null)
-	((URLSourcedLoader) m_FileLoader).setURL(m_URL.toString());
+	((URLSourcedLoader) m_Loader).setURL(m_URL.toString());
+      else if (m_Loader != null)
+	m_Loader.reset();
       
       m_BatchCounter      = 0;
       m_IncrementalBuffer = null;
 
-      if (m_FileLoader != null) {
+      if (m_Loader != null) {
 	if (!isIncremental())
-	  m_BatchBuffer = m_FileLoader.getDataSet();
+	  m_BatchBuffer = m_Loader.getDataSet();
 	else
 	  m_BatchBuffer = null;
       }
@@ -252,8 +283,8 @@ public class ConverterUtils
      * @throws Exception	if something goes wrong
      */
     public Instances getStructure() throws Exception {
-      if (m_FileLoader != null)
-	return m_FileLoader.getStructure();
+      if (m_Loader != null)
+	return m_Loader.getStructure();
       else
 	return new Instances(m_BatchBuffer, 0);
     }
@@ -277,7 +308,7 @@ public class ConverterUtils
 	}
 	else {
 	  try {
-	    m_IncrementalBuffer = m_FileLoader.getNextInstance();
+	    m_IncrementalBuffer = m_Loader.getNextInstance();
 	    result              = (m_IncrementalBuffer != null);
 	  }
 	  catch (Exception e) {
@@ -311,7 +342,7 @@ public class ConverterUtils
 	}
 	else {
 	  try {
-	    result = m_FileLoader.getNextInstance();
+	    result = m_Loader.getNextInstance();
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();
@@ -359,6 +390,29 @@ public class ConverterUtils
     }
   }
   
+  /** the core loaders - hardcoded list necessary for RMI/Remote Experiments 
+   * (comma-separated list) */
+  public final static String CORE_FILE_LOADERS = 
+      weka.core.converters.ArffLoader.class.getName() + ","
+    + weka.core.converters.C45Loader.class.getName() + ","
+    + weka.core.converters.CSVLoader.class.getName() + ","
+    + weka.core.converters.DatabaseConverter.class.getName() + ","
+    + weka.core.converters.LibSVMLoader.class.getName() + ","
+    + weka.core.converters.SerializedInstancesLoader.class.getName() + ","
+    + weka.core.converters.TextDirectoryLoader.class.getName() + ","
+    + weka.core.converters.XMLLoader.class.getName();
+
+  /** the core savers - hardcoded list necessary for RMI/Remote Experiments 
+   * (comma-separated list) */
+  public final static String CORE_FILE_SAVERS =
+      weka.core.converters.ArffSaver.class.getName() + ","
+    + weka.core.converters.C45Saver.class.getName() + ","
+    + weka.core.converters.CSVSaver.class.getName() + ","
+    + weka.core.converters.DatabaseConverter.class.getName() + ","
+    + weka.core.converters.LibSVMSaver.class.getName() + ","
+    + weka.core.converters.SerializedInstancesSaver.class.getName() + ","
+    + weka.core.converters.XMLSaver.class.getName();
+  
   /** all available loaders (extension &lt;-&gt; classname) */
   protected static Hashtable<String,String> m_FileLoaders;
   
@@ -373,53 +427,86 @@ public class ConverterUtils
     Vector classnames;
     
     try {
+      // generate properties 
+      // Note: does NOT work with RMI, hence m_FileLoadersCore/m_FileSaversCore
       GenericPropertiesCreator creator = new GenericPropertiesCreator();
       creator.execute(false);
       Properties props = creator.getOutputProperties();
+
+      // init
+      m_FileLoaders    = new Hashtable<String,String>();
+      m_URLFileLoaders = new Hashtable<String,String>();
+      m_FileSavers     = new Hashtable<String,String>();
       
       // loaders
       m_FileLoaders = getFileConverters(
-	  		props.getProperty(Loader.class.getName(), ""),
+	  		props.getProperty(Loader.class.getName(), CORE_FILE_LOADERS),
 	  		new String[]{FileSourcedConverter.class.getName()});
       
       // URL loaders
       m_URLFileLoaders = getFileConverters(
-	  		   props.getProperty(Loader.class.getName(), ""),
+	  		   props.getProperty(Loader.class.getName(), CORE_FILE_LOADERS),
 	  		   new String[]{
 	  		     FileSourcedConverter.class.getName(), 
 	  		     URLSourcedLoader.class.getName()});
 
       // savers
       m_FileSavers = getFileConverters(
-	  		props.getProperty(Saver.class.getName(), ""),
+	  		props.getProperty(Saver.class.getName(), CORE_FILE_SAVERS),
 	  		new String[]{FileSourcedConverter.class.getName()});
     }
     catch (Exception e) {
+      // ignore
+    }
+    finally {
       // loaders
-      classnames = ClassDiscovery.find(
-		AbstractFileLoader.class, 
-		AbstractFileLoader.class.getPackage().getName());
-      m_FileLoaders = getFileConverters(
-	  		classnames,
-	  		new String[]{FileSourcedConverter.class.getName()});
+      if (m_FileLoaders.size() == 0) {
+	classnames = ClassDiscovery.find(
+	               AbstractFileLoader.class, 
+	               AbstractFileLoader.class.getPackage().getName());
+	if (classnames.size() > 0)
+	  m_FileLoaders = getFileConverters(
+	                    classnames,
+	                    new String[]{FileSourcedConverter.class.getName()});
+	else
+	  m_FileLoaders = getFileConverters(
+	                    CORE_FILE_LOADERS,
+	                    new String[]{FileSourcedConverter.class.getName()});
+      }
 
       // URL loaders
-      classnames = ClassDiscovery.find(
-		AbstractFileLoader.class, 
-		AbstractFileLoader.class.getPackage().getName());
-      m_URLFileLoaders = getFileConverters(
-	  		   classnames,
-	  		   new String[]{
-	  		       FileSourcedConverter.class.getName(), 
-	  		       URLSourcedLoader.class.getName()});
+      if (m_URLFileLoaders.size() == 0) {
+        classnames = ClassDiscovery.find(
+		       AbstractFileLoader.class, 
+		       AbstractFileLoader.class.getPackage().getName());
+        if (classnames.size() > 0)
+	  m_URLFileLoaders = getFileConverters(
+	  		       classnames,
+	  		       new String[]{
+	  			   FileSourcedConverter.class.getName(), 
+	  			   URLSourcedLoader.class.getName()});
+        else
+          m_URLFileLoaders = getFileConverters(
+	                       CORE_FILE_LOADERS,
+	                       new String[]{
+	                	   FileSourcedConverter.class.getName(), 
+	                	   URLSourcedLoader.class.getName()});
+      }
 
       // savers
-      classnames = ClassDiscovery.find(
-		AbstractFileSaver.class, 
-		AbstractFileSaver.class.getPackage().getName());
-      m_FileSavers = getFileConverters(
-	  		classnames,
-	  		new String[]{FileSourcedConverter.class.getName()});
+      if (m_FileSavers.size() == 0) {
+	classnames = ClassDiscovery.find(
+		       AbstractFileSaver.class, 
+		       AbstractFileSaver.class.getPackage().getName());
+	if (classnames.size() > 0)
+	  m_FileSavers = getFileConverters(
+	  		   classnames,
+	  		   new String[]{FileSourcedConverter.class.getName()});
+	else
+	  m_FileSavers = getFileConverters(
+	                   CORE_FILE_SAVERS,
+	                   new String[]{FileSourcedConverter.class.getName()});
+      }
     }
   }
   
@@ -589,12 +676,20 @@ public class ConverterUtils
   protected static Object getConverterForFile(String filename, Hashtable<String,String> ht) {
     Object	result;
     String	extension;
+    int		index;
     
     result = null;
     
-    if (filename.lastIndexOf('.') > -1) {
-      extension = filename.substring(filename.lastIndexOf('.')).toLowerCase();
+    index = filename.lastIndexOf('.');
+    if (index > -1) {
+      extension = filename.substring(index).toLowerCase();
       result    = getConverterForExtension(extension, ht);
+      // is it a compressed format?
+      if (extension.equals(".gz") && result == null) {
+	index     = filename.lastIndexOf('.', index - 1);
+	extension = filename.substring(index).toLowerCase();
+	result    = getConverterForExtension(extension, ht);
+      }
     }
     
     return result;
@@ -612,14 +707,34 @@ public class ConverterUtils
     Object	result;
     String	classname;
     
+    result    = null;
     classname = (String) ht.get(extension);
-    try {
-      result = Class.forName(classname).newInstance();
+    if (classname != null) {
+      try {
+	result = Class.forName(classname).newInstance();
+      }
+      catch (Exception e) {
+	result = null;
+	e.printStackTrace();
+      }
     }
-    catch (Exception e) {
-      result = null;
-      e.printStackTrace();
-    }
+    
+    return result;
+  }
+  
+  /**
+   * checks whether the given class is one of the hardcoded core file loaders
+   * 
+   * @param classname	the class to check
+   * @return		true if the class is one of the core loaders
+   * @see		#CORE_FILE_LOADERS
+   */
+  public static boolean isCoreFileLoader(String classname) {
+    boolean	result;
+    String[]	classnames;
+    
+    classnames = CORE_FILE_LOADERS.split(",");
+    result     = (Arrays.binarySearch(classnames, classname) >= 0);
     
     return result;
   }
@@ -706,6 +821,23 @@ public class ConverterUtils
    */
   public static AbstractFileLoader getURLLoaderForExtension(String extension) {
     return (AbstractFileLoader) getConverterForExtension(extension, m_URLFileLoaders);
+  }
+  
+  /**
+   * checks whether the given class is one of the hardcoded core file savers
+   * 
+   * @param classname	the class to check
+   * @return		true if the class is one of the core savers
+   * @see		#CORE_FILE_SAVERS
+   */
+  public static boolean isCoreFileSaver(String classname) {
+    boolean	result;
+    String[]	classnames;
+    
+    classnames = CORE_FILE_SAVERS.split(",");
+    result     = (Arrays.binarySearch(classnames, classname) >= 0);
+    
+    return result;
   }
 
   /**
