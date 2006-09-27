@@ -43,7 +43,7 @@ import java.util.zip.GZIPInputStream;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see Loader
  */
 public class ArffLoader 
@@ -239,7 +239,7 @@ public class ArffLoader
       try {
 	m_structure = new Instances(m_sourceReader, 1);
       } catch (Exception ex) {
-	throw new IOException("Unable to determine structure as arff.");
+	throw new IOException("Unable to determine structure as arff (Reason: " + ex.toString() + ").");
       }
     }
 
