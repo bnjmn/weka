@@ -35,13 +35,10 @@ import weka.core.RelationalLocator;
 import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.Utils;
+import weka.core.converters.ConverterUtils.DataSource;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.io.Serializable;
 import java.util.Enumeration;
 
@@ -73,7 +70,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -600,7 +597,7 @@ public abstract class Filter
 
     boolean debug = false;
     Instances data = null;
-    Reader input = null;
+    DataSource input = null;
     PrintWriter output = null;
     boolean helpRequest;
 
@@ -623,9 +620,9 @@ public abstract class Filter
 	throw new Exception("Help requested.\n");
       }
       if (infileName.length() != 0) {
-	input = new BufferedReader(new FileReader(infileName));
+	input = new DataSource(infileName);
       } else {
-	input = new BufferedReader(new InputStreamReader(System.in));
+	input = new DataSource(System.in);
       }
       if (outfileName.length() != 0) {
 	output = new PrintWriter(new FileOutputStream(outfileName));
@@ -633,7 +630,7 @@ public abstract class Filter
 	output = new PrintWriter(System.out);
       }
 
-      data = new Instances(input, 1);
+      data = input.getStructure();
       if (classIndex.length() != 0) {
 	if (classIndex.equals("first")) {
 	  data.setClassIndex(0);
@@ -688,11 +685,14 @@ public abstract class Filter
     }
     
     // Pass all the instances to the filter
-    while (data.readInstance(input)) {
+    Instance inst;
+    while (input.hasMoreElements()) {
+      inst = input.nextElement();
+      inst.setDataset(data);
       if (debug) {
 	System.err.println("Input instance to filter");
       }
-      if (filter.input(data.instance(0))) {
+      if (filter.input(inst)) {
 	if (debug) {
 	  System.err.println("Filter said collect immediately");
 	}
@@ -705,9 +705,8 @@ public abstract class Filter
 	}
 	output.println(filter.output().toString());
       }
-      data.delete(0);
     }
-    
+
     // Say that input has finished, and print any pending output instances
     if (debug) {
       System.err.println("Setting end of batch");
@@ -760,8 +759,8 @@ public abstract class Filter
 
     Instances firstData = null;
     Instances secondData = null;
-    Reader firstInput = null;
-    Reader secondInput = null;
+    DataSource firstInput = null;
+    DataSource secondInput = null;
     PrintWriter firstOutput = null;
     PrintWriter secondOutput = null;
     boolean helpRequest;
@@ -770,14 +769,14 @@ public abstract class Filter
 
       String fileName = Utils.getOption('i', options); 
       if (fileName.length() != 0) {
-	firstInput = new BufferedReader(new FileReader(fileName));
+	firstInput = new DataSource(fileName);
       } else {
 	throw new Exception("No first input file given.\n");
       }
 
       fileName = Utils.getOption('r', options); 
       if (fileName.length() != 0) {
-	secondInput = new BufferedReader(new FileReader(fileName));
+	secondInput = new DataSource(fileName);
       } else {
 	throw new Exception("No second input file given.\n");
       }
@@ -805,8 +804,8 @@ public abstract class Filter
       if (helpRequest) {
 	throw new Exception("Help requested.\n");
       }
-      firstData = new Instances(firstInput, 1);
-      secondData = new Instances(secondInput, 1);
+      firstData = firstInput.getStructure();
+      secondData = secondInput.getStructure();
       if (!secondData.equalHeaders(firstData)) {
 	throw new Exception("Input file formats differ.\n");
       }
@@ -861,15 +860,17 @@ public abstract class Filter
     }
     
     // Pass all the instances to the filter
-    while (firstData.readInstance(firstInput)) {
-      if (filter.input(firstData.instance(0))) {
+    Instance inst;
+    while (firstInput.hasMoreElements()) {
+      inst = firstInput.nextElement();
+      inst.setDataset(firstData);
+      if (filter.input(inst)) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from setInputFormat() "
 			  + "earlier!");
 	}
 	firstOutput.println(filter.output().toString());
       }
-      firstData.delete(0);
     }
     
     // Say that input has finished, and print any pending output instances
@@ -891,15 +892,15 @@ public abstract class Filter
       printedHeader = true;
     }
     // Pass all the second instances to the filter
-    while (secondData.readInstance(secondInput)) {
-      if (filter.input(secondData.instance(0))) {
+    while (secondInput.hasMoreElements()) {
+      inst = secondInput.nextElement();
+      if (filter.input(inst)) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from"
 			  + " isOutputFormatDefined() earlier!");
 	}
 	secondOutput.println(filter.output().toString());
       }
-      secondData.delete(0);
     }
     
     // Say that input has finished, and print any pending output instances
