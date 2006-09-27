@@ -51,7 +51,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class DatabaseUtils
   implements Serializable {
@@ -78,10 +78,13 @@ public class DatabaseUtils
   public final static String PROPERTY_FILE = "weka/experiment/DatabaseUtils.props";
 
   /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
-  protected static Vector DRIVERS = new Vector();
+  protected Vector DRIVERS = new Vector();
+
+  /** keeping track of drivers that couldn't be loaded */
+  protected static Vector DRIVERS_ERRORS;
 
   /** Properties associated with the database connection */
-  protected static Properties PROPERTIES;
+  protected Properties PROPERTIES;
 
   /* Type mapping used for reading experiment results */
   /** Type mapping for STRING used for reading experiment results */
@@ -147,39 +150,42 @@ public class DatabaseUtils
    * @throws Exception 	if an error occurs
    */
   public DatabaseUtils() throws Exception {
-    if (PROPERTIES == null) {
-      try {
-	PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-	
-	// Register the drivers in jdbc DriverManager
-	String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
-	
-	if (drivers == null) {
-	  throw new Exception("No jdbc drivers specified");
-	}
-	// The call to newInstance() is necessary on some platforms
-	// (with some java VM implementations)
-	StringTokenizer st = new StringTokenizer(drivers, ", ");
-	while (st.hasMoreTokens()) {
-	  String driver = st.nextToken();
-	  boolean result;
-	  try {
-	    Class.forName(driver);
-	    DRIVERS.addElement(driver);
-	    result = true;
-	  }
-	  catch (Exception e) {
-	    result = false;
-	  }
-	  if (m_Debug || !result) 
-	    System.err.println(
-		"Trying to add JDBC driver: " + driver 
-		+ " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
-	}
-      } catch (Exception ex) {
-	System.err.println("Problem reading properties. Fix before continuing.");
-	System.err.println(ex);
+    if (DRIVERS_ERRORS == null)
+      DRIVERS_ERRORS = new Vector();
+
+    try {
+      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+
+      // Register the drivers in jdbc DriverManager
+      String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
+
+      if (drivers == null) {
+        throw new Exception("No jdbc drivers specified");
       }
+      // The call to newInstance() is necessary on some platforms
+      // (with some java VM implementations)
+      StringTokenizer st = new StringTokenizer(drivers, ", ");
+      while (st.hasMoreTokens()) {
+        String driver = st.nextToken();
+        boolean result;
+        try {
+          Class.forName(driver);
+          DRIVERS.addElement(driver);
+          result = true;
+        }
+        catch (Exception e) {
+          result = false;
+        }
+        if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) 
+          System.err.println(
+              "Trying to add JDBC driver: " + driver 
+              + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
+        if (!result)
+          DRIVERS_ERRORS.add(driver);
+      }
+    } catch (Exception ex) {
+      System.err.println("Problem reading properties. Fix before continuing.");
+      System.err.println(ex);
     }
 
     m_DatabaseURL = PROPERTIES.getProperty("jdbcURL", "jdbc:idb=experiments.prp");
@@ -245,7 +251,7 @@ public class DatabaseUtils
    * 			which data type / get()-Method to use in order to 
    * 			retrieve values from the
    */
-  public static int translateDBColumnType(String type) {
+  public int translateDBColumnType(String type) {
     try {
       // Oracle, e.g., has datatypes like "DOUBLE PRECISION"
       // BUT property names can't have blanks in the name (unless escaped with
