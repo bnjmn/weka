@@ -25,6 +25,7 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.AbstractLoader;
 import weka.core.converters.AbstractSaver;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.FileSourcedConverter;
@@ -45,7 +46,7 @@ import javax.swing.JOptionPane;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -97,6 +98,13 @@ public class ConverterFileChooser
   /** whether the file to be opened must exist (only open dialog) */
   protected boolean m_FileMustExist = true;
   
+  /** whether to display only core converters (hardcoded in ConverterUtils).
+   * Necessary for RMI/Remote Experiments for instance.
+   * 
+   * @see ConverterUtils#CORE_FILE_LOADERS
+   * @see ConverterUtils#CORE_FILE_SAVERS */
+  protected boolean m_CoreConvertersOnly = false;
+  
   static {
     initFilters(true, ConverterUtils.getFileLoaders());
     initFilters(false, ConverterUtils.getFileSavers());
@@ -130,6 +138,64 @@ public class ConverterFileChooser
     m_Self = this;
   }
 
+  /**
+   * filters out all non-core loaders if only those should be displayed
+   * 
+   * @param list	the list of filters to check
+   * @return		the filtered list of filters
+   * @see		#m_CoreConvertersOnly
+   */
+  protected Vector<ExtensionFileFilter> filterNonCoreLoaderFileFilters(Vector<ExtensionFileFilter> list) {
+    Vector<ExtensionFileFilter> result;
+    int				i;
+    ExtensionFileFilter		filter;
+    AbstractLoader		loader;
+    
+    if (!getCoreConvertersOnly()) {
+      result = list;
+    }
+    else {
+      result = new Vector<ExtensionFileFilter>();
+      for (i = 0; i < list.size(); i++) {
+	filter = list.get(i);
+	loader = ConverterUtils.getLoaderForExtension(filter.getExtensions()[0]);
+	if (ConverterUtils.isCoreFileLoader(loader.getClass().getName()))
+	  result.add(filter);
+      }
+    }
+    
+    return result;
+  }
+
+  /**
+   * filters out all non-core savers if only those should be displayed
+   * 
+   * @param list	the list of filters to check
+   * @return		the filtered list of filters
+   * @see		#m_CoreConvertersOnly
+   */
+  protected Vector<ExtensionFileFilter> filterNonCoreSaverFileFilters(Vector<ExtensionFileFilter> list) {
+    Vector<ExtensionFileFilter> result;
+    int				i;
+    ExtensionFileFilter		filter;
+    AbstractSaver		saver;
+    
+    if (!getCoreConvertersOnly()) {
+      result = list;
+    }
+    else {
+      result = new Vector<ExtensionFileFilter>();
+      for (i = 0; i < list.size(); i++) {
+	filter = list.get(i);
+	saver = ConverterUtils.getSaverForExtension(filter.getExtensions()[0]);
+	if (ConverterUtils.isCoreFileSaver(saver.getClass().getName()))
+	  result.add(filter);
+      }
+    }
+    
+    return result;
+  }
+  
   /**
    * filters the list of file filters according to the currently set
    * Capabilities
@@ -228,9 +294,9 @@ public class ConverterFileChooser
     resetChoosableFileFilters();
     setAcceptAllFileFilterUsed(true);
     if (m_DialogType == LOADER_DIALOG)
-      list = m_LoaderFileFilters;
+      list = filterNonCoreLoaderFileFilters(m_LoaderFileFilters);
     else
-      list = filterSaverFileFilters(m_SaverFileFilters);
+      list = filterSaverFileFilters(filterNonCoreSaverFileFilters(m_SaverFileFilters));
     for (i = 0; i < list.size(); i++) {
       addChoosableFileFilter(list.get(i));
     }
@@ -316,6 +382,29 @@ public class ConverterFileChooser
    */
   public boolean getFileMustExist() {
     return m_FileMustExist;
+  }
+
+  /**
+   * Whether to display only the hardocded core converters. Necessary for
+   * RMI/Remote Experiments (dynamic class discovery doesn't work there!).
+   * 
+   * @param value	if true only the core converters will be displayed
+   * @see 		#m_CoreConvertersOnly
+   */
+  public void setCoreConvertersOnly(boolean value) {
+    m_CoreConvertersOnly = value;
+  }
+  
+  /**
+   * Returns whether only the hardcoded core converters are displayed. 
+   * Necessary for RMI/REmote Experiments (dynamic class discovery doesn't 
+   * work there!).
+   * 
+   * @return		true if the file must exist
+   * @see 		#m_CoreConvertersOnly
+   */
+  public boolean getCoreConvertersOnly() {
+    return m_CoreConvertersOnly;
   }
   
   /**
