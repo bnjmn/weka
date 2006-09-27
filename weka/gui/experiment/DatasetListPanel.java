@@ -57,7 +57,7 @@ import javax.swing.event.ListSelectionListener;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -117,6 +117,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     // swing look and feels.
     // m_FileChooser.setMultiSelectionEnabled(true);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    m_FileChooser.setCoreConvertersOnly(true);
     m_DeleteBut.setEnabled(false);
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
