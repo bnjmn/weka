@@ -60,7 +60,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1103,7 +1103,7 @@ public class Capabilities
 	cap = handler.getMultiInstanceCapabilities();
 	boolean result;
 	if (data.numInstances() > 0)
-	  result = cap.test(data.attribute(1).relation(1));
+	  result = cap.test(data.attribute(1).relation(0));
 	else
 	  result = cap.test(data.attribute(1).relation());
 	
