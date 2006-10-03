@@ -1,7 +1,14 @@
 README
 ======
 
-Version: $Revision: 1.2 $
+Author:  FracPete (fracpete at waikato dot ac dot nz)
+Version: $Revision: 1.3 $
+
+Prerequisites
+-------------
+- templates/RunWeka.java
+  must be compiled (best with Java 1.4), since it will be added to the 
+  Installer archive (it's the central launcher class for Weka)
 
 
 Parameters
@@ -28,7 +35,7 @@ Examples
 - Weka 3.4.7:
   java GenerateSetup \
        -version 3.4.7 \
-       -input-dir ../../weka.previous_releases/weka-3-4-7 \
+       -input-dir ../../../weka.previous_releases/weka-3-4-7 \
        -output-dir ./output \
        -dir Weka-3-4 \
        -link-prefix "Weka 3.4"
@@ -36,11 +43,9 @@ Examples
 - Weka 3.4.7 (with JRE):
   java GenerateSetup \
        -version 3.4.7 \
-       -input-dir ../../weka.previous_releases/weka-3-4-7 \
+       -input-dir ../../../weka.previous_releases/weka-3-4-7 \
        -output-dir ./output \
        -dir Weka-3-4 \
        -link-prefix "Weka 3.4" \
        -jre d:/installs/windows/programming/java/jdk.14/j2re-1_4_2_11-windows-i586-p.exe
 
-
-FracPete, 2006-05-17
