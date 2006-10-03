@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.3 $
+# Version: $Revision: 1.3.2.1 $
 
 Name Weka
 
@@ -97,7 +97,8 @@ Section -Main SectionMain
     SetOutPath $INSTDIR
     File /r ${WEKA_FILES}\*
     # files from template directory have to be listed separately
-    File ${WEKA_TEMPLATES}\RunWeka.bat
+    File ${WEKA_TEMPLATES}\RunWeka.ini
+    File ${WEKA_TEMPLATES}\RunWeka.class
     File ${WEKA_TEMPLATES}\weka.ico
     File ${WEKA_TEMPLATES}\weka.gif
     File ${WEKA_TEMPLATES}\documentation.html
@@ -107,8 +108,8 @@ Section -Main SectionMain
     # End: JRE
     # Links in App directory (to get the working directory of the links correct!)
     SetOutPath $INSTDIR
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "javaw" '-Xmx128m -classpath "%CLASSPATH%;weka.jar" weka.gui.GUIChooser' $INSTDIR\Weka.ico
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (console).lnk" "$INSTDIR\RunWeka.bat" "" $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "java" '"RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "default"' $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "java" '"RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "console"' $INSTDIR\Weka.ico
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
@@ -118,8 +119,11 @@ Section "Start Menu" SectionMenu
     SectionIn 1
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Documentation.lnk" $INSTDIR\documentation.html
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (console).lnk" "$INSTDIR\${WEKA_LINK_PREFIX} (console).lnk" "" $INSTDIR\Weka.ico
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "" $INSTDIR\Weka.ico
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "" $INSTDIR\Weka.ico
+    # delete temporary shortcuts
+    Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX}.lnk"
+    Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk"
 SectionEnd
 
 # associate .arff with WEKA
@@ -128,7 +132,7 @@ Section "Associate Files" SectionAssociations
     WriteRegStr HKCR ".arff" "" "ARFFDataFile"
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"javaw.exe" "-cp" "%CLASSPATH%;$INSTDIR\weka.jar" "weka.gui.explorer.Explorer" "%1"'
+    WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"java.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
 SectionEnd
 
 # Start: JRE
@@ -187,11 +191,10 @@ done${UNSECTION_ID}:
 # Uninstaller sections
 Section /o un.Main UNSEC0000
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk"
-    Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (console).lnk"
+    Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (with console).lnk"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Documentation.lnk"
-    Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX}.lnk"
-    Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX} (console).lnk"
-    Delete /REBOOTOK "$INSTDIR\RunWeka.bat"
+    Delete /REBOOTOK "$INSTDIR\RunWeka.class"
+    Delete /REBOOTOK "$INSTDIR\RunWeka.ini"
     Delete /REBOOTOK "$INSTDIR\weka.ico"
     Delete /REBOOTOK "$INSTDIR\weka.gif"
     Delete /REBOOTOK "$INSTDIR\documentation.html"
@@ -240,5 +243,5 @@ FunctionEnd
 
 # launches program
 Function LaunchProgram
-  ExecShell "" "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "" SW_SHOWNORMAL
+  ExecShell "" "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk" "" SW_SHOWNORMAL
 FunctionEnd
