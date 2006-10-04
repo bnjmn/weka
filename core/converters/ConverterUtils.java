@@ -45,7 +45,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -66,7 +66,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.7 $
+   * @version $Revision: 1.8 $
    * @see #hasMoreElements()
    * @see #nextElement()
    * @see #reset()
@@ -253,6 +253,24 @@ public class ConverterUtils
     }
     
     /**
+     * returns the full dataset with the specified class index set, 
+     * can be null in case of an error
+     * 
+     * @param classIndex	the class index for the dataset
+     * @return			the full dataset
+     * @throws Exception 	if resetting of loader fails
+     */
+    public Instances getDataSet(int classIndex) throws Exception {
+      Instances		result;
+      
+      result = getDataSet();
+      if (result != null)
+	result.setClassIndex(classIndex);
+      
+      return result;
+    }
+    
+    /**
      * resets the loader
      * 
      * @throws Exception	if resetting fails
@@ -287,6 +305,23 @@ public class ConverterUtils
 	return m_Loader.getStructure();
       else
 	return new Instances(m_BatchBuffer, 0);
+    }
+
+    /**
+     * returns the structure of the data, with the defined class index
+     * 
+     * @param classIndex	the class index for the dataset
+     * @return			the structure of the data
+     * @throws Exception	if something goes wrong
+     */
+    public Instances getStructure(int classIndex) throws Exception {
+      Instances		result;
+      
+      result = getStructure();
+      if (result != null)
+	result.setClassIndex(classIndex);
+      
+      return result;
     }
     
     /**
@@ -357,6 +392,23 @@ public class ConverterUtils
 	}
       }
 
+      return result;
+    }
+    
+    /**
+     * returns the next element and sets the specified dataset, null if 
+     * none available
+     * 
+     * @param dataset	the dataset to set for the instance
+     * @return		the next Instance
+     */
+    public Instance nextElement(Instances dataset) {
+      Instance	result;
+      
+      result = nextElement();
+      if (result != null)
+	result.setDataset(dataset);
+      
       return result;
     }
     
