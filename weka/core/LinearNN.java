@@ -16,10 +16,13 @@
 
 /*
  *    LinearNN.java
- *    Copyright (C) 1999-2005 University of Waikato
+ *    Copyright (C) 1999-2006 University of Waikato
  */
 
 package weka.core;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -27,11 +30,21 @@ package weka.core;
  * <p/>
  <!-- globalinfo-end -->
  * 
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -S
+ *  Skip identical instances (distances equal to zero).
+ * </pre>
+ * 
+ <!-- options-end -->
+ *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LinearNN
-  extends NearestNeighbourSearch {
+  extends NearestNeighbourSearch
+  implements OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = -7318654963683219025L;
@@ -249,7 +262,11 @@ public class LinearNN
    *  both by nearestNeighbour() and kNearestNeighbours(). 
    */
   private double[] m_Distances;
-    
+  
+  
+  /** Whether to skip instances from the neighbours that are identical to the query instance. */
+  private boolean m_SkipIdentical=false;
+  
   /** Constructor */
   public LinearNN() {
     super();
@@ -263,6 +280,75 @@ public class LinearNN
   public LinearNN(Instances insts) {
     super(insts);
     m_DistanceFunction.setInstances(insts);
+  }
+  
+  /**
+   * Returns a string describing this nearest neighbour search algorithm.
+   * 
+   * @return a description of the algorithm for displaying in the 
+   * explorer/experimenter gui
+   */
+  public String globalInfo() {
+    return "Class implementing the brute force search algorithm for nearest "+
+           "neighbour search.";  
+  }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector newVector = new Vector();
+    
+    newVector.add(new Option(
+	"\tSkip identical instances (distances equal to zero).\n",
+	"S", 1,"-S"));
+    
+    return newVector.elements();
+  }
+  
+  /**
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S
+   *  Skip identical instances (distances equal to zero).
+   * </pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    super.setOptions(options);
+
+    setSkipIdentical(Utils.getFlag('S', options));
+  }
+
+  /**
+   * Gets the current settings.
+   *
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String[] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
+    
+    result = new Vector();
+    
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+    
+    if (getSkipIdentical())
+      result.add("-S");
+
+    return (String[]) result.toArray(new String[result.size()]);
   }
   
   /** 
@@ -293,20 +379,29 @@ public class LinearNN
     
     MyHeap heap = new MyHeap(kNN);
     double distance; 
+    int firstkNN=0;
     for(int i=0; i<m_Instances.numInstances(); i++) {
       if(target == m_Instances.instance(i)) //for hold-one-out cross-validation
         continue;
-      if(i<kNN) {
+      if(firstkNN<kNN) {
         if(print==true)
           System.out.println("K: "+(heap.size()+heap.noOfKthNearest()));
         distance = ((EuclideanDistance)m_DistanceFunction).distance(target, m_Instances.instance(i), Double.MAX_VALUE, print);
+        if(m_SkipIdentical && distance==0.0)
+          if(i<m_Instances.numInstances()-1)
+            continue;
+          else
+            heap.put(i, distance);
         heap.put(i, distance);
+        firstkNN++;
       }
       else {
         MyHeapElement temp = heap.peek();
         if(print==true)
           System.out.println("K: "+(heap.size()+heap.noOfKthNearest()));
-        distance = ((EuclideanDistance)m_DistanceFunction).distance(target, m_Instances.instance(i), temp.distance, print); 
+        distance = ((EuclideanDistance)m_DistanceFunction).distance(target, m_Instances.instance(i), temp.distance, print);
+        if(m_SkipIdentical && distance==0.0)
+          continue;
         if(distance < temp.distance) { 
           heap.putBySubstitute(i, distance);
         }
@@ -319,7 +414,7 @@ public class LinearNN
     
     Instances neighbours = new Instances(m_Instances, (heap.size()+heap.noOfKthNearest()));
     m_Distances = new double[heap.size()+heap.noOfKthNearest()];
-    int [] indices = new int[heap.size()+heap.noOfKthNearest()];
+    int[] indices = new int[heap.size()+heap.noOfKthNearest()];
     int i=1; MyHeapElement h;
     while(heap.noOfKthNearest()>0) {
       h = heap.getKthNearest();
@@ -357,7 +452,7 @@ public class LinearNN
    *         nearestNeighbours. The length and ordering of the array is the 
    *         same as that of the instances returned by nearestNeighbour 
    *         functions.
-   * @throws Exception if called before calling kNearestNeighbours
+   * @throws Exception an exception if called before calling kNearestNeighbours
    *            or nearestNeighbours.
    */
   public double[] getDistances() throws Exception {
@@ -369,10 +464,11 @@ public class LinearNN
 
   /** 
    * Sets the instances comprising the current neighbourhood.
+   * 
    * @param insts The set of instances on which the nearest neighbour search
    * is carried out. Usually this set is the training set. 
    */
-  public void setInstances(Instances insts) throws Exception {
+  public void setInstances(Instances insts) {
     m_Instances = insts;
     m_DistanceFunction.setInstances(insts);
   }
@@ -382,8 +478,11 @@ public class LinearNN
    * implementation only updates the ranges of the EuclideanDistance class, 
    * since our set of instances is passed by reference and should already have 
    * the newly added instance.
+   * 
    * @param ins The instance to add. Usually this is the instance that is
    * added to our neighbourhood i.e. the training instances.
+   * @throws Exception if the provided instance is either null or the 
+   * distance function cannot work with this instance.
    */
   public void update(Instance ins) throws Exception {
     if(m_Instances==null)
@@ -395,6 +494,7 @@ public class LinearNN
   /** 
    * Adds the given instance info. This implementation updates the range
    * datastructures of the EuclideanDistance.
+   * 
    * @param ins The instance to add the information of. Usually this is
    * the test instance supplied to update the range of attributes in the 
    * distance function.
@@ -404,14 +504,33 @@ public class LinearNN
       try{ update(ins); }
       catch(Exception ex) { ex.printStackTrace(); }
   }
-    
+
   /**
-   * Returns a string describing this nearest neighbour search algorithm.
-   * @return a description of the algorithm for displaying in the 
-   * explorer/experimenter gui
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
    */
-  public String globalInfo() {
-    return "Class implementing the brute force search algorithm for nearest "+
-           "neighbour search.";  
+  public String skipIdenticalTipText() {
+    return "Whether to skip identical instances (with distance 0 to the target)";
+  }
+  
+  /**
+   * Sets the property to skip identical instances (with distance zero from 
+   * the target) from the set of neighbours returned.
+   * 
+   * @param skip if true, identical intances are skipped
+   */
+  public void setSkipIdentical(boolean skip) {
+    m_SkipIdentical = skip;
+  }
+  
+  /**
+   * Gets whether if identical instances are skipped from the neighbourhood.
+   * 
+   * @return true if identical instances are skipped
+   */
+  public boolean getSkipIdentical() {
+    return m_SkipIdentical;
   }
 }
