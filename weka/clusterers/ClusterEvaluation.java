@@ -85,7 +85,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.34 $
+ * @version  $Revision: 1.35 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -223,8 +223,7 @@ public class ClusterEvaluation
       source = new DataSource(testFileName);
     else
       source = new DataSource(test);
-    testRaw = source.getStructure();
-    testRaw.setClassIndex(test.classIndex());
+    testRaw = source.getStructure(test.classIndex());
     
     // If class is set then do class based evaluation as well
     if (hasClass) {
@@ -240,8 +239,7 @@ public class ClusterEvaluation
     i = 0;
     while (source.hasMoreElements()) {
       // next instance
-      inst = source.nextElement();
-      inst.setDataset(testRaw);
+      inst = source.nextElement(testRaw);
       if (filter != null) {
 	filter.input(inst);
 	filter.batchFinished();
@@ -339,13 +337,11 @@ public class ClusterEvaluation
       source = new DataSource(fileName);
     else
       source = new DataSource(inst);
-    instances = source.getStructure();
-    instances.setClassIndex(inst.classIndex());
+    instances = source.getStructure(inst.classIndex());
 
     i = 0;
     while (source.hasMoreElements()) {
-      instance = source.nextElement();
-      instance.setDataset(instances);
+      instance = source.nextElement(instances);
       counts[(int)m_clusterAssignments[i]][(int)instance.classValue()]++;
       clusterTotals[(int)m_clusterAssignments[i]]++;
       i++;
@@ -681,8 +677,7 @@ public class ClusterEvaluation
       if (theClass == -1) {
 	if (updateable) {
 	  while (source.hasMoreElements()) {
-	    inst = source.nextElement();
-	    inst.setDataset(train);
+	    inst = source.nextElement(train);
 	    ((UpdateableClusterer) clusterer).updateClusterer(inst);
 	  }
 	}
@@ -699,8 +694,7 @@ public class ClusterEvaluation
 	  Instances clusterTrain = Filter.useFilter(train, removeClass);
 	  clusterer.buildClusterer(clusterTrain);
 	  while (source.hasMoreElements()) {
-	    inst = source.nextElement();
-	    inst.setDataset(train);
+	    inst = source.nextElement(train);
 	    removeClass.input(inst);
 	    removeClass.batchFinished();
 	    Instance clusterTrainInst = removeClass.output();
