@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -157,6 +157,18 @@ public class DatabaseLoader
   /** Properties associated with the database connection */
   protected static Properties PROPERTIES;
 
+  /** the JDBC URL to use */
+  protected String m_URL = null;
+
+  /** the database user to use */
+  protected String m_User = null;
+
+  /** the database password to use */
+  protected String m_Password = null;
+  
+  /** the keys for unique ordering */
+  protected String m_Keys = null;
+  
   /** reads the property file */
   static {
 
@@ -220,8 +232,20 @@ public class DatabaseLoader
     if(m_DataBaseConnection != null && m_DataBaseConnection.isConnected())
         m_DataBaseConnection.disconnectFromDatabase();
     m_DataBaseConnection = new DatabaseConnection();
+
+    // don't lose previously set connection data!
+    if (m_URL != null)
+      m_DataBaseConnection.setDatabaseURL(m_URL);
+    if (m_User != null)
+      m_DataBaseConnection.setUsername(m_User);
+    if (m_Password != null)
+      m_DataBaseConnection.setPassword(m_Password);
+
     m_orderBy = new FastVector();
-    //    m_query = "Select * from Results0";
+    // don't lose previously set key columns!
+    if (m_Keys != null)
+      setKeys(m_Keys);
+      
     m_inc = false;
     
   }
@@ -281,6 +305,7 @@ public class DatabaseLoader
    */
   public void setKeys(String keys){
   
+    m_Keys = keys;
     m_orderBy.removeAllElements();
     StringTokenizer st = new StringTokenizer(keys, ",");
     while (st.hasMoreTokens()) {
@@ -326,6 +351,7 @@ public class DatabaseLoader
    */
   public void setUrl(String url){
       
+      m_URL = url;
       m_DataBaseConnection.setDatabaseURL(url);
     
   }
@@ -357,6 +383,7 @@ public class DatabaseLoader
    */
   public void setUser(String user){
    
+      m_User = user;
       m_DataBaseConnection.setUsername(user);
   }
   
@@ -387,6 +414,7 @@ public class DatabaseLoader
    */
   public void setPassword(String password){
    
+      m_Password = password;
       m_DataBaseConnection.setPassword(password);
   }
 
@@ -421,9 +449,9 @@ public class DatabaseLoader
   
       try{
         m_DataBaseConnection = new DatabaseConnection();
-        m_DataBaseConnection.setDatabaseURL(url);
-        m_DataBaseConnection.setUsername(userName);
-        m_DataBaseConnection.setPassword(password);
+        setUrl(url);
+        setUser(userName);
+        setPassword(password);
       } catch(Exception ex) {
             printException(ex);
       }    
@@ -438,7 +466,9 @@ public class DatabaseLoader
   
       try{
         m_DataBaseConnection = new DatabaseConnection();
-        m_DataBaseConnection.setDatabaseURL(url);
+        setUrl(url);
+        m_User = m_DataBaseConnection.getUsername();
+        m_Password = m_DataBaseConnection.getPassword();
       } catch(Exception ex) {
             printException(ex);
        }    
@@ -452,6 +482,9 @@ public class DatabaseLoader
   public void setSource() throws Exception{
   
         m_DataBaseConnection = new DatabaseConnection();
+        m_URL = m_DataBaseConnection.getDatabaseURL();
+        m_User = m_DataBaseConnection.getUsername();
+        m_Password = m_DataBaseConnection.getPassword();
   }
   
   /**
