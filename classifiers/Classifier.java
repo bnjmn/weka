@@ -43,7 +43,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
@@ -292,8 +292,8 @@ public abstract class Classifier
       System.out.println(Evaluation.evaluateModel(classifier, options));
     } 
     catch (Exception e) {
-      if (    (e.getMessage() != null)
-	   && (e.getMessage().indexOf("General options") == -1) )
+      if (    ((e.getMessage() != null) && (e.getMessage().indexOf("General options") == -1))
+	   || (e.getMessage() == null) )
 	e.printStackTrace();
       else
 	System.err.println(e.getMessage());
