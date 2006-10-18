@@ -63,7 +63,7 @@ import java.util.Vector;
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
  * 
- * <pre> -R &lt;AVG|PROD|MAJ|MIN|MAX&gt;
+ * <pre> -R &lt;AVG|PROD|MAJ|MIN|MAX|MED&gt;
  *  The combination rule to use
  *  (default: AVG)</pre>
  * 
@@ -95,7 +95,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Vote
   extends MultipleClassifiersCombiner
@@ -106,21 +106,24 @@ public class Vote
   
   /** combination rule: Average of Probabilities */
   public static final int AVERAGE_RULE = 1;
-  /** combination rule: Product of Probabilities */
+  /** combination rule: Product of Probabilities (only nominal classes) */
   public static final int PRODUCT_RULE = 2;
-  /** combination rule: Majority Voting */
+  /** combination rule: Majority Voting (only nominal classes) */
   public static final int MAJORITY_VOTING_RULE = 3;
   /** combination rule: Minimum Probability */
   public static final int MIN_RULE = 4;
   /** combination rule: Maximum Probability */
   public static final int MAX_RULE = 5;
+  /** combination rule: Median Probability (only numeric class) */
+  public static final int MEDIAN_RULE = 6;
   /** combination rules */
   public static final Tag[] TAGS_RULES = {
     new Tag(AVERAGE_RULE, "AVG", "Average of Probabilities"),
     new Tag(PRODUCT_RULE, "PROD", "Product of Probabilities"),
     new Tag(MAJORITY_VOTING_RULE, "MAJ", "Majority Voting"),
     new Tag(MIN_RULE, "MIN", "Minimum Probability"),
-    new Tag(MAX_RULE, "MAX", "Maximum Probability")
+    new Tag(MAX_RULE, "MAX", "Maximum Probability"),
+    new Tag(MEDIAN_RULE, "MED", "Median")
   };
   
   /** Combination Rule variable */
@@ -199,7 +202,7 @@ public class Vote
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
    * 
-   * <pre> -R &lt;AVG|PROD|MAJ|MIN|MAX&gt;
+   * <pre> -R &lt;AVG|PROD|MAJ|MIN|MAX|MED&gt;
    *  The combination rule to use
    *  (default: AVG)</pre>
    * 
@@ -265,6 +268,12 @@ public class Vote
       result.enable(Capability.NOMINAL_CLASS);
       result.enableDependency(Capability.NOMINAL_CLASS);
     }
+    else if (m_CombinationRule == MEDIAN_RULE) {
+      result.disableAllClasses();
+      result.disableAllClassDependencies();
+      result.enable(Capability.NUMERIC_CLASS);
+      result.enableDependency(Capability.NUMERIC_CLASS);
+    }
     
     return result;
   }
@@ -292,6 +301,63 @@ public class Vote
   }
 
   /**
+   * Classifies the given test instance.
+   *
+   * @param instance the instance to be classified
+   * @return the predicted most likely class for the instance or 
+   * Instance.missingValue() if no prediction is made
+   * @throws Exception if an error occurred during the prediction
+   */
+  public double classifyInstance(Instance instance) throws Exception {
+    double result;
+    
+    switch (m_CombinationRule) {
+      case AVERAGE_RULE:
+      case PRODUCT_RULE:
+      case MAJORITY_VOTING_RULE:
+      case MIN_RULE:
+      case MAX_RULE:
+	result = Utils.maxIndex(distributionForInstance(instance));
+	if (result == 0)
+	  result = Instance.missingValue();
+	break;
+      case MEDIAN_RULE:
+	result = classifyInstanceMedian(instance);
+	break;
+      default:
+	throw new IllegalStateException("Unknown combination rule '" + m_CombinationRule + "'!");
+    }
+    
+    return result;
+  }
+
+  /**
+   * Classifies the given test instance, returning the median from all
+   * classifiers.
+   *
+   * @param instance the instance to be classified
+   * @return the predicted most likely class for the instance or 
+   * Instance.missingValue() if no prediction is made
+   * @throws Exception if an error occurred during the prediction
+   */
+  protected double classifyInstanceMedian(Instance instance) throws Exception {
+    double[] results = new double[m_Classifiers.length];
+    double result;
+
+    for (int i = 0; i < results.length; i++)
+      results[i] = m_Classifiers[i].classifyInstance(instance);
+    
+    if (results.length == 0)
+      result = 0;
+    else if (results.length == 1)
+      result = results[0];
+    else
+      result = Utils.kthSmallestValue(results, results.length / 2);
+    
+    return result;
+  }
+
+  /**
    * Classifies a given instance using the selected combination rule.
    *
    * @param instance the instance to be classified
@@ -300,20 +366,35 @@ public class Vote
    * successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
+    double[] result = new double[instance.numClasses()];
+    
     switch (m_CombinationRule) {
       case AVERAGE_RULE:
-	return distributionForInstanceAverage(instance);
+	result = distributionForInstanceAverage(instance);
+	break;
       case PRODUCT_RULE:
-	return distributionForInstanceProduct(instance);
+	result = distributionForInstanceProduct(instance);
+	break;
       case MAJORITY_VOTING_RULE:
-	return distributionForInstanceMajorityVoting(instance);
+	result = distributionForInstanceMajorityVoting(instance);
+	break;
       case MIN_RULE:
-	return distributionForInstanceMin(instance);
+	result = distributionForInstanceMin(instance);
+	break;
       case MAX_RULE:
-	return distributionForInstanceMax(instance);
+	result = distributionForInstanceMax(instance);
+	break;
+      case MEDIAN_RULE:
+	result[0] = classifyInstance(instance);
+	break;
       default:
 	throw new IllegalStateException("Unknown combination rule '" + m_CombinationRule + "'!");
     }
+    
+    if (!instance.classAttribute().isNumeric())
+      Utils.normalize(result);
+    
+    return result;
   }
   
   /**
@@ -527,6 +608,10 @@ public class Vote
 	
       case MAX_RULE:
 	result += "Maximum Probability";
+	break;
+	
+      case MEDIAN_RULE:
+	result += "Median Probability";
 	break;
 	
       default:
