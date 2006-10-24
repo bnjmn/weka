@@ -68,7 +68,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AlgorithmListPanel
   extends JPanel
@@ -151,7 +151,7 @@ public class AlgorithmListPanel
   /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(".xml", 
-                            "Experiment configuration files (*.xml)");
+                            "Classifier options (*.xml)");
 
   /** Whether an algorithm is added or only edited  */
   protected boolean m_Editing = false;
