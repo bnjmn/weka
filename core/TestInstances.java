@@ -99,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -1444,14 +1444,28 @@ public class TestInstances
       // attributes
       if (c.handles(Capability.NOMINAL_ATTRIBUTES))
 	result.setNumNominal(1);
+      else
+	result.setNumNominal(0);
+
       if (c.handles(Capability.NUMERIC_ATTRIBUTES))
 	result.setNumNumeric(1);
+      else
+	result.setNumNumeric(0);
+
       if (c.handles(Capability.DATE_ATTRIBUTES))
 	result.setNumDate(1);
+      else
+	result.setNumDate(0);
+      
       if (c.handles(Capability.STRING_ATTRIBUTES))
 	result.setNumString(1);
+      else
+	result.setNumString(0);
+      
       if (c.handles(Capability.RELATIONAL_ATTRIBUTES))
 	result.setNumRelational(1);
+      else
+	result.setNumRelational(0);
     }
     
     return result;
