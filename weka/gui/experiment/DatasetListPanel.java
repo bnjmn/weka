@@ -24,9 +24,13 @@
 package weka.gui.experiment;
 
 import weka.core.ClassDiscovery;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.Saver;
+import weka.core.converters.ConverterUtils.DataSource;
 import weka.experiment.Experiment;
 import weka.gui.ConverterFileChooser;
 import weka.gui.JListHelper;
+import weka.gui.ViewerDialog;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -34,6 +38,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -46,6 +53,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
@@ -57,7 +65,7 @@ import javax.swing.event.ListSelectionListener;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class DatasetListPanel extends JPanel implements ActionListener {
 
@@ -69,6 +77,9 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 
   /** Click to add a dataset */
   protected JButton m_AddBut = new JButton("Add new...");
+  
+  /** Click to edit the selected algorithm */
+  protected JButton m_EditBut = new JButton("Edit selected...");
 
   /** Click to remove the selected dataset from the list */
   protected JButton m_DeleteBut = new JButton("Delete selected");
@@ -112,6 +123,20 @@ public class DatasetListPanel extends JPanel implements ActionListener {
           setButtons(e);
         }
       });
+    MouseListener mouseListener = new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+        if (e.getClickCount() == 2) {
+          // unfortunately, locationToIndex only returns the nearest entry
+          // and not the exact one, i.e. if there's one item in the list and
+          // one doublelclicks somewhere in the list, this index will be
+          // returned
+          int index = m_List.locationToIndex(e.getPoint());
+          if (index > -1)
+            actionPerformed(new ActionEvent(m_EditBut, 0, ""));
+        }
+      }
+    };
+    m_List.addMouseListener(mouseListener);
     
     // Multiselection isn't handled by the current implementation of the
     // swing look and feels.
@@ -122,6 +147,8 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     m_DeleteBut.addActionListener(this);
     m_AddBut.setEnabled(false);
     m_AddBut.addActionListener(this);
+    m_EditBut.setEnabled(false);
+    m_EditBut.addActionListener(this);
     m_UpBut.setEnabled(false);
     m_UpBut.addActionListener(this);
     m_DownBut.setEnabled(false);
@@ -144,6 +171,9 @@ public class DatasetListPanel extends JPanel implements ActionListener {
     constraints.insets = new Insets(0,2,0,2);
     topLab.add(m_AddBut,constraints);
     constraints.gridx=1;constraints.gridy=0;constraints.weightx=5;
+    constraints.gridwidth=1;constraints.gridheight=1;
+    topLab.add(m_EditBut,constraints);
+    constraints.gridx=2;constraints.gridy=0;constraints.weightx=5;
     constraints.gridwidth=1;constraints.gridheight=1;
     topLab.add(m_DeleteBut,constraints);
 
@@ -180,6 +210,7 @@ public class DatasetListPanel extends JPanel implements ActionListener {
   private void setButtons(ListSelectionEvent e) {
     if ( (e == null) || (e.getSource() == m_List) ) {
       m_DeleteBut.setEnabled(m_List.getSelectedIndex() > -1);
+      m_EditBut.setEnabled(m_List.getSelectedIndices().length == 1);
       m_UpBut.setEnabled(JListHelper.canMoveUp(m_List));
       m_DownBut.setEnabled(JListHelper.canMoveDown(m_List));
     }
@@ -420,6 +451,43 @@ public class DatasetListPanel extends JPanel implements ActionListener {
 	  } else {
 	    m_List.setSelectedIndex(current - 1);
 	  }
+	}
+      }
+      setButtons(null);
+    } else if (e.getSource() == m_EditBut) {
+      // Delete the selected files
+      int selected = m_List.getSelectedIndex();
+      if (selected != -1) {
+	ViewerDialog dialog = new ViewerDialog(null);
+	String filename = m_List.getSelectedValue().toString();
+	int result;
+	try {
+	  DataSource source = new DataSource(filename);
+	  result = dialog.showDialog(source.getDataSet());
+	  // nasty workaround for Windows regarding locked files:
+	  // if file Reader in Loader is not closed explicitly, we cannot
+	  // overwrite the file.
+	  source = null;
+	  System.gc();
+	  // workaround end
+	  if ((result == ViewerDialog.APPROVE_OPTION) && (dialog.isChanged())) {
+	    result = JOptionPane.showConfirmDialog(
+			this,
+			"File was modified - save changes?");
+	    if (result == JOptionPane.YES_OPTION) {
+	      Saver saver = ConverterUtils.getSaverForFile(filename);
+	      saver.setFile(new File(filename));
+	      saver.setInstances(dialog.getInstances());
+	      saver.writeBatch();
+	    }
+	  }
+	}
+	catch (Exception ex) {
+	  JOptionPane.showMessageDialog(
+	      this,
+	      "Error loading file '" + filename + "':\n" + ex.toString(),
+	      "Error loading file",
+	      JOptionPane.INFORMATION_MESSAGE);
 	}
       }
       setButtons(null);
