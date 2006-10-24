@@ -76,7 +76,7 @@ import java.io.File;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.6 $
+ * @version $Revision: 1.7.2.7 $
  */
 public class AlgorithmListPanel extends JPanel implements ActionListener {
 
@@ -131,7 +131,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   /** A filter to ensure only experiment (in XML format) files get shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(".xml", 
-                            "Experiment configuration files (*.xml)");
+                            "Classifier options (*.xml)");
 
   /** Whether an algorithm is added or only edited  */
   protected boolean m_Editing = false;
