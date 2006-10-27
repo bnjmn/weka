@@ -20,6 +20,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.TestInstances;
@@ -34,7 +35,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.MultiInstanceToPropositionalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MultiInstanceToPropositionalTest 
   extends AbstractFilterTest {
@@ -46,6 +47,41 @@ public class MultiInstanceToPropositionalTest
   /** Creates a default MultiInstanceToPropositional */
   public Filter getFilter() {
     return new MultiInstanceToPropositional();
+  }
+
+  /**
+   * returns the configured FilteredClassifier. Since the base classifier is
+   * determined heuristically, derived tests might need to adjust it.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = new FilteredClassifier();
+    
+    result.setFilter(getFilter());
+    result.setClassifier(new weka.classifiers.rules.ZeroR());
+    
+    return result;
+  }
+  
+  /**
+   * returns data generated for the FilteredClassifier test
+   * 
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
+   */
+  protected Instances getFilteredClassifierData() throws Exception{
+    TestInstances	test;
+    Instances		result;
+
+    test = TestInstances.forCapabilities(m_FilteredClassifier.getCapabilities());
+    test.setClassIndex(TestInstances.CLASS_IS_LAST);
+
+    result = test.generate();
+    
+    return result;
   }
 
   /**
@@ -80,6 +116,15 @@ public class MultiInstanceToPropositionalTest
             + icopy.attribute(1).relation().numAttributes()
             - 1;
     assertEquals(result.numAttributes(), count);
+  }
+  
+  /**
+   * filter cannot be used in conjunction with the FilteredClassifier, since
+   * it can produce more than one instance out of a bag. This will of course 
+   * not with the distributionForInstance/classifyInstance methods.
+   */
+  public void testFilteredClassifier() {
+    // nothing
   }
 
   public static Test suite() {

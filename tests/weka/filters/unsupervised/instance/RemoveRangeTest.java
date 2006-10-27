@@ -4,20 +4,19 @@
 
 package weka.filters.unsupervised.instance;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests RemoveRange. Run from the command line with:<p>
  * java weka.filters.RemoveRangeTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RemoveRangeTest extends AbstractFilterTest {
   

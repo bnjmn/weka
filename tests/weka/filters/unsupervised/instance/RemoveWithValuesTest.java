@@ -4,20 +4,19 @@
 
 package weka.filters.unsupervised.instance;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import weka.core.Instances;
-import weka.core.Instance;
-import weka.filters.Filter;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests RemoveWithValues. Run from the command line with:<p>
  * java weka.filters.RemoveWithValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RemoveWithValuesTest extends AbstractFilterTest {
   
@@ -105,6 +104,15 @@ public class RemoveWithValuesTest extends AbstractFilterTest {
       assertTrue("Should select only instances with missing values",
              result.instance(i).isMissing(4));
     }
+  }
+  
+  /**
+   * filter cannot be used in conjunction with the FilteredClassifier, since
+   * an instance used in distributionForInstance/classifyInstance might get
+   * deleted.
+   */
+  public void testFilteredClassifier() {
+    // nothing
   }
 
   public static Test suite() {

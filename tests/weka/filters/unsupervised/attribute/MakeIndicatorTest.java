@@ -4,21 +4,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.Attribute;
-import weka.filters.Filter;
+import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests MakeIndicator. Run from the command line with:<p>
  * java weka.filters.MakeIndicatorTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MakeIndicatorTest extends AbstractFilterTest {
   
@@ -106,6 +105,30 @@ public class MakeIndicatorTest extends AbstractFilterTest {
              ==
              (result.instance(i).value(1) == 1));
     }
+  }
+  
+  /**
+   * tests the filter in conjunction with the FilteredClassifier
+   */
+  public void testFilteredClassifier() {
+    try {
+      Instances data = getFilteredClassifierData();
+
+      for (int i = 0; i < data.numAttributes(); i++) {
+	if (data.classIndex() == i)
+	  continue;
+	if (data.attribute(i).isNominal()) {
+	  ((MakeIndicator) m_FilteredClassifier.getFilter()).setAttributeIndex(
+	      "" + (i + 1));
+	  break;
+	}
+      }
+    }
+    catch (Exception e) {
+      fail("Problem setting up test for FilteredClassifier: " + e.toString());
+    }
+    
+    super.testFilteredClassifier();
   }
 
   public static Test suite() {

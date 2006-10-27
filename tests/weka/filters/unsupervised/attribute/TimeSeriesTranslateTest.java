@@ -20,20 +20,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
 import weka.core.Instance;
-import weka.filters.Filter;
+import weka.core.Instances;
 import weka.filters.AbstractTimeSeriesFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests TimeSeriesTranslate. Run from the command line with:<p>
  * java weka.filters.unsupervised.attribute.TimeSeriesTranslateTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class TimeSeriesTranslateTest 
   extends AbstractTimeSeriesFilterTest {

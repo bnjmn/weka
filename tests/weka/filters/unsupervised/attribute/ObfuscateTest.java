@@ -4,20 +4,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
 import weka.core.Attribute;
-import weka.filters.Filter;
+import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests Obfuscate. Run from the command line with:<p>
  * java weka.filters.ObfuscateTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ObfuscateTest extends AbstractFilterTest {
   

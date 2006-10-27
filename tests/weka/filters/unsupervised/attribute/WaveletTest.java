@@ -22,6 +22,7 @@ package weka.filters.unsupervised.attribute;
 
 import weka.core.Instances;
 import weka.core.SelectedTag;
+import weka.core.TestInstances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
@@ -33,12 +34,30 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.Wavelet
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class WaveletTest extends AbstractFilterTest {
   
   public WaveletTest(String name) { 
     super(name);
+  }
+  
+  /**
+   * returns data generated for the FilteredClassifier test
+   * 
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
+   */
+  protected Instances getFilteredClassifierData() throws Exception{
+    TestInstances	test;
+    Instances		result;
+
+    test = TestInstances.forCapabilities(m_FilteredClassifier.getCapabilities());
+    test.setClassIndex(TestInstances.CLASS_IS_LAST);
+
+    result = test.generate();
+    
+    return result;
   }
 
   /**

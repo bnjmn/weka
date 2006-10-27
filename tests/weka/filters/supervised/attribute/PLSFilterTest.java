@@ -20,6 +20,7 @@
 
 package weka.filters.supervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.SelectedTag;
@@ -35,7 +36,7 @@ import junit.framework.TestSuite;
  * java weka.filters.supervised.attribute.PLSFilterTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PLSFilterTest 
   extends AbstractFilterTest {
@@ -73,6 +74,26 @@ public class PLSFilterTest
     filter.setAlgorithm(new SelectedTag(algorithm, PLSFilter.TAGS_ALGORITHM));
 
     return filter;
+  }
+  
+  /**
+   * returns data generated for the FilteredClassifier test
+   * 
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
+   */
+  protected Instances getFilteredClassifierData() throws Exception{
+    TestInstances	test;
+    Instances		result;
+
+    test = new TestInstances();
+    test.setNumNominal(0);
+    test.setNumNumeric(NUM_NUMERIC_ATTS);
+    test.setClassType(Attribute.NUMERIC);
+
+    result = test.generate();
+    
+    return result;
   }
 
   /**

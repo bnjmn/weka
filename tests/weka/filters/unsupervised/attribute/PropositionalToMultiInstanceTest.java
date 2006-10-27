@@ -20,6 +20,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.TestInstances;
@@ -34,7 +35,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.PropositionalToMultiInstanceTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PropositionalToMultiInstanceTest 
   extends AbstractFilterTest {
@@ -80,6 +81,15 @@ public class PropositionalToMultiInstanceTest
             + result.attribute(1).relation().numAttributes()
             - 1;
     assertEquals(icopy.numAttributes(), count);
+  }
+  
+  /**
+   * filter cannot be used in conjunction with the FilteredClassifier, since
+   * it makes no sense creating bags containing only one instance in the
+   * distributionForInstance/classifyInstance methods.
+   */
+  public void testFilteredClassifier() {
+    // nothing
   }
 
   public static Test suite() {

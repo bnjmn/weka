@@ -4,9 +4,13 @@
 
 package weka.filters;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.TestInstances;
+import weka.core.Capabilities.Capability;
 import weka.test.Regression;
 
 import java.io.BufferedReader;
@@ -20,7 +24,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class AbstractFilterTest
   extends TestCase {
@@ -43,6 +47,9 @@ public abstract class AbstractFilterTest
   
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
+  
+  /** the FilteredClassifier instance used for tests */
+  protected FilteredClassifier m_FilteredClassifier;
 
   /**
    * Constructs the <code>AbstractFilterTest</code>. Called by subclasses.
@@ -63,12 +70,15 @@ public abstract class AbstractFilterTest
     m_Filter = getFilter();
     m_Instances = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/filters/data/FilterTest.arff"))));
     m_OptionTester = getOptionTester();
+    m_FilteredClassifier = getFilteredClassifier();
   }
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
     m_Filter = null;
     m_Instances = null;
+    m_OptionTester = null;
+    m_FilteredClassifier = null;
   }
   
   /**
@@ -91,6 +101,62 @@ public abstract class AbstractFilterTest
     return result;
   }
 
+  /**
+   * returns the configured FilteredClassifier. Since the base classifier is
+   * determined heuristically, derived tests might need to adjust it.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    Filter		filter;
+    Classifier		cls;
+    
+    result = new FilteredClassifier();
+    
+    // set filter
+    filter = getFilter();
+    result.setFilter(filter);
+    
+    // set classifier
+    if (filter.getCapabilities().handles(Capability.NOMINAL_CLASS))
+      cls = new weka.classifiers.trees.J48();
+    else if (filter.getCapabilities().handles(Capability.BINARY_CLASS))
+      cls = new weka.classifiers.trees.J48();
+    else if (filter.getCapabilities().handles(Capability.UNARY_CLASS))
+      cls = new weka.classifiers.trees.J48();
+    else if (filter.getCapabilities().handles(Capability.NUMERIC_CLASS))
+      cls = new weka.classifiers.trees.M5P();
+    else if (filter.getCapabilities().handles(Capability.DATE_CLASS))
+      cls = new weka.classifiers.trees.M5P();
+    else
+      throw new IllegalStateException("Cannot determine base classifier for FilteredClassifier!");
+    result.setClassifier(cls);
+    
+    return result;
+  }
+  
+  /**
+   * returns data generated for the FilteredClassifier test
+   * 
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
+   */
+  protected Instances getFilteredClassifierData() throws Exception {
+    TestInstances	test;
+    Instances		result;
+
+    // NB: in order to make sure that the classifier can handle the data,
+    //     we're using the classifier's capabilities to generate the data.
+    test = TestInstances.forCapabilities(
+  	m_FilteredClassifier.getClassifier().getCapabilities());
+    test.setClassIndex(TestInstances.CLASS_IS_LAST);
+
+    result = test.generate();
+    
+    return result;
+  }
+  
   /**
    * Used to create an instance of a specific filter. The filter
    * should be configured to operate on a dataset that contains
@@ -405,7 +471,7 @@ public abstract class AbstractFilterTest
   /**
    * tests the listing of the options
    */
-  public void testListOptions() throws Exception {
+  public void testListOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkListOptions())
 	fail("Options cannot be listed via listOptions.");
@@ -415,7 +481,7 @@ public abstract class AbstractFilterTest
   /**
    * tests the setting of the options
    */
-  public void testSetOptions() throws Exception {
+  public void testSetOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("setOptions method failed.");
@@ -425,7 +491,7 @@ public abstract class AbstractFilterTest
   /**
    * tests whether there are any remaining options
    */
-  public void testRemainingOptions() throws Exception {
+  public void testRemainingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkRemainingOptions())
 	fail("There were 'left-over' options.");
@@ -438,7 +504,7 @@ public abstract class AbstractFilterTest
    * 
    * @see 	#getOptionTester()
    */
-  public void testCanonicalUserOptions() throws Exception {
+  public void testCanonicalUserOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkCanonicalUserOptions())
 	fail("setOptions method failed");
@@ -448,10 +514,35 @@ public abstract class AbstractFilterTest
   /**
    * tests the resetting of the options to the default ones
    */
-  public void testResettingOptions() throws Exception {
+  public void testResettingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("Resetting of options failed");
+    }
+  }
+  
+  /**
+   * tests the filter in conjunction with the FilteredClassifier
+   */
+  public void testFilteredClassifier() {
+    Instances		data;
+    int			i;
+    double 		cls;
+    
+    try {
+      // generate data
+      data = getFilteredClassifierData();
+      
+      // build classifier
+      m_FilteredClassifier.buildClassifier(data);
+
+      // test classifier
+      for (i = 0; i < data.numInstances(); i++) {
+	cls = m_FilteredClassifier.classifyInstance(data.instance(i));
+      }
+    }
+    catch (Exception e) {
+      fail("Problem with FilteredClassifier: " + e.toString());
     }
   }
 }

@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.AddValuesTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddValuesTest 
   extends AbstractFilterTest {
@@ -168,6 +168,30 @@ public class AddValuesTest
    */
   public void testSortAndLabels() {
     performTest(getFilter(false, "__blah,__blubber"));
+  }
+  
+  /**
+   * tests the filter in conjunction with the FilteredClassifier
+   */
+  public void testFilteredClassifier() {
+    try {
+      Instances data = getFilteredClassifierData();
+
+      for (int i = 0; i < data.numAttributes(); i++) {
+	if (data.classIndex() == i)
+	  continue;
+	if (data.attribute(i).isNominal()) {
+	  ((AddValues) m_FilteredClassifier.getFilter()).setAttributeIndex(
+	      "" + (i + 1));
+	  break;
+	}
+      }
+    }
+    catch (Exception e) {
+      fail("Problem setting up test for FilteredClassifier: " + e.toString());
+    }
+    
+    super.testFilteredClassifier();
   }
   
   /**
