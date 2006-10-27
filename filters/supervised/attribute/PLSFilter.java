@@ -131,7 +131,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PLSFilter
   extends SimpleBatchFilter 
@@ -1052,9 +1052,6 @@ public class PLSFilter
     // class
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
-
-    // other
-    result.setMinimumNumberInstances(1);
     
     return result;
   }

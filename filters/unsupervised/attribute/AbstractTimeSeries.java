@@ -63,7 +63,7 @@ import weka.filters.UnsupervisedFilter;
  * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -259,7 +259,9 @@ public abstract class AbstractTimeSeries extends Filter
 	push(mergeInstances(null, (Instance) m_History.pop()));
       }
     } 
+    flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

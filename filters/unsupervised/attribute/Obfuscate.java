@@ -40,7 +40,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Obfuscate 
   extends Filter 
@@ -122,6 +122,7 @@ public class Obfuscate
       v.addElement(newAtt);
     }
     Instances newHeader = new Instances("R", v, 10);
+    newHeader.setClassIndex(instanceInfo.classIndex());
     setOutputFormat(newHeader);
     return true;
   }

@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AddID
   extends Filter
@@ -295,7 +295,7 @@ public class AddID
       m_NewBatch = false;
     }
     
-    if (m_Counter == -1) {
+    if (!isFirstBatchDone()) {
       bufferInput(instance);
       return false;
     } 
@@ -317,7 +317,7 @@ public class AddID
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
 
-    if (m_Counter == -1) {
+    if (!isFirstBatchDone()) {
       m_Counter = 0;
       
       // Convert pending input instances
@@ -329,6 +329,8 @@ public class AddID
     flushInput();
 
     m_NewBatch = true;
+    m_FirstBatchDone = true;
+    
     return (numPendingOutput() != 0);
   }
 

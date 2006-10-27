@@ -69,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  **/
 public class SpreadSubsample 
   extends Filter 
@@ -83,9 +83,6 @@ public class SpreadSubsample
 
   /** The maximum count of any class */
   private int m_MaxCount;
-  
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false;
 
   /** True if the first batch has been done */
   private double m_DistributionSpread = 0;
@@ -390,7 +387,6 @@ public class SpreadSubsample
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
-    m_FirstBatchDone = false;
     return true;
   }
 
@@ -412,7 +408,7 @@ public class SpreadSubsample
       resetQueue();
       m_NewBatch = false;
     }
-    if (m_FirstBatchDone) {
+    if (isFirstBatchDone()) {
       push(instance);
       return true;
     } else {
@@ -435,7 +431,7 @@ public class SpreadSubsample
       throw new IllegalStateException("No input instance format defined");
     }
 
-    if (!m_FirstBatchDone) {
+    if (!isFirstBatchDone()) {
       // Do the subsample, and clear the input instances.
       createSubsample();
     }
