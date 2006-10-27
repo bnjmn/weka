@@ -80,7 +80,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public class EM
   extends RandomizableDensityBasedClusterer
@@ -966,7 +966,9 @@ public class EM
    * @return      the capabilities of this clusterer
    */
   public Capabilities getCapabilities() {
-    return new SimpleKMeans().getCapabilities();
+    Capabilities result = new SimpleKMeans().getCapabilities();
+    result.setOwner(this);
+    return result;
   }
   
   /**
