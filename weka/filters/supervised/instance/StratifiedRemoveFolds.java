@@ -48,7 +48,7 @@ import java.util.*;
  * (default 0, don't randomize)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.1 $ 
 */
 public class StratifiedRemoveFolds extends Filter implements SupervisedFilter,
 						      OptionHandler {
@@ -330,6 +330,33 @@ public class StratifiedRemoveFolds extends Filter implements SupervisedFilter,
   }
 
   /**
+   * Input an instance for filtering. Filter requires all
+   * training instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws IllegalStateException if no input structure has been defined
+   */
+  public boolean input(Instance instance) {
+
+    if (getInputFormat() == null) {
+      throw new IllegalStateException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    if (m_FirstBatchDone) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
+  }
+
+  /**
    * Signify that this batch of input to the filter is
    * finished. Output() may now be called to retrieve the filtered
    * instances.
@@ -347,19 +374,27 @@ public class StratifiedRemoveFolds extends Filter implements SupervisedFilter,
       getInputFormat().randomize(new Random(m_Seed));
     }
 
-    // Select out a fold
-    getInputFormat().stratify(m_NumFolds);
     Instances instances;
-    if (!m_Inverse) {
-      instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
-    } else {
-      instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
+    if (!m_FirstBatchDone) {
+      // Select out a fold
+      getInputFormat().stratify(m_NumFolds);
+      if (!m_Inverse) {
+	instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
+      } else {
+	instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
+      }
+      for (int i = 0; i < instances.numInstances(); i++) {
+	push(instances.instance(i));
+      }
     }
-    for (int i = 0; i < instances.numInstances(); i++) {
-      push(instances.instance(i));
+    else {
+      instances = getInputFormat();
     }
+    
+    flushInput();
 
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

@@ -23,8 +23,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.Enumeration;
-import java.util.Vector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -34,6 +32,9 @@ import weka.core.Range;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  * An abstract instance filter that assumes instances form time-series data and
@@ -63,7 +64,7 @@ import weka.filters.UnsupervisedFilter;
  * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 public abstract class AbstractTimeSeries extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -259,7 +260,9 @@ public abstract class AbstractTimeSeries extends Filter
 	push(mergeInstances(null, (Instance) m_History.pop()));
       }
     } 
+    flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

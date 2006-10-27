@@ -50,7 +50,7 @@ import java.util.Vector;
  * dataset (default 100). <p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.4.2.1 $ 
  *
  */
 public class Resample extends Filter implements UnsupervisedFilter,
@@ -61,9 +61,6 @@ public class Resample extends Filter implements UnsupervisedFilter,
   
   /** The random number generator seed */
   private int m_RandomSeed = 1;
-
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false;
 
   /**
    * Returns a string describing this classifier
@@ -225,7 +222,6 @@ public class Resample extends Filter implements UnsupervisedFilter,
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
-    m_FirstBatchDone = false;
     return true;
   }
 

@@ -23,9 +23,17 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * This filter takes a dataset and outputs a specified fold for cross validation.
@@ -47,7 +55,7 @@ import java.util.*;
  * (default 0, don't randomize)<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.1.2.1 $ 
 */
 public class RemoveFolds extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -326,6 +334,33 @@ public class RemoveFolds extends Filter
   }
 
   /**
+   * Input an instance for filtering. Filter requires all
+   * training instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws IllegalStateException if no input structure has been defined
+   */
+  public boolean input(Instance instance) {
+
+    if (getInputFormat() == null) {
+      throw new IllegalStateException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    if (m_FirstBatchDone) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
+  }
+
+  /**
    * Signify that this batch of input to the filter is
    * finished. Output() may now be called to retrieve the filtered
    * instances.
@@ -338,24 +373,34 @@ public class RemoveFolds extends Filter
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
-    if (m_Seed > 0) {
-      // User has provided a random number seed.
-      getInputFormat().randomize(new Random(m_Seed));
-    }
-    // Push instances for output into output queue
     
-    // Select out a fold
     Instances instances;
-    if (!m_Inverse) {
-      instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
-    } else {
-      instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
+
+    // Select out a fold
+    if (!m_FirstBatchDone) {
+      if (m_Seed > 0) {
+	// User has provided a random number seed.
+	getInputFormat().randomize(new Random(m_Seed));
+      }
+
+      if (!m_Inverse) {
+	instances = getInputFormat().testCV(m_NumFolds, m_Fold - 1);
+      } else {
+	instances = getInputFormat().trainCV(m_NumFolds, m_Fold - 1);
+      }
     }
+    else {
+      instances = getInputFormat();
+    }
+    
+    flushInput();
+    
     for (int i = 0; i < instances.numInstances(); i++) {
       push(instances.instance(i));
     }
 
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

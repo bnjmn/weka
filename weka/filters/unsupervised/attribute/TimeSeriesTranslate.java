@@ -23,10 +23,12 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
 
 /** 
  * An instance filter that assumes instances form time-series data and
@@ -56,7 +58,7 @@ import weka.core.*;
  * (default is to remove those instances).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class TimeSeriesTranslate extends AbstractTimeSeries {
 

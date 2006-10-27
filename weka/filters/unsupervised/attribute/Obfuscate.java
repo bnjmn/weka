@@ -23,10 +23,14 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
 
 /** 
  * A simple instance filter that renames the relation, all attribute names
@@ -34,7 +38,7 @@ import weka.core.*;
  * datasets. Currently doesn't like string attributes.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class Obfuscate extends Filter implements UnsupervisedFilter,
 						 StreamableFilter {
@@ -86,6 +90,7 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
       v.addElement(newAtt);
     }
     Instances newHeader = new Instances("R", v, 10);
+    newHeader.setClassIndex(instanceInfo.classIndex());
     setOutputFormat(newHeader);
     return true;
   }

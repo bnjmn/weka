@@ -68,7 +68,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.24.2.1 $
  */
 public abstract class Filter implements Serializable {
 
@@ -102,6 +102,9 @@ public abstract class Filter implements Serializable {
 
   /** Record whether the filter is at the start of a batch */
   protected boolean m_NewBatch = true;
+
+  /** True if the first batch has been done */
+  protected boolean m_FirstBatchDone = false;
 
   /**
    * Sets the format of output instances. The derived class should use this
@@ -370,6 +373,7 @@ public abstract class Filter implements Serializable {
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
+    m_FirstBatchDone = false;
     return false;
   }
 
@@ -451,6 +455,7 @@ public abstract class Filter implements Serializable {
     }
     flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

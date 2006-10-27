@@ -23,9 +23,19 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
 import weka.clusterers.Clusterer;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -43,7 +53,7 @@ import java.util.Vector;
  * is set then the class is automatically ignored during clustering.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class AddCluster extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -86,50 +96,53 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
     }
 
     Instances toFilter = getInputFormat();
-    Instances toFilterIgnoringAttributes = toFilter;
+    
+    if (!m_FirstBatchDone) {
+      Instances toFilterIgnoringAttributes = toFilter;
 
-    // filter out attributes if necessary
-    if (m_IgnoreAttributesRange != null || toFilter.classIndex() >=0) {
-      toFilterIgnoringAttributes = new Instances(toFilter);
-      m_removeAttributes = new Remove();
-      String rangeString = "";
-      if (m_IgnoreAttributesRange != null) {
-	rangeString += m_IgnoreAttributesRange.getRanges();
-      }
-      if (toFilter.classIndex() >= 0) {
-	if (rangeString.length() > 0) {
-	  rangeString += (","+(toFilter.classIndex()+1));	  
-	} else {
-	  rangeString = ""+(toFilter.classIndex()+1);
+      // filter out attributes if necessary
+      if (m_IgnoreAttributesRange != null || toFilter.classIndex() >=0) {
+	toFilterIgnoringAttributes = new Instances(toFilter);
+	m_removeAttributes = new Remove();
+	String rangeString = "";
+	if (m_IgnoreAttributesRange != null) {
+	  rangeString += m_IgnoreAttributesRange.getRanges();
+	}
+	if (toFilter.classIndex() >= 0) {
+	  if (rangeString.length() > 0) {
+	    rangeString += (","+(toFilter.classIndex()+1));	  
+	  } else {
+	    rangeString = ""+(toFilter.classIndex()+1);
+	  }
+	}
+	((Remove)m_removeAttributes).setAttributeIndices(rangeString);
+	((Remove)m_removeAttributes).setInvertSelection(false);
+	m_removeAttributes.setInputFormat(toFilter);
+	for (int i = 0; i < toFilter.numInstances(); i++) {
+	  m_removeAttributes.input(toFilter.instance(i));
+	}
+	m_removeAttributes.batchFinished();
+	toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
+	Instance tempInst;
+	while ((tempInst = m_removeAttributes.output()) != null) {
+	  toFilterIgnoringAttributes.add(tempInst);
 	}
       }
-      ((Remove)m_removeAttributes).setAttributeIndices(rangeString);
-      ((Remove)m_removeAttributes).setInvertSelection(false);
-      m_removeAttributes.setInputFormat(toFilter);
-      for (int i = 0; i < toFilter.numInstances(); i++) {
-	m_removeAttributes.input(toFilter.instance(i));
+
+      // build the clusterer
+      m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
+
+      // create output dataset with new attribute
+      Instances filtered = new Instances(toFilter, 0); 
+      FastVector nominal_values = new FastVector(m_Clusterer.numberOfClusters());
+      for (int i=0; i<m_Clusterer.numberOfClusters(); i++) {
+	nominal_values.addElement("cluster" + (i+1)); 
       }
-      m_removeAttributes.batchFinished();
-      toFilterIgnoringAttributes = m_removeAttributes.getOutputFormat();
-      Instance tempInst;
-      while ((tempInst = m_removeAttributes.output()) != null) {
-	toFilterIgnoringAttributes.add(tempInst);
-      }
+      filtered.insertAttributeAt(new Attribute("cluster", nominal_values),
+	  filtered.numAttributes());
+
+      setOutputFormat(filtered);
     }
-
-    // build the clusterer
-    m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
-
-    // create output dataset with new attribute
-    Instances filtered = new Instances(toFilter, 0); 
-    FastVector nominal_values = new FastVector(m_Clusterer.numberOfClusters());
-    for (int i=0; i<m_Clusterer.numberOfClusters(); i++) {
-      nominal_values.addElement("cluster" + (i+1)); 
-    }
-    filtered.insertAttributeAt(new Attribute("cluster", nominal_values),
-			       filtered.numAttributes());
-
-    setOutputFormat(filtered);
 
     // build new dataset
     for (int i=0; i<toFilter.numInstances(); i++) {
@@ -137,6 +150,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
     }
     flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
 
     return (numPendingOutput() != 0);
   }

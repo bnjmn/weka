@@ -23,9 +23,16 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This filter removes a given percentage of a dataset.
@@ -40,7 +47,7 @@ import java.util.*;
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.3.2.1 $ 
 */
 public class RemovePercentage extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -211,6 +218,36 @@ public class RemovePercentage extends Filter
     setOutputFormat(instanceInfo);
     return true;
   }
+  
+  /**
+   * Input an instance for filtering. Ordinarily the instance is processed
+   * and made available for output immediately. Some filters require all
+   * instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws IllegalStateException if no input format has been set.
+   */
+  public boolean input(Instance instance) {
+     if (getInputFormat() == null) {
+        throw new IllegalStateException("No input instance format defined");
+     }
+     
+     if (m_NewBatch) {
+        resetQueue();
+        m_NewBatch = false;
+     }
+
+     if (m_FirstBatchDone) {
+       push(instance);
+       return true;
+     } 
+     else {
+       bufferInput(instance);
+       return false;
+     }
+  }
 
   /**
    * Signify that this batch of input to the filter is
@@ -239,7 +276,9 @@ public class RemovePercentage extends Filter
 	push(toFilter.instance(i));
       }
     }
+    flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

@@ -23,10 +23,21 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.StreamableFilter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** 
  * An instance filter that deletes a range of attributes from the dataset.<p>
@@ -41,7 +52,7 @@ import weka.core.*;
  * Invert matching sense (i.e. only keep specified columns)<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class Remove extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {

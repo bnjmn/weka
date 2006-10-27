@@ -23,9 +23,17 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import weka.core.*;
-import java.util.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * This filter takes a dataset and removes a subset of it.
@@ -40,7 +48,7 @@ import java.util.*;
  * Specifies if inverse of selection is to be output.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.3.2.1 $ 
 */
 public class RemoveRange extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -210,6 +218,33 @@ public class RemoveRange extends Filter
   }
 
   /**
+   * Input an instance for filtering. Filter requires all
+   * training instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws IllegalStateException if no input structure has been defined
+   */
+  public boolean input(Instance instance) {
+
+    if (getInputFormat() == null) {
+      throw new IllegalStateException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    if (m_FirstBatchDone) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
+  }
+
+  /**
    * Signify that this batch of input to the filter is
    * finished. Output() may now be called to retrieve the filtered
    * instances.
@@ -222,14 +257,23 @@ public class RemoveRange extends Filter
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
-    // Push instances for output into output queue
-    m_Range.setUpper(getInputFormat().numInstances() - 1);
-    for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      if (!m_Range.isInRange(i)) {
+    if (!m_FirstBatchDone) {
+      // Push instances for output into output queue
+      m_Range.setUpper(getInputFormat().numInstances() - 1);
+      for (int i = 0; i < getInputFormat().numInstances(); i++) {
+	if (!m_Range.isInRange(i)) {
+	  push(getInputFormat().instance(i));
+	}
+      }
+    }
+    else {
+      for (int i = 0; i < getInputFormat().numInstances(); i++) {
 	push(getInputFormat().instance(i));
       }
     }
+    flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

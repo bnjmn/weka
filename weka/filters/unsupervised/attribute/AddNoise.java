@@ -21,17 +21,17 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Attribute;
-import weka.core.OptionHandler;
 import weka.core.Option;
-import weka.core.Utils;
+import weka.core.OptionHandler;
 import weka.core.SingleIndex;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
 
-import java.util.Random;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Vector;
 
 /** 
@@ -54,7 +54,7 @@ import java.util.Vector;
  * and for choosing the value it is changed to (default 1). <p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2.2.1 $ 
+ * @version $Revision: 1.2.2.2 $ 
  **/
 public class AddNoise extends Filter implements UnsupervisedFilter,
 						OptionHandler {
@@ -365,10 +365,13 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
       m_NewBatch = false;
     }
 
-    // make new instance
-    Instance newInstance = (Instance)instance.copy();
-    getInputFormat().add(instance);
-    return false;
+    if (m_FirstBatchDone) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
   }
 
   /**
@@ -395,7 +398,10 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
       push ((Instance)getInputFormat().instance(i).copy());
     }
 
+    flushInput();
+    
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

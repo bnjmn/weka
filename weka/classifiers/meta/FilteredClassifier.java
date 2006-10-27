@@ -23,19 +23,17 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Evaluation;
-import weka.classifiers.Classifier;
-import weka.classifiers.rules.ZeroR;
 import weka.classifiers.SingleClassifierEnhancer;
-import java.util.Enumeration;
-import java.util.Vector;
+import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
-import weka.core.Attribute;
-import weka.core.Drawable;
+
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Class for running an arbitrary classifier on data that has been passed
@@ -52,7 +50,7 @@ import weka.core.Drawable;
  * followed by options to the filter. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20.2.2 $
+ * @version $Revision: 1.20.2.3 $
  */
 public class FilteredClassifier extends SingleClassifierEnhancer implements Drawable {
 

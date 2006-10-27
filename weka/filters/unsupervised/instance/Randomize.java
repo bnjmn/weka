@@ -23,10 +23,17 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
  * This filter randomly shuffles the order of instances passed through it.
@@ -39,7 +46,7 @@ import weka.core.*;
  * Specify the random number seed (default 42).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class Randomize extends Filter implements UnsupervisedFilter,
 						 OptionHandler {
@@ -166,6 +173,33 @@ public class Randomize extends Filter implements UnsupervisedFilter,
   }
 
   /**
+   * Input an instance for filtering. Filter requires all
+   * training instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws IllegalStateException if no input structure has been defined
+   */
+  public boolean input(Instance instance) {
+
+    if (getInputFormat() == null) {
+      throw new IllegalStateException("No input instance format defined");
+    }
+    if (m_NewBatch) {
+      resetQueue();
+      m_NewBatch = false;
+    }
+    if (m_FirstBatchDone) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
+  }
+
+  /**
    * Signify that this batch of input to the filter is finished. If
    * the filter requires all instances prior to filtering, output()
    * may now be called to retrieve the filtered instances. Any
@@ -183,13 +217,16 @@ public class Randomize extends Filter implements UnsupervisedFilter,
       throw new IllegalStateException("No input instance format defined");
     }
 
-    getInputFormat().randomize(m_Random);
+    if (!m_FirstBatchDone) {
+      getInputFormat().randomize(m_Random);
+    }
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
       push(getInputFormat().instance(i));
     }
     flushInput();
     
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

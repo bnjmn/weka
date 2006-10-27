@@ -22,10 +22,22 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.filters.*;
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.SparseInstance;
+import weka.core.Tag;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.UnsupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
  * Reduces the dimensionality of the data by projecting 
@@ -70,7 +82,7 @@ import weka.core.*;
  * calculating the random matrix (default 42). <p>
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.3.2.1 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
+ * @version $Revision: 1.3.2.2 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
  *          Kibriya)]
  */
 public class RandomProjection extends Filter implements UnsupervisedFilter, OptionHandler {
@@ -209,8 +221,9 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
     String mString = Utils.getOption('P', options);
     if (mString.length() != 0) {
-	setPercent((double) Double.parseDouble(mString)); //setNumberOfAttributes((int) Integer.parseInt(mString));
+	setPercent(Double.parseDouble(mString)); //setNumberOfAttributes((int) Integer.parseInt(mString));
     } else {
+        setPercent(0.0);
 	mString = Utils.getOption('N', options);
 	if (mString.length() != 0) 
 	    setNumberOfAttributes(Integer.parseInt(mString));	    
@@ -264,17 +277,17 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
       options[current++] = "-M";
     }
 
-    double d = getNumberOfAttributes();
-    options[current++] = "-N";
-    options[current++] = ""+d;
+    if (getPercent() == 0) {
+      options[current++] = "-N";
+      options[current++] = "" + getNumberOfAttributes();
+    }
+    else {
+      options[current++] = "-P";
+      options[current++] = "" + getPercent();
+    }
     
-    d = getPercent();
-    options[current++] = "-P";
-    options[current++] = ""+d;
-    
-    long l = getRandomSeed();
     options[current++] = "-R";
-    options[current++] = ""+l;
+    options[current++] = "" + getRandomSeed();
     
     SelectedTag t = getDistribution();
     options[current++] = "-D";
@@ -350,14 +363,14 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
 
   /** Sets the percent the attributes (dimensions) of the data should be reduced to */
   public void setPercent(double newPercent) {
-      if(newPercent>1)
+      if(newPercent > 0)
 	  newPercent /= 100;
       m_percent = newPercent;
   }
 
   /** Gets the percent the attributes (dimensions) of the data will be reduced to */
   public double getPercent() {
-      return m_percent;
+      return m_percent * 100;
   }
 
 

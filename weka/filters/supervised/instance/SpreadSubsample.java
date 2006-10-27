@@ -23,17 +23,20 @@
 
 package weka.filters.supervised.instance;
 
-import weka.filters.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.Vector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Utils;
+import weka.core.UnassignedClassException;
 import weka.core.UnsupportedClassTypeException;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.SupervisedFilter;
+
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Vector;
 
 /** 
  * Produces a random subsample of a dataset. The original dataset must
@@ -65,7 +68,7 @@ import weka.core.UnsupportedClassTypeException;
  *  <p>
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.3.2.1 $ 
  **/
 public class SpreadSubsample extends Filter implements SupervisedFilter,
 						       OptionHandler {
@@ -75,9 +78,6 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
 
   /** The maximum count of any class */
   private int m_MaxCount;
-  
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false;
 
   /** True if the first batch has been done */
   private double m_DistributionSpread = 0;
@@ -363,7 +363,6 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
       throw new UnsupportedClassTypeException("The class attribute must be nominal.");
     }
     setOutputFormat(instanceInfo);
-    m_FirstBatchDone = false;
     return true;
   }
 

@@ -31,15 +31,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.NoSuchElementException;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -52,6 +43,15 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.Vector;
+
 
 /** 
  * Converts String attributes into a set of attributes representing word
@@ -61,7 +61,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.8.2.1 $ 
  */
 public class StringToWordVector extends Filter
   implements UnsupervisedFilter, OptionHandler {
@@ -74,9 +74,6 @@ public class StringToWordVector extends Filter
 
   /** Contains a mapping of valid words to attribute indexes */
   private TreeMap m_Dictionary = new TreeMap();
-  
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false;
 
   /** True if output instances should contain word frequency rather than boolean 0 or 1. */
   private boolean m_OutputCounts = false;
@@ -376,7 +373,6 @@ public class StringToWordVector extends Filter
   public boolean setInputFormat(Instances instanceInfo) 
     throws Exception {
     super.setInputFormat(instanceInfo);
-    m_FirstBatchDone = false;
     return false;
   }
 
