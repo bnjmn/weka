@@ -99,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -1415,7 +1415,9 @@ public class TestInstances
     
     // multi-instance?
     if (c.getOwner() instanceof MultiInstanceCapabilitiesHandler) {
-      result = forCapabilities(((MultiInstanceCapabilitiesHandler) c.getOwner()).getMultiInstanceCapabilities());
+      Capabilities multi = (Capabilities) ((MultiInstanceCapabilitiesHandler) c.getOwner()).getMultiInstanceCapabilities().clone();
+      multi.setOwner(null);  // otherwise recursive!
+      result = forCapabilities(multi);
       result.setMultiInstance(true);
     }
     else  {
@@ -1436,6 +1438,8 @@ public class TestInstances
 	result.setClassType(Attribute.RELATIONAL);
 
       // # of classes
+      if (c.handles(Capability.UNARY_CLASS))
+	result.setNumClasses(1);
       if (c.handles(Capability.BINARY_CLASS))
 	result.setNumClasses(2);
       if (c.handles(Capability.NOMINAL_CLASS))
