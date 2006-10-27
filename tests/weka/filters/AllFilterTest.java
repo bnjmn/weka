@@ -4,17 +4,17 @@
 
 package weka.filters;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import weka.core.Instances;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests AllFilter. Run from the command line with:<p>
  * java weka.filters.AllFilterTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class AllFilterTest extends AbstractFilterTest {
   

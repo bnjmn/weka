@@ -20,20 +20,21 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instance;
-import weka.filters.Filter;
+import weka.core.Instances;
 import weka.filters.AbstractTimeSeriesFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests TimeSeriesDelta. Run from the command line with:<p>
  * java weka.filters.unsupervised.attribute.TimeSeriesDeltaTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class TimeSeriesDeltaTest extends AbstractTimeSeriesFilterTest {
 
@@ -51,6 +52,20 @@ public class TimeSeriesDeltaTest extends AbstractTimeSeriesFilterTest {
     af.setAttributeIndices(rangelist);
     af.setFillWithMissing(false);
     return af;
+  }
+
+  /**
+   * returns the configured FilteredClassifier.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    ((TimeSeriesDelta) result.getFilter()).setAttributeIndices("2");
+    
+    return result;
   }
 
   public void testInverted() {

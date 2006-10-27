@@ -4,20 +4,19 @@
 
 package weka.filters.unsupervised.instance;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.Filter;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests RemoveFolds. Run from the command line with:<p>
  * java weka.filters.RemoveFoldsTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class RemoveFoldsTest extends AbstractFilterTest {
   

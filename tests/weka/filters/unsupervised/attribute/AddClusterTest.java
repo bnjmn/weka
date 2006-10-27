@@ -22,14 +22,11 @@ package weka.filters.unsupervised.attribute;
 
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Attribute;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -37,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.AddClusterTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class AddClusterTest 
   extends AbstractFilterTest {

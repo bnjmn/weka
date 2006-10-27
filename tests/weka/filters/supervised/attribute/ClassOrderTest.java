@@ -20,12 +20,12 @@
 
 package weka.filters.supervised.attribute;
 
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
  * java weka.filters.supervised.attribute.ClassOrderTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class ClassOrderTest 
   extends AbstractFilterTest {

@@ -4,21 +4,21 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
-import weka.filters.Filter;
+import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests MakeIndicator. Run from the command line with:<p>
  * java weka.filters.MakeIndicatorTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class MakeIndicatorTest extends AbstractFilterTest {
   
@@ -32,6 +32,19 @@ public class MakeIndicatorTest extends AbstractFilterTest {
     return f;
   }
 
+  /**
+   * returns the configured FilteredClassifier.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    ((MakeIndicator) result.getFilter()).setAttributeIndex("3");
+    
+    return result;
+  }
 
   public void testInvalidAttributeTypes() {
     Instances icopy = new Instances(m_Instances);

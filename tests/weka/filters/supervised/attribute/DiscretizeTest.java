@@ -4,21 +4,20 @@
 
 package weka.filters.supervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instance;
-import weka.core.Instances;
 import weka.core.Attribute;
+import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests Discretize. Run from the command line with:<p>
  * java weka.filters.DiscretizeTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class DiscretizeTest extends AbstractFilterTest {
   

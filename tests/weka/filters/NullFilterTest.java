@@ -14,7 +14,7 @@ import weka.core.Instances;
  * java weka.filters.NullFilterTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class NullFilterTest extends AbstractFilterTest {
   
@@ -30,6 +30,13 @@ public class NullFilterTest extends AbstractFilterTest {
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
     assertEquals(0, result.numInstances());
+  }
+  
+  /**
+   * doesn't make sense, since the null filter doesn't return any instances
+   */
+  public void testFilteredClassifier() {
+    // do nothing
   }
 
   public static Test suite() {

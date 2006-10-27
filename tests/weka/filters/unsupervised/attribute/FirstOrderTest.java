@@ -4,20 +4,21 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instance;
-import weka.filters.Filter;
+import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests FirstOrder. Run from the command line with:<p>
  * java weka.filters.FirstOrderTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class FirstOrderTest extends AbstractFilterTest {
   
@@ -43,6 +44,25 @@ public class FirstOrderTest extends AbstractFilterTest {
            + "\n" + ex.getMessage()); 
     }
     return null;
+  }
+
+  /**
+   * returns the configured FilteredClassifier.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    try {
+      ((FirstOrder) result.getFilter()).setAttributeIndices("2,4");
+    }
+    catch (Exception e) {
+      fail("Problem setting up FilteredClassifier");
+    }
+    
+    return result;
   }
 
   public void testTypical() {

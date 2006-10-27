@@ -4,21 +4,20 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instance;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instances;
-import weka.core.Attribute;
-import weka.filters.Filter;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests SwapValues. Run from the command line with:<p>
  * java weka.filters.SwapValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class SwapValuesTest extends AbstractFilterTest {
   
@@ -30,6 +29,20 @@ public class SwapValuesTest extends AbstractFilterTest {
     // Ensure the filter we return can run on the test dataset
     f.setAttributeIndex("2"); 
     return f;
+  }
+
+  /**
+   * returns the configured FilteredClassifier.
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = super.getFilteredClassifier();
+    ((SwapValues) result.getFilter()).setAttributeIndex("1");
+    
+    return result;
   }
 
   public void testInvalidAttributeTypes() {

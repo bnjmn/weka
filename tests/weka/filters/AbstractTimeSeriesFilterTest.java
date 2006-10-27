@@ -4,21 +4,20 @@
 
 package weka.filters;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
 import weka.core.Instance;
-import weka.filters.unsupervised.attribute.TimeSeriesDelta;
+import weka.core.Instances;
 import weka.filters.unsupervised.attribute.TimeSeriesTranslate;
 import weka.filters.unsupervised.attribute.TimeSeriesTranslateTest;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests TimeSeriesTranslateFilter. Run from the command line with:<p>
  * java weka.filters.TimeSeriesTranslateFilterTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
 
@@ -103,6 +102,30 @@ public abstract class AbstractTimeSeriesFilterTest extends AbstractFilterTest {
         }
       }
     }    
+  }
+  
+  /**
+   * tests the filter in conjunction with the FilteredClassifier
+   */
+  public void testFilteredClassifier() {
+    try {
+      Instances data = getFilteredClassifierData();
+
+      for (int i = 0; i < data.numAttributes(); i++) {
+	if (data.classIndex() == i)
+	  continue;
+	if (data.attribute(i).isNumeric()) {
+	  ((TimeSeriesTranslate) m_FilteredClassifier.getFilter()).setAttributeIndices("" + (i + 1));
+	  ((TimeSeriesTranslate) m_FilteredClassifier.getFilter()).setFillWithMissing(true);
+	  break;
+	}
+      }
+    }
+    catch (Exception e) {
+      fail("Problem setting up test for FilteredClassifier: " + e.toString());
+    }
+    
+    super.testFilteredClassifier();
   }
 
   public static Test suite() {

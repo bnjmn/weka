@@ -4,19 +4,21 @@
 
 package weka.filters;
 
+import weka.classifiers.meta.FilteredClassifier;
+import weka.core.Instances;
+import weka.test.Regression;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
-import weka.core.Instances;
-import weka.test.Regression;
 
 /**
  * Abstract Test class for Filters.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public abstract class AbstractFilterTest extends TestCase {
 
@@ -28,6 +30,9 @@ public abstract class AbstractFilterTest extends TestCase {
 
   /** A set of instances to test with */
   protected Instances m_Instances;
+  
+  /** the FilteredClassifier instance used for tests */
+  protected FilteredClassifier m_FilteredClassifier;
 
   /**
    * Constructs the <code>AbstractFilterTest</code>. Called by subclasses.
@@ -45,6 +50,7 @@ public abstract class AbstractFilterTest extends TestCase {
   protected void setUp() throws Exception {
     m_Filter = getFilter();
     m_Instances = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/filters/data/FilterTest.arff"))));
+    m_FilteredClassifier = getFilteredClassifier();
   }
 
   /** Called by JUnit after each test method */
@@ -74,6 +80,44 @@ public abstract class AbstractFilterTest extends TestCase {
    * @return a suitably configured <code>Filter</code> value
    */
   public abstract Filter getFilter();
+
+  /**
+   * returns the configured FilteredClassifier. Derived tests might have to 
+   * adjust the base classifier (default is J48).
+   * 
+   * @return the configured FilteredClassifier
+   */
+  protected FilteredClassifier getFilteredClassifier() {
+    FilteredClassifier	result;
+    
+    result = new FilteredClassifier();
+    result.setFilter(getFilter());
+    result.setClassifier(new weka.classifiers.trees.J48());
+    
+    return result;
+  }
+  
+  /**
+   * returns data generated for the FilteredClassifier test
+   * 
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
+   */
+  protected Instances getFilteredClassifierData() throws Exception {
+    Instances	result;
+    int		i;
+
+    result = new Instances(m_Instances);
+    result.deleteStringAttributes();
+    for (i = 0; i < result.numAttributes(); i++) {
+      if (result.attribute(i).isNominal()) {
+	result.setClassIndex(i);
+	break;
+      }
+    }
+    
+    return result;
+  }
 
   /**
    * Simple method to return the filtered set of test instances after
@@ -361,6 +405,30 @@ public abstract class AbstractFilterTest extends TestCase {
                          + rate + " instances per sec"); 
 
 
+    }
+  }
+  
+  /**
+   * tests the filter in conjunction with the FilteredClassifier
+   */
+  public void testFilteredClassifier() {
+    Instances	data;
+    int		i;
+    double 	cls;
+    
+    try {
+      data = getFilteredClassifierData();
+      
+      // build classifier
+      m_FilteredClassifier.buildClassifier(data);
+
+      // test classifier
+      for (i = 0; i < data.numInstances(); i++) {
+	cls = m_FilteredClassifier.classifyInstance(data.instance(i));
+      }
+    }
+    catch (Exception e) {
+      fail("Problem with FilteredClassifier: " + e.toString());
     }
   }
 
