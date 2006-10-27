@@ -24,6 +24,7 @@
 package weka.filters.unsupervised.instance;
 
 import weka.core.Capabilities;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -56,7 +57,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
 */
 public class RemovePercentage 
   extends Filter
@@ -259,6 +260,36 @@ public class RemovePercentage
     setOutputFormat(instanceInfo);
     return true;
   }
+  
+  /**
+   * Input an instance for filtering. Ordinarily the instance is processed
+   * and made available for output immediately. Some filters require all
+   * instances be read before producing output.
+   *
+   * @param instance the input instance
+   * @return true if the filtered instance may now be
+   * collected with output().
+   * @throws IllegalStateException if no input format has been set.
+   */
+  public boolean input(Instance instance) {
+     if (getInputFormat() == null) {
+        throw new IllegalStateException("No input instance format defined");
+     }
+     
+     if (m_NewBatch) {
+        resetQueue();
+        m_NewBatch = false;
+     }
+
+     if (isFirstBatchDone()) {
+       push(instance);
+       return true;
+     } 
+     else {
+       bufferInput(instance);
+       return false;
+     }
+  }
 
   /**
    * Signify that this batch of input to the filter is
@@ -287,7 +318,11 @@ public class RemovePercentage
 	push(toFilter.instance(i));
       }
     }
+    flushInput();
+    
     m_NewBatch = true;
+    m_FirstBatchDone = true;
+    
     return (numPendingOutput() != 0);
   }
 

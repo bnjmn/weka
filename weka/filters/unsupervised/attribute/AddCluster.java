@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AddCluster 
   extends Filter 
@@ -166,29 +166,34 @@ public class AddCluster
     }
 
     Instances toFilter = getInputFormat();
-    // filter out attributes if necessary
-    Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
+    
+    if (!isFirstBatchDone()) {
+      // filter out attributes if necessary
+      Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
 
-    // build the clusterer
-    m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
+      // build the clusterer
+      m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
 
-    // create output dataset with new attribute
-    Instances filtered = new Instances(toFilter, 0); 
-    FastVector nominal_values = new FastVector(m_Clusterer.numberOfClusters());
-    for (int i=0; i<m_Clusterer.numberOfClusters(); i++) {
-      nominal_values.addElement("cluster" + (i+1)); 
+      // create output dataset with new attribute
+      Instances filtered = new Instances(toFilter, 0); 
+      FastVector nominal_values = new FastVector(m_Clusterer.numberOfClusters());
+      for (int i=0; i<m_Clusterer.numberOfClusters(); i++) {
+	nominal_values.addElement("cluster" + (i+1)); 
+      }
+      filtered.insertAttributeAt(new Attribute("cluster", nominal_values),
+	  filtered.numAttributes());
+
+      setOutputFormat(filtered);
     }
-    filtered.insertAttributeAt(new Attribute("cluster", nominal_values),
-			       filtered.numAttributes());
-
-    setOutputFormat(filtered);
 
     // build new dataset
     for (int i=0; i<toFilter.numInstances(); i++) {
       convertInstance(toFilter.instance(i));
     }
+    
     flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
 
     return (numPendingOutput() != 0);
   }

@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see MultiInstanceToPropositional
  */
 public class PropositionalToMultiInstance 
@@ -403,6 +403,8 @@ public class PropositionalToMultiInstance
     flushInput();
 
     m_NewBatch = true;
+    m_FirstBatchDone = true;
+    
     return (numPendingOutput() != 0);
   }
 

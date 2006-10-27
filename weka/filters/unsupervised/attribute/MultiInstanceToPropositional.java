@@ -66,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
@@ -268,6 +268,7 @@ public class MultiInstanceToPropositional
 
     // attributes
     result.enableAllAttributes();
+    result.disable(Capability.RELATIONAL_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
     
     // class

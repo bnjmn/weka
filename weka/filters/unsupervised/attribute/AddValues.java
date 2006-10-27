@@ -66,7 +66,7 @@ import java.util.Vector;
  * Based on code from AddValues.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     AddValues
  */
 public class AddValues 
@@ -279,6 +279,7 @@ public class AddValues
     }
     
     instNew = new Instances(instanceInfo.relationName(), atts, 0);
+    instNew.setClassIndex(instanceInfo.classIndex());
     
     // set new format
     setOutputFormat(instNew);

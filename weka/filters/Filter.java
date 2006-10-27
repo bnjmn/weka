@@ -70,7 +70,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -98,6 +98,34 @@ public abstract class Filter
 
   /** Record whether the filter is at the start of a batch */
   protected boolean m_NewBatch = true;
+
+  /** True if the first batch has been done */
+  protected boolean m_FirstBatchDone = false;
+
+  /**
+   * Returns true if the a new batch was started, either a new instance of the 
+   * filter was created or the batchFinished() method got called.
+   * 
+   * @return true if a new batch has been initiated
+   * @see #m_NewBatch
+   * @see #batchFinished()
+   */
+  public boolean isNewBatch() {
+    return m_NewBatch;
+  }
+  
+  /**
+   * Returns true if the first batch of instances got processed. Necessary for
+   * supervised filters, which "learn" from the first batch and then shouldn't
+   * get updated with subsequent calls of batchFinished().
+   * 
+   * @return true if the first batch has been processed
+   * @see #m_FirstBatchDone
+   * @see #batchFinished()
+   */
+  public boolean isFirstBatchDone() {
+    return m_FirstBatchDone;
+  }
 
   /** 
    * Returns the Capabilities of this filter. Derived filters have to
@@ -367,6 +395,7 @@ public abstract class Filter
     m_OutputFormat = null;
     m_OutputQueue = new Queue();
     m_NewBatch = true;
+    m_FirstBatchDone = false;
     initInputLocators(instanceInfo, null);
     return false;
   }
@@ -441,6 +470,7 @@ public abstract class Filter
     }
     flushInput();
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

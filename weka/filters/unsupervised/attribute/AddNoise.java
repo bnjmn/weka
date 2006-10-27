@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class AddNoise 
   extends Filter 
@@ -407,10 +407,13 @@ public class AddNoise
       m_NewBatch = false;
     }
 
-    // make new instance
-    Instance newInstance = (Instance)instance.copy();
-    getInputFormat().add(instance);
-    return false;
+    if (isFirstBatchDone()) {
+      push(instance);
+      return true;
+    } else {
+      bufferInput(instance);
+      return false;
+    }
   }
 
   /**
@@ -435,7 +438,10 @@ public class AddNoise
       push ((Instance)getInputFormat().instance(i).copy());
     }
 
+    flushInput();
+
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
   }
 

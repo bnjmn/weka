@@ -129,7 +129,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class StringToWordVector 
   extends Filter
@@ -146,9 +146,6 @@ public class StringToWordVector
 
   /** Contains a mapping of valid words to attribute indexes */
   private TreeMap m_Dictionary = new TreeMap();
-  
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false;
 
   /** True if output instances should contain word frequency rather than boolean 0 or 1. */
   private boolean m_OutputCounts = false;
@@ -574,8 +571,8 @@ public class StringToWordVector
    */
   public boolean setInputFormat(Instances instanceInfo) 
     throws Exception {
+
     super.setInputFormat(instanceInfo);
-    m_FirstBatchDone = false;
     avgDocLength = -1;
     numInstances = -1;
     return false;
@@ -599,7 +596,7 @@ public class StringToWordVector
       resetQueue();
       m_NewBatch = false;
     }
-    if (m_FirstBatchDone) {
+    if (isFirstBatchDone()) {
       FastVector fv = new FastVector();
       int firstCopy = convertInstancewoDocNorm(instance, fv);
       Instance inst = (Instance)fv.elementAt(0);
@@ -631,7 +628,7 @@ public class StringToWordVector
     // We only need to do something in this method
     // if the first batch hasn't been processed. Otherwise
     // input() has already done all the work.
-    if (!m_FirstBatchDone) {
+    if (!isFirstBatchDone()) {
 
       // Determine the dictionary from the first batch (training data)
       determineDictionary();

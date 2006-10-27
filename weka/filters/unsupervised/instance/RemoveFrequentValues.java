@@ -74,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RemoveFrequentValues 
    extends Filter 
@@ -587,9 +587,14 @@ public class RemoveFrequentValues
          m_NewBatch = false;
       }
 
-      bufferInput(instance);
-
-      return false;
+      if (isFirstBatchDone()) {
+	push(instance);
+	return true;
+      } 
+      else {
+	bufferInput(instance);
+	return false;
+      }
    }
 
    /**
@@ -613,6 +618,8 @@ public class RemoveFrequentValues
       flushInput();
       
       m_NewBatch = true;
+      m_FirstBatchDone = true;
+
       return (numPendingOutput() != 0);
    }
    

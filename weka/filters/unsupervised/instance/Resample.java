@@ -56,7 +56,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class Resample 
   extends Filter 
@@ -70,9 +70,6 @@ public class Resample
   
   /** The random number generator seed */
   private int m_RandomSeed = 1;
-
-  /** True if the first batch has been done */
-  private boolean m_FirstBatchDone = false;
 
   /**
    * Returns a string describing this classifier
@@ -261,7 +258,6 @@ public class Resample
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
-    m_FirstBatchDone = false;
     return true;
   }
 
@@ -283,7 +279,7 @@ public class Resample
       resetQueue();
       m_NewBatch = false;
     }
-    if (m_FirstBatchDone) {
+    if (isFirstBatchDone()) {
       push(instance);
       return true;
     } else {
@@ -306,7 +302,7 @@ public class Resample
       throw new IllegalStateException("No input instance format defined");
     }
 
-    if (!m_FirstBatchDone) {
+    if (!isFirstBatchDone()) {
       // Do the subsample, and clear the input instances.
       createSubsample();
     }

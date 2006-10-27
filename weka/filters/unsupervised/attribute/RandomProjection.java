@@ -103,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.6 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision: 1.7 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 
@@ -252,6 +252,7 @@ public class RandomProjection
     if (mString.length() != 0) {
 	setPercent((double) Double.parseDouble(mString)); //setNumberOfAttributes((int) Integer.parseInt(mString));
     } else {
+        setPercent(0);
 	mString = Utils.getOption('N', options);
 	if (mString.length() != 0) 
 	    setNumberOfAttributes(Integer.parseInt(mString));	    
@@ -305,17 +306,17 @@ public class RandomProjection
       options[current++] = "-M";
     }
 
-    double d = getNumberOfAttributes();
-    options[current++] = "-N";
-    options[current++] = ""+d;
+    if (getPercent() == 0) {
+      options[current++] = "-N";
+      options[current++] = "" + getNumberOfAttributes();
+    }
+    else {
+      options[current++] = "-P";
+      options[current++] = "" + getPercent();
+    }
     
-    d = getPercent();
-    options[current++] = "-P";
-    options[current++] = ""+d;
-    
-    long l = getRandomSeed();
     options[current++] = "-R";
-    options[current++] = ""+l;
+    options[current++] = "" + getRandomSeed();
     
     SelectedTag t = getDistribution();
     options[current++] = "-D";
@@ -424,7 +425,7 @@ public class RandomProjection
    * @param newPercent the percentage of attributes
    */
   public void setPercent(double newPercent) {
-      if(newPercent>1)
+      if(newPercent > 0)
 	  newPercent /= 100;
       m_percent = newPercent;
   }
@@ -435,7 +436,7 @@ public class RandomProjection
    * @return the percentage of attributes
    */
   public double getPercent() {
-      return m_percent;
+      return m_percent * 100;
   }
 
 

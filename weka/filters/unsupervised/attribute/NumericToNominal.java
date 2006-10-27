@@ -33,8 +33,6 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.SimpleBatchFilter;
 
-import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -59,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NumericToNominal
   extends SimpleBatchFilter {
@@ -346,6 +344,7 @@ public class NumericToNominal
     }
     
     result = new Instances(inputFormat.relationName(), atts, 0);
+    result.setClassIndex(inputFormat.classIndex());
     
     return result;
   }
