@@ -117,7 +117,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.54 $
+ * @version $Revision: 1.55 $
  */
 public class ClustererPanel
   extends JPanel
@@ -593,6 +593,7 @@ public class ClustererPanel
       sp.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
 	  m_TestInstances = sp.getInstances();
+	  m_TestInstances.setClassIndex(-1);  // make sure that no class attribute is set!
 	}
       });
       // Add propertychangelistener to update m_TestInstances whenever
