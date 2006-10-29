@@ -131,7 +131,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.98 $
+ * @version $Revision: 1.99 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1083,7 +1083,7 @@ public class ClassifierPanel
 		      + " size unknown (reading incrementally)\n");
 		else
 		  outBuff.append("user supplied test set: "
-		      + userTestStructure.numInstances() + " instances\n");
+		      + source.getDataSet().numInstances() + " instances\n");
 		break;
 	    }
             if (costMatrix != null) {
@@ -2117,7 +2117,7 @@ public class ClassifierPanel
               if (incrementalLoader)
         	outBuff.append("Instances:     unknown (yet). Reading incrementally\n");
               else
-        	outBuff.append("Instances:    " + userTestStructure.numInstances() + "\n");
+        	outBuff.append("Instances:    " + source.getDataSet().numInstances() + "\n");
               outBuff.append("Attributes:   " 
         	  + userTestStructure.numAttributes() 
         	  + "\n\n");
