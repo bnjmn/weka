@@ -45,7 +45,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -66,7 +66,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    * @see #hasMoreElements()
    * @see #nextElement()
    * @see #reset()
@@ -160,12 +160,14 @@ public class ConverterUtils
      */
     public DataSource(Loader loader) {
       super();
-      
+
       m_BatchBuffer = null;
       m_Loader      = loader;
       m_File        = null;
       m_URL         = null;
       m_Incremental = (m_Loader instanceof IncrementalConverter);
+      
+      initBatchBuffer();
     }
 
     /**
@@ -188,6 +190,24 @@ public class ConverterUtils
       m_File        = null;
       m_URL         = null;
       m_Incremental = (m_Loader instanceof IncrementalConverter);
+      
+      initBatchBuffer();
+    }
+
+    /**
+     * initializes the batch buffer if necessary, i.e., for non-incremental
+     * loaders
+     */
+    protected void initBatchBuffer() {
+      try {
+	if (!isIncremental())
+	  m_BatchBuffer = m_Loader.getDataSet();
+	else
+	  m_BatchBuffer = null;
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+      }
     }
     
     /**
