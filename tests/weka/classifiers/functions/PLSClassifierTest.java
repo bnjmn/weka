@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.functions.PLSClassifierTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PLSClassifierTest 
   extends AbstractClassifierTest {
@@ -69,6 +69,8 @@ public class PLSClassifierTest
     PLSClassifier classifier = new PLSClassifier();
     
     PLSFilter filter = new PLSFilter();
+    filter.setReplaceMissing(true);
+    filter.setPreprocessing(new SelectedTag(PLSFilter.PREPROCESSING_CENTER, PLSFilter.TAGS_PREPROCESSING));
     filter.setNumComponents(NUM_COMPONENTS);
     filter.setAlgorithm(new SelectedTag(PLSFilter.ALGORITHM_SIMPLS, PLSFilter.TAGS_ALGORITHM));
     try {
