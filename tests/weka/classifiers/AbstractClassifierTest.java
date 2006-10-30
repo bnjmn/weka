@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -863,11 +863,11 @@ public abstract class AbstractClassifierTest
         
       train = m_Tester.makeTestDataset(
           42, m_Tester.getNumInstances(), 
-  	  m_NominalPredictors[i] ? 2 : 0,
-  	  m_NumericPredictors[i] ? 1 : 0, 
-          m_StringPredictors[i] ? 1 : 0,
-          m_DatePredictors[i] ? 1 : 0,
-          m_RelationalPredictors[i] ? 1 : 0,
+  	  m_NominalPredictors[i] ? m_Tester.getNumNominal() : 0,
+  	  m_NumericPredictors[i] ? m_Tester.getNumNumeric() : 0, 
+          m_StringPredictors[i] ? m_Tester.getNumString() : 0,
+          m_DatePredictors[i] ? m_Tester.getNumDate() : 0,
+          m_RelationalPredictors[i] ? m_Tester.getNumRelational() : 0,
           2, 
           i,
           m_multiInstanceHandler);
