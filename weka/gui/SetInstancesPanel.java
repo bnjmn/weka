@@ -60,7 +60,7 @@ import javax.swing.JPanel;
  * then retrieve the instances by calling getInstances().
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class SetInstancesPanel extends JPanel {
   
@@ -260,7 +260,8 @@ public class SetInstancesPanel extends JPanel {
    * @param f a value of type 'File'
    */
   protected void setInstancesFromFile(File f) {
-      
+    boolean incremental = m_readIncrementally;
+    
     try {
       m_Loader = ConverterUtils.getLoaderForFile(f);
       if (m_Loader == null)
@@ -268,11 +269,11 @@ public class SetInstancesPanel extends JPanel {
       
       // not an incremental loader?
       if (!(m_Loader instanceof IncrementalConverter))
-	m_readIncrementally = false;
+	incremental = false;
 
       // load
       ((FileSourcedConverter) m_Loader).setFile(f);
-      if (m_readIncrementally) {
+      if (incremental) {
 	setInstances(m_Loader.getStructure());
       } else {
 	setInstances(m_Loader.getDataSet());
@@ -292,7 +293,8 @@ public class SetInstancesPanel extends JPanel {
    * @param u the URL to load from.
    */
   protected void setInstancesFromURL(URL u) {
-
+    boolean incremental = m_readIncrementally;
+    
     try {
       m_Loader = ConverterUtils.getURLLoaderForFile(u.toString());
       if (m_Loader == null)
@@ -300,11 +302,11 @@ public class SetInstancesPanel extends JPanel {
       
       // not an incremental loader?
       if (!(m_Loader instanceof IncrementalConverter))
-	m_readIncrementally = false;
+	incremental = false;
 
       // load
       ((URLSourcedLoader) m_Loader).setURL(u.toString());
-      if (m_readIncrementally) {
+      if (incremental) {
 	setInstances(m_Loader.getStructure());
       } else {
 	setInstances(m_Loader.getDataSet());
