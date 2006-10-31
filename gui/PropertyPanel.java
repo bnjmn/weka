@@ -55,7 +55,7 @@ import javax.swing.JMenuItem;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class PropertyPanel 
   extends JPanel {
@@ -204,6 +204,8 @@ public class PropertyPanel
       } else {
 	m_PD.setVisible(true);
       }
+      // make sure that m_Backup is correctly initialized!
+      m_Editor.setValue(m_Editor.getValue());
     }
   }
 
