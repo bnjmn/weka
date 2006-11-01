@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PLSClassifier
   extends Classifier {
@@ -276,6 +276,9 @@ public class PLSClassifier
     // class
     result.enable(Capability.MISSING_CLASS_VALUES);
 
+    // other
+    result.setMinimumNumberInstances(1);
+    
     return result;
   }
 
