@@ -24,6 +24,7 @@ package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.lazy.IBk;
+import weka.classifiers.Evaluation;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -31,6 +32,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -38,6 +40,8 @@ import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.SelectedTag;
+import weka.core.Tag;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.attributeSelection.SubsetEvaluator;
@@ -100,7 +104,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $ 
+ * @version $Revision: 1.37 $ 
  */
 public class DecisionTable 
 extends Classifier 
@@ -146,12 +150,6 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	/** Display Rules */
 	private boolean m_displayRules;
 
-	/** 
-	 * Maximum number of fully expanded non improving subsets for a best 
-	 * first search. 
-	 */
-	private int m_maxStale;
-
 	/** Number of folds for cross validating feature sets */
 	private int m_CVFolds;
 
@@ -166,6 +164,26 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	
 	/** Our own internal evaluator */
 	protected SubsetEvaluator m_evaluator;
+	
+	/** The evaluation object used to evaluate subsets */
+	protected Evaluation m_evaluation;
+	
+	/** default is accuracy for discrete class and RMSE for numeric class */
+	public static final int EVAL_DEFAULT = 1;
+	public static final int EVAL_ACCURACY = 2;
+	public static final int EVAL_RMSE = 3;
+	public static final int EVAL_MAE = 4;
+	public static final int EVAL_AUC = 5;
+
+	public static final Tag [] TAGS_EVALUATION = {
+    new Tag(EVAL_DEFAULT, "Default: accuracy (discrete class); RMSE (numeric class)"),
+    new Tag(EVAL_ACCURACY, "Accuracy (discrete class only"),
+    new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
+    new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
+    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)")
+  };
+	
+	protected int m_evaluationMeasure = EVAL_DEFAULT;
 
 	/**
 	 * Returns a string describing classifier
@@ -567,7 +585,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	 * @return the classification of the instance
 	 * @throws Exception if something goes wrong
 	 */
-	double classifyInstanceLeaveOneOut(Instance instance, double [] instA)
+	double evaluateInstanceLeaveOneOut(Instance instance, double [] instA)
 	throws Exception {
 
 		hashKey thekey;
@@ -596,8 +614,20 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 				}
 				if (ok) {
 					Utils.normalize(normDist);
+					if (m_evaluationMeasure == EVAL_AUC) {
+						m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, instance);						
+					} else {
+						m_evaluation.evaluateModelOnce(normDist, instance);
+					}
 					return Utils.maxIndex(normDist);
 				} else {
+					normDist = new double [normDist.length];
+					normDist[(int)m_majority] = 1.0;
+					if (m_evaluationMeasure == EVAL_AUC) {
+						m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, instance);						
+					} else {
+						m_evaluation.evaluateModelOnce(normDist, instance);
+					}
 					return m_majority;
 				}
 			}
@@ -611,9 +641,15 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 				normDist[0] -= (instance.classValue() * instance.weight());
 				normDist[1] -= instance.weight();
 				if (Utils.eq(normDist[1],0.0)) {
+					double [] temp = new double[1];
+					temp[0] = m_majority;
+					m_evaluation.evaluateModelOnce(temp, instance);
 					return m_majority;
 				} else {
-					return (normDist[0] / normDist[1]);
+					double [] temp = new double[1];
+					temp[0] = normDist[0] / normDist[1];
+					m_evaluation.evaluateModelOnce(temp, instance);
+					return temp[0];
 				}
 			} else {
 				throw new Error("This should never happen!");
@@ -633,7 +669,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	 * @return the accuracy for the fold
 	 * @throws Exception if something goes wrong
 	 */
-	double classifyFoldCV(Instances fold, int [] fs) throws Exception {
+	double evaluateFoldCV(Instances fold, int [] fs) throws Exception {
 
 		int i;
 		int ruleCount = 0;
@@ -693,21 +729,28 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 				}
 				if (ok) {
 					Utils.normalize(normDist);
-					if (Utils.maxIndex(normDist) == inst.classValue())
-						acc += inst.weight();
-				} else {
-					if (inst.classValue() == m_majority) {
-						acc += inst.weight();
+					if (m_evaluationMeasure == EVAL_AUC) {
+						m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
+					} else {
+						m_evaluation.evaluateModelOnce(normDist, inst);
+					}
+				} else {					
+					normDist[(int)m_majority] = 1.0;
+					if (m_evaluationMeasure == EVAL_AUC) {
+						m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
+					} else {
+						m_evaluation.evaluateModelOnce(normDist, inst);					
 					}
 				}
 			} else {
 				if (Utils.eq(normDist[1],0.0)) {
-					acc += ((inst.weight() * (m_majority - inst.classValue())) * 
-							(inst.weight() * (m_majority - inst.classValue())));
+					double [] temp = new double[1];
+					temp[0] = m_majority;
+					m_evaluation.evaluateModelOnce(temp, inst);
 				} else {
-					double t = (normDist[0] / normDist[1]);
-					acc += ((inst.weight() * (t - inst.classValue())) * 
-							(inst.weight() * (t - inst.classValue())));
+					double [] temp = new double[1];
+					temp[0] = normDist[0] / normDist[1];
+					m_evaluation.evaluateModelOnce(temp, inst);
 				}
 			}
 		}
@@ -734,12 +777,13 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	 * @return the estimated accuracy
 	 * @throws Exception if subset can't be evaluated
 	 */
-	private double estimateAccuracy(BitSet feature_set, int num_atts)
+	private double estimatePerformance(BitSet feature_set, int num_atts)
 	throws Exception {
 
+		m_evaluation = new Evaluation(m_theInstances);
 		int i;
 		int [] fs = new int [num_atts];
-		double acc = 0.0;
+		
 		double [] instA = new double [num_atts];
 		int classI = m_theInstances.classIndex();
 
@@ -784,16 +828,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 						instA[j] = inst.value(fs[j]);
 					}
 				}
-				double t = classifyInstanceLeaveOneOut(inst, instA);
-				if (m_classIsNominal) {
-					if (t == inst.classValue()) {
-						acc+=inst.weight();
-					}
-				} else {
-					acc += ((inst.weight() * (t - inst.classValue())) * 
-							(inst.weight() * (t - inst.classValue())));
-				}
-				// weight_sum += inst.weight();
+				evaluateInstanceLeaveOneOut(inst, instA);				
 			}
 		} else {
 			m_theInstances.randomize(m_rr);
@@ -802,15 +837,47 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 			// calculate 10 fold cross validation error
 			for (i=0;i<m_CVFolds;i++) {
 				Instances insts = m_theInstances.testCV(m_CVFolds,i);
-				acc += classifyFoldCV(insts, fs);
+				evaluateFoldCV(insts, fs);
 			}
 		}
-
-		if (m_classIsNominal) {
-			return (acc / m_theInstances.sumOfWeights());
-		} else {
-			return -(Math.sqrt(acc / m_theInstances.sumOfWeights()));   
-		}
+		
+		//if (m_classIsNominal) {
+			switch (m_evaluationMeasure) {
+				case EVAL_DEFAULT:
+					if (m_classIsNominal) {
+						return m_evaluation.pctCorrect();
+					}
+					return -m_evaluation.rootMeanSquaredError();
+				case EVAL_ACCURACY:
+					return m_evaluation.pctCorrect();
+				case EVAL_RMSE:
+					return -m_evaluation.rootMeanSquaredError();
+				case EVAL_MAE:
+					return -m_evaluation.meanAbsoluteError();
+				case EVAL_AUC:
+					double [] classPriors = m_evaluation.getClassPriors();
+					Utils.normalize(classPriors);
+					double weightedAUC = 0;
+					for (i = 0; i < m_theInstances.classAttribute().numValues(); i++) {
+						double tempAUC = m_evaluation.areaUnderROC(i);
+						if (tempAUC != Instance.missingValue()) {
+							weightedAUC += (classPriors[i] * tempAUC);
+						} else {
+							System.err.println("Undefined AUC!!");
+						}
+					}
+					//System.out.println(weightedAUC);
+					return weightedAUC;
+			}
+			//return m_evaluation.pctCorrect();
+			// return (acc / m_theInstances.sumOfWeights());
+		/*} else {
+			return -m_evaluation.rootMeanSquaredError();
+			//return -(Math.sqrt(acc / m_theInstances.sumOfWeights()));   
+		} */
+			
+			// shouldn't get here
+			return 0.0;
 	}
 
 	/**
@@ -831,131 +898,6 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	}
 
 	/**
-	 * Does a best first search 
-	 * 
-	 * @throws Exception if search fails
-	 */
-	private void best_first() throws Exception {
-
-		int i,j,classI,count=0,fc;
-		BitSet best_group, temp_group;
-		int [] stale;
-		double [] best_merit;
-		double merit;
-		boolean z;
-		boolean added;
-		Link tl;
-
-		Hashtable lookup = new Hashtable((int)(200.0*m_numAttributes*1.5));
-		LinkedList bfList = new LinkedList();
-		best_merit = new double[1]; best_merit[0] = 0.0;
-		stale = new int[1]; stale[0] = 0;
-		best_group = new BitSet(m_numAttributes);
-
-		// Add class to initial subset
-		classI = m_theInstances.classIndex();
-		best_group.set(classI);
-		best_merit[0] = estimateAccuracy(best_group, 1);
-		if (m_debug)
-			System.out.println("Accuracy of initial subset: "+best_merit[0]);
-
-		// add the initial group to the list
-		bfList.addToList(best_group,best_merit[0]);
-
-		// add initial subset to the hashtable
-		lookup.put(best_group,"");
-		while (stale[0] < m_maxStale) {
-
-			added = false;
-
-			// finished search?
-			if (bfList.size()==0) {
-				stale[0] = m_maxStale;
-				break;
-			}
-
-			// copy the feature set at the head of the list
-			tl = bfList.getLinkAt(0);
-			temp_group = (BitSet)(tl.getGroup().clone());
-
-			// remove the head of the list
-			bfList.removeLinkAt(0);
-
-			for (i=0;i<m_numAttributes;i++) {
-
-				// if (search_direction == 1)
-				z = ((i != classI) && (!temp_group.get(i)));
-				if (z) {
-
-					// set the bit (feature to add/delete) */
-					temp_group.set(i);
-
-					/* if this subset has been seen before, then it is already in 
-	     the list (or has been fully expanded) */
-					BitSet tt = (BitSet)temp_group.clone();
-					if (lookup.containsKey(tt) == false) {
-						fc = 0;
-						for (int jj=0;jj<m_numAttributes;jj++) {
-							if (tt.get(jj)) {
-								fc++;
-							}
-						}
-						merit = estimateAccuracy(tt, fc);
-						if (m_debug) {
-							System.out.println("evaluating: "+printSub(tt)+" "+merit); 
-						}
-
-						// is this better than the best?
-						// if (search_direction == 1)
-						z = ((merit - best_merit[0]) > 0.00001);
-
-						// else
-						// z = ((best_merit[0] - merit) > 0.00001);
-
-						if (z) {
-							if (m_debug) {
-								System.out.println("new best feature set: "+printSub(tt)+
-										" "+merit);
-							}
-							added = true;
-							stale[0] = 0;
-							best_merit[0] = merit;
-							best_group = (BitSet)(temp_group.clone());
-						}
-
-						// insert this one in the list and the hash table
-						bfList.addToList(tt, merit);
-						lookup.put(tt,"");
-						count++;
-					}
-
-					// unset this addition(deletion)
-					temp_group.clear(i);
-				}
-			}
-			/* if we haven't added a new feature subset then full expansion 
-	 of this node hasn't resulted in anything better */
-			if (!added) {
-				stale[0]++;
-			}
-		}
-
-		// set selected features
-		for (i=0,j=0;i<m_numAttributes;i++) {
-			if (best_group.get(i)) {
-				j++;
-			}
-		}
-
-		m_decisionFeatures = new int[j];
-		for (i=0,j=0;i<m_numAttributes;i++) {
-			if (best_group.get(i)) {
-				m_decisionFeatures[j++] = i;    
-			}
-		}
-	}
-
-	/**
 	 * Resets the options.
 	 */
 	protected void resetOptions()  {
@@ -965,8 +907,8 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 		m_debug = false;
 		m_useIBk = false;
 		m_CVFolds = 1;
-		m_maxStale = 5;
 		m_displayRules = false;
+		m_evaluationMeasure = EVAL_DEFAULT;
 	}
 
 	/**
@@ -984,7 +926,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	 */
 	public Enumeration listOptions() {
 
-		Vector newVector = new Vector(6);
+		Vector newVector = new Vector(7);
 
 		newVector.addElement(new Option(
 	      "\tFull class name of search method, followed\n"
@@ -1005,6 +947,11 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 				"\tUse number of folds = 1 for leave one out CV.\n" +
 				"\t(Default = leave one out CV)",
 				"X", 1, "-X <number of folds>"));
+		
+		newVector.addElement(new Option(
+				"\tPerformance evaluation measure to use for selecting attributes.\n" +
+				"\t(Default = accuracy for discrete class and rmse for numeric class)",
+				"E", 1, "-E <acc | rmse | mae | auc>"));
 
 		newVector.addElement(new Option(
 				"\tUse nearest neighbour instead of global table majority.",
@@ -1043,37 +990,6 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	public int getCrossVal() {
 
 		return m_CVFolds;
-	}
-
-	/**
-	 * Returns the tip text for this property
-	 * @return tip text for this property suitable for
-	 * displaying in the explorer/experimenter gui
-	 */
-	public String maxStaleTipText() {
-		return "Sets the number of non improving decision tables to consider " 
-		+ "before abandoning the search.";
-	}
-
-	/**
-	 * Sets the number of non improving decision tables to consider
-	 * before abandoning the search.
-	 *
-	 * @param stale the number of nodes
-	 */
-	public void setMaxStale(int stale) {
-
-		m_maxStale = stale;
-	}
-
-	/**
-	 * Gets the number of non improving decision tables
-	 *
-	 * @return the number of non improving decision tables
-	 */
-	public int getMaxStale() {
-
-		return m_maxStale;
 	}
 
 	/**
@@ -1135,6 +1051,15 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	}
 	
 	/**
+	 * Returns the tip text for this property
+	 * @return tip text for this property suitable for
+	 * displaying in the explorer/experimenter gui
+	 */
+	public String searchTipText() {
+		return "The search method used to find good attribute combinations for the "
+			+ "decision table.";
+	}
+	/**
 	 * Sets the search method to use
 	 * 
 	 * @param search
@@ -1150,6 +1075,37 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	 */
 	public ASSearch getSearch() {
 		return m_search;
+	}
+	
+	/**
+	 * Returns the tip text for this property
+	 * @return tip text for this property suitable for
+	 * displaying in the explorer/experimenter gui
+	 */
+	public String evaluationMeasureTipText() {
+		return "The measure used to evaluate the performance of attribute combinations "
+			+ "used in the decision table.";
+	}
+	/**
+	 * Gets the currently set performance evaluation measure used for selecting
+	 * attributes for the decision table
+	 * 
+	 * @return the performance evaluation measure
+	 */
+	public SelectedTag getEvaluationMeasure() {
+		return new SelectedTag(m_evaluationMeasure, TAGS_EVALUATION);
+	}
+	
+	/**
+	 * Sets the performance evaluation measure to use for selecting attributes
+	 * for the decision table
+	 * 
+	 * @param newMethod the new performance evaluation metric to use
+	 */
+	public void setEvaluationMeasure(SelectedTag newMethod) {
+		if (newMethod.getTags() == TAGS_EVALUATION) {
+			m_evaluationMeasure = newMethod.getSelectedTag().getID();
+		}
 	}
 
 	/**
@@ -1196,22 +1152,32 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 		if (optionString.length() != 0) {
 			m_CVFolds = Integer.parseInt(optionString);
 		}
-
-		optionString = Utils.getOption('M',options);
-		if (optionString.length() != 0) {
-			m_maxStale = Integer.parseInt(optionString);
-		}
-
+		
 		m_useIBk = Utils.getFlag('I',options);
 
 		m_displayRules = Utils.getFlag('R',options);
+		
+		optionString = Utils.getOption('E', options);
+		if (optionString.length() != 0) {
+			if (optionString.equals("acc")) {
+				setEvaluationMeasure(new SelectedTag(EVAL_ACCURACY, TAGS_EVALUATION));
+			} else if (optionString.equals("rmse")) {
+				setEvaluationMeasure(new SelectedTag(EVAL_RMSE, TAGS_EVALUATION));
+			} else if (optionString.equals("mae")) {
+				setEvaluationMeasure(new SelectedTag(EVAL_MAE, TAGS_EVALUATION));
+			} else if (optionString.equals("auc")) {
+				setEvaluationMeasure(new SelectedTag(EVAL_AUC, TAGS_EVALUATION));
+			} else {
+				throw new IllegalArgumentException("Invalid evaluation measure");
+			}
+		}
 		
 		String searchString = Utils.getOption('S', options);
     if (searchString.length() == 0)
       searchString = weka.attributeSelection.BestFirst.class.getName();
     String [] searchSpec = Utils.splitOptions(searchString);
     if (searchSpec.length == 0) {
-      throw new Exception("Invalid search specification string");
+      throw new IllegalArgumentException("Invalid search specification string");
     }
     String searchName = searchSpec[0];
     searchSpec[0] = "";
@@ -1229,7 +1195,24 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 		int current = 0;
 
 		options[current++] = "-X"; options[current++] = "" + m_CVFolds;
-		options[current++] = "-M"; options[current++] = "" + m_maxStale;
+		
+		if (m_evaluationMeasure != EVAL_DEFAULT) {
+			options[current++] = "-E";
+			switch (m_evaluationMeasure) {
+			case EVAL_ACCURACY:
+				options[current++] = "acc";
+				break;
+			case EVAL_RMSE:
+				options[current++] = "rmse";
+				break;
+			case EVAL_MAE:
+				options[current++] = "mae";
+				break;
+			case EVAL_AUC:
+				options[current++] = "auc";
+				break;
+			}
+		}
 		if (m_useIBk) {
 			options[current++] = "-I";
 		}
@@ -1278,7 +1261,9 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 
 		// class
 		result.enable(Capability.NOMINAL_CLASS);
-		result.enable(Capability.NUMERIC_CLASS);
+		if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_AUC) {
+			result.enable(Capability.NUMERIC_CLASS);
+		}
 		result.enable(Capability.DATE_CLASS);
 		result.enable(Capability.MISSING_CLASS_VALUES);
 
@@ -1319,7 +1304,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 					}
 				}
 				
-				return estimateAccuracy(subset, fc);
+				return estimatePerformance(subset, fc);
 			}
 		};
 		
@@ -1353,7 +1338,6 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 		m_numInstances = m_theInstances.numInstances();
 		m_majority = m_theInstances.meanOrMode(m_theInstances.classAttribute());
 
-		//best_first();
 		int [] selected = m_search.search(m_evaluator, m_theInstances);
 		m_decisionFeatures = new int [selected.length+1];
 		System.arraycopy(selected, 0, m_decisionFeatures, 0, selected.length);
@@ -1520,8 +1504,9 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 				text.append("Non matches covered by Majority class.\n");
 			}
 
-			text.append("Best first search for feature set,\nterminated after "+
-					m_maxStale+" non improving subsets.\n");
+			text.append(m_search.toString());
+			/*text.append("Best first search for feature set,\nterminated after "+
+					m_maxStale+" non improving subsets.\n"); */
 
 			text.append("Evaluation (for feature selection): CV ");
 			if (m_CVFolds > 1) {
