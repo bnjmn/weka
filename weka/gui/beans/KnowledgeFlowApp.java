@@ -120,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.13 $
+ * @version  $Revision: 1.14 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -299,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1287,7 +1287,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
     }
   }
 
-  private void clearLayout() {
+  public void clearLayout() {
     BeanInstance.reset(m_beanLayout);
     BeanConnection.reset();
     m_beanLayout.revalidate();
