@@ -57,7 +57,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.9 $
+ * @version $Revision: 1.14.2.10 $
  */
 public class GUIChooser extends JFrame {
 
@@ -207,7 +207,7 @@ public class GUIChooser extends JFrame {
     KnowledgeFlowApp.addStartupListener(new weka.gui.beans.StartUpListener() {
         public void startUpComplete() {
           if (m_KnowledgeFlowFrame == null) {
-            KnowledgeFlowApp kna = KnowledgeFlowApp.getSingleton();
+            final KnowledgeFlowApp kna = KnowledgeFlowApp.getSingleton();
             m_KnowledgeFlowBut.setEnabled(false);
             m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
             m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
@@ -215,6 +215,7 @@ public class GUIChooser extends JFrame {
               .add(kna, BorderLayout.CENTER);
             m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent w) {
+                  kna.clearLayout();
                   m_KnowledgeFlowFrame.dispose();
                   m_KnowledgeFlowFrame = null;
                   weka.gui.beans.BeanConnection.reset();
