@@ -98,7 +98,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $ 
+ * @version $Revision: 1.39 $ 
  */
 public class DecisionTable 
 extends Classifier 
@@ -218,138 +218,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 
     return result;
   }
-
-  /**
-   * Class for a node in a linked list. Used in best first search.
-   */
-  public class Link {
-
-    /** The group */
-    BitSet m_group;
-
-    /** The merit */
-    double m_merit;
-
-    /**
-     * The constructor.
-     *
-     * @param gr the group
-     * @param mer the merit
-     */
-    public Link (BitSet gr, double mer) {
-
-      m_group = (BitSet)gr.clone();
-      m_merit = mer;
-    }
-
-    /**
-     * Gets the group.
-     * 
-     * @return the group
-     */
-    public BitSet getGroup() {
-
-      return m_group;
-    }
-
-    /**
-     * Gets the merit.
-     * 
-     * @return the merit
-     */
-    public double getMerit() {
-
-      return m_merit;
-    }
-
-    /**
-     * Returns string representation.
-     * 
-     * @return a string representation
-     */
-    public String toString() {
-
-      return ("Node: "+m_group.toString()+"  "+m_merit);
-    }
-  }
-
-  /**
-   * Class for handling a linked list. Used in best first search.
-   * Extends the Vector class.
-   */
-  public class LinkedList 
-  extends FastVector {
-
-    /** for serialization */
-    static final long serialVersionUID = -8323010516352768601L;
-
-    /**
-     * Removes an element (Link) at a specific index from the list.
-     *
-     * @param index the index of the element to be removed.
-     * @throws Exception iof index out of range
-     */
-    public void removeLinkAt(int index) throws Exception {
-
-      if ((index >= 0) && (index < size())) {
-	removeElementAt(index);
-      } else {
-	throw new Exception("index out of range (removeLinkAt)");
-      }
-    }
-
-    /**
-     * Returns the element (Link) at a specific index from the list.
-     *
-     * @param index the index of the element to be returned.
-     * @return the link
-     * @throws Exception if index out of range
-     */
-    public Link getLinkAt(int index) throws Exception {
-
-      if (size()==0) {
-	throw new Exception("List is empty (getLinkAt)");
-      } else if ((index >= 0) && (index < size())) {
-	return ((Link)(elementAt(index)));
-      } else {
-	throw new Exception("index out of range (getLinkAt)");
-      }
-    }
-
-    /**
-     * Aadds an element (Link) to the list.
-     *
-     * @param gr the feature set specification
-     * @param mer the "merit" of this feature set
-     */
-    public void addToList(BitSet gr, double mer) {
-
-      Link newL = new Link(gr, mer);
-
-      if (size()==0) {
-	addElement(newL);
-      }
-      else if (mer > ((Link)(firstElement())).getMerit()) {
-	insertElementAt(newL,0);
-      } else {
-	int i = 0;
-	int size = size();
-	boolean done = false;
-	while ((!done) && (i < size)) {
-	  if (mer > ((Link)(elementAt(i))).getMerit()) {
-	    insertElementAt(newL,i);
-	    done = true;
-	  } else if (i == size-1) {
-	    addElement(newL);
-	    done = true;
-	  } else {
-	    i++;
-	  }
-	}
-      }
-    }
-  }
-
+  
   /**
    * Class providing keys to the hash table
    */
@@ -726,11 +595,11 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	ruleCount++;
       }
       m_classPriorCounts[(int)inst.classValue()] -= 
-	  inst.weight();	
+	inst.weight();	
     }
     double [] classPriors = m_classPriorCounts.clone();
     Utils.normalize(classPriors);
-    
+
     // now classify instances
     for (i=0;i<numFold;i++) {
       inst = fold.instance(i);
@@ -743,19 +612,19 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 	    break;
 	  }
 	}
-	
+
 	if (!ok) { // majority class
 	  normDist = classPriors.clone();
 	}
-	
+
 //	if (ok) {
-	  Utils.normalize(normDist);
-	  if (m_evaluationMeasure == EVAL_AUC) {
-	    m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
-	  } else {
-	    m_evaluation.evaluateModelOnce(normDist, inst);
-	  }
-/*	} else {					
+	Utils.normalize(normDist);
+	if (m_evaluationMeasure == EVAL_AUC) {
+	  m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
+	} else {
+	  m_evaluation.evaluateModelOnce(normDist, inst);
+	}
+	/*	} else {					
 	  normDist[(int)m_majority] = 1.0;
 	  if (m_evaluationMeasure == EVAL_AUC) {
 	    m_evaluation.evaluateModelOnceAndRecordPrediction(normDist, inst);						
@@ -779,10 +648,10 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
     // now re-insert instances
     for (i=0;i<numFold;i++) {
       inst = fold.instance(i);
-      
+
       m_classPriorCounts[(int)inst.classValue()] += 
-	  inst.weight();
-      
+	inst.weight();
+
       if (m_classIsNominal) {
 	class_distribs[i][(int)inst.classValue()] += inst.weight();
       } else {
@@ -1275,8 +1144,9 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
     result.enable(Capability.NOMINAL_CLASS);
     if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_AUC) {
       result.enable(Capability.NUMERIC_CLASS);
+      result.enable(Capability.DATE_CLASS);
     }
-    result.enable(Capability.DATE_CLASS);
+    
     result.enable(Capability.MISSING_CLASS_VALUES);
 
     return result;
@@ -1325,17 +1195,18 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
 
     m_rr = new Random(1);
 
-    //	 Set up class priors
-    m_classPriorCounts = 
-      new double [data.classAttribute().numValues()];
-    Arrays.fill(m_classPriorCounts, 1.0);
-    for (int i = 0; i <data.numInstances(); i++) {
-      Instance curr = data.instance(i);
-      m_classPriorCounts[(int)curr.classValue()] += 
-	curr.weight();
+    if (m_theInstances.classAttribute().isNominal())  {//	 Set up class priors
+      m_classPriorCounts = 
+	new double [data.classAttribute().numValues()];
+      Arrays.fill(m_classPriorCounts, 1.0);
+      for (int i = 0; i <data.numInstances(); i++) {
+	Instance curr = data.instance(i);
+	m_classPriorCounts[(int)curr.classValue()] += 
+	  curr.weight();
+      }
+      m_classPriors = m_classPriorCounts.clone();
+      Utils.normalize(m_classPriors);
     }
-    m_classPriors = m_classPriorCounts.clone();
-    Utils.normalize(m_classPriors);
 
     setUpEvaluator();
 
