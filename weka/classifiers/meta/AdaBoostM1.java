@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.3 $ 
+ * @version $Revision: 1.24.2.4 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -224,10 +224,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     }
       
     setUseResampling(Utils.getFlag('Q', options));
-    if (m_UseResampling && (thresholdString.length() != 0)) {
-      throw new Exception("Weight pruning with resampling"+
-			  "not allowed.");
-    }
+
     super.setOptions(options);
   }
 
@@ -237,22 +234,23 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
+    Vector        result;
+    String[]      options;
+    int           i;
+    
+    result  = new Vector();
 
-    String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 2];
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
-    int current = 0;
-    if (getUseResampling()) {
-      options[current++] = "-Q";
-      options[current++] = "";
-    } else {
-      options[current++] = "-P"; 
-      options[current++] = "" + getWeightThreshold();
-    }
+    if (getUseResampling())
+      result.add("-Q");
 
-    System.arraycopy(superOptions, 0, options, current, 
-		     superOptions.length);
-    return options;
+    result.add("-P");
+    result.add("" + getWeightThreshold());
+    
+    return (String[]) result.toArray(new String[result.size()]);
   }
   
   /**
