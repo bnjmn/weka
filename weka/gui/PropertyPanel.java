@@ -43,7 +43,7 @@ import java.beans.PropertyChangeEvent;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class PropertyPanel extends JPanel {
 
@@ -126,6 +126,8 @@ public class PropertyPanel extends JPanel {
       } else {
 	m_PD.setVisible(true);
       }
+      // make sure that m_Backup is correctly initialized!
+      m_Editor.setValue(m_Editor.getValue());
     }
   }
 
