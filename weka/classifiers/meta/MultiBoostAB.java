@@ -131,7 +131,7 @@ import java.util.Vector;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  */
 public class MultiBoostAB 
   extends AdaBoostM1
@@ -342,7 +342,8 @@ public class MultiBoostAB
 
     if ((m_NumIterationsPerformed + 1) % subCmtySize == 0) {
 
-      System.err.println(m_NumIterationsPerformed + " " + subCmtySize);
+      if (getDebug())
+	System.err.println(m_NumIterationsPerformed + " " + subCmtySize);
 
       double oldSumOfWeights = training.sumOfWeights();
 
