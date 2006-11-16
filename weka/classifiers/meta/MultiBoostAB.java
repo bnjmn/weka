@@ -100,7 +100,7 @@ import weka.core.*;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6.2.2 $ 
+ * @version $Revision: 1.6.2.3 $ 
 `*/
 public class MultiBoostAB extends AdaBoostM1 {
 
@@ -262,7 +262,8 @@ public class MultiBoostAB extends AdaBoostM1 {
 
     if ((m_NumIterationsPerformed + 1) % subCmtySize == 0) {
 
-      System.err.println(m_NumIterationsPerformed + " " + subCmtySize);
+      if (getDebug())
+	System.err.println(m_NumIterationsPerformed + " " + subCmtySize);
 
       double oldSumOfWeights = training.sumOfWeights();
 
