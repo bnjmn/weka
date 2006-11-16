@@ -26,7 +26,7 @@ package weka.core;
  * A <code>Tag</code> simply associates a numeric ID with a String description.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Tag {
 
@@ -105,6 +105,7 @@ public class Tag {
    * returns a list that can be used in the listOption methods to list all
    * the available ID strings, e.g.: &lt;0|1|2&gt; or &lt;what|ever&gt;
    * 
+   * @param tags the tags to create the list for
    * @return a list of all ID strings
    */
   public static String toOptionList(Tag[] tags) {
@@ -118,6 +119,25 @@ public class Tag {
       result += tags[i];
     }
     result += ">";
+    
+    return result;
+  }
+  
+  /**
+   * returns a string that can be used in the listOption methods to list all
+   * the available options, i.e., "\t\tID = Text\n" for each option
+   * 
+   * @param tags the tags to create the string for
+   * @return a string explaining the tags
+   */
+  public static String toOptionSynopsis(Tag[] tags) {
+    String	result;
+    int		i;
+
+    result = "";
+    for (i = 0; i < tags.length; i++) {
+      result += "\t\t" + tags[i].getIDStr() + " = " + tags[i].getReadable() + "\n";
+    }
     
     return result;
   }
