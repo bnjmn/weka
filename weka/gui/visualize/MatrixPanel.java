@@ -84,7 +84,7 @@ import weka.core.*;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.11.2.2 $
+ * @version $Revision: 1.11.2.3 $
  */
 
 
@@ -475,10 +475,10 @@ public class MatrixPanel extends JPanel{
         //                             )
         //                  );
         
-        inst = new Instances(m_data, 
+        inst = new Instances(inst, 
                  0,
                  (int)Math.round(Double.parseDouble(m_resamplePercent.getText())
-                 / 100D*m_data.numInstances())
+                 / 100D*inst.numInstances())
                             );
     }
     
