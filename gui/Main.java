@@ -91,7 +91,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Main
   extends JFrame {
@@ -103,7 +103,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -155,7 +155,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -792,7 +792,8 @@ public class Main
 	  String filename = m_FileChooserGraphVisualizer.getSelectedFile().getAbsolutePath();
 	  GraphVisualizer panel = new GraphVisualizer();
 	  try{
-	    if(filename.toLowerCase().endsWith(".xml")) {
+	    if (    filename.toLowerCase().endsWith(".xml") 
+                 || filename.toLowerCase().endsWith(".bif") ) {
 	      panel.readBIF(new FileInputStream(filename));
 	    }
 	    else {
