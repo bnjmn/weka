@@ -159,7 +159,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.69 $
+ * @version  $Revision: 1.70 $
  */
 public class Evaluation
 implements Summarizable {
@@ -1087,7 +1087,8 @@ implements Summarizable {
       Instance testInst;
       while (testSource.hasMoreElements()) {
 	testInst = testSource.nextElement(test);
-	testingEvaluation.evaluateModelOnce((Classifier)classifier, testInst);
+	testingEvaluation.evaluateModelOnceAndRecordPrediction(
+            (Classifier)classifier, testInst);
       }
 
       if (splitPercentage > 0)
