@@ -87,7 +87,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class Attribute
   implements Copyable, Serializable {
@@ -919,7 +919,7 @@ public class Attribute
   //@ ensures \result.m_Name  == newName;
   //@ ensures \result.m_Index == m_Index;
   //@ ensures \result.m_Type  == m_Type;
-  final /*@ pure non_null @*/ Attribute copy(String newName) {
+  public final /*@ pure non_null @*/ Attribute copy(String newName) {
 
     Attribute copy = new Attribute(newName);
 
