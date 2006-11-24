@@ -44,7 +44,7 @@ import  weka.core.*;
  * discard attributes. Use in conjunction with -R <p>
  *
  * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class GreedyStepwise extends ASSearch 
   implements RankedOutputSearch, StartSetHandler, OptionHandler {
@@ -536,14 +536,14 @@ public class GreedyStepwise extends ASSearch
     }
 
     // If a starting subset has been supplied, then initialise the bitset
-    if (m_starting != null) {
+    if (m_starting != null && m_rankedSoFar <= 0) {
       for (i = 0; i < m_starting.length; i++) {
 	if ((m_starting[i]) != m_classIndex) {
 	  m_best_group.set(m_starting[i]);
 	}
       }
     } else {
-      if (m_backward) {
+      if (m_backward && m_rankedSoFar <= 0) {
 	for (i = 0, j = 0; i < m_numAttribs; i++) {
 	  if (i != m_classIndex) {
 	    m_best_group.set(i);
