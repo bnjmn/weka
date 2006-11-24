@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class GreedyStepwise 
   extends ASSearch 
@@ -615,14 +615,14 @@ public class GreedyStepwise
     }
 
     // If a starting subset has been supplied, then initialise the bitset
-    if (m_starting != null) {
+    if (m_starting != null && m_rankedSoFar <= 0) {
       for (i = 0; i < m_starting.length; i++) {
 	if ((m_starting[i]) != m_classIndex) {
 	  m_best_group.set(m_starting[i]);
 	}
       }
     } else {
-      if (m_backward) {
+      if (m_backward && m_rankedSoFar <= 0) {
 	for (i = 0; i < m_numAttribs; i++) {
 	  if (i != m_classIndex) {
 	    m_best_group.set(i);
@@ -669,6 +669,7 @@ public class GreedyStepwise
               z = (temp_merit > temp_best);
             }
 	  }
+
 	  if (z) {
             temp_best = temp_merit;
             temp_index = i;
@@ -723,6 +724,7 @@ public class GreedyStepwise
       throw new Exception("Search must be performed before attributes "
 			  +"can be ranked.");
     }
+    
     m_doRank = true;
     search (m_ASEval, null);
 
