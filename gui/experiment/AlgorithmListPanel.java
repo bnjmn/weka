@@ -39,6 +39,9 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -57,7 +60,10 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -68,7 +74,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class AlgorithmListPanel
   extends JPanel
@@ -186,19 +192,110 @@ public class AlgorithmListPanel
    * Create the algorithm list panel initially disabled.
    */
   public AlgorithmListPanel() {
-    
+    final AlgorithmListPanel self = this;
     m_List = new JList();
     MouseListener mouseListener = new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2) {
-          // unfortunately, locationToIndex only returns the nearest entry
-          // and not the exact one, i.e. if there's one item in the list and
-          // one doublelclicks somewhere in the list, this index will be
-          // returned
-          int index = m_List.locationToIndex(e.getPoint());
-          if (index > -1)
-            actionPerformed(new ActionEvent(m_EditBut, 0, ""));
-        }
+	final int index = m_List.locationToIndex(e.getPoint());
+
+	if ((e.getClickCount() == 2) && (e.getButton() == MouseEvent.BUTTON1)) {
+	  // unfortunately, locationToIndex only returns the nearest entry
+	  // and not the exact one, i.e. if there's one item in the list and
+	  // one doublelclicks somewhere in the list, this index will be
+	  // returned
+	  if (index > -1)
+	    actionPerformed(new ActionEvent(m_EditBut, 0, ""));
+	}
+	else if (e.getClickCount() == 1) {
+	  if (    (e.getButton() == MouseEvent.BUTTON3) 
+	      || ((e.getButton() == MouseEvent.BUTTON1) && e.isAltDown() && e.isShiftDown()) ) {
+	    JPopupMenu menu = new JPopupMenu();
+	    JMenuItem item;
+
+	    item = new JMenuItem("Add configuration...");
+	    item.addActionListener(new ActionListener() {
+	      public void actionPerformed(ActionEvent e) {
+		String str = JOptionPane.showInputDialog(
+		    self, 
+		    "Configuration (<classname> [<options>])");
+		if (str != null) {
+		  try {
+		    String[] options = Utils.splitOptions(str);
+		    String classname = options[0];
+		    options[0] = "";
+		    DefaultListModel model = (DefaultListModel) m_List.getModel();
+		    Object obj = Utils.forName(Object.class, classname, options);
+		    model.addElement(obj);
+		  }
+		  catch (Exception ex) {
+		    ex.printStackTrace();
+		    JOptionPane.showMessageDialog(
+			self, 
+			"Error parsing commandline:\n" + ex, 
+			"Error...",
+			JOptionPane.ERROR_MESSAGE);
+		  }
+		}
+	      }
+	    });
+	    menu.add(item);
+
+	    if (m_List.getSelectedValue() != null) {
+	      menu.addSeparator();
+
+	      item = new JMenuItem("Show properties...");
+	      item.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  self.actionPerformed(new ActionEvent(m_EditBut, 0, ""));
+		}
+	      });
+	      menu.add(item);
+
+	      item = new JMenuItem("Copy configuration to clipboard");
+	      item.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  String str = m_List.getSelectedValue().getClass().getName();
+		  if (m_List.getSelectedValue() instanceof OptionHandler)
+		    str += " " + Utils.joinOptions(((OptionHandler) m_List.getSelectedValue()).getOptions());
+		  StringSelection selection = new StringSelection(str.trim());
+		  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		  clipboard.setContents(selection, selection);
+		}
+	      });
+	      menu.add(item);
+
+	      item = new JMenuItem("Enter configuration...");
+	      item.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  String str = JOptionPane.showInputDialog(
+		      self, 
+		      "Configuration (<classname> [<options>])");
+		  if (str != null) {
+		    try {
+		      String[] options = Utils.splitOptions(str);
+		      String classname = options[0];
+		      options[0] = "";
+		      DefaultListModel model = (DefaultListModel) m_List.getModel();
+		      Object obj = Utils.forName(Object.class, classname, options);
+		      model.setElementAt(obj, index);
+		    }
+		    catch (Exception ex) {
+		      ex.printStackTrace();
+		      JOptionPane.showMessageDialog(
+			  self, 
+			  "Error parsing commandline:\n" + ex, 
+			  "Error...",
+			  JOptionPane.ERROR_MESSAGE);
+		    }
+		  }
+		}
+	      });
+	      menu.add(item);
+	    }
+
+	    menu.show(m_List, e.getX(), e.getY());
+	  }
+	}
       }
     };
     m_List.addMouseListener(mouseListener);
