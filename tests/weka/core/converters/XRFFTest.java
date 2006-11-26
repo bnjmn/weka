@@ -25,20 +25,20 @@ import junit.framework.TestSuite;
 
 /**
  * Tests XRFFLoader/XRFFSaver. Run from the command line with:<p/>
- * java weka.core.converters.XMLTest
+ * java weka.core.converters.XRFFTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
-public class XMLTest 
+public class XRFFTest 
   extends AbstractFileConverterTest {
 
   /**
-   * Constructs the <code>XMLTest</code>.
+   * Constructs the <code>XRFFTest</code>.
    *
    * @param name the name of the test class
    */
-  public XMLTest(String name) { 
+  public XRFFTest(String name) { 
     super(name);  
   }
 
@@ -66,7 +66,7 @@ public class XMLTest
    * @return the test suite
    */
   public static Test suite() {
-    return new TestSuite(XMLTest.class);
+    return new TestSuite(XRFFTest.class);
   }
 
   /**
