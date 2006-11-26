@@ -15,7 +15,7 @@
  */
 
 /*
- * XMLLoader.java
+ * XRFFLoader.java
  * Copyright (C) 2006 University of Waikato, Hamilton, NZ
  *
  */
@@ -47,7 +47,7 @@ import java.util.zip.GZIPInputStream;
  * @version $Revision: 1.1 $
  * @see Loader
  */
-public class XMLLoader 
+public class XRFFLoader 
   extends AbstractFileLoader 
   implements BatchConverter, URLSourcedLoader {
 
@@ -106,7 +106,7 @@ public class XMLLoader
    * @return 		a short file description
    */
   public String getFileDescription() {
-    return "XML data files";
+    return "XRFF data files";
   }
 
   /**
@@ -263,14 +263,14 @@ public class XMLLoader
   }
 
   /**
-   * XMLLoader is unable to process a data set incrementally.
+   * XRFFLoader is unable to process a data set incrementally.
    *
    * @return 			never returns without throwing an exception
-   * @throws IOException 	always. XMLLoader is unable to process a 
+   * @throws IOException 	always. XRFFLoader is unable to process a 
    * 				data set incrementally.
    */
   public Instance getNextInstance() throws IOException {
-    throw new IOException("XMLLoader can't read data sets incrementally.");
+    throw new IOException("XRFFLoader can't read data sets incrementally.");
   }
 
   /**
@@ -279,6 +279,6 @@ public class XMLLoader
    * @param args 	should contain the name of an input file.
    */
   public static void main(String[] args) {
-    runFileLoader(new XMLLoader(), args);
+    runFileLoader(new XRFFLoader(), args);
   }
 }

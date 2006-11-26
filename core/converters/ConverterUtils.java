@@ -45,7 +45,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -66,7 +66,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.9 $
+   * @version $Revision: 1.10 $
    * @see #hasMoreElements()
    * @see #nextElement()
    * @see #reset()
@@ -472,7 +472,7 @@ public class ConverterUtils
     + weka.core.converters.LibSVMLoader.class.getName() + ","
     + weka.core.converters.SerializedInstancesLoader.class.getName() + ","
     + weka.core.converters.TextDirectoryLoader.class.getName() + ","
-    + weka.core.converters.XMLLoader.class.getName();
+    + weka.core.converters.XRFFLoader.class.getName();
 
   /** the core savers - hardcoded list necessary for RMI/Remote Experiments 
    * (comma-separated list) */
@@ -483,7 +483,7 @@ public class ConverterUtils
     + weka.core.converters.DatabaseConverter.class.getName() + ","
     + weka.core.converters.LibSVMSaver.class.getName() + ","
     + weka.core.converters.SerializedInstancesSaver.class.getName() + ","
-    + weka.core.converters.XMLSaver.class.getName();
+    + weka.core.converters.XRFFSaver.class.getName();
   
   /** all available loaders (extension &lt;-&gt; classname) */
   protected static Hashtable<String,String> m_FileLoaders;
