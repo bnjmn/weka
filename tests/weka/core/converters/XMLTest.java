@@ -24,11 +24,11 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests XMLLoader/XMLSaver. Run from the command line with:<p/>
+ * Tests XRFFLoader/XRFFSaver. Run from the command line with:<p/>
  * java weka.core.converters.XMLTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class XMLTest 
   extends AbstractFileConverterTest {
@@ -48,7 +48,7 @@ public class XMLTest
    * @return the configured loader
    */
   public AbstractLoader getLoader() {
-    return new XMLLoader();
+    return new XRFFLoader();
   }
 
   /**
@@ -57,7 +57,7 @@ public class XMLTest
    * @return the configured saver
    */
   public AbstractSaver getSaver() {
-    return new XMLSaver();
+    return new XRFFSaver();
   }
 
   /**

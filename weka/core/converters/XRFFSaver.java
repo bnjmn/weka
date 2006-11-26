@@ -15,7 +15,7 @@
  */
 
 /*
- * XMLSaver.java
+ * XRFFSaver.java
  * Copyright (C) 2006 University of Waikato, Hamilton, NZ
  *
  */
@@ -64,10 +64,10 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  * @see Saver
  */
-public class XMLSaver 
+public class XRFFSaver 
   extends AbstractFileSaver 
   implements BatchConverter {
   
@@ -86,7 +86,7 @@ public class XMLSaver
   /**
    * Constructor
    */
-  public XMLSaver(){
+  public XRFFSaver(){
     resetOptions();
   }
   
@@ -125,9 +125,9 @@ public class XMLSaver
     result.addElement(
         new Option(
             "\tCompresses the data (uses '" 
-            + XMLLoader.FILE_EXTENSION_COMPRESSED 
+            + XRFFLoader.FILE_EXTENSION_COMPRESSED 
             + "' as extension instead of '" 
-            + XMLLoader.FILE_EXTENSION + "')\n"
+            + XRFFLoader.FILE_EXTENSION + "')\n"
             + "\t(default: off)",
             "compress", 0, "-compress"));
     
@@ -204,7 +204,7 @@ public class XMLSaver
    * @return a short file description
    */
   public String getFileDescription() {
-    return "XML data files";
+    return "XRFF data files";
   }
 
   /**
@@ -213,7 +213,7 @@ public class XMLSaver
    * @return the file extensions
    */
   public String[] getFileExtensions() {
-    return new String[]{XMLLoader.FILE_EXTENSION, XMLLoader.FILE_EXTENSION_COMPRESSED};
+    return new String[]{XRFFLoader.FILE_EXTENSION, XRFFLoader.FILE_EXTENSION_COMPRESSED};
   }
   
   /** 
@@ -223,7 +223,7 @@ public class XMLSaver
    * @throws IOException throws an IOException if file cannot be set
    */
   public void setFile(File outputFile) throws IOException  {
-    if (outputFile.getAbsolutePath().endsWith(XMLLoader.FILE_EXTENSION_COMPRESSED))
+    if (outputFile.getAbsolutePath().endsWith(XRFFLoader.FILE_EXTENSION_COMPRESSED))
       setCompressOutput(true);
     
     super.setFile(outputFile);
@@ -236,9 +236,9 @@ public class XMLSaver
     super.resetOptions();
     
     if (getCompressOutput())
-      setFileExtension(XMLLoader.FILE_EXTENSION_COMPRESSED);
+      setFileExtension(XRFFLoader.FILE_EXTENSION_COMPRESSED);
     else
-      setFileExtension(XMLLoader.FILE_EXTENSION);
+      setFileExtension(XRFFLoader.FILE_EXTENSION);
     
     try {
       m_XMLInstances = new XMLInstances();
@@ -391,6 +391,6 @@ public class XMLSaver
    * @param args 	should contain the options of a Saver.
    */
   public static void main(String[] args) {
-    runFileSaver(new XMLSaver(), args);
+    runFileSaver(new XRFFSaver(), args);
   }
 }
