@@ -48,7 +48,7 @@ import org.w3c.dom.Element;
  * XML representation of the Instances class.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class XMLInstances
   extends XMLDocument
@@ -281,13 +281,13 @@ public class XMLInstances
 	tmpStr = enm.nextElement().toString();
 	label = m_Document.createElement(TAG_LABEL);
 	child.appendChild(label);
-	label.appendChild(m_Document.createTextNode(tmpStr));
+	label.appendChild(m_Document.createTextNode(validContent(tmpStr)));
       }
     }
     
     // format
     if (att.isDate())
-      node.setAttribute(ATT_FORMAT, att.getDateFormat());
+      node.setAttribute(ATT_FORMAT, validContent(att.getDateFormat()));
     
     // class
     if (m_Instances.classIndex() > -1) {
@@ -305,7 +305,7 @@ public class XMLInstances
 	property = m_Document.createElement(TAG_PROPERTY);
 	child.appendChild(property);
 	property.setAttribute(ATT_NAME, tmpStr);
-	property.appendChild(m_Document.createTextNode(att.getMetadata().getProperty(tmpStr, "")));
+	property.appendChild(m_Document.createTextNode(validContent(att.getMetadata().getProperty(tmpStr, ""))));
       }
     }
     
