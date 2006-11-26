@@ -50,7 +50,7 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -253,11 +253,16 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
 
     StringBuffer text = new StringBuffer();
     text.append("Isotonic regression\n\n");
-    text.append("Based on attribute: " + m_attribute.name() + "\n\n");
-    for (int i = 0; i < m_values.length; i++) {
-      text.append("prediction: " + Utils.doubleToString(m_values[i], 10, 2));
-      if (i < m_cuts.length) {
-        text.append("\t\tcut point: " + Utils.doubleToString(m_cuts[i], 10, 2) + "\n");
+    if (m_attribute == null) {
+      text.append("No model built yet!");
+    }
+    else {
+      text.append("Based on attribute: " + m_attribute.name() + "\n\n");
+      for (int i = 0; i < m_values.length; i++) {
+	text.append("prediction: " + Utils.doubleToString(m_values[i], 10, 2));
+	if (i < m_cuts.length) {
+	  text.append("\t\tcut point: " + Utils.doubleToString(m_cuts[i], 10, 2) + "\n");
+	}
       }
     }
     return text.toString();
