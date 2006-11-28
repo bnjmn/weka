@@ -97,7 +97,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.64 $
+ * @version $Revision: 1.65 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -676,8 +676,22 @@ public class PreprocessPanel
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	try {
 	  addUndoPoint();
-	} catch (Exception ignored) {}
-	setInstancesFromFile(m_FileChooser.getLoader());
+	}
+	catch (Exception ignored) {
+	  // ignored
+	}
+
+	if (m_FileChooser.getLoader() == null) {
+	  JOptionPane.showMessageDialog(this,
+	      "Cannot determine file loader automatically, please choose one.",
+	      "Load Instances",
+	      JOptionPane.ERROR_MESSAGE);
+	  converterQuery(m_FileChooser.getSelectedFile());
+	}
+	else {
+	  setInstancesFromFile(m_FileChooser.getLoader());
+	}
+	    
       }
     } else {
       JOptionPane.showMessageDialog(this,
