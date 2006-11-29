@@ -53,7 +53,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class ArffTable
   extends JTable {
@@ -168,9 +168,9 @@ public class ArffTable
   }
   
   /** the search string */
-  private String                   searchString;
+  private String m_SearchString;
   /** the listeners for changes */
-  private HashSet                  changeListeners;
+  private HashSet m_ChangeListeners;
   
   /**
    * initializes with no model
@@ -199,11 +199,11 @@ public class ArffTable
     ArffSortedTableModel      arffModel;
     
     // initialize the search
-    searchString = null;
+    m_SearchString = null;
     
     // init the listeners
-    if (changeListeners == null)
-      changeListeners = new HashSet();
+    if (m_ChangeListeners == null)
+      m_ChangeListeners = new HashSet();
     
     super.setModel(model);
     
@@ -244,6 +244,24 @@ public class ArffTable
       result = super.getCellEditor(row, column);
     
     return result;
+  }
+
+  /**
+   * returns whether the model is read-only
+   * 
+   * @return 		true if model is read-only
+   */
+  public boolean isReadOnly() {
+    return ((ArffSortedTableModel) getModel()).isReadOnly();
+  }
+  
+  /**
+   * sets whether the model is read-only
+   * 
+   * @param value	if true the model is set to read-only
+   */
+  public void setReadOnly(boolean value) {
+    ((ArffSortedTableModel) getModel()).setReadOnly(value);
   }
   
   /**
@@ -378,7 +396,7 @@ public class ArffTable
    * @param searchString	the search string to use
    */
   public void setSearchString(String searchString) {
-    this.searchString = searchString;
+    this.m_SearchString = searchString;
     repaint();
   }
   
@@ -388,7 +406,7 @@ public class ArffTable
    * @return			the current search string
    */
   public String getSearchString() {
-    return searchString;
+    return m_SearchString;
   }
   
   /**
@@ -423,7 +441,7 @@ public class ArffTable
   private void notifyListener() {
     Iterator                iter;
     
-    iter = changeListeners.iterator();
+    iter = m_ChangeListeners.iterator();
     while (iter.hasNext())
       ((ChangeListener) iter.next()).stateChanged(new ChangeEvent(this));
   }
@@ -434,7 +452,7 @@ public class ArffTable
    * @param l			the listener to add
    */
   public void addChangeListener(ChangeListener l) {
-    changeListeners.add(l);
+    m_ChangeListeners.add(l);
   }
   
   /**
@@ -443,6 +461,6 @@ public class ArffTable
    * @param l			the listener to remove
    */
   public void removeChangeListener(ChangeListener l) {
-    changeListeners.remove(l);
+    m_ChangeListeners.remove(l);
   }
 }
