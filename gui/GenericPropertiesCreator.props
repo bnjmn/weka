@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.11 $
+# Version: $Revision: 1.12 $
 
 # Lists the ResultProducers-Packages I want to choose from
 weka.experiment.ResultProducer=\
@@ -24,7 +24,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.nestedDichotomies,\
  weka.classifiers.mi,\
  weka.classifiers.misc,\
- weka.classifiers.monotone,\
  weka.classifiers.trees,\
  weka.classifiers.rules
 
