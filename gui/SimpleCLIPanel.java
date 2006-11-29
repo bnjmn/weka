@@ -29,8 +29,6 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.TextArea;
-import java.awt.TextField;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,6 +48,9 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  * Creates a very simple command line for invoking the main method of
@@ -59,7 +60,7 @@ import javax.swing.JPanel;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleCLIPanel
   extends JPanel
@@ -69,10 +70,10 @@ public class SimpleCLIPanel
   private static final long serialVersionUID = -7377739469759943231L;
 
   /** The output area canvas added to the frame */
-  protected TextArea m_OutputArea = new TextArea();
+  protected JTextArea m_OutputArea = new JTextArea();
 
   /** The command input area */
-  protected TextField m_Input = new TextField();
+  protected JTextField m_Input = new JTextField();
 
   /** The history of commands entered interactively */
   protected Vector m_CommandHistory = new Vector();
@@ -100,7 +101,7 @@ public class SimpleCLIPanel
    * A class that sends all lines from a reader to a TextArea component
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   class ReaderToTextArea extends Thread {
 
@@ -108,7 +109,7 @@ public class SimpleCLIPanel
     protected LineNumberReader m_Input;
 
     /** The output text component */
-    protected TextArea m_Output;
+    protected JTextArea m_Output;
     
     /**
      * Sets up the ReaderToTextArea
@@ -116,7 +117,7 @@ public class SimpleCLIPanel
      * @param input the Reader to monitor
      * @param output the TextArea to send output to
      */
-    public ReaderToTextArea(Reader input, TextArea output) {
+    public ReaderToTextArea(Reader input, JTextArea output) {
       setDaemon(true);
       m_Input = new LineNumberReader(input);
       m_Output = output;
@@ -131,6 +132,7 @@ public class SimpleCLIPanel
       while (true) {
 	try {
 	  m_Output.append(m_Input.readLine() + '\n');
+	  m_Output.setCaretPosition(m_Output.getDocument().getLength());
 	} catch (Exception ex) {
 	  try {
 	    sleep(100);
@@ -146,7 +148,7 @@ public class SimpleCLIPanel
    * in a separate thread
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   class ClassRunner extends Thread {
 
@@ -210,9 +212,10 @@ public class SimpleCLIPanel
   public SimpleCLIPanel() throws Exception {
     
     setLayout(new BorderLayout());
-    add(m_OutputArea, "Center");
+    add(new JScrollPane(m_OutputArea), "Center");
     add(m_Input, "South");
 
+    m_Input.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_Input.addActionListener(this);
     m_Input.addKeyListener(new KeyAdapter() {
       public void keyPressed(KeyEvent e) {
