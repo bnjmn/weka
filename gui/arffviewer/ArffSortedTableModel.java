@@ -34,7 +34,7 @@ import javax.swing.event.TableModelListener;
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
 public class ArffSortedTableModel 
@@ -107,6 +107,24 @@ public class ArffSortedTableModel
    */
   public void setUndoEnabled(boolean enabled) {
     ((ArffTableModel) getModel()).setUndoEnabled(enabled);
+  }
+
+  /**
+   * returns whether the model is read-only
+   * 
+   * @return 		true if model is read-only
+   */
+  public boolean isReadOnly() {
+    return ((ArffTableModel) getModel()).isReadOnly();
+  }
+  
+  /**
+   * sets whether the model is read-only
+   * 
+   * @param value	if true the model is set to read-only
+   */
+  public void setReadOnly(boolean value) {
+    ((ArffTableModel) getModel()).setReadOnly(value);
   }
   
   /**

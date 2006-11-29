@@ -54,23 +54,25 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class ArffTableModel 
   implements TableModel, Undoable {
   
   /** the listeners */
-  private HashSet         listeners;
+  private HashSet m_Listeners;
   /** the data */
-  private Instances       data;
+  private Instances m_Data;
   /** whether notfication is enabled */
-  private boolean         notificationEnabled;
+  private boolean m_NotificationEnabled;
   /** whether undo is active */
-  private boolean         undoEnabled;
+  private boolean m_UndoEnabled;
   /** whether to ignore changes, i.e. not adding to undo history */
-  private boolean         ignoreChanges;
+  private boolean m_IgnoreChanges;
   /** the undo list (contains temp. filenames) */
-  private Vector          undoList;
+  private Vector m_UndoList;
+  /** whether the table is read-only */
+  private boolean m_ReadOnly;
   
   /**
    * performs some initialization
@@ -78,12 +80,13 @@ public class ArffTableModel
   private ArffTableModel() {
     super();
     
-    listeners           = new HashSet();
-    data                = null;
-    notificationEnabled = true;
-    undoList            = new Vector();
-    ignoreChanges       = false;
-    undoEnabled         = true;
+    m_Listeners           = new HashSet();
+    m_Data                = null;
+    m_NotificationEnabled = true;
+    m_UndoList            = new Vector();
+    m_IgnoreChanges       = false;
+    m_UndoEnabled         = true;
+    m_ReadOnly            = false;
   }
   
   /**
@@ -106,7 +109,7 @@ public class ArffTableModel
   public ArffTableModel(Instances data) {
     this();
     
-    this.data = data;
+    this.m_Data = data;
   }
 
   /**
@@ -115,7 +118,7 @@ public class ArffTableModel
    * @return 		true if notification of changes is enabled
    */
   public boolean isNotificationEnabled() {
-    return notificationEnabled;
+    return m_NotificationEnabled;
   }
   
   /**
@@ -124,7 +127,7 @@ public class ArffTableModel
    * @param enabled	enables/disables the notification
    */
   public void setNotificationEnabled(boolean enabled) {
-    notificationEnabled = enabled;
+    m_NotificationEnabled = enabled;
   }
 
   /**
@@ -133,7 +136,7 @@ public class ArffTableModel
    * @return 		true if undo support is enabled
    */
   public boolean isUndoEnabled() {
-    return undoEnabled;
+    return m_UndoEnabled;
   }
   
   /**
@@ -142,7 +145,25 @@ public class ArffTableModel
    * @param enabled	whether to enable/disable undo support
    */
   public void setUndoEnabled(boolean enabled) {
-    undoEnabled = enabled;
+    m_UndoEnabled = enabled;
+  }
+
+  /**
+   * returns whether the model is read-only
+   * 
+   * @return 		true if model is read-only
+   */
+  public boolean isReadOnly() {
+    return m_ReadOnly;
+  }
+  
+  /**
+   * sets whether the model is read-only
+   * 
+   * @param value	if true the model is set to read-only
+   */
+  public void setReadOnly(boolean value) {
+    m_ReadOnly = value;
   }
   
   /**
@@ -158,7 +179,7 @@ public class ArffTableModel
     if (loader != null) {
       try {
         loader.setFile(new File(filename));
-        data = loader.getDataSet();
+        m_Data = loader.getDataSet();
       }
       catch (Exception e) {
         ComponentHelper.showMessageBox(
@@ -168,7 +189,7 @@ public class ArffTableModel
             JOptionPane.OK_CANCEL_OPTION,
             JOptionPane.ERROR_MESSAGE );
         System.out.println(e);
-        data = null;
+        m_Data = null;
       }
     }
   }
@@ -179,7 +200,7 @@ public class ArffTableModel
    * @param data	the data to use
    */
   public void setInstances(Instances data) {
-    this.data = data;
+    m_Data = data;
   }
   
   /**
@@ -188,7 +209,7 @@ public class ArffTableModel
    * @return		the current data
    */
   public Instances getInstances() {
-    return data;
+    return m_Data;
   }
   
   /**
@@ -200,7 +221,7 @@ public class ArffTableModel
    */
   public Attribute getAttributeAt(int columnIndex) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) )
-      return data.attribute(columnIndex - 1);
+      return m_Data.attribute(columnIndex - 1);
     else
       return null;
   }
@@ -229,7 +250,7 @@ public class ArffTableModel
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
          && (columnIndex > 0) && (columnIndex < getColumnCount()) )
-      result = data.instance(rowIndex).attribute(columnIndex - 1).type();
+      result = m_Data.instance(rowIndex).attribute(columnIndex - 1).type();
     
     return result;
   }
@@ -251,9 +272,9 @@ public class ArffTableModel
    */
   public void deleteAttributeAt(int columnIndex, boolean notify) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
-      if (!ignoreChanges)
+      if (!m_IgnoreChanges)
         addUndoPoint();
-      data.deleteAttributeAt(columnIndex - 1);
+      m_Data.deleteAttributeAt(columnIndex - 1);
       if (notify) 
         notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
@@ -271,10 +292,10 @@ public class ArffTableModel
     
     addUndoPoint();
 
-    ignoreChanges = true;
+    m_IgnoreChanges = true;
     for (i = columnIndices.length - 1; i >= 0; i--)
       deleteAttributeAt(columnIndices[i], false);
-    ignoreChanges = false;
+    m_IgnoreChanges = false;
 
     notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
   }
@@ -288,7 +309,7 @@ public class ArffTableModel
   public void renameAttributeAt(int columnIndex, String newName) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
       addUndoPoint();
-      data.renameAttribute(columnIndex - 1, newName);
+      m_Data.renameAttribute(columnIndex - 1, newName);
       notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
   }
@@ -310,7 +331,7 @@ public class ArffTableModel
       try {
         // build order string (1-based!)
         order = "";
-        for (i = 1; i < data.numAttributes() + 1; i++) {
+        for (i = 1; i < m_Data.numAttributes() + 1; i++) {
           // skip new class
           if (i == columnIndex)
             continue;
@@ -326,11 +347,11 @@ public class ArffTableModel
         // process data
         reorder = new Reorder();
         reorder.setAttributeIndices(order);
-        reorder.setInputFormat(data);
-        data = Filter.useFilter(data, reorder);
+        reorder.setInputFormat(m_Data);
+        m_Data = Filter.useFilter(m_Data, reorder);
         
         // set class index
-        data.setClassIndex(data.numAttributes() - 1);
+        m_Data.setClassIndex(m_Data.numAttributes() - 1);
       }
       catch (Exception e) {
         e.printStackTrace();
@@ -358,9 +379,9 @@ public class ArffTableModel
    */
   public void deleteInstanceAt(int rowIndex, boolean notify) {
     if ( (rowIndex >= 0) && (rowIndex < getRowCount()) ) {
-      if (!ignoreChanges)
+      if (!m_IgnoreChanges)
         addUndoPoint();
-      data.delete(rowIndex);
+      m_Data.delete(rowIndex);
       if (notify)
         notifyListener(
             new TableModelEvent(
@@ -381,10 +402,10 @@ public class ArffTableModel
     
     addUndoPoint();
     
-    ignoreChanges = true;
+    m_IgnoreChanges = true;
     for (i = rowIndices.length - 1; i >= 0; i--)
       deleteInstanceAt(rowIndices[i], false);
-    ignoreChanges = false;
+    m_IgnoreChanges = false;
 
     notifyListener(
         new TableModelEvent(
@@ -400,7 +421,7 @@ public class ArffTableModel
   public void sortInstances(int columnIndex) {
     if ( (columnIndex > 0) && (columnIndex < getColumnCount()) ) {
       addUndoPoint();
-      data.sort(columnIndex - 1);
+      m_Data.sort(columnIndex - 1);
       notifyListener(new TableModelEvent(this));
     }
   }
@@ -417,8 +438,8 @@ public class ArffTableModel
     
     result = -1;
     
-    for (i = 0; i < data.numAttributes(); i++) {
-      if (data.attribute(i).name().equals(name)) {
+    for (i = 0; i < m_Data.numAttributes(); i++) {
+      if (m_Data.attribute(i).name().equals(name)) {
         result = i + 1;
         break;
       }
@@ -460,8 +481,8 @@ public class ArffTableModel
     int         result;
     
     result = 1;
-    if (data != null)
-      result += data.numAttributes();
+    if (m_Data != null)
+      result += m_Data.numAttributes();
     
     return result;
   }
@@ -476,8 +497,8 @@ public class ArffTableModel
     boolean        result;
     int            index;
     
-    index  = data.classIndex();
-    result =    ((index == - 1) && (data.numAttributes() == columnIndex))
+    index  = m_Data.classIndex();
+    result =    ((index == - 1) && (m_Data.numAttributes() == columnIndex))
              || (index == columnIndex - 1);
     
     return result;
@@ -499,16 +520,16 @@ public class ArffTableModel
         result = "<html><center>No.<br><font size=\"-2\">&nbsp;</font></center></html>";
       }
       else {
-        if (data != null) {
-          if ( (columnIndex - 1 < data.numAttributes()) ) {
+        if (m_Data != null) {
+          if ( (columnIndex - 1 < m_Data.numAttributes()) ) {
             result = "<html><center>";
             // name
             if (isClassIndex(columnIndex))
               result +=   "<b>" 
-                + data.attribute(columnIndex - 1).name() 
+                + m_Data.attribute(columnIndex - 1).name() 
                 + "</b>";
             else
-              result += data.attribute(columnIndex - 1).name();
+              result += m_Data.attribute(columnIndex - 1).name();
             
             // attribute type
             switch (getType(columnIndex)) {
@@ -546,10 +567,10 @@ public class ArffTableModel
    * @return		the number of rows
    */
   public int getRowCount() {
-    if (data == null)
+    if (m_Data == null)
       return 0;
     else
-      return data.numInstances(); 
+      return m_Data.numInstances(); 
   }
   
   /**
@@ -566,7 +587,7 @@ public class ArffTableModel
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
          && (columnIndex > 0) && (columnIndex < getColumnCount()) )
-      result = (data.instance(rowIndex).isMissing(columnIndex - 1));
+      result = (m_Data.instance(rowIndex).isMissing(columnIndex - 1));
     
     return result;
   }
@@ -586,7 +607,7 @@ public class ArffTableModel
     
     if (    (rowIndex >= 0) && (rowIndex < getRowCount())
          && (columnIndex > 0) && (columnIndex < getColumnCount()) )
-      result = data.instance(rowIndex).value(columnIndex - 1);
+      result = m_Data.instance(rowIndex).value(columnIndex - 1);
     
     return result;
   }
@@ -619,10 +640,10 @@ public class ArffTableModel
             case Attribute.NOMINAL:
             case Attribute.STRING:
             case Attribute.RELATIONAL:
-              result = data.instance(rowIndex).stringValue(columnIndex - 1);
+              result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
               break;
             case Attribute.NUMERIC:
-              result = new Double(data.instance(rowIndex).value(columnIndex - 1));
+              result = new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
               break;
             default:
               result = "-can't display-";
@@ -655,7 +676,7 @@ public class ArffTableModel
    * @return			true if the cell is editable
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return (columnIndex > 0);
+    return (columnIndex > 0) && !isReadOnly();
   }
   
   /**
@@ -687,13 +708,13 @@ public class ArffTableModel
     Attribute      att;
     Object         oldValue;
     
-    if (!ignoreChanges)
+    if (!m_IgnoreChanges)
       addUndoPoint();
     
     oldValue = getValueAt(rowIndex, columnIndex);
     type     = getType(rowIndex, columnIndex);
     index    = columnIndex - 1;
-    inst     = data.instance(rowIndex);
+    inst     = m_Data.instance(rowIndex);
     att      = inst.attribute(index);
     
     // missing?
@@ -759,7 +780,7 @@ public class ArffTableModel
    * @param l		the listener to add
    */
   public void addTableModelListener(TableModelListener l) {
-    listeners.add(l);
+    m_Listeners.add(l);
   }
   
   /**
@@ -769,7 +790,7 @@ public class ArffTableModel
    * @param l		the listener to remove
    */
   public void removeTableModelListener(TableModelListener l) {
-    listeners.remove(l);
+    m_Listeners.remove(l);
   }
   
   /**
@@ -785,7 +806,7 @@ public class ArffTableModel
     if (!isNotificationEnabled())
       return;
     
-    iter = listeners.iterator();
+    iter = m_Listeners.iterator();
     while (iter.hasNext()) {
       l = (TableModelListener) iter.next();
       l.tableChanged(e);
@@ -796,7 +817,7 @@ public class ArffTableModel
    * removes the undo history
    */
   public void clearUndo() {
-    undoList = new Vector();
+    m_UndoList = new Vector();
   }
   
   /**
@@ -806,7 +827,7 @@ public class ArffTableModel
    * @return returns TRUE if there is an undo possible 
    */
   public boolean canUndo() {
-    return !undoList.isEmpty();
+    return !m_UndoList.isEmpty();
   }
   
   /**
@@ -819,7 +840,7 @@ public class ArffTableModel
     
     if (canUndo()) {
       // load file
-      tempFile = (File) undoList.get(undoList.size() - 1);
+      tempFile = (File) m_UndoList.get(m_UndoList.size() - 1);
       try {
         // read serialized data
         ooi = new ObjectInputStream(new BufferedInputStream(new FileInputStream(tempFile)));
@@ -837,7 +858,7 @@ public class ArffTableModel
       tempFile.delete();
       
       // remove from undo
-      undoList.remove(undoList.size() - 1);
+      m_UndoList.remove(m_UndoList.size() - 1);
     }
   }
   
@@ -867,7 +888,7 @@ public class ArffTableModel
         oos.close();
         
         // add to undo list
-        undoList.add(tempFile);
+        m_UndoList.add(tempFile);
       }
       catch (Exception e) {
         e.printStackTrace();
