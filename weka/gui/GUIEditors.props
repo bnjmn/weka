@@ -8,7 +8,7 @@
 # - full classname has to be provided
 #
 # author:  FracPete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.3 $
+# version: $Revision: 1.4 $
 
 # general
 java.lang.Object[]=weka.gui.GenericArrayEditor
@@ -23,6 +23,8 @@ weka.core.DistanceFunction=weka.gui.GenericObjectEditor
 weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
 weka.core.converters.Loader=weka.gui.GenericObjectEditor
 weka.core.converters.Saver=weka.gui.GenericObjectEditor
+weka.core.Range=weka.gui.GenericObjectEditor
+weka.core.Range[]=weka.gui.GenericArrayEditor
 
 # estimators
 weka.estimators.Estimator=weka.gui.GenericObjectEditor
