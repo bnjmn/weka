@@ -80,6 +80,8 @@ import java.util.Vector;
  *              be OK) </li>
  *         <li> Whether the classifier alters the data pased to it 
  *              (number of instances, instance order, instance weights, etc) </li>
+ *         <li> Whether the toString() method works correctly before the 
+ *              classifier has been built. </li>
  *      </ul>
  *    </li>
  *    <li> Degenerate cases 
@@ -157,7 +159,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  * @see TestInstances
  */
 public class CheckClassifier
@@ -340,6 +342,7 @@ public class CheckClassifier
     boolean weightedInstancesHandler = weightedInstancesHandler()[0];
     boolean multiInstanceHandler = multiInstanceHandler()[0];
     println("--> Classifier tests");
+    testToString();
     testsPerClassType(Attribute.NOMINAL,    updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.NUMERIC,    updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.DATE,       updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
@@ -420,6 +423,34 @@ public class CheckClassifier
       if (updateable)
         updatingEquality(PNom, PNum, PStr, PDat, PRel, multiInstance, classType);
     }
+  }
+
+  /**
+   * Checks whether the scheme's toString() method works even though the 
+   * classifies hasn't been built yet.
+   *
+   * @return index 0 is true if the toString() method works fine
+   */
+  protected boolean[] testToString() {
+    boolean[] result = new boolean[2];
+    
+    print("toString...");
+    
+    try {
+      Classifier copy = (Classifier) m_Classifier.getClass().newInstance();
+      copy.toString();
+      result[0] = true;
+    }
+    catch (Exception e) {
+      result[0] = false;
+      if (m_Debug) {
+        println("\n=== Full report ===");
+        e.printStackTrace();
+        println("\n");
+      }
+    }
+    
+    return result;
   }
   
   /**
