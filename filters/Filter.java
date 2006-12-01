@@ -70,7 +70,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -396,7 +396,7 @@ public abstract class Filter
     m_OutputQueue = new Queue();
     m_NewBatch = true;
     m_FirstBatchDone = false;
-    initInputLocators(instanceInfo, null);
+    initInputLocators(m_InputFormat, null);
     return false;
   }
 
