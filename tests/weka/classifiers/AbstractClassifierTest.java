@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -354,6 +354,19 @@ public abstract class AbstractClassifierTest
     }
   }
 
+  /**
+   * tests whether the toString method of the classifier works even though the
+   * classifier hasn't been built yet.
+   */
+  public void testToString() {
+    boolean[]     result;
+
+    result = m_Tester.testToString();
+
+    if (!result[0])
+      fail("Error in toString() method!");
+  }
+  
   /**
    * tests whether the classifier can handle different types of attributes and
    * if not, if the exception is OK
