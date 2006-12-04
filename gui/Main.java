@@ -91,7 +91,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Main
   extends JFrame {
@@ -103,7 +103,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -155,7 +155,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -306,9 +306,13 @@ public class Main
     
     try {
       // main window
-      setSize(1000, 800);
       int screenHeight = getGraphicsConfiguration().getBounds().height;
       int screenWidth  = getGraphicsConfiguration().getBounds().width;
+      int newHeight = (int) (((double) screenHeight) * 0.75);
+      int newWidth  = (int) (((double) screenWidth)  * 0.75);
+      setSize(
+	  1000 > newWidth  ? newWidth  : 1000,
+	  800  > newHeight ? newHeight : 800);
       setLocation(
 	  (screenWidth - getBounds().width) / 2,
 	  (screenHeight - getBounds().height) / 2);
