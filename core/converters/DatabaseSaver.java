@@ -77,7 +77,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -176,7 +176,7 @@ public class DatabaseSaver
   
       if(getWriteMode() == CANCEL){
           try{
-              m_DataBaseConnection.execute("DROP TABLE "+m_tableName);
+              m_DataBaseConnection.update("DROP TABLE "+m_tableName);
               if(m_DataBaseConnection.tableExists(m_tableName))
                 System.err.println("Table cannot be dropped.");
           }catch(Exception ex) {
@@ -512,7 +512,8 @@ public class DatabaseSaver
       }
       query.append(" )");
       //System.out.println(query.toString());
-      m_DataBaseConnection.execute(query.toString());
+      m_DataBaseConnection.update(query.toString());
+      m_DataBaseConnection.close();
       if(!m_DataBaseConnection.tableExists(m_tableName)){
           throw new IOException("Table cannot be built.");
       }
@@ -552,8 +553,11 @@ public class DatabaseSaver
       }
       insert.append(" )");
       //System.out.println(insert.toString());
-      if (m_DataBaseConnection.execute(insert.toString()) == false && m_DataBaseConnection.getUpdateCount() < 1) {
+      if (m_DataBaseConnection.update(insert.toString()) < 1) {
         throw new IOException("Tuple cannot be inserted.");
+      }
+      else {
+	m_DataBaseConnection.close();
       }
   }
   
