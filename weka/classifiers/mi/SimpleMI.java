@@ -79,7 +79,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class SimpleMI 
   extends SingleClassifierEnhancer
@@ -211,12 +211,13 @@ public class SimpleMI
     int           i;
     
     result  = new Vector();
+
+    result.add("-M");
+    result.add("" + m_TransformMethod);
+
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
       result.add(options[i]);
-    
-    result.add("-M");
-    result.add("" + m_TransformMethod);
 
     return (String[]) result.toArray(new String[result.size()]);
   }

@@ -109,7 +109,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class MIWrapper 
   extends SingleClassifierEnhancer
@@ -301,18 +301,16 @@ public class MIWrapper
     int           i;
     
     result  = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
 
-    if (getDebug())
-      result.add("-D");
-    
     result.add("-P");
     result.add("" + m_Method);
 
     result.add("-A");
     result.add("" + m_WeightMethod);
+
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
     return (String[]) result.toArray(new String[result.size()]);
   }
