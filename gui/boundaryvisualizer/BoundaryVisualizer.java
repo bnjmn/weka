@@ -91,21 +91,23 @@ import javax.swing.JTextField;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 1.0
  * @see JPanel 
  */
-public class BoundaryVisualizer extends JPanel {
+public class BoundaryVisualizer
+  extends JPanel {
 
   /**
    * Inner class to handle rendering the axis
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version 1.0
+   * @version $Revision: 1.17 $
    * @since 1.0
    * @see JPanel
    */
-  private class AxisPanel extends JPanel {
+  private class AxisPanel
+    extends JPanel {
     
     private static final int MAX_PRECISION = 10;
     private boolean m_vertical = false;
@@ -239,19 +241,23 @@ public class BoundaryVisualizer extends JPanel {
     }
   }
   
-  protected static int windowCount = 0; //the number of visualizer windows we have open.
+  /** the number of visualizer windows we have open. */
+  protected static int m_WindowCount = 0; 
+  
+  /** whether the exit if there are no more windows open */
+  protected static boolean m_ExitIfNoWindowsOpen = true;
 
-  // the training instances
+  /** the training instances */
   private Instances m_trainingInstances;
 
-  // the classifier to use
+  /** the classifier to use */
   private Classifier m_classifier;
 
   // plot area dimensions
   protected int m_plotAreaWidth = 512;
   protected int m_plotAreaHeight = 384;
 
-  // the plotting panel
+  /** the plotting panel */
   protected BoundaryPanel m_boundaryPanel;
 
   // combo boxes for selecting the class attribute, class values (for
@@ -285,16 +291,16 @@ public class BoundaryVisualizer extends JPanel {
   private int m_xIndex;
   private int m_yIndex;
 
-  // Kernel density estimator/generator
+  /* Kernel density estimator/generator */
   private KDDataGenerator m_dataGenerator;
 
-  // number of samples per pixel (fixed dimensions only)
+  /* number of samples per pixel (fixed dimensions only) */
   private int m_numberOfSamplesFromEachRegion;
 
-  // base for sampling in the non-fixed dimensions
+  /** base for sampling in the non-fixed dimensions */
   private int m_generatorSamplesBase;
 
-  // Set the kernel bandwidth to cover this many nearest neighbours
+  /** Set the kernel bandwidth to cover this many nearest neighbours */
   private int m_kernelBandwidth;
   
   private JTextField m_regionSamplesText = 
@@ -1047,12 +1053,32 @@ public class BoundaryVisualizer extends JPanel {
   	m_boundaryPanel.stopPlotting();
   }
   
+  /**
+   * Sets whether System.exit gets called when no more windows are open.
+   * 
+   * @param value	if TRUE then a System.exit call is ossued after the 
+   * 			last window gets closed.
+   */
+  public static void setExitIfNoWindowsOpen(boolean value) {
+    m_ExitIfNoWindowsOpen = value;
+  }
+  
+  /**
+   * Gets whether System.exit gets called after the last window gets closed
+   * 
+   * @return		TRUE if System.exit gets called after last window
+   * 			got closed.
+   */
+  public static boolean getExitIfNoWindowsOpen() {
+    return m_ExitIfNoWindowsOpen;
+  }
+  
   /** Creates a new GUI window with all of the BoundaryVisualizer trappings,
    *  @param classifier The classifier to use in the new window.  May be null.
    *  @param instances  The dataset to visualize on in the new window.  May be null.
    */
   public static void createNewVisualizerWindow(Classifier classifier, Instances instances) throws Exception {
-      windowCount++;
+      m_WindowCount++;
   
       final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka classification boundary visualizer");
@@ -1062,10 +1088,10 @@ public class BoundaryVisualizer extends JPanel {
       jf.setSize(bv.getMinimumSize());
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent e) {
-	    windowCount--;
+	    m_WindowCount--;
 	    bv.stopPlotting();
 	    jf.dispose();
-	    if (windowCount == 0) {
+	    if ((m_WindowCount == 0) && m_ExitIfNoWindowsOpen) {
 		System.exit(0);
 	    }
 	  }
