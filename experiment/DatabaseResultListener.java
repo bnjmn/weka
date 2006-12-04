@@ -24,7 +24,6 @@
 package weka.experiment;
 
 import weka.core.FastVector;
-import weka.core.Utils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -36,7 +35,7 @@ import java.sql.ResultSet;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class DatabaseResultListener 
   extends DatabaseUtils
@@ -383,16 +382,14 @@ public class DatabaseResultListener
 	}
       }
     }
-    if (execute(query)) {
-      ResultSet rs = getResultSet();
-      while (rs.next()) {
-	String keyVal = rs.getString(1);
-	if (!rs.wasNull()) {
-	  m_Cache.addElement(keyVal);
-	}
+    ResultSet rs = select(query);
+    while (rs.next()) {
+      String keyVal = rs.getString(1);
+      if (!rs.wasNull()) {
+	m_Cache.addElement(keyVal);
       }
-      rs.close();
     }
+    close(rs);
     m_CacheKey = (Object [])key.clone();
   }
   

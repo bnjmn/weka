@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class InstanceQuery 
   extends DatabaseUtils 
@@ -290,6 +290,7 @@ public class InstanceQuery
         if (m_Debug) 
           System.err.println(m_PreparedStatement.getUpdateCount() 
               + " rows affected.");
+        close();
         return null;
       }
     }
@@ -513,7 +514,7 @@ public class InstanceQuery
     for (int i = 0; i < instances.size(); i++) {
       result.add((Instance)instances.elementAt(i));
     }
-    rs.close();
+    close(rs);
    
     return result;
   }
