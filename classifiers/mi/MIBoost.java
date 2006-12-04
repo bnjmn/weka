@@ -97,7 +97,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class MIBoost 
   extends SingleClassifierEnhancer
@@ -270,18 +270,16 @@ public class MIBoost
     int           i;
     
     result  = new Vector();
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
 
-    if (getDebug())
-      result.add("-D");
-    
     result.add("-R");
     result.add("" + getMaxIterations());
 
     result.add("-B");
     result.add("" + getDiscretizeBin());
+
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
 
     return (String[]) result.toArray(new String[result.size()]);
   }
