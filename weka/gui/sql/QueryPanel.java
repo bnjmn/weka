@@ -59,7 +59,7 @@ import javax.swing.event.CaretEvent;
  *
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
 
 public class QueryPanel 
@@ -234,7 +234,7 @@ public class QueryPanel
     // close old resultset
     try {
       if (m_DbUtils.getResultSet() != null)
-        m_DbUtils.getResultSet().close();
+        m_DbUtils.close();
     }
     catch (Exception e) {
       // ignore (if no resultset present we get an unncessary NullPointerEx.)
