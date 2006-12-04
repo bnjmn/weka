@@ -47,7 +47,7 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -286,15 +286,17 @@ public class ConverterFileChooser
   
   /**
    * initializes the GUI
+   * 
+   * @param dialogType		the type of dialog to setup the GUI for
    */
-  protected void initGUI() {
+  protected void initGUI(int dialogType) {
     Vector<ExtensionFileFilter>	list;
     int				i;
     
     // setup filters
     resetChoosableFileFilters();
     setAcceptAllFileFilterUsed(true);
-    if (m_DialogType == LOADER_DIALOG)
+    if (dialogType == LOADER_DIALOG)
       list = filterNonCoreLoaderFileFilters(m_LoaderFileFilters);
     else
       list = filterSaverFileFilters(filterNonCoreSaverFileFilters(m_SaverFileFilters));
@@ -433,15 +435,10 @@ public class ConverterFileChooser
     m_DialogType       = LOADER_DIALOG;
     m_CurrentConverter = null;
     
-    initGUI();
+    initGUI(LOADER_DIALOG);
     
     setAcceptAllFileFilterUsed(true);
     int result = super.showOpenDialog(parent);
-    
-    if (result == APPROVE_OPTION) {
-      m_LastFilter = getFileFilter();
-      configureCurrentConverter();
-    }
     
     m_DialogType = UNHANDLED_DIALOG;
     removePropertyChangeListener(m_Listener);
@@ -450,17 +447,22 @@ public class ConverterFileChooser
     if (    (result == APPROVE_OPTION) 
 	 && (getFileMustExist()) 
 	 && (!getSelectedFile().exists()) ) {
-     int retVal = JOptionPane.showConfirmDialog(
-	  	  parent, 
-	  	  "The file '" 
-	  	  + getSelectedFile() 
-	  	  + "' does not exist - please select again!");
-     if (retVal == JOptionPane.OK_OPTION)
+      int retVal = JOptionPane.showConfirmDialog(
+	  parent, 
+	  "The file '" 
+	  + getSelectedFile() 
+	  + "' does not exist - please select again!");
+      if (retVal == JOptionPane.OK_OPTION)
 	result = showOpenDialog(parent);
-     else
+      else
 	result = CANCEL_OPTION;
-   }
-   
+    }
+
+    if (result == APPROVE_OPTION) {
+      m_LastFilter = getFileFilter();
+      configureCurrentConverter(LOADER_DIALOG);
+    }
+    
     return result;
   }
   
@@ -474,15 +476,10 @@ public class ConverterFileChooser
     m_DialogType       = SAVER_DIALOG;
     m_CurrentConverter = null;
     
-    initGUI();
+    initGUI(SAVER_DIALOG);
     
     setAcceptAllFileFilterUsed(false);
     int result = super.showSaveDialog(parent);
-    
-    if (result == APPROVE_OPTION) {
-      m_LastFilter = getFileFilter();
-      configureCurrentConverter();
-    }
     
     m_DialogType = UNHANDLED_DIALOG;
     removePropertyChangeListener(m_Listener);
@@ -504,6 +501,11 @@ public class ConverterFileChooser
 	result = CANCEL_OPTION;
     }
     
+    if (result == APPROVE_OPTION) {
+      m_LastFilter = getFileFilter();
+      configureCurrentConverter(SAVER_DIALOG);
+    }
+    
     return result;
   }
   
@@ -514,9 +516,7 @@ public class ConverterFileChooser
    * @return		the chosen loader, if any
    */
   public AbstractFileLoader getLoader() {
-    m_DialogType = LOADER_DIALOG;
-    configureCurrentConverter();
-    m_DialogType = UNHANDLED_DIALOG;
+    configureCurrentConverter(LOADER_DIALOG);
     
     if (m_CurrentConverter instanceof AbstractFileSaver)
       return null;
@@ -531,9 +531,7 @@ public class ConverterFileChooser
    * @return		the chosen saver, if any
    */
   public AbstractFileSaver getSaver() {
-    m_DialogType = SAVER_DIALOG;
-    configureCurrentConverter();
-    m_DialogType = UNHANDLED_DIALOG;
+    configureCurrentConverter(SAVER_DIALOG);
     
     if (m_CurrentConverter instanceof AbstractFileLoader)
       return null;
@@ -577,10 +575,13 @@ public class ConverterFileChooser
   
   /**
    * configures the current converter
+   * 
+   * @param dialogType		the type of dialog to configure for
    */
-  protected void configureCurrentConverter() {
+  protected void configureCurrentConverter(int dialogType) {
     String[]	extensions;
     String	filename;
+    File	currFile;
     
     if (!isAcceptAllFileFilterUsed())
       extensions = ((ExtensionFileFilter) getFileFilter()).getExtensions();
@@ -590,9 +591,9 @@ public class ConverterFileChooser
     filename = getSelectedFile().getAbsolutePath();
 
     if (m_CurrentConverter == null) {
-      if (m_DialogType == LOADER_DIALOG)
+      if (dialogType == LOADER_DIALOG)
 	m_CurrentConverter = ConverterUtils.getLoaderForFile(filename);
-      else if (m_DialogType == SAVER_DIALOG)
+      else if (dialogType == SAVER_DIALOG)
 	m_CurrentConverter = ConverterUtils.getSaverForFile(filename);
       else
 	throw new IllegalStateException("Cannot determine loader/saver!");
@@ -608,7 +609,9 @@ public class ConverterFileChooser
 	if (!filename.endsWith(extensions[0]))
 	  filename += extensions[0];
       }
-      ((FileSourcedConverter) m_CurrentConverter).setFile(new File(filename));
+      currFile = ((FileSourcedConverter) m_CurrentConverter).retrieveFile();
+      if ((currFile == null) || (!currFile.getAbsolutePath().equals(filename)))
+	((FileSourcedConverter) m_CurrentConverter).setFile(new File(filename));
     }
     catch (Exception e) {
       e.printStackTrace();
