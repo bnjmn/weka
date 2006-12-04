@@ -91,7 +91,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Main
   extends JFrame {
@@ -103,7 +103,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -155,7 +155,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -844,6 +844,8 @@ public class Main
 	    });
 	    frame.pack();
 	    frame.setSize(800, 600);
+	    // dont' do a System.exit after last window got closed!
+	    BoundaryVisualizer.setExitIfNoWindowsOpen(false);
 	  }
 	  else {
 	    showWindow(getWindow(title));
