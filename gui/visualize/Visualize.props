@@ -1,4 +1,6 @@
 # Properties for visualization
+#
+# Version: $Revision: 1.9 $
 
 # Maximum precision for numeric values
 weka.gui.visualize.precision=10
@@ -7,14 +9,14 @@ weka.gui.visualize.precision=10
 weka.gui.visualize.Plot2D.axisColour=green
 
 # Colour for the background of the 2D plot (can use R,G,B format)
-weka.gui.visualize.Plot2D.backgroundColour=black
+weka.gui.visualize.Plot2D.backgroundColour=white
 
 # Display the list of one dimensional attribute visualizations
 weka.gui.visualize.VisualizePanel.displayAttributeBars=true
 
 # Colour for the background of the attribute bars in the
 # AttributePanel (can use R,G,B format)
-weka.gui.visualize.AttributePanel.barColour=black
+weka.gui.visualize.AttributePanel.barColour=white
 
 # If you regularly visualize certain datasets with the same structure
 # you might want to define default x, y and colour dimensions (attributes)
