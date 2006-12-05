@@ -91,7 +91,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Main
   extends JFrame {
@@ -103,7 +103,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -155,7 +155,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -264,12 +264,12 @@ public class Main
   private JMenu jMenuTools;
   private JDesktopPane jDesktopPane;
   private JMenu jMenuApplications;
-  private JSeparator jSeparatorProgram1;
   private JMenuItem jMenuItemHelpSystemInfo;
-  private JSeparator jSeparatorHelp1;
-  private JSeparator jSeparatorHelp2;
   private JMenuItem jMenuItemHelpAbout;
   private JMenuItem jMenuItemHelpHomepage;
+  private JMenuItem jMenuItemHelpWekaWiki;
+  private JMenuItem jMenuItemHelpWekaDoc;
+  private JMenuItem jMenuItemHelpSourceforge;
   private JMenuItem jMenuItemVisualizationBoundaryVisualizer;
   private JMenuItem jMenuItemVisualizationGraphVisualizer;
   private JMenuItem jMenuItemVisualizationTreeVisualizer;
@@ -377,8 +377,7 @@ public class Main
 	}
       });
       
-      jSeparatorProgram1 = new JSeparator();
-      jMenuProgram.add(jSeparatorProgram1);
+      jMenuProgram.add(new JSeparator());
       
       // Program/Exit
       jMenuItemProgramExit = new JMenuItem();
@@ -869,9 +868,43 @@ public class Main
 	  BrowserHelper.openURL(m_Self, "http://www.cs.waikato.ac.nz/~ml/weka/");
 	}
       });
+
+      jMenuHelp.add(new JSeparator());
       
-      jSeparatorHelp1 = new JSeparator();
-      jMenuHelp.add(jSeparatorHelp1);
+      // Help/WekaDoc
+      jMenuItemHelpHomepage = new JMenuItem();
+      jMenuHelp.add(jMenuItemHelpHomepage);
+      jMenuItemHelpHomepage.setText("Online documentation");
+      jMenuItemHelpHomepage.setMnemonic('D');
+      jMenuItemHelpHomepage.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent evt) {
+	  BrowserHelper.openURL(m_Self, "http://weka.sourceforge.net/wekadoc/");
+	}
+      });
+      
+      // Help/WekaWiki
+      jMenuItemHelpHomepage = new JMenuItem();
+      jMenuHelp.add(jMenuItemHelpHomepage);
+      jMenuItemHelpHomepage.setText("HOWTOs, code snippets, etc.");
+      jMenuItemHelpHomepage.setMnemonic('W');
+      jMenuItemHelpHomepage.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent evt) {
+	  BrowserHelper.openURL(m_Self, "http://weka.sourceforge.net/wiki/");
+	}
+      });
+      
+      // Help/Sourceforge
+      jMenuItemHelpHomepage = new JMenuItem();
+      jMenuHelp.add(jMenuItemHelpHomepage);
+      jMenuItemHelpHomepage.setText("Weka on SourceForge");
+      jMenuItemHelpHomepage.setMnemonic('F');
+      jMenuItemHelpHomepage.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent evt) {
+	  BrowserHelper.openURL(m_Self, "http://sourceforge.net/projects/weka/");
+	}
+      });
+      
+      jMenuHelp.add(new JSeparator());
 
       // Help/SystemInfo
       jMenuItemHelpSystemInfo = new JMenuItem();
@@ -919,8 +952,7 @@ public class Main
 	}
       });
 
-      jSeparatorHelp2 = new JSeparator();
-      jMenuHelp.add(jSeparatorHelp2);
+      jMenuHelp.add(new JSeparator());
 
       // Help/About
       jMenuItemHelpAbout = new JMenuItem();
