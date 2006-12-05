@@ -60,7 +60,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 
 public class ArffPanel 
@@ -930,7 +930,7 @@ public class ArffPanel
     col   = m_TableArff.columnAtPoint(e.getPoint());
     popup =    ((e.getButton() == MouseEvent.BUTTON3) && (e.getClickCount() == 1))
             || ((e.getButton() == MouseEvent.BUTTON1) && (e.getClickCount() == 1) && e.isAltDown() && !e.isControlDown() && !e.isShiftDown());
-    popup = (getInstances() != null);
+    popup = popup && (getInstances() != null);
     
     if (e.getSource() == m_TableArff.getTableHeader()) {
       m_CurrentCol = col;
