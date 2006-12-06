@@ -24,14 +24,17 @@
 package weka.gui.explorer;
 
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.datagenerators.DataGenerator;
-import weka.gui.GenericArrayEditor;
 import weka.gui.GenericObjectEditor;
+import weka.gui.Logger;
 import weka.gui.PropertyPanel;
+import weka.gui.SysErrLog;
 
 import java.awt.BorderLayout;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -43,7 +46,7 @@ import javax.swing.JPanel;
  * A panel for generating artificial data via DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class DataGeneratorPanel
   extends JPanel {
@@ -56,6 +59,9 @@ public class DataGeneratorPanel
 
   /** the generated output (as text) */
   protected StringWriter m_Output = new StringWriter();
+
+  /** The destination for log/status messages */
+  protected Logger m_Log = new SysErrLog();
 
   /** register the classes */
   static {
@@ -83,6 +89,15 @@ public class DataGeneratorPanel
   }
 
   /**
+   * Sets the Logger to receive informational messages
+   *
+   * @param value 	the Logger that will now get info messages
+   */
+  public void setLog(Logger value) {
+    m_Log = value;
+  }
+
+  /**
    * returns the generated instances, null if the process was cancelled.
    *
    * @return the generated Instances
@@ -93,6 +108,8 @@ public class DataGeneratorPanel
 
   /**
    * returns the generated output as text
+   * 
+   * @return		the generated output
    */
   public String getOutput() {
     return m_Output.toString();
@@ -100,6 +117,8 @@ public class DataGeneratorPanel
 
   /**
    * sets the generator to use initially
+   * 
+   * @param value	the data generator to use
    */
   public void setGenerator(DataGenerator value) {
     if (value != null)
@@ -111,6 +130,8 @@ public class DataGeneratorPanel
 
   /**
    * returns the currently selected DataGenerator
+   * 
+   * @return		the current data generator
    */
   public DataGenerator getGenerator() {
     return (DataGenerator) m_GeneratorEditor.getValue();
@@ -119,22 +140,33 @@ public class DataGeneratorPanel
   /**
    * generates the instances, returns TRUE if successful
    * 
+   * @return		TRUE if successful
    * @see #getInstances()
    */
   public boolean execute() {
     DataGenerator     generator;
     boolean           result;
     String            relName;
+    String            cname;
+    String            cmd;
     
     result    = true;
     generator = (DataGenerator) m_GeneratorEditor.getValue();
     relName   = generator.getRelationName();
+
+    cname = generator.getClass().getName().replaceAll(".*\\.", "");
+    cmd = generator.getClass().getName();
+    if (generator instanceof OptionHandler)
+      cmd += " " + Utils.joinOptions(((OptionHandler) generator).getOptions());
     
     try {
+      m_Log.logMessage("Started " + cname);
+      m_Log.logMessage("Command: " + cmd);
       m_Output = new StringWriter();
       generator.setOutput(new PrintWriter(m_Output));
       DataGenerator.makeData(generator, generator.getOptions());
       m_Instances = new Instances(new StringReader(getOutput()));
+      m_Log.logMessage("Finished " + cname);
     }
     catch (Exception e) {
       e.printStackTrace();
