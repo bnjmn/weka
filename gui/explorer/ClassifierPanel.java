@@ -131,7 +131,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.99 $
+ * @version $Revision: 1.100 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1005,6 +1005,9 @@ public class ClassifierPanel
 	  } else {
 	    name += cname;
 	  }
+          String cmd = m_ClassifierEditor.getValue().getClass().getName();
+          if (m_ClassifierEditor.getValue() instanceof OptionHandler)
+            cmd += " " + Utils.joinOptions(((OptionHandler) m_ClassifierEditor.getValue()).getOptions());
 	  Evaluation eval = null;
 	  try {
 	    if (m_CVBut.isSelected()) {
@@ -1043,6 +1046,7 @@ public class ClassifierPanel
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
+	    m_Log.logMessage("Command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
