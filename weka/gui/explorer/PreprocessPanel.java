@@ -24,6 +24,8 @@ package weka.gui.explorer;
 
 import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
@@ -97,7 +99,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.65 $
+ * @version $Revision: 1.66 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -529,6 +531,8 @@ public class PreprocessPanel
   
   /**
    * Passes the dataset through the filter that has been configured for use.
+   * 
+   * @param filter	the filter to apply
    */
   protected void applyFilter(final Filter filter) {
 
@@ -543,7 +547,11 @@ public class PreprocessPanel
 		((TaskLogger)m_Log).taskStarted();
 	      }
 	      m_Log.statusMessage("Passing dataset through filter "
-				  + filter.getClass().getName());
+		  + filter.getClass().getName());
+	      String cmd = filter.getClass().getName();
+	      if (filter instanceof OptionHandler)
+		cmd += " " + Utils.joinOptions(((OptionHandler) filter).getOptions());
+	      m_Log.logMessage("Command: " + cmd);
 	      int classIndex = m_AttVisualizePanel.getColoringIndex();
 	      if ((classIndex < 0) && (filter instanceof SupervisedFilter)) {
 		throw new IllegalArgumentException("Class (colour) needs to " +
@@ -805,6 +813,7 @@ public class PreprocessPanel
                                   new JCheckBox("Show generated data as text, incl. comments");
 
               showOutputCheckBox.setMnemonic('S');
+              generatorPanel.setLog(m_Log);
               generatorPanel.setGenerator(m_DataGenerator);
               generatorPanel.setPreferredSize(
                   new Dimension(
@@ -861,6 +870,8 @@ public class PreprocessPanel
   
   /**
    * displays a dialog with the generated instances from the DataGenerator
+   * 
+   * @param data	the data to display
    */
   protected void showGeneratedInstances(String data) {
     final JDialog dialog = new JDialog();
@@ -1126,6 +1137,8 @@ public class PreprocessPanel
 
   /**
    * Backs up the current state of the dataset, so the changes can be undone.
+   * 
+   * @throws Exception 	if an error occurs
    */
   public void addUndoPoint() throws Exception {
     
