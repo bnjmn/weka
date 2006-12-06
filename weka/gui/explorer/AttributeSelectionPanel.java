@@ -100,7 +100,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -627,6 +627,15 @@ public class AttributeSelectionPanel
 	  } else {
 	    name += (" + "+ename);
 	  }
+          String cmd = weka.filters.supervised.attribute.AttributeSelection.class.getName();
+          cmd += " -E \"" + evaluator.getClass().getName();
+          if (evaluator instanceof OptionHandler)
+            cmd += " " + Utils.quote(Utils.joinOptions(((OptionHandler) evaluator).getOptions()));
+          cmd += "\"";
+          cmd += " -S \"" + search.getClass().getName();
+          if (search instanceof OptionHandler)
+            cmd += " " + Utils.quote(Utils.joinOptions(((OptionHandler) search).getOptions()));
+          cmd += "\"";
 
 	  AttributeSelection eval = null;
 
@@ -643,6 +652,7 @@ public class AttributeSelectionPanel
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + ename);
+	    m_Log.logMessage("Filter command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
