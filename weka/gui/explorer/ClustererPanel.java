@@ -117,7 +117,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.55 $
+ * @version $Revision: 1.56 $
  */
 public class ClustererPanel
   extends JPanel
@@ -716,8 +716,12 @@ public class ClustererPanel
 	  } else {
 	    name += cname;
 	  }
+          String cmd = m_ClustererEditor.getValue().getClass().getName();
+          if (m_ClustererEditor.getValue() instanceof OptionHandler)
+            cmd += " " + Utils.joinOptions(((OptionHandler) m_ClustererEditor.getValue()).getOptions());
 	  try {
 	    m_Log.logMessage("Started " + cname);
+	    m_Log.logMessage("Command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }

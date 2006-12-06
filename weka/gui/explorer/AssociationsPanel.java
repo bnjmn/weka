@@ -71,7 +71,7 @@ import javax.swing.event.ChangeListener;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class AssociationsPanel 
   extends JPanel
@@ -315,10 +315,14 @@ public class AssociationsPanel
 	  } else {
 	    name += cname;
 	  }
+          String cmd = m_AssociatorEditor.getValue().getClass().getName();
+          if (m_AssociatorEditor.getValue() instanceof OptionHandler)
+            cmd += " " + Utils.joinOptions(((OptionHandler) m_AssociatorEditor.getValue()).getOptions());
 	  try {
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
+	    m_Log.logMessage("Command: " + cmd);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
