@@ -27,8 +27,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.ConverterUtils;
+import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -37,7 +36,6 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
-import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -82,7 +80,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.42 $
+ * @version  $Revision: 1.43 $
  */
 public class AttributeSelection 
   implements Serializable {
@@ -328,10 +326,9 @@ public class AttributeSelection
 			   + makeOptionString(ASEvaluator, searchMethod));
     }
 
-    AbstractFileLoader loader = ConverterUtils.getLoaderForFile(trainFileName);
-    loader.setFile(new File(trainFileName));
-    train = loader.getDataSet();
-    return  SelectAttributes(ASEvaluator, options, train);
+    DataSource source = new DataSource(trainFileName);
+    train = source.getDataSet();
+    return SelectAttributes(ASEvaluator, options, train);
   }
 
   /**
