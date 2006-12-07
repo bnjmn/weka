@@ -100,7 +100,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -627,15 +627,15 @@ public class AttributeSelectionPanel
 	  } else {
 	    name += (" + "+ename);
 	  }
-          String cmd = weka.filters.supervised.attribute.AttributeSelection.class.getName();
-          cmd += " -E \"" + evaluator.getClass().getName();
+          String cmdFilter = weka.filters.supervised.attribute.AttributeSelection.class.getName();
+          cmdFilter += " -E \"" + evaluator.getClass().getName();
           if (evaluator instanceof OptionHandler)
-            cmd += " " + Utils.quote(Utils.joinOptions(((OptionHandler) evaluator).getOptions()));
-          cmd += "\"";
-          cmd += " -S \"" + search.getClass().getName();
+            cmdFilter += " " + Utils.joinOptions(((OptionHandler) evaluator).getOptions());
+          cmdFilter += "\"";
+          cmdFilter += " -S \"" + search.getClass().getName();
           if (search instanceof OptionHandler)
-            cmd += " " + Utils.quote(Utils.joinOptions(((OptionHandler) search).getOptions()));
-          cmd += "\"";
+            cmdFilter += " " + Utils.joinOptions(((OptionHandler) search).getOptions());
+          cmdFilter += "\"";
 
 	  AttributeSelection eval = null;
 
@@ -652,7 +652,7 @@ public class AttributeSelectionPanel
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + ename);
-	    m_Log.logMessage("Filter command: " + cmd);
+	    m_Log.logMessage("Filter command: " + cmdFilter);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
