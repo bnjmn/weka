@@ -27,6 +27,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
@@ -35,7 +37,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
-import java.io.FileReader;
+import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -51,7 +53,7 @@ import java.util.Random;
  * Display help. <p/>
  *
  * -I &lt;name of input file&gt; <br/>
- * Specify the training arff file. <p/>
+ * Specify the training data file. <p/>
  * 
  * -C &lt;class index&gt; <br/>
  * The index of the attribute to use as the class. <p/>
@@ -80,7 +82,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.41 $
+ * @version  $Revision: 1.42 $
  */
 public class AttributeSelection 
   implements Serializable {
@@ -326,7 +328,9 @@ public class AttributeSelection
 			   + makeOptionString(ASEvaluator, searchMethod));
     }
 
-    train = new Instances(new FileReader(trainFileName));
+    AbstractFileLoader loader = ConverterUtils.getLoaderForFile(trainFileName);
+    loader.setFile(new File(trainFileName));
+    train = loader.getDataSet();
     return  SelectAttributes(ASEvaluator, options, train);
   }
 
@@ -809,6 +813,10 @@ public class AttributeSelection
       if (Utils.getFlag('h', options)) {
 	helpRequested = true;
       }
+
+      // does data already have a class attribute set?
+      if (train.classIndex() != -1)
+	classIndex = train.classIndex() + 1;
 
       // get basic options (options the same for all attribute selectors
       classString = Utils.getOption('C', options);
