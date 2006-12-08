@@ -1,32 +1,49 @@
+\documentclass[a4paper]{article}
 
-\documentclass{article}
-%\usepackage{a4wide,epsfig}
 \usepackage{epsfig}
 
-\title{Bayesian Network Classifiers in Weka}
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\Bayesian Network Classifiers in Weka\\for Version 3-5-3}
 \author{Remco R. Bouckaert\\remco@cs.waikato.ac.nz}
 
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{1}
+
 \begin{document}
+
+\begin{titlepage}
+
 \maketitle
+\thispagestyle{empty}
+
+\center
+\vspace{8cm}
+
+\copyright 2006 University of Waikato
+
+\end{titlepage}
 
 \begin{abstract}
 Various Bayesian network classifier learning algorithms are implemented in Weka \cite{weka}.
-This note provides some user documentation and implementation details.\\
-Summary of main capabilities:\\
-$\bullet$ Structure learning of Bayesian networks using various hill climbing (K2, B, etc) and
-general purpose (simulated annealing, tabu search) algorithms.\\
-$\bullet$ Local score metrics implemented; Bayes, BDe, MDL, entropy, AIC.\\
-$\bullet$ Global score metrics implemented; leave one out cv, k-fold cv and cumulative cv.\\
-$\bullet$ Conditional independence based causal recovery algorithm available.\\
-$\bullet$ Parameter estimation using direct estimates and Bayesian model averaging.\\
-$\bullet$ GUI for easy inspection of Bayesian networks.\\
-$\bullet$ Part of Weka allowing systematic experiments to compare Bayes net performance with general 
-purpose classifiers like C4.5, nearest neighbor, support vector, etc.\\
-$\bullet$ Source code available under GPL allows for integration in other systems and 
-makes it easy to extend.\\
+This note provides some user documentation and implementation details.
+
+Summary of main capabilities:
+\begin{itemize}
+  \item Structure learning of Bayesian networks using various hill climbing (K2, B, etc) and
+general purpose (simulated annealing, tabu search) algorithms.
+  \item Local score metrics implemented; Bayes, BDe, MDL, entropy, AIC.
+  \item Global score metrics implemented; leave one out cv, k-fold cv and cumulative cv.
+  \item Conditional independence based causal recovery algorithm available.
+  \item Parameter estimation using direct estimates and Bayesian model averaging.
+  \item GUI for easy inspection of Bayesian networks.
+  \item Part of Weka allowing systematic experiments to compare Bayes net performance with general 
+purpose classifiers like C4.5, nearest neighbor, support vector, etc.
+  \item Source code available under GPL\footnote{GPL: GNU General Public License. For more information see the GNU homepage http://www.gnu.org/copyleft/gpl.html.} allows for integration in other open-source systems and makes it easy to extend.
+\end{itemize}
 \end{abstract}
+\newpage
 
 \tableofcontents
+\newpage
 
 \section{Introduction}
 
@@ -40,8 +57,13 @@ network represents a probability distributions $P(U) = \prod_{u\in
 U}p(u|pa(u))$.
 
 Below, a Bayesian network is shown for the variables in the iris data set.
-Note that the links between the nodes petallength, petalwidth and class 
+Note that the links between the nodes class, petallength and petalwidth 
 do not form a {\em directed} cycle, so the graph is a proper DAG.
+
+% information about screenshot
+% - dataset: iris.arff
+% - filter: weka.filters.unsupervised.attribute.Discretize -B 2 -M -1.0 -R first-last
+% - classifier: weka.classifiers.bayes.BayesNet -D -Q weka.classifiers.bayes.net.search.local.TabuSearch -- -L 5 -U 10 -P 2 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5
 
 \begin{center}
 \epsfig{file=images/gui.net.eps,height=7cm}
@@ -50,7 +72,7 @@ do not form a {\em directed} cycle, so the graph is a proper DAG.
 This picture just shows the network structure of the Bayes net, but for
 each of the nodes a probability distribution for the node given its parents
 are specified as well. For example, in the Bayes net above there is a conditional distribution
-for petallength given the value of sepalwidth. Since sepalwidth has no
+for petallength given the value of class. Since class has no
 parents, there is an unconditional distribution for sepalwidth.
 
 \subsection*{Basic assumptions}
@@ -71,11 +93,11 @@ All Bayes network algorithms implemented in Weka assume the following
 for the data set:
 \begin{itemize}
 \item all variables are discrete finite variables. If you have a data set
-with continuous variables, you can use the class {\tt weka.filters.unsupervised.attribute.Discretize} 
-to discretize them.
+with continuous variables, you can use the following filter to discretize them:\\
+{\tt weka.filters.unsupervised.attribute.Discretize} 
 \item no instances have missing values. If there are missing values in the
-data set, values are filled in using the {\tt weka.filters..unsupervised.attribute.ReplaceMissingValues}
-filter.
+data set, values are filled in using the following filter:\\
+{\tt weka.filters.unsupervised.attribute.ReplaceMissingValues}
 \end{itemize}
 
 The first step performed by {\tt buildClassifier} is checking if the data set fulfills
@@ -132,7 +154,7 @@ represented.
 \item {\em global score metrics}:
 A natural way to measure how well a Bayesian network performs on a
 given data set is to predict its future performance by estimating
-expected utilities, such as classification accuracy.  Cross validation
+expected utilities, such as classification accuracy.  Cross-validation
 provides an out of sample evaluation method to facilitate this by
 repeatedly splitting the data in training and validation sets.  A
 Bayesian network structure  can be evaluated by estimating the
@@ -141,14 +163,15 @@ network's performance determined against the validation set.  The
 average performance of the Bayesian network over the validation sets
 provides a metric for the quality of the network.
 
-Cross validation differs from local scoring metrics  in that the quality
+Cross-validation differs from local scoring metrics  in that the quality
 of a network structure often cannot be decomposed in the scores of the
 individual nodes. So, the whole network needs to be considered in order
 to determine the score.
 
 \item {\em fixed structure}:
 Finally, there are a few methods so that a structure can be fixed, for
-example, by reading it from an XML BIF file.
+example, by reading it from an XML BIF file\footnote{See {\sf http://www-2.cs.cmu.edu/\~{}fgcozman/Research/InterchangeFormat/}
+for details on XML BIF.}.
 \end{itemize}
 
 For each of these areas, different search algorithms are implemented in 
@@ -158,8 +181,8 @@ Once a good network structure is identified, the conditional probability
 tables for each of the variables can be estimated.
 
 You can select a Bayes net classifier by clicking the classifier 'Choose' button in 
-the Weka explorer, experimenter or knowledge flow and find BayesNet
-under the {\tt weka.classifiers.bayes} package (see below).%Figure \ref{fig.select}).
+the Weka explorer, experimenter or knowledge flow and find {\tt BayesNet}
+under the {\tt weka.classifiers.bayes} package (see below).
 
 \begin{center}
 \epsfig{file=images/select.eps,height=7cm}
@@ -172,8 +195,7 @@ The Bayes net classifier has the following options:
 \end{center}
 
 The {\tt BIFFile} option can be used to specify a Bayes network stored in
-file in BIF format\footnote{See {\sf http://www-2.cs.cmu.edu/\~{}fgcozman/Research/InterchangeFormat/}
-for details on XML BIF.}. When the toString method is called after learning the
+file in BIF format. When the {\tt toString()} method is called after learning the
 Bayes network, extra statistics (like extra and missing arcs) are printed 
 comparing the network learned with the one on file.
 
@@ -183,7 +205,7 @@ algorithm and specify its options.
 The {\tt estimator} option can be used to select the method for estimating the
 conditional probability distributions (Section \ref{sec.estimate}).
 
-When setting the {\tt useADTree} option to true, counts are calculated using the
+When setting the {\tt useADTree} option to \textbf{true}, counts are calculated using the
 ADTree algorithm of Moore \cite{Moore}. Since I have not noticed a lot of 
 improvement for small data sets, it is set off by default.
 Note that this ADTree algorithm is different from the ADTree classifier algorithm
@@ -207,20 +229,20 @@ Local score based algorithms have the following options in common:\\
 for starting the traversal of the search space is a naive Bayes network 
 structure. That is, a structure with arrows from the class variable to
 each of the attribute variables.\\
-If set {\bf false}, an empty network structure will be used (i.e. no arrows at all).\\
-{\tt markovBlanketClassifier} (False by default) if set {\bf true},
+If set {\bf false}, an empty network structure will be used (i.e., no arrows at all).\\
+{\tt markovBlanketClassifier} (\textbf{false} by default) if set {\bf true},
 at the end of the traversal of the search space, a heuristic is used
 to ensure each of the attributes are in the Markov blanket of the 
-classifier node. If a node is already in the Markov blanket (ie, is
+classifier node. If a node is already in the Markov blanket (i.e., is
 a parent, child of sibling of the classifier node) nothing happens,
 otherwise an arrow is added.\\
-If set {\bf false} no such arrows are added.\\
-{\tt scoreType} determines the score metric used (See Section 2.1
+If set to {\bf false} no such arrows are added.\\
+{\tt scoreType} determines the score metric used (see Section 2.1
 for details). Currently, K2, BDe, AIC, Entropy and MDL are implemented.\\
 {\tt maxNrOfParents} is an upper bound on the number of parents of each of the
 nodes in the network structure learned.
 
-\subsection*{2.1 Local score metrics \label{sec.score.metric}}
+\subsection{Local score metrics \label{sec.score.metric}}
 
 We use the following conventions to identify counts in the database
 $D$ and a network structure $B_S$.  Let $r_i$ ($1\le i\le n$) be the
@@ -293,34 +315,34 @@ With $N_{ijk}'=1/r_i\cdot q_i$ (and thus $N_{ij}'=1/q_i$), we obtain the {\bf BD
 \cite{heckerman95}.
 
 
-\subsection*{2.2 Search algorithms \label{sec.score.search}}
+\subsection{Search algorithms \label{sec.score.search}}
 
 The following search algorithms are implemented for local score metrics;
 \begin{itemize}
-\item K2 \cite{CooperHerskovits1992}: 
+\item \textit{K2} \cite{CooperHerskovits1992}: 
 hill climbing add arcs with a fixed ordering of variables.\\
-Specific option: {\tt useRandomOrder} if {\bf true} a random ordering of
+Specific option: {\tt randomOrder} if {\bf true} a random ordering of
 the nodes is made at the beginning of the search. If {\bf false} (default)
 the ordering in the data set is used. The only exception in both cases is that
 in case the initial network is a naive Bayes network ({\tt initAsNaiveBayes}
-set true) the class variable is made first in the ordering.
-\item Hill Climbing 
+set \textbf{true}) the class variable is made first in the ordering.
+\item \textit{Hill Climbing} 
 \cite{Buntine1996}: 
 hill climbing adding and deleting arcs with no fixed ordering of variables.\\
-{\tt useArcReversal} if true, also arc reversals are consider when determining
+{\tt useArcReversal} if \textbf{true}, also arc reversals are consider when determining
 the next step to make.
-\item Repeated Hill Climber starts with a randomly generated network and
+\item \textit{Repeated Hill Climber} starts with a randomly generated network and
 then applies hill climber to reach a local optimum. The best network found is
 returned.\\
 {\tt useArcReversal} option as for Hill Climber.
-\item LAGD Hill Climbing does hill climbing with look ahead on a limited set of 
-best scoring steps, implemented by Manuel. The number of look ahead steps and number of steps considered
+\item \textit{LAGD Hill Climbing} does hill climbing with look ahead on a limited set of 
+best scoring steps, implemented by Manuel Neubach. The number of look ahead steps and number of steps considered
 for look ahead are configurable.
-\item TAN \cite{ChengGreiner1999,friedman97}:
-Tree Augmented Naive Bayes where the tree is formed by calculating the
+\item \textit{TAN} \cite{ChengGreiner1999,friedman97}:
+\textit{T}ree \textit{A}ugmented \textit{N}aive Bayes where the tree is formed by calculating the
 maximum weight spanning tree using Chow and Liu algorithm \cite{chow1968}.\\
 No specific options.
-\item Simulated annealing \cite{bouck1995}:
+\item \textit{Simulated annealing} \cite{bouck1995}:
 using adding and deleting arrows.\\
 The algorithm randomly generates a candidate network $B_S'$ close to the current
 network $B_S$. It accepts the network if it is better than the current, i.e.,
@@ -334,12 +356,13 @@ The temperature starts at $t_0$ and is slowly decreases with each iteration.
 \epsfig{file=images/score.sa.eps,height=5cm}
 \end{center}
 
-Specific options: {\tt TStart} start temperature $t_0$.\\
+Specific options:\\
+{\tt TStart} start temperature $t_0$.\\
 {\tt delta} is the factor $\delta$ used to update the temperature, so $t_{i+1}=t_i \cdot \delta$.\\
-{\tt runs} number of iterations used to traverse the search space.
+{\tt runs} number of iterations used to traverse the search space.\\
 {\tt seed} is the initialization value for the random number generator.\\
 
-\item Tabu search \cite{bouck1995}:
+\item \textit{Tabu search} \cite{bouck1995}:
 using adding and deleting arrows.\\
 Tabu search performs hill climbing until it hits a local optimum.
 Then it steps to the least worse candidate in the neighborhood. However,
@@ -350,11 +373,11 @@ last $tl$ steps. These steps are stored in a so called tabu-list.
 \epsfig{file=images/score.tabu.eps,height=5cm}
 \end{center}
 
-Specific options: 
+Specific options: \\
 {\tt runs} is the number of iterations used to traverse the search space.\\
 {\tt tabuList} is the length $tl$ of the tabu list.
 
-\item Genetic search: applies a simple implementation of a genetic search algorithm
+\item \textit{Genetic search}: applies a simple implementation of a genetic search algorithm
 to network structure learning. A Bayes net structure is represented by a array
 of $n\cdot n$ ($n$ = number of nodes) bits where bit $i\cdot n + j$ represents whether
 there is an arrow from node $j\to i$.\\
@@ -363,9 +386,9 @@ there is an arrow from node $j\to i$.\\
 \epsfig{file=images/score.genetic.eps,height=8cm}
 \end{center}
 
-Specific options:
-{\tt populationsize} is the size of the population selected in each generation.\\
-{\tt descendantPopulationsize} is the number of offspring generated in each generation.\\
+Specific options:\\
+{\tt populationSize} is the size of the population selected in each generation.\\
+{\tt descendantPopulationSize} is the number of offspring generated in each generation.\\
 {\tt runs} is the number of generation to generate.\\
 {\tt seed} is the initialization value for the random number generator.\\
 {\tt useMutation} flag to indicate whether mutation should be used. Mutation is applied by
@@ -373,10 +396,10 @@ randomly adding or deleting a single arc.\\
 {\tt useCrossOver} flag to indicate whether cross-over should be used. Cross-over is applied
 by randomly picking an index $k$ in the bit representation and selecting the first $k$ bits
 from one and the remainder from another network structure in the population.
-At least one of useMutation and useCrossOver should be set to true.\\
-{\tt useTournamentSelection} when false, the best performing networks are selected from
+At least one of \texttt{useMutation} and \texttt{useCrossOver} should be set to \textbf{true}.\\
+{\tt useTournamentSelection} when \textbf{false}, the best performing networks are selected from
 the descendant population to form the population of the next generation. 
-When true, tournament selection is used. Tournament selection randomly chooses two
+When \textbf{true}, tournament selection is used. Tournament selection randomly chooses two
 individuals from the descendant population and selects the one that performs best.\\
 \end{itemize}
 
@@ -394,8 +417,9 @@ A test is performed by using any of the score metrics described in Section
 \epsfig{file=images/ci.algorithms.eps,height=8cm}
 \end{center}
 
-At the moment, only the ICS algorithm \cite{verma} is implemented. The algorithm
-makes two steps, first find a skeleton (the undirected graph with edges iff there
+At the moment, only the ICS  \cite{verma}and CI algorithm are implemented. 
+
+The ICS algorithm makes two steps, first find a skeleton (the undirected graph with edges $iff$ there
 is an arrow in network structure) and second direct all the edges in the skeleton
 to get a DAG.
 
@@ -437,12 +461,14 @@ The ICS algorithm comes with the following options.
 
 Since the ICS algorithm is focused on recovering causal structure, instead of 
 finding the optimal classifier, the Markov blanket correction can be made 
-afterwards.
-
+afterwards.\\
+\\
+Specific options:\\
 The {\tt maxCardinality} option determines the largest subset of $Z$ to be 
-considered in conditional independence tests $\langle x,y|Z\rangle$.
-
+considered in conditional independence tests $\langle x,y|Z\rangle$. \\
 The {\tt scoreType} option is used to select the scoring metric.
+
+XXX CI algorithm XXX
 
 \section{Global score metric based structure learning}
 
@@ -450,25 +476,24 @@ The {\tt scoreType} option is used to select the scoring metric.
 \epsfig{file=images/global.algorithms.eps,height=8cm}
 \end{center}
 
-Common options for cross validation based algorithms are:
-{\sf initAsNaiveBayes}, {\sf markovBlanketClassifier} and {\sf maxNrOfParents}
+Common options for cross-validation based algorithms are: \\
+{\tt initAsNaiveBayes}, {\tt markovBlanketClassifier} and {\tt maxNrOfParents}
 (see Section \ref{sec.score} for description).
 
-Further, for each of the cross validation based algorithms the {\tt CVType} can be
+Further, for each of the cross-validation based algorithms the {\tt CVType} can be
 chosen out of the following:
 
 \begin{itemize}
-\item {\em Leave one out cross validation (loo-cv)} selects $m=N$ training sets 
+\item {\em Leave one out cross-validation (loo-cv)} selects $m=N$ training sets 
 simply by taking the data set $D$ and removing the $i$th record for training 
 set $D_i^t$. The validation set consist of just the $i$th single record. 
 Loo-cv does not always produce accurate performance estimates. 
 
-\item {\em K-fold cross validation (k-fold cv)} splits the data $D$ in $m$ approximately 
+\item {\em K-fold cross-validation (k-fold cv)} splits the data $D$ in $m$ approximately 
 equal parts $D_1,\ldots,D_m$. Training set $D_i^t$ is obtained by removing part 
-$D_i$ from $D$. Typical values for $m$ are 5, 10 and 20. With $m=N$, v-fold cross
-validation becomes loo-cv. 
+$D_i$ from $D$. Typical values for $m$ are 5, 10 and 20. With $m=N$, k-fold cross-validation becomes loo-cv. 
 
-\item {\em Cumulative cross validation (cumulative cv)} starts with an empty data
+\item {\em Cumulative cross-validation (cumulative cv)} starts with an empty data
 set and adds instances item by item from $D$. After each time an item is added
 the next item to be added is classified using the then current state of the
 Bayes network.
@@ -506,29 +531,32 @@ tables selecting a class in the {\tt weka.classifiers.bayes.net.estimate} packag
 \end{center}
 
 
-The SimpleEstimator class produces direct estimates of the conditional probabilities,
+The \texttt{SimpleEstimator} class produces direct estimates of the conditional probabilities,
 that is, 
 $$P(x_i=k|pa(x_i)=j)=\frac{N_{ijk}+N_{ijk}'}{N_{ij}+N_{ij}'}$$ 
 where $N_{ijk}'$ is the alpha parameter that can be set and is
-$0.5$ by default. With alpha=0, we get maximum likelihood estimates.
+$0.5$ by default. With $alpha=0$, we get maximum likelihood estimates.
 
 \begin{center}
 \epsfig{file=images/estimate.direct.eps,height=4cm}
 \end{center}
 
-With the BMAEstimator, we get estimates for the conditional probability tables based
+With the \texttt{BMAEstimator}, we get estimates for the conditional probability tables based
 on Bayes model averaging of all network structures that are substructures of the
 network structure learned \cite{bouck1995}. This is achieved by estimating the
 conditional probability table of a node $x_i$ given its parents $pa(x_i)$ as a weighted 
 average of all conditional probability tables of $x_i$ given subsets of $pa(x_i)$.
 The weight of a distribution $P(x_i|S)$ with $S\subseteq pa(x_i)$ used is proportional
 to the contribution of network structure $\forall_{y\in S}y\to x_i$ to either the
-BDe metric or K2 metric depending on the setting of the {\tt useK2Prior} option (false
-and true respectively).
+BDe metric or K2 metric depending on the setting of the {\tt useK2Prior} option (\textbf{false}
+and \textbf{true} respectively).
 
 \begin{center}
 \epsfig{file=images/estimate.bma.eps,height=5cm}
 \end{center}
+
+XXX BayesNetEstimator XXX \\
+XXX MultiNomialBMAEstimator XXX \\
 
 \section{Running from the command line}
 These are the command line options of {\tt BayesNet}.
@@ -538,50 +566,67 @@ These are the command line options of {\tt BayesNet}.
 General options:
 
 -t <name of training file>
-	Sets training file.
+        Sets training file.
 -T <name of test file>
-	Sets test file. If missing, a cross-validation will be performed on the training data.
+        Sets test file. If missing, a cross-validation will be performed on the 
+        training data.
 -c <class index>
-	Sets index of class attribute (default: last).
+        Sets index of class attribute (default: last).
 -x <number of folds>
-	Sets number of folds for cross-validation (default: 10).
+        Sets number of folds for cross-validation (default: 10).
+-no-cv
+        Do not perform any cross validation.
+-split-percentage <percentage>
+        Sets the percentage for the train/test set split, e.g., 66.
+-preserve-order
+        Preserves the order in the percentage split.
 -s <random number seed>
-	Sets random number seed for cross-validation (default: 1).
+        Sets random number seed for cross-validation or percentage split
+        (default: 1).
 -m <name of file with cost matrix>
-	Sets file with cost matrix.
+        Sets file with cost matrix.
 -l <name of input file>
-	Sets model input file.
+        Sets model input file. In case the filename ends with '.xml',
+        the options are loaded from the XML file.
 -d <name of output file>
-	Sets model output file.
+        Sets model output file. In case the filename ends with '.xml',
+        only the options are saved to the XML file, not the model.
 -v
-	Outputs no statistics for training data.
+        Outputs no statistics for training data.
 -o
-	Outputs statistics only, not the classifier.
+        Outputs statistics only, not the classifier.
 -i
-	Outputs detailed information-retrieval statistics for each class.
+        Outputs detailed information-retrieval statistics for each class.
 -k
-	Outputs information-theoretic statistics.
+        Outputs information-theoretic statistics.
 -p <attribute range>
-	Only outputs predictions for test instances, along with attributes (0 for none).
+        Only outputs predictions for test instances (or the train
+        instances if no test instances provided), along with attributes
+        (0 for none).
+-distribution
+        Outputs the distribution instead of only the prediction
+        in conjunction with the '-p' option (only nominal classes).
 -r
-	Only outputs cumulative margin distribution.
+        Only outputs cumulative margin distribution.
 -g
-	Only outputs the graph representation of the classifier.
+        Only outputs the graph representation of the classifier.
+-xml filename | xml-string
+        Retrieves the options from the XML-data instead of the command line.
 
 Options specific to weka.classifiers.bayes.BayesNet:
 
 -D
-	Do not use ADTree data structure
+        Do not use ADTree data structure
 
 -B <BIF file>
-	BIF file to compare with
+        BIF file to compare with
 
 -Q weka.classifiers.bayes.net.search.SearchAlgorithm
-	Search algorithm
+        Search algorithm
 
 -E weka.classifiers.bayes.net.estimate.SimpleEstimator
-	Estimator algorithm
-
+        Estimator algorithm
+        
 \end{verbatim}
 }
 
@@ -589,381 +634,422 @@ The search algorithm option -Q and estimator option -E options are mandatory.
 
 Note that it is important that the -E options should be used after the
 -Q option. Extra options can be passed to the search algorithm and
-the estimator after the class name specified following '--'.
+the estimator after the class name specified following '\texttt{--}'.
 
-For example,\\
-{\tt java weka.classifiers.bayes.BayesNet -t iris.arff \\
- -Q weka.classifiers.bayes.net.search.local.SearchAlgorithmK2 -- -P 2 -S ENTROPY\\
- -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 1.0}
+\noindent For example:
+{\small
+\begin{verbatim}
+java weka.classifiers.bayes.BayesNet -t iris.arff -D \
+  -Q weka.classifiers.bayes.net.search.local.K2 -- -P 2 -S ENTROPY \
+  -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 1.0
+\end{verbatim}
+}
 
 \subsection*{Overview of options for search algorithms}
 
-Options specific to weka.classifiers.bayes.net.search.local.K2:
-
--N
-	Initial structure is empty (instead of Naive Bayes)
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Random order.
-	(default false)
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-
-\noindent Options specific to weka.classifiers.bayes.net.search.local.HillClimber:
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Use arc reversal operation.
-	(default false)
-
--N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-
-\noindent Options specific to weka.classifiers.bayes.net.search.local.RepeatedHillClimber:
-
--U $<$integer$>$
-	Number of runs
-
--A $<$seed$>$
-	Random number seed
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Use arc reversal operation.
-	(default false)
-
--N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-\noindent Options specific to weka.classifiers.bayes.net.search.local.LAGDHillClimber:
-
--L $<$nr of look ahead steps$>$
-         Number of look ahead steps
-
--G $<$nr of good operations$>$
-        Number of good operations per look ahead step.
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Use arc reversal operation.
-	(default false)
-
--N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.local.TAN:
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.local.SimulatedAnnealing:
-
--A $<$float$>$
-	Start temperature
-
--U $<$integer$>$
-	Number of runs
-
--D $<$float$>$
-	Delta temperature
-
--R $<$seed$>$
-	Random number seed
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.local.TabuSearch:
-
--L $<$integer$>$
-	Tabu list length
-
--U $<$integer$>$
-	Number of runs
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Use arc reversal operation.
-	(default false)
-
--N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.local.GeneticSearch:
-
--L $<$integer$>$
-	Population size
-
--A $<$integer$>$
-	Descendant population size
-
--U $<$integer$>$
-	Number of runs
-
+\begin{itemize}
+\item \texttt{weka.classifiers.bayes.net.search.local.GeneticSearch}
+  \begin{verbatim}
+-L <integer>
+        Population size
+-A <integer>
+        Descendant population size
+-U <integer>
+        Number of runs
 -M
-	Use mutation.
-	(default true)
-
+        Use mutation.
+        (default true)
 -C
-	Use cross-over.
-	(default true)
-
+        Use cross-over.
+        (default true)
 -O
-	Use tournament selection (true) or maximum subpopulation (false).
-	(default false)
-
--R $<$seed$>$
-	Random number seed
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm:
-
--S [BAYES$|$BDeu$|$MDL$|$ENTROPY$|$AIC]
-	Score type 
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.K2:
-
--N
-	Initial structure is empty (instead of Naive Bayes)
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
+        Use tournament selection (true) or maximum subpopulatin (false).
+        (default false)
+-R <seed>
+        Random number seed
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.HillClimber}
+  \begin{verbatim}
+-P <nr of parents>
+        Maximum number of parents
 -R
-	Random order.
-	(default false)
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
--Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.HillClimber:
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Use arc reversal operation.
-	(default false)
-
+        Use arc reversal operation.
+        (default false)
 -N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
--Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.RepeatedHillClimber:
-
--U $<$integer$>$
-	Number of runs
-
--A $<$seed$>$
-	Random number seed
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
--R
-	Use arc reversal operation.
-	(default false)
-
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.K2}
+  \begin{verbatim}
 -N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
--Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.TAN:
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
--Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.SimulatedAnnealing:
-
--A $<$float$>$
-	Start temperature
-
--U $<$integer$>$
-	Number of runs
-
--D $<$float$>$
-	Delta temperature
-
--R $<$seed$>$
-	Random number seed
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
--Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.TabuSearch:
-
--L $<$integer$>$
-	Tabu list length
-
--U $<$integer$>$
-	Number of runs
-
--P $<$nr of parents$>$
-	Maximum number of parents
-
+        Initial structure is empty (instead of Naive Bayes)
+-P <nr of parents>
+        Maximum number of parents
 -R
-	Use arc reversal operation.
-	(default false)
-
+        Random order.
+        (default false)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.LAGDHillClimber}
+  \begin{verbatim}
+-L <nr of look ahead steps>
+        Look Ahead Depth
+-G <nr of good operations>
+        Nr of Good Operations
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
 -N
-	Initial structure is empty (instead of Naive Bayes)
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
--Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.global.GeneticSearch:
-
--L $<$integer$>$
-	Population size
-
--A $<$integer$>$
-	Descendant population size
-
--U $<$integer$>$
-	Number of runs
-
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.RepeatedHillClimber}
+  \begin{verbatim}
+-U <integer>
+        Number of runs
+-A <seed>
+        Random number seed
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-N
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.SimulatedAnnealing}
+  \begin{verbatim}
+-A <float>
+        Start temperature
+-U <integer>
+        Number of runs
+-D <float>
+        Delta temperature
+-R <seed>
+        Random number seed
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.TabuSearch}
+  \begin{verbatim}
+-L <integer>
+        Tabu list length
+-U <integer>
+        Number of runs
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-N
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.local.TAN}
+  \begin{verbatim}
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.ci.CISearchAlgorithm}
+  \begin{verbatim}
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.ci.ICSSearchAlgorithm}
+  \begin{verbatim}
+-cardinality <num>
+        When determining whether an edge exists a search is performed
+        for a set Z that separates the nodes. MaxCardinality determines
+        the maximum size of the set Z. This greatly influences the
+        length of the search. (default 2)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [BAYES|MDL|ENTROPY|AIC|CROSS_CLASSIC|CROSS_BAYES]
+        Score type (BAYES, BDeu, MDL, ENTROPY and AIC)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.GeneticSearch}
+  \begin{verbatim}
+-L <integer>
+        Population size
+-A <integer>
+        Descendant population size
+-U <integer>
+        Number of runs
 -M
-	Use mutation.
-	(default true)
-
+        Use mutation.
+        (default true)
 -C
-	Use cross-over.
-	(default true)
-
+        Use cross-over.
+        (default true)
 -O
-	Use tournament selection (true) or maximum subpopulation (false).
-	(default false)
-
--R $<$seed$>$
-	Random number seed
-
--S [LOO-CV$|$k-Fold-CV$|$Cumulative-CV]
-	Score type 
-
+        Use tournament selection (true) or maximum subpopulatin (false).
+        (default false)
+-R <seed>
+        Random number seed
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
 -Q
-	Use probabilistic or 0/1 scoring.
-	(default probabilistic scoring)
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.fixed.FromFile:
-
--B $<$BIF File$>$
-	Name of file containing network structure in BIF format
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.search.fixed.NaiveBayes:
-
-
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.HillClimber}
+  \begin{verbatim}
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-N
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
+-Q
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.K2}
+  \begin{verbatim}
+-N
+        Initial structure is empty (instead of Naive Bayes)
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Random order.
+        (default false)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
+-Q
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.RepeatedHillClimber}
+  \begin{verbatim}
+-U <integer>
+        Number of runs
+-A <seed>
+        Random number seed
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-N
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
+-Q
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.SimulatedAnnealing}
+  \begin{verbatim}
+-A <float>
+        Start temperature
+-U <integer>
+        Number of runs
+-D <float>
+        Delta temperature
+-R <seed>
+        Random number seed
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
+-Q
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.TabuSearch}
+  \begin{verbatim}
+-L <integer>
+        Tabu list length
+-U <integer>
+        Number of runs
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-P <nr of parents>
+        Maximum number of parents
+-R
+        Use arc reversal operation.
+        (default false)
+-N
+        Initial structure is empty (instead of Naive Bayes)
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
+-Q
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.global.TAN}
+  \begin{verbatim}
+-mbc
+        Applies a Markov Blanket correction to the network structure,
+        after a network structure is learned. This ensures that all
+        nodes in the network are part of the Markov blanket of the
+        classifier node.
+-S [LOO-CV|k-Fold-CV|Cumulative-CV]
+        Score type (LOO-CV,k-Fold-CV,Cumulative-CV)
+-Q
+        Use probabilistic or 0/1 scoring.
+        (default probabilistic scoring)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.fixed.FromFile}
+  \begin{verbatim}
+-B <BIF File>
+        Name of file containing network structure in BIF format
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.search.fixed.NaiveBayes}
+  \begin{verbatim}
+No options.
+  \end{verbatim}
+\end{itemize}
 
 \subsection*{Overview of options for estimators}
 
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.estimate.SimpleEstimator:
-
--A $<$alpha$>$
-	Initial count (alpha)
-
-
-\noindent 
-Options specific to weka.classifiers.bayes.net.estimate.BMAEstimator:
-
--A $<$alpha$>$
-	Initial count (alpha)
-
-
+\begin{itemize}
+\item \texttt{weka.classifiers.bayes.net.estimate.BayesNetEstimator}
+  \begin{verbatim}
+-A <alpha>
+        Initial count (alpha)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.estimate.BMAEstimator}
+  \begin{verbatim}
+-k2
+        Whether to use K2 prior.
+-A <alpha>
+        Initial count (alpha)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.estimate.MultiNomialBMAEstimator}
+  \begin{verbatim}
+-k2
+        Whether to use K2 prior.
+-A <alpha>
+        Initial count (alpha)
+  \end{verbatim}
+\item \texttt{weka.classifiers.bayes.net.estimate.SimpleEstimator}
+  \begin{verbatim}
+-A <alpha>
+        Initial count (alpha)
+  \end{verbatim}
+\end{itemize}
 
 \subsection*{Generating random networks and artificial data sets}
-You can generate a random Bayes nets and data sets
- using {\tt weka.classifiers.bayes.net.BayesNetGenerator}
- The options are\\
--B: when specified, the network is printed, otherwise an arff file with
-instances randomly drawn from the network is printed.\\
--N $<$integer$>$: number of nodes in the network (default 10).\\
--A $<$integer$>$: number of arcs in the network (default 10).\\
--C $<$integer$>$: cardinality of the variables (default 2).\\
--S $<$integer$>$: random seed value (default 1).\\
--M $<$integer$>$: number of instances to be generated (default 10).\\
--F $<$filename$>$: read Bayes network from file instead of generating it randomly (default no file specified).
 
-The network structure is generate by first generating a tree so that we can
+You can generate random Bayes nets and data sets using \\
+\indent {\tt weka.classifiers.bayes.net.BayesNetGenerator} \\
+The options are:
+\begin{verbatim}
+-B
+        Generate network (instead of instances)
+-N <integer>
+        Nr of nodes
+-A <integer>
+        Nr of arcs
+-M <integer>
+        Nr of instances
+-C <integer>
+        Cardinality of the variables
+-S <integer>
+        Seed for random number generator
+-F <file>
+        The BIF file to obtain the structure from.
+\end{verbatim}
+
+The network structure is generated by first generating a tree so that we can
 ensure that we have a connected graph. If any more arrows are specified they are
 randomly added.
 
@@ -975,20 +1061,23 @@ in the Explorer in text format and also in graphical format.
   
 \subsection*{Bayesian networks in text}
 
-Below, you find output typical for a 10 fold cross validation run in the Weka
+Below, you find output typical for a 10 fold cross-validation run in the Weka
 Explorer with comments where the output is specific for Bayesian nets. 
+
+% iris.xml generated with:
+% weka.classifiers.bayes.BayesNet -D -Q weka.classifiers.bayes.net.search.fixed.NaiveBayes -- -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5
+% and then used with:
+% weka.classifiers.bayes.BayesNet -D -B iris.xml -Q weka.classifiers.bayes.net.search.local.K2 -- -P 2 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5
 
 \begin{verbatim}
 === Run information ===
 
-Scheme:       weka.classifiers.bayes.BayesNet -S -D -B iris.xml 
--Q weka.classifiers.bayes.net.search.local.TabuSearch -- -P 2
--E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5
+Scheme:       weka.classifiers.bayes.BayesNet -D -B iris.xml -Q weka.classifiers.bayes.net.search.local.K2 -- -P 2 -S BAYES -E weka.classifiers.bayes.net.estimate.SimpleEstimator -- -A 0.5
 \end{verbatim}
-Options for  BayesNet include the class names for the structure learner and for the 
+Options for \texttt{BayesNet} include the class names for the structure learner and for the 
 distribution estimator.
 \begin{verbatim}
-Relation:     iris-weka.filters.DiscretizeFilter-B2-Rfirst-last
+Relation:     iris-weka.filters.unsupervised.attribute.Discretize-B2-M-1.0-Rfirst-last
 Instances:    150
 Attributes:   5
               sepallength
@@ -1013,24 +1102,24 @@ classifier was trained.
 
 \begin{verbatim}
 Network structure (nodes followed by parents)
-sepallength(2): petalwidth 
-sepalwidth(2): 
-petallength(2): sepalwidth 
-petalwidth(2): petallength 
-class(3): petallength petalwidth sepalwidth 
+sepallength(2): class 
+sepalwidth(2): class 
+petallength(2): class sepallength 
+petalwidth(2): class petallength 
+class(3): 
 \end{verbatim}
 This list specifies the network structure. Each of the variables is followed by
-a list of parents, so the class variable has parents petallength, petalwidth and sepalwidth
-while sepalwidth has no parents. The number in braces is the cardinality of the variable.
+a list of parents, so the $petallength$ variable has parents $sepallength$ and $class$,
+while $class$ has no parents. The number in braces is the cardinality of the variable.
 It shows that in the iris dataset there are three class variables. All other variables
 are made binary by running it through a discretization filter.
 
 \begin{verbatim}
-LogScore Bayes: -479.9282866605174
-LogScore BDeu: -431.83882596810105
-LogScore MDL: -574.6304836846906
-LogScore ENTROPY: -479.42841309686185
-LogScore AIC: -517.4284130968618
+LogScore Bayes: -374.9942769685747
+LogScore BDeu: -351.85811477631626
+LogScore MDL: -416.86897021246466
+LogScore ENTROPY: -366.76261727150217
+LogScore AIC: -386.76261727150217
 \end{verbatim}
 These lines list the logarithmic score of the network structure for various methods
 of scoring.
@@ -1039,8 +1128,8 @@ If a BIF file was specified, the following two lines will be produced (if no suc
 file was specified, no information is printed).
 
 \begin{verbatim}
-Missing: 1 Extra: 3 Reversed: 3
-Divergence: -0.21124512294538134
+Missing: 0 Extra: 2 Reversed: 0
+Divergence: -0.0719759699700729
 \end{verbatim}
 
 In this case the network that was learned was compared with a file {\tt iris.xml}
@@ -1057,20 +1146,20 @@ networks.
 
 The remainder of the output is standard output for all classifiers. 
 \begin{verbatim}
-Time taken to build model: 0.39 seconds
+Time taken to build model: 0.01 seconds
 
 === Stratified cross-validation ===
 === Summary ===
 
-Correctly Classified Instances         115               76.6667 %
-Incorrectly Classified Instances        35               23.3333 %
+Correctly Classified Instances         116               77.3333 %
+Incorrectly Classified Instances        34               22.6667 %
 \end{verbatim}
 etc...
 
 \subsection*{Bayesian networks in GUI}
 
-To show the graphical structure, right click the appropriate BayesNet in result list of
-the Explorer. A menu pops up, in which you select Visualize Graph.
+To show the graphical structure, right click the appropriate \texttt{BayesNet} in result list of
+the Explorer. A menu pops up, in which you select ``Visualize graph''.
 
 \begin{center}
 \epsfig{file=images/gui.select.eps,height=8cm}
@@ -1080,7 +1169,7 @@ The Bayes network is automatically layed out and drawn thanks to a graph drawing
 implemented by Ashraf Kibriya.
 
 \begin{center}
-\epsfig{file=images/gui.net.eps,height=7cm}
+\epsfig{file=images/gui.net2.eps,height=7cm}
 \end{center}
 
 When you hover the mouse over a node, the node lights up and all its children are highlighted
@@ -1115,7 +1204,7 @@ parents, the right side shows the probability of the node clicked conditioned on
 values of the parents listed on the left.
 
 \begin{center}
-\epsfig{file=images/gui.table.eps,height=4cm}
+\epsfig{file=images/gui.table.eps,height=3cm}
 \end{center}
 
 So, the graph visualizer allows you to inspect both network structure and probability tables. 
@@ -1150,14 +1239,14 @@ Here is the quick guide for adding a structure learner:
 
 \begin{enumerate}
 \item Create a class that derives from {\tt weka.classifiers.bayes.net.search.SearchAlgorithm}.
-  If your searcher is score based, conditional independence based or cross validation based, you
-  probably want to derive from {\tt ScoreSearchAlgorithm}, {\tt CISearchAlgorithm} or {CVSearchAlgorithm}
-  instead of deriving from SearchAlgorithm directly.
+  If your searcher is score based, conditional independence based or cross-validation based, you
+  probably want to derive from {\tt ScoreSearchAlgorithm}, {\tt CISearchAlgorithm} or {\tt CVSearchAlgorithm}
+  instead of deriving from {\tt SearchAlgorithm} directly.
   Let's say it is called \\{\tt weka.classifiers.bayes.net.search.local.MySearcher}
   derived from {\tt ScoreSearchAlgorithm}.
 
 \item Implement the method\\
-{\tt         public void buildStructure (BayesNet bayesNet, Instances instances)}.
+{\tt public void buildStructure(BayesNet bayesNet, Instances instances)}.
 Essentially, you are responsible for setting the parent sets in {\tt bayesNet}.
 You can access the parentsets using {\tt bayesNet.getParentSet(iAttribute)} where
 {\tt iAttribute} is the number of the node/variable.
@@ -1167,34 +1256,28 @@ To add a parent {\tt iParent} to node {\tt iAttribute}, use\\
 {\tt instances} need to be passed for the parent set to derive properties of
 the attribute.
 
-
 Alternatively, implement
-{\tt         public void search (BayesNet bayesNet, Instances instances)}.
-The implementation of {\tt buildStructure} in the base class
-This method is called by the{\tt  SearchAlgorithm} will call search
-after initializing parent sets and if the InitAsNaiveBase flag is set, it will
+{\tt public void search(BayesNet bayesNet, Instances instances)}.
+The implementation of {\tt buildStructure} in the base class XXX.
+This method is called by the {\tt SearchAlgorithm} will call search
+after initializing parent sets and if the {\tt initAsNaiveBase} flag is set, it will
 start with a naive Bayes network structure. After calling {\tt search} in your
-custom class, it will add arrows if the {\tt MarkovBlanketClassifier} flag is 
+custom class, it will add arrows if the {\tt markovBlanketClassifier} flag is 
 set to ensure all attributes are in the Markov blanket of the class node.
 
 \item If the structure learner has options that are not default options,
-you want to implement {\tt public Enumeration listOptions()},
-{\tt public void setOptions(String[] options)},
-{\tt public String [] getOptions()} and the get and set methods for
+you want to implement {\tt public Enumeration listOptions()}, 
+{\tt public void setOptions(String[] options)}, 
+{\tt public String[] getOptions()} and the get and set methods for
 the properties you want to be able to set.
 
-NB 1. do not use the -E options since that is reserved for the BayesNet class to 
-distinguish the extra options for the SearchAlgorithm class and the Estimator class.
-If the -E option is used, it will not be passed to your SearchAlgorithm (and
-probably causes problems in the BayesNet class).
+NB 1. do not use the -E option since that is reserved for the {\tt BayesNet} class to 
+distinguish the extra options for the {\tt SearchAlgorithm} class and the {\tt Estimator} class.
+If the -E option is used, it will not be passed to your {\tt SearchAlgorithm} (and
+probably causes problems in the {\tt BayesNet} class).
 
 NB 2. make sure to process options of the parent class if any in the get/setOpions
 methods.
-
-\item Add an entry to {\tt weka/gui/GenericObjectEditor.props} so that the class 
-shows up when selecting a structure learner. Just add the name of the
-class\\ {\tt weka.classifiers.bayes.net.search.local.MySearcher}
-to the item\\ {\tt weka.classifiers.bayes.net.search.SearchAlgorithm}.
 \end{enumerate}
 
 \subsection*{Adding a new estimator}
@@ -1202,31 +1285,28 @@ to the item\\ {\tt weka.classifiers.bayes.net.search.SearchAlgorithm}.
 This is the quick guide for adding a new estimator:
 
 \begin{enumerate}
-\item Create a class that derives from {\tt weka.classifiers.bayes.net.estimate.BayesNetEstimator}.
-  Let's say it is called \\{\tt weka.classifiers.bayes.net.estimate.MyEstimator}.
+\item Create a class that derives from \\
+  {\tt weka.classifiers.bayes.net.estimate.BayesNetEstimator}.
+  Let's say it is called \\
+  {\tt weka.classifiers.bayes.net.estimate.MyEstimator}.
 
 \item Implement the methods\\
-{\tt public void initCPTs(BayesNet bayesNet)},
-{\tt public void estimateCPTs(BayesNet bayesNet)},
-{\tt public void updateClassifier(BayesNet bayesNet, Instance instance)}, and
+{\tt public void initCPTs(BayesNet bayesNet)} \\
+{\tt public void estimateCPTs(BayesNet bayesNet)} \\
+{\tt public void updateClassifier(BayesNet bayesNet, Instance instance)}, and \\
 {\tt  public double[] distributionForInstance(BayesNet bayesNet, Instance instance)}.
 
 \item If the structure learner has options that are not default options,
 you want to implement {\tt public Enumeration listOptions()},
 {\tt public void setOptions(String[] options)},
-{\tt public String [] getOptions()} and the get and set methods for
+{\tt public String[] getOptions()} and the get and set methods for
 the properties you want to be able to set.
 
-NB do not use the -E options since that is reserved for the BayesNet class to 
+NB do not use the -E option since that is reserved for the BayesNet class to 
 distinguish the extra options for the SearchAlgorithm class and the Estimator class.
 If the -E option is used and no extra arguments are passed to the SearchAlgorithm,
 the extra options to your Estimator will be passed to the SearchAlgorithm
 instead. In short, do not use the -E option.
-
-\item Add an entry to {\tt weka/gui/GenericObjectEditor.props} so that the class 
-shows up when selecting an estimator. Just add the name of the
-class\\ {\tt weka.classifiers.bayes.net.estimate.MyEstimator}
-to the item\\ {\tt weka.classifiers.bayes.net.estimate.BayesNetEstimator}.
 \end{enumerate}
 
 \section{FAQ}
@@ -1261,21 +1341,25 @@ will generate a data set with 1000 instances from the network stored in the file
 {\tt alarm.xml}.
 
 \subsection*{How do I save a Bayes net in BIF format?}
-{\bf GUI:} In the explorer,\\
-o learn the network structure,\\
-o right click the relevant run in the result list,\\
-o choose Visualize Graph in the pop up menu,\\
-o click the floppy button in the Graph Visualizer window.
-o a file ``save as'' dialog pops up that allows you to select the file name to save to.
+\begin{itemize}
+\item {\bf GUI:} In the Explorer
+\begin{itemize}
+\item learn the network structure,
+\item right click the relevant run in the result list,
+\item choose ``Visualize graph'' in the pop up menu,
+\item click the floppy button in the Graph Visualizer window.
+\item a file ``save as'' dialog pops up that allows you to select the file name to save to.
+\end{itemize}
 
-{\bf Java:} Create a {\tt BayesNet} and call {\tt BayesNet.toXMLBIF03()}
+\item {\bf Java:} Create a {\tt BayesNet} and call {\tt BayesNet.toXMLBIF03()}
 which returns the Bayes network in BIF format as a String.
 
-{\bf Command line:} Cannot be done (yet).
+\item {\bf Command line:} use the {\tt -g} option and redirect the output on stdout into a file.
+\end{itemize}
 
 \subsection*{How do I compare a network I learned with one in BIF format?}
 Specify the -B $<$bif-file$>$ option to BayesNet. 
-Calling toString will produce a summary of extra, missing and reversed arrows.
+Calling {\tt toString()} will produce a summary of extra, missing and reversed arrows.
 Also the divergence between the network learned and the one on file is reported.
 
 \subsection*{How do I use the network I learned for general inference?}
@@ -1300,8 +1384,6 @@ genetic search).
 \item implement more conditional independence based search algorithms.
 \end{itemize}
 
-\item Allow BayesNets to be saved in XML BIF format from the command line.
-
 \item Implement score metrics that can handle sparse instances in order to allow 
 for processing large datasets.
 
@@ -1317,9 +1399,9 @@ that can handle missing values.
 The classes used for estimating the conditional probabilities need to be updated
 as well.
 
-\item Only leave-one-out, k-fold and cumulative cross validation are implemented.
-These implementations can be made more efficient and other cross validation methods
-can be implemented, such as Monte Carlo cross validation and bootstrap cross
+\item Only leave-one-out, k-fold and cumulative cross-validation are implemented.
+These implementations can be made more efficient and other cross-validation methods
+can be implemented, such as Monte Carlo cross-validation and bootstrap cross
 validation.
 
 \item Implement methods that can handle incremental extensions of the data set for
@@ -1391,12 +1473,10 @@ can be handled.
   Proc. of the Eighth Conference on Uncertainty in Artificial Intelligence, 
   323-330, 
 1992.
-\bibitem{weka} 
-	I.H. Witten, E. Frank. 
-	Data mining: Practical machine learning tools and techniques with Java implementations. 
-	Morgan Kaufmann, 
-	%San Francisco, 
-	2000.
+\bibitem{weka}
+  I.H. Witten, E. Frank.
+  Data Mining: Practical machine learning tools and techniques.
+  2nd Edition, Morgan Kaufmann, San Francisco, 2005.
 \end{thebibliography}
 
 
