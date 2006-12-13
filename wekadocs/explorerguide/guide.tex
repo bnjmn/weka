@@ -1,11 +1,13 @@
 \documentclass[a4paper]{article}
 
-\usepackage{epsfig}
+\usepackage{epsfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/epsfig.html
+\usepackage{wrapfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/wrapfig.html
 
-\title{\epsfig{file=coa-hor.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-3}
-\author{Richard Kirkby\\Eibe Frank}
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-4}
+\author{Richard Kirkby\\Eibe Frank\\Peter Reutemann}
 
-\setcounter{secnumdepth}{1}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
 
 \begin{document}
 
@@ -15,7 +17,7 @@
 \thispagestyle{empty}
 
 \center
-\vspace{8cm}
+\vspace{7.5cm}
 
 \copyright 2002-2006 University of Waikato
 
@@ -27,38 +29,99 @@
 
 \section{Launching WEKA}
 
-The WEKA GUI Chooser window is used to launch WEKA's graphical
-environments. At the bottom of the window are six buttons:
+The new menu-driven GUI in WEKA (class \texttt{weka.gui.Main}) succeeds the old GUI Chooser (class \texttt{weka.gui.GUIChooser}). Its MDI (``multiple document interface'') appearance makes it easier to keep track of all the open windows.
+
+\begin{center}
+	\epsfig{file=images/main.eps,height=3cm}
+\end{center}
+
+\begin{wrapfigure}{r}{0.1cm}
+	\vspace{0.2cm}
+	\epsfig{file=images/main_program.eps,height=1.2cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_applications.eps,height=1.8cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_tools.eps,height=1.5cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_visualization.eps,height=2.1cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_windows.eps,height=2.4cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_help.eps,height=2.1cm}
+\end{wrapfigure}
+
+The menu consists of six sections:
 
 \begin{enumerate}
-\item \textbf{Simple CLI}.  Provides a simple command-line interface
-that allows direct execution of WEKA commands for operating systems
-that do not provide their own command line interface. 
-\item \textbf{Explorer}.  An environment for exploring data with
-WEKA. 
-\item \textbf{Experimenter}.
-An environment for performing experiments and conducting statistical tests
-between learning schemes. 
-\item \textbf{Knowledge Flow}.  This environment supports essentially
+	\item \textbf{Program}
+		\begin{itemize}
+			\item \textbf{LogWindow} Opens a log window that captures all that is printed to \textit{stdout} or \textit{stderr}. Useful for environments like MS Windows, where WEKA is not started from a terminal.
+			\item \textbf{Exit} Closes WEKA.
+		\end{itemize}
+		
+	\item \textbf{Applications} Lists the main applications within WEKA.
+		\begin{itemize}
+			\item \textbf{Explorer} An environment for exploring data with
+WEKA (the rest of this documentation deals with this application in more detail).
+			\item \textbf{Experimenter} An environment for performing experiments and conducting statistical tests
+between learning schemes.
+			\item \textbf{KnowledgeFlow} This environment supports essentially
 the same functions as the Explorer but with a drag-and-drop
 interface. One advantage is that it supports incremental learning.
-\item \textbf{ArffViewer}.  Displays ARFF files in a tabular format, 
-supports sorting and basic handling of attributes.
-\item \textbf{Log}.  Everything that is printed to \texttt{stdout} or 
-\texttt{stderr} will appear in the Log Window. It is useful for environments 
-that normally don't start WEKA from a terminal and therefore miss details 
-on error messages, e.g., Microsoft Windows.
+			\item \textbf{SimpleCLI} Provides a simple command-line interface
+that allows direct execution of WEKA commands for operating systems
+that do not provide their own command line interface.
+		\end{itemize}
+		
+	\item \textbf{Tools} Other useful applications.
+		\begin{itemize}
+			\item \textbf{ArffViewer} An MDI application for viewing ARFF files in spreadsheet format.
+			\item \textbf{SqlViewer} represents an SQL worksheet, for querying databases via JDBC.
+			\item \textbf{EnsembleLibrary} An interface for generating setups for Ensemble Selection \cite{ensemble}.
+		\end{itemize}
+		
+	\item \textbf{Visualization} Ways of visualizing data with WEKA.
+		\begin{itemize}
+			\item \textbf{Plot} For plotting a 2D plot of a dataset.
+			\item \textbf{ROC} Displays a previously saved ROC curve.
+			\item \textbf{TreeVisualizer} For displaying directed graphs, e.g., a decision tree.
+			\item \textbf{GraphVisualizer} Visualizes XML BIF or DOT format graphs, e.g., for Bayesian networks.
+			\item \textbf{BoundaryVisualizer} Allows the visualization of classifier decision boundaries in two dimensions.
+		\end{itemize}
+		
+	\item \textbf{Windows} All open windows are listed here.
+		\begin{itemize}
+			\item \textbf{Minimize} Minimizes all current windows.
+			\item \textbf{Restore} Restores all minimized windows again.
+		\end{itemize}
+		
+	\item \textbf{Help} Online resources for WEKA can be found here.
+		\begin{itemize}
+			\item \textbf{Weka homepage} Opens a browser window with WEKA's homepage.
+			\item \textbf{Online documentation} Directs to the WekaDoc Wiki \cite{wekadoc}.
+			\item \textbf{HOWTOs, code snippets, etc.} The general WekaWiki \cite{wekawiki}, containing lots of examples and HOWTOs around the development and use of WEKA.
+			\item \textbf{Weka on Sourceforge} WEKA's project homepage on Sourceforge.net.
+			\item \textbf{SystemInfo} Lists some internals about the Java/WEKA environment, e.g., the \texttt{CLASSPATH}.
+			\item \textbf{About} The infamous ``About'' box.
+		\end{itemize}
 \end{enumerate}
 
 If you launch WEKA from a terminal window, some text begins scrolling in the
-terminal.  Ignore this text unless something goes wrong, in which case it can
-help in tracking down the cause.
+terminal. Ignore this text unless something goes wrong, in which case it can
+help in tracking down the cause (the \textit{LogWindow} displays that information as well).
 
 This User Manual, which is also available online on the \textit{WekaDoc Wiki} 
 \cite{wekadoc}, focuses on using the Explorer but does not explain
 the individual data preprocessing tools and learning algorithms in
 WEKA. For more information on the various filters and learning methods
 in WEKA, see the book {\em Data Mining} \cite{witten}.
+
+\newpage
 
 \section{The WEKA Explorer}
 
@@ -115,7 +178,12 @@ collector is constantly running as a background task anyway.
 Clicking on this button brings up a separate window containing a scrollable text
 field. Each line of text is stamped with the time it was entered into the
 log. As you perform actions in WEKA, the log keeps a record of what has
-happened.
+happened. For people using the command line or the SimpleCLI, the log now also 
+contains the full setup strings for classification, clustering, attribute selection, 
+etc., so that it is possible to copy/paste them elsewhere. 
+Options for dataset(s) and, if applicable, the class attribute still have to 
+be provided by the user (e.g., \texttt{-t} for classifiers or \texttt{-i} 
+and \texttt{-o} for filters).
 
 \subsection{WEKA Status Icon}
 
@@ -125,9 +193,15 @@ symbol gives the number of concurrent processes running.  When the system is
 idle it is zero, but it increases as the number of processes increases.
 When any process is started, the bird gets up and starts moving around. If
 it's standing but stops moving for a long time, it's sick: something has gone
-wrong!  In that case you should restart the WEKA explorer.
+wrong!  In that case you should restart the WEKA Explorer.
+
+\newpage
 
 \section{Preprocessing}
+
+\begin{center}
+\epsfig{file=images/explorer_preprocess.eps,height=7cm}
+\end{center}
 
 \subsection{Loading Data}
 
@@ -152,7 +226,10 @@ of formats: WEKA's ARFF format, CSV format, C4.5 format, or serialized
 Instances format. ARFF files typically have a {\em .arff\/}
 extension, CSV files a {\em .csv\/} extension, C4.5 files a {\em
 .data\/} and {\em .names\/} extension, and serialized Instances
-objects a {\em .bsi\/} extension.
+objects a {\em .bsi\/} extension. 
+
+\textbf{NB:} This list of formats can be extended by adding custom file 
+converters to the \texttt{weka.core.converters} package.
 
 \subsection{The Current Relation}
 
@@ -246,6 +323,10 @@ corner of the Preprocess panel.
 
 \subsection{Working With Filters}
 
+\begin{center}
+\epsfig{file=images/explorer_preprocess_filter.eps,height=7cm}
+\end{center}
+
 The preprocess section allows filters to be defined that transform the
 data in various ways.  The \textbf{Filter} box is used to set up the
 filters that are required.  At the left of the \textbf{Filter} box is
@@ -296,8 +377,8 @@ will then show the transformed data. The change can be undone by
 pressing the \textbf{Undo} button. You can also use the
 \textbf{Edit...} button to modify your data manually in a dataset
 editor.  Finally, the \textbf{Save...}  button at the top right of the
-Preprocess panel saves the current version of the relation in the same
-formats available for loading data, allowing it to be kept for future
+Preprocess panel saves the current version of the relation in file
+formats that can represent the relation, allowing it to be kept for future
 use.  \\
 
 \noindent \textbf{Note:} Some of the filters behave differently
@@ -309,7 +390,13 @@ filters'' require a class attribute to be set, and some of the
 one is set. Note that it is also possible to set {\em Class} to {\em
 None}, in which case no class is set.
 
+\newpage
+
 \section{Classification}
+
+\begin{center}
+\epsfig{file=images/explorer_classify.eps,height=7cm}
+\end{center}
 
 \subsection{Selecting a Classifier}
 
@@ -495,7 +582,13 @@ available (by default: none). More about these plugins can be found on the
 \noindent
 Options are greyed out if they do not apply to the specific set of results.
 
+\newpage
+
 \section{Clustering}
+
+\begin{center}
+\epsfig{file=images/explorer_cluster.eps,height=7cm}
+\end{center}
 
 \subsection{Selecting a Clusterer}
 
@@ -543,7 +636,13 @@ except that it shows only two visualization options: \textbf{Visualize
 cluster assignments} and \textbf{Visualize tree}. The latter is grayed
 out when it is not applicable.
 
+\newpage
+
 \section{Associating}
+
+\begin{center}
+\epsfig{file=images/explorer_associate.eps,height=7cm}
+\end{center}
 
 \subsection{Setting Up}
 
@@ -558,7 +657,13 @@ set, click the \textbf{Start} button.  When complete, right-clicking
 on an entry in the result list allows the results to be viewed or
 saved.
 
+\newpage
+
 \section{Selecting Attributes}
+
+\begin{center}
+\epsfig{file=images/explorer_selectattributes.eps,height=7cm}
+\end{center}
 
 \subsection{Searching and Evaluating}
 
@@ -596,9 +701,52 @@ main window}, \textbf{View in separate window} and \textbf{Save result
 buffer}), are the same as for the classify panel.  It is also possible
 to \textbf{Visualize reduced data}, or if you have used an attribute
 transformer such as PrincipalComponents, \textbf{Visualize transformed
-data}.
+data}. The reduced/transformed data can be saved to a file with the 
+\textbf{Save reduced data...} or \textbf{Save transformed data...}
+option.
+
+In case one wants to reduce/transform a training and a test at the same 
+time and not use the AttributeSelectedClassifier from the classifier 
+panel, it is best to use the AttributeSelection filter (a supervised 
+attribute filter) in batch mode ('\texttt{-b}') 
+from the command line or in the SimpleCLI. The batch mode allows one to 
+specify an additional input and output file pair (options \texttt{-r} 
+and \texttt{-s}), that is processed with the filter setup that 
+was determined based on the training data (specified by options 
+\texttt{-i} and \texttt{-o}). \\
+
+\noindent Here is an example for a Unix/Linux bash:
+\begin{verbatim}
+java weka.filters.supervised.attribute.AttributeSelection \
+       -E "weka.attributeSelection.CfsSubsetEval " \
+       -S "weka.attributeSelection.BestFirst -D 1 -N 5" \
+       -b \
+       -i <input1.arff> \
+       -o <output1.arff> \
+       -r <input2.arff> \
+       -s <output2.arff>
+\end{verbatim}
+
+\noindent \textbf{Notes:}
+\begin{itemize}
+	\item The ``backslashes'' at the end of each line tell the bash that 
+	the command is not finished yet. Using the SimpleCLI one has to  
+	use this command in one line without the backslashes.
+	
+	\item It is assumed that WEKA is available in the \texttt{CLASSPATH}, 
+	otherwise one has to use the \texttt{-classpath} option.
+	
+	\item The full filter setup is output in the log, as well as
+	the setup for running regular attribute selection.
+\end{itemize}
+
+\newpage
 
 \section{Visualizing}
+
+\begin{center}
+\epsfig{file=images/explorer_visualization.eps,height=7cm}
+\end{center}
 
 WEKA's visualization section allows you to visualize 2D plots of the
 current relation.  
@@ -692,6 +840,8 @@ and returns you to the original graph with all points included.  Finally,
 clicking the \textbf{Save} button allows you to save the currently visible
 instances to a new ARFF file.
 
+\newpage
+
 \begin{thebibliography}{999}
    \bibitem{drummond} Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
 Publishers, San Mateo, CA.
@@ -700,6 +850,7 @@ learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
 	\bibitem{wekawiki} \textit{WekaWiki} -- \texttt{http://weka.sourceforge.net/wiki/}
 	\bibitem{wekadoc} \textit{WekaDoc} -- \texttt{http://weka.sourceforge.net/wekadoc/}
+	\bibitem{ensemble} Ensemble Selection on \textit{WekaDoc} -- \\ \small{\texttt{http://weka.sourceforge.net/wekadoc/index.php/en:Ensemble\_Selection}}
 \end{thebibliography}
 
 \end{document}
