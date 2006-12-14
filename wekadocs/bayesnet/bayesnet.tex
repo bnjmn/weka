@@ -2,7 +2,7 @@
 
 \usepackage{epsfig}
 
-\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\Bayesian Network Classifiers in Weka\\for Version 3-5-3}
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\Bayesian Network Classifiers in Weka\\for Version 3-5-4}
 \author{Remco R. Bouckaert\\remco@cs.waikato.ac.nz}
 
 \setcounter{secnumdepth}{2}
@@ -468,8 +468,6 @@ The {\tt maxCardinality} option determines the largest subset of $Z$ to be
 considered in conditional independence tests $\langle x,y|Z\rangle$. \\
 The {\tt scoreType} option is used to select the scoring metric.
 
-XXX CI algorithm XXX
-
 \section{Global score metric based structure learning}
 
 \begin{center}
@@ -554,9 +552,6 @@ and \textbf{true} respectively).
 \begin{center}
 \epsfig{file=images/estimate.bma.eps,height=5cm}
 \end{center}
-
-XXX BayesNetEstimator XXX \\
-XXX MultiNomialBMAEstimator XXX \\
 
 \section{Running from the command line}
 These are the command line options of {\tt BayesNet}.
@@ -1258,7 +1253,7 @@ the attribute.
 
 Alternatively, implement
 {\tt public void search(BayesNet bayesNet, Instances instances)}.
-The implementation of {\tt buildStructure} in the base class XXX.
+The implementation of {\tt buildStructure} in the base class.
 This method is called by the {\tt SearchAlgorithm} will call search
 after initializing parent sets and if the {\tt initAsNaiveBase} flag is set, it will
 start with a naive Bayes network structure. After calling {\tt search} in your
