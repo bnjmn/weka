@@ -47,7 +47,7 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -437,7 +437,6 @@ public class ConverterFileChooser
     
     initGUI(LOADER_DIALOG);
     
-    setAcceptAllFileFilterUsed(true);
     int result = super.showOpenDialog(parent);
     
     m_DialogType = UNHANDLED_DIALOG;
@@ -478,8 +477,10 @@ public class ConverterFileChooser
     
     initGUI(SAVER_DIALOG);
     
+    boolean acceptAll = isAcceptAllFileFilterUsed();
     setAcceptAllFileFilterUsed(false);
     int result = super.showSaveDialog(parent);
+    setAcceptAllFileFilterUsed(acceptAll);
     
     m_DialogType = UNHANDLED_DIALOG;
     removePropertyChangeListener(m_Listener);
