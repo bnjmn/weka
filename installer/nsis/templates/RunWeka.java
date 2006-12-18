@@ -7,9 +7,12 @@ import java.util.Vector;
 
 /**
  * A simple class for starting Weka under Windows with parameters from
- * the props file "Weka.ini". <p/>
+ * the props file "RunWeka.ini". <p/>
  *
  * Valid options: <p/>
+ *
+ * -h <br/>
+ *  prints all available commands in the ini file and exits. <p/>
  *
  * -c cmd <br/>
  *  the command to use (are prefixed with "cmd_" in the inifile), 
@@ -31,7 +34,7 @@ import java.util.Vector;
  * Additional parameters will be appended to the generated java call.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class RunWeka {
 
@@ -109,10 +112,14 @@ public class RunWeka {
   }
 
   /**
-   * runs Weka
+   * runs Weka, "-h" displays all the available commands in RunWeka.ini
+   *
+   * @param args        the command line parameters
+   * @throws Exception  if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     boolean debug = getFlag("-d", args);
+    boolean help = getFlag("-h", args);
 
     // other setup than default?
     String command = getOption("-c", args, "default");
@@ -134,6 +141,23 @@ public class RunWeka {
     Properties props = new Properties();;
     props.load(new FileInputStream(inifile));
     props.setProperty(PLACEHOLDER_WEKAJAR, wekajar);
+    
+    // help? -> output all commands
+    if (help) {
+      System.out.println("\nAvailable commands:");
+      Vector commands = new Vector();
+      Enumeration enm = props.propertyNames();
+      while (enm.hasMoreElements()) {
+        String cmd = enm.nextElement().toString();
+        if (cmd.startsWith("cmd_"))
+          commands.add(cmd.substring(4));
+      }
+      Collections.sort(commands);
+      for (int i = 0; i < commands.size(); i++)
+        System.out.println("  " + commands.get(i));
+      System.out.println();
+      System.exit(0);
+    }
 
     // does command exist?
     String cmd = props.getProperty("cmd_" + command, "");
