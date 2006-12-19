@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.3.2.2 $
+# Version: $Revision: 1.3.2.3 $
 
 Name Weka
 
@@ -110,7 +110,7 @@ Section -Main SectionMain
     # Links in App directory (to get the working directory of the links correct!)
     SetOutPath $INSTDIR
     CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "console" $INSTDIR\Weka.ico
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
