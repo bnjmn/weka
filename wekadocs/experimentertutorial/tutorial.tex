@@ -205,7 +205,7 @@ After clicking \textit{Open} the file will be displayed in the datasets list. If
       In order to get statistically meaningful results, the default number of iterations is 10. In case of 10-fold cross-validation this means 100 calls of one classifier with training data and tested against test data. 
 
    \item \textbf{Data sets first/Algorithms first} \\
-      As soon as one has more than one dataset and algorithm, it can be useful to switch from datasets being iterated over first to algorithms. This is the case, if one stores the results in a database and wants to complete the results for all the datasets for one algorithm as early as possible. 
+      As soon as one has more than one dataset and algorithm, it can be useful to switch from datasets being iterated over first to algorithms. This is the case if one stores the results in a database and wants to complete the results for all the datasets for one algorithm as early as possible. 
 \end{itemize}
 
 
@@ -601,71 +601,104 @@ In this experiment, the \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48} schemes 
 \newpage
 \section{Remote Experiments}
 
-Remote experiments enable you to distribute the computing load across multiple computers.
+Remote experiments enable you to distribute the computing load across multiple computers. In the following we will discuss the setup and operation for HSQLDB \cite{hsql} and MySQL \cite{mysql}.
 
 \subsection{Preparation}
 
 To run a remote experiment you will need:
 
 \begin{itemize}
-   \item A database server
-   \item A number of computers to run remote engines on
-   \item To edit the remote engine policy file included in the Weka distribution to allow class loading from your home directory
-   \item An invocation of the Experimenter on a machine somewhere (any will do)
+   \item A database server.
+   \item A number of computers to run remote engines on.
+   \item To edit the remote engine policy file included in the Weka distribution to allow Java class and dataset loading from your home directory.
+   \item An invocation of the Experimenter on a machine somewhere (any will do).
 \end{itemize}
 
-For the following examples, we assume a user called \textit{johndoe} with this setup:
+\noindent For the following examples, we assume a user called \textit{johndoe} with this setup:
 
 \begin{itemize}
-	\item Access to a set of computers running a flavour of Unix (pathnames need to be changed for Windows)
-   \item The home directory is located at \texttt{/home/johndoe} 
-   \item This remote experiment description uses the HSQLDB \cite{hsql} database, which requires editing the \textit{DatabaseUtils.props} file
-    \item HSQLDB needs special parameter settings being transferred from \textit{DatabaseUtils.props.hsql} to  \textit{DatabaseUtils.props}
-	\item The jar archive for HSQLDB is located here: \texttt{/home/johndoe/hsqldb.jar} 
+	\item Access to a set of computers running a flavour of Unix (pathnames need to be changed for Windows).
+   \item The home directory is located at \texttt{/home/johndoe}.
+   \item Weka is found in \texttt{/home/johndoe/weka}.
+   \item Additional jar archives, i.e., JDBC drivers, are stored in \texttt{/home/johndoe/jars}.
+   \item The directory for the datasets is \texttt{/home/johndoe/datasets}.
 \end{itemize}
 
+\noindent \textbf{Note:} The example policy file \texttt{remote.policy.example} is using this setup (available in \texttt{weka/experiment}\footnote{Weka's source code can be found in the \texttt{weka-src.jar} archive or obtained from CVS \cite{cvs}.}).
 
 \subsection{Database Server Setup}
 
-To set up the database server, choose or create a directory to run the database server from, and start the server with:
+\begin{itemize}
+	\item HSQLDB
+	
+		\begin{itemize}
+			\item Download the JDBC driver for HSQLDB, extract the \texttt{hsqldb.jar} and place it in the directory \texttt{/home/johndoe/jars}.
+			
+			\item To set up the database server, choose or create a directory to run the database server from, and start the server with:
 
-\begin{verbatim}
-java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname xdb
-\end{verbatim}
+				\begin{verbatim}
+java -classpath /home/johndoe/jars/hsqldb.jar \
+  org.hsqldb.Server \
+  -database.0 experiment -dbname.0 experiment
+				\end{verbatim}
+				
+				\textbf{Note:} This will start up a database with the alias ``experiment'' (\texttt{-dbname.0 <alias>}) and create a properties and a log file at the current location prefixed with ``experiment'' (\texttt{-database.0 <file>}).
+				
+		\end{itemize}
+		
+	\item MySQL
+	
+We won't go into the details of setting up a MySQL server, but this is rather straightforward and includes the following steps:
 
+		\begin{itemize}
+  			\item Download a suitable version of MySQL for your server machine.
+  			\item Install and start the MySQL server.
+  			\item Create a database - for our example we will use \texttt{experiment} as database name.
+  			\item Download the appropriate JDBC driver, extract the JDBC jar and place it as \texttt{mysql.jar} in \texttt{/home/johndoe/jars}.
+		\end{itemize}
+		
+\end{itemize}
 
 \subsection{Remote Engine Setup}
 
 \begin{itemize}
    \item First, set up a directory for scripts and policy files: 
-
 		\begin{verbatim}
 /home/johndoe/remote_engine
 		\end{verbatim}
 
-   \item Next, copy the \texttt{remoteEngine.jar} (from the Weka distribution; or build it from the sources with \texttt{ant remotejar}) to the \texttt{/home/johndoe/remote\_engine} directory 
+   \item Unzip the \texttt{remoteExperimentServer.jar} (from the Weka distribution; or build it from the sources\footnote{Weka's source code can be found in the \texttt{weka-src.jar} archive or obtained from CVS \cite{cvs}.} with \texttt{ant remotejar}) into a temporary directory.
 
-   \item Create a script, called \texttt{/home/johndoe/remote\_engine/startRemoteEngine}, with the following content (don't forget to make it executable with \textit{chmod}, if you're using a flavour of Unix): 
-		\begin{verbatim}
-/path/to/your/jdk/bin/java -Xmx256m \
--classpath /home/johndoe/hsqldb.jar:remoteEngine.jar \
--Djava.security.policy=remote_engine.policy weka.experiment.RemoteEngine &
-		\end{verbatim}
+   \item Next, copy \texttt{remoteEngine.jar} and \texttt{remote.policy.example} to the \\ \texttt{/home/johndoe/remote\_engine} directory.
 
-   \item Now we will start the remote engines (note that the same version of Java must be used for the Experimenter and remote engines) :
-   	\begin{itemize}
-         \item Edit the \texttt{remote\_engine.policy} file in \texttt{/home/johndoe/remote\_engine} by adding the lines
+   \item Create a script, called \texttt{/home/johndoe/remote\_engine/startRemoteEngine}, with the following content (don't forget to make it executable with \texttt{chmod a+x startRemoteEngine} when you are on Linux/Unix): 
+      \begin{itemize}
+      	\item HSQLDB
 				\begin{verbatim}
-            permission java.io.FilePermission
-            "/home/johndoe/-", "read";
-            \end{verbatim}
+java -Xmx256m \
+  -classpath /home/johndoe/jars/hsqldb.jar:remoteEngine.jar \
+  -Djava.security.policy=remote.policy \
+  weka.experiment.RemoteEngine &
+				\end{verbatim}
+			
+			\item MySQL
+				\begin{verbatim}
+java -Xmx256m \
+  -classpath /home/johndoe/jars/mysql.jar:remoteEngine.jar \
+  -Djava.security.policy=remote.policy \
+  weka.experiment.RemoteEngine &
+				\end{verbatim}
+		\end{itemize}
 
-            \textit{Note:} In case the datasets are not located in the user's home then another file permission entry will be needed in the policy file.
-         \item For each machine you want to run an engine on:
+   \item Now we will start the remote engines that run the experiments on the remote computers (note that the same version of Java must be used for the Experimenter and remote engines):
+   	\begin{itemize}
+         \item Rename the \texttt{remote.policy.example} file to \texttt{remote.policy}.
+
+         \item For each machine you want to run a remote engine on:
          	\begin{itemize}
-         		\item \texttt{ssh} to the machine
-               \item \textit{cd} to \texttt{/home/johndoe/remote\_engine}
-               \item Run \texttt{/home/johndoe/startRemoteEngine} (to enable the remote engines to use more memory, modify the \texttt{-Xmx} option in the \texttt{startRemoteEngine} script) 
+         		\item \texttt{ssh} to the machine.
+               \item \texttt{cd} to \texttt{/home/johndoe/remote\_engine}.
+               \item Run \texttt{/home/johndoe/startRemoteEngine} (to enable the remote engines to use more memory, modify the \texttt{-Xmx} option in the \texttt{startRemoteEngine} script) .
             \end{itemize}
       \end{itemize}
 \end{itemize}
@@ -676,51 +709,68 @@ java -classpath /home/johndoe/hsqldb.jar org.hsqldb.Server -database.0 -dbname x
 Now we will run the Experimenter:
 
 \begin{itemize}
-   \item Create a directory for the experiment
-   \item Copy the \textit{DatabaseUtils.props.hsql} file to this directory and rename it to \textit{DatabaseUtils.props} - a copy comes with your Weka distribution in \texttt{weka/experiment}
-   \item Edit this file and change the "\texttt{jdbcURL=jdbc:hsqldb:hsql://servername}" entry to include the name of the machine that is running your database server (e.g., \texttt{jdbcURL=jdbc:hsqldb:hsql://dodo.company.com})
-   \item Now start the experimenter (inside this directory): 
-		\begin{verbatim}
- java -classpath /home/johndoe/hsqldb.jar \
-      -Djava.rmi.server.codebase=file:/home/<path to your weka classes>/ \
-      weka.gui.experiment.Experimenter
-		\end{verbatim}
+	\item HSQLDB
+		\begin{itemize}
+   		\item Copy the \textit{DatabaseUtils.props.hsql} file from \texttt{weka/experiment} in the \texttt{weka.jar} archive to the \texttt{/home/johndoe/remote\_engine} directory and rename it to \textit{DatabaseUtils.props}.
+		   \item Edit this file and change the "\small{\texttt{jdbcURL=jdbc:hsqldb:hsql://server\_name/database\_name}}" entry to include the name of the machine that is running your database server (e.g., \small{\texttt{jdbcURL=jdbc:hsqldb:hsql://dodo.company.com/experiment}}).
+		   \item Now start the Experimenter (inside this directory): 
+				\small{\begin{verbatim}
+java \
+  -cp /home/johndoe/jars/hsqldb.jar:remoteEngine.jar:/home/johndoe/weka/weka.jar \
+  -Djava.rmi.server.codebase=file:/home/johndoe/weka/weka.jar \
+  weka.gui.experiment.Experimenter
+				\end{verbatim}}
+		\end{itemize}
+
+	\item MySQL
+		\begin{itemize}
+   		\item Copy the \textit{DatabaseUtils.props.mysql} file from \texttt{weka/experiment} in the \texttt{weka.jar} archive to the \texttt{/home/johndoe/remote\_engine} directory and rename it to \textit{DatabaseUtils.props}.
+		   \item Edit this file and change the "\small{\texttt{jdbcURL=jdbc:mysql://server\_name:3306/database\_name}}" entry to include the name of the machine that is running your database server and the name of the database the result will be stored in (e.g., \small{\texttt{jdbcURL=jdbc:mysql://dodo.company.com:3306/experiment}}). 
+		   \item Now start the Experimenter (inside this directory): 
+				\small{\begin{verbatim}
+java \
+  -cp /home/johndoe/jars/mysql.jar:remoteEngine.jar:/home/johndoe/weka/weka.jar \
+  -Djava.rmi.server.codebase=file:/home/johndoe/weka/weka.jar \
+  weka.gui.experiment.Experimenter
+				\end{verbatim}}
+		\end{itemize}
+		
+		\textbf{Note:} the database name \textit{experiment} can still be modified in the Experimenter, this is just the default setup.
 \end{itemize}
 
 Now we will configure the experiment:
 
 \begin{itemize}
    \item First of all select the \textit{Advanced} mode in the \textit{Setup} tab
-   \item Now choose the \textit{DatabaseResultListener} in the \textit{Destination} panel. Configure this result producer and supply the value \textbf{sa} for the username
-   \item From the \textit{Result generator} panel choose either the \textit{CrossValidationResultProducer} or the \textit{RandomSplitResultProducer} (these are the most commonly used ones) and then configure the remaining experiment details (e.g., datasets and classifiers)
-   \item Now enable the \textit{Distribute Experiment} panel by checking the tick box
-   \item Click on the \textit{Hosts} button and enter the names of the machines that you started remote engines on
-   \item You can choose to distribute by run or dataset (try to get a balance)
-   \item Save your experiment configuration
-   \item Now start your experiment as you would do normally
-   \item Check your results in the \textit{Analyse} tab by clicking either the \textit{Database} or \textit{Experiment} buttons 
+   \item Now choose the \textit{DatabaseResultListener} in the \textit{Destination} panel. Configure this result producer:
+   	\begin{itemize}
+    		\item HSQLDB \\ Supply the value \textbf{sa} for the username and leave the password empty.
+    		\item MySQL \\ Provide the username and password that you need for connecting to the database.
+    	\end{itemize}
+   \item From the \textit{Result generator} panel choose either the \textit{CrossValidationResultProducer} or the \textit{RandomSplitResultProducer} (these are the most commonly used ones) and then configure the remaining experiment details (e.g., datasets and classifiers).
+   \item Now enable the \textit{Distribute Experiment} panel by checking the tick box.
+   \item Click on the \textit{Hosts} button and enter the names of the machines that you started remote engines on (\texttt{<Enter>} adds the host to the list).
+   \item You can choose to distribute by run or dataset.
+   \item Save your experiment configuration.
+   \item Now start your experiment as you would do normally.
+   \item Check your results in the \textit{Analyse} tab by clicking either the \textit{Database} or \textit{Experiment} buttons.
 \end{itemize}
 
 
 \subsection{Troubleshooting}
 
 \begin{itemize}
-   \item DON'T FORGET THE TRAILING SLASH - when you provide the Java startup option for the Experimenter: 
-		\begin{verbatim}
-    -Djava.rmi.server.codebase=file:/home/<path to your weka classes>/ \end{verbatim}
-    without it, you will get security access exceptions. 
-
    \item If you get an error at the start of an experiment that looks a bit like this: 
 
-    \texttt{01:13:19: RemoteExperiment (//blabla.company.com/RemoteEngine) (sub)experiment (datataset vineyard.arff) failed : java.sql.SQLException: Table already exists: EXPERIMENT\_INDEX in statement [CREATE TABLE Experiment\_index ( Experiment\_type LONGVARCHAR, Experiment\_setup LONGVARCHAR, Result\_table INT )]} 
+    \texttt{01:13:19: RemoteExperiment (//blabla.company.com/RemoteEngine) (sub)experiment (datataset vineyard.arff) failed : \\ java.sql.SQLException: Table already exists: EXPERIMENT\_INDEX in statement [CREATE TABLE Experiment\_index ( Experiment\_type \\ LONGVARCHAR, Experiment\_setup LONGVARCHAR, Result\_table INT )]} 
 
-    \texttt{01:13:19: dataset :vineyard.arff RemoteExperiment \\ (//blabla.company.com/RemoteEngine) (sub)experiment (datataset vineyard.arff) failed : java.sql.SQLException: Table already exists: EXPERIMENT\_INDEX in statement [CREATE TABLE Experiment\_index ( Experiment\_type LONGVARCHAR, Experiment\_setup LONGVARCHAR, Result\_table INT )]. Scheduling for execution on another host.} 
+    \texttt{01:13:19: dataset :vineyard.arff RemoteExperiment \\ (//blabla.company.com/RemoteEngine) (sub)experiment (datataset vineyard.arff) failed : java.sql.SQLException: Table already exists: EXPERIMENT\_INDEX in statement [CREATE TABLE \\ Experiment\_index ( Experiment\_type LONGVARCHAR, Experiment\_setup LONGVARCHAR, Result\_table INT )]. Scheduling for execution on \\ another host.} 
 
     then do not panic - this happens because multiple remote machines are trying to create the same table and are temporarily locked out - this will resolve itself so just leave your experiment running - in fact, it is a sign that the experiment is working! 
 
-   \item If you serialized an experiment and then modify your \textit{DatabaseUtils.props} file due to an error (e.g., a missing type-mapping), the Experimenter will use the \textit{DatabaseUtils.props} you had \textit{at the time you serialized the experiment}. Keep in mind that the serialization process also serializes the \textit{DatabaseUtils} class and therefore stored your props-file! This is another reason for storing your experiments as XML and not in a properietary binary format the Java serialization produces. 
+   \item If you serialized an experiment and then modify your \textit{DatabaseUtils.props} file due to an error (e.g., a missing type-mapping), the Experimenter will use the \textit{DatabaseUtils.props} you had \textit{at the time you serialized the experiment}. Keep in mind that the serialization process also serializes the \textit{DatabaseUtils} class and therefore stored your props-file! This is another reason for storing your experiments as XML and not in the properietary binary format the Java serialization produces. 
 
-   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the ''User'' button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from CVS. 
+   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the ''User'' button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from CVS \cite{cvs}. 
 
    \item If you get \texttt{NullPointerException at java.util.Hashtable.get()} in the Remote Engine do not be alarmed. This will have no effect on the results of your experiment. 
 \end{itemize}
@@ -734,7 +784,7 @@ Now we will configure the experiment:
 
 \subsection{Setup}
 
-Weka includes an experiment analyser that can be used to analyse the results of experiments that were sent to an \textit{InstancesResultListener}. The experiment shown below uses 3 schemes, \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48}, to classify the Iris data in an experiment using 10 train and test runs, with 66\% of the data used for training and 34\% used for testing.
+Weka includes an experiment analyser that can be used to analyse the results of experiments (in this example, the results were sent to an \textit{InstancesResultListener}). The experiment shown below uses 3 schemes, \texttt{ZeroR}, \texttt{OneR}, and \texttt{J48}, to classify the Iris data in an experiment using 10 train and test runs, with 66\% of the data used for training and 34\% used for testing.
 \begin{center}
 	\epsfig{file=images/analyser01.eps,width=10cm}
 \end{center}
@@ -779,7 +829,7 @@ The following formats are supported:
 \end{itemize}
 
 \begin{center}
-	\epsfig{file=images/analyser_outputformat.eps,width=6cm}
+	\epsfig{file=images/analyser_outputformat.eps,width=4cm}
 \end{center}
 
 
@@ -790,7 +840,7 @@ The information displayed in the \textit{Test output} panel is controlled by the
 	\epsfig{file=images/analyser06.eps,width=6cm}
 \end{center}
 
-The results shown in the \textit{Test output} panel can be saved to a file by clicking \textit{Save output}. Only one set of results can be saved at a time but Weka permits the user to save all results to the same dataset by saving them one at a time and using the \textit{Append} option instead of the \textit{Overwrite} option for the second and subsequent saves.
+The results shown in the \textit{Test output} panel can be saved to a file by clicking \textit{Save output}. Only one set of results can be saved at a time but Weka permits the user to save all results to the same file by saving them one at a time and using the \textit{Append} option instead of the \textit{Overwrite} option for the second and subsequent saves.
 \begin{center}
 	\epsfig{file=images/analyser07.eps,width=10cm}
 \end{center}
@@ -841,7 +891,9 @@ learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
 	\bibitem{bengio} Bengio, Y. and Nadeau, C. (1999) \textit{Inference for the Generalization Error}.
 	\bibitem{quinlan} Ross Quinlan (1993). \textit{C4.5: Programs for Machine Learning}, Morgan Kaufmann Publishers, San Mateo, CA.
+	\bibitem{cvs} \textit{CVS} -- \texttt{http://weka.sourceforge.net/wiki/index.php/CVS}
 	\bibitem{hsql} \textit{HSQLDB} -- \texttt{http://hsqldb.sourceforge.net/}
+	\bibitem{mysql} \textit{MySQL} -- \texttt{http://www.mysql.com/}
 	\bibitem{wekadoc} \textit{WekaDoc} -- \texttt{http://weka.sourceforge.net/wekadoc/}
 \end{thebibliography}
 
