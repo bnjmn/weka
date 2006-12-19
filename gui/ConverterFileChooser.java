@@ -47,7 +47,7 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -441,6 +441,18 @@ public class ConverterFileChooser
     
     m_DialogType = UNHANDLED_DIALOG;
     removePropertyChangeListener(m_Listener);
+
+    // do we have to add the extension?
+    if (result == APPROVE_OPTION) {
+      if (getFileFilter() instanceof ExtensionFileFilter) {
+	String filename = getSelectedFile().getAbsolutePath();
+	String[] extensions = ((ExtensionFileFilter) getFileFilter()).getExtensions();
+	if (!filename.endsWith(extensions[0])) {
+	  filename += extensions[0];
+	  setSelectedFile(new File(filename));
+	}
+      }
+    }
     
     // does file exist?
     if (    (result == APPROVE_OPTION) 
@@ -478,9 +490,38 @@ public class ConverterFileChooser
     initGUI(SAVER_DIALOG);
     
     boolean acceptAll = isAcceptAllFileFilterUsed();
+
+    // using "setAcceptAllFileFilterUsed" messes up the currently selected 
+    // file filter/file, hence backup/restore of currently selected 
+    // file filter/file
+    FileFilter currentFilter = getFileFilter();
+    File currentFile = getSelectedFile();
     setAcceptAllFileFilterUsed(false);
+    setFileFilter(currentFilter);
+    setSelectedFile(currentFile);
+    
     int result = super.showSaveDialog(parent);
+    
+    // do we have to add the extension?
+    if (result == APPROVE_OPTION) {
+      if (getFileFilter() instanceof ExtensionFileFilter) {
+	String filename = getSelectedFile().getAbsolutePath();
+	String[] extensions = ((ExtensionFileFilter) getFileFilter()).getExtensions();
+	if (!filename.endsWith(extensions[0])) {
+	  filename += extensions[0];
+	  setSelectedFile(new File(filename));
+	}
+      }
+    }
+    
+    // using "setAcceptAllFileFilterUsed" messes up the currently selected 
+    // file filter/file, hence backup/restore of currently selected 
+    // file filter/file
+    currentFilter = getFileFilter();
+    currentFile = getSelectedFile();
     setAcceptAllFileFilterUsed(acceptAll);
+    setFileFilter(currentFilter);
+    setSelectedFile(currentFile);
     
     m_DialogType = UNHANDLED_DIALOG;
     removePropertyChangeListener(m_Listener);
@@ -580,17 +621,14 @@ public class ConverterFileChooser
    * @param dialogType		the type of dialog to configure for
    */
   protected void configureCurrentConverter(int dialogType) {
-    String[]	extensions;
     String	filename;
     File	currFile;
     
-    if (!isAcceptAllFileFilterUsed())
-      extensions = ((ExtensionFileFilter) getFileFilter()).getExtensions();
-    else
-      extensions = null;
+    if (getSelectedFile() == null)
+      return;
     
     filename = getSelectedFile().getAbsolutePath();
-
+    
     if (m_CurrentConverter == null) {
       if (dialogType == LOADER_DIALOG)
 	m_CurrentConverter = ConverterUtils.getLoaderForFile(filename);
@@ -605,11 +643,6 @@ public class ConverterFileChooser
     }
     
     try {
-      if (m_CurrentConverter instanceof AbstractFileSaver) {
-	// add extension if necessary
-	if (!filename.endsWith(extensions[0]))
-	  filename += extensions[0];
-      }
       currFile = ((FileSourcedConverter) m_CurrentConverter).retrieveFile();
       if ((currFile == null) || (!currFile.getAbsolutePath().equals(filename)))
 	((FileSourcedConverter) m_CurrentConverter).setFile(new File(filename));
