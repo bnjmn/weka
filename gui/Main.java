@@ -91,7 +91,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Main
   extends JFrame {
@@ -103,7 +103,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -155,7 +155,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -984,7 +984,7 @@ public class Main
 	    titlePan.add(new JLabel("Version " + Version.VERSION,
 	                            SwingConstants.CENTER));
 	    titlePan.add(new JLabel(""));
-	    titlePan.add(new JLabel("(c) 1999 - 2005",
+	    titlePan.add(new JLabel("(c) 1999 - 2006",
 	    SwingConstants.CENTER));
 	    titlePan.add(new JLabel("University of Waikato",
 	    SwingConstants.CENTER));
