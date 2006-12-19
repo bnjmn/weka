@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.6 $
+# Version: $Revision: 1.7 $
 
 Name Weka
 
@@ -110,7 +110,7 @@ Section -Main SectionMain
     # Links in App directory (to get the working directory of the links correct!)
     SetOutPath $INSTDIR
     CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "console" $INSTDIR\Weka.ico
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
@@ -130,10 +130,16 @@ SectionEnd
 # associate .arff with WEKA
 Section "Associate Files" SectionAssociations
     SectionIn 1
+    # ARFF
     WriteRegStr HKCR ".arff" "" "ARFFDataFile"
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
     WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
+    # XRFF
+    WriteRegStr HKCR ".xrff" "" "XRFFDataFile"
+    WriteRegStr HKCR "XRFFDataFile" "" "XRFF Data File"
+    WriteRegStr HKCR "XRFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
+    WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
 SectionEnd
 
 # Start: JRE
@@ -208,6 +214,8 @@ Section /o un.Main UNSEC0000
     DeleteRegValue HKLM "${REGKEY}\Components" Main
     DeleteRegKey HKCR ".arff"
     DeleteRegKey HKCR "ARFFDataFile"
+    DeleteRegKey HKCR ".xrff"
+    DeleteRegKey HKCR "XRFFDataFile"
 SectionEnd
 
 Section un.post UNSEC0001
