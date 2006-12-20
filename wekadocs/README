@@ -4,12 +4,12 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.4.8
-                            8 June 2006
+                             WEKA 3.4.9
+                            20 Dec 2006
                                                                        
                  Java Programs for Machine Learning 
 
-           Copyright (C) 1998-2005  University of Waikato
+           Copyright (C) 1998-2006  University of Waikato
 
               web: http://www.cs.waikato.ac.nz/~ml/weka            
                                                                        
@@ -63,6 +63,17 @@ java -jar weka.jar
 or if you are using Windows use
 
 javaw -jar weka.jar
+
+Note:
+Using "-jar" overrides your CLASSPATH variable! If you need to
+use classes specified in the CLASSPATH, use the following command
+instead:
+
+java -classpath $CLASSPATH:weka.jar weka.gui.Main
+
+or if you are using Windows use
+
+javaw -classpath "%CLASSPATH%;weka.jar" weka.gui.Main
 
 This will start a small graphical user interface (GUIChooser) from
 which you can select the SimpleCLI interface or the more sophisticated
@@ -252,6 +263,16 @@ weka/experiment (you need to expand wek.jar to be able to look a this
 file). Note that the settings in this file are used unless they are
 overidden by settings in the DatabaseUtils.props file in your home
 directory or the current directory (in that order).
+
+There are also example DatabaseUtils.props files for several common
+databases available (also in weka/experiment):
+
+* HSQLDB: DatabaseUtils.props.hsql
+* MS SQL Server: DatabaseUtils.props.mssqlserver
+* MySQL: DatabaseUtils.props.mysql
+* ODBC: DatabaseUtils.props.odbc
+* Oracle: DatabaseUtils.props.oracle
+* PostgreSQL: DatabaseUtils.props.postgresql
 
 ----------------------------------------------------------------------
 
