@@ -4,8 +4,8 @@
                               README                                   
                               ======                                   
                                                                        
-                             WEKA 3.5.3
-                            8 June 2006
+                             WEKA 3.5.4
+                            20 Dec 2006
                                                                        
                  Java Programs for Machine Learning 
 
@@ -35,13 +35,15 @@ Contents:
 
 6. Explorer guide
 
-7. Source code
+7. Bayesian Network Classifiers
 
-8. Credits
+8. Source code
 
-9. Submission of code and bug reports
+9. Credits
 
-10. Copyright
+10. Submission of code and bug reports
+
+11. Copyright
 
 
 ----------------------------------------------------------------------
@@ -53,7 +55,7 @@ This assumes that the Weka archive that you have downloaded has been
 extracted into a directory containing this README and that you haven't
 used an automatic installer (e.g. the one provided for Windows).
 
-Weka 3.4 requires Java 1.4 or higher. Depending on your platform you
+Weka 3.5 requires Java 1.5 or higher. Depending on your platform you
 may be able to just double-click on the weka.jar icon to run the
 graphical user interfaces for Weka. Otherwise, from a command-line
 (assuming you are in the directory containing weka.jar), type
@@ -64,14 +66,25 @@ or if you are using Windows use
 
 javaw -jar weka.jar
 
-This will start a small graphical user interface (GUIChooser) from
-which you can select the SimpleCLI interface or the more sophisticated
-Explorer, Experimenter, and Knowledge Flow interfaces. SimpleCLI just
-acts like a simple command shell. The Explorer is currently the main
-interface for data analysis using Weka. The Experimenter can be used
-to compare the performance of different learning algorithms across
-various datasets. The Knowledge Flow provides a component-based
-alternative to the Explorer interface.
+Note:
+Using "-jar" overrides your CLASSPATH variable! If you need to
+use classes specified in the CLASSPATH, use the following command
+instead:
+
+java -classpath $CLASSPATH:weka.jar weka.gui.Main
+
+or if you are using Windows use
+
+javaw -classpath "%CLASSPATH%;weka.jar" weka.gui.Main
+
+This will start a graphical user interface (weka.gui.Main) from
+which you can select various interfaces, like the SimpleCLI interface 
+or the more sophisticated Explorer, Experimenter, and Knowledge Flow 
+interfaces. SimpleCLI just acts like a simple command shell. The 
+Explorer is currently the main interface for data analysis using 
+Weka. The Experimenter can be used to compare the performance of 
+different learning algorithms across various datasets. The Knowledge 
+Flow provides a component-based alternative to the Explorer interface.
 
 Example datasets that can be used with Weka are in the sub-directory
 called "data", which should be located in the same directory as this
@@ -248,10 +261,20 @@ properties file that specifies which JDBC drivers to use, where to
 find the database, and specify a mapping for the data types. This file
 should reside in your home directory or the current directory and be
 called "DatabaseUtils.props". An example is provided in
-weka/experiment (you need to expand wek.jar to be able to look a this
+weka/experiment (you need to expand weka.jar to be able to look a this
 file). Note that the settings in this file are used unless they are
 overidden by settings in the DatabaseUtils.props file in your home
 directory or the current directory (in that order).
+
+There are also example DatabaseUtils.props files for several common
+databases available (also in weka/experiment):
+
+* HSQLDB: DatabaseUtils.props.hsql
+* MS SQL Server: DatabaseUtils.props.mssqlserver
+* MySQL: DatabaseUtils.props.mysql
+* ODBC: DatabaseUtils.props.odbc
+* Oracle: DatabaseUtils.props.oracle
+* PostgreSQL: DatabaseUtils.props.postgresql
 
 ----------------------------------------------------------------------
 
@@ -321,7 +344,7 @@ However, all this is much easier if you use the Experimenter GUI.
 ----------------------------------------------------------------------
 
 6. Explorer guide:
-------------
+------------------
 
 A guide on how to use the WEKA Explorer is in
 $WEKAHOME/ExplorerGuide.pdf.  For an explanation on how to use the
@@ -330,7 +353,14 @@ book "Data Mining" by Witten and Frank (2005) (see our web page).
 
 ----------------------------------------------------------------------
 
-7. Source code:
+7. Bayesian Network Classifiers:
+--------------------------------
+
+Information about the Bayesian Network classifiers in Weka, background
+theory as well as useage, can be found in the 
+$WEKAHOME/BayesianNetClassifiers.pdf.
+
+8. Source code:
 ---------------
 
 The source code for WEKA is in $WEKAHOME/weka-src.jar. To expand it, 
@@ -338,7 +368,7 @@ use the jar utility that's in every Java distribution.
 
 ----------------------------------------------------------------------
 
-8. Credits:
+9. Credits:
 -----------
 
 Refer to the web page for a list of contributors:
@@ -347,7 +377,7 @@ http://www.cs.waikato.ac.nz/~ml/weka/
 
 ----------------------------------------------------------------------
 
-9. Call for code and bug reports:
+10. Call for code and bug reports:
 ---------------------------------
 
 If you have implemented a learning scheme, filter, application,
@@ -359,7 +389,7 @@ If you find any bugs, send a bug report to the wekalist mailing list.
 
 -----------------------------------------------------------------------
 
-10. Copyright:
+11. Copyright:
 --------------
 
 WEKA is distributed under the GNU public license. Please read

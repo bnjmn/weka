@@ -4,6 +4,8 @@ Experiment Gui Quick Primer
 
 NOTE THAT THIS README IS FOR THE "ADVANCED" MODE OF THE EXPERIMENTER
 (however, some of it may be useful for the "simple" mode as well).
+For a more in-depth documentation, please refer to the 
+ExperimenterTutorial.pdf.
 
 The basic philosophy of the Experiment package is described briefly in
 the main README file. Please read this first before continuing.
