@@ -36,7 +36,7 @@ import java.io.*;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.14.2.1 $
+ * @version $Revision: 1.14.2.2 $
  */
 public class SparseInstance extends Instance {
 
@@ -300,7 +300,7 @@ public class SparseInstance extends Instance {
     }
     for (int j = 0; j < inst.numValues(); j++, m++) {
       values[m] = inst.valueSparse(j);
-      indices[m] = inst.index(j) + inst.numAttributes();
+      indices[m] = numAttributes() + inst.index(j);
     }
     
     return new SparseInstance(1.0, values, indices, numAttributes() +
