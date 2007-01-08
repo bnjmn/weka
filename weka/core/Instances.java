@@ -22,10 +22,10 @@
 
 package weka.core;
 
-import java.io.BufferedReader;
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StreamTokenizer;
@@ -63,7 +63,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.66 $ 
+ * @version $Revision: 1.67 $ 
  */
 public class Instances 
   implements Serializable {
@@ -2473,30 +2473,56 @@ public class Instances
   }
 
   /**
-   * Main method for this class -- just prints a summary of a set
-   * of instances.
+   * Main method for this class. The following calls are possible:
+   * <ul>
+   *   <li>
+   *     <code>weka.core.Instances</code> &lt;filename&gt;<br/>
+   *     prints a summary of a set of instances.
+   *   </li>
+   *   <li>
+   *     <code>weka.core.Instances</code> merge &lt;filename1&gt; &lt;filename2&gt;<br/>
+   *     merges the two datasets (must have same number of instances) and
+   *     outputs the results on stdout.
+   *   </li>
+   * </ul>
    *
-   * @param args should contain one element: the name of an ARFF file
+   * @param args 	the commandline parameters
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
-      Reader r = null;
-      if (args.length > 1) {
-	throw (new Exception("Usage: Instances <filename>"));
-      } else if (args.length == 0) {
-        r = new BufferedReader(new InputStreamReader(System.in));
-      } else {
-        r = new BufferedReader(new FileReader(args[0]));
+      Instances i;
+      // read from stdin and print statistics
+      if (args.length == 0) {
+	DataSource source = new DataSource(System.in);
+	i = source.getDataSet();
+	System.out.println(i.toSummaryString());
       }
-      Instances i = new Instances(r);
-      System.out.println(i.toSummaryString());
-    } catch (Exception ex) {
+      // read file and print statistics
+      else if (args.length == 1) {
+	DataSource source = new DataSource(args[0]);
+	i = source.getDataSet();
+	System.out.println(i.toSummaryString());
+      }
+      // read two files, merge them and print result to stdout
+      else if ((args.length == 3) && (args[0].toLowerCase().equals("merge"))) {
+	DataSource source1 = new DataSource(args[1]);
+	DataSource source2 = new DataSource(args[2]);
+	i = Instances.mergeInstances(source1.getDataSet(), source2.getDataSet());
+	System.out.println(i);
+      }
+      // wrong parameters
+      else {
+	System.err.println(
+	    "\nUsage:\n"
+	    + "\tweka.core.Instances <filename>\n"
+	    + "\tweka.core.Instances merge <filename1> <filename2>\n");
+	System.exit(1);
+      }
+    }
+    catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
   }
 }
-
-     
-
