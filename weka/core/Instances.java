@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58.2.2 $ 
+ * @version $Revision: 1.58.2.3 $ 
  */
 public class Instances implements Serializable {
  
@@ -2341,30 +2341,55 @@ public class Instances implements Serializable {
   }
 
   /**
-   * Main method for this class -- just prints a summary of a set
-   * of instances.
+   * Main method for this class. The following calls are possible:
+   * <ul>
+   *   <li>
+   *     <code>weka.core.Instances</code> &lt;filename&gt;<br/>
+   *     prints a summary of a set of instances.
+   *   </li>
+   *   <li>
+   *     <code>weka.core.Instances</code> merge &lt;filename1&gt; &lt;filename2&gt;<br/>
+   *     merges the two datasets (must have same number of instances) and
+   *     outputs the results on stdout.
+   *   </li>
+   * </ul>
    *
-   * @param argv should contain one element: the name of an ARFF file
+   * @param args 	the commandline parameters
    */
-  public static void main(String [] args) {
+  public static void main(String[] args) {
 
     try {
-      Reader r = null;
-      if (args.length > 1) {
-	throw (new Exception("Usage: Instances <filename>"));
-      } else if (args.length == 0) {
-        r = new BufferedReader(new InputStreamReader(System.in));
-      } else {
-        r = new BufferedReader(new FileReader(args[0]));
+      Instances i;
+      // read from stdin and print statistics
+      if (args.length == 0) {
+	i = new Instances(new BufferedReader(new InputStreamReader(System.in)));
+	System.out.println(i.toSummaryString());
       }
-      Instances i = new Instances(r);
-      System.out.println(i.toSummaryString());
-    } catch (Exception ex) {
+      // read file and print statistics
+      else if (args.length == 1) {
+	i = new Instances(new BufferedReader(new FileReader(args[0])));
+	System.out.println(i.toSummaryString());
+      }
+      // read two files, merge them and print result to stdout
+      else if ((args.length == 3) && (args[0].toLowerCase().equals("merge"))) {
+	i = Instances.mergeInstances(
+            new Instances(new BufferedReader(new FileReader(args[1]))),
+            new Instances(new BufferedReader(new FileReader(args[2]))));
+	System.out.println(i);
+      }
+      // wrong parameters
+      else {
+	System.err.println(
+	    "\nUsage:\n"
+	    + "\tweka.core.Instances <filename>\n"
+	    + "\tweka.core.Instances merge <filename1> <filename2>\n");
+	System.exit(1);
+      }
+    }
+    catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
   }
 }
-
-     
 
