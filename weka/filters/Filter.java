@@ -70,7 +70,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -924,6 +924,7 @@ public abstract class Filter
     // Pass all the second instances to the filter
     while (secondInput.hasMoreElements()) {
       inst = secondInput.nextElement();
+      inst.setDataset(secondData);
       if (filter.input(inst)) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from"
