@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19.2.10 $
+   $Revision: 1.19.2.11 $
   ===========================================================================
 -->
 
@@ -97,7 +97,7 @@
     <javadoc sourcepath="${path_modifier}." destdir="${path_modifier}${doc}" packagenames="weka.core.*, weka.core.converters.*, weka.datagenerators.*, weka.classifiers.*, weka.classifiers.trees.*, weka.classifiers.trees.j48.*, weka.classifiers.trees.m5.*, weka.classifiers.trees.adtree.*, weka.classifiers.trees.lmt.*, weka.classifiers.bayes.*, weka.classifiers.bayes.net.*, weka.classifiers.bayes.net.search.*, weka.classifiers.bayes.net.search.ci.*, weka.classifiers.bayes.net.search.fixed.*, weka.classifiers.bayes.net.search.global.*, weka.classifiers.bayes.net.search.local.*, weka.classifiers.bayes.net.estimate.*, weka.classifiers.functions.*, weka.classifiers.functions.supportVector.*, weka.classifiers.lazy.kstar.*, weka.classifiers.lazy.*, weka.classifiers.meta.*, weka.classifiers.misc.*, weka.classifiers.rules.*, weka.classifiers.rules.part.*, weka.classifiers.functions.neural.*, weka.classifiers.functions.*, weka.classifiers.functions.pace.*, weka.classifiers.evaluation.*, weka.filters.*, weka.filters.supervised.attribute.*, weka.filters.supervised.instance.*, weka.filters.unsupervised.attribute.*, weka.filters.unsupervised.instance.*, weka.estimators.*, weka.associations.*, weka.associations.tertius.*, weka.clusterers.*, weka.attributeSelection.*, weka.experiment.*, weka.gui.*, weka.gui.experiment.*, weka.gui.explorer.*, weka.gui.visualize.*, weka.gui.treevisualizer.*, weka.gui.streams.*, weka.gui.boundaryvisualizer.*, weka.gui.graphvisualizer.*, weka.gui.beans.*" Author="yes" Public="yes" maxmemory="128m"/>
     
     <!-- insert the links to our homepage and tutorial -->
-      <replace dir="${path_modifier}${doc}" token="help-doc.html" value="../ExplorerGuide.pdf">
+      <replace dir="${path_modifier}${doc}" token="help-doc.html" value="../documentation.html">
       <include name="**/*.html"/>
       </replace>
       
@@ -197,11 +197,12 @@
   <!-- Put everything in ${path_modifier}${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
    description="Create an executable jar file in ${path_modifier}/dist">
-    <echo message="Main-Class: weka.gui.GUIChooser" 
-     file="${path_modifier}${build}/classes/manifest.tmp"/>
     <jar jarfile="${path_modifier}${dist}/weka.jar" 
-     basedir="${path_modifier}${build}/classes"
-     manifest="${path_modifier}${build}/classes/manifest.tmp"/>
+      basedir="${path_modifier}${build}/classes">
+     <manifest>
+       <attribute name="Main-Class" value="weka.gui.GUIChooser"/>
+     </manifest>
+    </jar>
   </target>
 
   <!-- Put all .java, and .props files into ${path_modifier}${dist}/weka-src.jar-->
