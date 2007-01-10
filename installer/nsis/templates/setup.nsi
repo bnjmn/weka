@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.3.2.3 $
+# Version: $Revision: 1.3.2.4 $
 
 Name Weka
 
@@ -100,10 +100,6 @@ Section -Main SectionMain
     File ${WEKA_TEMPLATES}\RunWeka.bat
     File ${WEKA_TEMPLATES}\RunWeka.ini
     File ${WEKA_TEMPLATES}\RunWeka.class
-    File ${WEKA_TEMPLATES}\weka.ico
-    File ${WEKA_TEMPLATES}\weka.gif
-    File ${WEKA_TEMPLATES}\documentation.html
-    File ${WEKA_TEMPLATES}\documentation.css
     # Start: JRE
     File ${WEKA_JRE}
     # End: JRE
@@ -197,10 +193,6 @@ Section /o un.Main UNSEC0000
     Delete /REBOOTOK "$INSTDIR\RunWeka.class"
     Delete /REBOOTOK "$INSTDIR\RunWeka.ini"
     Delete /REBOOTOK "$INSTDIR\RunWeka.bat"
-    Delete /REBOOTOK "$INSTDIR\weka.ico"
-    Delete /REBOOTOK "$INSTDIR\weka.gif"
-    Delete /REBOOTOK "$INSTDIR\documentation.html"
-    Delete /REBOOTOK "$INSTDIR\documentation.css"
     # Start: JRE
     Delete /REBOOTOK "$INSTDIR\${WEKA_JRE_INSTALL_DONE}"
     # End: JRE
