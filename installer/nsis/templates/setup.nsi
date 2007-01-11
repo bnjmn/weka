@@ -4,9 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.3.2.4 $
-
-Name Weka
+# Version: $Revision: 1.3.2.5 $
 
 # Start: Weka
 !define WEKA_WEKA "Weka"
@@ -26,6 +24,8 @@ Name Weka
 !define WEKA_JRE_SUFFIX ""
 # End: Weka
 
+Name "Weka ${WEKA_VERSION}"
+
 # Defines
 !define REGKEY "SOFTWARE\$(^Name)"
 !define VERSION "${WEKA_VERSION}"
@@ -34,9 +34,9 @@ Name Weka
 
 # MUI defines
 !define MUI_ICON "${NSISDIR}\Contrib\Graphics\Icons\modern-install.ico"
+!define MUI_WELCOMEPAGE_TITLE "Welcome to the Weka ${WEKA_VERSION} Setup Wizard"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
-!define MUI_STARTMENUPAGE_NODISABLE
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME StartMenuGroup
 !define MUI_STARTMENUPAGE_DEFAULT_FOLDER ${WEKA_WEKA}
@@ -107,25 +107,13 @@ Section -Main SectionMain
     SetOutPath $INSTDIR
     CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
     CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "console" $INSTDIR\Weka.ico
-    SetOutPath $SMPROGRAMS\$StartMenuGroup
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
-SectionEnd
-
-# Start menu
-Section "Start Menu" SectionMenu
-    SectionIn 1
-    SetOutPath $SMPROGRAMS\$StartMenuGroup
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Documentation.lnk" $INSTDIR\documentation.html
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "" $INSTDIR\Weka.ico
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "" $INSTDIR\Weka.ico
-    # delete temporary shortcuts
-    Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX}.lnk"
-    Delete /REBOOTOK "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk"
 SectionEnd
 
 # associate .arff with WEKA
 Section "Associate Files" SectionAssociations
     SectionIn 1
+    # ARFF
     WriteRegStr HKCR ".arff" "" "ARFFDataFile"
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
@@ -158,10 +146,15 @@ SectionEnd
 Section -post SectionPost
     WriteRegStr HKLM "${REGKEY}" Path $INSTDIR
     WriteUninstaller $INSTDIR\uninstall.exe
+
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     SetOutPath $SMPROGRAMS\$StartMenuGroup
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Documentation.lnk" $INSTDIR\documentation.html
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "" $INSTDIR\Weka.ico
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "" $INSTDIR\Weka.ico
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\Uninstall $(^Name).lnk" $INSTDIR\uninstall.exe
     !insertmacro MUI_STARTMENU_WRITE_END
+
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayName "$(^Name)"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" DisplayVersion "${VERSION}"
     WriteRegStr HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)" Publisher "${COMPANY}"
@@ -198,6 +191,7 @@ Section /o un.Main UNSEC0000
     # End: JRE
     RmDir /r /REBOOTOK $INSTDIR
     DeleteRegValue HKLM "${REGKEY}\Components" Main
+    # ARFF
     DeleteRegKey HKCR ".arff"
     DeleteRegKey HKCR "ARFFDataFile"
 SectionEnd
@@ -216,7 +210,6 @@ SectionEnd
 
 # Section overview
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SectionMenu} "Adds a group to the Start Menu with links for Weka and the Documentation."
   !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff files with the Weka Explorer."
   # Start: JRE
   !insertmacro MUI_DESCRIPTION_TEXT ${SectionJRE} "Installs the Java Runtime Environment (JRE). The setup file will be placed in the Weka program folder regardless of the selection here."
@@ -237,5 +230,5 @@ FunctionEnd
 
 # launches program
 Function LaunchProgram
-  ExecShell "" "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk" "" SW_SHOWNORMAL
+  ExecShell "" "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "" SW_SHOWNORMAL
 FunctionEnd
