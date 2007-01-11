@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.34 $
+   $Revision: 1.35 $
   ===========================================================================
 -->
 
@@ -81,14 +81,15 @@
       source="1.5" target="1.5"/>
     <copy todir="${path_modifier}${build}/classes" >
        <fileset dir="${path_modifier}.">
-          <include name="weka/**/*.props"/>
-          <include name="weka/**/*.excludes"/>
-          <include name="weka/**/DatabaseUtils.props.*"/>
-	  <include name="weka/**/*.gif"/>
-	  <include name="weka/**/*.jpg"/>
-	  <include name="weka/**/*.jpeg"/>
-	  <include name="weka/**/*.txt"/>
-	  <include name="weka/gui/beans/README*"/>
+         <include name="weka/**/*.excludes"/>
+         <include name="weka/**/*.gif"/>
+         <include name="weka/**/*.jpeg"/>
+         <include name="weka/**/*.jpg"/>
+         <include name="weka/**/*.props"/>
+         <include name="weka/**/*.txt"/>
+         <include name="weka/**/*.xml"/>
+         <include name="weka/**/DatabaseUtils.props.*"/>
+         <include name="weka/gui/beans/README*"/>
        </fileset>
     </copy>
     <rmic base="${path_modifier}${build}/classes"
@@ -96,19 +97,29 @@
   </target>
 
   <!-- Make the javadocs -->
-  <target name="docs" depends="init_all" 
-   description="Make javadocs into ${path_modifier}/doc">
+  <target name="docs" 
+          depends="init_all" 
+          description="Make javadocs into ${path_modifier}/doc">
     <mkdir dir="${path_modifier}${doc}"/>
-    <javadoc sourcepath="${path_modifier}." destdir="${path_modifier}${doc}" packagenames="weka.core.*, weka.core.converters.*, weka.datagenerators.*, weka.classifiers.*, weka.classifiers.trees.*, weka.classifiers.trees.j48.*, weka.classifiers.trees.m5.*, weka.classifiers.trees.adtree.*, weka.classifiers.trees.lmt.*, weka.classifiers.bayes.*, weka.classifiers.bayes.net.*, weka.classifiers.bayes.net.search.*, weka.classifiers.bayes.net.search.ci.*, weka.classifiers.bayes.net.search.fixed.*, weka.classifiers.bayes.net.search.global.*, weka.classifiers.bayes.net.search.local.*, weka.classifiers.bayes.net.estimate.*, weka.classifiers.functions.*, weka.classifiers.functions.supportVector.*, weka.classifiers.lazy.kstar.*, weka.classifiers.lazy.*, weka.classifiers.meta.*, weka.classifiers.misc.*, weka.classifiers.rules.*, weka.classifiers.rules.part.*, weka.classifiers.functions.neural.*, weka.classifiers.functions.*, weka.classifiers.functions.pace.*, weka.classifiers.evaluation.*, weka.filters.*, weka.filters.supervised.attribute.*, weka.filters.supervised.instance.*, weka.filters.unsupervised.attribute.*, weka.filters.unsupervised.instance.*, weka.estimators.*, weka.associations.*, weka.associations.tertius.*, weka.clusterers.*, weka.attributeSelection.*, weka.experiment.*, weka.gui.*, weka.gui.experiment.*, weka.gui.explorer.*, weka.gui.visualize.*, weka.gui.treevisualizer.*, weka.gui.streams.*, weka.gui.boundaryvisualizer.*, weka.gui.graphvisualizer.*, weka.gui.beans.*" Author="yes" Public="yes" maxmemory="128m"/>
+    <javadoc sourcepath="${path_modifier}." 
+             destdir="${path_modifier}${doc}" 
+             packagenames="weka.*"
+             Author="yes" 
+             Public="yes" 
+             maxmemory="128m"/>
     
-    <!-- insert the links to our homepage and tutorial -->
-      <replace dir="${path_modifier}${doc}" token="help-doc.html" value="../documentation.html">
+    <!-- insert the links to our homepage and documentation.html -->
+    <replace dir="${path_modifier}${doc}" 
+             token="&#34;help-doc.html&#34;" 
+             value="&#34;../documentation.html&#34; target=&#34;_blank&#34;">
       <include name="**/*.html"/>
-      </replace>
+    </replace>
       
-      <replace dir="${path_modifier}${doc}" token="Help&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt;" value="Help&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt; &lt;TD BGCOLOR=&#34;&#35;EEEEFF&#34; CLASS=&#34;NavBarCell1&#34;&gt; &lt;A HREF=&#34;http://www.cs.waikato.ac.nz/ml/weka/index.html&#34;&gt;&lt;FONT CLASS=&#34;NavBarFont1&#34;&gt;&lt;B&gt;Weka's home&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt;">
+    <replace dir="${path_modifier}${doc}" 
+             token="Help&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt;" 
+             value="Help&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt; &lt;TD BGCOLOR=&#34;&#35;EEEEFF&#34; CLASS=&#34;NavBarCell1&#34;&gt; &lt;A HREF=&#34;http://www.cs.waikato.ac.nz/ml/weka/&#34; target=&#34;_blank&#34;&gt;&lt;FONT CLASS=&#34;NavBarFont1&#34;&gt;&lt;B&gt;Weka's home&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt;">
       <include name="**/*.html"/>
-      </replace>
+    </replace>
   </target> 
 
 
@@ -141,6 +152,7 @@
        <fileset dir="${path_modifier}tests">
           <include name="**/*.arff"/>
           <include name="**/*.cost"/>
+          <include name="**/*.xml"/>
        </fileset>
      </copy>
   </target>
@@ -216,8 +228,18 @@
    description="Create a jar file containing weka source in ${path_modifier}/dist">  
     <!-- jar up the source -->
     <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
-    basedir="${path_modifier}."
-    includes="weka/**/*.java,weka/**/*.props,weka/**/DatabaseUtils.props.*,weka/**/*.gif,weka/**/*.jpeg,weka/**/*.jpg,weka/**/*.txt,weka/**/*.xml,weka/**/*.excludes"/>
+      basedir="${path_modifier}.">
+      <include name="weka/**/*.excludes"/>
+      <include name="weka/**/*.gif"/>
+      <include name="weka/**/*.java"/>
+      <include name="weka/**/*.jpeg"/>
+      <include name="weka/**/*.jpg"/>
+      <include name="weka/**/*.props"/>
+      <include name="weka/**/*.txt"/>
+      <include name="weka/**/*.xml"/>
+      <include name="weka/**/DatabaseUtils.props.*"/>
+      <include name="weka/gui/beans/README*"/>
+    </jar>
   </target>
 
   <!-- make a jar file containing just the stuff needed for running a remote experiment server -->
