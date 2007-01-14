@@ -22,123 +22,130 @@
 
 package weka.core;
 
-import java.util.*;
-import java.io.*;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 
 /**
- * Implementation of Active-sets method with BFGS update
- * to solve optimization problem with only bounds constraints in 
- * multi-dimensions.  In this implementation we consider both the lower and higher 
- * bound constraints.  <p>
+ * Implementation of Active-sets method with BFGS update to solve optimization
+ * problem with only bounds constraints in multi-dimensions.  In this
+ * implementation we consider both the lower and higher bound constraints. <p/>
  *
  * Here is the sketch of our searching strategy, and the detailed description
- * of the algorithm can be found in the Appendix of Xin Xu's MSc thesis:<p>
- * Initialize everything, incl. initial value, direction, etc.<p>
- * LOOP (main algorithm):<br>
+ * of the algorithm can be found in the Appendix of Xin Xu's MSc thesis:<p/>
+ * Initialize everything, incl. initial value, direction, etc.<p/>
+ * LOOP (main algorithm):<br/>
  * 
- * 1. Perform the line search using the directions for free variables<br>
+ * 1. Perform the line search using the directions for free variables<br/>
  * 1.1  Check all the bounds that are not "active" (i.e. binding variables)
- *      and compute the feasible step length to the bound for each of them<br>
+ *      and compute the feasible step length to the bound for each of them<br/>
  * 1.2  Pick up the least feasible step length, say \alpha, and set it as 
- *      the upper bound of the current step length, i.e. 0<\lambda<=\alpha<br>
- * 1.3  Search for any possible step length<=\alpha that can result the 
- *      "sufficient function decrease" (\alpha condition) AND "positive definite 
- *      inverse Hessian" (\beta condition), if possible, using SAFEGUARDED polynomial 
- *      interpolation.  This step length is "safe" and thus
- *      is used to compute the next value of the free variables .<br>
- * 1.4  Fix the variable(s) that are newly bound to its constraint(s).<p>     
+ *      the upper bound of the current step length, i.e.
+ *      0&lt;\lambda&lt;=\alpha<br/>
+ * 1.3  Search for any possible step length&lt;=\alpha that can result the 
+ *      "sufficient function decrease" (\alpha condition) AND "positive
+ *      definite inverse Hessian" (\beta condition), if possible, using
+ *      SAFEGUARDED polynomial interpolation.  This step length is "safe" and
+ *      thus is used to compute the next value of the free variables .<br/>
+ * 1.4  Fix the variable(s) that are newly bound to its constraint(s).<p/>     
  *
  * 2. Check whether there is convergence of all variables or their gradients.
  *    If there is, check the possibilities to release any current bindings of
- *    the fixed variables to their bounds based on the "reliable" second-order 
- *    Lagarange multipliers if available.  If it's available and negative for one
- *    variable, then release it.  If not available, use first-order Lagarange 
- *    multiplier to test release.  If there is any released variables, STOP the loop.
- *    Otherwise update the inverse of Hessian matrix and gradient for the newly 
- *    released variables and CONTINUE LOOP.<p>
+ *    the fixed variables to their bounds based on the "reliable" second-order
+ *    Lagarange multipliers if available.  If it's available and negative for
+ *    one variable, then release it.  If not available, use first-order
+ *    Lagarange multiplier to test release.  If there is any released
+ *    variables, STOP the loop.  Otherwise update the inverse of Hessian matrix
+ *    and gradient for the newly released variables and CONTINUE LOOP.<p/>
  *
  * 3. Use BFGS formula to update the inverse of Hessian matrix.  Note the 
  *    already-fixed variables must have zeros in the corresponding entries
- *    in the inverse Hessian.<p>  
+ *    in the inverse Hessian.<p/>  
  *
  * 4. Compute the new (newton) search direction d=H^{-1}*g, where H^{-1} is the 
  *    inverse Hessian and g is the Jacobian.  Note that again, the already-
- *    fixed variables will have zero direction.<p>
+ *    fixed variables will have zero direction.<p/>
  *
- * ENDLOOP<p>
+ * ENDLOOP<p/>
  *
  * A typical usage of this class is to create your own subclass of this class
- * and provide the objective function and gradients as follows:<p>
- * <code>
- * class MyOpt extends Optimization{ <br>
- *   // Provide the objective function <br>
- *   protected double objectiveFunction(double[] x){<br>
- *       // How to calculate your objective function...<br>
- *       // ...<br>
- *   }<p>
+ * and provide the objective function and gradients as follows:<p/>
+ * <pre>
+ * class MyOpt extends Optimization {
+ *   // Provide the objective function
+ *   protected double objectiveFunction(double[] x) {
+ *       // How to calculate your objective function...
+ *       // ...
+ *   }
  *
- *   // Provide the first derivatives<br>
- *   protected double[] evaluateGradient(double[] x){<br>
- *       // How to calculate the gradient of the objective function...<br>
- *       // ...<br>
- *   } <p>
+ *   // Provide the first derivatives
+ *   protected double[] evaluateGradient(double[] x) {
+ *       // How to calculate the gradient of the objective function...
+ *       // ...
+ *   }
  *
- *   // If possible, provide the index^{th} row of the Hessian matrix<br>
- *   protected double[] evaluateHessian(double[] x, int index){<br>
- *      // How to calculate the index^th variable's second derivative<br>
- *      // ... <br>
- *   }<br>
- * } <p>
+ *   // If possible, provide the index^{th} row of the Hessian matrix
+ *   protected double[] evaluateHessian(double[] x, int index) {
+ *      // How to calculate the index^th variable's second derivative
+ *      // ... 
+ *   }
+ * }
+ * </pre>
  *
- * // When it's the time to use it, in some routine(s) of other class...<br>
- * MyOpt opt = new MyOpt();<p>
+ * When it's the time to use it, in some routine(s) of other class...
+ * <pre>
+ * MyOpt opt = new MyOpt();
  * 
- * // Set up initial variable values and bound constraints<br>
- * double[] x = new double[numVariables];<br>
- * // Lower and upper bounds: 1st row is lower bounds, 2nd is upper<br>
- * double[] constraints = new double[2][numVariables];<br>
- * ...<p>
+ * // Set up initial variable values and bound constraints
+ * double[] x = new double[numVariables];
+ * // Lower and upper bounds: 1st row is lower bounds, 2nd is upper
+ * double[] constraints = new double[2][numVariables];
+ * ...
  *
- * // Find the minimum, 200 iterations as default<br>
- * x = opt.findArgmin(x, constraints); <br>
- * while(x == null){  // 200 iterations are not enough<br>
- *    x = opt.getVarbValues();  // Try another 200 iterations<br>
- *    x = opt.findArgmin(x, constraints);<br>
- * }<p>
+ * // Find the minimum, 200 iterations as default
+ * x = opt.findArgmin(x, constraints); 
+ * while(x == null){  // 200 iterations are not enough
+ *    x = opt.getVarbValues();  // Try another 200 iterations
+ *    x = opt.findArgmin(x, constraints);
+ * }
  *
- * // The minimal function value<br>
- * double minFunction = opt.getMinFunction();<br>
- * ...<p>
- * </code>  
- * It is recommended that Hessian values be provided so that the second-order 
- * Lagrangian multiplier estimate can be calcluated.  However, if it is not provided, 
- * there is no need to override the <code>evaluateHessian()</code> function.<p>
+ * // The minimal function value
+ * double minFunction = opt.getMinFunction();
+ * ...
+ * </pre>
+ * 
+ * It is recommended that Hessian values be provided so that the second-order
+ * Lagrangian multiplier estimate can be calcluated.  However, if it is not
+ * provided, there is no need to override the <code>evaluateHessian()</code>
+ * function.<p/>
  *
- * REFERENCES:<br>
- * The whole model algorithm is adapted from Chapter 5 and other related chapters in 
- * Gill, Murray and Wright(1981) "Practical Optimization", Academic Press.
- * and Gill and Murray(1976) "Minimization Subject to Bounds on the Variables", NPL 
- * Report NAC72, while Chong and Zak(1996) "An Introduction to Optimization", 
- * John Wiley & Sons, Inc. provides us a brief but helpful introduction to the method. <p>
+ * REFERENCES (see also the <code>getTechnicalInformation()</code> method):<br/>
+ * The whole model algorithm is adapted from Chapter 5 and other related
+ * chapters in Gill, Murray and Wright(1981) "Practical Optimization", Academic
+ * Press.  and Gill and Murray(1976) "Minimization Subject to Bounds on the
+ * Variables", NPL Report NAC72, while Chong and Zak(1996) "An Introduction to
+ * Optimization", John Wiley &amp; Sons, Inc. provides us a brief but helpful
+ * introduction to the method. <p/>
  *
- * Dennis and Schnabel(1983) "Numerical Methods for Unconstrained Optimization and 
- * Nonlinear Equations", Prentice-Hall Inc. and Press et al.(1992) "Numeric Recipe in C",
- * Second Edition, Cambridge University Press. are consulted for the polynomial
- * interpolation used in the line search implementation.  <p>
+ * Dennis and Schnabel(1983) "Numerical Methods for Unconstrained Optimization
+ * and Nonlinear Equations", Prentice-Hall Inc. and Press et al.(1992) "Numeric
+ * Recipe in C", Second Edition, Cambridge University Press. are consulted for
+ * the polynomial interpolation used in the line search implementation.  <p/>
  *
- * The Hessian modification in BFGS update uses Cholesky factorization and two rank-one 
- * modifications:<br>
- * Bk+1 = Bk + (Gk*Gk')/(Gk'Dk) + (dGk*(dGk)'))/[alpha*(dGk)'*Dk]. <br>
+ * The Hessian modification in BFGS update uses Cholesky factorization and two
+ * rank-one modifications:<br/>
+ * Bk+1 = Bk + (Gk*Gk')/(Gk'Dk) + (dGk*(dGk)'))/[alpha*(dGk)'*Dk]. <br/>
  * where Gk is the gradient vector, Dk is the direction vector and alpha is the
- * step rate.  <br>
- * This method is due to Gill, Golub, Murray and Saunders(1974) ``Methods for Modifying 
- * Matrix Factorizations'', Mathematics of Computation, Vol.28, No.126, pp 505-535.
- * <p>
+ * step rate. <br/>
+ * This method is due to Gill, Golub, Murray and Saunders(1974) ``Methods for
+ * Modifying Matrix Factorizations'', Mathematics of Computation, Vol.28,
+ * No.126, pp 505-535. <p/>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
+ * @see #getTechnicalInformation()
  */
-public abstract class Optimization{
+public abstract class Optimization
+    implements TechnicalInformationHandler {
     
     protected double m_ALF = 1.0e-4;
 
@@ -152,19 +159,19 @@ public abstract class Optimization{
     
     protected static boolean m_Debug = false;
     
-    // function value
+    /** function value */
     protected double m_f;    
  
-    // G'*p
+    /** G'*p */
     private double m_Slope;
     
-    // Test if zero step in lnsrch
+    /** Test if zero step in lnsrch */
     private boolean m_IsZeroStep = false;
     
-    // Used when iteration overflow occurs
+    /** Used when iteration overflow occurs */
     private double[] m_X;
     
-    // Compute machine precision
+    /** Compute machine precision */
     protected static double m_Epsilon, m_Zero; 
     static {
 	m_Epsilon=1.0;
@@ -178,25 +185,92 @@ public abstract class Optimization{
 			     " and zero set to "+m_Zero);
     }
     
-    /* 
+    /**
+     * Returns an instance of a TechnicalInformation object, containing 
+     * detailed information about the technical background of this class,
+     * e.g., paper reference or book this class is based on.
+     * 
+     * @return the technical information about this class
+     */
+    public TechnicalInformation getTechnicalInformation() {
+      TechnicalInformation 	result;
+      TechnicalInformation 	additional;
+      
+      result = new TechnicalInformation(Type.MASTERSTHESIS);
+      result.setValue(Field.AUTHOR, "Xin Xu");
+      result.setValue(Field.YEAR, "2003");
+      result.setValue(Field.TITLE, "Statistical learning in multiple instance problem");
+      result.setValue(Field.SCHOOL, "University of Waikato");
+      result.setValue(Field.ADDRESS, "Hamilton, NZ");
+      result.setValue(Field.NOTE, "0657.594");
+
+      additional = result.add(Type.BOOK);
+      additional.setValue(Field.AUTHOR, "P. E. Gill and W. Murray and M. H. Wright");
+      additional.setValue(Field.YEAR, "1981");
+      additional.setValue(Field.TITLE, "Practical Optimization");
+      additional.setValue(Field.PUBLISHER, "Academic Press");
+      additional.setValue(Field.ADDRESS, "London and New York");
+      
+      additional = result.add(Type.TECHREPORT);
+      additional.setValue(Field.AUTHOR, "P. E. Gill and W. Murray");
+      additional.setValue(Field.YEAR, "1976");
+      additional.setValue(Field.TITLE, "Minimization subject to bounds on the variables");
+      additional.setValue(Field.INSTITUTION, "National Physical Laboratory");
+      additional.setValue(Field.NUMBER, "NAC 72");
+      
+      additional = result.add(Type.BOOK);
+      additional.setValue(Field.AUTHOR, "E. K. P. Chong and S. H. Zak");
+      additional.setValue(Field.YEAR, "1996");
+      additional.setValue(Field.TITLE, "An Introduction to Optimization");
+      additional.setValue(Field.PUBLISHER, "John Wiley and Sons");
+      additional.setValue(Field.ADDRESS, "New York");
+      
+      additional = result.add(Type.BOOK);
+      additional.setValue(Field.AUTHOR, "J. E. Dennis and R. B. Schnabel");
+      additional.setValue(Field.YEAR, "1983");
+      additional.setValue(Field.TITLE, "Numerical Methods for Unconstrained Optimization and Nonlinear Equations");
+      additional.setValue(Field.PUBLISHER, "Prentice-Hall");
+      
+      additional = result.add(Type.BOOK);
+      additional.setValue(Field.AUTHOR, "W. H. Press and B. P. Flannery and S. A. Teukolsky and W. T. Vetterling");
+      additional.setValue(Field.YEAR, "1992");
+      additional.setValue(Field.TITLE, "Numerical Recipes in C");
+      additional.setValue(Field.PUBLISHER, "Cambridge University Press");
+      additional.setValue(Field.EDITION, "Second");
+      
+      additional = result.add(Type.ARTICLE);
+      additional.setValue(Field.AUTHOR, "P. E. Gill and G. H. Golub and W. Murray and M. A. Saunders");
+      additional.setValue(Field.YEAR, "1974");
+      additional.setValue(Field.TITLE, "Methods for modifying matrix factorizations");
+      additional.setValue(Field.JOURNAL, "Mathematics of Computation");
+      additional.setValue(Field.VOLUME, "28");
+      additional.setValue(Field.NUMBER, "126");
+      additional.setValue(Field.PAGES, "505-535");
+      
+      return result;
+    }
+    
+    /**
      * Subclass should implement this procedure to evaluate objective
      * function to be minimized
      * 
      * @param x the variable values
      * @return the objective function value
+     * @throws Exception if something goes wrong
      */
     protected abstract double objectiveFunction(double[] x) throws Exception;
 
-    /* 
+    /**
      * Subclass should implement this procedure to evaluate gradient
      * of the objective function
      * 
      * @param x the variable values
      * @return the gradient vector
+     * @throws Exception if something goes wrong
      */
     protected abstract double[] evaluateGradient(double[] x) throws Exception;
 
-    /* 
+    /**
      * Subclass is recommended to override this procedure to evaluate second-order
      * gradient of the objective function.  If it's not provided, it returns
      * null.
@@ -204,6 +278,7 @@ public abstract class Optimization{
      * @param x the variables
      * @param index the row index in the Hessian matrix
      * @return one row (the row #index) of the Hessian matrix, null as default
+     * @throws Exception if something goes wrong
      */
     protected double[] evaluateHessian(double[] x, int index) throws Exception{
 	return null;
@@ -214,21 +289,27 @@ public abstract class Optimization{
      *
      * @return minimal function value found
      */
-    public double getMinFunction(){ return m_f;}
+    public double getMinFunction() {
+      return m_f;
+    }
 
     /**
      * Set the maximal number of iterations in searching (Default 200)
      *
      * @param it the maximal number of iterations
      */
-    public void setMaxIteration(int it){ m_MAXITS=it; }
+    public void setMaxIteration(int it) {
+      m_MAXITS=it;
+    }
       
     /**
      * Set whether in debug mode
      *
      * @param db use debug or not
      */
-    public void setDebug(boolean db){ m_Debug = db; }
+    public void setDebug(boolean db) {
+      m_Debug = db;
+    }
     
     /**
      * Get the variable values.  Only needed when iterations exceeds 
@@ -236,7 +317,9 @@ public abstract class Optimization{
      *
      * @return the current variable values
      */
-    public double[] getVarbValues(){ return m_X; }
+    public double[] getVarbValues() {
+      return m_X;
+    }
     
     /**
      * Find a new point x in the direction p from a point xold at which the
@@ -257,7 +340,7 @@ public abstract class Optimization{
      *                  these variables are already fixed and no longer subject to
      *                  the constraints
      * @return new value along direction p from xold, null if no step was taken
-     * @exception Exception if an error occurs
+     * @throws Exception if an error occurs
      */
     public double[] lnsrch(double[] xold, double[] gradient, 
 			   double[] direct, double stpmax,
@@ -265,7 +348,7 @@ public abstract class Optimization{
 			   DynamicIntArray wsBdsIndx)
 	throws Exception {
 	
-	int i, j, k,len=xold.length, 
+	int i, k,len=xold.length, 
 	    fixedOne=-1; // idx of variable to be fixed
 	double alam, alamin; // lambda to be found, and its lower bound
 	
@@ -733,7 +816,7 @@ public abstract class Optimization{
      *                    constraints[0] is the lower bounds and 
      *                    constraints[1] is the upper bounds
      * @return the solution of x, null if number of iterations not enough
-     * @exception Exception if an error occurs
+     * @throws Exception if an error occurs
      */
     public double[] findArgmin(double[] initX, double[][] constraints) 
 	throws Exception{
@@ -1065,7 +1148,7 @@ public abstract class Optimization{
     /**
      * One rank update of the Cholesky factorization of B matrix in BFGS updates,
      * i.e. B = LDL', and B_{new} = LDL' + coeff*(vv') where L is a unit lower triangle
-     * matrix and D is a diagonal matrix, and v is a vector.<br>
+     * matrix and D is a diagonal matrix, and v is a vector.<br/>
      * When coeff > 0, we use C1 algorithm, and otherwise we use C2 algorithm described
      * in ``Methods for Modifying Matrix Factorizations'' 
      *
@@ -1248,7 +1331,6 @@ public abstract class Optimization{
      * Two integer vectors are equal if all the elements are the 
      * same, regardless of the order of the elements
      *
-     * @param a one integer vector
      * @param b another integer vector
      * @return whether they are equal
      */ 
