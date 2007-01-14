@@ -54,7 +54,7 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;misc{Xu2003,
+ * &#64;mastersthesis{Xu2003,
  *    address = {Hamilton, NZ},
  *    author = {Xin Xu},
  *    note = {0657.594},
@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class TLD 
   extends RandomizableClassifier 
@@ -167,7 +167,7 @@ public class TLD
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
     
-    result = new TechnicalInformation(Type.MISC);
+    result = new TechnicalInformation(Type.MASTERSTHESIS);
     result.setValue(Field.AUTHOR, "Xin Xu");
     result.setValue(Field.YEAR, "2003");
     result.setValue(Field.TITLE, "Statistical learning in multiple instance problem");
