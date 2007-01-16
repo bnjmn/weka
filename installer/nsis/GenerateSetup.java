@@ -1,5 +1,3 @@
-import weka.core.Utils;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,7 +17,7 @@ import java.util.Vector;
  * target="_blank">NSIS</a>.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.3 $
+ * @version   $Revision: 1.4 $
  */
 public class GenerateSetup {
 
@@ -283,7 +281,6 @@ public class GenerateSetup {
     block += "!define WEKA_JRE \"" + new File(mJRE).getAbsolutePath() + "\"\n";
     block += "!define WEKA_JRE_TEMP \"jre_setup.exe\"\n";
     block += "!define WEKA_JRE_INSTALL \"RunJREInstaller.bat\"\n";
-    block += "!define WEKA_JRE_INSTALL_DONE \"RunJREInstaller.done\"\n";
     if (mJRE.length() != 0)
       block += "!define WEKA_JRE_SUFFIX \"jre\"";
     else
@@ -322,6 +319,29 @@ public class GenerateSetup {
   }
 
   /**
+   * returns the value for the given option
+   *
+   * @param option  the option to retrieve the value for (excluding "-")
+   * @param list    the commandline options
+   * @return        the value of the option, can be empty
+   */
+  protected static String getOption(String option, String[] list) {
+    String    result;
+    int       i;
+
+    result = "";
+
+    for (i = 0; i < list.length - 1; i++) {
+      if (list[i].equals("-" + option)) {
+        result = list[i + 1];
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * runs the generator with the necessary parameters.
    *
    * @param args        the commandline parameters
@@ -331,12 +351,12 @@ public class GenerateSetup {
     GenerateSetup generator;
 
     generator = new GenerateSetup();
-    generator.setVersion(Utils.getOption("version", args));
-    generator.setInputDir(Utils.getOption("input-dir", args));
-    generator.setOutputDir(Utils.getOption("output-dir", args));
-    generator.setDir(Utils.getOption("dir", args));
-    generator.setLinkPrefix(Utils.getOption("link-prefix", args));
-    generator.setJRE(Utils.getOption("jre", args));
+    generator.setVersion(getOption("version", args));
+    generator.setInputDir(getOption("input-dir", args));
+    generator.setOutputDir(getOption("output-dir", args));
+    generator.setDir(getOption("dir", args));
+    generator.setLinkPrefix(getOption("link-prefix", args));
+    generator.setJRE(getOption("jre", args));
     System.out.println("Result = " + generator.execute());
   }
 }

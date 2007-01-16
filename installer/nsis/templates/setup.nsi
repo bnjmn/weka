@@ -4,7 +4,7 @@
 #       DO NOT modify these sections.
 #
 # Author : FracPete (fracpete at waikato dot at dot nz)
-# Version: $Revision: 1.9 $
+# Version: $Revision: 1.10 $
 
 # Start: Weka
 !define WEKA_WEKA "Weka"
@@ -20,7 +20,6 @@
 !define WEKA_JRE "D:\installs\windows\programming\java\jdk.14\j2re-1_4_2_11-windows-i586-p.exe"
 !define WEKA_JRE_TEMP "jre_setup.exe"
 !define WEKA_JRE_INSTALL "RunJREInstaller.bat"
-!define WEKA_JRE_INSTALL_DONE "RunJREInstaller.done"
 !define WEKA_JRE_SUFFIX ""
 # End: Weka
 
@@ -100,9 +99,6 @@ Section -Main SectionMain
     File ${WEKA_TEMPLATES}\RunWeka.bat
     File ${WEKA_TEMPLATES}\RunWeka.ini
     File ${WEKA_TEMPLATES}\RunWeka.class
-    # Start: JRE
-    File ${WEKA_JRE}
-    # End: JRE
     # Links in App directory (to get the working directory of the links correct!)
     SetOutPath $INSTDIR
     CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
@@ -143,8 +139,9 @@ Section "Install JRE" SectionJRE
     # execute batch file    
     ExecWait "${WEKA_JRE_INSTALL}"
     
-    # delete batch file
-    Rename "${WEKA_JRE_INSTALL}" "${WEKA_JRE_INSTALL_DONE}"
+    # delete temp files
+    Delete "$INSTDIR\${WEKA_JRE_INSTALL}"
+    Delete "$INSTDIR\${WEKA_JRE_TEMP}"
 SectionEnd
 # End: JRE
 
@@ -191,9 +188,6 @@ Section /o un.Main UNSEC0000
     Delete /REBOOTOK "$INSTDIR\RunWeka.class"
     Delete /REBOOTOK "$INSTDIR\RunWeka.ini"
     Delete /REBOOTOK "$INSTDIR\RunWeka.bat"
-    # Start: JRE
-    Delete /REBOOTOK "$INSTDIR\${WEKA_JRE_INSTALL_DONE}"
-    # End: JRE
     RmDir /r /REBOOTOK $INSTDIR
     DeleteRegValue HKLM "${REGKEY}\Components" Main
     # ARFF
@@ -218,9 +212,9 @@ SectionEnd
 
 # Section overview
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff files with the Weka Explorer."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SectionAssociations} "Associates the .arff and .xrff files with the Weka Explorer."
   # Start: JRE
-  !insertmacro MUI_DESCRIPTION_TEXT ${SectionJRE} "Installs the Java Runtime Environment (JRE). The setup file will be placed in the Weka program folder regardless of the selection here."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SectionJRE} "Installs the Java Runtime Environment (JRE)."
   # End: JRE
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
