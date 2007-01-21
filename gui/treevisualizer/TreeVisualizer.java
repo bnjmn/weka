@@ -60,7 +60,7 @@ import weka.gui.visualize.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class TreeVisualizer extends PrintablePanel implements MouseMotionListener,
 			       MouseListener,ActionListener,ItemListener {
@@ -809,7 +809,7 @@ public class TreeVisualizer extends PrintablePanel implements MouseMotionListene
 	}
 	else {
 	  JOptionPane.showMessageDialog(this, "Sorry, there is no " + 
-					"availble Instances data for " +
+					"available Instances data for " +
 					"this Node.", "Sorry!",
 					JOptionPane.WARNING_MESSAGE); 
 	}
