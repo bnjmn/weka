@@ -159,7 +159,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.71 $
+ * @version  $Revision: 1.72 $
  */
 public class Evaluation
 implements Summarizable {
@@ -1075,7 +1075,8 @@ implements Summarizable {
 	  if (classStatistics) {
 	    text.append("\n\n" + trainingEvaluation.toClassDetailsString());
 	  }
-	  text.append("\n\n" + trainingEvaluation.toMatrixString());
+          if (!noCrossValidation)
+            text.append("\n\n" + trainingEvaluation.toMatrixString());
 	}
 
       }
@@ -1124,7 +1125,8 @@ implements Summarizable {
       if (classStatistics) {
 	text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
-      text.append("\n\n" + testingEvaluation.toMatrixString());
+      if (!noCrossValidation)
+        text.append("\n\n" + testingEvaluation.toMatrixString());
     }
 
     return text.toString();
