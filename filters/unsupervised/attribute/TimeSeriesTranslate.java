@@ -32,7 +32,7 @@ import weka.core.Capabilities.Capability;
 
 /** 
  <!-- globalinfo-start -->
- * An instance filter that assumes instances form time-series data and replaces attribute values in the current instance with the equivalent attribute attribute values of some previous (or future) instance. For instances where the desired value is unknown either the instance may  be dropped, or missing values used. Skips the class attribute if it is set.
+ * An instance filter that assumes instances form time-series data and replaces attribute values in the current instance with the equivalent attribute values of some previous (or future) instance. For instances where the desired value is unknown either the instance may be dropped, or missing values used. Skips the class attribute if it is set.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -59,7 +59,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class TimeSeriesTranslate 
   extends AbstractTimeSeries {
@@ -73,11 +73,12 @@ public class TimeSeriesTranslate
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "An instance filter that assumes instances form time-series data and "
+    return
+        "An instance filter that assumes instances form time-series data and "
       + "replaces attribute values in the current instance with the equivalent "
-      + "attribute attribute values of some previous (or future) instance. For "
+      + "attribute values of some previous (or future) instance. For "
       + "instances where the desired value is unknown either the instance may "
-      + " be dropped, or missing values used. Skips the class attribute if it is set.";
+      + "be dropped, or missing values used. Skips the class attribute if it is set.";
   }
 
   /** 
