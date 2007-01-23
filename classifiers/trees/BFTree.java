@@ -58,6 +58,32 @@ import java.util.Vector;
  * <p/>
  <!-- globalinfo-end -->
  *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;mastersthesis{Shi2007,
+ *    address = {Hamilton, NZ},
+ *    author = {Haijian Shi},
+ *    note = {COMP594},
+ *    school = {University of Waikato},
+ *    title = {Best-first decision tree learning},
+ *    year = {2007}
+ * }
+ * 
+ * &#64;article{Friedman2000,
+ *    author = {Jerome Friedman and Trevor Hastie and Robert Tibshirani},
+ *    journal = {Annals of statistics},
+ *    number = {2},
+ *    pages = {337-407},
+ *    title = {Additive logistic regression : A statistical view of boosting},
+ *    volume = {28},
+ *    year = {2000},
+ *    ISSN = {0090-5364}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
  <!-- options-start -->
  * Valid options are: <p/>
  * 
@@ -105,7 +131,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Haijian Shi (hs69@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BFTree
   extends RandomizableClassifier

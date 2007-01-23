@@ -54,6 +54,20 @@ import java.util.Vector;
  * <p/>
  <!-- globalinfo-end -->	
  *
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;book{Breiman1984,
+ *    address = {Belmont, California},
+ *    author = {Leo Breiman and Jerome H. Friedman and Richard A. Olshen and Charles J. Stone},
+ *    publisher = {Wadsworth International Group},
+ *    title = {Classification and Regression Trees},
+ *    year = {1984}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
  <!-- options-start -->
  * Valid options are: <p/>
  * 
@@ -92,7 +106,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Haijian Shi (hs69@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleCart
   extends RandomizableClassifier
