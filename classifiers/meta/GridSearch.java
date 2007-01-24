@@ -60,17 +60,21 @@ import java.util.Vector;
 /**
  <!-- globalinfo-start -->
  * Performs a grid search of parameter pairs for the a classifier (Y-axis, default is LinearRegression with the "Ridge" parameter) and the PLSFilter (X-axis, "# of Components") and chooses the best pair found for the actual predicting.<br/>
+ * <br/>
  * The initial grid is worked on with 2-fold CV to determine the values of the parameter pairs for the selected type of evaluation (e.g., accuracy). The best point in the grid is then taken and a 10-fold CV is performed with the adjacent parameter pairs. If a better pair is found, then this will act as new center and another 10-fold CV will be performed (kind of hill-climbing). This process is repeated until no better pair is found or the best pair is on the border of the grid.<br/>
  * In case the best pair is on the border, one can let GridSearch automatically extend the grid and continue the search. Check out the properties 'gridIsExtendable' (option '-extend-grid') and 'maxGridExtensions' (option '-max-grid-extensions &lt;num&gt;').<br/>
+ * <br/>
  * GridSearch can handle doubles, integers (values are just cast to int) and booleans (0 is false, otherwise true). float, char and long are supported as well.<br/>
- * The best filter/classifier can be accessed after the buildClassifier call via the getBestFilter/getBestClassifier methods.
+ * <br/>
+ * The best filter/classifier setup can be accessed after the buildClassifier call via the getBestFilter/getBestClassifier methods.<br/>
+ * Note on the implementation: after the data has been passed through the filter, a default NumericCleaner filter is applied to the data in order to avoid numbers that are getting too small and might produce NaNs in other schemes.
  * <p/>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -E &lt;&lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC&gt;&gt;
+ * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC&gt;
  *  Determines the parameter used for evaluation:
  *  CC = Correlation coefficient
  *  RMSE = Root mean squared error
@@ -113,7 +117,8 @@ import java.util.Vector;
  *  (default: 'pow(BASE,I)')</pre>
  * 
  * <pre> -filter &lt;filter specification&gt;
- *  The filter to use (on X axis). Full classname of filter to include,  followed by scheme options.
+ *  The filter to use (on X axis). Full classname of filter to include, 
+ *  followed by scheme options.
  *  (default: weka.filters.supervised.attribute.PLSFilter)</pre>
  * 
  * <pre> -x-property &lt;option&gt;
@@ -264,7 +269,7 @@ import java.util.Vector;
  *           "I". This will test the number of components the PLSFilter will
  *           produce from 5 to 20.</li>
  *       <li>Set the YProperty to "classifier.ridge", XMin to "-10", XMax to 
- *           "5", YStep to "1" and YExpression to ""pow(BASE,I). This will
+ *           "5", YStep to "1" and YExpression to "pow(BASE,I)". This will
  *           try ridge parameters from 10^-10 to 10^5.</li>
  *     </ul>
  *   </li>
@@ -283,7 +288,10 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
+ * @see     PLSFilter
+ * @see     LinearRegression
+ * @see	    NumericCleaner
  */
 public class GridSearch
   extends RandomizableSingleClassifierEnhancer
@@ -1484,7 +1492,7 @@ public class GridSearch
         "Performs a grid search of parameter pairs for the a classifier "
       + "(Y-axis, default is LinearRegression with the \"Ridge\" parameter) "
       + "and the PLSFilter (X-axis, \"# of Components\") and chooses the best "
-      + "pair found for the actual predicting.\n"
+      + "pair found for the actual predicting.\n\n"
       + "The initial grid is worked on with 2-fold CV to determine the values "
       + "of the parameter pairs for the selected type of evaluation (e.g., "
       + "accuracy). The best point in the grid is then taken and a 10-fold CV "
@@ -1495,12 +1503,16 @@ public class GridSearch
       + "In case the best pair is on the border, one can let GridSearch "
       + "automatically extend the grid and continue the search. Check out the "
       + "properties 'gridIsExtendable' (option '-extend-grid') and "
-      + "'maxGridExtensions' (option '-max-grid-extensions <num>').\n"
+      + "'maxGridExtensions' (option '-max-grid-extensions <num>').\n\n"
       + "GridSearch can handle doubles, integers (values are just cast to int) "
       + "and booleans (0 is false, otherwise true). float, char and long are "
-      + "supported as well.\n"
-      + "The best filter/classifier can be accessed after the buildClassifier "
-      + "call via the getBestFilter/getBestClassifier methods.";
+      + "supported as well.\n\n"
+      + "The best filter/classifier setup can be accessed after the buildClassifier "
+      + "call via the getBestFilter/getBestClassifier methods.\n"
+      + "Note on the implementation: after the data has been passed through "
+      + "the filter, a default NumericCleaner filter is applied to the data in "
+      + "order to avoid numbers that are getting too small and might produce "
+      + "NaNs in other schemes.";
   }
 
   /**
@@ -1537,7 +1549,7 @@ public class GridSearch
 	"\tDetermines the parameter used for evaluation:\n"
 	+ desc
 	+ "\t(default: " + new SelectedTag(EVALUATION_CC, TAGS_EVALUATION) + ")",
-	"E", 1, "-E <" + Tag.toOptionList(TAGS_EVALUATION) + ">"));
+	"E", 1, "-E " + Tag.toOptionList(TAGS_EVALUATION)));
 
     result.addElement(new Option(
 	"\tThe Y option to test (without leading dash).\n"
@@ -1577,7 +1589,7 @@ public class GridSearch
 	"y-expression", 1, "-y-expression <expr>"));
 
     result.addElement(new Option(
-	"\tThe filter to use (on X axis). Full classname of filter to include, "
+	"\tThe filter to use (on X axis). Full classname of filter to include, \n"
 	+ "\tfollowed by scheme options.\n"
 	+ "\t(default: weka.filters.supervised.attribute.PLSFilter)",
 	"filter", 1, "-filter <filter specification>"));
@@ -1752,7 +1764,7 @@ public class GridSearch
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -E &lt;&lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC&gt;&gt;
+   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC&gt;
    *  Determines the parameter used for evaluation:
    *  CC = Correlation coefficient
    *  RMSE = Root mean squared error
@@ -1795,7 +1807,8 @@ public class GridSearch
    *  (default: 'pow(BASE,I)')</pre>
    * 
    * <pre> -filter &lt;filter specification&gt;
-   *  The filter to use (on X axis). Full classname of filter to include,  followed by scheme options.
+   *  The filter to use (on X axis). Full classname of filter to include, 
+   *  followed by scheme options.
    *  (default: weka.filters.supervised.attribute.PLSFilter)</pre>
    * 
    * <pre> -x-property &lt;option&gt;
