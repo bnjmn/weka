@@ -60,7 +60,9 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
+ * @see Discretize
+ * @see NumericToBinary
  */
 public class InfoGainAttributeEval
   extends AttributeEvaluator

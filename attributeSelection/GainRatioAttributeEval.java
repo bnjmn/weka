@@ -55,7 +55,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
+ * @see Discretize
  */
 public class GainRatioAttributeEval
   extends AttributeEvaluator
