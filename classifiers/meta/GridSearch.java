@@ -288,7 +288,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -996,10 +996,11 @@ public class GridSearch
       else
 	result = 0;
 	
-      // only correlation coefficient obeys to this order, for the errors (and
-      // the combination of all three), the smaller the number the better 
-      // -> hence invert them
-      if (getEvaluation() != EVALUATION_CC)
+      // only correlation coefficient and accuracy obey to this order, for the
+      // errors (and the combination of all three), the smaller the number the
+      // better -> hence invert them
+      if (    (getEvaluation() != EVALUATION_CC) 
+           && (getEvaluation() != EVALUATION_ACC) )
 	result = -result;
 	
       return result;
