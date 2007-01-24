@@ -82,7 +82,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
+ * @see Discretize
  */
 public class CfsSubsetEval
   extends SubsetEvaluator

@@ -68,7 +68,8 @@ import java.util.Hashtable;
  <!-- technical-bibtex-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
+ * @see Discretize
  */
 public class ConsistencySubsetEval 
   extends SubsetEvaluator

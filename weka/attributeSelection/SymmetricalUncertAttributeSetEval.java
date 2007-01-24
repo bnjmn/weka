@@ -113,7 +113,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
+ * @see Discretize
  */
 public class SymmetricalUncertAttributeSetEval
   extends AttributeSetEvaluator
