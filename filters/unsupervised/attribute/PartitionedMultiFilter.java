@@ -15,7 +15,7 @@
  */
 
 /*
- * PartitionedFilter.java
+ * PartitionedMultiFilter.java
  * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     weka.filters.StreamableFilter
  */
 public class PartitionedMultiFilter
