@@ -1,5 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
+#
+# Version: $Revision: 1.116 $
 
 # Lists the ResultProducers I want to choose from
 weka.experiment.ResultProducer=\
@@ -67,6 +69,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.EnsembleSelection,\
  weka.classifiers.meta.FilteredClassifier,\
  weka.classifiers.meta.Grading,\
+ weka.classifiers.meta.GridSearch,\
  weka.classifiers.meta.LogitBoost,\
  weka.classifiers.meta.MetaCost,\
  weka.classifiers.meta.MultiBoostAB,\
@@ -105,6 +108,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.misc.OSDL,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.ADTree,\
+ weka.classifiers.trees.BFTree,\
  weka.classifiers.trees.DecisionStump,\
  weka.classifiers.trees.Id3,\
  weka.classifiers.trees.J48,\
@@ -114,6 +118,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees.RandomForest,\
  weka.classifiers.trees.RandomTree,\
  weka.classifiers.trees.REPTree,\
+ weka.classifiers.trees.SimpleCart,\
  weka.classifiers.trees.UserClassifier,\
  weka.classifiers.rules.ConjunctiveRule,\
  weka.classifiers.rules.DecisionTable,\
@@ -159,6 +164,7 @@ weka.filters.Filter=\
  weka.filters.unsupervised.attribute.MultiInstanceToPropositional,\
  weka.filters.unsupervised.attribute.NominalToBinary,\
  weka.filters.unsupervised.attribute.Normalize,\
+ weka.filters.unsupervised.attribute.NumericCleaner,\
  weka.filters.unsupervised.attribute.NumericToBinary,\
  weka.filters.unsupervised.attribute.NumericToNominal,\
  weka.filters.unsupervised.attribute.NumericTransform,\
