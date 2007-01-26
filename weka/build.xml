@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.35 $
+   $Revision: 1.36 $
   ===========================================================================
 -->
 
@@ -311,6 +311,9 @@
          <include name="README*"/>
 	 <include name="*.pdf"/>
 	 <include name="COPYING"/>
+         <include name="documentation.*"/>
+         <include name="weka.gif"/>
+         <include name="weka.ico"/>
        </fileset>
     </copy>
     <zip destfile="${path_modifier}weka-${release}.zip" 
