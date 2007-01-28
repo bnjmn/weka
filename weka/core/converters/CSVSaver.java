@@ -22,20 +22,14 @@
 
 package weka.core.converters;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.SparseInstance;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
 
 /**
  * Writes to a destination in csv format.
@@ -50,7 +44,7 @@ import weka.core.Option;
  * 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @see Saver
  */
 public class CSVSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
@@ -156,7 +150,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
               if(retrieveFile() == null || outW == null)
                 System.out.println(inst);
               else{
-                outW.println(inst);
+                outW.println(instanceToString(inst));
                 //flushes every 100 instances
                 m_incrementalCounter++;
                 if(m_incrementalCounter > 100){
@@ -215,12 +209,30 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
 	}
       }
       for (int i = 0; i < getInstances().numInstances(); i++) {
-	outW.println(getInstances().instance(i));
+	outW.println(instanceToString((getInstances().instance(i))));
       }
       outW.flush();
       outW.close();
       setWriteMode(WAIT);
-      
+  }
+
+  /**
+   * turns an instance into a string. takes care of sparse instances as well.
+   *
+   * @param inst the instance to turn into a string
+   */
+  protected String instanceToString(Instance inst) {
+    Instance outInst;
+
+    if (inst instanceof SparseInstance) {
+      outInst = new Instance(inst.weight(), inst.toDoubleArray());
+      outInst.setDataset(inst.dataset());
+    }
+    else {
+      outInst = inst;
+    }
+
+    return outInst.toString();
   }
 
   /**
