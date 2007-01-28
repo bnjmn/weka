@@ -6,7 +6,7 @@
 #   is read).
 #
 # Author  FracPete (fracpete at waikato dot ac dot nz)
-# Version $Revision: 1.3 $
+# Version $Revision: 1.4 $
 
 # if set to true the Capabilities filters in the GOE will be initialized
 # based on the full dataset that has been loaded into the Explorer 
@@ -81,6 +81,15 @@ ClassifierRandomSeed=1
 # tab 
 # (default is false)
 ClassifierPreserveOrder=false
+
+# whether the source code of a Sourcable classifier is output as well in the 
+# classifier tab 
+# (default is false)
+ClassifierOutputSourceCode=false
+
+# the default classname of a Sourcable classifier in the classifier tab 
+# (default is Foobar)
+ClassifierSourceCodeClass=WekaClassifier
 
 # the default clusterer, including options
 # (default is EM)

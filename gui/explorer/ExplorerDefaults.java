@@ -34,7 +34,7 @@ import java.util.Vector;
  * the props file <code>weka/gui/explorer/Explorer.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see #PROPERTY_FILE
  */
 public class ExplorerDefaults
@@ -274,6 +274,25 @@ public class ExplorerDefaults
    */
   public static boolean getClassifierPreserveOrder() {
     return Boolean.parseBoolean(get("ClassifierPreserveOrder", "false"));
+  }
+
+  /**
+   * returns whether the source of a sourcable Classifier is output
+   * in the classify tab
+   * 
+   * @return		true if the source code is output
+   */
+  public static boolean getClassifierOutputSourceCode() {
+    return Boolean.parseBoolean(get("ClassifierOutputSourceCode", "false"));
+  }
+
+  /**
+   * returns the default classname for a sourcable Classifier in the classify tab
+   * 
+   * @return		the default classname
+   */
+  public static String getClassifierSourceCodeClass() {
+    return get("ClassifierSourceCodeClass", "Foobar");
   }
   
   /**

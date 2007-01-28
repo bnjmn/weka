@@ -26,6 +26,7 @@ package weka.gui.explorer;
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
+import weka.classifiers.Sourcable;
 import weka.classifiers.evaluation.CostCurve;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
@@ -69,6 +70,7 @@ import weka.gui.visualize.plugins.VisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -131,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.100 $
+ * @version $Revision: 1.101 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -213,13 +215,13 @@ public class ClassifierPanel
   protected JLabel m_CVLab = new JLabel("Folds", SwingConstants.RIGHT);
 
   /** The field where the cv folds are entered */
-  protected JTextField m_CVText = new JTextField("10");
+  protected JTextField m_CVText = new JTextField("10", 3);
 
   /** Label by where the % split is entered */
   protected JLabel m_PercentLab = new JLabel("%", SwingConstants.RIGHT);
 
   /** The field where the % split is entered */
-  protected JTextField m_PercentText = new JTextField("66");
+  protected JTextField m_PercentText = new JTextField("66", 3);
 
   /** The button used to open a separate test dataset */
   protected JButton m_SetTestBut = new JButton("Set...");
@@ -244,7 +246,7 @@ public class ClassifierPanel
   JButton m_MoreOptions = new JButton("More options...");
 
   /** User specified random seed for cross validation or % split */
-  protected JTextField m_RandomSeedText = new JTextField("1      ");
+  protected JTextField m_RandomSeedText = new JTextField("1", 3);
   
   /** the label for the random seed textfield */
   protected JLabel m_RandomLab = new JLabel("Random seed for XVal / % Split", 
@@ -252,6 +254,12 @@ public class ClassifierPanel
 
   /** Whether randomization is turned off to preserve order */
   protected JCheckBox m_PreserveOrderBut = new JCheckBox("Preserve order for % Split");
+
+  /** Whether to output the source code (only for classifiers importing Sourcable) */
+  protected JCheckBox m_OutputSourceCode = new JCheckBox("Output source code");
+
+  /** The name of the generated class (only applicable to Sourcable schemes) */
+  protected JTextField m_SourceCodeClass = new JTextField("WekaClassifier", 10);
   
   /** Click to start running the classifier */
   protected JButton m_StartBut = new JButton("Start");
@@ -341,6 +349,12 @@ public class ClassifierPanel
       .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_OutputPredictionsTextBut
       .setToolTipText("Include the predictions in the output buffer");
+    m_RandomLab.setToolTipText("The seed value for randomization");
+    m_RandomSeedText.setToolTipText(m_RandomLab.getToolTipText());
+    m_PreserveOrderBut.setToolTipText("Preserves the order in a percentage split");
+    m_OutputSourceCode.setToolTipText(
+      "Whether to output the built classifier as Java source code");
+    m_SourceCodeClass.setToolTipText("The classname of the built classifier");
 
     m_FileChooser.setFileFilter(m_ModelFilter);
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -352,8 +366,16 @@ public class ClassifierPanel
     m_EvalWRTCostsBut.setSelected(ExplorerDefaults.getClassifierCostSensitiveEval());
     m_OutputEntropyBut.setSelected(ExplorerDefaults.getClassifierOutputEntropyEvalMeasures());
     m_OutputPredictionsTextBut.setSelected(ExplorerDefaults.getClassifierOutputPredictions());
-    m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed() + "      ");
+    m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
     m_PreserveOrderBut.setSelected(ExplorerDefaults.getClassifierPreserveOrder());
+    m_OutputSourceCode.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_SourceCodeClass.setEnabled(m_OutputSourceCode.isSelected());
+      }
+    });
+    m_OutputSourceCode.setSelected(ExplorerDefaults.getClassifierOutputSourceCode());
+    m_SourceCodeClass.setText(ExplorerDefaults.getClassifierSourceCodeClass());
+    m_SourceCodeClass.setEnabled(m_OutputSourceCode.isSelected());
     m_ClassCombo.setEnabled(false);
     m_ClassCombo.setPreferredSize(COMBO_SIZE);
     m_ClassCombo.setMaximumSize(COMBO_SIZE);
@@ -468,24 +490,28 @@ public class ClassifierPanel
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(9, 1));
+	moreOptionsPanel.setLayout(new GridLayout(10, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
 	moreOptionsPanel.add(m_OutputPredictionsTextBut);
-	JPanel costMatrixOption = new JPanel();
-	costMatrixOption.setLayout(new BorderLayout());
-	costMatrixOption.add(m_EvalWRTCostsBut, BorderLayout.WEST);
-	costMatrixOption.add(m_SetCostsBut, BorderLayout.EAST);
+	JPanel costMatrixOption = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	costMatrixOption.add(m_EvalWRTCostsBut);
+	costMatrixOption.add(m_SetCostsBut);
 	moreOptionsPanel.add(costMatrixOption);
-	JPanel seedPanel = new JPanel();
-	seedPanel.setLayout(new BorderLayout());
-	seedPanel.add(m_RandomLab, BorderLayout.WEST);
-	seedPanel.add(m_RandomSeedText, BorderLayout.EAST);
+	JPanel seedPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	seedPanel.add(m_RandomLab);
+	seedPanel.add(m_RandomSeedText);
 	moreOptionsPanel.add(seedPanel);
 	moreOptionsPanel.add(m_PreserveOrderBut);
+        JPanel sourcePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        m_OutputSourceCode.setEnabled(m_ClassifierEditor.getValue() instanceof Sourcable);
+        m_SourceCodeClass.setEnabled(m_OutputSourceCode.isEnabled() && m_OutputSourceCode.isSelected());
+        sourcePanel.add(m_OutputSourceCode);
+        sourcePanel.add(m_SourceCodeClass);
+        moreOptionsPanel.add(sourcePanel);
 
 	JPanel all = new JPanel();
 	all.setLayout(new BorderLayout());	
@@ -1330,6 +1356,13 @@ public class ClassifierPanel
 		outBuff.append(eval.toMatrixString() + "\n");
 	      }
 	    }
+
+            if (   (fullClassifier instanceof Sourcable) 
+                 && m_OutputSourceCode.isSelected()) {
+              outBuff.append("=== Source code ===\n\n");
+              outBuff.append(
+                ((Sourcable) fullClassifier).toSource(m_SourceCodeClass.getText()));
+            }
 
 	    m_History.updateResult(name);
 	    m_Log.logMessage("Finished " + cname);
