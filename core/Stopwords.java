@@ -14,8 +14,6 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-
 /*
  *    Stopwords.java
  *    Copyright (C) 2001 Eibe Frank
@@ -23,566 +21,821 @@
 
 package weka.core;
 
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * Class that can test whether a given string is a stop word.
- * Lowercases all words before the test.
+ * Lowercases all words before the test. <p/>
+ * The format for reading and writing is one word per line, lines starting
+ * with '#' are interpreted as comments and therefore skipped. <p/>
+ * The default stopwords are based on <a href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/" target="_blank">Rainbow</a>. <p/>
  *
+ * Accepts the following parameter: <p/>
+ *
+ * -i file <br/>
+ * loads the stopwords from the given file <p/>
+ *
+ * -o file <br/>
+ * saves the stopwords to the given file <p/>
+ *
+ * -p <br/>
+ * outputs the current stopwords on stdout <p/>
+ *
+ * Any additional parameters are interpreted as words to test as stopwords.
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.3 $
  */
 public class Stopwords {
   
-  /** The hashtable containing the list of stopwords */
-  private static Hashtable m_Stopwords = null;
+  /** The hash set containing the list of stopwords */
+  protected HashSet m_Words = null;
+
+  /** The default stopwords object (stoplist based on Rainbow) */
+  protected static Stopwords m_Stopwords;
 
   static {
-   
     if (m_Stopwords == null) {
-      m_Stopwords = new Hashtable();
-      Double dummy = new Double(0);
-
-      
-      //Stopwords list from Rainbow
-      m_Stopwords.put("a", dummy);
-      m_Stopwords.put("able", dummy);
-      m_Stopwords.put("about", dummy);
-      m_Stopwords.put("above", dummy);
-      m_Stopwords.put("according", dummy);
-      m_Stopwords.put("accordingly", dummy);
-      m_Stopwords.put("across", dummy);
-      m_Stopwords.put("actually", dummy);
-      m_Stopwords.put("after", dummy);
-      m_Stopwords.put("afterwards", dummy);
-      m_Stopwords.put("again", dummy);
-      m_Stopwords.put("against", dummy);
-      m_Stopwords.put("all", dummy);
-      m_Stopwords.put("allow", dummy);
-      m_Stopwords.put("allows", dummy);
-      m_Stopwords.put("almost", dummy);
-      m_Stopwords.put("alone", dummy);
-      m_Stopwords.put("along", dummy);
-      m_Stopwords.put("already", dummy);
-      m_Stopwords.put("also", dummy);
-      m_Stopwords.put("although", dummy);
-      m_Stopwords.put("always", dummy);
-      m_Stopwords.put("am", dummy);
-      m_Stopwords.put("among", dummy);
-      m_Stopwords.put("amongst", dummy);
-      m_Stopwords.put("an", dummy);
-      m_Stopwords.put("and", dummy);
-      m_Stopwords.put("another", dummy);
-      m_Stopwords.put("any", dummy);
-      m_Stopwords.put("anybody", dummy);
-      m_Stopwords.put("anyhow", dummy);
-      m_Stopwords.put("anyone", dummy);
-      m_Stopwords.put("anything", dummy);
-      m_Stopwords.put("anyway", dummy);
-      m_Stopwords.put("anyways", dummy);
-      m_Stopwords.put("anywhere", dummy);
-      m_Stopwords.put("apart", dummy);
-      m_Stopwords.put("appear", dummy);
-      m_Stopwords.put("appreciate", dummy);
-      m_Stopwords.put("appropriate", dummy);
-      m_Stopwords.put("are", dummy);
-      m_Stopwords.put("around", dummy);
-      m_Stopwords.put("as", dummy);
-      m_Stopwords.put("aside", dummy);
-      m_Stopwords.put("ask", dummy);
-      m_Stopwords.put("asking", dummy);
-      m_Stopwords.put("associated", dummy);
-      m_Stopwords.put("at", dummy);
-      m_Stopwords.put("available", dummy);
-      m_Stopwords.put("away", dummy);
-      m_Stopwords.put("awfully", dummy);
-      m_Stopwords.put("b", dummy);
-      m_Stopwords.put("be", dummy);
-      m_Stopwords.put("became", dummy);
-      m_Stopwords.put("because", dummy);
-      m_Stopwords.put("become", dummy);
-      m_Stopwords.put("becomes", dummy);
-      m_Stopwords.put("becoming", dummy);
-      m_Stopwords.put("been", dummy);
-      m_Stopwords.put("before", dummy);
-      m_Stopwords.put("beforehand", dummy);
-      m_Stopwords.put("behind", dummy);
-      m_Stopwords.put("being", dummy);
-      m_Stopwords.put("believe", dummy);
-      m_Stopwords.put("below", dummy);
-      m_Stopwords.put("beside", dummy);
-      m_Stopwords.put("besides", dummy);
-      m_Stopwords.put("best", dummy);
-      m_Stopwords.put("better", dummy);
-      m_Stopwords.put("between", dummy);
-      m_Stopwords.put("beyond", dummy);
-      m_Stopwords.put("both", dummy);
-      m_Stopwords.put("brief", dummy);
-      m_Stopwords.put("but", dummy);
-      m_Stopwords.put("by", dummy);
-      m_Stopwords.put("c", dummy);
-      m_Stopwords.put("came", dummy);
-      m_Stopwords.put("can", dummy);
-      m_Stopwords.put("cannot", dummy);
-      m_Stopwords.put("cant", dummy);
-      m_Stopwords.put("cause", dummy);
-      m_Stopwords.put("causes", dummy);
-      m_Stopwords.put("certain", dummy);
-      m_Stopwords.put("certainly", dummy);
-      m_Stopwords.put("changes", dummy);
-      m_Stopwords.put("clearly", dummy);
-      m_Stopwords.put("co", dummy);
-      m_Stopwords.put("com", dummy);
-      m_Stopwords.put("come", dummy);
-      m_Stopwords.put("comes", dummy);
-      m_Stopwords.put("concerning", dummy);
-      m_Stopwords.put("consequently", dummy);
-      m_Stopwords.put("consider", dummy);
-      m_Stopwords.put("considering", dummy);
-      m_Stopwords.put("contain", dummy);
-      m_Stopwords.put("containing", dummy);
-      m_Stopwords.put("contains", dummy);
-      m_Stopwords.put("corresponding", dummy);
-      m_Stopwords.put("could", dummy);
-      m_Stopwords.put("course", dummy);
-      m_Stopwords.put("currently", dummy);
-      m_Stopwords.put("d", dummy);
-      m_Stopwords.put("definitely", dummy);
-      m_Stopwords.put("described", dummy);
-      m_Stopwords.put("despite", dummy);
-      m_Stopwords.put("did", dummy);
-      m_Stopwords.put("different", dummy);
-      m_Stopwords.put("do", dummy);
-      m_Stopwords.put("does", dummy);
-      m_Stopwords.put("doing", dummy);
-      m_Stopwords.put("done", dummy);
-      m_Stopwords.put("down", dummy);
-      m_Stopwords.put("downwards", dummy);
-      m_Stopwords.put("during", dummy);
-      m_Stopwords.put("e", dummy);
-      m_Stopwords.put("each", dummy);
-      m_Stopwords.put("edu", dummy);
-      m_Stopwords.put("eg", dummy);
-      m_Stopwords.put("eight", dummy);
-      m_Stopwords.put("either", dummy);
-      m_Stopwords.put("else", dummy);
-      m_Stopwords.put("elsewhere", dummy);
-      m_Stopwords.put("enough", dummy);
-      m_Stopwords.put("entirely", dummy);
-      m_Stopwords.put("especially", dummy);
-      m_Stopwords.put("et", dummy);
-      m_Stopwords.put("etc", dummy);
-      m_Stopwords.put("even", dummy);
-      m_Stopwords.put("ever", dummy);
-      m_Stopwords.put("every", dummy);
-      m_Stopwords.put("everybody", dummy);
-      m_Stopwords.put("everyone", dummy);
-      m_Stopwords.put("everything", dummy);
-      m_Stopwords.put("everywhere", dummy);
-      m_Stopwords.put("ex", dummy);
-      m_Stopwords.put("exactly", dummy);
-      m_Stopwords.put("example", dummy);
-      m_Stopwords.put("except", dummy);
-      m_Stopwords.put("f", dummy);
-      m_Stopwords.put("far", dummy);
-      m_Stopwords.put("few", dummy);
-      m_Stopwords.put("fifth", dummy);
-      m_Stopwords.put("first", dummy);
-      m_Stopwords.put("five", dummy);
-      m_Stopwords.put("followed", dummy);
-      m_Stopwords.put("following", dummy);
-      m_Stopwords.put("follows", dummy);
-      m_Stopwords.put("for", dummy);
-      m_Stopwords.put("former", dummy);
-      m_Stopwords.put("formerly", dummy);
-      m_Stopwords.put("forth", dummy);
-      m_Stopwords.put("four", dummy);
-      m_Stopwords.put("from", dummy);
-      m_Stopwords.put("further", dummy);
-      m_Stopwords.put("furthermore", dummy);
-      m_Stopwords.put("g", dummy);
-      m_Stopwords.put("get", dummy);
-      m_Stopwords.put("gets", dummy);
-      m_Stopwords.put("getting", dummy);
-      m_Stopwords.put("given", dummy);
-      m_Stopwords.put("gives", dummy);
-      m_Stopwords.put("go", dummy);
-      m_Stopwords.put("goes", dummy);
-      m_Stopwords.put("going", dummy);
-      m_Stopwords.put("gone", dummy);
-      m_Stopwords.put("got", dummy);
-      m_Stopwords.put("gotten", dummy);
-      m_Stopwords.put("greetings", dummy);
-      m_Stopwords.put("h", dummy);
-      m_Stopwords.put("had", dummy);
-      m_Stopwords.put("happens", dummy);
-      m_Stopwords.put("hardly", dummy);
-      m_Stopwords.put("has", dummy);
-      m_Stopwords.put("have", dummy);
-      m_Stopwords.put("having", dummy);
-      m_Stopwords.put("he", dummy);
-      m_Stopwords.put("hello", dummy);
-      m_Stopwords.put("help", dummy);
-      m_Stopwords.put("hence", dummy);
-      m_Stopwords.put("her", dummy);
-      m_Stopwords.put("here", dummy);
-      m_Stopwords.put("hereafter", dummy);
-      m_Stopwords.put("hereby", dummy);
-      m_Stopwords.put("herein", dummy);
-      m_Stopwords.put("hereupon", dummy);
-      m_Stopwords.put("hers", dummy);
-      m_Stopwords.put("herself", dummy);
-      m_Stopwords.put("hi", dummy);
-      m_Stopwords.put("him", dummy);
-      m_Stopwords.put("himself", dummy);
-      m_Stopwords.put("his", dummy);
-      m_Stopwords.put("hither", dummy);
-      m_Stopwords.put("hopefully", dummy);
-      m_Stopwords.put("how", dummy);
-      m_Stopwords.put("howbeit", dummy);
-      m_Stopwords.put("however", dummy);
-      m_Stopwords.put("i", dummy);
-      m_Stopwords.put("ie", dummy);
-      m_Stopwords.put("if", dummy);
-      m_Stopwords.put("ignored", dummy);
-      m_Stopwords.put("immediate", dummy);
-      m_Stopwords.put("in", dummy);
-      m_Stopwords.put("inasmuch", dummy);
-      m_Stopwords.put("inc", dummy);
-      m_Stopwords.put("indeed", dummy);
-      m_Stopwords.put("indicate", dummy);
-      m_Stopwords.put("indicated", dummy);
-      m_Stopwords.put("indicates", dummy);
-      m_Stopwords.put("inner", dummy);
-      m_Stopwords.put("insofar", dummy);
-      m_Stopwords.put("instead", dummy);
-      m_Stopwords.put("into", dummy);
-      m_Stopwords.put("inward", dummy);
-      m_Stopwords.put("is", dummy);
-      m_Stopwords.put("it", dummy);
-      m_Stopwords.put("its", dummy);
-      m_Stopwords.put("itself", dummy);
-      m_Stopwords.put("j", dummy);
-      m_Stopwords.put("just", dummy);
-      m_Stopwords.put("k", dummy);
-      m_Stopwords.put("keep", dummy);
-      m_Stopwords.put("keeps", dummy);
-      m_Stopwords.put("kept", dummy);
-      m_Stopwords.put("know", dummy);
-      m_Stopwords.put("knows", dummy);
-      m_Stopwords.put("known", dummy);
-      m_Stopwords.put("l", dummy);
-      m_Stopwords.put("last", dummy);
-      m_Stopwords.put("lately", dummy);
-      m_Stopwords.put("later", dummy);
-      m_Stopwords.put("latter", dummy);
-      m_Stopwords.put("latterly", dummy);
-      m_Stopwords.put("least", dummy);
-      m_Stopwords.put("less", dummy);
-      m_Stopwords.put("lest", dummy);
-      m_Stopwords.put("let", dummy);
-      m_Stopwords.put("like", dummy);
-      m_Stopwords.put("liked", dummy);
-      m_Stopwords.put("likely", dummy);
-      m_Stopwords.put("little", dummy);
-      m_Stopwords.put("ll", dummy); //added to avoid words like you'll,I'll etc.
-      m_Stopwords.put("look", dummy);
-      m_Stopwords.put("looking", dummy);
-      m_Stopwords.put("looks", dummy);
-      m_Stopwords.put("ltd", dummy);
-      m_Stopwords.put("m", dummy);
-      m_Stopwords.put("mainly", dummy);
-      m_Stopwords.put("many", dummy);
-      m_Stopwords.put("may", dummy);
-      m_Stopwords.put("maybe", dummy);
-      m_Stopwords.put("me", dummy);
-      m_Stopwords.put("mean", dummy);
-      m_Stopwords.put("meanwhile", dummy);
-      m_Stopwords.put("merely", dummy);
-      m_Stopwords.put("might", dummy);
-      m_Stopwords.put("more", dummy);
-      m_Stopwords.put("moreover", dummy);
-      m_Stopwords.put("most", dummy);
-      m_Stopwords.put("mostly", dummy);
-      m_Stopwords.put("much", dummy);
-      m_Stopwords.put("must", dummy);
-      m_Stopwords.put("my", dummy);
-      m_Stopwords.put("myself", dummy);
-      m_Stopwords.put("n", dummy);
-      m_Stopwords.put("name", dummy);
-      m_Stopwords.put("namely", dummy);
-      m_Stopwords.put("nd", dummy);
-      m_Stopwords.put("near", dummy);
-      m_Stopwords.put("nearly", dummy);
-      m_Stopwords.put("necessary", dummy);
-      m_Stopwords.put("need", dummy);
-      m_Stopwords.put("needs", dummy);
-      m_Stopwords.put("neither", dummy);
-      m_Stopwords.put("never", dummy);
-      m_Stopwords.put("nevertheless", dummy);
-      m_Stopwords.put("new", dummy);
-      m_Stopwords.put("next", dummy);
-      m_Stopwords.put("nine", dummy);
-      m_Stopwords.put("no", dummy);
-      m_Stopwords.put("nobody", dummy);
-      m_Stopwords.put("non", dummy);
-      m_Stopwords.put("none", dummy);
-      m_Stopwords.put("noone", dummy);
-      m_Stopwords.put("nor", dummy);
-      m_Stopwords.put("normally", dummy);
-      m_Stopwords.put("not", dummy);
-      m_Stopwords.put("nothing", dummy);
-      m_Stopwords.put("novel", dummy);
-      m_Stopwords.put("now", dummy);
-      m_Stopwords.put("nowhere", dummy);
-      m_Stopwords.put("o", dummy);
-      m_Stopwords.put("obviously", dummy);
-      m_Stopwords.put("of", dummy);
-      m_Stopwords.put("off", dummy);
-      m_Stopwords.put("often", dummy);
-      m_Stopwords.put("oh", dummy);
-      m_Stopwords.put("ok", dummy);
-      m_Stopwords.put("okay", dummy);
-      m_Stopwords.put("old", dummy);
-      m_Stopwords.put("on", dummy);
-      m_Stopwords.put("once", dummy);
-      m_Stopwords.put("one", dummy);
-      m_Stopwords.put("ones", dummy);
-      m_Stopwords.put("only", dummy);
-      m_Stopwords.put("onto", dummy);
-      m_Stopwords.put("or", dummy);
-      m_Stopwords.put("other", dummy);
-      m_Stopwords.put("others", dummy);
-      m_Stopwords.put("otherwise", dummy);
-      m_Stopwords.put("ought", dummy);
-      m_Stopwords.put("our", dummy);
-      m_Stopwords.put("ours", dummy);
-      m_Stopwords.put("ourselves", dummy);
-      m_Stopwords.put("out", dummy);
-      m_Stopwords.put("outside", dummy);
-      m_Stopwords.put("over", dummy);
-      m_Stopwords.put("overall", dummy);
-      m_Stopwords.put("own", dummy);
-      m_Stopwords.put("p", dummy);
-      m_Stopwords.put("particular", dummy);
-      m_Stopwords.put("particularly", dummy);
-      m_Stopwords.put("per", dummy);
-      m_Stopwords.put("perhaps", dummy);
-      m_Stopwords.put("placed", dummy);
-      m_Stopwords.put("please", dummy);
-      m_Stopwords.put("plus", dummy);
-      m_Stopwords.put("possible", dummy);
-      m_Stopwords.put("presumably", dummy);
-      m_Stopwords.put("probably", dummy);
-      m_Stopwords.put("provides", dummy);
-      m_Stopwords.put("q", dummy);
-      m_Stopwords.put("que", dummy);
-      m_Stopwords.put("quite", dummy);
-      m_Stopwords.put("qv", dummy);
-      m_Stopwords.put("r", dummy);
-      m_Stopwords.put("rather", dummy);
-      m_Stopwords.put("rd", dummy);
-      m_Stopwords.put("re", dummy);
-      m_Stopwords.put("really", dummy);
-      m_Stopwords.put("reasonably", dummy);
-      m_Stopwords.put("regarding", dummy);
-      m_Stopwords.put("regardless", dummy);
-      m_Stopwords.put("regards", dummy);
-      m_Stopwords.put("relatively", dummy);
-      m_Stopwords.put("respectively", dummy);
-      m_Stopwords.put("right", dummy);
-      m_Stopwords.put("s", dummy);
-      m_Stopwords.put("said", dummy);
-      m_Stopwords.put("same", dummy);
-      m_Stopwords.put("saw", dummy);
-      m_Stopwords.put("say", dummy);
-      m_Stopwords.put("saying", dummy);
-      m_Stopwords.put("says", dummy);
-      m_Stopwords.put("second", dummy);
-      m_Stopwords.put("secondly", dummy);
-      m_Stopwords.put("see", dummy);
-      m_Stopwords.put("seeing", dummy);
-      m_Stopwords.put("seem", dummy);
-      m_Stopwords.put("seemed", dummy);
-      m_Stopwords.put("seeming", dummy);
-      m_Stopwords.put("seems", dummy);
-      m_Stopwords.put("seen", dummy);
-      m_Stopwords.put("self", dummy);
-      m_Stopwords.put("selves", dummy);
-      m_Stopwords.put("sensible", dummy);
-      m_Stopwords.put("sent", dummy);
-      m_Stopwords.put("serious", dummy);
-      m_Stopwords.put("seriously", dummy);
-      m_Stopwords.put("seven", dummy);
-      m_Stopwords.put("several", dummy);
-      m_Stopwords.put("shall", dummy);
-      m_Stopwords.put("she", dummy);
-      m_Stopwords.put("should", dummy);
-      m_Stopwords.put("since", dummy);
-      m_Stopwords.put("six", dummy);
-      m_Stopwords.put("so", dummy);
-      m_Stopwords.put("some", dummy);
-      m_Stopwords.put("somebody", dummy);
-      m_Stopwords.put("somehow", dummy);
-      m_Stopwords.put("someone", dummy);
-      m_Stopwords.put("something", dummy);
-      m_Stopwords.put("sometime", dummy);
-      m_Stopwords.put("sometimes", dummy);
-      m_Stopwords.put("somewhat", dummy);
-      m_Stopwords.put("somewhere", dummy);
-      m_Stopwords.put("soon", dummy);
-      m_Stopwords.put("sorry", dummy);
-      m_Stopwords.put("specified", dummy);
-      m_Stopwords.put("specify", dummy);
-      m_Stopwords.put("specifying", dummy);
-      m_Stopwords.put("still", dummy);
-      m_Stopwords.put("sub", dummy);
-      m_Stopwords.put("such", dummy);
-      m_Stopwords.put("sup", dummy);
-      m_Stopwords.put("sure", dummy);
-      m_Stopwords.put("t", dummy);
-      m_Stopwords.put("take", dummy);
-      m_Stopwords.put("taken", dummy);
-      m_Stopwords.put("tell", dummy);
-      m_Stopwords.put("tends", dummy);
-      m_Stopwords.put("th", dummy);
-      m_Stopwords.put("than", dummy);
-      m_Stopwords.put("thank", dummy);
-      m_Stopwords.put("thanks", dummy);
-      m_Stopwords.put("thanx", dummy);
-      m_Stopwords.put("that", dummy);
-      m_Stopwords.put("thats", dummy);
-      m_Stopwords.put("the", dummy);
-      m_Stopwords.put("their", dummy);
-      m_Stopwords.put("theirs", dummy);
-      m_Stopwords.put("them", dummy);
-      m_Stopwords.put("themselves", dummy);
-      m_Stopwords.put("then", dummy);
-      m_Stopwords.put("thence", dummy);
-      m_Stopwords.put("there", dummy);
-      m_Stopwords.put("thereafter", dummy);
-      m_Stopwords.put("thereby", dummy);
-      m_Stopwords.put("therefore", dummy);
-      m_Stopwords.put("therein", dummy);
-      m_Stopwords.put("theres", dummy);
-      m_Stopwords.put("thereupon", dummy);
-      m_Stopwords.put("these", dummy);
-      m_Stopwords.put("they", dummy);
-      m_Stopwords.put("think", dummy);
-      m_Stopwords.put("third", dummy);
-      m_Stopwords.put("this", dummy);
-      m_Stopwords.put("thorough", dummy);
-      m_Stopwords.put("thoroughly", dummy);
-      m_Stopwords.put("those", dummy);
-      m_Stopwords.put("though", dummy);
-      m_Stopwords.put("three", dummy);
-      m_Stopwords.put("through", dummy);
-      m_Stopwords.put("throughout", dummy);
-      m_Stopwords.put("thru", dummy);
-      m_Stopwords.put("thus", dummy);
-      m_Stopwords.put("to", dummy);
-      m_Stopwords.put("together", dummy);
-      m_Stopwords.put("too", dummy);
-      m_Stopwords.put("took", dummy);
-      m_Stopwords.put("toward", dummy);
-      m_Stopwords.put("towards", dummy);
-      m_Stopwords.put("tried", dummy);
-      m_Stopwords.put("tries", dummy);
-      m_Stopwords.put("truly", dummy);
-      m_Stopwords.put("try", dummy);
-      m_Stopwords.put("trying", dummy);
-      m_Stopwords.put("twice", dummy);
-      m_Stopwords.put("two", dummy);
-      m_Stopwords.put("u", dummy);
-      m_Stopwords.put("un", dummy);
-      m_Stopwords.put("under", dummy);
-      m_Stopwords.put("unfortunately", dummy);
-      m_Stopwords.put("unless", dummy);
-      m_Stopwords.put("unlikely", dummy);
-      m_Stopwords.put("until", dummy);
-      m_Stopwords.put("unto", dummy);
-      m_Stopwords.put("up", dummy);
-      m_Stopwords.put("upon", dummy);
-      m_Stopwords.put("us", dummy);
-      m_Stopwords.put("use", dummy);
-      m_Stopwords.put("used", dummy);
-      m_Stopwords.put("useful", dummy);
-      m_Stopwords.put("uses", dummy);
-      m_Stopwords.put("using", dummy);
-      m_Stopwords.put("usually", dummy);
-      m_Stopwords.put("uucp", dummy);
-      m_Stopwords.put("v", dummy);
-      m_Stopwords.put("value", dummy);
-      m_Stopwords.put("various", dummy);
-      m_Stopwords.put("ve", dummy); //added to avoid words like I've,you've etc.
-      m_Stopwords.put("very", dummy);
-      m_Stopwords.put("via", dummy);
-      m_Stopwords.put("viz", dummy);
-      m_Stopwords.put("vs", dummy);
-      m_Stopwords.put("w", dummy);
-      m_Stopwords.put("want", dummy);
-      m_Stopwords.put("wants", dummy);
-      m_Stopwords.put("was", dummy);
-      m_Stopwords.put("way", dummy);
-      m_Stopwords.put("we", dummy);
-      m_Stopwords.put("welcome", dummy);
-      m_Stopwords.put("well", dummy);
-      m_Stopwords.put("went", dummy);
-      m_Stopwords.put("were", dummy);
-      m_Stopwords.put("what", dummy);
-      m_Stopwords.put("whatever", dummy);
-      m_Stopwords.put("when", dummy);
-      m_Stopwords.put("whence", dummy);
-      m_Stopwords.put("whenever", dummy);
-      m_Stopwords.put("where", dummy);
-      m_Stopwords.put("whereafter", dummy);
-      m_Stopwords.put("whereas", dummy);
-      m_Stopwords.put("whereby", dummy);
-      m_Stopwords.put("wherein", dummy);
-      m_Stopwords.put("whereupon", dummy);
-      m_Stopwords.put("wherever", dummy);
-      m_Stopwords.put("whether", dummy);
-      m_Stopwords.put("which", dummy);
-      m_Stopwords.put("while", dummy);
-      m_Stopwords.put("whither", dummy);
-      m_Stopwords.put("who", dummy);
-      m_Stopwords.put("whoever", dummy);
-      m_Stopwords.put("whole", dummy);
-      m_Stopwords.put("whom", dummy);
-      m_Stopwords.put("whose", dummy);
-      m_Stopwords.put("why", dummy);
-      m_Stopwords.put("will", dummy);
-      m_Stopwords.put("willing", dummy);
-      m_Stopwords.put("wish", dummy);
-      m_Stopwords.put("with", dummy);
-      m_Stopwords.put("within", dummy);
-      m_Stopwords.put("without", dummy);
-      m_Stopwords.put("wonder", dummy);
-      m_Stopwords.put("would", dummy);
-      m_Stopwords.put("would", dummy);
-      m_Stopwords.put("x", dummy);
-      m_Stopwords.put("y", dummy);
-      m_Stopwords.put("yes", dummy);
-      m_Stopwords.put("yet", dummy);
-      m_Stopwords.put("you", dummy);
-      m_Stopwords.put("your", dummy);
-      m_Stopwords.put("yours", dummy);
-      m_Stopwords.put("yourself", dummy);
-      m_Stopwords.put("yourselves", dummy);
-      m_Stopwords.put("z", dummy);
-      m_Stopwords.put("zero", dummy);
-
+      m_Stopwords = new Stopwords();
     }
+  }
+
+  /**
+   * initializes the stopwords (based on <a href="http://www.cs.cmu.edu/~mccallum/bow/rainbow/" target="_blank">Rainbow</a>).
+   */
+  public Stopwords() {
+    m_Words = new HashSet();
+
+    //Stopwords list from Rainbow
+    add("a");
+    add("able");
+    add("about");
+    add("above");
+    add("according");
+    add("accordingly");
+    add("across");
+    add("actually");
+    add("after");
+    add("afterwards");
+    add("again");
+    add("against");
+    add("all");
+    add("allow");
+    add("allows");
+    add("almost");
+    add("alone");
+    add("along");
+    add("already");
+    add("also");
+    add("although");
+    add("always");
+    add("am");
+    add("among");
+    add("amongst");
+    add("an");
+    add("and");
+    add("another");
+    add("any");
+    add("anybody");
+    add("anyhow");
+    add("anyone");
+    add("anything");
+    add("anyway");
+    add("anyways");
+    add("anywhere");
+    add("apart");
+    add("appear");
+    add("appreciate");
+    add("appropriate");
+    add("are");
+    add("around");
+    add("as");
+    add("aside");
+    add("ask");
+    add("asking");
+    add("associated");
+    add("at");
+    add("available");
+    add("away");
+    add("awfully");
+    add("b");
+    add("be");
+    add("became");
+    add("because");
+    add("become");
+    add("becomes");
+    add("becoming");
+    add("been");
+    add("before");
+    add("beforehand");
+    add("behind");
+    add("being");
+    add("believe");
+    add("below");
+    add("beside");
+    add("besides");
+    add("best");
+    add("better");
+    add("between");
+    add("beyond");
+    add("both");
+    add("brief");
+    add("but");
+    add("by");
+    add("c");
+    add("came");
+    add("can");
+    add("cannot");
+    add("cant");
+    add("cause");
+    add("causes");
+    add("certain");
+    add("certainly");
+    add("changes");
+    add("clearly");
+    add("co");
+    add("com");
+    add("come");
+    add("comes");
+    add("concerning");
+    add("consequently");
+    add("consider");
+    add("considering");
+    add("contain");
+    add("containing");
+    add("contains");
+    add("corresponding");
+    add("could");
+    add("course");
+    add("currently");
+    add("d");
+    add("definitely");
+    add("described");
+    add("despite");
+    add("did");
+    add("different");
+    add("do");
+    add("does");
+    add("doing");
+    add("done");
+    add("down");
+    add("downwards");
+    add("during");
+    add("e");
+    add("each");
+    add("edu");
+    add("eg");
+    add("eight");
+    add("either");
+    add("else");
+    add("elsewhere");
+    add("enough");
+    add("entirely");
+    add("especially");
+    add("et");
+    add("etc");
+    add("even");
+    add("ever");
+    add("every");
+    add("everybody");
+    add("everyone");
+    add("everything");
+    add("everywhere");
+    add("ex");
+    add("exactly");
+    add("example");
+    add("except");
+    add("f");
+    add("far");
+    add("few");
+    add("fifth");
+    add("first");
+    add("five");
+    add("followed");
+    add("following");
+    add("follows");
+    add("for");
+    add("former");
+    add("formerly");
+    add("forth");
+    add("four");
+    add("from");
+    add("further");
+    add("furthermore");
+    add("g");
+    add("get");
+    add("gets");
+    add("getting");
+    add("given");
+    add("gives");
+    add("go");
+    add("goes");
+    add("going");
+    add("gone");
+    add("got");
+    add("gotten");
+    add("greetings");
+    add("h");
+    add("had");
+    add("happens");
+    add("hardly");
+    add("has");
+    add("have");
+    add("having");
+    add("he");
+    add("hello");
+    add("help");
+    add("hence");
+    add("her");
+    add("here");
+    add("hereafter");
+    add("hereby");
+    add("herein");
+    add("hereupon");
+    add("hers");
+    add("herself");
+    add("hi");
+    add("him");
+    add("himself");
+    add("his");
+    add("hither");
+    add("hopefully");
+    add("how");
+    add("howbeit");
+    add("however");
+    add("i");
+    add("ie");
+    add("if");
+    add("ignored");
+    add("immediate");
+    add("in");
+    add("inasmuch");
+    add("inc");
+    add("indeed");
+    add("indicate");
+    add("indicated");
+    add("indicates");
+    add("inner");
+    add("insofar");
+    add("instead");
+    add("into");
+    add("inward");
+    add("is");
+    add("it");
+    add("its");
+    add("itself");
+    add("j");
+    add("just");
+    add("k");
+    add("keep");
+    add("keeps");
+    add("kept");
+    add("know");
+    add("knows");
+    add("known");
+    add("l");
+    add("last");
+    add("lately");
+    add("later");
+    add("latter");
+    add("latterly");
+    add("least");
+    add("less");
+    add("lest");
+    add("let");
+    add("like");
+    add("liked");
+    add("likely");
+    add("little");
+    add("ll"); //added to avoid words like you'll,I'll etc.
+    add("look");
+    add("looking");
+    add("looks");
+    add("ltd");
+    add("m");
+    add("mainly");
+    add("many");
+    add("may");
+    add("maybe");
+    add("me");
+    add("mean");
+    add("meanwhile");
+    add("merely");
+    add("might");
+    add("more");
+    add("moreover");
+    add("most");
+    add("mostly");
+    add("much");
+    add("must");
+    add("my");
+    add("myself");
+    add("n");
+    add("name");
+    add("namely");
+    add("nd");
+    add("near");
+    add("nearly");
+    add("necessary");
+    add("need");
+    add("needs");
+    add("neither");
+    add("never");
+    add("nevertheless");
+    add("new");
+    add("next");
+    add("nine");
+    add("no");
+    add("nobody");
+    add("non");
+    add("none");
+    add("noone");
+    add("nor");
+    add("normally");
+    add("not");
+    add("nothing");
+    add("novel");
+    add("now");
+    add("nowhere");
+    add("o");
+    add("obviously");
+    add("of");
+    add("off");
+    add("often");
+    add("oh");
+    add("ok");
+    add("okay");
+    add("old");
+    add("on");
+    add("once");
+    add("one");
+    add("ones");
+    add("only");
+    add("onto");
+    add("or");
+    add("other");
+    add("others");
+    add("otherwise");
+    add("ought");
+    add("our");
+    add("ours");
+    add("ourselves");
+    add("out");
+    add("outside");
+    add("over");
+    add("overall");
+    add("own");
+    add("p");
+    add("particular");
+    add("particularly");
+    add("per");
+    add("perhaps");
+    add("placed");
+    add("please");
+    add("plus");
+    add("possible");
+    add("presumably");
+    add("probably");
+    add("provides");
+    add("q");
+    add("que");
+    add("quite");
+    add("qv");
+    add("r");
+    add("rather");
+    add("rd");
+    add("re");
+    add("really");
+    add("reasonably");
+    add("regarding");
+    add("regardless");
+    add("regards");
+    add("relatively");
+    add("respectively");
+    add("right");
+    add("s");
+    add("said");
+    add("same");
+    add("saw");
+    add("say");
+    add("saying");
+    add("says");
+    add("second");
+    add("secondly");
+    add("see");
+    add("seeing");
+    add("seem");
+    add("seemed");
+    add("seeming");
+    add("seems");
+    add("seen");
+    add("self");
+    add("selves");
+    add("sensible");
+    add("sent");
+    add("serious");
+    add("seriously");
+    add("seven");
+    add("several");
+    add("shall");
+    add("she");
+    add("should");
+    add("since");
+    add("six");
+    add("so");
+    add("some");
+    add("somebody");
+    add("somehow");
+    add("someone");
+    add("something");
+    add("sometime");
+    add("sometimes");
+    add("somewhat");
+    add("somewhere");
+    add("soon");
+    add("sorry");
+    add("specified");
+    add("specify");
+    add("specifying");
+    add("still");
+    add("sub");
+    add("such");
+    add("sup");
+    add("sure");
+    add("t");
+    add("take");
+    add("taken");
+    add("tell");
+    add("tends");
+    add("th");
+    add("than");
+    add("thank");
+    add("thanks");
+    add("thanx");
+    add("that");
+    add("thats");
+    add("the");
+    add("their");
+    add("theirs");
+    add("them");
+    add("themselves");
+    add("then");
+    add("thence");
+    add("there");
+    add("thereafter");
+    add("thereby");
+    add("therefore");
+    add("therein");
+    add("theres");
+    add("thereupon");
+    add("these");
+    add("they");
+    add("think");
+    add("third");
+    add("this");
+    add("thorough");
+    add("thoroughly");
+    add("those");
+    add("though");
+    add("three");
+    add("through");
+    add("throughout");
+    add("thru");
+    add("thus");
+    add("to");
+    add("together");
+    add("too");
+    add("took");
+    add("toward");
+    add("towards");
+    add("tried");
+    add("tries");
+    add("truly");
+    add("try");
+    add("trying");
+    add("twice");
+    add("two");
+    add("u");
+    add("un");
+    add("under");
+    add("unfortunately");
+    add("unless");
+    add("unlikely");
+    add("until");
+    add("unto");
+    add("up");
+    add("upon");
+    add("us");
+    add("use");
+    add("used");
+    add("useful");
+    add("uses");
+    add("using");
+    add("usually");
+    add("uucp");
+    add("v");
+    add("value");
+    add("various");
+    add("ve"); //added to avoid words like I've,you've etc.
+    add("very");
+    add("via");
+    add("viz");
+    add("vs");
+    add("w");
+    add("want");
+    add("wants");
+    add("was");
+    add("way");
+    add("we");
+    add("welcome");
+    add("well");
+    add("went");
+    add("were");
+    add("what");
+    add("whatever");
+    add("when");
+    add("whence");
+    add("whenever");
+    add("where");
+    add("whereafter");
+    add("whereas");
+    add("whereby");
+    add("wherein");
+    add("whereupon");
+    add("wherever");
+    add("whether");
+    add("which");
+    add("while");
+    add("whither");
+    add("who");
+    add("whoever");
+    add("whole");
+    add("whom");
+    add("whose");
+    add("why");
+    add("will");
+    add("willing");
+    add("wish");
+    add("with");
+    add("within");
+    add("without");
+    add("wonder");
+    add("would");
+    add("would");
+    add("x");
+    add("y");
+    add("yes");
+    add("yet");
+    add("you");
+    add("your");
+    add("yours");
+    add("yourself");
+    add("yourselves");
+    add("z");
+    add("zero");
+  }
+
+  /**
+   * removes all stopwords
+   */
+  public void clear() {
+    m_Words.clear();
+  }
+
+  /**
+   * adds the given word to the stopword list (is automatically converted to
+   * lower case and trimmed)
+   *
+   * @param word the word to add
+   */
+  public void add(String word) {
+    if (word.trim().length() > 0)
+      m_Words.add(word.trim().toLowerCase());
+  }
+
+  /**
+   * removes the word from the stopword list
+   *
+   * @param word the word to remove
+   * @return true if the word was found in the list and then removed
+   */
+  public boolean remove(String word) {
+    return m_Words.remove(word);
   }
   
   /** 
    * Returns true if the given string is a stop word.
+   * 
+   * @param word the word to test
+   * @return true if the word is a stopword
+   */
+  public boolean is(String word) {
+    return m_Words.contains(word.toLowerCase());
+  }
+
+  /**
+   * Returns a sorted enumeration over all stored stopwords
+   *
+   * @return the enumeration over all stopwords
+   */
+  public Enumeration elements() {
+    Iterator    iter;
+    Vector      list;
+
+    iter = m_Words.iterator();
+    list = new Vector();
+
+    while (iter.hasNext())
+      list.add(iter.next());
+
+    // sort list
+    Collections.sort(list);
+
+    return list.elements();
+  }
+
+  /**
+   * Generates a new Stopwords object from the given file
+   *
+   * @param filename the file to read the stopwords from
+   */
+  public void read(String filename) throws Exception {
+    read(new File(filename));
+  }
+
+  /**
+   * Generates a new Stopwords object from the given file
+   *
+   * @param file the file to read the stopwords from
+   */
+  public void read(File file) throws Exception {
+    read(new BufferedReader(new FileReader(file)));
+  }
+
+  /**
+   * Generates a new Stopwords object from the reader. The reader is
+   * closed automatically.
+   *
+   * @param reader the reader to get the stopwords from
+   * @return the initialized stopwords object
+   */
+  public void read(BufferedReader reader) throws Exception {
+    String      line;
+
+    clear();
+    
+    while ((line = reader.readLine()) != null) {
+      line = line.trim();
+      // comment?
+      if (line.startsWith("#"))
+        continue;
+      add(line);
+    }
+
+    reader.close();
+  }
+
+  /**
+   * Writes the current stopwords to the given file
+   *
+   * @param filename the file to write the stopwords to
+   */
+  public void write(String filename) throws Exception {
+    write(new File(filename));
+  }
+
+  /**
+   * Writes the current stopwords to the given file
+   *
+   * @param file the file to write the stopwords to
+   */
+  public void write(File file) throws Exception {
+    write(new BufferedWriter(new FileWriter(file)));
+  }
+
+  /**
+   * Writes the current stopwords to the given writer. The writer is closed
+   * automatically.
+   *
+   * @param reader the reader to get the stopwords from
+   */
+  public void write(BufferedWriter writer) throws Exception {
+    Enumeration   enm;
+
+    // header
+    writer.write("# generated " + new Date());
+    writer.newLine();
+
+    enm = elements();
+
+    while (enm.hasMoreElements()) {
+      writer.write(enm.nextElement().toString());
+      writer.newLine();
+    }
+
+    writer.flush();
+    writer.close();
+  }
+
+  /**
+   * returns the current stopwords in a string
+   *
+   * @return the current stopwords
+   */
+  public String toString() {
+    Enumeration   enm;
+    StringBuffer  result;
+
+    result = new StringBuffer();
+    enm    = elements();
+    while (enm.hasMoreElements()) {
+      result.append(enm.nextElement().toString());
+      if (enm.hasMoreElements())
+        result.append(",");
+    }
+
+    return result.toString();
+  }
+  
+  /** 
+   * Returns true if the given string is a stop word.
+   * 
+   * @param str the word to test
+   * @return true if the word is a stopword
    */
   public static boolean isStopword(String str) {
+    return m_Stopwords.is(str.toLowerCase());
+  }
+  
+  /**
+   * Accepts the following parameter: <p/>
+   *
+   * -i file <br/>
+   * loads the stopwords from the given file <p/>
+   *
+   * -o file <br/>
+   * saves the stopwords to the given file <p/>
+   *
+   * -p <br/>
+   * outputs the current stopwords on stdout <p/>
+   *
+   * Any additional parameters are interpreted as words to test as stopwords.
+   * 
+   * @param args commandline parameters
+   */
+  public static void main(String[] args) throws Exception {
+    String input = Utils.getOption('i', args);
+    String output = Utils.getOption('o', args);
+    boolean print = Utils.getFlag('p', args);
 
-    return m_Stopwords.containsKey(str.toLowerCase());
+    // words to process?
+    Vector words = new Vector();
+    for (int i = 0; i < args.length; i++) {
+      if (args[i].trim().length() > 0)
+        words.add(args[i].trim());
+    }
+    
+    Stopwords stopwords = new Stopwords();
+
+    // load from file?
+    if (input.length() != 0)
+      stopwords.read(input);
+
+    // write to file?
+    if (output.length() != 0)
+      stopwords.write(output);
+    
+    // output to stdout?
+    if (print) {
+      System.out.println("\nStopwords:");
+      Enumeration enm = stopwords.elements();
+      int i = 0;
+      while (enm.hasMoreElements()) {
+        System.out.println((i+1) + ". " + enm.nextElement());
+        i++;
+      }
+    }
+
+    // check words for being a stopword
+    if (words.size() > 0) {
+      System.out.println("\nChecking for stopwords:");
+      for (int i = 0; i < words.size(); i++) {
+        System.out.println(
+            (i+1) + ". " + words.get(i) + ": " 
+            + stopwords.is(words.get(i).toString()));
+      }
+    }
   }
 }
-
-
