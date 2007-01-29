@@ -28,7 +28,6 @@
  *                        support for using a list of stopwords.
  */
 
-
 package weka.filters.unsupervised.attribute;
 
 import weka.core.Attribute;
@@ -41,6 +40,7 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SelectedTag;
 import weka.core.SparseInstance;
+import weka.core.Stopwords;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -49,6 +49,7 @@ import weka.core.stemmers.Stemmer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -57,7 +58,6 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
-
 
 /** 
  <!-- globalinfo-start -->
@@ -125,11 +125,19 @@ import java.util.Vector;
  *  basis but based on the documents in all the classes 
  *  (even if a class attribute is set).</pre>
  * 
+ * <pre> -stopwords &lt;file&gt;
+ *  A file containing stopwords to override the default ones.
+ *  Using this option automatically sets the flag ('-S') to use the
+ *  stoplist if the file exists.
+ *  Format: one stopword per line, lines starting with '#'
+ *  are interpreted as comments and ignored.</pre>
+ * 
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
+ * @see Stopwords
  */
 public class StringToWordVector 
   extends Filter
@@ -223,6 +231,10 @@ public class StringToWordVector
   /** whether to operate on a per-class basis */
   private boolean m_doNotOperateOnPerClassBasis = false;
 
+  /** a file containing stopwords for using others than the default Rainbow 
+   * ones */
+  private File m_Stopwords = new File(System.getProperty("user.dir"));
+
   /**
    * Returns an enumeration describing the available options
    *
@@ -292,6 +304,13 @@ public class StringToWordVector
 				    + "\tbasis but based on the documents in all the classes \n"
 				    + "\t(even if a class attribute is set).",
 				    "O", 0, "-O"));
+    newVector.addElement(new Option(
+				    "\tA file containing stopwords to override the default ones.\n"
+				    + "\tUsing this option automatically sets the flag ('-S') to use the\n"
+				    + "\tstoplist if the file exists.\n"
+                                    + "\tFormat: one stopword per line, lines starting with '#'\n"
+                                    + "\tare interpreted as comments and ignored.",
+				    "stopwords", 1, "-stopwords <file>"));
 
     return newVector.elements();
   }
@@ -358,6 +377,13 @@ public class StringToWordVector
    *  minimum term frequency is not enforced on a per-class 
    *  basis but based on the documents in all the classes 
    *  (even if a class attribute is set).</pre>
+   * 
+   * <pre> -stopwords &lt;file&gt;
+   *  A file containing stopwords to override the default ones.
+   *  Using this option automatically sets the flag ('-S') to use the
+   *  stoplist if the file exists.
+   *  Format: one stopword per line, lines starting with '#'
+   *  are interpreted as comments and ignored.</pre>
    * 
    <!-- options-end -->
    *
@@ -427,6 +453,11 @@ public class StringToWordVector
         ((OptionHandler) stemmer).setOptions(stemmerSpec);
       setStemmer(stemmer);
     }
+
+    value = Utils.getOption("stopwords", options);
+    if (value.length() != 0) {
+      setStopwords(new File(value));
+    }
   }
 
   /**
@@ -436,7 +467,7 @@ public class StringToWordVector
    */
   public String [] getOptions() {
 
-    String [] options = new String [22];
+    String [] options = new String [24];
     int current = 0;
 
     options[current++] = "-D"; 
@@ -491,6 +522,11 @@ public class StringToWordVector
     
     if(this.getDoNotOperateOnPerClassBasis())
       options[current++] = "-O";
+    
+    if(!getStopwords().isDirectory()) {
+        options[current++] = "-stopwords";
+        options[current++] = getStopwords().getAbsolutePath();
+    }
     
     while (current < options.length) {
       options[current++] = "";
@@ -1103,6 +1139,42 @@ public class StringToWordVector
   public String stemmerTipText() {
     return "The stemming algorithm to use on the words.";
   }
+
+  /**
+   * sets the file containing the stopwords, null or a directory unset the
+   * stopwords. If the file exists, it automatically turns on the flag to
+   * use the stoplist.
+   *
+   * @param value     the file containing the stopwords
+   */
+  public void setStopwords(File value) {
+    if (value == null)
+      value = new File(System.getProperty("user.dir"));
+
+    m_Stopwords = value;
+    if (value.exists() && value.isFile())
+      setUseStoplist(true);
+  }
+
+  /**
+   * returns the file used for obtaining the stopwords, if the file represents
+   * a directory then the default ones are used.
+   *
+   * @return          the file containing the stopwords
+   */
+  public File getStopwords() {
+    return m_Stopwords;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String stopwordsTipText() {
+    return "The file containing the stopwords (if this is a directory then the default ones are used).";
+  }
   
   /**
    * sorts an array
@@ -1163,6 +1235,17 @@ public class StringToWordVector
    * determines the dictionary
    */
   private void determineDictionary() {
+    // initialize stopwords
+    Stopwords stopwords = new Stopwords();
+    if (getUseStoplist()) {
+      try {
+	if (!getStopwords().exists() && !getStopwords().isDirectory())
+	  stopwords.read(getStopwords());
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+      }
+    }
 
     // Operate on a per-class basis if class attribute is set
     int classInd = getInputFormat().classIndex();
@@ -1212,7 +1295,7 @@ public class StringToWordVector
             word = m_Stemmer.stem(word);
             
             if(this.m_useStoplist==true)
-                if(weka.core.Stopwords.isStopword(word))
+                if(stopwords.is(word))
                     continue;
             
             if(!(h.contains(word)))
