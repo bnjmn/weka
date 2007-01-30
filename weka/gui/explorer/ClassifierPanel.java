@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.101 $
+ * @version $Revision: 1.102 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -2020,7 +2020,7 @@ public class ClassifierPanel
 
 	outBuff.append("=== Model information ===\n\n");
 	outBuff.append("Filename:     " + selected.getName() + "\n");
-	outBuff.append("Scheme:       " + cname);
+	outBuff.append("Scheme:       " + classifier.getClass().getName());
 	if (classifier instanceof OptionHandler) {
 	  String [] o = ((OptionHandler) classifier).getOptions();
 	  outBuff.append(" " + Utils.joinOptions(o));
