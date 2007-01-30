@@ -117,7 +117,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.57 $
  */
 public class ClustererPanel
   extends JPanel
@@ -1366,7 +1366,7 @@ public class ClustererPanel
 
 	outBuff.append("=== Model information ===\n\n");
 	outBuff.append("Filename:     " + selected.getName() + "\n");
-	outBuff.append("Scheme:       " + cname);
+	outBuff.append("Scheme:       " + clusterer.getClass().getName());
 	if (clusterer instanceof OptionHandler) {
 	  String [] o = ((OptionHandler) clusterer).getOptions();
 	  outBuff.append(" " + Utils.joinOptions(o));
