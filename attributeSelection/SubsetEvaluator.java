@@ -22,16 +22,19 @@
 
 package weka.attributeSelection;
 
-import java.util.*;
+import java.util.BitSet;
 
 /** 
  * Abstract attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class SubsetEvaluator extends ASEvaluation {
 
+  /** for serialization */
+  private static final long serialVersionUID = 917898857215312640L;
+  
   // ===============
   // Public methods.
   // ===============

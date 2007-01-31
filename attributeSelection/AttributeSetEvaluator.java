@@ -60,9 +60,13 @@ package weka.attributeSelection;
  * Abstract attribute set evaluator.
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AttributeSetEvaluator extends ASEvaluation {
+  
+    /** for serialization */
+    private static final long serialVersionUID = -5744881009422257389L;
+  
     // ===============
     // Public methods.
     // ===============

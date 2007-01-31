@@ -27,9 +27,13 @@ package weka.attributeSelection;
  * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class AttributeEvaluator extends ASEvaluation {
+  
+    /** for serialization */
+    private static final long serialVersionUID = -5389991923744272762L;
+  
     // ===============
     // Public methods.
     // ===============

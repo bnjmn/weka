@@ -35,11 +35,14 @@ import java.io.Serializable;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public abstract class ASEvaluation
   implements Serializable, CapabilitiesHandler {
 
+  /** for serialization */
+  private static final long serialVersionUID = 2091705669885950849L;
+  
   // ===============
   // Public methods.
   // ===============
