@@ -32,11 +32,14 @@ import java.util.Iterator;
  * Class representing the head of a rule.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Head extends LiteralSet {
   
+  /** for serialization */
+  private static final long serialVersionUID = 5068076274253706199L;
+
   /**
    * Constructor without storing the counter-instances.
    */

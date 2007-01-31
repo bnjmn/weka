@@ -24,24 +24,26 @@
 
 package weka.associations.tertius;
 
-import weka.core.Instances;
 import weka.core.Instance;
-import java.util.Enumeration;
-import java.util.ListIterator;
-import java.util.LinkedList;
-import java.util.ArrayList;
-import java.util.Comparator;
+import weka.core.Instances;
+
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Enumeration;
 
 /**
  * Class representing a rule with a body and a head.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class Rule implements Serializable, Cloneable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7763378359090435505L;
 
   /** The body of the rule. */
   private Body m_body;

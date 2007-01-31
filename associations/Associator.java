@@ -35,11 +35,14 @@ import java.io.Serializable;
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public abstract class Associator 
   implements Cloneable, Serializable, CapabilitiesHandler {
  
+  /** for serialization */
+  private static final long serialVersionUID = -3017644543382432070L;
+  
   /**
    * Generates an associator. Must initialize all fields of the associator
    * that are not being set via options (ie. multiple calls of buildAssociator

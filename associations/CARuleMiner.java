@@ -22,9 +22,8 @@
 
 package weka.associations;
 
-import weka.core.Instances;
 import weka.core.FastVector;
-import weka.core.WekaException;
+import weka.core.Instances;
 import weka.core.OptionHandler;
 
 /** 
@@ -32,7 +31,7 @@ import weka.core.OptionHandler;
  * class association rules implemement this interface.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public interface CARuleMiner extends OptionHandler  {
     

@@ -31,10 +31,13 @@ import weka.core.Instance;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class Literal implements Serializable {
 
+  /** for serialization */
+  private static final long serialVersionUID = 2675363669503575771L;
+  
   private Predicate m_predicate;
 
   public static final int NEG = 0;

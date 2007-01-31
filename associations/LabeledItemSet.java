@@ -23,11 +23,12 @@
 package weka.associations;
 
 import weka.core.FastVector;
-import weka.core.Instances;
 import weka.core.Instance;
-import java.util.Hashtable;
-import java.util.Enumeration;
+import weka.core.Instances;
+
 import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 
 /**
@@ -39,12 +40,15 @@ import java.io.Serializable;
  * Because every item set knows its class label the training set can be splitted up virtually.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class LabeledItemSet extends ItemSet implements Serializable{
 
-     /** The class label. */
+  /** for serialization */
+  private static final long serialVersionUID = 4158771925518299903L;
+
+    /** The class label. */
     protected int m_classLabel;
 
      /** The support of the rule. */
