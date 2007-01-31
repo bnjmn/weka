@@ -25,16 +25,18 @@
 package weka.associations.tertius;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SimpleLinkedList implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4518028976847186200L;
 
   public class LinkedListIterator implements Serializable {
     Entry current = first;

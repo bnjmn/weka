@@ -36,10 +36,13 @@ import java.util.ArrayList;
  * of a rule.
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public abstract class LiteralSet implements Serializable, Cloneable {
+  
+  /** for serialization */
+  private static final long serialVersionUID = 6094536488654503152L;
   
   /** Literals contained in this set. */
   private ArrayList m_literals;

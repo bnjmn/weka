@@ -30,9 +30,12 @@ import weka.associations.Tertius;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AttributeValueLiteral extends Literal {
+
+  /** for serialization */
+  private static final long serialVersionUID = 4077436297281456239L;
 
   private String m_value;
   
