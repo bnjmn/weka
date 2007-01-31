@@ -20,19 +20,22 @@
  *
  */
 
-
 package weka.attributeSelection;
+
 import weka.clusterers.Clusterer;
 
 /** 
  * Abstract unsupervised attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class UnsupervisedSubsetEvaluator 
   extends SubsetEvaluator{
 
+  /** for serialization */
+  static final long serialVersionUID = 627934376267488763L;
+  
   /**
    * Return the number of clusters used by the subset evaluator
    *

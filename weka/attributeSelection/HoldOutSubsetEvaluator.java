@@ -22,8 +22,10 @@
 
 package weka.attributeSelection;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+
+import java.util.BitSet;
 
 /** 
  * Abstract attribute subset evaluator capable of evaluating subsets with
@@ -31,10 +33,13 @@ import weka.core.*;
  * train the subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class HoldOutSubsetEvaluator extends SubsetEvaluator {
 
+  /** for serialization */
+  private static final long serialVersionUID = 8280529785412054174L;
+  
   /**
    * Evaluates a subset of attributes with respect to a set of instances.
    * @param subset a bitset representing the attribute subset to be
