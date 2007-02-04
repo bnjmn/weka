@@ -109,7 +109,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Wavelet
   extends SimpleBatchFilter 
@@ -547,7 +547,7 @@ public class Wavelet
     for (i = 0; i < data.numAttributes(); i++) {
       n++;
       if (i == data.classIndex())
-	atts.addElement(new Attribute(data.attribute(i).name()));
+	atts.addElement((Attribute) data.attribute(i).copy());
       else
 	atts.addElement(new Attribute(prefix + "_" + n));
     }
@@ -597,14 +597,14 @@ public class Wavelet
     int		level;
     int		length;
     double[]	clsVal;
-    String	clsName;
+    Attribute	clsAtt;
 
     clsIdx  = instances.classIndex();
     clsVal  = null;
-    clsName = "<noname>";
+    clsAtt  = null;
     if (clsIdx > -1) {
       clsVal  = instances.attributeToDoubleArray(clsIdx);
-      clsName = instances.classAttribute().name();
+      clsAtt  = (Attribute) instances.classAttribute().copy();
       instances.setClassIndex(-1);
       instances.deleteAttributeAt(clsIdx);
     }
@@ -634,7 +634,7 @@ public class Wavelet
 
     // add class again
     if (clsIdx > -1) {
-      result.insertAttributeAt(new Attribute(clsName), clsIdx);
+      result.insertAttributeAt(clsAtt, clsIdx);
       result.setClassIndex(clsIdx);
       for (i = 0; i < clsVal.length; i++)
 	result.instance(i).setClassValue(clsVal[i]);
@@ -658,6 +658,7 @@ public class Wavelet
     result.enable(Capability.MISSING_VALUES);
     
     // class
+    result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.NO_CLASS);

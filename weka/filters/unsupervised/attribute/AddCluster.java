@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AddCluster 
   extends Filter 
@@ -79,6 +79,23 @@ public class AddCluster
 
   /** Filter for removing attributes */
   protected Filter m_removeAttributes = new Remove();
+
+  /** 
+   * Returns the Capabilities of this filter, makes sure that the class is
+   * never set (for the clusterer).
+   *
+   * @param data	the data to use for customization
+   * @return            the capabilities of this object, based on the data
+   * @see               #getCapabilities()
+   */
+  public Capabilities getCapabilities(Instances data) {
+    Instances	newData;
+    
+    newData = new Instances(data, 0);
+    newData.setClassIndex(-1);
+    
+    return super.getCapabilities(newData);
+  }
 
   /** 
    * Returns the Capabilities of this filter.
@@ -101,7 +118,7 @@ public class AddCluster
    * @throws Exception		if the test fails
    */
   protected void testInputFormat(Instances instanceInfo) throws Exception {
-    getCapabilities().testWithFail(removeIgnored(instanceInfo));
+    getCapabilities(instanceInfo).testWithFail(removeIgnored(instanceInfo));
   }
 
   /**
