@@ -35,12 +35,14 @@ import weka.core.RelationalLocator;
 import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.Iterator;
 
 /** 
  * An abstract class for instance filters: objects that take instances
@@ -70,7 +72,7 @@ import java.util.Enumeration;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -139,6 +141,45 @@ public abstract class Filter
 
     result = new Capabilities(this);
     result.setMinimumNumberInstances(0);
+    
+    return result;
+  }
+
+  /** 
+   * Returns the Capabilities of this filter, customized based on the data.
+   * I.e., if removes all class capabilities, in case there's not class
+   * attribute present or removes the NO_CLASS capability, in case that
+   * there's a class present.
+   *
+   * @param data	the data to use for customization
+   * @return            the capabilities of this object, based on the data
+   * @see               #getCapabilities()
+   */
+  public Capabilities getCapabilities(Instances data) {
+    Capabilities 	result;
+    Capabilities 	classes;
+    Iterator		iter;
+    Capability		cap;
+
+    result = getCapabilities();
+
+    // no class? -> remove all class capabilites apart from NO_CLASS
+    if (data.classIndex() == -1) {
+      classes = result.getClassCapabilities();
+      iter    = classes.capabilities();
+      while (iter.hasNext()) {
+	cap = (Capability) iter.next();
+	if (cap != Capability.NO_CLASS) {
+	  result.disable(cap);
+	  result.disableDependency(cap);
+	}
+      }
+    }
+    // class? -> remove NO_CLASS
+    else {
+      result.disable(Capability.NO_CLASS);
+      result.disableDependency(Capability.NO_CLASS);
+    }
     
     return result;
   }
@@ -371,7 +412,7 @@ public abstract class Filter
    * @throws Exception		if the test fails
    */
   protected void testInputFormat(Instances instanceInfo) throws Exception {
-    getCapabilities().testWithFail(instanceInfo);
+    getCapabilities(instanceInfo).testWithFail(instanceInfo);
   }
 
   /**

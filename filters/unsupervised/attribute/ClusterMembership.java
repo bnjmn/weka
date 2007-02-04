@@ -64,7 +64,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -101,6 +101,23 @@ public class ClusterMembership
     
     return result;
   }
+
+  /** 
+   * Returns the Capabilities of this filter, makes sure that the class is
+   * never set (for the clusterer).
+   *
+   * @param data	the data to use for customization
+   * @return            the capabilities of this object, based on the data
+   * @see               #getCapabilities()
+   */
+  public Capabilities getCapabilities(Instances data) {
+    Instances	newData;
+    
+    newData = new Instances(data, 0);
+    newData.setClassIndex(-1);
+    
+    return super.getCapabilities(newData);
+  }
   
   /**
    * tests the data whether the filter can actually handle it
@@ -109,7 +126,7 @@ public class ClusterMembership
    * @throws Exception		if the test fails
    */
   protected void testInputFormat(Instances instanceInfo) throws Exception {
-    getCapabilities().testWithFail(removeIgnored(instanceInfo));
+    getCapabilities(instanceInfo).testWithFail(removeIgnored(instanceInfo));
   }
   
   /**
