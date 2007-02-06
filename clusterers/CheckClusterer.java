@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -152,7 +153,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -352,6 +353,7 @@ public class CheckClusterer
     boolean weightedInstancesHandler = weightedInstancesHandler()[0];
     boolean multiInstanceHandler = multiInstanceHandler()[0];
     println("--> Clusterer tests");
+    declaresSerialVersionUID();
     runTests(weightedInstancesHandler, multiInstanceHandler, updateable);
   }
   
@@ -502,6 +504,27 @@ public class CheckClusterer
       println("no");
       result[0] = false;
     }
+    
+    return result;
+  }
+  
+  /**
+   * tests for a serialVersionUID. Fails in case the scheme doesn't declare
+   * a UID.
+   *
+   * @return index 0 is true if the scheme declares a UID
+   */
+  protected boolean[] declaresSerialVersionUID() {
+    boolean[] result = new boolean[2];
+    
+    print("serialVersionUID...");
+    
+    result[0] = !SerializationHelper.needsUID(m_Clusterer.getClass());
+    
+    if (result[0])
+      println("yes");
+    else
+      println("no");
     
     return result;
   }

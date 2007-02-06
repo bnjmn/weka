@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
 import weka.core.TestInstances;
 import weka.core.Utils;
@@ -176,7 +177,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see TestInstances
  */
 public class CheckAttributeSelection 
@@ -437,6 +438,7 @@ public class CheckAttributeSelection
     boolean weightedInstancesHandler = weightedInstancesHandler()[0];
     boolean multiInstanceHandler = multiInstanceHandler()[0];
     println("--> Scheme tests");
+    declaresSerialVersionUID();
     testsPerClassType(Attribute.NOMINAL,    weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.NUMERIC,    weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.DATE,       weightedInstancesHandler, multiInstanceHandler);
@@ -679,6 +681,32 @@ public class CheckAttributeSelection
       println("no");
       result[0] = false;
     }
+    
+    return result;
+  }
+  
+  /**
+   * tests for a serialVersionUID. Fails in case the schemes don't declare
+   * a UID (both must!).
+   *
+   * @return index 0 is true if the scheme declares a UID
+   */
+  protected boolean[] declaresSerialVersionUID() {
+    boolean[] result = new boolean[2];
+    boolean eval;
+    boolean search;
+    
+    print("serialVersionUID...");
+    
+    eval   = !SerializationHelper.needsUID(m_Evaluator.getClass());
+    search = !SerializationHelper.needsUID(m_Search.getClass());
+    
+    result[0] = eval && search;
+    
+    if (result[0])
+      println("yes");
+    else
+      println("no");
     
     return result;
   }
