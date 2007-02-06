@@ -20,13 +20,15 @@
 
 package weka.datagenerators;
 
+import weka.core.SerializationHelper;
+
 import junit.framework.TestCase;
 
 /**
  * Abstract Test class for ClusterDefinitions.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractClusterDefinitionTest 
   extends TestCase {
@@ -76,5 +78,13 @@ public abstract class AbstractClusterDefinitionTest
     catch (Exception e) {
       fail("setOptions(getOptions()) does not work: " + e.getMessage());
     }
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    if (SerializationHelper.needsUID(m_Definition.getClass()))
+      fail("Doesn't declare serialVersionUID!");
   }
 }

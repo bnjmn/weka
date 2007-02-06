@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -365,6 +365,18 @@ public abstract class AbstractClassifierTest
 
     if (!result[0])
       fail("Error in toString() method!");
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    boolean[]     result;
+
+    result = m_Tester.declaresSerialVersionUID();
+
+    if (!result[0])
+      fail("Doesn't declare serialVersionUID!");
   }
   
   /**

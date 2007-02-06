@@ -20,6 +20,8 @@
 
 package weka.datagenerators;
 
+import weka.core.SerializationHelper;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -29,7 +31,7 @@ import junit.framework.TestCase;
  * Abstract Test class for DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractDataGeneratorTest 
   extends TestCase {
@@ -97,5 +99,13 @@ public abstract class AbstractDataGeneratorTest
     catch (Exception e) {
       fail("Generation of data failed: " + e.getMessage());
     }
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    if (SerializationHelper.needsUID(m_Generator.getClass()))
+      fail("Doesn't declare serialVersionUID!");
   }
 }

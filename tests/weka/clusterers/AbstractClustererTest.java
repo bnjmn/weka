@@ -33,7 +33,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean, boolean)
@@ -251,6 +251,18 @@ public abstract class AbstractClustererTest
     // relational
     if (!m_multiInstanceHandler)
       checkAttributes(false, false, false, false, true,  true);
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    boolean[]     result;
+
+    result = m_Tester.declaresSerialVersionUID();
+
+    if (!result[0])
+      fail("Doesn't declare serialVersionUID!");
   }
 
   /**

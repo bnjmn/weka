@@ -35,7 +35,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  * @see CheckKernel
  * @see CheckKernel#testsPerClassType(int, boolean, boolean)
@@ -327,6 +327,18 @@ public abstract class AbstractKernelTest
     // relational
     if (!m_multiInstanceHandler)
       checkAttributes(false, false, false, false, true,  true);
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    boolean[]     result;
+
+    result = m_Tester.declaresSerialVersionUID();
+
+    if (!result[0])
+      fail("Doesn't declare serialVersionUID!");
   }
 
   /**

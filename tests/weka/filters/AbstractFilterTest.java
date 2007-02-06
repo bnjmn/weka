@@ -9,6 +9,7 @@ import weka.classifiers.meta.FilteredClassifier;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.core.Capabilities.Capability;
 import weka.test.Regression;
@@ -24,7 +25,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class AbstractFilterTest
   extends TestCase {
@@ -205,6 +206,14 @@ public abstract class AbstractFilterTest
       fail("Exception thrown on useFilter(): \n" + ex.getMessage());
     }
     return result;
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    if (SerializationHelper.needsUID(m_Filter.getClass()))
+      fail("Doesn't declare serialVersionUID!");
   }
   
   /**

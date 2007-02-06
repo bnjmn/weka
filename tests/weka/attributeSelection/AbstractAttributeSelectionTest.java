@@ -35,7 +35,7 @@ import junit.framework.TestCase;
  * method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  *
  * @see CheckAttributeSelection
  * @see CheckAttributeSelection#testsPerClassType(int, boolean, boolean)
@@ -337,6 +337,18 @@ public abstract class AbstractAttributeSelectionTest
     // relational
     if (!m_multiInstanceHandler)
       checkAttributes(false, false, false, false, true,  true);
+  }
+
+  /**
+   * tests whether the scheme declares a serialVersionUID.
+   */
+  public void testSerialVersionUID() {
+    boolean[]     result;
+
+    result = m_Tester.declaresSerialVersionUID();
+
+    if (!result[0])
+      fail("Doesn't declare serialVersionUID!");
   }
 
   /**
