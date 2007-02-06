@@ -30,6 +30,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -159,7 +160,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  * @see TestInstances
  */
 public class CheckClassifier
@@ -342,6 +343,7 @@ public class CheckClassifier
     boolean weightedInstancesHandler = weightedInstancesHandler()[0];
     boolean multiInstanceHandler = multiInstanceHandler()[0];
     println("--> Classifier tests");
+    declaresSerialVersionUID();
     testToString();
     testsPerClassType(Attribute.NOMINAL,    updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.NUMERIC,    updateableClassifier, weightedInstancesHandler, multiInstanceHandler);
@@ -440,15 +442,38 @@ public class CheckClassifier
       Classifier copy = (Classifier) m_Classifier.getClass().newInstance();
       copy.toString();
       result[0] = true;
+      println("yes");
     }
     catch (Exception e) {
       result[0] = false;
+      println("no");
       if (m_Debug) {
         println("\n=== Full report ===");
         e.printStackTrace();
         println("\n");
       }
     }
+    
+    return result;
+  }
+  
+  /**
+   * tests for a serialVersionUID. Fails in case the scheme doesn't declare
+   * a UID.
+   *
+   * @return index 0 is true if the scheme declares a UID
+   */
+  protected boolean[] declaresSerialVersionUID() {
+    boolean[] result = new boolean[2];
+    
+    print("serialVersionUID...");
+    
+    result[0] = !SerializationHelper.needsUID(m_Classifier.getClass());
+    
+    if (result[0])
+      println("yes");
+    else
+      println("no");
     
     return result;
   }
