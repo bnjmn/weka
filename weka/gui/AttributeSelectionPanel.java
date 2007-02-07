@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui;
 
 import weka.core.Instances;
@@ -56,15 +55,23 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class AttributeSelectionPanel extends JPanel {
+public class AttributeSelectionPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 627131485290359194L;
 
   /**
    * A table model that looks at the names of attributes and maintains
    * a list of attributes that have been "selected".
    */
-  class AttributeTableModel extends AbstractTableModel {
+  class AttributeTableModel
+    extends AbstractTableModel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4152987434024338064L;
 
     /** The instances who's attribute structure we are reporting */
     protected Instances m_Instances;

@@ -35,9 +35,15 @@ import javax.swing.JPanel;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class PrintablePanel extends JPanel implements PrintableHandler {
+public class PrintablePanel
+  extends JPanel
+  implements PrintableHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6281532227633417538L;
+  
   /** the class responsible for printing */
   protected PrintableComponent m_Printer = null;
   

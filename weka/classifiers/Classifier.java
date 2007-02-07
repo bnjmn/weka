@@ -43,11 +43,14 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
  
+  /** for serialization */
+  private static final long serialVersionUID = 6502780192411755341L;
+  
   /** Whether the classifier is run in debug mode. */
   protected boolean m_Debug = false;
 

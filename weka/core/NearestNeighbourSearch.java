@@ -33,9 +33,13 @@ import weka.core.Instances;
  * do nearest neighbour search should extend this class. 
  *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public abstract class NearestNeighbourSearch implements Serializable{
+public abstract class NearestNeighbourSearch
+  implements Serializable{
+
+  /** for serialization */
+  private static final long serialVersionUID = -7926775031901072687L;
   
   /** The neighbourhood of instances to find neighbours in. */
   protected Instances m_Instances;

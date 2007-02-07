@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.filters;
 
 import weka.core.Instance;
@@ -136,7 +135,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see     SimpleBatchFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -145,6 +144,9 @@ import weka.core.Instances;
 public abstract class SimpleStreamFilter
   extends SimpleFilter 
   implements StreamableFilter {
+
+  /** for serialization */
+  private static final long serialVersionUID = 2754882676192747091L;
 
   /**
    * Returns true if the output format is immediately available after the

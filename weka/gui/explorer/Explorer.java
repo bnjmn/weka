@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.explorer;
 
 import weka.core.Capabilities;
@@ -55,9 +54,13 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
-public class Explorer extends JPanel {
+public class Explorer
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7674003708867909578L;
 
   /** The panel for preprocessing instances */
   protected PreprocessPanel m_PreprocessPanel = new PreprocessPanel();

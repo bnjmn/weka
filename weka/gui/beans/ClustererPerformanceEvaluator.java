@@ -22,34 +22,26 @@
 
 package weka.gui.beans;
 
-import weka.clusterers.Clusterer;
 import weka.clusterers.ClusterEvaluation;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.FastVector;
-import weka.gui.Logger;
-import weka.gui.visualize.PlotData2D;
+import weka.clusterers.Clusterer;
 
 import java.io.Serializable;
-import java.util.Vector;
 import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.BorderFactory;
-import java.awt.*;
-import javax.swing.JScrollPane;
+import java.util.Vector;
 
 /**
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class ClustererPerformanceEvaluator extends AbstractEvaluator implements BatchClustererListener, Serializable, UserRequestAcceptor, EventConstraints {
+public class ClustererPerformanceEvaluator
+  extends AbstractEvaluator
+  implements BatchClustererListener, Serializable, UserRequestAcceptor, 
+             EventConstraints {
+
+  /** for serialization */
+  private static final long serialVersionUID = 8041163601333978584L;
 
   /**
    * Evaluation object used for evaluating a clusterer

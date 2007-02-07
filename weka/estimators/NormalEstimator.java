@@ -32,9 +32,14 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class NormalEstimator extends Estimator implements IncrementalEstimator {
+public class NormalEstimator
+  extends Estimator
+  implements IncrementalEstimator {
+
+  /** for serialization */
+  private static final long serialVersionUID = 93584379632315841L;
 
   /** The sum of the weights */
   private double m_SumOfWeights;

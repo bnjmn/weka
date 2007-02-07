@@ -33,11 +33,13 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-
 public class LUDecomposition 
   implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2731022568037808629L;
 
   /** 
    * Array for internal storage of decomposition.

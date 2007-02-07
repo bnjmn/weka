@@ -22,21 +22,25 @@
 
 package weka.core;
 
-import java.util.Properties;
-import java.util.Map;
-import java.util.Enumeration;
 import java.io.InputStream;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Simple class that extends the Properties class so that the properties are
  * unable to be modified.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class ProtectedProperties extends Properties {
+public class ProtectedProperties
+  extends Properties {
 
-  // the properties need to be open during construction of the object
+  /** for serialization */
+  private static final long serialVersionUID = 3876658672657323985L;
+
+  /** the properties need to be open during construction of the object */
   private boolean closed = false;
 
   /**

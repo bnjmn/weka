@@ -96,7 +96,7 @@ import java.util.ArrayList;
  *
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class LBR 
   extends Classifier
@@ -111,7 +111,11 @@ public class LBR
    * with an algorithm.  This reduces the memory overheads and time required 
    * when manipulating and referencing Instances and their Attributes.  
    */
-  public class Indexes implements Serializable {
+  public class Indexes
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -2771490019751421307L;
     
     /** the array instance indexes **/
     public boolean [] m_InstIndexes;

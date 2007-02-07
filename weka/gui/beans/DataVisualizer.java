@@ -23,33 +23,35 @@
 package weka.gui.beans;
 
 import weka.core.Instances;
-import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
 
-import java.io.Serializable;
-import java.util.Vector;
-import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 import java.awt.BorderLayout;
-import javax.swing.ImageIcon;
+import java.beans.PropertyChangeListener;
+import java.beans.VetoableChangeListener;
+import java.beans.beancontext.BeanContext;
+import java.beans.beancontext.BeanContextChild;
+import java.beans.beancontext.BeanContextChildSupport;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import java.awt.*;
-import java.beans.*;
-import java.beans.beancontext.*;
+import javax.swing.JPanel;
 
 /**
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
 	     TestSetListener, Visible, UserRequestAcceptor, Serializable,
 	     BeanContextChild {
+
+  /** for serialization */
+  private static final long serialVersionUID = 1949062132560159028L;
 
   protected BeanVisual m_visual;
 

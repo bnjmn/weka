@@ -33,9 +33,13 @@ import java.util.Enumeration;
  * either 'is < some_value' or 'is >= some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class TwoWayNumericSplit extends Splitter {
+public class TwoWayNumericSplit
+  extends Splitter {
+
+  /** for serialization */
+  private static final long serialVersionUID = 449769177903158283L;
 
   /** The index of the attribute the split depends on */
   private int attIndex;

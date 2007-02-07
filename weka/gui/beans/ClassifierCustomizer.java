@@ -22,27 +22,32 @@
 
 package weka.gui.beans;
 
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import java.beans.*;
-import java.awt.BorderLayout;
-import java.awt.event.*;
-import javax.swing.JPanel;
-import javax.swing.JCheckBox;
+import weka.classifiers.Classifier;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
-import weka.gui.PropertyPanel;
-import weka.classifiers.Classifier;
 
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 /**
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class ClassifierCustomizer extends JPanel
+public class ClassifierCustomizer
+  extends JPanel
   implements Customizer {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6688000820160821429L;
 
   static {
      GenericObjectEditor.registerEditors();

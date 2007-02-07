@@ -20,18 +20,41 @@
  *
  */
 
-
 package weka.gui.treevisualizer;
 
-import java.awt.*;
-import javax.swing.*;
-import java.awt.event.*;
-import java.io.*;
 import weka.core.Instances;
 import weka.gui.visualize.PrintablePanel;
 import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.VisualizePanelListener;
-import weka.gui.visualize.VisualizePanelEvent;
+
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JTextField;
+import javax.swing.Timer;
 
 /**
  * Class for displaying a Node structure in Swing. <p>
@@ -60,11 +83,14 @@ import weka.gui.visualize.VisualizePanelEvent;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class TreeVisualizer extends PrintablePanel implements MouseMotionListener,
-			       MouseListener,ActionListener,ItemListener {
+public class TreeVisualizer
+  extends PrintablePanel
+  implements MouseMotionListener, MouseListener, ActionListener, ItemListener {
 
+  /** for serialization */
+  private static final long serialVersionUID = -8668637962504080749L;
 
   /** The placement algorithm for the Node structure. */
   private NodePlace m_placer;  

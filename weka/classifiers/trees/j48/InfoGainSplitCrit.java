@@ -28,9 +28,13 @@ import weka.core.Utils;
  * Class for computing the information gain for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public final class InfoGainSplitCrit extends EntropyBasedSplitCrit{
+public final class InfoGainSplitCrit
+  extends EntropyBasedSplitCrit{
+
+  /** for serialization */
+  private static final long serialVersionUID = 4892105020180728499L;
 
   /**
    * This method is a straightforward implementation of the information

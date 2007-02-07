@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import java.awt.Component;
@@ -33,12 +32,15 @@ import javax.swing.ListCellRenderer;
  * A specialized renderer that takes care of JLabels in a JList.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class InfoPanelCellRenderer 
   extends JLabel 
   implements ListCellRenderer {
+
+  /** for serialization */
+  private static final long serialVersionUID = -533380118807178531L;
   
   /**
    * the constructor

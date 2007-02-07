@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.visualize;
 
 import weka.core.FastVector;
@@ -49,9 +48,13 @@ import javax.swing.JTextArea;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
-public class Plot2D extends JPanel {
+public class Plot2D
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1673162410856660442L;  
 
   /* constants for shape types */
   public static final int MAX_SHAPES = 5;

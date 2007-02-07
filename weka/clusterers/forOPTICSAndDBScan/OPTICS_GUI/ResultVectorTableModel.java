@@ -40,9 +40,13 @@ import javax.swing.table.AbstractTableModel;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class ResultVectorTableModel extends AbstractTableModel {
+public class ResultVectorTableModel
+    extends AbstractTableModel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -7732711470435549210L;
 
     /**
      * Holds the ClusterOrder (dataObjects with their r_dist and c_dist) for the GUI

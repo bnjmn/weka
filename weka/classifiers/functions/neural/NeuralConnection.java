@@ -21,19 +21,21 @@
 
 package weka.classifiers.functions.neural;
 
-import java.awt.Graphics;
 import java.awt.Color;
-import java.io.*;
+import java.awt.Graphics;
+import java.io.Serializable;
 
 /** 
  * Abstract unit in a NeuralNetwork.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
+public abstract class NeuralConnection
+  implements Serializable {
 
-public abstract class NeuralConnection implements Serializable {
-
+  /** for serialization */
+  private static final long serialVersionUID = -286208828571059163L;
 
   //bitwise flags for the types of unit.
 
@@ -110,6 +112,8 @@ public abstract class NeuralConnection implements Serializable {
   /**
    * Constructs The unit with the basic connection information prepared for
    * use. 
+   * 
+   * @param id the unique id of the unit
    */
   public NeuralConnection(String id) {
     

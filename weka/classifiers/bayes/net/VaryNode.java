@@ -26,91 +26,99 @@ import java.io.Serializable;
 
 /**
  * Part of ADTree implementation. See ADNode.java for more details.
+ * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class VaryNode implements Serializable {
-	/** index of the node varied **/
-	public int m_iNode;
-	
-	/** most common value **/
-	public int m_nMCV;
+public class VaryNode
+  implements Serializable {
 
-        /** list of ADNode children **/
-	public ADNode [] m_ADNodes;
+  /** for serialization */
+  private static final long serialVersionUID = -6196294370675872424L;
 
-        /** Creates new VaryNode */
-        public VaryNode(int iNode) {
-                    m_iNode = iNode;
-        }
-         
-          /** get counts for specific instantiation of a set of nodes
-           * @param nCounts - array for storing counts
-           * @param nNodes - array of node indexes 
-           * @param nOffsets - offset for nodes in nNodes in nCounts
-           * @param iNode - index into nNode indicating current node
-           * @param iOffset - Offset into nCounts due to nodes below iNode
-           * @param parent - parant ADNode of this VaryNode
-           * @param bSubstract - indicate whether counts should be added or substracted
-           */
-          public void getCounts(
-            int [] nCounts, 
-            int [] nNodes, 
-            int [] nOffsets, 
-            int iNode, 
-            int iOffset, 
-            ADNode parent,
-            boolean bSubstract) {
-              int nCurrentNode = nNodes[iNode];
-              for (int iValue = 0 ; iValue < m_ADNodes.length; iValue++) {
-                if (iValue != m_nMCV) {
-                  if (m_ADNodes[iValue] != null) {
-                    m_ADNodes[iValue].getCounts(nCounts, 
-                    	nNodes, 
-                    	nOffsets, 
-                    	iNode + 1, 
-                    	iOffset + nOffsets[iNode] * iValue, 
-                    	bSubstract);
-                  }
-                } else {
-                  parent.getCounts(nCounts, 
-                  	nNodes, 
-                  	nOffsets, 
-                  	iNode + 1, 
-                  	iOffset + nOffsets[iNode] * iValue, 
-                  	bSubstract);
-                  for (int iValue2 = 0; iValue2 < m_ADNodes.length; iValue2++) {
-                    if (iValue2 != m_nMCV && m_ADNodes[iValue2] != null) {
-                        m_ADNodes[iValue2].getCounts(nCounts, 
-                        	nNodes, 
-                        	nOffsets, 
-                        	iNode + 1, 
-                        	iOffset + nOffsets[iNode] * iValue, 
-                        	!bSubstract);
-                    }
-                  }
-                }
-              }
-          } // getCounts
+  /** index of the node varied **/
+  public int m_iNode;
 
-          /* print is used for debugging only, called from ADNode
-           * @param sTab - amount of space.
-           */
-        public void print(String sTab) {
-          for (int iValue = 0; iValue < m_ADNodes.length; iValue++) {
-            System.out.print(sTab + iValue + ": ");
-            if (m_ADNodes[iValue] == null) {
-              if (iValue == m_nMCV) {
-                System.out.println("MCV");
-              } else {
-                System.out.println("null");
-              }
-            } else {
-              System.out.println();
-              m_ADNodes[iValue].print();
-            }
-          }
-        } // print
+  /** most common value **/
+  public int m_nMCV;
 
-} // class VaryNode
+  /** list of ADNode children **/
+  public ADNode [] m_ADNodes;
 
+  /** Creates new VaryNode */
+  public VaryNode(int iNode) {
+    m_iNode = iNode;
+  }
+
+  /**
+   * get counts for specific instantiation of a set of nodes
+   * 
+   * @param nCounts array for storing counts
+   * @param nNodes array of node indexes 
+   * @param nOffsets offset for nodes in nNodes in nCounts
+   * @param iNode index into nNode indicating current node
+   * @param iOffset Offset into nCounts due to nodes below iNode
+   * @param parent parant ADNode of this VaryNode
+   * @param bSubstract indicate whether counts should be added or substracted
+   */
+  public void getCounts(
+      int [] nCounts, 
+      int [] nNodes, 
+      int [] nOffsets, 
+      int iNode, 
+      int iOffset, 
+      ADNode parent,
+      boolean bSubstract) {
+    int nCurrentNode = nNodes[iNode];
+    for (int iValue = 0 ; iValue < m_ADNodes.length; iValue++) {
+      if (iValue != m_nMCV) {
+	if (m_ADNodes[iValue] != null) {
+	  m_ADNodes[iValue].getCounts(nCounts, 
+	      nNodes, 
+	      nOffsets, 
+	      iNode + 1, 
+	      iOffset + nOffsets[iNode] * iValue, 
+	      bSubstract);
+	}
+      } else {
+	parent.getCounts(nCounts, 
+	    nNodes, 
+	    nOffsets, 
+	    iNode + 1, 
+	    iOffset + nOffsets[iNode] * iValue, 
+	    bSubstract);
+	for (int iValue2 = 0; iValue2 < m_ADNodes.length; iValue2++) {
+	  if (iValue2 != m_nMCV && m_ADNodes[iValue2] != null) {
+	    m_ADNodes[iValue2].getCounts(nCounts, 
+		nNodes, 
+		nOffsets, 
+		iNode + 1, 
+		iOffset + nOffsets[iNode] * iValue, 
+		!bSubstract);
+	  }
+	}
+      }
+    }
+  }
+
+  /** 
+   * print is used for debugging only, called from ADNode
+   * 
+   * @param sTab amount of space.
+   */
+  public void print(String sTab) {
+    for (int iValue = 0; iValue < m_ADNodes.length; iValue++) {
+      System.out.print(sTab + iValue + ": ");
+      if (m_ADNodes[iValue] == null) {
+	if (iValue == m_nMCV) {
+	  System.out.println("MCV");
+	} else {
+	  System.out.println("null");
+	}
+      } else {
+	System.out.println();
+	m_ADNodes[iValue].print();
+      }
+    }
+  }
+}

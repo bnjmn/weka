@@ -26,9 +26,13 @@ package weka.core;
  * Class for Weka-specific exceptions.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class WekaException extends Exception {
+public class WekaException
+  extends Exception {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6428269989006208585L;
 
   /**
    * Creates a new WekaException with no message.

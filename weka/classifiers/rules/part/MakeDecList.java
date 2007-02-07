@@ -39,9 +39,13 @@ import java.util.Vector;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
-public class MakeDecList implements Serializable, CapabilitiesHandler {
+public class MakeDecList
+  implements Serializable, CapabilitiesHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1427481323245079123L;
 
   /** Vector storing the rules. */
   private Vector theRules;

@@ -33,10 +33,13 @@ import weka.core.Capabilities.Capability;
  * classification.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
- */ 
+ * @version $Revision: 1.4 $
+ */
+public class NBTreeClassifierTree
+  extends ClassifierTree {
 
-public class NBTreeClassifierTree extends ClassifierTree {
+  /** for serialization */
+  private static final long serialVersionUID = -4472639447877404786L;
 
   public NBTreeClassifierTree(ModelSelection toSelectLocModel) {
     super(toSelectLocModel);

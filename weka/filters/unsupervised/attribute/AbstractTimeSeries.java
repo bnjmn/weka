@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.filters.unsupervised.attribute;
 
 import java.util.Enumeration;
@@ -63,10 +62,14 @@ import weka.filters.UnsupervisedFilter;
  * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public abstract class AbstractTimeSeries extends Filter
+public abstract class AbstractTimeSeries
+  extends Filter
   implements UnsupervisedFilter, OptionHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3795656792078022357L;
 
   /** Stores which columns to copy */
   protected Range m_SelectedCols = new Range();

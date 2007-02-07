@@ -29,9 +29,13 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class AttributeStats implements Serializable {    
+public class AttributeStats
+  implements Serializable {    
+
+  /** for serialization */
+  private static final long serialVersionUID = 4434688832743939380L;
   
   /** The number of int-like values */
   public int intCount = 0;

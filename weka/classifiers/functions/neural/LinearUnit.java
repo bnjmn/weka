@@ -19,21 +19,19 @@
  *    Copyright (C) 2001 Malcolm Ware
  */
 
-
 package weka.classifiers.functions.neural;
-
-
-
 
 /**
  * This can be used by the 
  * neuralnode to perform all it's computations (as a Linear unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LinearUnit implements NeuralMethod {
 
+  /** for serialization */
+  private static final long serialVersionUID = 8572152807755673630L;
   
   /**
    * This function calculates what the output value should be.

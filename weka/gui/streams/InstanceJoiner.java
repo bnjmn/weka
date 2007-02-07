@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.streams;
 
 import weka.core.Instance;
@@ -29,15 +28,17 @@ import weka.core.Instances;
 import java.io.Serializable;
 import java.util.Vector;
 
-
 /** 
  * A bean that joins two streams of instances into one.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class InstanceJoiner implements Serializable, InstanceProducer, 
-  SerialInstanceListener {
+public class InstanceJoiner
+  implements Serializable, InstanceProducer, SerialInstanceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6529972700291329656L;
 
   /** The listeners */
   private Vector listeners;

@@ -20,14 +20,12 @@
  *
  */
 
-
 package weka.experiment;
 
-import java.io.Serializable;
-import java.io.IOException;
-import java.beans.PropertyDescriptor;
 import java.beans.IntrospectionException;
-import java.lang.ClassNotFoundException;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Stores information on a property of an object: the class of the
@@ -35,9 +33,13 @@ import java.lang.ClassNotFoundException;
  * value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class PropertyNode implements Serializable {
+public class PropertyNode
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -8718165742572631384L;
 
   /** The current property value */
   public Object value;

@@ -31,9 +31,13 @@ import weka.core.Instances;
  * make reweighting of instances easy to manage.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class ReferenceInstances extends Instances {
+public class ReferenceInstances
+  extends Instances {
+
+  /** for serialization */
+  private static final long serialVersionUID = -8022666381920252997L;
 
   /**
    * Creates an empty set of instances.

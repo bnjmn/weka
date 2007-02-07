@@ -22,16 +22,12 @@
 
 package weka.gui.beans;
 
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
 import java.io.Serializable;
 import java.util.Vector;
+
 import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.awt.*;
-import java.beans.EventSetDescriptor;
 
 /**
  * Abstract base class for TrainAndTestSetProducers that contains default
@@ -39,12 +35,15 @@ import java.beans.EventSetDescriptor;
  * visual representation.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractTrainAndTestSetProducer 
   extends JPanel
   implements Visible, TrainingSetProducer, TestSetProducer, 
 	     BeanCommon, Serializable, DataSourceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1809339823613492037L;
 
   /**
    * Objects listening for trainin set events

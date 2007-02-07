@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.streams;
 
 import java.util.EventObject;
@@ -29,9 +28,13 @@ import java.util.EventObject;
  * An event encapsulating an instance stream event.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class InstanceEvent extends EventObject {
+public class InstanceEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3207259868110667379L;
   
   /** Specifies that the instance format is available */
   public static final int FORMAT_AVAILABLE   = 1;

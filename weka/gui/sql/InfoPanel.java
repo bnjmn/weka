@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.gui.ComponentHelper;
@@ -41,10 +40,15 @@ import javax.swing.JScrollPane;
  * A simple panel for displaying information, e.g. progress information etc.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
 
-public class InfoPanel extends JPanel {
+public class InfoPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7701133696481997973L;
+  
   /** the parent of this panel */
   protected JFrame m_Parent;
   

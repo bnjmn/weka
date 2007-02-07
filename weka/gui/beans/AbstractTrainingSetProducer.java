@@ -35,13 +35,17 @@ import javax.swing.JPanel;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see TrainingSetProducer
  */
-public abstract class AbstractTrainingSetProducer extends JPanel
+public abstract class AbstractTrainingSetProducer
+  extends JPanel
   implements TrainingSetProducer, Visible, 
 	     BeanCommon, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7842746199524591125L;
 
   /**
    * Objects listening for training set events

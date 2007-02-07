@@ -22,8 +22,7 @@
 
 package weka.core;
 
-import java.util.*;
-import java.io.*;
+import java.util.Enumeration;
 
 /**
  * Class for storing an instance as a sparse vector. A sparse instance
@@ -36,9 +35,13 @@ import java.io.*;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
-public class SparseInstance extends Instance {
+public class SparseInstance
+  extends Instance {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3579051291332630149L;
 
   /** The index of the attribute associated with each stored value. */
   protected int[] m_Indices;

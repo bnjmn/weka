@@ -32,11 +32,13 @@ import java.io.Serializable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-
 public abstract class Rule 
     implements WeightedInstancesHandler, Copyable, Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = 8815687740470471229L;
     
     /**
      * Get a shallow copy of this rule

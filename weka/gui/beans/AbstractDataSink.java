@@ -22,29 +22,30 @@
 
 package weka.gui.beans;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.util.Vector;
-import java.awt.*;
-import java.io.Serializable;
+import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+
+import javax.swing.JPanel;
 
 /**
  * Abstract class for objects that store instances to some destination.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
  */
 
-public abstract class AbstractDataSink extends JPanel
+public abstract class AbstractDataSink
+  extends JPanel
   implements DataSink, BeanCommon, Visible, 
 	     DataSourceListener, TrainingSetListener,
 	     TestSetListener, InstanceListener, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3956528599473814287L;
 
   /**
    * Default visual for data sources

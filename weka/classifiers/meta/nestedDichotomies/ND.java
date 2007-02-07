@@ -146,7 +146,11 @@ public class ND
   /**
    * a node class
    */
-  protected class NDTree implements Serializable {
+  protected class NDTree
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = 4284655952754474880L;
     
     /** The indices associated with this node */
     protected FastVector m_indices = null;

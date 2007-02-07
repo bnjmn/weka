@@ -31,23 +31,27 @@ import java.io.Serializable;
  * visualization.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see Serializable
  */
-public class RemoteResult implements Serializable {
+public class RemoteResult
+  implements Serializable {
 
-  // the row number that this result corresponds to
+  /** for serialization */
+  private static final long serialVersionUID = 1873271280044633808L;
+
+  /** the row number that this result corresponds to */
   private int m_rowNumber;
 
-  // how many pixels in a row
+  /** how many pixels in a row */
   private int m_rowLength;
 
-  // the result - ie. the probability distributions produced by the
-  // classifier for this row in the visualization
+  /** the result - ie. the probability distributions produced by the
+   * classifier for this row in the visualization */
   private double [][] m_probabilities;
 
-  // progress on computing this row
+  /** progress on computing this row */
   private int m_percentCompleted;
 
   /**

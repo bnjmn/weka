@@ -32,11 +32,15 @@ import java.util.EventObject;
  * Class encapsulating an incrementally built classifier and current instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  * @see EventObject
  */
-public class IncrementalClassifierEvent extends EventObject {
+public class IncrementalClassifierEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 28979464317643232L;
 
   public static final int NEW_BATCH = 0;
   public static final int WITHIN_BATCH = 1;

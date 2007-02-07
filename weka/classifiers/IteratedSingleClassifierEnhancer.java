@@ -22,23 +22,25 @@
 
 package weka.classifiers;
 
-import weka.classifiers.Classifier;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.Option;
 import weka.core.Instances;
-import java.util.Vector;
+import weka.core.Option;
+import weka.core.Utils;
+
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to
  * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class IteratedSingleClassifierEnhancer 
   extends SingleClassifierEnhancer {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6217979135443319724L;
   
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers;

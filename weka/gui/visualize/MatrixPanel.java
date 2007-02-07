@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.visualize;
 
 import weka.core.Attribute;
@@ -76,9 +75,13 @@ import javax.swing.event.ChangeListener;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
-public class MatrixPanel extends JPanel{
+public class MatrixPanel
+  extends JPanel{
+
+  /** for serialization */
+  private static final long serialVersionUID = -1232642719869188740L;
 
   /** The that panel contains the actual matrix */
   private final Plot m_plotsPanel;
@@ -307,6 +310,8 @@ public class MatrixPanel extends JPanel{
 	  final JDialog jd = new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(), 
 					 "Subsample % Panel",
 					 true) {
+	      private static final long serialVersionUID = -269823533147146296L;
+	      
 	      public void dispose() { 
 		m_resamplePercent.setText(percentTxt.getText());
 		super.dispose();
@@ -739,7 +744,12 @@ public class MatrixPanel extends JPanel{
      Requires the internal data fields of the parent class to be properly initialized
      before being created
   */
-  private class Plot extends JPanel implements MouseMotionListener, MouseListener {
+  private class Plot
+    extends JPanel
+    implements MouseMotionListener, MouseListener {
+
+    /** for serialization */
+    private static final long serialVersionUID = -1721245738439420882L;    
 
     int extpad=3, intpad=4, cellSize=100, cellRange=100, lastx=0, lasty=0, jitter=0;
     java.awt.Rectangle r;
@@ -764,6 +774,7 @@ public class MatrixPanel extends JPanel{
       cellRange = cellSize; cellSize = cellRange + 2*intpad;
 
       jPlColHeader = new JPanel() {
+	private static final long serialVersionUID = -9098547751937467506L;
         java.awt.Rectangle r;
         public void paint(Graphics g) {
           r = g.getClipBounds();
@@ -801,6 +812,8 @@ public class MatrixPanel extends JPanel{
       };
 
       jPlRowHeader = new JPanel() {
+	private static final long serialVersionUID = 8474957069309552844L;
+	
         java.awt.Rectangle r;
         public void paint(Graphics g) {
           r = g.getClipBounds();

@@ -22,18 +22,22 @@
 
 package weka.gui.beans;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import java.io.Serializable;
-import java.awt.*;
-import java.beans.PropertyChangeSupport;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  * BeanVisual encapsulates icons and label for a given bean. Has methods
@@ -41,12 +45,16 @@ import java.io.IOException;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
  */
-public class BeanVisual extends JPanel implements Serializable {
+public class BeanVisual
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6677473561687129614L;
 
   public static final String ICON_PATH="weka/gui/beans/icons/";
 

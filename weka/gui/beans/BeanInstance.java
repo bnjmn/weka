@@ -22,26 +22,30 @@
 
 package weka.gui.beans;
 
-import java.util.Vector;
-import java.beans.Beans;
-import java.awt.Component;
-import java.awt.Rectangle;
-import java.awt.Point;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.FontMetrics;
 import java.awt.Font;
-import javax.swing.JComponent;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.beans.Beans;
 import java.io.Serializable;
+import java.util.Vector;
+
+import javax.swing.JComponent;
 
 /**
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
  * @since 1.0
  */
-public class BeanInstance implements Serializable {
+public class BeanInstance
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7575653109025406342L;
 
   /**
    * class variable holding all the beans

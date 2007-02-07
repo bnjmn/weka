@@ -118,11 +118,11 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $ 
+ * @version $Revision: 1.18 $ 
  */
 public class Ridor 
   extends Classifier
-  implements OptionHandler, AdditionalMeasureProducer, WeightedInstancesHandler,
+  implements AdditionalMeasureProducer, WeightedInstancesHandler,
              TechnicalInformationHandler {
 
   /** for serialization */
@@ -926,6 +926,9 @@ public class Ridor
    */
   private abstract class Antd 
     implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = 5317379013858933369L;
     
     /** The attribute of the antecedent */
     protected Attribute att;

@@ -20,62 +20,59 @@
  *
  */
 
-
 package weka.gui;
 
-import weka.core.SelectedTag;
 import weka.core.SerializedObject;
-import weka.classifiers.Classifier;
 
-import java.lang.reflect.Array;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyEditor;
-import java.beans.PropertyEditorManager;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Font;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.FlowLayout;
-import java.awt.event.ItemListener;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.ListCellRenderer;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JPanel;
-import javax.swing.JList;
-import javax.swing.ListModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.JOptionPane;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyEditor;
+import java.beans.PropertyEditorManager;
+import java.lang.reflect.Array;
 
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /** 
  * A PropertyEditor for arrays of objects that themselves have
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
-public class GenericArrayEditor extends JPanel
+public class GenericArrayEditor
+  extends JPanel
   implements PropertyEditor {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3914616975334750480L;
 
   /** Handles property change notification */
   private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
@@ -291,6 +288,8 @@ public class GenericArrayEditor extends JPanel
 	}
 	e.setValue(value);
 	return new JPanel() {
+	  
+	  private static final long serialVersionUID = -3124434678426673334L;
 
 	  public void paintComponent(Graphics g) {
 
@@ -599,6 +598,7 @@ public class GenericArrayEditor extends JPanel
       PropertyDialog pd = new PropertyDialog(ce, 100, 100);
       pd.setSize(200,200);
       pd.addWindowListener(new WindowAdapter() {
+	private static final long serialVersionUID = -3124434678426673334L;
 	public void windowClosing(WindowEvent e) {
 	  System.exit(0);
 	}

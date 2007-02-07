@@ -20,53 +20,47 @@
  *
  */
 
-
 package weka.gui.experiment;
 
-import weka.gui.LogPanel;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 import weka.experiment.Experiment;
 import weka.experiment.RemoteExperiment;
-import weka.experiment.RemoteExperimentListener;
 import weka.experiment.RemoteExperimentEvent;
-import weka.core.Utils;
-import weka.core.SerializedObject;
+import weka.experiment.RemoteExperimentListener;
+import weka.gui.LogPanel;
 
-import java.io.Serializable;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.io.File;
+import java.io.Serializable;
 
-
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /** 
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
-public class RunPanel extends JPanel implements ActionListener {
+public class RunPanel
+  extends JPanel
+  implements ActionListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 1691868018596872051L;
 
   /** The message displayed when no experiment is running */
   protected static final String NOT_RUNNING = "Not running";
@@ -92,7 +86,12 @@ public class RunPanel extends JPanel implements ActionListener {
    * A class that handles running a copy of the experiment
    * in a separate thread
    */
-  class ExperimentRunner extends Thread implements Serializable {
+  class ExperimentRunner
+    extends Thread
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -5591889874714150118L;
 
     Experiment m_ExpCopy;
     

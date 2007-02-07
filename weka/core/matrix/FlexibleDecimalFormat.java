@@ -26,9 +26,13 @@ import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class FlexibleDecimalFormat extends DecimalFormat {
+public class FlexibleDecimalFormat
+  extends DecimalFormat {
+
+  /** for serialization */
+  private static final long serialVersionUID = 110912192794064140L;
 
   private DecimalFormat nf = null;
   private int      digits = 7;

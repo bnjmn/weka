@@ -67,7 +67,7 @@ import javax.swing.event.ChangeListener;
  * to a specific number of models with a slider bar.
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DefaultModelsPanel 
   extends JPanel 
@@ -281,6 +281,9 @@ public class DefaultModelsPanel
 	KeyStroke.getKeyStroke("released DELETE"), "deleteSelected");
     m_ModelList.getActionMap().put("deleteSelected",
 	new AbstractAction("deleteSelected") {
+      
+      private static final long serialVersionUID = 4601977182190493654L;
+      
       public void actionPerformed(ActionEvent evt) {
 	
 	Object[] currentModels = m_ModelList.getSelectedValues();

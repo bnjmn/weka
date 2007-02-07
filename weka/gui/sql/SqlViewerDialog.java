@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.gui.sql.event.ResultChangedEvent;
@@ -41,14 +40,15 @@ import javax.swing.JPanel;
 /**
  * A little dialog containing the SqlViewer.
  *
- *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
-
 public class SqlViewerDialog 
   extends JDialog 
   implements ResultChangedListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -31619864037233099L;
   
   /** the parent frame */
   protected JFrame m_Parent;

@@ -86,12 +86,21 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
-public class VisualizePanel extends PrintablePanel {
+public class VisualizePanel
+  extends PrintablePanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 240108358588153943L;
 
   /** Inner class to handle plotting */
-  protected class PlotPanel extends PrintablePanel implements Plot2DCompanion {
+  protected class PlotPanel
+    extends PrintablePanel
+    implements Plot2DCompanion {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4823674171136494204L;
 
     /** The actual generic plotting panel */
     protected Plot2D m_plot2D = new Plot2D();

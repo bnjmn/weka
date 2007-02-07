@@ -22,24 +22,25 @@
 
 package weka.classifiers;
 
-import weka.classifiers.Classifier;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 import weka.core.Option;
-import weka.core.Instances;
 import weka.core.Randomizable;
-import java.util.Vector;
+import weka.core.Utils;
+
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to randomizable
  * meta classifiers that build an ensemble from a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class RandomizableIteratedSingleClassifierEnhancer 
   extends IteratedSingleClassifierEnhancer implements Randomizable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5063351391524938557L;
   
   /** The random number seed. */
   protected int m_Seed = 1;

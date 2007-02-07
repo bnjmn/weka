@@ -22,15 +22,19 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.*;
+import weka.core.Utils;
 
 /**
  * Class for computing the gain ratio for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public final class GainRatioSplitCrit extends EntropyBasedSplitCrit{
+public final class GainRatioSplitCrit
+  extends EntropyBasedSplitCrit{
+
+  /** for serialization */
+  private static final long serialVersionUID = -433336694718670930L;
 
   /**
    * This method is a straightforward implementation of the gain

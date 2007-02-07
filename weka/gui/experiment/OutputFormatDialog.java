@@ -20,8 +20,11 @@
  *
  */
 
-
 package weka.gui.experiment;
+
+import weka.core.ClassDiscovery;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -40,17 +43,18 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import weka.core.ClassDiscovery;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-
 /** 
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class OutputFormatDialog extends JDialog {
+public class OutputFormatDialog
+  extends JDialog {
+
+  /** for serialization */
+  private static final long serialVersionUID = 2169792738187807378L;
+
   /** Signifies an OK property selection */
   public static final int APPROVE_OPTION = 0;
 

@@ -108,7 +108,7 @@ import javax.swing.tree.DefaultTreeModel;
  * <a href="http://www.java2s.com/ExampleCode/Swing-JFC/CheckBoxNodeTreeSample.htm" target="_blank">http://www.java2s.com/ExampleCode/Swing-JFC/CheckBoxNodeTreeSample.htm</a>
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddModelsPanel 
   extends JPanel
@@ -266,6 +266,9 @@ public class AddModelsPanel
 	KeyStroke.getKeyStroke("released DELETE"), "deleteSelected");
     m_ModelList.getActionMap().put("deleteSelected",
 	new AbstractAction("deleteSelected") {
+      /** for serialization */
+      private static final long serialVersionUID = -3351194234735560372L;
+      
       public void actionPerformed(ActionEvent evt) {
 	
 	Object[] currentModels = m_ModelList.getSelectedValues();

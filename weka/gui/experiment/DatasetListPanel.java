@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.experiment;
 
 import weka.core.ClassDiscovery;
@@ -59,15 +58,19 @@ import javax.swing.JScrollPane;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-
 /** 
  * This panel controls setting a list of datasets for an experiment to
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
-public class DatasetListPanel extends JPanel implements ActionListener {
+public class DatasetListPanel
+  extends JPanel
+  implements ActionListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 7068857852794405769L;
 
   /** The experiment to set the dataset list of */
   protected Experiment m_Exp;

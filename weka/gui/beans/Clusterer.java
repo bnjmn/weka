@@ -22,41 +22,26 @@
 
 package weka.gui.beans;
 
-
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
-import java.awt.*;
-import java.io.Serializable;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.beans.EventSetDescriptor;
-
-import weka.core.Instance;
+import weka.clusterers.EM;
 import weka.core.Instances;
-import weka.clusterers.*;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-//import weka.classifiers.*;
-//import weka.classifiers.rules.ZeroR;
 import weka.gui.Logger;
+
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.swing.JPanel;
 
 /**
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -66,7 +51,13 @@ import weka.gui.Logger;
  * @see TrainingSetListener
  * @see TestSetListener
  */
-public class Clusterer extends JPanel implements BeanCommon, Visible, WekaWrapper, EventConstraints, Serializable, UserRequestAcceptor, TrainingSetListener, TestSetListener{
+public class Clusterer
+  extends JPanel
+  implements BeanCommon, Visible, WekaWrapper, EventConstraints, 
+             UserRequestAcceptor, TrainingSetListener, TestSetListener{
+
+  /** for serialization */
+  private static final long serialVersionUID = 7729795159836843810L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Clusterer",

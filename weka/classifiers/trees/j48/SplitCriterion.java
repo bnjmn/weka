@@ -22,16 +22,20 @@
 
 package weka.classifiers.trees.j48;
 
-import java.io.*;
+import java.io.Serializable;
 
 /**
  * Abstract class for computing splitting criteria
  * with respect to distributions of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public abstract class SplitCriterion implements Serializable {
+public abstract class SplitCriterion
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5490996638027101259L;
 
   /**
    * Computes result of splitting criterion for given distribution.

@@ -35,11 +35,14 @@ import java.util.Vector;
  * Meta-clusterer for enhancing a base clusterer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class SingleClustererEnhancer
   extends Clusterer
   implements OptionHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = 4893928362926428671L;
 
   /** the clusterer */
   protected Clusterer m_Clusterer = new SimpleKMeans();

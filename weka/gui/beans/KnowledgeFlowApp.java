@@ -23,109 +23,102 @@
 package weka.gui.beans;
 
 import weka.core.Memory;
-import weka.core.Utils;
 import weka.core.SerializedObject;
+import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.gui.ExtensionFileFilter;
-import weka.gui.ListSelectorDialog;
-import weka.gui.LogPanel;
-import weka.gui.LookAndFeel;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
+import weka.gui.LogPanel;
+import weka.gui.LookAndFeel;
 import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
 
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.LineNumberReader;
-import java.io.InputStreamReader;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import java.util.TreeMap;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Enumeration;
-import java.util.Date;
-import java.util.Hashtable;
-import java.text.SimpleDateFormat;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.Box;
-import javax.swing.JFrame;
-import javax.swing.JWindow;
-import javax.swing.JButton;
-import javax.swing.JToggleButton;
-import javax.swing.JButton;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JLabel;
-import javax.swing.JComponent;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JTabbedPane;
-import javax.swing.JToolBar;
-import javax.swing.JScrollPane;
-import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import javax.swing.JFileChooser;
-import javax.swing.JTextArea;
-import javax.swing.filechooser.FileFilter;
-
-
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Dimension;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.Point;
-import java.awt.Font;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
+import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
-import java.awt.Insets;
-import java.awt.Component;
-import java.awt.FontMetrics;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.beans.BeanInfo;
+import java.beans.Beans;
 import java.beans.Customizer;
 import java.beans.EventSetDescriptor;
-import java.beans.Beans;
-import java.beans.PropertyDescriptor;
-import java.beans.MethodDescriptor;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.beancontext.*;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
 import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.beancontext.BeanContextChild;
+import java.beans.beancontext.BeanContextSupport;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
+import javax.swing.JToolBar;
+import javax.swing.JWindow;
+import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.14 $
+ * @version  $Revision: 1.15 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
  */
-public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
+public class KnowledgeFlowApp
+  extends JPanel
+  implements PropertyChangeListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7064906770289728431L;
 
   /**
    * Location of the property file for the KnowledgeFlowApp
@@ -299,11 +292,16 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.14 $
+   * @version $Revision: 1.15 $
    * @since 1.0
    * @see PrintablePanel
    */
-  protected class BeanLayout extends PrintablePanel {
+  protected class BeanLayout
+    extends PrintablePanel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -146377012429662757L;
+
     public void paintComponent(Graphics gx) {
       super.paintComponent(gx);
       BeanInstance.paintLabels(gx);

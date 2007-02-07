@@ -28,10 +28,13 @@ import java.text.FieldPosition;
  * Class for the format of floating point numbers
  *
  * @author Yong Wang
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
+public class FloatingPointFormat
+  extends DecimalFormat {
 
-public class FloatingPointFormat extends DecimalFormat {
+  /** for serialization */
+  private static final long serialVersionUID = 4500373755333429499L;
     
   protected DecimalFormat nf ;
   protected int width;

@@ -41,11 +41,13 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class EuclideanDistance implements DistanceFunction, Cloneable, 
-					  Serializable {
+public class EuclideanDistance
+  implements DistanceFunction, Cloneable, Serializable {
 
+  /** for serialization */
+  private static final long serialVersionUID = 1068606253458807903L;
 
   /** the data */
   protected Instances m_Data;

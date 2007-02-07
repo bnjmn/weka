@@ -23,37 +23,30 @@
 package weka.gui.beans;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.Evaluation;
-import weka.core.Instances;
-import weka.core.Instance;
+import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.FastVector;
-import weka.gui.Logger;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
-import java.util.Vector;
 import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.BorderFactory;
-import java.awt.*;
-import javax.swing.JScrollPane;
+import java.util.Vector;
 
 /**
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
   implements BatchClassifierListener, 
 	     Serializable, UserRequestAcceptor, EventConstraints {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3511801418192148690L;
 
   /**
    * Evaluation object used for evaluating a classifier

@@ -22,19 +22,22 @@
 
 package weka.classifiers.evaluation;
 
-import weka.core.Matrix;
-import weka.core.FastVector;
-import weka.core.Utils;
 import weka.classifiers.CostMatrix;
+import weka.core.FastVector;
+import weka.core.Matrix;
+import weka.core.Utils;
 
 /**
  * Cells of this matrix correspond to counts of the number (or weight)
  * of predictions for each actual value / predicted value combination.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ConfusionMatrix extends Matrix {
+
+  /** for serialization */
+  private static final long serialVersionUID = -181789981401504090L;
 
   /** Stores the names of the classes */
   protected String [] m_ClassNames;

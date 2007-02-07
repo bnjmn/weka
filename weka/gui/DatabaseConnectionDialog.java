@@ -22,19 +22,35 @@
 
 package weka.gui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /** 
  * A dialog to enter URL, username and password for a database connection.
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
+public class DatabaseConnectionDialog
+  extends JDialog {
 
-public class DatabaseConnectionDialog extends JDialog {
+  /** for serialization */
+  private static final long serialVersionUID = -1081946748666245054L;
 
   /* URL field and label */
   protected JTextField m_DbaseURLText;

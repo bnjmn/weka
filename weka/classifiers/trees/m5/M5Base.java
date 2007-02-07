@@ -1,7 +1,4 @@
 /*
- *    M5Base.java
- *    Copyright (C) 2000 Mark Hall
- *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -16,6 +13,13 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+/*
+ *    M5Base.java
+ *    Copyright (C) 2000 Mark Hall
+ *
+ */
+
 package weka.classifiers.trees.m5;
 
 import weka.classifiers.Classifier;
@@ -26,7 +30,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -66,33 +69,36 @@ import java.util.Vector;
  * -R <br>
  * Build regression tree/rule rather than model tree/rule
  *
- * @version $Revision: 1.16 $
+ * @author Mark Hall (mhall@cs.waikato.ac.nz)
+ * @version $Revision: 1.17 $
  */
 public abstract class M5Base 
   extends Classifier 
-  implements OptionHandler,
-	     AdditionalMeasureProducer,
+  implements AdditionalMeasureProducer,
 	     TechnicalInformationHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4022221950191647679L;
 
   /**
    * the instances covered by the tree/rules
    */
-  private Instances		     m_instances;
+  private Instances m_instances;
 
   /**
    * the rule set
    */
-  protected FastVector		     m_ruleSet;
+  protected FastVector m_ruleSet;
 
   /**
    * generate a decision list instead of a single tree.
    */
-  private boolean		     m_generateRules;
+  private boolean m_generateRules;
 
   /**
    * use unsmoothed predictions
    */
-  private boolean		     m_unsmoothedPredictions;
+  private boolean m_unsmoothedPredictions;
 
   /**
    * filter to fill in missing values
@@ -102,7 +108,7 @@ public abstract class M5Base
   /**
    * filter to convert nominal attributes to binary
    */
-  private NominalToBinary      m_nominalToBinary;
+  private NominalToBinary m_nominalToBinary;
   
   /**
    * for removing useless attributes 

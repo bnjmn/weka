@@ -42,9 +42,13 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class EuclidianDataObject implements DataObject, Serializable {
+public class EuclidianDataObject
+    implements DataObject, Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4408119914898291075L;
 
     /**
      * Holds the original instance

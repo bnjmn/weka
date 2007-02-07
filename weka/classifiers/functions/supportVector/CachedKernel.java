@@ -35,10 +35,13 @@ import java.util.Vector;
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Steven Hugg (hugg@fasterlight.com) (refactored, LRU cache)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz) (full cache)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class CachedKernel 
   extends Kernel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 702810182699015136L;
     
   /** Counts the number of kernel evaluations. */
   protected int m_kernelEvals;

@@ -53,7 +53,7 @@ import javax.swing.filechooser.FileFilter;
  * as a flat file and choosing the working directory for the library.
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ListModelsPanel
   extends JPanel 
@@ -118,6 +118,9 @@ public class ListModelsPanel
 	KeyStroke.getKeyStroke("released DELETE"), "deleteSelected");
     m_ModelList.getActionMap().put("deleteSelected",
 	new AbstractAction("deleteSelected") {
+
+      private static final long serialVersionUID = 8178827388328307805L;
+      
       public void actionPerformed(ActionEvent evt) {
 	
 	Object[] currentModels = m_ModelList.getSelectedValues();

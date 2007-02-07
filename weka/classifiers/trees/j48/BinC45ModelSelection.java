@@ -22,16 +22,23 @@
 
 package weka.classifiers.trees.j48;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.util.Enumeration;
 
 /**
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class BinC45ModelSelection extends ModelSelection{
+public class BinC45ModelSelection
+  extends ModelSelection{
+
+  /** for serialization */
+  private static final long serialVersionUID = 179170923545122001L;
 
   /** Minimum number of instances in interval. */
   private int m_minNoObj;               

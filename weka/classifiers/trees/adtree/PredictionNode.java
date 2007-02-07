@@ -23,17 +23,22 @@
 package weka.classifiers.trees.adtree;
 
 import weka.classifiers.trees.ADTree;
-import weka.core.*;
-import java.io.*;
-import java.util.*;
+import weka.core.FastVector;
+
+import java.io.Serializable;
+import java.util.Enumeration;
 
 /**
  * Class representing a prediction node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public final class PredictionNode implements Serializable, Cloneable {
+public final class PredictionNode
+  implements Serializable, Cloneable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6018958856358698814L;
 
   /** The prediction value stored in this node */
   private double value;

@@ -44,10 +44,13 @@ import java.util.Vector;
  * classifiers and clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3698585946221802578L;
 
   /** Debugging mode */
   protected boolean m_Debug = false;

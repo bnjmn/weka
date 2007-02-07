@@ -31,10 +31,14 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
+public class PoissonEstimator
+  extends Estimator
+  implements IncrementalEstimator {
 
-public class PoissonEstimator extends Estimator implements IncrementalEstimator {
+  /** for serialization */
+  private static final long serialVersionUID = 7669362595289236662L;
   
   /** The number of values seen */
   private double m_NumValues;

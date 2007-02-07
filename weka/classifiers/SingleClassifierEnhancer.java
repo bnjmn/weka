@@ -37,9 +37,12 @@ import java.util.Vector;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3665885256363525164L;
 
   /** The base classifier to use */
   protected Classifier m_Classifier = new ZeroR();

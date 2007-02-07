@@ -18,23 +18,26 @@ import java.io.Serializable;
 
 /** 
  * QR Decomposition.
-* <P>
-* For an m-by-n matrix A with m &gt;= n, the QR decomposition is an m-by-n
-* orthogonal matrix Q and an n-by-n upper triangular matrix R so that A = Q*R.
-* <P>
-* The QR decompostion always exists, even if the matrix does not have full
-* rank, so the constructor will never fail.  The primary use of the QR
-* decomposition is in the least squares solution of nonsquare systems of
-* simultaneous linear equations.  This will fail if isFullRank() returns false.
+ * <P>
+ * For an m-by-n matrix A with m &gt;= n, the QR decomposition is an m-by-n
+ * orthogonal matrix Q and an n-by-n upper triangular matrix R so that A = Q*R.
+ * <P>
+ * The QR decompostion always exists, even if the matrix does not have full
+ * rank, so the constructor will never fail.  The primary use of the QR
+ * decomposition is in the least squares solution of nonsquare systems of
+ * simultaneous linear equations.  This will fail if isFullRank() returns false.
  * <p/>
  * Adapted from the <a href="http://math.nist.gov/javanumerics/jama/" target="_blank">JAMA</a> package.
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
-*/
+ * @version $Revision: 1.3 $
+ */
 public class QRDecomposition 
   implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5013090736132211418L;
 
   /** 
    * Array for internal storage of decomposition.

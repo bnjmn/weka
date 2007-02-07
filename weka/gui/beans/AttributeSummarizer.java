@@ -24,32 +24,31 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 import weka.gui.AttributeVisualizationPanel;
-import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.PlotData2D;
 
-import java.io.Serializable;
-import java.util.Vector;
-import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
 import java.awt.BorderLayout;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.beans.beancontext.BeanContext;
+import java.util.Enumeration;
+import java.util.Vector;
+
 import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import java.awt.*;
-import java.beans.*;
-import java.beans.beancontext.*;
 
 /**
  * Bean that encapsulates displays bar graph summaries for attributes in
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class AttributeSummarizer extends DataVisualizer {
+public class AttributeSummarizer
+  extends DataVisualizer {
+
+  /** for serialization */
+  private static final long serialVersionUID = -294354961169372758L;
 
   /**
    * The number of plots horizontally in the display

@@ -47,9 +47,13 @@ import java.util.TreeMap;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class SequentialDatabase implements Database, Serializable {
+public class SequentialDatabase
+    implements Database, Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = 787245523118665778L;
 
     /**
      * Internal, sorted Treemap for storing all the DataObjects

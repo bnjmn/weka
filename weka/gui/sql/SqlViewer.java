@@ -20,11 +20,9 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.core.Memory;
-import weka.core.Utils;
 import weka.gui.LookAndFeel;
 import weka.gui.sql.event.ConnectionEvent;
 import weka.gui.sql.event.ConnectionListener;
@@ -53,17 +51,18 @@ import javax.swing.JPanel;
 /**
  * Represents a little tool for querying SQL databases.
  *
- *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision: 1.4 $
  */
-
 public class SqlViewer 
   extends    JPanel 
   implements ConnectionListener, 
              HistoryChangedListener,
              QueryExecuteListener, 
              ResultChangedListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4395028775566514329L;
 
   /** the name of the history file (in the home directory) */
   protected final static String HISTORY_FILE = "SqlViewerHistory.props";

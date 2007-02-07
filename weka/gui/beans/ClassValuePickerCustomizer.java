@@ -22,24 +22,31 @@
 
 package weka.gui.beans;
 
-import java.beans.*;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JLabel;
 import weka.core.Instances;
-import weka.core.Attribute;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.Customizer;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class ClassValuePickerCustomizer extends JPanel
+public class ClassValuePickerCustomizer
+  extends JPanel
   implements Customizer, CustomizerClosingListener, DataFormatListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 8213423053861600469L;
 
   private boolean m_displayValNames = false;
 

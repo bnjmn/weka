@@ -28,9 +28,13 @@ import java.util.EventObject;
  * Event for graphs
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class GraphEvent extends EventObject {
+public class GraphEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 2099494034652519986L;
 
   protected String m_graphString;
   protected String m_graphTitle;

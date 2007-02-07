@@ -35,11 +35,14 @@ import java.util.Vector;
  * clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class RandomizableSingleClustererEnhancer
   extends Clusterer
   implements OptionHandler, Randomizable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -644847037106316249L;
   
   /** the default seed value */
   protected int m_SeedDefault = 1;

@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.explorer;
 
 import weka.core.Instances;
@@ -46,10 +45,13 @@ import javax.swing.JPanel;
  * A panel for generating artificial data via DataGenerators.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class DataGeneratorPanel
   extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2520408165350629380L;
 
   /** the GOE for the generators */
   protected GenericObjectEditor m_GeneratorEditor = new GenericObjectEditor();

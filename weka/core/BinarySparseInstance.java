@@ -22,8 +22,7 @@
 
 package weka.core;
 
-import java.util.*;
-import java.io.*;
+import java.util.Enumeration;
 
 /**
  * Class for storing a binary-data-only instance as a sparse vector. A
@@ -36,9 +35,13 @@ import java.io.*;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class BinarySparseInstance extends SparseInstance {
+public class BinarySparseInstance
+  extends SparseInstance {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5297388762342528737L;
 
   /**
    * Constructor that generates a sparse instance from the given

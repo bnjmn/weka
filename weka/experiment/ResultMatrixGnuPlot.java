@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.experiment;
 
 import weka.core.Utils;
@@ -32,10 +31,14 @@ import weka.core.Version;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
+public class ResultMatrixGnuPlot
+  extends ResultMatrix {
 
-public class ResultMatrixGnuPlot extends ResultMatrix {
+  /** for serialization */
+  private static final long serialVersionUID = -234648254944790097L;
+  
   /**
    * initializes the matrix as 1x1 matrix
    */

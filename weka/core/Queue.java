@@ -23,24 +23,33 @@
  *     software engineering course, so the specifications are more precise
  *     and complete than one would normally do).
  *    Passed a static analysis using ESC/Java-2.0a6 with no warnings.
-*/
+ */
 
 package weka.core;
 
-import java.io.*;
+import java.io.Serializable;
 
 /** 
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class Queue extends Object implements Serializable {
+public class Queue
+  extends Object
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1141282001146389780L;
 
   /**
    * Represents one node in the queue.
    */
-  protected class QueueNode implements Serializable {
+  protected class QueueNode
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -5119358279412097455L;
 
     /** The next node in the queue */
     protected /*@ spec_public @*/ QueueNode m_Next;

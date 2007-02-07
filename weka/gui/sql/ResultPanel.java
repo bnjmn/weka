@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.gui.JTableHelper;
@@ -32,7 +31,6 @@ import weka.gui.sql.event.ResultChangedListener;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -42,7 +40,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -50,14 +47,15 @@ import javax.swing.event.ChangeListener;
 /**
  * Represents a panel for displaying the results of a query in table format.
  *
- *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.1 $
+ * @version   $Revision: 1.2 $
  */
-
 public class ResultPanel 
   extends JPanel 
   implements QueryExecuteListener, ChangeListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 278654800344034571L;
   
   /** the parent of this panel */
   protected JFrame m_Parent;

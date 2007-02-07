@@ -21,15 +21,19 @@
 
 package weka.classifiers.functions.neural;
 
-
 import java.util.Random;
 
 /**
  * This class is used to represent a node in the neuralnet.
+ * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class NeuralNode extends NeuralConnection {
+public class NeuralNode
+  extends NeuralConnection {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1085750607680839163L;
     
   /** The weights for each of the input connections, and the threshold. */
   private double[] m_weights;

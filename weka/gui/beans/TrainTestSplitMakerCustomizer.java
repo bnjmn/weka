@@ -22,20 +22,27 @@
 
 package weka.gui.beans;
 
-import java.io.File;
-import java.beans.*;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
 import weka.gui.PropertySheetPanel;
+
+import java.awt.BorderLayout;
+import java.beans.Customizer;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import javax.swing.JPanel;
 
 /**
  * GUI customizer for the train test split maker bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class TrainTestSplitMakerCustomizer extends JPanel
+public class TrainTestSplitMakerCustomizer
+  extends JPanel
   implements Customizer {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1684662340241807260L;
 
   private PropertyChangeSupport m_pcSupport = 
     new PropertyChangeSupport(this);

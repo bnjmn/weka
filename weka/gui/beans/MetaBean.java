@@ -22,23 +22,21 @@
 
 package weka.gui.beans;
 
-import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JComponent;
-import java.awt.BorderLayout;
-import java.awt.Point;
-import java.awt.Dimension;
-import java.io.Serializable;
-import java.beans.EventSetDescriptor;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.IntrospectionException;
-import java.beans.PropertyChangeListener;
-
 import weka.gui.Logger;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.beans.EventSetDescriptor;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyChangeListener;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 /**
  * A meta bean that encapsulates several other regular beans, useful for 
@@ -46,11 +44,15 @@ import weka.gui.Logger;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class MetaBean extends JPanel 
-implements BeanCommon, Visible, EventConstraints,
-           Serializable, UserRequestAcceptor {
+public class MetaBean
+  extends JPanel 
+  implements BeanCommon, Visible, EventConstraints,
+             Serializable, UserRequestAcceptor {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6582768902038027077L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Group",

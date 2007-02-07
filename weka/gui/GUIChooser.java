@@ -20,38 +20,33 @@
  *
  */
 
-
 package weka.gui;
 
 import weka.core.Memory;
 import weka.core.Version;
-import weka.gui.explorer.Explorer;
-import weka.gui.experiment.Experimenter;
+import weka.gui.arffviewer.ArffViewer;
 import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.arffviewer.ArffViewer;
+import weka.gui.experiment.Experimenter;
+import weka.gui.explorer.Explorer;
 
-import java.awt.Panel;
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.GridLayout;
-import java.awt.Frame;
-import java.awt.Label;
-import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Vector;
+
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
-
 
 /** 
  * The main class for the Weka GUIChooser. Lets the user choose
@@ -59,9 +54,13 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
-public class GUIChooser extends JFrame {
+public class GUIChooser
+  extends JFrame {
+
+  /** for serialization */
+  private static final long serialVersionUID = 9001529425230247914L;
 
   /** Click to open the simplecli */
   protected Button m_SimpleBut = new Button("Simple CLI");

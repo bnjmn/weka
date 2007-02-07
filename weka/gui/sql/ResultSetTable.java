@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.gui.JTableHelper;
@@ -29,19 +28,21 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableColumnModel;
 
 /**
  * Represents an extended JTable, containing a table model based on a ResultSet
  * and the corresponding query.
  *
- *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
+public class ResultSetTable
+  extends JTable {
 
-public class ResultSetTable extends JTable {
+  /** for serialization */
+  private static final long serialVersionUID = -3391076671854464137L;
+
   /** the query the table model is based on */
   protected String m_Query;
 

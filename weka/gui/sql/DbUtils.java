@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.experiment.DatabaseUtils;
@@ -37,10 +36,14 @@ import java.sql.SQLException;
  * @see       DatabaseUtils
  * @see       #execute(String)
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.1 $
+ * @version   $Revision: 1.2 $
  */
+public class DbUtils
+  extends DatabaseUtils {
 
-public class DbUtils extends DatabaseUtils {
+  /** for serialization */
+  private static final long serialVersionUID = 103748569037426479L;
+  
   /**
    * initializes the object
    * @throws Exception      in case something goes wrong in the init of the

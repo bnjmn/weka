@@ -36,9 +36,12 @@ import java.util.Vector;
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
+
+  /** for serialization */
+  private static final long serialVersionUID = 2776436621129422119L;
   
   /** Array for storing the generated base classifiers. */
   protected Classifier[] m_Classifiers = {

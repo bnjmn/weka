@@ -20,29 +20,31 @@
  *
  */
 
-
 package weka.gui.streams;
 
-import java.awt.Panel;
-import java.awt.TextField;
-import java.awt.Label;
+import weka.core.Instance;
+import weka.core.Instances;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextField;
 import java.io.FileOutputStream;
-import java.io.Serializable;
 import java.io.PrintWriter;
-
-import weka.core.Instances;
-import weka.core.Instance;
 
 /** 
  * A bean that saves a stream of instances to a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class InstanceSavePanel extends Panel implements Serializable,
-  InstanceListener {
+public class InstanceSavePanel
+  extends Panel
+  implements InstanceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6061005366989295026L;
   
   private Label count_Lab;
   private int m_Count;

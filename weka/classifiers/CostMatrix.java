@@ -21,16 +21,18 @@
  */
 
 package weka.classifiers;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Utils;
+
 import weka.core.AttributeExpression;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.Matrix;
-import java.io.Reader;
-import java.io.Writer;
-import java.io.StreamTokenizer;
+import weka.core.Utils;
+
 import java.io.LineNumberReader;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.Writer;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -44,10 +46,13 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class CostMatrix implements Serializable {
 
+  /** for serialization */
+  private static final long serialVersionUID = -1973792250544554965L;
+  
   private int m_size;
 
   /** [rows][columns] */

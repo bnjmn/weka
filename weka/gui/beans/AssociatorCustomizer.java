@@ -22,27 +22,28 @@
 
 package weka.gui.beans;
 
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import java.beans.*;
-import java.awt.BorderLayout;
-import java.awt.event.*;
-import javax.swing.JPanel;
-import javax.swing.JCheckBox;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
-import weka.gui.PropertyPanel;
-import weka.associations.Associator;
 
+import java.awt.BorderLayout;
+import java.beans.Customizer;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import javax.swing.JPanel;
 
 /**
  * GUI customizer for the associator wrapper bean
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class AssociatorCustomizer extends JPanel
+public class AssociatorCustomizer
+  extends JPanel
   implements Customizer {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5767664969353495974L;
 
   static {
     GenericObjectEditor.registerEditors();

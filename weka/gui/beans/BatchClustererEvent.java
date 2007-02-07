@@ -22,8 +22,8 @@
 
 package weka.gui.beans;
 
-import weka.core.Instances;
 import weka.clusterers.Clusterer;
+
 import java.util.EventObject;
 
 /**
@@ -31,11 +31,15 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see EventObject
  */
-public class BatchClustererEvent extends EventObject {
+public class BatchClustererEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 7268777944939129714L;
 
   /**
    * The clusterer

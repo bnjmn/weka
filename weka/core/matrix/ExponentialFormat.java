@@ -26,9 +26,13 @@ import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class ExponentialFormat extends DecimalFormat {
+public class ExponentialFormat
+  extends DecimalFormat {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5298981701073897741L;
     
   protected DecimalFormat nf ;
   protected boolean sign;

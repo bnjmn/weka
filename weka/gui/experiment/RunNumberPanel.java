@@ -24,30 +24,24 @@
 package weka.gui.experiment;
 
 import weka.experiment.Experiment;
-import java.awt.Component;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 
 
@@ -56,9 +50,13 @@ import javax.swing.BoxLayout;
  * in an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class RunNumberPanel extends JPanel {
+public class RunNumberPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1644336658426067852L;
 
   /** Configures the lower run number */
   protected JTextField m_LowerText = new JTextField("1");

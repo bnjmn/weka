@@ -27,10 +27,13 @@ import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
 import weka.core.FastVector;
 import weka.core.Utils;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+
+import javax.swing.JComponent;
 
 /**
  * <p>
@@ -43,9 +46,13 @@ import java.awt.event.MouseMotionAdapter;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class GraphPanel extends JComponent {
+public class GraphPanel
+    extends JComponent {
+
+    /** for serialization */
+    private static final long serialVersionUID = 7917937528738361470L;
 
     /**
      * Holds the clustering results

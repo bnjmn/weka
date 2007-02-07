@@ -20,67 +20,55 @@
  *
  */
 
-
-
 package weka.gui.experiment;
 
-import weka.core.Tag;
-import weka.core.SelectedTag;
 import weka.core.Utils;
 import weka.core.xml.KOML;
+import weka.experiment.Experiment;
+import weka.experiment.PropertyNode;
+import weka.experiment.RemoteExperiment;
+import weka.experiment.ResultListener;
+import weka.experiment.ResultProducer;
 import weka.experiment.xml.XMLExperiment;
-
 import weka.gui.ExtensionFileFilter;
-import weka.gui.SelectedTagEditor;
 import weka.gui.GenericObjectEditor;
-import weka.gui.GenericArrayEditor;
 import weka.gui.PropertyPanel;
-import weka.gui.FileEditor;
 
-import weka.experiment.*;
-
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeSupport;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.io.BufferedInputStream;
-import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.Dimension;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.Insets;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
-import javax.swing.Box;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
+import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.ButtonGroup;
-
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.filechooser.FileFilter;
 
 /** 
  * This panel controls the configuration of an experiment.
@@ -92,9 +80,13 @@ import javax.swing.ButtonGroup;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
-public class SetupPanel extends JPanel {
+public class SetupPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6552671886903170033L;
 
   /** The experiment being configured */
   protected Experiment m_Exp;

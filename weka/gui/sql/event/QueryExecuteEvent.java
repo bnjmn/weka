@@ -20,13 +20,11 @@
  *
  */
 
-
 package weka.gui.sql.event;
 
 import weka.gui.sql.DbUtils;
 
 import java.sql.ResultSet;
-import java.util.EventListener;
 import java.util.EventObject;
 
 /**
@@ -34,10 +32,14 @@ import java.util.EventObject;
  *
  * @see         QueryExecuteListener
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
+public class QueryExecuteEvent
+  extends EventObject {
 
-public class QueryExecuteEvent extends EventObject {
+  /** for serialization */
+  private static final long serialVersionUID = -5556385019954730740L;
+  
   /** the Db utils instance for the current DB connection  */
   protected DbUtils m_DbUtils;
   

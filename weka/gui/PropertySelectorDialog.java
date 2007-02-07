@@ -20,57 +20,46 @@
  *
  */
 
-
 package weka.gui;
 
 import weka.experiment.PropertyNode;
 
-import java.beans.PropertyDescriptor;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
-import java.awt.Component;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Frame;
-import java.awt.FlowLayout;
-import java.awt.Container;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
+import java.lang.reflect.Method;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import javax.swing.JTextField;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JTree;
+import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
 
 /** 
  * Allows the user to select any (supported) property of an object, including
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class PropertySelectorDialog extends JDialog {
+public class PropertySelectorDialog
+  extends JDialog {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3155058124137930518L;
   
   /** Click to choose the currently selected property */
   protected JButton m_SelectBut = new JButton("Select");

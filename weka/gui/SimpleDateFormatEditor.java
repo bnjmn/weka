@@ -44,7 +44,7 @@ import javax.swing.event.DocumentListener;
  * Class for editing SimpleDateFormat strings. 
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see SimpleDateFormat
  */
 public class SimpleDateFormatEditor 
@@ -70,6 +70,9 @@ public class SimpleDateFormatEditor
     extends JPanel 
     implements ActionListener, DocumentListener {
 
+    /** for serialization */
+    private static final long serialVersionUID = -4018834274636309987L;
+    
     /** The text field for the format */
     private JTextField m_FormatText;
     
