@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.experiment;
 
 import weka.core.Utils;
@@ -31,10 +30,14 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
+public class ResultMatrixLatex
+  extends ResultMatrix {
 
-public class ResultMatrixLatex extends ResultMatrix {
+  /** for serialization */
+  private static final long serialVersionUID = 777690788447600978L;
+  
   /**
    * initializes the matrix as 1x1 matrix
    */

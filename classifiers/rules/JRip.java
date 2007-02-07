@@ -30,7 +30,6 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -131,12 +130,11 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class JRip 
   extends Classifier 
-  implements OptionHandler, 
-	     AdditionalMeasureProducer, 
+  implements AdditionalMeasureProducer, 
 	     WeightedInstancesHandler,
 	     TechnicalInformationHandler {    
 
@@ -670,6 +668,9 @@ public class JRip
    */    
   private abstract class Antd 
     implements WeightedInstancesHandler, Copyable, Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -8929754772994154334L;
 	
     /** The attribute of the antecedent */
     protected Attribute att;

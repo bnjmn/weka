@@ -89,9 +89,13 @@ import javax.swing.filechooser.FileFilter;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class SimpleSetupPanel extends JPanel {
+public class SimpleSetupPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5257424515609176509L;
 
   /** The experiment being configured */
   protected Experiment m_Exp;

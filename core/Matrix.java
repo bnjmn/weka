@@ -23,11 +23,9 @@
 
 package weka.core;
 
-import java.io.Writer;
 import java.io.Reader;
-import java.io.LineNumberReader;
 import java.io.Serializable;
-import java.util.StringTokenizer;
+import java.io.Writer;
 
 /**
  * Class for performing operations on a matrix of floating-point values.
@@ -40,12 +38,15 @@ import java.util.StringTokenizer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22 $
- * @deprecated Use instead <code>weka.core.matrix.Matrix</code> - only for
+ * @version $Revision: 1.23 $
+ * @deprecated Use <code>weka.core.matrix.Matrix</code> instead - only for
  * backwards compatibility. 
  */
 public class Matrix 
   implements Cloneable, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3604757095849145838L;
 
   /**
    * The actual matrix */

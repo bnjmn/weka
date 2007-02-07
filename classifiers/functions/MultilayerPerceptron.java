@@ -140,7 +140,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -656,7 +656,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.7 $
+   * @version $Revision: 1.8 $
    */
   class ControlPanel 
     extends JPanel {
@@ -703,6 +703,9 @@ public class MultilayerPerceptron
       
       m_totalEpochsLabel = new JLabel("Num Of Epochs  ");
       m_epochsLabel = new JPanel(){ 
+	  /** for serialization */
+	  private static final long serialVersionUID = 2562773937093221399L;
+
 	  public void paintComponent(Graphics g) {
 	    super.paintComponent(g);
 	    g.setColor(m_controlPanel.m_totalEpochsLabel.getForeground());
@@ -714,6 +717,9 @@ public class MultilayerPerceptron
       m_changeEpochs = new JTextField();
       m_changeEpochs.setText("" + m_numEpochs);
       m_errorLabel = new JPanel(){
+	  /** for serialization */
+	  private static final long serialVersionUID = 4390239056336679189L;
+
 	  public void paintComponent(Graphics g) {
 	    super.paintComponent(g);
 	    g.setColor(m_controlPanel.m_totalEpochsLabel.getForeground());

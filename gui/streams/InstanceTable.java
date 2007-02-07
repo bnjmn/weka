@@ -20,30 +20,31 @@
  *
  */
 
-
 package weka.gui.streams;
 
 import weka.core.Instance;
 import weka.core.Instances;
+
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.util.Vector;
-import java.io.Serializable;
+
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.JScrollPane;
-import javax.swing.table.TableModel;
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * A bean that takes a stream of instances and displays in a table.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class InstanceTable extends JPanel
-  implements Serializable, InstanceListener {
+public class InstanceTable
+  extends JPanel
+  implements InstanceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2462533698100834803L;
   
   private JTable m_InstanceTable;
   private boolean m_Debug;
@@ -72,6 +73,8 @@ public class InstanceTable extends JPanel
   public void batchFinished() {
     
     TableModel newModel = new AbstractTableModel() {
+      private static final long serialVersionUID = 5447106383000555291L;
+      
       public String getColumnName(int col) {
 	return m_Instances.attribute(col).name();
       }

@@ -49,10 +49,13 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class ClusterGenerator 
   extends DataGenerator {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6131722618472046365L;
 
   /** Number of attribute the dataset should have */
   protected int m_NumAttributes;

@@ -34,11 +34,14 @@ import java.util.Enumeration;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public abstract class ClusterDefinition
   implements Serializable, OptionHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5950001207047429961L;
 
   /** the parent of the cluster */
   protected ClusterGenerator m_Parent;

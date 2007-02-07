@@ -22,17 +22,24 @@
 
 package weka.classifiers.trees.j48;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
 
 /**
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class Distribution implements Cloneable, Serializable {
+public class Distribution
+  implements Cloneable, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 8526859638230806576L;
 
   /** Weight of instances per class per bag. */
   private double m_perClassPerBag[][]; 

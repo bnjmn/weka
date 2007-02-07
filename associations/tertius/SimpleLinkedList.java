@@ -31,14 +31,19 @@ import java.util.NoSuchElementException;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SimpleLinkedList implements Serializable {
 
   /** for serialization */
-  private static final long serialVersionUID = -4518028976847186200L;
+  private static final long serialVersionUID = -1491148276509976299L;
 
-  public class LinkedListIterator implements Serializable {
+  public class LinkedListIterator
+    implements Serializable {
+    
+    /** for serialization */
+    private static final long serialVersionUID = -2448555236100426759L;
+    
     Entry current = first;
     Entry lastReturned = null;
     
@@ -77,7 +82,12 @@ public class SimpleLinkedList implements Serializable {
 
   }
 
-  public class LinkedListInverseIterator implements Serializable {
+  public class LinkedListInverseIterator
+    implements Serializable {
+    
+    /** for serialization */
+    private static final long serialVersionUID = 6290379064027832108L;
+    
     Entry current = last;
     Entry lastReturned = null;
     
@@ -108,7 +118,12 @@ public class SimpleLinkedList implements Serializable {
   }
 
 
-  private static class Entry implements Serializable {
+  private static class Entry
+    implements Serializable {
+    
+    /** for serialization */
+    private static final long serialVersionUID = 7888492479685339831L;
+    
     Object element;
     Entry next;
     Entry previous;

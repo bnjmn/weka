@@ -33,9 +33,13 @@ import weka.core.Utils;
  * can be pruned using a pruning set.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class PruneableDecList extends ClassifierDecList{
+public class PruneableDecList
+  extends ClassifierDecList{
+
+  /** for serialization */
+  private static final long serialVersionUID = -7228103346297172921L;
   
   /**
    * Constructor for pruneable partial tree structure. 

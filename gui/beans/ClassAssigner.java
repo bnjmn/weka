@@ -23,29 +23,29 @@
 package weka.gui.beans;
 
 import weka.core.Instances;
-import weka.core.Instance;
-import java.util.Vector;
-import java.io.Serializable;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+
 import java.awt.BorderLayout;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.awt.*;
 import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.Vector;
+
+import javax.swing.JPanel;
 
 /**
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class ClassAssigner extends JPanel
+public class ClassAssigner
+  extends JPanel
   implements Visible, DataSourceListener, TrainingSetListener, TestSetListener,
 	     DataSource, TrainingSetProducer, TestSetProducer,
 	     BeanCommon, EventConstraints, Serializable,
 	     InstanceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 4011131665025817924L;
   
   private String m_classColumn = "last";
 

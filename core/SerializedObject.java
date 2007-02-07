@@ -39,9 +39,13 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
-public class SerializedObject implements Serializable {
+public class SerializedObject
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6635502953928860434L;
 
   /** The array storing the object. */
   private byte[] m_storedObjectArray;

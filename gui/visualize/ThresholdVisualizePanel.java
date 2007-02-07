@@ -48,10 +48,13 @@ import javax.swing.border.TitledBorder;
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ThresholdVisualizePanel 
   extends VisualizePanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3070002211779443890L;
 
   /** The string to add to the Plot Border. */
   private String m_ROCString="";

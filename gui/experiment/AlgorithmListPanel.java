@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.experiment;
 
 import weka.classifiers.Classifier;
@@ -74,17 +73,23 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class AlgorithmListPanel
   extends JPanel
   implements ActionListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7204528834764898671L;
 
   /**
    * Class required to show the Classifiers nicely in the list
    */
   public class ObjectCellRenderer
     extends DefaultListCellRenderer {
+
+    /** for serialization */
+    private static final long serialVersionUID = -5067138526587433808L;
     
     /**
      * Return a component that has been configured to display the specified 

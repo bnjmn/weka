@@ -46,10 +46,13 @@ import java.util.Vector;
  * </pre>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class RegressionGenerator 
   extends DataGenerator {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3073254041275658221L;
 
   /** Number of instances*/
   protected int m_NumExamples;

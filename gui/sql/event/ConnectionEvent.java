@@ -20,12 +20,10 @@
  *
  */
 
-
 package weka.gui.sql.event;
 
 import weka.gui.sql.DbUtils;
 
-import java.util.EventListener;
 import java.util.EventObject;
 
 /**
@@ -33,10 +31,14 @@ import java.util.EventObject;
  *
  * @see         ConnectionListener
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
+public class ConnectionEvent
+  extends EventObject {
 
-public class ConnectionEvent extends EventObject {
+  /** for serialization */
+  private static final long serialVersionUID = 5420308930427835037L;
+  
   /** it was a connect try */
   public final static int CONNECT = 0;
 

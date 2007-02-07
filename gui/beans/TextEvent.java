@@ -28,9 +28,13 @@ import java.util.EventObject;
  * Event that encapsulates some textual information
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class TextEvent extends EventObject {
+public class TextEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 4196810607402973744L;
   
   /**
    * The text

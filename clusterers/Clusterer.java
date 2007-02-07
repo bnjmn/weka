@@ -37,9 +37,13 @@ import java.io.Serializable;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
-public abstract class Clusterer implements Cloneable, Serializable, CapabilitiesHandler {
+public abstract class Clusterer
+  implements Cloneable, Serializable, CapabilitiesHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6099962589663877632L;
 
   // ===============
   // Public methods.

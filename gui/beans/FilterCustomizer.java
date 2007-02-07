@@ -22,23 +22,29 @@
 
 package weka.gui.beans;
 
-import weka.core.Utils;
-import weka.core.OptionHandler;
-import java.beans.*;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
 import weka.filters.Filter;
+import weka.gui.GenericObjectEditor;
+
+import java.awt.BorderLayout;
+import java.beans.Customizer;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import javax.swing.JPanel;
 
 /**
  * GUI customizer for the filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public class FilterCustomizer extends JPanel
+public class FilterCustomizer
+  extends JPanel
   implements Customizer {
+
+  /** for serialization */
+  private static final long serialVersionUID = 2049895469240109738L;
   
   static {
      GenericObjectEditor.registerEditors();

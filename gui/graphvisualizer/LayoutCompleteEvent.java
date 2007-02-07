@@ -30,9 +30,13 @@ import java.util.EventObject;
  * the changes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.4 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
-public class LayoutCompleteEvent extends EventObject {
+public class LayoutCompleteEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6172467234026258427L;
   
   public LayoutCompleteEvent(Object source) {
     super(source);

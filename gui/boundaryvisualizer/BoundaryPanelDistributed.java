@@ -22,33 +22,22 @@
 
 package weka.gui.boundaryvisualizer;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.JPanel;
-import javax.swing.ToolTipManager;
-import java.util.Vector;
-import java.util.Random;
-import java.rmi.*;
-
-import com.sun.image.codec.jpeg.*;
-import java.awt.image.*;
-import java.io.*;
-
-import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayesSimple;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.J48;
-import weka.classifiers.lazy.IBk;
-import weka.classifiers.functions.Logistic;
-import weka.clusterers.EM;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.Add;
-import weka.experiment.RemoteExperimentListener;
-import weka.experiment.RemoteExperimentEvent;
+import weka.core.FastVector;
+import weka.core.Instances;
+import weka.core.Utils;
 import weka.experiment.Compute;
+import weka.experiment.RemoteExperimentEvent;
+import weka.experiment.RemoteExperimentListener;
 import weka.experiment.TaskStatusInfo;
+
+import java.awt.BorderLayout;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.ObjectInputStream;
+import java.rmi.Naming;
+import java.util.Vector;
 
 /**
  * This class extends BoundaryPanel with code for distributing the
@@ -57,11 +46,15 @@ import weka.experiment.TaskStatusInfo;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see BoundaryPanel
  */
-public class BoundaryPanelDistributed extends BoundaryPanel {
+public class BoundaryPanelDistributed
+  extends BoundaryPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1743284397893937776L;
 
   /** a list of RemoteExperimentListeners */
   protected Vector m_listeners = new Vector();
@@ -101,7 +94,7 @@ public class BoundaryPanelDistributed extends BoundaryPanel {
   /** The queue of sub-tasks waiting to be processed */
   private weka.core.Queue m_subExpQueue = new weka.core.Queue();
 
-  // number of seconds between polling server
+  /** number of seconds between polling server */
   private int m_minTaskPollTime = 1000;
 
   private int [] m_hostPollingTime;

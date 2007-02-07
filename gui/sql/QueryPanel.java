@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import weka.gui.ListSelectorDialog;
@@ -48,24 +47,24 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.CaretListener;
 import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 
 /**
  * Represents a panel for entering an SQL query.
  *
- *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision: 1.3 $
  */
-
 public class QueryPanel 
   extends JPanel 
-  implements ConnectionListener,
-             CaretListener {
+  implements ConnectionListener, CaretListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 4348967824619706636L;
 
   /** the name of the history */
   public final static String HISTORY_NAME = "query";

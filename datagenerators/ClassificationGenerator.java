@@ -33,10 +33,13 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class ClassificationGenerator 
   extends DataGenerator {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5261662546673517844L;
 
   /** Number of instances*/
   protected int m_NumExamples;

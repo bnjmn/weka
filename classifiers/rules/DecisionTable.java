@@ -22,16 +22,19 @@
 
 package weka.classifiers.rules;
 
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.SubsetEvaluator;
 import weka.classifiers.Classifier;
-import weka.classifiers.lazy.IBk;
 import weka.classifiers.Evaluation;
+import weka.classifiers.lazy.IBk;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -40,12 +43,8 @@ import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.SelectedTag;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.attributeSelection.SubsetEvaluator;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.BestFirst;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -98,16 +97,15 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $ 
+ * @version $Revision: 1.40 $ 
  */
 public class DecisionTable 
-extends Classifier 
-implements OptionHandler, WeightedInstancesHandler, 
-AdditionalMeasureProducer, TechnicalInformationHandler {
+  extends Classifier 
+  implements OptionHandler, WeightedInstancesHandler, 
+             AdditionalMeasureProducer, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 2888557078165701326L;
-  //static final long serialVersionUID = 2888557078885701326L;
 
   /** The hashtable used to hold training instances */
   protected Hashtable m_entries;
@@ -223,7 +221,7 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
    * Class providing keys to the hash table
    */
   public static class hashKey 
-  implements Serializable {
+    implements Serializable {
 
     /** for serialization */
     static final long serialVersionUID = 5674163500154964602L;
@@ -1159,8 +1157,10 @@ AdditionalMeasureProducer, TechnicalInformationHandler {
   protected void setUpEvaluator() {
     m_evaluator = new SubsetEvaluator () {
 
+      /** for serialization */
+      private static final long serialVersionUID = 3927442457704974150L;
+      
       public void buildEvaluator(Instances data) throws Exception {
-
       }
 
       public double evaluateSubset(BitSet subset) throws Exception {

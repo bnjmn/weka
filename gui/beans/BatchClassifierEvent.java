@@ -22,8 +22,8 @@
 
 package weka.gui.beans;
 
-import weka.core.Instances;
 import weka.classifiers.Classifier;
+
 import java.util.EventObject;
 
 /**
@@ -31,11 +31,15 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see EventObject
  */
-public class BatchClassifierEvent extends EventObject {
+public class BatchClassifierEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 878097199815991084L;
 
   /**
    * The classifier

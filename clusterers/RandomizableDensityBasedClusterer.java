@@ -35,11 +35,14 @@ import java.util.Vector;
  * clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class RandomizableDensityBasedClusterer
   extends DensityBasedClusterer
   implements OptionHandler, Randomizable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5325270357918932849L;
   
   /** the default seed value */
   protected int m_SeedDefault = 1;

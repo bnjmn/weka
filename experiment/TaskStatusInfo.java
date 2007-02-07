@@ -19,6 +19,7 @@
  *    Copyright (C) 2001 Mark Hall
  *
  */
+
 package weka.experiment;
 
 import java.io.Serializable;
@@ -32,9 +33,13 @@ import java.io.Serializable;
  * execute.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class TaskStatusInfo implements Serializable {
+public class TaskStatusInfo
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6129343303703560015L;
   
   public static final int TO_BE_RUN = 0;
   public static final int PROCESSING=1;

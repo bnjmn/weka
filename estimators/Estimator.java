@@ -89,10 +89,10 @@ import weka.core.Utils;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class Estimator 
-implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
+  implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {
   
   /** for serialization */
   static final long serialVersionUID = -5902411487362274342L;
@@ -105,12 +105,15 @@ implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler{
   
   /** set if class is not important */
   private boolean m_noClass = true;
-
   
-  /*
+  /**
    * Class to support a building process of an estimator.
    */
-  private static class Builder implements Serializable {
+  private static class Builder
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -5810927990193597303L;
     
     /** instances of the builder */
     Instances m_instances = null;

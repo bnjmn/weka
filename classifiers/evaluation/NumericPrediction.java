@@ -29,9 +29,13 @@ import java.io.Serializable;
  * plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class NumericPrediction implements Prediction, Serializable {
+public class NumericPrediction
+  implements Prediction, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4880216423674233887L;
 
   /** The actual class value */
   private double m_Actual = MISSING_VALUE;

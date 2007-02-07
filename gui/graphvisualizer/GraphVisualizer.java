@@ -21,57 +21,51 @@
  */
 package weka.gui.graphvisualizer;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.FileReader;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.IOException;
-
-import java.awt.Frame;
-import java.awt.Container;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Dimension;
-import java.awt.Rectangle;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Insets;
-import java.awt.LayoutManager;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.BorderLayout;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import java.io.File;
-
-import javax.swing.JFrame;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.ButtonGroup;
-import javax.swing.RepaintManager;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
-import javax.swing.JToolBar;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
-import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
-
 import weka.core.FastVector;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.visualize.PrintablePanel;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.table.AbstractTableModel;
 
 /**
  * This class displays the graph we want to visualize. It should
@@ -99,10 +93,14 @@ import weka.gui.visualize.PrintablePanel;
  * over nodes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class GraphVisualizer extends JPanel implements GraphConstants,
-LayoutCompleteEventListener  {
+public class GraphVisualizer
+  extends JPanel
+  implements GraphConstants, LayoutCompleteEventListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2038911085935515624L;
   
   /** Vector containing nodes */
   protected FastVector m_nodes=new FastVector();
@@ -723,13 +721,15 @@ LayoutCompleteEventListener  {
     }
   }
   
-  
   /**
-   * The panel which contains the actual  graph.
-   *
+   * The panel which contains the actual graph.
    */
-  private class GraphPanel extends PrintablePanel {
-    //Image buf;
+  private class GraphPanel
+    extends PrintablePanel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -3562813603236753173L;
+
     public GraphPanel() {
       super();
       this.addMouseListener( new GraphVisualizerMouseListener() );
@@ -1116,7 +1116,12 @@ LayoutCompleteEventListener  {
    * Table Model for the Table that shows the probability
    * distribution for a node
    */
-  private class GraphVisualizerTableModel extends AbstractTableModel {
+  private class GraphVisualizerTableModel
+    extends AbstractTableModel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4789813491347366596L;
+    
     final String[] columnNames;
     final double[][] data;
     

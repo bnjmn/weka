@@ -22,16 +22,21 @@
 
 package weka.gui.beans;
 
-import java.util.EventObject;
 import weka.core.Instances;
+
+import java.util.EventObject;
 
 /**
  * Event encapsulating a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class TrainingSetEvent extends EventObject {
+public class TrainingSetEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5872343811810872662L;
   
   /**
    * The training instances

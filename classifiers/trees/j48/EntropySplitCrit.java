@@ -22,15 +22,19 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.*;
+import weka.core.Utils;
 
 /**
  * Class for computing the entropy for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public final class EntropySplitCrit extends EntropyBasedSplitCrit {
+public final class EntropySplitCrit
+  extends EntropyBasedSplitCrit {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5986252682266803935L;
 
   /**
    * Computes entropy for given distribution.

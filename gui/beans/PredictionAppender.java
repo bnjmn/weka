@@ -22,20 +22,17 @@
 
 package weka.gui.beans;
 
-import java.io.Serializable;
-import java.util.Vector;
-import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import javax.swing.SwingConstants;
-import java.awt.*;
-import java.beans.EventSetDescriptor;
-
-import weka.core.Instances;
-import weka.core.Instance;
 import weka.clusterers.DensityBasedClusterer;
+import weka.core.Instance;
+import weka.core.Instances;
+
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.swing.JPanel;
 
 /**
  * Bean that can can accept batch or incremental classifier events
@@ -43,12 +40,16 @@ import weka.clusterers.DensityBasedClusterer;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class PredictionAppender extends JPanel
+public class PredictionAppender
+  extends JPanel
   implements DataSource, Visible, BeanCommon,
 	     EventConstraints, BatchClassifierListener,
 	     IncrementalClassifierListener, BatchClustererListener, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2987740065058976673L;
 
   /**
    * Objects listenening for dataset events

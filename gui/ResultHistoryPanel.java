@@ -61,7 +61,7 @@ import javax.swing.text.JTextComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class ResultHistoryPanel
   extends JPanel {
@@ -130,6 +130,8 @@ public class ResultHistoryPanel
     }
     m_List.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     m_List.addMouseListener(new RMouseAdapter() {
+      private static final long serialVersionUID = -9015397020486290479L;
+      
       public void mouseClicked(MouseEvent e) {
 	if ((e.getModifiers() & InputEvent.BUTTON1_MASK)
 	    == InputEvent.BUTTON1_MASK) {
@@ -155,6 +157,8 @@ public class ResultHistoryPanel
     });
 
     m_List.addKeyListener(new RKeyAdapter() {
+      private static final long serialVersionUID = 7910681776999302344L;
+      
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
           int selected = m_List.getSelectedIndex();
@@ -164,8 +168,7 @@ public class ResultHistoryPanel
         }
       }
     });
-    m_List.getSelectionModel()
-      .addListSelectionListener(new ListSelectionListener() {
+    m_List.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
       public void valueChanged(ListSelectionEvent e) {
 	if (!e.getValueIsAdjusting()) {
 	  ListSelectionModel lm = (ListSelectionModel) e.getSource();

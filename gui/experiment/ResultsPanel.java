@@ -20,77 +20,79 @@
  *
  */
 
-
 package weka.gui.experiment;
 
-import weka.gui.ExtensionFileFilter;
-import weka.gui.ListSelectorDialog;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.DatabaseConnectionDialog;
-import weka.experiment.Experiment;
+import weka.core.Attribute;
+import weka.core.ClassDiscovery;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Range;
+import weka.core.converters.CSVLoader;
 import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
+import weka.experiment.Experiment;
+import weka.experiment.InstanceQuery;
 import weka.experiment.PairedCorrectedTTester;
 import weka.experiment.ResultMatrix;
 import weka.experiment.ResultMatrixPlainText;
 import weka.experiment.Tester;
-import weka.experiment.InstanceQuery;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.Range;
-import weka.core.ClassDiscovery;
-import weka.core.Instance;
-import weka.core.converters.CSVLoader;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.ListSelectorDialog;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
 
-import java.io.Reader;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.File;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
 import javax.swing.BorderFactory;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.JFileChooser;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JSplitPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.JOptionPane;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.awt.Dimension;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
 
 /** 
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
-public class ResultsPanel extends JPanel {
+public class ResultsPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4913007978534178569L;
 
   /** Message shown when no experimental results have been loaded */
   protected static final String NO_SOURCE = "No source";

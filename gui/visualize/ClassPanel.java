@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.visualize;
 
 import weka.core.FastVector;
@@ -50,9 +49,13 @@ import javax.swing.JPanel;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
-public class ClassPanel extends JPanel {
+public class ClassPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7969401840501661430L;
     
   /** True when the panel has been enabled (ie after 
       setNumeric or setNominal has been called */
@@ -125,7 +128,12 @@ public class ClassPanel extends JPanel {
   /** Inner Inner class used to create labels for nominal attributes
    * so that there color can be changed.
    */
-  private class NomLabel extends JLabel {
+  private class NomLabel
+    extends JLabel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4686613106474820655L;
+
     private int m_index = 0;
 
     /** 

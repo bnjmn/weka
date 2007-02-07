@@ -20,27 +20,28 @@
  *
  */
 
-
 package weka.gui;
 
-import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
+import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyEditor;
+
 import javax.swing.JFrame;
-import javax.swing.JButton;
 
 /** 
  * Support for PropertyEditors with custom editors: puts the editor into
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class PropertyDialog extends JFrame {
+public class PropertyDialog
+  extends JFrame {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2314850859392433539L;
 
   /** The property editor */
   private PropertyEditor m_Editor;

@@ -38,9 +38,14 @@ import java.io.Serializable;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class SERObject implements Serializable {
+public class SERObject
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -6022057864970639151L;
+  
     private FastVector resultVector;
     private int databaseSize;
     private int numberOfAttributes;

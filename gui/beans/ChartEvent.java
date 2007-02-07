@@ -29,9 +29,14 @@ import java.util.Vector;
  * Event encapsulating info for plotting a data point on the StripChart
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class ChartEvent extends EventObject {
+public class ChartEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 7812460715499569390L;
+
   private Vector m_legendText;
   private double m_max;
   private double m_min;

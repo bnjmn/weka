@@ -22,6 +22,9 @@
 
 package weka.gui;
 
+import weka.core.Instances;
+import weka.gui.arffviewer.ArffPanel;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -34,21 +37,20 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import weka.core.Instances;
-import weka.gui.arffviewer.ArffPanel;
-
 /**
  * A downsized version of the ArffViewer, displaying only one Instances-Object.
  *
  *
  * @see weka.gui.arffviewer.ArffViewer
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
-
 public class ViewerDialog 
   extends JDialog 
-  implements  ChangeListener { 
+  implements ChangeListener { 
+
+  /** for serialization */
+  private static final long serialVersionUID = 6747718484736047752L;
   
   /** Signifies an OK property selection */
   public static final int APPROVE_OPTION = 0;

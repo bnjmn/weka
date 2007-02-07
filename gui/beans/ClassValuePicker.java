@@ -23,27 +23,27 @@
 package weka.gui.beans;
 
 import weka.core.Instances;
-import weka.core.Instance;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.SwapValues;
-import java.util.Vector;
-import java.io.Serializable;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+
 import java.awt.BorderLayout;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.awt.*;
 import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.Vector;
+
+import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class ClassValuePicker extends JPanel
+public class ClassValuePicker
+  extends JPanel
   implements Visible, DataSourceListener, BeanCommon,
 	     EventConstraints, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1196143276710882989L;
 
   /** the class value index considered to be the positive class */
   private int m_classValueIndex = 0;

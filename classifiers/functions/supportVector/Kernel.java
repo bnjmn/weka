@@ -42,10 +42,13 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class Kernel 
   implements Serializable, OptionHandler, CapabilitiesHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6102771099905817064L;
 
   /** The dataset */
   protected Instances m_data;

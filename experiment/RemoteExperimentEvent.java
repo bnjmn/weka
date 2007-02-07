@@ -20,17 +20,21 @@
  *
  */
 
-
 package weka.experiment;
 
 import java.io.Serializable;
+
 /**
  * Class encapsulating information on progress of a remote experiment
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class RemoteExperimentEvent implements Serializable {
+public class RemoteExperimentEvent
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 7000867987391866451L;
 
   /** A status type message */
   public boolean m_statusMessage;

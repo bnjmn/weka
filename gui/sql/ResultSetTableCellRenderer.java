@@ -20,26 +20,29 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
-* Handles the background colors for missing values differently than the
-* DefaultTableCellRenderer.
-*
-*
-* @author     FracPete (fracpete at waikato dot ac dot nz)
-* @version    $Revision: 1.1 $
-*/
+ * Handles the background colors for missing values differently than the
+ * DefaultTableCellRenderer.
+ *
+ * @author     FracPete (fracpete at waikato dot ac dot nz)
+ * @version    $Revision: 1.2 $
+ */
+public class ResultSetTableCellRenderer
+  extends DefaultTableCellRenderer {
 
-public class ResultSetTableCellRenderer extends DefaultTableCellRenderer {
+  /** for serialization */
+  private static final long serialVersionUID = -8106963669703497351L;
+  
   // the color for missing values
   private Color           missingColor;
   private Color           missingColorSelected;

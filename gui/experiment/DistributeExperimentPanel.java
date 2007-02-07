@@ -20,44 +20,38 @@
  *
  */
 
-
 package weka.gui.experiment;
 
 import weka.experiment.Experiment;
 import weka.experiment.RemoteExperiment;
-import java.awt.Component;
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JFrame;
-import javax.swing.SwingConstants;
-import javax.swing.JCheckBox;
 import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 /** 
  * This panel enables an experiment to be distributed to multiple hosts;
  * it also allows remote host names to be specified.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
+public class DistributeExperimentPanel
+  extends JPanel {
 
-public class DistributeExperimentPanel extends JPanel {
+  /** for serialization */
+  private static final long serialVersionUID = 5206721431754800278L;
 
   /**
    * The experiment to configure.

@@ -24,31 +24,25 @@ package weka.gui.beans;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.core.Instances;
 import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.Utils;
-import weka.gui.Logger;
 
-import java.io.Serializable;
 import java.util.Vector;
-import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
-import java.awt.*;
 
 /**
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
   implements IncrementalClassifierListener,
 	     EventConstraints {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3105419818939541291L;
 
   private transient Evaluation m_eval;
 

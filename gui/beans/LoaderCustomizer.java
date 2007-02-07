@@ -50,15 +50,18 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-
 /**
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
-public class LoaderCustomizer extends JPanel
+public class LoaderCustomizer
+  extends JPanel
   implements Customizer, CustomizerCloseRequester {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6990446313118930298L;
 
   static {
      GenericObjectEditor.registerEditors();

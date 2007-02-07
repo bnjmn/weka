@@ -32,10 +32,13 @@ import java.util.Enumeration;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
+public class BinC45Split
+  extends ClassifierSplitModel {
 
-public class BinC45Split extends ClassifierSplitModel{
+  /** for serialization */
+  private static final long serialVersionUID = -1278776919563022474L;
 
   /** Attribute to split on. */
   private int m_attIndex;        

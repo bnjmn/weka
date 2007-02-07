@@ -22,18 +22,23 @@
 
 package weka.gui.beans;
 
-import java.util.EventObject;
 import weka.gui.visualize.PlotData2D;
+
+import java.util.EventObject;
 
 /**
  * Event encapsulating error information for a learning scheme
  * that can be visualized in the DataVisualizer
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see EventObject
  */
-public class VisualizableErrorEvent extends EventObject {
+public class VisualizableErrorEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5811819270887223400L;
 
   private PlotData2D m_dataSet;
 

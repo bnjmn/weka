@@ -22,14 +22,12 @@
 
 package weka.classifiers;
 
-import weka.classifiers.Classifier;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 import weka.core.Option;
-import weka.core.Instances;
 import weka.core.Randomizable;
-import java.util.Vector;
+import weka.core.Utils;
+
 import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract utility class for handling settings common to randomizable
@@ -37,10 +35,13 @@ import java.util.Enumeration;
  * on a given random number seed.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class RandomizableMultipleClassifiersCombiner 
   extends MultipleClassifiersCombiner implements Randomizable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5057936555724785679L;
   
   /** The random number seed. */
   protected int m_Seed = 1;

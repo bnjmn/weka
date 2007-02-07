@@ -22,42 +22,39 @@
 
 package weka.gui.beans;
 
-import weka.core.FastVector;
 import weka.core.Drawable;
+import weka.core.FastVector;
 import weka.gui.ResultHistoryPanel;
-import weka.gui.treevisualizer.*;
-import weka.gui.graphvisualizer.*;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeVisualizer;
 
+import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.ImageIcon;
-
-import javax.swing.SwingConstants;
-import javax.swing.JFrame;
-import javax.swing.BorderFactory;
-import java.awt.*;
-import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
-import java.io.ObjectInputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.awt.event.MouseEvent;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 /**
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GraphViewer 
   extends JPanel
   implements Visible, GraphListener,
 	     UserRequestAcceptor, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5183121972114900617L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("GraphViewer", 
@@ -93,6 +90,9 @@ public class GraphViewer
     m_history.setHandleRightClicks(false);
     m_history.getList().
       addMouseListener(new ResultHistoryPanel.RMouseAdapter() {
+	  /** for serialization */
+	  private static final long serialVersionUID = -4984130887963944249L;
+
 	  public void mouseClicked(MouseEvent e) {
 	    int index = m_history.getList().locationToIndex(e.getPoint());
 	    if (index != -1) {
@@ -115,8 +115,7 @@ public class GraphViewer
     if (m_history == null) {
       setUpResultHistory();
     }
-    String name = (new SimpleDateFormat("HH:mm:ss - "))
-      .format(new Date());
+    String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
 
     name += e.getGraphTitle();
     graphInfo.addElement(new Integer(e.getGraphType()));

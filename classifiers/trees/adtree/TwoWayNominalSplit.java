@@ -33,9 +33,13 @@ import java.util.Enumeration;
  * either 'is some_value' or 'is not some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class TwoWayNominalSplit extends Splitter {
+public class TwoWayNominalSplit
+  extends Splitter {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4598366190152721355L;
 
   /** The index of the attribute the split depends on */
   private int attIndex;

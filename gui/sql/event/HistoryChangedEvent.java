@@ -20,10 +20,8 @@
  *
  */
 
-
 package weka.gui.sql.event;
 
-import java.util.EventListener;
 import java.util.EventObject;
 
 import javax.swing.DefaultListModel;
@@ -33,10 +31,14 @@ import javax.swing.DefaultListModel;
  *
  * @see         HistoryChangedListener
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
+public class HistoryChangedEvent
+  extends EventObject {
 
-public class HistoryChangedEvent extends EventObject {
+  /** for serialization */
+  private static final long serialVersionUID = 7476087315774869973L;
+  
   /** the name of the history */
   protected String m_HistoryName;
   

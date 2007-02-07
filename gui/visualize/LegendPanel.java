@@ -20,35 +20,26 @@
  *
  */
 
-
 package weka.gui.visualize;
 
 import weka.core.FastVector;
-import weka.core.Utils;
 import weka.core.Instances;
 
-import java.util.Random;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Dimension;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JColorChooser;
-
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Component;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  * This panel displays legends for a list of plots. If a given plot
@@ -56,9 +47,13 @@ import java.awt.Component;
  * be changed.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class LegendPanel extends JScrollPane {
+public class LegendPanel
+  extends JScrollPane {
+
+  /** for serialization */
+  private static final long serialVersionUID = -1262384440543001505L;
 
   /** the list of plot elements */
   protected FastVector m_plots;
@@ -73,7 +68,11 @@ public class LegendPanel extends JScrollPane {
   /**
    * Inner class for handling legend entries
    */
-  protected class LegendEntry extends JPanel {
+  protected class LegendEntry
+    extends JPanel {
+
+    /** for serialization */
+    private static final long serialVersionUID = 3879990289042935670L;
 
     /** the data for this legend entry */
     private PlotData2D m_plotData=null;
@@ -131,6 +130,8 @@ public class LegendPanel extends JScrollPane {
       constraints.fill = GridBagConstraints.HORIZONTAL;
       constraints.gridx=0;constraints.gridy=0;constraints.weightx=5; */
       m_pointShape = new JPanel() {
+	private static final long serialVersionUID = -7048435221580488238L;
+	
 	public void paintComponent(Graphics gx) {
 	  super.paintComponent(gx);
 	  if (!m_plotData.m_useCustomColour) {

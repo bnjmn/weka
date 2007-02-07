@@ -22,16 +22,19 @@
 
 package weka.core;
 
-import java.lang.Math;
 import java.util.Random;
 
 /**
  * Class implementing some simple random variates generator.
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public final class RandomVariates extends Random{
+public final class RandomVariates
+    extends Random {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4763742718209460354L;
     
     /** 
      * Simply the constructor of super class

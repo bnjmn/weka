@@ -14,13 +14,11 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *    Filter.java
  *    Copyright (C) 1999 Len Trigg
  *
  */
-
 
 package weka.filters;
 
@@ -72,10 +70,13 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = -8835063755891851218L;
 
   /** The output format for instances */
   private Instances m_OutputFormat = null;

@@ -20,11 +20,8 @@
  *
  */
 
-
 package weka.gui.sql.event;
 
-import java.sql.ResultSet;
-import java.util.EventListener;
 import java.util.EventObject;
 
 /**
@@ -33,10 +30,14 @@ import java.util.EventObject;
  *
  * @see         ResultChangedListener
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.2 $
  */
+public class ResultChangedEvent
+  extends EventObject {
 
-public class ResultChangedEvent extends EventObject {
+  /** for serialization */
+  private static final long serialVersionUID = 36042516077236111L;
+  
   /** the query that is associated with the active result table */
   protected String m_Query;
 

@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui;
 
 import weka.core.Instances;
@@ -60,9 +59,13 @@ import javax.swing.JPanel;
  * then retrieve the instances by calling getInstances().
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
-public class SetInstancesPanel extends JPanel {
+public class SetInstancesPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -384804041420453735L;
   
   /** Click to open instances from a file */
   protected JButton m_OpenFileBut = new JButton("Open file...");

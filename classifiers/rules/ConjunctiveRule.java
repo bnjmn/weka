@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class ConjunctiveRule 
   extends Classifier 
@@ -165,8 +165,12 @@ public class ConjunctiveRule
    * the corresponding value.  There are two inherited classes, namely NumericAntd
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
-    
-  private abstract class Antd implements Serializable {
+  private abstract class Antd
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -8729076306737827571L;
+
     /** The attribute of the antecedent */
     protected Attribute att;
 	

@@ -27,9 +27,13 @@ package weka.core;
  * class type of the data it has been passed.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class UnsupportedClassTypeException extends WekaException {
+public class UnsupportedClassTypeException
+  extends WekaException {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5175741076972192151L;
 
   /**
    * Creates a new UnsupportedClassTypeException with no message.

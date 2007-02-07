@@ -22,15 +22,20 @@
 
 package weka.classifiers.trees.j48;
 
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /**
  * Class implementing a "no-split"-split.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public final class NoSplit extends ClassifierSplitModel{
+public final class NoSplit
+  extends ClassifierSplitModel{
+
+  /** for serialization */
+  private static final long serialVersionUID = -1292620749331337546L;
 
   /**
    * Creates "no-split"-split for given distribution.

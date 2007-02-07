@@ -22,7 +22,9 @@
 
 package weka.clusterers;
 
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
 /** 
  * Abstract clustering model that produces (for each test instance)
@@ -31,9 +33,13 @@ import weka.core.*;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.5 $
+ * @version  $Revision: 1.6 $
  */
-public abstract class DensityBasedClusterer extends Clusterer {
+public abstract class DensityBasedClusterer
+  extends Clusterer {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5950728041704213845L;
 
   // ===============
   // Public methods.

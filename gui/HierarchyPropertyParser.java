@@ -26,7 +26,6 @@ import java.io.Serializable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-
 /**
  * This class implements a parser to read properties that have
  * a hierarchy(i.e. tree) structure.  Conceptually it's similar to 
@@ -42,9 +41,13 @@ import java.util.Vector;
  * goToXXX() and information accessing functions).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class HierarchyPropertyParser implements Serializable{
+public class HierarchyPropertyParser
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -4151103338506077544L;
 
     /** Keep track of the root of the tree */
     private TreeNode m_Root;

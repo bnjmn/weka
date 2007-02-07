@@ -20,8 +20,8 @@
  *
  */
 
-
 package weka.experiment;
+
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -30,9 +30,13 @@ import java.io.Serializable;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class Stats implements Serializable {
+public class Stats
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -8610544539090024102L;
   
   /** The number of values seen */
   public double count = 0;

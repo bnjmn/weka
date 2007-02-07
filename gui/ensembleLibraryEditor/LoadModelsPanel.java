@@ -55,7 +55,7 @@ import javax.swing.event.ChangeListener;
 /**
  * 
  * @author  Robert Jung
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LoadModelsPanel
   extends JPanel
@@ -196,6 +196,9 @@ public class LoadModelsPanel
 	KeyStroke.getKeyStroke("released DELETE"), "deleteSelected");
     m_ModelList.getActionMap().put("deleteSelected",
 	new AbstractAction("deleteSelected") {
+      
+      private static final long serialVersionUID = 4557836979081722983L;
+      
       public void actionPerformed(ActionEvent evt) {
 	
 	Object[] currentModels = m_ModelList.getSelectedValues();

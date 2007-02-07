@@ -41,16 +41,19 @@ import javax.swing.ListModel;
  * the wrapper is removed and only the payload object is returned.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CheckBoxList
   extends JList {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4359573373359270258L;
   
   /**
    * represents an item in the CheckBoxListModel
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   protected class CheckBoxListItem {
     
@@ -128,10 +131,13 @@ public class CheckBoxList
    * A specialized model.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   public class CheckBoxListModel
     extends DefaultListModel {
+
+    /** for serialization */
+    private static final long serialVersionUID = 7772455499540273507L;
     
     /**
      * initializes the model with no data.
@@ -444,12 +450,15 @@ public class CheckBoxList
    * A specialized CellRenderer for the CheckBoxList
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    * @see CheckBoxList
    */
   public class CheckBoxListRenderer 
     extends JCheckBox 
     implements ListCellRenderer {
+
+    /** for serialization */
+    private static final long serialVersionUID = 1059591605858524586L;
   
     /**
      * Return a component that has been configured to display the specified 

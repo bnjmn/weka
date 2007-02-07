@@ -20,17 +20,14 @@
  *
  */
 
-
 package weka.gui;
 
-import java.awt.Graphics;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyEditor;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
+
 import javax.swing.JTextField;
 
 /** 
@@ -39,9 +36,13 @@ import javax.swing.JTextField;
  * somewhere other than this field simultaneously
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-class PropertyText extends JTextField {
+class PropertyText
+  extends JTextField {
+
+  /** for serialization */
+  private static final long serialVersionUID = -3915342928825822730L;
 
   /** The property editor */
   private PropertyEditor m_Editor;

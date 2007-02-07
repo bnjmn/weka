@@ -25,7 +25,6 @@
 package weka.classifiers.lazy.kstar;
 
 import java.io.Serializable;
-import java.util.*;
 
 /**
  * A class representing the caching system used to keep track of each attribute
@@ -33,10 +32,13 @@ import java.util.*;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision 1.0 $
+ * @version $Revision: 1.9 $
  */
+public class KStarCache
+  implements Serializable {
 
-public class KStarCache implements Serializable {
+  /** for serialization */
+  private static final long serialVersionUID = -7693632394267140678L;
   
   /**
    * cache table
@@ -85,7 +87,11 @@ public class KStarCache implements Serializable {
    * A custom hashtable class to support the caching system.
    *
    */
-  public class CacheTable implements Serializable {
+  public class CacheTable
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -8086106452588253423L;
 
     /** The hash table data. */
     private TableEntry [] m_Table;
@@ -252,7 +258,12 @@ public class KStarCache implements Serializable {
   /**
    * Hashtable collision list.
    */
-  public class TableEntry implements Serializable {
+  public class TableEntry
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = 4057602386766259138L;
+
     /** attribute value hash code */
     public int hash;
 

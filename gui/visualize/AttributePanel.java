@@ -20,35 +20,24 @@
  *
  */
 
-
 package weka.gui.visualize;
 
-import weka.core.Instances;
-import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Utils;
+import weka.core.Instances;
 
-import java.util.Random;
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.GridBagLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Dimension;
 
 import javax.swing.JPanel;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-
-import java.awt.Color;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
 
 /**
  * This panel displays one dimensional views of the attributes in a
@@ -57,9 +46,14 @@ import java.awt.Graphics;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class AttributePanel extends JScrollPane {
+public class AttributePanel
+  extends JScrollPane {
+
+  /** for serialization */
+  private static final long serialVersionUID = 3533330317806757814L;
+  
   /** The instances to be plotted */
   protected Instances m_plotInstances=null;
     
@@ -104,7 +98,11 @@ public class AttributePanel extends JScrollPane {
   /** inner inner class used for plotting the points 
    * into a bar for a particular attribute. 
    */
-  protected class AttributeSpacing extends JPanel {
+  protected class AttributeSpacing
+    extends JPanel {
+
+    /** for serialization */
+    private static final long serialVersionUID = 7220615894321679898L;
 
     /** The min and max values for this attribute. */
     protected double m_maxVal;
@@ -459,6 +457,8 @@ public class AttributePanel extends JScrollPane {
 
     if (m_span == null) {
       m_span = new JPanel() {
+	  private static final long serialVersionUID = 7107576557995451922L;
+	  
 	  public void paintComponent(Graphics gx) {
 	    super.paintComponent(gx);
 	    gx.setColor(Color.red);

@@ -99,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
@@ -352,6 +352,9 @@ public class FilteredClassifier
       result = super.getCapabilities();
     else
       result = getFilter().getCapabilities();
+    
+    // the filtered classifier always needs a class
+    result.disable(Capability.NO_CLASS);
     
     // set dependencies
     for (Capability cap: Capability.values())

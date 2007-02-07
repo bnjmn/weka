@@ -41,15 +41,18 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 
-
 /**
  * Class for encapsulating a connection between two beans. Also
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class BeanConnection implements Serializable {
+public class BeanConnection
+  implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 8804264241791332064L;
 
   /**
    * The list of connections

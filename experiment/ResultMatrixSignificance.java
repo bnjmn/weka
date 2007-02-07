@@ -20,10 +20,7 @@
  *
  */
 
-
 package weka.experiment;
-
-import weka.core.Utils;
 
 /**
  * This matrix is a container for the datasets and classifier setups and 
@@ -32,10 +29,14 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
+public class ResultMatrixSignificance
+  extends ResultMatrix {
 
-public class ResultMatrixSignificance extends ResultMatrix {
+  /** for serialization */
+  private static final long serialVersionUID = -1280545644109764206L;
+  
   /**
    * initializes the matrix as 1x1 matrix
    */

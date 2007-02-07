@@ -20,10 +20,8 @@
  *
  */
 
-
 package weka.gui;
 
-import weka.gui.LookAndFeel;
 import weka.core.Tee;
 import weka.core.Utils;
 
@@ -33,8 +31,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -48,27 +44,29 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.text.JTextComponent;
 import javax.swing.JTextPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
-import javax.swing.text.Style;
 
 /** 
  * Frame that shows the output from stdout and stderr.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LogWindow 
   extends JFrame
   implements CaretListener, ChangeListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5650947361381061112L;
 
   /** the name of the style for stdout */
   public final static String STYLE_STDOUT = "stdout";
@@ -458,6 +456,7 @@ public class LogWindow
       m_Output = new JTextPane();
     else
       m_Output = new JTextPane(){
+        private static final long serialVersionUID = -8275856175921425981L;
         public void setSize(Dimension d) {    
           if (d.width < getGraphicsConfiguration().getBounds().width) 
             d.width = getGraphicsConfiguration().getBounds().width; 

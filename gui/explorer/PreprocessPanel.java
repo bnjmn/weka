@@ -99,11 +99,14 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.66 $
+ * @version $Revision: 1.67 $
  */
 public class PreprocessPanel
   extends JPanel 
   implements CapabilitiesFilterChangeListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6764850273874813049L;
   
   /** Displays simple stats on the working instances */
   protected InstancesSummaryPanel m_InstSummaryPanel =

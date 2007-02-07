@@ -22,21 +22,24 @@
 
 package weka.core;
 
-import java.util.Random;
 import java.io.Serializable;
+import java.util.Random;
 
 /**
  * Class for performing operations on an algebraic vector
  * of floating-point values.
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AlgVector 
   implements Cloneable, Serializable {
 
+  /** for serialization */
+  private static final long serialVersionUID = -4023736016850256591L;
+
   /** The values of the matrix */
-  protected double [] m_Elements;
+  protected double[] m_Elements;
 
   /**
    * Constructs a vector and initializes it with default values.

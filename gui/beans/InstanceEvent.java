@@ -22,18 +22,24 @@
 
 package weka.gui.beans;
 
-import java.util.EventObject;
-import weka.core.Instances;
 import weka.core.Instance;
+import weka.core.Instances;
+
+import java.util.EventObject;
 
 /**
  * Event that encapsulates a single instance or header information only
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see EventObject
  */
-public class InstanceEvent extends EventObject {
+public class InstanceEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6104920894559423946L;
+  
   public static final int FORMAT_AVAILABLE = 0;
   public static final int INSTANCE_AVAILABLE = 1;
   public static final int BATCH_FINISHED = 2;

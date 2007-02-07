@@ -22,16 +22,23 @@
 
 package weka.classifiers.trees.j48;
 
-import java.util.*;
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.util.Enumeration;
 
 /**
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class C45Split extends ClassifierSplitModel{
+public class C45Split
+  extends ClassifierSplitModel{
+
+  /** for serialization */
+  private static final long serialVersionUID = 3064079330067903161L;
 
   /** Desired number of branches. */
   private int m_complexityIndex;  

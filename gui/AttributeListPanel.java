@@ -20,24 +20,19 @@
  *
  */
 
-
 package weka.gui;
 
 import weka.core.Instances;
 
-import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.Dimension;
+
 import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JTable;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.AbstractTableModel;
-import javax.swing.BorderFactory;
+import javax.swing.table.TableColumnModel;
 
 /**
  * Creates a panel that displays the attributes contained in a set of
@@ -45,14 +40,22 @@ import javax.swing.BorderFactory;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class AttributeListPanel extends JPanel {
+public class AttributeListPanel
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2030706987910400362L;
 
   /**
    * A table model that looks at the names of attributes.
    */
-  class AttributeTableModel extends AbstractTableModel {
+  class AttributeTableModel
+    extends AbstractTableModel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -7345701953670327707L;
 
     /** The instances who's attribute structure we are reporting */
     protected Instances m_Instances;

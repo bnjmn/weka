@@ -22,29 +22,38 @@
 
 package weka.gui.boundaryvisualizer;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.JPanel;
-import javax.swing.JOptionPane;
-import javax.swing.ToolTipManager;
-import java.util.Vector;
-import java.util.Random;
-
-import com.sun.image.codec.jpeg.*;
-import java.awt.image.*;
-import java.io.*;
-
-import weka.core.*;
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayesSimple;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.trees.J48;
-import weka.classifiers.lazy.IBk;
-import weka.classifiers.functions.Logistic;
-import weka.clusterers.EM;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.Add;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.util.Random;
+import java.util.Vector;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
+
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGEncodeParam;
+import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 /**
  * BoundaryPanel. A class to handle the plotting operations
@@ -52,13 +61,17 @@ import weka.filters.unsupervised.attribute.Add;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @since 1.0
  * @see JPanel
  */
-public class BoundaryPanel extends JPanel {
+public class BoundaryPanel
+  extends JPanel {
 
-  // default colours for classes
+  /** for serialization */
+  private static final long serialVersionUID = -8499445518744770458L;
+  
+  /** default colours for classes */
   public static final Color [] DEFAULT_COLORS = {
     Color.red,
     Color.green,
@@ -69,21 +82,21 @@ public class BoundaryPanel extends JPanel {
     new Color(255, 255, 255), //white
     new Color(0, 0, 0)};
     
-  //The distance we can click away from a point in the GUI and still remove it.
+  /** The distance we can click away from a point in the GUI and still remove it. */
   public static final double REMOVE_POINT_RADIUS = 7.0;
 
   protected FastVector m_Colors = new FastVector();
 
-  // training data
+  /** training data */
   protected Instances m_trainingData;
 
-  // distribution classifier to use
+  /** distribution classifier to use */
   protected Classifier m_classifier;
 
-  // data generator to use
+  /** data generator to use */
   protected DataGenerator m_dataGenerator;
 
-  // index of the class attribute
+  /** index of the class attribute */
   private int m_classIndex = -1;
 
   // attributes for visualizing on
@@ -102,7 +115,7 @@ public class BoundaryPanel extends JPanel {
   protected double m_pixHeight;
   protected double m_pixWidth;
 
-  // used for offscreen drawing
+  /** used for offscreen drawing */
   protected Image m_osi = null;
 
   // width and height of the display area
@@ -116,11 +129,18 @@ public class BoundaryPanel extends JPanel {
   protected int m_numOfSamplesPerGenerator;
   protected double m_samplesBase = 2.0;
 
-  // listeners to be notified when plot is complete
+  /** listeners to be notified when plot is complete */
   private Vector m_listeners = new Vector();
 
-  // small inner class for rendering the bitmap on to
-  private class PlotPanel extends JPanel {
+  /**
+   * small inner class for rendering the bitmap on to
+   */
+  private class PlotPanel
+    extends JPanel {
+
+    /** for serialization */
+    private static final long serialVersionUID = 743629498352235060L;
+    
     public PlotPanel() {
       this.setToolTipText("");
     }
@@ -156,33 +176,33 @@ public class BoundaryPanel extends JPanel {
     }
   }
 
-  // the actual plotting area
+  /** the actual plotting area */
   private PlotPanel m_plotPanel = new PlotPanel();
 
-  // thread for running the plotting operation in
+  /** thread for running the plotting operation in */
   private Thread m_plotThread = null;
 
-  // Stop the plotting thread
+  /** Stop the plotting thread */
   protected boolean m_stopPlotting = false;
 
-  // Stop any replotting threads
+  /** Stop any replotting threads */
   protected boolean m_stopReplotting = false;
 
   // Used by replotting threads to pause and resume the main plot thread
   private Double m_dummy = new Double(1.0);
   private boolean m_pausePlotting = false;
-  // what size of tile is currently being plotted
+  /** what size of tile is currently being plotted */
   private int m_size = 1;
-  // is the main plot thread performing the initial coarse tiling
+  /** is the main plot thread performing the initial coarse tiling */
   private boolean m_initialTiling;
 
-  // A random number generator 
+  /** A random number generator  */
   private Random m_random = null;
 
-  // cache of probabilities for fast replotting
+  /** cache of probabilities for fast replotting */
   protected double [][][] m_probabilityCache;
 
-  // plot the training data
+  /** plot the training data */
   protected boolean m_plotTrainingData = true;
 
   /**

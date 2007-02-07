@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.graphvisualizer;
 
 /**
@@ -29,12 +28,16 @@ package weka.gui.graphvisualizer;
  * stream.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.4 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
-public class BIFFormatException extends Exception {
+public class BIFFormatException
+  extends Exception {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4102518086411708140L;
   
   public BIFFormatException(String s) {
     super(s);
   }
   
-} // BIFFormatException
+}

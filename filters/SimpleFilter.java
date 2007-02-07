@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.filters;
 
 import weka.filters.Filter;
@@ -37,13 +36,16 @@ import java.util.Vector;
  * SimpleStreamFilter.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see     SimpleBatchFilter 
  * @see     SimpleStreamFilter 
  */
 public abstract class SimpleFilter
   extends Filter 
   implements OptionHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5702974949137433141L;
 
   /** Whether debugging is on */
   protected boolean m_Debug = false;

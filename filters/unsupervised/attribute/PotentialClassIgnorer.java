@@ -14,7 +14,6 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *    PotentialClassIgnorer.java
  *    Copyright (C) 2003 University of Waikato
@@ -40,11 +39,14 @@ import java.util.Vector;
  * attribute that is originally the class attribute !
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public abstract class PotentialClassIgnorer
   extends Filter
   implements OptionHandler {
+
+  /** for serialization */
+  private static final long serialVersionUID = 8625371119276845454L;
 
   /** True if the class is to be unset */
   protected boolean m_IgnoreClass = false;

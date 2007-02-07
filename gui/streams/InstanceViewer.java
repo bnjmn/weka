@@ -20,20 +20,16 @@
  *
  */
 
-
 package weka.gui.streams;
 
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.util.Vector;
-import java.io.Serializable;
 import weka.core.Instance;
 import weka.core.Instances;
+
 import java.awt.BorderLayout;
-import java.awt.Font;
+
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * This is a very simple instance viewer - just displays the dataset as
@@ -41,10 +37,14 @@ import javax.swing.JScrollPane;
  * might be more spreadsheet-like
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class InstanceViewer extends JPanel
-  implements Serializable, InstanceListener {
+public class InstanceViewer
+  extends JPanel
+  implements InstanceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4925729441294121772L;
   
   private JTextArea m_OutputTex;
   private boolean m_Debug;
@@ -153,7 +153,3 @@ public class InstanceViewer extends JPanel
     }
   }
 }
-
-
-
-

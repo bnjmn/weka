@@ -24,29 +24,25 @@ package weka.gui.beans;
 
 import weka.core.Instances;
 
-import java.util.Random;
 import java.io.Serializable;
-import java.util.Vector;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.awt.*;
 import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Bean for splitting instances into training ant test sets according to
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
   implements DataSourceListener, TrainingSetListener, TestSetListener, 
 	     UserRequestAcceptor, EventConstraints, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -6350179298851891512L;
 
   private int m_numFolds = 10;
   private int m_randomSeed = 1;

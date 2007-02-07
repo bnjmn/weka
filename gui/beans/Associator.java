@@ -22,37 +22,24 @@
 
 package weka.gui.beans;
 
+import weka.associations.Apriori;
+import weka.core.Instances;
+import weka.gui.Logger;
 
-import java.util.Vector;
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
-import java.awt.*;
-import java.io.Serializable;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.beans.EventSetDescriptor;
+import java.util.Vector;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.associations.Apriori;
-import weka.gui.Logger;
+import javax.swing.JPanel;
 
 /**
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -63,12 +50,16 @@ import weka.gui.Logger;
  * @see TrainingSetListener
  * @see DataSourceListener
  */
-public class Associator extends JPanel
+public class Associator
+  extends JPanel
   implements BeanCommon, Visible, 
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
              DataSourceListener,
 	     TrainingSetListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = -7843500322130210057L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Associator",

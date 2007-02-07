@@ -20,34 +20,32 @@
  *
  */
 
-
 package weka.gui;
 
-import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.awt.BorderLayout;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.BorderFactory;
-import javax.swing.SwingConstants;
-import javax.swing.JViewport;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
-import java.awt.event.ActionListener;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.Point;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /** 
  * This panel allows log and status messages to be posted. Log messages
@@ -55,9 +53,14 @@ import java.awt.Point;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
-public class LogPanel extends JPanel implements Logger, TaskLogger {
+public class LogPanel
+  extends JPanel
+  implements Logger, TaskLogger {
+
+  /** for serialization */
+  private static final long serialVersionUID = -4072464549112439484L;
 
   /** Displays the current status */
   protected JLabel m_StatusLab = new JLabel("OK");

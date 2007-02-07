@@ -27,9 +27,13 @@ package weka.core;
  * reference to a dataset, when one is required.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class UnassignedDatasetException extends RuntimeException {
+public class UnassignedDatasetException
+  extends RuntimeException {
+
+  /** for serialization */
+  private static final long serialVersionUID = -9000116786626328854L;
 
   /**
    * Creates a new UnassignedDatasetException with no message.

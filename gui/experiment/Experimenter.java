@@ -20,34 +20,34 @@
  *
  */
 
-
 package weka.gui.experiment;
 
 import weka.core.Memory;
 import weka.experiment.Experiment;
 import weka.gui.LookAndFeel;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-import javax.swing.JPanel;
-import javax.swing.JOptionPane;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 /** 
  * The main class for the experiment environment. Lets the user create,
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class Experimenter extends JPanel {
+public class Experimenter
+  extends JPanel {
+
+  /** for serialization */
+  private static final long serialVersionUID = -5751617505738193788L;
 
   /** The panel for configuring the experiment */
   protected SetupModePanel m_SetupPanel;

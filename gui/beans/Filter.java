@@ -22,46 +22,40 @@
 
 package weka.gui.beans;
 
-
-import java.util.Vector;
-import java.util.EventObject;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
-import java.awt.*;
-import java.io.Serializable;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.beans.EventSetDescriptor;
-
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.*;
+import weka.filters.AllFilter;
+import weka.filters.StreamableFilter;
+import weka.filters.SupervisedFilter;
 import weka.gui.Logger;
+
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.EventObject;
+import java.util.Hashtable;
+import java.util.Vector;
+
+import javax.swing.JPanel;
 
 /**
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
-public class Filter extends JPanel
+public class Filter
+  extends JPanel
   implements BeanCommon, Visible, WekaWrapper,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     TrainingSetProducer, TestSetProducer,
 	     DataSource, DataSourceListener, 
 	     InstanceListener, EventConstraints {
+
+  /** for serialization */
+  private static final long serialVersionUID = 8249759470189439321L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Filter",

@@ -27,9 +27,13 @@ package weka.core;
  * class assigned to it, but a class is needed to perform the operation.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class UnassignedClassException extends RuntimeException {
+public class UnassignedClassException
+  extends RuntimeException {
+
+  /** for serialization */
+  private static final long serialVersionUID = 6268278694768818235L;
 
   /**
    * Creates a new UnassignedClassException with no message.

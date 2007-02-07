@@ -22,19 +22,16 @@
 
 package weka.classifiers.functions.neural;
 
-import java.io.*;
-
-
+import java.io.Serializable;
 
 /**
  * This is an interface used to create classes that can be used by the 
  * neuralnode to perform all it's computations.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface NeuralMethod extends Serializable {
-
   
   /**
    * This function calculates what the output value should be.

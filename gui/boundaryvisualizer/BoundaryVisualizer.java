@@ -91,23 +91,29 @@ import javax.swing.JTextField;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @since 1.0
  * @see JPanel 
  */
 public class BoundaryVisualizer
   extends JPanel {
 
+  /** for serialization */
+  private static final long serialVersionUID = 3933877580074013208L;
+
   /**
    * Inner class to handle rendering the axis
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.17 $
+   * @version $Revision: 1.18 $
    * @since 1.0
    * @see JPanel
    */
   private class AxisPanel
     extends JPanel {
+
+    /** for serialization */
+    private static final long serialVersionUID = -7421022416674492712L;
     
     private static final int MAX_PRECISION = 10;
     private boolean m_vertical = false;

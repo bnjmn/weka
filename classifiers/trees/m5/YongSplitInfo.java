@@ -1,7 +1,4 @@
 /*
- *    YongSplitInfo.java
- *    Copyright (C) 1999 
- *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -16,23 +13,32 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+
+/*
+ *    YongSplitInfo.java
+ *    Copyright (C) 1999 Yong Wang
+ *
+ */
+
 package weka.classifiers.trees.m5;
 
-import java.io.*;
-import java.util.*;
+import weka.core.Instances;
+import weka.core.Utils;
 
-import weka.core.*;
+import java.io.Serializable;
 
 /**
  * Stores split information.
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public final class YongSplitInfo implements Cloneable, 
-					    Serializable, 
-					    SplitEvaluate {
+public final class YongSplitInfo
+  implements Cloneable, Serializable, SplitEvaluate {
+
+  /** for serialization */
+  private static final long serialVersionUID = 1864267581079767881L;
 
   private int  number;         // number of total instances
   private int  first;          // first instance index

@@ -22,22 +22,28 @@
 
 package weka.classifiers.trees.j48;
 
-import java.util.Random;
-import weka.core.*;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
-import weka.filters.supervised.attribute.Discretize;
+import weka.core.Instance;
+import weka.core.Instances;
 import weka.filters.Filter;
+import weka.filters.supervised.attribute.Discretize;
+
+import java.util.Random;
 
 /**
  * Class implementing a "no-split"-split (leaf node) for naive bayes
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public final class NBTreeNoSplit extends ClassifierSplitModel {
+public final class NBTreeNoSplit
+  extends ClassifierSplitModel {
+
+  /** for serialization */
+  private static final long serialVersionUID = 7824804381545259618L;
 
   /** the naive bayes classifier */
   private NaiveBayesUpdateable m_nb;

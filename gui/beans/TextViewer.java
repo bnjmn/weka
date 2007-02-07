@@ -37,7 +37,6 @@ import java.beans.VetoableChangeListener;
 import java.beans.beancontext.BeanContext;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextChildSupport;
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -51,19 +50,21 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-
 /**
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class TextViewer 
   extends JPanel
   implements TextListener, DataSourceListener, 
 	     TrainingSetListener, TestSetListener,
 	     Visible, UserRequestAcceptor, 
-	     Serializable, BeanContextChild {
+	     BeanContextChild {
+
+  /** for serialization */
+  private static final long serialVersionUID = 104838186352536832L;
 
   protected BeanVisual m_visual;
 

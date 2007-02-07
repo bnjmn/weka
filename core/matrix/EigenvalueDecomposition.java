@@ -35,11 +35,13 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-
 public class EigenvalueDecomposition 
   implements Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = 4011654467211422319L;
 
   /** 
    * Row and column dimension (square matrix).

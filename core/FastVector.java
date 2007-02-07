@@ -31,8 +31,13 @@ import java.util.Enumeration;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ */
-public class FastVector implements Copyable, Serializable {
+ * @version $Revision: 1.13 $
+ */
+public class FastVector
+  implements Copyable, Serializable {
+
+  /** for serialization */
+  private static final long serialVersionUID = -2173635135622930169L;
 
   /**
    * Class for enumerating the vector's elements.

@@ -57,7 +57,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -186,11 +185,11 @@ import java.util.zip.GZIPOutputStream;
  * 
  * @author Robert Jung
  * @author David Michael
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class EnsembleSelection 
   extends RandomizableClassifier 
-  implements Serializable, TechnicalInformationHandler {
+  implements TechnicalInformationHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1744155148765058511L;

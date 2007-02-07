@@ -22,42 +22,24 @@
 
 package weka.gui.beans;
 
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.*;
-import java.io.Serializable;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.util.Vector;
-import java.util.Enumeration;
-import java.io.IOException;
-import java.beans.beancontext.*;
-import javax.swing.JButton;
-
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.converters.*;
-
+import weka.core.converters.ArffSaver;
+import weka.core.converters.DatabaseConverter;
+import weka.core.converters.DatabaseSaver;
 
 /**
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  *
  */
-public class Saver extends AbstractDataSink implements WekaWrapper {
+public class Saver
+  extends AbstractDataSink
+  implements WekaWrapper {
+
+  /** for serialization */
+  private static final long serialVersionUID = 5371716690308950755L;
 
   /**
    * Holds the instances to be saved
@@ -68,8 +50,6 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
    * Holds the structure
    */
   private Instances m_structure;
-  
-  
 
   /**
    * Global info for the wrapped loader (if it exists).
@@ -91,18 +71,13 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
    */
   private String m_fileName;
   
-  
   /** Flag indicating that instances will be saved to database. Used because structure information can only be sent after a database has been configured.*/
   private boolean m_isDBSaver;
-  
-  
  
   /**
    * Count for structure available messages
    */
   private int m_count;
-
-  
   
   private class SaveBatchThread extends Thread {
     private DataSink m_DS;

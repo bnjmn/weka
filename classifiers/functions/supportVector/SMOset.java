@@ -22,18 +22,20 @@
 
 package weka.classifiers.functions.supportVector;
 
-import java.util.*;
-import java.io.*;
-import weka.core.*;
+import java.io.Serializable;
 
 /**
  * Stores a set of integer of a given size.
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class SMOset implements Serializable {
+public class SMOset
+  implements Serializable {
 
+  /** for serialization */
+  private static final long serialVersionUID = -8364829283188675777L;
+  
   /** The current number of elements in the set */
   private int m_number;
 
