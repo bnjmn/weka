@@ -47,7 +47,7 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -292,10 +292,14 @@ public class ConverterFileChooser
   protected void initGUI(int dialogType) {
     Vector<ExtensionFileFilter>	list;
     int				i;
-    
+    boolean 			acceptAll;
+
+    // backup current state
+    acceptAll = isAcceptAllFileFilterUsed();
+
     // setup filters
     resetChoosableFileFilters();
-    setAcceptAllFileFilterUsed(true);
+    setAcceptAllFileFilterUsed(acceptAll);
     if (dialogType == LOADER_DIALOG)
       list = filterNonCoreLoaderFileFilters(m_LoaderFileFilters);
     else
@@ -443,7 +447,7 @@ public class ConverterFileChooser
     removePropertyChangeListener(m_Listener);
 
     // do we have to add the extension?
-    if (result == APPROVE_OPTION) {
+    if ( (result == APPROVE_OPTION) && (getSelectedFile().isFile()) ) {
       if (getFileFilter() instanceof ExtensionFileFilter) {
 	String filename = getSelectedFile().getAbsolutePath();
 	String[] extensions = ((ExtensionFileFilter) getFileFilter()).getExtensions();
@@ -457,6 +461,7 @@ public class ConverterFileChooser
     // does file exist?
     if (    (result == APPROVE_OPTION) 
 	 && (getFileMustExist()) 
+	 && (getSelectedFile().isFile())
 	 && (!getSelectedFile().exists()) ) {
       int retVal = JOptionPane.showConfirmDialog(
 	  parent, 
@@ -624,7 +629,7 @@ public class ConverterFileChooser
     String	filename;
     File	currFile;
     
-    if (getSelectedFile() == null)
+    if ( (getSelectedFile() == null) || (getSelectedFile().isDirectory()) )
       return;
     
     filename = getSelectedFile().getAbsolutePath();
