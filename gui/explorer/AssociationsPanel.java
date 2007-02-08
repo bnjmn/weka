@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.explorer;
 
 import weka.associations.Associator;
@@ -38,6 +37,8 @@ import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -71,14 +72,17 @@ import javax.swing.event.ChangeListener;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class AssociationsPanel 
   extends JPanel
-  implements CapabilitiesFilterChangeListener {
+  implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
   
   /** for serialization */
   static final long serialVersionUID = -6867871711865476971L;
+
+  /** the parent frame */
+  protected Explorer m_Explorer = null;
 
   /** Lets the user configure the associator */
   protected GenericObjectEditor m_AssociatorEditor =
@@ -482,6 +486,43 @@ public class AssociationsPanel
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
     updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+  }
+
+  /**
+   * Sets the Explorer to use as parent frame (used for sending notifications
+   * about changes in the data)
+   * 
+   * @param parent	the parent frame
+   */
+  public void setExplorer(Explorer parent) {
+    m_Explorer = parent;
+  }
+  
+  /**
+   * returns the parent Explorer frame
+   * 
+   * @return		the parent
+   */
+  public Explorer getExplorer() {
+    return m_Explorer;
+  }
+  
+  /**
+   * Returns the title for the tab in the Explorer
+   * 
+   * @return 		the title of this tab
+   */
+  public String getTabTitle() {
+    return "Associate";
+  }
+  
+  /**
+   * Returns the tooltip for the tab in the Explorer
+   * 
+   * @return 		the tooltip of this tab
+   */
+  public String getTabTitleToolTip() {
+    return "Discover association rules";
   }
 
   /**

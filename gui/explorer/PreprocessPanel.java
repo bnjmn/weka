@@ -52,6 +52,8 @@ import weka.gui.TaskLogger;
 import weka.gui.ViewerDialog;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.sql.SqlViewerDialog;
 
 import java.awt.BorderLayout;
@@ -99,11 +101,11 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.67 $
+ * @version $Revision: 1.68 $
  */
 public class PreprocessPanel
   extends JPanel 
-  implements CapabilitiesFilterChangeListener {
+  implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 6764850273874813049L;
@@ -1288,6 +1290,24 @@ public class PreprocessPanel
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
     updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+  }
+  
+  /**
+   * Returns the title for the tab in the Explorer
+   * 
+   * @return 		the title of this tab
+   */
+  public String getTabTitle() {
+    return "Preprocess";
+  }
+  
+  /**
+   * Returns the tooltip for the tab in the Explorer
+   * 
+   * @return 		the tooltip of this tab
+   */
+  public String getTabTitleToolTip() {
+    return "Open/Edit/Save instances";
   }
   
   /**

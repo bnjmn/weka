@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.explorer;
 
 import weka.attributeSelection.ASEvaluation;
@@ -46,6 +45,8 @@ import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.visualize.MatrixPanel;
 
 import java.awt.BorderLayout;
@@ -101,14 +102,17 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
-  implements CapabilitiesFilterChangeListener {
+  implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
   
   /** for serialization */
   static final long serialVersionUID = 5627185966993476142L;
+
+  /** the parent frame */
+  protected Explorer m_Explorer = null;
 
   /** Lets the user configure the attribute evaluator */
   protected GenericObjectEditor m_AttributeEvaluatorEditor =
@@ -1081,6 +1085,43 @@ public class AttributeSelectionPanel
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
     updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+  }
+
+  /**
+   * Sets the Explorer to use as parent frame (used for sending notifications
+   * about changes in the data)
+   * 
+   * @param parent	the parent frame
+   */
+  public void setExplorer(Explorer parent) {
+    m_Explorer = parent;
+  }
+  
+  /**
+   * returns the parent Explorer frame
+   * 
+   * @return		the parent
+   */
+  public Explorer getExplorer() {
+    return m_Explorer;
+  }
+  
+  /**
+   * Returns the title for the tab in the Explorer
+   * 
+   * @return 		the title of this tab
+   */
+  public String getTabTitle() {
+    return "Select attributes";
+  }
+  
+  /**
+   * Returns the tooltip for the tab in the Explorer
+   * 
+   * @return 		the tooltip of this tab
+   */
+  public String getTabTitleToolTip() {
+    return "Determine relevance of attributes";
   }
 
   /**

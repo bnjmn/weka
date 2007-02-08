@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.gui.explorer;
 
 import weka.classifiers.Classifier;
@@ -58,6 +57,8 @@ import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
+import weka.gui.explorer.Explorer.ExplorerPanel;
+import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.graphvisualizer.BIFFormatException;
 import weka.gui.graphvisualizer.GraphVisualizer;
 import weka.gui.treevisualizer.PlaceNode2;
@@ -133,14 +134,17 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.102 $
+ * @version $Revision: 1.103 $
  */
 public class ClassifierPanel 
   extends JPanel
-  implements CapabilitiesFilterChangeListener {
+  implements CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
    
   /** for serialization */
   static final long serialVersionUID = 6959973704963624003L;
+
+  /** the parent frame */
+  protected Explorer m_Explorer = null;
 
   /** The filename extension that should be used for model files */
   public static String MODEL_FILE_EXTENSION = ".model";
@@ -2344,6 +2348,43 @@ public class ClassifierPanel
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
     updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+  }
+
+  /**
+   * Sets the Explorer to use as parent frame (used for sending notifications
+   * about changes in the data)
+   * 
+   * @param parent	the parent frame
+   */
+  public void setExplorer(Explorer parent) {
+    m_Explorer = parent;
+  }
+  
+  /**
+   * returns the parent Explorer frame
+   * 
+   * @return		the parent
+   */
+  public Explorer getExplorer() {
+    return m_Explorer;
+  }
+  
+  /**
+   * Returns the title for the tab in the Explorer
+   * 
+   * @return 		the title of this tab
+   */
+  public String getTabTitle() {
+    return "Classify";
+  }
+  
+  /**
+   * Returns the tooltip for the tab in the Explorer
+   * 
+   * @return 		the tooltip of this tab
+   */
+  public String getTabTitleToolTip() {
+    return "Classify instances";
   }
   
   /**

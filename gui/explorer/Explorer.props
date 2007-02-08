@@ -6,7 +6,7 @@
 #   is read).
 #
 # Author  FracPete (fracpete at waikato dot ac dot nz)
-# Version $Revision: 1.4 $
+# Version $Revision: 1.5 $
 
 # if set to true the Capabilities filters in the GOE will be initialized
 # based on the full dataset that has been loaded into the Explorer 
@@ -16,6 +16,26 @@
 #       combobox only leads to an inspection of the data in the current tab), 
 #       which can be slow on big datasets.
 InitGenericObjectEditorFilter=True
+
+# The tabs to display apart from the PreprocessPanel.
+#
+# The classes listed here must import the weka.gui.explorer.Explorer.ExplorerPanel
+# interface. Optionally, they can also import the 
+# weka.gui.explorer.Explorer.LogHandler interface if they want to use the logging
+# functionality of the Explorer and the 
+# weka.gui.exporer.Explorer.CapabilitiesFilterChangeListener interface 
+# in case they need to know when the Capabilities have changed, e.g., when a 
+# new dataset has been loaded into the Explorer.
+#
+# Additional options follow the classname after a colon.
+# Currently supported options are:
+#   standalone - the tab does not depend on the PreprocessPanel to load the data first
+#
+Tabs=weka.gui.explorer.ClassifierPanel,\
+     weka.gui.explorer.ClustererPanel,\
+     weka.gui.explorer.AssociationsPanel,\
+     weka.gui.explorer.AttributeSelectionPanel,\
+     weka.gui.explorer.VisualizePanel
 
 # the default filter, including options (can be left empty)
 Filter=
