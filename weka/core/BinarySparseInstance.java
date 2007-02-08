@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class BinarySparseInstance
   extends SparseInstance {
@@ -186,7 +186,7 @@ public class BinarySparseInstance
     }
     for (int j = 0; j < inst.numValues(); j++) {
       if (inst.valueSparse(j) != 0) {
-        indices[m++] = inst.index(j) + inst.numAttributes();
+        indices[m++] = numAttributes() + inst.index(j);
       }
     }
 
@@ -204,7 +204,6 @@ public class BinarySparseInstance
    * Does nothing, since we don't support missing values.
    *
    * @param array containing the means and modes
-   * @exception IllegalArgumentException if numbers of attributes are unequal
    */
   public void replaceMissingValues(double[] array) {
 	 
@@ -274,7 +273,7 @@ public class BinarySparseInstance
   public double[] toDoubleArray() {
 
     double[] newValues = new double[m_NumAttributes];
-    for (int i = 0; i < m_AttValues.length; i++) {
+    for (int i = 0; i < m_Indices.length; i++) {
       newValues[m_Indices[i]] = 1.0;
     }
     return newValues;
@@ -351,7 +350,7 @@ public class BinarySparseInstance
    * Deletes an attribute at the given position (0 to 
    * numAttributes() - 1).
    *
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   void forceDeleteAttributeAt(int position) {
 
@@ -379,7 +378,7 @@ public class BinarySparseInstance
    * Inserts an attribute at the given position
    * (0 to numAttributes()) and sets its value to 1. 
    *
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   void forceInsertAttributeAt(int position)  {
 
@@ -407,6 +406,8 @@ public class BinarySparseInstance
 
   /**
    * Main method for testing this class.
+   * 
+   * @param options	the command line options - ignored
    */
   public static void main(String[] options) {
 
