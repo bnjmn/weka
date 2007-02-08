@@ -34,7 +34,7 @@ import java.util.Vector;
  * the props file <code>weka/gui/explorer/Explorer.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see #PROPERTY_FILE
  */
 public class ExplorerDefaults
@@ -135,6 +135,23 @@ public class ExplorerDefaults
    */
   public static boolean getInitGenericObjectEditorFilter() {
     return Boolean.parseBoolean(get("InitGenericObjectEditorFilter", "false"));
+  }
+  
+  /**
+   * returns an array with the classnames of all the additional panels to 
+   * display as tabs in the Explorer
+   * 
+   * @return		the classnames
+   */
+  public static String[] getTabs() {
+    String[]	result;
+    String	tabs;
+    
+    // read and split on comma
+    tabs   = get("Tabs", "weka.gui.explorer.ClassifierPanel,weka.gui.explorer.ClustererPanel,weka.gui.explorer.AssociationsPanel,weka.gui.explorer.AttributeSelectionPanel,weka.gui.explorer.VisualizePanel");
+    result = tabs.split(",");
+    
+    return result;
   }
   
   /**

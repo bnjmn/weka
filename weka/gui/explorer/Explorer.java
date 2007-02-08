@@ -23,13 +23,14 @@
 package weka.gui.explorer;
 
 import weka.core.Capabilities;
+import weka.core.Instances;
 import weka.core.Memory;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.ConverterUtils;
 import weka.gui.LogPanel;
+import weka.gui.Logger;
 import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
-import weka.gui.visualize.MatrixPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
@@ -43,6 +44,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EventListener;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -54,7 +57,7 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class Explorer
   extends JPanel {
@@ -62,37 +65,11 @@ public class Explorer
   /** for serialization */
   private static final long serialVersionUID = -7674003708867909578L;
 
-  /** The panel for preprocessing instances */
-  protected PreprocessPanel m_PreprocessPanel = new PreprocessPanel();
-
-  /** The panel for running classifiers */
-  protected ClassifierPanel m_ClassifierPanel = new ClassifierPanel();
-
-  /** Label for a panel that still need to be implemented */
-  protected ClustererPanel m_ClustererPanel = new ClustererPanel();
-
-  /** Label for a panel that still need to be implemented */
-  protected AssociationsPanel m_AssociationPanel = new AssociationsPanel();
-
-  /** Label for a panel that still need to be implemented */
-  protected AttributeSelectionPanel m_AttributeSelectionPanel =
-    new AttributeSelectionPanel();
-
-  /** Label for a panel that still need to be implemented */
-  protected MatrixPanel m_VisualizePanel =
-    new MatrixPanel();
-  
-  /** The tabbed pane that controls which sub-pane we are working with */
-  protected JTabbedPane m_TabbedPane = new JTabbedPane();
-  
-  /** The panel for log and status messages */
-  protected LogPanel m_LogPanel = new LogPanel(new WekaTaskMonitor());
-  
-  /** the listeners that listen to filter changes */
-  protected HashSet<CapabilitiesFilterChangeListener> m_CapabilitiesFilterChangeListeners = new HashSet<CapabilitiesFilterChangeListener>();
-
   /**
-   * Interface for classes that listen to filter changes.
+   * Interface for classes that listen for filter changes.
+   * 
+   * @author FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.40 $
    */
   public static interface CapabilitiesFilterChangeListener 
     extends EventListener {
@@ -107,6 +84,9 @@ public class Explorer
 
   /**
    * This event can be fired in case the capabilities filter got changed 
+   * 
+   * @author FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.40 $
    */
   public static class CapabilitiesFilterChangeEvent
     extends ChangeEvent {
@@ -138,72 +118,187 @@ public class Explorer
     }
   }
 
+  /**
+   * A common interface for panels to be displayed in the Explorer
+   * 
+   * @author FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.40 $
+   */
+  public static interface ExplorerPanel {
 
+    /**
+     * Sets the Explorer to use as parent frame (used for sending notifications
+     * about changes in the data)
+     * 
+     * @param parent	the parent frame
+     */
+    public void setExplorer(Explorer parent);
+    
+    /**
+     * returns the parent Explorer frame
+     * 
+     * @return		the parent
+     */
+    public Explorer getExplorer();
+    
+    /**
+     * Tells the panel to use a new set of instances.
+     *
+     * @param inst a set of Instances
+     */
+    public void setInstances(Instances inst);
+    
+    /**
+     * Returns the title for the tab in the Explorer
+     * 
+     * @return the title of this tab
+     */
+    public String getTabTitle();
+    
+    /**
+     * Returns the tooltip for the tab in the Explorer
+     * 
+     * @return the tooltip of this tab
+     */
+    public String getTabTitleToolTip();
+  }
+
+  /**
+   * A common interface for panels in the explorer that can handle logs
+   * 
+   * @author FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.40 $
+   */
+  public static interface LogHandler {
+    
+    /**
+     * Sets the Logger to receive informational messages
+     *
+     * @param newLog the Logger that will now get info messages
+     */
+    public void setLog(Logger newLog);
+  }
+
+  /** The panel for preprocessing instances */
+  protected PreprocessPanel m_PreprocessPanel = new PreprocessPanel();
+  
+  /** Contains all the additional panels apart from the pre-processing panel */
+  protected Vector<ExplorerPanel> m_Panels = new Vector<ExplorerPanel>();
+  
+  /** The tabbed pane that controls which sub-pane we are working with */
+  protected JTabbedPane m_TabbedPane = new JTabbedPane();
+  
+  /** The panel for log and status messages */
+  protected LogPanel m_LogPanel = new LogPanel(new WekaTaskMonitor());
+  
+  /** the listeners that listen to filter changes */
+  protected HashSet<CapabilitiesFilterChangeListener> m_CapabilitiesFilterChangeListeners = new HashSet<CapabilitiesFilterChangeListener>();
+  
   /**
    * Creates the experiment environment gui with no initial experiment
    */
   public Explorer() {
     
-    String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
-      .format(new Date());
+    String date = (new SimpleDateFormat("EEEE, d MMMM yyyy")).format(new Date());
     m_LogPanel.logMessage("Weka Explorer");
-    m_LogPanel.logMessage("(c) 1999-2005 The University of Waikato, Hamilton,"
+    m_LogPanel.logMessage("(c) 1999-2007 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/weka");
     m_LogPanel.logMessage("Started on " + date);
     m_LogPanel.statusMessage("Welcome to the Weka Explorer");
+
+    // intialize pre-processpanel
     m_PreprocessPanel.setLog(m_LogPanel);
-    m_ClassifierPanel.setLog(m_LogPanel);
-    m_AssociationPanel.setLog(m_LogPanel);
-    m_ClustererPanel.setLog(m_LogPanel);
-    m_AttributeSelectionPanel.setLog(m_LogPanel);
-    m_TabbedPane.addTab("Preprocess", null, m_PreprocessPanel,
-			"Open/Edit/Save instances");
-    m_TabbedPane.addTab("Classify", null, m_ClassifierPanel,
-			"Classify instances");
-    m_TabbedPane.addTab("Cluster", null, m_ClustererPanel,
-		      "Identify instance clusters");
-    m_TabbedPane.addTab("Associate", null, m_AssociationPanel,
-		      "Discover association rules");
-    m_TabbedPane.addTab("Select attributes", null, m_AttributeSelectionPanel,
-		      "Determine relevance of attributes");
-    m_TabbedPane.addTab("Visualize", null, m_VisualizePanel,
-		      "Explore the data");
+    m_TabbedPane.addTab(
+	m_PreprocessPanel.getTabTitle(),
+	null,
+	m_PreprocessPanel,
+	m_PreprocessPanel.getTabTitleToolTip());
+    
+    // initialize additional panels
+    String[] tabs = ExplorerDefaults.getTabs();
+    Hashtable<String, HashSet> tabOptions = new Hashtable<String, HashSet>();
+    for (int i = 0; i < tabs.length; i++) {
+      try {
+	// determine classname and additional options
+	String[] optionsStr = tabs[i].split(":");
+	String classname = optionsStr[0];
+	HashSet options = new HashSet();
+	tabOptions.put(classname, options);
+	for (int n = 1; n < optionsStr.length; n++)
+	  options.add(optionsStr[n]);
+	  
+	// setup panel
+	ExplorerPanel panel = (ExplorerPanel) Class.forName(classname).newInstance();
+	panel.setExplorer(this);
+	m_Panels.add(panel);
+	if (panel instanceof LogHandler)
+	  ((LogHandler) panel).setLog(m_LogPanel);
+	m_TabbedPane.addTab(
+	    panel.getTabTitle(), null, (JPanel) panel, panel.getTabTitleToolTip());
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+      }
+    }
+
+    // setup tabbed pane
     m_TabbedPane.setSelectedIndex(0);
-    m_TabbedPane.setEnabledAt(1, false);
-    m_TabbedPane.setEnabledAt(2, false);
-    m_TabbedPane.setEnabledAt(3, false);
-    m_TabbedPane.setEnabledAt(4, false);
-    m_TabbedPane.setEnabledAt(5, false);
+    for (int i = 0; i < m_Panels.size(); i++) {
+      HashSet options = tabOptions.get(m_Panels.get(i).getClass().getName());
+      m_TabbedPane.setEnabledAt(i + 1, options.contains("standalone"));
+    }
+
+    // setup notification for dataset changes
     m_PreprocessPanel.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
-        m_ClassifierPanel.setInstances(m_PreprocessPanel.getInstances());
-        m_AssociationPanel.setInstances(m_PreprocessPanel.getInstances());
-        m_ClustererPanel.setInstances(m_PreprocessPanel.getInstances());
-        m_AttributeSelectionPanel.setInstances(m_PreprocessPanel
-                                               .getInstances());
-        m_VisualizePanel.setInstances(m_PreprocessPanel.getInstances());
-        
-        m_TabbedPane.setEnabledAt(1, true);
-        m_TabbedPane.setEnabledAt(2, true);
-        m_TabbedPane.setEnabledAt(3, true);
-        m_TabbedPane.setEnabledAt(4, true);
-        m_TabbedPane.setEnabledAt(5, true);
+	for (int i = 0; i < m_Panels.size(); i++) {
+	   m_Panels.get(i).setInstances(m_PreprocessPanel.getInstances());
+	   m_TabbedPane.setEnabledAt(i + 1, true);
+	}
       }
     });
 
-    setLayout(new BorderLayout());
-    add(m_TabbedPane, BorderLayout.CENTER);
-   
-    add(m_LogPanel, BorderLayout.SOUTH);
-
-    // add listeners
+    // add listeners for changes in the capabilities
     m_PreprocessPanel.setExplorer(this);
     addCapabilitiesFilterListener(m_PreprocessPanel);
-    addCapabilitiesFilterListener(m_ClassifierPanel);
-    addCapabilitiesFilterListener(m_ClustererPanel);
-    addCapabilitiesFilterListener(m_AssociationPanel);
-    addCapabilitiesFilterListener(m_AttributeSelectionPanel);
+    for (int i = 0; i < m_Panels.size(); i++) {
+      if (m_Panels.get(i) instanceof CapabilitiesFilterChangeListener)
+	addCapabilitiesFilterListener((CapabilitiesFilterChangeListener) m_Panels.get(i));
+    }
+
+    // add components to layout
+    setLayout(new BorderLayout());
+    add(m_TabbedPane, BorderLayout.CENTER);
+    add(m_LogPanel, BorderLayout.SOUTH);
+  }
+  
+  /**
+   * returns all the panels, apart from the PreprocessPanel
+   * 
+   * @return		the currently displayed panels w/o PreprocessPanel
+   */
+  public Vector<ExplorerPanel> getPanels() {
+    return m_Panels;
+  }
+  
+  /**
+   * returns the instance of the PreprocessPanel being used in this instance
+   * of the Explorer
+   * 
+   * @return		the panel
+   */
+  public PreprocessPanel getPreprocessPanel() {
+    return m_PreprocessPanel;
+  }
+  
+  /**
+   * returns the tabbed pane of the Explorer
+   * 
+   * @return		the tabbed pane
+   */
+  public JTabbedPane getTabbedPane() {
+    return m_TabbedPane;
   }
   
   /**
