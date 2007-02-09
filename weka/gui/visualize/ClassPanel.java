@@ -49,7 +49,7 @@ import javax.swing.JPanel;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ClassPanel
   extends JPanel {
@@ -443,6 +443,9 @@ public class ClassPanel
 	  if (rm <= 0) {
 	    rm = 0;
 	  }
+	  if (rm >= val.length()) {
+	    rm = val.length() - 1;
+	  }
 	  val = val.substring(0,val.length()-rm);
 	  sw = m_labelMetrics.stringWidth(val);
 	}
@@ -496,6 +499,9 @@ public class ClassPanel
 	    / incr;
 	  if (rm <= 0) {
 	    rm = 0;
+	  }
+	  if (rm >= val.length()) {
+	    rm = val.length() - 1;
 	  }
 	  val = val.substring(0,val.length()-rm);
 	  sw = m_labelMetrics.stringWidth(val);
