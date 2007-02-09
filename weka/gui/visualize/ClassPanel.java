@@ -55,7 +55,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class ClassPanel extends JPanel {
     
@@ -444,6 +444,9 @@ public class ClassPanel extends JPanel {
 	  if (rm <= 0) {
 	    rm = 0;
 	  }
+	  if (rm >= val.length()) {
+	    rm = val.length() - 1;
+	  }
 	  val = val.substring(0,val.length()-rm);
 	  sw = m_labelMetrics.stringWidth(val);
 	}
@@ -497,6 +500,9 @@ public class ClassPanel extends JPanel {
 	    / incr;
 	  if (rm <= 0) {
 	    rm = 0;
+	  }
+	  if (rm >= val.length()) {
+	    rm = val.length() - 1;
 	  }
 	  val = val.substring(0,val.length()-rm);
 	  sw = m_labelMetrics.stringWidth(val);
