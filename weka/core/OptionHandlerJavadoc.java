@@ -42,13 +42,16 @@ import java.util.Vector;
  * <pre> -dir &lt;dir&gt;
  *  The directory above the package hierarchy of the class.</pre>
  * 
+ * <pre> -silent
+ *  Suppresses printing in the console.</pre>
+ * 
  * <pre> -noprolog
  *  Suppresses the 'Valid options are...' prolog in the Javadoc.</pre>
  * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */

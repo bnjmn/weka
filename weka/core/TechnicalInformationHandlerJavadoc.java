@@ -41,13 +41,16 @@ import java.util.Vector;
  * <pre> -dir &lt;dir&gt;
  *  The directory above the package hierarchy of the class.</pre>
  * 
+ * <pre> -silent
+ *  Suppresses printing in the console.</pre>
+ * 
  * <pre> -noprolog
  *  Suppresses the 'BibTex:' prolog in the Javadoc.</pre>
  * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see #PLAINTEXT_STARTTAG
  * @see #PLAINTEXT_ENDTAG
  * @see #BIBTEX_STARTTAG
@@ -211,4 +214,3 @@ public class TechnicalInformationHandlerJavadoc
     runJavadoc(new TechnicalInformationHandlerJavadoc(), args);
   }
 }
-

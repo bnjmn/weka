@@ -41,10 +41,13 @@ import java.lang.reflect.Method;
  * <pre> -dir &lt;dir&gt;
  *  The directory above the package hierarchy of the class.</pre>
  * 
+ * <pre> -silent
+ *  Suppresses printing in the console.</pre>
+ * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see #GLOBALINFO_METHOD
  * @see #GLOBALINFO_STARTTAG
  * @see #GLOBALINFO_ENDTAG
@@ -119,4 +122,3 @@ public class GlobalInfoJavadoc
     runJavadoc(new GlobalInfoJavadoc(), args);
   }
 }
-
