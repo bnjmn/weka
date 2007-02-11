@@ -29,7 +29,7 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class NominalPrediction implements Prediction, Serializable {
 
@@ -78,12 +78,16 @@ public class NominalPrediction implements Prediction, Serializable {
       throw new NullPointerException("Null distribution in NominalPrediction.");
     }
     m_Actual = actual;
-    m_Distribution = distribution;
+    m_Distribution = distribution.clone();
     m_Weight = weight;
     updatePredicted();
   }
 
-  /** Gets the predicted probabilities */
+  /**
+   * Gets the predicted probabilities
+   * 
+   * @return the predicted probabilities
+   */
   public double [] distribution() { 
 
     return m_Distribution; 
