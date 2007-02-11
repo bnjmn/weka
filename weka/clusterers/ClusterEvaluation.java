@@ -61,7 +61,7 @@ import  weka.filters.unsupervised.attribute.Remove;
  * is performed. <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.27.2.1 $
+ * @version  $Revision: 1.27.2.2 $
  */
 public class ClusterEvaluation implements Serializable {
 
@@ -560,6 +560,10 @@ public class ClusterEvaluation implements Serializable {
 	    throw new Exception("Can't load a clusterer and do class based "
 				+"evaluation");
 	  }
+
+          if (objectOutputFileName.length() != 0)
+            throw new Exception(
+                "Can't do class based evaluation and save clusterer");
 	}
 
 	if (theClass != -1) {
