@@ -38,10 +38,13 @@ import java.util.Vector;
  * <pre> -dir &lt;dir&gt;
  *  The directory above the package hierarchy of the class.</pre>
  * 
+ * <pre> -silent
+ *  Suppresses printing in the console.</pre>
+ * 
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AllJavadoc
   extends Javadoc {
