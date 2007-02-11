@@ -66,6 +66,10 @@ import java.util.Vector;
  *  Adds an attribute with the actual classification.
  *  (default: off)</pre>
  * 
+ * <pre> -remove-old-class
+ *  Removes the old class attribute.
+ *  (default: off)</pre>
+ * 
  * <pre> -distribution
  *  Adds attributes with the distribution for all classes 
  *  (for numeric classes this will be identical to the attribute 
@@ -81,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddClassification
   extends SimpleBatchFilter {
@@ -100,6 +104,9 @@ public class AddClassification
 
   /** whether to output the classification */
   protected boolean m_OutputClassification = false;
+
+  /** whether to remove the old class attribute */
+  protected boolean m_RemoveOldClass = false;
   
   /** whether to output the class distribution */
   protected boolean m_OutputDistribution = false;
@@ -153,6 +160,11 @@ public class AddClassification
 	"classification", 0, "-classification"));
 
     result.addElement(new Option(
+	"\tRemoves the old class attribute.\n"
+	+ "\t(default: off)",
+	"remove-old-class", 0, "-remove-old-class"));
+
+    result.addElement(new Option(
 	"\tAdds attributes with the distribution for all classes \n"
         + "\t(for numeric classes this will be identical to the attribute \n"
         + "\toutput with '-classification').\n"
@@ -192,6 +204,10 @@ public class AddClassification
    *  Adds an attribute with the actual classification.
    *  (default: off)</pre>
    * 
+   * <pre> -remove-old-class
+   *  Removes the old class attribute.
+   *  (default: off)</pre>
+   * 
    * <pre> -distribution
    *  Adds attributes with the distribution for all classes 
    *  (for numeric classes this will be identical to the attribute 
@@ -217,9 +233,11 @@ public class AddClassification
 
     setOutputClassification(Utils.getFlag("classification", options));
     
-    setOutputClassification(Utils.getFlag("distribution", options));
+    setRemoveOldClass(Utils.getFlag("remove-old-class", options));
+    
+    setOutputDistribution(Utils.getFlag("distribution", options));
 
-    setOutputClassification(Utils.getFlag("error", options));
+    setOutputErrorFlag(Utils.getFlag("error", options));
     
     serializedModel = false;
     tmpStr = Utils.getOption("serialized", options);
@@ -272,6 +290,9 @@ public class AddClassification
 
     if (getOutputClassification())
       result.add("-classification");
+
+    if (getRemoveOldClass())
+      result.add("-remove-old-class");
 
     if (getOutputDistribution())
       result.add("-distribution");
@@ -426,6 +447,34 @@ public class AddClassification
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
+  public String removeOldClassTipText() {
+    return "Whether to remove the old class attribute.";
+  }
+
+  /**
+   * Get whether the old class attribute is removed.
+   *
+   * @return 		true if the old class attribute is removed.
+   */
+  public boolean getRemoveOldClass() {
+    return m_RemoveOldClass;
+  }
+  
+  /**
+   * Set whether the old class attribute is removed.
+   *
+   * @param value 	whether the old class attribute is removed.
+   */
+  public void setRemoveOldClass(boolean value) {
+    m_RemoveOldClass = value;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
   public String outputDistributionTipText() {
     return 
         "Whether to add attributes with the distribution for all classes "
@@ -501,15 +550,28 @@ public class AddClassification
     FastVector	atts;
     int		i;
     FastVector	values;
+    int		classindex;
+    
+    classindex = -1;
     
     // copy old attributes
     atts = new FastVector();
-    for (i = 0; i < inputFormat.numAttributes(); i++)
+    for (i = 0; i < inputFormat.numAttributes(); i++) {
+      // remove class?
+      if ((i == inputFormat.classIndex()) && (getRemoveOldClass()) )
+	continue;
+      // record class index
+      if (i == inputFormat.classIndex())
+	classindex = i;
       atts.addElement(inputFormat.attribute(i).copy());
+    }
     
     // add new attributes
     // 1. classification?
     if (getOutputClassification()) {
+      // if old class got removed, use this one
+      if (classindex == -1)
+	classindex = atts.size();
       atts.addElement(inputFormat.classAttribute().copy("classification"));
     }
     
@@ -540,7 +602,7 @@ public class AddClassification
     
     // generate new header
     result = new Instances(inputFormat.relationName(), atts, 0);
-    result.setClassIndex(inputFormat.classIndex());
+    result.setClassIndex(classindex);
     
     return result;
   }
@@ -589,12 +651,14 @@ public class AddClassification
       oldValues   = oldInstance.toDoubleArray();
       newValues   = new double[result.numAttributes()];
       
+      start = oldValues.length;
+      if (getRemoveOldClass())
+	start--;
+
       // copy old values
-      System.arraycopy(oldValues, 0, newValues, 0, oldValues.length);
+      System.arraycopy(oldValues, 0, newValues, 0, start);
       
       // add new values:
-      start = oldValues.length;
-      
       // 1. classification?
       if (getOutputClassification()) {
 	newValues[start] = m_ActualClassifier.classifyInstance(oldInstance);
