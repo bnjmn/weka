@@ -28,17 +28,14 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Random;
@@ -85,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.35 $
+ * @version  $Revision: 1.36 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -522,8 +519,6 @@ public class ClusterEvaluation
     String[] savedOptions = null;
     boolean printClusterAssignments = false;
     Range attributesToOutput = null;
-    ObjectInputStream objectInputStream = null;
-    ObjectOutputStream objectOutputStream = null;
     StringBuffer text = new StringBuffer();
     int theClass = -1; // class based evaluation of clustering
     boolean updateable = (clusterer instanceof UpdateableClusterer);
@@ -616,6 +611,10 @@ public class ClusterEvaluation
 	    if (objectInputFileName.length() != 0)
 	      throw new Exception("Can't load a clusterer and do class based "
 		  +"evaluation");
+
+	    if (objectOutputFileName.length() != 0)
+	      throw new Exception(
+		  "Can't do class based evaluation and save clusterer");
 	  }
 	}
 	else {
@@ -637,15 +636,6 @@ public class ClusterEvaluation
 	  
 	  train.setClassIndex(theClass - 1);
 	}
-      }
-
-      if (objectInputFileName.length() != 0) {
-	objectInputStream = new ObjectInputStream(new FileInputStream(objectInputFileName));
-      }
-
-      if (objectOutputFileName.length() != 0) {
-	objectOutputStream = new 
-	  ObjectOutputStream(new FileOutputStream(objectOutputFileName));
       }
     }
     catch (Exception e) {
@@ -669,8 +659,7 @@ public class ClusterEvaluation
 
     if (objectInputFileName.length() != 0) {
       // Load the clusterer from file
-      clusterer = (Clusterer) objectInputStream.readObject();
-      objectInputStream.close();
+      clusterer = (Clusterer) SerializationHelper.read(objectInputFileName);
     }
     else {
       // Build the clusterer if no object file provided
@@ -743,11 +732,8 @@ public class ClusterEvaluation
     }
 
     // Save the clusterer if an object output file is provided
-    if (objectOutputFileName.length() != 0) {
-      objectOutputStream.writeObject(clusterer);
-      objectOutputStream.flush();
-      objectOutputStream.close();
-    }
+    if (objectOutputFileName.length() != 0)
+      SerializationHelper.write(objectOutputFileName, clusterer);
 
     // If classifier is drawable output string describing graph
     if ((clusterer instanceof Drawable) && (graphFileName.length() != 0)) {
