@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
  * java weka.filters.supervised.attribute.AddClassificationTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AddClassificationTest 
   extends AbstractFilterTest {
@@ -67,8 +67,9 @@ public class AddClassificationTest
    * @param cl		whether the classification is to be output
    * @param dist	whether the distribution is to be output
    * @param error	whether the error flag is to be output
+   * @param remove	whether to remove the old class attribute
    */
-  protected void performTest(boolean num, boolean cl, boolean dist, boolean error) {
+  protected void performTest(boolean num, boolean cl, boolean dist, boolean error, boolean remove) {
     Instances	icopy;
     int		numAtts;
     
@@ -89,6 +90,7 @@ public class AddClassificationTest
     ((AddClassification) m_Filter).setOutputClassification(cl);
     ((AddClassification) m_Filter).setOutputDistribution(dist);
     ((AddClassification) m_Filter).setOutputErrorFlag(error);
+    ((AddClassification) m_Filter).setRemoveOldClass(remove);
     
     numAtts = icopy.numAttributes();
     if (cl)
@@ -97,6 +99,8 @@ public class AddClassificationTest
       numAtts += icopy.numClasses();
     if (error)
       numAtts++;
+    if (remove)
+      numAtts--;
     
     Instances result = useFilter();
     assertEquals(result.numAttributes(), numAtts);
@@ -117,63 +121,95 @@ public class AddClassificationTest
    * performs the application with no options set (Nominal class)
    */
   public void testNoneNominal() {
-    performTest(false, false, false, false);
+    performTest(false, false, false, false, false);
   }
   
   /**
    * performs the application with only error flag set (Nominal class)
    */
   public void testErrorFlagNominal() {
-    performTest(false, false, false, true);
+    performTest(false, false, false, true, false);
   }
   
   /**
    * performs the application with only classification set (Nominal class)
    */
   public void testClassificationNominal() {
-    performTest(false, true, false, false);
+    performTest(false, true, false, false, false);
   }
   
   /**
    * performs the application with only distribution set (Nominal class)
    */
   public void testDistributionNominal() {
-    performTest(false, false, true, false);
+    performTest(false, false, true, false, false);
   }
   
   /**
    * performs the application with no options set (Nominal class)
    */
   public void testNoneNumeric() {
-    performTest(true, false, false, false);
+    performTest(true, false, false, false, false);
   }
   
   /**
    * performs the application with only error flag set (Numeric class)
    */
   public void testErrorFlagNumeric() {
-    performTest(true, false, false, true);
+    performTest(true, false, false, true, false);
   }
   
   /**
    * performs the application with only classification set (Numeric class)
    */
   public void testClassificationNumeric() {
-    performTest(true, true, false, false);
+    performTest(true, true, false, false, false);
   }
   
   /**
    * performs the application with only distribution set (Numeric class)
    */
   public void testDistributionNumeric() {
-    performTest(true, false, true, false);
+    performTest(true, false, true, false, false);
   }
 
   public static Test suite() {
     return new TestSuite(AddClassificationTest.class);
   }
+  
+  /**
+   * performs the application with only classification set (Nominal class)
+   * and removal of the old class attribute
+   */
+  public void testClassificationRemoveNominal() {
+    performTest(false, true, false, false, true);
+  }
+  
+  /**
+   * performs the application with only classification set (numeric class)
+   * and removal of the old class attribute
+   */
+  public void testClassificationRemoveNumeric() {
+    performTest(true, true, false, false, true);
+  }
 
   public static void main(String[] args){
     junit.textui.TestRunner.run(suite());
+  }
+  
+  /**
+   * performs the application with only removal of the old class attribute
+   * (nominal)
+   */
+  public void testClassificationOnlyRemoveNominal() {
+    performTest(false, false, false, false, true);
+  }
+  
+  /**
+   * performs the application with only removal of the old class attribute
+   * (numeric)
+   */
+  public void testClassificationOnlyRemoveNumeric() {
+    performTest(true, false, false, false, true);
   }
 }
