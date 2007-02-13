@@ -9,17 +9,19 @@ jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver,org.gjt.mm.mysql.Driver,com.mckoi.JDB
 jdbcURL=jdbc:idb=experiments.prp
 #jdbcURL=jdbc:mysql://mysqlserver/username
 
-#the method that is used to retrieve values from the db (java datatype + RecordSet.<method>)
-#string,getString()= 0;         -->nominal
-#boolean,getBoolean() = 1;  -->nominal
-#double,getDouble() = 2;    -->numeric
-#byte,getByte() = 3;        -->numeric
-#short,getByte()= 4;        -->numeric
-#int,getInteger() = 5;            -->numeric
-#long,getLong() = 6;                -->numeric
-#gloat,getFloat() = 7;            -->numeric
-#date,getDate() = 8;                -->date
-#the original conversion: <column type>=<conversion>
+# the method that is used to retrieve values from the db 
+# (java datatype + RecordSet.<method>)
+# string, getString() = 0;    --> nominal
+# boolean, getBoolean() = 1;  --> nominal
+# double, getDouble() = 2;    --> numeric
+# byte, getByte() = 3;        --> numeric
+# short, getByte()= 4;        --> numeric
+# int, getInteger() = 5;      --> numeric
+# long, getLong() = 6;        --> numeric
+# gloat, getFloat() = 7;      --> numeric
+# date, getDate() = 8;        --> date
+# text, getString() = 9;      --> string
+# the original conversion: <column type>=<conversion>
 #char=0
 #varchar=0
 #longvarchar=0
@@ -43,10 +45,10 @@ jdbcURL=jdbc:idb=experiments.prp
 CHAR=0
 TEXT=0
 VARCHAR=0
-LONGVARCHAR=0
+LONGVARCHAR=9
 BINARY=0
 VARBINARY=0
-LONGVARBINARY=0
+LONGVARBINARY=9
 BIT=1
 NUMERIC=2
 DECIMAL=2
