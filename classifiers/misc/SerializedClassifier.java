@@ -36,7 +36,9 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * A wrapper around a serialized classifier model. This classifier loads a serialized models and uses it to make predictions.
+ * A wrapper around a serialized classifier model. This classifier loads a serialized models and uses it to make predictions.<br/>
+ * <br/>
+ * Warning: since the serialized model doesn't get changed, cross-validation cannot bet used with this classifier.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -54,7 +56,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SerializedClassifier
   extends Classifier {
@@ -77,7 +79,9 @@ public class SerializedClassifier
   public String globalInfo() {
     return 
         "A wrapper around a serialized classifier model. This classifier loads "
-      + "a serialized models and uses it to make predictions.";
+      + "a serialized models and uses it to make predictions.\n\n"
+      + "Warning: since the serialized model doesn't get changed, cross-validation "
+      + "cannot bet used with this classifier.";
   }
 
   /**
