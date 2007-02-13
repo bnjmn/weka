@@ -52,7 +52,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class DatabaseUtils
   implements Serializable {
@@ -106,6 +106,8 @@ public class DatabaseUtils
   public static final int FLOAT = 7;
   /** Type mapping for DATE used for reading experiment results */
   public static final int DATE = 8; 
+  /** Type mapping for TEXT used for reading, e.g., text blobs */
+  public static final int TEXT = 9; 
   
   /** Database URL */
   protected String m_DatabaseURL;

@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -756,6 +756,21 @@ public class DatabaseLoader
                     stringToNominal(rs1,i);
                     rs1.close();
                     break;
+                case DatabaseConnection.TEXT:
+                    //System.err.println("boolean --> string");
+                    columnName = md.getColumnName(i);
+                    if(m_DataBaseConnection.getUpperCase())
+                      columnName = columnName.toUpperCase();
+                    m_nominalIndexes[i - 1] = new Hashtable();
+                    m_nominalStrings[i - 1] = new FastVector();
+                    query = "SELECT COUNT(DISTINCT( "+columnName+" )) FROM " + end;
+                    if (m_DataBaseConnection.execute(query) == true){
+                      rs1 = m_DataBaseConnection.getResultSet();
+                      stringToNominal(rs1,i);
+                      rs1.close();
+                    }
+                    attributeTypes[i - 1] = Attribute.STRING;
+                    break;
                 case DatabaseConnection.BOOL:
                     //System.err.println("boolean --> nominal");
                     attributeTypes[i - 1] = Attribute.NOMINAL;
@@ -811,7 +826,11 @@ public class DatabaseLoader
                     attribInfo.addElement(new Attribute(attribName));
                     break;
                 case Attribute.STRING:
-                    attribInfo.addElement(new Attribute(attribName, (FastVector)null));
+                    Attribute att = new Attribute(attribName, (FastVector)null);
+                    for (int n = 0; n < m_nominalStrings[i].size(); n++) {
+                      att.addStringValue((String) m_nominalStrings[i].elementAt(n));
+                    }
+                    attribInfo.addElement(att);
                     break;
                 case Attribute.DATE:
                     attribInfo.addElement(new Attribute(attribName, (String)null));
@@ -897,6 +916,21 @@ public class DatabaseLoader
         stringToNominal(rs1,i);
         rs1.close();  
 	break;
+      case DatabaseConnection.TEXT:
+        columnName = md.getColumnName(i);
+        if(m_DataBaseConnection.getUpperCase())
+            columnName = columnName.toUpperCase();
+        end = endOfQuery(false);
+        m_nominalIndexes[i - 1] = new Hashtable();
+        m_nominalStrings[i - 1] = new FastVector();
+        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
+            throw new Exception("Nominal values cannot be retrieved");
+        }
+        rs1 = m_DataBaseConnection.getResultSet();
+        attributeTypes[i - 1] = Attribute.STRING;
+        stringToNominal(rs1,i);
+        rs1.close();  
+	break;
       case DatabaseConnection.BOOL:
 	//System.err.println("boolean --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
@@ -959,6 +993,20 @@ public class DatabaseLoader
                 }
                 vals[i - 1] = index.doubleValue();
             }
+	  break;
+	case DatabaseConnection.TEXT:
+	  str = rs.getString(i);
+
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  }
+	  else {
+	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
+	    if (index == null) {
+	      index = new Double(m_structure.attribute(i-1).addStringValue(str));
+	    }
+	    vals[i - 1] = index.doubleValue();
+	  }
 	  break;
 	case DatabaseConnection.BOOL:
 	  boolean boo = rs.getBoolean(i);
@@ -1049,7 +1097,11 @@ public class DatabaseLoader
 	attribInfo.addElement(new Attribute(attribName));
 	break;
       case Attribute.STRING:
-	attribInfo.addElement(new Attribute(attribName, (FastVector)null));
+	Attribute att = new Attribute(attribName, (FastVector) null);
+	attribInfo.addElement(att);
+	for (int n = 0; n < m_nominalStrings[i].size(); n++) {
+	  att.addStringValue((String) m_nominalStrings[i].elementAt(n));
+	}
 	break;
       case Attribute.DATE:
 	attribInfo.addElement(new Attribute(attribName, (String)null));
@@ -1111,6 +1163,19 @@ public class DatabaseLoader
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
 	  } else {
+	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
+	    if (index == null) {
+              index = new Double(m_structure.attribute(i-1).addStringValue(str));
+	    }
+	    vals[i - 1] = index.doubleValue();
+	  }
+	  break;
+	case DatabaseConnection.TEXT:
+	  str = rs.getString(i);
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  }
+	  else {
 	    Double index = (Double)m_nominalIndexes[i - 1].get(str);
 	    if (index == null) {
               index = new Double(m_structure.attribute(i-1).addStringValue(str));

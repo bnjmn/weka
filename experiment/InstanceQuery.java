@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class InstanceQuery 
   extends DatabaseUtils 
@@ -322,6 +322,12 @@ public class InstanceQuery
 	nominalIndexes[i - 1] = new Hashtable();
 	nominalStrings[i - 1] = new FastVector();
 	break;
+      case TEXT:
+	//System.err.println("Text --> string");
+	attributeTypes[i - 1] = Attribute.STRING;
+	nominalIndexes[i - 1] = new Hashtable();
+	nominalStrings[i - 1] = new FastVector();
+	break;
       case BOOL:
 	//System.err.println("boolean --> nominal");
 	attributeTypes[i - 1] = Attribute.NOMINAL;
@@ -398,6 +404,21 @@ public class InstanceQuery
 	      index = new Double(nominalStrings[i - 1].size());
 	      nominalIndexes[i - 1].put(str, index);
 	      nominalStrings[i - 1].addElement(str);
+	    }
+	    vals[i - 1] = index.doubleValue();
+	  }
+	  break;
+	case TEXT:
+	  String txt = rs.getString(i);
+	  
+	  if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+	    Double index = (Double)nominalIndexes[i - 1].get(txt);
+	    if (index == null) {
+	      index = new Double(nominalStrings[i - 1].size());
+	      nominalIndexes[i - 1].put(txt, index);
+	      nominalStrings[i - 1].addElement(txt);
 	    }
 	    vals[i - 1] = index.doubleValue();
 	  }
@@ -500,7 +521,11 @@ public class InstanceQuery
 	attribInfo.addElement(new Attribute(attribName));
 	break;
       case Attribute.STRING:
-	attribInfo.addElement(new Attribute(attribName, (FastVector)null));
+	Attribute att = new Attribute(attribName, (FastVector) null);
+	attribInfo.addElement(att);
+	for (int n = 0; n < nominalStrings[i].size(); n++) {
+	  att.addStringValue((String) nominalStrings[i].elementAt(n));
+	}
 	break;
       case Attribute.DATE:
 	attribInfo.addElement(new Attribute(attribName, (String)null));

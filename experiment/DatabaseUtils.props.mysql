@@ -3,7 +3,7 @@
 # url:     http://www.mysql.com/
 # jdbc:    http://www.mysql.com/products/connector/j/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.2 $
+# version: $Revision: 1.3 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.gjt.mm.mysql.Driver
@@ -12,15 +12,16 @@ jdbcDriver=org.gjt.mm.mysql.Driver
 jdbcURL=jdbc:mysql://server_name:3306/database_name
 
 # specific data types
-#string,getString()= 0;         -->nominal
-#boolean,getBoolean() = 1;  -->nominal
-#double,getDouble() = 2;    -->numeric
-#byte,getByte() = 3;        -->numeric
-#short,getByte()= 4;        -->numeric
-#int,getInteger() = 5;            -->numeric
-#long,getLong() = 6;                -->numeric
-#gloat,getFloat() = 7;            -->numeric
-#date,getDate() = 8;                -->date
+# string, getString() = 0;    --> nominal
+# boolean, getBoolean() = 1;  --> nominal
+# double, getDouble() = 2;    --> numeric
+# byte, getByte() = 3;        --> numeric
+# short, getByte()= 4;        --> numeric
+# int, getInteger() = 5;      --> numeric
+# long, getLong() = 6;        --> numeric
+# gloat, getFloat() = 7;      --> numeric
+# date, getDate() = 8;        --> date
+# text, getString() = 9;      --> string
 
 # other options
 CREATE_DOUBLE=DOUBLE
