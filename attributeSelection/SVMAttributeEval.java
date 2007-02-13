@@ -32,6 +32,7 @@ import weka.core.SelectedTag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
@@ -116,7 +117,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator
@@ -621,7 +622,20 @@ public class SVMAttributeEval
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    return new SMO().getCapabilities();
+    Capabilities 	result;
+    
+    result = new SMO().getCapabilities();
+    
+    result.setOwner(this);
+    
+    // only binary attributes are allowed, otherwise the NominalToBinary
+    // filter inside SMO will increase the number of attributes which in turn
+    // will lead to ArrayIndexOutOfBounds-Exceptions.
+    result.disable(Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capability.BINARY_ATTRIBUTES);
+    result.disableAllAttributeDependencies();
+    
+    return result;
   }
 
   /**
