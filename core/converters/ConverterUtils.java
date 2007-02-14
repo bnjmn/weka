@@ -30,6 +30,7 @@ import weka.gui.GenericPropertiesCreator;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StreamTokenizer;
 import java.net.URL;
@@ -45,7 +46,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -66,10 +67,11 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    * @see #hasMoreElements()
    * @see #nextElement()
    * @see #reset()
+   * @see DataSink
    */
   public static class DataSource
     implements Serializable, Enumeration {
@@ -217,7 +219,7 @@ public class ConverterUtils
      * @param location		the file location to check
      * @return			true if the location seems to be of ARFF format
      */
-    protected boolean isArff(String location) {
+    public static boolean isArff(String location) {
       if (    location.toLowerCase().endsWith(ArffLoader.FILE_EXTENSION.toLowerCase())
 	   || location.toLowerCase().endsWith(ArffLoader.FILE_EXTENSION_COMPRESSED.toLowerCase()) )
 	return true;
@@ -433,6 +435,60 @@ public class ConverterUtils
     }
     
     /**
+     * convencience method for loading a dataset in batch mode
+     * 
+     * @param location		the dataset to load
+     * @return			the dataset
+     * @throws Exception	if loading fails
+     * @see			#DataSource(String)
+     */
+    public static Instances read(String location) throws Exception {
+      DataSource	source;
+      Instances		result;
+      
+      source = new DataSource(location);
+      result = source.getDataSet();
+      
+      return result;
+    }
+    
+    /**
+     * convencience method for loading a dataset in batch mode from a stream
+     * 
+     * @param stream		the stream to load the dataset from
+     * @return			the dataset
+     * @throws Exception	if loading fails
+     * @see			#DataSource(InputStream)
+     */
+    public static Instances read(InputStream stream) throws Exception {
+      DataSource	source;
+      Instances		result;
+      
+      source = new DataSource(stream);
+      result = source.getDataSet();
+      
+      return result;
+    }
+    
+    /**
+     * convencience method for loading a dataset in batch mode
+     * 
+     * @param loader		the loader to get the dataset from
+     * @return			the dataset
+     * @throws Exception	if loading fails
+     * @see			#DataSource(Loader)
+     */
+    public static Instances read(Loader loader) throws Exception {
+      DataSource	source;
+      Instances		result;
+      
+      source = new DataSource(loader);
+      result = source.getDataSet();
+      
+      return result;
+    }
+    
+    /**
      * for testing only - takes a data file as input
      * 
      * @param args		the commandline arguments
@@ -459,6 +515,150 @@ public class ConverterUtils
       System.out.println(loader.getStructure());
       while (loader.hasMoreElements())
 	System.out.println(loader.nextElement());
+    }
+  }
+
+  /**
+   * Helper class for saving data to files. Via the ConverterUtils
+   * class it determines which converter to use for saving the data.
+   * It is the logical counterpart to <code>DataSource</code>.
+   * 
+   * @author FracPete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.11 $
+   * @see DataSource
+   */
+  public static class DataSink
+    implements Serializable {
+
+    /** for serialization */
+    private static final long serialVersionUID = -1504966891136411204L;
+
+    /** the saver to use for storing the data */
+    protected Saver m_Saver = null;
+    
+    /** the stream to store the data in (always in ARFF format) */
+    protected OutputStream m_Stream = null;
+    
+    /**
+     * initializes the sink to save the data to the given file
+     * 
+     * @param filename		the file to save data to
+     * @throws Exception	if set of saver fails
+     */
+    public DataSink(String filename) throws Exception {
+      m_Stream = null;
+      
+      if (DataSource.isArff(filename))
+	m_Saver = new ArffSaver();
+      else
+	m_Saver = getSaverForFile(filename);
+      
+      ((AbstractFileSaver) m_Saver).setFile(new File(filename));
+    }
+    
+    /**
+     * initializes the sink to save the data to the given Saver (expected to be 
+     * fully configured)
+     * 
+     * @param saver	the saver to use for saving the data
+     */
+    public DataSink(Saver saver) {
+      m_Saver  = saver;
+      m_Stream = null;
+    }
+    
+    /**
+     * initializes the sink to save the data in the stream (always in ARFF 
+     * format)
+     * 
+     * @param stream	the output stream to use for storing the data in ARFF
+     * 			format
+     */
+    public DataSink(OutputStream stream) {
+      m_Saver  = null;
+      m_Stream = stream;
+    }
+
+    /**
+     * writes the given data either via the saver or to the defined 
+     * output stream (depending on the constructor). In case of the stream, 
+     * the stream is only flushed, but not closed.
+     * 
+     * @param data		the data to save
+     * @throws Exception	if saving fails
+     */
+    public void write(Instances data) throws Exception {
+      if (m_Saver != null) {
+	m_Saver.setInstances(data);
+	m_Saver.writeBatch();
+      }
+      else {
+	m_Stream.write(data.toString().getBytes());
+	m_Stream.flush();
+      }
+    }
+    
+    /**
+     * writes the data to the given file
+     * 
+     * @param filename		the file to write the data to
+     * @param data		the data to store
+     * @throws Exception	if writing fails
+     */
+    public static void write(String filename, Instances data) throws Exception {
+      DataSink	sink;
+      
+      sink = new DataSink(filename);
+      sink.write(data);
+    }
+    
+    /**
+     * writes the data via the given saver
+     * 
+     * @param saver		the saver to use for writing the data
+     * @param data		the data to store
+     * @throws Exception	if writing fails
+     */
+    public static void write(Saver saver, Instances data) throws Exception {
+      DataSink	sink;
+      
+      sink = new DataSink(saver);
+      sink.write(data);
+    }
+    
+    /**
+     * writes the data to the given stream (always in ARFF format)
+     * 
+     * @param stream		the stream to write the data to (ARFF format)
+     * @param data		the data to store
+     * @throws Exception	if writing fails
+     */
+    public static void write(OutputStream stream, Instances data) throws Exception {
+      DataSink	sink;
+      
+      sink = new DataSink(stream);
+      sink.write(data);
+    }
+    
+    /**
+     * for testing only - takes a data file as input and a data file for the
+     * output
+     * 
+     * @param args		the commandline arguments
+     * @throws Exception 	if something goes wrong
+     */
+    public static void main(String[] args) throws Exception {
+      if (args.length != 2) {
+	System.out.println(
+	    "\nUsage: " + DataSource.class.getName() + " <input-file> <output-file>\n");
+	System.exit(1);
+      }
+
+      // load data
+      Instances data = DataSource.read(args[0]);
+      
+      // save data
+      DataSink.write(args[1], data);
     }
   }
   
