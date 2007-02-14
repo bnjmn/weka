@@ -34,6 +34,7 @@ import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.Summarizable;
 import weka.core.Utils;
+import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
@@ -132,7 +133,16 @@ import java.util.zip.GZIPOutputStream;
  * 
  * -xml filename | xml-string <br/>
  * Retrieves the options from the XML-data instead of the command line. <p/>
- *
+ * 
+ * -threshold-file file <br/>
+ * The file to save the threshold data to.
+ * The format is determined by the extensions, e.g., '.arff' for ARFF
+ * format or '.csv' for CSV. <p/>
+ *         
+ * -threshold-label label <br/>
+ * The class label to determine the threshold data for
+ * (default is the first label) <p/>
+ *         
  * ------------------------------------------------------------------- <p/>
  *
  * Example usage as the main of a classifier (called FunkyClassifier):
@@ -159,7 +169,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.73 $
+ * @version  $Revision: 1.74 $
  */
 public class Evaluation
 implements Summarizable {
@@ -511,6 +521,15 @@ implements Summarizable {
    *
    * -xml filename | xml-string <br/>
    * Retrieves the options from the XML-data instead of the command line. <p/>
+   * 
+   * -threshold-file file <br/>
+   * The file to save the threshold data to.
+   * The format is determined by the extensions, e.g., '.arff' for ARFF
+   * format or '.csv' for CSV. <p/>
+   *         
+   * -threshold-label label <br/>
+   * The class label to determine the threshold data for
+   * (default is the first label) <p/>
    *
    * @param classifierString class of machine learning classifier as a string
    * @param options the array of string containing the options
@@ -668,6 +687,8 @@ implements Summarizable {
     boolean preserveOrder = false;
     boolean trainSetPresent = false;
     boolean testSetPresent = false;
+    String thresholdFile;
+    String thresholdLabel;
 
     // help requested?
     if (Utils.getFlag("h", options) || Utils.getFlag("help", options)) {
@@ -800,6 +821,8 @@ implements Summarizable {
       sourceClass = Utils.getOption('z', options);
       printSource = (sourceClass.length() != 0);
       printDistribution = Utils.getFlag("distribution", options);
+      thresholdFile = Utils.getOption("threshold-file", options);
+      thresholdLabel = Utils.getOption("threshold-label", options);
 
       // percentage split
       splitPercentageString = Utils.getOption("split-percentage", options);
@@ -1129,6 +1152,18 @@ implements Summarizable {
         text.append("\n\n" + testingEvaluation.toMatrixString());
     }
 
+    if ((thresholdFile.length() != 0) && template.classAttribute().isNominal()) {
+      int labelIndex = 0;
+      if (thresholdLabel.length() != 0)
+	labelIndex = template.classAttribute().indexOfValue(thresholdLabel);
+      if (labelIndex == -1)
+	throw new IllegalArgumentException(
+	    "Class label '" + thresholdLabel + "' is unknown!");
+      ThresholdCurve tc = new ThresholdCurve();
+      Instances result = tc.getCurve(testingEvaluation.predictions(), labelIndex);
+      DataSink.write(thresholdFile, result);
+    }
+    
     return text.toString();
   }
 
@@ -2780,8 +2815,8 @@ implements Summarizable {
     optionsText.append("-t <name of training file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
-    optionsText.append("\tSets test file. If missing, a cross-validation");
-    optionsText.append(" will be performed on the training data.\n");
+    optionsText.append("\tSets test file. If missing, a cross-validation will be performed\n");
+    optionsText.append("\ton the training data.\n");
     optionsText.append("-c <class index>\n");
     optionsText.append("\tSets index of class attribute (default: last).\n");
     optionsText.append("-x <number of folds>\n");
@@ -2835,6 +2870,13 @@ implements Summarizable {
     optionsText.append("-xml filename | xml-string\n");
     optionsText.append("\tRetrieves the options from the XML-data instead of the " 
 	+ "command line.\n");
+    optionsText.append("-threshold-file <file>\n");
+    optionsText.append("\tThe file to save the threshold data to.\n"
+	+ "\tThe format is determined by the extensions, e.g., '.arff' for ARFF \n"
+	+ "\tformat or '.csv' for CSV.\n");
+    optionsText.append("-threshold-label <label>\n");
+    optionsText.append("\tThe class label to determine the threshold data for\n"
+	+ "\t(default is the first label)\n");
 
     // Get scheme-specific options
     if (classifier instanceof OptionHandler) {
