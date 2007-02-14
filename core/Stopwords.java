@@ -56,7 +56,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Stopwords {
   
@@ -670,6 +670,7 @@ public class Stopwords {
    * Generates a new Stopwords object from the given file
    *
    * @param filename the file to read the stopwords from
+   * @throws Exception if reading fails
    */
   public void read(String filename) throws Exception {
     read(new File(filename));
@@ -679,6 +680,7 @@ public class Stopwords {
    * Generates a new Stopwords object from the given file
    *
    * @param file the file to read the stopwords from
+   * @throws Exception if reading fails
    */
   public void read(File file) throws Exception {
     read(new BufferedReader(new FileReader(file)));
@@ -689,7 +691,7 @@ public class Stopwords {
    * closed automatically.
    *
    * @param reader the reader to get the stopwords from
-   * @return the initialized stopwords object
+   * @throws Exception if reading fails
    */
   public void read(BufferedReader reader) throws Exception {
     String      line;
@@ -711,6 +713,7 @@ public class Stopwords {
    * Writes the current stopwords to the given file
    *
    * @param filename the file to write the stopwords to
+   * @throws Exception if writing fails
    */
   public void write(String filename) throws Exception {
     write(new File(filename));
@@ -720,6 +723,7 @@ public class Stopwords {
    * Writes the current stopwords to the given file
    *
    * @param file the file to write the stopwords to
+   * @throws Exception if writing fails
    */
   public void write(File file) throws Exception {
     write(new BufferedWriter(new FileWriter(file)));
@@ -729,7 +733,8 @@ public class Stopwords {
    * Writes the current stopwords to the given writer. The writer is closed
    * automatically.
    *
-   * @param reader the reader to get the stopwords from
+   * @param writer the writer to get the stopwords from
+   * @throws Exception if writing fails
    */
   public void write(BufferedWriter writer) throws Exception {
     Enumeration   enm;
@@ -794,6 +799,7 @@ public class Stopwords {
    * Any additional parameters are interpreted as words to test as stopwords.
    * 
    * @param args commandline parameters
+   * @throws Exception if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     String input = Utils.getOption('i', args);
