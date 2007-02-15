@@ -22,6 +22,7 @@
 
 package weka.gui;
 
+import weka.core.Copyright;
 import weka.core.Memory;
 import weka.core.Version;
 import weka.gui.arffviewer.ArffViewer;
@@ -54,7 +55,7 @@ import javax.swing.SwingConstants;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class GUIChooser
   extends JFrame {
@@ -143,11 +144,11 @@ public class GUIChooser
     titlePan.add(new JLabel("Version " + Version.VERSION,
                             SwingConstants.CENTER));
     titlePan.add(new JLabel(""));
-    titlePan.add(new JLabel("(c) 1999 - 2007",
+    titlePan.add(new JLabel("(c) " + Copyright.getFromYear() + " - " + Copyright.getToYear(),
     SwingConstants.CENTER));
-    titlePan.add(new JLabel("University of Waikato",
+    titlePan.add(new JLabel(Copyright.getOwner(),
     SwingConstants.CENTER));
-    titlePan.add(new JLabel("New Zealand",
+    titlePan.add(new JLabel(Copyright.getAddress(),
     SwingConstants.CENTER));
     this.getContentPane().add(titlePan, BorderLayout.NORTH);
     

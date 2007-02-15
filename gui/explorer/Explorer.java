@@ -23,6 +23,7 @@
 package weka.gui.explorer;
 
 import weka.core.Capabilities;
+import weka.core.Copyright;
 import weka.core.Instances;
 import weka.core.Memory;
 import weka.core.converters.AbstractFileLoader;
@@ -57,7 +58,7 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class Explorer
   extends JPanel {
@@ -69,7 +70,7 @@ public class Explorer
    * Interface for classes that listen for filter changes.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.40 $
+   * @version $Revision: 1.41 $
    */
   public static interface CapabilitiesFilterChangeListener 
     extends EventListener {
@@ -86,7 +87,7 @@ public class Explorer
    * This event can be fired in case the capabilities filter got changed 
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.40 $
+   * @version $Revision: 1.41 $
    */
   public static class CapabilitiesFilterChangeEvent
     extends ChangeEvent {
@@ -122,7 +123,7 @@ public class Explorer
    * A common interface for panels to be displayed in the Explorer
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.40 $
+   * @version $Revision: 1.41 $
    */
   public static interface ExplorerPanel {
 
@@ -167,7 +168,7 @@ public class Explorer
    * A common interface for panels in the explorer that can handle logs
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.40 $
+   * @version $Revision: 1.41 $
    */
   public static interface LogHandler {
     
@@ -201,9 +202,9 @@ public class Explorer
     
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy")).format(new Date());
     m_LogPanel.logMessage("Weka Explorer");
-    m_LogPanel.logMessage("(c) 1999-2007 The University of Waikato, Hamilton,"
-			  + " New Zealand");
-    m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/weka");
+    m_LogPanel.logMessage("(c) " + Copyright.getFromYear() + "-" + Copyright.getToYear() 
+	+ " " + Copyright.getOwner() + ", " + Copyright.getAddress());
+    m_LogPanel.logMessage("web: " + Copyright.getURL());
     m_LogPanel.logMessage("Started on " + date);
     m_LogPanel.statusMessage("Welcome to the Weka Explorer");
 
