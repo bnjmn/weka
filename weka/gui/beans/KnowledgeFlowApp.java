@@ -22,6 +22,7 @@
 
 package weka.gui.beans;
 
+import weka.core.Copyright;
 import weka.core.Memory;
 import weka.core.SerializedObject;
 import weka.core.Utils;
@@ -108,7 +109,7 @@ import javax.swing.filechooser.FileFilter;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.15 $
+ * @version  $Revision: 1.16 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -292,7 +293,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.15 $
+   * @version $Revision: 1.16 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -665,8 +666,9 @@ public class KnowledgeFlowApp
        .format(new Date());
      m_logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
      m_logPanel.logMessage("Weka Knowledge Flow");
-     m_logPanel.logMessage("(c) 2002-2005 Mark Hall");
-     m_logPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
+     m_logPanel.logMessage("(c) 2002-" + Copyright.getToYear() + " " 
+	 + Copyright.getOwner() + ", " + Copyright.getAddress());
+     m_logPanel.logMessage("web: " + Copyright.getURL());
      m_logPanel.logMessage( date);
      m_logPanel.statusMessage("Welcome to the Weka Knowledge Flow");
     

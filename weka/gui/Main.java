@@ -24,6 +24,7 @@ package weka.gui;
 
 import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Copyright;
 import weka.core.Instances;
 import weka.core.Memory;
 import weka.core.SystemInfo;
@@ -91,7 +92,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Main
   extends JFrame {
@@ -103,7 +104,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -155,7 +156,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -976,20 +977,14 @@ public class Main
 	    JPanel titlePan = new JPanel();
 	    titlePan.setLayout(new GridLayout(8,1));
 	    titlePan.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
-	    titlePan.add(new JLabel("Waikato Environment for",
-	                            SwingConstants.CENTER));
-	    titlePan.add(new JLabel("Knowledge Analysis",
-	                            SwingConstants.CENTER));
+	    titlePan.add(new JLabel("Waikato Environment for", SwingConstants.CENTER));
+	    titlePan.add(new JLabel("Knowledge Analysis", SwingConstants.CENTER));
 	    titlePan.add(new JLabel(""));
-	    titlePan.add(new JLabel("Version " + Version.VERSION,
-	                            SwingConstants.CENTER));
+	    titlePan.add(new JLabel("Version " + Version.VERSION, SwingConstants.CENTER));
 	    titlePan.add(new JLabel(""));
-	    titlePan.add(new JLabel("(c) 1999 - 2007",
-	    SwingConstants.CENTER));
-	    titlePan.add(new JLabel("University of Waikato",
-	    SwingConstants.CENTER));
-	    titlePan.add(new JLabel("New Zealand",
-	    SwingConstants.CENTER));
+	    titlePan.add(new JLabel("(c) " + Copyright.getFromYear() + " - " + Copyright.getToYear(), SwingConstants.CENTER));
+	    titlePan.add(new JLabel(Copyright.getOwner(), SwingConstants.CENTER));
+	    titlePan.add(new JLabel(Copyright.getAddress(), SwingConstants.CENTER));
 	    frame.getContentPane().add(titlePan, BorderLayout.NORTH);
 	    
 	    frame.addInternalFrameListener(new InternalFrameAdapter() {
