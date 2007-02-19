@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class MultilayerPerceptron extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -555,7 +555,7 @@ public class MultilayerPerceptron extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.2.2.1 $
    */
   class ControlPanel extends JPanel {
     
@@ -735,7 +735,8 @@ public class MultilayerPerceptron extends Classifier
     }
   }
   
-
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
     
   /** The training instances. */
   private Instances m_instances;
@@ -1574,6 +1575,19 @@ public class MultilayerPerceptron extends Classifier
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
 
+    // only class? -> build ZeroR model
+    if (i.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+          + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(i);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     if (i.numInstances() == 0) {
       throw new IllegalArgumentException("No training instances.");
     }
@@ -1766,7 +1780,11 @@ public class MultilayerPerceptron extends Classifier
 			      " smaller learning rate.");
 	}
 	else {
-	  //reset the network
+	  //reset the network if possible
+	  if (m_learningRate <= Utils.SMALL)
+	    throw new IllegalStateException(
+                "Learning rate got too small (" + m_learningRate 
+                + " <= " + Utils.SMALL + ")!");
 	  m_learningRate /= 2;
 	  buildClassifier(i);
 	  m_learningRate = origRate;
@@ -1870,6 +1888,10 @@ public class MultilayerPerceptron extends Classifier
    */
   public double[] distributionForInstance(Instance i) throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(i);
+    }
     
     if (m_useNomToBin) {
       m_nominalToBinaryFilter.input(i);
@@ -2193,6 +2215,16 @@ public class MultilayerPerceptron extends Classifier
    * @return string describing the model.
    */
   public String toString() {
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     StringBuffer model = new StringBuffer(m_neuralNodes.length * 100); 
     //just a rough size guess
     NeuralNode con;
