@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -313,7 +313,7 @@ public abstract class AbstractClassifierTest
    * @param rel         to check for relational attributes
    * @param allowFail   whether a junit fail can be executed
    * @see CheckClassifier#canPredict(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   protected void checkAttributes(boolean nom, boolean num, boolean str, 
                                  boolean dat, boolean rel,
@@ -403,7 +403,7 @@ public abstract class AbstractClassifierTest
    * tests whether the classifier handles instance weights correctly
    *
    * @see CheckClassifier#instanceWeights(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testInstanceWeights() {
     boolean[]     result;
@@ -432,10 +432,38 @@ public abstract class AbstractClassifierTest
   }
 
   /**
+   * tests whether classifier handles data containing only a class attribute
+   *
+   * @see CheckClassifier#canHandleOnlyClass(boolean, boolean, boolean, boolean, boolean, int)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
+   */
+  public void testOnlyClass() {
+    boolean[]	result;
+    int		i;
+
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+      // does the classifier support this type of class at all?
+      if (!canPredict(i))
+        continue;
+      
+      result = m_Tester.canHandleOnlyClass(
+	  m_NominalPredictors[i],
+	  m_NumericPredictors[i],
+	  m_StringPredictors[i],
+	  m_DatePredictors[i],
+	  m_RelationalPredictors[i],
+	  i);
+
+      if (!result[0] && !result[1])
+	      fail("Error handling data containing only the class!");
+    }
+  }
+
+  /**
    * tests whether classifier handles N classes
    *
    * @see CheckClassifier#canHandleNClasses(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    * @see #m_NClasses
    */
   public void testNClasses() {
@@ -497,7 +525,7 @@ public abstract class AbstractClassifierTest
    * since the multi-instance data has a fixed format (bagID,bag,class).
    *
    * @see CheckClassifier#canHandleClassAsNthAttribute(boolean, boolean, boolean, boolean, boolean, boolean, int, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testClassAsNthAttribute() {
     int           i;
@@ -523,7 +551,7 @@ public abstract class AbstractClassifierTest
    * tests whether the classifier can handle zero training instances
    *
    * @see CheckClassifier#canHandleZeroTraining(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testZeroTraining() {
     boolean[]     result;
@@ -586,7 +614,7 @@ public abstract class AbstractClassifierTest
    * tests whether the classifier can handle missing predictors (20% and 100%)
    *
    * @see CheckClassifier#canHandleMissing(boolean, boolean, boolean, boolean, boolean, boolean, int, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testMissingPredictors() {
     int           i;
@@ -643,7 +671,7 @@ public abstract class AbstractClassifierTest
    * 100%)
    *
    * @see CheckClassifier#canHandleMissing(boolean, boolean, boolean, boolean, boolean, boolean, int, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testMissingClass() {
     int           i;
@@ -667,7 +695,7 @@ public abstract class AbstractClassifierTest
    * buildClassifier method
    *
    * @see CheckClassifier#correctBuildInitialisation(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testBuildInitialization() {
     boolean[]     result;
@@ -697,7 +725,7 @@ public abstract class AbstractClassifierTest
    * tests whether the classifier alters the training set during training.
    *
    * @see CheckClassifier#datasetIntegrity(boolean, boolean, boolean, boolean, boolean, boolean, int, boolean, boolean)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testDatasetIntegrity() {
     boolean[]     result;
@@ -730,7 +758,7 @@ public abstract class AbstractClassifierTest
    * instances (if provided)
    *
    * @see CheckClassifier#doesntUseTestClassVal(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testUseOfTestClassValue() {
     boolean[]     result;
@@ -760,7 +788,7 @@ public abstract class AbstractClassifierTest
    * incrementally as when batch trained.
    *
    * @see CheckClassifier#updatingEquality(boolean, boolean, boolean, boolean, boolean, boolean, int)
-   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
    */
   public void testUpdatingEquality() {
     boolean[]     result;
