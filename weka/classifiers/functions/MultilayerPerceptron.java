@@ -140,7 +140,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -656,7 +656,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.8 $
+   * @version $Revision: 1.9 $
    */
   class ControlPanel 
     extends JPanel {
@@ -847,6 +847,8 @@ public class MultilayerPerceptron
   }
   
 
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
     
   /** The training instances. */
   private Instances m_instances;
@@ -1710,6 +1712,19 @@ public class MultilayerPerceptron
     // remove instances with missing class
     i = new Instances(i);
     i.deleteWithMissingClass();
+
+    // only class? -> build ZeroR model
+    if (i.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(i);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
     
     m_epoch = 0;
     m_error = 0;
@@ -1895,7 +1910,11 @@ public class MultilayerPerceptron
 			      " smaller learning rate.");
 	}
 	else {
-	  //reset the network
+	  //reset the network if possible
+	  if (m_learningRate <= Utils.SMALL)
+	    throw new IllegalStateException(
+		"Learning rate got too small (" + m_learningRate 
+		+ " <= " + Utils.SMALL + ")!");
 	  m_learningRate /= 2;
 	  buildClassifier(i);
 	  m_learningRate = origRate;
@@ -1999,6 +2018,10 @@ public class MultilayerPerceptron
    */
   public double[] distributionForInstance(Instance i) throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(i);
+    }
     
     if (m_useNomToBin) {
       m_nominalToBinaryFilter.input(i);
@@ -2332,6 +2355,16 @@ public class MultilayerPerceptron
    * @return string describing the model.
    */
   public String toString() {
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     StringBuffer model = new StringBuffer(m_neuralNodes.length * 100); 
     //just a rough size guess
     NeuralNode con;
