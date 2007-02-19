@@ -160,7 +160,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  * @see TestInstances
  */
 public class CheckClassifier
@@ -397,6 +397,8 @@ public class CheckClassifier
       if (weighted)
         instanceWeights(PNom, PNum, PStr, PDat, PRel, multiInstance, classType);
       
+      canHandleOnlyClass(PNom, PNum, PStr, PDat, PRel, classType);
+      
       if (classType == Attribute.NOMINAL)
         canHandleNClasses(PNom, PNum, PStr, PDat, PRel, multiInstance, 4);
 
@@ -623,6 +625,47 @@ public class CheckClassifier
         missingLevel, predictorMissing, classMissing,
         numTrain, numTest, numClasses, 
         accepts);
+  }
+  
+  /**
+   * Checks whether the scheme can handle data that contains only the class
+   * attribute. If a scheme cannot build a proper model with that data, it
+   * should default back to a ZeroR model.
+   *
+   * @param nominalPredictor if true use nominal predictor attributes
+   * @param numericPredictor if true use numeric predictor attributes
+   * @param stringPredictor if true use string predictor attributes
+   * @param datePredictor if true use date predictor attributes
+   * @param relationalPredictor if true use relational predictor attributes
+   * @param classType the class type (NOMINAL, NUMERIC, etc.)
+   * @return index 0 is true if the test was passed, index 1 is true if test 
+   *         was acceptable
+   */
+  protected boolean[] canHandleOnlyClass(
+      boolean nominalPredictor,
+      boolean numericPredictor, 
+      boolean stringPredictor, 
+      boolean datePredictor,
+      boolean relationalPredictor,
+      int classType) {
+    
+    print("only class in data");
+    printAttributeSummary(
+        nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, false, classType);
+    print("...");
+    FastVector accepts = new FastVector();
+    accepts.addElement("class");
+    accepts.addElement("zeror");
+    int numTrain = getNumInstances(), numTest = getNumInstances(), 
+    missingLevel = 0;
+    boolean predictorMissing = false, classMissing = false;
+    
+    return runBasicTest(false, false, false, false, false, 
+                        false,
+                        classType,
+                        missingLevel, predictorMissing, classMissing,
+                        numTrain, numTest, 2, 
+                        accepts);
   }
   
   /**
