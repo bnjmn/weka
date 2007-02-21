@@ -71,7 +71,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class RandomTree 
   extends Classifier 
@@ -113,6 +113,9 @@ public class RandomTree
   /** The maximum depth of the tree (0 = unlimited) */
   protected int m_MaxDepth = 0;
 
+  /** a ZeroR model in case no model can be built from the data */
+  protected Classifier m_ZeroR;
+    
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -414,6 +417,19 @@ public class RandomTree
     data = new Instances(data);
     data.deleteWithMissingClass();
     
+    // only class? -> build ZeroR model
+    if (data.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     Instances train = data;
 
     // Create array of sorted indices and weights
@@ -490,6 +506,11 @@ public class RandomTree
    * @throws Exception if computation fails
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
+    
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
     
     double[] returnedDist = null;
     
@@ -602,6 +623,16 @@ public class RandomTree
    * @return a string representation of the classifier
    */
   public String toString() {
+    
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
     
     if (m_Successors == null) {
       return "RandomTree: no model has been built yet.";

@@ -77,7 +77,7 @@ import java.util.Vector;
  *
  * @author  Liangxiao Jiang (ljiang@cug.edu.cn)
  * @author  H. Zhang (hzhang@unb.ca)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class WAODE 
   extends Classifier
@@ -128,6 +128,9 @@ public class WAODE
   /** whether to print more internals in the toString method
    * @see #toString() */
   private boolean m_Internals = false;
+
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
   
   /**
    * Returns a string describing this classifier
@@ -289,6 +292,19 @@ public class WAODE
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
+    // only class? -> build ZeroR model
+    if (instances.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(instances);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+
     // reset variable
     m_NumClasses = instances.numClasses();
     m_ClassIndex = instances.classIndex();
@@ -414,6 +430,11 @@ public class WAODE
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
     
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     //Definition of local variables
     double[] probs = new double[m_NumClasses];
     double prob;
@@ -445,7 +466,8 @@ public class WAODE
       }
       probs[classVal]/=mutualInfoSum;
     }
-    Utils.normalize(probs);
+    if (!Double.isNaN(Utils.sum(probs)))
+      Utils.normalize(probs);
     return probs;
   }
   
@@ -459,29 +481,39 @@ public class WAODE
     String		classname;
     int			i;
     
-    classname = this.getClass().getName().replaceAll(".*\\.", "");
-    result    = new StringBuffer();
-    result.append(classname + "\n");
-    result.append(classname.replaceAll(".", "=") + "\n\n");
-
-    if (m_Header == null) {
-      result.append("No Model built yet.\n");
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      result = new StringBuffer();
+      result.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      result.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      result.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      result.append(m_ZeroR.toString());
     }
     else {
-      if (getInternals()) {
-	result.append("Mutual information of attributes with class attribute:\n");
-	for (i = 0; i < m_Header.numAttributes(); i++) {
-	  // skip class
-	  if (i == m_Header.classIndex())
-	    continue;
-	  
-	  result.append(
-	      (i+1) + ". " + m_Header.attribute(i).name() + ": " 
-	      + Utils.doubleToString(m_mutualInformation[i], 6) + "\n");
-	}
+      classname = this.getClass().getName().replaceAll(".*\\.", "");
+      result    = new StringBuffer();
+      result.append(classname + "\n");
+      result.append(classname.replaceAll(".", "=") + "\n\n");
+
+      if (m_Header == null) {
+	result.append("No Model built yet.\n");
       }
       else {
-	result.append("Model built successfully.\n");
+	if (getInternals()) {
+	  result.append("Mutual information of attributes with class attribute:\n");
+	  for (i = 0; i < m_Header.numAttributes(); i++) {
+	    // skip class
+	    if (i == m_Header.classIndex())
+	      continue;
+
+	    result.append(
+		(i+1) + ". " + m_Header.attribute(i).name() + ": " 
+		+ Utils.doubleToString(m_mutualInformation[i], 6) + "\n");
+	  }
+	}
+	else {
+	  result.append("Model built successfully.\n");
+	}
       }
     }
     

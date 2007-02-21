@@ -50,7 +50,7 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -68,6 +68,9 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
 
   /** The minimum mean squared error that has been achieved. */
   private double m_minMsq;
+
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
 
   /**
    * Returns a string describing this classifier
@@ -90,6 +93,11 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
    * @throws Exception if an error occurs
    */
   public double classifyInstance(Instance inst) throws Exception {
+    
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.classifyInstance(inst);
+    }
     
     if (inst.isMissing(m_attribute.index())) {
       throw new Exception("IsotonicRegression: No missing values!");
@@ -233,6 +241,19 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
     insts = new Instances(insts);
     insts.deleteWithMissingClass();
 
+    // only class? -> build ZeroR model
+    if (insts.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(insts);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+
     // Choose best attribute and mode
     m_minMsq = Double.MAX_VALUE;
     m_attribute = null;
@@ -251,6 +272,16 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
    */
   public String toString() {
 
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     StringBuffer text = new StringBuffer();
     text.append("Isotonic regression\n\n");
     if (m_attribute == null) {

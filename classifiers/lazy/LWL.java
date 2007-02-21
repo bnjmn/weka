@@ -22,6 +22,7 @@
 
 package weka.classifiers.lazy;
 
+import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
@@ -113,7 +114,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
@@ -146,6 +147,9 @@ public class LWL
   protected static final int GAUSS        = 4;
   protected static final int CONSTANT     = 5;
 
+  /** a ZeroR model in case no model can be built from the data */
+  protected Classifier m_ZeroR;
+    
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -494,6 +498,19 @@ public class LWL
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
     
+    // only class? -> build ZeroR model
+    if (instances.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(instances);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     m_Train = new Instances(instances, 0, instances.numInstances());
 
     m_NNSearch.setInstances(m_Train);
@@ -528,6 +545,11 @@ public class LWL
    * @throws Exception if distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
+    
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
     
     if (m_Train.numInstances() == 0) {
       throw new Exception("No training instances!");
@@ -640,6 +662,16 @@ public class LWL
    */
   public String toString() {
 
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     if (m_Train == null) {
       return "Locally weighted learning: No model built yet.";
     }

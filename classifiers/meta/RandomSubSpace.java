@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.filters.unsupervised.attribute.Remove;
+import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -123,7 +124,7 @@ import java.util.Collections;
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Peter Reutemann (fracpete@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomSubSpace
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -135,6 +136,9 @@ public class RandomSubSpace
   /** The size of each bag sample, as a percentage of the training size */
   protected double m_SubSpaceSize = 0.5;
 
+  /** a ZeroR model in case no model can be built from the data */
+  protected Classifier m_ZeroR;
+    
   /**
    * Constructor.
    */
@@ -398,6 +402,19 @@ public class RandomSubSpace
     data = new Instances(data);
     data.deleteWithMissingClass();
     
+    // only class? -> build ZeroR model
+    if (data.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     super.buildClassifier(data);
 
     Integer[] indices = new Integer[data.numAttributes()-1];
@@ -438,6 +455,11 @@ public class RandomSubSpace
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     double[] sums = new double [instance.numClasses()], newProbs; 
     
     for (int i = 0; i < m_NumIterations; i++) {
@@ -466,6 +488,16 @@ public class RandomSubSpace
    * @return 		description of the bagged classifier as a string
    */
   public String toString() {
+    
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
     
     if (m_Classifiers == null) {
       return "RandomSubSpace: No model built yet.";
