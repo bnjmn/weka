@@ -22,6 +22,7 @@
 
 package weka.classifiers.meta;
 
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.classifiers.Sourcable;
@@ -108,7 +109,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
  */
 public class AdaBoostM1 
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -135,6 +136,9 @@ public class AdaBoostM1
   /** The number of classes */
   protected int m_NumClasses;
   
+  /** a ZeroR model in case no model can be built from the data */
+  protected Classifier m_ZeroR;
+    
   /**
    * Constructor.
    */
@@ -437,6 +441,19 @@ public class AdaBoostM1
     data = new Instances(data);
     data.deleteWithMissingClass();
     
+    // only class? -> build ZeroR model
+    if (data.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     m_NumClasses = data.numClasses();
     if ((!m_UseResampling) && 
 	(m_Classifier instanceof WeightedInstancesHandler)) {
@@ -641,6 +658,11 @@ public class AdaBoostM1
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
       
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     if (m_NumIterationsPerformed == 0) {
       throw new Exception("No model built");
     }
@@ -707,6 +729,16 @@ public class AdaBoostM1
    * @return description of the boosted classifier as a string
    */
   public String toString() {
+    
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
     
     StringBuffer text = new StringBuffer();
     

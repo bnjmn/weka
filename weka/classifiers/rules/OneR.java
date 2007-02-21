@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
 */
 public class OneR 
   extends Classifier 
@@ -220,14 +220,22 @@ public class OneR
   /** The minimum bucket size */
   private int m_minBucketSize = 6;
 
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
+    
   /**
    * Classifies a given instance.
    *
    * @param inst the instance to be classified
    * @return the classification of the instance
    */
-  public double classifyInstance(Instance inst) {
+  public double classifyInstance(Instance inst) throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.classifyInstance(inst);
+    }
+    
     int v = 0;
     if (inst.isMissing(m_rule.m_attr)) {
       if (m_rule.m_missingValueClass != -1) {
@@ -286,6 +294,19 @@ public class OneR
     Instances data = new Instances(instances);
     data.deleteWithMissingClass();
 
+    // only class? -> build ZeroR model
+    if (data.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     // for each attribute ...
     Enumeration enu = instances.enumerateAttributes();
     while (enu.hasMoreElements()) {
@@ -524,6 +545,16 @@ public class OneR
    */
   public String toString() {
 
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     if (m_rule == null) {
       return "OneR: No model built yet.";
     }

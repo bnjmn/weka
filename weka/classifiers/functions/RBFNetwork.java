@@ -68,7 +68,7 @@ import java.util.Vector;
  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 
@@ -102,6 +102,9 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   /** The minimum standard deviation */
   private double m_minStdDev = 0.1;
 
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
+    
   /**
    * Returns a string describing this classifier
    * @return a description of the classifier suitable for
@@ -152,6 +155,19 @@ public class RBFNetwork extends Classifier implements OptionHandler {
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
     
+    // only class? -> build ZeroR model
+    if (instances.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(instances);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     m_standardize = new Standardize();
     m_standardize.setInputFormat(instances);
     instances = Filter.useFilter(instances, m_standardize);
@@ -193,6 +209,11 @@ public class RBFNetwork extends Classifier implements OptionHandler {
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     m_standardize.input(instance);
     m_basisFilter.input(m_standardize.output());
     Instance transformed = m_basisFilter.output();
@@ -209,6 +230,16 @@ public class RBFNetwork extends Classifier implements OptionHandler {
    */
   public String toString() {
 
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     if (m_basisFilter == null) {
       return "No classifier built yet!";
     }

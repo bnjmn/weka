@@ -51,7 +51,7 @@ import java.io.Serializable;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */ 
 public class HyperPipes 
   extends Classifier {
@@ -68,7 +68,9 @@ public class HyperPipes
   /** Stores the HyperPipe for each class */
   protected HyperPipe [] m_HyperPipes;
 
-
+  /** a ZeroR model in case no model can be built from the data */
+  protected Classifier m_ZeroR;
+    
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -242,6 +244,19 @@ public class HyperPipes
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
     
+    // only class? -> build ZeroR model
+    if (instances.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(instances);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     m_ClassIndex = instances.classIndex();
     m_Instances = new Instances(instances, 0); // Copy the structure for ref
 
@@ -282,6 +297,11 @@ public class HyperPipes
    */
   public double [] distributionForInstance(Instance instance) throws Exception {
         
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     double [] dist = new double[m_HyperPipes.length];
 
     for (int j = 0; j < m_HyperPipes.length; j++) {
@@ -308,6 +328,16 @@ public class HyperPipes
    */
   public String toString() {
 
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     if (m_HyperPipes == null) {
       return ("HyperPipes classifier");
     }
