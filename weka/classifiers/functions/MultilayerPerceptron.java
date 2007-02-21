@@ -41,7 +41,7 @@ import weka.filters.Filter;
  * units).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class MultilayerPerceptron extends Classifier 
   implements OptionHandler, WeightedInstancesHandler {
@@ -555,7 +555,7 @@ public class MultilayerPerceptron extends Classifier
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.2.2.1 $
+   * @version $Revision: 1.2.2.2 $
    */
   class ControlPanel extends JPanel {
     
@@ -1567,7 +1567,7 @@ public class MultilayerPerceptron extends Classifier
    * Call this function to build and train a neural network for the training
    * data provided.
    * @param i The training data.
-   * @exception Throws exception if can't build classification properly.
+   * @exception Exception if can't build classification properly.
    */
   public void buildClassifier(Instances i) throws Exception {
 
@@ -1884,7 +1884,7 @@ public class MultilayerPerceptron extends Classifier
    * classification model has been built with the buildClassifier call.
    * @param i The instance to classify.
    * @return A double array filled with the probabilities of each class type.
-   * @exception if can't classify instance.
+   * @exception Exception if can't classify instance.
    */
   public double[] distributionForInstance(Instance i) throws Exception {
 

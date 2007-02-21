@@ -61,7 +61,7 @@ import weka.classifiers.*;
  * Debugging output. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.17.2.1 $
  */
 public class AdditiveRegression extends IteratedSingleClassifierEnhancer 
   implements OptionHandler,
@@ -84,6 +84,9 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
   /** The model for the mean */
   protected ZeroR m_zeroR;
 
+  /** whether we have suitable data or nor (if not, ZeroR model is used) */
+  protected boolean m_SuitableData = true;
+  
   /**
    * Returns a string describing this attribute evaluator
    * @return a description of the evaluator suitable for
@@ -253,6 +256,19 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
     // Add the model for the mean first
     m_zeroR = new ZeroR();
     m_zeroR.buildClassifier(newData);
+
+    // only class? -> use only ZeroR model
+    if (newData.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_SuitableData = false;
+      return;
+    }
+    else {
+      m_SuitableData = true;
+    }
+    
     newData = residualReplace(newData, m_zeroR, false);
     for (int i = 0; i < newData.numInstances(); i++) {
       sum += newData.instance(i).weight() *
@@ -295,6 +311,11 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
 
     double prediction = m_zeroR.classifyInstance(inst);
 
+    // default model?
+    if (!m_SuitableData) {
+      return prediction;
+    }
+    
     for (int i = 0; i < m_NumIterationsPerformed; i++) {
       double toAdd = m_Classifiers[i].classifyInstance(inst);
       toAdd *= getShrinkage();
@@ -372,6 +393,16 @@ public class AdditiveRegression extends IteratedSingleClassifierEnhancer
   public String toString() {
     StringBuffer text = new StringBuffer();
 
+    // only ZeroR model?
+    if (!m_SuitableData) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_zeroR.toString());
+      return buf.toString();
+    }
+    
     if (m_NumIterations == 0) {
       return "Classifier hasn't been built yet!";
     }

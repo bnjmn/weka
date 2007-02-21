@@ -80,7 +80,7 @@ import weka.core.*;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.33.2.1 $ 
  */
 public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   implements Sourcable, WeightedInstancesHandler {
@@ -128,6 +128,9 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /** The value by which the actual target value for the
       true class is offset. */
   protected double m_Offset = 0.0;
+    
+  /** a ZeroR model in case no model can be built from the data */
+  protected Classifier m_ZeroR;
     
   /**
    * Returns a string describing classifier
@@ -568,6 +571,20 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     if (data.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Cannot handle string attributes!");
     }
+
+    // only class? -> build ZeroR model
+    if (data.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+          + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
+    
     if (m_Debug) {
       System.err.println("Creating copy of the training data");
     }
@@ -878,6 +895,11 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   public double [] distributionForInstance(Instance instance) 
     throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     instance = (Instance)instance.copy();
     instance.setDataset(m_NumericClassData);
     double [] pred = new double [m_NumClasses];
@@ -974,6 +996,16 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
    * @return description of the boosted classifier as a string
    */
   public String toString() {
+    
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
     
     StringBuffer text = new StringBuffer();
     
