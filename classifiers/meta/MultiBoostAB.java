@@ -131,7 +131,7 @@ import java.util.Vector;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class MultiBoostAB 
   extends AdaBoostM1
@@ -368,6 +368,16 @@ public class MultiBoostAB
    * @return description of the boosted classifier as a string
    */
   public String toString() {
+    
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
     
     StringBuffer text = new StringBuffer();
     
