@@ -16,10 +16,9 @@
 
 /*
  * NominalToString.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
-
 
 package weka.filters.unsupervised.attribute;
 
@@ -42,10 +41,20 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
+ * Converts a nominal attribute (i.e. set number of values) to string (i.e. unspecified number of values).
+ * <p/>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;col&gt;
+ *  Sets the attribute index (default last).</pre>
+ * 
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NominalToString
   extends Filter 
@@ -192,6 +201,11 @@ public class NominalToString
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;col&gt;
+   *  Sets the attribute index (default last).</pre>
+   * 
    <!-- options-end -->
    *
    * @param options 	the list of options as an array of strings
