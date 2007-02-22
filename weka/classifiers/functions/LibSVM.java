@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */
@@ -998,11 +998,8 @@ public class LibSVM
           "Zero Weights processed. Default weights will be used");
     
     for (i = 0; i < m_Weight.length; i++) {
-      m_Weight[i] = Double.parseDouble(tok.nextToken());
-      if (i == 0)
-        m_WeightLabel[i] = -1;  // label of first class
-      else
-        m_WeightLabel[i] = i;
+      m_Weight[i]      = Double.parseDouble(tok.nextToken());
+      m_WeightLabel[i] = i;
     }
   }
   
@@ -1383,11 +1380,10 @@ public class LibSVM
 
       // Return order of probabilities to canonical weka attribute order
       for (int k = 0; k < prob_estimates.length; k++) {
-        if (labels[k] == -1) 
-          labels[k] = 0;
         result[labels[k]] = prob_estimates[k];
       }
-    } else {
+    }
+    else {
       v = ((Double) invokeMethod(
           Class.forName(CLASS_SVM).newInstance(),
           "svm_predict",
@@ -1399,8 +1395,6 @@ public class LibSVM
             x})).doubleValue();
       
       if (instance.classAttribute().isNominal()) {
-	if (v == -1) 
-	  v = 0;
 	result[(int) v] = 1;
       }
       else {
@@ -1428,7 +1422,6 @@ public class LibSVM
     switch (m_SVMType) {
       case SVMTYPE_C_SVC:
       case SVMTYPE_NU_SVC:
-	//result.enable(Capability.BINARY_CLASS);
 	result.enable(Capability.NOMINAL_CLASS);
 	break;
 	
@@ -1486,10 +1479,7 @@ public class LibSVM
       if (m > 0)
         max_index = Math.max(max_index, ((Integer) getField(Array.get(x, m - 1), "index")).intValue());
       vx.addElement(x);
-      if ( (m_SVMType == SVMTYPE_C_SVC) || (m_SVMType == SVMTYPE_NU_SVC) )
-	vy.addElement(new Double(inst.classValue() == 0 ? -1.0 : +1.0));
-      else
-	vy.addElement(new Double(inst.classValue()));
+      vy.addElement(new Double(inst.classValue()));
     }
     
     // calculate actual gamma
