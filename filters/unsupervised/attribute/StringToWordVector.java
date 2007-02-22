@@ -80,6 +80,9 @@ import java.util.Vector;
  *  Specify list of string attributes to convert to words (as weka Range).
  *  (default: select all string attributes)</pre>
  * 
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
+ * 
  * <pre> -P &lt;attribute name prefix&gt;
  *  Specify a prefix for the created attribute names.
  *  (default: "")</pre>
@@ -136,7 +139,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.16 $ 
+ * @version $Revision: 1.17 $ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -147,10 +150,10 @@ public class StringToWordVector
   static final long serialVersionUID = 8249106275278565424L;
   
   /** Delimiters used in tokenization */
-  private String delimiters = " \n\t.,:'\"()?!";
+  private String m_Delimiters = " \n\t.,:'\"()?!";
 
   /** Range of columns to convert to word vectors */
-  protected Range m_SelectedRange = null;
+  protected Range m_SelectedRange = new Range("first-last");
 
   /** Contains a mapping of valid words to attribute indexes */
   private TreeMap m_Dictionary = new TreeMap();
@@ -163,18 +166,18 @@ public class StringToWordVector
   
   /** Contains the number of documents (instances) a particular word appears in.
       The counts are stored with the same indexing as given by m_Dictionary.  */
-  private int [] docsCounts;
+  private int [] m_DocsCounts;
   
   /** Contains the number of documents (instances) in the input format from 
       which the dictionary is created. It is used in IDF transform. */
-  private int numInstances = -1;
+  private int m_NumInstances = -1;
 
   /**
    * Contains the average length of documents (among the first batch of 
    * instances aka training data). This is used in length normalization of 
    * documents which will be normalized to average document length.
    */
-  private double avgDocLength = -1;
+  private double m_AvgDocLength = -1;
   
   /**
    * The default number of words (per class if there is a class attribute
@@ -241,78 +244,95 @@ public class StringToWordVector
    * @return an enumeration of all the available options
    */
   public Enumeration listOptions() {
+    Vector result = new Vector();
 
-    Vector newVector = new Vector();
+    result.addElement(new Option(
+	"\tOutput word counts rather than boolean word presence.\n",
+	"C", 0, "-C"));
 
-    newVector.addElement(new Option(
-				    "\tOutput word counts rather than boolean word presence.\n",
-				    "C", 0, "-C"));
-    newVector.addElement(new Option(
-				    "\tString containing the set of delimiter characters\n"
-				    + "\t(default: \" \\n\\t.,:'\\\"()?!\")",
-				    "D", 1, "-D <delimiter set>"));
-    newVector.addElement(new Option(
-				    "\tSpecify list of string attributes to convert to words (as weka Range).\n"
-				    + "\t(default: select all string attributes)",
-				    "R", 1, "-R <index1,index2-index4,...>"));
-    newVector.addElement(new Option(
-				    "\tSpecify a prefix for the created attribute names.\n"
-				    + "\t(default: \"\")",
-				    "P", 1, "-P <attribute name prefix>"));
-    newVector.addElement(new Option(
-				    "\tSpecify approximate number of word fields to create.\n"
-				    + "\tSurplus words will be discarded..\n"
-				    + "\t(default: 1000)",
-				    "W", 1, "-W <number of words to keep>"));
-    newVector.addElement(new Option(
-				    "\tTransform the word frequencies into log(1+fij)\n"+
-                                    "\twhere fij is the frequency of word i in jth "+
-                                    "document(instance).\n",
-				    "T", 0, "-T"));
-    newVector.addElement(new Option(
-				    "\tTransform each word frequency into:\n"+
-                                    "\tfij*log(num of Documents/num of "+
-                                    " documents containing word i)\n"+
-                                    "\t  where fij if frequency of word i in "+
-                                    " jth document(instance)",
-				    "I", 0, "-I"));
-    newVector.addElement(new Option("\tWhether to 0=not normalize/1=normalize all data/2=normalize test data only\n" 
-				    + "\tto average length of training documents "
-				    + "(default 0=don\'t normalize).",
-				    "N", 1, "-N"));
-    newVector.addElement(new Option(
-				    "\tOnly form tokens from contiguous "+
-                                    "alphabetic sequences\n\t(The delimiter "+
-                                    "string is ignored if this is set).",
-				    "A", 0, "-A"));
-    newVector.addElement(new Option(
-				    "\tConvert all tokens to lowercase before "+
-                                    "adding to the dictionary.",
-				    "L", 0, "-L"));
-    newVector.addElement(new Option(
-				    "\tIgnore words that are in the stoplist.",
-				    "S", 0, "-S"));
-    newVector.addElement(new Option(
-				    "\tThe stemmering algorihtm (classname plus parameters) to use.",
-				    "stemmer", 1, "-stemmer <spec>"));
-    newVector.addElement(new Option(
-				    "\tThe minimum term frequency (default = 1).",
-				    "M", 1, "-M <int>"));
-    newVector.addElement(new Option(
-				    "\tIf this is set, the maximum number of words and the \n"
-				    + "\tminimum term frequency is not enforced on a per-class \n"
-				    + "\tbasis but based on the documents in all the classes \n"
-				    + "\t(even if a class attribute is set).",
-				    "O", 0, "-O"));
-    newVector.addElement(new Option(
-				    "\tA file containing stopwords to override the default ones.\n"
-				    + "\tUsing this option automatically sets the flag ('-S') to use the\n"
-				    + "\tstoplist if the file exists.\n"
-                                    + "\tFormat: one stopword per line, lines starting with '#'\n"
-                                    + "\tare interpreted as comments and ignored.",
-				    "stopwords", 1, "-stopwords <file>"));
+    result.addElement(new Option(
+	"\tString containing the set of delimiter characters\n"
+	+ "\t(default: \" \\n\\t.,:'\\\"()?!\")",
+	"D", 1, "-D <delimiter set>"));
 
-    return newVector.elements();
+    result.addElement(new Option(
+	"\tSpecify list of string attributes to convert to words (as weka Range).\n"
+	+ "\t(default: select all string attributes)",
+	"R", 1, "-R <index1,index2-index4,...>"));
+
+    result.addElement(new Option(
+	"\tInvert matching sense of column indexes.",
+	"V", 0, "-V"));
+
+    result.addElement(new Option(
+	"\tSpecify a prefix for the created attribute names.\n"
+	+ "\t(default: \"\")",
+	"P", 1, "-P <attribute name prefix>"));
+
+    result.addElement(new Option(
+	"\tSpecify approximate number of word fields to create.\n"
+	+ "\tSurplus words will be discarded..\n"
+	+ "\t(default: 1000)",
+	"W", 1, "-W <number of words to keep>"));
+
+    result.addElement(new Option(
+	"\tTransform the word frequencies into log(1+fij)\n"+
+	"\twhere fij is the frequency of word i in jth "+
+	"document(instance).\n",
+	"T", 0, "-T"));
+
+    result.addElement(new Option(
+	"\tTransform each word frequency into:\n"+
+	"\tfij*log(num of Documents/num of "+
+	" documents containing word i)\n"+
+	"\t  where fij if frequency of word i in "+
+	" jth document(instance)",
+	"I", 0, "-I"));
+
+    result.addElement(new Option("\tWhether to 0=not normalize/1=normalize all data/2=normalize test data only\n" 
+	+ "\tto average length of training documents "
+	+ "(default 0=don\'t normalize).",
+	"N", 1, "-N"));
+
+    result.addElement(new Option(
+	"\tOnly form tokens from contiguous "+
+	"alphabetic sequences\n\t(The delimiter "+
+	"string is ignored if this is set).",
+	"A", 0, "-A"));
+
+    result.addElement(new Option(
+	"\tConvert all tokens to lowercase before "+
+	"adding to the dictionary.",
+	"L", 0, "-L"));
+
+    result.addElement(new Option(
+	"\tIgnore words that are in the stoplist.",
+	"S", 0, "-S"));
+
+    result.addElement(new Option(
+	"\tThe stemmering algorihtm (classname plus parameters) to use.",
+	"stemmer", 1, "-stemmer <spec>"));
+
+    result.addElement(new Option(
+	"\tThe minimum term frequency (default = 1).",
+	"M", 1, "-M <int>"));
+
+    result.addElement(new Option(
+	"\tIf this is set, the maximum number of words and the \n"
+	+ "\tminimum term frequency is not enforced on a per-class \n"
+	+ "\tbasis but based on the documents in all the classes \n"
+	+ "\t(even if a class attribute is set).",
+	"O", 0, "-O"));
+
+    result.addElement(new Option(
+	"\tA file containing stopwords to override the default ones.\n"
+	+ "\tUsing this option automatically sets the flag ('-S') to use the\n"
+	+ "\tstoplist if the file exists.\n"
+	+ "\tFormat: one stopword per line, lines starting with '#'\n"
+	+ "\tare interpreted as comments and ignored.",
+	"stopwords", 1, "-stopwords <file>"));
+
+    return result.elements();
   }
 
   /**
@@ -332,6 +352,9 @@ public class StringToWordVector
    * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of string attributes to convert to words (as weka Range).
    *  (default: select all string attributes)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
    * 
    * <pre> -P &lt;attribute name prefix&gt;
    *  Specify a prefix for the created attribute names.
@@ -391,31 +414,39 @@ public class StringToWordVector
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    String value = Utils.getOption('D', options);
-    if (value.length() != 0) {
+    String 	value;
+    
+    value = Utils.getOption('D', options);
+    if (value.length() != 0)
       setDelimiters(value);
-    }
+    else
+      setDelimiters(" \n\t.,:'\"()?!");
 
     value = Utils.getOption('R', options);
-    if (value.length() != 0) {
+    if (value.length() != 0)
       setSelectedRange(value);
-    }
+    else
+      setSelectedRange("first-last");
+
+    setInvertSelection(Utils.getFlag('V', options));
 
     value = Utils.getOption('P', options);
-    if (value.length() != 0) {
+    if (value.length() != 0)
       setAttributeNamePrefix(value);
-    }
+    else
+      setAttributeNamePrefix("");
 
     value = Utils.getOption('W', options);
-    if (value.length() != 0) {
+    if (value.length() != 0)
       setWordsToKeep(Integer.valueOf(value).intValue());
-    }
+    else
+      setWordsToKeep(1000);
 
     value = Utils.getOption('M', options);
-    if (value.length() != 0) {
+    if (value.length() != 0)
       setMinTermFreq(Integer.valueOf(value).intValue());
-    }
+    else
+      setMinTermFreq(1);
     
     setOutputWordCounts(Utils.getFlag('C', options));
 
@@ -426,11 +457,10 @@ public class StringToWordVector
     setDoNotOperateOnPerClassBasis(Utils.getFlag('O', options));
 
     String nString = Utils.getOption('N', options);
-    if (nString.length() != 0) {
+    if (nString.length() != 0)
       setNormalizeDocLength(new SelectedTag(Integer.parseInt(nString), TAGS_FILTER));
-    } else {
+    else
       setNormalizeDocLength(new SelectedTag(FILTER_NONE, TAGS_FILTER));
-    }
     
     setLowerCaseTokens(Utils.getFlag('L', options));
     
@@ -455,9 +485,10 @@ public class StringToWordVector
     }
 
     value = Utils.getOption("stopwords", options);
-    if (value.length() != 0) {
+    if (value.length() != 0)
       setStopwords(new File(value));
-    }
+    else
+      setStopwords(null);
   }
 
   /**
@@ -465,73 +496,70 @@ public class StringToWordVector
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  public String[] getOptions() {
+    Vector        result;
 
-    String [] options = new String [24];
-    int current = 0;
+    result = new Vector();
 
-    options[current++] = "-D"; 
-    options[current++] = getDelimiters();
+    result.add("-D"); 
+    result.add(getDelimiters());
 
-    if (getSelectedRange() != null) {
-      options[current++] = "-R"; 
-      m_SelectedRange.setUpper(getInputFormat().numAttributes() - 1);
-      options[current++] = getSelectedRange().getRanges();
-    }
+    result.add("-R"); 
+    result.add(getSelectedRange().getRanges());
+
+    if (getInvertSelection())
+      result.add("-V");
 
     if (!"".equals(getAttributeNamePrefix())) {
-      options[current++] = "-P"; 
-      options[current++] = getAttributeNamePrefix();
+      result.add("-P"); 
+      result.add(getAttributeNamePrefix());
     }
 
-    options[current++] = "-W"; 
-    options[current++] = String.valueOf(getWordsToKeep());
+    result.add("-W"); 
+    result.add(String.valueOf(getWordsToKeep()));
 
-    if (getOutputWordCounts()) {
-      options[current++] = "-C";
-    }
+    if (getOutputWordCounts())
+      result.add("-C");
 
-    if(getTFTransform())
-        options[current++] = "-T";
-    
-    if(getIDFTransform())
-        options[current++] = "-I";
-    
-    options[current++] = "-N"; options[current++] = "" + m_filterType;
-    
-    if(this.getLowerCaseTokens())
-        options[current++] = "-L";
-    
-    if(this.getOnlyAlphabeticTokens())
-        options[current++] = "-A";
-    
-    if(this.getUseStoplist())
-        options[current++] = "-S";
-    
+    if (getTFTransform())
+      result.add("-T");
+
+    if (getIDFTransform())
+      result.add("-I");
+
+    result.add("-N"); 
+    result.add("" + m_filterType);
+
+    if (getLowerCaseTokens())
+      result.add("-L");
+
+    if (getOnlyAlphabeticTokens())
+      result.add("-A");
+
+    if (getUseStoplist())
+      result.add("-S");
+
     if (getStemmer() != null) {
-      options[current++] = "-stemmer";
+      result.add("-stemmer");
       String spec = getStemmer().getClass().getName();
       if (getStemmer() instanceof OptionHandler)
-        spec += " " + Utils.joinOptions(
-                          ((OptionHandler) getStemmer()).getOptions());
-      options[current++] = spec.trim();
+	spec += " " + Utils.joinOptions(
+	    ((OptionHandler) getStemmer()).getOptions());
+      result.add(spec.trim());
     }
 
-    options[current++] = "-M"; 
-    options[current++] = String.valueOf(getMinTermFreq());
-    
-    if(this.getDoNotOperateOnPerClassBasis())
-      options[current++] = "-O";
-    
-    if(!getStopwords().isDirectory()) {
-        options[current++] = "-stopwords";
-        options[current++] = getStopwords().getAbsolutePath();
+    result.add("-M"); 
+    result.add(String.valueOf(getMinTermFreq()));
+
+    if (getDoNotOperateOnPerClassBasis())
+      result.add("-O");
+
+    if (!getStopwords().isDirectory()) {
+      result.add("-stopwords");
+      result.add(getStopwords().getAbsolutePath());
     }
-    
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -609,8 +637,9 @@ public class StringToWordVector
     throws Exception {
 
     super.setInputFormat(instanceInfo);
-    avgDocLength = -1;
-    numInstances = -1;
+    m_SelectedRange.setUpper(instanceInfo.numAttributes() - 1);
+    m_AvgDocLength = -1;
+    m_NumInstances = -1;
     return false;
   }
 
@@ -672,13 +701,13 @@ public class StringToWordVector
       // Convert all instances w/o normalization
       FastVector fv = new FastVector();
       int firstCopy=0;
-      for(int i=0; i < numInstances; i++) {
+      for(int i=0; i < m_NumInstances; i++) {
 	firstCopy = convertInstancewoDocNorm(getInputFormat().instance(i), fv);
       }
       
       // Need to compute average document length if necessary
       if (m_filterType != FILTER_NONE) {
-	avgDocLength = 0;
+	m_AvgDocLength = 0;
 	for(int i=0; i<fv.size(); i++) {
 	  Instance inst = (Instance) fv.elementAt(i);
 	  double docLength = 0;
@@ -687,9 +716,9 @@ public class StringToWordVector
 	      docLength += inst.valueSparse(j) * inst.valueSparse(j);
 	    }
 	  }        
-	  avgDocLength += Math.sqrt(docLength);
+	  m_AvgDocLength += Math.sqrt(docLength);
 	}
-	avgDocLength /= numInstances;
+	m_AvgDocLength /= m_NumInstances;
       }
 
       // Perform normalization if necessary.
@@ -761,7 +790,7 @@ public class StringToWordVector
    * @return Value of delimiters.
    */
   public String getDelimiters() {
-    return delimiters.replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'");
+    return m_Delimiters.replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'");
   }
     
   /**
@@ -770,7 +799,7 @@ public class StringToWordVector
    * @param newDelimiters Value to assign to delimiters.
    */
   public void setDelimiters(String newDelimiters) {
-    delimiters = newDelimiters.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "'");
+    m_Delimiters = newDelimiters.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "'");
   }
 
   /**
@@ -801,6 +830,84 @@ public class StringToWordVector
    */
   public void setSelectedRange(String newSelectedRange) {
     m_SelectedRange = new Range(newSelectedRange);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String attributeIndicesTipText() {
+    return "Specify range of attributes to act on."
+      + " This is a comma separated list of attribute indices, with"
+      + " \"first\" and \"last\" valid values. Specify an inclusive"
+      + " range with \"-\". E.g: \"first-3,5,6-10,last\".";
+  }
+
+  /**
+   * Gets the current range selection
+   *
+   * @return a string containing a comma separated list of ranges
+   */
+  public String getAttributeIndices() {
+    return m_SelectedRange.getRanges();
+  }
+
+  /**
+   * Sets which attributes are to be worked on.
+   *
+   * @param rangeList a string representing the list of attributes. Since
+   * the string will typically come from a user, attributes are indexed from
+   * 1. <br>
+   * eg: first-3,5,6-last
+   * @throws IllegalArgumentException if an invalid range list is supplied 
+   */
+  public void setAttributeIndices(String rangeList) {
+    m_SelectedRange.setRanges(rangeList);
+  }
+
+  /**
+   * Sets which attributes are to be processed.
+   *
+   * @param attributes an array containing indexes of attributes to process.
+   * Since the array will typically come from a program, attributes are indexed
+   * from 0.
+   * @throws IllegalArgumentException if an invalid set of ranges
+   * is supplied 
+   */
+  public void setAttributeIndicesArray(int[] attributes) {
+    setAttributeIndices(Range.indicesToRangeList(attributes));
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+    return "Set attribute selection mode. If false, only selected"
+      + " attributes in the range will be worked on; if"
+      + " true, only non-selected attributes will be processed.";
+  }
+
+  /**
+   * Gets whether the supplied columns are to be processed or skipped
+   *
+   * @return true if the supplied columns will be kept
+   */
+  public boolean getInvertSelection() {
+    return m_SelectedRange.getInvert();
+  }
+
+  /**
+   * Sets whether selected columns should be processed or skipped.
+   *
+   * @param invert the new invert setting
+   */
+  public void setInvertSelection(boolean invert) {
+    m_SelectedRange.setInvert(invert);
   }
 
   /**
@@ -1280,7 +1387,7 @@ public class StringToWordVector
           Enumeration st;
           if(this.m_onlyAlphabeticTokens==false)
               st = new StringTokenizer(instance.stringValue(j),
-                                                   delimiters);
+                                                   m_Delimiters);
           else
               st = new AlphabeticStringTokenizer(instance.stringValue(j));
           
@@ -1389,7 +1496,7 @@ public class StringToWordVector
     }
     
     // Compute document frequencies
-    docsCounts = new int[attributes.size()];
+    m_DocsCounts = new int[attributes.size()];
     Iterator it = newDictionary.keySet().iterator();
     while(it.hasNext()) {
       String word = (String) it.next();
@@ -1400,13 +1507,13 @@ public class StringToWordVector
 	if(c!=null)
 	  docsCount += c.docCount;
       }
-      docsCounts[idx]=docsCount;
+      m_DocsCounts[idx]=docsCount;
     }
 
     // Trim vector and set instance variables
     attributes.trimToSize();
     m_Dictionary = newDictionary;
-    numInstances = getInputFormat().numInstances();
+    m_NumInstances = getInputFormat().numInstances();
     
     // Set the filter's output format
     Instances outputFormat = new Instances(getInputFormat().relationName(), 
@@ -1470,7 +1577,7 @@ public class StringToWordVector
         
         if(this.m_onlyAlphabeticTokens==false)
 	  st = new StringTokenizer(instance.stringValue(j),
-				   delimiters);
+				   m_Delimiters);
         else
 	  st = new AlphabeticStringTokenizer(instance.stringValue(j));
         
@@ -1516,8 +1623,8 @@ public class StringToWordVector
 	Integer index = (Integer)it.next();
 	if( index.intValue() >= firstCopy ) {
 	  double val = ((Double)contained.get(index)).doubleValue();
-	  val = val*Math.log( numInstances /
-			      (double) docsCounts[index.intValue()] );
+	  val = val*Math.log( m_NumInstances /
+			      (double) m_DocsCounts[index.intValue()] );
 	  contained.put(index, new Double(val));
 	}
       }        
@@ -1556,7 +1663,7 @@ public class StringToWordVector
 
     double docLength = 0;
 
-    if (avgDocLength < 0) {
+    if (m_AvgDocLength < 0) {
       throw new Exception("Average document length not set.");
     }
 
@@ -1571,7 +1678,7 @@ public class StringToWordVector
     // Normalize document vector
     for(int j=0; j<inst.numValues(); j++) {
       if(inst.index(j)>=firstCopy) {
-	double val = inst.valueSparse(j) * avgDocLength / docLength;
+	double val = inst.valueSparse(j) * m_AvgDocLength / docLength;
 	inst.setValueSparse(j, val);
 	if (val == 0){
 	  System.err.println("setting value "+inst.index(j)+" to zero.");
