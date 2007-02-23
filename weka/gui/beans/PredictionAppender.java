@@ -40,11 +40,11 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class PredictionAppender
   extends JPanel
-  implements DataSource, Visible, BeanCommon,
+  implements DataSource, TrainingSetProducer, TestSetProducer, Visible, BeanCommon,
 	     EventConstraints, BatchClassifierListener,
 	     IncrementalClassifierListener, BatchClustererListener, Serializable {
 
@@ -60,6 +60,16 @@ public class PredictionAppender
    * Objects listening for instances events
    */
   protected Vector m_instanceListeners = new Vector();
+  
+  /**
+   * Objects listening for training set events
+   */
+  protected Vector m_trainingSetListeners = new Vector();;
+  
+  /**
+   * Objects listening for test set events
+   */
+  protected Vector m_testSetListeners = new Vector();
 
   /**
    * Non null if this object is a target for any events.
@@ -132,6 +142,53 @@ public class PredictionAppender
     m_appendProbabilities = ap;
   }
 
+  /**
+   * Add a training set listener
+   *
+   * @param tsl a <code>TrainingSetListener</code> value
+   */
+  public void addTrainingSetListener(TrainingSetListener tsl) {
+    // TODO Auto-generated method stub
+    m_trainingSetListeners.addElement(tsl);
+    // pass on any format that we might have determined so far
+    if (m_format != null) {
+      TrainingSetEvent e = new TrainingSetEvent(this, m_format);
+      tsl.acceptTrainingSet(e);
+    }
+  }
+
+  /**
+   * Remove a training set listener
+   *
+   * @param tsl a <code>TrainingSetListener</code> value
+   */
+  public void removeTrainingSetListener(TrainingSetListener tsl) {   
+    m_trainingSetListeners.removeElement(tsl);
+  }
+
+  /**
+   * Add a test set listener
+   *
+   * @param tsl a <code>TestSetListener</code> value
+   */
+  public void addTestSetListener(TestSetListener tsl) {
+    m_testSetListeners.addElement(tsl);
+//  pass on any format that we might have determined so far
+    if (m_format != null) {
+      TestSetEvent e = new TestSetEvent(this, m_format);
+      tsl.acceptTestSet(e);
+    }
+  }
+
+  /**
+   * Remove a test set listener
+   *
+   * @param tsl a <code>TestSetListener</code> value
+   */
+  public void removeTestSetListener(TestSetListener tsl) {
+    m_testSetListeners.removeElement(tsl);
+  }
+  
   /**
    * Add a datasource listener
    *
@@ -207,6 +264,7 @@ public class PredictionAppender
   protected InstanceEvent m_instanceEvent;
   protected double [] m_instanceVals;
 
+  
   /**
    * Accept and process an incremental classifier event
    *
@@ -300,29 +358,60 @@ public class PredictionAppender
    * @param e a <code>BatchClassifierEvent</code> value
    */
   public void acceptClassifier(BatchClassifierEvent e) {
-    if (m_dataSourceListeners.size() > 0) {
+    if (m_dataSourceListeners.size() > 0 
+	|| m_trainingSetListeners.size() > 0
+	|| m_testSetListeners.size() > 0) {
       Instances testSet = e.getTestSet().getDataSet();
+      Instances trainSet = e.getTrainSet().getDataSet();
 
       weka.classifiers.Classifier classifier = e.getClassifier();
       String relationNameModifier = "_set_"+e.getSetNumber()+"_of_"
 	+e.getMaxSetNumber();
       if (!m_appendProbabilities || testSet.classAttribute().isNumeric()) {
 	try {
-	  Instances newInstances = makeDataSetClass(testSet, classifier,
+	  Instances newTestSetInstances = makeDataSetClass(testSet, classifier,
 						    relationNameModifier);
-	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+	  Instances newTrainingSetInstances = makeDataSetClass(trainSet, classifier,
+		    relationNameModifier);
+	  
+	  if (m_trainingSetListeners.size() > 0) {
+	    notifyTrainingSetAvailable(new TrainingSetEvent(this, 
+		new Instances(newTrainingSetInstances, 0)));
+	    // fill in predicted values
+            for (int i = 0; i < trainSet.numInstances(); i++) {
+              double predClass = 
+        	classifier.classifyInstance(trainSet.instance(i));
+              newTrainingSetInstances.instance(i).setValue(newTrainingSetInstances.numAttributes()-1,
+        	  predClass);
+            }
+            notifyTrainingSetAvailable(new TrainingSetEvent(this, newTrainingSetInstances));
+	  }
+	  
+	  if (m_testSetListeners.size() > 0) {
+	    notifyTestSetAvailable(new TestSetEvent(this, new Instances(newTestSetInstances,0)));
+	  }
+	  if (m_dataSourceListeners.size() > 0) {
+	    notifyDataSetAvailable(new DataSetEvent(this, new Instances(newTestSetInstances,0)));
+	  }
           if (e.getTestSet().isStructureOnly()) {
-	    m_format = newInstances;
+	    m_format = newTestSetInstances;
 	  }
-	  // fill in predicted values
-	  for (int i = 0; i < testSet.numInstances(); i++) {
-	    double predClass = 
-	      classifier.classifyInstance(testSet.instance(i));
-	    newInstances.instance(i).setValue(newInstances.numAttributes()-1,
-					      predClass);
-	  }
+          if (m_dataSourceListeners.size() > 0 || m_testSetListeners.size() > 0) {
+            // fill in predicted values
+            for (int i = 0; i < testSet.numInstances(); i++) {
+              double predClass = 
+        	classifier.classifyInstance(testSet.instance(i));
+              newTestSetInstances.instance(i).setValue(newTestSetInstances.numAttributes()-1,
+        	  predClass);
+            }
+          }
 	  // notify listeners
-	  notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+          if (m_testSetListeners.size() > 0) {
+            notifyTestSetAvailable(new TestSetEvent(this, newTestSetInstances));
+          }
+          if (m_dataSourceListeners.size() > 0) {
+            notifyDataSetAvailable(new DataSetEvent(this, newTestSetInstances));            
+          }
 	  return;
 	} catch (Exception ex) {
 	  ex.printStackTrace();
@@ -330,24 +419,54 @@ public class PredictionAppender
       }
       if (m_appendProbabilities) {
 	try {
-	  Instances newInstances = 
+	  Instances newTestSetInstances = 
 	    makeDataSetProbabilities(testSet,
 				     classifier,relationNameModifier);
-	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
-          if (e.getTestSet().isStructureOnly()) {
-	    m_format = newInstances;
-	  }
-	  // fill in predicted probabilities
-	  for (int i = 0; i < testSet.numInstances(); i++) {
-	    double [] preds = classifier.
-	      distributionForInstance(testSet.instance(i));
-	    for (int j = 0; j < testSet.classAttribute().numValues(); j++) {
-	      newInstances.instance(i).setValue(testSet.numAttributes()+j,
-						preds[j]);
+	  Instances newTrainingSetInstances = 
+	    makeDataSetProbabilities(trainSet,
+				     classifier,relationNameModifier);
+	  if (m_trainingSetListeners.size() > 0) {
+	    notifyTrainingSetAvailable(new TrainingSetEvent(this, 
+		new Instances(newTrainingSetInstances, 0)));
+//	    fill in predicted probabilities
+	    for (int i = 0; i < trainSet.numInstances(); i++) {
+	      double [] preds = classifier.
+	      distributionForInstance(trainSet.instance(i));
+	      for (int j = 0; j < trainSet.classAttribute().numValues(); j++) {
+		newTrainingSetInstances.instance(i).setValue(trainSet.numAttributes()+j,
+		    preds[j]);
+	      }
 	    }
+	    notifyTrainingSetAvailable(new TrainingSetEvent(this, newTrainingSetInstances));
 	  }
-	  // notify listeners
-	  notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+	  if (m_testSetListeners.size() > 0) {
+	    notifyTestSetAvailable(new TestSetEvent(this, new Instances(newTestSetInstances,0)));
+	  }
+	  if (m_dataSourceListeners.size() > 0) {
+	    notifyDataSetAvailable(new DataSetEvent(this, new Instances(newTestSetInstances,0)));
+	  }
+          if (e.getTestSet().isStructureOnly()) {
+	    m_format = newTestSetInstances;
+	  }
+          if (m_dataSourceListeners.size() > 0 || m_testSetListeners.size() > 0) {
+            // fill in predicted probabilities
+            for (int i = 0; i < testSet.numInstances(); i++) {
+              double [] preds = classifier.
+              distributionForInstance(testSet.instance(i));
+              for (int j = 0; j < testSet.classAttribute().numValues(); j++) {
+        	newTestSetInstances.instance(i).setValue(testSet.numAttributes()+j,
+        	    preds[j]);
+              }
+            }
+          }
+          
+          // notify listeners
+          if (m_testSetListeners.size() > 0) {
+            notifyTestSetAvailable(new TestSetEvent(this, newTestSetInstances));
+          }
+          if (m_dataSourceListeners.size() > 0) {
+            notifyDataSetAvailable(new DataSetEvent(this, newTestSetInstances));
+          }
 	} catch (Exception ex) {
 	  ex.printStackTrace();
 	}
@@ -560,6 +679,42 @@ public class PredictionAppender
       }
     }
   }
+  
+  /**
+   * Notify all test set listeners that a test set is available
+   *
+   * @param e a <code>TestSetEvent</code> value
+   */
+  protected void notifyTestSetAvailable(TestSetEvent e) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_testSetListeners.clone();
+    }
+    
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	((TestSetListener)l.elementAt(i)).acceptTestSet(e);
+      }
+    }
+  }
+  
+  /**
+   * Notify all test set listeners that a test set is available
+   *
+   * @param e a <code>TestSetEvent</code> value
+   */
+  protected void notifyTrainingSetAvailable(TrainingSetEvent e) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_trainingSetListeners.clone();
+    }
+    
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(e);
+      }
+    }
+  }
 
   /**
    * Set a logger
@@ -650,7 +805,9 @@ public class PredictionAppender
 	  return false;
 	}
       }
-      if (eventName.equals("dataSet")) {
+      if (eventName.equals("dataSet") 
+	  || eventName.equals("trainingSet") 
+	  || eventName.equals("testSet")) {
 	if (!((EventConstraints)m_listenee).
 	    eventGeneratable("batchClassifier") && !((EventConstraints)m_listenee).
 	    eventGeneratable("batchClusterer")) {
