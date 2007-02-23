@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for PredictionAppender.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  * @since 1.0
  * @see SimpleBeanInfo
  */
@@ -43,14 +43,22 @@ public class PredictionAppenderBeanInfo extends SimpleBeanInfo {
     try {
       EventSetDescriptor [] esds =  
       { new EventSetDescriptor(PredictionAppender.class, 
-			       "dataSet",
-			       DataSourceListener.class,
-			       "acceptDataSet"),
-	new EventSetDescriptor(DataSource.class, 
-			       "instance",
-			       InstanceListener.class,
-			       "acceptInstance")
-         };
+	  "dataSet",
+	  DataSourceListener.class,
+      "acceptDataSet"),
+      new EventSetDescriptor(PredictionAppender.class, 
+	  "instance",
+	  InstanceListener.class,
+      "acceptInstance"),
+      new EventSetDescriptor(PredictionAppender.class, 
+	  "trainingSet",
+	  TrainingSetListener.class,
+      "acceptTrainingSet"),
+      new EventSetDescriptor(PredictionAppender.class, 
+	  "testSet",
+	  TestSetListener.class,
+      "acceptTestSet")
+      };
       return esds;
     } catch (Exception ex) {
       ex.printStackTrace();

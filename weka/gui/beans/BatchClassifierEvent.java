@@ -22,8 +22,8 @@
 
 package weka.gui.beans;
 
-import weka.core.Instances;
 import weka.classifiers.Classifier;
+
 import java.util.EventObject;
 
 /**
@@ -31,11 +31,15 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @since 1.0
  * @see EventObject
  */
-public class BatchClassifierEvent extends EventObject {
+public class BatchClassifierEvent
+  extends EventObject {
+
+  /** for serialization */
+  private static final long serialVersionUID = 878097199815991084L;
 
   /**
    * The classifier
@@ -48,6 +52,11 @@ public class BatchClassifierEvent extends EventObject {
    */
   //  protected Instances m_testSet;
   protected DataSetEvent m_testSet;
+  
+  /**
+   * Instances that were used to train the classifier (may be null if not available)
+   */
+  protected DataSetEvent m_trainSet;
 
   /**
    * The set number for the test set
@@ -65,17 +74,19 @@ public class BatchClassifierEvent extends EventObject {
    *
    * @param source the source object
    * @param scheme a Classifier
+   * @param trsI the training instances used to train the classifier
    * @param tstI the test instances
    * @param setNum the set number of the test instances
    * @param maxSetNum the last set number in the series
    */
   public BatchClassifierEvent(Object source, Classifier scheme,
-			 DataSetEvent tstI, int setNum,
+			 DataSetEvent trsI, DataSetEvent tstI, int setNum,
 			 int maxSetNum) {
     super(source);
     //    m_trainingSet = trnI;
     m_classifier = scheme;
     m_testSet = tstI;
+    m_trainSet = trsI;
     m_setNumber = setNum;
     m_maxSetNumber = maxSetNum;
   }
@@ -105,6 +116,15 @@ public class BatchClassifierEvent extends EventObject {
    */
   public DataSetEvent getTestSet() {
     return m_testSet;
+  }
+  
+  /**
+   * Get the train set
+   *
+   * @return the testing instances
+   */
+  public DataSetEvent getTrainSet() {
+    return m_trainSet;
   }
 
   /**

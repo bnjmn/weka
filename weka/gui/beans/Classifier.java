@@ -22,38 +22,24 @@
 
 package weka.gui.beans;
 
+import weka.classifiers.rules.ZeroR;
+import weka.core.Instances;
+import weka.gui.Logger;
 
-import java.util.Vector;
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import java.awt.BorderLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.InputEvent;
-import java.awt.*;
-import java.io.Serializable;
-import java.io.Reader;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import javax.swing.ImageIcon;
-import javax.swing.SwingConstants;
-import java.beans.EventSetDescriptor;
+import java.util.Vector;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.classifiers.*;
-import weka.classifiers.rules.ZeroR;
-import weka.gui.Logger;
+import javax.swing.JPanel;
 
 /**
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.4 $
+ * @version $Revision: 1.16.2.5 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -64,12 +50,16 @@ import weka.gui.Logger;
  * @see TrainingSetListener
  * @see TestSetListener
  */
-public class Classifier extends JPanel
+public class Classifier
+  extends JPanel
   implements BeanCommon, Visible, 
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     InstanceListener {
+
+  /** for serialization */
+  private static final long serialVersionUID = 659603893917736008L;
 
   protected BeanVisual m_visual = 
     new BeanVisual("Classifier",
@@ -485,6 +475,7 @@ public class Classifier extends JPanel
       BatchClassifierEvent ce = 
 	new BatchClassifierEvent(this, m_Classifier, 
 				 new DataSetEvent(this, e.getTrainingSet()),
+				 new DataSetEvent(this, e.getTrainingSet()),
 				 e.getSetNumber(), e.getMaxSetNumber());
 
       notifyBatchClassifierListeners(ce);
@@ -575,7 +566,7 @@ public class Classifier extends JPanel
 		    }
 		  } else {
 		    // save header
-		    m_trainingSet = new Instances(m_trainingSet, 0);
+		    //m_trainingSet = new Instances(m_trainingSet, 0);
 		  }
 		  if (m_log != null) {
 		    m_log.statusMessage("OK");
@@ -622,7 +613,8 @@ public class Classifier extends JPanel
 	  if (m_trainingSet.equalHeaders(m_testingSet)) {
 
 	    BatchClassifierEvent ce = 
-	      new BatchClassifierEvent(this, m_Classifier, 
+	      new BatchClassifierEvent(this, m_Classifier, 				       
+				       new DataSetEvent(this, m_trainingSet),
 				       new DataSetEvent(this, e.getTestSet()),
 				  e.getSetNumber(), e.getMaxSetNumber());
 
