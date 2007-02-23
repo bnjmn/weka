@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -475,6 +475,7 @@ public class Classifier
       BatchClassifierEvent ce = 
 	new BatchClassifierEvent(this, m_Classifier, 
 				 new DataSetEvent(this, e.getTrainingSet()),
+				 new DataSetEvent(this, e.getTrainingSet()),
 				 e.getSetNumber(), e.getMaxSetNumber());
 
       notifyBatchClassifierListeners(ce);
@@ -565,7 +566,7 @@ public class Classifier
 		    }
 		  } else {
 		    // save header
-		    m_trainingSet = new Instances(m_trainingSet, 0);
+		    //m_trainingSet = new Instances(m_trainingSet, 0);
 		  }
 		  if (m_log != null) {
 		    m_log.statusMessage("OK");
@@ -612,7 +613,8 @@ public class Classifier
 	  if (m_trainingSet.equalHeaders(m_testingSet)) {
 
 	    BatchClassifierEvent ce = 
-	      new BatchClassifierEvent(this, m_Classifier, 
+	      new BatchClassifierEvent(this, m_Classifier, 				       
+				       new DataSetEvent(this, m_trainingSet),
 				       new DataSetEvent(this, e.getTestSet()),
 				  e.getSetNumber(), e.getMaxSetNumber());
 
