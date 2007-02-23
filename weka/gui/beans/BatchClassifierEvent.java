@@ -31,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @since 1.0
  * @see EventObject
  */
@@ -52,6 +52,11 @@ public class BatchClassifierEvent
    */
   //  protected Instances m_testSet;
   protected DataSetEvent m_testSet;
+  
+  /**
+   * Instances that were used to train the classifier (may be null if not available)
+   */
+  protected DataSetEvent m_trainSet;
 
   /**
    * The set number for the test set
@@ -69,17 +74,19 @@ public class BatchClassifierEvent
    *
    * @param source the source object
    * @param scheme a Classifier
+   * @param trsI the training instances used to train the classifier
    * @param tstI the test instances
    * @param setNum the set number of the test instances
    * @param maxSetNum the last set number in the series
    */
   public BatchClassifierEvent(Object source, Classifier scheme,
-			 DataSetEvent tstI, int setNum,
+			 DataSetEvent trsI, DataSetEvent tstI, int setNum,
 			 int maxSetNum) {
     super(source);
     //    m_trainingSet = trnI;
     m_classifier = scheme;
     m_testSet = tstI;
+    m_trainSet = trsI;
     m_setNumber = setNum;
     m_maxSetNumber = maxSetNum;
   }
@@ -109,6 +116,15 @@ public class BatchClassifierEvent
    */
   public DataSetEvent getTestSet() {
     return m_testSet;
+  }
+  
+  /**
+   * Get the train set
+   *
+   * @return the testing instances
+   */
+  public DataSetEvent getTrainSet() {
+    return m_trainSet;
   }
 
   /**
