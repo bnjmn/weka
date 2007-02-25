@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -988,6 +988,21 @@ public class Classifier
     String eventName = esd.getName();
     return eventGeneratable(eventName);
   }
+  
+  /**
+   * @param name of the event to check
+   * @return true if eventName is one of the possible events
+   * that this component can generate
+   */
+  private boolean generatableEvent(String eventName) {
+    if (eventName.compareTo("graph") == 0
+	|| eventName.compareTo("text") == 0
+	|| eventName.compareTo("batchClassifier") == 0
+	|| eventName.compareTo("incrementalClassifier") == 0) {
+      return true;
+    }
+    return false;
+  }
 
   /**
    * Returns true, if at the current time, the named event could
@@ -999,6 +1014,9 @@ public class Classifier
    * time
    */
   public boolean eventGeneratable(String eventName) {
+    if (!generatableEvent(eventName)) {
+      return false;
+    }
     if (eventName.compareTo("graph") == 0) {
       // can't generate a GraphEvent if classifier is not drawable
       if (!(m_Classifier instanceof weka.core.Drawable)) {
