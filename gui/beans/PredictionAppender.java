@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PredictionAppender
   extends JPanel
@@ -808,11 +808,14 @@ public class PredictionAppender
       if (eventName.equals("dataSet") 
 	  || eventName.equals("trainingSet") 
 	  || eventName.equals("testSet")) {
-	if (!((EventConstraints)m_listenee).
-	    eventGeneratable("batchClassifier") && !((EventConstraints)m_listenee).
-	    eventGeneratable("batchClusterer")) {
-	  return false;
+	if (((EventConstraints)m_listenee).
+	    eventGeneratable("batchClassifier")) {
+	  return true;
 	}
+	if (((EventConstraints)m_listenee).eventGeneratable("batchClusterer")) {
+	  return true;
+	}
+	return false;
       }
     }
     return true;
