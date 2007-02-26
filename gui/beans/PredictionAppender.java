@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class PredictionAppender
   extends JPanel
@@ -363,6 +363,8 @@ public class PredictionAppender
 	|| m_testSetListeners.size() > 0) {
       Instances testSet = e.getTestSet().getDataSet();
       Instances trainSet = e.getTrainSet().getDataSet();
+      int setNum = e.getSetNumber();
+      int maxNum = e.getMaxSetNumber();
 
       weka.classifiers.Classifier classifier = e.getClassifier();
       String relationNameModifier = "_set_"+e.getSetNumber()+"_of_"
@@ -375,8 +377,11 @@ public class PredictionAppender
 		    relationNameModifier);
 	  
 	  if (m_trainingSetListeners.size() > 0) {
-	    notifyTrainingSetAvailable(new TrainingSetEvent(this, 
-		new Instances(newTrainingSetInstances, 0)));
+	    TrainingSetEvent tse = new TrainingSetEvent(this,
+		new Instances(newTrainingSetInstances, 0));
+	    tse.m_setNumber = setNum;
+	    tse.m_maxSetNumber = maxNum;
+	    notifyTrainingSetAvailable(tse);
 	    // fill in predicted values
             for (int i = 0; i < trainSet.numInstances(); i++) {
               double predClass = 
@@ -384,11 +389,19 @@ public class PredictionAppender
               newTrainingSetInstances.instance(i).setValue(newTrainingSetInstances.numAttributes()-1,
         	  predClass);
             }
-            notifyTrainingSetAvailable(new TrainingSetEvent(this, newTrainingSetInstances));
+            tse = new TrainingSetEvent(this,
+        	newTrainingSetInstances);
+            tse.m_setNumber = setNum;
+            tse.m_maxSetNumber = maxNum;
+            notifyTrainingSetAvailable(tse);
 	  }
 	  
 	  if (m_testSetListeners.size() > 0) {
-	    notifyTestSetAvailable(new TestSetEvent(this, new Instances(newTestSetInstances,0)));
+	    TestSetEvent tse = new TestSetEvent(this,
+		new Instances(newTestSetInstances, 0));
+	    tse.m_setNumber = setNum;
+	    tse.m_maxSetNumber = maxNum;
+	    notifyTestSetAvailable(tse);
 	  }
 	  if (m_dataSourceListeners.size() > 0) {
 	    notifyDataSetAvailable(new DataSetEvent(this, new Instances(newTestSetInstances,0)));
@@ -407,7 +420,10 @@ public class PredictionAppender
           }
 	  // notify listeners
           if (m_testSetListeners.size() > 0) {
-            notifyTestSetAvailable(new TestSetEvent(this, newTestSetInstances));
+            TestSetEvent tse = new TestSetEvent(this, newTestSetInstances);
+            tse.m_setNumber = setNum;
+            tse.m_maxSetNumber = maxNum;
+            notifyTestSetAvailable(tse);
           }
           if (m_dataSourceListeners.size() > 0) {
             notifyDataSetAvailable(new DataSetEvent(this, newTestSetInstances));            
@@ -426,8 +442,11 @@ public class PredictionAppender
 	    makeDataSetProbabilities(trainSet,
 				     classifier,relationNameModifier);
 	  if (m_trainingSetListeners.size() > 0) {
-	    notifyTrainingSetAvailable(new TrainingSetEvent(this, 
-		new Instances(newTrainingSetInstances, 0)));
+	    TrainingSetEvent tse = new TrainingSetEvent(this,
+		new Instances(newTrainingSetInstances, 0));
+	    tse.m_setNumber = setNum;
+	    tse.m_maxSetNumber = maxNum;
+	    notifyTrainingSetAvailable(tse);
 //	    fill in predicted probabilities
 	    for (int i = 0; i < trainSet.numInstances(); i++) {
 	      double [] preds = classifier.
@@ -437,10 +456,18 @@ public class PredictionAppender
 		    preds[j]);
 	      }
 	    }
-	    notifyTrainingSetAvailable(new TrainingSetEvent(this, newTrainingSetInstances));
+	    tse = new TrainingSetEvent(this,
+        	newTrainingSetInstances);
+            tse.m_setNumber = setNum;
+            tse.m_maxSetNumber = maxNum;
+            notifyTrainingSetAvailable(tse);
 	  }
 	  if (m_testSetListeners.size() > 0) {
-	    notifyTestSetAvailable(new TestSetEvent(this, new Instances(newTestSetInstances,0)));
+	    TestSetEvent tse = new TestSetEvent(this,
+		new Instances(newTestSetInstances, 0));
+	    tse.m_setNumber = setNum;
+	    tse.m_maxSetNumber = maxNum;
+	    notifyTestSetAvailable(tse);
 	  }
 	  if (m_dataSourceListeners.size() > 0) {
 	    notifyDataSetAvailable(new DataSetEvent(this, new Instances(newTestSetInstances,0)));
@@ -462,7 +489,10 @@ public class PredictionAppender
           
           // notify listeners
           if (m_testSetListeners.size() > 0) {
-            notifyTestSetAvailable(new TestSetEvent(this, newTestSetInstances));
+            TestSetEvent tse = new TestSetEvent(this, newTestSetInstances);
+            tse.m_setNumber = setNum;
+            tse.m_maxSetNumber = maxNum;
+            notifyTestSetAvailable(tse);
           }
           if (m_dataSourceListeners.size() > 0) {
             notifyDataSetAvailable(new DataSetEvent(this, newTestSetInstances));
@@ -549,13 +579,16 @@ public class PredictionAppender
 			     weka.classifiers.Classifier classifier,
 			     String relationNameModifier) 
   throws Exception {
+    String classifierName = classifier.getClass().getName();
+    classifierName = classifierName.
+      substring(classifierName.lastIndexOf('.')+1, classifierName.length());
     int numOrigAtts = format.numAttributes();
     Instances newInstances = new Instances(format);
     for (int i = 0; i < format.classAttribute().numValues(); i++) {
       weka.filters.unsupervised.attribute.Add addF = new
 	weka.filters.unsupervised.attribute.Add();
       addF.setAttributeIndex("last");
-      addF.setAttributeName("prob_"+format.classAttribute().value(i));
+      addF.setAttributeName(classifierName+"_prob_"+format.classAttribute().value(i));
       addF.setInputFormat(newInstances);
       newInstances = weka.filters.Filter.useFilter(newInstances, addF);
     }
