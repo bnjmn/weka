@@ -33,7 +33,7 @@ import weka.filters.Filter;
 /** 
  * An instance filter that assumes instances form time-series data and
  * replaces attribute values in the current instance with the equivalent
- * attribute attribute values of some previous (or future) instance. For
+ * attribute values of some previous (or future) instance. For
  * instances where the desired value is unknown either the instance may
  * be dropped, or missing values used.<p>
  *
@@ -58,7 +58,7 @@ import weka.filters.Filter;
  * (default is to remove those instances).<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.2 $
+ * @version $Revision: 1.3.2.3 $
  */
 public class TimeSeriesTranslate extends AbstractTimeSeries {
 
@@ -70,9 +70,9 @@ public class TimeSeriesTranslate extends AbstractTimeSeries {
   public String globalInfo() {
     return "An instance filter that assumes instances form time-series data and "
       + "replaces attribute values in the current instance with the equivalent "
-      + "attribute attribute values of some previous (or future) instance. For "
+      + "attribute values of some previous (or future) instance. For "
       + "instances where the desired value is unknown either the instance may "
-      + " be dropped, or missing values used. Skips the class attribute if it is set.";
+      + "be dropped, or missing values used. Skips the class attribute if it is set.";
   }
 
   /**
