@@ -21,7 +21,7 @@
  */
 package weka.clusterers;
 
-import weka.classifiers.rules.DecisionTable;
+import weka.classifiers.rules.DecisionTableHashKey;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -59,7 +59,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -193,11 +193,11 @@ public class SimpleKMeans
     Random RandomO = new Random(getSeed());
     int instIndex;
     HashMap initC = new HashMap();
-    DecisionTable.hashKey hk = null;
+    DecisionTableHashKey hk = null;
 
     for (int j = instances.numInstances() - 1; j >= 0; j--) {
       instIndex = RandomO.nextInt(j+1);
-      hk = new DecisionTable.hashKey(instances.instance(instIndex), 
+      hk = new DecisionTableHashKey(instances.instance(instIndex), 
 				     instances.numAttributes(), true);
       if (!initC.containsKey(hk)) {
 	m_ClusterCentroids.add(instances.instance(instIndex));
