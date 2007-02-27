@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.36 $
+ * @version  $Revision: 1.37 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -170,7 +170,7 @@ public class ClusterEvaluation
    * is EM.
    */
   public ClusterEvaluation () {
-    setClusterer(new EM());
+    setClusterer(new SimpleKMeans());
     m_clusteringResults = new StringBuffer();
     m_clusterAssignments = null;
   }
