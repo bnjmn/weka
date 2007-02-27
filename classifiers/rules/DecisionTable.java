@@ -46,7 +46,6 @@ import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Enumeration;
@@ -97,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $ 
+ * @version $Revision: 1.41 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -218,176 +217,6 @@ public class DecisionTable
   }
   
   /**
-   * Class providing keys to the hash table
-   */
-  public static class hashKey 
-    implements Serializable {
-
-    /** for serialization */
-    static final long serialVersionUID = 5674163500154964602L;
-
-    /** Array of attribute values for an instance */
-    private double [] attributes;
-
-    /** True for an index if the corresponding attribute value is missing. */
-    private boolean [] missing;
-
-    /** The key */
-    private int key;
-
-    /**
-     * Constructor for a hashKey
-     *
-     * @param t an instance from which to generate a key
-     * @param numAtts the number of attributes
-     * @param ignoreClass if true treat the class as a normal attribute
-     * @throws Exception if something goes wrong
-     */
-    public hashKey(Instance t, int numAtts, boolean ignoreClass) throws Exception {
-
-      int i;
-      int cindex = t.classIndex();
-
-      key = -999;
-      attributes = new double [numAtts];
-      missing = new boolean [numAtts];
-      for (i=0;i<numAtts;i++) {
-	if (i == cindex && !ignoreClass) {
-	  missing[i] = true;
-	} else {
-	  if ((missing[i] = t.isMissing(i)) == false) {
-	    attributes[i] = t.value(i);
-	  }
-	}
-      }
-    }
-
-    /**
-     * Convert a hash entry to a string
-     *
-     * @param t the set of instances
-     * @param maxColWidth width to make the fields
-     * @return string representation of the hash entry
-     */
-    public String toString(Instances t, int maxColWidth) {
-
-      int i;
-      int cindex = t.classIndex();
-      StringBuffer text = new StringBuffer();
-
-      for (i=0;i<attributes.length;i++) {
-	if (i != cindex) {
-	  if (missing[i]) {
-	    text.append("?");
-	    for (int j=0;j<maxColWidth;j++) {
-	      text.append(" ");
-	    }
-	  } else {
-	    String ss = t.attribute(i).value((int)attributes[i]);
-	    StringBuffer sb = new StringBuffer(ss);
-
-	    for (int j=0;j < (maxColWidth-ss.length()+1); j++) {
-	      sb.append(" ");
-	    }
-	    text.append(sb);
-	  }
-	}
-      }
-      return text.toString();
-    }
-
-    /**
-     * Constructor for a hashKey
-     *
-     * @param t an array of feature values
-     */
-    public hashKey(double [] t) {
-
-      int i;
-      int l = t.length;
-
-      key = -999;
-      attributes = new double [l];
-      missing = new boolean [l];
-      for (i=0;i<l;i++) {
-	if (t[i] == Double.MAX_VALUE) {
-	  missing[i] = true;
-	} else {
-	  missing[i] = false;
-	  attributes[i] = t[i];
-	}
-      }
-    }
-
-    /**
-     * Calculates a hash code
-     *
-     * @return the hash code as an integer
-     */
-    public int hashCode() {
-
-      int hv = 0;
-
-      if (key != -999)
-	return key;
-      for (int i=0;i<attributes.length;i++) {
-	if (missing[i]) {
-	  hv += (i*13);
-	} else {
-	  hv += (i * 5 * (attributes[i]+1));
-	}
-      }
-      if (key == -999) {
-	key = hv;
-      }
-      return hv;
-    }
-
-    /**
-     * Tests if two instances are equal
-     *
-     * @param b a key to compare with
-     * @return true if both objects are equal
-     */
-    public boolean equals(Object b) {
-
-      if ((b == null) || !(b.getClass().equals(this.getClass()))) {
-	return false;
-      }
-      boolean ok = true;
-      boolean l;
-      if (b instanceof hashKey) {
-	hashKey n = (hashKey)b;
-	for (int i=0;i<attributes.length;i++) {
-	  l = n.missing[i];
-	  if (missing[i] || l) {
-	    if ((missing[i] && !l) || (!missing[i] && l)) {
-	      ok = false;
-	      break;
-	    }
-	  } else {
-	    if (attributes[i] != n.attributes[i]) {
-	      ok = false;
-	      break;
-	    }
-	  }
-	}
-      } else {
-	return false;
-      }
-      return ok;
-    }
-
-    /**
-     * Prints the hash code
-     */
-    public void print_hash_code() {
-
-      System.out.println("Hash val: "+hashCode());
-    }
-  }
-
-  /**
    * Inserts an instance into the hash table
    *
    * @param inst instance to be inserted
@@ -399,12 +228,12 @@ public class DecisionTable
 
     double [] tempClassDist2;
     double [] newDist;
-    hashKey thekey;
+    DecisionTableHashKey thekey;
 
     if (instA != null) {
-      thekey = new hashKey(instA);
+      thekey = new DecisionTableHashKey(instA);
     } else {
-      thekey = new hashKey(inst, inst.numAttributes(), false);
+      thekey = new DecisionTableHashKey(inst, inst.numAttributes(), false);
     }
 
     // see if this one is already in the table
@@ -412,6 +241,12 @@ public class DecisionTable
     if (tempClassDist2 == null) {
       if (m_classIsNominal) {
 	newDist = new double [m_theInstances.classAttribute().numValues()];
+	
+	//Leplace estimation
+	for (int i = 0; i < m_theInstances.classAttribute().numValues(); i++) {
+	  newDist[i] = 1.0;
+	}
+	
 	newDist[(int)inst.classValue()] = inst.weight();
 
 	// add to the table
@@ -454,11 +289,11 @@ public class DecisionTable
   double evaluateInstanceLeaveOneOut(Instance instance, double [] instA)
   throws Exception {
 
-    hashKey thekey;
+    DecisionTableHashKey thekey;
     double [] tempDist;
     double [] normDist;
 
-    thekey = new hashKey(instA);
+    thekey = new DecisionTableHashKey(instA);
     if (m_classIsNominal) {
 
       // if this one is not in the table
@@ -473,7 +308,7 @@ public class DecisionTable
 	// first check to see if the class counts are all zero now
 	boolean ok = false;
 	for (int i=0;i<normDist.length;i++) {
-	  if (!Utils.eq(normDist[i],0.0)) {
+	  if (Utils.gr(normDist[i],1.0)) {
 	    ok = true;
 	    break;
 	  }
@@ -557,7 +392,7 @@ public class DecisionTable
     double [][] class_distribs = new double [numFold][numCl];
     double [] instA = new double [fs.length];
     double [] normDist;
-    hashKey thekey;
+    DecisionTableHashKey thekey;
     double acc = 0.0;
     int classI = m_theInstances.classIndex();
     Instance inst;
@@ -580,7 +415,7 @@ public class DecisionTable
 	  instA[j] = inst.value(fs[j]);
 	}
       }
-      thekey = new hashKey(instA);
+      thekey = new DecisionTableHashKey(instA);
       if ((class_distribs[i] = (double [])m_entries.get(thekey)) == null) {
 	throw new Error("This should never happen!");
       } else {
@@ -605,7 +440,7 @@ public class DecisionTable
       if (m_classIsNominal) {
 	boolean ok = false;
 	for (int j=0;j<normDist.length;j++) {
-	  if (!Utils.eq(normDist[j],0.0)) {
+	  if (Utils.gr(normDist[j],1.0)) {
 	    ok = true;
 	    break;
 	  }
@@ -1154,7 +989,7 @@ public class DecisionTable
    * Sets up a dummy subset evaluator that basically just delegates
    * evaluation to the estimatePerformance method in DecisionTable
    */
-  protected void setUpEvaluator() {
+  protected void setUpEvaluator() throws Exception {
     m_evaluator = new SubsetEvaluator () {
 
       /** for serialization */
@@ -1292,7 +1127,7 @@ public class DecisionTable
   public double [] distributionForInstance(Instance instance)
   throws Exception {
 
-    hashKey thekey;
+    DecisionTableHashKey thekey;
     double [] tempDist;
     double [] normDist;
 
@@ -1304,7 +1139,7 @@ public class DecisionTable
     m_delTransform.batchFinished();
     instance = m_delTransform.output();
 
-    thekey = new hashKey(instance, instance.numAttributes(), false);
+    thekey = new DecisionTableHashKey(instance, instance.numAttributes(), false);
 
     // if this one is not in the table
     if ((tempDist = (double [])m_entries.get(thekey)) == null) {
@@ -1470,7 +1305,7 @@ public class DecisionTable
 
 	Enumeration e = m_entries.keys();
 	while (e.hasMoreElements()) {
-	  hashKey tt = (hashKey)e.nextElement();
+	  DecisionTableHashKey tt = (DecisionTableHashKey)e.nextElement();
 	  text.append(tt.toString(m_dtInstances,maxColWidth));
 	  double [] ClassDist = (double []) m_entries.get(tt);
 
@@ -1505,4 +1340,3 @@ public class DecisionTable
     runClassifier(new DecisionTable(), argv);
   }
 }
-
