@@ -35,7 +35,7 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class PNGWriter
   extends JComponentWriter {
@@ -164,7 +164,7 @@ public class PNGWriter
     weka.gui.treevisualizer.TreeVisualizer tv = new weka.gui.treevisualizer.TreeVisualizer(null, top, arrange);
     tv.setSize(800 ,600);
     
-    String filename = System.getProperty("java.io.tmpdir") + "test.png";
+    String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.png";
     System.out.println("outputting to '" + filename + "'...");
     toOutput(tv, new File(filename));
 
