@@ -144,7 +144,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -2285,9 +2285,11 @@ throws Exception{
 
     temp.append("Requested iterations            : " + m_MaxIterations + "\n");
     temp.append("Iterations performed            : " + m_IterationCount+ "\n");
-    temp.append("kMeans did not converge\n");
-    temp.append("  but was stopped by max-loops " 
-		+ m_KMeansStopped + " times (max kMeans-iter) = \n\n");
+    if (m_KMeansStopped > 0) {
+      temp.append("kMeans did not converge\n");
+      temp.append("  but was stopped by max-loops " 
+	  + m_KMeansStopped + " times (max kMeans-iter)\n");
+    }
     temp.append("Splits prepared                 : " + m_NumSplits + "\n");
     temp.append("Splits performed                : " + m_NumSplitsDone + "\n");
     temp.append("Cutoff factor                   : " + m_CutOffFactor + "\n");
