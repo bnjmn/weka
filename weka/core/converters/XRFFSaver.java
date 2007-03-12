@@ -53,7 +53,7 @@ import java.util.zip.GZIPOutputStream;
  * <pre> -o &lt;the output file&gt;
  *  The output file</pre>
  * 
- * <pre> -c &lt;class index&gt;
+ * <pre> -C &lt;class index&gt;
  *  The class index (first and last are valid as well).
  *  (default: last)</pre>
  * 
@@ -64,7 +64,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Saver
  */
 public class XRFFSaver 
@@ -75,7 +75,7 @@ public class XRFFSaver
   private static final long serialVersionUID = -7226404765213522043L;
 
   /** the class index */
-  protected SingleIndex m_ClassIndex = new SingleIndex("last"); 
+  protected SingleIndex m_ClassIndex = new SingleIndex(); 
 
   /** the generated XML document */
   protected XMLInstances m_XMLInstances;
@@ -120,7 +120,7 @@ public class XRFFSaver
         new Option(
             "\tThe class index (first and last are valid as well).\n"
             + "\t(default: last)",
-            "c", 1, "-c <class index>"));
+            "C", 1, "-C <class index>"));
     
     result.addElement(
         new Option(
@@ -146,8 +146,10 @@ public class XRFFSaver
 
     result = new Vector();
 
-    result.add("-C");
-    result.add(getClassIndex());
+    if (getClassIndex().length() != 0) {
+      result.add("-C");
+      result.add(getClassIndex());
+    }
 
     if (getCompressOutput())
       result.add("-compress");
@@ -171,7 +173,7 @@ public class XRFFSaver
    * <pre> -o &lt;the output file&gt;
    *  The output file</pre>
    * 
-   * <pre> -c &lt;class index&gt;
+   * <pre> -C &lt;class index&gt;
    *  The class index (first and last are valid as well).
    *  (default: last)</pre>
    * 
@@ -331,8 +333,10 @@ public class XRFFSaver
    * @param instances 	the instances
    */
   public void setInstances(Instances instances) {
-    m_ClassIndex.setUpper(instances.numAttributes() - 1);
-    instances.setClassIndex(m_ClassIndex.getIndex());
+    if (m_ClassIndex.getSingleIndex().length() != 0) {
+      m_ClassIndex.setUpper(instances.numAttributes() - 1);
+      instances.setClassIndex(m_ClassIndex.getIndex());
+    }
     
     super.setInstances(instances);
   }
