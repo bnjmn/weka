@@ -60,7 +60,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1057,7 +1057,7 @@ public class Capabilities
 	  inst = data.instance(i);
 	  
 	  if (inst instanceof SparseInstance) {
-	    for (m = 0; m <= inst.numValues(); m++) {
+	    for (m = 0; m < inst.numValues(); m++) {
 	      n = inst.index(m);
 	      
 	      // out of scope?
