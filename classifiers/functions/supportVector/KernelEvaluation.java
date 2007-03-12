@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * Class for evaluating Kernels.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class KernelEvaluation {
 
@@ -242,7 +242,7 @@ public class KernelEvaluation {
     m_Evaluations = new double[data.numInstances()][data.numInstances()];
     for (n = 0; n < data.numInstances(); n++) {
       for (i = n; i < data.numInstances(); i++) {
-	m_Evaluations[n][i] = kernel.eval(n, i, data.instance(i));
+	m_Evaluations[n][i] = kernel.eval(n, i, data.instance(n));
       }
     }
     
@@ -250,7 +250,7 @@ public class KernelEvaluation {
     if (kernel instanceof CachedKernel) {
       for (n = 0; n < data.numInstances(); n++) {
 	for (i = n; i < data.numInstances(); i++) {
-	  m_Evaluations[n][i] = kernel.eval(n, i, data.instance(i));
+	  m_Evaluations[n][i] = kernel.eval(n, i, data.instance(n));
 	}
       }
     }
@@ -290,6 +290,8 @@ public class KernelEvaluation {
       return false;
     for (int n = 0; n < m_Evaluations.length; n++) {
       for (int i = 0; i < m_Evaluations[n].length; i++) {
+	if (Double.isNaN(m_Evaluations[n][i]) && Double.isNaN(cmp.m_Evaluations[n][i]))
+	  continue;
 	if (m_Evaluations[n][i] != cmp.m_Evaluations[n][i])
 	  return false;
       }
