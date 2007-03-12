@@ -60,7 +60,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -949,10 +949,12 @@ public class Capabilities
   public boolean test(Instances data, int fromIndex, int toIndex) {
     int         	i;
     int         	n;
+    int			m;
     Attribute   	att;
     Instance    	inst;
     boolean		testClass;
     Capabilities	cap;
+    boolean		missing;
     
     // shall we test the data?
     if (!m_InstancesTest)
@@ -1050,18 +1052,48 @@ public class Capabilities
     // missing values
     if (m_MissingValuesTest) {
       if (!handles(Capability.MISSING_VALUES)) {
+	missing = false;
 	for (i = 0; i < data.numInstances(); i++) {
 	  inst = data.instance(i);
-	  for (n = fromIndex; n <= toIndex; n++) {
-	    // skip class
-	    if (n == inst.classIndex())
-	      continue;
-	    
-	    if (inst.isMissing(n)) {
-	      m_FailReason = new NoSupportForMissingValuesException(
-		  createMessage("Cannot handle missing values!"));
-	      return false;
+	  
+	  if (inst instanceof SparseInstance) {
+	    for (m = 0; m <= inst.numValues(); m++) {
+	      n = inst.index(m);
+	      
+	      // out of scope?
+	      if (n < fromIndex)
+		continue;
+	      if (n > toIndex)
+		break;
+
+	      // skip class
+	      if (n == inst.classIndex())
+		continue;
+	      
+
+	      if (inst.isMissing(n)) {
+		missing = true;
+		break;
+	      }
 	    }
+	  }
+	  else {
+	    for (n = fromIndex; n < toIndex; n++) {
+	      // skip class
+	      if (n == inst.classIndex())
+		continue;
+
+	      if (inst.isMissing(n)) {
+		missing = true;
+		break;
+	      }
+	    }
+	  }
+	  
+	  if (missing) {
+	    m_FailReason = new NoSupportForMissingValuesException(
+		createMessage("Cannot handle missing values!"));
+	    return false;
 	  }
 	}
       }
@@ -1229,6 +1261,9 @@ public class Capabilities
     Capabilities	multiInstance;
     int			i;
     int			n;
+    int			m;
+    Instance		inst;
+    boolean		missing;
     
     result = new Capabilities(null);
     
@@ -1311,15 +1346,40 @@ public class Capabilities
       result.enable(Capability.RELATIONAL_ATTRIBUTES);
     
     // missing values
-    for (n = 0; n < data.numAttributes(); n++) {
-      if (n == data.classIndex())
-	continue;
-      
-      for (i = 0; i < data.numInstances(); i++) {
-	if (data.instance(i).isMissing(n)) {
-	  result.enable(Capability.MISSING_VALUES);
-	  break;
+    missing = false;
+    for (i = 0; i < data.numInstances(); i++) {
+      inst = data.instance(i);
+
+      if (inst instanceof SparseInstance) {
+	for (m = 0; m < inst.numValues(); m++) {
+	  n = inst.index(m);
+
+	  // skip class
+	  if (n == inst.classIndex())
+	    continue;
+
+	  if (inst.isMissing(n)) {
+	    missing = true;
+	    break;
+	  }
 	}
+      }
+      else {
+	for (n = 0; n < data.numAttributes(); n++) {
+	  // skip class
+	  if (n == inst.classIndex())
+	    continue;
+
+	  if (inst.isMissing(n)) {
+	    missing = true;
+	    break;
+	  }
+	}
+      }
+
+      if (missing) {
+	result.enable(Capability.MISSING_VALUES);
+	break;
       }
     }
 
