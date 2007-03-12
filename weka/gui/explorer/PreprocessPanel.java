@@ -64,6 +64,8 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeListener;
@@ -101,7 +103,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.68 $
+ * @version $Revision: 1.69 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -368,6 +370,13 @@ public class PreprocessPanel
     JComboBox colorBox = m_AttVisualizePanel.getColorBox();
     colorBox.setToolTipText("The chosen attribute will also be used as the " +
 			    "class attribute when a filter is applied.");
+    colorBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent ie) {
+	if (ie.getStateChange() == ItemEvent.SELECTED) {
+	  updateCapabilitiesFilter(m_FilterEditor.getCapabilitiesFilter());
+	}
+      }
+    });
     final JButton visAllBut = new JButton("Visualize All");
     visAllBut.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent ae) {
@@ -1268,6 +1277,10 @@ public class PreprocessPanel
    * @param filter	the new filter to use
    */
   protected void updateCapabilitiesFilter(Capabilities filter) {
+    Instances 		tempInst;
+    Capabilities 	filterClass;
+    Capabilities	filterMerged;
+
     if (filter == null) {
       m_FilterEditor.setCapabilitiesFilter(new Capabilities(null));
       return;
@@ -1277,10 +1290,25 @@ public class PreprocessPanel
     filter.disable(Capability.NO_CLASS);
     filter.disableAllClasses();
 
-    // we don't get notified if the class gets changed in the 
-    // AttributeVisualizePanel, so we don't bother setting it here
+    // determine class attribute (will miss missing class values, but for
+    // efficiency reasons we don't examine the complete dataset again!)
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+      tempInst = new Instances(m_Instances, 0);
+    else
+      tempInst = new Instances(m_Instances);
+    tempInst.setClassIndex(m_AttVisualizePanel.getColorBox().getSelectedIndex() - 1);
+    filterClass = null;
+    try {
+      filterClass = Capabilities.forInstances(tempInst);
+    }
+    catch (Exception e) {
+      filterClass = new Capabilities(null);
+    }
     
-    m_FilterEditor.setCapabilitiesFilter(filter);
+    // generate and set new filter
+    filterMerged = (Capabilities) filter.clone();
+    filterMerged.or(filterClass);
+    m_FilterEditor.setCapabilitiesFilter(filterMerged);
   }
   
   /**
