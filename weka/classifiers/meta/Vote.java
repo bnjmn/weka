@@ -95,7 +95,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class Vote
   extends MultipleClassifiersCombiner
@@ -310,6 +310,8 @@ public class Vote
    */
   public double classifyInstance(Instance instance) throws Exception {
     double result;
+    double[] dist;
+    int index;
     
     switch (m_CombinationRule) {
       case AVERAGE_RULE:
@@ -317,9 +319,20 @@ public class Vote
       case MAJORITY_VOTING_RULE:
       case MIN_RULE:
       case MAX_RULE:
-	result = Utils.maxIndex(distributionForInstance(instance));
-	if (result == 0)
+	dist = distributionForInstance(instance);
+	if (instance.classAttribute().isNominal()) {
+	  index = Utils.maxIndex(dist);
+	  if (dist[index] == 0)
+	    result = Instance.missingValue();
+	  else
+	    result = dist[index];
+	}
+	else if (instance.classAttribute().isNumeric()){
+	  result = dist[0];
+	}
+	else {
 	  result = Instance.missingValue();
+	}
 	break;
       case MEDIAN_RULE:
 	result = classifyInstanceMedian(instance);
@@ -391,7 +404,7 @@ public class Vote
 	throw new IllegalStateException("Unknown combination rule '" + m_CombinationRule + "'!");
     }
     
-    if (!instance.classAttribute().isNumeric())
+    if (!instance.classAttribute().isNumeric() && (Utils.sum(result) > 0))
       Utils.normalize(result);
     
     return result;
@@ -421,7 +434,6 @@ public class Vote
     return probs;
   }
   
-  
   /**
    * Classifies a given instance using the Product of Probabilities 
    * combination rule.
@@ -444,7 +456,6 @@ public class Vote
     return probs;
   }
   
-  
   /**
    * Classifies a given instance using the Majority Voting combination rule.
    *
@@ -455,45 +466,43 @@ public class Vote
    */
   protected double[] distributionForInstanceMajorityVoting(Instance instance) throws Exception {
 
-    double[] probs = getClassifier(0).distributionForInstance(instance);
-    // If it was possible to get the number of classes without classifying
-    // double probs = new double[getClassifier(0).numOfClasses()]; 
+    double[] probs = new double[instance.classAttribute().numValues()];
     double[] votes = new double[probs.length];
     
     for (int i = 0; i < m_Classifiers.length; i++) {
       probs = getClassifier(i).distributionForInstance(instance);
       int maxIndex = 0;
-      for(int j=0; j<probs.length; j++) {
+      for(int j = 0; j<probs.length; j++) {
           if(probs[j] > probs[maxIndex])
         	  maxIndex = j;
       }
       
       // Consider the cases when multiple classes happen to have the same probability
-      for(int j=0; j<probs.length; j++) {
-    	  if(probs[j] == probs[maxIndex])
-    		  votes[j]++;
+      for (int j=0; j<probs.length; j++) {
+	if (probs[j] == probs[maxIndex])
+	  votes[j]++;
       }
     }
     
     int tmpMajorityIndex = 0;
     for (int k = 1; k < votes.length; k++) {
-      if(votes[k] > votes[tmpMajorityIndex])
-    	  tmpMajorityIndex = k;
+      if (votes[k] > votes[tmpMajorityIndex])
+	tmpMajorityIndex = k;
     }
     
     // Consider the cases when multiple classes receive the same amount of votes
     Vector majorityIndexes = new Vector();
     for (int k = 0; k < votes.length; k++) {
-        if(votes[k] == votes[tmpMajorityIndex])
-        	majorityIndexes.add(new Integer(k));
+      if (votes[k] == votes[tmpMajorityIndex])
+	majorityIndexes.add(new Integer(k));
      }
     // Resolve the ties according to a uniform random distribution
     int majorityIndex = ((Integer)majorityIndexes.get((int)(Math.random()/(1/majorityIndexes.size())))).intValue();
     
     //set probs to 0
-    for(int k=0; k<probs.length; k++)
-    	probs[k]=0;
-    probs[majorityIndex]=1; //the class that have been voted the most receives 1
+    for (int k = 0; k<probs.length; k++)
+      probs[k] = 0;
+    probs[majorityIndex] = 1; //the class that have been voted the most receives 1
     
     return probs;
   }
