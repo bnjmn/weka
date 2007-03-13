@@ -63,7 +63,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.67 $ 
+ * @version $Revision: 1.68 $ 
  */
 public class Instances 
   implements Serializable {
@@ -2476,6 +2476,10 @@ public class Instances
    * Main method for this class. The following calls are possible:
    * <ul>
    *   <li>
+   *     <code>weka.core.Instances</code> help<br/>
+   *     prints a short list of possible commands.
+   *   </li>
+   *   <li>
    *     <code>weka.core.Instances</code> &lt;filename&gt;<br/>
    *     prints a summary of a set of instances.
    *   </li>
@@ -2483,6 +2487,15 @@ public class Instances
    *     <code>weka.core.Instances</code> merge &lt;filename1&gt; &lt;filename2&gt;<br/>
    *     merges the two datasets (must have same number of instances) and
    *     outputs the results on stdout.
+   *   </li>
+   *   <li>
+   *     <code>weka.core.Instances</code> append &lt;filename1&gt; &lt;filename2&gt;<br/>
+   *     appends the second dataset to the first one (must have same headers) and
+   *     outputs the results on stdout.
+   *   </li>
+   *   <li>
+   *     <code>weka.core.Instances</code> randomize &lt;seed&gt; &lt;filename&gt;<br/>
+   *     randomizes the dataset with the given seed and outputs the result on stdout.
    *   </li>
    * </ul>
    *
@@ -2499,7 +2512,7 @@ public class Instances
 	System.out.println(i.toSummaryString());
       }
       // read file and print statistics
-      else if (args.length == 1) {
+      else if ((args.length == 1) && (!args[0].equals("-h")) && (!args[0].equals("help"))) {
 	DataSource source = new DataSource(args[0]);
 	i = source.getDataSet();
 	System.out.println(i.toSummaryString());
@@ -2511,12 +2524,35 @@ public class Instances
 	i = Instances.mergeInstances(source1.getDataSet(), source2.getDataSet());
 	System.out.println(i);
       }
+      // read two files, append them and print result to stdout
+      else if ((args.length == 3) && (args[0].toLowerCase().equals("append"))) {
+	DataSource source1 = new DataSource(args[1]);
+	DataSource source2 = new DataSource(args[2]);
+	if (!source1.getStructure().equalHeaders(source2.getStructure()))
+	  throw new Exception("The two datasets have different headers!");
+	i = source1.getDataSet();
+	source2.reset();
+	while (source2.hasMoreElements())
+	  i.add(source2.nextElement());
+	System.out.println(i);
+      }
+      // read file and seed value, randomize data and print result to stdout
+      else if ((args.length == 3) && (args[0].toLowerCase().equals("randomize"))) {
+	DataSource source = new DataSource(args[2]);
+	i = source.getDataSet();
+	i.randomize(new Random(Integer.parseInt(args[1])));
+	System.out.println(i);
+      }
       // wrong parameters
       else {
 	System.err.println(
 	    "\nUsage:\n"
+	    + "\tweka.core.Instances help\n"
 	    + "\tweka.core.Instances <filename>\n"
-	    + "\tweka.core.Instances merge <filename1> <filename2>\n");
+	    + "\tweka.core.Instances merge <filename1> <filename2>\n"
+	    + "\tweka.core.Instances append <filename1> <filename2>\n"
+	    + "\tweka.core.Instances randomize <seed> <filename>\n"
+	);
 	System.exit(1);
       }
     }
