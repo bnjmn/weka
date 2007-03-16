@@ -21,6 +21,8 @@
 
 package weka.core;
 
+import weka.core.converters.ConverterUtils.DataSource;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
@@ -60,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1299,7 +1301,8 @@ public class Capabilities
 	  break;
 	  
 	default:
-	  throw new UnsupportedAttributeTypeException("Unknown class attribute type '" + data.classAttribute() + "'!");
+	  throw new UnsupportedAttributeTypeException(
+	      "Unknown class attribute type '" + data.classAttribute() + "'!");
       }
       
       // missing class values
@@ -1312,38 +1315,41 @@ public class Capabilities
     }
     
     // attributes
-    if (data.checkForAttributeType(Attribute.NOMINAL)) {
-      result.enable(Capability.UNARY_ATTRIBUTES);
-      
-      for (i = 0; i < data.numAttributes(); i++) {
-	// skip class
-	if (i == data.classIndex())
-	  continue;
+    for (i = 0; i < data.numAttributes(); i++) {
+      // skip class
+      if (i == data.classIndex())
+	continue;
 
-	// non-unary attributes?
-	if (data.attribute(i).isNominal()) {
-	  if (data.attribute(i).numValues() == 2) {
+      switch (data.attribute(i).type()) {
+	case Attribute.NOMINAL:
+	  result.enable(Capability.UNARY_ATTRIBUTES);
+	  if (data.attribute(i).numValues() == 2)
 	    result.enable(Capability.BINARY_ATTRIBUTES);
-	  }
-	  else if (data.attribute(i).numValues() > 2) {
+	  else if (data.attribute(i).numValues() > 2)
 	    result.enable(Capability.NOMINAL_ATTRIBUTES);
-	    break;
-	  }
-	}
+	  break;
+
+	case Attribute.NUMERIC:
+	  result.enable(Capability.NUMERIC_ATTRIBUTES);
+	  break;
+		
+	case Attribute.DATE:
+	  result.enable(Capability.DATE_ATTRIBUTES);
+	  break;
+
+	case Attribute.STRING:
+	  result.enable(Capability.STRING_ATTRIBUTES);
+	  break;
+	  
+	case Attribute.RELATIONAL:
+	  result.enable(Capability.RELATIONAL_ATTRIBUTES);
+	  break;
+	  
+	default:
+	  throw new UnsupportedAttributeTypeException(
+	      "Unknown attribute type '" + data.attribute(i).type() + "'!");
       }
     }
-
-    if (data.checkForAttributeType(Attribute.NUMERIC))
-      result.enable(Capability.NUMERIC_ATTRIBUTES);
-    
-    if (data.checkForAttributeType(Attribute.STRING))
-      result.enable(Capability.STRING_ATTRIBUTES);
-
-    if (data.checkForAttributeType(Attribute.DATE))
-      result.enable(Capability.DATE_ATTRIBUTES);
-
-    if (data.checkForAttributeType(Attribute.RELATIONAL))
-      result.enable(Capability.RELATIONAL_ATTRIBUTES);
     
     // missing values
     missing = false;
@@ -1399,5 +1405,75 @@ public class Capabilities
     }
     
     return result;
+  }
+  
+  /**
+   * loads the given dataset and prints the Capabilities necessary to 
+   * process it. <p/>
+   * 
+   * Valid parameters: <p/>
+   * 
+   * -file filename <br/>
+   *  the file to load
+   *  
+   * -c index
+   *  the explicit index of the class attribute (default: none)
+   * 
+   * @param args	the commandline arguments
+   * @throws Exception	if something goes wrong
+   */
+  public static void main(String[] args) throws Exception {
+    String 		tmpStr;
+    String		filename;
+    DataSource 		source;
+    Instances 		data;
+    int 		classIndex;
+    Capabilities 	cap;
+    Iterator		iter;
+
+    if (args.length == 0) {
+      System.out.println(
+	  "\nUsage: " + Capabilities.class.getName() 
+	  + " -file <dataset> [-c <class index>]\n");
+      return;
+    }
+    
+    // get parameters
+    tmpStr = Utils.getOption("file", args);
+    if (tmpStr.length() == 0)
+      throw new Exception("No file provided with option '-file'!");
+    else
+      filename = tmpStr;
+
+    tmpStr = Utils.getOption("c", args);
+    if (tmpStr.length() != 0) {
+      if (tmpStr.equals("first"))
+	classIndex = 0;
+      else if (tmpStr.equals("last"))
+	classIndex = -2;  // last
+      else
+	classIndex = Integer.parseInt(tmpStr) - 1;
+    }
+    else {
+      classIndex = -3;  // not set
+    }
+    
+    // load data
+    source = new DataSource(filename);
+    if (classIndex == -3)
+      data = source.getDataSet();
+    else if (classIndex == -2)
+      data = source.getDataSet(source.getStructure().numAttributes() - 1);
+    else
+      data = source.getDataSet(classIndex);
+
+    // determine and print capabilities
+    cap = forInstances(data);
+    System.out.println("File: " + filename);
+    System.out.println("Class index: " + ((data.classIndex() == -1) ? "not set" : "" + (data.classIndex() + 1)));
+    System.out.println("Capabilities:");
+    iter = cap.capabilities();
+    while (iter.hasNext())
+      System.out.println("- " + iter.next());
   }
 }
