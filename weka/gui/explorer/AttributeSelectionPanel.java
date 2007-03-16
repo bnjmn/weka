@@ -34,7 +34,6 @@ import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
@@ -102,7 +101,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.45 $
+ * @version $Revision: 1.46 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -1044,7 +1043,6 @@ public class AttributeSelectionPanel
   protected void updateCapabilitiesFilter(Capabilities filter) {
     Instances 		tempInst;
     Capabilities 	filterClass;
-    Capabilities	filterMerged;
 
     if (filter == null) {
       m_AttributeEvaluatorEditor.setCapabilitiesFilter(new Capabilities(null));
@@ -1052,18 +1050,12 @@ public class AttributeSelectionPanel
       return;
     }
     
-    // class index is never set in Explorer!
-    filter.disable(Capability.NO_CLASS);
-    filter.disableAllClasses();
-
-    // determine class attribute (will miss missing class values, but for
-    // efficiency reasons we don't examine the complete dataset again!)
     if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
       tempInst = new Instances(m_Instances, 0);
     else
       tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
-    filterClass = null;
+
     try {
       filterClass = Capabilities.forInstances(tempInst);
     }
@@ -1071,11 +1063,9 @@ public class AttributeSelectionPanel
       filterClass = new Capabilities(null);
     }
     
-    // generate and set new filter
-    filterMerged = (Capabilities) filter.clone();
-    filterMerged.or(filterClass);
-    m_AttributeEvaluatorEditor.setCapabilitiesFilter(filterMerged);
-    m_AttributeSearchEditor.setCapabilitiesFilter(filterMerged);
+    // set new filter
+    m_AttributeEvaluatorEditor.setCapabilitiesFilter(filterClass);
+    m_AttributeSearchEditor.setCapabilitiesFilter(filterClass);
   }
   
   /**
@@ -1084,7 +1074,10 @@ public class AttributeSelectionPanel
    * @param e		the associated change event
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    if (e.getFilter() == null)
+      updateCapabilitiesFilter(null);
+    else
+      updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**

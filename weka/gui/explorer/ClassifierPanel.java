@@ -134,7 +134,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.103 $
+ * @version $Revision: 1.104 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -2309,25 +2309,18 @@ public class ClassifierPanel
   protected void updateCapabilitiesFilter(Capabilities filter) {
     Instances 		tempInst;
     Capabilities 	filterClass;
-    Capabilities	filterMerged;
 
     if (filter == null) {
       m_ClassifierEditor.setCapabilitiesFilter(new Capabilities(null));
       return;
     }
     
-    // class index is never set in Explorer!
-    filter.disable(Capability.NO_CLASS);
-    filter.disableAllClasses();
-
-    // determine class attribute (will miss missing class values, but for
-    // efficiency reasons we don't examine the complete dataset again!)
     if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
       tempInst = new Instances(m_Instances, 0);
     else
       tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(m_ClassCombo.getSelectedIndex());
-    filterClass = null;
+
     try {
       filterClass = Capabilities.forInstances(tempInst);
     }
@@ -2335,10 +2328,8 @@ public class ClassifierPanel
       filterClass = new Capabilities(null);
     }
     
-    // generate and set new filter
-    filterMerged = (Capabilities) filter.clone();
-    filterMerged.or(filterClass);
-    m_ClassifierEditor.setCapabilitiesFilter(filterMerged);
+    // set new filter
+    m_ClassifierEditor.setCapabilitiesFilter(filterClass);
   }
   
   /**
@@ -2347,7 +2338,10 @@ public class ClassifierPanel
    * @param e		the associated change event
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    if (e.getFilter() == null)
+      updateCapabilitiesFilter(null);
+    else
+      updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**

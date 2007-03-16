@@ -72,7 +72,7 @@ import javax.swing.event.ChangeListener;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class AssociationsPanel 
   extends JPanel
@@ -476,6 +476,11 @@ public class AssociationsPanel
    * @param filter	the new filter to use
    */
   protected void updateCapabilitiesFilter(Capabilities filter) {
+    if (filter == null) {
+      m_AssociatorEditor.setCapabilitiesFilter(new Capabilities(null));
+      return;
+    }
+    
     m_AssociatorEditor.setCapabilitiesFilter(filter);
   }
   
@@ -485,7 +490,10 @@ public class AssociationsPanel
    * @param e		the associated change event
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    if (e.getFilter() == null)
+      updateCapabilitiesFilter(null);
+    else
+      updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**

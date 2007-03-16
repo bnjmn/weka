@@ -26,7 +26,6 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import weka.core.Capabilities.Capability;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
 import weka.core.converters.ConverterUtils;
@@ -103,7 +102,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.69 $
+ * @version $Revision: 1.70 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -485,12 +484,21 @@ public class PreprocessPanel
 	  
 	  // notify GOEs about change
 	  try {
+	    // get rid of old filter settings
+	    getExplorer().notifyCapabilitiesFilterListener(null);
+
+	    int oldIndex = m_Instances.classIndex();
+	    m_Instances.setClassIndex(m_AttVisualizePanel.getColorBox().getSelectedIndex() - 1);
+	    
+	    // send new ones
 	    if (ExplorerDefaults.getInitGenericObjectEditorFilter())
 	      getExplorer().notifyCapabilitiesFilterListener(
 		  Capabilities.forInstances(m_Instances));
 	    else
 	      getExplorer().notifyCapabilitiesFilterListener(
 		  Capabilities.forInstances(new Instances(m_Instances, 0)));
+
+	    m_Instances.setClassIndex(oldIndex);
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();
@@ -1279,25 +1287,18 @@ public class PreprocessPanel
   protected void updateCapabilitiesFilter(Capabilities filter) {
     Instances 		tempInst;
     Capabilities 	filterClass;
-    Capabilities	filterMerged;
 
     if (filter == null) {
       m_FilterEditor.setCapabilitiesFilter(new Capabilities(null));
       return;
     }
     
-    // class index is never set in Explorer!
-    filter.disable(Capability.NO_CLASS);
-    filter.disableAllClasses();
-
-    // determine class attribute (will miss missing class values, but for
-    // efficiency reasons we don't examine the complete dataset again!)
     if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
       tempInst = new Instances(m_Instances, 0);
     else
       tempInst = new Instances(m_Instances);
     tempInst.setClassIndex(m_AttVisualizePanel.getColorBox().getSelectedIndex() - 1);
-    filterClass = null;
+
     try {
       filterClass = Capabilities.forInstances(tempInst);
     }
@@ -1305,10 +1306,8 @@ public class PreprocessPanel
       filterClass = new Capabilities(null);
     }
     
-    // generate and set new filter
-    filterMerged = (Capabilities) filter.clone();
-    filterMerged.or(filterClass);
-    m_FilterEditor.setCapabilitiesFilter(filterMerged);
+    // set new filter
+    m_FilterEditor.setCapabilitiesFilter(filterClass);
   }
   
   /**
@@ -1317,7 +1316,10 @@ public class PreprocessPanel
    * @param e		the associated change event
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    if (e.getFilter() == null)
+      updateCapabilitiesFilter(null);
+    else
+      updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
   
   /**
