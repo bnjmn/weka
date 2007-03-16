@@ -118,7 +118,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.59 $
  */
 public class ClustererPanel
   extends JPanel
@@ -1574,14 +1574,28 @@ public class ClustererPanel
    * @param filter	the new filter to use
    */
   protected void updateCapabilitiesFilter(Capabilities filter) {
+    Instances 		tempInst;
+    Capabilities 	filterClass;
+
     if (filter == null) {
       m_ClustererEditor.setCapabilitiesFilter(new Capabilities(null));
       return;
     }
     
-    // clusterer don't need the class attribute, so we can skip that here
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+      tempInst = new Instances(m_Instances, 0);
+    else
+      tempInst = new Instances(m_Instances);
+    tempInst.setClassIndex(-1);
+
+    try {
+      filterClass = Capabilities.forInstances(tempInst);
+    }
+    catch (Exception e) {
+      filterClass = new Capabilities(null);
+    }
     
-    m_ClustererEditor.setCapabilitiesFilter(filter);
+    m_ClustererEditor.setCapabilitiesFilter(filterClass);
   }
   
   /**
@@ -1590,7 +1604,10 @@ public class ClustererPanel
    * @param e		the associated change event
    */
   public void capabilitiesFilterChanged(CapabilitiesFilterChangeEvent e) {
-    updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
+    if (e.getFilter() == null)
+      updateCapabilitiesFilter(null);
+    else
+      updateCapabilitiesFilter((Capabilities) e.getFilter().clone());
   }
 
   /**
