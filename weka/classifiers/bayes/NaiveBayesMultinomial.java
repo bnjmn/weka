@@ -71,7 +71,7 @@ import weka.core.TechnicalInformation.Type;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class NaiveBayesMultinomial 
   extends Classifier 
@@ -85,22 +85,22 @@ public class NaiveBayesMultinomial
    * The matrix is in the this format: probOfWordGivenClass[class][wordAttribute]
    * NOTE: the values are actually the log of Pr[w|H]
    */
-  private double[][] probOfWordGivenClass;
+  protected double[][] m_probOfWordGivenClass;
     
   /** the probability of a class (i.e. Pr[H]) */
-  private double[] probOfClass;
+  protected double[] m_probOfClass;
     
   /** number of unique words */
-  private int numAttributes;
+  protected int m_numAttributes;
     
   /** number of class values */
-  private int numClasses;
+  protected int m_numClasses;
     
   /** cache lnFactorial computations */
-  private double[] lnFactorialCache = new double[]{0.0,0.0};
+  protected double[] m_lnFactorialCache = new double[]{0.0,0.0};
     
   /** copy of header information for use in toString method */
-  Instances headerInfo;
+  protected Instances m_headerInfo;
 
   /**
    * Returns a string describing this classifier
@@ -158,7 +158,7 @@ public class NaiveBayesMultinomial
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception 
   {
@@ -169,22 +169,22 @@ public class NaiveBayesMultinomial
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
     
-    headerInfo = new Instances(instances, 0);
-    numClasses = instances.numClasses();
-    numAttributes = instances.numAttributes();
-    probOfWordGivenClass = new double[numClasses][];
+    m_headerInfo = new Instances(instances, 0);
+    m_numClasses = instances.numClasses();
+    m_numAttributes = instances.numAttributes();
+    m_probOfWordGivenClass = new double[m_numClasses][];
 	
     /*
       initialising the matrix of word counts
       NOTE: Laplace estimator introduced in case a word that does not appear for a class in the 
       training set does so for the test set
     */
-    for(int c = 0; c<numClasses; c++)
+    for(int c = 0; c<m_numClasses; c++)
       {
-	probOfWordGivenClass[c] = new double[numAttributes];
-	for(int att = 0; att<numAttributes; att++)
+	m_probOfWordGivenClass[c] = new double[m_numAttributes];
+	for(int att = 0; att<m_numAttributes; att++)
 	  {
-	    probOfWordGivenClass[c][att] = 1;
+	    m_probOfWordGivenClass[c][att] = 1;
 	  }
       }
 	
@@ -192,8 +192,8 @@ public class NaiveBayesMultinomial
     Instance instance;
     int classIndex;
     double numOccurences;
-    double[] docsPerClass = new double[numClasses];
-    double[] wordsPerClass = new double[numClasses];
+    double[] docsPerClass = new double[m_numClasses];
+    double[] wordsPerClass = new double[m_numClasses];
 	
     java.util.Enumeration enumInsts = instances.enumerateInstances();
     while (enumInsts.hasMoreElements()) 
@@ -211,7 +211,7 @@ public class NaiveBayesMultinomial
 		  if(numOccurences < 0)
 		    throw new Exception("Numeric attribute values must all be greater or equal to zero.");
 		  wordsPerClass[classIndex] += numOccurences;
-		  probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
+		  m_probOfWordGivenClass[classIndex][instance.index(a)] += numOccurences;
 		}
 	    } 
       }
@@ -220,19 +220,19 @@ public class NaiveBayesMultinomial
       normalising probOfWordGivenClass values
       and saving each value as the log of each value
     */
-    for(int c = 0; c<numClasses; c++)
-      for(int v = 0; v<numAttributes; v++) 
-	probOfWordGivenClass[c][v] = Math.log(probOfWordGivenClass[c][v] / (wordsPerClass[c] + numAttributes - 1));
+    for(int c = 0; c<m_numClasses; c++)
+      for(int v = 0; v<m_numAttributes; v++) 
+	m_probOfWordGivenClass[c][v] = Math.log(m_probOfWordGivenClass[c][v] / (wordsPerClass[c] + m_numAttributes - 1));
 	
     /*
       calculating Pr(H)
       NOTE: Laplace estimator introduced in case a class does not get mentioned in the set of 
       training instances
     */
-    final double numDocs = instances.sumOfWeights() + numClasses;
-    probOfClass = new double[numClasses];
-    for(int h=0; h<numClasses; h++)
-      probOfClass[h] = (double)(docsPerClass[h] + 1)/numDocs; 
+    final double numDocs = instances.sumOfWeights() + m_numClasses;
+    m_probOfClass = new double[m_numClasses];
+    for(int h=0; h<m_numClasses; h++)
+      m_probOfClass[h] = (double)(docsPerClass[h] + 1)/numDocs; 
   }
     
   /**
@@ -241,23 +241,23 @@ public class NaiveBayesMultinomial
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if there is a problem generating the prediction
+   * @throws Exception if there is a problem generating the prediction
    */
   public double [] distributionForInstance(Instance instance) throws Exception 
   {
-    double[] probOfClassGivenDoc = new double[numClasses];
+    double[] probOfClassGivenDoc = new double[m_numClasses];
 	
     //calculate the array of log(Pr[D|C])
-    double[] logDocGivenClass = new double[numClasses];
-    for(int h = 0; h<numClasses; h++)
+    double[] logDocGivenClass = new double[m_numClasses];
+    for(int h = 0; h<m_numClasses; h++)
       logDocGivenClass[h] = probOfDocGivenClass(instance, h);
 	
     double max = logDocGivenClass[Utils.maxIndex(logDocGivenClass)];
     double probOfDoc = 0.0;
 	
-    for(int i = 0; i<numClasses; i++) 
+    for(int i = 0; i<m_numClasses; i++) 
       {
-	probOfClassGivenDoc[i] = Math.exp(logDocGivenClass[i] - max) * probOfClass[i];
+	probOfClassGivenDoc[i] = Math.exp(logDocGivenClass[i] - max) * m_probOfClass[i];
 	probOfDoc += probOfClassGivenDoc[i];
       }
 	
@@ -291,7 +291,7 @@ public class NaiveBayesMultinomial
 	{
 	  freqOfWordInDoc = inst.valueSparse(i);
 	  //totalWords += freqOfWordInDoc;
-	  answer += (freqOfWordInDoc * probOfWordGivenClass[classIndex][inst.index(i)] 
+	  answer += (freqOfWordInDoc * m_probOfWordGivenClass[classIndex][inst.index(i)] 
 		     ); //- lnFactorial(freqOfWordInDoc));
 	}
 	
@@ -321,15 +321,15 @@ public class NaiveBayesMultinomial
   {
     if (n < 0) return weka.core.SpecialFunctions.lnFactorial(n);
 	
-    if (lnFactorialCache.length <= n) {
+    if (m_lnFactorialCache.length <= n) {
       double[] tmp = new double[n+1];
-      System.arraycopy(lnFactorialCache,0,tmp,0,lnFactorialCache.length);
-      for(int i = lnFactorialCache.length; i < tmp.length; i++) 
+      System.arraycopy(m_lnFactorialCache,0,tmp,0,m_lnFactorialCache.length);
+      for(int i = m_lnFactorialCache.length; i < tmp.length; i++) 
 	tmp[i] = tmp[i-1] + Math.log(i);
-      lnFactorialCache = tmp;
+      m_lnFactorialCache = tmp;
     }
 	
-    return lnFactorialCache[n];
+    return m_lnFactorialCache[n];
   }
     
   /**
@@ -341,21 +341,21 @@ public class NaiveBayesMultinomial
   {
     StringBuffer result = new StringBuffer("The independent probability of a class\n--------------------------------------\n");
 	
-    for(int c = 0; c<numClasses; c++)
-      result.append(headerInfo.classAttribute().value(c)).append("\t").append(Double.toString(probOfClass[c])).append("\n");
+    for(int c = 0; c<m_numClasses; c++)
+      result.append(m_headerInfo.classAttribute().value(c)).append("\t").append(Double.toString(m_probOfClass[c])).append("\n");
 	
     result.append("\nThe probability of a word given the class\n-----------------------------------------\n\t");
 
-    for(int c = 0; c<numClasses; c++)
-      result.append(headerInfo.classAttribute().value(c)).append("\t");
+    for(int c = 0; c<m_numClasses; c++)
+      result.append(m_headerInfo.classAttribute().value(c)).append("\t");
 	
     result.append("\n");
 
-    for(int w = 0; w<numAttributes; w++)
+    for(int w = 0; w<m_numAttributes; w++)
       {
-	result.append(headerInfo.attribute(w).name()).append("\t");
-	for(int c = 0; c<numClasses; c++)
-	  result.append(Double.toString(Math.exp(probOfWordGivenClass[c][w]))).append("\t");
+	result.append(m_headerInfo.attribute(w).name()).append("\t");
+	for(int c = 0; c<m_numClasses; c++)
+	  result.append(Double.toString(Math.exp(m_probOfWordGivenClass[c][w]))).append("\t");
 	result.append("\n");
       }
 
