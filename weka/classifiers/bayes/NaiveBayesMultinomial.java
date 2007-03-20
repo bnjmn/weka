@@ -15,9 +15,8 @@
  */
 
 /*
- *    NaiveBayesMultinomial1.java
- *    Copyright (C) 2003 Andrew Golightly
- *                  -- last updated 30/06/2003
+ * NaiveBayesMultinomial.java
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.bayes;
@@ -36,7 +35,7 @@ import weka.classifiers.Classifier;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.1 $ 
+ * @version $Revision: 1.9.2.2 $ 
  */
 
 /**
