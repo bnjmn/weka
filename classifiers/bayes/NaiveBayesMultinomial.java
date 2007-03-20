@@ -15,8 +15,8 @@
  */
 
 /*
- *    NaiveBayesMultinomial1.java
- *    Copyright (C) 2003 Andrew Golightly
+ * NaiveBayesMultinomial.java
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.bayes;
@@ -71,7 +71,7 @@ import weka.core.TechnicalInformation.Type;
  *
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class NaiveBayesMultinomial 
   extends Classifier 
