@@ -44,7 +44,7 @@ import java.util.logging.SimpleFormatter;
  * A helper class for debug output, logging, clocking, etc.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class Debug
   implements Serializable {
@@ -82,10 +82,13 @@ public class Debug
   
   /**
    * A little helper class for clocking and outputting times. It measures the
-   * CPU time if possible, otherwise it's just based on the system time.
+   * CPU time if possible, otherwise it's just based on the system time. In 
+   * case one just wants to measure time (e.g., database queries don't take up
+   * much CPU time, but still might take a long time to finish), then one can
+   * disable the use of CPU time as well.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $ 
+   * @version $Revision: 1.6 $ 
    * @see ThreadMXBean#isThreadCpuTimeEnabled()
    */
   public static class Clock 
@@ -128,23 +131,28 @@ public class Debug
     /** whether the system can measure the CPU time */
     protected boolean m_CanMeasureCpuTime;
     
+    /** whether to use the CPU time (by default TRUE) */
+    protected boolean m_UseCpuTime;
+    
     /** the thread monitor, if the system can measure the CPU time */
     protected transient ThreadMXBean m_ThreadMonitor;
     
     /**
-     * automatically starts the clock with FORMAT_SECONDS format
+     * automatically starts the clock with FORMAT_SECONDS format and CPU
+     * time if available
      * 
-     * @see               #m_OutputFormat
+     * @see		#m_OutputFormat
      */
     public Clock() {
       this(true);
     }
     
     /**
-     * automatically starts the clock with the given output format
+     * automatically starts the clock with the given output format and CPU
+     * time if available
      * 
-     * @param format      the output format
-     * @see               #m_OutputFormat
+     * @param format	the output format
+     * @see		#m_OutputFormat
      */
     public Clock(int format) {
       this(true, format);
@@ -152,26 +160,28 @@ public class Debug
     
     /**
      * starts the clock depending on <code>start</code> immediately with the
-     * FORMAT_SECONDS output format
+     * FORMAT_SECONDS output format and CPU time if available
      * 
-     * @param start       whether to start the clock immediately
-     * @see               #m_OutputFormat
+     * @param start	whether to start the clock immediately
+     * @see		#m_OutputFormat
      */
     public Clock(boolean start) {
       this(start, FORMAT_SECONDS);
     }
     
     /**
-     * starts the clock depending on <code>start</code> immediately
+     * starts the clock depending on <code>start</code> immediately, using
+     * CPU time if available
      * 
-     * @param start       whether to start the clock immediately
+     * @param start	whether to start the clock immediately
      * @param format	the format
-     * @see               #m_OutputFormat
+     * @see		#m_OutputFormat
      */
     public Clock(boolean start, int format) {
-      m_Running = false;
-      m_Start   = 0;
-      m_Stop    = 0;
+      m_Running    = false;
+      m_Start      = 0;
+      m_Stop       = 0;
+      m_UseCpuTime = true;
       setOutputFormat(format);
 
       if (start)
@@ -191,16 +201,47 @@ public class Debug
     
     /**
      * whether the measurement is based on the msecs returned from the System
-     * class or on the more accurate CPU time.
+     * class or on the more accurate CPU time. Also depends on whether the 
+     * usage of the CPU time was disabled or enabled.
      * 
-     * @return		true if the more accurate CPU time of the thread is used
+     * @return		true if the more accurate CPU time of the thread is 
+     * 			used and the use of CPU time hasn't been disabled
      * @see System#currentTimeMillis()
      * @see ThreadMXBean#isThreadCpuTimeEnabled()
+     * @see #getUseCpuTime()
      */
     public boolean isCpuTime() {
-      return m_CanMeasureCpuTime;
+      return m_UseCpuTime && m_CanMeasureCpuTime;
     }
 
+    /**
+     * enables/disables the use of CPU time (if measurement of CPU time is 
+     * available). The actual use of CPU time still depends on whether the 
+     * system supports it. Resets the current timer, if running.
+     * 
+     * @param value	if true the CPU time is used (if possible)
+     */
+    public void setUseCpuTime(boolean value) {
+      m_UseCpuTime = value;
+      
+      // we have to re-initialize the start time, otherwise we get bogus
+      // results
+      if (m_Running) {
+	stop();
+	start();
+      }
+    }
+
+    /**
+     * returns whether the use of CPU is time is enabled/disabled (regardless
+     * whether the system supports it or not)
+     * 
+     * @return		true the CPU time is used (if possible)
+     */
+    public boolean getUseCpuTime() {
+      return m_UseCpuTime;
+    }
+    
     /**
      * Returns a new thread monitor if the current one is null (e.g., due to
      * serialization) or the currently set one. The thread ID is also updated
@@ -386,7 +427,7 @@ public class Debug
    * formatting options, see java.text.SimpleDateFormat.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $ 
+   * @version $Revision: 1.6 $ 
    * @see SimpleDateFormat
    */
   public static class Timestamp
@@ -600,7 +641,7 @@ public class Debug
    * Debug.SimpleLog class.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $ 
+   * @version $Revision: 1.6 $ 
    * @see Debug.SimpleLog
    */
   public static class Log
@@ -817,7 +858,7 @@ public class Debug
    * INFO).
    *
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   public static class Random
     extends java.util.Random
@@ -1092,7 +1133,7 @@ public class Debug
    * contains debug methods
    *
    * @author Gabi Schmidberger (gabi at cs dot waikato dot ac dot nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   public static class DBO 
     implements Serializable {
