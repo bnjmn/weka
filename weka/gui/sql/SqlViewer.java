@@ -34,6 +34,7 @@ import weka.gui.sql.event.ResultChangedEvent;
 import weka.gui.sql.event.ResultChangedListener;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
@@ -52,7 +53,7 @@ import javax.swing.JPanel;
  * Represents a little tool for querying SQL databases.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.4 $
+ * @version     $Revision: 1.5 $
  */
 public class SqlViewer 
   extends    JPanel 
@@ -67,6 +68,12 @@ public class SqlViewer
   /** the name of the history file (in the home directory) */
   protected final static String HISTORY_FILE = "SqlViewerHistory.props";
 
+  /** the width property in the history file */
+  public final static String WIDTH = "width";
+
+  /** the height property in the history file */
+  public final static String HEIGHT = "height";
+  
   /** the parent of this panel */
   protected JFrame m_Parent;
 
@@ -386,8 +393,10 @@ public class SqlViewer
    * @see #HISTORY_FILE
    */
   protected void loadHistory(boolean set) {
-    BufferedInputStream     str;
-    File                    file;
+    BufferedInputStream		str;
+    File			file;
+    int				width;
+    int				height;
 
     try {
       file = new File(getHistoryFilename());
@@ -411,6 +420,11 @@ public class SqlViewer
             m_History.getProperty(QueryPanel.HISTORY_NAME, "")));
       m_QueryPanel.setMaxRows(
           Integer.parseInt(m_History.getProperty(QueryPanel.MAX_ROWS, "100")));
+
+      width  = Integer.parseInt(m_History.getProperty(WIDTH, "0"));
+      height = Integer.parseInt(m_History.getProperty(HEIGHT, "0"));
+      if ((width != 0) && (height != 0))
+	setPreferredSize(new Dimension(width, height));
     }
   }
 
@@ -431,6 +445,18 @@ public class SqlViewer
     }
   }
 
+  /**
+   * obtains the size of the panel and saves it in the history
+   * 
+   * @see #saveHistory()
+   */
+  public void saveSize() {
+    m_History.setProperty(WIDTH, "" + getSize().width);
+    m_History.setProperty(HEIGHT, "" + getSize().height);
+
+    saveHistory();
+  }
+  
   /**
    * calls the clear method of all sub-panels to set back to default values
    * and free up memory
@@ -570,6 +596,7 @@ public class SqlViewer
       jf.getContentPane().add(m_Viewer, BorderLayout.CENTER);
       jf.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
+          m_Viewer.saveSize();
           jf.dispose();
           System.exit(0);
         }

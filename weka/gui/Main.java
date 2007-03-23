@@ -92,7 +92,7 @@ import javax.swing.event.InternalFrameEvent;
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Main
   extends JFrame {
@@ -104,7 +104,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.9 $
+   * @version $Revision: 1.10 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -156,7 +156,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.9 $
+   * @version $Revision: 1.10 $
    */
   public static class ChildFrame
     extends JInternalFrame {
@@ -571,15 +571,16 @@ public class Main
 	  String title = jMenuItemToolsSqlViewer.getText();
 	  if (!containsWindow(title)) {
 	    final ChildFrame frame = new ChildFrame(m_Self, title);
+	    final SqlViewer sql = new SqlViewer(null);
 	    frame.getContentPane().setLayout(new BorderLayout());
-	    frame.getContentPane().add(new SqlViewer(null), BorderLayout.CENTER);
+	    frame.getContentPane().add(sql, BorderLayout.CENTER);
 	    frame.addInternalFrameListener(new InternalFrameAdapter() {
 	      public void internalFrameClosing(InternalFrameEvent e) {
+		sql.saveSize();
 		frame.dispose();
 	      }
 	    });
 	    frame.pack();
-	    frame.setSize(800, 600);
 	  }
 	  else {
 	    showWindow(getWindow(title));

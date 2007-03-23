@@ -87,7 +87,7 @@ import javax.swing.SwingConstants;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class GUIChooser
   extends JFrame {
@@ -489,12 +489,14 @@ public class GUIChooser
       public void actionPerformed(ActionEvent e) {
 	if (m_SqlViewerFrame == null) {
 	  m_SqlViewerBut.setEnabled(false);
+	  final SqlViewer sql = new SqlViewer(null);
 	  m_SqlViewerFrame = new JFrame("SqlViewer");
 	  m_SqlViewerFrame.setIconImage(m_Icon);
 	  m_SqlViewerFrame.getContentPane().setLayout(new BorderLayout());
-	  m_SqlViewerFrame.getContentPane().add(new SqlViewer(null), BorderLayout.CENTER);
+	  m_SqlViewerFrame.getContentPane().add(sql, BorderLayout.CENTER);
 	  m_SqlViewerFrame.addWindowListener(new WindowAdapter() {
 	    public void windowClosing(WindowEvent w) {
+	      sql.saveSize();
 	      m_SqlViewerFrame.dispose();
 	      m_SqlViewerFrame = null;
 	      m_SqlViewerBut.setEnabled(true);
@@ -502,7 +504,6 @@ public class GUIChooser
 	    }
 	  });
 	  m_SqlViewerFrame.pack();
-	  m_SqlViewerFrame.setSize(800, 600);
 	  m_SqlViewerFrame.setVisible(true);
 	}
       }

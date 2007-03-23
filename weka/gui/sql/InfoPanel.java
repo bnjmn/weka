@@ -25,6 +25,10 @@ package weka.gui.sql;
 import weka.gui.ComponentHelper;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -35,12 +39,14 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  * A simple panel for displaying information, e.g. progress information etc.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision: 1.3 $
  */
 
 public class InfoPanel
@@ -60,6 +66,9 @@ public class InfoPanel
 
   /** the button to clear the area */
   protected JButton m_ButtonClear;
+
+  /** the button to copy the selected message */
+  protected JButton m_ButtonCopy;
   
   /**
    * creates the panel
@@ -76,13 +85,20 @@ public class InfoPanel
    */
   protected void createPanel() {
     JPanel          panel;
+    JPanel          panel2;
     
     setLayout(new BorderLayout());
+    setPreferredSize(new Dimension(0, 80));
 
     // text
     m_Model = new DefaultListModel();
     m_Info  = new JList(m_Model);
     m_Info.setCellRenderer(new InfoPanelCellRenderer());
+    m_Info.addListSelectionListener(new ListSelectionListener() {
+      public void valueChanged(ListSelectionEvent e) {
+        setButtons(e);
+      }
+    });
     add(new JScrollPane(m_Info), BorderLayout.CENTER);
 
     // clear button
@@ -95,6 +111,28 @@ public class InfoPanel
 	}
       });
     panel.add(m_ButtonClear, BorderLayout.NORTH);
+
+    // clear button
+    panel2 = new JPanel(new BorderLayout());
+    panel.add(panel2, BorderLayout.CENTER);
+    m_ButtonCopy = new JButton("Copy");
+    m_ButtonCopy.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+	  copyToClipboard();
+	}
+      });
+    panel2.add(m_ButtonCopy, BorderLayout.NORTH);
+  }
+  
+  /**
+   * sets the state of the buttons according to the selection state of the
+   * JList
+   */
+  protected void setButtons(ListSelectionEvent e) {
+    if ( (e == null) || (e.getSource() == m_Info) ) {
+      m_ButtonClear.setEnabled(m_Model.getSize() > 0);
+      m_ButtonCopy.setEnabled(m_Info.getSelectedIndices().length == 1);
+    }
   }
 
   /**
@@ -109,8 +147,27 @@ public class InfoPanel
    */
   public void clear() {
     m_Model.clear();
+    setButtons(null);
   }
 
+  /**
+   * copies the currently selected error message to the clipboard
+   * 
+   * @return		true if the content was copied
+   */
+  public boolean copyToClipboard() {
+    StringSelection      selection;
+    Clipboard            clipboard;
+    
+    if (m_Info.getSelectedIndices().length != 1)
+      return false;
+    
+    selection = new StringSelection(((JLabel) m_Info.getSelectedValue()).getText());
+    clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    clipboard.setContents(selection, selection);
+    return true;
+  }
+  
   /**
    * adds the given message to the end of the list (with the associated icon
    * at the beginning)
@@ -134,6 +191,8 @@ public class InfoPanel
     m_Model.addElement(msg);
     m_Info.setSelectedIndex(m_Model.getSize() - 1);
     m_Info.ensureIndexIsVisible(m_Info.getSelectedIndex());
+    
+    setButtons(null);
   }
 }
 

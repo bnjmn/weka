@@ -29,6 +29,7 @@ import weka.gui.sql.event.ResultChangedEvent;
 import weka.gui.sql.event.ResultChangedListener;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ import javax.swing.event.ChangeListener;
  * Represents a panel for displaying the results of a query in table format.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.2 $
+ * @version   $Revision: 1.3 $
  */
 public class ResultPanel 
   extends JPanel 
@@ -109,6 +110,7 @@ public class ResultPanel
     JPanel          panel4;
 
     setLayout(new BorderLayout());
+    setPreferredSize(new Dimension(0, 200));
 
     // tabbed pane
     m_TabbedPane = new JTabbedPane(JTabbedPane.BOTTOM);

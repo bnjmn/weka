@@ -29,6 +29,8 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -41,7 +43,7 @@ import javax.swing.JPanel;
  * A little dialog containing the SqlViewer.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision: 1.3 $
  */
 public class SqlViewerDialog 
   extends JDialog 
@@ -128,6 +130,7 @@ public class SqlViewerDialog
           // remove listener, otherwise does the disposal of resultspanel
           // change the query again!
           m_Viewer.removeResultChangedListener(dialog);
+          m_Viewer.saveSize();
 	  dialog.dispose();
       }
     });
@@ -139,7 +142,17 @@ public class SqlViewerDialog
           // remove listener, otherwise does the disposal of resultspanel
           // change the query again!
           m_Viewer.removeResultChangedListener(dialog);
+          m_Viewer.saveSize();
 	  dialog.dispose();
+      }
+    });
+    
+    addWindowListener(new WindowAdapter() {
+      /**
+       * Invoked when a window is in the process of being closed.
+       */
+      public void windowClosing(WindowEvent e) {
+	m_Viewer.saveSize();
       }
     });
    
