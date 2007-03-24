@@ -16,7 +16,7 @@
 
 /*
  *    RandomProjection.java
- *    Copyright (C) 2003 Ashraf M. Kibriya
+ *    Copyright (C) 2003 University of Waikato
  *
  */
 
@@ -30,7 +30,6 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
-import weka.core.SparseInstance;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -103,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision: 1.8 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 
@@ -113,14 +112,14 @@ public class RandomProjection
   static final long serialVersionUID = 4428905532728645880L;
 
   /** Stores the number of dimensions to reduce the data to */
-  private int m_k = 10;
+  protected int m_k = 10;
 
   /** Stores the dimensionality the data should be reduced to as percentage of the original dimension */
-  private double m_percent = 0.0;
+  protected double m_percent = 0.0;
 
   /** Is the random matrix will be computed using 
       Gaussian distribution or not */
-  private boolean m_useGaussian = false;
+  protected boolean m_useGaussian = false;
 
   /** distribution type: sparse 1 */
   public static final int SPARSE1 = 1;
@@ -139,30 +138,29 @@ public class RandomProjection
 
   /** Stores the distribution to use for calculating the
       random matrix */
-  private int m_distribution = SPARSE1;
+  protected int m_distribution = SPARSE1;
  
   /** Should the missing values be replaced using 
       unsupervised.ReplaceMissingValues filter */
-  private boolean m_useReplaceMissing = false;
+  protected boolean m_useReplaceMissing = false;
 
   /** Keeps track of output format if it is defined or not */
-  private boolean m_OutputFormatDefined = false;
+  protected boolean m_OutputFormatDefined = false;
 
   /** The NominalToBinary filter applied to the data before this filter */
-  private Filter m_ntob; // = new weka.filters.unsupervised.attribute.NominalToBinary();
+  protected Filter m_ntob; // = new weka.filters.unsupervised.attribute.NominalToBinary();
 
   /** The ReplaceMissingValues filter */
-  private Filter m_replaceMissing;
+  protected Filter m_replaceMissing;
     
   /** Stores the random seed used to generate the random matrix */
-  private long m_rndmSeed = 42;
+  protected long m_rndmSeed = 42;
 
   /** The random matrix */
-  private double m_rmatrix[][];
+  protected double m_rmatrix[][];
 
   /** The random number generator used for generating the random matrix */
-  private Random m_random;
-
+  protected Random m_random;
 
   /**
    * Returns an enumeration describing the available options.
@@ -741,7 +739,7 @@ public class RandomProjection
     
 
   /** Sets the output format */  
-  private void setOutputFormat() {
+  protected void setOutputFormat() {
       Instances currentFormat;
       if(m_ntob!=null) {
 	  currentFormat = m_ntob.getOutputFormat();
@@ -793,51 +791,54 @@ public class RandomProjection
       setOutputFormat(newFormat);
   }
 
-
-  /** 
+  /**
    * converts a single instance to the required format
-   * 
-   * @param currentInstance	the instance to convert
-   * @return			the converted instance
+   *
+   * @param currentInstance     the instance to convert
+   * @return                    the converted instance
    */
-  private Instance convertInstance(Instance currentInstance) {
-      
+  protected Instance convertInstance(Instance currentInstance) {
+
       Instance newInstance;
       double vals[] = new double[getOutputFormat().numAttributes()];
       int classIndex = (m_ntob==null) ? getInputFormat().classIndex():m_ntob.getOutputFormat().classIndex();
-      int attNum = m_k;
-      //double d = Math.sqrt(1D/attNum);
-      
-      for(int i=0; i<attNum; i++) {
-	  boolean ismissing=false;
-	  for(int j=0; j<currentInstance.numValues(); j++) {
-	      if(classIndex!=-1 && j==classIndex) //ignore the class value for now
-		  continue;
-	      if(!currentInstance.isMissing(j)) {
-		  vals[i] += m_rmatrix[i][j] * currentInstance.value(j);
-	      }
-	      //else {
-	      //  ismissing=true;
-	      //  vals[i] = currentInstance.missingValue();
-	      //  break;
-	      //}
-	  }
-	  //if(ismissing)
-	  //    break;
+
+      for(int i = 0; i < m_k; i++) {
+        vals[i] = computeRandomProjection(i,classIndex,currentInstance);
       }
-      if(classIndex!=-1) {
-	  vals[m_k] = currentInstance.value(classIndex);
+      if (classIndex != -1) {
+        vals[m_k] = currentInstance.value(classIndex);
       }
 
-      if(currentInstance instanceof SparseInstance) {
-	  newInstance = new SparseInstance(currentInstance.weight(), vals);
-      }
-      else {
-	  newInstance = new Instance(currentInstance.weight(), vals);
-      }
+      newInstance = new Instance(currentInstance.weight(), vals);
       newInstance.setDataset(getOutputFormat());
-      
+
       return newInstance;
+  }
+
+
+  /**
+   * computes one random projection for a given instance (skip missing values)
+   *
+   * @param rpIndex     offset the new random projection attribute
+   * @param classIndex  classIndex of the input instance
+   * @param instance    the instance to convert
+   * @return    the random sum
+   */
+
+  protected double computeRandomProjection(int rpIndex, int classIndex, Instance instance) {
+
+    double sum = 0.0;
+    for(int i = 0; i < instance.numValues(); i++) {
+      int index = instance.index(i);
+      if (index != classIndex) {
+        double value = instance.valueSparse(i);
+        if (!Instance.isMissingValue(value)) {
+          sum += m_rmatrix[rpIndex][index] * value;
+        }
+      }
+    }
+    return sum;
   }
 
   private static final int weights[] = {1, 1, 4};
@@ -853,7 +854,7 @@ public class RandomProjection
    * @param useDstrWithZero
    * @return
    */
-  private double rndmNum(boolean useDstrWithZero) {
+  protected double rndmNum(boolean useDstrWithZero) {
       if(useDstrWithZero)
 	  return sqrt3 * vals[weightedDistribution(weights)];
       else
@@ -866,7 +867,7 @@ public class RandomProjection
    * @param weights the weights to use
    * @return
    */
-  private int weightedDistribution(int [] weights) {
+  protected int weightedDistribution(int [] weights) {
       int sum=0; 
       
       for(int i=0; i<weights.length; i++) 
