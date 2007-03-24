@@ -82,7 +82,7 @@ import java.util.Vector;
  * calculating the random matrix (default 42). <p>
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.3.2.2 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
+ * @version $Revision: 1.3.2.3 $ [1.0 - 22 July 2003 - Initial version (Ashraf M.
  *          Kibriya)]
  */
 public class RandomProjection extends Filter implements UnsupervisedFilter, OptionHandler {
@@ -684,49 +684,55 @@ public class RandomProjection extends Filter implements UnsupervisedFilter, Opti
       setOutputFormat(newFormat);
   }
 
+  /**
+   * converts a single instance to the required format
+   *
+   * @param currentInstance     the instance to convert
+   * @return                    the converted instance
+   */
+  protected Instance convertInstance(Instance currentInstance) {
 
-  /** converts a single instance to the required format */
-  private Instance convertInstance(Instance currentInstance) {
-      
       Instance newInstance;
       double vals[] = new double[getOutputFormat().numAttributes()];
       int classIndex = (ntob==null) ? getInputFormat().classIndex():ntob.getOutputFormat().classIndex();
-      int attNum = m_k;
-      //double d = Math.sqrt(1D/attNum);
-      
-      for(int i=0; i<attNum; i++) {
-	  boolean ismissing=false;
-	  for(int j=0; j<currentInstance.numValues(); j++) {
-	      if(classIndex!=-1 && j==classIndex) //ignore the class value for now
-		  continue;
-	      if(!currentInstance.isMissing(j)) {
-		  vals[i] += rmatrix[i][j] * currentInstance.value(j);
-	      }
-	      //else {
-	      //  ismissing=true;
-	      //  vals[i] = currentInstance.missingValue();
-	      //  break;
-	      //}
-	  }
-	  //if(ismissing)
-	  //    break;
+
+      for(int i = 0; i < m_k; i++) {
+        vals[i] = computeRandomProjection(i,classIndex,currentInstance);
       }
-      if(classIndex!=-1) {
-	  vals[m_k] = currentInstance.value(classIndex);
+      if (classIndex != -1) {
+        vals[m_k] = currentInstance.value(classIndex);
       }
 
-      if(currentInstance instanceof SparseInstance) {
-	  newInstance = new SparseInstance(currentInstance.weight(), vals);
-      }
-      else {
-	  newInstance = new Instance(currentInstance.weight(), vals);
-      }
+      newInstance = new Instance(currentInstance.weight(), vals);
       newInstance.setDataset(getOutputFormat());
-      
+
       return newInstance;
   }
 
 
+  /**
+   * computes one random projection for a given instance (skip missing values)
+   *
+   * @param rpIndex     offset the new random projection attribute
+   * @param classIndex  classIndex of the input instance
+   * @param instance    the instance to convert
+   * @return    the random sum
+   */
+
+  protected double computeRandomProjection(int rpIndex, int classIndex, Instance instance) {
+
+    double sum = 0.0;
+    for(int i = 0; i < instance.numValues(); i++) {
+      int index = instance.index(i);
+      if (index != classIndex) {
+        double value = instance.valueSparse(i);
+        if (!Instance.isMissingValue(value)) {
+          sum += rmatrix[rpIndex][index] * value;
+        }
+      }
+    }
+    return sum;
+  }
 
   private static final int weights[] = {1, 1, 4};
   private static final int vals[] = {-1, 1, 0};
