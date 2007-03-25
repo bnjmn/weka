@@ -110,8 +110,7 @@ import java.util.Vector;
  *  (Default = 10).</pre>
  * 
  * <pre> -W
- *  Weight nearest neighbours by distance
- * </pre>
+ *  Weight nearest neighbours by distance</pre>
  * 
  * <pre> -A &lt;num&gt;
  *  Specify sigma value (used in an exp
@@ -125,7 +124,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ReliefFAttributeEval
   extends AttributeEvaluator
@@ -248,8 +247,8 @@ public class ReliefFAttributeEval
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    TechnicalInformation 	additional;
+    TechnicalInformation        result;
+    TechnicalInformation        additional;
     
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "Kenji Kira and Larry A. Rendell");
@@ -289,30 +288,30 @@ public class ReliefFAttributeEval
     Vector newVector = new Vector(4);
     newVector
       .addElement(new Option("\tSpecify the number of instances to\n" 
-			     + "\tsample when estimating attributes.\n" 
-			     + "\tIf not specified, then all instances\n" 
-			     + "\twill be used.", "M", 1
-			     , "-M <num instances>"));
+                             + "\tsample when estimating attributes.\n" 
+                             + "\tIf not specified, then all instances\n" 
+                             + "\twill be used.", "M", 1
+                             , "-M <num instances>"));
     newVector.
       addElement(new Option("\tSeed for randomly sampling instances.\n" 
-			    + "\t(Default = 1)", "D", 1
-			    , "-D <seed>"));
+                            + "\t(Default = 1)", "D", 1
+                            , "-D <seed>"));
     newVector.
       addElement(new Option("\tNumber of nearest neighbours (k) used\n" 
-			    + "\tto estimate attribute relevances\n" 
-			    + "\t(Default = 10).", "K", 1
-			    , "-K <number of neighbours>"));
+                            + "\tto estimate attribute relevances\n" 
+                            + "\t(Default = 10).", "K", 1
+                            , "-K <number of neighbours>"));
     newVector.
-      addElement(new Option("\tWeight nearest neighbours by distance\n", "W"
-			    , 0, "-W"));
+      addElement(new Option("\tWeight nearest neighbours by distance", "W"
+                            , 0, "-W"));
     newVector.
       addElement(new Option("\tSpecify sigma value (used in an exp\n" 
-			    + "\tfunction to control how quickly\n" 
-			    + "\tweights for more distant instances\n" 
-			    + "\tdecrease. Use in conjunction with -W.\n" 
-			    + "\tSensible value=1/5 to 1/10 of the\n" 
-			    + "\tnumber of nearest neighbours.\n" 
-			    + "\t(Default = 2)", "A", 1, "-A <num>"));
+                            + "\tfunction to control how quickly\n" 
+                            + "\tweights for more distant instances\n" 
+                            + "\tdecrease. Use in conjunction with -W.\n" 
+                            + "\tSensible value=1/5 to 1/10 of the\n" 
+                            + "\tnumber of nearest neighbours.\n" 
+                            + "\t(Default = 2)", "A", 1, "-A <num>"));
     return  newVector.elements();
   }
 
@@ -339,8 +338,7 @@ public class ReliefFAttributeEval
    *  (Default = 10).</pre>
    * 
    * <pre> -W
-   *  Weight nearest neighbours by distance
-   * </pre>
+   *  Weight nearest neighbours by distance</pre>
    * 
    * <pre> -A &lt;num&gt;
    *  Specify sigma value (used in an exp
@@ -597,9 +595,9 @@ public class ReliefFAttributeEval
 
       if (m_weightByDistance) {
         text.append("\tExponentially decreasing (with distance) " 
-		    + "influence for\n" 
-		    + "\tnearest neighbours. Sigma: " 
-		    + m_sigma + "\n");
+                    + "influence for\n" 
+                    + "\tnearest neighbours. Sigma: " 
+                    + m_sigma + "\n");
       }
       else {
         text.append("\tEqual influence nearest neighbours\n");
@@ -673,12 +671,12 @@ public class ReliefFAttributeEval
 
     if (m_weightByDistance) // set up the rank based weights
       {
-	m_weightsByRank = new double[m_Knn];
+        m_weightsByRank = new double[m_Knn];
 
-	for (int i = 0; i < m_Knn; i++) {
-	  m_weightsByRank[i] = 
-	    Math.exp(-((i/(double)m_sigma)*(i/(double)m_sigma)));
-	}
+        for (int i = 0; i < m_Knn; i++) {
+          m_weightsByRank[i] = 
+            Math.exp(-((i/(double)m_sigma)*(i/(double)m_sigma)));
+        }
       }
 
     // the final attribute weights
@@ -760,13 +758,13 @@ public class ReliefFAttributeEval
     for (int i = 0; i < m_numAttribs; i++) {if (i != m_classIndex) {
       if (m_numericClass) {
         m_weights[i] = m_ndcda[i]/m_ndc - 
-	  ((m_nda[i] - m_ndcda[i])/((double)totalInstances - m_ndc));
+          ((m_nda[i] - m_ndcda[i])/((double)totalInstances - m_ndc));
       }
       else {
         m_weights[i] *= (1.0/(double)totalInstances);
       }
 
-      //	  System.out.println(r_weights[i]);
+      //          System.out.println(r_weights[i]);
     }
     }
   }
@@ -807,7 +805,7 @@ public class ReliefFAttributeEval
    */
   private double norm (double x, int i) {
     if (Double.isNaN(m_minArray[i]) || 
-	Utils.eq(m_maxArray[i], m_minArray[i])) {
+        Utils.eq(m_maxArray[i], m_minArray[i])) {
       return  0;
     }
     else {
@@ -826,23 +824,23 @@ public class ReliefFAttributeEval
     //    for (int j = 0; j < m_numAttribs; j++) {
     try {
       for (int j = 0; j < instance.numValues(); j++) {
-	if ((instance.attributeSparse(j).isNumeric()) && 
-	    (!instance.isMissingSparse(j))) {
-	  if (Double.isNaN(m_minArray[instance.index(j)])) {
-	    m_minArray[instance.index(j)] = instance.valueSparse(j);
-	    m_maxArray[instance.index(j)] = instance.valueSparse(j);
-	  }
-	else {
-	  if (instance.valueSparse(j) < m_minArray[instance.index(j)]) {
-	    m_minArray[instance.index(j)] = instance.valueSparse(j);
-	  }
-	  else {
-	    if (instance.valueSparse(j) > m_maxArray[instance.index(j)]) {
-	      m_maxArray[instance.index(j)] = instance.valueSparse(j);
-	    }
-	  }
-	}
-	}
+        if ((instance.attributeSparse(j).isNumeric()) && 
+            (!instance.isMissingSparse(j))) {
+          if (Double.isNaN(m_minArray[instance.index(j)])) {
+            m_minArray[instance.index(j)] = instance.valueSparse(j);
+            m_maxArray[instance.index(j)] = instance.valueSparse(j);
+          }
+        else {
+          if (instance.valueSparse(j) < m_minArray[instance.index(j)]) {
+            m_minArray[instance.index(j)] = instance.valueSparse(j);
+          }
+          else {
+            if (instance.valueSparse(j) > m_maxArray[instance.index(j)]) {
+              m_maxArray[instance.index(j)] = instance.valueSparse(j);
+            }
+          }
+        }
+        }
       }
     } catch (Exception ex) {
       System.err.println(ex);
@@ -861,36 +859,36 @@ public class ReliefFAttributeEval
       
       // If attribute is nominal
       if (Instance.isMissingValue(val1) || 
-	  Instance.isMissingValue(val2)) {
-	return (1.0 - (1.0/((double)m_trainInstances.
-			    attribute(index).numValues())));
+          Instance.isMissingValue(val2)) {
+        return (1.0 - (1.0/((double)m_trainInstances.
+                            attribute(index).numValues())));
       } else if ((int)val1 != (int)val2) {
-	return 1;
+        return 1;
       } else {
-	return 0;
+        return 0;
       }
     case Attribute.NUMERIC:
 
       // If attribute is numeric
       if (Instance.isMissingValue(val1) || 
-	  Instance.isMissingValue(val2)) {
-	if (Instance.isMissingValue(val1) && 
-	    Instance.isMissingValue(val2)) {
-	  return 1;
-	} else {
-	  double diff;
-	  if (Instance.isMissingValue(val2)) {
-	    diff = norm(val1, index);
-	  } else {
-	    diff = norm(val2, index);
-	  }
-	  if (diff < 0.5) {
-	    diff = 1.0 - diff;
-	  }
-	  return diff;
-	}
+          Instance.isMissingValue(val2)) {
+        if (Instance.isMissingValue(val1) && 
+            Instance.isMissingValue(val2)) {
+          return 1;
+        } else {
+          double diff;
+          if (Instance.isMissingValue(val2)) {
+            diff = norm(val1, index);
+          } else {
+            diff = norm(val2, index);
+          }
+          if (diff < 0.5) {
+            diff = 1.0 - diff;
+          }
+          return diff;
+        }
       } else {
-	return Math.abs(norm(val1, index) - norm(val2, index));
+        return Math.abs(norm(val1, index) - norm(val2, index));
       }
     default:
       return 0;
@@ -910,37 +908,37 @@ public class ReliefFAttributeEval
     int firstI, secondI;
 
     for (int p1 = 0, p2 = 0; 
-	 p1 < first.numValues() || p2 < second.numValues();) {
+         p1 < first.numValues() || p2 < second.numValues();) {
       if (p1 >= first.numValues()) {
-	firstI = m_trainInstances.numAttributes();
+        firstI = m_trainInstances.numAttributes();
       } else {
-	firstI = first.index(p1); 
+        firstI = first.index(p1); 
       }
       if (p2 >= second.numValues()) {
-	secondI = m_trainInstances.numAttributes();
+        secondI = m_trainInstances.numAttributes();
       } else {
-	secondI = second.index(p2);
+        secondI = second.index(p2);
       }
       if (firstI == m_trainInstances.classIndex()) {
-	p1++; continue;
+        p1++; continue;
       } 
       if (secondI == m_trainInstances.classIndex()) {
-	p2++; continue;
+        p2++; continue;
       } 
       double diff;
       if (firstI == secondI) {
-	diff = difference(firstI, 
-			  first.valueSparse(p1),
-			  second.valueSparse(p2));
-	p1++; p2++;
+        diff = difference(firstI, 
+                          first.valueSparse(p1),
+                          second.valueSparse(p2));
+        p1++; p2++;
       } else if (firstI > secondI) {
-	diff = difference(secondI, 
-			  0, second.valueSparse(p2));
-	p2++;
+        diff = difference(secondI, 
+                          0, second.valueSparse(p2));
+        p2++;
       } else {
-	diff = difference(firstI, 
-			  first.valueSparse(p1), 0);
-	p1++;
+        diff = difference(firstI, 
+                          first.valueSparse(p1), 0);
+        p1++;
       }
       //      distance += diff * diff;
       distance += diff;
@@ -971,10 +969,10 @@ public class ReliefFAttributeEval
       tempDist = new double[m_stored[0]];
 
       for (j = 0, distNorm = 0; j < m_stored[0]; j++) {
-	// copy the distances
-	tempDist[j] = m_karray[0][j][0];
-	// sum normalizer
-	distNorm += m_weightsByRank[j];
+        // copy the distances
+        tempDist[j] = m_karray[0][j][0];
+        // sum normalizer
+        distNorm += m_weightsByRank[j];
       }
 
       tempSorted = Utils.sort(tempDist);
@@ -983,89 +981,89 @@ public class ReliefFAttributeEval
     for (i = 0; i < m_stored[0]; i++) {
       // P diff prediction (class) given nearest instances
       if (m_weightByDistance) {
-	temp = difference(m_classIndex, 
-			  inst.value(m_classIndex),
-			  m_trainInstances.
-			  instance((int)m_karray[0][tempSorted[i]][1]).
-			  value(m_classIndex));
-	temp *= (m_weightsByRank[i]/distNorm);
+        temp = difference(m_classIndex, 
+                          inst.value(m_classIndex),
+                          m_trainInstances.
+                          instance((int)m_karray[0][tempSorted[i]][1]).
+                          value(m_classIndex));
+        temp *= (m_weightsByRank[i]/distNorm);
       }
       else {
-	temp = difference(m_classIndex, 
-			  inst.value(m_classIndex), 
-			  m_trainInstances.
-			  instance((int)m_karray[0][i][1]).
-			  value(m_classIndex));
-	temp *= (1.0/(double)m_stored[0]); // equal influence
+        temp = difference(m_classIndex, 
+                          inst.value(m_classIndex), 
+                          m_trainInstances.
+                          instance((int)m_karray[0][i][1]).
+                          value(m_classIndex));
+        temp *= (1.0/(double)m_stored[0]); // equal influence
       }
 
       m_ndc += temp;
 
       Instance cmp;
       cmp = (m_weightByDistance) 
-	? m_trainInstances.instance((int)m_karray[0][tempSorted[i]][1])
-	: m_trainInstances.instance((int)m_karray[0][i][1]);
+        ? m_trainInstances.instance((int)m_karray[0][tempSorted[i]][1])
+        : m_trainInstances.instance((int)m_karray[0][i][1]);
  
       double temp_diffP_diffA_givNearest = 
-	difference(m_classIndex, inst.value(m_classIndex),
-		   cmp.value(m_classIndex));
+        difference(m_classIndex, inst.value(m_classIndex),
+                   cmp.value(m_classIndex));
       // now the attributes
       for (int p1 = 0, p2 = 0; 
-	   p1 < inst.numValues() || p2 < cmp.numValues();) {
-	if (p1 >= inst.numValues()) {
-	  firstI = m_trainInstances.numAttributes();
-	} else {
-	  firstI = inst.index(p1); 
-	}
-	if (p2 >= cmp.numValues()) {
-	  secondI = m_trainInstances.numAttributes();
-	} else {
-	  secondI = cmp.index(p2);
-	}
-	if (firstI == m_trainInstances.classIndex()) {
-	  p1++; continue;
-	} 
-	if (secondI == m_trainInstances.classIndex()) {
-	  p2++; continue;
-	} 
-	temp = 0.0;
-	temp2 = 0.0;
+           p1 < inst.numValues() || p2 < cmp.numValues();) {
+        if (p1 >= inst.numValues()) {
+          firstI = m_trainInstances.numAttributes();
+        } else {
+          firstI = inst.index(p1); 
+        }
+        if (p2 >= cmp.numValues()) {
+          secondI = m_trainInstances.numAttributes();
+        } else {
+          secondI = cmp.index(p2);
+        }
+        if (firstI == m_trainInstances.classIndex()) {
+          p1++; continue;
+        } 
+        if (secondI == m_trainInstances.classIndex()) {
+          p2++; continue;
+        } 
+        temp = 0.0;
+        temp2 = 0.0;
       
-	if (firstI == secondI) {
-	  j = firstI;
-	  temp = difference(j, inst.valueSparse(p1), cmp.valueSparse(p2)); 
-	  p1++;p2++;
-	} else if (firstI > secondI) {
-	  j = secondI;
-	  temp = difference(j, 0, cmp.valueSparse(p2));
-	  p2++;
-	} else {
-	  j = firstI;
-	  temp = difference(j, inst.valueSparse(p1), 0);
-	  p1++;
-	} 
+        if (firstI == secondI) {
+          j = firstI;
+          temp = difference(j, inst.valueSparse(p1), cmp.valueSparse(p2)); 
+          p1++;p2++;
+        } else if (firstI > secondI) {
+          j = secondI;
+          temp = difference(j, 0, cmp.valueSparse(p2));
+          p2++;
+        } else {
+          j = firstI;
+          temp = difference(j, inst.valueSparse(p1), 0);
+          p1++;
+        } 
        
-	temp2 = temp_diffP_diffA_givNearest * temp; 
-	// P of different prediction and different att value given
-	// nearest instances
-	if (m_weightByDistance) {
-	  temp2 *= (m_weightsByRank[i]/distNorm);
-	}
-	else {
-	  temp2 *= (1.0/(double)m_stored[0]); // equal influence
-	}
+        temp2 = temp_diffP_diffA_givNearest * temp; 
+        // P of different prediction and different att value given
+        // nearest instances
+        if (m_weightByDistance) {
+          temp2 *= (m_weightsByRank[i]/distNorm);
+        }
+        else {
+          temp2 *= (1.0/(double)m_stored[0]); // equal influence
+        }
 
-	m_ndcda[j] += temp2;
+        m_ndcda[j] += temp2;
        
-	// P of different attribute val given nearest instances
-	if (m_weightByDistance) {
-	  temp *= (m_weightsByRank[i]/distNorm);
-	}
-	else {
-	  temp *= (1.0/(double)m_stored[0]); // equal influence
-	}
+        // P of different attribute val given nearest instances
+        if (m_weightByDistance) {
+          temp *= (m_weightsByRank[i]/distNorm);
+        }
+        else {
+          temp *= (1.0/(double)m_stored[0]); // equal influence
+        }
 
-	m_nda[j] += temp;
+        m_nda[j] += temp;
       }
     }
   }
@@ -1101,10 +1099,10 @@ public class ReliefFAttributeEval
       tempDistClass = new double[m_stored[cl]];
 
       for (j = 0, distNormClass = 0; j < m_stored[cl]; j++) {
-	// copy the distances
-	tempDistClass[j] = m_karray[cl][j][0];
-	// sum normalizer
-	distNormClass += m_weightsByRank[j];
+        // copy the distances
+        tempDistClass[j] = m_karray[cl][j][0];
+        // sum normalizer
+        distNormClass += m_weightsByRank[j];
       }
 
       tempSortedClass = Utils.sort(tempDistClass);
@@ -1113,20 +1111,20 @@ public class ReliefFAttributeEval
       distNormAtt = new double[m_numClasses];
 
       for (k = 0; k < m_numClasses; k++) {
-	if (k != cl) // already done cl
-	  {
-	    // sort the distances
-	    tempDistAtt = new double[m_stored[k]];
+        if (k != cl) // already done cl
+          {
+            // sort the distances
+            tempDistAtt = new double[m_stored[k]];
 
-	    for (j = 0, distNormAtt[k] = 0; j < m_stored[k]; j++) {
-	      // copy the distances
-	      tempDistAtt[j] = m_karray[k][j][0];
-	      // sum normalizer
-	      distNormAtt[k] += m_weightsByRank[j];
-	    }
+            for (j = 0, distNormAtt[k] = 0; j < m_stored[k]; j++) {
+              // copy the distances
+              tempDistAtt[j] = m_karray[k][j][0];
+              // sum normalizer
+              distNormAtt[k] += m_weightsByRank[j];
+            }
 
-	    tempSortedAtt[k] = Utils.sort(tempDistAtt);
-	  }
+            tempSortedAtt[k] = Utils.sort(tempDistAtt);
+          }
       }
     }
 
@@ -1140,52 +1138,52 @@ public class ReliefFAttributeEval
     for (j = 0, temp_diff = 0.0; j < m_stored[cl]; j++) {
       Instance cmp;
       cmp = (m_weightByDistance) 
-	? m_trainInstances.
-	instance((int)m_karray[cl][tempSortedClass[j]][1])
-	: m_trainInstances.instance((int)m_karray[cl][j][1]);
+        ? m_trainInstances.
+        instance((int)m_karray[cl][tempSortedClass[j]][1])
+        : m_trainInstances.instance((int)m_karray[cl][j][1]);
 
       for (int p1 = 0, p2 = 0; 
-	   p1 < inst.numValues() || p2 < cmp.numValues();) {
-	if (p1 >= inst.numValues()) {
-	  firstI = m_trainInstances.numAttributes();
-	} else {
-	  firstI = inst.index(p1); 
-	}
-	if (p2 >= cmp.numValues()) {
-	  secondI = m_trainInstances.numAttributes();
-	} else {
-	  secondI = cmp.index(p2);
-	}
-	if (firstI == m_trainInstances.classIndex()) {
-	  p1++; continue;
-	} 
-	if (secondI == m_trainInstances.classIndex()) {
-	  p2++; continue;
-	} 
-	if (firstI == secondI) {
-	  i = firstI;
-	  temp_diff = difference(i, inst.valueSparse(p1), 
-				 cmp.valueSparse(p2)); 
-	  p1++;p2++;
-	} else if (firstI > secondI) {
-	  i = secondI;
-	  temp_diff = difference(i, 0, cmp.valueSparse(p2));
-	  p2++;
-	} else {
-	  i = firstI;
-	  temp_diff = difference(i, inst.valueSparse(p1), 0);
-	  p1++;
-	} 
-	
-	if (m_weightByDistance) {
-	  temp_diff *=
-	    (m_weightsByRank[j]/distNormClass);
-	} else {
-	  if (m_stored[cl] > 0) {
-	    temp_diff /= (double)m_stored[cl];
-	  }
-	}
-	m_weights[i] -= temp_diff;
+           p1 < inst.numValues() || p2 < cmp.numValues();) {
+        if (p1 >= inst.numValues()) {
+          firstI = m_trainInstances.numAttributes();
+        } else {
+          firstI = inst.index(p1); 
+        }
+        if (p2 >= cmp.numValues()) {
+          secondI = m_trainInstances.numAttributes();
+        } else {
+          secondI = cmp.index(p2);
+        }
+        if (firstI == m_trainInstances.classIndex()) {
+          p1++; continue;
+        } 
+        if (secondI == m_trainInstances.classIndex()) {
+          p2++; continue;
+        } 
+        if (firstI == secondI) {
+          i = firstI;
+          temp_diff = difference(i, inst.valueSparse(p1), 
+                                 cmp.valueSparse(p2)); 
+          p1++;p2++;
+        } else if (firstI > secondI) {
+          i = secondI;
+          temp_diff = difference(i, 0, cmp.valueSparse(p2));
+          p2++;
+        } else {
+          i = firstI;
+          temp_diff = difference(i, inst.valueSparse(p1), 0);
+          p1++;
+        } 
+        
+        if (m_weightByDistance) {
+          temp_diff *=
+            (m_weightsByRank[j]/distNormClass);
+        } else {
+          if (m_stored[cl] > 0) {
+            temp_diff /= (double)m_stored[cl];
+          }
+        }
+        m_weights[i] -= temp_diff;
 
       }
     }
@@ -1196,64 +1194,64 @@ public class ReliefFAttributeEval
 
     for (k = 0; k < m_numClasses; k++) {
       if (k != cl) // already done cl
-	{
-	  for (j = 0; j < m_stored[k]; j++) {
-	    Instance cmp;
-	    cmp = (m_weightByDistance) 
-	      ? m_trainInstances.
-	      instance((int)m_karray[k][tempSortedAtt[k][j]][1])
-	      : m_trainInstances.instance((int)m_karray[k][j][1]);
-	
-	    for (int p1 = 0, p2 = 0; 
-		 p1 < inst.numValues() || p2 < cmp.numValues();) {
-	      if (p1 >= inst.numValues()) {
-		firstI = m_trainInstances.numAttributes();
-	      } else {
-		firstI = inst.index(p1); 
-	      }
-	      if (p2 >= cmp.numValues()) {
-		secondI = m_trainInstances.numAttributes();
-	      } else {
-		secondI = cmp.index(p2);
-	      }
-	      if (firstI == m_trainInstances.classIndex()) {
-		p1++; continue;
-	      } 
-	      if (secondI == m_trainInstances.classIndex()) {
-		p2++; continue;
-	      } 
-	      if (firstI == secondI) {
-		i = firstI;
-		temp_diff = difference(i, inst.valueSparse(p1), 
-				       cmp.valueSparse(p2)); 
-		p1++;p2++;
-	      } else if (firstI > secondI) {
-		i = secondI;
-		temp_diff = difference(i, 0, cmp.valueSparse(p2));
-		p2++;
-	      } else {
-		i = firstI;
-		temp_diff = difference(i, inst.valueSparse(p1), 0);
-		p1++;
-	      } 
+        {
+          for (j = 0; j < m_stored[k]; j++) {
+            Instance cmp;
+            cmp = (m_weightByDistance) 
+              ? m_trainInstances.
+              instance((int)m_karray[k][tempSortedAtt[k][j]][1])
+              : m_trainInstances.instance((int)m_karray[k][j][1]);
+        
+            for (int p1 = 0, p2 = 0; 
+                 p1 < inst.numValues() || p2 < cmp.numValues();) {
+              if (p1 >= inst.numValues()) {
+                firstI = m_trainInstances.numAttributes();
+              } else {
+                firstI = inst.index(p1); 
+              }
+              if (p2 >= cmp.numValues()) {
+                secondI = m_trainInstances.numAttributes();
+              } else {
+                secondI = cmp.index(p2);
+              }
+              if (firstI == m_trainInstances.classIndex()) {
+                p1++; continue;
+              } 
+              if (secondI == m_trainInstances.classIndex()) {
+                p2++; continue;
+              } 
+              if (firstI == secondI) {
+                i = firstI;
+                temp_diff = difference(i, inst.valueSparse(p1), 
+                                       cmp.valueSparse(p2)); 
+                p1++;p2++;
+              } else if (firstI > secondI) {
+                i = secondI;
+                temp_diff = difference(i, 0, cmp.valueSparse(p2));
+                p2++;
+              } else {
+                i = firstI;
+                temp_diff = difference(i, inst.valueSparse(p1), 0);
+                p1++;
+              } 
 
-	      if (m_weightByDistance) {
-		temp_diff *=
-		  (m_weightsByRank[j]/distNormAtt[k]);
-	      }
-	      else {
-		if (m_stored[k] > 0) {
-		  temp_diff /= (double)m_stored[k];
-		}
-	      }
-	      if (m_numClasses > 2) {
-		m_weights[i] += ((m_classProbs[k]/w_norm)*temp_diff);
-	      } else {
-		m_weights[i] += temp_diff;
-	      }
-	    }
-	  }
-	}
+              if (m_weightByDistance) {
+                temp_diff *=
+                  (m_weightsByRank[j]/distNormAtt[k]);
+              }
+              else {
+                if (m_stored[k] > 0) {
+                  temp_diff /= (double)m_stored[k];
+                }
+              }
+              if (m_numClasses > 2) {
+                m_weights[i] += ((m_classProbs[k]/w_norm)*temp_diff);
+              } else {
+                m_weights[i] += temp_diff;
+              }
+            }
+          }
+        }
     }
   }
 
@@ -1274,51 +1272,51 @@ public class ReliefFAttributeEval
 
     for (i = 0; i < m_numInstances; i++) {
       if (i != instNum) {
-	Instance cmpInst = m_trainInstances.instance(i);
-	temp_diff = distance(cmpInst, thisInst);
+        Instance cmpInst = m_trainInstances.instance(i);
+        temp_diff = distance(cmpInst, thisInst);
 
-	// class of this training instance or 0 if numeric
-	if (m_numericClass) {
-	  cl = 0;
-	}
-	else {
-	  cl = (int)m_trainInstances.instance(i).value(m_classIndex);
-	}
+        // class of this training instance or 0 if numeric
+        if (m_numericClass) {
+          cl = 0;
+        }
+        else {
+          cl = (int)m_trainInstances.instance(i).value(m_classIndex);
+        }
 
-	// add this diff to the list for the class of this instance
-	if (m_stored[cl] < m_Knn) {
-	  m_karray[cl][m_stored[cl]][0] = temp_diff;
-	  m_karray[cl][m_stored[cl]][1] = i;
-	  m_stored[cl]++;
+        // add this diff to the list for the class of this instance
+        if (m_stored[cl] < m_Knn) {
+          m_karray[cl][m_stored[cl]][0] = temp_diff;
+          m_karray[cl][m_stored[cl]][1] = i;
+          m_stored[cl]++;
 
-	  // note the worst diff for this class
-	  for (j = 0, ww = -1.0; j < m_stored[cl]; j++) {
-	    if (m_karray[cl][j][0] > ww) {
-	      ww = m_karray[cl][j][0];
-	      m_index[cl] = j;
-	    }
-	  }
+          // note the worst diff for this class
+          for (j = 0, ww = -1.0; j < m_stored[cl]; j++) {
+            if (m_karray[cl][j][0] > ww) {
+              ww = m_karray[cl][j][0];
+              m_index[cl] = j;
+            }
+          }
 
-	  m_worst[cl] = ww;
-	}
-	else 
-	  /* if we already have stored knn for this class then check to
-	     see if this instance is better than the worst */
-	  {
-	    if (temp_diff < m_karray[cl][m_index[cl]][0]) {
-	      m_karray[cl][m_index[cl]][0] = temp_diff;
-	      m_karray[cl][m_index[cl]][1] = i;
+          m_worst[cl] = ww;
+        }
+        else 
+          /* if we already have stored knn for this class then check to
+             see if this instance is better than the worst */
+          {
+            if (temp_diff < m_karray[cl][m_index[cl]][0]) {
+              m_karray[cl][m_index[cl]][0] = temp_diff;
+              m_karray[cl][m_index[cl]][1] = i;
 
-	      for (j = 0, ww = -1.0; j < m_stored[cl]; j++) {
-		if (m_karray[cl][j][0] > ww) {
-		  ww = m_karray[cl][j][0];
-		  m_index[cl] = j;
-		}
-	      }
+              for (j = 0, ww = -1.0; j < m_stored[cl]; j++) {
+                if (m_karray[cl][j][0] > ww) {
+                  ww = m_karray[cl][j][0];
+                  m_index[cl] = j;
+                }
+              }
 
-	      m_worst[cl] = ww;
-	    }
-	  }
+              m_worst[cl] = ww;
+            }
+          }
       }
     }
   }
@@ -1336,4 +1334,3 @@ public class ReliefFAttributeEval
     runEvaluator(new ReliefFAttributeEval(), args);
   }
 }
-

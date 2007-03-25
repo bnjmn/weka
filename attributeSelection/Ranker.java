@@ -20,7 +20,6 @@
  *
  */
 
-
 package weka.attributeSelection;
 
 import weka.core.Instances;
@@ -45,12 +44,13 @@ import java.util.Vector;
  * 
  * <pre> -P &lt;start set&gt;
  *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7. 
- * Any starting attributes specified are 
- * ignored during the ranking.</pre>
+ *  Eg. 1,3,5-7.
+ *  Any starting attributes specified are
+ *  ignored during the ranking.</pre>
  * 
  * <pre> -T &lt;threshold&gt;
- *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+ *  Specify a theshold by which attributes
+ *  may be discarded from the ranking.</pre>
  * 
  * <pre> -N &lt;num to select&gt;
  *  Specify number of attributes to select</pre>
@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class Ranker 
   extends ASSearch 
@@ -258,21 +258,21 @@ public class Ranker
     Vector newVector = new Vector(3);
 
     newVector
-      .addElement(new Option("\tSpecify a starting set of attributes." 
-			     + "\n\tEg. 1,3,5-7."
-			     +"\t\nAny starting attributes specified are"
-			     +"\t\nignored during the ranking."
-			     ,"P",1
-			     , "-P <start set>"));
+      .addElement(new Option("\tSpecify a starting set of attributes.\n" 
+                             + "\tEg. 1,3,5-7.\n"
+                             +"\tAny starting attributes specified are\n"
+                             +"\tignored during the ranking."
+                             ,"P",1
+                             , "-P <start set>"));
     newVector
-      .addElement(new Option("\tSpecify a theshold by which attributes" 
-			     + "\tmay be discarded from the ranking.","T",1
-			     , "-T <threshold>"));
+      .addElement(new Option("\tSpecify a theshold by which attributes\n" 
+                             + "\tmay be discarded from the ranking.","T",1
+                             , "-T <threshold>"));
 
     newVector
       .addElement(new Option("\tSpecify number of attributes to select" 
-			     ,"N",1
-			     , "-N <num to select>"));
+                             ,"N",1
+                             , "-N <num to select>"));
 
     return newVector.elements();
 
@@ -286,12 +286,13 @@ public class Ranker
    * 
    * <pre> -P &lt;start set&gt;
    *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7. 
-   * Any starting attributes specified are 
-   * ignored during the ranking.</pre>
+   *  Eg. 1,3,5-7.
+   *  Any starting attributes specified are
+   *  ignored during the ranking.</pre>
    * 
    * <pre> -T &lt;threshold&gt;
-   *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+   *  Specify a theshold by which attributes
+   *  may be discarded from the ranking.</pre>
    * 
    * <pre> -N &lt;num to select&gt;
    *  Specify number of attributes to select</pre>
@@ -371,18 +372,18 @@ public class Ranker
       didPrint = false;
       
       if ((m_hasClass == false) || 
-	  (m_hasClass == true && i != m_classIndex)) {
-	FString.append((m_starting[i] + 1));
-	didPrint = true;
+          (m_hasClass == true && i != m_classIndex)) {
+        FString.append((m_starting[i] + 1));
+        didPrint = true;
       }
       
       if (i == (m_starting.length - 1)) {
-	FString.append("");
+        FString.append("");
       }
       else {
-	if (didPrint) {
-	  FString.append(",");
-	}
+        if (didPrint) {
+          FString.append(",");
+        }
       }
     }
     
@@ -405,8 +406,8 @@ public class Ranker
 
     if (!(ASEval instanceof AttributeEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 
-			   + " is not a" 
-			   + "Attribute evaluator!");
+                           + " is not a" 
+                           + "Attribute evaluator!");
     }
 
     m_numAttribs = data.numAttributes();
@@ -416,10 +417,10 @@ public class Ranker
     }
     else {
       m_classIndex = data.classIndex();
-      if (m_classIndex >= 0) {	
-	m_hasClass = true;
+      if (m_classIndex >= 0) {  
+        m_hasClass = true;
       } else {
-	m_hasClass = false;
+        m_hasClass = false;
       }
     }
 
@@ -428,8 +429,8 @@ public class Ranker
     if (ASEval instanceof AttributeTransformer) {
       data = ((AttributeTransformer)ASEval).transformedHeader();
       if (m_classIndex >= 0 && data.classIndex() >= 0) {
-	m_classIndex = data.classIndex();
-	m_hasClass = true;
+        m_classIndex = data.classIndex();
+        m_hasClass = true;
       }
     }
 
@@ -447,19 +448,19 @@ public class Ranker
       // see if the supplied list contains the class index
       boolean ok = false;
       for (i = 0; i < sl; i++) {
-	if (m_starting[i] == m_classIndex) {
-	  ok = true;
-	  break;
-	}
+        if (m_starting[i] == m_classIndex) {
+          ok = true;
+          break;
+        }
       }
       
       if (ok == false) {
-	sl++;
+        sl++;
       }
     }
     else {
       if (m_hasClass == true) {
-	sl++;
+        sl++;
       }
     }
 
@@ -470,7 +471,7 @@ public class Ranker
     // add in those attributes not in the starting (omit list)
     for (i = 0, j = 0; i < m_numAttribs; i++) {
       if (!inStarting(i)) {
-	m_attributeList[j++] = i;
+        m_attributeList[j++] = i;
       }
     }
 
@@ -503,7 +504,7 @@ public class Ranker
 
     if (m_attributeList == null || m_attributeMerit == null) {
       throw  new Exception("Search must be performed before a ranked " 
-			   + "attribute list can be obtained");
+                           + "attribute list can be obtained");
     }
 
     int[] ranked = Utils.sort(m_attributeMerit);
@@ -527,9 +528,9 @@ public class Ranker
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
-	m_calculatedNumToSelect = bestToWorst.length;
+        m_calculatedNumToSelect = bestToWorst.length;
       } else {
-	determineNumToSelectFromThreshold(bestToWorst);
+        determineNumToSelectFromThreshold(bestToWorst);
       }
     }
     /*    if (m_numToSelect > 0) {
@@ -543,7 +544,7 @@ public class Ranker
     int count = 0;
     for (int i = 0; i < ranking.length; i++) {
       if (ranking[i][1] > m_threshold) {
-	count++;
+        count++;
       }
     }
     m_calculatedNumToSelect = count;
@@ -560,7 +561,7 @@ public class Ranker
     }
 
     m_threshold = (ranking[m_numToSelect-1][1] + 
-		   ranking[m_numToSelect][1]) / 2.0;
+                   ranking[m_numToSelect][1]) / 2.0;
   }
 
   /**
@@ -580,7 +581,7 @@ public class Ranker
 
     if (m_threshold != -Double.MAX_VALUE) {
       BfString.append("\tThreshold for discarding attributes: "
-		      + Utils.doubleToString(m_threshold,8,4)+"\n");
+                      + Utils.doubleToString(m_threshold,8,4)+"\n");
     }
 
     return BfString.toString();
@@ -611,11 +612,10 @@ public class Ranker
 
     for (int i = 0; i < m_starting.length; i++) {
       if (m_starting[i] == feat) {
-	return  true;
+        return  true;
       }
     }
 
     return  false;
   }
-
 }

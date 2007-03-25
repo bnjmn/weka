@@ -47,7 +47,7 @@ import java.util.Vector;
  *  evaluator options LAST on the command line following a "--".
  *  eg.:
  *   -A weka.attributeSelection.GainRatioAttributeEval ... -- -M
- * (default: weka.attributeSelection.GainRatioAttributeEval)</pre>
+ *  (default: weka.attributeSelection.GainRatioAttributeEval)</pre>
  * 
  * <pre> -S &lt;step size&gt;
  *  number of attributes to be added from the
@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class RankSearch 
   extends ASSearch 
@@ -222,29 +222,29 @@ public class RankSearch
     Vector newVector = new Vector(4);
     
     newVector.addElement(new Option(
-	"\tclass name of attribute evaluator to use for ranking. Place any\n" 
-	+ "\tevaluator options LAST on the command line following a \"--\".\n" 
-	+ "\teg.:\n"
-	+ "\t\t-A weka.attributeSelection.GainRatioAttributeEval ... -- -M\n"
-	+ "(default: weka.attributeSelection.GainRatioAttributeEval)", 
-	"A", 1, "-A <attribute evaluator>"));
+        "\tclass name of attribute evaluator to use for ranking. Place any\n" 
+        + "\tevaluator options LAST on the command line following a \"--\".\n" 
+        + "\teg.:\n"
+        + "\t\t-A weka.attributeSelection.GainRatioAttributeEval ... -- -M\n"
+        + "\t(default: weka.attributeSelection.GainRatioAttributeEval)", 
+        "A", 1, "-A <attribute evaluator>"));
     
     newVector.addElement(new Option(
-	"\tnumber of attributes to be added from the"
-	+"\n\tranking in each iteration (default = 1).", 
-	"S", 1,"-S <step size>"));
+        "\tnumber of attributes to be added from the"
+        +"\n\tranking in each iteration (default = 1).", 
+        "S", 1,"-S <step size>"));
     
     newVector.addElement(new Option(
-	"\tpoint in the ranking to start evaluating from. "
-	+"\n\t(default = 0, ie. the head of the ranking).", 
-	"R", 1,"-R <start point>"));
+        "\tpoint in the ranking to start evaluating from. "
+        +"\n\t(default = 0, ie. the head of the ranking).", 
+        "R", 1,"-R <start point>"));
 
     if ((m_ASEval != null) && 
-	(m_ASEval instanceof OptionHandler)) {
+        (m_ASEval instanceof OptionHandler)) {
       newVector.addElement(new Option("", "", 0, "\nOptions specific to " 
-				      + "evaluator " 
-				      + m_ASEval.getClass().getName() 
-				      + ":"));
+                                      + "evaluator " 
+                                      + m_ASEval.getClass().getName() 
+                                      + ":"));
       Enumeration enu = ((OptionHandler)m_ASEval).listOptions();
 
       while (enu.hasMoreElements()) {
@@ -267,7 +267,7 @@ public class RankSearch
    *  evaluator options LAST on the command line following a "--".
    *  eg.:
    *   -A weka.attributeSelection.GainRatioAttributeEval ... -- -M
-   * (default: weka.attributeSelection.GainRatioAttributeEval)</pre>
+   *  (default: weka.attributeSelection.GainRatioAttributeEval)</pre>
    * 
    * <pre> -S &lt;step size&gt;
    *  number of attributes to be added from the
@@ -308,7 +308,7 @@ public class RankSearch
     if (optionString.length() == 0)
       optionString = GainRatioAttributeEval.class.getName();
     setAttributeEvaluator(ASEvaluation.forName(optionString, 
-				     Utils.partitionOptions(options)));
+                                     Utils.partitionOptions(options)));
   }
 
   /**
@@ -320,7 +320,7 @@ public class RankSearch
     String[] evaluatorOptions = new String[0];
 
     if ((m_ASEval != null) && 
-	(m_ASEval instanceof OptionHandler)) {
+        (m_ASEval instanceof OptionHandler)) {
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
     }
 
@@ -339,7 +339,7 @@ public class RankSearch
     if (evaluatorOptions.length > 0) {
       options[current++] = "--";
       System.arraycopy(evaluatorOptions, 0, options, current, 
-	  evaluatorOptions.length);
+          evaluatorOptions.length);
       current += evaluatorOptions.length;
     }
 
@@ -376,8 +376,8 @@ public class RankSearch
     
     if (!(ASEval instanceof SubsetEvaluator)) {
       throw  new Exception(ASEval.getClass().getName() 
-			   + " is not a " 
-			   + "Subset evaluator!");
+                           + " is not a " 
+                           + "Subset evaluator!");
     }
 
     m_SubsetEval = ASEval;
@@ -386,14 +386,14 @@ public class RankSearch
 
     /*    if (m_ASEval instanceof AttributeTransformer) {
       throw new Exception("Can't use an attribute transformer "
-			  +"with RankSearch");
-			  } */
+                          +"with RankSearch");
+                          } */
     if (m_ASEval instanceof UnsupervisedAttributeEvaluator || 
-	m_ASEval instanceof UnsupervisedSubsetEvaluator) {
+        m_ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
       /*      if (!(m_SubsetEval instanceof UnsupervisedSubsetEvaluator)) {
-	throw new Exception("Must use an unsupervised subset evaluator.");
-	} */
+        throw new Exception("Must use an unsupervised subset evaluator.");
+        } */
     }
     else {
       m_hasClass = true;
@@ -405,10 +405,10 @@ public class RankSearch
       Ranker ranker = new Ranker();
       ((AttributeEvaluator)m_ASEval).buildEvaluator(m_Instances);
       if (m_ASEval instanceof AttributeTransformer) {
-	// get the transformed data a rebuild the subset evaluator
-	m_Instances = ((AttributeTransformer)m_ASEval).
-	  transformedData();
-	((SubsetEvaluator)m_SubsetEval).buildEvaluator(m_Instances);
+        // get the transformed data a rebuild the subset evaluator
+        m_Instances = ((AttributeTransformer)m_ASEval).
+          transformedData();
+        ((SubsetEvaluator)m_SubsetEval).buildEvaluator(m_Instances);
       }
       m_Ranking = ranker.search((AttributeEvaluator)m_ASEval, m_Instances);
     } else {
@@ -420,7 +420,7 @@ public class RankSearch
       rankres = fs.rankedAttributes();
       m_Ranking = new int[rankres.length];
       for (int i=0;i<rankres.length;i++) {
-	m_Ranking[i] = (int)rankres[i][0];
+        m_Ranking[i] = (int)rankres[i][0];
       }
     }
 
@@ -428,13 +428,13 @@ public class RankSearch
     for (int i=m_startPoint;i<m_Ranking.length;i+=m_add) {
       temp_group = new BitSet(m_numAttribs);
       for (int j=0;j<=i;j++) {
-	temp_group.set(m_Ranking[j]);
+        temp_group.set(m_Ranking[j]);
       }
       temp_merit = ((SubsetEvaluator)m_SubsetEval).evaluateSubset(temp_group);
 
       if (temp_merit > best_merit) {
-	best_merit = temp_merit;;
-	best_group = temp_group;
+        best_merit = temp_merit;;
+        best_group = temp_group;
       }
     }
     m_bestMerit = best_merit;
@@ -452,7 +452,7 @@ public class RankSearch
     // count how many were selected
     for (int i = 0; i < m_numAttribs; i++) {
       if (group.get(i)) {
-	count++;
+        count++;
       }
     }
 
@@ -461,7 +461,7 @@ public class RankSearch
 
     for (int i = 0; i < m_numAttribs; i++) {
       if (group.get(i)) {
-	list[count++] = i;
+        list[count++] = i;
       }
     }
 
@@ -476,12 +476,12 @@ public class RankSearch
     StringBuffer text = new StringBuffer();
     text.append("\tRankSearch :\n");
     text.append("\tAttribute evaluator : "
-		+ getAttributeEvaluator().getClass().getName() +" ");
+                + getAttributeEvaluator().getClass().getName() +" ");
     if (m_ASEval instanceof OptionHandler) {
       String[] evaluatorOptions = new String[0];
       evaluatorOptions = ((OptionHandler)m_ASEval).getOptions();
       for (int i=0;i<evaluatorOptions.length;i++) {
-	text.append(evaluatorOptions[i]+' ');
+        text.append(evaluatorOptions[i]+' ');
       }
     }
     text.append("\n");
@@ -489,8 +489,8 @@ public class RankSearch
     int rlength = (int)(Math.log(m_Ranking.length) / Math.log(10) + 1);
     for (int i=0;i<m_Ranking.length;i++) {
       text.append("\t "+Utils.doubleToString((double)(m_Ranking[i]+1),
-					     rlength,0)
-		  +" "+m_Instances.attribute(m_Ranking[i]).name()+'\n');
+                                             rlength,0)
+                  +" "+m_Instances.attribute(m_Ranking[i]).name()+'\n');
     }
     text.append("\tMerit of best subset found : ");
     int fieldwidth = 3;
@@ -505,8 +505,8 @@ public class RankSearch
     }
 
     text.append(Utils.doubleToString(Math.abs(m_bestMerit),
-				     fieldwidth+(int)precision,
-				     (int)precision)+"\n");
+                                     fieldwidth+(int)precision,
+                                     (int)precision)+"\n");
     return text.toString();
   }
 }
