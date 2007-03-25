@@ -80,7 +80,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.44 $
+ * @version  $Revision: 1.45 $
  */
 public class AttributeSelection 
   implements Serializable {
@@ -306,19 +306,25 @@ public class AttributeSelection
     String trainFileName, searchName;
     Instances train = null;
     ASSearch searchMethod = null;
+    String[] optionsTmp = (String[]) options.clone();
+    boolean helpRequested = false;
 
     try {
       // get basic options (options the same for all attribute selectors
       trainFileName = Utils.getOption('i', options);
+      helpRequested = Utils.getFlag('h', optionsTmp);
 
-      if (trainFileName.length() == 0) {
-        searchName = Utils.getOption('s', options);
-	
+      if (helpRequested || (trainFileName.length() == 0)) {
+        searchName = Utils.getOption('s', optionsTmp);
         if (searchName.length() != 0) {
-          searchMethod = (ASSearch)Class.forName(searchName).newInstance();
+          String[] searchOptions = Utils.splitOptions(searchName);
+          searchMethod = (ASSearch)Class.forName(searchOptions[0]).newInstance();
         }
 
-        throw  new Exception("No training file given.");
+        if (helpRequested)
+          throw new Exception("Help requested.");
+        else
+          throw new Exception("No training file given.");
       }
     }
     catch (Exception e) {

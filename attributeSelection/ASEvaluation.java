@@ -35,7 +35,7 @@ import java.io.Serializable;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public abstract class ASEvaluation
   implements Serializable, CapabilitiesHandler {
@@ -138,7 +138,10 @@ public abstract class ASEvaluation
 	  AttributeSelection.SelectAttributes(evaluator, options));
     }
     catch (Exception e) {
-      e.printStackTrace();
+      String msg = e.toString().toLowerCase();
+      if (    (msg.indexOf("help requested") == -1)
+           && (msg.indexOf("no training file given") == -1) )
+        e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
