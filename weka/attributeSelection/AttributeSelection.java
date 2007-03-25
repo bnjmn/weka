@@ -44,27 +44,27 @@ import java.lang.reflect.Method;
  * -h <br>
  * Display help. <p>
  *
- * -I <name of input file> <br>
+ * -i &lt;name of input file&gt; <br>
  * Specify the training arff file. <p>
  * 
- * -C <class index> <br>
+ * -c &lt;class index&gt; <br>
  * The index of the attribute to use as the class. <p>
  * 
- * -S <search method> <br>
+ * -s &lt;search method&gt; <br>
  * The full class name of the search method followed by search method options
  * (if any).<br>
- * Eg. -S "weka.attributeSelection.BestFirst -N 10" <p>
+ * Eg. -s "weka.attributeSelection.BestFirst -N 10" <p>
  *
- * -X <number of folds> <br>
+ * -x &lt;number of folds&gt; <br>
  * Perform a cross validation. <p>
  *
- * -N <random number seed> <br>
- * Specify a random number seed. Use in conjuction with -X. (Default = 1). <p>
+ * -n &lt;random number seed&gt; <br>
+ * Specify a random number seed. Use in conjuction with -x. (Default = 1). <p>
  * 
  * ------------------------------------------------------------------------ <p>
  * 
  * Example usage as the main of an attribute evaluator (called FunkyEvaluator):
- * <code> <pre>
+ * <pre>
  * public static void main(String [] args) {
  *   try {
  *     ASEvaluator eval = new FunkyEvaluator();
@@ -73,13 +73,13 @@ import java.lang.reflect.Method;
  *     System.err.println(e.getMessage());
  *   }
  * }
- * </code> </pre>
+ * </pre>
  * <p>
  *
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.35.2.3 $
+ * @version  $Revision: 1.35.2.4 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -301,28 +301,34 @@ public class AttributeSelection implements Serializable {
     String trainFileName, searchName;
     Instances train = null;
     ASSearch searchMethod = null;
+    String[] optionsTmp = (String[]) options.clone();
+    boolean helpRequested = false;
 
     try {
       // get basic options (options the same for all attribute selectors
-      trainFileName = Utils.getOption('I', options);
-
-      if (trainFileName.length() == 0) {
-        searchName = Utils.getOption('S', options);
-	
+      trainFileName = Utils.getOption('i', options);
+      helpRequested = Utils.getFlag('h', optionsTmp);
+      
+      if (helpRequested || (trainFileName.length() == 0)) {
+        searchName = Utils.getOption('s', optionsTmp);
         if (searchName.length() != 0) {
-          searchMethod = (ASSearch)Class.forName(searchName).newInstance();
+          String[] searchOptions = Utils.splitOptions(searchName);
+          searchMethod = (ASSearch)Class.forName(searchOptions[0]).newInstance();
         }
 
-        throw  new Exception("No training file given.");
+        if (helpRequested)
+          throw new Exception("Help requested.");
+        else
+          throw new Exception("No training file given.");
       }
     }
     catch (Exception e) {
-      throw  new Exception('\n' + e.getMessage() 
+      throw new Exception('\n' + e.getMessage() 
 			   + makeOptionString(ASEvaluator, searchMethod));
     }
 
     train = new Instances(new FileReader(trainFileName));
-    return  SelectAttributes(ASEvaluator, options, train);
+    return SelectAttributes(ASEvaluator, options, train);
   }
 
   /**
@@ -817,7 +823,7 @@ public class AttributeSelection implements Serializable {
       }
 
       // get basic options (options the same for all attribute selectors
-      classString = Utils.getOption('C', options);
+      classString = Utils.getOption('c', options);
 
       if (classString.length() != 0) {
 	if (classString.equals("first")) {
@@ -842,7 +848,7 @@ public class AttributeSelection implements Serializable {
 	//	train.setClassIndex(classIndex - 1);
       }
       
-      foldsString = Utils.getOption('X', options);
+      foldsString = Utils.getOption('x', options);
 
       if (foldsString.length() != 0) {
 	folds = Integer.parseInt(foldsString);
@@ -852,7 +858,7 @@ public class AttributeSelection implements Serializable {
       trainSelector.setFolds(folds);
       trainSelector.setXval(doCrossVal);
 
-      seedString = Utils.getOption('N', options);
+      seedString = Utils.getOption('n', options);
 
       if (seedString.length() != 0) {
 	seed = Integer.parseInt(seedString);
@@ -860,7 +866,7 @@ public class AttributeSelection implements Serializable {
 
       trainSelector.setSeed(seed);
 
-      searchName = Utils.getOption('S', options);
+      searchName = Utils.getOption('s', options);
 
       if ((searchName.length() == 0) && 
 	  (!(ASEvaluator instanceof AttributeEvaluator))) {
