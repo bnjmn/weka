@@ -101,7 +101,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -640,7 +640,7 @@ public class AttributeSelectionPanel
           
           // attribute selection command
           list = new Vector();
-          list.add("-S");
+          list.add("-s");
           if (search instanceof OptionHandler)
             list.add(sname + " " + Utils.joinOptions(((OptionHandler) search).getOptions()));
           else

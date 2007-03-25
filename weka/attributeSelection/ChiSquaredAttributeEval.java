@@ -52,13 +52,13 @@ import java.util.Vector;
  *  treat missing values as a seperate value.</pre>
  * 
  * <pre> -B
- *  just binarize numeric attributes instead
- *   of properly discretizing them.</pre>
+ *  just binarize numeric attributes instead 
+ *  of properly discretizing them.</pre>
  * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
  * @see Discretize
  * @see NumericToBinary
  */
@@ -102,10 +102,10 @@ public class ChiSquaredAttributeEval
   public Enumeration listOptions () {
     Vector newVector = new Vector(2);
     newVector.addElement(new Option("\ttreat missing values as a seperate " 
-				    + "value.", "M", 0, "-M"));
-    newVector.addElement(new Option("\tjust binarize numeric attributes instead\n " 
-				    +"\tof properly discretizing them.", "B", 0, 
-				    "-B"));
+                                    + "value.", "M", 0, "-M"));
+    newVector.addElement(new Option("\tjust binarize numeric attributes instead \n" 
+                                    +"\tof properly discretizing them.", "B", 0, 
+                                    "-B"));
     return  newVector.elements();
   }
 
@@ -120,8 +120,8 @@ public class ChiSquaredAttributeEval
    *  treat missing values as a seperate value.</pre>
    * 
    * <pre> -B
-   *  just binarize numeric attributes instead
-   *   of properly discretizing them.</pre>
+   *  just binarize numeric attributes instead 
+   *  of properly discretizing them.</pre>
    * 
    <!-- options-end -->
    *
@@ -273,8 +273,8 @@ public class ChiSquaredAttributeEval
     double[][][] counts = new double[data.numAttributes()][][];
     for (int k = 0; k < data.numAttributes(); k++) {
       if (k != classIndex) {
-	int numValues = data.attribute(k).numValues();
-	counts[k] = new double[numValues + 1][numClasses + 1];
+        int numValues = data.attribute(k).numValues();
+        counts[k] = new double[numValues + 1][numClasses + 1];
       }
     }
 
@@ -283,16 +283,16 @@ public class ChiSquaredAttributeEval
     for (int k = 0; k < numInstances; k++) {
       Instance inst = data.instance(k);
       if (inst.classIsMissing()) {
-	temp[numClasses] += inst.weight();
+        temp[numClasses] += inst.weight();
       } else {
-	temp[(int)inst.classValue()] += inst.weight();
+        temp[(int)inst.classValue()] += inst.weight();
       }
     }
     for (int k = 0; k < counts.length; k++) {
       if (k != classIndex) {
-	for (int i = 0; i < temp.length; i++) {
-	  counts[k][0][i] = temp[i];
-	}
+        for (int i = 0; i < temp.length; i++) {
+          counts[k][0][i] = temp[i];
+        }
       }
     }
 
@@ -300,28 +300,28 @@ public class ChiSquaredAttributeEval
     for (int k = 0; k < numInstances; k++) {
       Instance inst = data.instance(k);
       for (int i = 0; i < inst.numValues(); i++) {
-	if (inst.index(i) != classIndex) {
-	  if (inst.isMissingSparse(i) || inst.classIsMissing()) {
-	    if (!inst.isMissingSparse(i)) {
-	      counts[inst.index(i)][(int)inst.valueSparse(i)][numClasses] += 
-		inst.weight();
-	      counts[inst.index(i)][0][numClasses] -= inst.weight();
-	    } else if (!inst.classIsMissing()) {
-	      counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
-		[(int)inst.classValue()] += inst.weight();
-	      counts[inst.index(i)][0][(int)inst.classValue()] -= 
-		inst.weight();
-	    } else {
-	      counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
-		[numClasses] += inst.weight();
-	      counts[inst.index(i)][0][numClasses] -= inst.weight();
-	    }
-	  } else {
-	    counts[inst.index(i)][(int)inst.valueSparse(i)]
-	      [(int)inst.classValue()] += inst.weight();
-	    counts[inst.index(i)][0][(int)inst.classValue()] -= inst.weight();
-	  }
-	}
+        if (inst.index(i) != classIndex) {
+          if (inst.isMissingSparse(i) || inst.classIsMissing()) {
+            if (!inst.isMissingSparse(i)) {
+              counts[inst.index(i)][(int)inst.valueSparse(i)][numClasses] += 
+                inst.weight();
+              counts[inst.index(i)][0][numClasses] -= inst.weight();
+            } else if (!inst.classIsMissing()) {
+              counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
+                [(int)inst.classValue()] += inst.weight();
+              counts[inst.index(i)][0][(int)inst.classValue()] -= 
+                inst.weight();
+            } else {
+              counts[inst.index(i)][data.attribute(inst.index(i)).numValues()]
+                [numClasses] += inst.weight();
+              counts[inst.index(i)][0][numClasses] -= inst.weight();
+            }
+          } else {
+            counts[inst.index(i)][(int)inst.valueSparse(i)]
+              [(int)inst.classValue()] += inst.weight();
+            counts[inst.index(i)][0][(int)inst.classValue()] -= inst.weight();
+          }
+        }
       }
     }
 
@@ -329,57 +329,57 @@ public class ChiSquaredAttributeEval
     if (m_missing_merge) {
       
       for (int k = 0; k < data.numAttributes(); k++) {
-	if (k != classIndex) {
-	  int numValues = data.attribute(k).numValues();
+        if (k != classIndex) {
+          int numValues = data.attribute(k).numValues();
 
-	  // Compute marginals
-	  double[] rowSums = new double[numValues];
-	  double[] columnSums = new double[numClasses];
-	  double sum = 0;
-	  for (int i = 0; i < numValues; i++) {
-	    for (int j = 0; j < numClasses; j++) {
-	      rowSums[i] += counts[k][i][j];
-	      columnSums[j] += counts[k][i][j];
-	    }
-	    sum += rowSums[i];
-	  }
+          // Compute marginals
+          double[] rowSums = new double[numValues];
+          double[] columnSums = new double[numClasses];
+          double sum = 0;
+          for (int i = 0; i < numValues; i++) {
+            for (int j = 0; j < numClasses; j++) {
+              rowSums[i] += counts[k][i][j];
+              columnSums[j] += counts[k][i][j];
+            }
+            sum += rowSums[i];
+          }
 
-	  if (Utils.gr(sum, 0)) {
-	    double[][] additions = new double[numValues][numClasses];
+          if (Utils.gr(sum, 0)) {
+            double[][] additions = new double[numValues][numClasses];
 
-	    // Compute what needs to be added to each row
-	    for (int i = 0; i < numValues; i++) {
-	      for (int j = 0; j  < numClasses; j++) {
-		additions[i][j] = (rowSums[i] / sum) * counts[k][numValues][j];
-	      }
-	    }
-	    
-	    // Compute what needs to be added to each column
-	    for (int i = 0; i < numClasses; i++) {
-	      for (int j = 0; j  < numValues; j++) {
-		additions[j][i] += (columnSums[i] / sum) * 
-		  counts[k][j][numClasses];
-	      }
-	    }
-	    
-	    // Compute what needs to be added to each cell
-	    for (int i = 0; i < numClasses; i++) {
-	      for (int j = 0; j  < numValues; j++) {
-		additions[j][i] += (counts[k][j][i] / sum) * 
-		  counts[k][numValues][numClasses];
-	      }
-	    }
-	    
-	    // Make new contingency table
-	    double[][] newTable = new double[numValues][numClasses];
-	    for (int i = 0; i < numValues; i++) {
-	      for (int j = 0; j < numClasses; j++) {
-		newTable[i][j] = counts[k][i][j] + additions[i][j];
-	      }
-	    }
-	    counts[k] = newTable;
-	  }
-	}
+            // Compute what needs to be added to each row
+            for (int i = 0; i < numValues; i++) {
+              for (int j = 0; j  < numClasses; j++) {
+                additions[i][j] = (rowSums[i] / sum) * counts[k][numValues][j];
+              }
+            }
+            
+            // Compute what needs to be added to each column
+            for (int i = 0; i < numClasses; i++) {
+              for (int j = 0; j  < numValues; j++) {
+                additions[j][i] += (columnSums[i] / sum) * 
+                  counts[k][j][numClasses];
+              }
+            }
+            
+            // Compute what needs to be added to each cell
+            for (int i = 0; i < numClasses; i++) {
+              for (int j = 0; j  < numValues; j++) {
+                additions[j][i] += (counts[k][j][i] / sum) * 
+                  counts[k][numValues][numClasses];
+              }
+            }
+            
+            // Make new contingency table
+            double[][] newTable = new double[numValues][numClasses];
+            for (int i = 0; i < numValues; i++) {
+              for (int j = 0; j < numClasses; j++) {
+                newTable[i][j] = counts[k][i][j] + additions[i][j];
+              }
+            }
+            counts[k] = newTable;
+          }
+        }
       }
     }
 
@@ -387,8 +387,8 @@ public class ChiSquaredAttributeEval
     m_ChiSquareds = new double[data.numAttributes()];
     for (int i = 0; i < data.numAttributes(); i++) {
       if (i != classIndex) {
-	m_ChiSquareds[i] = ContingencyTables.
-	  chiVal(ContingencyTables.reduceMatrix(counts[i]), false); 
+        m_ChiSquareds[i] = ContingencyTables.
+          chiVal(ContingencyTables.reduceMatrix(counts[i]), false); 
       }
     }
   }
@@ -430,10 +430,10 @@ public class ChiSquaredAttributeEval
     else {
       text.append("\tChi-squared Ranking Filter");
       if (!m_missing_merge) {
-	text.append("\n\tMissing values treated as seperate");
+        text.append("\n\tMissing values treated as seperate");
       }
       if (m_Binarize) {
-	text.append("\n\tNumeric attributes are just binarized");
+        text.append("\n\tNumeric attributes are just binarized");
       }
     }
     

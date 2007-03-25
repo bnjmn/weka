@@ -50,22 +50,22 @@ import java.util.Random;
  * -h <br/>
  * Display help. <p/>
  *
- * -I &lt;name of input file&gt; <br/>
+ * -i &lt;name of input file&gt; <br/>
  * Specify the training data file. <p/>
  * 
- * -C &lt;class index&gt; <br/>
+ * -c &lt;class index&gt; <br/>
  * The index of the attribute to use as the class. <p/>
  * 
- * -S &lt;search method&gt; <br/>
+ * -s &lt;search method&gt; <br/>
  * The full class name of the search method followed by search method options
  * (if any).<br/>
- * Eg. -S "weka.attributeSelection.BestFirst -N 10" <p/>
+ * Eg. -s "weka.attributeSelection.BestFirst -N 10" <p/>
  *
- * -X &lt;number of folds&gt; <br/>
+ * -x &lt;number of folds&gt; <br/>
  * Perform a cross validation. <p/>
  *
- * -N &lt;random number seed&gt; <br/>
- * Specify a random number seed. Use in conjuction with -X. (Default = 1). <p/>
+ * -n &lt;random number seed&gt; <br/>
+ * Specify a random number seed. Use in conjuction with -x. (Default = 1). <p/>
  * 
  * ------------------------------------------------------------------------ <p/>
  * 
@@ -80,7 +80,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.43 $
+ * @version  $Revision: 1.44 $
  */
 public class AttributeSelection 
   implements Serializable {
@@ -309,10 +309,10 @@ public class AttributeSelection
 
     try {
       // get basic options (options the same for all attribute selectors
-      trainFileName = Utils.getOption('I', options);
+      trainFileName = Utils.getOption('i', options);
 
       if (trainFileName.length() == 0) {
-        searchName = Utils.getOption('S', options);
+        searchName = Utils.getOption('s', options);
 	
         if (searchName.length() != 0) {
           searchMethod = (ASSearch)Class.forName(searchName).newInstance();
@@ -816,7 +816,7 @@ public class AttributeSelection
 	classIndex = train.classIndex() + 1;
 
       // get basic options (options the same for all attribute selectors
-      classString = Utils.getOption('C', options);
+      classString = Utils.getOption('c', options);
 
       if (classString.length() != 0) {
 	if (classString.equals("first")) {
@@ -841,7 +841,7 @@ public class AttributeSelection
 	//	train.setClassIndex(classIndex - 1);
       }
       
-      foldsString = Utils.getOption('X', options);
+      foldsString = Utils.getOption('x', options);
 
       if (foldsString.length() != 0) {
 	folds = Integer.parseInt(foldsString);
@@ -851,7 +851,7 @@ public class AttributeSelection
       trainSelector.setFolds(folds);
       trainSelector.setXval(doCrossVal);
 
-      seedString = Utils.getOption('N', options);
+      seedString = Utils.getOption('n', options);
 
       if (seedString.length() != 0) {
 	seed = Integer.parseInt(seedString);
@@ -859,7 +859,7 @@ public class AttributeSelection
 
       trainSelector.setSeed(seed);
 
-      searchName = Utils.getOption('S', options);
+      searchName = Utils.getOption('s', options);
 
       if ((searchName.length() == 0) && 
 	  (!(ASEvaluator instanceof AttributeEvaluator))) {
@@ -1011,18 +1011,18 @@ public class AttributeSelection
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
-    optionsText.append("-h display this help\n");
-    optionsText.append("-I <name of input file>\n");
+    optionsText.append("-h\n\tdisplay this help\n");
+    optionsText.append("-i <name of input file>\n");
     optionsText.append("\tSets training file.\n");
-    optionsText.append("-C <class index>\n");
+    optionsText.append("-c <class index>\n");
     optionsText.append("\tSets the class index for supervised attribute\n");
     optionsText.append("\tselection. Default=last column.\n");
-    optionsText.append("-S <Class name>\n");
+    optionsText.append("-s <class name>\n");
     optionsText.append("\tSets search method for subset evaluators.\n");
-    optionsText.append("-X <number of folds>\n");
+    optionsText.append("-x <number of folds>\n");
     optionsText.append("\tPerform a cross validation.\n");
-    optionsText.append("-N <random number seed>\n");
-    optionsText.append("\tUse in conjunction with -X.\n");
+    optionsText.append("-n <random number seed>\n");
+    optionsText.append("\tUse in conjunction with -x.\n");
 
     // Get attribute evaluator-specific options
     if (ASEvaluator instanceof OptionHandler) {

@@ -93,7 +93,7 @@ import java.util.Vector;
  * <pre> -R &lt;report frequency&gt;
  *  Set frequency of generation reports.
  *  e.g, setting the value to 5 will 
- *   report every 5th generation
+ *  report every 5th generation
  *  (default = number of generations)</pre>
  * 
  * <pre> -S &lt;seed&gt;
@@ -103,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class GeneticSearch 
   extends ASSearch 
@@ -299,35 +299,35 @@ public class GeneticSearch
     Vector newVector = new Vector(6);
 
     newVector.addElement(new Option("\tSpecify a starting set of attributes." 
-				    + "\n\tEg. 1,3,5-7."
-				    +"If supplied, the starting set becomes"
-				    +"\n\tone member of the initial random"
-				    +"\n\tpopulation."
-				    ,"P",1
-				    , "-P <start set>"));
+                                    + "\n\tEg. 1,3,5-7."
+                                    +"If supplied, the starting set becomes"
+                                    +"\n\tone member of the initial random"
+                                    +"\n\tpopulation."
+                                    ,"P",1
+                                    , "-P <start set>"));
     newVector.addElement(new Option("\tSet the size of the population."
-				    +"\n\t(default = 10)."
-				    , "Z", 1
-				    , "-Z <population size>"));
+                                    +"\n\t(default = 10)."
+                                    , "Z", 1
+                                    , "-Z <population size>"));
     newVector.addElement(new Option("\tSet the number of generations."
-				    +"\n\t(default = 20)" 
-				    , "G", 1, "-G <number of generations>"));
+                                    +"\n\t(default = 20)" 
+                                    , "G", 1, "-G <number of generations>"));
     newVector.addElement(new Option("\tSet the probability of crossover."
-				    +"\n\t(default = 0.6)" 
-				    , "C", 1, "-C <probability of"
-				    +" crossover>"));    
+                                    +"\n\t(default = 0.6)" 
+                                    , "C", 1, "-C <probability of"
+                                    +" crossover>"));    
     newVector.addElement(new Option("\tSet the probability of mutation."
-				    +"\n\t(default = 0.033)" 
-				    , "M", 1, "-M <probability of mutation>"));
+                                    +"\n\t(default = 0.033)" 
+                                    , "M", 1, "-M <probability of mutation>"));
 
     newVector.addElement(new Option("\tSet frequency of generation reports."
-				    +"\n\te.g, setting the value to 5 will "
-				    +"\n\t report every 5th generation"
-				    +"\n\t(default = number of generations)" 
-				    , "R", 1, "-R <report frequency>"));
+                                    +"\n\te.g, setting the value to 5 will "
+                                    +"\n\treport every 5th generation"
+                                    +"\n\t(default = number of generations)" 
+                                    , "R", 1, "-R <report frequency>"));
     newVector.addElement(new Option("\tSet the random number seed."
-				    +"\n\t(default = 1)" 
-				    , "S", 1, "-S <seed>"));
+                                    +"\n\t(default = 1)" 
+                                    , "S", 1, "-S <seed>"));
     return  newVector.elements();
   }
 
@@ -362,7 +362,7 @@ public class GeneticSearch
    * <pre> -R &lt;report frequency&gt;
    *  Set frequency of generation reports.
    *  e.g, setting the value to 5 will 
-   *   report every 5th generation
+   *  report every 5th generation
    *  (default = number of generations)</pre>
    * 
    * <pre> -S &lt;seed&gt;
@@ -658,7 +658,7 @@ public class GeneticSearch
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
+    TechnicalInformation        result;
     
     result = new TechnicalInformation(Type.BOOK);
     result.setValue(Field.AUTHOR, "David E. Goldberg");
@@ -698,18 +698,18 @@ public class GeneticSearch
       didPrint = false;
       
       if ((m_hasClass == false) || 
-	  (m_hasClass == true && i != m_classIndex)) {
-	FString.append((m_starting[i] + 1));
-	didPrint = true;
+          (m_hasClass == true && i != m_classIndex)) {
+        FString.append((m_starting[i] + 1));
+        didPrint = true;
       }
       
       if (i == (m_starting.length - 1)) {
-	FString.append("");
+        FString.append("");
       }
       else {
-	if (didPrint) {
-	  FString.append(",");
-	  }
+        if (didPrint) {
+          FString.append(",");
+          }
       }
     }
 
@@ -733,9 +733,9 @@ public class GeneticSearch
     GAString.append("\tPopulation size: "+m_popSize);
     GAString.append("\n\tNumber of generations: "+m_maxGenerations);
     GAString.append("\n\tProbability of crossover: "
-		+Utils.doubleToString(m_pCrossover,6,3));
+                +Utils.doubleToString(m_pCrossover,6,3));
     GAString.append("\n\tProbability of mutation: "
-		+Utils.doubleToString(m_pMutation,6,3));
+                +Utils.doubleToString(m_pMutation,6,3));
     GAString.append("\n\tReport frequency: "+m_reportFrequency);
     GAString.append("\n\tRandom number seed: "+m_seed+"\n");
     GAString.append(m_generationReports.toString());
@@ -758,8 +758,8 @@ public class GeneticSearch
 
      if (!(ASEval instanceof SubsetEvaluator)) {
        throw  new Exception(ASEval.getClass().getName() 
-			    + " is not a " 
-			    + "Subset evaluator!");
+                            + " is not a " 
+                            + "Subset evaluator!");
      }
      
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
@@ -801,12 +801,12 @@ public class GeneticSearch
       converged = checkBest();
 
       if ((i == m_maxGenerations) || 
-	  ((i % m_reportFrequency) == 0) ||
-	  (converged == true)) {
-	m_generationReports.append(populationReport(i));
-	if (converged == true) {
-	  break;
-	}
+          ((i % m_reportFrequency) == 0) ||
+          (converged == true)) {
+        m_generationReports.append(populationReport(i));
+        if (converged == true) {
+          break;
+        }
       }
     }
     return attributeList(m_best.getChromosome());
@@ -823,7 +823,7 @@ public class GeneticSearch
     // count how many were selected
     for (int i = 0; i < m_numAttribs; i++) {
       if (group.get(i)) {
-	count++;
+        count++;
       }
     }
 
@@ -832,7 +832,7 @@ public class GeneticSearch
 
     for (int i = 0; i < m_numAttribs; i++) {
       if (group.get(i)) {
-	list[count++] = i;
+        list[count++] = i;
       }
     }
 
@@ -858,31 +858,31 @@ public class GeneticSearch
     if (m_maxFitness - m_minFitness > 0) {
       // find the best in this population
       for (i=0;i<m_popSize;i++) {
-	if (m_population[i].getObjective() > b) {
-	  b = m_population[i].getObjective();
-	  localbest = m_population[i];
-	  oldcount = countFeatures(localbest.getChromosome());
-	} else if (Utils.eq(m_population[i].getObjective(), b)) {
-	  // see if it contains fewer features
-	  count = countFeatures(m_population[i].getChromosome());
-	  if (count < oldcount) {
-	    b = m_population[i].getObjective();
-	    localbest = m_population[i];
-	    oldcount = count;
-	  }
-	}
+        if (m_population[i].getObjective() > b) {
+          b = m_population[i].getObjective();
+          localbest = m_population[i];
+          oldcount = countFeatures(localbest.getChromosome());
+        } else if (Utils.eq(m_population[i].getObjective(), b)) {
+          // see if it contains fewer features
+          count = countFeatures(m_population[i].getChromosome());
+          if (count < oldcount) {
+            b = m_population[i].getObjective();
+            localbest = m_population[i];
+            oldcount = count;
+          }
+        }
       }
     } else {
       // look for the smallest subset
       for (i=0;i<m_popSize;i++) {
-	temp = m_population[i].getChromosome();
-	count = countFeatures(temp);;
+        temp = m_population[i].getChromosome();
+        count = countFeatures(temp);;
 
-	if (count < lowestCount) {
-	  lowestCount = count;
-	  localbest = m_population[i];
-	  b = localbest.getObjective();
-	}
+        if (count < lowestCount) {
+          lowestCount = count;
+          localbest = m_population[i];
+          b = localbest.getObjective();
+        }
       }
       converged = true;
     }
@@ -902,8 +902,8 @@ public class GeneticSearch
     } else if (Utils.eq(m_best.getObjective(), b)) {
       // see if the localbest has fewer features than the best so far
       if (count < m_bestFeatureCount) {
-	m_best = (GABitSet)localbest.clone();
-	m_bestFeatureCount = count;
+        m_best = (GABitSet)localbest.clone();
+        m_bestFeatureCount = count;
       }
     }
     return converged;
@@ -918,7 +918,7 @@ public class GeneticSearch
     int count = 0;
     for (int i=0;i<m_numAttribs;i++) {
       if (featureSet.get(i)) {
-	count++;
+        count++;
       }
     }
     return count;
@@ -937,19 +937,19 @@ public class GeneticSearch
     int parent1,parent2;
 
     /** first ensure that the population best is propogated into the new
-	generation */
+        generation */
     for (i=0;i<m_popSize;i++) {
       if (m_population[i].getFitness() > best_fit) {
-	j = i;
-	best_fit = m_population[i].getFitness();
-	old_count = countFeatures(m_population[i].getChromosome());
+        j = i;
+        best_fit = m_population[i].getFitness();
+        old_count = countFeatures(m_population[i].getChromosome());
       } else if (Utils.eq(m_population[i].getFitness(), best_fit)) {
-	count = countFeatures(m_population[i].getChromosome());
-	if (count < old_count) {
-	  j = i;
-	  best_fit = m_population[i].getFitness();
-	  old_count = count;
-	}
+        count = countFeatures(m_population[i].getChromosome());
+        if (count < old_count) {
+          j = i;
+          best_fit = m_population[i].getFitness();
+          old_count = count;
+        }
       }
     }
     newPop[0] = (GABitSet)(m_population[j].clone());
@@ -962,68 +962,68 @@ public class GeneticSearch
       newPop[j+1] = (GABitSet)(m_population[parent2].clone());
       // if parents are equal mutate one bit
       if (parent1 == parent2) {
-	int r;
-	if (m_hasClass) {
-	  while ((r = (Math.abs(m_random.nextInt()) % m_numAttribs)) == m_classIndex);
-	}
-	else {
-	  r = m_random.nextInt() % m_numAttribs;
-	}
-	
-	if (newPop[j].get(r)) {
-	  newPop[j].clear(r);
-	}
-	else {
-	  newPop[j].set(r);
-	}
+        int r;
+        if (m_hasClass) {
+          while ((r = (Math.abs(m_random.nextInt()) % m_numAttribs)) == m_classIndex);
+        }
+        else {
+          r = m_random.nextInt() % m_numAttribs;
+        }
+        
+        if (newPop[j].get(r)) {
+          newPop[j].clear(r);
+        }
+        else {
+          newPop[j].set(r);
+        }
       } else {
-	// crossover
-	double r = m_random.nextDouble();
-	if (m_numAttribs >= 3) {
-	  if (r < m_pCrossover) {
-	    // cross point
-	    int cp = Math.abs(m_random.nextInt());
-	    
-	    cp %= (m_numAttribs-2);
-	    cp ++;
-	    
-	    for (i=0;i<cp;i++) {
-	      if (m_population[parent1].get(i)) {
-		newPop[j+1].set(i);
-	      }
-	      else {
-		newPop[j+1].clear(i);
-	      }
-	      if (m_population[parent2].get(i)) {
-		newPop[j].set(i);
-	      }
-	      else {
-		newPop[j].clear(i);
-	      }
-	    }
-	  }
-	}
+        // crossover
+        double r = m_random.nextDouble();
+        if (m_numAttribs >= 3) {
+          if (r < m_pCrossover) {
+            // cross point
+            int cp = Math.abs(m_random.nextInt());
+            
+            cp %= (m_numAttribs-2);
+            cp ++;
+            
+            for (i=0;i<cp;i++) {
+              if (m_population[parent1].get(i)) {
+                newPop[j+1].set(i);
+              }
+              else {
+                newPop[j+1].clear(i);
+              }
+              if (m_population[parent2].get(i)) {
+                newPop[j].set(i);
+              }
+              else {
+                newPop[j].clear(i);
+              }
+            }
+          }
+        }
 
-	// mutate
-	for (int k=0;k<2;k++) {
-	  for (i=0;i<m_numAttribs;i++) {
-	    r = m_random.nextDouble();
-	    if (r < m_pMutation) {
-	      if (m_hasClass && (i == m_classIndex)) {
-		// ignore class attribute
-	      }
-	      else {
-		if (newPop[j+k].get(i)) {
-		  newPop[j+k].clear(i);
-		}
-		else {
-		  newPop[j+k].set(i);
-		}
-	      }
-	    }
-	  }
-	}
-		  
+        // mutate
+        for (int k=0;k<2;k++) {
+          for (i=0;i<m_numAttribs;i++) {
+            r = m_random.nextDouble();
+            if (r < m_pMutation) {
+              if (m_hasClass && (i == m_classIndex)) {
+                // ignore class attribute
+              }
+              else {
+                if (newPop[j+k].get(i)) {
+                  newPop[j+k].clear(i);
+                }
+                else {
+                  newPop[j+k].set(i);
+                }
+              }
+            }
+          }
+        }
+                  
       }
     }
 
@@ -1043,7 +1043,7 @@ public class GeneticSearch
     for (i=0;i<m_popSize;i++) {
       partsum += m_population[i].getFitness();
       if (partsum >= r) {
-	break;
+        break;
       }
     }
     
@@ -1070,14 +1070,14 @@ public class GeneticSearch
     for (i=0;i<m_popSize;i++) {
       // if its not in the lookup table then evaluate and insert
       if (m_lookupTable.containsKey(m_population[i]
-				    .getChromosome()) == false) {
-	merit = ASEvaluator.evaluateSubset(m_population[i].getChromosome());
-	m_population[i].setObjective(merit);
-	m_lookupTable.put(m_population[i].getChromosome(),m_population[i]);
+                                    .getChromosome()) == false) {
+        merit = ASEvaluator.evaluateSubset(m_population[i].getChromosome());
+        m_population[i].setObjective(merit);
+        m_lookupTable.put(m_population[i].getChromosome(),m_population[i]);
       } else {
-	GABitSet temp = (GABitSet)m_lookupTable.
-	  get(m_population[i].getChromosome());
-	m_population[i].setObjective(temp.getObjective());
+        GABitSet temp = (GABitSet)m_lookupTable.
+          get(m_population[i].getChromosome());
+        m_population[i].setObjective(temp.getObjective());
       }
     }
   }
@@ -1098,9 +1098,9 @@ public class GeneticSearch
     if (m_starting != null) {
       m_population[0] = new GABitSet();
       for (i=0;i<m_starting.length;i++) {
-	if ((m_starting[i]) != m_classIndex) {
-	  m_population[0].set(m_starting[i]);
-	}
+        if ((m_starting[i]) != m_classIndex) {
+          m_population[0].set(m_starting[i]);
+        }
       }
       start = 1;
     }
@@ -1111,34 +1111,34 @@ public class GeneticSearch
       num_bits = m_random.nextInt();
       num_bits = num_bits % m_numAttribs-1;
       if (num_bits < 0) {
-	num_bits *= -1;
+        num_bits *= -1;
       }
       if (num_bits == 0) {
-	num_bits = 1;
+        num_bits = 1;
       }
 
       for (j=0;j<num_bits;j++) {
-	ok = false;
-	do {
-	  bit = m_random.nextInt();
-	  if (bit < 0) {
-	    bit *= -1;
-	  }
-	  bit = bit % m_numAttribs;
-	  if (m_hasClass) {
-	    if (bit != m_classIndex) {
-	      ok = true;
-	    }
-	  }
-	  else {
-	    ok = true;
-	  }
-	} while (!ok);
-	
-	if (bit > m_numAttribs) {
-	  throw new Exception("Problem in population init");
-	}
-	m_population[i].set(bit);
+        ok = false;
+        do {
+          bit = m_random.nextInt();
+          if (bit < 0) {
+            bit *= -1;
+          }
+          bit = bit % m_numAttribs;
+          if (m_hasClass) {
+            if (bit != m_classIndex) {
+              ok = true;
+            }
+          }
+          else {
+            ok = true;
+          }
+        } while (!ok);
+        
+        if (bit > m_numAttribs) {
+          throw new Exception("Problem in population init");
+        }
+        m_population[i].set(bit);
       }
     }
   }
@@ -1155,10 +1155,10 @@ public class GeneticSearch
     for (i=1;i<m_popSize;i++) {
       m_sumFitness += m_population[i].getObjective();
       if (m_population[i].getObjective() > m_maxFitness) {
-	m_maxFitness = m_population[i].getObjective();
+        m_maxFitness = m_population[i].getObjective();
       }
       else if (m_population[i].getObjective() < m_minFitness) {
-	m_minFitness = m_population[i].getObjective();
+        m_minFitness = m_population[i].getObjective();
       }
     }
     m_avgFitness = (m_sumFitness / m_popSize);
@@ -1176,7 +1176,7 @@ public class GeneticSearch
     
     // prescale
     if (m_minFitness > ((fmultiple * m_avgFitness - m_maxFitness) / 
-			(fmultiple - 1.0))) {
+                        (fmultiple - 1.0))) {
       delta = m_maxFitness - m_avgFitness;
       a = ((fmultiple - 1.0) * m_avgFitness / delta);
       b = m_avgFitness * (m_maxFitness - fmultiple * m_avgFitness) / delta;
@@ -1191,11 +1191,11 @@ public class GeneticSearch
     m_sumFitness = 0;
     for (j=0;j<m_popSize;j++) {
       if (a == Double.POSITIVE_INFINITY || a == Double.NEGATIVE_INFINITY ||
-	  b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
-	m_population[j].setFitness(m_population[j].getObjective());
+          b == Double.POSITIVE_INFINITY || b == Double.NEGATIVE_INFINITY) {
+        m_population[j].setFitness(m_population[j].getObjective());
       } else {
-	m_population[j].
-	  setFitness(Math.abs((a * m_population[j].getObjective() + b)));
+        m_population[j].
+          setFitness(Math.abs((a * m_population[j].getObjective() + b)));
       }
       m_sumFitness += m_population[j].getFitness();
     }
@@ -1219,12 +1219,12 @@ public class GeneticSearch
     
     for (i=0;i<m_popSize;i++) {
       temp.append(Utils.doubleToString(Math.
-				       abs(m_population[i].getObjective()),
-				       8,5)
-		  +"\t"
-		  +Utils.doubleToString(m_population[i].getFitness(),
-					8,5)
-		  +"\t");
+                                       abs(m_population[i].getObjective()),
+                                       8,5)
+                  +"\t"
+                  +Utils.doubleToString(m_population[i].getFitness(),
+                                        8,5)
+                  +"\t");
 
       temp.append(printPopMember(m_population[i].getChromosome())+"\n");
     }
@@ -1257,9 +1257,9 @@ public class GeneticSearch
 
     for (int j=0;j<m_numAttribs;j++) {
       if (temp.get(j)) {
-	text.append("1");
+        text.append("1");
       } else {
-	text.append("0");
+        text.append("0");
       }
     }
     return text.toString();

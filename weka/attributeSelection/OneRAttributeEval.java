@@ -49,21 +49,24 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -S &lt;seed&gt;
- *  Random number seed for cross validation (default = 1)</pre>
+ *  Random number seed for cross validation
+ *  (default = 1)</pre>
  * 
  * <pre> -F &lt;folds&gt;
- *  Number of folds for cross validation (default = 10)</pre>
+ *  Number of folds for cross validation
+ *  (default = 10)</pre>
  * 
  * <pre> -D
  *  Use training data for evaluation rather than cross validaton</pre>
  * 
  * <pre> -B &lt;minimum bucket size&gt;
- *  Minimum number of objects in a bucket (passed on to OneR, default = 6)</pre>
+ *  Minimum number of objects in a bucket
+ *  (passed on to OneR, default = 6)</pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class OneRAttributeEval
   extends AttributeEvaluator 
@@ -234,21 +237,24 @@ public class OneRAttributeEval
     Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
-			 "\tRandom number seed for cross validation (default = 1)",
-			 "S", 1, "-S <seed>"));
+        "\tRandom number seed for cross validation\n"
+        + "\t(default = 1)",
+        "S", 1, "-S <seed>"));
 
     newVector.addElement(new Option(
-			 "\tNumber of folds for cross validation (default = 10)",
-			 "F", 1, "-F <folds>"));
+        "\tNumber of folds for cross validation\n"
+        + "\t(default = 10)",
+        "F", 1, "-F <folds>"));
 
     newVector.addElement(new Option(
-		   "\tUse training data for evaluation rather than cross validaton",
-		   "D", 0, "-D"));
+        "\tUse training data for evaluation rather than cross validaton",
+        "D", 0, "-D"));
 
     newVector.addElement(new Option(
-			 "\tMinimum number of objects in a bucket (passed on to "
-			 +"OneR, default = 6)",
-			 "B", 1, "-B <minimum bucket size>"));
+        "\tMinimum number of objects in a bucket\n"
+        + "\t(passed on to "
+        +"OneR, default = 6)",
+        "B", 1, "-B <minimum bucket size>"));
 
     return newVector.elements();
   }
@@ -260,16 +266,19 @@ public class OneRAttributeEval
    * Valid options are: <p/>
    * 
    * <pre> -S &lt;seed&gt;
-   *  Random number seed for cross validation (default = 1)</pre>
+   *  Random number seed for cross validation
+   *  (default = 1)</pre>
    * 
    * <pre> -F &lt;folds&gt;
-   *  Number of folds for cross validation (default = 10)</pre>
+   *  Number of folds for cross validation
+   *  (default = 10)</pre>
    * 
    * <pre> -D
    *  Use training data for evaluation rather than cross validaton</pre>
    * 
    * <pre> -B &lt;minimum bucket size&gt;
-   *  Minimum number of objects in a bucket (passed on to OneR, default = 6)</pre>
+   *  Minimum number of objects in a bucket
+   *  (passed on to OneR, default = 6)</pre>
    * 
    <!-- options-end -->
    *
@@ -414,8 +423,8 @@ public class OneRAttributeEval
       o_Evaluation.evaluateModel(oneR, trainCopy);
     } else {
       /*      o_Evaluation.crossValidateModel("weka.classifiers.rules.OneR", 
-	      trainCopy, 10, 
-	      null, new Random(m_randomSeed)); */
+              trainCopy, 10, 
+              null, new Random(m_randomSeed)); */
       o_Evaluation.crossValidateModel(oneR, trainCopy, m_folds, new Random(m_randomSeed));
     }
     errorRate = o_Evaluation.errorRate();
@@ -437,13 +446,13 @@ public class OneRAttributeEval
       text.append("\tOneR feature evaluator.\n\n");
       text.append("\tUsing ");
       if (m_evalUsingTrainingData) {
-	text.append("training data for evaluation of attributes.");
+        text.append("training data for evaluation of attributes.");
       } else {
-	text.append(""+getFolds()+" fold cross validation for evaluating "
-		    +"attributes.");
+        text.append(""+getFolds()+" fold cross validation for evaluating "
+                    +"attributes.");
       }
       text.append("\n\tMinimum bucket size for OneR: "
-		  +getMinimumBucketSize());
+                  +getMinimumBucketSize());
     }
 
     text.append("\n");

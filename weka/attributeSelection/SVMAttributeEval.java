@@ -89,8 +89,7 @@ import java.util.Vector;
  * <pre> -Z &lt;threshold for percent elimination&gt;
  *  Specify the threshold below which 
  *  percentage attribute elimination
- *  reverts to the constant method.
- * </pre>
+ *  reverts to the constant method.</pre>
  * 
  * <pre> -P &lt;epsilon&gt;
  *  Specify the value of P (epsilon
@@ -111,13 +110,14 @@ import java.util.Vector;
  *  Default = 1.0</pre>
  * 
  * <pre> -N
- *  Whether the SVM should 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ *  Whether the SVM should 0=normalize/1=standardize/2=neither.
+ *  (default 0=normalize)</pre>
  * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator
@@ -176,7 +176,7 @@ public class SVMAttributeEval
    * @return the technical information about this class
    */
   public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
+    TechnicalInformation        result;
     
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "I. Guyon and J. Weston and S. Barnhill and V. Vapnik");
@@ -205,72 +205,72 @@ public class SVMAttributeEval
     Vector newVector = new Vector(4);
 
     newVector.addElement(
-			 new Option(
-				    "\tSpecify the constant rate of attribute\n"
-				    + "\telimination per invocation of\n"
-				    + "\tthe support vector machine.\n"
-				    + "\tDefault = 1.",
-				    "X",
-				    1,
-				    "-X <constant rate of elimination>"));
+                         new Option(
+                                    "\tSpecify the constant rate of attribute\n"
+                                    + "\telimination per invocation of\n"
+                                    + "\tthe support vector machine.\n"
+                                    + "\tDefault = 1.",
+                                    "X",
+                                    1,
+                                    "-X <constant rate of elimination>"));
 
     newVector.addElement(
-			 new Option(
-				    "\tSpecify the percentage rate of attributes to\n"
-				    + "\telimination per invocation of\n"
-				    + "\tthe support vector machine.\n"
-				    + "\tTrumps constant rate (above threshold).\n"
-				    + "\tDefault = 0.",
-				    "Y",
-				    1,
-				    "-Y <percent rate of elimination>"));
+                         new Option(
+                                    "\tSpecify the percentage rate of attributes to\n"
+                                    + "\telimination per invocation of\n"
+                                    + "\tthe support vector machine.\n"
+                                    + "\tTrumps constant rate (above threshold).\n"
+                                    + "\tDefault = 0.",
+                                    "Y",
+                                    1,
+                                    "-Y <percent rate of elimination>"));
 
     newVector.addElement(
-			 new Option(
-				    "\tSpecify the threshold below which \n"
-				    + "\tpercentage attribute elimination\n"
-				    + "\treverts to the constant method.\n",
-				    "Z",
-				    1,
-				    "-Z <threshold for percent elimination>"));
+                         new Option(
+                                    "\tSpecify the threshold below which \n"
+                                    + "\tpercentage attribute elimination\n"
+                                    + "\treverts to the constant method.",
+                                    "Z",
+                                    1,
+                                    "-Z <threshold for percent elimination>"));
 
 
     newVector.addElement(
-			 new Option(
-				    "\tSpecify the value of P (epsilon\n"
-				    + "\tparameter) to pass on to the\n"
-				    + "\tsupport vector machine.\n"
-				    + "\tDefault = 1.0e-25",
-				    "P",
-				    1,
-				    "-P <epsilon>"));
+                         new Option(
+                                    "\tSpecify the value of P (epsilon\n"
+                                    + "\tparameter) to pass on to the\n"
+                                    + "\tsupport vector machine.\n"
+                                    + "\tDefault = 1.0e-25",
+                                    "P",
+                                    1,
+                                    "-P <epsilon>"));
 
     newVector.addElement(
-			 new Option(
-				    "\tSpecify the value of T (tolerance\n"
-				    + "\tparameter) to pass on to the\n"
-				    + "\tsupport vector machine.\n"
-				    + "\tDefault = 1.0e-10",
-				    "T",
-				    1,
-				    "-T <tolerance>"));
+                         new Option(
+                                    "\tSpecify the value of T (tolerance\n"
+                                    + "\tparameter) to pass on to the\n"
+                                    + "\tsupport vector machine.\n"
+                                    + "\tDefault = 1.0e-10",
+                                    "T",
+                                    1,
+                                    "-T <tolerance>"));
 
     newVector.addElement(
-			 new Option(
-				    "\tSpecify the value of C (complexity\n"
-				    + "\tparameter) to pass on to the\n"
-				    + "\tsupport vector machine.\n"
-				    + "\tDefault = 1.0",
-				    "C",
-				    1,
-				    "-C <complexity>"));
+                         new Option(
+                                    "\tSpecify the value of C (complexity\n"
+                                    + "\tparameter) to pass on to the\n"
+                                    + "\tsupport vector machine.\n"
+                                    + "\tDefault = 1.0",
+                                    "C",
+                                    1,
+                                    "-C <complexity>"));
 
     newVector.addElement(new Option("\tWhether the SVM should "
-				    + "0=normalize/1=standardize/2=neither. "
-				    + "(default 0=normalize)",
-				    "N",
-				    1,
-				    "-N"));
+                                    + "0=normalize/1=standardize/2=neither.\n"
+                                    + "\t(default 0=normalize)",
+                                    "N",
+                                    1,
+                                    "-N"));
 
     return newVector.elements();
   }
@@ -297,8 +297,7 @@ public class SVMAttributeEval
    * <pre> -Z &lt;threshold for percent elimination&gt;
    *  Specify the threshold below which 
    *  percentage attribute elimination
-   *  reverts to the constant method.
-   * </pre>
+   *  reverts to the constant method.</pre>
    * 
    * <pre> -P &lt;epsilon&gt;
    *  Specify the value of P (epsilon
@@ -319,7 +318,8 @@ public class SVMAttributeEval
    *  Default = 1.0</pre>
    * 
    * <pre> -N
-   *  Whether the SVM should 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+   *  Whether the SVM should 0=normalize/1=standardize/2=neither.
+   *  (default 0=normalize)</pre>
    * 
    <!-- options-end -->
    *
@@ -386,18 +386,18 @@ public class SVMAttributeEval
 
     options[current++] = "-Z";
     options[current++] = "" + getPercentThreshold();
-		
+                
     options[current++] = "-P";
     options[current++] = "" + getEpsilonParameter();
 
     options[current++] = "-T";
-    options[current++] = "" + getToleranceParameter();		
+    options[current++] = "" + getToleranceParameter();          
 
     options[current++] = "-C";
-    options[current++] = "" + getComplexityParameter();		
+    options[current++] = "" + getComplexityParameter();         
 
     options[current++] = "-N";
-    options[current++] = "" + m_smoFilterType;		
+    options[current++] = "" + m_smoFilterType;          
 
     while (current < options.length) {
       options[current++] = "";
@@ -553,7 +553,7 @@ public class SVMAttributeEval
   public double getEpsilonParameter() {
     return m_smoPParameter;
   }
-	
+        
   /**
    * Set the value of T for SMO
    *
@@ -622,7 +622,7 @@ public class SVMAttributeEval
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    Capabilities 	result;
+    Capabilities        result;
     
     result = new SMO().getCapabilities();
     
@@ -650,7 +650,7 @@ public class SVMAttributeEval
     getCapabilities().testWithFail(data);
 
     //System.out.println("Class attribute: " + data.attribute(data.classIndex()).name());
-    // Check settings		
+    // Check settings           
     m_numToEliminate = (m_numToEliminate > 1) ? m_numToEliminate : 1;
     m_percentToEliminate = (m_percentToEliminate < 100) ? m_percentToEliminate : 100;
     m_percentToEliminate = (m_percentToEliminate > 0) ? m_percentToEliminate : 0;
@@ -663,7 +663,7 @@ public class SVMAttributeEval
     if(data.numClasses()>2) {
       attScoresByClass = new int[data.numClasses()][numAttr];
       for (int i = 0; i < data.numClasses(); i++) {
-	attScoresByClass[i] = rankBySVM(i, data);
+        attScoresByClass[i] = rankBySVM(i, data);
       }
     }
     else {
@@ -676,9 +676,9 @@ public class SVMAttributeEval
     ArrayList ordered = new ArrayList(numAttr);
     for (int i = 0; i < numAttr; i++) {
       for (int j = 0; j < (data.numClasses()>2 ? data.numClasses() : 1); j++) {
-	Integer rank = new Integer(attScoresByClass[j][i]);
-	if (!ordered.contains(rank))
-	  ordered.add(rank);
+        Integer rank = new Integer(attScoresByClass[j][i]);
+        if (!ordered.contains(rank))
+          ordered.add(rank);
       }
     }
     m_attScores = new double[data.numAttributes()];
@@ -712,69 +712,69 @@ public class SVMAttributeEval
       Instances trainCopy = Filter.useFilter(data, filter);
       double pctToElim = ((double) m_percentToEliminate) / 100.0;
       while (numAttrLeft > 0) {
-	int numToElim;
-	if (pctToElim > 0) {
-	  numToElim = (int) (trainCopy.numAttributes() * pctToElim);
-	  numToElim = (numToElim > 1) ? numToElim : 1;
-	  if (numAttrLeft - numToElim <= m_percentThreshold) {
-	    pctToElim = 0;
-	    numToElim = numAttrLeft - m_percentThreshold;
-	  }
-	} else {
-	  numToElim = (numAttrLeft >= m_numToEliminate) ? m_numToEliminate : numAttrLeft;
-	}
-	
-	// Build the linear SVM with default parameters
-	SMO smo = new SMO();
-				
-	// SMO seems to get stuck if data not normalised when few attributes remain
-	// smo.setNormalizeData(numAttrLeft < 40);
-	smo.setFilterType(new SelectedTag(m_smoFilterType, SMO.TAGS_FILTER));
-	smo.setEpsilon(m_smoPParameter);
-	smo.setToleranceParameter(m_smoTParameter);
-	smo.setC(m_smoCParameter);
-	smo.buildClassifier(trainCopy);
-				
-	// Find the attribute with maximum weight^2
-	double[] weightsSparse = smo.sparseWeights()[0][1];
-	int[] indicesSparse = smo.sparseIndices()[0][1];
-	double[] weights = new double[trainCopy.numAttributes()];
-	for (int j = 0; j < weightsSparse.length; j++) {
-	  weights[indicesSparse[j]] = weightsSparse[j] * weightsSparse[j];
-	}
-	weights[trainCopy.classIndex()] = Double.MAX_VALUE;
-	int minWeightIndex;
-	int[] featArray = new int[numToElim];
-	boolean[] eliminated = new boolean[origIndices.length];
-	for (int j = 0; j < numToElim; j++) {
-	  minWeightIndex = Utils.minIndex(weights);
-	  attRanks[--numAttrLeft] = origIndices[minWeightIndex];
-	  featArray[j] = minWeightIndex;
-	  eliminated[minWeightIndex] = true;
-	  weights[minWeightIndex] = Double.MAX_VALUE;
-	}
-				
-	// Delete the worst attributes. 
-	weka.filters.unsupervised.attribute.Remove delTransform =
-	  new weka.filters.unsupervised.attribute.Remove();
-	delTransform.setInvertSelection(false);
-	delTransform.setAttributeIndicesArray(featArray);
-	delTransform.setInputFormat(trainCopy);
-	trainCopy = Filter.useFilter(trainCopy, delTransform);
-				
-	// Update the array of remaining attribute indices
-	int[] temp = new int[origIndices.length - numToElim];
-	int k = 0;
-	for (int j = 0; j < origIndices.length; j++) {
-	  if (!eliminated[j]) {
-	    temp[k++] = origIndices[j];
-	  }
-	}
-	origIndices = temp;
-      }			
+        int numToElim;
+        if (pctToElim > 0) {
+          numToElim = (int) (trainCopy.numAttributes() * pctToElim);
+          numToElim = (numToElim > 1) ? numToElim : 1;
+          if (numAttrLeft - numToElim <= m_percentThreshold) {
+            pctToElim = 0;
+            numToElim = numAttrLeft - m_percentThreshold;
+          }
+        } else {
+          numToElim = (numAttrLeft >= m_numToEliminate) ? m_numToEliminate : numAttrLeft;
+        }
+        
+        // Build the linear SVM with default parameters
+        SMO smo = new SMO();
+                                
+        // SMO seems to get stuck if data not normalised when few attributes remain
+        // smo.setNormalizeData(numAttrLeft < 40);
+        smo.setFilterType(new SelectedTag(m_smoFilterType, SMO.TAGS_FILTER));
+        smo.setEpsilon(m_smoPParameter);
+        smo.setToleranceParameter(m_smoTParameter);
+        smo.setC(m_smoCParameter);
+        smo.buildClassifier(trainCopy);
+                                
+        // Find the attribute with maximum weight^2
+        double[] weightsSparse = smo.sparseWeights()[0][1];
+        int[] indicesSparse = smo.sparseIndices()[0][1];
+        double[] weights = new double[trainCopy.numAttributes()];
+        for (int j = 0; j < weightsSparse.length; j++) {
+          weights[indicesSparse[j]] = weightsSparse[j] * weightsSparse[j];
+        }
+        weights[trainCopy.classIndex()] = Double.MAX_VALUE;
+        int minWeightIndex;
+        int[] featArray = new int[numToElim];
+        boolean[] eliminated = new boolean[origIndices.length];
+        for (int j = 0; j < numToElim; j++) {
+          minWeightIndex = Utils.minIndex(weights);
+          attRanks[--numAttrLeft] = origIndices[minWeightIndex];
+          featArray[j] = minWeightIndex;
+          eliminated[minWeightIndex] = true;
+          weights[minWeightIndex] = Double.MAX_VALUE;
+        }
+                                
+        // Delete the worst attributes. 
+        weka.filters.unsupervised.attribute.Remove delTransform =
+          new weka.filters.unsupervised.attribute.Remove();
+        delTransform.setInvertSelection(false);
+        delTransform.setAttributeIndicesArray(featArray);
+        delTransform.setInputFormat(trainCopy);
+        trainCopy = Filter.useFilter(trainCopy, delTransform);
+                                
+        // Update the array of remaining attribute indices
+        int[] temp = new int[origIndices.length - numToElim];
+        int k = 0;
+        for (int j = 0; j < origIndices.length; j++) {
+          if (!eliminated[j]) {
+            temp[k++] = origIndices[j];
+          }
+        }
+        origIndices = temp;
+      }                 
       // Carefully handle all exceptions
     } catch (Exception e) {
-      e.printStackTrace();			
+      e.printStackTrace();                      
     }
     return attRanks;
   }
