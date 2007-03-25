@@ -270,7 +270,8 @@ There are also example DatabaseUtils.props files for several common
 databases available (also in weka/experiment):
 
 * HSQLDB: DatabaseUtils.props.hsql
-* MS SQL Server: DatabaseUtils.props.mssqlserver
+* MS SQL Server 2000: DatabaseUtils.props.mssqlserver
+* MS SQL Server 2005 Express Edition: DatabaseUtils.props.mssqlserver2005
 * MySQL: DatabaseUtils.props.mysql
 * ODBC: DatabaseUtils.props.odbc
 * Oracle: DatabaseUtils.props.oracle
@@ -398,4 +399,5 @@ the file COPYING.
 -----------------------------------------------------------------------
 
 
+$Revision: 1.10 $
 
