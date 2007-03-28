@@ -99,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -282,7 +282,7 @@ public class TestInstances
     result.addElement(new Option(
         "\tThe number of classes to generate (for nominal classes only)\n"
 	+ "\t(default 2).",
-        "class-values", 1, "-classes-values <num>"));
+        "class-values", 1, "-class-values <num>"));
     
     result.addElement(new Option(
         "\tThe class index, with -1=last, (default -1).",
