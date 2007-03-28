@@ -140,7 +140,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -656,7 +656,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.9 $
+   * @version $Revision: 1.10 $
    */
   class ControlPanel 
     extends JPanel {
@@ -1815,6 +1815,13 @@ public class MultilayerPerceptron
       m_win.getContentPane().setLayout(new BorderLayout());
       m_win.setTitle("Neural Network");
       m_nodePanel = new NodePanel();
+      // without the following two lines, the NodePanel.paintComponents(Graphics) 
+      // method will go berserk if the network doesn't fit completely: it will
+      // get called on a constant basis, using 100% of the CPU
+      // see the following forum thread:
+      // http://forum.java.sun.com/thread.jspa?threadID=580929&messageID=2945011
+      m_nodePanel.setPreferredSize(new Dimension(640, 480));
+      m_nodePanel.revalidate();
 
       JScrollPane sp = new JScrollPane(m_nodePanel,
 				       JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, 
