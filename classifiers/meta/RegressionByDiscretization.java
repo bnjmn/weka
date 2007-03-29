@@ -99,7 +99,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer {
@@ -318,7 +318,7 @@ public class RegressionByDiscretization
     String [] options = new String [superOptions.length + 2];
     int current = 0;
 
-    options[current++] = "-I";
+    options[current++] = "-B";
     options[current++] = "" + getNumBins();
 
     System.arraycopy(superOptions, 0, options, current, 
