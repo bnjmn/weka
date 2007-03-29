@@ -35,13 +35,13 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PNGWriter
   extends JComponentWriter {
 
   /** the background color */
-  private Color m_Background;
+  protected Color m_Background;
   
   /**
    * initializes the object 
@@ -117,25 +117,11 @@ public class PNGWriter
   }
   
   /**
-   * outputs the given component as JPEG in the specified file
+   * generates the actual output
    * 
-   * @param c		the component to output as PS
-   * @param f		the file to store the PS in 
-   * @throws Exception	if component of file are <code>null</code>
+   * @throws Exception	if something goes wrong
    */
-  public static void toOutput(JComponent c, File f) throws Exception {
-    JComponentWriter        writer;
-    
-    writer = new PNGWriter(c, f);
-    writer.toOutput();
-  }
-  
-  /**
-   * saves the current component to the currently set file
-   *
-   * @throws Exception	if component of file are <code>null</code>
-   */
-  public void toOutput() throws Exception {
+  public void generateOutput() throws Exception {
     BufferedImage	bi;
     Graphics		g;
 
@@ -166,7 +152,7 @@ public class PNGWriter
     
     String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.png";
     System.out.println("outputting to '" + filename + "'...");
-    toOutput(tv, new File(filename));
+    toOutput(new PNGWriter(), tv, new File(filename));
 
     System.out.println("done!");
   }

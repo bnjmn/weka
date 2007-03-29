@@ -22,6 +22,12 @@
 
 package weka.gui.visualize;
 
+import weka.core.ClassDiscovery;
+import weka.gui.ExtensionFileFilter;
+
+import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedOutputStream;
@@ -33,32 +39,48 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-
-import weka.core.ClassDiscovery;
-import weka.core.Utils;
-import weka.gui.ExtensionFileFilter;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /** 
  * This class extends the component which is handed over in the constructor
  * by a print dialog.
- * The Print dialog is accessible via Ctrl-Shft-Left Mouse Click. <p>
+ * The Print dialog is accessible via Alt+Shift+LeftMouseClick. <p>
  * The individual JComponentWriter-descendants can be accessed by the
  * <code>getWriter(String)</code> method, if the parameters need to be changed.
  *
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class PrintableComponent implements PrintableHandler {
+public class PrintableComponent
+  implements PrintableHandler {
+  
   /** the parent component of this print dialog */
   protected JComponent m_Component;
   
   /** the filechooser for saving the panel */
-  protected static JFileChooser m_FileChooserPanel = null;
+  protected static JFileChooser m_FileChooserPanel;
+
+  /** the checkbox for the custom dimensions */
+  protected static JCheckBox m_CustomDimensionsCheckBox;
+  
+  /** the edit field for the custom width */
+  protected static JTextField m_CustomWidthText;
+  
+  /** the edit field for the custom height */
+  protected static JTextField m_CustomHeightText;
+
+  /** the checkbox for keeping the aspect ration */
+  protected static JCheckBox m_AspectRatioCheckBox;
   
   /** the title of the save dialog */
   protected String m_SaveDialogTitle = "Save as...";
@@ -68,6 +90,12 @@ public class PrintableComponent implements PrintableHandler {
   
   /** the y scale factor */
   protected double m_yScale = 1.0;
+
+  /** the aspect ratio */
+  protected double m_AspectRatio;
+
+  /** whether to ignore the update of the text field (in case of "keep ratio") */
+  protected boolean m_IgnoreChange;
   
   /** whether to print some debug information */
   private static final boolean DEBUG = false;
@@ -115,7 +143,9 @@ public class PrintableComponent implements PrintableHandler {
   public PrintableComponent(JComponent component) {
     super();
     
-    m_Component = component;
+    m_Component   = component;
+    m_AspectRatio = Double.NaN;
+    
     getComponent().addMouseListener(new PrintMouseListener(this));
     getComponent().setToolTipText(getToolTipText(this));
     initFileChooser();
@@ -226,6 +256,8 @@ public class PrintableComponent implements PrintableHandler {
     int                 i;
     Class               cls;
     JComponentWriter    writer;
+    JPanel		accessory;
+    JLabel		label;
 
     // already initialized?
     if (m_FileChooserPanel != null)
@@ -235,6 +267,102 @@ public class PrintableComponent implements PrintableHandler {
     m_FileChooserPanel.resetChoosableFileFilters();
     m_FileChooserPanel.setAcceptAllFileFilterUsed(false);
 
+    // setup the accessory
+    accessory = new JPanel();
+    accessory.setLayout(null);
+    accessory.setPreferredSize(new Dimension(200, 200));
+    accessory.revalidate();
+    m_FileChooserPanel.setAccessory(accessory);
+ 
+    m_CustomDimensionsCheckBox = new JCheckBox("Use custom dimensions");
+    m_CustomDimensionsCheckBox.setBounds(14, 7, 200, 21);
+    m_CustomDimensionsCheckBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+	boolean custom = m_CustomDimensionsCheckBox.isSelected();
+	m_CustomWidthText.setEnabled(custom);
+	m_CustomHeightText.setEnabled(custom);
+	m_AspectRatioCheckBox.setEnabled(custom);
+	if (custom) {
+	  m_IgnoreChange = true;
+	  m_CustomWidthText.setText("" + m_Component.getWidth());
+	  m_CustomHeightText.setText("" + m_Component.getHeight());
+	  m_IgnoreChange = false;
+	}
+	else {
+	  m_IgnoreChange = true;
+	  m_CustomWidthText.setText("-1");
+	  m_CustomHeightText.setText("-1");
+	  m_IgnoreChange = false;
+	}
+      }
+    });
+    accessory.add(m_CustomDimensionsCheckBox);
+    
+    m_CustomWidthText = new JTextField(5);
+    m_CustomWidthText.setText("-1");
+    m_CustomWidthText.setEnabled(false);
+    m_CustomWidthText.setBounds(65, 35, 50, 21);
+    m_CustomWidthText.getDocument().addDocumentListener(new DocumentListener() {
+      public void changedUpdate(DocumentEvent e) {
+	updateDimensions(m_CustomWidthText);
+      }
+      
+      public void insertUpdate(DocumentEvent e) {
+	updateDimensions(m_CustomWidthText);
+      }
+      
+      public void removeUpdate(DocumentEvent e) {
+	updateDimensions(m_CustomWidthText);
+      }
+    });
+    label = new JLabel("Width");
+    label.setLabelFor(m_CustomWidthText);
+    label.setDisplayedMnemonic('W');
+    label.setBounds(14, 35, 50, 21);
+    accessory.add(label);
+    accessory.add(m_CustomWidthText);
+    
+    m_CustomHeightText = new JTextField(5);
+    m_CustomHeightText.setText("-1");
+    m_CustomHeightText.setEnabled(false);
+    m_CustomHeightText.setBounds(65, 63, 50, 21);
+    m_CustomHeightText.getDocument().addDocumentListener(new DocumentListener() {
+      public void changedUpdate(DocumentEvent e) {
+	updateDimensions(m_CustomHeightText);
+      }
+      
+      public void insertUpdate(DocumentEvent e) {
+	updateDimensions(m_CustomHeightText);
+      }
+      
+      public void removeUpdate(DocumentEvent e) {
+	updateDimensions(m_CustomHeightText);
+      }
+    });
+    label = new JLabel("Height");
+    label.setLabelFor(m_CustomHeightText);
+    label.setDisplayedMnemonic('H');
+    label.setBounds(14, 63, 50, 21);
+    accessory.add(label);
+    accessory.add(m_CustomHeightText);
+    
+    m_AspectRatioCheckBox = new JCheckBox("Keep aspect ratio");
+    m_AspectRatioCheckBox.setBounds(14, 91, 200, 21);
+    m_AspectRatioCheckBox.setEnabled(false);
+    m_AspectRatioCheckBox.setSelected(true);
+    m_AspectRatioCheckBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent e) {
+	boolean keep = m_AspectRatioCheckBox.isSelected();
+	if (keep) {
+	  m_IgnoreChange = true;
+	  m_CustomWidthText.setText("" + m_Component.getWidth());
+	  m_CustomHeightText.setText("" + m_Component.getHeight());
+	  m_IgnoreChange = false;
+	}
+      }
+    });
+    accessory.add(m_AspectRatioCheckBox);
+    
     // determine all available writers and add them to the filechooser
     writerNames = ClassDiscovery.find(JComponentWriter.class.getName(), JComponentWriter.class.getPackage().getName());
     Collections.sort(writerNames);
@@ -243,7 +371,10 @@ public class PrintableComponent implements PrintableHandler {
         cls    = Class.forName(writerNames.get(i).toString());
         writer = (JComponentWriter) cls.newInstance();
         m_FileChooserPanel.addChoosableFileFilter(
-            new PrintableComponent.JComponentWriterFileFilter(writer.getExtension(), writer.getDescription(), writer));
+            new JComponentWriterFileFilter(
+        	writer.getExtension(), 
+        	writer.getDescription() + " (*" + writer.getExtension() + ")", 
+        	writer));
       }
       catch (Exception e) {
         System.err.println(writerNames.get(i) + ": " + e);
@@ -253,6 +384,53 @@ public class PrintableComponent implements PrintableHandler {
     // set first filter as active filter
     if (m_FileChooserPanel.getChoosableFileFilters().length > 0)
       m_FileChooserPanel.setFileFilter(m_FileChooserPanel.getChoosableFileFilters()[0]);
+  }
+  
+  /**
+   * updates the dimensions if necessary (i.e., if aspect ratio is to be kept)
+   * 
+   * @param sender	the JTextField which send the notification to update
+   */
+  protected void updateDimensions(JTextField sender) {
+    int		newValue;
+    int		baseValue;
+    
+    // some sanity checks
+    if (!m_AspectRatioCheckBox.isSelected() || m_IgnoreChange)
+      return;
+    if (!(sender instanceof JTextField) || (sender == null))
+      return;
+    if (sender.getText().length() == 0)
+      return;
+    
+    // is it a valid integer, greater than 0?
+    try {
+      baseValue = Integer.parseInt(sender.getText());
+      newValue  = 0;
+      if (baseValue <= 0)
+	return;
+
+      if (Double.isNaN(m_AspectRatio)) {
+	m_AspectRatio = (double) getComponent().getWidth() / 
+	(double) getComponent().getHeight();
+      }
+    }
+    catch (Exception e) {
+      // we can't parse the string!
+      return;
+    }
+
+    // computer and update
+    m_IgnoreChange = true;
+    if (sender == m_CustomWidthText) {
+      newValue = (int) (((double) baseValue) * (1/m_AspectRatio));
+      m_CustomHeightText.setText("" + newValue);
+    }
+    else if (sender == m_CustomHeightText) {
+      newValue = (int) (((double) baseValue) * m_AspectRatio);
+      m_CustomWidthText.setText("" + newValue);
+    }
+    m_IgnoreChange = false;
   }
   
   /**
@@ -362,6 +540,15 @@ public class PrintableComponent implements PrintableHandler {
       writer.setComponent(getComponent());
       writer.setFile(file);
       writer.setScale(getXScale(), getYScale());
+      writer.setUseCustomDimensions(m_CustomDimensionsCheckBox.isSelected());
+      if (m_CustomDimensionsCheckBox.isSelected()) {
+	writer.setCustomWidth(Integer.parseInt(m_CustomWidthText.getText()));
+	writer.setCustomHeight(Integer.parseInt(m_CustomHeightText.getText()));
+      }
+      else {
+	writer.setCustomWidth(-1);
+	writer.setCustomHeight(-1);
+      }
       writer.toOutput();
     }
     catch (Exception e) {
