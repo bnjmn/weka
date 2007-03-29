@@ -62,7 +62,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class CheckOptionHandler
   extends Check {
@@ -393,6 +393,37 @@ public class CheckOptionHandler
   }
   
   /**
+   * checks whether the default options can be processed completely
+   * or some invalid options are returned by the getOptions() method.
+   * 
+   * @return index 0 is true if the test was passed, index 1 is always false
+   */
+  public boolean checkDefaultOptions() {
+    boolean	result;
+    String[]	options;
+    
+    print("Default options...");
+
+    options = getDefaultOptions();
+    
+    try {
+      getDefaultHandler().setOptions(options);
+      Utils.checkForRemainingOptions(options);
+      println("yes");
+      result = true;
+    }
+    catch (Exception e) {
+      println("no");
+      result = false;
+
+      if (getDebug())
+	println(e);
+    }
+    
+    return result;
+  }
+  
+  /**
    * checks whether the user-supplied options can be processed completely
    * or some "left-over" options remain
    * 
@@ -530,6 +561,9 @@ public class CheckOptionHandler
 
     if (m_Success)
       m_Success = checkSetOptions();
+   
+    if (m_Success)
+      m_Success = checkDefaultOptions();
     
     if (m_Success)
       m_Success = checkRemainingOptions();
