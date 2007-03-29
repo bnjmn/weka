@@ -41,13 +41,16 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  * Scaling is by default disabled, since we always take a screenshot.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public class JPEGWriter extends JComponentWriter {
+public class JPEGWriter
+  extends JComponentWriter {
+  
   /** the quality of the image */
-  private float quality;
+  protected float m_Quality;
+  
   /** the background color */
-  private Color background;
+  protected Color m_Background;
   
   /**
    * initializes the object 
@@ -74,8 +77,8 @@ public class JPEGWriter extends JComponentWriter {
   public JPEGWriter(JComponent c, File f) {
     super(c, f);
     
-    quality    = 1.0f;
-    background = Color.WHITE;
+    m_Quality    = 1.0f;
+    m_Background = Color.WHITE;
   }
   
   /**
@@ -84,8 +87,8 @@ public class JPEGWriter extends JComponentWriter {
   public void initialize() {
     super.initialize();
     
-    quality    = 1.0f;
-    background = Color.WHITE;
+    m_Quality    = 1.0f;
+    m_Background = Color.WHITE;
     setScalingEnabled(false);
   }
 
@@ -116,7 +119,7 @@ public class JPEGWriter extends JComponentWriter {
    * @return the current background color
    */
   public Color getBackground() {
-    return background;
+    return m_Background;
   }
   
   /**
@@ -125,7 +128,7 @@ public class JPEGWriter extends JComponentWriter {
    * @param c the color to use for background
    */
   public void setBackground(Color c) {
-    background = c;
+    m_Background = c;
   }
   
   /**
@@ -134,7 +137,7 @@ public class JPEGWriter extends JComponentWriter {
    * @return the quality
    */
   public float getQuality() {
-    return quality;
+    return m_Quality;
   }
   
   /**
@@ -143,34 +146,20 @@ public class JPEGWriter extends JComponentWriter {
    * @param q the quality to use
    */
   public void setQuality(float q) {
-    quality = q;
+    m_Quality = q;
   }
   
   /**
-   * outputs the given component as JPEG in the specified file
+   * generates the actual output
    * 
-   * @param c           the component to output as PS
-   * @param f           the file to store the PS in 
-   * @throws Exception  if component of file are <code>null</code>
+   * @throws Exception	if something goes wrong
    */
-  public static void toOutput(JComponent c, File f) throws Exception {
-    JComponentWriter        writer;
-    
-    writer = new JPEGWriter(c, f);
-    writer.toOutput();
-  }
-  
-  /**
-   * saves the current component to the currently set file
-   *
-   * @throws Exception  if component of file are <code>null</code>
-   */
-  public void toOutput() throws Exception {
-    BufferedImage                bi;
-    JPEGImageEncoder             encoder;
-    JPEGEncodeParam              param;
-    Graphics                     g;
-    BufferedOutputStream         ostream;
+  public void generateOutput() throws Exception {
+    BufferedImage		bi;
+    JPEGImageEncoder		encoder;
+    JPEGEncodeParam		param;
+    Graphics			g;
+    BufferedOutputStream	ostream;
 
     ostream = new BufferedOutputStream(new FileOutputStream(getFile()));
     bi      = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -206,7 +195,7 @@ public class JPEGWriter extends JComponentWriter {
     
     String filename = System.getProperty("java.io.tmpdir") + File.separator + "test.jpg";
     System.out.println("outputting to '" + filename + "'...");
-    toOutput(tv, new File(filename));
+    toOutput(new JPEGWriter(), tv, new File(filename));
 
     System.out.println("done!");
   }

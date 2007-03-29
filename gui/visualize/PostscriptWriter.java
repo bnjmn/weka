@@ -25,7 +25,6 @@ package weka.gui.visualize;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import javax.swing.JComponent;
 
@@ -39,10 +38,12 @@ import javax.swing.JComponent;
  * this issue. :-(
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see PostscriptGraphics
  */
-public class PostscriptWriter extends JComponentWriter {
+public class PostscriptWriter
+  extends JComponentWriter {
+  
   /**
    * initializes the object 
    */
@@ -74,7 +75,7 @@ public class PostscriptWriter extends JComponentWriter {
    * must be overridden in the derived class.
    */
   public String getDescription() {
-    return "Postscript-File (EPS)";
+    return "Postscript-File";
   }
   
   /**
@@ -87,30 +88,14 @@ public class PostscriptWriter extends JComponentWriter {
   }
   
   /**
-   * outputs the given component as Postscript in the specified file
+   * generates the actual output
    * 
-   * @param c         the component to print in the output format
-   * @param f         the file to store the output in
-   * @throws Exception  if component of file are <code>null</code>
+   * @throws Exception	if something goes wrong
    */
-  public static void toOutput(JComponent c, File f) throws Exception {
-    JComponentWriter        writer;
-    
-    writer = new PostscriptWriter(c, f);
-    writer.toOutput();
-  }
-  
-  /**
-   * saves the current component to the currently set file
-   *
-   * @throws Exception  if component of file are <code>null</code>
-   */
-  public void toOutput() throws Exception {
+  public void generateOutput() throws Exception {
     BufferedOutputStream      ostrm;
     PostscriptGraphics        psg;
 
-    super.toOutput();
-    
     ostrm = null;
     
     try { 
@@ -148,7 +133,7 @@ public class PostscriptWriter extends JComponentWriter {
     
     String filename = System.getProperty("java.io.tmpdir") + "test.eps";
     System.out.println("outputting to '" + filename + "'...");
-    toOutput(tv, new File(filename));
+    toOutput(new PostscriptWriter(), tv, new File(filename));
 
     System.out.println("done!");
   }
