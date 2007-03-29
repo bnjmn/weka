@@ -63,7 +63,7 @@ import weka.core.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.5 $ 
+ * @version $Revision: 1.24.2.6 $ 
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, Sourcable {
@@ -241,11 +241,7 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     String[]      options;
     int           i;
     
-    result  = new Vector();
-
-    options = super.getOptions();
-    for (i = 0; i < options.length; i++)
-      result.add(options[i]);
+    result = new Vector();
 
     if (getUseResampling())
       result.add("-Q");
@@ -253,6 +249,10 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     result.add("-P");
     result.add("" + getWeightThreshold());
     
+    options = super.getOptions();
+    for (i = 0; i < options.length; i++)
+      result.add(options[i]);
+
     return (String[]) result.toArray(new String[result.size()]);
   }
   
