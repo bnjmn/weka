@@ -38,7 +38,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -970,6 +970,14 @@ public abstract class AbstractClassifierTest
   public void testSetOptions() throws Exception {
     if (!m_OptionTester.checkSetOptions())
       fail("setOptions method failed.");
+  }
+  
+  /**
+   * tests whether the default settings are processed correctly
+   */
+  public void testDefaultOptions() throws Exception {
+    if (!m_OptionTester.checkDefaultOptions())
+      fail("Default options were not processed correctly.");
   }
   
   /**

@@ -33,7 +33,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean, boolean)
@@ -553,6 +553,16 @@ public abstract class AbstractClustererTest
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("setOptions method failed.");
+    }
+  }
+  
+  /**
+   * tests whether the default settings are processed correctly
+   */
+  public void testDefaultOptions() throws Exception {
+    if (m_OptionTester.getOptionHandler() != null) {
+      if (!m_OptionTester.checkDefaultOptions())
+	fail("Default options were not processed correctly.");
     }
   }
   
