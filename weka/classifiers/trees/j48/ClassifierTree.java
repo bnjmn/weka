@@ -31,7 +31,7 @@ import java.io.*;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.17.2.1 $
  */
 public class ClassifierTree implements Drawable, Serializable {
 
@@ -556,46 +556,41 @@ public class ClassifierTree implements Drawable, Serializable {
     }
     text.append("]");
   }
-
   /**
    * Help method for computing class probabilities of 
    * a given instance.
    *
-   * @exception Exception if something goes wrong
+   * @param classIndex the class index
+   * @param instance the instance to compute the probabilities for
+   * @param weight the weight to use
+   * @return the laplace probs
+   * @throws Exception if something goes wrong
    */
   private double getProbsLaplace(int classIndex, Instance instance, double weight) 
     throws Exception {
     
-    double [] weights;
     double prob = 0;
-    int treeIndex;
-    int i,j;
     
     if (m_isLeaf) {
       return weight * localModel().classProbLaplace(classIndex, instance, -1);
     } else {
-      treeIndex = localModel().whichSubset(instance);
+      int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
-	weights = localModel().weights(instance);
-	for (i = 0; i < m_sons.length; i++) {
-	  if (!son(i).m_isEmpty) {
-	    if (!son(i).m_isLeaf) {
-	      prob += son(i).getProbsLaplace(classIndex, instance, 
-					     weights[i] * weight);
-	    } else {
-	      prob += weight * weights[i] * 
-		localModel().classProbLaplace(classIndex, instance, i);
-	    }
-	  }
-	}
-	return prob;
+        double[] weights = localModel().weights(instance);
+        for (int i = 0; i < m_sons.length; i++) {
+          if (!son(i).m_isEmpty) {
+            prob += son(i).getProbsLaplace(classIndex, instance, 
+                                           weights[i] * weight);
+          }
+        }
+        return prob;
       } else {
-	if (son(treeIndex).m_isLeaf) {
-	  return weight * localModel().classProbLaplace(classIndex, instance, 
-							treeIndex);
-	} else {
-	  return son(treeIndex).getProbsLaplace(classIndex, instance, weight);
-	}
+        if (son(treeIndex).m_isEmpty) {
+          return weight * localModel().classProbLaplace(classIndex, instance, 
+                                                        treeIndex);
+        } else {
+          return son(treeIndex).getProbsLaplace(classIndex, instance, weight);
+        }
       }
     }
   }
@@ -603,37 +598,38 @@ public class ClassifierTree implements Drawable, Serializable {
   /**
    * Help method for computing class probabilities of 
    * a given instance.
-   *
-   * @exception Exception if something goes wrong
+   * 
+   * @param classIndex the class index
+   * @param instance the instance to compute the probabilities for
+   * @param weight the weight to use
+   * @return the probs
+   * @throws Exception if something goes wrong
    */
   private double getProbs(int classIndex, Instance instance, double weight) 
     throws Exception {
     
-    double [] weights;
     double prob = 0;
-    int treeIndex;
-    int i,j;
     
     if (m_isLeaf) {
       return weight * localModel().classProb(classIndex, instance, -1);
     } else {
-      treeIndex = localModel().whichSubset(instance);
+      int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
-	weights = localModel().weights(instance);
-	for (i = 0; i < m_sons.length; i++) {
-	  if (!son(i).m_isEmpty) {
-	    prob += son(i).getProbs(classIndex, instance, 
-				    weights[i] * weight);
-	  }
-	}
-	return prob;
+        double[] weights = localModel().weights(instance);
+        for (int i = 0; i < m_sons.length; i++) {
+          if (!son(i).m_isEmpty) {
+            prob += son(i).getProbs(classIndex, instance, 
+                                    weights[i] * weight);
+          }
+        }
+        return prob;
       } else {
-	if (son(treeIndex).m_isEmpty) {
-	  return weight * localModel().classProb(classIndex, instance, 
-						 treeIndex);
-	} else {
-	  return son(treeIndex).getProbs(classIndex, instance, weight);
-	}
+        if (son(treeIndex).m_isEmpty) {
+          return weight * localModel().classProb(classIndex, instance, 
+                                                 treeIndex);
+        } else {
+          return son(treeIndex).getProbs(classIndex, instance, weight);
+        }
       }
     }
   }

@@ -30,7 +30,7 @@ import weka.core.*;
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class Distribution implements Cloneable, Serializable {
 
@@ -622,7 +622,7 @@ public class Distribution implements Cloneable, Serializable {
   public final double laplaceProb(int classIndex) {
 
     return (m_perClass[classIndex] + 1) / 
-      (totaL + (double) actualNumClasses());
+      (totaL + (double) m_perClass.length);
   }
 
   /**
@@ -630,8 +630,12 @@ public class Distribution implements Cloneable, Serializable {
    */
   public final double laplaceProb(int classIndex, int intIndex) {
 
-    return (m_perClassPerBag[intIndex][classIndex] + 1.0) /
-      (m_perBag[intIndex] + (double) actualNumClasses());
+    if (Utils.gr(m_perBag[intIndex],0))
+      return (m_perClassPerBag[intIndex][classIndex] + 1.0) /
+        (m_perBag[intIndex] + (double) m_perClass.length);
+    else
+      return laplaceProb(classIndex);
+      
   }
 
   /**
