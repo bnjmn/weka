@@ -36,7 +36,7 @@ import java.io.Serializable;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class ClassifierTree 
   implements Drawable, Serializable, CapabilitiesHandler {
@@ -616,31 +616,23 @@ public class ClassifierTree
   private double getProbsLaplace(int classIndex, Instance instance, double weight) 
     throws Exception {
     
-    double [] weights;
     double prob = 0;
-    int treeIndex;
-    int i,j;
     
     if (m_isLeaf) {
       return weight * localModel().classProbLaplace(classIndex, instance, -1);
     } else {
-      treeIndex = localModel().whichSubset(instance);
+      int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
-	weights = localModel().weights(instance);
-	for (i = 0; i < m_sons.length; i++) {
+	double[] weights = localModel().weights(instance);
+	for (int i = 0; i < m_sons.length; i++) {
 	  if (!son(i).m_isEmpty) {
-	    if (!son(i).m_isLeaf) {
-	      prob += son(i).getProbsLaplace(classIndex, instance, 
+        prob += son(i).getProbsLaplace(classIndex, instance, 
 					     weights[i] * weight);
-	    } else {
-	      prob += weight * weights[i] * 
-		localModel().classProbLaplace(classIndex, instance, i);
-	    }
 	  }
 	}
 	return prob;
       } else {
-	if (son(treeIndex).m_isLeaf) {
+	if (son(treeIndex).m_isEmpty) {
 	  return weight * localModel().classProbLaplace(classIndex, instance, 
 							treeIndex);
 	} else {
@@ -663,18 +655,15 @@ public class ClassifierTree
   private double getProbs(int classIndex, Instance instance, double weight) 
     throws Exception {
     
-    double [] weights;
     double prob = 0;
-    int treeIndex;
-    int i,j;
     
     if (m_isLeaf) {
       return weight * localModel().classProb(classIndex, instance, -1);
     } else {
-      treeIndex = localModel().whichSubset(instance);
+      int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
-	weights = localModel().weights(instance);
-	for (i = 0; i < m_sons.length; i++) {
+	double[] weights = localModel().weights(instance);
+	for (int i = 0; i < m_sons.length; i++) {
 	  if (!son(i).m_isEmpty) {
 	    prob += son(i).getProbs(classIndex, instance, 
 				    weights[i] * weight);
