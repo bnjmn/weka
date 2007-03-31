@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class Distribution
   implements Cloneable, Serializable {
@@ -629,7 +629,7 @@ public class Distribution
   public final double laplaceProb(int classIndex) {
 
     return (m_perClass[classIndex] + 1) / 
-      (totaL + (double) actualNumClasses());
+      (totaL + (double) m_perClass.length);
   }
 
   /**
@@ -637,8 +637,12 @@ public class Distribution
    */
   public final double laplaceProb(int classIndex, int intIndex) {
 
-    return (m_perClassPerBag[intIndex][classIndex] + 1.0) /
-      (m_perBag[intIndex] + (double) actualNumClasses());
+	  if (Utils.gr(m_perBag[intIndex],0))
+		return (m_perClassPerBag[intIndex][classIndex] + 1.0) /
+	           (m_perBag[intIndex] + (double) m_perClass.length);
+	  else
+	    return laplaceProb(classIndex);
+	  
   }
 
   /**
