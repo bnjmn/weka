@@ -66,18 +66,25 @@ import weka.core.Utils;
  * structure (e.g. a release directory and a developer directory with additional
  * classes). <br>
  * <br>
+ * The dynamic discovery can be turned off via the <code>UseDyanmic</code>
+ * property in the props file (values: true|false).
  * 
  * @see #CREATOR_FILE
  * @see #PROPERTY_FILE
+ * @see #USE_DYNAMIC
  * @see GenericObjectEditor
  * @see weka.core.ClassDiscovery
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class GenericPropertiesCreator {
   
   /** whether to output some debug information */
   public final static boolean VERBOSE = false;
+
+  /** name of property whether to use the dynamic approach or the old 
+   * GenericObjectEditor.props file */
+  public final static String USE_DYNAMIC = "UseDynamic";
   
   /** The name of the properties file to use as a template. Contains the 
    * packages in which to look for derived classes. It has the same structure
@@ -298,6 +305,19 @@ public class GenericPropertiesCreator {
   }
 
   /**
+   * gets whether the dynamic approach should be used or not
+   * 
+   * @return		true if the dynamic approach is to be used
+   */
+  public boolean useDynamic() {
+    if (getInputProperties() == null)
+      loadInputProperties();
+    
+    return Boolean.parseBoolean(
+	getInputProperties().getProperty(USE_DYNAMIC, "true"));
+  }
+  
+  /**
    * checks whether the classname is a valid one, i.e., from a public class
    *
    * @param classname   the classname to check
@@ -405,9 +425,11 @@ public class GenericPropertiesCreator {
     int               i;
     
     m_OutputProperties = new Properties();
-    keys             = m_InputProperties.propertyNames();
+    keys               = m_InputProperties.propertyNames();
     while (keys.hasMoreElements()) {
       key   = keys.nextElement().toString();
+      if (key.equals(USE_DYNAMIC))
+	continue;
       tok   = new StringTokenizer(m_InputProperties.getProperty(key), ",");
       value = "";
       // get classes for all packages
