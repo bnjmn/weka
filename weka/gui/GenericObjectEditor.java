@@ -87,16 +87,17 @@ import javax.swing.tree.TreeSelectionModel;
  * and themselves configured. The configuration file is called
  * "GenericObjectEditor.props" and may live in either the location given by
  * "user.home" or the current directory (this last will take precedence), and a
- * default properties file is read from the weka distribution. For speed, the
+ * default properties file is read from the Weka distribution. For speed, the
  * properties file is read only once when the class is first loaded -- this may
  * need to be changed if we ever end up running in a Java OS ;-). <br>
  * <br>
- * If it is used in a <b>dynamic</b> way (<code>USE_DYNAMIC</code> is
- * <code>true</code>) then the classes to list are discovered by the 
+ * If it is used in a <b>dynamic</b> way (the <code>UseDynamic</code> property 
+ * of the GenericPropertiesCreator props file is set to <code>true</code>) 
+ * then the classes to list are discovered by the 
  * <code>GenericPropertiesCreator</code> class (it checks the complete classpath). 
  * 
- * @see #USE_DYNAMIC
  * @see GenericPropertiesCreator
+ * @see GenericPropertiesCreator#useDynamic()
  * @see GenericPropertiesCreator#CREATOR_FILE
  * @see weka.core.ClassDiscovery
  * 
@@ -104,7 +105,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.55 $
+ * @version $Revision: 1.56 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -147,9 +148,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
   /** whether the class can be changed */
   protected boolean m_canChangeClassInDialog;
-
-  /** whether to generate the properties dynamically or use the static props-file */
-  protected final static boolean USE_DYNAMIC = true;
   
   /** whether the Weka Editors were already registered */
   protected static boolean m_EditorsRegistered;
@@ -164,44 +162,59 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @see GenericPropertiesCreator
    */
   static {
-	
-    if (USE_DYNAMIC) {
-      try {
-        GenericPropertiesCreator creator = new GenericPropertiesCreator();
-        creator.execute(false);
-        EDITOR_PROPERTIES = creator.getOutputProperties();
+
+    try {
+      GenericPropertiesCreator creator = new GenericPropertiesCreator();
+
+      // dynamic approach?
+      if (creator.useDynamic()) {
+	try {
+	  creator.execute(false);
+	  EDITOR_PROPERTIES = creator.getOutputProperties();
+	}
+	catch (Exception e) {
+	  JOptionPane.showMessageDialog(
+	      null,
+	      "Could not determine the properties for the generic object\n"
+	      + "editor. This exception was produced:\n"
+	      + e.toString(),
+	      "GenericObjectEditor",
+	      JOptionPane.ERROR_MESSAGE);
+	}
       }
-      catch (Exception e) {
-        JOptionPane.showMessageDialog(
-            null,
-              "Could not determine the properties for the generic object\n"
-            + "editor. This exception was produced:\n"
-            + e.toString(),
-            "GenericObjectEditor",
-            JOptionPane.ERROR_MESSAGE);
+      else {
+	// Allow a properties file in the current directory to override
+	try {
+	  EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+	  java.util.Enumeration keys = 
+	    (java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
+	  if (!keys.hasMoreElements()) {
+	    throw new Exception("Failed to read a property file for the "
+		+"generic object editor");
+	  }
+	}
+	catch (Exception ex) {
+	  JOptionPane.showMessageDialog(
+	      null,
+	      "Could not read a configuration file for the generic object\n"
+	      +"editor. An example file is included with the Weka distribution.\n"
+	      +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+	      +"should be placed either in your user home (which is set\n"
+	      + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+	      + "or the directory that java was started from\n",
+	      "GenericObjectEditor",
+	      JOptionPane.ERROR_MESSAGE);
+	}
       }
     }
-    else {
-      // Allow a properties file in the current directory to override
-      try {
-        EDITOR_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-        java.util.Enumeration keys = 
-  	(java.util.Enumeration)EDITOR_PROPERTIES.propertyNames();
-        if (!keys.hasMoreElements()) {
-  	  throw new Exception("Failed to read a property file for the "
-  			      +"generic object editor");
-        }
-      } catch (Exception ex) {
-        JOptionPane.showMessageDialog(null,
-  				    "Could not read a configuration file for the generic object\n"
-  				    +"editor. An example file is included with the Weka distribution.\n"
-  				    +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-  				    +"should be placed either in your user home (which is set\n"
-  				    + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-  				    + "or the directory that java was started from\n",
-  				    "GenericObjectEditor",
-  				    JOptionPane.ERROR_MESSAGE);
-      }
+    catch (Exception e) {
+      JOptionPane.showMessageDialog(
+	  null,
+	  "Could not initialize the GenericPropertiesCreator. "
+	  + "This exception was produced:\n"
+	  + e.toString(),
+	  "GenericObjectEditor",
+	  JOptionPane.ERROR_MESSAGE);
     }
   }
 
