@@ -27,6 +27,9 @@ import weka.gui.Logger;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.beans.EventSetDescriptor;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -35,8 +38,11 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JWindow;
 
 /**
  * A meta bean that encapsulates several other regular beans, useful for 
@@ -44,7 +50,7 @@ import javax.swing.JPanel;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MetaBean
   extends JPanel 
@@ -60,6 +66,8 @@ public class MetaBean
 		   BeanVisual.ICON_PATH+"DiamondPlain.gif");
 
   private transient Logger m_log = null;
+  private transient JWindow m_previewWindow = null;
+  private transient javax.swing.Timer m_previewTimer = null;
 
   protected Vector m_subFlow = new Vector();
   protected Vector m_inputs = new Vector();
@@ -67,6 +75,9 @@ public class MetaBean
 
   // the internal connections for the grouping
   protected Vector m_associatedConnections = new Vector();
+  
+  // Holds a preview image of the encapsulated sub-flow
+  protected ImageIcon m_subFlowPreview = null;
 
   public MetaBean() {
     setLayout(new BorderLayout());
@@ -393,6 +404,13 @@ public class MetaBean
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector();
+    if (m_subFlowPreview != null) {
+      String text = "Show preview";
+      if (m_previewWindow != null) {
+	text = "$"+text;
+      }
+      newVector.addElement(text);
+    }
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (temp.getBean() instanceof UserRequestAcceptor) {
@@ -415,6 +433,51 @@ public class MetaBean
     
     return newVector.elements();
   }
+  
+  public void setSubFlowPreview(ImageIcon sfp) {
+    m_subFlowPreview = sfp;
+  }
+  
+  private void showPreview() {
+    if (m_previewWindow == null) {
+      
+      JLabel jl = new JLabel(m_subFlowPreview);
+      //Dimension d = jl.getPreferredSize();
+      jl.setLocation(0,0);
+      m_previewWindow = new JWindow();
+      //popup.getContentPane().setLayout(null);
+      m_previewWindow.getContentPane().add(jl);
+      m_previewWindow.validate();
+      m_previewWindow.setSize(m_subFlowPreview.getIconWidth(), m_subFlowPreview.getIconHeight());
+      
+      m_previewWindow.addMouseListener(new MouseAdapter() {
+	  public void mouseClicked(MouseEvent e) {
+	    m_previewWindow.dispose();
+	    m_previewWindow = null;
+	  }
+	});
+      
+      m_previewWindow.setLocation(
+	  getParent().getLocationOnScreen().x + getX() + getWidth() / 2 - 
+	  m_subFlowPreview.getIconWidth() / 2, 
+	  getParent().getLocationOnScreen().y + getY() + getHeight() / 2 - 
+	  m_subFlowPreview.getIconHeight() / 2);
+      //popup.pack();
+      m_previewWindow.setVisible(true);
+      m_previewTimer = 
+	new javax.swing.Timer(8000, new java.awt.event.ActionListener() {
+	  public void actionPerformed(java.awt.event.ActionEvent e) {
+	    if (m_previewWindow != null) {
+	      m_previewWindow.dispose();
+	      m_previewWindow = null;
+	      m_previewTimer = null;
+	    }
+	  }
+	});
+      m_previewTimer.setRepeats(false);
+      m_previewTimer.start();
+    }
+  }
 
   /**
    * Perform a particular request
@@ -423,6 +486,10 @@ public class MetaBean
    * @exception IllegalArgumentException if an error occurs
    */
   public void performRequest(String request) {
+    if (request.compareTo("Show preview") == 0) {
+      showPreview();
+      return;
+    }
     // first grab the index if any
     if (request.indexOf(":") < 0) {
       return;

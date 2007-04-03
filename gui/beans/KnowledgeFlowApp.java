@@ -46,6 +46,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,6 +54,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 import java.beans.BeanInfo;
 import java.beans.Beans;
 import java.beans.Customizer;
@@ -67,6 +69,7 @@ import java.beans.beancontext.BeanContextSupport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
@@ -109,7 +112,7 @@ import javax.swing.filechooser.FileFilter;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.16 $
+ * @version  $Revision: 1.17 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -293,7 +296,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.16 $
+   * @version $Revision: 1.17 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -458,10 +461,10 @@ public class KnowledgeFlowApp
   public KnowledgeFlowApp() {
     // Grab a fontmetrics object
     JWindow temp = new JWindow();
-    temp.show();
+    temp.setVisible(true);
     temp.getGraphics().setFont(new Font("Monospaced", Font.PLAIN, 10));
     m_fontM = temp.getGraphics().getFontMetrics();
-    temp.hide();
+    temp.setVisible(false);
 
     // some GUI defaults
     try {
@@ -550,6 +553,7 @@ public class KnowledgeFlowApp
             revalidate();
             m_beanLayout.repaint();
             m_mode = NONE;
+                        
             checkSubFlow(m_startX, m_startY, me.getX(), me.getY());
           }
 	}
@@ -1815,8 +1819,9 @@ public class KnowledgeFlowApp
                              (startY < endY) ? startY: endY,
                              Math.abs(startX - endX),
                              Math.abs(startY - endY));
+    System.err.println(r);
     Vector selected = BeanInstance.findInstances(r);
-
+    System.err.println(r);
     // check if sub flow is valid
     Vector inputs = BeanConnection.inputs(selected);
     Vector outputs = BeanConnection.outputs(selected);
@@ -1860,6 +1865,14 @@ public class KnowledgeFlowApp
           setDisplayConnectors(true, java.awt.Color.green);
       }
     }
+    
+    BufferedImage subFlowPreview = null; 
+    try {
+      	subFlowPreview = createImage(m_beanLayout, r);              
+    } catch (IOException ex) {
+      ex.printStackTrace();
+      // drop through quietly
+    }
 
     // Confirmation pop-up
     int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
@@ -1879,6 +1892,7 @@ public class KnowledgeFlowApp
         group.setAssociatedConnections(associatedConnections);
         group.setInputs(inputs);
         group.setOutputs(outputs);
+        group.setSubFlowPreview(new ImageIcon(subFlowPreview));
         if (name.length() > 0) {
           group.getVisual().setText(name);
         }
@@ -2016,6 +2030,29 @@ public class KnowledgeFlowApp
     }
     m_loadB.setEnabled(true);
     m_saveB.setEnabled(true);
+  }
+  
+  /**
+   * Utility method to create an image of a region of the given component
+   * @param component the component to create an image of
+   * @param region the region of the component to put into the image
+   * @return the image
+   * @throws IOException
+   */
+  protected static BufferedImage createImage(JComponent component, Rectangle region)
+  throws IOException {
+    boolean opaqueValue = component.isOpaque();
+    component.setOpaque( true );
+    BufferedImage image = new BufferedImage(region.width, 
+	region.height, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g2d = image.createGraphics();
+    g2d.translate(-region.getX(), -region.getY());
+    //g2d.setClip( region );
+    component.paint( g2d );
+    g2d.dispose();
+    component.setOpaque( opaqueValue );
+    
+    return image;
   }
 
 
