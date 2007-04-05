@@ -97,8 +97,8 @@ import java.util.Vector;
  * <pre> -A &lt;attribute evaluator&gt;
  *  Attribute ranker to use if doing a 
  *  rank search. Place any
- *  evaluator options LAST on the
- *  command line following a "--".
+ *  evaluator options LAST on 
+ *  the command line following a "--".
  *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.
  *  (default = GainRatioAttributeEval)</pre>
  * 
@@ -116,7 +116,7 @@ import java.util.Vector;
  *  Specify number of attributes to retain from 
  *  the ranking. Overides -T. Use in conjunction with -Q</pre>
  * 
- * <pre> -T &lt;threshold&gt;
+ * <pre> -J &lt;threshold&gt;
  *  Specify a theshold by which attributes
  *  may be discarded from the ranking.
  *  Use in conjuction with -Q</pre>
@@ -134,7 +134,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class RaceSearch 
   extends ASSearch 
@@ -587,65 +587,72 @@ public class RaceSearch
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(8);
-     newVector.addElement(new Option("\tType of race to perform.\n\t"
-                                     +"(default = 0).",
-                                     "R", 1 ,"-R <0 = forward | 1 = backward "
-                                     +"race | 2 = schemata | 3 = rank>"));
-     newVector.addElement(new Option("\tSignificance level for comaparisons"
-                                     +"\n\t(default = 0.001(forward/backward/"
-                                     +"rank)/0.01(schemata)).",
-                                     "L",1,"-L <significance>"));
-     newVector.addElement(new Option("\tThreshold for error comparison.\n\t"
-                                     +"(default = 0.001).",
-                                     "T",1,"-T <threshold>"));
-     
-     newVector.addElement(new Option("\tAttribute ranker to use if doing a "
-                           +"\n\trank search. Place any\n\t"
-                           +"evaluator options LAST on the" 
-                           + "\n\tcommand line following a \"--\"." 
-                           + "\n\teg. -A weka.attributeSelection."
-                           +"GainRatioAttributeEval ... " 
-                           + "-- -M.\n\t(default = GainRatioAttributeEval)", 
-                           "A", 1, "-A <attribute evaluator>"));
+    Vector newVector = new Vector();
     
-     newVector.addElement(new Option("\tFolds for cross validation\n\t"
-                            +"(default = 0 (1 if schemata race)",
-                            "F",1,"-F <0 = 10 fold | 1 = leave-one-out>"));
-     newVector.addElement(new Option("\tGenerate a ranked list of attributes."
-                                     +"\n\tForces the search to be forward\n"
-                                     +"\tand races until all attributes have\n"
-                                     +"\tselected, thus producing a ranking.",
-                                     "Q",0,"-Q"));
+     newVector.addElement(new Option(
+	 "\tType of race to perform.\n"
+	 + "\t(default = 0).",
+	 "R", 1 ,"-R <0 = forward | 1 = backward race | 2 = schemata | 3 = rank>"));
+     
+     newVector.addElement(new Option(
+	 "\tSignificance level for comaparisons\n"
+	 + "\t(default = 0.001(forward/backward/rank)/0.01(schemata)).",
+	 "L",1,"-L <significance>"));
+     
+     newVector.addElement(new Option(
+	 "\tThreshold for error comparison.\n"
+	 + "\t(default = 0.001).",
+	 "T",1,"-T <threshold>"));
+     
+     newVector.addElement(new Option(
+	 "\tAttribute ranker to use if doing a \n"
+	 + "\trank search. Place any\n"
+	 + "\tevaluator options LAST on \n"
+	 + "\tthe command line following a \"--\".\n" 
+	 + "\teg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.\n"
+	 + "\t(default = GainRatioAttributeEval)", 
+	 "A", 1, "-A <attribute evaluator>"));
+    
+     newVector.addElement(new Option(
+	 "\tFolds for cross validation\n"
+	 + "\t(default = 0 (1 if schemata race)",
+	 "F",1,"-F <0 = 10 fold | 1 = leave-one-out>"));
+     
+     newVector.addElement(new Option(
+	 "\tGenerate a ranked list of attributes.\n"
+	 +"\tForces the search to be forward\n"
+	 +"\tand races until all attributes have\n"
+	 +"\tselected, thus producing a ranking.",
+	 "Q",0,"-Q"));
 
-    newVector
-      .addElement(new Option("\tSpecify number of attributes to retain from "
-                             +"\n\tthe ranking. Overides -T. Use "
-                             +"in conjunction with -Q"
-                             ,"N",1
-                             , "-N <num to select>"));
+    newVector.addElement(new Option(
+	"\tSpecify number of attributes to retain from \n"
+	+ "\tthe ranking. Overides -T. Use in conjunction with -Q", 
+	"N", 1, "-N <num to select>"));
 
-    newVector
-      .addElement(new Option("\tSpecify a theshold by which attributes" 
-                             + "\n\tmay be discarded from the ranking."
-                             +"\n\tUse in conjuction with -Q","T",1
-                             , "-T <threshold>"));
+    newVector.addElement(new Option(
+	"\tSpecify a theshold by which attributes\n" 
+	+ "\tmay be discarded from the ranking.\n"
+	+"\tUse in conjuction with -Q",
+	"J",1, "-J <threshold>"));
 
-     newVector.addElement(new Option("\tVerbose output for monitoring the "
-                                     +"search.",
-                                     "Z",0,"-Z"));
+     newVector.addElement(new Option(
+	 "\tVerbose output for monitoring the search.",
+	 "Z",0,"-Z"));
+     
      if ((m_ASEval != null) && 
          (m_ASEval instanceof OptionHandler)) {
-       newVector.addElement(new Option("", "", 0, "\nOptions specific to " 
-                                       + "evaluator " 
-                                       + m_ASEval.getClass().getName() 
-                                       + ":"));
+       newVector.addElement(new Option(
+	   "", 
+	   "", 0, "\nOptions specific to evaluator " 
+	   + m_ASEval.getClass().getName() + ":"));
+
        Enumeration enu = ((OptionHandler)m_ASEval).listOptions();
-       
        while (enu.hasMoreElements()) {
          newVector.addElement(enu.nextElement());
        }
      }
+     
      return newVector.elements();
   }
 
@@ -670,8 +677,8 @@ public class RaceSearch
    * <pre> -A &lt;attribute evaluator&gt;
    *  Attribute ranker to use if doing a 
    *  rank search. Place any
-   *  evaluator options LAST on the
-   *  command line following a "--".
+   *  evaluator options LAST on 
+   *  the command line following a "--".
    *  eg. -A weka.attributeSelection.GainRatioAttributeEval ... -- -M.
    *  (default = GainRatioAttributeEval)</pre>
    * 
@@ -689,7 +696,7 @@ public class RaceSearch
    *  Specify number of attributes to retain from 
    *  the ranking. Overides -T. Use in conjunction with -Q</pre>
    * 
-   * <pre> -T &lt;threshold&gt;
+   * <pre> -J &lt;threshold&gt;
    *  Specify a theshold by which attributes
    *  may be discarded from the ranking.
    *  Use in conjuction with -Q</pre>
@@ -708,8 +715,7 @@ public class RaceSearch
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
-   *
-   **/
+   */
   public void setOptions (String[] options)
     throws Exception {
     String optionString;
@@ -729,16 +735,12 @@ public class RaceSearch
 
     optionString = Utils.getOption('L', options);
     if (optionString.length() !=0) {
-      Double temp;
-      temp = Double.valueOf(optionString);
-      setSignificanceLevel(temp.doubleValue());
+      setSignificanceLevel(Double.parseDouble(optionString));
     }
 
     optionString = Utils.getOption('T', options);
     if (optionString.length() !=0) {
-      Double temp;
-      temp = Double.valueOf(optionString);
-      setThreshold(temp.doubleValue());
+      setThreshold(Double.parseDouble(optionString));
     }
 
     optionString = Utils.getOption('A', options);
@@ -749,11 +751,9 @@ public class RaceSearch
 
     setGenerateRanking(Utils.getFlag('Q', options));
 
-    optionString = Utils.getOption('T', options);
+    optionString = Utils.getOption('J', options);
     if (optionString.length() != 0) {
-      Double temp;
-      temp = Double.valueOf(optionString);
-      setThreshold(temp.doubleValue());
+      setSelectionThreshold(Double.parseDouble(optionString));
     }
     
     optionString = Utils.getOption('N', options);
