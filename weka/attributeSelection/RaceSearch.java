@@ -38,20 +38,20 @@ import weka.experiment.Stats;
  *
  * Valid options are:<p>
  *
- * -R <race type><br>
+ * -R race type<br>
  * 0 = forward, 1 = backward, 2 = schemata, 3 = rank. <p>
  * 
- * -L <significance level> <br>
+ * -L significance level <br>
  * significance level to use for t-tests. <p>
  *
- * -T <threshold> <br>
+ * -T threshold <br>
  * threshold for considering mean errors of two subsets the same <p>
  *
- * -F <xval type> <br>
+ * -F xval type <br>
  * 0 = 10 fold, 1 = leave-one-out (selected automatically for schemata race
  * <p>
  *
- * -A <attribute evaluator> <br>
+ * -A attribute evaluator <br>
  * the attribute evaluator to use when doing a rank search <p>
  *
  * -Q <br>
@@ -59,11 +59,11 @@ import weka.experiment.Stats;
  * the race type to be forward. Racing continues until *all* attributes
  * have been selected, thus producing a ranked list of attributes. <p>
  *
- * -N <number to retain> <br>
+ * -N number to retain <br>
  * Specify the number of attributes to retain. Overides any threshold. 
  * Use in conjunction with -Q. <p>
  * 
- * -J <threshold> <br>
+ * -J threshold <br>
  * Specify a threshold by which the AttributeSelection module can discard
  * attributes. Use in conjunction with -Q. <p>
  *
@@ -71,7 +71,7 @@ import weka.experiment.Stats;
  * Turn on verbose output for monitoring the search <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.1 $
+ * @version $Revision: 1.14.2.2 $
  */
 public class RaceSearch extends ASSearch implements RankedOutputSearch, 
 						    OptionHandler {
@@ -497,7 +497,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
-    Vector newVector = new Vector(8);
+    Vector newVector = new Vector();
      newVector.addElement(new Option("\tType of race to perform.\n\t"
 				     +"(default = 0).",
 				     "R", 1 ,"-R <0 = forward | 1 = backward "
@@ -538,8 +538,8 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     newVector
       .addElement(new Option("\tSpecify a theshold by which attributes" 
 			     + "\n\tmay be discarded from the ranking."
-			     +"\n\tUse in conjuction with -Q","T",1
-			     , "-T <threshold>"));
+			     +"\n\tUse in conjuction with -Q","J",1
+			     , "-J <threshold>"));
 
      newVector.addElement(new Option("\tVerbose output for monitoring the "
 				     +"search.",
@@ -564,20 +564,20 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    *
    * Valid options are:<p>
    *
-   * -R <race type><br>
+   * -R race type<br>
    * 0 = forward, 1 = backward, 2 = schemata, 3 = rank. <p>
    * 
-   * -L <significance level> <br>
+   * -L significance level <br>
    * significance level to use for t-tests. <p>
    *
-   * -T <threshold> <br>
+   * -T threshold <br>
    * threshold for considering mean errors of two subsets the same <p>
    *
-   * -F <xval type> <br>
+   * -F xval type <br>
    * 0 = 10 fold, 1 = leave-one-out (selected automatically for schemata race
    * <p>
    *
-   * -A <attribute evaluator> <br>
+   * -A attribute evaluator <br>
    * the attribute evaluator to use when doing a rank search <p>
    *
    * -Q <br>
@@ -585,11 +585,11 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
    * the race type to be forward. Racing continues until *all* attributes
    * have been selected, thus producing a ranked list of attributes. <p>
    *
-   * -N <number to retain> <br>
+   * -N number to retain <br>
    * Specify the number of attributes to retain. Overides any threshold. 
    * Use in conjunction with -Q. <p>
    * 
-   * -J <threshold> <br>
+   * -J threshold <br>
    * Specify a threshold by which the AttributeSelection module can discard
    * attributes. Use in conjunction with -Q. <p>
    *
@@ -639,11 +639,11 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 
     setGenerateRanking(Utils.getFlag('Q', options));
 
-    optionString = Utils.getOption('T', options);
+    optionString = Utils.getOption('J', options);
     if (optionString.length() != 0) {
       Double temp;
       temp = Double.valueOf(optionString);
-      setThreshold(temp.doubleValue());
+      setSelectionThreshold(temp.doubleValue());
     }
     
     optionString = Utils.getOption('N', options);
@@ -735,7 +735,7 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
 			  +"(RaceSearch)");
     }
 
-    m_Instances = data;
+    m_Instances = new Instances(data);
     m_Instances.deleteWithMissingClass();
     if (m_Instances.numInstances() == 0) {
       throw new Exception("All instances have missing class! (RaceSearch)");
@@ -754,25 +754,25 @@ public class RaceSearch extends ASSearch implements RankedOutputSearch,
     }
 
     if (m_xvalType == LEAVE_ONE_OUT) {
-      m_numFolds = data.numInstances();
+      m_numFolds = m_Instances.numInstances();
     } else {
       m_numFolds = 10;
     }
 
     Random random = new Random(1); // I guess this should really be a parameter?
-    data.randomize(random);
+    m_Instances.randomize(random);
     int [] bestSubset=null;
 
     switch (m_raceType) {
     case FORWARD_RACE:
     case BACKWARD_RACE: 
-      bestSubset = hillclimbRace(data, random);
+      bestSubset = hillclimbRace(m_Instances, random);
       break;
     case SCHEMATA_RACE:
-      bestSubset = schemataRace(data, random);
+      bestSubset = schemataRace(m_Instances, random);
       break;
     case RANK_RACE:
-      bestSubset = rankRace(data, random);
+      bestSubset = rankRace(m_Instances, random);
       break;
     }
 
