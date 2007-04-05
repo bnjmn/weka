@@ -98,7 +98,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class CostSensitiveClassifier 
   extends RandomizableSingleClassifierEnhancer
@@ -264,7 +264,7 @@ public class CostSensitiveClassifier
                                           TAGS_MATRIX_SOURCE));
     }
     
-    String demandDir = Utils.getOption('D', options);
+    String demandDir = Utils.getOption('N', options);
     if (demandDir.length() != 0) {
       setOnDemandDirectory(new File(demandDir));
     }
