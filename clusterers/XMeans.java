@@ -144,7 +144,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -2233,7 +2233,8 @@ throws Exception{
     result.add("-B");
     result.add("" + getBinValue());
     
-    if (getKDTree() != null) {
+    if (getUseKDTree()) {
+      result.add("-use-kdtree");
       result.add("-K");
       result.add("" + getKDTreeSpec());
     }
