@@ -70,7 +70,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class MakeDensityBasedClusterer 
   extends DensityBasedClusterer
@@ -497,20 +497,15 @@ public class MakeDensityBasedClusterer
   public void setOptions(String[] options) throws Exception {
 
     String optionString = Utils.getOption('M', options);
-    if (optionString.length() != 0) {
+    if (optionString.length() != 0)
       setMinStdDev((new Double(optionString)).doubleValue());
-    }
+    else
+      setMinStdDev(1e-6);
      
     String wString = Utils.getOption('W', options);
     if (wString.length() == 0)
       wString = defaultClustererString();
-    String[] spec = Utils.splitOptions(wString);
-    if (spec.length == 0) {
-      throw new IllegalArgumentException("Invalid clusterer specification string");
-    }
-    String name = spec[0];
-    spec[0] = "";
-    setClusterer(Clusterer.forName(name, spec));
+    setClusterer(Clusterer.forName(wString, Utils.partitionOptions(options)));
   }
 
   /**
