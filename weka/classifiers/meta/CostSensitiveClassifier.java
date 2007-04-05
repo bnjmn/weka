@@ -82,7 +82,7 @@ import weka.filters.Filter;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18.2.3 $
+ * @version $Revision: 1.18.2.4 $
  */
 public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhancer
   implements OptionHandler, Drawable {
@@ -220,7 +220,7 @@ public class CostSensitiveClassifier extends RandomizableSingleClassifierEnhance
                                           TAGS_MATRIX_SOURCE));
     }
     
-    String demandDir = Utils.getOption('D', options);
+    String demandDir = Utils.getOption('N', options);
     if (demandDir.length() != 0) {
       setOnDemandDirectory(new File(demandDir));
     }
