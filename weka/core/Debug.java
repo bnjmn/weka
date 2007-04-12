@@ -22,11 +22,7 @@
 package weka.core;
 
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -44,7 +40,7 @@ import java.util.logging.SimpleFormatter;
  * A helper class for debug output, logging, clocking, etc.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Debug
   implements Serializable {
@@ -88,7 +84,7 @@ public class Debug
    * disable the use of CPU time as well.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $ 
+   * @version $Revision: 1.7 $ 
    * @see ThreadMXBean#isThreadCpuTimeEnabled()
    */
   public static class Clock 
@@ -427,7 +423,7 @@ public class Debug
    * formatting options, see java.text.SimpleDateFormat.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $ 
+   * @version $Revision: 1.7 $ 
    * @see SimpleDateFormat
    */
   public static class Timestamp
@@ -641,7 +637,7 @@ public class Debug
    * Debug.SimpleLog class.
    *
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $ 
+   * @version $Revision: 1.7 $ 
    * @see Debug.SimpleLog
    */
   public static class Log
@@ -858,7 +854,7 @@ public class Debug
    * INFO).
    *
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    */
   public static class Random
     extends java.util.Random
@@ -1133,7 +1129,7 @@ public class Debug
    * contains debug methods
    *
    * @author Gabi Schmidberger (gabi at cs dot waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision: 1.7 $
    */
   public static class DBO 
     implements Serializable {
@@ -1559,18 +1555,18 @@ public class Debug
    * @return		true if writing was successful
    */
   public static boolean saveToFile(String filename, Object o) {
-    boolean 		result;
-    ObjectOutputStream 	oos;
+    boolean 	result;
     
-    try {
-      oos = new ObjectOutputStream(new FileOutputStream(filename));
-      oos.writeObject(o);
-      oos.flush();
-      oos.close();
-      
-      result = true;
+    if (SerializationHelper.isSerializable(o.getClass())) {
+      try {
+	SerializationHelper.write(filename, o);
+	result = true;
+      }
+      catch (Exception e) {
+	result = false;
+      }
     }
-    catch (Exception e) {
+    else {
       result = false;
     }
     
@@ -1585,13 +1581,10 @@ public class Debug
    * @return		the deserialized content, null if problem occurred
    */
   public static Object loadFromFile(String filename) {
-    Object		result;
-    ObjectInputStream 	ois;
+    Object	result;
     
     try {
-      ois    = new ObjectInputStream(new FileInputStream(filename));
-      result = ois.readObject();
-      ois.close();
+      result = SerializationHelper.read(filename);
     }
     catch (Exception e) {
       result = null;
