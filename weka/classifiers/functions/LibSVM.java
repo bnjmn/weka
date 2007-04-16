@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */
@@ -1287,10 +1287,10 @@ public class LibSVM
       if (instance.value(i) == 0)
 	continue;
 
+      Array.set(result, index, Class.forName(CLASS_SVMNODE).newInstance());
+      setField(Array.get(result, index), "index", new Integer(i + 1));
+      setField(Array.get(result, index), "value", new Double(instance.value(i)));
       index++;
-      Array.set(result, index - 1, Class.forName(CLASS_SVMNODE).newInstance());
-      setField(Array.get(result, index - 1), "index", new Integer(index));
-      setField(Array.get(result, index - 1), "value", new Double(instance.value(i)));
     }
     
     return result;
