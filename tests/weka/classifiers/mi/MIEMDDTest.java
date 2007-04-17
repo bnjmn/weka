@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIEMDD. Run from the command line with:<p/>
- * java weka.classifiers.mi.MIEMDD
+ * java weka.classifiers.mi.MIEMDDTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIEMDDTest 
   extends AbstractClassifierTest {

@@ -24,15 +24,14 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Tests Dagging. Run from the command line with:<p/>
- * java weka.classifiers.meta.Dagging
+ * Tests DataNearBalancedND. Run from the command line with:<p/>
+ * java weka.classifiers.meta.nestedDichotomies.DataNearBalancedNDTest
  *
  * @author eibe
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class DataNearBalancedNDTest 
   extends AbstractClassifierTest {

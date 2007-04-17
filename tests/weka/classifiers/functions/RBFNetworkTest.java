@@ -29,10 +29,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests RBFNetwork. Run from the command line with:<p/>
- * java weka.classifiers.functions.RBFNetwork
+ * java weka.classifiers.functions.RBFNetworkTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RBFNetworkTest 
   extends AbstractClassifierTest {

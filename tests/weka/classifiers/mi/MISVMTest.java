@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MISVM. Run from the command line with:<p/>
- * java weka.classifiers.mi.MISVM
+ * java weka.classifiers.mi.MISVMTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MISVMTest 
   extends AbstractClassifierTest {

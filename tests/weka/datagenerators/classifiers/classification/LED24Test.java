@@ -24,15 +24,14 @@ import weka.datagenerators.AbstractDataGeneratorTest;
 import weka.datagenerators.DataGenerator;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests LED24. Run from the command line with:<p/>
- * java weka.datagenerators.classifiers.classification.LED24
+ * java weka.datagenerators.classifiers.classification.LED24Test
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LED24Test 
   extends AbstractDataGeneratorTest {

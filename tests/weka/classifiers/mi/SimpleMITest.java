@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests SimpleMI. Run from the command line with:<p/>
- * java weka.classifiers.mi.SimpleMI
+ * java weka.classifiers.mi.SimpleMITest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleMITest 
   extends AbstractClassifierTest {

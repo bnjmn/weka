@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIWrapper. Run from the command line with:<p/>
- * java weka.classifiers.mi.MIWrapper
+ * java weka.classifiers.mi.MIWrapperTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIWrapperTest 
   extends AbstractClassifierTest {

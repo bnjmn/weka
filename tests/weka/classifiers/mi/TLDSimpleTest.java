@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests TLDSimple. Run from the command line with:<p/>
- * java weka.classifiers.mi.TLDSimple
+ * java weka.classifiers.mi.TLDSimpleTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TLDSimpleTest 
   extends AbstractClassifierTest {

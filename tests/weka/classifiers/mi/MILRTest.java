@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MILR. Run from the command line with:<p/>
- * java weka.classifiers.mi.MILR
+ * java weka.classifiers.mi.MILRTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MILRTest 
   extends AbstractClassifierTest {

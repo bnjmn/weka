@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 /**
  * Test class for all supportVector classes. Run from the command line with:
  * <p/>
- * java weka.classifiers.AllTests
+ * java weka.classifiers.functions.supportVector.AllTests
  *
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AllTests 
   extends WekaTestSuite {

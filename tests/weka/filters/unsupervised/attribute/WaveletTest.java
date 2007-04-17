@@ -31,10 +31,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests Wavelet. Run from the command line with:<p>
- * java weka.filters.unsupervised.attribute.Wavelet
+ * java weka.filters.unsupervised.attribute.WaveletTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class WaveletTest extends AbstractFilterTest {
   

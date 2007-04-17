@@ -25,10 +25,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests GreedyStepwise. Run from the command line with:<p/>
- * java weka.associations.GreedyStepwiseTest
+ * java weka.attributeSelection.GreedyStepwiseTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GreedyStepwiseTest 
   extends AbstractSearchTest {

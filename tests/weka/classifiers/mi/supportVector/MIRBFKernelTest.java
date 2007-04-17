@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIRBFKernel. Run from the command line with:<p/>
- * java weka.classifiers.mi.supportVector.MIRBFKernel
+ * java weka.classifiers.mi.supportVector.MIRBFKernelTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIRBFKernelTest 
   extends AbstractKernelTest {

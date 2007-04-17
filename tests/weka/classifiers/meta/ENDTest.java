@@ -24,15 +24,14 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests END. Run from the command line with:<p/>
- * java weka.classifiers.meta.END
+ * java weka.classifiers.meta.ENDTest
  *
  * @author eibe
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ENDTest 
   extends AbstractClassifierTest {

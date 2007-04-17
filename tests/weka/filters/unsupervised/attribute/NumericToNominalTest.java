@@ -30,10 +30,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests NumericToNominal. Run from the command line with:<p>
- * java weka.filters.unsupervised.attribute.NumericToNominal
+ * java weka.filters.unsupervised.attribute.NumericToNominalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NumericToNominalTest extends AbstractFilterTest {
   

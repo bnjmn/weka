@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MINND. Run from the command line with:<p/>
- * java weka.classifiers.mi.MINND
+ * java weka.classifiers.mi.MINNDTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MINNDTest 
   extends AbstractClassifierTest {

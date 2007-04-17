@@ -24,15 +24,14 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests IsotonicRegression. Run from the command line with:<p/>
- * java weka.classifiers.functions.IsotonicRegression
+ * java weka.classifiers.functions.IsotonicRegressionTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class IsotonicRegressionTest 
   extends AbstractClassifierTest {

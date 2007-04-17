@@ -24,15 +24,14 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests RandomCommittee. Run from the command line with:<p/>
- * java weka.classifiers.meta.RandomCommittee
+ * java weka.classifiers.meta.RandomCommitteeTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomCommitteeTest 
   extends AbstractClassifierTest {

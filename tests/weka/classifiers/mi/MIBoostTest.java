@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIBoost. Run from the command line with:<p/>
- * java weka.classifiers.mi.MIBoost
+ * java weka.classifiers.mi.MIBoostTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIBoostTest 
   extends AbstractClassifierTest {

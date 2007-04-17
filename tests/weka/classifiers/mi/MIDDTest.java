@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIDD. Run from the command line with:<p/>
- * java weka.classifiers.mi.MIDD
+ * java weka.classifiers.mi.MIDDTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIDDTest 
   extends AbstractClassifierTest {

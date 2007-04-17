@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests SimpleLogistic. Run from the command line with:<p/>
- * java weka.classifiers.functions.SimpleLogistic
+ * java weka.classifiers.functions.SimpleLogisticTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SimpleLogisticTest 
   extends AbstractClassifierTest {

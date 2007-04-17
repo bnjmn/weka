@@ -20,27 +20,24 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.*;
+import weka.classifiers.AbstractClassifierTest;
+import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.core.Attribute;
 import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.NoSupportForMissingValuesException;
 import weka.core.SelectedTag;
 import weka.core.UnsupportedAttributeTypeException;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.RemoveType;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import weka.filters.Filter;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.util.Random;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -49,7 +46,7 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ThresholdSelectorTest 
   extends AbstractClassifierTest {

@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests CitationKNN. Run from the command line with:<p/>
- * java weka.classifiers.mi.CitationKNN
+ * java weka.classifiers.mi.CitationKNNTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CitationKNNTest 
   extends AbstractClassifierTest {

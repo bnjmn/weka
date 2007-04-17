@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests StringKernel. Run from the command line with:<p/>
- * java weka.classifiers.functions.supportVector.StringKernel
+ * java weka.classifiers.functions.supportVector.StringKernelTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class StringKernelTest 
   extends AbstractKernelTest {

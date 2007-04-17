@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MISMO. Run from the command line with:<p/>
- * java weka.classifiers.mi.MISMO
+ * java weka.classifiers.mi.MISMOTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MISMOTest 
   extends AbstractClassifierTest {

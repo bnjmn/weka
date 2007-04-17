@@ -25,10 +25,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests RandomSearch. Run from the command line with:<p/>
- * java weka.associations.RandomSearchTest
+ * java weka.attributeSelection.RandomSearchTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomSearchTest 
   extends AbstractSearchTest {

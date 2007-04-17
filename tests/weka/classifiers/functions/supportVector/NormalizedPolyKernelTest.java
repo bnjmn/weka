@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests NormalizedPolyKernel. Run from the command line with:<p/>
- * java weka.classifiers.functions.supportVector.NormalizedPolyKernel
+ * java weka.classifiers.functions.supportVector.NormalizedPolyKernelTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NormalizedPolyKernelTest 
   extends AbstractKernelTest {

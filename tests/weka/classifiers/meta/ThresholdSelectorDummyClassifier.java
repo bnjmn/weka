@@ -31,13 +31,15 @@ import weka.classifiers.Classifier;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see ThresholdSelectorTest
  */
-
 public class ThresholdSelectorDummyClassifier 
   extends Classifier {
 
+  /** for serialization */
+  private static final long serialVersionUID = -2040984810834943903L;
+  
   private double[] m_Preds;
   private int m_Pos;
 

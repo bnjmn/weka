@@ -20,7 +20,6 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Instances;
 import weka.core.TestInstances;
@@ -35,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.ClusterMembershipTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClusterMembershipTest 
   extends AbstractFilterTest {

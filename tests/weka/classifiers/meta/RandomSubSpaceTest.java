@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests RandomSubSpace. Run from the command line with:<p/>
- * java weka.classifiers.meta.RandomSubSpace
+ * java weka.classifiers.meta.RandomSubSpaceTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RandomSubSpaceTest 
   extends AbstractClassifierTest {

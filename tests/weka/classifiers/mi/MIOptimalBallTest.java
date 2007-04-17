@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIOptimalBall. Run from the command line with:<p/>
- * java weka.classifiers.mi.MIOptimalBall
+ * java weka.classifiers.mi.MIOptimalBallTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIOptimalBallTest 
   extends AbstractClassifierTest {

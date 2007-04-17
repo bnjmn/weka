@@ -37,7 +37,7 @@ import junit.framework.TestSuite;
  * java weka.core.OptionHandlerTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class OptionHandlersTest 
   extends TestCase {
@@ -158,7 +158,7 @@ public class OptionHandlersTest
      * tests the whether the user-supplied options stay the same after setting.
      * getting, and re-setting again.
      * 
-     * @see 	#getOptionTester()
+     * @see 	#m_OptionTester
      * @throws Exception if test fails
      */
     public void testCanonicalUserOptions() throws Exception {

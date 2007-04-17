@@ -20,20 +20,19 @@
 
 package weka.filters.unsupervised.attribute;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 import weka.core.Instances;
-import weka.core.Attribute;
-import weka.filters.Filter;
 import weka.filters.AbstractFilterTest;
+import weka.filters.Filter;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests Center. Run from the command line with:<p>
- * java weka.filters.unsupervised.attribute.Center
+ * java weka.filters.unsupervised.attribute.CenterTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CenterTest extends AbstractFilterTest {
   

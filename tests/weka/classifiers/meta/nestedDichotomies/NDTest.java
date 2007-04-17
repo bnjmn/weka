@@ -24,15 +24,14 @@ import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Tests Dagging. Run from the command line with:<p/>
- * java weka.classifiers.meta.Dagging
+ * Tests ND. Run from the command line with:<p/>
+ * java weka.classifiers.meta.nestedDichotomies.NDTest
  *
  * @author eibe
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NDTest 
   extends AbstractClassifierTest {

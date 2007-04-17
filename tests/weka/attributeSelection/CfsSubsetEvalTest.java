@@ -25,10 +25,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests BestFirst. Run from the command line with:<p/>
- * java weka.associations.CfsSubsetEvalTest
+ * java weka.attributeSelection.CfsSubsetEvalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CfsSubsetEvalTest 
   extends AbstractEvaluatorTest {

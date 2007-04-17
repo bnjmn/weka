@@ -24,15 +24,14 @@ import weka.datagenerators.AbstractDataGeneratorTest;
 import weka.datagenerators.DataGenerator;
 
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
  * Tests BayesNet. Run from the command line with:<p/>
- * java weka.datagenerators.classifiers.classification.BayesNet
+ * java weka.datagenerators.classifiers.classification.BayesNetTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BayesNetTest 
   extends AbstractDataGeneratorTest {

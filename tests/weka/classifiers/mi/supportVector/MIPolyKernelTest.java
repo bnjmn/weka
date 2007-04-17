@@ -28,10 +28,10 @@ import junit.framework.TestSuite;
 
 /**
  * Tests MIPolyKernel. Run from the command line with:<p/>
- * java weka.classifiers.mi.supportVector.MIPolyKernel
+ * java weka.classifiers.mi.supportVector.MIPolyKernelTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MIPolyKernelTest 
   extends AbstractKernelTest {

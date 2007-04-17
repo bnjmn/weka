@@ -22,17 +22,16 @@ package weka.classifiers.functions;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.supportVector.RegSMOImproved;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
  * Tests SVMreg. Run from the command line with:<p/>
- * java weka.classifiers.functions.SVMreg
+ * java weka.classifiers.functions.SVMregTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SVMregTest 
   extends AbstractClassifierTest {
