@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     weka.filters.StreamableFilter
  */
 public class PartitionedMultiFilter
@@ -528,55 +528,60 @@ public class PartitionedMultiFilter
     FastVector	atts;
     Attribute	att;
     
-    // we need the full dataset here, see process(Instances)
-    if (inputFormat.numInstances() == 0)
-      return null;
-    
-    checkDimensions();
-    
-    // determine unused indices
-    determineUnusedIndices(inputFormat);
-    
-    atts = new FastVector();
-    for (i = 0; i < getFilters().length; i++) {
-      if (!isFirstBatchDone()) {
-	// generate subset
-	processed = generateSubset(inputFormat, getRange(i));
-	// set input format
-	if (!getFilter(i).setInputFormat(processed))
-	  Filter.useFilter(processed, getFilter(i));
+    if (!isFirstBatchDone()) {
+      // we need the full dataset here, see process(Instances)
+      if (inputFormat.numInstances() == 0)
+	return null;
+
+      checkDimensions();
+
+      // determine unused indices
+      determineUnusedIndices(inputFormat);
+
+      atts = new FastVector();
+      for (i = 0; i < getFilters().length; i++) {
+	if (!isFirstBatchDone()) {
+	  // generate subset
+	  processed = generateSubset(inputFormat, getRange(i));
+	  // set input format
+	  if (!getFilter(i).setInputFormat(processed))
+	    Filter.useFilter(processed, getFilter(i));
+	}
+
+	// get output format
+	processed = getFilter(i).getOutputFormat();
+
+	// rename attributes
+	processed = renameAttributes(processed, "filtered-" + i + "-");
+
+	// add attributes
+	for (n = 0; n < processed.numAttributes(); n++) {
+	  if (n == processed.classIndex())
+	    continue;
+	  atts.addElement(processed.attribute(n).copy());
+	}
       }
 
-      // get output format
-      processed = getFilter(i).getOutputFormat();
-      
-      // rename attributes
-      processed = renameAttributes(processed, "filtered-" + i + "-");
-      
-      // add attributes
-      for (n = 0; n < processed.numAttributes(); n++) {
-	if (n == processed.classIndex())
-	  continue;
-	atts.addElement(processed.attribute(n).copy());
+      // add unused attributes
+      if (!getRemoveUnused()) {
+	for (i = 0; i < m_IndicesUnused.length; i++) {
+	  att = inputFormat.attribute(m_IndicesUnused[i]);
+	  atts.addElement(att.copy("unfiltered-" + att.name()));
+	}
       }
-    }
-    
-    // add unused attributes
-    if (!getRemoveUnused()) {
-      for (i = 0; i < m_IndicesUnused.length; i++) {
-	att = inputFormat.attribute(m_IndicesUnused[i]);
-	atts.addElement(att.copy("unfiltered-" + att.name()));
-      }
-    }
-    
-    // add class if present
-    if (inputFormat.classIndex() > -1)
-      atts.addElement(inputFormat.classAttribute().copy());
 
-    // generate new dataset
-    result = new Instances(inputFormat.relationName(), atts, 0);
-    if (inputFormat.classIndex() > -1)
-      result.setClassIndex(result.numAttributes() - 1);
+      // add class if present
+      if (inputFormat.classIndex() > -1)
+	atts.addElement(inputFormat.classAttribute().copy());
+
+      // generate new dataset
+      result = new Instances(inputFormat.relationName(), atts, 0);
+      if (inputFormat.classIndex() > -1)
+	result.setClassIndex(result.numAttributes() - 1);
+    }
+    else {
+      result = getOutputFormat();
+    }
     
     return result;
   }
@@ -602,16 +607,18 @@ public class PartitionedMultiFilter
     double[]		values;
     Vector		errors;
 
-    checkDimensions();
-    
-    // set upper limits
-    for (i = 0; i < m_Ranges.length; i++)
-      m_Ranges[i].setUpper(instances.numAttributes() - 1);
-    
-    // determine unused indices
-    determineUnusedIndices(instances);
+    if (!isFirstBatchDone()) {
+      checkDimensions();
 
-    // pass data through all datasets
+      // set upper limits
+      for (i = 0; i < m_Ranges.length; i++)
+	m_Ranges[i].setUpper(instances.numAttributes() - 1);
+
+      // determine unused indices
+      determineUnusedIndices(instances);
+    }
+
+    // pass data through all filters
     processed = new Instances[getFilters().length];
     for (i = 0; i < getFilters().length; i++) {
       processed[i] = generateSubset(instances, getRange(i));
@@ -621,8 +628,13 @@ public class PartitionedMultiFilter
     }
 
     // set output format (can only be determined with full dataset, hence here)
-    result = determineOutputFormat(instances);
-    setOutputFormat(result);
+    if (!isFirstBatchDone()) {
+      result = determineOutputFormat(instances);
+      setOutputFormat(result);
+    }
+    else {
+      result = getOutputFormat();
+    }
     
     // check whether all filters didn't change the number of instances
     errors = new Vector();
