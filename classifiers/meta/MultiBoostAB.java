@@ -91,7 +91,7 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -C &lt;num&gt;
- *  Number of sub-committees. (Default 10)</pre>
+ *  Number of sub-committees. (Default 3)</pre>
  * 
  * <pre> -P &lt;num&gt;
  *  Percentage of weight mass to base training on.
@@ -131,7 +131,7 @@ import java.util.Vector;
  * @author Shane Butler (sbutle@deakin.edu.au)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class MultiBoostAB 
   extends AdaBoostM1
@@ -202,7 +202,7 @@ public class MultiBoostAB
     Vector vec = new Vector(1);
 
     vec.addElement(new Option(
-	      "\tNumber of sub-committees. (Default 10)",
+	      "\tNumber of sub-committees. (Default 3)",
 	      "C", 1, "-C <num>"));
     while (enu.hasMoreElements()) {
       vec.addElement(enu.nextElement());
@@ -217,7 +217,7 @@ public class MultiBoostAB
    * Valid options are: <p/>
    * 
    * <pre> -C &lt;num&gt;
-   *  Number of sub-committees. (Default 10)</pre>
+   *  Number of sub-committees. (Default 3)</pre>
    * 
    * <pre> -P &lt;num&gt;
    *  Percentage of weight mass to base training on.
@@ -412,4 +412,3 @@ public class MultiBoostAB
     runClassifier(new MultiBoostAB(), argv);
   }
 }
-
