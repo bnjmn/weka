@@ -138,7 +138,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see     SimpleStreamFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -185,6 +185,19 @@ public abstract class SimpleBatchFilter
     }
 
     bufferInput(instance);
+    
+    if (isFirstBatchDone()) {
+      try {
+	Instances inst = new Instances(getInputFormat());
+	inst = process(inst);
+	for (int i = 0; i < inst.numInstances(); i++)
+	  push(inst.instance(i));
+	flushInput();
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+      }
+    }
 
     return m_FirstBatchDone;
   }
