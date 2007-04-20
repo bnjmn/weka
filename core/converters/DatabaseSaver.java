@@ -77,7 +77,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -115,6 +115,12 @@ public class DatabaseSaver
   
   /** Flag indicating whether the default name of the table is the relaion name or not.*/
   private boolean m_tabName;
+  
+  /** the user name for the database */
+  private String m_Username;
+  
+  /** the password for the database */
+  private String m_Password;
   
   /** The property file for the database connection */
   protected static String PROPERTY_FILE = DatabaseConnection.PROPERTY_FILE;
@@ -156,6 +162,8 @@ public class DatabaseSaver
     super.resetOptions();
     setRetrieval(NONE);
     m_tableName = "";
+    m_Username = "";
+    m_Password = "";
     m_count = 1;
     m_id = false;
     m_tabName = true;
@@ -325,7 +333,7 @@ public class DatabaseSaver
    * @param user the user name
    */  
   public void setUser(String user){
-   
+      m_Username = user;
       m_DataBaseConnection.setUsername(user);
   }
   
@@ -355,7 +363,7 @@ public class DatabaseSaver
    * @param password the password
    */  
   public void setPassword(String password){
-   
+      m_Password = password;
       m_DataBaseConnection.setPassword(password);
   }
 
@@ -407,6 +415,8 @@ public class DatabaseSaver
       try{
         m_DataBaseConnection = new DatabaseConnection();
         m_DataBaseConnection.setDatabaseURL(url);
+        m_DataBaseConnection.setUsername(m_Username);
+        m_DataBaseConnection.setPassword(m_Password);
       } catch(Exception ex) {
             printException(ex);
        }    
@@ -417,6 +427,8 @@ public class DatabaseSaver
   
       try{
         m_DataBaseConnection = new DatabaseConnection();
+        m_DataBaseConnection.setUsername(m_Username);
+        m_DataBaseConnection.setPassword(m_Password);
       } catch(Exception ex) {
             printException(ex);
        }    
@@ -441,6 +453,7 @@ public class DatabaseSaver
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
+    result.enable(Capability.NO_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
     return result;
