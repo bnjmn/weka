@@ -23,6 +23,7 @@ package weka.filters;
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.core.CheckOptionHandler;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.SerializationHelper;
@@ -41,7 +42,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public abstract class AbstractFilterTest
   extends TestCase {
@@ -516,7 +517,7 @@ public abstract class AbstractFilterTest
   /**
    * tests whether the default settings are processed correctly
    */
-  public void testDefaultOptions() throws Exception {
+  public void testDefaultOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkDefaultOptions())
 	fail("Default options were not processed correctly.");
@@ -562,7 +563,6 @@ public abstract class AbstractFilterTest
   public void testFilteredClassifier() {
     Instances		data;
     int			i;
-    double 		cls;
     
     try {
       // generate data
@@ -573,11 +573,90 @@ public abstract class AbstractFilterTest
 
       // test classifier
       for (i = 0; i < data.numInstances(); i++) {
-	cls = m_FilteredClassifier.classifyInstance(data.instance(i));
+	m_FilteredClassifier.classifyInstance(data.instance(i));
       }
     }
     catch (Exception e) {
       fail("Problem with FilteredClassifier: " + e.toString());
+    }
+  }
+  
+  /**
+   * simulates batch filtering
+   */
+  public void testBatchFiltering() {
+    Instances result = null;
+    Instances icopy = new Instances(m_Instances);
+    
+    // setup filter
+    try {
+      if (m_Filter.setInputFormat(icopy)) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (setup)", result);
+      }
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on setInputFormat(): \n" + ex);
+    }
+
+    // first batch
+    try {
+      for (int i = 0; i < icopy.numInstances(); i++) {
+	if (m_Filter.input(icopy.instance(i))) {
+	  Instance out = m_Filter.output();
+	  assertNotNull("Instance not made available immediately (1. batch)", out);
+	  result.add(out);
+	}
+      }
+      m_Filter.batchFinished();
+
+      if (result == null) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (1. batch)", result);
+	assertTrue("Pending output instances (1. batch)", m_Filter.numPendingOutput() > 0);
+      }
+
+      while (m_Filter.numPendingOutput() > 0)
+	result.add(m_Filter.output());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown during 1. batch: \n" + ex);
+    }
+
+    // second batch
+    try {
+      result = null;
+      if (m_Filter.isOutputFormatDefined())
+	result = m_Filter.getOutputFormat();
+      
+      for (int i = 0; i < icopy.numInstances(); i++) {
+	if (m_Filter.input(icopy.instance(i))) {
+	  if (result == null) {
+	    fail("Filter didn't return true from isOutputFormatDefined() (2. batch)");
+	  }
+	  else {
+	    Instance out = m_Filter.output();
+	    assertNotNull("Instance not made available immediately (2. batch)", out);
+	    result.add(out);
+	  }
+	}
+      }
+      m_Filter.batchFinished();
+      
+      if (result == null) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (2. batch)", result);
+	assertTrue("Pending output instances (2. batch)", m_Filter.numPendingOutput() > 0);
+      }
+
+      while (m_Filter.numPendingOutput() > 0)
+	result.add(m_Filter.output());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown during 2. batch: \n" + ex);
     }
   }
 }
