@@ -65,7 +65,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class MultiScheme 
   extends RandomizableMultipleClassifiersCombiner {
@@ -330,6 +330,16 @@ public class MultiScheme
   public boolean getDebug() {
 
     return m_Debug;
+  }
+  
+  /**
+   * Get the index of the classifier that was determined as best during 
+   * cross-validation.
+   * 
+   * @return the index in the classifier array
+   */
+  public int getBestClassifierIndex() {
+    return m_ClassifierIndex;
   }
 
   /**
