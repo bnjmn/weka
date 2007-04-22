@@ -51,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RemoveUseless 
   extends Filter 
@@ -126,6 +126,7 @@ public class RemoveUseless
       m_removeFilter.input(instance);
       Instance processed = m_removeFilter.output();
       processed.setDataset(getOutputFormat());
+      copyValues(processed, false, instance.dataset(), getOutputFormat());
       push(processed);
       return true;
     }
