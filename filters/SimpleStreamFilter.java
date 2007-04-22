@@ -135,7 +135,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see     SimpleBatchFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -246,13 +246,13 @@ public abstract class SimpleStreamFilter
     }
     
     try {
-      if (hasImmediateOutputFormat()) {
+      if (hasImmediateOutputFormat() || isFirstBatchDone()) {
         push(process((Instance) instance.copy()));
         return true;
       }
       else {
         bufferInput(instance);
-        return m_FirstBatchDone;
+        return false;
       }
     }
     catch (Exception e) {
