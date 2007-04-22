@@ -138,7 +138,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see     SimpleStreamFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -231,15 +231,20 @@ public abstract class SimpleBatchFilter
       if (!hasImmediateOutputFormat() && !isFirstBatchDone())
         setOutputFormat(determineOutputFormat(new Instances(inst, 0)));
 
-      // process data
-      inst = process(inst);
+      // don't do anything in case there are no instances pending.
+      // in case of second batch, they may have already been processed
+      // directly by the input method and added to the output queue
+      if (inst.numInstances() > 0) {
+	// process data
+	inst = process(inst);
 
-      // clear input queue
-      flushInput();
+	// clear input queue
+	flushInput();
 
-      // move it to the output
-      for (i = 0; i < inst.numInstances(); i++)
-        push(inst.instance(i));
+	// move it to the output
+	for (i = 0; i < inst.numInstances(); i++)
+	  push(inst.instance(i));
+      }
     }
     catch (Exception e) {
       e.printStackTrace();
