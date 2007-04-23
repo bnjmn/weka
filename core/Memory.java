@@ -32,7 +32,7 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.5 $
+ * @version   $Revision: 1.6 $
  * @see       #setEnabled(boolean)
  */
 public class Memory {
@@ -146,6 +146,15 @@ public class Memory {
   }
 
   /**
+   * returns the amount of bytes as MB
+   * 
+   * @return		the MB amount
+   */
+  public static double toMegaByte(long bytes) {
+    return (bytes / (double) (1024 * 1024));
+  }
+
+  /**
    * prints an error message if OutOfMemory (and if GUI is present a dialog),
    * otherwise nothing happens. isOutOfMemory() has to be called beforehand,
    * since it sets all the memory parameters.
@@ -153,29 +162,19 @@ public class Memory {
    * @see #m_Enabled
    */
   public void showOutOfMemory() {
-    double        MB;
-    double        initial;
-    double        total;
-    double        max;
-
     if (!isEnabled())
       return;
       
     System.gc();
 
-    MB      = 1024 * 1024;
-    initial = m_Initial / MB;
-    total   = m_Total / MB;
-    max     = m_Max / MB;
-    
     String msg =   "Not enough memory. Please load a smaller "  
                  + "dataset or use larger heap size.\n"
                  + "- initial JVM size:   " 
-                 + Utils.doubleToString(initial, 1) + "MB\n"
+                 + Utils.doubleToString(toMegaByte(m_Initial), 1) + "MB\n"
                  + "- total memory used:  " 
-                 + Utils.doubleToString(total, 1) + "MB\n"
+                 + Utils.doubleToString(toMegaByte(m_Total), 1) + "MB\n"
                  + "- max. memory avail.: " 
-                 + Utils.doubleToString(max, 1) + "MB\n"
+                 + Utils.doubleToString(toMegaByte(m_Max), 1) + "MB\n"
                  + "\n"
                  + "Note:\n"
                  + "The Java heap size can be specified with the -Xmx option.\n"
@@ -217,5 +216,22 @@ public class Memory {
     thGroup = null;
 
     System.gc();
+  }
+
+  /**
+   * prints only some statistics
+   *
+   * @param args the commandline arguments - ignored
+   */
+  public static void main(String[] args) {
+    Memory mem = new Memory();
+    System.out.println(
+        "Initial memory: "
+        + Utils.doubleToString(Memory.toMegaByte(mem.getInitial()), 1) + "MB" 
+        + " (" + mem.getInitial() + ")");
+    System.out.println(
+        "Max memory: "
+        + Utils.doubleToString(Memory.toMegaByte(mem.getMax()), 1) + "MB"
+        + " (" + mem.getMax() + ")");
   }
 }
