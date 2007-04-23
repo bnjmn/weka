@@ -22,7 +22,7 @@
 
 package weka.classifiers.meta;
 
-import weka.classifiers.MultipleClassifiersCombiner;
+import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -37,6 +37,7 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -95,10 +96,10 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Vote
-  extends MultipleClassifiersCombiner
+  extends RandomizableMultipleClassifiersCombiner
   implements TechnicalInformationHandler {
     
   /** for serialization */
@@ -128,6 +129,10 @@ public class Vote
   
   /** Combination Rule variable */
   protected int m_CombinationRule = AVERAGE_RULE;
+  
+  /** the random number generator used for breaking ties in majority voting
+   * @see #distributionForInstanceMajorityVoting(Instance) */
+  protected Random m_Random;
   
   /**
    * Returns a string describing classifier
@@ -294,6 +299,8 @@ public class Vote
     // remove instances with missing class
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
+
+    m_Random = new Random(getSeed());
     
     for (int i = 0; i < m_Classifiers.length; i++) {
       getClassifier(i).buildClassifier(newData);
@@ -491,13 +498,13 @@ public class Vote
     }
     
     // Consider the cases when multiple classes receive the same amount of votes
-    Vector majorityIndexes = new Vector();
+    Vector<Integer> majorityIndexes = new Vector<Integer>();
     for (int k = 0; k < votes.length; k++) {
       if (votes[k] == votes[tmpMajorityIndex])
-	majorityIndexes.add(new Integer(k));
+	majorityIndexes.add(k);
      }
     // Resolve the ties according to a uniform random distribution
-    int majorityIndex = ((Integer)majorityIndexes.get((int)(Math.random()/(1/majorityIndexes.size())))).intValue();
+    int majorityIndex = majorityIndexes.get(m_Random.nextInt(majorityIndexes.size()));
     
     //set probs to 0
     for (int k = 0; k<probs.length; k++)
