@@ -34,7 +34,7 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SystemInfo {
   /** for storing the information */
@@ -58,6 +58,7 @@ public class SystemInfo {
     String[]            laf;
     String              tmpStr;
     int                 i;
+    Memory              mem;
     
     m_Info.clear();
 
@@ -82,6 +83,17 @@ public class SystemInfo {
     }
     m_Info.put("ui.installedLookAndFeels", tmpStr);
     m_Info.put("ui.currentLookAndFeel", LookAndFeel.getSystemLookAndFeel());
+
+    // memory info
+    mem = new Memory();
+    m_Info.put(
+        "memory.initial", 
+        "" + Utils.doubleToString(Memory.toMegaByte(mem.getInitial()), 1) + "MB" 
+        + " (" + mem.getInitial() + ")");
+    m_Info.put(
+        "memory.max", 
+        "" + Utils.doubleToString(Memory.toMegaByte(mem.getMax()), 1) + "MB"
+        + " (" + mem.getMax() + ")");
   }
 
   /**
