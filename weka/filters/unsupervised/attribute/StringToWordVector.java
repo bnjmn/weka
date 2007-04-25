@@ -18,14 +18,6 @@
  *    StringToWordVector.java
  *    Copyright (C) 2002 University of Waikato
  *
- *    Updated 12/Dec/2001 by Gordon Paynter (gordon.paynter@ucr.edu)
- *                        Added parameters for delimiter set,
- *                        number of words to add, and input range.
- *    updated 27/Nov/2003 by Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- *                        Added options for TF/IDF transforms, length 
- *                        normalization and down casing the tokens. Also 
- *                        added another onlyAlphabeticStringTokenizer and
- *                        support for using a list of stopwords.
  */
 
 package weka.filters.unsupervised.attribute;
@@ -46,6 +38,8 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
+import weka.core.tokenizers.WordTokenizer;
+import weka.core.tokenizers.Tokenizer;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -54,14 +48,12 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * Converts String attributes into a set of attributes representing word occurrence information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
+ * Converts String attributes into a set of attributes representing word occurrence (depending on the tokenizer) information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -71,10 +63,6 @@ import java.util.Vector;
  * <pre> -C
  *  Output word counts rather than boolean word presence.
  * </pre>
- * 
- * <pre> -D &lt;delimiter set&gt;
- *  String containing the set of delimiter characters
- *  (default: " \n\t.,:'\"()?!")</pre>
  * 
  * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of string attributes to convert to words (as weka Range).
@@ -99,16 +87,12 @@ import java.util.Vector;
  * 
  * <pre> -I
  *  Transform each word frequency into:
- *  fij*log(num of Documents/num of  documents containing word i)
- *    where fij if frequency of word i in  jth document(instance)</pre>
+ *  fij*log(num of Documents/num of documents containing word i)
+ *    where fij if frequency of word i in jth document(instance)</pre>
  * 
  * <pre> -N
  *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
  *  to average length of training documents (default 0=don't normalize).</pre>
- * 
- * <pre> -A
- *  Only form tokens from contiguous alphabetic sequences
- *  (The delimiter string is ignored if this is set).</pre>
  * 
  * <pre> -L
  *  Convert all tokens to lowercase before adding to the dictionary.</pre>
@@ -135,11 +119,17 @@ import java.util.Vector;
  *  Format: one stopword per line, lines starting with '#'
  *  are interpreted as comments and ignored.</pre>
  * 
+ * <pre> -tokenizer &lt;spec&gt;
+ *  The tokenizing algorihtm (classname plus parameters) to use.
+ *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.17 $ 
+ * @author Gordon Paynter (gordon.paynter@ucr.edu)
+ * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
+ * @version $Revision: 1.18 $ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -148,9 +138,6 @@ public class StringToWordVector
 
   /** for serialization */
   static final long serialVersionUID = 8249106275278565424L;
-  
-  /** Delimiters used in tokenization */
-  private String m_Delimiters = " \n\t.,:'\"()?!";
 
   /** Range of columns to convert to word vectors */
   protected Range m_SelectedRange = new Range("first-last");
@@ -213,12 +200,6 @@ public class StringToWordVector
      fij*log(numOfDocs/numOfDocsWithWordi) */
   private boolean m_IDFTransform;
   
-  /** True if tokens are to be formed only from alphabetic sequences of 
-      characters. (The delimiters string property is ignored if this
-      is true).
-   */
-  private boolean m_onlyAlphabeticTokens;  
-  
   /** True if all tokens should be downcased */
   private boolean m_lowerCaseTokens;
   
@@ -238,6 +219,15 @@ public class StringToWordVector
    * ones */
   private File m_Stopwords = new File(System.getProperty("user.dir"));
 
+  /** the tokenizer algorithm to use */
+  private Tokenizer m_Tokenizer = new WordTokenizer();
+
+  /**
+   * Default constructor. Targets 1000 words in the output.
+   */
+  public StringToWordVector() {
+  }
+  
   /**
    * Returns an enumeration describing the available options
    *
@@ -249,11 +239,6 @@ public class StringToWordVector
     result.addElement(new Option(
 	"\tOutput word counts rather than boolean word presence.\n",
 	"C", 0, "-C"));
-
-    result.addElement(new Option(
-	"\tString containing the set of delimiter characters\n"
-	+ "\t(default: \" \\n\\t.,:'\\\"()?!\")",
-	"D", 1, "-D <delimiter set>"));
 
     result.addElement(new Option(
 	"\tSpecify list of string attributes to convert to words (as weka Range).\n"
@@ -277,28 +262,20 @@ public class StringToWordVector
 
     result.addElement(new Option(
 	"\tTransform the word frequencies into log(1+fij)\n"+
-	"\twhere fij is the frequency of word i in jth "+
-	"document(instance).\n",
+	"\twhere fij is the frequency of word i in jth document(instance).\n",
 	"T", 0, "-T"));
 
     result.addElement(new Option(
 	"\tTransform each word frequency into:\n"+
-	"\tfij*log(num of Documents/num of "+
-	" documents containing word i)\n"+
-	"\t  where fij if frequency of word i in "+
-	" jth document(instance)",
+	"\tfij*log(num of Documents/num of documents containing word i)\n"+
+	"\t  where fij if frequency of word i in jth document(instance)",
 	"I", 0, "-I"));
 
-    result.addElement(new Option("\tWhether to 0=not normalize/1=normalize all data/2=normalize test data only\n" 
+    result.addElement(new Option(
+	"\tWhether to 0=not normalize/1=normalize all data/2=normalize test data only\n" 
 	+ "\tto average length of training documents "
 	+ "(default 0=don\'t normalize).",
 	"N", 1, "-N"));
-
-    result.addElement(new Option(
-	"\tOnly form tokens from contiguous "+
-	"alphabetic sequences\n\t(The delimiter "+
-	"string is ignored if this is set).",
-	"A", 0, "-A"));
 
     result.addElement(new Option(
 	"\tConvert all tokens to lowercase before "+
@@ -332,6 +309,11 @@ public class StringToWordVector
 	+ "\tare interpreted as comments and ignored.",
 	"stopwords", 1, "-stopwords <file>"));
 
+    result.addElement(new Option(
+	"\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
+	+ "\t(default: " + WordTokenizer.class.getName() + ")",
+	"tokenizer", 1, "-tokenizer <spec>"));
+
     return result.elements();
   }
 
@@ -344,10 +326,6 @@ public class StringToWordVector
    * <pre> -C
    *  Output word counts rather than boolean word presence.
    * </pre>
-   * 
-   * <pre> -D &lt;delimiter set&gt;
-   *  String containing the set of delimiter characters
-   *  (default: " \n\t.,:'\"()?!")</pre>
    * 
    * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of string attributes to convert to words (as weka Range).
@@ -372,16 +350,12 @@ public class StringToWordVector
    * 
    * <pre> -I
    *  Transform each word frequency into:
-   *  fij*log(num of Documents/num of  documents containing word i)
-   *    where fij if frequency of word i in  jth document(instance)</pre>
+   *  fij*log(num of Documents/num of documents containing word i)
+   *    where fij if frequency of word i in jth document(instance)</pre>
    * 
    * <pre> -N
    *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
    *  to average length of training documents (default 0=don't normalize).</pre>
-   * 
-   * <pre> -A
-   *  Only form tokens from contiguous alphabetic sequences
-   *  (The delimiter string is ignored if this is set).</pre>
    * 
    * <pre> -L
    *  Convert all tokens to lowercase before adding to the dictionary.</pre>
@@ -408,6 +382,10 @@ public class StringToWordVector
    *  Format: one stopword per line, lines starting with '#'
    *  are interpreted as comments and ignored.</pre>
    * 
+   * <pre> -tokenizer &lt;spec&gt;
+   *  The tokenizing algorihtm (classname plus parameters) to use.
+   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -416,12 +394,6 @@ public class StringToWordVector
   public void setOptions(String[] options) throws Exception {
     String 	value;
     
-    value = Utils.getOption('D', options);
-    if (value.length() != 0)
-      setDelimiters(value);
-    else
-      setDelimiters(" \n\t.,:'\"()?!");
-
     value = Utils.getOption('R', options);
     if (value.length() != 0)
       setSelectedRange(value);
@@ -464,8 +436,6 @@ public class StringToWordVector
     
     setLowerCaseTokens(Utils.getFlag('L', options));
     
-    setOnlyAlphabeticTokens(Utils.getFlag('A', options));
-    
     setUseStoplist(Utils.getFlag('S', options));
     
     String stemmerString = Utils.getOption("stemmer", options);
@@ -489,6 +459,22 @@ public class StringToWordVector
       setStopwords(new File(value));
     else
       setStopwords(null);
+
+    String tokenizerString = Utils.getOption("tokenizer", options);
+    if (tokenizerString.length() == 0) {
+      setTokenizer(new WordTokenizer());
+    }
+    else {
+      String[] tokenizerSpec = Utils.splitOptions(tokenizerString);
+      if (tokenizerSpec.length == 0)
+        throw new Exception("Invalid tokenizer specification string");
+      String tokenizerName = tokenizerSpec[0];
+      tokenizerSpec[0] = "";
+      Tokenizer tokenizer = (Tokenizer) Class.forName(tokenizerName).newInstance();
+      if (tokenizer instanceof OptionHandler)
+        ((OptionHandler) tokenizer).setOptions(tokenizerSpec);
+      setTokenizer(tokenizer);
+    }
   }
 
   /**
@@ -500,9 +486,6 @@ public class StringToWordVector
     Vector        result;
 
     result = new Vector();
-
-    result.add("-D"); 
-    result.add(getDelimiters());
 
     result.add("-R"); 
     result.add(getSelectedRange().getRanges());
@@ -533,9 +516,6 @@ public class StringToWordVector
     if (getLowerCaseTokens())
       result.add("-L");
 
-    if (getOnlyAlphabeticTokens())
-      result.add("-A");
-
     if (getUseStoplist())
       result.add("-S");
 
@@ -559,13 +539,14 @@ public class StringToWordVector
       result.add(getStopwords().getAbsolutePath());
     }
 
-    return (String[]) result.toArray(new String[result.size()]);
-  }
+    result.add("-tokenizer");
+    String spec = getTokenizer().getClass().getName();
+    if (getTokenizer() instanceof OptionHandler)
+      spec += " " + Utils.joinOptions(
+	  ((OptionHandler) getTokenizer()).getOptions());
+    result.add(spec.trim());
 
-  /**
-   * Default constructor. Targets 1000 words in the output.
-   */
-  public StringToWordVector() {
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   /**
@@ -748,10 +729,11 @@ public class StringToWordVector
    * displaying in the explorer/experimenter gui
    */  
   public String globalInfo() {
-    return "Converts String attributes into a set of attributes representing "+
-           "word occurrence information from the text contained in the "+
-           "strings. The set of words (attributes) is determined by the first "+
-           "batch filtered (typically training data).";
+    return 
+        "Converts String attributes into a set of attributes representing "
+      + "word occurrence (depending on the tokenizer) information from the "
+      + "text contained in the strings. The set of words (attributes) is "
+      + "determined by the first batch filtered (typically training data).";
   }  
   
   /**
@@ -782,36 +764,6 @@ public class StringToWordVector
   public String outputWordCountsTipText() {
       return "Output word counts rather than boolean 0 or 1"+
              "(indicating presence or absence of a word).";
-  }
-
-  /**
-   * Get the value of delimiters.
-   *
-   * @return Value of delimiters.
-   */
-  public String getDelimiters() {
-    return m_Delimiters.replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'");
-  }
-    
-  /**
-   * Set the value of delimiters.
-   *
-   * @param newDelimiters Value to assign to delimiters.
-   */
-  public void setDelimiters(String newDelimiters) {
-    m_Delimiters = newDelimiters.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "'");
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String delimitersTipText() {
-      return "Set of delimiter characters to use in tokenizing "+
-             "(default: \" \\n\\t.,:'\\\"()?!\"). "+
-             "This option is ignored if onlyAlphabeticTokens option is set to"+
-             " true.";
   }
 
   /**
@@ -1067,39 +1019,6 @@ public class StringToWordVector
              "should be normalized or not.";
   }
   
-  /** Gets whether if the tokens are to be formed only from contiguous 
-   *  alphabetic sequences. The delimiter string is ignored if this is true.
-   *
-   * @return true if tokens are to be formed from contiguous alphabetic 
-   * characters.
-   */
-  public boolean getOnlyAlphabeticTokens() {
-      return m_onlyAlphabeticTokens;
-  }  
-  
-  /** Sets whether if tokens are to be formed only from contiguous alphabetic
-   * character sequences. The delimiter string is ignored if this option is 
-   * set to true.
-   *
-   * @param tokenizeOnlyAlphabeticSequences should be set to true if only alphabetic 
-   * tokens should be formed.
-   */
-  public void setOnlyAlphabeticTokens(boolean tokenizeOnlyAlphabeticSequences) {
-      m_onlyAlphabeticTokens = tokenizeOnlyAlphabeticSequences;
-  }
-
-  /**
-   * Returns the tip text for this property.
-   *
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String onlyAlphabeticTokensTipText() {
-      return "Sets whether if the word tokens are to be formed only from "+
-             "contiguous alphabetic sequences (The delimiter string is "+
-             "ignored if this option is set to true).";
-  }
-  
   /** Gets whether if the tokens are to be downcased or not.
    *
    * @return true if the tokens are to be downcased.
@@ -1284,6 +1203,34 @@ public class StringToWordVector
   }
   
   /**
+   * the tokenizer algorithm to use
+   *
+   * @param value     the configured tokenizing algorithm
+   */
+  public void setTokenizer(Tokenizer value) {
+    m_Tokenizer = value;
+  }
+
+  /**
+   * Returns the current tokenizer algorithm.
+   *
+   * @return          the current tokenizer algorithm
+   */
+  public Tokenizer getTokenizer() {
+    return m_Tokenizer;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String tokenizerTipText() {
+    return "The tokenizing algorithm to use on the strings.";
+  }
+
+  /**
    * sorts an array
    * 
    * @param array the array to sort
@@ -1384,17 +1331,12 @@ public class StringToWordVector
         if (m_SelectedRange.isInRange(j) && (instance.isMissing(j) == false)) {
 
 	  // Get tokenizer
-          Enumeration st;
-          if(this.m_onlyAlphabeticTokens==false)
-              st = new StringTokenizer(instance.stringValue(j),
-                                                   m_Delimiters);
-          else
-              st = new AlphabeticStringTokenizer(instance.stringValue(j));
+          m_Tokenizer.tokenize(instance.stringValue(j));
           
 	  // Iterate through tokens, perform stemming, and remove stopwords
 	  // (if required)
-          while (st.hasMoreElements()) {
-            String word = ((String)st.nextElement()).intern();
+          while (m_Tokenizer.hasMoreElements()) {
+            String word = ((String)m_Tokenizer.nextElement()).intern();
             
             if(this.m_lowerCaseTokens==true)
                 word = word.toLowerCase();
@@ -1573,16 +1515,11 @@ public class StringToWordVector
       //if ((getInputFormat().attribute(j).type() == Attribute.STRING) 
       if (m_SelectedRange.isInRange(j)
 	  && (instance.isMissing(j) == false)) {          
-        Enumeration st;
         
-        if(this.m_onlyAlphabeticTokens==false)
-	  st = new StringTokenizer(instance.stringValue(j),
-				   m_Delimiters);
-        else
-	  st = new AlphabeticStringTokenizer(instance.stringValue(j));
+        m_Tokenizer.tokenize(instance.stringValue(j));
         
-        while (st.hasMoreElements()) {
-          String word = (String)st.nextElement(); 
+        while (m_Tokenizer.hasMoreElements()) {
+          String word = (String)m_Tokenizer.nextElement(); 
           if(this.m_lowerCaseTokens==true)
 	    word = word.toLowerCase();
           word = m_Stemmer.stem(word);
@@ -1696,89 +1633,5 @@ public class StringToWordVector
    */
   public static void main(String [] argv) {
     runFilter(new StringToWordVector(), argv);
-  }
-  
-  
-  /**
-   * alphabetic string tokenizer
-   */
-  private class AlphabeticStringTokenizer 
-      implements Enumeration {
-    
-      /** the characters of the string */
-      private char[] str;
-      
-      /** the current position */
-      int currentPos=0;
-      
-      /**
-       * Constructor
-       * 
-       * @param toTokenize the string to tokenize
-       */
-      public AlphabeticStringTokenizer(String toTokenize) {
-          str = new char[toTokenize.length()];
-          toTokenize.getChars(0, toTokenize.length(), str, 0);
-      }
-      
-      /**
-       * returns whether there are more elements still
-       * 
-       * @return true if there are still more elements
-       */
-      public boolean hasMoreElements() {
-          int beginpos = currentPos;
-          
-          while( beginpos < str.length && 
-                 (str[beginpos]<'a' || str[beginpos]>'z') &&
-                 (str[beginpos]<'A' || str[beginpos]>'Z') ) {
-                     beginpos++;    
-          }
-          currentPos = beginpos;
-          //System.out.println("Currently looking at "+str[beginpos]);
-          
-          if( beginpos<str.length && 
-              ((str[beginpos]>='a' && str[beginpos]<='z') ||
-               (str[beginpos]>='A' && str[beginpos]<='Z')) ) {
-                   return true;
-          }
-          else
-              return false;
-      }
-      
-      /**
-       * returns the next element
-       * 
-       * @return the next element
-       */
-      public Object nextElement() {
-          int beginpos, endpos;
-          beginpos = currentPos;
-          
-          while( beginpos < str.length && 
-                 (str[beginpos]<'a' && str[beginpos]>'z') &&
-                 (str[beginpos]<'A' && str[beginpos]>'Z') ) {
-                     beginpos++;    
-          }
-          currentPos = endpos = beginpos;
-          
-          if(beginpos>=str.length)
-              throw new NoSuchElementException("no more tokens present");
-          
-          while( endpos < str.length && 
-                 ((str[endpos]>='a' && str[endpos]<='z') ||
-                  (str[endpos]>='A' && str[endpos]<='Z')) ) {                     
-                     endpos++;
-          }
-          
-          String s = new String(str, beginpos, endpos-currentPos);
-          currentPos = endpos;
-          //System.out.println("found token >"+s+
-          //                   "< beginpos: "+beginpos+
-          //                   " endpos: "+endpos+
-          //                   " str.length: "+str.length+
-          //                   " str[beginpos]: "+str[beginpos]);
-          return s;
-      }      
   }
 }
