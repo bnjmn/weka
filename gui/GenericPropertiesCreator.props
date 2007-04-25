@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.13 $
+# Version: $Revision: 1.14 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
@@ -55,7 +55,6 @@ weka.attributeSelection.ASSearch = \
 # Lists the Associators-Packages I want to choose from
 weka.associations.Associator=\
  weka.associations
-
 
 # Lists the Clusterers-Packages I want to choose from
 weka.clusterers.Clusterer=\
@@ -119,3 +118,6 @@ weka.classifiers.functions.supportVector.Kernel=\
 weka.classifiers.functions.supportVector.RegOptimizer=\
  weka.classifiers.functions.supportVector
 
+# List of tokenizers
+weka.core.tokenizers.Tokenizer=\
+ weka.core.tokenizers
