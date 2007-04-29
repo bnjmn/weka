@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
  * java weka.core.AllTests
  *
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AllTests 
   extends WekaTestSuite {
@@ -55,7 +55,11 @@ public class AllTests
     // TODO: fix all errors
     //suite.addTest(OptionHandlersTest.suite());
     
+    // converters
     suite.addTest(weka.core.converters.AllTests.suite());
+    
+    // tokenizers
+    suite.addTest(weka.core.tokenizers.AllTests.suite());
 
     return suite;
   }
