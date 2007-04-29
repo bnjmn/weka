@@ -86,10 +86,12 @@ import java.util.zip.GZIPOutputStream;
  * Sets the percentage for the train/test set split, e.g., 66. <p/>
  * 
  * -preserve-order <br/>
- * Preserves the order in the percentage split. <p/>
+ * Preserves the order in the percentage split instead of randomizing
+ * the data first with the seed value ('-s'). <p/>
  *
  * -s seed <br/>
- * Random number seed for the cross-validation (default: 1). <p/>
+ * Random number seed for the cross-validation and percentage split
+ * (default: 1). <p/>
  *
  * -m filename <br/>
  * The name of a file containing a cost matrix. <p/>
@@ -169,7 +171,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.74 $
+ * @version  $Revision: 1.75 $
  */
 public class Evaluation
 implements Summarizable {
@@ -474,10 +476,12 @@ implements Summarizable {
    * Sets the percentage for the train/test set split, e.g., 66. <p/>
    * 
    * -preserve-order <br/>
-   * Preserves the order in the percentage split. <p/>
+   * Preserves the order in the percentage split instead of randomizing
+   * the data first with the seed value ('-s'). <p/>
    *
    * -s seed <br/>
-   * Random number seed for the cross-validation (default: 1). <p/>
+   * Random number seed for the cross-validation and percentage split
+   * (default: 1). <p/>
    *
    * -m filename <br/>
    * The name of a file containing a cost matrix. <p/>
@@ -601,10 +605,12 @@ implements Summarizable {
    * Sets the percentage for the train/test set split, e.g., 66. <p/>
    * 
    * -preserve-order <br/>
-   * Preserves the order in the percentage split. <p/>
+   * Preserves the order in the percentage split instead of randomizing
+   * the data first with the seed value ('-s'). <p/>
    *
-   * -s random number seed <br/>
-   * Random number seed for the cross-validation (default: 1). <p/>
+   * -s seed <br/>
+   * Random number seed for the cross-validation and percentage split
+   * (default: 1). <p/>
    *
    * -m file with cost matrix <br/>
    * The name of a file containing a cost matrix. <p/>
@@ -732,6 +738,14 @@ implements Summarizable {
       objectInputFileName = Utils.getOption('l', options);
       objectOutputFileName = Utils.getOption('d', options);
       testFileName = Utils.getOption('T', options);
+      foldsString = Utils.getOption('x', options);
+      if (foldsString.length() != 0) {
+	folds = Integer.parseInt(foldsString);
+      }
+      seedString = Utils.getOption('s', options);
+      if (seedString.length() != 0) {
+	seed = Integer.parseInt(seedString);
+      }
       if (trainFileName.length() == 0) {
 	if (objectInputFileName.length() == 0) {
 	  throw new Exception("No training file and no object "+
@@ -785,6 +799,48 @@ implements Summarizable {
 	}
 	actualClassIndex = test.classIndex();
       }
+      else {
+	// percentage split
+	splitPercentageString = Utils.getOption("split-percentage", options);
+	if (splitPercentageString.length() != 0) {
+	  if (foldsString.length() != 0)
+	    throw new Exception(
+		"Percentage split cannot be used in conjunction with "
+		+ "cross-validation ('-x').");
+	  splitPercentage = Integer.parseInt(splitPercentageString);
+	  if ((splitPercentage <= 0) || (splitPercentage >= 100))
+	    throw new Exception("Percentage split value needs be >0 and <100.");
+	}
+	else {
+	  splitPercentage = -1;
+	}
+	preserveOrder = Utils.getFlag("preserve-order", options);
+	if (preserveOrder) {
+	  if (splitPercentage == -1)
+	    throw new Exception("Percentage split ('-percentage-split') is missing.");
+	}
+	// create new train/test sources
+	if (splitPercentage > 0) {
+	  testSetPresent = true;
+	  Instances tmpInst = trainSource.getDataSet(actualClassIndex);
+	  if (!preserveOrder)
+	    tmpInst.randomize(new Random(seed));
+	  int trainSize = tmpInst.numInstances() * splitPercentage / 100;
+	  int testSize  = tmpInst.numInstances() - trainSize;
+	  Instances trainInst = new Instances(tmpInst, 0, trainSize);
+	  Instances testInst  = new Instances(tmpInst, trainSize, testSize);
+	  trainSource = new DataSource(trainInst);
+	  testSource  = new DataSource(testInst);
+	  template = test = testSource.getStructure();
+	  if (classIndex != -1) {
+	    test.setClassIndex(classIndex - 1);
+	  } else {
+	    if ( (test.classIndex() == -1) || (classIndexString.length() != 0) )
+	      test.setClassIndex(test.numAttributes() - 1);
+	  }
+	  actualClassIndex = test.classIndex();
+	}
+      }
       if (trainSetPresent) {
 	template = train = trainSource.getStructure();
 	if (classIndex != -1) {
@@ -801,14 +857,6 @@ implements Summarizable {
       if (template == null) {
 	throw new Exception("No actual dataset provided to use as template");
       }
-      seedString = Utils.getOption('s', options);
-      if (seedString.length() != 0) {
-	seed = Integer.parseInt(seedString);
-      }
-      foldsString = Utils.getOption('x', options);
-      if (foldsString.length() != 0) {
-	folds = Integer.parseInt(foldsString);
-      }
       costMatrix = handleCostOption(
 	  Utils.getOption('m', options), template.numClasses());
 
@@ -823,28 +871,6 @@ implements Summarizable {
       printDistribution = Utils.getFlag("distribution", options);
       thresholdFile = Utils.getOption("threshold-file", options);
       thresholdLabel = Utils.getOption("threshold-label", options);
-
-      // percentage split
-      splitPercentageString = Utils.getOption("split-percentage", options);
-      if (splitPercentageString.length() != 0) {
-	if (foldsString.length() != 0)
-	  throw new Exception(
-	      "Percentage split cannot be used in conjunction with "
-	      + "cross-validation ('-x').");
-	splitPercentage = Integer.parseInt(splitPercentageString);
-	if ((splitPercentage <= 0) || (splitPercentage >= 100))
-	  throw new Exception("Percentage split value needs be >0 and <100.");
-      }
-      else {
-	splitPercentage = -1;
-      }
-      preserveOrder = Utils.getFlag("preserve-order", options);
-      if (preserveOrder) {
-	if (splitPercentage == -1)
-	  throw new Exception("Percentage split ('-percentage-split') is missing.");
-      }
-      if (splitPercentage > 0)
-	testSetPresent = true;
 
       // Check -p option
       try {
@@ -1010,29 +1036,6 @@ implements Summarizable {
     if (!printMargins && (costMatrix != null)) {
       text.append("\n=== Evaluation Cost Matrix ===\n\n");
       text.append(costMatrix.toString());
-    }
-
-    // build new train/test set based on split and re-train classifier
-    if (splitPercentage > 0) {
-      Instances tmpInst = trainSource.getDataSet(actualClassIndex);
-      if (!preserveOrder)
-	tmpInst.randomize(new Random(seed));
-      int trainSize = tmpInst.numInstances() * splitPercentage / 100;
-      int testSize  = tmpInst.numInstances() - trainSize;
-      Instances trainInst = new Instances(tmpInst, 0, trainSize);
-      Instances testInst  = new Instances(tmpInst, trainSize, testSize);
-      trainSource = new DataSource(trainInst);
-      testSource  = new DataSource(testInst);
-      train = trainSource.getDataSet(actualClassIndex);
-      test  = testSource.getDataSet(actualClassIndex);
-      trainingEvaluation.setPriors(train);
-      testingEvaluation.setPriors(train);
-      // re-train classifier
-      classifier = Classifier.makeCopy(classifierBackup);
-      classifier.buildClassifier(train);
-      // set classifier used for predictions
-      if (printClassifications)
-	classifierClassifications = Classifier.makeCopy(classifier);
     }
 
     // Output test instance predictions only
