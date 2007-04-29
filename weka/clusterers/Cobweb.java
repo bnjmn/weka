@@ -1,4 +1,4 @@
-/*
+	/*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -101,7 +101,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @see RandomizableClusterer
  * @see Drawable
  */
@@ -902,8 +902,14 @@ public class Cobweb
       updateClusterer(data.instance(i));
     }
     
-    // init "m_numberOfClusters"
-    numberOfClusters();
+    updateFinished();
+  }
+
+  /**
+   * Singals the end of the updating.
+   */
+  public void updateFinished() {
+    determineNumberOfClusters();
   }
 
   /**
@@ -1157,11 +1163,11 @@ public class Cobweb
    * @return an array of strings suitable for passing to setOptions()
    */
   public String[] getOptions() {
-    int       	i;
-    Vector    	result;
-    String[]  	options;
+    int       		i;
+    Vector<String>    	result;
+    String[]  		options;
 
-    result = new Vector();
+    result = new Vector<String>();
 
     result.add("-A"); 
     result.add("" + m_acuity);
@@ -1172,7 +1178,7 @@ public class Cobweb
     for (i = 0; i < options.length; i++)
       result.add(options[i]);
 
-    return (String[]) result.toArray(new String[result.size()]);	  
+    return result.toArray(new String[result.size()]);	  
   }
 
   /**

@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.37 $
+ * @version  $Revision: 1.38 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -665,10 +665,12 @@ public class ClusterEvaluation
       // Build the clusterer if no object file provided
       if (theClass == -1) {
 	if (updateable) {
+	  clusterer.buildClusterer(source.getStructure());
 	  while (source.hasMoreElements()) {
 	    inst = source.nextElement(train);
 	    ((UpdateableClusterer) clusterer).updateClusterer(inst);
 	  }
+	  ((UpdateableClusterer) clusterer).updateFinished();
 	}
 	else {
 	  clusterer.buildClusterer(source.getDataSet());
@@ -689,6 +691,7 @@ public class ClusterEvaluation
 	    Instance clusterTrainInst = removeClass.output();
 	    ((UpdateableClusterer) clusterer).updateClusterer(clusterTrainInst);
 	  }
+	  ((UpdateableClusterer) clusterer).updateFinished();
 	}
 	else {
 	  Instances clusterTrain = Filter.useFilter(source.getDataSet(), removeClass);
