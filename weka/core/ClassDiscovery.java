@@ -28,6 +28,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.jar.JarEntry;
@@ -38,13 +40,16 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see StringCompare
  */
 public class ClassDiscovery {
 
   /** whether to output some debug information */
   public final static boolean VERBOSE = false;
+  
+  /** for caching queries (classname+packagename &lt;-&gt; Vector with classnames) */
+  protected static Hashtable<String,Vector> m_Cache;
   
   /** notify if VERBOSE is still on */
   static {
@@ -312,14 +317,180 @@ public class ClassDiscovery {
     JarEntry              entry;
     Enumeration           enm;
 
+
+    // already cached?
+    result = getCache(cls, pkgname);
+    
+    if (result == null) {
+      result = new Vector();
+
+      if (VERBOSE)
+	System.out.println(
+	    "Searching for '" + cls.getName() + "' in '" + pkgname + "':");
+
+      // turn package into path
+      pkgpath = pkgname.replaceAll("\\.", "/");
+
+      // check all parts of the classpath, to include additional classes from
+      // "parallel" directories/jars, not just the first occurence
+      tok = new StringTokenizer(
+	  System.getProperty("java.class.path"), 
+	  System.getProperty("path.separator"));
+
+      while (tok.hasMoreTokens()) {
+	part = tok.nextToken();
+	if (VERBOSE)
+	  System.out.println("Classpath-part: " + part);
+
+	// does package exist in this part of the classpath?
+	url = getURL(part, "/" + pkgpath);
+	if (VERBOSE) {
+	  if (url == null)
+	    System.out.println("   " + pkgpath + " NOT FOUND");
+	  else
+	    System.out.println("   " + pkgpath + " FOUND");
+	}
+	if (url == null)
+	  continue;
+
+	// find classes
+	dir = new File(part + "/" + pkgpath);
+	if (dir.exists()) {
+	  files = dir.listFiles();
+	  for (i = 0; i < files.length; i++) {
+	    // only class files
+	    if (    (!files[i].isFile()) 
+		|| (!files[i].getName().endsWith(".class")) )
+	      continue;
+
+	    try {
+	      classname =   pkgname + "." 
+	      + files[i].getName().replaceAll(".*/", "")
+	      .replaceAll("\\.class", "");
+	      result.add(classname);
+	    }
+	    catch (Exception e) {
+	      e.printStackTrace();
+	    }
+	  }
+	}
+	else {
+	  try {
+	    jar = new JarFile(part);
+	    enm = jar.entries();
+	    while (enm.hasMoreElements()) {
+	      entry = (JarEntry) enm.nextElement();
+
+	      // only class files
+	      if (    (entry.isDirectory())
+		  || (!entry.getName().endsWith(".class")) )
+		continue;
+
+	      classname = entry.getName().replaceAll("\\.class", "");
+
+	      // only classes in the particular package
+	      if (!classname.startsWith(pkgpath))
+		continue;
+
+	      // no sub-package
+	      if (classname.substring(pkgpath.length() + 1).indexOf("/") > -1)
+		continue;
+
+	      result.add(classname.replaceAll("/", "."));
+	    }
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	  }
+	}
+      }
+
+      // check classes
+      i = 0;
+      while (i < result.size()) {
+	try {
+	  clsNew = Class.forName((String) result.get(i));
+
+	  // no abstract classes
+	  if (Modifier.isAbstract(clsNew.getModifiers()))
+	    result.remove(i);
+	  // must implement interface
+	  else if ( (cls.isInterface()) && (!hasInterface(cls, clsNew)) )
+	    result.remove(i);
+	  // must be derived from class
+	  else if ( (!cls.isInterface()) && (!isSubclass(cls, clsNew)) )
+	    result.remove(i);
+	  else
+	    i++;
+	}
+	catch (Exception e) {
+	  e.printStackTrace();
+	}
+      }
+
+      // sort result
+      Collections.sort(result, new ClassDiscovery().new StringCompare());
+
+      // add to cache
+      addCache(cls, pkgname, result);
+    }
+
+    return result;
+  }
+
+  /**
+   * adds all the sub-directories recursively to the list
+   * 
+   * @param prefix	the path prefix
+   * @param dir		the directory to look in for sub-dirs
+   * @param list	the current list of sub-dirs
+   * @return		the new list of sub-dirs
+   */
+  protected static HashSet getSubDirectories(String prefix, File dir, HashSet list) {
+    File[]	files;
+    int		i;
+    String 	newPrefix;
+    
+    // add directory to the list
+    if (prefix == null)
+      newPrefix = "";
+    else if (prefix.length() == 0)
+      newPrefix = dir.getName();
+    else
+      newPrefix = prefix + "." + dir.getName();
+
+    if (newPrefix.length() != 0)
+      list.add(newPrefix);
+    
+    // search for sub-directories
+    files = dir.listFiles();
+    if (files != null) {
+      for (i = 0; i < files.length; i++) {
+	if (files[i].isDirectory())
+	  list = getSubDirectories(newPrefix, files[i], list);
+      }
+    }
+      
+    return list;
+  }
+  
+  /**
+   * Lists all packages it can find in the classpath.
+   *
+   * @return                a list with all the found packages
+   */
+  public static Vector findPackages() {
+    Vector		result;
+    StringTokenizer	tok;
+    String		part;
+    File		file;
+    JarFile		jar;
+    JarEntry		entry;
+    Enumeration		enm;
+    HashSet		set;
+
     result = new Vector();
-
-    if (VERBOSE)
-      System.out.println(
-          "Searching for '" + cls.getName() + "' in '" + pkgname + "':");
-
-    // turn package into path
-    pkgpath = pkgname.replaceAll("\\.", "/");
+    set    = new HashSet();
     
     // check all parts of the classpath, to include additional classes from
     // "parallel" directories/jars, not just the first occurence
@@ -332,61 +503,21 @@ public class ClassDiscovery {
       if (VERBOSE)
         System.out.println("Classpath-part: " + part);
       
-      // does package exist in this part of the classpath?
-      url = getURL(part, "/" + pkgpath);
-      if (VERBOSE) {
-        if (url == null)
-          System.out.println("   " + pkgpath + " NOT FOUND");
-        else
-          System.out.println("   " + pkgpath + " FOUND");
-      }
-      if (url == null)
-        continue;
-
       // find classes
-      dir = new File(part + "/" + pkgpath);
-      if (dir.exists()) {
-        files = dir.listFiles();
-        for (i = 0; i < files.length; i++) {
-          // only class files
-          if (    (!files[i].isFile()) 
-               || (!files[i].getName().endsWith(".class")) )
-            continue;
-
-          try {
-            classname =   pkgname + "." 
-                        + files[i].getName().replaceAll(".*/", "")
-                                            .replaceAll("\\.class", "");
-            result.add(classname);
-          }
-          catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
+      file = new File(part);
+      if (file.isDirectory()) {
+	set = getSubDirectories(null, file, set);
       }
-      else {
+      else if (file.exists()) {
         try {
           jar = new JarFile(part);
           enm = jar.entries();
           while (enm.hasMoreElements()) {
             entry = (JarEntry) enm.nextElement();
             
-            // only class files
-            if (    (entry.isDirectory())
-                 || (!entry.getName().endsWith(".class")) )
-              continue;
-
-            classname = entry.getName().replaceAll("\\.class", "");
-
-            // only classes in the particular package
-            if (!classname.startsWith(pkgpath))
-              continue;
-
-            // no sub-package
-            if (classname.substring(pkgpath.length() + 1).indexOf("/") > -1)
-              continue;
-
-            result.add(classname.replaceAll("/", "."));
+            // only directories
+            if (entry.isDirectory())
+              set.add(entry.getName().replaceAll("/", ".").replaceAll("\\.$", ""));
           }
         }
         catch (Exception e) {
@@ -395,42 +526,67 @@ public class ClassDiscovery {
       }
     }
 
-    // check classes
-    i = 0;
-    while (i < result.size()) {
-      try {
-        clsNew = Class.forName((String) result.get(i));
-        
-        // no abstract classes
-        if (Modifier.isAbstract(clsNew.getModifiers()))
-          result.remove(i);
-        // must implement interface
-        else if ( (cls.isInterface()) && (!hasInterface(cls, clsNew)) )
-          result.remove(i);
-        // must be derived from class
-        else if ( (!cls.isInterface()) && (!isSubclass(cls, clsNew)) )
-          result.remove(i);
-        else
-          i++;
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-
     // sort result
+    set.remove("META-INF");
+    result.addAll(set);
     Collections.sort(result, new ClassDiscovery().new StringCompare());
 
     return result;
   }
 
   /**
-   * For testing only. Takes two arguments:
-   * <ol>
-   *    <li>classname</li>
-   *    <li>packagename(s) [comma-separated list]</li>
-   * </ol>
-   * Prints the classes it found.
+   * initializes the cache for the classnames 
+   */
+  protected static void initCache() {
+    if (m_Cache == null)
+      m_Cache = new Hashtable<String,Vector>();
+  }
+  
+  /**
+   * adds the list of classnames to the cache
+   * 
+   * @param cls		the class to cache the classnames for
+   * @param pkgname	the package name the classes were found in
+   * @param classnames	the list of classnames to cache
+   */
+  protected static void addCache(Class cls, String pkgname, Vector classnames) {
+    initCache();
+    m_Cache.put(cls.getName() + "-" + pkgname, classnames);
+  }
+  
+  /**
+   * returns the list of classnames associated with this class and package, if
+   * available, otherwise null
+   * 
+   * @param cls		the class to get the classnames for
+   * @param pkgname	the package name for the classes 
+   * @return		the classnames if found, otherwise null
+   */
+  protected static Vector getCache(Class cls, String pkgname) {
+    initCache();
+    return m_Cache.get(cls.getName() + "-" + pkgname);
+  }
+  
+  /**
+   * clears the cache for class/classnames relation
+   */
+  public static void clearCache() {
+    initCache();
+    m_Cache.clear();
+  }
+
+  /**
+   * Possible calls:
+   * <ul>
+   *    <li>
+   *      weka.core.ClassDiscovery &lt;packages&gt;<br/>
+   *      Prints all the packages in the current classpath
+   *    </li>
+   *    <li>
+   *      weka.core.ClassDiscovery &lt;classname&gt; &lt;packagename(s)&gt;<br/>
+   *      Prints the classes it found.
+   *    </li>
+   * </ul>
    * 
    * @param args	the commandline arguments
    */
@@ -440,30 +596,42 @@ public class ClassDiscovery {
     int         	i;
     StringTokenizer	tok;
     
-    if (args.length != 2) {
+    if ((args.length == 1) && (args[0].equals("packages"))) {
+      list = findPackages();
+      for (i = 0; i < list.size(); i++)
+	System.out.println(list.get(i));
+    }
+    else if (args.length == 2) {
+      // packages
+      packages = new Vector();
+      tok = new StringTokenizer(args[1], ",");
+      while (tok.hasMoreTokens())
+        packages.add(tok.nextToken());
+      
+      // search
+      list = ClassDiscovery.find(
+  		args[0], 
+  		(String[]) packages.toArray(new String[packages.size()]));
+
+      // print result, if any
       System.out.println(
-          "\nUsage: " + ClassDiscovery.class.getName() 
-          + " <classname> <packagename(s)>\n");
+          "Searching for '" + args[0] + "' in '" + args[1] + "':\n" 
+          + "  " + list.size() + " found.");
+      for (i = 0; i < list.size(); i++)
+        System.out.println("  " + (i+1) + ". " + list.get(i));
+    }
+    else {
+      System.out.println("\nUsage:");
+      System.out.println(
+	  ClassDiscovery.class.getName() + " packages");
+      System.out.println("\tlists all packages in the classpath");
+      System.out.println(
+	  ClassDiscovery.class.getName() + " <classname> <packagename(s)>");
+      System.out.println("\tlists classes derived from/implementing 'classname' that");
+      System.out.println("\tcan be found in 'packagename(s)' (comma-separated list");
+      System.out.println();
       System.exit(1);
     }
-
-    // packages
-    packages = new Vector();
-    tok = new StringTokenizer(args[1], ",");
-    while (tok.hasMoreTokens())
-      packages.add(tok.nextToken());
-    
-    // search
-    list = ClassDiscovery.find(
-		args[0], 
-		(String[]) packages.toArray(new String[packages.size()]));
-
-    // print result, if any
-    System.out.println(
-        "Searching for '" + args[0] + "' in '" + args[1] + "':\n" 
-        + "  " + list.size() + " found.");
-    for (i = 0; i < list.size(); i++)
-      System.out.println("  " + (i+1) + ". " + list.get(i));
   }
   
   /**
