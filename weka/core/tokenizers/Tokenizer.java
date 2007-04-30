@@ -23,6 +23,8 @@ package weka.core.tokenizers;
 
 import weka.core.OptionHandler;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -31,7 +33,7 @@ import java.util.Vector;
  * A superclass for all tokenizer algorithms.
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class Tokenizer
   implements Enumeration, OptionHandler, Serializable {
@@ -100,7 +102,9 @@ public abstract class Tokenizer
   
   /**
    * initializes the given tokenizer with the given options and runs the
-   * tokenizer over all the remaining strings in the options array.
+   * tokenizer over all the remaining strings in the options array. If no 
+   * strings remained in the option string then data is read from stdin, line 
+   * by line.
    * 
    * @param tokenizer	the tokenizer to use
    * @param options	the options for the tokenizer
@@ -110,24 +114,45 @@ public abstract class Tokenizer
   public static String[] tokenize(Tokenizer tokenizer, String[] options) throws Exception {
     Vector<String>	result;
     Vector<String>	tmpResult;
+    Vector<String>	data;
     int			i;
+    boolean		processed;
+    BufferedReader	reader;
+    String		line;
     
     result = new Vector<String>();
     
     // init tokenizer
     tokenizer.setOptions(options);
+
+    // for storing the data to process
+    data = new Vector<String>();
     
     // run over all un-processed strings in the options array
+    processed = false;
     for (i = 0; i < options.length; i++) {
       if (options[i].length() != 0) {
-	tmpResult = new Vector<String>();
-	// tokenize string
-	tokenizer.tokenize(options[i]);
-	while (tokenizer.hasMoreElements())
-	  tmpResult.add((String) tokenizer.nextElement());
-	// add to result
-	result.addAll(tmpResult);
+	processed = true;
+	data.add(options[i]);
       }
+    }
+    
+    // if no strings in option string then read from stdin
+    if (!processed) {
+      reader = new BufferedReader(new InputStreamReader(System.in));
+      while ((line = reader.readLine()) != null) {
+	data.add(line);
+      }
+    }
+
+    // process data
+    for (i = 0; i < data.size(); i++) {
+      tmpResult = new Vector<String>();
+      tokenizer.tokenize(data.get(i));
+      while (tokenizer.hasMoreElements())
+	tmpResult.add((String) tokenizer.nextElement());
+      // add to result
+      result.addAll(tmpResult);
     }
     
     return result.toArray(new String[result.size()]);
@@ -136,7 +161,8 @@ public abstract class Tokenizer
   /**
    * initializes the given tokenizer with the given options and runs the
    * tokenizer over all the remaining strings in the options array. The 
-   * generated tokens are then printed to stdout.
+   * generated tokens are then printed to stdout. If no strings remained
+   * in the option string then data is read from stdin, line by line.
    * 
    * @param tokenizer	the tokenizer to use
    * @param options	the options for the tokenizer
