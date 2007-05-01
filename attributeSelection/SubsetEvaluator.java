@@ -16,7 +16,7 @@
 
 /*
  *    SubsetEvaluator.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.BitSet;
  * Abstract attribute subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract class SubsetEvaluator extends ASEvaluation {
 

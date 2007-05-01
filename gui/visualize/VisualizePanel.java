@@ -16,7 +16,7 @@
 
 /*
  *    VisualizePanel.java
- *    Copyright (C) 1999 Mark Hall, Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -86,7 +86,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class VisualizePanel
   extends PrintablePanel {

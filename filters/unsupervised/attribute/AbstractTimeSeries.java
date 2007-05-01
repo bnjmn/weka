@@ -16,7 +16,7 @@
 
 /*
  *    AbstractTimeSeries.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -62,7 +62,7 @@ import weka.filters.UnsupervisedFilter;
  * values). <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class AbstractTimeSeries
   extends Filter

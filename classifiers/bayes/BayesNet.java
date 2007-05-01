@@ -16,7 +16,7 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2001 Remco Bouckaert
+ * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes;
@@ -84,7 +84,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 

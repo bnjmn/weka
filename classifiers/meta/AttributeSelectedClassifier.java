@@ -16,7 +16,7 @@
 
 /*
  *    AttributeSelectedClassifier.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -111,7 +111,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class AttributeSelectedClassifier 
   extends SingleClassifierEnhancer

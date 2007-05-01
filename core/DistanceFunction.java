@@ -16,7 +16,7 @@
 
 /*
  *    DistanceFunction.java
- *    Copyright (C) 1999-2005 University of Waikato
+ *    Copyright (C) 1999-2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.core;
  * instances.
  *
  * @author  Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public interface DistanceFunction extends OptionHandler {
     

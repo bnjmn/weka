@@ -16,7 +16,7 @@
 
 /*
  *    Task.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Interface to something that can be remotely executed as a task.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public interface Task extends Serializable {
   

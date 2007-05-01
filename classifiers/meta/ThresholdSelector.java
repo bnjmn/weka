@@ -16,7 +16,7 @@
 
 /*
  *    ThresholdSelector.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -112,7 +112,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $ 
+ * @version $Revision: 1.38 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 

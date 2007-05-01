@@ -16,7 +16,7 @@
 
 /*
  * K2.java
- * Copyright (C) 2001 Remco Bouckaert
+ * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.search.global;
@@ -101,7 +101,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class K2 
 	extends GlobalScoreSearchAlgorithm

@@ -16,7 +16,7 @@
 
 /*
  *    DatabaseConverter.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 

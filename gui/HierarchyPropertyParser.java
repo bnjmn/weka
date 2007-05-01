@@ -16,7 +16,7 @@
 
 /*
  *    HierarchyPropertyParser.java
- *    Copyright (C) 2001 Xin Xu
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import java.util.Vector;
  * goToXXX() and information accessing functions).<p>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class HierarchyPropertyParser
     implements Serializable {

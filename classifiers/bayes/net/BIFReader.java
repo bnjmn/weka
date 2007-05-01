@@ -16,7 +16,7 @@
 
 /*
  * BIFReader.java
- * Copyright (C) 2003 Remco Bouckaert
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  * 
  */
 
@@ -88,7 +88,7 @@ import org.w3c.dom.NodeList;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class BIFReader 
     extends BayesNet

@@ -16,7 +16,7 @@
 
 /*
  *    SingleIndex.java
- *    Copyright (C) 2003 University of Waikato
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -38,7 +38,7 @@ import java.io.Serializable;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SingleIndex
   implements Serializable {

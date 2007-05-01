@@ -16,7 +16,7 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2003 Remco Bouckaert
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  * 
  */
 
@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class BayesNetGenerator extends BayesNet {
     /** the seed value */

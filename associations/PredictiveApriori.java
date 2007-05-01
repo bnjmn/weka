@@ -16,7 +16,7 @@
 
 /*
  *    PredictiveApriori.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ */
+ * @version $Revision: 1.10 $ */
 
 public class PredictiveApriori 
   extends Associator 

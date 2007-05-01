@@ -16,7 +16,7 @@
 
 /*
  *    ChangeDateFormat.java
- *    Copyright (C) 2004 Len Trigg
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -61,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ChangeDateFormat 
   extends Filter 

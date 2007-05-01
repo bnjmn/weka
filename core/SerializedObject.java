@@ -16,7 +16,7 @@
 
 /*
  *    SerializedObject.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class SerializedObject
   implements Serializable {

@@ -16,7 +16,7 @@
 
 /*
  *    ResidualSplit.java
- *    Copyright (C) 2003 Niels Landwehr
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +34,7 @@ import weka.core.Utils;
  * splitting criterion based on residuals of the LogitBoost algorithm.
  * 
  * @author Niels Landwehr
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ResidualSplit
   extends ClassifierSplitModel{

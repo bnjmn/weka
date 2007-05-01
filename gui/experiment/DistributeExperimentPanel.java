@@ -16,7 +16,7 @@
 
 /*
  *    DistributeExperimentPanel.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -45,7 +45,7 @@ import javax.swing.JRadioButton;
  * it also allows remote host names to be specified.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DistributeExperimentPanel
   extends JPanel {

@@ -16,7 +16,7 @@
 
 /*
  * ADNode.java
- * Copyright (C) 2002 Remco Bouckaert
+ * Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  * 
  */
 
@@ -59,7 +59,7 @@ import java.io.Serializable;
  <!-- technical-bibtex-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ADNode 
 	implements Serializable, TechnicalInformationHandler {

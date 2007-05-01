@@ -16,7 +16,7 @@
 
 /*
  * CorrelationSplitInfo.java
- * Copyright (C) 2000 Mark Hall
+ * Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Finds split points using correlation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public final class CorrelationSplitInfo
   implements Cloneable, Serializable, SplitEvaluate {

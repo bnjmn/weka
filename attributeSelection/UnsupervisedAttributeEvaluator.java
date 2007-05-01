@@ -16,7 +16,7 @@
 
 /*
  *    UnsupervisedAttributeEvaluator.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ package weka.attributeSelection;
  * Abstract unsupervised attribute evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class UnsupervisedAttributeEvaluator
   extends AttributeEvaluator{

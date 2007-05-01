@@ -16,7 +16,7 @@
 
 /*
  *    TextViewer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -54,7 +54,7 @@ import javax.swing.JTextArea;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class TextViewer 
   extends JPanel

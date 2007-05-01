@@ -16,7 +16,7 @@
 
 /*
  *    BinarySparseInstance.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class BinarySparseInstance
   extends SparseInstance {

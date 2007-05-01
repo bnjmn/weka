@@ -16,7 +16,7 @@
 
 /*
  *    DataNearBalancedND.java
- *    Copyright (C) 2005 University of Waikato
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.classifiers.meta.nestedDichotomies;

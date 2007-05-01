@@ -16,7 +16,7 @@
 
 /*
  *    CustomPanelSupplier.java
- *    Copyright (C) 2002 Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import javax.swing.JPanel;
  * the standard PropertyPanel GUI.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface CustomPanelSupplier {
 

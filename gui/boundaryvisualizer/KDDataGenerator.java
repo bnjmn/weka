@@ -16,7 +16,7 @@
 
 /*
  *   KDDataGenerator.java
- *   Copyright (C) 2002 Mark Hall
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import java.util.Random;
  * instances based on a supplied set of instances.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see DataGenerator
  * @see Serializable

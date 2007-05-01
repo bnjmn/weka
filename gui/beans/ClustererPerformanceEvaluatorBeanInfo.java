@@ -16,7 +16,7 @@
 
 /*
  *    ClustererPerformanceEvaluatorBeanInfo.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the clusterer performance evaluator
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClustererPerformanceEvaluatorBeanInfo extends SimpleBeanInfo {
   

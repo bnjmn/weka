@@ -16,7 +16,7 @@
 
 /*
  *    ClustererCustomizer.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import javax.swing.JPanel;
  * GUI customizer for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClustererCustomizer
   extends JPanel

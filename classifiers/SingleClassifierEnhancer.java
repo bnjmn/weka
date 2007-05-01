@@ -16,7 +16,7 @@
 
 /*
  *    SingleClassifierEnhancer.java
- *    Copyright (C) 2004 Eibe Frank
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import java.util.Vector;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 

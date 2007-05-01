@@ -16,7 +16,7 @@
 
 /*
  *    Utils.java
- *    Copyright (C) 1999-2004 University of Waikato
+ *    Copyright (C) 1999-2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.53 $
+ * @version $Revision: 1.54 $
  */
 public final class Utils {
 

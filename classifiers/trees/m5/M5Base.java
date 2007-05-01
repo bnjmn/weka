@@ -16,7 +16,7 @@
 
 /*
  *    M5Base.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -70,7 +70,7 @@ import java.util.Vector;
  * Build regression tree/rule rather than model tree/rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public abstract class M5Base 
   extends Classifier 

@@ -16,7 +16,7 @@
 
 /*
  * IteratedLovinsStemmer.java
- * Copyright (C) 2001 Eibe Frank
+ * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -48,7 +48,7 @@ package weka.core.stemmers;
  <!-- technical-bibtex-end -->
  *
  * @author  Eibe Frank (eibe at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see     LovinsStemmer
  */
 public class IteratedLovinsStemmer 

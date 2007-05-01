@@ -16,7 +16,7 @@
 
 /*
  *    MultilayerPerceptron.java
- *    Copyright (C) 2000 Malcolm Ware
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
@@ -140,7 +140,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -656,7 +656,7 @@ public class MultilayerPerceptron
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    */
   class ControlPanel 
     extends JPanel {

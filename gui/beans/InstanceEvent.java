@@ -16,7 +16,7 @@
 
 /*
  *    InstanceEvent.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.util.EventObject;
  * Event that encapsulates a single instance or header information only
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see EventObject
  */
 public class InstanceEvent

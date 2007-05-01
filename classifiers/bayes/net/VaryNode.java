@@ -16,7 +16,7 @@
 
 /*
  * VaryNode.java
- * Copyright (C) 2002 Remco Bouckaert
+ * Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  * 
  */
 
@@ -28,7 +28,7 @@ import java.io.Serializable;
  * Part of ADTree implementation. See ADNode.java for more details.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class VaryNode
   implements Serializable {

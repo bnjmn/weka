@@ -16,7 +16,7 @@
 
 /*
  *    Attribute.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -87,7 +87,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class Attribute
   implements Copyable, Serializable {

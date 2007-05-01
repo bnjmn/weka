@@ -16,7 +16,7 @@
 
 /*
  *    Clusterer.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible

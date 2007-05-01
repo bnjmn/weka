@@ -16,7 +16,7 @@
 
 /*
  *    Optimization.java
- *    Copyright (C) 2003 Xin Xu
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -141,7 +141,7 @@ import weka.core.TechnicalInformation.Type;
  * No.126, pp 505-535. <p/>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  * @see #getTechnicalInformation()
  */
 public abstract class Optimization

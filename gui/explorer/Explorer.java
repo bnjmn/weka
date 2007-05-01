@@ -16,7 +16,7 @@
 
 /*
  *    Explorer.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -58,7 +58,7 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class Explorer
   extends JPanel {
@@ -70,7 +70,7 @@ public class Explorer
    * Interface for classes that listen for filter changes.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.41 $
+   * @version $Revision: 1.42 $
    */
   public static interface CapabilitiesFilterChangeListener 
     extends EventListener {
@@ -87,7 +87,7 @@ public class Explorer
    * This event can be fired in case the capabilities filter got changed 
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.41 $
+   * @version $Revision: 1.42 $
    */
   public static class CapabilitiesFilterChangeEvent
     extends ChangeEvent {
@@ -123,7 +123,7 @@ public class Explorer
    * A common interface for panels to be displayed in the Explorer
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.41 $
+   * @version $Revision: 1.42 $
    */
   public static interface ExplorerPanel {
 
@@ -168,7 +168,7 @@ public class Explorer
    * A common interface for panels in the explorer that can handle logs
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.41 $
+   * @version $Revision: 1.42 $
    */
   public static interface LogHandler {
     

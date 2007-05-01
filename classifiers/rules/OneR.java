@@ -16,7 +16,7 @@
 
 /*
  *    OneR.java
- *    Copyright (C) 1999 Ian H. Witten
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
 */
 public class OneR 
   extends Classifier 

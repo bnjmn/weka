@@ -16,7 +16,7 @@
 
 /*
  *    AttributeStats.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class AttributeStats
   implements Serializable {    

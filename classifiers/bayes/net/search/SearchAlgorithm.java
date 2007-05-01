@@ -16,7 +16,7 @@
 
 /*
  * SearchAlgorithm.java
- * Copyright (C) 2003 Remco Bouckaert
+ * Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.search;
@@ -39,7 +39,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SearchAlgorithm 
     implements OptionHandler, Serializable {

@@ -16,7 +16,7 @@
 
 /*
  *    ClassPanel.java
- *    Copyright (C) 2000 Mark Hall, Malcolm Ware
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -49,7 +49,7 @@ import javax.swing.JPanel;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClassPanel
   extends JPanel {

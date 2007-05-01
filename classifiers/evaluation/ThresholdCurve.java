@@ -16,7 +16,7 @@
 
 /*
  *    ThresholdCurve.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -38,7 +38,7 @@ import weka.core.Utils;
  * for ROC curve analysis (true positive rate vs false positive rate).
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class ThresholdCurve {
 

@@ -15,7 +15,7 @@
 
 /*
  *    FlexibleDecimalFormat.java
- *    Copyright (C) 2002 Yong Wang
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ import java.text.FieldPosition;
 
 /**
  * @author Yong Wang
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FlexibleDecimalFormat
   extends DecimalFormat {

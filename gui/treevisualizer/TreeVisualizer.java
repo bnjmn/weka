@@ -16,7 +16,7 @@
 
 /*
  *    TreeVisualizer.java
- *    Copyright (C) 1999 Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -83,7 +83,7 @@ import javax.swing.Timer;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class TreeVisualizer
   extends PrintablePanel

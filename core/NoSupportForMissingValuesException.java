@@ -16,7 +16,7 @@
 
 /*
  *    NoSupportForMissingValuesException.java
- *    Copyright (C) 2002 Eibe Frank
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.core;
  * data with missing values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NoSupportForMissingValuesException
   extends WekaException {

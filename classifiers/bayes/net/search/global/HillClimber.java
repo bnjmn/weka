@@ -16,7 +16,7 @@
 
 /*
  * HillClimber.java
- * Copyright (C) 2004 Remco Bouckaert
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
  
@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class HillClimber 
     extends GlobalScoreSearchAlgorithm {

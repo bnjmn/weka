@@ -16,7 +16,7 @@
 
 /*
  *    RunNumberPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,7 +50,7 @@ import javax.swing.SwingConstants;
  * in an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class RunNumberPanel
   extends JPanel {

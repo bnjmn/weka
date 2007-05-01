@@ -16,7 +16,7 @@
 
 /*
  *    ReplaceMissingValues.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -48,7 +48,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ReplaceMissingValues 
   extends PotentialClassIgnorer

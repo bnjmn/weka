@@ -16,7 +16,7 @@
 
  /*
   *    JComponentWriter.java
-  *    Copyright (C) 2005 Fracpete
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
   *
   */
 
@@ -38,7 +38,7 @@ import javax.swing.JComponent;
  *
  * @see #setScalingEnabled(boolean)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class JComponentWriter {
   /** whether to print some debug information */

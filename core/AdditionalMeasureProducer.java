@@ -16,7 +16,7 @@
 
 /*
  *    AdditionalMeasureProducer.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import java.util.*;
  * calculated by evaluation modules. 
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public interface AdditionalMeasureProducer {
 

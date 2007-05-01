@@ -16,7 +16,7 @@
 
 /*
  *    ThresholdDataEvent.java
- *    Copyright (C) 2003 Mark Hall
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.util.EventObject;
  * varying a threshold over the classifier's predicted probabilities
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see EventObject
  */
 public class ThresholdDataEvent

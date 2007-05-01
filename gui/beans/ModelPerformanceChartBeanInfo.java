@@ -16,7 +16,7 @@
 
 /*
  *    ModelPerformanceChartBeanInfo.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the model performance chart
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ModelPerformanceChartBeanInfo extends SimpleBeanInfo {
   

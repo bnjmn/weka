@@ -16,7 +16,7 @@
 
 /*
  *    NeuralNode.java
- *    Copyright (C) 2000 Malcolm Ware
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions.neural;
@@ -27,7 +27,7 @@ import java.util.Random;
  * This class is used to represent a node in the neuralnet.
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NeuralNode
   extends NeuralConnection {

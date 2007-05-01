@@ -16,7 +16,7 @@
 
 /*
  *    NeuralConnection.java
- *    Copyright (C) 2000 Malcolm Ware
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions.neural;
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * Abstract unit in a NeuralNetwork.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class NeuralConnection
   implements Serializable {

@@ -16,7 +16,7 @@
 
 /*
  *    CVParameterSelection.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -111,7 +111,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.33 $ 
+ * @version $Revision: 1.34 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer

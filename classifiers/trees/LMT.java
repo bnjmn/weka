@@ -16,7 +16,7 @@
 
 /*
  *    LMT.java
- *    Copyright (C) 2003 Niels Landwehr
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -115,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class LMT 
   extends Classifier 

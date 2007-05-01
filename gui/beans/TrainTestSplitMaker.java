@@ -16,7 +16,7 @@
 
 /*
  *    TrainTestSplitMaker.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +34,7 @@ import java.util.Vector;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer

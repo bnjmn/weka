@@ -16,7 +16,7 @@
 
 /*
  *    SupervisedFilter.java
- *    Copyright (C) 2002  Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ package weka.filters;
  * Interface for filters that make use of a class attribute.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public interface SupervisedFilter {

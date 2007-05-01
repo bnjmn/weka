@@ -16,7 +16,7 @@
 
 /*
  *    NumericPrediction.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NumericPrediction
   implements Prediction, Serializable {

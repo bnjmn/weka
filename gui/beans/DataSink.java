@@ -16,7 +16,7 @@
 
 /*
  *    DataSink.java
- *    Copyright (C) 2003 Mark Hall
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.gui.beans;
  * destination
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public interface DataSink {

@@ -16,7 +16,7 @@
 
 /*
  *    Experiment.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -144,7 +144,7 @@ import javax.swing.DefaultListModel;
  * All options after -- will be passed to the result producer. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class Experiment 
   implements Serializable, OptionHandler {

@@ -16,7 +16,7 @@
 
 /*
  *    RemoveFrequentValues.java
- *    Copyright (C) 2004 FracPete
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -74,7 +74,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class RemoveFrequentValues 
    extends Filter 

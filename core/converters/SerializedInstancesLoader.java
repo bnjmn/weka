@@ -16,7 +16,7 @@
 
 /*
  *    SerializedInstancesLoader.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import java.io.ObjectInputStream;
  <!-- globalinfo-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Loader
  */
 public class SerializedInstancesLoader 

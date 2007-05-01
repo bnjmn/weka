@@ -15,7 +15,7 @@
 
 /*
  *    MixtureDistribution.java
- *    Copyright (C) 2002 Yong Wang
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import weka.core.matrix.IntVector;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.4 $ */
 
 public abstract class MixtureDistribution
   implements TechnicalInformationHandler {

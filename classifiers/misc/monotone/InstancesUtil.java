@@ -14,7 +14,6 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *    InstancesUtil.java
  *    Copyright (C) 2004 Stijn Lievens
@@ -47,7 +46,7 @@ import java.util.Random;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class InstancesUtil {
 

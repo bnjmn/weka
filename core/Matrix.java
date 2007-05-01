@@ -14,10 +14,9 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *    Matrix.java
- *    Copyright (C) 1999 Yong Wang, Eibe Frank, Len Trigg, Gabi Schmidberger
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -38,7 +37,7 @@ import java.io.Writer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @deprecated Use <code>weka.core.matrix.Matrix</code> instead - only for
  * backwards compatibility. 
  */

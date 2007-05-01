@@ -16,7 +16,7 @@
 
 /*
  *    Splitter.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * Abstract class representing a splitter node in an alternating tree.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class Splitter
   implements Serializable, Cloneable {

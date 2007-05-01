@@ -16,7 +16,7 @@
 
 /*
  *    ResidualModelSelection.java
- *    Copyright (C) 2003 Niels Landwehr
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import weka.core.Instances;
  * splitting criterion based on residuals.
  * 
  * @author Niels Landwehr
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ResidualModelSelection
   extends ModelSelection {

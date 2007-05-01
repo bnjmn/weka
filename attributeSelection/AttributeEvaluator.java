@@ -16,7 +16,7 @@
 
 /*
  *    AttributeEvaluator.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.attributeSelection;
  * Abstract attribute evaluator. Evaluate attributes individually.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract class AttributeEvaluator extends ASEvaluation {
   

@@ -16,7 +16,7 @@
 
 /*
  *    EvaluationUtils.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import java.util.Random;
  * various manners.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class EvaluationUtils {
 

@@ -16,7 +16,7 @@
 
 /*
  *    NearestNeighbourSearch.java
- *    Copyright (C) 1999-2005 University of Waikato
+ *    Copyright (C) 1999-2005 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -33,7 +33,7 @@ import weka.core.Instances;
  * do nearest neighbour search should extend this class. 
  *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class NearestNeighbourSearch
   implements Serializable{

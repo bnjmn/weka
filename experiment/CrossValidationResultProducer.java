@@ -16,7 +16,7 @@
 
 /*
  *    CrossValidationResultProducer.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -99,7 +99,7 @@ import java.util.Vector;
  * All options after -- will be passed to the split evaluator.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class CrossValidationResultProducer 
   implements ResultProducer, OptionHandler, AdditionalMeasureProducer {

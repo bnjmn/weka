@@ -16,7 +16,7 @@
 
 /*
  *    IntervalEstimator.java
- *    Copyright (C) 2005 Kurt Driessens
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import weka.core.Instance;
  * Interface for classifiers that can output confidence intervals
  *
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface IntervalEstimator {
 

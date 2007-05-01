@@ -16,7 +16,7 @@
 
 /*
  *    ClustererPanel.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -118,7 +118,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.59 $
+ * @version $Revision: 1.60 $
  */
 public class ClustererPanel
   extends JPanel

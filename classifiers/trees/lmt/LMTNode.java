@@ -16,7 +16,7 @@
 
 /*
  *    LMTNode.java
- *    Copyright (C) 2003 Niels Landwehr
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -62,7 +62,7 @@ class CompareNode
  * 
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LMTNode 
     extends LogisticBase {   

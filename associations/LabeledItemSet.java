@@ -16,7 +16,7 @@
 
 /*
  * LabeledItemSet.java
- * Copyright (C) 2004 Stefan Mutter
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -40,7 +40,7 @@ import java.util.Hashtable;
  * Because every item set knows its class label the training set can be splitted up virtually.
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class LabeledItemSet extends ItemSet implements Serializable{

@@ -16,7 +16,7 @@
 
 /*
  *    Rule.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Generates a single m5 tree or rule
  *
  * @author Mark Hall
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Rule
   implements Serializable {

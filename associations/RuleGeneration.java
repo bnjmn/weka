@@ -16,7 +16,7 @@
 
 /*
  *    RuleGeneration.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -43,7 +43,7 @@ import weka.associations.ItemSet;
  * (out of an unpublished manuscript from T. Scheffer). 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 public class RuleGeneration implements Serializable {
 
   /** for serialization */

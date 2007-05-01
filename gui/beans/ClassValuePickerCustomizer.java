@@ -16,7 +16,7 @@
 
 /*
  *    ClassValuePickerCustomizer.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ClassValuePickerCustomizer
   extends JPanel

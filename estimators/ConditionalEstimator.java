@@ -16,7 +16,7 @@
 
 /*
  *    ConditionalEstimator.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,7 +50,7 @@ package weka.estimators;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface ConditionalEstimator {
 

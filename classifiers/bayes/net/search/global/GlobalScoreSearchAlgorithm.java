@@ -16,7 +16,7 @@
 
 /*
  * GlobalScoreSearchAlgorithm.java
- * Copyright (C) 2004 Remco Bouckaert
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
 
@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class GlobalScoreSearchAlgorithm 
 	extends SearchAlgorithm {

@@ -16,7 +16,7 @@
 
 /*
  *    WekaWrapper.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ package weka.gui.beans;
  * by a bean for handling classes of Weka algorithms. 
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  */
 public interface WekaWrapper {

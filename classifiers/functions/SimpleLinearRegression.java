@@ -16,7 +16,7 @@
 
 /*
  *    SimpleLinearRegression.java
- *    Copyright (C) 2002 Eibe Frank
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -47,7 +47,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SimpleLinearRegression extends Classifier 
   implements WeightedInstancesHandler {

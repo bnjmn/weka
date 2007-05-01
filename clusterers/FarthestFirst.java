@@ -16,9 +16,7 @@
 
 /*
  *    FarthestFirst.java
- *    Copyright (C) 2002 Bernhard Pfahringer
- *    based on SimpleKMeans which is 
- *    Copyright (C) 2000 Mark Hall (mhall@cs.waikato.ac.nz)
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.clusterers;
@@ -95,7 +93,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see RandomizableClusterer
  */
 public class FarthestFirst 

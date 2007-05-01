@@ -16,7 +16,7 @@
 
 /*
  * FromFile.java
- * Copyright (C) 2004 Remco Bouckaert
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.search.fixed;
@@ -48,7 +48,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class FromFile 
 	extends SearchAlgorithm {

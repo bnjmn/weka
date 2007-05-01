@@ -17,7 +17,7 @@
 /*
  *    MathematicalExpression.java
  *    Copyright (C) 2004 Prados Julien
- *    Copyright (C) 2002 Eibe Frank
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -80,7 +80,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MathematicalExpression {
   
@@ -89,7 +89,7 @@ public class MathematicalExpression {
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   static public class Tokenizer 
     extends StreamTokenizer {
@@ -144,7 +144,7 @@ public class MathematicalExpression {
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   static public class TreeNode 
     implements Serializable {

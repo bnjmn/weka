@@ -16,7 +16,7 @@
 
 /*
  *    SimpleKMeans.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.clusterers;
@@ -59,7 +59,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 

@@ -16,7 +16,7 @@
 
 /*
  *    PropertyText.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import javax.swing.JTextField;
  * somewhere other than this field simultaneously
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 class PropertyText
   extends JTextField {

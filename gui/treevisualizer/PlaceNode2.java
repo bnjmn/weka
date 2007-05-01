@@ -16,7 +16,7 @@
 
 /*
  *    PlaceNode2.java
- *    Copyright (C) 1999 Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import java.util.*;
  *
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PlaceNode2 implements NodePlace {
   /** The space each row will take up. */

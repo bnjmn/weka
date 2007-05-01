@@ -16,7 +16,7 @@
 
 /*
  *    Rule.java
- *    Copyright (C) 2001 Xin Xu
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.rules;
@@ -32,7 +32,7 @@ import java.io.Serializable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class Rule 
     implements WeightedInstancesHandler, Copyable, Serializable {

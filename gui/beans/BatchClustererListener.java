@@ -16,7 +16,7 @@
 
 /*
  *    BatchClustererListener.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Interface to something that can process a BatchClustererEvent
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">MStefan Mutter</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see EventListener
  */
 public interface BatchClustererListener extends EventListener {

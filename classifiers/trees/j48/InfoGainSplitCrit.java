@@ -16,7 +16,7 @@
 
 /*
  *    InfoGainSplitCrit.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import weka.core.Utils;
  * Class for computing the information gain for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public final class InfoGainSplitCrit
   extends EntropyBasedSplitCrit{

@@ -16,7 +16,7 @@
 
 /*
  *    GenericObjectEditor.java
- *    Copyright (C) 2002 Len Trigg, Xin Xu, Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -105,7 +105,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.57 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   

@@ -16,7 +16,7 @@
 
 /*
  * ArffTable.java
- * Copyright (C) 2005 FracPete
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -53,7 +53,7 @@ import javax.swing.table.TableModel;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class ArffTable
   extends JTable {

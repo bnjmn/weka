@@ -16,7 +16,7 @@
 
 /*
  *    NBTreeSplit.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +34,7 @@ import java.util.Random;
  * Class implementing a NBTree split on an attribute.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NBTreeSplit
   extends ClassifierSplitModel{

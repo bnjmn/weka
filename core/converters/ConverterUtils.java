@@ -16,7 +16,7 @@
 
 /*
  *    ConverterUtils.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -67,7 +67,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    * @see #hasMoreElements()
    * @see #nextElement()
    * @see #reset()
@@ -524,7 +524,7 @@ public class ConverterUtils
    * It is the logical counterpart to <code>DataSource</code>.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    * @see DataSource
    */
   public static class DataSink

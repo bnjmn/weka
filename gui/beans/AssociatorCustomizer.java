@@ -16,7 +16,7 @@
 
 /*
  *    AssociatorCustomizer.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import javax.swing.JPanel;
  * GUI customizer for the associator wrapper bean
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AssociatorCustomizer
   extends JPanel

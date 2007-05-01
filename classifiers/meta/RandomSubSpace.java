@@ -16,7 +16,7 @@
 
 /*
  *    RandomSubSpace.java
- *    Copyright (C) 2006 University of Waikato
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -124,7 +124,7 @@ import java.util.Collections;
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Peter Reutemann (fracpete@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RandomSubSpace
   extends RandomizableIteratedSingleClassifierEnhancer 

@@ -16,7 +16,7 @@
 
 /*
  * ComponentHelper.java
- * Copyright (C) 2005 FracPete
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import javax.swing.JOptionPane;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 
 public class ComponentHelper {

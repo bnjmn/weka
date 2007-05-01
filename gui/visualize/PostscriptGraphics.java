@@ -16,7 +16,7 @@
 
 /*
  *    PostscriptGraphics.java
- *    Copyright (C) 2003 Dale Fletcher
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class PostscriptGraphics extends Graphics2D {

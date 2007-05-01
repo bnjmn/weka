@@ -16,7 +16,7 @@
 
 /*
  * ArffTableCellRenderer.java
- * Copyright (C) 2005 FracPete
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 
 public class ArffTableCellRenderer 

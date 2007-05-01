@@ -16,7 +16,7 @@
 
 /*
  *    GeneratorPropertyIteratorPanel.java
- *    Copyright (C) 1999 Len Trigg, Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -55,7 +55,7 @@ import javax.swing.JPanel;
  * resultgenerator property for an experiment to iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class GeneratorPropertyIteratorPanel
   extends JPanel

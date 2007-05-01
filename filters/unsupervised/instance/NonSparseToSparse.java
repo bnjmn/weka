@@ -16,7 +16,7 @@
 
 /*
  *    NonSparseToSparse.java
- *    Copyright (C) 2000 Eibe Frank
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NonSparseToSparse 
   extends Filter

@@ -16,7 +16,7 @@
 
 /*
  *    Puk.java
- *    Copyright (C) 2007 University of Waikato
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Puk 
   extends CachedKernel

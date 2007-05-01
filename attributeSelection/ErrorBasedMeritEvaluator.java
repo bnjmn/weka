@@ -16,7 +16,7 @@
 
 /*
  *    ErrorBasedMeritEvaluator.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ package weka.attributeSelection;
  * as the error of a learning scheme
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface ErrorBasedMeritEvaluator {
 

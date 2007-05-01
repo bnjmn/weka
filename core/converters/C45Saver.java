@@ -16,7 +16,7 @@
 
 /*
  *    C45Saver.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -59,7 +59,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see Saver
  */
 public class C45Saver 

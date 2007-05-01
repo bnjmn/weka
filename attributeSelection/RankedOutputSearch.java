@@ -16,7 +16,7 @@
 
 /*
  *    RankedOutputSearch.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ package weka.attributeSelection;
  * ranked list of attributes.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public interface RankedOutputSearch {
 

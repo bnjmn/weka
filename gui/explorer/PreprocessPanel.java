@@ -16,7 +16,7 @@
 
 /*
  *    PreprocessPanel.java
- *    Copyright (C) 2003 Richard Kirkby, Len Trigg
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -102,7 +102,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.70 $
+ * @version $Revision: 1.71 $
  */
 public class PreprocessPanel
   extends JPanel 

@@ -16,7 +16,7 @@
 
 /*
  *    LogisticBase.java
- *    Copyright (C) 2003 Niels Landwehr
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -47,7 +47,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LogisticBase 
     extends Classifier 

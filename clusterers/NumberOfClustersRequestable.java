@@ -15,7 +15,7 @@
 
 /*
  *    NumberOfClustersRequestable.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ package weka.clusterers;
  * clusters
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface NumberOfClustersRequestable {
   

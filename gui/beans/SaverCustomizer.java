@@ -16,7 +16,7 @@
 
 /*
  *    SaverCustomizer.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -57,7 +57,7 @@ import javax.swing.filechooser.FileFilter;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class SaverCustomizer
   extends JPanel

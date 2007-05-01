@@ -16,7 +16,7 @@
 
 /*
  *    LWL.java
- *    Copyright (C) 1999, 2002, 2003 Len Trigg, Eibe Frank, Ashraf M. Kibriya
+ *    Copyright (C) 1999, 2002, 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -114,7 +114,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
