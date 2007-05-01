@@ -16,7 +16,7 @@
 
 /*
  *    InstanceLoader.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -42,7 +42,7 @@ import javax.swing.JTextField;
  * A bean that produces a stream of instances from a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InstanceLoader
   extends JPanel 

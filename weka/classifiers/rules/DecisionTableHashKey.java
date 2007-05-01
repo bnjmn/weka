@@ -16,7 +16,7 @@
 
 /*
  *    DecisionTableHashKey.java
- *    Copyright (C) 2007 University of Waikato
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.classifiers.rules;

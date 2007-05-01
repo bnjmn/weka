@@ -16,7 +16,7 @@
 
 /*
  *    AddNoise.java
- *    Copyright (C) 2000 Gabi Schmidberger.
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.attribute;
@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class AddNoise 
   extends Filter 

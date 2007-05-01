@@ -16,7 +16,7 @@
 
 /*
  *    ModelPerformanceChart.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -44,7 +44,7 @@ import javax.swing.JPanel;
  * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ModelPerformanceChart
   extends JPanel

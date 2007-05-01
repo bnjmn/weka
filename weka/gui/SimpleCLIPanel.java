@@ -16,7 +16,7 @@
 
 /*
  *    SimpleCLIPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -65,7 +65,7 @@ import javax.swing.JTextField;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SimpleCLIPanel
   extends JPanel
@@ -108,7 +108,7 @@ public class SimpleCLIPanel
    * A class that sends all lines from a reader to a TextArea component
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   class ReaderToTextArea extends Thread {
 
@@ -155,7 +155,7 @@ public class SimpleCLIPanel
    * in a separate thread
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   class ClassRunner extends Thread {
 
@@ -244,7 +244,7 @@ public class SimpleCLIPanel
    * A class for commandline completion of classnames
    * 
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   public static class CommandlineCompletion {
     

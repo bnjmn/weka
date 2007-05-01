@@ -16,7 +16,7 @@
 
 /*
  *    LinearNN.java
- *    Copyright (C) 1999-2006 University of Waikato
+ *    Copyright (C) 1999-2006 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -40,7 +40,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class LinearNN
   extends NearestNeighbourSearch

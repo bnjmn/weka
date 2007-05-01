@@ -16,7 +16,7 @@
 
 /*
  *    ResultHistoryPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -61,7 +61,7 @@ import javax.swing.text.JTextComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class ResultHistoryPanel
   extends JPanel {

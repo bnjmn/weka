@@ -16,7 +16,7 @@
 
 /*
  *    RandomTree.java
- *    Copyright (C) 2001 Richard Kirkby, Eibe Frank
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -71,7 +71,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class RandomTree 
   extends Classifier 

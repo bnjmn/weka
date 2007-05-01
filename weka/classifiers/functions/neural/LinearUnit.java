@@ -16,7 +16,7 @@
 
 /*
  *    LinearUnit.java
- *    Copyright (C) 2001 Malcolm Ware
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions.neural;
@@ -26,7 +26,7 @@ package weka.classifiers.functions.neural;
  * neuralnode to perform all it's computations (as a Linear unit).
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LinearUnit implements NeuralMethod {
 

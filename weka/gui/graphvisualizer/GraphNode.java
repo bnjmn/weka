@@ -16,7 +16,7 @@
 
 /*
  *    GraphNode.java
- *    Copyright (C) 2003 Ashraf M. Kibriya
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ package weka.gui.graphvisualizer;
  * This class represents a node in the Graph.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.4 $ - 23 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 
 public class GraphNode extends Object implements GraphConstants {

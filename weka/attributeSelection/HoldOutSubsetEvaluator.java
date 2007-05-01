@@ -16,7 +16,7 @@
 
 /*
  *    HoldOutSubsetEvaluator.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import java.util.BitSet;
  * train the subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class HoldOutSubsetEvaluator extends SubsetEvaluator {
 

@@ -16,7 +16,7 @@
 
 /*
  *    StartUpListener.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Interface to something that can be notified of a successful startup
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface StartUpListener extends EventListener {
 

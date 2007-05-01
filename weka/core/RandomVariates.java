@@ -16,7 +16,7 @@
 
 /*
  *    RandomVariates.java
- *    Copyright (C) 2002 Xin Xu
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.Random;
  * Class implementing some simple random variates generator.
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public final class RandomVariates
     extends Random {

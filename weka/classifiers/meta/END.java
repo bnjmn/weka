@@ -16,7 +16,7 @@
 
 /*
  *    END.java
- *    Copyright (C) 2004-2005 University of Waikato
+ *    Copyright (C) 2004-2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -151,7 +151,7 @@ import java.util.Random;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class END 
   extends RandomizableIteratedSingleClassifierEnhancer

@@ -16,7 +16,7 @@
 
 /*
  *    SystemInfo.java
- *    Copyright (C) 2005 FracPete
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.core;
@@ -34,7 +34,7 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SystemInfo {
   /** for storing the information */

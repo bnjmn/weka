@@ -16,7 +16,7 @@
 
 /*
  *    SimpleLogistic.java
- *    Copyright (C) 2003 Niels Landwehr
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -115,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class SimpleLogistic 
   extends Classifier 

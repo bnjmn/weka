@@ -16,7 +16,7 @@
 
 /*
  *    Prediction.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.classifiers.evaluation;
  * actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public interface Prediction {
 

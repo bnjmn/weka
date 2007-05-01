@@ -16,7 +16,7 @@
 
 /*
  *    KnowledgeFlowApp.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -112,7 +112,7 @@ import javax.swing.filechooser.FileFilter;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.17 $
+ * @version  $Revision: 1.18 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -296,7 +296,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.17 $
+   * @version $Revision: 1.18 $
    * @since 1.0
    * @see PrintablePanel
    */

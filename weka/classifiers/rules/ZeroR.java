@@ -16,7 +16,7 @@
 
 /*
  *    ZeroR.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -49,7 +49,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ZeroR 
   extends Classifier 

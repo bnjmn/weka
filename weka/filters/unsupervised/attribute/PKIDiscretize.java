@@ -16,7 +16,7 @@
 
 /*
  *    PKIDiscretize.java
- *    Copyright (C) 2003 Richard Kirkby
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -81,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PKIDiscretize 
   extends Discretize

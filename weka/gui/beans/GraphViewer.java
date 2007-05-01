@@ -16,7 +16,7 @@
 
 /*
  *    GraphViewer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class GraphViewer 
   extends JPanel

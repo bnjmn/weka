@@ -16,7 +16,7 @@
 
 /*
  *    InstanceSavePanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import java.io.PrintWriter;
  * A bean that saves a stream of instances to a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InstanceSavePanel
   extends Panel

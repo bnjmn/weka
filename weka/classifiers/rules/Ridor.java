@@ -16,7 +16,7 @@
 
 /*
  *    Ridor.java
- *    Copyright (C) 2001 Xin Xu
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -118,7 +118,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $ 
+ * @version $Revision: 1.19 $ 
  */
 public class Ridor 
   extends Classifier

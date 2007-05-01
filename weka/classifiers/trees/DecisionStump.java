@@ -16,7 +16,7 @@
 
 /*
  *    DecisionStump.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -53,7 +53,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class DecisionStump 
   extends Classifier 

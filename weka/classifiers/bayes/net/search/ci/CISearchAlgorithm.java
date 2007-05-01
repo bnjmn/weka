@@ -16,7 +16,7 @@
 
 /*
  * CISearchAlgorithm.java
- * Copyright (C) 2004 Remco Bouckaert
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
 
@@ -48,7 +48,7 @@ import weka.core.Instances;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class CISearchAlgorithm 
 	extends LocalScoreSearchAlgorithm {

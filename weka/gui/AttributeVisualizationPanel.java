@@ -14,9 +14,9 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/**
+/*
  *    AttributeVisualizationPanel.java
- *    Copyright (C) 2003 Ashraf M. Kibriya
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -61,7 +61,7 @@ import javax.swing.JFrame;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class AttributeVisualizationPanel
   extends PrintablePanel {

@@ -16,7 +16,7 @@
 
 /*
  *    FileSourcedConverter.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.core.converters;
@@ -28,7 +28,7 @@ import java.io.IOException;
  * Interface to a loader/saver that loads/saves from a file source.
  *
  * @author Mark Hall
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public interface FileSourcedConverter {
 

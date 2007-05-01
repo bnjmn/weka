@@ -16,7 +16,7 @@
 
 /*
  *    RandomProjection.java
- *    Copyright (C) 2003 University of Waikato
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -102,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision: 1.9 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 

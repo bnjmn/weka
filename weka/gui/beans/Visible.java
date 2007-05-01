@@ -16,7 +16,7 @@
 
 /*
  *    Visible.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ package weka.gui.beans;
  * Interface to something that has a visible (via BeanVisual) reprentation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  */
 public interface Visible {

@@ -16,7 +16,7 @@
 
 /*
  *    Discretize.java
- *    Copyright (C) 1999 Eibe Frank,Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -107,7 +107,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class Discretize 
   extends Filter 

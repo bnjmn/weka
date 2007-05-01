@@ -16,7 +16,7 @@
 
 /*
  *    MetaBean.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,7 +50,7 @@ import javax.swing.JWindow;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MetaBean
   extends JPanel 

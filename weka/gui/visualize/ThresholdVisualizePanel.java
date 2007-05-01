@@ -16,7 +16,7 @@
 
 /*
  *    ThresholdVisualizePanel.java
- *    Copyright (C) 2003 Dale Fletcher
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -48,7 +48,7 @@ import javax.swing.border.TitledBorder;
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ThresholdVisualizePanel 
   extends VisualizePanel {

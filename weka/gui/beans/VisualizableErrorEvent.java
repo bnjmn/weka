@@ -16,7 +16,7 @@
 
 /*
  *    VisualizableErrorEvent.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.util.EventObject;
  * that can be visualized in the DataVisualizer
  *
  * @author Mark Hall
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see EventObject
  */
 public class VisualizableErrorEvent

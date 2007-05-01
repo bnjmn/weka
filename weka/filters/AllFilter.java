@@ -16,7 +16,7 @@
 
 /*
  *    AllFilter.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import weka.core.Capabilities.Capability;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AllFilter extends Filter {
 

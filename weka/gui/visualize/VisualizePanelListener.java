@@ -16,7 +16,7 @@
 
 /*
  *    VisualizePanelListener.java
- *    Copyright (C) 1999 Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.gui.visualize;
  * Interface implemented by a class that is interested in receiving
  * submited shapes from a visualize panel.
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface VisualizePanelListener {
 

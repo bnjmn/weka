@@ -16,7 +16,7 @@
 
 /*
  *    PlaceNode1.java
- *    Copyright (C) 1999 Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ package weka.gui.treevisualizer;
  * This is simple to calculate but is not visually nice for most trees.<p>
  *
  * @author Malcolm F Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PlaceNode1 implements NodePlace {
   /** An array containing the spacing value for each level */

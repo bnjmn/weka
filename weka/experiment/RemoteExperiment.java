@@ -16,7 +16,7 @@
 
 /*
  *    RemoteExperiment.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -181,7 +181,7 @@ import javax.swing.DefaultListModel;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class RemoteExperiment 
   extends Experiment {

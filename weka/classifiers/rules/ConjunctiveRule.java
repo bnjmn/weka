@@ -16,7 +16,7 @@
 
 /*
  *    ConjunctiveRule.java
- *    Copyright (C) 2001 Xin Xu
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -88,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  */
 public class ConjunctiveRule 
   extends Classifier 

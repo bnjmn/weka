@@ -16,7 +16,7 @@
 
 /*
  *    RunPanel.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -53,7 +53,7 @@ import javax.swing.JPanel;
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class RunPanel
   extends JPanel

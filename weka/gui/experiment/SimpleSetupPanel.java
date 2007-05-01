@@ -16,7 +16,7 @@
 
 /*
  *    SimpleSetupPanel.java
- *    Copyright (C) 2002 Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -89,7 +89,7 @@ import javax.swing.filechooser.FileFilter;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class SimpleSetupPanel
   extends JPanel {

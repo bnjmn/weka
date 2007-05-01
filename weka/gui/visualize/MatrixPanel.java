@@ -16,7 +16,7 @@
 
 /*
  *    MatrixPanel.java
- *    Copyright (C) 2002 Ashraf M. Kibriya
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -75,7 +75,7 @@ import javax.swing.event.ChangeListener;
  * high). Datapoints missing a class value are displayed in black.
  * 
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class MatrixPanel
   extends JPanel{

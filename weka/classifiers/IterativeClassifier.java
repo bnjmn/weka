@@ -16,7 +16,7 @@
 
 /*
  *    IterativeClassifier.java
- *    Copyright (C) 2001  Gabi Schmidberger, Bernhard Pfahringer
+ *    Copyright (C) 2001  University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import weka.core.*;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public interface IterativeClassifier {

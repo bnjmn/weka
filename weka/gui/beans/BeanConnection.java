@@ -16,7 +16,7 @@
 
 /*
  *    BeanConnection.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ import javax.swing.SwingConstants;
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class BeanConnection
   implements Serializable {

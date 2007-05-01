@@ -16,7 +16,7 @@
 
 /*
  *    UnsuppotedAttributeTypeException.java
- *    Copyright (C) 2002 Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.core;
  * attribute types it has been passed.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class UnsupportedAttributeTypeException
   extends WekaException {

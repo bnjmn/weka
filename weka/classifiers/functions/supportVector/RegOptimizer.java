@@ -16,7 +16,7 @@
 
 /*
  *    RegOptimizer.java
- *    Copyright (C) 2006 Remco Bouckaert
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -51,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RegOptimizer 
   implements OptionHandler, Serializable {

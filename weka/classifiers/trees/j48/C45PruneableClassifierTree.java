@@ -16,7 +16,7 @@
 
 /*
  *    C45PruneableClassifierTree.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import weka.core.Capabilities.Capability;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 
 public class C45PruneableClassifierTree 

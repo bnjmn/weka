@@ -16,7 +16,7 @@
 
 /*
  *    TwoWayNumericSplit.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * either 'is < some_value' or 'is >= some_value'.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TwoWayNumericSplit
   extends Splitter {

@@ -16,7 +16,7 @@
 
 /*
  *    ClassifierSplitModel.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import java.io.Serializable;
  * recursively to split the data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public abstract class ClassifierSplitModel
   implements Cloneable, Serializable {

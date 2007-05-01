@@ -17,7 +17,7 @@
 
 /*
  *    RBFNetwork.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.classifiers.functions;
@@ -68,7 +68,7 @@ import java.util.Vector;
  *
  * @author Mark Hall
  * @author Eibe Frank
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class RBFNetwork extends Classifier implements OptionHandler {
 

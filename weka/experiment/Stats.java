@@ -16,7 +16,7 @@
 
 /*
  *    Stats.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import java.io.Serializable;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Stats
   implements Serializable {

@@ -16,7 +16,7 @@
 
 /*
  *    InstanceTable.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import javax.swing.table.TableModel;
  * A bean that takes a stream of instances and displays in a table.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class InstanceTable
   extends JPanel

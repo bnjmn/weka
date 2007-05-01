@@ -16,7 +16,7 @@
 
 /*
  *    DataVisualizer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,

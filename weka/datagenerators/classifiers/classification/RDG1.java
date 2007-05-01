@@ -16,7 +16,7 @@
 
 /*
  * RDG1.java
- * Copyright (C) 2000 Gabi Schmidberger.
+ * Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -120,7 +120,7 @@ import java.util.Vector;
  * </pre>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class RDG1 
   extends ClassificationGenerator {

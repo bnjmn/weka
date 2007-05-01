@@ -16,7 +16,7 @@
 
 /*
  *    TextViewerBeanInfo.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the text viewer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class TextViewerBeanInfo extends SimpleBeanInfo {
   

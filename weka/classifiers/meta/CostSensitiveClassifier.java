@@ -16,7 +16,7 @@
 
 /*
  *    CostSensitiveClassifier.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -98,7 +98,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class CostSensitiveClassifier 
   extends RandomizableSingleClassifierEnhancer

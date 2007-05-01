@@ -16,7 +16,7 @@
 
 /*
  *    RandomCommittee.java
- *    Copyright (C) 2003 Eibe Frank
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -80,7 +80,7 @@ import java.util.Random;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RandomCommittee 
   extends RandomizableIteratedSingleClassifierEnhancer

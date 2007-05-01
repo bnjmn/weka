@@ -16,8 +16,7 @@
 
 /*
  *    SVMAttributeEval.java
- *    Copyright (C) 2002 Eibe Frank
- *    Mod by Kieran Holland
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -117,7 +116,8 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @author Kieran Holland
+ * @version $Revision: 1.26 $
  */
 public class SVMAttributeEval 
   extends AttributeEvaluator

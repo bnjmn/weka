@@ -16,7 +16,7 @@
 
 /*
  *    AbstractDataSourceBeanInfo.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import java.beans.*;
  * AbstractDataSource might want to extend this class
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see SimpleBeanInfo
  */

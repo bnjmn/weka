@@ -16,7 +16,7 @@
 
 /*
  *    ListSelectorDialog.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -45,7 +45,7 @@ import javax.swing.JScrollPane;
  * make a selection from, or cancel the selection.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ListSelectorDialog
   extends JDialog {

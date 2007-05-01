@@ -16,7 +16,7 @@
 
 /*
  *    SparseInstance.java
- *    Copyright (C) 2000 Eibe Frank
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class SparseInstance
   extends Instance {

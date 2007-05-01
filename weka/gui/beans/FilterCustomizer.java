@@ -16,7 +16,7 @@
 
 /*
  *    FilterCustomizer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import javax.swing.JPanel;
  * GUI customizer for the filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class FilterCustomizer
   extends JPanel

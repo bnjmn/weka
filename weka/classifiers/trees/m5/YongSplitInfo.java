@@ -16,7 +16,7 @@
 
 /*
  *    YongSplitInfo.java
- *    Copyright (C) 1999 Yong Wang
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import java.io.Serializable;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public final class YongSplitInfo
   implements Cloneable, Serializable, SplitEvaluate {

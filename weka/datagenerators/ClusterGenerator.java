@@ -16,7 +16,7 @@
 
 /*
  * ClusterGenerator.java
- * Copyright (C) 2000 Gabi Schmidberger
+ * Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -49,7 +49,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class ClusterGenerator 
   extends DataGenerator {

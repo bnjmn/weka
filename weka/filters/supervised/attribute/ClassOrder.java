@@ -16,7 +16,7 @@
 
 /*
  *    ClassOrder.java
- *    Copyright (C) 2002 Xin Xu
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.filters.supervised.attribute;
@@ -60,7 +60,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ClassOrder 
   extends Filter 

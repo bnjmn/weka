@@ -16,7 +16,7 @@
 
 /*
  *    ScatterPlotMatrix.java
- *    Copyright (C) 2003 Mark Hall
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import java.awt.BorderLayout;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ScatterPlotMatrix
   extends DataVisualizer {

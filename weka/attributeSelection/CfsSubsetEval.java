@@ -16,7 +16,7 @@
 
 /*
  *    CfsSubsetEval.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -81,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  * @see Discretize
  */
 public class CfsSubsetEval

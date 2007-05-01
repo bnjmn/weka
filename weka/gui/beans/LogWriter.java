@@ -16,7 +16,7 @@
 
 /*
  *    LogWriter.java
- *    Copyright (C) 2005 University of Waikato, Hamilton NZ
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ package weka.gui.beans;
  * that provide detailed processing instructions.
  * 
  * @author Carsten Pohle (cp AT cpohle de)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface LogWriter {
   /**

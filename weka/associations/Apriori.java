@@ -16,7 +16,7 @@
 
 /*
  *    Apriori.java
- *    Copyright (C) 1999 Eibe Frank,Mark Hall, Stefan Mutter
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -125,7 +125,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class Apriori 
   extends Associator 

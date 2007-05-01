@@ -16,7 +16,7 @@
 
 /*
  *    Filter.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -70,7 +70,7 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision: 1.37 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {

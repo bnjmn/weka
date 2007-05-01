@@ -16,7 +16,7 @@
 
 /*
  *    InstanceProducer.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import weka.core.Instances;
  * An interface for objects capable of producing streams of instances.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface InstanceProducer {
   

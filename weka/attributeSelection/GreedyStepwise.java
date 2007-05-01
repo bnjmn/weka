@@ -16,7 +16,7 @@
 
 /*
  *    GreedyStepwise.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class GreedyStepwise 
   extends ASSearch 

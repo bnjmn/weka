@@ -16,7 +16,7 @@
 
 /*
  *    ClassifierPerformanceEvaluator.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -38,7 +38,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator

@@ -16,7 +16,7 @@
 
 /*
  *    NeuralMethod.java
- *    Copyright (C) 2001 Malcolm Ware
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * neuralnode to perform all it's computations.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface NeuralMethod extends Serializable {
   

@@ -16,7 +16,7 @@
 
 /*
  *    CostMatrixEditor.java
- *    Copyright (C) 2002 Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -63,7 +63,7 @@ import javax.swing.table.AbstractTableModel;
  * load cost matrices from files.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class CostMatrixEditor 
   implements PropertyEditor {

@@ -16,7 +16,7 @@
 
 /*
  *    JRip.java
- *    Copyright (C) 2001 Xin Xu, Eibe Frank
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.rules;
@@ -130,7 +130,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class JRip 
   extends Classifier 

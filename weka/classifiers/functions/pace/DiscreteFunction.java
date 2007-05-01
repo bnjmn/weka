@@ -15,7 +15,7 @@
 
 /*
  *    ChisqMixture.java
- *    Copyright (C) 2002 Yong Wang
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import weka.core.matrix.IntVector;
  * set of points. <p>
  * 
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $ */
+ * @version $Revision: 1.3 $ */
 
 public class  DiscreteFunction {
     

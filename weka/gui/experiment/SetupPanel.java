@@ -16,7 +16,7 @@
 
 /*
  *    SetupPanel.java
- *    Copyright (C) 1999 Len Trigg, Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -80,7 +80,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class SetupPanel
   extends JPanel {

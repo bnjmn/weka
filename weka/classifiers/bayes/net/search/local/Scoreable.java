@@ -1,4 +1,3 @@
-
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +16,7 @@
 
 /*
  * Scoreable.java
- * Copyright (C) 2001 Remco Bouckaert
+ * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.search.local;
@@ -26,7 +25,7 @@ package weka.classifiers.bayes.net.search.local;
  * Interface for allowing to score a classifier
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface Scoreable {
 

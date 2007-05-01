@@ -16,7 +16,7 @@
 
 /*
  *    PropertySelectorDialog.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -53,7 +53,7 @@ import javax.swing.tree.TreeSelectionModel;
  * properties that any of it's property values may have.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PropertySelectorDialog
   extends JDialog {

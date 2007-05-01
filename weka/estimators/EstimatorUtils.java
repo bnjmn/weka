@@ -16,7 +16,7 @@
 
 /*
  *    EstimatorUtils.java
- *    Copyright (C) 2004 Gabi Schmidberger
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import weka.core.*;
  * Contains static utility functions for Estimators.<p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class EstimatorUtils {
   

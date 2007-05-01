@@ -16,7 +16,7 @@
 
 /*
  *    RandomSearch.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class RandomSearch 
   extends ASSearch 

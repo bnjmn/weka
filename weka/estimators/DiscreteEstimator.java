@@ -16,7 +16,7 @@
 
 /*
  *    DiscreteEstimator.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import weka.core.Utils;
  * Simple symbolic probability estimator based on symbol counts.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DiscreteEstimator extends Estimator implements IncrementalEstimator {
   

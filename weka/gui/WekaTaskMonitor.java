@@ -16,7 +16,7 @@
 
 /*
  *    WekaTaskMonitor.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -38,7 +38,7 @@ import javax.swing.SwingConstants;
  * simple bird animation while their are active tasks
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class WekaTaskMonitor
   extends JPanel

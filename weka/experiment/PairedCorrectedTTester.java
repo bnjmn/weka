@@ -16,7 +16,7 @@
 
 /*
  *    PairedCorrectedTTester.java
- *    Copyright (C) 2003 Richard Kirkby
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -107,7 +107,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PairedCorrectedTTester 
   extends PairedTTester

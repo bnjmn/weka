@@ -16,7 +16,7 @@
 
 /*
  *    EuclideanDistance.java
- *    Copyright (C) 1999-2005 University of Waikato
+ *    Copyright (C) 1999-2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class EuclideanDistance
   implements DistanceFunction, Cloneable, Serializable {

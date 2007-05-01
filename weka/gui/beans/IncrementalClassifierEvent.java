@@ -16,7 +16,7 @@
 
 /*
  *    IncrementalClassifierEvent.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import java.util.EventObject;
  * Class encapsulating an incrementally built classifier and current instance
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @since 1.0
  * @see EventObject
  */

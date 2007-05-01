@@ -16,7 +16,7 @@
 
 /*
  * PriorEstimation.java
- * Copyright (C) 2004 Stefan Mutter
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -40,7 +40,7 @@ import java.util.Random;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ */
+ * @version $Revision: 1.6 $ */
 
  public class PriorEstimation implements Serializable{
     

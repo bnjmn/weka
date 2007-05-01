@@ -16,8 +16,7 @@
 
 /*
  *    NaiveBayesMultinomialUpdateable.java
- *    Copyright (C) 2003 Andrew Golightly
- *    Copyright (C) Bernhard Pfahringer
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *    Copyright (C) 2007 Jiang Su (incremental version)
  */
 
@@ -69,7 +68,7 @@ import weka.core.Utils;
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Jiang Su
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NaiveBayesMultinomialUpdateable
   extends NaiveBayesMultinomial

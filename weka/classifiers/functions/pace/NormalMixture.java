@@ -15,7 +15,7 @@
 
 /*
  *    NormalMixture.java
- *    Copyright (C) 2002 Yong Wang
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -60,7 +60,7 @@ import weka.core.matrix.Maths;
  <!-- technical-bibtex-end -->
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class  NormalMixture 
   extends MixtureDistribution {

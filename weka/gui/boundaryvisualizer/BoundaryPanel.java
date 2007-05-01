@@ -16,7 +16,7 @@
 
 /*
  *   BoundaryPanel.java
- *   Copyright (C) 2002 Mark Hall
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -61,7 +61,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @since 1.0
  * @see JPanel
  */

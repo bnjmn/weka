@@ -16,7 +16,7 @@
 
 /*
  *   RemoteResult.java
- *   Copyright (C) 2003 Mark Hall
+ *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * visualization.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see Serializable
  */

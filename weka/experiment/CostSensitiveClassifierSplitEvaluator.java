@@ -16,7 +16,7 @@
 
 /*
  *    CostSensitiveClassifierSplitEvaluator.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -87,7 +87,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 

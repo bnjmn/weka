@@ -16,7 +16,7 @@
 
 /*
  *    ClustererPerformanceEvaluator.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClustererPerformanceEvaluator
   extends AbstractEvaluator

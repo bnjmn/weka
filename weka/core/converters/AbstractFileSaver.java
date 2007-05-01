@@ -16,7 +16,7 @@
 
 /*
  *    AbstractFileSaver.java
- *    Copyright (C) 2004 Richard Kirkby, Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -49,7 +49,7 @@ import java.util.Enumeration;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractFileSaver
   extends AbstractSaver

@@ -16,7 +16,7 @@
 
 /*
  *    CustomizerCloseRequester.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import javax.swing.JFrame;
  * Frame whenever it suits them.
  *
  * @author Mark Hall
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface CustomizerCloseRequester {
 

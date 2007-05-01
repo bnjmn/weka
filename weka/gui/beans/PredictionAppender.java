@@ -16,7 +16,7 @@
 
 /*
  *    PredictionAppender.java
- *    Copyright (C) 2003 Mark Hall
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class PredictionAppender
   extends JPanel

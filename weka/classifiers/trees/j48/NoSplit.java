@@ -16,7 +16,7 @@
 
 /*
  *    NoSplit.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Class implementing a "no-split"-split.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public final class NoSplit
   extends ClassifierSplitModel{

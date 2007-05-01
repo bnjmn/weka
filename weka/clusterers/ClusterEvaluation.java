@@ -16,7 +16,7 @@
 
 /*
  *    ClusterEvaluation.java
- *    Copyright (C) 1999 Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.38 $
+ * @version  $Revision: 1.39 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 

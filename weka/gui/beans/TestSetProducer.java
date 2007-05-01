@@ -16,7 +16,7 @@
 
 /*
  *    TestSetProducer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Interface to something that can produce test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface TestSetProducer {
 

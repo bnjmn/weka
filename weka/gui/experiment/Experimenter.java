@@ -16,7 +16,7 @@
 
 /*
  *    Experimenter.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import javax.swing.JTabbedPane;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Experimenter
   extends JPanel {

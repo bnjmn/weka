@@ -16,7 +16,7 @@
 
 /*
  *    Estimator.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -89,7 +89,7 @@ import weka.core.Utils;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class Estimator 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler {

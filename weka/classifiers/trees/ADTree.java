@@ -16,7 +16,7 @@
 
 /*
  *    ADTree.java
- *    Copyright (C) 2001 Richard Kirkby, Bernhard Pfahringer
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -96,7 +96,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ADTree
   extends Classifier 

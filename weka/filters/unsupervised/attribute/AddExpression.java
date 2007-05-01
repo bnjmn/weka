@@ -16,7 +16,7 @@
 
 /*
  *    AddExpression.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -66,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class AddExpression 
   extends Filter 

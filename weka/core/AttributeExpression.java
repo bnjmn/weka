@@ -16,7 +16,7 @@
 
 /*
  *    AttributeExpression.java
- *    Copyright (C) 2006 Mark Hall
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 

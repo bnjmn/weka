@@ -15,7 +15,7 @@
 
 /*
  *    PaceRegression.java
- *    Copyright (C) 2002 Yong Wang
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
@@ -119,7 +119,7 @@ import java.util.Vector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PaceRegression 
   extends Classifier 

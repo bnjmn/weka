@@ -16,7 +16,7 @@
 
 /*
  *    Instance.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class Instance
   implements Copyable, Serializable {

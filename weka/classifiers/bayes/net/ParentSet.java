@@ -1,4 +1,3 @@
-
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +16,7 @@
 
 /*
  * ParentSet.java
- * Copyright (C) 2001 Remco Bouckaert
+ * Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net;
@@ -31,7 +30,7 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class ParentSet 
   implements Serializable {

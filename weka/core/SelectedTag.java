@@ -16,7 +16,7 @@
 
 /*
  *    SelectedTag.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.util.HashSet;
  * associating names with the alternative behaviours.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a> 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class SelectedTag {
   

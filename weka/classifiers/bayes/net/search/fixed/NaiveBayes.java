@@ -16,7 +16,7 @@
 
 /*
  * NaiveBayes.java
- * Copyright (C) 2004 Remco Bouckaert
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
 package weka.classifiers.bayes.net.search.fixed;
@@ -35,7 +35,7 @@ import weka.core.Instances;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class NaiveBayes 
 	extends SearchAlgorithm {

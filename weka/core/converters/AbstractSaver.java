@@ -16,7 +16,7 @@
 
 /*
  *    AbstractSaver.java
- *    Copyright (C) 2004 Richard Kirkby, Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import java.io.OutputStream;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractSaver
   implements Saver, CapabilitiesHandler {

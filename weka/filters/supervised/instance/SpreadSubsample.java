@@ -16,7 +16,7 @@
 
 /*
  *    SpreadSubsample.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -69,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  **/
 public class SpreadSubsample 
   extends Filter 

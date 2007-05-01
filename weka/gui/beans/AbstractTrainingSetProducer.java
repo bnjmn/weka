@@ -16,7 +16,7 @@
 
 /*
  *    AbstractTrainingSetProducer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @since 1.0
  * @see TrainingSetProducer
  */

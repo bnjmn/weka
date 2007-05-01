@@ -16,7 +16,7 @@
 
 /*
  *    AprioriItemSet.java
- *    Copyright (C) 2004 Eibe Frank, Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import java.util.Hashtable;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AprioriItemSet 
   extends ItemSet 

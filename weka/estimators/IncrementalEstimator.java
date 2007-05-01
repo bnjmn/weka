@@ -16,7 +16,7 @@
 
 /*
  *    IncrementalEstimator.java
- *    Copyright (C) 2004 University of Waikato
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.estimators;
  * Interface for an incremental probability estimators.<p>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface IncrementalEstimator {
 

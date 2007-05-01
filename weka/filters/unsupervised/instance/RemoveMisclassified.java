@@ -16,7 +16,7 @@
 
 /*
  *    RemoveMisclassified.java
- *    Copyright (C) 2002 Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -74,7 +74,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RemoveMisclassified 
   extends Filter 

@@ -16,7 +16,7 @@
 
 /*
  *    Associator.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon

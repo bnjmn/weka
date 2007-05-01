@@ -16,7 +16,7 @@
 
 /*
  *    DatabaseConnectionDialog.java
- *    Copyright (C) 2004 Dale Fletcher
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -44,7 +44,7 @@ import javax.swing.SwingConstants;
  * A dialog to enter URL, username and password for a database connection.
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class DatabaseConnectionDialog
   extends JDialog {

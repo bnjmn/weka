@@ -16,7 +16,7 @@
 
 /*
  *   BoundaryPanelDistrubuted.java
- *   Copyright (C) 2003 Mark Hall
+ *   Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ import java.util.Vector;
  * processed row by row using the available remote computers.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see BoundaryPanel
  */

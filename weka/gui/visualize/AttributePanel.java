@@ -16,7 +16,7 @@
 
 /*
  *    AttributePanel.java
- *    Copyright (C) 1999 Malcolm Ware, Mark Hall
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ import javax.swing.JScrollPane;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AttributePanel
   extends JScrollPane {

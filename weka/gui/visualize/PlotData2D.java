@@ -16,7 +16,7 @@
 
 /*
  *    PlotData2D.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class PlotData2D {
 

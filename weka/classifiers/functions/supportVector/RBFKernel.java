@@ -16,7 +16,7 @@
 
 /*
  *    RBFKernel.java
- *    Copyright (C) 1999 Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -63,7 +63,7 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RBFKernel 
   extends CachedKernel {

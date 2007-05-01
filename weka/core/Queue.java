@@ -16,7 +16,7 @@
 
 /*
  *    Queue.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  *    Modified March-May 2004 by Mark Utting to add JML specs
  *    (this was done as the example solution of an assignment for a
@@ -33,7 +33,7 @@ import java.io.Serializable;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Queue
   extends Object

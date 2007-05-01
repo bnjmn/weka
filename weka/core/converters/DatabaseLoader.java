@@ -16,7 +16,7 @@
 
 /*
  *    DatabaseLoader.java
- *    Copyright (C) 2004 Stefan Mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see Loader
  */
 public class DatabaseLoader 

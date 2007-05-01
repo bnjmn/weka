@@ -16,7 +16,7 @@
 
 /*
  *    OrdinalClassClassifier.java
- *    Copyright (C) 2001 Mark Hall
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 

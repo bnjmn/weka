@@ -16,7 +16,7 @@
 
 /*
  *    GUIChooser.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -87,7 +87,7 @@ import javax.swing.SwingConstants;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.31 $
+ * @version $Revision: 1.32 $
  */
 public class GUIChooser
   extends JFrame {

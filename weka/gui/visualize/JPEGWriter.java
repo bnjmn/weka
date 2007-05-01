@@ -16,7 +16,7 @@
 
  /*
   *    JPEGWriter.java
-  *    Copyright (C) 2005 Fracpete
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
   *
   */
 
@@ -41,7 +41,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  * Scaling is by default disabled, since we always take a screenshot.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class JPEGWriter
   extends JComponentWriter {

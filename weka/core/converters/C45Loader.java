@@ -16,7 +16,7 @@
 
 /*
  *    C45Loader.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -42,7 +42,7 @@ import java.io.StreamTokenizer;
  <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class C45Loader 

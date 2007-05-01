@@ -16,7 +16,7 @@
 
 /*
  *    AlgVector.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import java.util.Random;
  * of floating-point values.
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class AlgVector 
   implements Cloneable, Serializable {

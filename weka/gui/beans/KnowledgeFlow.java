@@ -16,7 +16,7 @@
 
 /*
  *    KnowledgeFlow.java
- *    Copyright (C) 2005 Mark Hall
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -26,7 +26,7 @@ package weka.gui.beans;
  * Startup class for the KnowledgeFlow. Displays a splash screen.
  *
  * @author Mark Hall
- * @version  $Revision: 1.28 $
+ * @version  $Revision: 1.29 $
  */
 public class KnowledgeFlow {
 

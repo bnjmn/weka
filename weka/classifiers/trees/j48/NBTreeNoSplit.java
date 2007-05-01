@@ -16,7 +16,7 @@
 
 /*
  *    NBTreeNoSplit.java
- *    Copyright (C) 2004 Mark Hall
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import java.util.Random;
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public final class NBTreeNoSplit
   extends ClassifierSplitModel {

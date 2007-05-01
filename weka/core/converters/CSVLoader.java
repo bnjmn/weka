@@ -16,7 +16,7 @@
 
 /*
  *    CSVLoader.java
- *    Copyright (C) 2000 Mark Hall
+ *    Copyright (C) 2000 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -43,7 +43,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see Loader
  */
 public class CSVLoader 

@@ -16,7 +16,7 @@
 
 /*
  *    GraphVisualizer.java
- *    Copyright (C) 2003 Ashraf M. Kibriya
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.gui.graphvisualizer;
@@ -93,7 +93,7 @@ import javax.swing.table.AbstractTableModel;
  * over nodes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class GraphVisualizer
   extends JPanel

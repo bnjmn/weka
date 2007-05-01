@@ -16,7 +16,7 @@
 
 /*
  *    CrossValidationFoldMaker.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +34,7 @@ import java.util.Vector;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer

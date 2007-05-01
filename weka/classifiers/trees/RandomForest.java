@@ -16,7 +16,7 @@
 
 /*
  *    RandomForest.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -91,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RandomForest 
   extends Classifier 

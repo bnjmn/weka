@@ -16,7 +16,7 @@
 
 /*
  *    AveragingResultProducer.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -116,7 +116,7 @@ import java.util.Vector;
  * All options after -- will be passed to the result producer.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AveragingResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,

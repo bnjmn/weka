@@ -16,7 +16,7 @@
 
 /*
  *    PairedStats.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import weka.core.Statistics;
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PairedStats {
   

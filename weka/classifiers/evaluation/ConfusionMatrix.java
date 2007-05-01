@@ -16,7 +16,7 @@
 
 /*
  *    NominalPrediction.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import weka.core.Utils;
  * of predictions for each actual value / predicted value combination.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ConfusionMatrix extends Matrix {
 

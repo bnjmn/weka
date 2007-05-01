@@ -16,7 +16,7 @@
 
 /*
  *    BatchClustererEvent.java
- *    Copyright (C) 2004 Stefan mutter
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -31,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @since 1.0
  * @see EventObject
  */

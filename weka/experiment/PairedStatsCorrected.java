@@ -16,7 +16,7 @@
 
 /*
  *    PairedStatsCorrected.java
- *    Copyright (C) 2003 Richard Kirkby
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import weka.core.Statistics;
  * Machine Learning, 2001.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class PairedStatsCorrected extends PairedStats {
 

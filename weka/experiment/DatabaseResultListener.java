@@ -16,7 +16,7 @@
 
 /*
  *    DatabaseResultListener.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import java.sql.ResultSet;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class DatabaseResultListener 
   extends DatabaseUtils

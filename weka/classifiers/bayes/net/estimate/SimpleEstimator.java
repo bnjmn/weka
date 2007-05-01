@@ -16,7 +16,7 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2004 Remco Bouckaert
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  * 
  */
  
@@ -46,7 +46,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SimpleEstimator 
     extends BayesNetEstimator {

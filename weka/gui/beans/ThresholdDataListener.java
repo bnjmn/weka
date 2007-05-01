@@ -16,7 +16,7 @@
 
 /*
  *    ThresholdDataListener.java
- *    Copyright (C) 2003 Mark Hall
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.util.EventListener;
  * Interface to something that can accept ThresholdDataEvents
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @since 1.0
  * @see EventListener
  */

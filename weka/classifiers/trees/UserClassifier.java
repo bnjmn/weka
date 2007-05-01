@@ -16,7 +16,7 @@
 
 /*
  *    UserClassifier.java
- *    Copyright (C) 1999 Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -96,7 +96,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class UserClassifier 
   extends Classifier 

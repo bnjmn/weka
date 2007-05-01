@@ -16,7 +16,7 @@
 
 /*
  *    ProtectedProperties.java
- *    Copyright (C) 2001 Richard Kirkby
+ *    Copyright (C) 2001 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -32,7 +32,7 @@ import java.util.Properties;
  * unable to be modified.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ProtectedProperties
   extends Properties {

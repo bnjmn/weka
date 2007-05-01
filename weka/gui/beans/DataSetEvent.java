@@ -16,7 +16,7 @@
 
 /*
  *    DataSetEvent.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import java.util.EventObject;
  * Event encapsulating a data set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see EventObject
  */
 public class DataSetEvent

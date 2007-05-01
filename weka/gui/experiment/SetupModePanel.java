@@ -16,7 +16,7 @@
 
 /*
  *    SetupModePanel.java
- *    Copyright (C) 2002 Richard Kirkby
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -39,7 +39,7 @@ import javax.swing.JRadioButton;
  * This panel switches between simple and advanced experiment setup panels.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SetupModePanel
   extends JPanel {

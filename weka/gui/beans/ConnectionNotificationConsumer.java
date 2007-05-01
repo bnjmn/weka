@@ -16,7 +16,7 @@
 
 /*
  *    ConnectionNotificationConsumer.java
- *    Copyright (C) 2005 University of Waikato, Hamilton NZ
+ *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui.beans;
@@ -29,7 +29,7 @@ package weka.gui.beans;
  * configuration information with preceding nodes in the processing chain.
  * 
  * @author Carsten Pohle (cp AT cpohle de)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface ConnectionNotificationConsumer {
   /**

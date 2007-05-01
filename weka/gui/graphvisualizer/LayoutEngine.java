@@ -14,13 +14,11 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
 /*
  *    LayoutEngine.java
- *    Copyright (C) 2003 Ashraf M. Kibriya
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
-
 
 package weka.gui.graphvisualizer;
 
@@ -35,7 +33,7 @@ import javax.swing.JProgressBar;
  * interface.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.5 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public interface LayoutEngine {
   /**

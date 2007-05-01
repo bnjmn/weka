@@ -17,7 +17,7 @@
 /*
  *    MathExpression.java
  *    Copyright (C) 2004 Prados Julien
- *    Copyright (C) 2002 Eibe Frank
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.attribute;
@@ -69,7 +69,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see MathematicalExpression
  */
 public class MathExpression 

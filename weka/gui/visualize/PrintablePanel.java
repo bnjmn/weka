@@ -16,7 +16,7 @@
 
  /*
   *    PrintablePanel.java
-  *    Copyright (C) 2005 Fracpete, Dale
+  *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
   *
   */
 
@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PrintablePanel
   extends JPanel

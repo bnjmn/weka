@@ -16,7 +16,7 @@
 
 /*
  *    RandomizableClassifier.java
- *    Copyright (C) 2004 Eibe Frank
+ *    Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,7 +34,7 @@ import java.util.Vector;
  * classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class RandomizableClassifier
   extends Classifier implements Randomizable {

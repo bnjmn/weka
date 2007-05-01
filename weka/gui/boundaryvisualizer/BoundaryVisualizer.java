@@ -16,7 +16,7 @@
 
 /*
  *   BoundaryVisualizer.java
- *   Copyright (C) 2002 Mark Hall
+ *   Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -91,7 +91,7 @@ import javax.swing.JTextField;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @since 1.0
  * @see JPanel 
  */
@@ -105,7 +105,7 @@ public class BoundaryVisualizer
    * Inner class to handle rendering the axis
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18 $
+   * @version $Revision: 1.19 $
    * @since 1.0
    * @see JPanel
    */

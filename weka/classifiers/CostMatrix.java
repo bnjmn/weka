@@ -16,7 +16,7 @@
 
 /*
  *    CostMatrix.java
- *    Copyright (C) 2006 University of Waikato
+ *    Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -46,7 +46,7 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class CostMatrix implements Serializable {
 

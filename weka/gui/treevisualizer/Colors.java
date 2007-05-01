@@ -16,7 +16,7 @@
 
 /*
  *    Colors.java
- *    Copyright (C) 1999 Malcolm Ware
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,7 +30,7 @@ import java.awt.*;
  * dotty standard and what color (in RGB) they represent
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class Colors {
   

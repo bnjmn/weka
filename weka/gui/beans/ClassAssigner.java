@@ -16,7 +16,7 @@
 
 /*
  *    ClassAssigner.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class ClassAssigner
   extends JPanel

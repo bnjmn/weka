@@ -16,7 +16,7 @@
 
 /*
  *    NominalPrediction.java
- *    Copyright (C) 2002 University of Waikato
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class NominalPrediction implements Prediction, Serializable {
 

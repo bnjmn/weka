@@ -16,7 +16,7 @@
 
 /*
  * RuleItem.java
- * Copyright (C) 2004 Stefan Mutter
+ * Copyright (C) 2004 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -33,7 +33,7 @@ import java.util.Hashtable;
  * These two measures allow to introduce a sort order for rules.
  *
  * @author Stefan Mutter
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RuleItem implements Comparable, Serializable{
       

@@ -16,7 +16,7 @@
 
 /*
  *    GraphConstants.java
- *    Copyright (C) 2003 Ashraf M. Kibriya
+ *    Copyright (C) 2003 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ package weka.gui.graphvisualizer;
  *
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.5 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public interface GraphConstants  {
   /** Types of Edges */

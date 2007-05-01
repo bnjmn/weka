@@ -16,7 +16,7 @@
 
 /*
  *    ClassifierCustomizer.java
- *    Copyright (C) 2002 Mark Hall
+ *    Copyright (C) 2002 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class ClassifierCustomizer
   extends JPanel

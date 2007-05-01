@@ -16,7 +16,7 @@
 
 /*
  *    FileEditor.java
- *    Copyright (C) 1999 Len Trigg
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -36,7 +36,7 @@ import javax.swing.JFileChooser;
  * A PropertyEditor for File objects that lets the user select a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class FileEditor extends PropertyEditorSupport {
 
