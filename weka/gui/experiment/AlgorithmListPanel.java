@@ -73,7 +73,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class AlgorithmListPanel
   extends JPanel
@@ -228,9 +228,9 @@ public class AlgorithmListPanel
 		    String[] options = Utils.splitOptions(str);
 		    String classname = options[0];
 		    options[0] = "";
-		    DefaultListModel model = (DefaultListModel) m_List.getModel();
 		    Object obj = Utils.forName(Object.class, classname, options);
-		    model.addElement(obj);
+		    m_AlgorithmListModel.addElement(obj);
+		    updateExperiment();
 		  }
 		  catch (Exception ex) {
 		    ex.printStackTrace();
@@ -280,9 +280,9 @@ public class AlgorithmListPanel
 		      String[] options = Utils.splitOptions(str);
 		      String classname = options[0];
 		      options[0] = "";
-		      DefaultListModel model = (DefaultListModel) m_List.getModel();
 		      Object obj = Utils.forName(Object.class, classname, options);
-		      model.setElementAt(obj, index);
+		      m_AlgorithmListModel.setElementAt(obj, index);
+		      updateExperiment();
 		    }
 		    catch (Exception ex) {
 		      ex.printStackTrace();
@@ -422,17 +422,25 @@ public class AlgorithmListPanel
    * @param newScheme	the new scheme to add
    */
   private void addNewAlgorithm(Classifier newScheme) {
-
     if (!m_Editing)
       m_AlgorithmListModel.addElement(newScheme);
     else
       m_AlgorithmListModel.setElementAt(newScheme, m_List.getSelectedIndex());
+    
+    updateExperiment();
+    
+    m_Editing = false;
+  }
+  
+  /**
+   * updates the classifiers in the experiment
+   */
+  private void updateExperiment() {
     Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
     for (int i=0; i<cArray.length; i++) {
       cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
     }
     m_Exp.setPropertyArray(cArray); 
-    m_Editing = false;
   }
   
   /**
@@ -506,11 +514,7 @@ public class AlgorithmListPanel
         m_DownBut.setEnabled(false);
       }
 
-      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
-      for (int i=0; i<cArray.length; i++) {
-	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
-      }
-      m_Exp.setPropertyArray(cArray); 
+      updateExperiment();
     } else if (e.getSource() == m_LoadOptionsBut) {
       if (m_List.getSelectedValue() != null) {
         int returnVal = m_FileChooser.showOpenDialog(this);
@@ -522,6 +526,7 @@ public class AlgorithmListPanel
             XMLClassifier xmlcls = new XMLClassifier();
             Classifier c = (Classifier) xmlcls.read(file);
             m_AlgorithmListModel.setElementAt(c, m_List.getSelectedIndex());
+            updateExperiment();
           }
           catch (Exception ex) {
             ex.printStackTrace();
@@ -547,21 +552,11 @@ public class AlgorithmListPanel
     } 
     else if (e.getSource() == m_UpBut) {
       JListHelper.moveUp(m_List);
-      
-      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
-      for (int i=0; i<cArray.length; i++) {
-	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
-      }
-      m_Exp.setPropertyArray(cArray); 
+      updateExperiment();
     }
     else if (e.getSource() == m_DownBut) {
       JListHelper.moveDown(m_List);
-
-      Classifier[] cArray = new Classifier[m_AlgorithmListModel.size()];
-      for (int i=0; i<cArray.length; i++) {
-	cArray[i] = (Classifier) m_AlgorithmListModel.elementAt(i);
-      }
-      m_Exp.setPropertyArray(cArray); 
+      updateExperiment();
     }
   }
 
