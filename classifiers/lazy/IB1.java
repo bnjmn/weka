@@ -16,7 +16,7 @@
 
 /*
  *    IB1.java
- *    Copyright (C) 1999 Stuart Inglis,Len Trigg,Eibe Frank
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -73,7 +73,7 @@ import java.util.Enumeration;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class IB1 
   extends Classifier 
