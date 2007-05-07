@@ -16,8 +16,7 @@
 
 /*
  *    KStar.java
- *    Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).
- *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
+ *    Copyright (C) 1995-97 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -90,8 +89,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com)
- * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz) - Java port
+ * @version $Revision: 1.8 $
  */
 public class KStar 
   extends Classifier
