@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.54 $
+ * @version $Revision: 1.55 $
  */
 public final class Utils {
 
@@ -461,7 +461,7 @@ public final class Utils {
    * @param options an array of strings
    * @exception Exception if there are any non-empty options
    */
-  public static void checkForRemainingOptions(String [] options) 
+  public static void checkForRemainingOptions(String[] options) 
     throws Exception {
     
     int illegalOptionsFound = 0;
@@ -491,7 +491,7 @@ public final class Utils {
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
-  public static boolean getFlag(char flag, String [] options) 
+  public static boolean getFlag(char flag, String[] options) 
     throws Exception {
     
     return getFlag("" + flag, options);
@@ -507,7 +507,7 @@ public final class Utils {
    * @return true if the flag was found
    * @exception Exception if an illegal option was found
    */
-  public static boolean getFlag(String flag, String [] options) 
+  public static boolean getFlag(String flag, String[] options) 
     throws Exception {
     
     int pos = getOptionPos(flag, options);
@@ -528,7 +528,7 @@ public final class Utils {
    * @return the indicated option or an empty string
    * @exception Exception if the option indicated by the flag can't be found
    */
-  public static /*@non_null@*/ String getOption(char flag, String [] options) 
+  public static /*@non_null@*/ String getOption(char flag, String[] options) 
     throws Exception {
     
     return getOption("" + flag, options);
@@ -544,7 +544,7 @@ public final class Utils {
    * @return the indicated option or an empty string
    * @exception Exception if the option indicated by the flag can't be found
    */
-  public static /*@non_null@*/ String getOption(String flag, String [] options) 
+  public static /*@non_null@*/ String getOption(String flag, String[] options) 
     throws Exception {
 
     String newString;
@@ -667,37 +667,37 @@ public final class Utils {
     StringBuffer newStringBuffer;
 
     // replace each of the following characters with the backquoted version
-    char   charsFind[] =    {'\\',   '\'',  '\t',  '"',    '%'};
-    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\\"", "\\%"};
-    for(int i = 0; i < charsFind.length; i++) {
-	if (string.indexOf(charsFind[i]) != -1 ) {
-	    newStringBuffer = new StringBuffer();
-	    while ((index = string.indexOf(charsFind[i])) != -1) {
-		if (index > 0) {
-		    newStringBuffer.append(string.substring(0, index));
-		}
-		newStringBuffer.append(charsReplace[i]);
-		if ((index + 1) < string.length()) {
-		    string = string.substring(index + 1);
-		} else {
-		    string = "";
-		}
-	    }
-	    newStringBuffer.append(string);
-	    string = newStringBuffer.toString();
+    char   charsFind[] =    {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
+    String charsReplace[] = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
+    for (int i = 0; i < charsFind.length; i++) {
+      if (string.indexOf(charsFind[i]) != -1 ) {
+	newStringBuffer = new StringBuffer();
+	while ((index = string.indexOf(charsFind[i])) != -1) {
+	  if (index > 0) {
+	    newStringBuffer.append(string.substring(0, index));
+	  }
+	  newStringBuffer.append(charsReplace[i]);
+	  if ((index + 1) < string.length()) {
+	    string = string.substring(index + 1);
+	  } else {
+	    string = "";
+	  }
 	}
+	newStringBuffer.append(string);
+	string = newStringBuffer.toString();
+      }
     }
 
-    return Utils.convertNewLines(string);
+    return string;
   }
 
   /**
    * Converts carriage returns and new lines in a string into \r and \n.
+   *
    * @param string the string
    * @return the converted string
    */
-  public static /*@pure@*/ String convertNewLines(String string) {
-    
+  public static String convertNewLines(String string) {
     int index;
 
     // Replace with \n
@@ -734,7 +734,49 @@ public final class Utils {
     newStringBuffer.append(string);
     return newStringBuffer.toString();
   }
+
+  /**
+   * Reverts \r and \n in a string into carriage returns and new lines.
+   * 
+   * @param string the string
+   * @return the converted string
+   */
+  public static String revertNewLines(String string) {
+    int index;
+
+    // Replace with \n
+    StringBuffer newStringBuffer = new StringBuffer();
+    while ((index = string.indexOf("\\n")) != -1) {
+      if (index > 0) {
+	newStringBuffer.append(string.substring(0, index));
+      }
+      newStringBuffer.append('\n');
+      if ((index + 2) < string.length()) {
+	string = string.substring(index + 2);
+      } else {
+	string = "";
+      }
+    }
+    newStringBuffer.append(string);
+    string = newStringBuffer.toString();
+
+    // Replace with \r
+    newStringBuffer = new StringBuffer();
+    while ((index = string.indexOf("\\r")) != -1) {
+      if (index > 0) {
+	newStringBuffer.append(string.substring(0, index));
+      }
+      newStringBuffer.append('\r');
+      if ((index + 2) < string.length()){
+	string = string.substring(index + 2);
+      } else {
+	string = "";
+      }
+    }
+    newStringBuffer.append(string);
     
+    return newStringBuffer.toString();
+  }
 
   /**
    * Returns the secondary set of options (if any) contained in
@@ -745,12 +787,12 @@ public final class Utils {
    * @param options the input array of options
    * @return the array of secondary options
    */
-  public static String [] partitionOptions(String [] options) {
+  public static String[] partitionOptions(String[] options) {
 
     for (int i = 0; i < options.length; i++) {
       if (options[i].equals("--")) {
 	options[i++] = "";
-	String [] result = new String [options.length - i];
+	String[] result = new String [options.length - i];
 	for (int j = i; j < options.length; j++) {
 	  result[j - i] = options[j];
 	  options[j] = "";
@@ -766,6 +808,7 @@ public final class Utils {
    * Converts back-quoted carriage returns and new lines in a string 
    * to the corresponding character ('\r' and '\n').
    * Also "un"-back-quotes the following characters: ` " \ \t and %
+   *
    * @param string the string
    * @return the converted string
    */
@@ -775,28 +818,38 @@ public final class Utils {
     StringBuffer newStringBuffer;
     
     // replace each of the following characters with the backquoted version
-    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\\"", "\\%"};
-    char   charsReplace[] = {'\\',   '\'',  '\t',  '"',    '%'};
+    String charsFind[]    = {"\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%"};
+    char   charsReplace[] = {'\\',   '\'',  '\t',  '\n',  '\r',  '"',    '%'};
+    int pos[] = new int[charsFind.length];
+    int	curPos;
     
-    for(int i = 0; i < charsFind.length; i++) {
-      if (string.indexOf(charsFind[i]) != -1 ) {
-	newStringBuffer = new StringBuffer();
-	while ((index = string.indexOf(charsFind[i])) != -1) {
-	  if (index > 0) {
-	    newStringBuffer.append(string.substring(0, index));
-	  }
-	  newStringBuffer.append(charsReplace[i]);
-	  if ((index + charsFind[i].length()) < string.length()) {
-	    string = string.substring(index + charsFind[i].length());
-	  } else {
-	    string = "";
-	  }
+    String str = new String(string);
+    newStringBuffer = new StringBuffer();
+    while (str.length() > 0) {
+      // get positions and closest character to replace
+      curPos = str.length();
+      index  = -1;
+      for (int i = 0; i < pos.length; i++) {
+	pos[i] = str.indexOf(charsFind[i]);
+	if ( (pos[i] > -1) && (pos[i] < curPos) ) {
+	  index  = i;
+	  curPos = pos[i];
 	}
-	newStringBuffer.append(string);
-	string = newStringBuffer.toString();
+      }
+      
+      // replace character if found, otherwise finished
+      if (index == -1) {
+	newStringBuffer.append(str);
+	str = "";
+      }
+      else {
+	newStringBuffer.append(str.substring(0, pos[index]));
+	newStringBuffer.append(charsReplace[index]);
+	str = str.substring(pos[index] + charsFind[index].length());
       }
     }
-    return Utils.convertNewLines(string);
+
+    return newStringBuffer.toString();
   }    
   
   /**
@@ -808,7 +861,7 @@ public final class Utils {
    * @throws Exception 	in case of an unterminated string, unknown character or
    * 			a parse error
    */
-  public static String [] splitOptions(String quotedOptionString) throws Exception{
+  public static String[] splitOptions(String quotedOptionString) throws Exception{
 
     FastVector optionsVec = new FastVector();
     String str = new String(quotedOptionString);
@@ -858,7 +911,7 @@ public final class Utils {
     }
     
     //convert optionsVec to an array of String
-    String [] options = new String[optionsVec.size()];
+    String[] options = new String[optionsVec.size()];
     for (i = 0; i < optionsVec.size(); i++) {
       options[i] = (String)optionsVec.elementAt(i);
     }
@@ -872,7 +925,7 @@ public final class Utils {
    * @param optionArray the array of options
    * @return the string containing all options.
    */
-  public static String joinOptions(String [] optionArray) {
+  public static String joinOptions(String[] optionArray) {
 
     String optionString = "";
     for (int i = 0; i < optionArray.length; i++) {
@@ -916,7 +969,7 @@ public final class Utils {
    */
   public static Object forName(Class classType,
 			       String className,
-			       String [] options) throws Exception {
+			       String[] options) throws Exception {
 
     Class c = null;
     try {
@@ -1008,7 +1061,7 @@ public final class Utils {
    */
   public static double kthSmallestValue(int[] array, int k) {
 
-    int [] index = new int[array.length];
+    int[] index = new int[array.length];
     
     for (int i = 0; i < index.length; i++) {
       index[i] = i;
@@ -1026,7 +1079,7 @@ public final class Utils {
    */
   public static double kthSmallestValue(double[] array, int k) {
 
-    int [] index = new int[array.length];
+    int[] index = new int[array.length];
     
     for (int i = 0; i < index.length; i++) {
       index[i] = i;
@@ -1053,7 +1106,7 @@ public final class Utils {
    * @param doubles the array of doubles
    * @return the index of the maximum element
    */
-  public static /*@pure@*/ int maxIndex(double [] doubles) {
+  public static /*@pure@*/ int maxIndex(double[] doubles) {
 
     double maximum = 0;
     int maxIndex = 0;
@@ -1075,7 +1128,7 @@ public final class Utils {
    * @param ints the array of integers
    * @return the index of the maximum element
    */
-  public static /*@pure@*/ int maxIndex(int [] ints) {
+  public static /*@pure@*/ int maxIndex(int[] ints) {
 
     int maximum = 0;
     int maxIndex = 0;
@@ -1116,7 +1169,7 @@ public final class Utils {
    * @param ints the array of integers
    * @return the index of the minimum element
    */
-  public static /*@pure@*/ int minIndex(int [] ints) {
+  public static /*@pure@*/ int minIndex(int[] ints) {
 
     int minimum = 0;
     int minIndex = 0;
@@ -1138,7 +1191,7 @@ public final class Utils {
    * @param doubles the array of doubles
    * @return the index of the minimum element
    */
-  public static /*@pure@*/ int minIndex(double [] doubles) {
+  public static /*@pure@*/ int minIndex(double[] doubles) {
 
     double minimum = 0;
     int minIndex = 0;
@@ -1303,11 +1356,11 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.
    */
-  public static /*@pure@*/ int[] sort(int [] array) {
+  public static /*@pure@*/ int[] sort(int[] array) {
 
-    int [] index = new int[array.length];
-    int [] newIndex = new int[array.length];
-    int [] helpIndex;
+    int[] index = new int[array.length];
+    int[] newIndex = new int[array.length];
+    int[] helpIndex;
     int numEqual;
     
     for (int i = 0; i < index.length; i++) {
@@ -1354,10 +1407,10 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.  
    */
-  public static /*@pure@*/ int[] sort(/*@non_null@*/ double [] array) {
+  public static /*@pure@*/ int[] sort(/*@non_null@*/ double[] array) {
 
-    int [] index = new int[array.length];
-    array = (double [])array.clone();
+    int[] index = new int[array.length];
+    array = (double[])array.clone();
     for (int i = 0; i < index.length; i++) {
       index[i] = i;
       if (Double.isNaN(array[i])) {
@@ -1379,14 +1432,14 @@ public final class Utils {
    * @return an array of integers with the positions in the sorted
    * array.
    */
-  public static /*@pure@*/ int[] stableSort(double [] array){
+  public static /*@pure@*/ int[] stableSort(double[] array){
 
-    int [] index = new int[array.length];
-    int [] newIndex = new int[array.length];
-    int [] helpIndex;
+    int[] index = new int[array.length];
+    int[] newIndex = new int[array.length];
+    int[] helpIndex;
     int numEqual;
     
-    array = (double [])array.clone();
+    array = (double[])array.clone();
     for (int i = 0; i < index.length; i++) {
       index[i] = i;
       if (Double.isNaN(array[i])) {
