@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class AddNoise 
   extends Filter 
@@ -304,7 +304,7 @@ public class AddNoise
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String attIndexSetTipText() {
+  public String attributeIndexTipText() {
 
     return "Index of the attribute that is to changed.";
   }

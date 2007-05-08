@@ -70,7 +70,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision: 1.10 $ 
  */
 public class Resample
   extends Filter 
@@ -308,7 +308,7 @@ public class Resample
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String sampeSizePercentTipText() {
+  public String sampleSizePercentTipText() {
     return "The subsample size as a percentage of the original set.";
   }
   
