@@ -31,13 +31,13 @@ import java.util.Vector;
  * Abstract superclass for tokenizers that take characters as delimiters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class CharacterDelimitedTokenizer
   extends Tokenizer {
 
   /** Delimiters used in tokenization */
-  protected String m_Delimiters = " \n\t.,;:'\"()?!";
+  protected String m_Delimiters = " \r\n\t.,;:'\"()?!";
   
   /**
    * Returns an enumeration of all the available options..
@@ -51,7 +51,7 @@ public abstract class CharacterDelimitedTokenizer
     
     result.addElement(new Option(
         "\tThe delimiters to use\n"
-	+ "\t(default ' \\n\\t.,;:'\"()?!').",
+	+ "\t(default ' \\r\\n\\t.,;:'\"()?!').",
         "delimiters", 1, "-delimiters <value>"));
     
     return result.elements();
@@ -89,25 +89,30 @@ public abstract class CharacterDelimitedTokenizer
     if (tmpStr.length() != 0)
       setDelimiters(tmpStr);
     else
-      setDelimiters(" \n\t.,;:'\"()?!");
+      setDelimiters(" \r\n\t.,;:'\"()?!");
   }
 
   /**
-   * Get the value of delimiters.
+   * Get the value of delimiters (not backquoted).
    *
    * @return 		Value of delimiters.
    */
   public String getDelimiters() {
-    return m_Delimiters.replaceAll("\"", "\\\\\"").replaceAll("'", "\\\\'");
+    return m_Delimiters;
   }
     
   /**
-   * Set the value of delimiters.
+   * Set the value of delimiters. For convenienve, the strings 
+   * "\r", "\n", "\t", "\'", "\\" get automatically translated into their 
+   * character representations '\r', '\n', '\t', '\'', '\\'. This means, one 
+   * can either use <code>setDelimiters("\r\n\t\\");</code> or 
+   * <code>setDelimiters("\\r\\n\\t\\\\");</code>.
    *
    * @param value 	Value to assign to delimiters.
+   * @see 		Utils#unbackQuoteChars(String)
    */
   public void setDelimiters(String value) {
-    m_Delimiters = value.replaceAll("\\\\\"", "\"").replaceAll("\\\\'", "'");
+    m_Delimiters = Utils.unbackQuoteChars(value);
   }
 
   /**
@@ -117,6 +122,6 @@ public abstract class CharacterDelimitedTokenizer
    * 			displaying in the explorer/experimenter gui
    */
   public String delimitersTipText() {
-    return "Set of delimiter characters to use in tokenizing";
+    return "Set of delimiter characters to use in tokenizing (\\r, \\n and \\t can be used for carriage-return, line-feed and tab)";
   }
 }
