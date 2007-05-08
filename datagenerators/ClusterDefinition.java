@@ -34,7 +34,7 @@ import java.util.Enumeration;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public abstract class ClusterDefinition
@@ -121,10 +121,21 @@ public abstract class ClusterDefinition
 
   /**
    * sets the parent datagenerator this cluster belongs to
-   * @param parent      the parent datagenerator
+   * 
+   * @param parent the parent datagenerator
    */
   public void setParent(ClusterGenerator parent) {
     m_Parent = parent;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String parentTipText() {
+    return "The cluster generator this object belongs to.";
   }
 
   /**
