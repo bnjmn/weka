@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see     weka.filters.StreamableFilter
  */
 public class PartitionedMultiFilter
@@ -386,7 +386,7 @@ public class PartitionedMultiFilter
    * @return    	tip text for this property suitable for
    *            	displaying in the explorer/experimenter gui
    */
-  public String RangesTipText() {
+  public String rangesTipText() {
     return "The attribute ranges to be used.";
   }
   

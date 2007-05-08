@@ -63,7 +63,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -472,7 +472,7 @@ public class ClusterMembership
    *
    * @return description of this option
    */
-  public String clustererTipText() {
+  public String densityBasedClustererTipText() {
     return "The clusterer that will generate membership values for the instances.";
   }
 

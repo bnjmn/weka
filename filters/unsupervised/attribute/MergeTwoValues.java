@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class MergeTwoValues 
   extends Filter
@@ -306,7 +306,7 @@ public class MergeTwoValues
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String firstValueTipText() {
+  public String firstValueIndexTipText() {
 
     return "Sets the first value to be merged. "
       + "(\"first\" and \"last\" are valid values)";
@@ -336,7 +336,7 @@ public class MergeTwoValues
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String secondValueTipText() {
+  public String secondValueIndexTipText() {
 
     return "Sets the second value to be merged. "
       + "(\"first\" and \"last\" are valid values)";

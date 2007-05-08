@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see MultiInstanceToPropositional
  */
 public class PropositionalToMultiInstance 
@@ -171,6 +171,16 @@ public class PropositionalToMultiInstance
       result.add("-R");
 
     return (String[]) result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The random seed used by the random number generator";
   }
 
   /**
