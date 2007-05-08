@@ -134,7 +134,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class RaceSearch 
   extends ASSearch 
@@ -396,9 +396,9 @@ public class RaceSearch
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String foldsTipText() {
-    return "Set the number of folds to use for x-val error estimation. "
-      +"Leave-one-out is selected automatically for schemata search.";
+  public String foldsTypeTipText() {
+    return "Set the number of folds to use for x-val error estimation; "
+      +"leave-one-out is selected automatically for schemata search.";
   }
 
   /**
