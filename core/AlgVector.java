@@ -29,8 +29,8 @@ import java.util.Random;
  * Class for performing operations on an algebraic vector
  * of floating-point values.
  *
- * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
+ * @version $Revision: 1.9 $
  */
 public class AlgVector 
   implements Cloneable, Serializable {
@@ -44,7 +44,7 @@ public class AlgVector
   /**
    * Constructs a vector and initializes it with default values.
    *
-   * @param n the number of elements
+   * @param n 		the number of elements
    */
   public AlgVector(int n) {
 
@@ -55,9 +55,9 @@ public class AlgVector
  /**
    * Constructs a vector using a given array.
    *
-   * @param array the values of the matrix
+   * @param array 	the values of the matrix
    */
-  public AlgVector(double[] array) throws Exception {
+  public AlgVector(double[] array) {
     
     m_Elements = new double[array.length];
     for (int i = 0; i < array.length; i++) {
@@ -71,9 +71,9 @@ public class AlgVector
    * The other attributes (nominal, string) are ignored.
    * Random is used to initialize the attributes.
    *
-   * @param format the data format to use
-   * @param random for initializing the attributes
-   * @throws Exception if something goes wrong
+   * @param format 	the data format to use
+   * @param random 	for initializing the attributes
+   * @throws Exception	if something goes wrong
    */
   public AlgVector(Instances format, Random random) throws Exception {
     
@@ -92,28 +92,37 @@ public class AlgVector
    * The vector has an element for each numerical attribute.
    * The other attributes (nominal, string) are ignored.
    *
-   * @param instance with numeric attributes, that AlgVector gets build from
-   * @exception Exception if instance doesn't have access to the data format
+   * @param instance 	with numeric attributes, that AlgVector gets build from
+   * @throws Exception 	if instance doesn't have access to the data format or
+   * 			no numeric attributes in the data
    */
   public AlgVector(Instance instance) throws Exception {
     
     int len = instance.numAttributes();
     for (int i = 0; i < instance.numAttributes(); i++) {
-      if (!instance.attribute(i).isNumeric()) len--;
+      if (!instance.attribute(i).isNumeric())
+	len--;
     }
     if (len > 0) {
       m_Elements = new double[len];
-      for (int i = 0; i < len; i++) {
-	m_Elements[i] = instance.valueSparse(i); //possibly a bug
+      int n = 0;
+      for (int i = 0; i < instance.numAttributes(); i++) {
+	if (!instance.attribute(i).isNumeric())
+	  continue;
+	m_Elements[n] = instance.value(i);
+	n++;
       }
+    }
+    else {
+      throw new IllegalArgumentException("No numeric attributes in data!");
     }
   }
 
   /**
    * Creates and returns a clone of this object.
    *
-   * @return a clone of this instance.
-   * @exception CloneNotSupportedException if an error occurs
+   * @return 		a clone of this instance.
+   * @throws CloneNotSupportedException if an error occurs
    */
   public Object clone() throws CloneNotSupportedException {
 
@@ -137,7 +146,9 @@ public class AlgVector
   }
 
   /**
-   * Resets the elements to the default value which is 0.0.
+   * Initializes the values with random numbers between 0 and 1.
+   * 
+   * @param random	the random number generator to use for initializing
    */
   protected void initialize(Random random) {
 
@@ -149,11 +160,10 @@ public class AlgVector
   /**
    * Returns the value of a cell in the matrix.
    *
-   * @param index the row's index
-   * @return the value of the cell of the vector
+   * @param index 	the row's index
+   * @return 		the value of the cell of the vector
    */
   public final double getElement(int index) {
-    
     return m_Elements[index];
   }
 
@@ -161,7 +171,7 @@ public class AlgVector
   /**
    * Returns the number of elements in the vector.
    *
-   * @return the number of rows
+   * @return 		the number of rows
    */
   public final int numElements() {
   
@@ -172,8 +182,8 @@ public class AlgVector
   /**
    * Sets an element of the matrix to the given value.
    *
-   * @param index the elements index
-   * @param value the new value
+   * @param index 	the elements index
+   * @param value 	the new value
    */
   public final void setElement(int index, double value) {
     
@@ -184,7 +194,7 @@ public class AlgVector
    * Sets the elements of the vector to values of the given array.
    * Performs a deep copy.
    *
-   * @param elements an array of doubles
+   * @param elements 	an array of doubles
    */
   public final void setElements(double[] elements) {
 
@@ -196,9 +206,9 @@ public class AlgVector
   /**
    * Gets the elements of the vector and returns them as double array.
    *
-   * @return an array of doubles
+   * @return 		an array of doubles
    */
-  public double[] getElements(int index) {  //no need for index
+  public double[] getElements() {
 
     double [] elements = new double[this.numElements()];
     for (int i = 0; i < elements.length; i++) {
@@ -209,10 +219,12 @@ public class AlgVector
 
   /**
    * Gets the elements of the vector as an instance.
-   *
    * !! NON-numeric data is ignored sofar
-   * @return an array of doubles
-   * @exception Exception if length of vector is not number of numerical attributes
+   * 
+   * @param model 	the dataset structure to fit the data to
+   * @param random 	in case of nominal values a random label is taken
+   * @return 		an array of doubles
+   * @throws Exception	if length of vector is not number of numerical attributes
    */
   public Instance getAsInstance(Instances model, Random random) 
     throws Exception {
@@ -240,28 +252,12 @@ public class AlgVector
     }
     return newInst;
   }
-
-  /** 
-   * Converts a vector to a string
-   *
-   * @return the converted string
-   */
-  public String toString() {
-
-    StringBuffer text = new StringBuffer();
-    for (int i = 0; i < m_Elements.length; i++) {
-      if (i > 0) text.append(",");
-      text.append(Utils.doubleToString(m_Elements[i],6));
-    }
-
-    text.append("\n");
-    return text.toString();
-  }
     
   /**
    * Returns the sum of this vector with another.
    *
-   * @return a vector containing the sum.
+   * @param other 	the vector to add
+   * @return 		a vector containing the sum.
    */
   public final AlgVector add(AlgVector other) {
   
@@ -286,7 +282,8 @@ public class AlgVector
   /**
    * Returns the difference of this vector minus another.
    *
-   * @return a vector containing the difference vector.
+   * @param other 	the vector to subtract
+   * @return 		a vector containing the difference vector.
    */
   public final AlgVector substract(AlgVector other) {
   
@@ -308,8 +305,8 @@ public class AlgVector
   /**
    * Returns the inner (or dot) product of two vectors
    *
-   * @param b the multiplication matrix
-   * @return the double representing the dot product
+   * @param b 		the multiplication matrix
+   * @return 		the double representing the dot product
    */
   public final double dotMultiply(AlgVector b) {
    
@@ -317,7 +314,6 @@ public class AlgVector
  
     if (m_Elements != null) {
       int n = m_Elements.length;
-      int bn = b.m_Elements.length;
       
       for(int i = 0; i < n; i++) {
 	sum += m_Elements[i] * b.m_Elements[i];
@@ -330,7 +326,7 @@ public class AlgVector
   /**
    * Computes the scalar product of this vector with a scalar
    *
-   * @param s the scalar
+   * @param s 		the scalar
    */
   public final void scalarMultiply(double s) {
    
@@ -346,7 +342,7 @@ public class AlgVector
   /**
    * Changes the length of a vector.
    *
-   * @param len the new length of the vector
+   * @param len 	the new length of the vector
    */
   public void changeLength(double len) {
    
@@ -358,7 +354,7 @@ public class AlgVector
   /**
    * Returns the norm of the vector
    *
-   * @return the norm of the vector
+   * @return 		the norm of the vector
    */
   public double norm() {
    
@@ -376,7 +372,6 @@ public class AlgVector
 
   /**
    * Norms this vector to length 1.0
-   *
    */
   public final void normVector() {
    
@@ -384,11 +379,31 @@ public class AlgVector
     this.scalarMultiply(1 / len);
   }
 
-  /**
-   * Main method for testing this class.
+  /** 
+   * Converts a vector to a string
+   *
+   * @return 		the converted string
    */
-  public static void main(String[] ops) {
-  
+  public String toString() {
+
+    StringBuffer text = new StringBuffer();
+    for (int i = 0; i < m_Elements.length; i++) {
+      if (i > 0) text.append(",");
+      text.append(Utils.doubleToString(m_Elements[i],6));
+    }
+
+    text.append("\n");
+    return text.toString();
+  }
+
+  /**
+   * Main method for testing this class, can take an ARFF file as first argument.
+   * 
+   * @param args 	commandline options
+   * @throws Exception	if something goes wrong in testing
+   */
+  public static void main(String[] args) throws Exception {
+    
     double[] first = {2.3, 1.2, 5.0};
     
     try {
