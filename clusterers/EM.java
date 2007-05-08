@@ -80,7 +80,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class EM
   extends RandomizableDensityBasedClusterer
@@ -367,6 +367,17 @@ public class EM
    */
   public int getMaxIterations () {
     return  m_max_iterations;
+  }
+
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String debugTipText() {
+    return "If set to true, clusterer may output additional info to " +
+      "the console.";
   }
 
 

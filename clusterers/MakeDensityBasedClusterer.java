@@ -70,7 +70,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class MakeDensityBasedClusterer 
   extends DensityBasedClusterer
@@ -382,6 +382,15 @@ public class MakeDensityBasedClusterer
 
     return  text.toString();
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String clustererTipText() {
+    return "the clusterer to wrap";
+  }
 
   /**
    * Sets the clusterer to wrap.
@@ -402,6 +411,7 @@ public class MakeDensityBasedClusterer
 
     return m_wrappedClusterer;
   }
+  
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
