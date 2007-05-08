@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.55 $
+ * @version $Revision: 1.56 $
  */
 public final class Utils {
 
@@ -932,7 +932,14 @@ public final class Utils {
       if (optionArray[i].equals("")) {
 	continue;
       }
-      if (optionArray[i].indexOf(' ') != -1) {
+      boolean escape = false;
+      for (int n = 0; n < optionArray[i].length(); n++) {
+	if (Character.isWhitespace(optionArray[i].charAt(n))) {
+	  escape = true;
+	  break;
+	}
+      }
+      if (escape) {
 	optionString += '"' + backQuoteChars(optionArray[i]) + '"';
       } else {
 	optionString += optionArray[i];
