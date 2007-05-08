@@ -96,7 +96,7 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class AODE extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
@@ -633,7 +633,7 @@ public class AODE extends Classifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String setWeightTipText() {
+  public String weightTipText() {
     return "Set the weight for m-estimate.";
   }
 

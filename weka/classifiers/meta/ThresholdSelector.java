@@ -112,7 +112,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $ 
+ * @version $Revision: 1.39 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 
@@ -283,21 +283,35 @@ public class ThresholdSelector
     }
   }
 
-    /** set measure used for determining threshold
-     * @param newMeasure Tag representing measure to be used
-     **/
-    public void setMeasure(SelectedTag newMeasure) {
-	if (newMeasure.getTags() == TAGS_MEASURE) {
-	    m_nMeasure = newMeasure.getSelectedTag().getID();
-	}
-    }
+  /**
+   * Tooltip for this property.
+   * 
+   * @return 	tip text for this property suitable for
+   * 		displaying in the explorer/experimenter gui
+   */
+  public String measureTipText() {
+    return "Sets the measure for determining the threshold.";
+  }
 
-    /** get measure used for determining threshold 
-     * @return Tag representing measure used
-     **/
-    public SelectedTag getMeasure() {
-	return new SelectedTag(m_nMeasure, TAGS_MEASURE);
+  /** 
+   * set measure used for determining threshold
+   * 
+   * @param newMeasure Tag representing measure to be used
+   */
+  public void setMeasure(SelectedTag newMeasure) {
+    if (newMeasure.getTags() == TAGS_MEASURE) {
+      m_nMeasure = newMeasure.getSelectedTag().getID();
     }
+  }
+
+  /**
+   * get measure used for determining threshold 
+   * 
+   * @return Tag representing measure used
+   */
+  public SelectedTag getMeasure() {
+    return new SelectedTag(m_nMeasure, TAGS_MEASURE);
+  }
 
 
   /**
