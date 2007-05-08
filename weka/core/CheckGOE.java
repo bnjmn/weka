@@ -60,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CheckGOE
   extends Check {
@@ -74,6 +74,21 @@ public class CheckGOE
   /** properties that are skipped in the checkToolTips method 
    * @see #checkToolTips() */
   protected HashSet<String> m_IgnoredProperties = new HashSet<String>();
+  
+  /**
+   * default constructor
+   */
+  public CheckGOE() {
+    super();
+    
+    // set default options
+    try {
+      setOptions(new String[0]);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
   
   /**
    * Returns an enumeration describing the available options.
@@ -250,7 +265,7 @@ public class CheckGOE
    * 
    * @return 		true if the test was passed
    */
-  protected boolean checkGlobalInfo() {
+  public boolean checkGlobalInfo() {
     boolean 	result;
     Class	cls;
     
@@ -281,7 +296,7 @@ public class CheckGOE
    * 
    * @return 		true if the test was passed
    */
-  protected boolean checkToolTips() {
+  public boolean checkToolTips() {
     boolean 			result;
     Class			cls;
     BeanInfo			info;
