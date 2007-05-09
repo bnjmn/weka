@@ -66,7 +66,7 @@ import java.util.Vector;
  *
  * @author  Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see SubspaceCluster
  */
 public class SubspaceClusterDefinition 
@@ -76,10 +76,10 @@ public class SubspaceClusterDefinition
   static final long serialVersionUID = 3135678125044007231L;
   
   /** cluster type */
-  protected int m_clustertype = SubspaceCluster.UNIFORM_RANDOM;
+  protected int m_clustertype;
 
   /** cluster subtypes */
-  protected int m_clustersubtype = SubspaceCluster.CONTINUOUS;
+  protected int m_clustersubtype;
 
   /** number of attributes the cluster is defined for */
   protected int m_numClusterAttributes;
@@ -257,9 +257,12 @@ public class SubspaceClusterDefinition
       typeCount++;
     }
 
+    // default is uniform/random
     if (typeCount == 0)
-      throw new Exception("No cluster type specified!");
-    if (typeCount > 1)
+      setClusterType(
+          new SelectedTag(
+            SubspaceCluster.UNIFORM_RANDOM, SubspaceCluster.TAGS_CLUSTERTYPE));
+    else if (typeCount > 1)
       throw new Exception("Only one cluster type can be specified!");
 
     setAttrIndexRange(fromToStr);
