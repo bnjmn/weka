@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.56 $
+ * @version $Revision: 1.57 $
  */
 public final class Utils {
 
@@ -628,8 +628,9 @@ public final class Utils {
    * A quoted question mark distinguishes it from the missing value which
    * is represented as an unquoted question mark in arff files.
    *
-   * @param string the string to be quoted
-   * @return the string (possibly quoted)
+   * @param string 	the string to be quoted
+   * @return 		the string (possibly quoted)
+   * @see		#unquote(String)
    */
   public static /*@pure@*/ String quote(String string) {
       boolean quote = false;
@@ -656,10 +657,35 @@ public final class Utils {
   }
 
   /**
+   * unquotes are previously quoted string (but only if necessary), i.e., it
+   * removes the single quotes around it. Inverse to quote(String).
+   * 
+   * @param string	the string to process
+   * @return		the unquoted string
+   * @see		#quote(String)
+   */
+  public static String unquote(String string) {
+    if (string.startsWith("'") && string.endsWith("'")) {
+      string = string.substring(1, string.length() - 1);
+      
+      if ((string.indexOf("\\n") != -1) || (string.indexOf("\\r") != -1) || 
+	  (string.indexOf("\\'") != -1) || (string.indexOf("\\\"") != -1) || 
+	  (string.indexOf("\\\\") != -1) || 
+	  (string.indexOf("\\t") != -1) || (string.indexOf("\\%") != -1)) {
+	string = unbackQuoteChars(string);
+      }
+    }
+
+    return string;
+  }
+
+  /**
    * Converts carriage returns and new lines in a string into \r and \n.
    * Backquotes the following characters: ` " \ \t and %
-   * @param string the string
-   * @return the converted string
+   * 
+   * @param string 	the string
+   * @return 		the converted string
+   * @see		#unbackQuoteChars(String)
    */
   public static /*@pure@*/ String backQuoteChars(String string) {
 
@@ -809,8 +835,9 @@ public final class Utils {
    * to the corresponding character ('\r' and '\n').
    * Also "un"-back-quotes the following characters: ` " \ \t and %
    *
-   * @param string the string
-   * @return the converted string
+   * @param string 	the string
+   * @return 		the converted string
+   * @see		#backQuoteChars(String)
    */
   public static String unbackQuoteChars(String string) {
 
