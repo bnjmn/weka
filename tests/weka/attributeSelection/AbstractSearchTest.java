@@ -20,6 +20,7 @@
 
 package weka.attributeSelection;
 
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.OptionHandler;
 import weka.core.CheckScheme.PostProcessor;
@@ -31,7 +32,7 @@ import weka.core.CheckScheme.PostProcessor;
  * method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  * @see CheckAttributeSelection
  * @see CheckAttributeSelection#testsPerClassType(int, boolean, boolean)
@@ -75,6 +76,20 @@ public abstract class AbstractSearchTest
     result = super.getOptionTester();
     if (getSearch() instanceof OptionHandler)
       result.setOptionHandler((OptionHandler) getSearch());
+    
+    return result;
+  }
+  
+  /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * 
+   * @return	the fully configured CheckGOE
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+
+    result = super.getGOETester();
+    result.setObject(getSearch());
     
     return result;
   }

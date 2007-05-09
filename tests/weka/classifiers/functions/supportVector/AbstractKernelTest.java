@@ -21,6 +21,7 @@
 package weka.classifiers.functions.supportVector;
 
 import weka.core.Attribute;
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -35,7 +36,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  *
  * @see CheckKernel
  * @see CheckKernel#testsPerClassType(int, boolean, boolean)
@@ -102,6 +103,9 @@ public abstract class AbstractKernelTest
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
   
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
+  
   /**
    * Constructs the <code>AbstractKernelTest</code>. Called by subclasses.
    *
@@ -112,7 +116,7 @@ public abstract class AbstractKernelTest
   }
 
   /**
-   * returns a custom PostProcessor for the CheckClassifier datasets, currently
+   * returns a custom PostProcessor for the CheckKernel datasets, currently
    * only null.
    * 
    * @return		a custom PostProcessor, if necessary
@@ -162,15 +166,33 @@ public abstract class AbstractKernelTest
   }
   
   /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the Kernel returned from the getKernel() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getKernel()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getKernel());
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
    * Called by JUnit before each test method. This implementation creates
    * the default Kernel to test and loads a test set of Instances.
    *
    * @exception Exception if an error occurs reading the example instances.
    */
   protected void setUp() throws Exception {
-    m_Kernel   = getKernel();
+    m_Kernel       = getKernel();
     m_Tester       = getTester();
     m_OptionTester = getOptionTester();
+    m_GOETester    = getGOETester();
 
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
@@ -207,8 +229,10 @@ public abstract class AbstractKernelTest
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
-    m_Kernel = null;
-    m_Tester     = null;
+    m_Kernel       = null;
+    m_Tester       = null;
+    m_OptionTester = null;
+    m_GOETester    = null;
 
     m_weightedInstancesHandler     = false;
     m_NominalPredictors            = new boolean[LAST_CLASSTYPE + 1];
@@ -313,7 +337,7 @@ public abstract class AbstractKernelTest
    * tests whether the Kernel can handle different types of attributes and
    * if not, if the exception is OK
    *
-   * @see #checkAttributes(boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see #checkAttributes(boolean, boolean, boolean, boolean, boolean, boolean)
    */
   public void testAttributes() {
     // nominal
@@ -781,7 +805,7 @@ public abstract class AbstractKernelTest
   /**
    * tests the listing of the options
    */
-  public void testListOptions() throws Exception {
+  public void testListOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkListOptions())
 	fail("Options cannot be listed via listOptions.");
@@ -791,7 +815,7 @@ public abstract class AbstractKernelTest
   /**
    * tests the setting of the options
    */
-  public void testSetOptions() throws Exception {
+  public void testSetOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("setOptions method failed.");
@@ -801,7 +825,7 @@ public abstract class AbstractKernelTest
   /**
    * tests whether there are any remaining options
    */
-  public void testRemainingOptions() throws Exception {
+  public void testRemainingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkRemainingOptions())
 	fail("There were 'left-over' options.");
@@ -814,7 +838,7 @@ public abstract class AbstractKernelTest
    * 
    * @see 	#getOptionTester()
    */
-  public void testCanonicalUserOptions() throws Exception {
+  public void testCanonicalUserOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkCanonicalUserOptions())
 	fail("setOptions method failed");
@@ -824,10 +848,26 @@ public abstract class AbstractKernelTest
   /**
    * tests the resetting of the options to the default ones
    */
-  public void testResettingOptions() throws Exception {
+  public void testResettingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("Resetting of options failed");
     }
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

@@ -21,6 +21,7 @@
 package weka.attributeSelection;
 
 import weka.core.Attribute;
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.CheckScheme.PostProcessor;
@@ -35,7 +36,7 @@ import junit.framework.TestCase;
  * method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  *
  * @see CheckAttributeSelection
  * @see CheckAttributeSelection#testsPerClassType(int, boolean, boolean)
@@ -105,6 +106,9 @@ public abstract class AbstractAttributeSelectionTest
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
   
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
+  
   /**
    * Constructs the <code>AbstractAttributeSelectionTest</code>. Called by subclasses.
    *
@@ -162,6 +166,21 @@ public abstract class AbstractAttributeSelectionTest
   }
   
   /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * 
+   * @return	the fully configured CheckGOE
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(null);
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
    * Called by JUnit before each test method. This implementation creates
    * the default scheme to test and loads a test set of Instances.
    *
@@ -172,6 +191,7 @@ public abstract class AbstractAttributeSelectionTest
     m_Evaluator    = getEvaluator();
     m_Tester       = getTester();
     m_OptionTester = getOptionTester();
+    m_GOETester    = getGOETester();
 
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
@@ -212,6 +232,7 @@ public abstract class AbstractAttributeSelectionTest
     m_Evaluator    = null;
     m_Tester       = null;
     m_OptionTester = null;
+    m_GOETester    = null;
 
     m_weightedInstancesHandler     = false;
     m_NominalPredictors            = new boolean[LAST_CLASSTYPE + 1];
@@ -323,7 +344,7 @@ public abstract class AbstractAttributeSelectionTest
    * tests whether the scheme can handle different types of attributes and
    * if not, if the exception is OK
    *
-   * @see #checkAttributes(boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see #checkAttributes(boolean, boolean, boolean, boolean, boolean, boolean)
    */
   public void testAttributes() {
     // nominal
@@ -680,7 +701,7 @@ public abstract class AbstractAttributeSelectionTest
   /**
    * Builds a model using the current scheme using the given data.
    *
-   * @param data 	the instances to test the classifier on
+   * @param data 	the instances to test the selection scheme on
    * @return 		a string containing the results.
    */
   protected String useScheme(Instances data) throws Exception {
@@ -783,7 +804,7 @@ public abstract class AbstractAttributeSelectionTest
   /**
    * tests the listing of the options
    */
-  public void testListOptions() throws Exception {
+  public void testListOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkListOptions())
 	fail("Options cannot be listed via listOptions.");
@@ -793,7 +814,7 @@ public abstract class AbstractAttributeSelectionTest
   /**
    * tests the setting of the options
    */
-  public void testSetOptions() throws Exception {
+  public void testSetOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("setOptions method failed.");
@@ -803,7 +824,7 @@ public abstract class AbstractAttributeSelectionTest
   /**
    * tests whether the default settings are processed correctly
    */
-  public void testDefaultOptions() throws Exception {
+  public void testDefaultOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkDefaultOptions())
 	fail("Default options were not processed correctly.");
@@ -813,7 +834,7 @@ public abstract class AbstractAttributeSelectionTest
   /**
    * tests whether there are any remaining options
    */
-  public void testRemainingOptions() throws Exception {
+  public void testRemainingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkRemainingOptions())
 	fail("There were 'left-over' options.");
@@ -826,7 +847,7 @@ public abstract class AbstractAttributeSelectionTest
    * 
    * @see 	#getOptionTester()
    */
-  public void testCanonicalUserOptions() throws Exception {
+  public void testCanonicalUserOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkCanonicalUserOptions())
 	fail("setOptions method failed");
@@ -836,10 +857,26 @@ public abstract class AbstractAttributeSelectionTest
   /**
    * tests the resetting of the options to the default ones
    */
-  public void testResettingOptions() throws Exception {
+  public void testResettingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("Resetting of options failed");
     }
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

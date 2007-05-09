@@ -20,6 +20,7 @@
 
 package weka.core.tokenizers;
 
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.FastVector;
 import weka.core.OptionHandler;
@@ -34,7 +35,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  * @see PostProcessor
  */
@@ -52,6 +53,9 @@ public abstract class AbstractTokenizerTest
   
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
+  
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
   
   /**
    * Constructs the <code>AbstractTokenizerTest</code>. Called by subclasses.
@@ -98,14 +102,32 @@ public abstract class AbstractTokenizerTest
   }
   
   /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the Tokenizer returned from the getTokenizer() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getTokenizer()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getTokenizer());
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
    * Called by JUnit before each test method. This implementation creates
-   * the default classifier to test and loads a test set of Instances.
+   * the default tokenizer to test and loads a test set of Instances.
    *
    * @exception Exception if an error occurs reading the example instances.
    */
   protected void setUp() throws Exception {
     m_Tokenizer         = getTokenizer();
     m_OptionTester      = getOptionTester();
+    m_GOETester         = getGOETester();
     m_Data              = getData();
     m_RegressionResults = new FastVector[m_Data.length];
   }
@@ -114,6 +136,7 @@ public abstract class AbstractTokenizerTest
   protected void tearDown() {
     m_Tokenizer         = null;
     m_OptionTester      = null;
+    m_GOETester         = null;
     m_Data              = null;
     m_RegressionResults = null;
   }
@@ -138,8 +161,8 @@ public abstract class AbstractTokenizerTest
   }
 
   /**
-   * tests whether the classifier correctly initializes in the
-   * buildClassifier method
+   * tests whether the tokenizer correctly initializes in the
+   * buildTokenizer method
    */
   public void testBuildInitialization() {
     boolean		result;
@@ -327,5 +350,21 @@ public abstract class AbstractTokenizerTest
       if (!m_OptionTester.checkSetOptions())
 	fail("Resetting of options failed");
     }
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

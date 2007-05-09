@@ -22,6 +22,7 @@ package weka.classifiers;
 
 import weka.classifiers.evaluation.EvaluationUtils;
 import weka.core.Attribute;
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.FastVector;
 import weka.core.Instances;
@@ -38,7 +39,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -148,6 +149,9 @@ public abstract class AbstractClassifierTest
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
   
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
+  
   /**
    * Constructs the <code>AbstractClassifierTest</code>. Called by subclasses.
    *
@@ -205,6 +209,23 @@ public abstract class AbstractClassifierTest
   }
   
   /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the Classifier returned from the getClassifier() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getClassifier()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getClassifier());
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
    * Called by JUnit before each test method. This implementation creates
    * the default classifier to test and loads a test set of Instances.
    *
@@ -214,6 +235,7 @@ public abstract class AbstractClassifierTest
     m_Classifier   = getClassifier();
     m_Tester       = getTester();
     m_OptionTester = getOptionTester();
+    m_GOETester    = getGOETester();
 
     m_updateableClassifier         = m_Tester.updateableClassifier()[0];
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
@@ -251,8 +273,10 @@ public abstract class AbstractClassifierTest
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
-    m_Classifier = null;
-    m_Tester     = null;
+    m_Classifier   = null;
+    m_Tester       = null;
+    m_OptionTester = null;
+    m_GOETester    = null;
 
     m_updateableClassifier         = false;
     m_weightedInstancesHandler     = false;
@@ -959,7 +983,7 @@ public abstract class AbstractClassifierTest
   /**
    * tests the listing of the options
    */
-  public void testListOptions() throws Exception {
+  public void testListOptions() {
     if (!m_OptionTester.checkListOptions())
       fail("Options cannot be listed via listOptions.");
   }
@@ -967,7 +991,7 @@ public abstract class AbstractClassifierTest
   /**
    * tests the setting of the options
    */
-  public void testSetOptions() throws Exception {
+  public void testSetOptions() {
     if (!m_OptionTester.checkSetOptions())
       fail("setOptions method failed.");
   }
@@ -975,7 +999,7 @@ public abstract class AbstractClassifierTest
   /**
    * tests whether the default settings are processed correctly
    */
-  public void testDefaultOptions() throws Exception {
+  public void testDefaultOptions() {
     if (!m_OptionTester.checkDefaultOptions())
       fail("Default options were not processed correctly.");
   }
@@ -983,7 +1007,7 @@ public abstract class AbstractClassifierTest
   /**
    * tests whether there are any remaining options
    */
-  public void testRemainingOptions() throws Exception {
+  public void testRemainingOptions() {
     if (!m_OptionTester.checkRemainingOptions())
       fail("There were 'left-over' options.");
   }
@@ -994,7 +1018,7 @@ public abstract class AbstractClassifierTest
    * 
    * @see 	#getOptionTester()
    */
-  public void testCanonicalUserOptions() throws Exception {
+  public void testCanonicalUserOptions() {
     if (!m_OptionTester.checkCanonicalUserOptions())
       fail("setOptions method failed");
   }
@@ -1002,8 +1026,24 @@ public abstract class AbstractClassifierTest
   /**
    * tests the resetting of the options to the default ones
    */
-  public void testResettingOptions() throws Exception {
+  public void testResettingOptions() {
     if (!m_OptionTester.checkSetOptions())
       fail("Resetting of options failed");
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

@@ -20,6 +20,7 @@
 
 package weka.clusterers;
 
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -33,7 +34,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean, boolean)
@@ -83,6 +84,9 @@ public abstract class AbstractClustererTest
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
   
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
+  
   /**
    * Constructs the <code>AbstractClustererTest</code>. Called by subclasses.
    *
@@ -106,6 +110,7 @@ public abstract class AbstractClustererTest
     m_Tester.setNumInstances(20);
     m_Tester.setDebug(DEBUG);
     m_OptionTester = getOptionTester();
+    m_GOETester    = getGOETester();
 
     m_updateableClusterer         = m_Tester.updateableClusterer()[0];
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
@@ -131,8 +136,10 @@ public abstract class AbstractClustererTest
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
-    m_Clusterer = null;
-    m_Tester     = null;
+    m_Clusterer    = null;
+    m_Tester       = null;
+    m_OptionTester = null;
+    m_GOETester    = null;
 
     m_updateableClusterer          = false;
     m_weightedInstancesHandler     = false;
@@ -160,6 +167,23 @@ public abstract class AbstractClustererTest
     else
       result.setOptionHandler(null);
     result.setUserOptions(new String[0]);
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the Clusterer returned from the getClusterer() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getClusterer()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getClusterer());
     result.setSilent(true);
     
     return result;
@@ -539,7 +563,7 @@ public abstract class AbstractClustererTest
   /**
    * tests the listing of the options
    */
-  public void testListOptions() throws Exception {
+  public void testListOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkListOptions())
 	fail("Options cannot be listed via listOptions.");
@@ -549,7 +573,7 @@ public abstract class AbstractClustererTest
   /**
    * tests the setting of the options
    */
-  public void testSetOptions() throws Exception {
+  public void testSetOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("setOptions method failed.");
@@ -559,7 +583,7 @@ public abstract class AbstractClustererTest
   /**
    * tests whether the default settings are processed correctly
    */
-  public void testDefaultOptions() throws Exception {
+  public void testDefaultOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkDefaultOptions())
 	fail("Default options were not processed correctly.");
@@ -569,7 +593,7 @@ public abstract class AbstractClustererTest
   /**
    * tests whether there are any remaining options
    */
-  public void testRemainingOptions() throws Exception {
+  public void testRemainingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkRemainingOptions())
 	fail("There were 'left-over' options.");
@@ -582,7 +606,7 @@ public abstract class AbstractClustererTest
    * 
    * @see 	#getOptionTester()
    */
-  public void testCanonicalUserOptions() throws Exception {
+  public void testCanonicalUserOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkCanonicalUserOptions())
 	fail("setOptions method failed");
@@ -592,10 +616,26 @@ public abstract class AbstractClustererTest
   /**
    * tests the resetting of the options to the default ones
    */
-  public void testResettingOptions() throws Exception {
+  public void testResettingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("Resetting of options failed");
     }
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

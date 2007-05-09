@@ -22,6 +22,7 @@ package weka.filters;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.FilteredClassifier;
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -42,7 +43,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public abstract class AbstractFilterTest
   extends TestCase {
@@ -68,6 +69,9 @@ public abstract class AbstractFilterTest
   
   /** the FilteredClassifier instance used for tests */
   protected FilteredClassifier m_FilteredClassifier;
+  
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
 
   /**
    * Constructs the <code>AbstractFilterTest</code>. Called by subclasses.
@@ -85,17 +89,19 @@ public abstract class AbstractFilterTest
    * @throws Exception if an error occurs reading the example instances.
    */
   protected void setUp() throws Exception {
-    m_Filter = getFilter();
-    m_Instances = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/filters/data/FilterTest.arff"))));
-    m_OptionTester = getOptionTester();
+    m_Filter             = getFilter();
+    m_Instances          = new Instances(new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("weka/filters/data/FilterTest.arff"))));
+    m_OptionTester       = getOptionTester();
+    m_GOETester          = getGOETester();
     m_FilteredClassifier = getFilteredClassifier();
   }
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
-    m_Filter = null;
-    m_Instances = null;
-    m_OptionTester = null;
+    m_Filter             = null;
+    m_Instances          = null;
+    m_OptionTester       = null;
+    m_GOETester          = null;
     m_FilteredClassifier = null;
   }
   
@@ -114,6 +120,23 @@ public abstract class AbstractFilterTest
     else
       result.setOptionHandler(null);
     result.setUserOptions(new String[0]);
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the Filter returned from the getFilter() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getFilter()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getFilter());
     result.setSilent(true);
     
     return result;
@@ -658,5 +681,21 @@ public abstract class AbstractFilterTest
       ex.printStackTrace();
       fail("Exception thrown during 2. batch: \n" + ex);
     }
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

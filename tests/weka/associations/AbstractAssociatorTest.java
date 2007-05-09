@@ -21,6 +21,7 @@
 package weka.associations;
 
 import weka.core.Attribute;
+import weka.core.CheckGOE;
 import weka.core.CheckOptionHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -35,7 +36,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  *
  * @see CheckAssociator
  * @see CheckAssociator#testsPerClassType(int, boolean, boolean)
@@ -102,6 +103,9 @@ public abstract class AbstractAssociatorTest
   /** the OptionHandler tester */
   protected CheckOptionHandler m_OptionTester;
   
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
+  
   /**
    * Constructs the <code>AbstractAssociatorTest</code>. Called by subclasses.
    *
@@ -141,8 +145,8 @@ public abstract class AbstractAssociatorTest
   }
   
   /**
-   * Configures the CheckOptionHandler uses for testing the optionhandling.
-   * Sets the Associator return from the getAssociator() method.
+   * Configures the CheckOptionHandler used for testing the optionhandling.
+   * Sets the Associator returned from the getAssociator() method.
    * 
    * @return	the fully configured CheckOptionHandler
    * @see	#getAssociator()
@@ -162,6 +166,23 @@ public abstract class AbstractAssociatorTest
   }
   
   /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the Associator returned from the getAssociator() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getAssociator()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getAssociator());
+    result.setSilent(true);
+    
+    return result;
+  }
+  
+  /**
    * Called by JUnit before each test method. This implementation creates
    * the default Associator to test and loads a test set of Instances.
    *
@@ -171,6 +192,7 @@ public abstract class AbstractAssociatorTest
     m_Associator   = getAssociator();
     m_Tester       = getTester();
     m_OptionTester = getOptionTester();
+    m_GOETester    = getGOETester();
 
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
@@ -207,8 +229,10 @@ public abstract class AbstractAssociatorTest
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
-    m_Associator = null;
-    m_Tester     = null;
+    m_Associator   = null;
+    m_Tester       = null;
+    m_OptionTester = null;
+    m_GOETester    = null;
 
     m_weightedInstancesHandler     = false;
     m_NominalPredictors            = new boolean[LAST_CLASSTYPE + 1];
@@ -313,7 +337,7 @@ public abstract class AbstractAssociatorTest
    * tests whether the Associator can handle different types of attributes and
    * if not, if the exception is OK
    *
-   * @see #checkAttributes(boolean, boolean, boolean, boolean, boolean, boolean, boolean)
+   * @see #checkAttributes(boolean, boolean, boolean, boolean, boolean, boolean)
    */
   public void testAttributes() {
     // nominal
@@ -772,7 +796,7 @@ public abstract class AbstractAssociatorTest
   /**
    * tests the listing of the options
    */
-  public void testListOptions() throws Exception {
+  public void testListOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkListOptions())
 	fail("Options cannot be listed via listOptions.");
@@ -782,7 +806,7 @@ public abstract class AbstractAssociatorTest
   /**
    * tests the setting of the options
    */
-  public void testSetOptions() throws Exception {
+  public void testSetOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("setOptions method failed.");
@@ -792,7 +816,7 @@ public abstract class AbstractAssociatorTest
   /**
    * tests whether the default settings are processed correctly
    */
-  public void testDefaultOptions() throws Exception {
+  public void testDefaultOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkDefaultOptions())
 	fail("Default options were not processed correctly.");
@@ -802,7 +826,7 @@ public abstract class AbstractAssociatorTest
   /**
    * tests whether there are any remaining options
    */
-  public void testRemainingOptions() throws Exception {
+  public void testRemainingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkRemainingOptions())
 	fail("There were 'left-over' options.");
@@ -815,7 +839,7 @@ public abstract class AbstractAssociatorTest
    * 
    * @see 	#getOptionTester()
    */
-  public void testCanonicalUserOptions() throws Exception {
+  public void testCanonicalUserOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkCanonicalUserOptions())
 	fail("setOptions method failed");
@@ -825,10 +849,26 @@ public abstract class AbstractAssociatorTest
   /**
    * tests the resetting of the options to the default ones
    */
-  public void testResettingOptions() throws Exception {
+  public void testResettingOptions() {
     if (m_OptionTester.getOptionHandler() != null) {
       if (!m_OptionTester.checkSetOptions())
 	fail("Resetting of options failed");
     }
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }

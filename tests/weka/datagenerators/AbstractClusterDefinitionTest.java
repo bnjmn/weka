@@ -20,6 +20,7 @@
 
 package weka.datagenerators;
 
+import weka.core.CheckGOE;
 import weka.core.SerializationHelper;
 
 import junit.framework.TestCase;
@@ -28,13 +29,16 @@ import junit.framework.TestCase;
  * Abstract Test class for ClusterDefinitions.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractClusterDefinitionTest 
   extends TestCase {
 
   /** The cluster definition to be tested */
   protected ClusterDefinition m_Definition;
+  
+  /** for testing GOE stuff */
+  protected CheckGOE m_GOETester;
 
   /**
    * Constructs the <code>AbstractClusterDefinitionTest</code>. 
@@ -53,12 +57,14 @@ public abstract class AbstractClusterDefinitionTest
    * @throws Exception if an error occurs 
    */
   protected void setUp() throws Exception {
-    m_Definition = getDefinition();
+    m_Definition   = getDefinition();
+    m_GOETester    = getGOETester();
   }
 
   /** Called by JUnit after each test method */
   protected void tearDown() {
-    m_Definition = null;
+    m_Definition   = null;
+    m_GOETester    = null;
   }
 
   /**
@@ -67,6 +73,23 @@ public abstract class AbstractClusterDefinitionTest
    * @return a suitably configured <code>ClusterDefinition</code> value
    */
   public abstract ClusterDefinition getDefinition();
+  
+  /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   * Sets the ClusterDefinition returned from the getDefinition() method.
+   * 
+   * @return	the fully configured CheckGOE
+   * @see	#getDefinition()
+   */
+  protected CheckGOE getGOETester() {
+    CheckGOE		result;
+    
+    result = new CheckGOE();
+    result.setObject(getDefinition());
+    result.setSilent(true);
+    
+    return result;
+  }
 
   /**
    * tests whether setting the options returned by getOptions() works
@@ -86,5 +109,21 @@ public abstract class AbstractClusterDefinitionTest
   public void testSerialVersionUID() {
     if (SerializationHelper.needsUID(m_Definition.getClass()))
       fail("Doesn't declare serialVersionUID!");
+  }
+  
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETester.checkGlobalInfo())
+      fail("No globalInfo method");
+  }
+  
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETester.checkToolTips())
+      fail("Tool tips inconsistent");
   }
 }
