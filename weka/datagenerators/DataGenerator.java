@@ -44,7 +44,7 @@ import java.util.Vector;
  * classifiers and clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable {
@@ -172,7 +172,7 @@ public abstract class DataGenerator
 
     tmpStr = Utils.getOption('r', options);
     if (tmpStr.length() != 0)
-      setRelationName(tmpStr);
+      setRelationName(Utils.unquote(tmpStr));
     else
       setRelationName("");
 
