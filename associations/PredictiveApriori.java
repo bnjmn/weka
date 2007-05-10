@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ */
+ * @version $Revision: 1.11 $ */
 
 public class PredictiveApriori 
   extends Associator 
@@ -250,7 +250,7 @@ public class PredictiveApriori
     m_bestChanged = false;
     m_expectation = 0;
     m_count = 1;
-    m_instances = instances;
+    m_instances = new Instances(instances);
 
     if (m_classIndex == -1)
       m_instances.setClassIndex(m_instances.numAttributes()-1);     

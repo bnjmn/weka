@@ -125,7 +125,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class Apriori 
   extends Associator 
@@ -373,6 +373,8 @@ public class Apriori
     FastVector[] sortedRuleSet;
     int necSupport=0;
 
+    instances = new Instances(instances);
+    
     if (m_removeMissingCols) {
       instances = removeMissingColumns(instances);
     }
