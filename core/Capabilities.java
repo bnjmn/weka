@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -957,6 +957,7 @@ public class Capabilities
     boolean		testClass;
     Capabilities	cap;
     boolean		missing;
+    Iterator		iter;
     
     // shall we test the data?
     if (!m_InstancesTest)
@@ -998,6 +999,18 @@ public class Capabilities
       m_FailReason = new UnassignedClassException(
 	  createMessage("Class attribute not set!"));
       return false;
+    }
+      
+    // special case: no class attribute can be handled
+    if (handles(Capability.NO_CLASS) && (data.classIndex() > -1)) {
+      cap  = getClassCapabilities();
+      cap.disable(Capability.NO_CLASS);
+      iter = cap.capabilities();
+      if (!iter.hasNext()) {
+	m_FailReason = new UnassignedClassException(
+	    createMessage("Cannot handle any class attribute!"));
+	return false;
+      }
     }
       
     if (testClass && !handles(Capability.NO_CLASS)) {
