@@ -186,7 +186,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see TestInstances
  */
 public class CheckAssociator
@@ -200,6 +200,9 @@ public class CheckAssociator
    *
    * FracPete (fracpete at waikato dot ac dot nz)
    */
+
+  /** a "dummy" class type */
+  public final static int NO_CLASS = -1;
   
   /*** The associator to be examined */
   protected Associator m_Associator = new weka.associations.Apriori();
@@ -402,6 +405,9 @@ public class CheckAssociator
     boolean multiInstanceHandler = multiInstanceHandler()[0];
     println("--> Associator tests");
     declaresSerialVersionUID();
+    println("--> no class attribute");
+    testsWithoutClass(weightedInstancesHandler, multiInstanceHandler);
+    println("--> with class attribute");
     testsPerClassType(Attribute.NOMINAL,    weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.NUMERIC,    weightedInstancesHandler, multiInstanceHandler);
     testsPerClassType(Attribute.DATE,       weightedInstancesHandler, multiInstanceHandler);
@@ -476,6 +482,42 @@ public class CheckAssociator
       correctBuildInitialisation(PNom, PNum, PStr, PDat, PRel, multiInstance, classType);
       datasetIntegrity(PNom, PNum, PStr, PDat, PRel, multiInstance, classType,
           handleMissingPredictors, handleMissingClass);
+    }
+  }
+  
+  /**
+   * Run a battery of tests without a class
+   *
+   * @param weighted true if the associator says it handles weights
+   * @param multiInstance true if the associator is a multi-instance associator
+   */
+  protected void testsWithoutClass(boolean weighted,
+                                   boolean multiInstance) {
+    
+    boolean PNom = canPredict(true,  false, false, false, false, multiInstance, NO_CLASS)[0];
+    boolean PNum = canPredict(false, true,  false, false, false, multiInstance, NO_CLASS)[0];
+    boolean PStr = canPredict(false, false, true,  false, false, multiInstance, NO_CLASS)[0];
+    boolean PDat = canPredict(false, false, false, true,  false, multiInstance, NO_CLASS)[0];
+    boolean PRel;
+    if (!multiInstance)
+      PRel = canPredict(false, false, false, false,  true, multiInstance, NO_CLASS)[0];
+    else
+      PRel = false;
+
+    if (PNom || PNum || PStr || PDat || PRel) {
+      if (weighted)
+        instanceWeights(PNom, PNum, PStr, PDat, PRel, multiInstance, NO_CLASS);
+      
+      canHandleZeroTraining(PNom, PNum, PStr, PDat, PRel, multiInstance, NO_CLASS);
+      boolean handleMissingPredictors = canHandleMissing(PNom, PNum, PStr, PDat, PRel, 
+          multiInstance, NO_CLASS, 
+          true, false, 20)[0];
+      if (handleMissingPredictors)
+        canHandleMissing(PNom, PNum, PStr, PDat, PRel, multiInstance, NO_CLASS, true, false, 100);
+      
+      correctBuildInitialisation(PNom, PNum, PStr, PDat, PRel, multiInstance, NO_CLASS);
+      datasetIntegrity(PNom, PNum, PStr, PDat, PRel, multiInstance, NO_CLASS,
+          handleMissingPredictors, false);
     }
   }
   
@@ -603,6 +645,7 @@ public class CheckAssociator
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
     FastVector accepts = new FastVector();
+    accepts.addElement("any");
     accepts.addElement("unary");
     accepts.addElement("binary");
     accepts.addElement("nominal");
@@ -1386,8 +1429,14 @@ public class CheckAssociator
     dataset.setNumDate(numDate);
     dataset.setNumRelational(numRelational);
     dataset.setNumClasses(numClasses);
-    dataset.setClassType(classType);
-    dataset.setClassIndex(classIndex);
+    if (classType == NO_CLASS) {
+      dataset.setClassType(Attribute.NOMINAL);  // ignored
+      dataset.setClassIndex(TestInstances.NO_CLASS);
+    }
+    else {
+      dataset.setClassType(classType);
+      dataset.setClassIndex(classIndex);
+    }
     dataset.setNumClasses(numClasses);
     dataset.setMultiInstance(multiInstance);
     dataset.setWords(getWords());
@@ -1461,6 +1510,9 @@ public class CheckAssociator
         break;
       case Attribute.RELATIONAL:
         str = " (relational class," + str;
+        break;
+      case NO_CLASS:
+        str = " (no class," + str;
         break;
     }
     
