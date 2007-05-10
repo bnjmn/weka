@@ -115,7 +115,7 @@ import java.awt.event.ActionEvent;
  * Set output of current values. (default: 0) <p>
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 
 public class Tertius extends Associator implements OptionHandler, Runnable {
@@ -1586,9 +1586,9 @@ public class Tertius extends Associator implements OptionHandler, Runnable {
 
     /* Initialization of the search. */
     if (m_parts == null) {
-      m_instances = instances;
+      m_instances = new Instances(instances);
     } else {
-      m_instances = new IndividualInstances(instances, m_parts);
+      m_instances = new IndividualInstances(new Instances(instances), m_parts);
     }    
     m_results = new SimpleLinkedList();
     m_hypotheses = 0;

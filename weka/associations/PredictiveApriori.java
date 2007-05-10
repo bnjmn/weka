@@ -61,7 +61,7 @@ import weka.associations.RuleGeneration;
  * The required number of rules (default: 100). <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.1 $ */
+ * @version $Revision: 1.3.2.2 $ */
 
 public class PredictiveApriori extends Associator implements OptionHandler {
   
@@ -159,7 +159,7 @@ public class PredictiveApriori extends Associator implements OptionHandler {
     if (instances.checkForStringAttributes()) {
       throw new Exception("Can't handle string attributes!");
     }
-    m_instances = instances;
+    m_instances = new Instances(instances);
     m_instances.setClassIndex(m_instances.numAttributes()-1);
     
     //prior estimation

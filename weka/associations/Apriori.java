@@ -73,7 +73,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.3 $ */
+ * @version $Revision: 1.19.2.4 $ */
 
 public class Apriori extends Associator implements OptionHandler {
 
@@ -247,6 +247,8 @@ public class Apriori extends Associator implements OptionHandler {
       throw new Exception("Can't handle string attributes!");
     }
 
+    instances = new Instances(instances);
+    
     if (m_removeMissingCols) {
       instances = removeMissingColumns(instances);
     }
