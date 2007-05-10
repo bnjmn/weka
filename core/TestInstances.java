@@ -99,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -1397,6 +1397,9 @@ public class TestInstances
         m_Data.add(current);
       }
     }
+
+    if (m_Data.classIndex() == NO_CLASS)
+      m_Data.setClassIndex(-1);
     
     return getData();
   }
