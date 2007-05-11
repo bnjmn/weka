@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  *
  * @see CheckAssociator
  * @see CheckAssociator#testsPerClassType(int, boolean, boolean)
@@ -90,12 +90,6 @@ public abstract class AbstractAssociatorTest
 
   /** whether Associator handles class with only missing values */
   protected boolean[] m_handleMissingClass;
-
-  /** whether Associator handles class as first attribute */
-  protected boolean[] m_handleClassAsFirstAttribute;
-
-  /** whether Associator handles class as second attribute */
-  protected boolean[] m_handleClassAsSecondAttribute;
   
   /** the results of the regression tests */
   protected String[] m_RegressionResults;
@@ -196,16 +190,15 @@ public abstract class AbstractAssociatorTest
 
     m_weightedInstancesHandler     = m_Tester.weightedInstancesHandler()[0];
     m_multiInstanceHandler         = m_Tester.multiInstanceHandler()[0];
-    m_NominalPredictors            = new boolean[LAST_CLASSTYPE + 1];
-    m_NumericPredictors            = new boolean[LAST_CLASSTYPE + 1];
-    m_StringPredictors             = new boolean[LAST_CLASSTYPE + 1];
-    m_DatePredictors               = new boolean[LAST_CLASSTYPE + 1];
-    m_RelationalPredictors         = new boolean[LAST_CLASSTYPE + 1];
-    m_handleMissingPredictors      = new boolean[LAST_CLASSTYPE + 1];
-    m_handleMissingClass           = new boolean[LAST_CLASSTYPE + 1];
-    m_handleClassAsFirstAttribute  = new boolean[LAST_CLASSTYPE + 1];
-    m_handleClassAsSecondAttribute = new boolean[LAST_CLASSTYPE + 1];
-    m_RegressionResults            = new String[LAST_CLASSTYPE + 1];
+    // LAST_CLASSTYPE+1 = no class attribute
+    m_NominalPredictors            = new boolean[LAST_CLASSTYPE + 2];
+    m_NumericPredictors            = new boolean[LAST_CLASSTYPE + 2];
+    m_StringPredictors             = new boolean[LAST_CLASSTYPE + 2];
+    m_DatePredictors               = new boolean[LAST_CLASSTYPE + 2];
+    m_RelationalPredictors         = new boolean[LAST_CLASSTYPE + 2];
+    m_handleMissingPredictors      = new boolean[LAST_CLASSTYPE + 2];
+    m_handleMissingClass           = new boolean[LAST_CLASSTYPE + 2];
+    m_RegressionResults            = new String[LAST_CLASSTYPE + 2];
     m_NClasses                     = 4;
 
     // initialize attributes
@@ -216,14 +209,15 @@ public abstract class AbstractAssociatorTest
     checkAttributes(false, false, false, false, true,  false);
     
     // initialize missing values handling
-    for (int i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+    for (int i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
       // does the scheme support this type of class at all?
       if (!canPredict(i))
         continue;
       
       // 20% missing
       m_handleMissingPredictors[i] = checkMissingPredictors(i, 20, false);
-      m_handleMissingClass[i]      = checkMissingClass(i, 20, false);
+      if (i <= LAST_CLASSTYPE)
+	m_handleMissingClass[i] = checkMissingClass(i, 20, false);
     }
   }
 
@@ -235,16 +229,14 @@ public abstract class AbstractAssociatorTest
     m_GOETester    = null;
 
     m_weightedInstancesHandler     = false;
-    m_NominalPredictors            = new boolean[LAST_CLASSTYPE + 1];
-    m_NumericPredictors            = new boolean[LAST_CLASSTYPE + 1];
-    m_StringPredictors             = new boolean[LAST_CLASSTYPE + 1];
-    m_DatePredictors               = new boolean[LAST_CLASSTYPE + 1];
-    m_RelationalPredictors         = new boolean[LAST_CLASSTYPE + 1];
-    m_handleMissingPredictors      = new boolean[LAST_CLASSTYPE + 1];
-    m_handleMissingClass           = new boolean[LAST_CLASSTYPE + 1];
-    m_handleClassAsFirstAttribute  = new boolean[LAST_CLASSTYPE + 1];
-    m_handleClassAsSecondAttribute = new boolean[LAST_CLASSTYPE + 1];
-    m_RegressionResults            = new String[LAST_CLASSTYPE + 1];
+    m_NominalPredictors            = null;
+    m_NumericPredictors            = null;
+    m_StringPredictors             = null;
+    m_DatePredictors               = null;
+    m_RelationalPredictors         = null;
+    m_handleMissingPredictors      = null;
+    m_handleMissingClass           = null;
+    m_RegressionResults            = null;
     m_NClasses                     = 4;
   }
 
@@ -278,7 +270,10 @@ public abstract class AbstractAssociatorTest
    * @return            the class type as string
    */
   protected String getClassTypeString(int type) {
-    return CheckAssociator.attributeTypeToString(type);
+    if (type == LAST_CLASSTYPE + 1)
+      return "no";
+    else
+      return CheckAssociator.attributeTypeToString(type);
   }
 
   /**
@@ -300,6 +295,7 @@ public abstract class AbstractAssociatorTest
     boolean[]     result;
     String        att;
     int           i;
+    int           type;
 
     // determine text for type of attributes
     att = "";
@@ -314,8 +310,13 @@ public abstract class AbstractAssociatorTest
     else if (rel)
       att = "relational";
     
-    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
-      result = m_Tester.canPredict(nom, num, str, dat, rel, m_multiInstanceHandler, i);
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
+      if (i == LAST_CLASSTYPE + 1)
+	type = CheckAssociator.NO_CLASS;
+      else
+	type = i;
+      result = m_Tester.canPredict(nom, num, str, dat, rel, m_multiInstanceHandler, type);
+
       if (nom)
         m_NominalPredictors[i] = result[0];
       else if (num)
@@ -374,12 +375,18 @@ public abstract class AbstractAssociatorTest
   public void testInstanceWeights() {
     boolean[]     result;
     int           i;
+    int           type;
     
     if (m_weightedInstancesHandler) {
-      for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+      for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
         // does the Associator support this type of class at all?
         if (!canPredict(i))
           continue;
+
+        if (i == LAST_CLASSTYPE + 1)
+          type = CheckAssociator.NO_CLASS;
+        else
+          type = i;
         
         result = m_Tester.instanceWeights(
             m_NominalPredictors[i], 
@@ -388,7 +395,7 @@ public abstract class AbstractAssociatorTest
             m_DatePredictors[i], 
             m_RelationalPredictors[i], 
             m_multiInstanceHandler, 
-            i);
+            type);
 
         if (!result[0])
           System.err.println("Error handling instance weights (" + getClassTypeString(i) 
@@ -478,10 +485,10 @@ public abstract class AbstractAssociatorTest
         continue;
       
       // first attribute
-      m_handleClassAsFirstAttribute[i] = checkClassAsNthAttribute(i, 0);
+      checkClassAsNthAttribute(i, 0);
 
       // second attribute
-      m_handleClassAsSecondAttribute[i] = checkClassAsNthAttribute(i, 1);
+      checkClassAsNthAttribute(i, 1);
     }
   }
 
@@ -494,12 +501,18 @@ public abstract class AbstractAssociatorTest
   public void testZeroTraining() {
     boolean[]     result;
     int           i;
+    int           type;
     
-    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
       // does the Associator support this type of class at all?
       if (!canPredict(i))
         continue;
       
+      if (i == LAST_CLASSTYPE + 1)
+	type = CheckAssociator.NO_CLASS;
+      else
+	type = i;
+
       result = m_Tester.canHandleZeroTraining(
           m_NominalPredictors[i], 
           m_NumericPredictors[i], 
@@ -507,7 +520,7 @@ public abstract class AbstractAssociatorTest
           m_DatePredictors[i], 
           m_RelationalPredictors[i], 
           m_multiInstanceHandler, 
-          i);
+          type);
 
       if (!result[0] && !result[1])
         fail("Error handling zero training instances (" + getClassTypeString(i) 
@@ -526,7 +539,13 @@ public abstract class AbstractAssociatorTest
    */
   protected boolean checkMissingPredictors(int type, int percent, boolean allowFail) {
     boolean[]     result;
+    int           classType;
     
+    if (type == LAST_CLASSTYPE + 1)
+      classType = CheckAssociator.NO_CLASS;
+    else
+      classType = type;
+
     result = m_Tester.canHandleMissing(
         m_NominalPredictors[type], 
         m_NumericPredictors[type], 
@@ -534,7 +553,7 @@ public abstract class AbstractAssociatorTest
         m_DatePredictors[type], 
         m_RelationalPredictors[type], 
         m_multiInstanceHandler, 
-        type,
+        classType,
         true,
         false,
         percent);
@@ -557,7 +576,7 @@ public abstract class AbstractAssociatorTest
   public void testMissingPredictors() {
     int           i;
     
-    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
       // does the Associator support this type of class at all?
       if (!canPredict(i))
         continue;
@@ -638,12 +657,18 @@ public abstract class AbstractAssociatorTest
   public void testBuildInitialization() {
     boolean[]     result;
     int           i;
+    int           type;
     
-    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
       // does the Associator support this type of class at all?
       if (!canPredict(i))
         continue;
       
+      if (i == LAST_CLASSTYPE + 1)
+	type = CheckAssociator.NO_CLASS;
+      else
+	type = i;
+
       result = m_Tester.correctBuildInitialisation(
           m_NominalPredictors[i], 
           m_NumericPredictors[i], 
@@ -651,7 +676,7 @@ public abstract class AbstractAssociatorTest
           m_DatePredictors[i], 
           m_RelationalPredictors[i], 
           m_multiInstanceHandler, 
-          i);
+          type);
 
       if (!result[0] && !result[1])
         fail("Incorrect build initialization (" + getClassTypeString(i) 
@@ -668,12 +693,18 @@ public abstract class AbstractAssociatorTest
   public void testDatasetIntegrity() {
     boolean[]     result;
     int           i;
+    int           type;
     
-    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
       // does the Associator support this type of class at all?
       if (!canPredict(i))
         continue;
       
+      if (i == LAST_CLASSTYPE + 1)
+	type = CheckAssociator.NO_CLASS;
+      else
+	type = i;
+
       result = m_Tester.datasetIntegrity(
           m_NominalPredictors[i], 
           m_NumericPredictors[i], 
@@ -681,7 +712,7 @@ public abstract class AbstractAssociatorTest
           m_DatePredictors[i], 
           m_RelationalPredictors[i], 
           m_multiInstanceHandler, 
-          i,
+          type,
           m_handleMissingPredictors[i],
           m_handleMissingClass[i]);
 
@@ -694,10 +725,11 @@ public abstract class AbstractAssociatorTest
   /**
    * Builds a model using the current Associator using the given data and 
    * returns the produced output.
-   * TODO unified rules as output instead of toString() result???
+   * TODO: unified rules as output instead of toString() result???
    *
    * @param data 	the instances to test the Associator on
    * @return 		a String containing the output of the Associator.
+   * @throws Exception	if something goes wrong
    */
   protected String useAssociator(Instances data) throws Exception {
     Associator associator = null;
@@ -731,12 +763,15 @@ public abstract class AbstractAssociatorTest
    * object matches that in a reference version. When this test is
    * run without any pre-existing reference output, the reference version
    * is created.
+   * 
+   * @throws Exception 	if something goes wrong
    */
   public void testRegression() throws Exception {
     int		i;
     boolean	succeeded;
     Regression 	reg;
     Instances   train;
+    int		type;
     
     // don't bother if not working correctly
     if (m_Tester.hasClasspathProblems())
@@ -746,11 +781,16 @@ public abstract class AbstractAssociatorTest
     succeeded = false;
     train = null;
     
-    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE; i++) {
+    for (i = FIRST_CLASSTYPE; i <= LAST_CLASSTYPE + 1; i++) {
       // does the Associator support this type of class at all?
       if (!canPredict(i))
         continue;
         
+      if (i == LAST_CLASSTYPE + 1)
+	type = CheckAssociator.NO_CLASS;
+      else
+	type = i;
+
       train = m_Tester.makeTestDataset(
           42, m_Tester.getNumInstances(), 
   	  m_NominalPredictors[i] ? 2 : 0,
@@ -759,7 +799,7 @@ public abstract class AbstractAssociatorTest
           m_DatePredictors[i] ? 1 : 0,
           m_RelationalPredictors[i] ? 1 : 0,
           2, 
-          i,
+          type,
           m_multiInstanceHandler);
   
       try {
