@@ -47,7 +47,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class LogisticBase 
     extends Classifier 
@@ -931,6 +931,14 @@ public class LogisticBase
 		coefficients[j][attribute + 1] += slope;
 	    }
 	}
+        
+        // Need to multiply all coefficients by (J-1) / J
+        for (int j = 0; j < coefficients.length; j++) {
+          for (int i = 0; i < coefficients[0].length; i++) {
+            coefficients[j][i] *= (double)(m_numClasses - 1) / (double)m_numClasses;
+          }
+        }
+
 	return coefficients;
     }
 
