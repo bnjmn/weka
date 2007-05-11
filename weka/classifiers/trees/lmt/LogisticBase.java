@@ -33,7 +33,7 @@ import weka.filters.Filter;
  * and standalone logistic regression (weka.classifiers.functions.SimpleLogistic).
  *
  * @author Niels Landwehr
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 
 public class LogisticBase extends Classifier implements WeightedInstancesHandler{
@@ -708,6 +708,14 @@ public class LogisticBase extends Classifier implements WeightedInstancesHandler
 		coefficients[j][attribute + 1] += slope;
 	    }
 	}
+        
+        // Need to multiply all coefficients by (J-1) / J
+        for (int j = 0; j < coefficients.length; j++) {
+          for (int i = 0; i < coefficients[0].length; i++) {
+            coefficients[j][i] *= (double)(m_numClasses - 1) / (double)m_numClasses;
+          }
+        }
+
 	return coefficients;
     }
 

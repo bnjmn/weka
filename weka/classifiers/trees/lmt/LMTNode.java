@@ -45,7 +45,7 @@ class CompareNode implements Comparator{
  * 
  * 
  * @author Niels Landwehr 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 
 public class LMTNode extends LogisticBase {    
@@ -805,13 +805,14 @@ public class LMTNode extends LogisticBase {
 	//get coefficients from m_regressions: use method of LogisticBase
 	double[][] coefficients = super.getCoefficients();
 	//get coefficients from m_higherRegressions:
+        double constFactor = (double)(m_numClasses - 1) / (double)m_numClasses; // (J - 1)/J
 	for (int j = 0; j < m_numClasses; j++) {
 	    for (int i = 0; i < m_numHigherRegressions; i++) {		
 		double slope = m_higherRegressions[j][i].getSlope();
 		double intercept = m_higherRegressions[j][i].getIntercept();
 		int attribute = m_higherRegressions[j][i].getAttributeIndex();
-		coefficients[j][0] += intercept;
-		coefficients[j][attribute + 1] += slope;
+		coefficients[j][0] += constFactor * intercept;
+		coefficients[j][attribute + 1] += constFactor * slope;
 	    }
 	}
 	return coefficients;
