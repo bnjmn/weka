@@ -22,39 +22,37 @@
 
 package weka.core;
 
+import weka.core.converters.ArffLoader.ArffReader;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
-import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.Random;
 
 /**
  * Class for handling an ordered set of weighted instances. <p>
  *
- * Typical usage (code from the main() method of this class): <p>
- *
- * <code>
- * ... <br>
+ * Typical usage: <p>
+ * <pre>
+ * import weka.core.converters.ConverterUtils.DataSource;
+ * ...
  * 
- * // Read all the instances in the file <br>
- * reader = new FileReader(filename); <br>
- * instances = new Instances(reader); <br><br>
+ * // Read all the instances in the file (ARFF, CSV, XRFF, ...)
+ * DataSource source = new DataSource(filename);
+ * Instances instances = source.getDataSet();
  *
- * // Make the last attribute be the class <br>
- * instances.setClassIndex(instances.numAttributes() - 1); <br><br>
+ * // Make the last attribute be the class
+ * instances.setClassIndex(instances.numAttributes() - 1);
  * 
- * // Print header and instances. <br>
- * System.out.println("\nDataset:\n"); <br> 
- * System.out.println(instances); <br><br>
- *
- * ... <br>
- * </code><p>
+ * // Print header and instances.
+ * System.out.println("\nDataset:\n");
+ * System.out.println(instances);
+ * 
+ * ...
+ * </pre><p>
  *
  * All methods that change a set of instances are safe, ie. a change
  * of a set of instances does not affect any other sets of
@@ -63,7 +61,8 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.69 $ 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.70 $ 
  */
 public class Instances 
   implements Serializable {
@@ -72,16 +71,16 @@ public class Instances
   static final long serialVersionUID = -19412345060742748L;
   
   /** The filename extension that should be used for arff files */
-  public static String FILE_EXTENSION = ".arff";
+  public final static String FILE_EXTENSION = ".arff";
 
   /** The filename extension that should be used for bin. serialized instances files */
-  public static String SERIALIZED_OBJ_FILE_EXTENSION = ".bsi";
+  public final static String SERIALIZED_OBJ_FILE_EXTENSION = ".bsi";
 
   /** The keyword used to denote the start of an arff header */
-  static String ARFF_RELATION = "@relation";
+  public final static String ARFF_RELATION = "@relation";
 
   /** The keyword used to denote the start of the arff data section */
-  static String ARFF_DATA = "@data";
+  public final static String ARFF_DATA = "@data";
 
   /** The dataset's name. */
   protected /*@spec_public non_null@*/ String m_RelationName;         
@@ -99,12 +98,12 @@ public class Instances
   protected int m_ClassIndex;
   //@ protected invariant classIndex() == m_ClassIndex;
 
-  /** Buffer of values for sparse instance */
-  protected double[] m_ValueBuffer;
-
-  /** Buffer of indices for sparse instance */
-  protected int[] m_IndicesBuffer;
-
+  /** The lines read so far in case of incremental loading. Since the 
+   * StreamTokenizer will be re-initialized with every instance that is read,
+   * we have to keep track of the number of lines read so far. 
+   * @see #readInstance(Reader) */
+  protected int m_Lines = 0;
+  
   /**
    * Reads an ARFF file from a reader, and assigns a weight of
    * one to each instance. Lets the index of the class 
@@ -115,15 +114,10 @@ public class Instances
    * successfully
    */
   public Instances(/*@non_null@*/Reader reader) throws IOException {
-
-    StreamTokenizer tokenizer;
-
-    tokenizer = new StreamTokenizer(reader);
-    initTokenizer(tokenizer);
-    readHeader(tokenizer);
-    m_ClassIndex = -1;
-    m_Instances = new FastVector(1000);
-    while (getInstance(tokenizer, true)) {};
+    ArffReader arff = new ArffReader(reader);
+    Instances dataset = arff.getData();
+    initialize(dataset, dataset.numInstances());
+    dataset.copyInstances(0, this, dataset.numInstances());
     compactify();
   }
  
@@ -137,22 +131,21 @@ public class Instances
    * @throws IllegalArgumentException if the header is not read successfully
    * or the capacity is negative.
    * @throws IOException if there is a problem with the reader.
+   * @deprecated instead of using this method in conjunction with the
+   * <code>readInstance(Reader)</code> method, one should use the 
+   * <code>ArffLoader</code> or <code>DataSource</code> class instead.
+   * @see weka.core.converters.ArffLoader
+   * @see weka.core.converters.ConverterUtils.DataSource
    */
   //@ requires capacity >= 0;
   //@ ensures classIndex() == -1;
-  public Instances(/*@non_null@*/Reader reader, int capacity)
+  @Deprecated public Instances(/*@non_null@*/Reader reader, int capacity)
     throws IOException {
 
-    StreamTokenizer tokenizer;
-
-    if (capacity < 0) {
-      throw new IllegalArgumentException("Capacity has to be positive!");
-    }
-    tokenizer = new StreamTokenizer(reader); 
-    initTokenizer(tokenizer);
-    readHeader(tokenizer);
-    m_ClassIndex = -1;
-    m_Instances = new FastVector(capacity);
+    ArffReader arff = new ArffReader(reader, 0);
+    Instances header = arff.getStructure();
+    initialize(header, capacity);
+    m_Lines = arff.getLineNo();
   }
 
   /**
@@ -178,19 +171,28 @@ public class Instances
    * @param capacity the capacity of the new dataset 
    */
   public Instances(/*@non_null@*/Instances dataset, int capacity) {
-    
-    if (capacity < 0) {
+    initialize(dataset, capacity);
+  }
+
+  /**
+   * initializes with the header information of the given dataset and sets
+   * the capacity of the set of instances.
+   * 
+   * @param dataset the dataset to use as template
+   * @param capacity the number of rows to reserve
+   */
+  protected void initialize(Instances dataset, int capacity) {
+    if (capacity < 0)
       capacity = 0;
-    }
     
     // Strings only have to be "shallow" copied because
     // they can't be modified.
-    m_ClassIndex = dataset.m_ClassIndex;
+    m_ClassIndex   = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
-    m_Attributes = dataset.m_Attributes;
-    m_Instances = new FastVector(capacity);
+    m_Attributes   = dataset.m_Attributes;
+    m_Instances    = new FastVector(capacity);
   }
-
+  
   /**
    * Creates a new set of instances by copying a 
    * subset of another set.
@@ -876,14 +878,25 @@ public class Instances
    * @return false if end of file has been reached
    * @throws IOException if the information is not read 
    * successfully
+   * @deprecated instead of using this method in conjunction with the
+   * <code>readInstance(Reader)</code> method, one should use the 
+   * <code>ArffLoader</code> or <code>DataSource</code> class instead.
+   * @see weka.core.converters.ArffLoader
+   * @see weka.core.converters.ConverterUtils.DataSource
    */ 
-  public boolean readInstance(Reader reader) 
+  @Deprecated public boolean readInstance(Reader reader) 
        throws IOException {
 
-    StreamTokenizer tokenizer = new StreamTokenizer(reader);
-    
-    initTokenizer(tokenizer);
-    return getInstance(tokenizer, false);
+    ArffReader arff = new ArffReader(reader, this, m_Lines, 1);
+    Instance inst = arff.readInstance(false);
+    m_Lines = arff.getLineNo();
+    if (inst != null) {
+      add(inst);
+      return true;
+    }
+    else {
+      return false;
+    }
   }    
 
   /**
@@ -1528,418 +1541,6 @@ public class Instances
     }
     return result.toString();
   }
-  
-  /**
-   * Reads a single instance using the tokenizer and appends it
-   * to the dataset. Automatically expands the dataset if it
-   * is not large enough to hold the instance.
-   *
-   * @param tokenizer the tokenizer to be used
-   * @param flag if method should test for carriage return after 
-   * each instance
-   * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
-   * successfully
-   */ 
-  protected boolean getInstance(StreamTokenizer tokenizer, 
-				boolean flag) 
-       throws IOException {
-    
-    // Check if any attributes have been declared.
-    if (m_Attributes.size() == 0) {
-      errms(tokenizer,"no header information available");
-    }
-
-    // Check if end of file reached.
-    getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      return false;
-    }
-    
-    // Parse instance
-    if (tokenizer.ttype == '{') {
-      return getInstanceSparse(tokenizer, flag);
-    } else {
-      return getInstanceFull(tokenizer, flag);
-    }
-  }
-
-  /**
-   * Reads a single instance using the tokenizer and appends it
-   * to the dataset. Automatically expands the dataset if it
-   * is not large enough to hold the instance.
-   *
-   * @param tokenizer the tokenizer to be used
-   * @param flag if method should test for carriage return after 
-   * each instance
-   * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
-   * successfully
-   */ 
-  protected boolean getInstanceSparse(StreamTokenizer tokenizer, 
-				      boolean flag) 
-       throws IOException {
-
-    int valIndex, numValues = 0, maxIndex = -1;
-    
-    // Get values
-    do {
-      
-      // Get index
-      getIndex(tokenizer);
-      if (tokenizer.ttype == '}') {
-	break;
-      }
- 
-      // Is index valid?
-      try{
-	m_IndicesBuffer[numValues] = Integer.valueOf(tokenizer.sval).intValue();
-      } catch (NumberFormatException e) {
-	errms(tokenizer,"index number expected");
-      }
-      if (m_IndicesBuffer[numValues] <= maxIndex) {
-	errms(tokenizer,"indices have to be ordered");
-      }
-      if ((m_IndicesBuffer[numValues] < 0) || 
-	  (m_IndicesBuffer[numValues] >= numAttributes())) {
-	errms(tokenizer,"index out of bounds");
-      }
-      maxIndex = m_IndicesBuffer[numValues];
-
-      // Get value;
-      getNextToken(tokenizer);
-
-      // Check if value is missing.
-      if  (tokenizer.ttype == '?') {
-	m_ValueBuffer[numValues] = Instance.missingValue();
-      } else {
-
-	// Check if token is valid.
-	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
-	  errms(tokenizer,"not a valid value");
-	}
-        switch (attribute(m_IndicesBuffer[numValues]).type()) {
-          case Attribute.NOMINAL:
-            // Check if value appears in header.
-            valIndex = 
-              attribute(m_IndicesBuffer[numValues]).indexOfValue(tokenizer.sval);
-            if (valIndex == -1) {
-              errms(tokenizer,"nominal value not declared in header");
-            }
-            m_ValueBuffer[numValues] = (double)valIndex;
-            break;
-	case Attribute.NUMERIC:
-	  // Check if value is really a number.
-	  try{
-	    m_ValueBuffer[numValues] = Double.valueOf(tokenizer.sval).
-	      doubleValue();
-	  } catch (NumberFormatException e) {
-	    errms(tokenizer,"number expected");
-	  }
-          break;
-	case Attribute.STRING:
-	  m_ValueBuffer[numValues] = 
-	    attribute(m_IndicesBuffer[numValues]).addStringValue(tokenizer.sval);
-          break;
-        case Attribute.DATE:
-          try {
-            m_ValueBuffer[numValues] = 
-              attribute(m_IndicesBuffer[numValues]).parseDate(tokenizer.sval);
-          } catch (ParseException e) {
-            errms(tokenizer,"unparseable date: " + tokenizer.sval);
-          }
-          break;
-        case Attribute.RELATIONAL:
-          StringReader reader = new StringReader(tokenizer.sval);
-          StreamTokenizer innerTokenizer = new StreamTokenizer(reader);
-          initTokenizer(innerTokenizer);
-          Instances data = new Instances(attribute(m_IndicesBuffer[numValues]).relation(), 100);
-
-          // Allocate buffers in case sparse instances have to be read
-          data.m_ValueBuffer = new double[data.numAttributes()];
-          data.m_IndicesBuffer = new int[data.numAttributes()];
-
-          while (data.getInstance(innerTokenizer, true)) {};
-          data.compactify();
-          m_ValueBuffer[numValues] = attribute(m_IndicesBuffer[numValues]).addRelation(data);
-          break;
-        default:
-          errms(tokenizer,"unknown attribute type in column " + m_IndicesBuffer[numValues]);
-	}
-      }
-      numValues++;
-    } while (true);
-    if (flag) {
-      getLastToken(tokenizer,true);
-    }
-      
-    // Add instance to dataset
-    double[] tempValues = new double[numValues];
-    int[] tempIndices = new int[numValues];
-    System.arraycopy(m_ValueBuffer, 0, tempValues, 0, numValues);
-    System.arraycopy(m_IndicesBuffer, 0, tempIndices, 0, numValues);
-    add(new SparseInstance(1, tempValues, tempIndices, numAttributes()));
-    return true;
-  }
-
-  /**
-   * Reads a single instance using the tokenizer and appends it
-   * to the dataset. Automatically expands the dataset if it
-   * is not large enough to hold the instance.
-   *
-   * @param tokenizer the tokenizer to be used
-   * @param flag if method should test for carriage return after 
-   * each instance
-   * @return false if end of file has been reached
-   * @throws IOException if the information is not read 
-   * successfully
-   */ 
-  protected boolean getInstanceFull(StreamTokenizer tokenizer, 
-				    boolean flag) 
-       throws IOException {
-
-    double[] instance = new double[numAttributes()];
-    int index;
-    
-    // Get values for all attributes.
-    for (int i = 0; i < numAttributes(); i++){
-      
-      // Get next token
-      if (i > 0) {
-	getNextToken(tokenizer);
-      }
-            
-      // Check if value is missing.
-      if  (tokenizer.ttype == '?') {
-	instance[i] = Instance.missingValue();
-      } else {
-
-	// Check if token is valid.
-	if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
-	  errms(tokenizer,"not a valid value");
-	}
-        switch (attribute(i).type()) {
-        case Attribute.NOMINAL:
-	  // Check if value appears in header.
-	  index = attribute(i).indexOfValue(tokenizer.sval);
-	  if (index == -1) {
-	    errms(tokenizer,"nominal value not declared in header");
-	  }
-	  instance[i] = (double)index;
-          break;
-	case Attribute.NUMERIC:
-	  // Check if value is really a number.
-	  try{
-	    instance[i] = Double.valueOf(tokenizer.sval).
-	      doubleValue();
-	  } catch (NumberFormatException e) {
-	    errms(tokenizer,"number expected");
-	  }
-          break;
-	case Attribute.STRING:
-	  instance[i] = attribute(i).addStringValue(tokenizer.sval);
-          break;
-        case Attribute.DATE:
-          try {
-            instance[i] = attribute(i).parseDate(tokenizer.sval);
-          } catch (ParseException e) {
-            errms(tokenizer,"unparseable date: " + tokenizer.sval);
-          }
-          break;
-        case Attribute.RELATIONAL:
-          StringReader reader = new StringReader(tokenizer.sval);
-          StreamTokenizer innerTokenizer = new StreamTokenizer(reader);
-          initTokenizer(innerTokenizer);
-          Instances data = new Instances(attribute(i).relation(), 100);
-
-          // Allocate buffers in case sparse instances have to be read
-          data.m_ValueBuffer = new double[data.numAttributes()];
-          data.m_IndicesBuffer = new int[data.numAttributes()];
-
-          while (data.getInstance(innerTokenizer, true)) {};
-          data.compactify();
-          instance[i] = attribute(i).addRelation(data);
-          break;
-        default:
-          errms(tokenizer,"unknown attribute type in column " + i);
-	}
-      }
-    }
-    if (flag) {
-      getLastToken(tokenizer,true);
-    }
-      
-    // Add instance to dataset
-    add(new Instance(1, instance));
-    return true;
-  }
-
-  /**
-   * Reads and stores header of an ARFF file.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if the information is not read 
-   * successfully
-   */ 
-  protected void readHeader(StreamTokenizer tokenizer) 
-     throws IOException {
-    
-    // Get name of relation.
-    getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      errms(tokenizer,"premature end of file");
-    }
-    if (ARFF_RELATION.equalsIgnoreCase(tokenizer.sval)) {
-      getNextToken(tokenizer);
-      m_RelationName = tokenizer.sval;
-      getLastToken(tokenizer,false);
-    } else {
-      errms(tokenizer,"keyword " + ARFF_RELATION + " expected");
-    }
-
-    // Create vectors to hold information temporarily.
-    m_Attributes = new FastVector();
- 
-    // Get attribute declarations.
-    getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      errms(tokenizer,"premature end of file");
-    }
-
-    while (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
-      parseAttribute(tokenizer);
-    }
-
-    // Check if data part follows. We can't easily check for EOL.
-    if (!ARFF_DATA.equalsIgnoreCase(tokenizer.sval)) {
-      errms(tokenizer,"keyword " + ARFF_DATA + " expected");
-    }
-    
-    // Check if any attributes have been declared.
-    if (m_Attributes.size() == 0) {
-      errms(tokenizer,"no attributes declared");
-    }
-
-    // Allocate buffers in case sparse instances have to be read
-    m_ValueBuffer = new double[numAttributes()];
-    m_IndicesBuffer = new int[numAttributes()];
-  }
-
-  /**
-   * Parses the attribute declaration.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if the information is not read 
-   * successfully
-   */
-  protected void parseAttribute(StreamTokenizer tokenizer) 
-    throws IOException {
-
-    String attributeName;
-    FastVector attributeValues;
-
-    // Get attribute name.
-    getNextToken(tokenizer);
-    attributeName = tokenizer.sval;
-    getNextToken(tokenizer);
-    
-    // Check if attribute is nominal.
-    if (tokenizer.ttype == StreamTokenizer.TT_WORD) {
-      
-      // Attribute is real, integer, or string.
-      if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_REAL) ||
-          tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER) ||
-          tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
-        m_Attributes.addElement(new Attribute(attributeName, numAttributes()));
-        readTillEOL(tokenizer);
-      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
-        m_Attributes.
-          addElement(new Attribute(attributeName, (FastVector)null,
-                                   numAttributes()));
-        readTillEOL(tokenizer);
-      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
-        String format = null;
-        if (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
-          if ((tokenizer.ttype != StreamTokenizer.TT_WORD) &&
-              (tokenizer.ttype != '\'') &&
-              (tokenizer.ttype != '\"')) {
-            errms(tokenizer,"not a valid date format");
-          }
-          format = tokenizer.sval;
-          readTillEOL(tokenizer);
-        } else {
-          tokenizer.pushBack();
-        }
-        m_Attributes.addElement(new Attribute(attributeName, format,
-                                              numAttributes()));
-        
-      } else if (tokenizer.sval.equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_RELATIONAL)) {
-        readTillEOL(tokenizer);
-        
-        // Read attributes for subrelation
-        // First, save current set of attributes
-        FastVector atts = m_Attributes;
-        m_Attributes = new FastVector();
-        
-        // Now, read attributes until we hit end of declaration of relational value
-        getFirstToken(tokenizer);
-        if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-          errms(tokenizer,"premature end of file");
-        }
-        do {
-          if (Attribute.ARFF_ATTRIBUTE.equalsIgnoreCase(tokenizer.sval)) {
-            parseAttribute(tokenizer);
-          } else if (Attribute.ARFF_END_SUBRELATION.equalsIgnoreCase(tokenizer.sval)) {
-            getNextToken(tokenizer);
-            if (!attributeName.equalsIgnoreCase(tokenizer.sval)) {
-              errms(tokenizer, "declaration of subrelation " + attributeName + 
-                    " must be terminated by " + "@end " + attributeName);
-            }
-            break;
-          } else {
-            errms(tokenizer, "declaration of subrelation " + attributeName + 
-                  " must be terminated by " + "@end " + attributeName);
-          }
-        } while (true);
-        
-        // Make relation and restore original set of attributes
-        Instances relation = new Instances(attributeName, m_Attributes, 0);
-        m_Attributes = atts;
-        m_Attributes.addElement(new Attribute(attributeName, relation,
-                                              numAttributes()));
-      } else {
-        errms(tokenizer,"no valid attribute type or invalid "+
-              "enumeration");
-      }
-    } else {
-      
-      // Attribute is nominal.
-      attributeValues = new FastVector();
-      tokenizer.pushBack();
-      
-      // Get values for nominal attribute.
-      if (tokenizer.nextToken() != '{') {
-        errms(tokenizer,"{ expected at beginning of enumeration");
-      }
-      while (tokenizer.nextToken() != '}') {
-        if (tokenizer.ttype == StreamTokenizer.TT_EOL) {
-          errms(tokenizer,"} expected at end of enumeration");
-        } else {
-          attributeValues.addElement(tokenizer.sval);
-        }
-      }
-      if (attributeValues.size() == 0) {
-        errms(tokenizer,"no nominal values found");
-      }
-      m_Attributes.
-        addElement(new Attribute(attributeName, attributeValues,
-                                 numAttributes()));
-    }
-    getLastToken(tokenizer,false);
-    getFirstToken(tokenizer);
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF)
-      errms(tokenizer,"premature end of file");
-  }
 
   /**
    * Copies instances from one set to the end of another 
@@ -1959,117 +1560,12 @@ public class Instances
   }
   
   /**
-   * Throws error message with line number and last token read.
-   *
-   * @param theMsg the error message to be thrown
-   * @param tokenizer the stream tokenizer
-   * @throws IOException containing the error message
-   */
-  protected void errms(StreamTokenizer tokenizer, String theMsg) 
-       throws IOException {
-    
-    throw new IOException(theMsg + ", read " + tokenizer.toString());
-  }
-  
-  /**
    * Replaces the attribute information by a clone of
    * itself.
    */
   protected void freshAttributeInfo() {
 
     m_Attributes = (FastVector) m_Attributes.copyElements();
-  }
-
-  /**
-   * Gets next token, skipping empty lines.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if reading the next token fails
-   */
-  protected void getFirstToken(StreamTokenizer tokenizer) 
-    throws IOException {
-    
-    while (tokenizer.nextToken() == StreamTokenizer.TT_EOL){};
-    if ((tokenizer.ttype == '\'') ||
-	(tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))){
-      tokenizer.ttype = '?';
-    }
-  }
-
-  /**
-   * Gets index, checking for a premature and of line.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if it finds a premature end of line
-   */
-  protected void getIndex(StreamTokenizer tokenizer) throws IOException {
-    
-    if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
-      errms(tokenizer,"premature end of line");
-    }
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      errms(tokenizer,"premature end of file");
-    }
-  }
-  
-  /**
-   * Gets token and checks if its end of line.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if it doesn't find an end of line
-   */
-  protected void getLastToken(StreamTokenizer tokenizer, boolean endOfFileOk) 
-       throws IOException {
-
-    if ((tokenizer.nextToken() != StreamTokenizer.TT_EOL) &&
-	((tokenizer.ttype != StreamTokenizer.TT_EOF) || !endOfFileOk)) {
-      errms(tokenizer,"end of line expected");
-    }
-  }
-
-  /**
-   * Gets next token, checking for a premature and of line.
-   *
-   * @param tokenizer the stream tokenizer
-   * @throws IOException if it finds a premature end of line
-   */
-  protected void getNextToken(StreamTokenizer tokenizer) 
-       throws IOException {
-    
-    if (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
-      errms(tokenizer,"premature end of line");
-    }
-    if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
-      errms(tokenizer,"premature end of file");
-    } else if ((tokenizer.ttype == '\'') ||
-	       (tokenizer.ttype == '"')) {
-      tokenizer.ttype = StreamTokenizer.TT_WORD;
-    } else if ((tokenizer.ttype == StreamTokenizer.TT_WORD) &&
-	       (tokenizer.sval.equals("?"))){
-      tokenizer.ttype = '?';
-    }
-  }
-	
-  /**
-   * Initializes the StreamTokenizer used for reading the ARFF file.
-   *
-   * @param tokenizer the stream tokenizer
-   */
-  protected void initTokenizer(StreamTokenizer tokenizer){
-
-    tokenizer.resetSyntax();         
-    tokenizer.whitespaceChars(0, ' ');    
-    tokenizer.wordChars(' '+1,'\u00FF');
-    tokenizer.whitespaceChars(',',',');
-    tokenizer.commentChar('%');
-    tokenizer.quoteChar('"');
-    tokenizer.quoteChar('\'');
-    tokenizer.ordinaryChar('{');
-    tokenizer.ordinaryChar('}');
-    tokenizer.eolIsSignificant(true);
   }
  
   /**
@@ -2144,18 +1640,6 @@ public class Instances
       quickSort(attIndex, left, middle);
       quickSort(attIndex, middle + 1, right);
     }
-  }
-
-  /**
-   * Reads and skips all tokens before next end of line token.
-   *
-   * @param tokenizer the stream tokenizer
-   */
-  protected void readTillEOL(StreamTokenizer tokenizer) 
-       throws IOException {
-    
-    while (tokenizer.nextToken() != StreamTokenizer.TT_EOL) {};
-    tokenizer.pushBack();
   }
   
   /**
