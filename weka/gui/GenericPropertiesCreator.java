@@ -75,7 +75,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.ClassDiscovery
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class GenericPropertiesCreator {
   
@@ -110,7 +110,7 @@ public class GenericPropertiesCreator {
   /** The name of the properties file for the static GenericObjectEditor 
    * (<code>USE_DYNAMIC</code> = <code>false</code>) 
    * @see GenericObjectEditor 
-   * @see GenericObjectEditor#USE_DYNAMIC 
+   * @see #USE_DYNAMIC 
    */
   protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
   
