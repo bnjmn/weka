@@ -87,7 +87,7 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class Attribute
   implements Copyable, Serializable {
@@ -120,28 +120,28 @@ public class Attribute
   public static final int ORDERING_MODULO   = 2;
 
   /** The keyword used to denote the start of an arff attribute declaration */
-  static String ARFF_ATTRIBUTE = "@attribute";
+  public final static String ARFF_ATTRIBUTE = "@attribute";
 
   /** A keyword used to denote a numeric attribute */
-  static String ARFF_ATTRIBUTE_INTEGER = "integer";
+  public final static String ARFF_ATTRIBUTE_INTEGER = "integer";
 
   /** A keyword used to denote a numeric attribute */
-  static String ARFF_ATTRIBUTE_REAL = "real";
+  public final static String ARFF_ATTRIBUTE_REAL = "real";
 
   /** A keyword used to denote a numeric attribute */
-  static String ARFF_ATTRIBUTE_NUMERIC = "numeric";
+  public final static String ARFF_ATTRIBUTE_NUMERIC = "numeric";
 
   /** The keyword used to denote a string attribute */
-  static String ARFF_ATTRIBUTE_STRING = "string";
+  public final static String ARFF_ATTRIBUTE_STRING = "string";
 
   /** The keyword used to denote a date attribute */
-  static String ARFF_ATTRIBUTE_DATE = "date";
+  public final static String ARFF_ATTRIBUTE_DATE = "date";
 
   /** The keyword used to denote a relation-valued attribute */
-  static String ARFF_ATTRIBUTE_RELATIONAL = "relational";
+  public final static String ARFF_ATTRIBUTE_RELATIONAL = "relational";
 
   /** The keyword used to denote the end of the declaration of a subrelation */
-  static String ARFF_END_SUBRELATION = "@end";
+  public final static String ARFF_END_SUBRELATION = "@end";
 
   /** Strings longer than this will be stored compressed. */
   private static final int STRING_COMPRESS_THRESHOLD = 200;
@@ -733,7 +733,7 @@ public class Attribute
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  Attribute(String attributeName, int index) {
+  public Attribute(String attributeName, int index) {
 
     this(attributeName);
     m_Index = index;
@@ -752,7 +752,7 @@ public class Attribute
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  Attribute(String attributeName, String dateFormat, 
+  public Attribute(String attributeName, String dateFormat, 
 	    int index) {
 
     this(attributeName, dateFormat);
@@ -774,7 +774,7 @@ public class Attribute
   //@ requires index >= 0;
   //@ ensures  m_Name == attributeName;
   //@ ensures  m_Index == index;
-  Attribute(String attributeName, FastVector attributeValues, 
+  public Attribute(String attributeName, FastVector attributeValues, 
 	    int index) {
 
     this(attributeName, attributeValues);
