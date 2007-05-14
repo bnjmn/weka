@@ -31,7 +31,7 @@ import weka.core.converters.DatabaseSaver;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  *
  */
 public class Saver
@@ -174,15 +174,24 @@ public class Saver
     else
         m_isDBSaver = false;
   }
-  
-  
+
+  /**
+   * makes sure that the filename is valid, i.e., replaces slashes,
+   * backslashes and colons with underscores ("_").
+   * 
+   * @param filename	the filename to cleanse
+   * @return		the cleansed filename
+   */
+  protected String sanitizeFilename(String filename) {
+    return filename.replaceAll("\\\\", "_").replaceAll(":", "_").replaceAll("/", "_");
+  }
   
   /** Method reacts to a dataset event and starts the writing process in batch mode
    * @param e a dataset event
    */  
   public synchronized void acceptDataSet(DataSetEvent e) {
   
-      m_fileName = e.getDataSet().relationName();
+      m_fileName = sanitizeFilename(e.getDataSet().relationName());
       m_dataSet = e.getDataSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -205,7 +214,7 @@ public class Saver
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
   
-      m_fileName = e.getTestSet().relationName();
+      m_fileName = sanitizeFilename(e.getTestSet().relationName());
       m_dataSet = e.getTestSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -234,7 +243,7 @@ public class Saver
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
   
-      m_fileName = e.getTrainingSet().relationName();
+      m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
       m_dataSet = e.getTrainingSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
            ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -279,7 +288,7 @@ public class Saver
       if(e.getStatus() == e.FORMAT_AVAILABLE){
         m_Saver.setRetrieval(m_Saver.INCREMENTAL);
         m_structure = e.getStructure();
-        m_fileName = m_structure.relationName();
+        m_fileName = sanitizeFilename(m_structure.relationName());
         m_Saver.setInstances(m_structure);
         if(m_isDBSaver)
             if(((DatabaseSaver)m_Saver).getRelationForTableName())
