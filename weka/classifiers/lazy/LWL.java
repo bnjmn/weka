@@ -28,8 +28,8 @@ import weka.classifiers.UpdateableClassifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.LinearNN;
-import weka.core.NearestNeighbourSearch;
+import weka.core.neighboursearch.LinearNNSearch;
+import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -81,7 +81,7 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -A
- *  The nearest neighbour search algorithm to use (default: LinearNN).
+ *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
  * </pre>
  * 
  * <pre> -K &lt;number of neighbours&gt;
@@ -113,33 +113,35 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @author Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
+ * @version $Revision: 1.21 $ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
   implements UpdateableClassifier, WeightedInstancesHandler, 
              TechnicalInformationHandler {
 
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 1979797405383665815L;
 
   /** The training instances used for classification. */
   protected Instances m_Train;
     
-  /** The number of neighbours used to select the kernel bandwidth */
+  /** The number of neighbours used to select the kernel bandwidth. */
   protected int m_kNN = -1;
 
-  /** The weighting kernel method currently selected */
+  /** The weighting kernel method currently selected. */
   protected int m_WeightKernel = LINEAR;
 
-  /** True if m_kNN should be set to all instances */
+  /** True if m_kNN should be set to all instances. */
   protected boolean m_UseAllK = true;
   
-  /** The nearest neighbour search algorithm to use. (Default: LinearNN) */
-  protected NearestNeighbourSearch m_NNSearch = new LinearNN();
+  /** The nearest neighbour search algorithm to use. 
+   * (Default: weka.core.neighboursearch.LinearNNSearch) 
+   */
+  protected NearestNeighbourSearch m_NNSearch =  new LinearNNSearch();
   
-  /** The available kernel weighting methods */
+  /** The available kernel weighting methods. */
   protected static final int LINEAR       = 0;
   protected static final int EPANECHNIKOV = 1;
   protected static final int TRICUBE      = 2;  
@@ -147,11 +149,11 @@ public class LWL
   protected static final int GAUSS        = 4;
   protected static final int CONSTANT     = 5;
 
-  /** a ZeroR model in case no model can be built from the data */
+  /** a ZeroR model in case no model can be built from the data. */
   protected Classifier m_ZeroR;
     
   /**
-   * Returns a string describing classifier
+   * Returns a string describing classifier.
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -197,8 +199,7 @@ public class LWL
   /**
    * Constructor.
    */
-  public LWL() {
-    
+  public LWL() {    
     m_Classifier = new weka.classifiers.trees.DecisionStump();
   }
 
@@ -213,6 +214,26 @@ public class LWL
   }
 
   /**
+   * Returns an enumeration of the additional measure names 
+   * produced by the neighbour search algorithm.
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    return m_NNSearch.enumerateMeasures();
+  }
+  
+  /**
+   * Returns the value of the named measure from the 
+   * neighbour search algorithm.
+   * @param additionalMeasureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @throws IllegalArgumentException if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) {
+    return m_NNSearch.getMeasure(additionalMeasureName);
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    *
    * @return an enumeration of all the available options.
@@ -221,7 +242,8 @@ public class LWL
     
     Vector newVector = new Vector(3);
     newVector.addElement(new Option("\tThe nearest neighbour search " +
-                                    "algorithm to use (default: LinearNN).\n",
+                                    "algorithm to use " +
+                                    "(default: weka.core.neighboursearch.LinearNNSearch).\n",
                                     "A", 0, "-A"));
     newVector.addElement(new Option("\tSet the number of neighbours used to set"
 				    +" the kernel bandwidth.\n"
@@ -248,7 +270,7 @@ public class LWL
    * Valid options are: <p/>
    * 
    * <pre> -A
-   *  The nearest neighbour search algorithm to use (default: LinearNN).
+   *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
    * </pre>
    * 
    * <pre> -K &lt;number of neighbours&gt;
@@ -314,7 +336,7 @@ public class LWL
                                         );
     }
     else 
-      this.setNearestNeighbourSearchAlgorithm(new LinearNN());
+      this.setNearestNeighbourSearchAlgorithm(new LinearNNSearch());
 
     super.setOptions(options);
   }
@@ -348,7 +370,7 @@ public class LWL
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -388,7 +410,7 @@ public class LWL
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -431,7 +453,7 @@ public class LWL
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -517,7 +539,7 @@ public class LWL
   }
 
   /**
-   * Adds the supplied instance to the training set
+   * Adds the supplied instance to the training set.
    *
    * @param instance the instance to add
    * @throws Exception if instance could not be incorporated
@@ -568,9 +590,14 @@ public class LWL
     double distances[] = m_NNSearch.getDistances();
 
     if (m_Debug) {
-      System.out.println("Kept " + neighbours.numInstances() + " out of " + 
-                         m_Train.numInstances() + " instances");
+      System.out.println("Test Instance: "+instance);
+      System.out.println("For "+k+" kept " + neighbours.numInstances() + " out of " + 
+                         m_Train.numInstances() + " instances.");
     }
+    
+    //IF LinearNN has skipped so much that <k neighbours are remaining.
+    if(k>distances.length)
+      k = distances.length;
 
     if (m_Debug) {
       System.out.println("Instance Distances");

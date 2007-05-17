@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  */
 public class Instance
   implements Copyable, Serializable {
@@ -96,7 +96,7 @@ public class Instance
    * values and the weight are to be copied 
    */
   //@ ensures m_Dataset == null;
-  protected Instance(/*@non_null@*/ Instance instance) {
+  public Instance(/*@non_null@*/ Instance instance) {
     
     m_AttValues = instance.m_AttValues;
     m_Weight = instance.m_Weight;

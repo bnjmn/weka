@@ -8,7 +8,7 @@
 # - full classname has to be provided
 #
 # author:  FracPete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.5 $
+# version: $Revision: 1.6 $
 
 # general
 java.lang.Object[]=weka.gui.GenericArrayEditor
@@ -17,14 +17,16 @@ java.text.SimpleDateFormat=weka.gui.SimpleDateFormatEditor
 
 # core
 weka.core.SelectedTag=weka.gui.SelectedTagEditor
-weka.core.NearestNeighbourSearch=weka.gui.GenericObjectEditor
-weka.core.KDTree=weka.gui.GenericObjectEditor
 weka.core.DistanceFunction=weka.gui.GenericObjectEditor
-weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
-weka.core.converters.Loader=weka.gui.GenericObjectEditor
-weka.core.converters.Saver=weka.gui.GenericObjectEditor
 weka.core.Range=weka.gui.GenericObjectEditor
 weka.core.Range[]=weka.gui.GenericArrayEditor
+weka.core.converters.Loader=weka.gui.GenericObjectEditor
+weka.core.converters.Saver=weka.gui.GenericObjectEditor
+weka.core.neighboursearch.NearestNeighbourSearch=weka.gui.GenericObjectEditor
+weka.core.neighboursearch.balltrees.BallTreeConstructor=weka.gui.GenericObjectEditor
+weka.core.neighboursearch.balltrees.BallSplitter=weka.gui.GenericObjectEditor
+weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=weka.gui.GenericObjectEditor
+weka.core.stemmers.Stemmer=weka.gui.GenericObjectEditor
 weka.core.tokenizers.Tokenizer=weka.gui.GenericObjectEditor
 
 # estimators
@@ -66,4 +68,3 @@ weka.clusterers.DensityBasedClusterer=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASEvaluation=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASSearch=weka.gui.GenericObjectEditor
 weka.attributeSelection.UnsupervisedSubsetEvaluator=weka.gui.GenericObjectEditor
-
