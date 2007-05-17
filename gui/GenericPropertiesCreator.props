@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.14 $
+# Version: $Revision: 1.15 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
@@ -73,8 +73,20 @@ weka.core.converters.Saver=\
  weka.core.converters
 
 # Lists the search algorithms for nearest neighbour search
-weka.core.NearestNeighbourSearch =\
- weka.core
+weka.core.neighboursearch.NearestNeighbourSearch =\
+ weka.core.neighboursearch
+
+# Lists the ball tree constructors
+weka.core.neighboursearch.balltrees.BallTreeConstructor =\
+ weka.core.neighboursearch.balltrees
+
+# Lists the ball splitters
+weka.core.neighboursearch.balltrees.BallSplitter =\
+ weka.core.neighboursearch.balltrees
+ 
+# Lists the kd tree splitters
+weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter =\
+ weka.core.neighboursearch.kdtrees
 
 # Lists the distance functions for use nearest neighbour search
 weka.core.DistanceFunction =\

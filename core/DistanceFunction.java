@@ -22,29 +22,52 @@
 
 package weka.core;
 
+import weka.core.neighboursearch.PerformanceStats;
+
 /**
  * Interface for any class that can compute and return distances between two
  * instances.
  *
  * @author  Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public interface DistanceFunction extends OptionHandler {
-    
-  /** Sets the instances */
+
+  /**
+   * Sets the instances
+   * 
+   * @param insts 	the instances to use
+   */
   public void setInstances(Instances insts);
-  
-  /** returns the instances currently set */
+
+  /**
+   * returns the instances currently set
+   * 
+   * @return 		the current instances
+   */
   public Instances getInstances();
 
   /**
    * Calculates the distance between two instances.
-   * @param first the first instance
-   * @param second the second instance
-   * @return the distance between the two given instances,
+   * 
+   * @param first 	the first instance
+   * @param second 	the second instance
+   * @return 		the distance between the two given instances
    */
- public double distance(Instance first, Instance second) throws Exception;
- 
+  public double distance(Instance first, Instance second);
+
+  /**
+   * Calculates the distance between two instances.
+   * 
+   * @param first 	the first instance
+   * @param second 	the second instance
+   * @param stats 	the performance stats object
+   * @return 		the distance between the two given instances
+   * @throws Exception 	if calculation fails
+   */
+  public double distance(Instance first, Instance second, PerformanceStats stats) 
+      throws Exception;
+
   /**
    * Calculates the distance between two instances. Offers speed up (if the 
    * distance function class in use supports it) in nearest neighbour search by 
@@ -52,17 +75,37 @@ public interface DistanceFunction extends OptionHandler {
    * distance function class, post processing of the distances by 
    * postProcessDistances(double []) may be required if this function is used.
    *
-   * @param first the first instance
-   * @param second the second instance
+   * @param first 	the first instance
+   * @param second 	the second instance
    * @param cutOffValue If the distance being calculated becomes larger than 
    *                    cutOffValue then the rest of the calculation is 
    *                    discarded.
-   * @return the distance between the two given instances or Double.MAX_VALUE
-   * if the distance being calculated becomes larger than cutOffValue. 
+   * @return 		the distance between the two given instances or 
+   * 			Double.POSITIVE_INFINITY if the distance being 
+   * 			calculated becomes larger than cutOffValue. 
+   */
+  public double distance(Instance first, Instance second, double cutOffValue);
+
+  /**
+   * Calculates the distance between two instances. Offers speed up (if the 
+   * distance function class in use supports it) in nearest neighbour search by 
+   * taking into account the cutOff or maximum distance. Depending on the 
+   * distance function class, post processing of the distances by 
+   * postProcessDistances(double []) may be required if this function is used.
+   *
+   * @param first 	the first instance
+   * @param second 	the second instance
+   * @param cutOffValue If the distance being calculated becomes larger than 
+   *                    cutOffValue then the rest of the calculation is 
+   *                    discarded.
+   * @param stats 	the performance stats object
+   * @return 		the distance between the two given instances or 
+   * 			Double.POSITIVE_INFINITY if the distance being 
+   * 			calculated becomes larger than cutOffValue. 
    */
   public double distance(Instance first, Instance second, 
-                                   double cutOffValue) throws Exception;
-  
+      double cutOffValue, PerformanceStats stats);
+
   /**
    * Does post processing of the distances (if necessary) returned by
    * distance(distance(Instance first, Instance second, double cutOffValue). It
@@ -71,12 +114,16 @@ public interface DistanceFunction extends OptionHandler {
    * may not return correct distances using the cutOffValue distance function to 
    * minimize the inaccuracies resulting from floating point comparison and 
    * manipulation.
+   * 
+   * @param distances	the distances to post-process
    */
   public void postProcessDistances(double distances[]);
-  
+
   /**
    * Update the distance function (if necessary) for the newly added instance.
+   * 
+   * @param ins		the instance to add
    */
-  public void update(Instance ins) throws Exception;
-  
+  public void update(Instance ins);
+
 }

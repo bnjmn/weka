@@ -28,7 +28,7 @@ import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.KDTree;
+import weka.core.neighboursearch.KDTree;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
@@ -106,10 +106,14 @@ import java.util.Vector;
  *  distance value for binary attributes
  *  (default 1.0).</pre>
  * 
+ * <pre> -use-kdtree
+ *  Uses the KDTree internally
+ *  (default no).</pre>
+ * 
  * <pre> -K &lt;KDTree class specification&gt;
  *  Full class name of KDTree class to use, followed
  *  by scheme options.
- *  eg: "weka.core.KDTree -P"
+ *  eg: "weka.core.neighboursearch.kdtrees.KDTree -P"
  *  (default no KDTree class used).</pre>
  * 
  * <pre> -C &lt;value&gt;
@@ -144,7 +148,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -157,16 +161,16 @@ public class XMeans
    * make BIC-Score replaceable by other scores
    */
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -7941793078404132616L;
   
-  /** training instances */
+  /** training instances. */
   protected Instances m_Instances = null;
 
-  /** model information, should increase readability */
+  /** model information, should increase readability. */
   protected Instances m_Model = null;
   
-  /** replace missing values in training instances */
+  /** replace missing values in training instances. */
   protected ReplaceMissingValues m_ReplaceMissingFilter;
 
   /**
@@ -175,101 +179,101 @@ public class XMeans
    */
   protected double m_BinValue = 1.0;
 
-  /** BIC-Score of the current model */
+  /** BIC-Score of the current model. */
   protected double m_Bic = Double.MIN_VALUE;
 
-  /** Distortion  */
+  /** Distortion.  */
   protected double[] m_Mle = null;
 
-  /** maximum overall iterations */
+  /** maximum overall iterations. */
   protected int m_MaxIterations = 1;
 
   /**
    * maximum iterations to perform Kmeans part 
-   * if negative, iterations are not checked
+   * if negative, iterations are not checked.
    */
   protected int m_MaxKMeans = 1000;
 
-  /** see above, but for kMeans of splitted clusters
+  /** see above, but for kMeans of splitted clusters.
    */
   protected int m_MaxKMeansForChildren = 1000;
 
-  /** The actual number of clusters */
+  /** The actual number of clusters. */
   protected int m_NumClusters = 2;
 
-  /** min number of clusters to generate */
+  /** min number of clusters to generate. */
   protected int m_MinNumClusters = 2;
 
-  /** max number of clusters to generate */
+  /** max number of clusters to generate. */
   protected int m_MaxNumClusters = 4;
 
-  /** the distance function used */
+  /** the distance function used. */
   protected DistanceFunction m_DistanceF = new EuclideanDistance();
 
-  /** cluster centers */
+  /** cluster centers. */
   protected Instances m_ClusterCenters;
 
-  /** file name of the output file for the cluster centers */
+  /** file name of the output file for the cluster centers. */
   protected File m_InputCenterFile = new File(System.getProperty("user.dir"));
 
   /* --> DebugVectors - USED FOR DEBUGGING */
-  /** input file for the random vectors --> USED FOR DEBUGGING */
+  /** input file for the random vectors --> USED FOR DEBUGGING. */
   protected Reader m_DebugVectorsInput = null;
-  /** the index for the current debug vector */
+  /** the index for the current debug vector. */
   protected int m_DebugVectorsIndex = 0;
-  /** all the debug vectors */
+  /** all the debug vectors. */
   protected Instances m_DebugVectors = null;
 
-  /** file name of the input file for the random vectors */
+  /** file name of the input file for the random vectors. */
   protected File m_DebugVectorsFile = new File(System.getProperty("user.dir"));
 
-  /** input file for the cluster centers */
+  /** input file for the cluster centers. */
   protected Reader m_CenterInput = null;
     
-  /** file name of the output file for the cluster centers */
+  /** file name of the output file for the cluster centers. */
   protected File m_OutputCenterFile = new File(System.getProperty("user.dir"));
   
-  /** output file for the cluster centers */
+  /** output file for the cluster centers. */
   protected PrintWriter m_CenterOutput = null;
     
   /**
-   * temporary variable holding cluster assignments while iterating
+   * temporary variable holding cluster assignments while iterating.
    */
   protected int[] m_ClusterAssignments;
 
   /** cutoff factor - percentage of splits done in Improve-Structure part
-     only relevant, if all children lost */ 
+     only relevant, if all children lost. */ 
   protected double m_CutOffFactor = 0.5;
 
-  /** Index in ranges for LOW */
+  /** Index in ranges for LOW. */
   public static int R_LOW = 0;
-  /** Index in ranges for HIGH */
+  /** Index in ranges for HIGH. */
   public static int R_HIGH = 1;
-  /** Index in ranges for WIDTH */
+  /** Index in ranges for WIDTH. */
   public static int R_WIDTH = 2;
 
   /**
-   * KDTrees class if KDTrees are used
+   * KDTrees class if KDTrees are used.
    */
   protected KDTree m_KDTree = new KDTree();
   
   /** whether to use the KDTree (the KDTree is only initialized to be 
-   * configurable from the GUI) */
+   * configurable from the GUI). */
   protected boolean m_UseKDTree = false;
 
-  /** counts iterations done in main loop */
+  /** counts iterations done in main loop. */
   protected int m_IterationCount = 0;
 
-  /** counter to say how often kMeans was stopped by loop counter */
+  /** counter to say how often kMeans was stopped by loop counter. */
   protected int m_KMeansStopped = 0;
 
-  /** Number of splits prepared */
+  /** Number of splits prepared. */
   protected int m_NumSplits = 0;
 
-  /** Number of splits accepted (including cutoff factor decisions) */
+  /** Number of splits accepted (including cutoff factor decisions). */
   protected int m_NumSplitsDone = 0;
 
-  /** Number of splits accepted just because of cutoff factor */
+  /** Number of splits accepted just because of cutoff factor. */
   protected int m_NumSplitsStillDone = 0;
 
   /**
@@ -277,30 +281,30 @@ public class XMeans
    */
   protected int m_DebugLevel = 0;
   
-  /** print the centers */
+  /** print the centers. */
   public static int D_PRINTCENTERS = 1;
-  /** follows the splitting of the centers */
+  /** follows the splitting of the centers. */
   public static int D_FOLLOWSPLIT = 2;
-  /** have a closer look at converge children */
+  /** have a closer look at converge children. */
   public static int D_CONVCHCLOSER = 3;
-  /** check on random vectors */
+  /** check on random vectors. */
   public static int D_RANDOMVECTOR = 4;
-  /** check on kdtree */
+  /** check on kdtree. */
   public static int D_KDTREE = 5;
-  /** follow iterations */
+  /** follow iterations. */
   public static int D_ITERCOUNT = 6;
-  /** functions were maybe misused  */
+  /** functions were maybe misused.  */
   public static int D_METH_MISUSE = 80; 
-  /** for current debug  */
+  /** for current debug.  */
   public static int D_CURR = 88;
-  /** general debugging */
+  /** general debugging. */
   public static int D_GENERAL = 99;
 
-  /** Flag: I'm debugging */
+  /** Flag: I'm debugging. */
   public boolean m_CurrDebugFlag = true;
 
   /**
-   * the default constructor
+   * the default constructor.
    */
   public XMeans() {
     super();
@@ -310,7 +314,7 @@ public class XMeans
   }
   
   /**
-   * Returns a string describing this clusterer
+   * Returns a string describing this clusterer.
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -787,25 +791,28 @@ public class XMeans
   }
 
   /**
-   * Returns new centers.
-   * Depending on splitWon: if true takes children, if false
-   * takes parent = current center.
-   * @param splitWon array of boolean to indicate to take split or not
-   * @param splitCenters list of splitted centers
+   * Returns new centers. Depending on splitWon: if true takes children, if
+   * false takes parent = current center.
+   * 
+   * @param splitWon
+   *          array of boolean to indicate to take split or not
+   * @param splitCenters
+   *          list of splitted centers
    * @return the new centers
    */
-  protected Instances newCentersAfterSplit(boolean[] splitWon, 
-                                         Instances splitCenters) {
+  protected Instances newCentersAfterSplit(boolean[] splitWon,
+      Instances splitCenters) {
     Instances newCenters = new Instances(splitCenters, 0);
 
     int sIndex = 0;
     for (int i = 0; i < splitWon.length; i++) {
       if (splitWon[i]) {
         m_NumSplitsDone++;
-	newCenters.add(splitCenters.instance(sIndex++));
-	newCenters.add(splitCenters.instance(sIndex++));
+        newCenters.add(splitCenters.instance(sIndex++));
+        newCenters.add(splitCenters.instance(sIndex++));
       } else {
-	sIndex++; sIndex++;
+        sIndex++;
+        sIndex++;
         newCenters.add(m_ClusterCenters.instance(i));
       }
     }
@@ -813,10 +820,13 @@ public class XMeans
   }
 
   /**
-   * Controls that counter does not exceed max iteration value.
-   * Special function for kmeans iterations.
-   * @param iterationCount current value of counter
-   * @param max maximum value for counter
+   * Controls that counter does not exceed max iteration value. Special function
+   * for kmeans iterations.
+   * 
+   * @param iterationCount
+   *          current value of counter
+   * @param max
+   *          maximum value for counter
    * @return true if iteration should be stopped
    */ 
   protected boolean stopKMeansIteration(int iterationCount, int max) {
@@ -830,7 +840,7 @@ public class XMeans
 
   /**
    * Checks if iterationCount has to be checked and if yes
-   * (this means max is > 0) compares it with max
+   * (this means max is > 0) compares it with max.
    * 
    * @param iterationCount the current iteration count
    * @param max the maximum number of iterations
@@ -1210,22 +1220,21 @@ public class XMeans
    * 
    * @param random the random number generator
    * @param instances of the region
-   * @param model 
+   * @param model the model for the centers 
+   * (should be the same as that of instances)
    * @return a pair of new centers
    */
   protected Instances splitCenters(Random random,
 				 Instances instances,
 				 Instances model) {
     Instances children = new Instances(model, 2);
-    int instIndex = Math.abs(random.nextInt()) % 
-      instances.numInstances();
+    int instIndex = Math.abs(random.nextInt()) % instances.numInstances();
     children.add(instances.instance(instIndex));
     int instIndex2 = instIndex;
     int count = 0;
     while ((instIndex2 == instIndex) && count < 10) {
       count++;
-      instIndex2 = Math.abs(random.nextInt()) %
-	instances.numInstances();
+      instIndex2 = Math.abs(random.nextInt()) % instances.numInstances();
     }
     children.add(instances.instance(instIndex2));
     
@@ -1392,31 +1401,31 @@ public class XMeans
    * @param centers the centers
    * @return the list of distortions distortion.
    */
-  protected double[] distortion(int[][] instOfCent, Instances centers) 
-    throws Exception {
-    double[] distortion = new double [centers.numInstances()];
+  protected double[] distortion(int[][] instOfCent, Instances centers) {
+    double[] distortion = new double[centers.numInstances()];
     for (int i = 0; i < centers.numInstances(); i++) {
       distortion[i] = 0.0;
       for (int j = 0; j < instOfCent[i].length; j++) {
-	distortion[i] += m_DistanceF.distance(
-                                 m_Instances.instance(instOfCent[i][j]), 
-				 centers.instance(i));
+        distortion[i] += m_DistanceF.distance(m_Instances
+            .instance(instOfCent[i][j]), centers.instance(i));
       }
     }
-    /* diff not done in x-means
-    res *= 1.0 / (count - centers.numInstances());
-    */
+    /*
+     * diff not done in x-means res *= 1.0 / (count - centers.numInstances());
+     */
     return distortion;
   }
   
   /**
    * Clusters an instance.
-   * @param instance the instance to assign a cluster to.
-   * @param centers the centers to cluster the instance to.
+   * 
+   * @param instance
+   *          the instance to assign a cluster to.
+   * @param centers
+   *          the centers to cluster the instance to.
    * @return a cluster index.
    */
-  protected int clusterProcessedInstance(Instance instance, Instances centers)
-throws Exception{
+  protected int clusterProcessedInstance(Instance instance, Instances centers) {
     
     double minDist = Integer.MAX_VALUE;
     int bestCluster = 0;
@@ -1424,28 +1433,30 @@ throws Exception{
       double dist = m_DistanceF.distance(instance, centers.instance(i));
 
       if (dist < minDist) {
-	minDist = dist;     
-	bestCluster = i;    
-      }                     
+        minDist = dist;
+        bestCluster = i;
+      }
     }
-;                         
+    ;
     return bestCluster;
   }
   
   /**
    * Clusters an instance that has been through the filters.
-   *
-   * @param instance the instance to assign a cluster to
+   * 
+   * @param instance
+   *          the instance to assign a cluster to
    * @return a cluster number
    */
-  protected int clusterProcessedInstance(Instance instance) throws Exception {
+  protected int clusterProcessedInstance(Instance instance) {
     double minDist = Integer.MAX_VALUE;
     int bestCluster = 0;
     for (int i = 0; i < m_NumClusters; i++) {
-      double dist = m_DistanceF.distance(instance, m_ClusterCenters.instance(i));
+      double dist = m_DistanceF
+          .distance(instance, m_ClusterCenters.instance(i));
       if (dist < minDist) {
-	minDist = dist;
-	bestCluster = i;
+        minDist = dist;
+        bestCluster = i;
       }
     }
     return bestCluster;
@@ -1525,7 +1536,7 @@ throws Exception{
     result.addElement(new Option(
 	"\tFull class name of KDTree class to use, followed\n"
 	+ "\tby scheme options.\n"
-	+ "\teg: \"weka.core.KDTree -P\"\n"
+	+ "\teg: \"weka.core.neighboursearch.kdtrees.KDTree -P\"\n"
 	+ "\t(default no KDTree class used).",
 	"K", 1, "-K <KDTree class specification>"));
     
@@ -1566,7 +1577,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property 
    */
   public String minNumClustersTipText() {
@@ -1593,7 +1604,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property 
    */
   public String maxNumClustersTipText() {
@@ -1619,7 +1630,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property 
    */
   public String maxIterationsTipText() {
@@ -1647,7 +1658,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property 
    */
   public String maxKMeansTipText() {
@@ -1655,7 +1666,7 @@ throws Exception{
   }
 
   /**
-   * Set the maximum number of iterations to perform in KMeans
+   * Set the maximum number of iterations to perform in KMeans.
    * @param i the number of iterations
    */
   public void setMaxKMeans(int i) {
@@ -1672,7 +1683,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property 
    */
   public String maxKMeansForChildrenTipText() {
@@ -1684,7 +1695,7 @@ throws Exception{
    * on the child centers.
    * @param i the number of iterations
    */
-  public void setMaxKMeansForChildren(int i) throws Exception {
+  public void setMaxKMeansForChildren(int i) {
     m_MaxKMeansForChildren = i;
   }
 
@@ -1697,7 +1708,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property 
    */
   public String cutOffFactorTipText() {
@@ -1708,7 +1719,7 @@ throws Exception{
    * Sets a new cutoff factor.
    * @param i the new cutoff factor
    */
-  public void setCutOffFactor(double i) throws Exception {
+  public void setCutOffFactor(double i) {
     m_CutOffFactor = i;
   }
 
@@ -1721,7 +1732,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -1739,7 +1750,7 @@ throws Exception{
   }
 
   /**
-   * Sets the distance value between true and false of binary attributes 
+   * Sets the distance value between true and false of binary attributes.
    * and  "same" and "different" of nominal attributes    
    * @param value the distance
    */
@@ -1748,7 +1759,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1758,7 +1769,7 @@ throws Exception{
   }
 
   /**
-   * gets the "binary" distance value 
+   * gets the "binary" distance value.
    * @param distanceF the distance function with all options set
    */
   public void setDistanceF(DistanceFunction distanceF) {
@@ -1775,7 +1786,7 @@ throws Exception{
 
   /**
    * Gets the distance function specification string, which contains the 
-   * class name of the distance function class and any options to it
+   * class name of the distance function class and any options to it.
    *
    * @return the distance function specification string
    */
@@ -1790,7 +1801,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1819,6 +1830,8 @@ throws Exception{
   
   /**
    * Initialises the debug vector input.
+   * @throws Exception if there is error 
+   * opening the debug input file.
    */
   public void initDebugVectorsInput() throws Exception {
     m_DebugVectorsInput = 
@@ -1829,7 +1842,10 @@ throws Exception{
 
   /**
    * Read an instance from debug vectors file.
-   * @param model the data model for the instance
+   * @param model the data model for the instance.
+   * @throws Exception if there are no debug vector 
+   * in m_DebugVectors.
+   * @return the next debug vector.
    */
   public Instance getNextDebugVectorsInstance(Instances model) 
     throws Exception {
@@ -1842,7 +1858,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1870,7 +1886,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1898,7 +1914,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1925,7 +1941,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1954,7 +1970,7 @@ throws Exception{
 
   /**
    * Gets the KDTree specification string, which contains the class name of
-   * the KDTree class and any options to the KDTree
+   * the KDTree class and any options to the KDTree.
    *
    * @return the KDTree string.
    */
@@ -1969,7 +1985,7 @@ throws Exception{
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -1999,7 +2015,7 @@ throws Exception{
    * Checks the instances.
    * No checks in this KDTree but it calls the check of the distance function.
    */
-  protected void checkInstances () throws Exception {
+  protected void checkInstances () {
     
    // m_DistanceF.checkInstances();
   }
@@ -2036,10 +2052,14 @@ throws Exception{
    *  distance value for binary attributes
    *  (default 1.0).</pre>
    * 
+   * <pre> -use-kdtree
+   *  Uses the KDTree internally
+   *  (default no).</pre>
+   * 
    * <pre> -K &lt;KDTree class specification&gt;
    *  Full class name of KDTree class to use, followed
    *  by scheme options.
-   *  eg: "weka.core.KDTree -P"
+   *  eg: "weka.core.neighboursearch.kdtrees.KDTree -P"
    *  (default no KDTree class used).</pre>
    * 
    * <pre> -C &lt;value&gt;

@@ -28,8 +28,8 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.LinearNN;
-import weka.core.NearestNeighbourSearch;
+import weka.core.neighboursearch.LinearNNSearch;
+import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SelectedTag;
@@ -41,6 +41,7 @@ import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.AdditionalMeasureProducer;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -99,7 +100,7 @@ import java.util.Vector;
  *  on the training data (use when k &gt; 1)</pre>
  * 
  * <pre> -A
- *  The nearest neighbour search algorithm to use (default: LinearNN).
+ *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
  * </pre>
  * 
  <!-- options-end -->
@@ -107,37 +108,37 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class IBk 
   extends Classifier 
   implements OptionHandler, UpdateableClassifier, WeightedInstancesHandler,
-             TechnicalInformationHandler {
+             TechnicalInformationHandler, AdditionalMeasureProducer {
 
-  /** for serialiation */
+  /** for serialization. */
   static final long serialVersionUID = -3080186098777067172L;
 
   /** The training instances used for classification. */
   protected Instances m_Train;
 
-  /** The number of class values (or 1 if predicting numeric) */
+  /** The number of class values (or 1 if predicting numeric). */
   protected int m_NumClasses;
 
-  /** The class attribute type */
+  /** The class attribute type. */
   protected int m_ClassType;
 
-  /** The number of neighbours to use for classification (currently) */
+  /** The number of neighbours to use for classification (currently). */
   protected int m_kNN;
 
   /**
    * The value of kNN provided by the user. This may differ from
-   * m_kNN if cross-validation is being used
+   * m_kNN if cross-validation is being used.
    */
   protected int m_kNNUpper;
 
   /**
    * Whether the value of k selected by cross validation has
-   * been invalidated by a change in the training instances
+   * been invalidated by a change in the training instances.
    */
   protected boolean m_kNNValid;
 
@@ -149,35 +150,35 @@ public class IBk
    */
   protected int m_WindowSize;
 
-  /** Whether the neighbours should be distance-weighted */
+  /** Whether the neighbours should be distance-weighted. */
   protected int m_DistanceWeighting;
 
-  /** Whether to select k by cross validation */
+  /** Whether to select k by cross validation. */
   protected boolean m_CrossValidate;
 
   /**
    * Whether to minimise mean squared error rather than mean absolute
-   * error when cross-validating on numeric prediction tasks
+   * error when cross-validating on numeric prediction tasks.
    */
   protected boolean m_MeanSquared;
 
-  /** no weighting */
+  /** no weighting. */
   public static final int WEIGHT_NONE = 1;
-  /** weight by 1/distance */
+  /** weight by 1/distance. */
   public static final int WEIGHT_INVERSE = 2;
-  /** weight by 1-distance */
+  /** weight by 1-distance. */
   public static final int WEIGHT_SIMILARITY = 4;
-  /** possible instance weighting methods */
+  /** possible instance weighting methods. */
   public static final Tag [] TAGS_WEIGHTING = {
     new Tag(WEIGHT_NONE, "No distance weighting"),
     new Tag(WEIGHT_INVERSE, "Weight by 1/distance"),
     new Tag(WEIGHT_SIMILARITY, "Weight by 1-distance")
   };
   
-  /** for nearest-neighbor search */
-  protected NearestNeighbourSearch m_NNSearch = new LinearNN();
+  /** for nearest-neighbor search. */
+  protected NearestNeighbourSearch m_NNSearch = new LinearNNSearch();
 
-  /** The number of attributes the contribute to a prediction */
+  /** The number of attributes the contribute to a prediction. */
   protected double m_NumAttributesUsed;
   
   /**
@@ -203,7 +204,7 @@ public class IBk
   }
   
   /**
-   * Returns a string describing classifier
+   * Returns a string describing classifier.
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -238,7 +239,7 @@ public class IBk
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -268,7 +269,7 @@ public class IBk
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -306,7 +307,7 @@ public class IBk
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -340,7 +341,7 @@ public class IBk
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -373,7 +374,7 @@ public class IBk
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -385,7 +386,7 @@ public class IBk
   
   /**
    * Gets whether hold-one-out cross-validation will be used
-   * to select the best k value
+   * to select the best k value.
    *
    * @return true if cross-validation will be used.
    */
@@ -396,7 +397,7 @@ public class IBk
   
   /**
    * Sets whether hold-one-out cross-validation will be used
-   * to select the best k value
+   * to select the best k value.
    *
    * @param newCrossValidate true if cross-validation should be used.
    */
@@ -406,12 +407,13 @@ public class IBk
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String nearestNeighbourSearchAlgorithmTipText() {
-    return "The nearest neighbour search algorithm to use (Default: LinearNN).";
+    return "The nearest neighbour search algorithm to use " +
+    	   "(Default: weka.core.neighboursearch.LinearNNSearch).";
   }
   
   /**
@@ -432,7 +434,7 @@ public class IBk
   }
    
   /**
-   * Get the number of training instances the classifier is currently using
+   * Get the number of training instances the classifier is currently using.
    * 
    * @return the number of training instances the classifier is currently using
    */
@@ -474,7 +476,7 @@ public class IBk
    * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
-
+    
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
@@ -503,12 +505,13 @@ public class IBk
     }
     
     m_NNSearch.setInstances(m_Train);
+
     // Invalidate any currently cross-validation selected k
     m_kNNValid = false;
   }
 
   /**
-   * Adds the supplied instance to the training set
+   * Adds the supplied instance to the training set.
    *
    * @param instance the instance to add
    * @throws Exception if instance could not be incorporated
@@ -571,20 +574,9 @@ public class IBk
     Instances neighbours = m_NNSearch.kNearestNeighbours(instance, m_kNN);
     double [] distances = m_NNSearch.getDistances();
     double [] distribution = makeDistribution( neighbours, distances );
-    
-    //debug
-//    int maxIndex = Utils.maxIndex(distribution);
-//    if(instance.toString().startsWith("10,4,3,1,3,3,6,5,2,?")) {
-//      System.out.println("Target: "+instance+" "+m_Train.attribute(m_Train.classIndex()).value(maxIndex)+" found "+neighbours.numInstances()+" neighbours\n");
-//      for(int k=0; k<neighbours.numInstances(); k++) {
-//        System.out.println(instNum+", "+neighbours.instance(k)+", distance "+ //"Node: instance "+neighbours.instance(k)+", distance "+
-//        distances[k]);
-//      } instNum++;
-//      System.out.println("");
-//    }
+
     return distribution;
   }
- 
 
   /**
    * Returns an enumeration describing the available options.
@@ -608,11 +600,11 @@ public class IBk
 	      "\t(Default = 1)",
 	      "K", 1,"-K <number of neighbors>"));
     newVector.addElement(new Option(
-              "\tMinimise mean squared error rather than mean absolute\n"+
+          "\tMinimise mean squared error rather than mean absolute\n"+
 	      "\terror when using -X option with numeric prediction.",
 	      "E", 0,"-E"));
     newVector.addElement(new Option(
-              "\tMaximum number of training instances maintained.\n"+
+          "\tMaximum number of training instances maintained.\n"+
 	      "\tTraining instances are dropped FIFO. (Default = no window)",
 	      "W", 1,"-W <window size>"));
     newVector.addElement(new Option(
@@ -622,7 +614,7 @@ public class IBk
 	      "X", 0,"-X"));
     newVector.addElement(new Option(
 	      "\tThe nearest neighbour search algorithm to use "+
-              "(default: LinearNN).\n",
+          "(default: weka.core.neighboursearch.LinearNNSearch).\n",
 	      "A", 0, "-A"));
 
     return newVector.elements();
@@ -660,7 +652,7 @@ public class IBk
    *  on the training data (use when k &gt; 1)</pre>
    * 
    * <pre> -A
-   *  The nearest neighbour search algorithm to use (default: LinearNN).
+   *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
    * </pre>
    * 
    <!-- options-end -->
@@ -709,7 +701,7 @@ public class IBk
                                         );
     }
     else 
-      this.setNearestNeighbourSearchAlgorithm(new LinearNN());
+      this.setNearestNeighbourSearchAlgorithm(new LinearNNSearch());
     
     Utils.checkForRemainingOptions(options);
   }
@@ -747,6 +739,27 @@ public class IBk
     return options;
   }
 
+  /**
+   * Returns an enumeration of the additional measure names 
+   * produced by the neighbour search algorithm.
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    return m_NNSearch.enumerateMeasures();
+  }
+  
+  /**
+   * Returns the value of the named measure from the 
+   * neighbour search algorithm.
+   * @param additionalMeasureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @throws IllegalArgumentException if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) {
+    return m_NNSearch.getMeasure(additionalMeasureName);
+  }
+  
+  
   /**
    * Returns a description of this classifier.
    *
@@ -795,7 +808,7 @@ public class IBk
   }
   
   /**
-   * Turn the list of nearest neighbors into a probability distribution
+   * Turn the list of nearest neighbors into a probability distribution.
    *
    * @param neighbours the list of nearest neighboring instances
    * @param distances the distances of the neighbors
@@ -864,6 +877,11 @@ public class IBk
   protected void crossValidate() {
 
     try {
+      if (m_NNSearch instanceof weka.core.neighboursearch.CoverTree)
+	throw new Exception("CoverTree doesn't support hold-one-out "+
+			    "cross-validation. Use some other NN " +
+			    "method.");
+
       double [] performanceStats = new double [m_kNNUpper];
       double [] performanceStatsSq = new double [m_kNNUpper];
 
