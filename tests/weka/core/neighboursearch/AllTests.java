@@ -15,63 +15,34 @@
  */
 
 /*
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 University of Waikato 
  */
 
-package weka.core;
+package weka.core.neighboursearch;
 
 import weka.test.WekaTestSuite;
 
-import java.util.Vector;
-
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Test class for all core classes. Run from the command line with: <p/>
- * java weka.core.AllTests
+ * Test class for all neighboursearch. Run from the command line with: <p/>
+ * java weka.core.neighboursearch.AllTests
  *
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.1 $
  */
 public class AllTests 
   extends WekaTestSuite {
 
-  /**
-   * generates all the tests
-   * 
-   * @return		all the tests
-   */
   public static Test suite() {
     TestSuite suite = new TestSuite();
-    
-    // all test in core package
-    Vector packages = new Vector();
-    packages.add("weka.core");
-    suite.addTest(suite(TestCase.class.getName(), packages));
 
-    // all OptionHandler's
-    // TODO: fix all errors
-    //suite.addTest(OptionHandlersTest.suite());
-    
-    // converters
-    suite.addTest(weka.core.converters.AllTests.suite());
-    
-    // neighboursearch
-    suite.addTest(weka.core.neighboursearch.AllTests.suite());
-    
-    // tokenizers
-    suite.addTest(weka.core.tokenizers.AllTests.suite());
+    suite.addTest(suite("weka.core.neighboursearch.NearestNeighbourSearch"));
 
     return suite;
   }
 
-  /**
-   * for running the tests from commandline
-   * 
-   * @param args	the commandline arguments - ignored
-   */
   public static void main(String []args) {
     junit.textui.TestRunner.run(suite());
   }
