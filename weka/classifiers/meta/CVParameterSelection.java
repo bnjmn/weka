@@ -111,7 +111,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $ 
+ * @version $Revision: 1.35 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -535,6 +535,15 @@ public class CVParameterSelection
     return options;
   }
 
+  /**
+   * Returns (a copy of) the best options found for the classifier.
+   * 
+   * @return the best options
+   */
+  public String[] getBestClassifierOptions() {
+    return (String[]) m_BestClassifierOptions.clone();
+  }
+  
   /**
    * Returns default capabilities of the classifier.
    *
