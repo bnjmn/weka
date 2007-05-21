@@ -32,7 +32,7 @@ import weka.estimators.Estimator;
  * Symbolic probability estimator based on symbol counts and a prior.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class DiscreteEstimatorBayes extends Estimator
   implements  Scoreable {
@@ -134,54 +134,56 @@ public class DiscreteEstimatorBayes extends Estimator
    * @param nType score type
    * @return the score
    */
-  public double logScore(int nType) {
-    double fScore = 0.0;
+  public double logScore(int nType, int nCardinality) {
+	    double fScore = 0.0;
 
-    switch (nType) {
+	    switch (nType) {
 
-    case (Scoreable.BAYES): {
-      for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
-	fScore += Statistics.lnGamma(m_Counts[iSymbol]);
-      } 
-
-      fScore -= Statistics.lnGamma(m_SumOfCounts);
-      if (m_fPrior != 0.0) {
-	      fScore -= m_nSymbols * Statistics.lnGamma(m_fPrior);
-    	  fScore += Statistics.lnGamma(m_nSymbols * m_fPrior);
-      }
-    } 
-
-      break;
-	  case (Scoreable.BDeu): {
-	  for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
+	    case (Scoreable.BAYES): {
+	      for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
 		fScore += Statistics.lnGamma(m_Counts[iSymbol]);
+	      } 
+
+	      fScore -= Statistics.lnGamma(m_SumOfCounts);
+	      if (m_fPrior != 0.0) {
+		      fScore -= m_nSymbols * Statistics.lnGamma(m_fPrior);
+	    	  fScore += Statistics.lnGamma(m_nSymbols * m_fPrior);
+	      }
+	    } 
+
+	      break;
+		  case (Scoreable.BDeu): {
+		  for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
+			fScore += Statistics.lnGamma(m_Counts[iSymbol]);
+		  } 
+
+		  fScore -= Statistics.lnGamma(m_SumOfCounts);
+		  //fScore -= m_nSymbols * Statistics.lnGamma(1.0);
+		  //fScore += Statistics.lnGamma(m_nSymbols * 1.0);
+	      fScore -= m_nSymbols * Statistics.lnGamma(1.0/(m_nSymbols * nCardinality));
+	      fScore += Statistics.lnGamma(1.0/nCardinality);
+		} 
+		  break;
+
+	    case (Scoreable.MDL):
+
+	    case (Scoreable.AIC):
+
+	    case (Scoreable.ENTROPY): {
+	      for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
+		double fP = getProbability(iSymbol);
+
+		fScore += m_Counts[iSymbol] * Math.log(fP);
+	      } 
+	    } 
+
+	      break;
+
+	    default: {}
+	    }
+
+	    return fScore;
 	  } 
-
-	  fScore -= Statistics.lnGamma(m_SumOfCounts);
-	  fScore -= m_nSymbols * Statistics.lnGamma(1.0);
-	  fScore += Statistics.lnGamma(m_nSymbols * 1.0);
-	} 
-	  break;
-
-    case (Scoreable.MDL):
-
-    case (Scoreable.AIC):
-
-    case (Scoreable.ENTROPY): {
-      for (int iSymbol = 0; iSymbol < m_nSymbols; iSymbol++) {
-	double fP = getProbability(iSymbol);
-
-	fScore += m_Counts[iSymbol] * Math.log(fP);
-      } 
-    } 
-
-      break;
-
-    default: {}
-    }
-
-    return fScore;
-  } 
 
   /**
    * Display a representation of this estimator
