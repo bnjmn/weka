@@ -57,7 +57,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -112,6 +112,7 @@ public class LocalScoreSearchAlgorithm
 	 * @return log score.
 	 */
     public double logScore(int nType) {
+    	if (m_BayesNet.m_Distributions == null) {return 0;}
         if (nType < 0) {
             nType = m_nScoreType;
         }
@@ -121,8 +122,9 @@ public class LocalScoreSearchAlgorithm
         Instances instances = m_BayesNet.m_Instances;
 
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            for (int iParent = 0; iParent < m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
-                fLogScore += ((Scoreable) m_BayesNet.m_Distributions[iAttribute][iParent]).logScore(nType);
+        	int nCardinality = m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents();
+            for (int iParent = 0; iParent < nCardinality; iParent++) {
+                fLogScore += ((Scoreable) m_BayesNet.m_Distributions[iAttribute][iParent]).logScore(nType, nCardinality);
             }
 
             switch (nType) {
