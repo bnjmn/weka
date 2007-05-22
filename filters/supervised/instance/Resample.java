@@ -40,7 +40,7 @@ import java.util.Vector;
 /** 
  <!-- globalinfo-start -->
  * Produces a random subsample of a dataset using either sampling with replacement or without replacement.<br/>
- * The original dataset must fit entirely in memory. The number of instances in the generated dataset may be specified. The dataset must have a nominal class attribute. If not, use the unsupervised version. The filter can be made to maintain the class distribution in the subsample, or to bias the class distribution toward a uniform distribution. When used in batch mode (i.e. in the FilteredClassifier), subsequent batches are NOTE resampled.
+ * The original dataset must fit entirely in memory. The number of instances in the generated dataset may be specified. The dataset must have a nominal class attribute. If not, use the unsupervised version. The filter can be made to maintain the class distribution in the subsample, or to bias the class distribution toward a uniform distribution. When used in batch mode (i.e. in the FilteredClassifier), subsequent batches are NOT resampled.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -70,7 +70,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.11 $ 
  */
 public class Resample
   extends Filter 
@@ -112,7 +112,7 @@ public class Resample
       + "attribute. If not, use the unsupervised version. The filter can be "
       + "made to maintain the class distribution in the subsample, or to bias "
       + "the class distribution toward a uniform distribution. When used in batch "
-      + "mode (i.e. in the FilteredClassifier), subsequent batches are NOTE resampled.";
+      + "mode (i.e. in the FilteredClassifier), subsequent batches are NOT resampled.";
   }
 
   /**
