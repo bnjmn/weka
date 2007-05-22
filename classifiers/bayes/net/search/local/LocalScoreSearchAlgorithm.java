@@ -57,7 +57,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -316,8 +316,8 @@ public class LocalScoreSearchAlgorithm
                     }
                     fLogScore -= Statistics.lnGamma(nSumOfCounts);
 
-                    fLogScore -= numValues * Statistics.lnGamma(1.0);
-                    fLogScore += Statistics.lnGamma(numValues * 1.0);
+                    fLogScore -= numValues * Statistics.lnGamma(1.0/(numValues * nCardinality));
+                    fLogScore += Statistics.lnGamma(1.0/nCardinality);
                 }
 	                break;
 
@@ -414,8 +414,8 @@ public class LocalScoreSearchAlgorithm
 					}
 					fLogScore -= Statistics.lnGamma(nSumOfCounts);
 
-					fLogScore -= numValues * Statistics.lnGamma(1.0);
-					fLogScore += Statistics.lnGamma(numValues * 1.0);
+					fLogScore -= numValues * Statistics.lnGamma(1.0/(nCardinality * numValues));
+					fLogScore += Statistics.lnGamma(1.0/ nCardinality);
 				}
 					break;
 
