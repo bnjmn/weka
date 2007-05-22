@@ -16,7 +16,7 @@
 
 /*
  * Stack.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006 Alina Beygelzimer and Sham Kakade and John Langford
  */
 
 package weka.core.neighboursearch.covertrees;
@@ -31,8 +31,11 @@ import java.util.List;
  * 
  * @param <T> The type of elements to be stored in 
  * the stack.
- * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @author Alina Beygelzimer (original C++ code)
+ * @author Sham Kakade (original C++ code)
+ * @author John Langford (original C++ code)
+ * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz) (Java port)
+ * @version $Revision: 1.2 $
  */
 public class Stack<T>
   implements Serializable {
