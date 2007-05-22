@@ -41,7 +41,7 @@ import java.util.Enumeration;
  * conditional independence based search algorithms).
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 
@@ -93,8 +93,9 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
         Instances instances = m_BayesNet.m_Instances;
 
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            for (int iParent = 0; iParent < m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents(); iParent++) {
-                fLogScore += ((Scoreable) m_BayesNet.m_Distributions[iAttribute][iParent]).logScore(nType);
+       	    int nCardinality = m_BayesNet.getParentSet(iAttribute).getCardinalityOfParents();
+            for (int iParent = 0; iParent < nCardinality; iParent++) {
+                fLogScore += ((Scoreable) m_BayesNet.m_Distributions[iAttribute][iParent]).logScore(nType, nCardinality);
             }
 
             switch (nType) {
@@ -281,9 +282,9 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
                         }
                     }
                     fLogScore -= Statistics.lnGamma(nSumOfCounts);
+					fLogScore -= numValues * Statistics.lnGamma(1.0/(numValues * nCardinality));
+					fLogScore += Statistics.lnGamma(1.0/nCardinality);
 
-                    fLogScore -= numValues * Statistics.lnGamma(1.0);
-                    fLogScore += Statistics.lnGamma(numValues * 1.0);
                 }
 	                break;
 
@@ -380,8 +381,8 @@ public class LocalScoreSearchAlgorithm extends SearchAlgorithm {
 					}
 					fLogScore -= Statistics.lnGamma(nSumOfCounts);
 
-					fLogScore -= numValues * Statistics.lnGamma(1.0);
-					fLogScore += Statistics.lnGamma(numValues * 1.0);
+					fLogScore -= numValues * Statistics.lnGamma(1.0/(numValues * nCardinality));
+					fLogScore += Statistics.lnGamma(1.0/nCardinality);
 				}
 					break;
 
