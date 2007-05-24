@@ -121,7 +121,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.38 $
+ * @version $Revision: 1.39 $
  */
 public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -545,7 +545,7 @@ public class Bagging
 	// determine predictions for instance
 	int voteCount = 0;
 	for (int j = 0; j < m_Classifiers.length; j++) {
-	  if (!inBag[j][i])
+	  if (inBag[j][i])
 	    continue;
 	  
 	  voteCount++;
