@@ -27,7 +27,11 @@ import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Copyright;
 import weka.core.Instances;
 import weka.core.Memory;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
 import weka.core.SystemInfo;
+import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.gui.arffviewer.ArffViewerMainPanel;
@@ -50,12 +54,17 @@ import weka.gui.visualize.VisualizePanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -91,11 +100,23 @@ import javax.swing.event.InternalFrameEvent;
 /**
  * Menu-based GUI for Weka, replacement for the GUIChooser.
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -gui &lt;MDI|SDI&gt;
+ *  Determines the layout of the GUI:
+ *  MDI = MDI Layout
+ *  SDI = SDI Layout
+ *  (default: MDI)</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class Main
-  extends JFrame {
+  extends JFrame
+  implements OptionHandler {
   
   /** for serialization */
   private static final long serialVersionUID = 1453813254824253849L;
@@ -104,7 +125,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -153,16 +174,16 @@ public class Main
   }
   
   /**
-   * Specialized JInternalFrame class.
+   * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.10 $
+   * @version $Revision: 1.11 $
    */
-  public static class ChildFrame
-    extends JInternalFrame {
+  public static class ChildFrameSDI 
+    extends JFrame {
     
     /** for serialization */
-    private static final long serialVersionUID = 3772573515346899959L;
+    private static final long serialVersionUID = 8588293938686425618L;
     
     /** the parent frame */
     protected Main m_Parent;
@@ -173,13 +194,13 @@ public class Main
      * @param parent	the parent frame
      * @param title	the title of the frame
      */
-    public ChildFrame(Main parent, String title) {
-      super(title, true, true, true, true);
+    public ChildFrameSDI(Main parent, String title) {
+      super(title);
       
       m_Parent = parent;
 
-      addInternalFrameListener(new InternalFrameAdapter() {
-	public void internalFrameActivated(InternalFrameEvent e) {
+      addWindowListener(new WindowAdapter() {
+	public void windowActivated(WindowEvent e) {
 	  // update title of parent
 	  if (getParentFrame() != null)
 	    getParentFrame().createTitle(getTitle());
@@ -189,16 +210,7 @@ public class Main
       // add to parent
       if (getParentFrame() != null) {
 	getParentFrame().addChildFrame(this);
-	getParentFrame().jDesktopPane.add(this);
-      }
-      
-      // display frame
-      setVisible(true);
-      try {
-	setSelected(true);
-      }
-      catch (Exception e) {
-	e.printStackTrace();
+	setIconImage(getParentFrame().getIconImage());
       }
     }
     
@@ -224,8 +236,84 @@ public class Main
     }
   }
   
+  /**
+   * Specialized JInternalFrame class.
+   * 
+   * @author  fracpete (fracpete at waikato dot ac dot nz)
+   * @version $Revision: 1.11 $
+   */
+  public static class ChildFrameMDI
+    extends JInternalFrame {
+    
+    /** for serialization */
+    private static final long serialVersionUID = 3772573515346899959L;
+    
+    /** the parent frame */
+    protected Main m_Parent;
+    
+    /**
+     * constructs a new internal frame that knows about its parent
+     * 
+     * @param parent	the parent frame
+     * @param title	the title of the frame
+     */
+    public ChildFrameMDI(Main parent, String title) {
+      super(title, true, true, true, true);
+      
+      m_Parent = parent;
+
+      addInternalFrameListener(new InternalFrameAdapter() {
+	public void internalFrameActivated(InternalFrameEvent e) {
+	  // update title of parent
+	  if (getParentFrame() != null)
+	    getParentFrame().createTitle(getTitle());
+	}
+      });
+      
+      // add to parent
+      if (getParentFrame() != null) {
+	getParentFrame().addChildFrame(this);
+	getParentFrame().jDesktopPane.add(this);
+      }
+    }
+    
+    /**
+     * returns the parent frame, can be null
+     * 
+     * @return		the parent frame
+     */
+    public Main getParentFrame() {
+      return m_Parent;
+    }
+    
+    /**
+     * de-registers the child frame with the parent first
+     */
+    public void dispose() {
+      if (getParentFrame() != null) {
+	getParentFrame().removeChildFrame(this);
+	getParentFrame().createTitle("");
+      }
+      
+      super.dispose();
+    }
+  }
+
+  /** displays the GUI as MDI */
+  public final static int GUI_MDI = 0;
+  /** displays the GUI as SDI */
+  public final static int GUI_SDI = 1;
+  /** GUI tags */
+  public static final Tag[] TAGS_GUI = {
+    new Tag(GUI_MDI, "MDI", "MDI Layout"),
+    new Tag(GUI_SDI, "SDI", "SDI Layout")
+ };
+  
   /** the frame itself */
   protected Main m_Self;
+  
+  /** the type of GUI to display */
+  protected int m_GUIType = GUI_MDI;
   
   /** variable for the Main class which would be set to null by the memory 
    *  monitoring thread to free up some memory if we running out of memory */
@@ -242,7 +330,7 @@ public class Main
   protected static Memory m_Memory = new Memory(true);
   
   /** contains the child frames (title &lt;-&gt; object) */
-  protected HashSet<ChildFrame> m_ChildFrames = new HashSet<ChildFrame>();
+  protected HashSet<Container> m_ChildFrames = new HashSet<Container>();
 
   /** The frame of the LogWindow */
   protected static LogWindow m_LogWindow = new LogWindow();
@@ -285,8 +373,9 @@ public class Main
   private JMenuItem jMenuItemApplicationsExplorer;
   private JMenuItem jMenuItemProgramExit;
   private JMenuItem jMenuItemProgramLogWindow;
-  private JMenuItem jMenuItemProgramPreferences;
+  private JMenuItem jMenuItemProgramPreferences;  // TODO: see below
   private JMenu jMenuProgram;
+  private JMenu jMenuExtensions;
   private JMenu jMenuWindows;
   private JMenuBar jMenuBar;
   
@@ -295,28 +384,167 @@ public class Main
    */
   public Main() {
     super();
+  }
+  
+  /**
+   * creates a frame (depending on m_GUIType) and returns it
+   * 
+   * @param parent		the parent of the generated frame
+   * @param title		the title of the frame
+   * @param c			the component to place, can be null
+   * @param layout		the layout to use, e.g., BorderLayout
+   * @param layoutConstraints	the layout constraints, e.g., BorderLayout.CENTER
+   * @param width		the width of the frame, ignored if -1
+   * @param height		the height of the frame, ignored if -1
+   * @param menu		an optional menu
+   * @param listener		if true a default listener is added
+   * @param visible		if true then the frame is made visible immediately
+   * @return			the generated frame
+   * @see 			#m_GUIType
+   */
+  protected Container createFrame(
+      Main parent, String title, Component c, LayoutManager layout, 
+      Object layoutConstraints, int width, int height, JMenuBar menu,
+      boolean listener, boolean visible) {
+
+    Container result = null;
     
-    initGUI();
+    if (m_GUIType == GUI_MDI) {
+      final ChildFrameMDI frame = new ChildFrameMDI(parent, title);
+      
+      // layout
+      frame.setLayout(layout);
+      if (c != null)
+	frame.getContentPane().add(c, layoutConstraints);
+      
+      // menu
+      frame.setJMenuBar(menu);
+      
+      // size
+      frame.pack();
+      if ((width > -1) && (height > -1))
+	frame.setSize(width, height);
+      frame.validate();
+
+      // listener?
+      if (listener) {
+	frame.addInternalFrameListener(new InternalFrameAdapter() {
+	  public void internalFrameClosing(InternalFrameEvent e) {
+	    frame.dispose();
+	  }
+	});
+      }
+      
+      // display frame
+      if (visible) {
+	frame.setVisible(true);
+	try {
+	  frame.setSelected(true);
+	}
+	catch (Exception e) {
+	  e.printStackTrace();
+	}
+      }
+      
+      result = frame;
+    }
+    else if (m_GUIType == GUI_SDI) {
+      final ChildFrameSDI frame = new ChildFrameSDI(parent, title);
+      
+      // layout
+      frame.setLayout(layout);
+      if (c != null)
+	frame.getContentPane().add(c, layoutConstraints);
+      
+      // menu
+      frame.setJMenuBar(menu);
+      
+      // size
+      frame.pack();
+      if ((width > -1) && (height > -1))
+	frame.setSize(width, height);
+      frame.validate();
+
+      // location
+      int screenHeight = getGraphicsConfiguration().getBounds().height;
+      int screenWidth  = getGraphicsConfiguration().getBounds().width;
+      frame.setLocation(
+	  (screenWidth - frame.getBounds().width) / 2,
+	  (screenHeight - frame.getBounds().height) / 2);
+      
+      // listener?
+      if (listener) {
+	frame.addWindowListener(new WindowAdapter() {
+	  public void windowClosing(WindowEvent e) {
+	    frame.dispose();
+	  }
+	});
+      }
+      
+      // display frame
+      if (visible)
+	frame.setVisible(true);
+
+      result = frame;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * insert the menu item in a sorted fashion
+   * 
+   * @param menu	the menu to add the item to
+   * @param menuitem	the menu item to add
+   */
+  protected void insertMenuItem(JMenu menu, JMenuItem menuitem) {
+    insertMenuItem(menu, menuitem, 0);
+  }
+  
+  /**
+   * insert the menu item in a sorted fashion
+   * 
+   * @param menu	the menu to add the item to
+   * @param menuitem	the menu item to add
+   * @param startIndex	the index in the menu to start with (0-based)
+   */
+  protected void insertMenuItem(JMenu menu, JMenuItem menuitem, int startIndex) {
+    boolean	inserted;
+    int		i;
+    JMenuItem	current;
+    String	currentStr;
+    String	newStr;
+    
+    inserted = false;
+    newStr   = menuitem.getText().toLowerCase();
+    
+    // try to find a spot inbetween
+    for (i = startIndex; i < menu.getMenuComponentCount(); i++) {
+      if (!(menu.getMenuComponent(i) instanceof JMenuItem))
+	continue;
+      
+      current    = (JMenuItem) menu.getMenuComponent(i);
+      currentStr = current.getText().toLowerCase();
+      if (currentStr.compareTo(newStr) > 0) {
+	inserted = true;
+	menu.insert(menuitem, i);
+	break;
+      }
+    }
+    
+    // add it at the end if not yet inserted
+    if (!inserted)
+      menu.add(menuitem);
   }
   
   /**
    * initializes the GUI
    */
-  private void initGUI() {
+  protected void initGUI() {
     m_Self = this;
     
     try {
       // main window
-      int screenHeight = getGraphicsConfiguration().getBounds().height;
-      int screenWidth  = getGraphicsConfiguration().getBounds().width;
-      int newHeight = (int) (((double) screenHeight) * 0.75);
-      int newWidth  = (int) (((double) screenWidth)  * 0.75);
-      setSize(
-	  1000 > newWidth  ? newWidth  : 1000,
-	  800  > newHeight ? newHeight : 800);
-      setLocation(
-	  (screenWidth - getBounds().width) / 2,
-	  (screenHeight - getBounds().height) / 2);
       createTitle("");
       this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       this.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("weka/gui/weka_icon.gif")).getImage());
@@ -332,41 +560,47 @@ public class Main
 	      Instances.FILE_EXTENSION,
 	      "ARFF Files (*" + Instances.FILE_EXTENSION + ")"));
       m_FileChooserPlot.setMultiSelectionEnabled(true);
-      
+
       m_FileChooserROC.addChoosableFileFilter(
 	  new ExtensionFileFilter(
 	      Instances.FILE_EXTENSION,
 	      "ARFF Files (*" + Instances.FILE_EXTENSION + ")"));
 
       // Desktop
-      jDesktopPane = new BackgroundDesktopPane("weka/gui/images/weka_background.gif");
-      jDesktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
-      setContentPane(jDesktopPane);
-      
+      if (m_GUIType == GUI_MDI) {
+	jDesktopPane = new BackgroundDesktopPane("weka/gui/images/weka_background.gif");
+	jDesktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
+	setContentPane(jDesktopPane);
+      }
+      else {
+	jDesktopPane = null;
+      }
+
       // Menu
       jMenuBar = new JMenuBar();
       setJMenuBar(jMenuBar);
-      
+
       // Program
       jMenuProgram = new JMenu();
       jMenuBar.add(jMenuProgram);
       jMenuProgram.setText("Program");
       jMenuProgram.setMnemonic('P');
-      
+
       // Program/Preferences
+      // TODO: read all properties from all props file and display them
       /*
-      jMenuItemProgramPreferences = new JMenuItem();
-      jMenuProgram.add(jMenuItemProgramPreferences);
-      jMenuItemProgramPreferences.setText("Preferences");
-      jMenuItemProgramPreferences.setMnemonic('P');
-      jMenuItemProgramPreferences.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent evt) {
-	  System.out.println("jMenuItemProgramPreferences.actionPerformed, event="+evt);
-	  //TODO add your code for jMenuItemProgramPreferences.actionPerformed
-	}
-      });
-      */
-      
+        jMenuItemProgramPreferences = new JMenuItem();
+        jMenuProgram.add(jMenuItemProgramPreferences);
+        jMenuItemProgramPreferences.setText("Preferences");
+        jMenuItemProgramPreferences.setMnemonic('P');
+        jMenuItemProgramPreferences.addActionListener(new ActionListener() {
+  	  public void actionPerformed(ActionEvent evt) {
+	    System.out.println("jMenuItemProgramPreferences.actionPerformed, event="+evt);
+	    //TODO add your code for jMenuItemProgramPreferences.actionPerformed
+  	  }
+        });
+       */
+
       // Program/LogWindow
       jMenuItemProgramLogWindow = new JMenuItem();
       jMenuProgram.add(jMenuItemProgramLogWindow);
@@ -377,9 +611,9 @@ public class Main
 	  m_LogWindow.setVisible(true);
 	}
       });
-      
+
       jMenuProgram.add(new JSeparator());
-      
+
       // Program/Exit
       jMenuItemProgramExit = new JMenuItem();
       jMenuProgram.add(jMenuItemProgramExit);
@@ -389,11 +623,16 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  // close all children
 	  Iterator iter = getWindowList();
-	  Vector<ChildFrame> list = new Vector<ChildFrame>();
+	  Vector<Container> list = new Vector<Container>();
 	  while (iter.hasNext())
-	    list.add((ChildFrame) iter.next());
-	  for (int i = 0; i < list.size(); i++)
-	    list.get(i).dispose();
+	    list.add((Container) iter.next());
+	  for (int i = 0; i < list.size(); i++) {
+	    Container c = list.get(i);
+	    if (c instanceof ChildFrameMDI)
+	      ((ChildFrameMDI) c).dispose();
+	    else if (c instanceof ChildFrameSDI)
+	      ((ChildFrameSDI) c).dispose();
+	  }
 	  // close logwindow
 	  m_LogWindow.dispose();
 	  // close main window
@@ -402,13 +641,13 @@ public class Main
 	  System.exit(0);
 	}
       });
-      
+
       // Applications
       jMenuApplications = new JMenu();
       jMenuBar.add(jMenuApplications);
       jMenuApplications.setText("Applications");
       jMenuApplications.setMnemonic('A');
-      
+
       // Applications/Explorer
       jMenuItemApplicationsExplorer = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsExplorer);
@@ -418,23 +657,16 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemApplicationsExplorer.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    frame.getContentPane().add(new Explorer(), BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(800, 600);
+	    createFrame(
+		m_Self, title, new Explorer(), new BorderLayout(), 
+		BorderLayout.CENTER, 800, 600, null, true, true);
 	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
-      
+
       // Applications/Experimenter
       jMenuItemApplicationsExperimenter = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsExperimenter);
@@ -444,23 +676,16 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemApplicationsExperimenter.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    frame.getContentPane().add(new Experimenter(false), BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(800, 600);
+	    createFrame(
+		m_Self, title, new Experimenter(false), new BorderLayout(), 
+		BorderLayout.CENTER, 800, 600, null, true, true);
 	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
-      
+
       // Applications/KnowledgeFlow
       jMenuItemApplicationsKnowledgeFlow = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsKnowledgeFlow);
@@ -472,26 +697,19 @@ public class Main
 	}
       });
       KnowledgeFlowApp.addStartupListener(new weka.gui.beans.StartUpListener() {
-        public void startUpComplete() {
+	public void startUpComplete() {
 	  String title = jMenuItemApplicationsKnowledgeFlow.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    frame.getContentPane().add(KnowledgeFlowApp.getSingleton(), BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(900, 600);
-          }
+	    createFrame(
+		m_Self, title, KnowledgeFlowApp.getSingleton(), new BorderLayout(), 
+		BorderLayout.CENTER, 900, 600, null, true, true);
+	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
-        }
+	}
       });
-      
+
       // Applications/SimpleCLI
       jMenuItemApplicationsSimpleCLI = new JMenuItem();
       jMenuApplications.add(jMenuItemApplicationsSimpleCLI);
@@ -501,10 +719,10 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemApplicationsSimpleCLI.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
 	    try {
-	      frame.getContentPane().add(new SimpleCLIPanel(), BorderLayout.CENTER);
+	      createFrame(
+		  m_Self, title, new SimpleCLIPanel(), new BorderLayout(), 
+		  BorderLayout.CENTER, 600, 500, null, true, true);
 	    }
 	    catch (Exception e) {
 	      e.printStackTrace();
@@ -512,26 +730,19 @@ public class Main
 		  m_Self, "Error instantiating SimpleCLI:\n" + e.getMessage());
 	      return;
 	    }
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(600, 500);
-          }
+	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
-      
+
       // Tools
       jMenuTools = new JMenu();
       jMenuBar.add(jMenuTools);
       jMenuTools.setText("Tools");
       jMenuTools.setMnemonic('T');
-      
+
       // Tools/ArffViewer
       jMenuItemToolsArffViewer = new JMenuItem();
       jMenuTools.add(jMenuItemToolsArffViewer);
@@ -541,26 +752,19 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemToolsArffViewer.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    ArffViewerMainPanel panel = new ArffViewerMainPanel(frame);
+	    ArffViewerMainPanel panel = new ArffViewerMainPanel(null);
 	    panel.setConfirmExit(false);
-	    frame.getContentPane().add(panel, BorderLayout.CENTER);
-	    frame.setJMenuBar(panel.getMenu());
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(800, 600);
+	    Container frame = createFrame(
+		m_Self, title, panel, new BorderLayout(), 
+		BorderLayout.CENTER, 800, 600, panel.getMenu(), true, true);
+	    panel.setParent(frame);
 	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
-      
+
       // Tools/SqlViewer
       jMenuItemToolsSqlViewer = new JMenuItem();
       jMenuTools.add(jMenuItemToolsSqlViewer);
@@ -570,24 +774,35 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemToolsSqlViewer.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
 	    final SqlViewer sql = new SqlViewer(null);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    frame.getContentPane().add(sql, BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		sql.saveSize();
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
+	    final Container frame = createFrame(
+		m_Self, title, sql, new BorderLayout(), 
+		BorderLayout.CENTER, -1, -1, null, false, true);
+
+	    // custom listener
+	    if (frame instanceof ChildFrameMDI) {
+	      ((ChildFrameMDI) frame).addInternalFrameListener(new InternalFrameAdapter() {
+		public void internalFrameClosing(InternalFrameEvent e) {
+		  sql.saveSize();
+		  ((ChildFrameMDI) frame).dispose();
+		}
+	      });
+	    }
+	    else if (frame instanceof ChildFrameSDI) {
+	      ((ChildFrameSDI) frame).addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent e) {
+		  sql.saveSize();
+		  ((ChildFrameSDI) frame).dispose();
+		}
+	      });
+	    }
 	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
-      
+
       // Tools/EnsembleLibrary
       jMenuItemToolsEnsembleLibrary = new JMenuItem();
       jMenuTools.add(jMenuItemToolsEnsembleLibrary);
@@ -597,32 +812,25 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemToolsEnsembleLibrary.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
 	    EnsembleLibrary value = new EnsembleLibrary();
 	    EnsembleLibraryEditor libraryEditor = new EnsembleLibraryEditor();
 	    libraryEditor.setValue(value);
-	    frame.getContentPane().add(libraryEditor.getCustomEditor(), BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(800, 600);
+	    createFrame(
+		m_Self, title, libraryEditor.getCustomEditor(), new BorderLayout(), 
+		BorderLayout.CENTER, 800, 600, null, true, true);
 	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
-      
+
       // Visualization
       jMenuVisualization = new JMenu();
       jMenuBar.add(jMenuVisualization);
       jMenuVisualization.setText("Visualization");
       jMenuVisualization.setMnemonic('V');
-      
+
       // Visualization/Plot
       jMenuItemVisualizationPlot = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationPlot);
@@ -634,7 +842,7 @@ public class Main
 	  int retVal = m_FileChooserPlot.showOpenDialog(m_Self);
 	  if (retVal != JFileChooser.APPROVE_OPTION)
 	    return;
-	  
+
 	  // build plot
 	  VisualizePanel panel = new VisualizePanel();
 	  String filenames = "";
@@ -650,7 +858,7 @@ public class Main
 	      Instances i = new Instances(r);
 	      i.setClassIndex(i.numAttributes()-1);
 	      PlotData2D pd1 = new PlotData2D(i);
-	      
+
 	      if (j == 0) {
 		pd1.setPlotName("Master plot");
 		panel.setMasterPlot(pd1);
@@ -670,19 +878,13 @@ public class Main
 	  }
 
 	  // create frame
-	  final ChildFrame frame = new ChildFrame(m_Self, jMenuItemVisualizationPlot.getText() + " - " + filenames);
-	  frame.getContentPane().setLayout(new BorderLayout());
-	  frame.getContentPane().add(panel, BorderLayout.CENTER);
-	  frame.addInternalFrameListener(new InternalFrameAdapter() {
-	    public void internalFrameClosing(InternalFrameEvent e) {
-	      frame.dispose();
-	    }
-	  });
-	  frame.pack();
-	  frame.setSize(800, 600);
+	  createFrame(
+	      m_Self, jMenuItemVisualizationPlot.getText() + " - " + filenames, 
+	      panel, new BorderLayout(), 
+	      BorderLayout.CENTER, 800, 600, null, true, true);
 	}
       });
-      
+
       // Visualization/ROC
       // based on this Wiki article:
       // http://weka.sourceforge.net/wiki/index.php/Visualizing_ROC_curve
@@ -696,7 +898,7 @@ public class Main
 	  int retVal = m_FileChooserROC.showOpenDialog(m_Self);
 	  if (retVal != JFileChooser.APPROVE_OPTION)
 	    return;
-	  
+
 	  // create plot
 	  String filename  = m_FileChooserROC.getSelectedFile().getAbsolutePath();
 	  Instances result = null;
@@ -726,20 +928,14 @@ public class Main
 		m_Self, "Error adding plot:\n" + e.getMessage());
 	    return;
 	  }
-	  
-	  final ChildFrame frame = new ChildFrame(m_Self, jMenuItemVisualizationROC.getText() + " - " + filename);
-	  frame.getContentPane().setLayout(new BorderLayout());
-	  frame.getContentPane().add(vmc, BorderLayout.CENTER);
-	  frame.addInternalFrameListener(new InternalFrameAdapter() {
-	    public void internalFrameClosing(InternalFrameEvent e) {
-	      frame.dispose();
-	    }
-	  });
-	  frame.pack();
-	  frame.setSize(800, 600);
+
+	  createFrame(
+	      m_Self, jMenuItemVisualizationROC.getText() + " - " + filename, 
+	      vmc, new BorderLayout(), 
+	      BorderLayout.CENTER, 800, 600, null, true, true);
 	}
       });
-      
+
       // Visualization/TreeVisualizer
       jMenuItemVisualizationTreeVisualizer = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationTreeVisualizer);
@@ -751,7 +947,7 @@ public class Main
 	  int retVal = m_FileChooserTreeVisualizer.showOpenDialog(m_Self);
 	  if (retVal != JFileChooser.APPROVE_OPTION)
 	    return;
-	  
+
 	  // build tree
 	  String filename = m_FileChooserTreeVisualizer.getSelectedFile().getAbsolutePath();
 	  TreeBuild builder = new TreeBuild();
@@ -766,21 +962,15 @@ public class Main
 		m_Self, "Error loading file '" + filename + "':\n" + e.getMessage());
 	    return;
 	  }
-	  
+
 	  // create frame
-	  final ChildFrame frame = new ChildFrame(m_Self, jMenuItemVisualizationTreeVisualizer.getText() + " - " + filename);
-	  frame.getContentPane().setLayout(new BorderLayout());
-	  frame.getContentPane().add(new TreeVisualizer(null, top, arrange), BorderLayout.CENTER);
-	  frame.addInternalFrameListener(new InternalFrameAdapter() {
-	    public void internalFrameClosing(InternalFrameEvent e) {
-	      frame.dispose();
-	    }
-	  });
-	  frame.pack();
-	  frame.setSize(800, 600);
+	  createFrame(
+	      m_Self, jMenuItemVisualizationTreeVisualizer.getText() + " - " + filename, 
+	      new TreeVisualizer(null, top, arrange), new BorderLayout(), 
+	      BorderLayout.CENTER, 800, 600, null, true, true);
 	}
       });
-      
+
       // Visualization/GraphVisualizer
       jMenuItemVisualizationGraphVisualizer = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationGraphVisualizer);
@@ -792,13 +982,13 @@ public class Main
 	  int retVal = m_FileChooserGraphVisualizer.showOpenDialog(m_Self);
 	  if (retVal != JFileChooser.APPROVE_OPTION)
 	    return;
-	  
+
 	  // build graph
 	  String filename = m_FileChooserGraphVisualizer.getSelectedFile().getAbsolutePath();
 	  GraphVisualizer panel = new GraphVisualizer();
 	  try{
 	    if (    filename.toLowerCase().endsWith(".xml") 
-                 || filename.toLowerCase().endsWith(".bif") ) {
+		|| filename.toLowerCase().endsWith(".bif") ) {
 	      panel.readBIF(new FileInputStream(filename));
 	    }
 	    else {
@@ -811,21 +1001,15 @@ public class Main
 		m_Self, "Error loading file '" + filename + "':\n" + e.getMessage());
 	    return;
 	  }
-	  
+
 	  // create frame
-	  final ChildFrame frame = new ChildFrame(m_Self, jMenuItemVisualizationGraphVisualizer.getText() + " - " + filename);
-	  frame.getContentPane().setLayout(new BorderLayout());
-	  frame.getContentPane().add(panel, BorderLayout.CENTER);
-	  frame.addInternalFrameListener(new InternalFrameAdapter() {
-	    public void internalFrameClosing(InternalFrameEvent e) {
-	      frame.dispose();
-	    }
-	  });
-	  frame.pack();
-	  frame.setSize(800, 600);
+	  createFrame(
+	      m_Self, jMenuItemVisualizationGraphVisualizer.getText() + " - " + filename, 
+	      panel, new BorderLayout(), 
+	      BorderLayout.CENTER, 800, 600, null, true, true);
 	}
       });
-      
+
       // Visualization/BoundaryVisualizer
       jMenuItemVisualizationBoundaryVisualizer = new JMenuItem();
       jMenuVisualization.add(jMenuItemVisualizationBoundaryVisualizer);
@@ -835,16 +1019,9 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemVisualizationBoundaryVisualizer.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    frame.getContentPane().add(new BoundaryVisualizer(), BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(800, 600);
+	    createFrame(
+		m_Self, title, new BoundaryVisualizer(), new BorderLayout(), 
+		BorderLayout.CENTER, 800, 600, null, true, true);
 	    // dont' do a System.exit after last window got closed!
 	    BoundaryVisualizer.setExitIfNoWindowsOpen(false);
 	  }
@@ -853,13 +1030,85 @@ public class Main
 	  }
 	}
       });
-      
+
+      // Extensions
+      jMenuExtensions = new JMenu("Extensions");
+      jMenuExtensions.setMnemonic(java.awt.event.KeyEvent.VK_E);
+      jMenuBar.add(jMenuExtensions);
+      jMenuExtensions.setVisible(false);
+
+      String extensions = GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
+	  MainMenuExtension.class.getName(), "");
+
+      if (extensions.length() > 0) {
+	jMenuExtensions.setVisible(true);
+	String[] classnames = GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
+	    MainMenuExtension.class.getName(), "").split(",");
+	Hashtable<String,JMenu> submenus = new Hashtable<String,JMenu>();
+
+	// add all extensions
+	for (int i = 0; i < classnames.length; i++) {
+	  String classname = classnames[i];
+	  try {
+	    MainMenuExtension ext = (MainMenuExtension) Class.forName(classname).newInstance();
+
+	    // menuitem in a submenu?
+	    JMenu submenu = null;
+	    if (ext.getSubmenuTitle() != null) {
+	      submenu = submenus.get(ext.getSubmenuTitle());
+	      if (submenu == null) {
+		submenu = new JMenu(ext.getSubmenuTitle());
+		submenus.put(ext.getSubmenuTitle(), submenu);
+		insertMenuItem(jMenuExtensions, submenu);
+	      }
+	    }
+
+	    // create menu item
+	    JMenuItem menuitem = new JMenuItem();
+	    menuitem.setText(ext.getMenuTitle());
+	    // does the extension need a frame or does it have its own ActionListener?
+	    ActionListener listener = ext.getActionListener(m_Self);
+	    if (listener != null) {
+	      menuitem.addActionListener(listener);
+	    }
+	    else {
+	      final JMenuItem finalMenuitem = menuitem;
+	      final MainMenuExtension finalExt = ext;
+	      menuitem.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		  Component frame = createFrame(
+		      m_Self, finalMenuitem.getText(), 
+		      null, null, null, -1, -1, null, false, false);
+		  finalExt.fillFrame(frame);
+		  frame.setVisible(true);
+		}
+	      });
+	    }
+
+	    // sorted insert of menu item
+	    if (submenu != null)
+	      insertMenuItem(submenu, menuitem);
+	    else
+	      insertMenuItem(jMenuExtensions, menuitem);
+	  }
+	  catch (Exception e) {
+	    e.printStackTrace();
+	  }
+	}
+      }
+
+      // Windows
+      jMenuWindows = new JMenu("Windows");
+      jMenuWindows.setMnemonic(java.awt.event.KeyEvent.VK_W);
+      jMenuBar.add(jMenuWindows);
+      jMenuWindows.setVisible(false);  // initially, there are no windows open
+
       // Help
       jMenuHelp = new JMenu();
       jMenuBar.add(jMenuHelp);
       jMenuHelp.setText("Help");
       jMenuHelp.setMnemonic('H');
-      
+
       // Help/Homepage
       jMenuItemHelpHomepage = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpHomepage);
@@ -872,40 +1121,40 @@ public class Main
       });
 
       jMenuHelp.add(new JSeparator());
-      
+
       // Help/WekaDoc
-      jMenuItemHelpHomepage = new JMenuItem();
-      jMenuHelp.add(jMenuItemHelpHomepage);
-      jMenuItemHelpHomepage.setText("Online documentation");
-      jMenuItemHelpHomepage.setMnemonic('D');
-      jMenuItemHelpHomepage.addActionListener(new ActionListener() {
+      jMenuItemHelpWekaDoc = new JMenuItem();
+      jMenuHelp.add(jMenuItemHelpWekaDoc);
+      jMenuItemHelpWekaDoc.setText("Online documentation");
+      jMenuItemHelpWekaDoc.setMnemonic('D');
+      jMenuItemHelpWekaDoc.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
 	  BrowserHelper.openURL(m_Self, "http://weka.sourceforge.net/wekadoc/");
 	}
       });
-      
+
       // Help/WekaWiki
-      jMenuItemHelpHomepage = new JMenuItem();
-      jMenuHelp.add(jMenuItemHelpHomepage);
-      jMenuItemHelpHomepage.setText("HOWTOs, code snippets, etc.");
-      jMenuItemHelpHomepage.setMnemonic('W');
-      jMenuItemHelpHomepage.addActionListener(new ActionListener() {
+      jMenuItemHelpWekaWiki = new JMenuItem();
+      jMenuHelp.add(jMenuItemHelpWekaWiki);
+      jMenuItemHelpWekaWiki.setText("HOWTOs, code snippets, etc.");
+      jMenuItemHelpWekaWiki.setMnemonic('W');
+      jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
 	  BrowserHelper.openURL(m_Self, "http://weka.sourceforge.net/wiki/");
 	}
       });
-      
+
       // Help/Sourceforge
-      jMenuItemHelpHomepage = new JMenuItem();
-      jMenuHelp.add(jMenuItemHelpHomepage);
-      jMenuItemHelpHomepage.setText("Weka on SourceForge");
-      jMenuItemHelpHomepage.setMnemonic('F');
-      jMenuItemHelpHomepage.addActionListener(new ActionListener() {
+      jMenuItemHelpSourceforge = new JMenuItem();
+      jMenuHelp.add(jMenuItemHelpSourceforge);
+      jMenuItemHelpSourceforge.setText("Weka on SourceForge");
+      jMenuItemHelpSourceforge.setMnemonic('F');
+      jMenuItemHelpSourceforge.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
 	  BrowserHelper.openURL(m_Self, "http://sourceforge.net/projects/weka/");
 	}
       });
-      
+
       jMenuHelp.add(new JSeparator());
 
       // Help/SystemInfo
@@ -917,19 +1166,16 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemHelpSystemInfo.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-
 	    // get info
 	    Hashtable info = new SystemInfo().getSystemInfo();
-	    
+
 	    // sort names
 	    Vector names = new Vector();
 	    Enumeration enm = info.keys();
 	    while (enm.hasMoreElements())
 	      names.add(enm.nextElement());
 	    Collections.sort(names);
-	    
+
 	    // generate table
 	    String[][] data = new String[info.size()][2];
 	    for (int i = 0; i < names.size(); i++) {
@@ -938,15 +1184,10 @@ public class Main
 	    }
 	    String[] titles = new String[]{"Key", "Value"};
 	    JTable table = new JTable(data, titles);
-	    
-	    frame.getContentPane().add(new JScrollPane(table), BorderLayout.CENTER);
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
-	    frame.setSize(800, 600);
+
+	    createFrame(
+		m_Self, title, new JScrollPane(table), new BorderLayout(), 
+		BorderLayout.CENTER, 800, 600, null, true, true);
 	  }
 	  else {
 	    showWindow(getWindow(title));
@@ -965,16 +1206,15 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  String title = jMenuItemHelpAbout.getText();
 	  if (!containsWindow(title)) {
-	    final ChildFrame frame = new ChildFrame(m_Self, title);
-	    frame.getContentPane().setLayout(new BorderLayout());
-	    
 	    JPanel wekaPan = new JPanel();
 	    wekaPan.setToolTipText("Weka, a native bird of New Zealand");
 	    ImageIcon wii = new ImageIcon(Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("weka/gui/weka3.gif")));
 	    JLabel wekaLab = new JLabel(wii);
 	    wekaPan.add(wekaLab);
-	    frame.getContentPane().add(wekaPan, BorderLayout.CENTER);
-	    
+	    Container frame = createFrame(
+		m_Self, title, wekaPan, new BorderLayout(), 
+		BorderLayout.CENTER, -1, -1, null, true, true);
+
 	    JPanel titlePan = new JPanel();
 	    titlePan.setLayout(new GridLayout(8,1));
 	    titlePan.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 5));
@@ -986,20 +1226,40 @@ public class Main
 	    titlePan.add(new JLabel("(c) " + Copyright.getFromYear() + " - " + Copyright.getToYear(), SwingConstants.CENTER));
 	    titlePan.add(new JLabel(Copyright.getOwner(), SwingConstants.CENTER));
 	    titlePan.add(new JLabel(Copyright.getAddress(), SwingConstants.CENTER));
-	    frame.getContentPane().add(titlePan, BorderLayout.NORTH);
-	    
-	    frame.addInternalFrameListener(new InternalFrameAdapter() {
-	      public void internalFrameClosing(InternalFrameEvent e) {
-		frame.dispose();
-	      }
-	    });
-	    frame.pack();
+
+	    if (frame instanceof ChildFrameMDI) {
+	      ((ChildFrameMDI) frame).getContentPane().add(titlePan, BorderLayout.NORTH);
+	      ((ChildFrameMDI) frame).pack();
+	    }
+	    else if (frame instanceof ChildFrameSDI) {
+	      ((ChildFrameSDI) frame).getContentPane().add(titlePan, BorderLayout.NORTH);
+	      ((ChildFrameSDI) frame).pack();
+	    }
 	  }
 	  else {
 	    showWindow(getWindow(title));
 	  }
 	}
       });
+
+      // size + position
+      int screenHeight = getGraphicsConfiguration().getBounds().height;
+      int screenWidth  = getGraphicsConfiguration().getBounds().width;
+      if (m_GUIType == GUI_MDI) {
+	int newHeight = (int) (((double) screenHeight) * 0.75);
+	int newWidth  = (int) (((double) screenWidth)  * 0.75);
+	setSize(
+	    1000 > newWidth  ? newWidth  : 1000,
+		800  > newHeight ? newHeight : 800);
+	setLocation(
+	    (screenWidth - getBounds().width) / 2,
+	    (screenHeight - getBounds().height) / 2);
+      }
+      else if (m_GUIType == GUI_SDI) {
+	pack();
+	setSize(screenWidth, getHeight());
+	setLocation(0, 0);
+      }
     } 
     catch (Exception e) {
       e.printStackTrace();
@@ -1026,7 +1286,7 @@ public class Main
    * 
    * @param c 		the child frame to add
    */
-  public void addChildFrame(ChildFrame c) {
+  public void addChildFrame(Container c) {
     m_ChildFrames.add(c);
     windowListChanged();
   }
@@ -1037,7 +1297,7 @@ public class Main
    * @param c 		the child frame to remove
    * @return 		true if the child frame could be removed
    */
-  public boolean removeChildFrame(ChildFrame c) {
+  public boolean removeChildFrame(Container c) {
     boolean result = m_ChildFrames.remove(c);
     windowListChanged();
     return result;
@@ -1049,18 +1309,29 @@ public class Main
    * @param c 		the frame to activate
    * @return 		true if frame was activated
    */
-  public boolean showWindow(ChildFrame c) {
-    boolean        result;
+  public boolean showWindow(Container c) {
+    boolean        	result;
+    ChildFrameMDI	mdiFrame;
+    ChildFrameSDI	sdiFrame;
     
     if (c != null) {
       try {
-	c.setIcon(false);
+	if (c instanceof ChildFrameMDI) {
+	  mdiFrame = (ChildFrameMDI) c;
+	  mdiFrame.setIcon(false);
+	  mdiFrame.toFront();
+	  createTitle(mdiFrame.getTitle());
+	}
+	else if (c instanceof ChildFrameSDI) {
+	  sdiFrame = (ChildFrameSDI) c;
+	  sdiFrame.setExtendedState(JFrame.NORMAL);
+	  sdiFrame.toFront();
+	  createTitle(sdiFrame.getTitle());
+	}
       }
       catch (Exception e) {
 	e.printStackTrace();
       }
-      c.toFront();
-      createTitle(c.getTitle());
       result = true;
     }
     else {
@@ -1097,15 +1368,15 @@ public class Main
    * @param windowClass	the class to retrieve the first instance for
    * @return		null, if no instance can be found
    */
-  public ChildFrame getWindow(Class windowClass) {
-    ChildFrame	result;
+  public Container getWindow(Class windowClass) {
+    Container	result;
     Iterator	iter;
-    ChildFrame	current;
+    Container	current;
     
     result = null;
     iter   = getWindowList();
     while (iter.hasNext()) {
-      current = (ChildFrame) iter.next();
+      current = (Container) iter.next();
       if (current.getClass() == windowClass) {
         result = current;
         break;
@@ -1122,16 +1393,24 @@ public class Main
    * @param title	the title to look for
    * @return		null, if no instance can be found
    */
-  public ChildFrame getWindow(String title) {
-    ChildFrame	result;
+  public Container getWindow(String title) {
+    Container	result;
     Iterator	iter;
-    ChildFrame	current;
+    Container	current;
+    boolean	found;
     
     result = null;
     iter   = getWindowList();
     while (iter.hasNext()) {
-      current = (ChildFrame) iter.next();
-      if (current.getTitle().equals(title)) {
+      current = (Container) iter.next();
+      found   = false;
+      
+      if (current instanceof ChildFrameMDI)
+	found = ((ChildFrameMDI) current).getTitle().equals(title);
+      else if (current instanceof ChildFrameSDI)
+	found = ((ChildFrameSDI) current).getTitle().equals(title);
+	
+      if (found) {
         result = current;
         break;
       }
@@ -1169,13 +1448,16 @@ public class Main
    */
   public void minimizeWindows() {
     Iterator	iter;
-    ChildFrame	frame;
+    Container	frame;
     
     iter = getWindowList();
     while (iter.hasNext()) {
-      frame = (ChildFrame) iter.next();
+      frame = (Container) iter.next();
       try {
-	frame.setIcon(true);
+	if (frame instanceof ChildFrameMDI)
+	  ((ChildFrameMDI) frame).setIcon(true);
+	else if (frame instanceof ChildFrameSDI)
+	  ((ChildFrameSDI) frame).setExtendedState(JFrame.ICONIFIED);
       }
       catch (Exception e) {
 	e.printStackTrace();
@@ -1188,14 +1470,17 @@ public class Main
    */
   public void restoreWindows() {
     Iterator	iter;
-    ChildFrame	frame;
+    Container	frame;
     
     iter = getWindowList();
     while (iter.hasNext()) {
-      frame = (ChildFrame) iter.next();
+      frame = (Container) iter.next();
       try {
-	frame.setIcon(false);
-      }
+	if (frame instanceof ChildFrameMDI)
+	  ((ChildFrameMDI) frame).setIcon(false);
+	else if (frame instanceof ChildFrameSDI)
+	  ((ChildFrameSDI) frame).setExtendedState(JFrame.NORMAL);
+    }
       catch (Exception e) {
 	e.printStackTrace();
       }
@@ -1212,19 +1497,11 @@ public class Main
   /**
    * creates the menu of currently open windows
    */
-  private void createWindowMenu() {
+  protected synchronized void createWindowMenu() {
     Iterator          iter;
     JMenuItem         menuItem;
+    int	              startIndex;
     
-    // first time?
-    if (jMenuWindows == null) {
-      jMenuWindows = new JMenu("Windows");
-      jMenuWindows.setMnemonic(java.awt.event.KeyEvent.VK_W);
-      jMenuBar.remove(jMenuHelp);
-      jMenuBar.add(jMenuWindows);
-      jMenuBar.add(jMenuHelp);
-    }
-
     // remove all existing entries
     jMenuWindows.removeAll();
     
@@ -1248,19 +1525,23 @@ public class Main
     jMenuWindows.addSeparator();
     
     // windows
+    startIndex = jMenuWindows.getMenuComponentCount() - 1;
     iter = getWindowList();
     jMenuWindows.setVisible(iter.hasNext());
     while (iter.hasNext()) {
-      ChildFrame frame = (ChildFrame) iter.next();
-      menuItem = new JMenuItem(((ChildFrame) frame).getTitle());
-      jMenuWindows.add(menuItem);
+      Container frame = (Container) iter.next();
+      if (frame instanceof ChildFrameMDI)
+	menuItem = new JMenuItem(((ChildFrameMDI) frame).getTitle());
+      else if (frame instanceof ChildFrameSDI)
+	menuItem = new JMenuItem(((ChildFrameSDI) frame).getTitle());
+      insertMenuItem(jMenuWindows, menuItem, startIndex);
       menuItem.setActionCommand(Integer.toString(frame.hashCode()));
       menuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent evt) {
-          ChildFrame frame = null;
+          Container frame = null;
           Iterator iter = getWindowList();
           while (iter.hasNext()) {
-            frame = (ChildFrame) iter.next();
+            frame = (Container) iter.next();
             String hashFrame = Integer.toString(frame.hashCode());
             if (hashFrame.equals(evt.getActionCommand())) {
               showWindow(frame);
@@ -1270,7 +1551,6 @@ public class Main
           showWindow(frame);
         }
       });
-      jMenuWindows.add(menuItem);
     }
   }
   
@@ -1290,11 +1570,19 @@ public class Main
   /**
    * Create the singleton instance of the Main GUI
    * 
-   * @param args 	ignored at present
+   * @param args 	commandline options
    */
   public static void createSingleton(String[] args) {
     if (m_MainSingleton == null)
       m_MainSingleton = new Main();
+    
+    // set options
+    try {
+      m_MainSingleton.setOptions(args);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
 
     // notify listeners (if any)
     for (int i = 0; i < m_StartupListeners.size(); i++)
@@ -1318,6 +1606,99 @@ public class Main
   public static void addStartupListener(StartUpListener s) {
     m_StartupListeners.add(s);
   }
+
+  /**
+   * Gets an enumeration describing the available options.
+   *
+   * @return 		an enumeration of all the available options.
+   */
+  public Enumeration listOptions(){
+    Vector        	result;
+    String		desc;
+    SelectedTag		tag;
+    int			i;
+
+    result = new Vector();
+
+    desc  = "";
+    for (i = 0; i < TAGS_GUI.length; i++) {
+      tag = new SelectedTag(TAGS_GUI[i].getID(), TAGS_GUI);
+      desc  +=   "\t" + tag.getSelectedTag().getIDStr() 
+      	       + " = " + tag.getSelectedTag().getReadable()
+      	       + "\n";
+    }
+    result.addElement(new Option(
+	"\tDetermines the layout of the GUI:\n"
+	+ desc
+	+ "\t(default: " + new SelectedTag(GUI_MDI, TAGS_GUI) + ")",
+	"gui", 1, "-gui " + Tag.toOptionList(TAGS_GUI)));
+
+    return result.elements();
+  }
+  
+  /**
+   * returns the options of the current setup
+   *
+   * @return		the current options
+   */
+  public String[] getOptions(){
+    Vector<String>    	result;
+
+    result = new Vector();
+
+    result.add("-gui");
+    result.add("" + getGUIType());
+
+    return result.toArray(new String[result.size()]);	  
+  }
+
+  /**
+   * Parses the options for this object. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -gui &lt;MDI|SDI&gt;
+   *  Determines the layout of the GUI:
+   *  MDI = MDI Layout
+   *  SDI = SDI Layout
+   *  (default: MDI)</pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options	the options to use
+   * @throws Exception	if setting of options fails
+   */
+  public void setOptions(String[] options) throws Exception {
+    String	tmpStr;
+
+    tmpStr = Utils.getOption("gui", options);
+    if (tmpStr.length() != 0)
+      setGUIType(new SelectedTag(tmpStr, TAGS_GUI));
+    else
+      setGUIType(new SelectedTag(GUI_MDI, TAGS_GUI));
+  }
+
+  /**
+   * Sets the type of GUI to use. 
+   *
+   * @param value 	.the GUI type
+   */
+  public void setGUIType(SelectedTag value) {
+    if (value.getTags() == TAGS_GUI) {
+      m_GUIType = value.getSelectedTag().getID();
+      initGUI();
+    }
+  }
+
+  /**
+   * Gets the currently set type of GUI to display. 
+   * 
+   * @return 		the current GUI Type.
+   */
+  public SelectedTag getGUIType() {
+    return new SelectedTag(m_GUIType, TAGS_GUI);
+  }
   
   /**
    * starts the application
@@ -1331,6 +1712,28 @@ public class Main
       // uncomment the following line to disable the memory management:
       //m_Memory.setEnabled(false);
 
+      // help?
+      if (Utils.getFlag('h', args)) {
+	System.out.println();
+	System.out.println("Help requested.");
+	System.out.println();
+	System.out.println("General options:");
+	System.out.println();
+	System.out.println("-h");
+	System.out.println("\tprints this help screen");
+	System.out.println();
+
+	Enumeration enu = new Main().listOptions();
+	while (enu.hasMoreElements()) {
+	  Option option = (Option) enu.nextElement();
+	  System.out.println(option.synopsis());
+	  System.out.println(option.description());
+	}
+
+	System.out.println();
+	System.exit(0);
+      }
+      
       // setup splash screen
       Main.addStartupListener(new weka.gui.beans.StartUpListener() {
         public void startUpComplete() {
@@ -1346,10 +1749,11 @@ public class Main
       SplashWindow.splash(ClassLoader.getSystemResource("weka/gui/images/weka_splash.gif"));
 
       // start GUI
+      final String[] options = (String[]) args.clone();
       Thread nt = new Thread() {
 	public void run() {
 	  weka.gui.SplashWindow.invokeMethod(
-	      "weka.gui.Main", "createSingleton", new String [1]);
+	      "weka.gui.Main", "createSingleton", options);
 	}
       };
       nt.start();
