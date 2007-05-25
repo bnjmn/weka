@@ -31,7 +31,7 @@ import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -64,7 +64,7 @@ import javax.swing.event.ChangeListener;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 
 public class ArffViewerMainPanel 
@@ -87,7 +87,7 @@ public class ArffViewerMainPanel
   /** default height */
   public final static int    HEIGHT            = 600;
 
-  protected Component             parent;
+  protected Container             parent;
   protected JTabbedPane           tabbedPane;
   protected JMenuBar              menuBar;
   protected JMenu                 menuFile;
@@ -129,7 +129,7 @@ public class ArffViewerMainPanel
    * 
    * @param parentFrame		the parent frame (JFrame or JInternalFrame)
    */
-  public ArffViewerMainPanel(Component parentFrame) {
+  public ArffViewerMainPanel(Container parentFrame) {
     parent     = parentFrame;
     frameTitle = "ARFF-Viewer"; 
     createPanel();
@@ -273,6 +273,15 @@ public class ArffViewerMainPanel
       return (JInternalFrame) parent;
     else
       return null;
+  }
+  
+  /**
+   * sets the new parent frame
+   * 
+   * @param value	the parent frame
+   */
+  public void setParent(Container value) {
+    parent = value;
   }
   
   /**

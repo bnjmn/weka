@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.15 $
+# Version: $Revision: 1.16 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
@@ -133,3 +133,7 @@ weka.classifiers.functions.supportVector.RegOptimizer=\
 # List of tokenizers
 weka.core.tokenizers.Tokenizer=\
  weka.core.tokenizers
+
+# List of extensions for the main GUI, package "weka.gui" is not allowed
+weka.gui.MainMenuExtension=
+
