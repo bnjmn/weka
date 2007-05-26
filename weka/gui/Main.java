@@ -35,7 +35,6 @@ import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.gui.arffviewer.ArffViewerMainPanel;
-import weka.gui.beans.KnowledgeFlow;
 import weka.gui.beans.KnowledgeFlowApp;
 import weka.gui.beans.StartUpListener;
 import weka.gui.boundaryvisualizer.BoundaryVisualizer;
@@ -112,7 +111,7 @@ import javax.swing.event.InternalFrameEvent;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Main
   extends JFrame
@@ -125,7 +124,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -177,7 +176,7 @@ public class Main
    * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    */
   public static class ChildFrameSDI 
     extends JFrame {
@@ -240,7 +239,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.12 $
    */
   public static class ChildFrameMDI
     extends JInternalFrame {
@@ -693,13 +692,9 @@ public class Main
       jMenuItemApplicationsKnowledgeFlow.setMnemonic('K');
       jMenuItemApplicationsKnowledgeFlow.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
-	  KnowledgeFlow.startApp();
-	}
-      });
-      KnowledgeFlowApp.addStartupListener(new weka.gui.beans.StartUpListener() {
-	public void startUpComplete() {
 	  String title = jMenuItemApplicationsKnowledgeFlow.getText();
 	  if (!containsWindow(title)) {
+	    KnowledgeFlowApp.createSingleton(new String[0]);
 	    createFrame(
 		m_Self, title, KnowledgeFlowApp.getSingleton(), new BorderLayout(), 
 		BorderLayout.CENTER, 900, 600, null, true, true);
@@ -1753,7 +1748,7 @@ public class Main
       Thread nt = new Thread() {
 	public void run() {
 	  weka.gui.SplashWindow.invokeMethod(
-	      "weka.gui.Main", "createSingleton", options);
+	      Main.class.getName(), "createSingleton", options);
 	}
       };
       nt.start();
