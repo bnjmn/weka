@@ -36,7 +36,7 @@ import java.io.*;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.14.2.2 $
+ * @version $Revision: 1.14.2.3 $
  */
 public class SparseInstance extends Instance {
 
@@ -481,11 +481,11 @@ public class SparseInstance extends Instance {
 		      Utils.doubleToString(m_AttValues[i],6));
 	} else {
 	  if (m_Dataset.attribute(m_Indices[i]).isNominal() || 
-	      m_Dataset.attribute(m_Indices[i]).isString()) {
+	      m_Dataset.attribute(m_Indices[i]).isString() ||
+	      m_Dataset.attribute(m_Indices[i]).isDate()) {
 	    try {
 	      text.append(m_Indices[i] + " " +
-			  Utils.quote(m_Dataset.attribute(m_Indices[i]).
-				      value((int)valueSparse(i))));
+			  Utils.quote(stringValue(m_Indices[i])));
 	    } catch (Exception e) {
               e.printStackTrace();
               System.err.println(new Instances(m_Dataset, 0));
