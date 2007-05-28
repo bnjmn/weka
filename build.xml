@@ -10,7 +10,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.36 $
+   $Revision: 1.37 $
   ===========================================================================
 -->
 
@@ -359,16 +359,48 @@
    depends="init_build_from_cvs_checkout, junit"
    description="Does a cvs checkout, builds, runs unit tests, and mails html summary to mail recipients (run ant with -Dmail_recipients=&lt;email,email,...&gt;)">
      <!-- mail the junit test results -->
-     <mimemail messageMimeType="text/html"
-               messageFile="${path_modifier}${reports}/junit-noframes.html"
+     <mail messageMimeType="text/html"
+          messageFile="${path_modifier}${reports}/junit-noframes.html"
 	       tolist="${mail_recipients}"
-	       mailhost="mail.cs.waikato.ac.nz"
-	       subject="JUnit test results: ${TODAY}"
-	       from="wekasupport@cs.waikato.ac.nz">
-	 <fileset dir="${path_modifier}${reports}">
-	    <include name="TESTS-*.xml"/>
-	 </fileset>
-     </mimemail>
+	       mailhost="${mail_smtp_host}"
+	       subject="JUnit test results (${tag}): ${TODAY}"
+	       from="${mail_sender}">
+       <fileset dir="${path_modifier}${reports}">
+         <include name="TESTS-*.xml"/>
+       </fileset>
+     </mail>
+  </target>
+
+  <!-- This target is used for an automated nightly/weekly build job -->
+  <target name="nightly_build"
+          depends="init_tests"
+          description="Does a cvs checkout, builds, runs unit tests, and mails the output to mail recipients (run ant with -Dmail_recipients=&lt;email,email,...&gt; -Dmail_sender=email -Dmail_smtp_host=smtp-server)">
+
+     <!-- run the build process -->
+     <ant antfile="${ant.file}" target="init_build_from_cvs_checkout" output="${path_modifier}${reports}/nightly_build-init.txt">
+       <property name="mail_smtp_host" value="${mail_smtp_host}"/>
+       <property name="mail_sender" value="${mail_sender}"/>
+       <property name="mail_recipients" value="${mail_recipients}"/>
+       <property name="tag" value="${tag}"/>
+     </ant>
+
+     <ant antfile="${ant.file}" target="run_tests" output="${path_modifier}${reports}/nightly_build-results.txt">
+       <property name="mail_smtp_host" value="${mail_smtp_host}"/>
+       <property name="mail_sender" value="${mail_sender}"/>
+       <property name="mail_recipients" value="${mail_recipients}"/>
+       <property name="tag" value="${tag}"/>
+     </ant>
+
+     <!-- mail the results -->
+     <mail messageMimeType="text/html"
+	       tolist="${mail_recipients}"
+	       mailhost="${mail_smtp_host}"
+	       subject="nightly build results (${tag}): ${TODAY}"
+	       from="${mail_sender}">
+       <fileset dir="${path_modifier}${reports}">
+         <include name="nightly_build*.*"/>
+       </fileset>
+     </mail>
   </target>
 
 
