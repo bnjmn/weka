@@ -1,16 +1,15 @@
 <project name="weka" default="compile_inline" basedir=".">
 <!-- 
   ===========================================================================
-   Ant build file for weka. Tested with ant1.6.2 and Junit3.7. Requires
-   Xalan2.x, JavaMail and the java activation framework for converting xml
-   to html, and mailing unit test results respectively.
+   Ant build file for weka. Tested with ant 1.6.5 and Junit 3.8.2. Requires
+   JavaMail and the java activation framework for mailing unit test results.
 
    Type ant -projecthelp for targets and descriptions.
    Assumes weka and tests (if unit testing) are in the same directory.
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19.2.14 $
+   $Revision: 1.19.2.15 $
   ===========================================================================
 -->
 
@@ -22,6 +21,7 @@
   <property name="path_modifier" value=""/>
   <property name="cvsroot_anon" value=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"/>
   <property name="javac_max_memory" value="256m"/>
+  <property name="run_tests_fail" value="true"/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -160,7 +160,7 @@
    description="Execute unit tests (fast)" if="junit.present">
      <java fork="yes" dir="${path_modifier}."
       classname="junit.textui.TestRunner"
-      taskname="junit" failonerror="true">
+      taskname="junit" failonerror="${run_tests_fail}">
 	 <arg value="weka.AllTests"/>
 	 <classpath>
 	    <pathelement location="${path_modifier}${build}/classes"/>
@@ -384,6 +384,7 @@
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
        <property name="tag" value="${tag}"/>
+       <property name="run_tests_fail" value="false"/>
      </ant>
 
      <!-- mail the results -->
