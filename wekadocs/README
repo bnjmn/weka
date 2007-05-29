@@ -9,7 +9,7 @@
                                                                        
                  Java Programs for Machine Learning 
 
-           Copyright (C) 1998-2006  University of Waikato
+           Copyright (C) 1998-2007  University of Waikato
 
               web: http://www.cs.waikato.ac.nz/~ml/weka            
                                                                        
@@ -31,19 +31,21 @@ Contents:
 
 4. Database access
 
-5. The Experiment package
+5. The Experiment package (and tutorial)
 
 6. Explorer guide
 
-7. Bayesian Network Classifiers
+7. KnowlodegeFlow tutorial
 
-8. Source code
+8. Bayesian Network Classifiers
 
-9. Credits
+9. Source code
 
-10. Submission of code and bug reports
+10. Credits
 
-11. Copyright
+11. Submission of code and bug reports
+
+12. Copyright
 
 
 ----------------------------------------------------------------------
@@ -220,7 +222,7 @@ weka.classifiers.functions.LinearRegression: linear regression
 weka.classifiers.trees.M5P: model trees
 weka.classifiers.rules.M5Rules: model rules
 weka.classifiers.lazy.IBk: k-nearest neighbour learner
-weka.classifiers.lazy.LWR: locally weighted regression
+weka.classifiers.lazy.LWL: locally weighted learning
 
 =================
 Association rules
@@ -279,8 +281,8 @@ databases available (also in weka/experiment):
 
 ----------------------------------------------------------------------
 
-5. The Experiment package:
---------------------------
+5. The Experiment package (and tutorial):
+-----------------------------------------
 
 There is support for running experiments that involve evaluating
 classifiers on repeated randomizations of datasets, over multiple
@@ -341,6 +343,7 @@ t-tests using weka.experiment.PairedTTester (use the -h option to find
 out what options it needs).
 
 However, all this is much easier if you use the Experimenter GUI.
+Check out the tutorial at: $WEKAHOME/ExperimenterTutorial.pdf
 
 ----------------------------------------------------------------------
 
@@ -354,23 +357,32 @@ book "Data Mining" by Witten and Frank (2005) (see our web page).
 
 ----------------------------------------------------------------------
 
-7. Bayesian Network Classifiers:
+7. KnowledgeFlow Tutorial:
+--------------------------
+
+A tutorial on how to use the KnowledgeFlow is in
+$WEKAHOME/KnowledgeFlowTutorial.pdf.
+
+----------------------------------------------------------------------
+
+8. Bayesian Network Classifiers:
 --------------------------------
 
 Information about the Bayesian Network classifiers in Weka, background
 theory as well as useage, can be found in the 
 $WEKAHOME/BayesianNetClassifiers.pdf.
 
-8. Source code:
+9. Source code:
 ---------------
 
 The source code for WEKA is in $WEKAHOME/weka-src.jar. To expand it, 
-use the jar utility that's in every Java distribution.
+use the jar utility that's in every Java distribution (or any file 
+archiver that can handle ZIP files).
 
 ----------------------------------------------------------------------
 
-9. Credits:
------------
+10. Credits:
+------------
 
 Refer to the web page for a list of contributors:
 
@@ -378,19 +390,25 @@ http://www.cs.waikato.ac.nz/~ml/weka/
 
 ----------------------------------------------------------------------
 
-10. Call for code and bug reports:
+11. Call for code and bug reports:
 ---------------------------------
 
 If you have implemented a learning scheme, filter, application,
 visualization tool, etc., using the WEKA classes, and you think it 
 should be included in WEKA, send us the code, and we can potentially
-put it in the next WEKA distribution.
+put it in the next WEKA distribution. 
+
+The conditions for new classifiers (schemes in general) are that, 
+firstly, they have to be published in the proceedings of a renowned 
+conference (e.g., ICML) or as an article of respected journal (e.g., 
+Machine Learning) and, secondly, that they outperform other standard 
+schemes (e.g., J48/C4.5).
 
 If you find any bugs, send a bug report to the wekalist mailing list.
 
 -----------------------------------------------------------------------
 
-11. Copyright:
+12. Copyright:
 --------------
 
 WEKA is distributed under the GNU public license. Please read
@@ -399,5 +417,5 @@ the file COPYING.
 -----------------------------------------------------------------------
 
 
-$Revision: 1.10 $
+$Revision: 1.11 $
 
