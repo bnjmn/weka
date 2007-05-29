@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19.2.15 $
+   $Revision: 1.19.2.16 $
   ===========================================================================
 -->
 
@@ -22,6 +22,7 @@
   <property name="cvsroot_anon" value=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"/>
   <property name="javac_max_memory" value="256m"/>
   <property name="run_tests_fail" value="true"/>
+  <property name="headless" value="false"/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -167,6 +168,7 @@
 	    <pathelement location="${path_modifier}${build}/testcases"/>
 	    <pathelement path="${java.class.path}"/>
 	 </classpath>
+         <jvmarg value="-Djava.awt.headless=${headless}"/>
      </java>
   </target>
 
@@ -385,6 +387,7 @@
        <property name="mail_recipients" value="${mail_recipients}"/>
        <property name="tag" value="${tag}"/>
        <property name="run_tests_fail" value="false"/>
+       <property name="headless" value="${headless}"/>
      </ant>
 
      <!-- mail the results -->
