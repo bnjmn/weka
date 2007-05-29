@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.SymmetricalUncertAttributeSetEvalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SymmetricalUncertAttributeSetEvalTest 
   extends AbstractEvaluatorTest {
@@ -37,7 +37,7 @@ public class SymmetricalUncertAttributeSetEvalTest
     super(name);  
   }
 
-  /** Creates a default BestFirst */
+  /** Creates a default FCBFSearch */
   public ASSearch getSearch() {
     return new FCBFSearch();
   }

@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.FCBFSearchTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FCBFSearchTest 
   extends AbstractSearchTest {
@@ -42,7 +42,7 @@ public class FCBFSearchTest
     return new FCBFSearch();
   }
 
-  /** Creates a default CfsSubsetEval */
+  /** Creates a default SymmetricalUncertAttributeSetEval */
   public ASEvaluation getEvaluator() {
     return new SymmetricalUncertAttributeSetEval();
   }

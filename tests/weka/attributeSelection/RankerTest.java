@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.RankerTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RankerTest 
   extends AbstractSearchTest {
@@ -42,7 +42,7 @@ public class RankerTest
     return new Ranker();
   }
 
-  /** Creates a default CfsSubsetEval */
+  /** Creates a default InfoGainAttributeEval */
   public ASEvaluation getEvaluator() {
     return new InfoGainAttributeEval();
   }

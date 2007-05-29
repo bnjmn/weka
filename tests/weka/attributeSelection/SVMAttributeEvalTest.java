@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.SVMAttributeEvalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SVMAttributeEvalTest 
   extends AbstractEvaluatorTest {
@@ -37,7 +37,7 @@ public class SVMAttributeEvalTest
     super(name);  
   }
 
-  /** Creates a default BestFirst */
+  /** Creates a default Ranker */
   public ASSearch getSearch() {
     return new Ranker();
   }

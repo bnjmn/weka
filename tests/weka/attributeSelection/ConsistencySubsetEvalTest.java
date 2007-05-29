@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.ConsistencySubsetEvalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ConsistencySubsetEvalTest 
   extends AbstractEvaluatorTest {
@@ -37,7 +37,7 @@ public class ConsistencySubsetEvalTest
     super(name);  
   }
 
-  /** Creates a default BestFirst */
+  /** Creates a default GreedyStepwise */
   public ASSearch getSearch() {
     return new GreedyStepwise();
   }
