@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.RaceSearchTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RaceSearchTest 
   extends AbstractSearchTest {
@@ -42,9 +42,11 @@ public class RaceSearchTest
     return new RaceSearch();
   }
 
-  /** Creates a default CfsSubsetEval */
+  /** Creates a ClassifierSubsetEval with J48 */
   public ASEvaluation getEvaluator() {
-    return new ClassifierSubsetEval();
+    ClassifierSubsetEval eval = new ClassifierSubsetEval();
+    eval.setClassifier(new weka.classifiers.trees.J48());
+    return eval;
   }
 
   public static Test suite() {

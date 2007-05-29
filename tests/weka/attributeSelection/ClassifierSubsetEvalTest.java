@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.ClassifierSubsetEvalTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class ClassifierSubsetEvalTest 
   extends AbstractEvaluatorTest {
@@ -37,14 +37,16 @@ public class ClassifierSubsetEvalTest
     super(name);  
   }
 
-  /** Creates a default BestFirst */
+  /** Creates a default GreedyStepwise */
   public ASSearch getSearch() {
     return new GreedyStepwise();
   }
 
-  /** Creates a default ClassifierSubsetEval */
+  /** Creates a ClassifierSubsetEval with J48 as classifier */
   public ASEvaluation getEvaluator() {
-    return new ClassifierSubsetEval();
+    ClassifierSubsetEval eval = new ClassifierSubsetEval();
+    eval.setClassifier(new weka.classifiers.trees.J48());
+    return eval;
   }
 
   public static Test suite() {
