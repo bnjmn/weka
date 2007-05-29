@@ -9,7 +9,7 @@
                                                                        
                  Java Programs for Machine Learning 
 
-           Copyright (C) 1998-2006  University of Waikato
+           Copyright (C) 1998-2007  University of Waikato
 
               web: http://www.cs.waikato.ac.nz/~ml/weka            
                                                                        
@@ -31,7 +31,7 @@ Contents:
 
 4. Database access
 
-5. The Experiment package
+5. The Experiment package (and tutorial)
 
 6. Explorer guide
 
@@ -218,7 +218,7 @@ weka.classifiers.functions.LinearRegression: linear regression
 weka.classifiers.trees.M5P: model trees
 weka.classifiers.rules.M5Rules: model rules
 weka.classifiers.lazy.IBk: k-nearest neighbour learner
-weka.classifiers.lazy.LWR: locally weighted regression
+weka.classifiers.lazy.LWL: locally weighted learning
 
 =================
 Association rules
@@ -277,8 +277,8 @@ databases available (also in weka/experiment):
 
 ----------------------------------------------------------------------
 
-5. The Experiment package:
---------------------------
+5. The Experiment package (and tutorial):
+-----------------------------------------
 
 There is support for running experiments that involve evaluating
 classifiers on repeated randomizations of datasets, over multiple
@@ -339,11 +339,12 @@ t-tests using weka.experiment.PairedTTester (use the -h option to find
 out what options it needs).
 
 However, all this is much easier if you use the Experimenter GUI.
+Check out the tutorial at: $WEKAHOME/ExperimenterTutorial.pdf
 
 ----------------------------------------------------------------------
 
 6. Explorer guide:
-------------
+------------------
 
 A guide on how to use the WEKA Explorer is in
 $WEKAHOME/ExplorerGuide.pdf.  For an explanation on how to use the
@@ -377,6 +378,12 @@ visualization tool, etc., using the WEKA classes, and you think it
 should be included in WEKA, send us the code, and we can potentially
 put it in the next WEKA distribution.
 
+The conditions for new classifiers (schemes in general) are that, 
+firstly, they have to be published in the proceedings of a renowned 
+conference (e.g., ICML) or as an article of respected journal (e.g., 
+Machine Learning) and, secondly, that they outperform other standard 
+schemes (e.g., J48/C4.5).
+
 If you find any bugs, send a bug report to the wekalist mailing list.
 
 -----------------------------------------------------------------------
@@ -390,5 +397,5 @@ the file COPYING.
 -----------------------------------------------------------------------
 
 
-$Revision: 1.2.2.9 $
+$Revision: 1.2.2.10 $
 
