@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1019,16 +1019,7 @@ public class Capabilities
 	return false;
 
       // special handling of RELATIONAL class
-      if (att.type() == Attribute.RELATIONAL) {
-	// test recursively (but add ability to handle NO_CLASS and set # of
-	// instances to 0)
-	cap = (Capabilities) this.clone();
-	cap.enable(Capability.NO_CLASS);
-	cap.disable(Capability.ONLY_MULTIINSTANCE);
-	cap.setMinimumNumberInstances(0);
-	if (!cap.test(att.relation()))
-	  return false;
-      }
+      // TODO: store additional Capabilities for this case
       
       // missing class labels
       if (m_MissingClassValuesTest) {
