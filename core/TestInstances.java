@@ -50,7 +50,7 @@ import java.util.Vector;
  *  The class type, see constants in weka.core.Attribute
  *  (default 1=nominal).</pre>
  * 
- * <pre> -classes-values &lt;num&gt;
+ * <pre> -class-values &lt;num&gt;
  *  The number of classes to generate (for nominal classes only)
  *  (default 2).</pre>
  * 
@@ -84,6 +84,21 @@ import java.util.Vector;
  * <pre> -relational &lt;num&gt;
  *  The number of relational attributes (default 0).</pre>
  * 
+ * <pre> -relational-nominal &lt;num&gt;
+ *  The number of nominal attributes in a rel. attribute (default 1).</pre>
+ * 
+ * <pre> -relational-nominal-values &lt;num&gt;
+ *  The number of values for nominal attributes in a rel. attribute (default 2).</pre>
+ * 
+ * <pre> -relational-numeric &lt;num&gt;
+ *  The number of numeric attributes in a rel. attribute (default 0).</pre>
+ * 
+ * <pre> -relational-string &lt;num&gt;
+ *  The number of string attributes in a rel. attribute (default 0).</pre>
+ * 
+ * <pre> -relational-date &lt;num&gt;
+ *  The number of date attributes in a rel. attribute (default 0).</pre>
+ * 
  * <pre> -num-instances-relational &lt;num&gt;
  *  The number of instances in relational/bag attributes (default 10).</pre>
  * 
@@ -99,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
@@ -169,6 +184,21 @@ public class TestInstances
   /** the number of relational attributes */
   protected int m_NumRelational = 0;
   
+  /** the number of nominal attributes in a relational attribute */
+  protected int m_NumRelationalNominal = 1;
+  
+  /** the number of values for nominal attributes in relational attributes */
+  protected int m_NumRelationalNominalValues = 2;
+  
+  /** the number of numeric attributes in a relational attribute */
+  protected int m_NumRelationalNumeric = 0;
+  
+  /** the number of string attributes in a relational attribute */
+  protected int m_NumRelationalString = 0;
+  
+  /** the number of date attributes in a relational attribute */
+  protected int m_NumRelationalDate = 0;
+  
   /** whether to generate Multi-Instance data or not */
   protected boolean m_MultiInstance = false;
   
@@ -206,6 +236,11 @@ public class TestInstances
     setNumString(0);
     setNumDate(0);
     setNumRelational(0);
+    setNumRelationalNominal(1);
+    setNumRelationalNominalValues(2);
+    setNumRelationalNumeric(0);
+    setNumRelationalString(0);
+    setNumRelationalDate(0);
     setNumInstancesRelational(10);
     setMultiInstance(false);
     setWords(arrayToList(DEFAULT_WORDS));
@@ -245,6 +280,11 @@ public class TestInstances
     setNumString(t.getNumString());
     setNumDate(t.getNumDate());
     setNumRelational(t.getNumRelational());
+    setNumRelationalNominal(t.getNumRelationalNominal());
+    setNumRelationalNominalValues(t.getNumRelationalNominalValues());
+    setNumRelationalNumeric(t.getNumRelationalNumeric());
+    setNumRelationalString(t.getNumRelationalString());
+    setNumRelationalDate(t.getNumRelationalDate());
     setMultiInstance(t.getMultiInstance());
     for (int i = 0; i < t.getNumRelational(); i++)
       setRelationalFormat(i, t.getRelationalFormat(i));
@@ -325,6 +365,26 @@ public class TestInstances
         "relational", 1, "-relational <num>"));
     
     result.addElement(new Option(
+        "\tThe number of nominal attributes in a rel. attribute (default 1).",
+        "relational-nominal", 1, "-relational-nominal <num>"));
+    
+    result.addElement(new Option(
+        "\tThe number of values for nominal attributes in a rel. attribute (default 2).",
+        "relational-nominal-values", 1, "-relational-nominal-values <num>"));
+    
+    result.addElement(new Option(
+        "\tThe number of numeric attributes in a rel. attribute (default 0).",
+        "relational-numeric", 1, "-relational-numeric <num>"));
+    
+    result.addElement(new Option(
+        "\tThe number of string attributes in a rel. attribute (default 0).",
+        "relational-string", 1, "-relational-string <num>"));
+    
+    result.addElement(new Option(
+        "\tThe number of date attributes in a rel. attribute (default 0).",
+        "relational-date", 1, "-relational-date <num>"));
+    
+    result.addElement(new Option(
         "\tThe number of instances in relational/bag attributes (default 10).",
         "num-instances-relational", 1, "-num-instances-relational <num>"));
     
@@ -361,7 +421,7 @@ public class TestInstances
    *  The class type, see constants in weka.core.Attribute
    *  (default 1=nominal).</pre>
    * 
-   * <pre> -classes-values &lt;num&gt;
+   * <pre> -class-values &lt;num&gt;
    *  The number of classes to generate (for nominal classes only)
    *  (default 2).</pre>
    * 
@@ -394,6 +454,21 @@ public class TestInstances
    * 
    * <pre> -relational &lt;num&gt;
    *  The number of relational attributes (default 0).</pre>
+   * 
+   * <pre> -relational-nominal &lt;num&gt;
+   *  The number of nominal attributes in a rel. attribute (default 1).</pre>
+   * 
+   * <pre> -relational-nominal-values &lt;num&gt;
+   *  The number of values for nominal attributes in a rel. attribute (default 2).</pre>
+   * 
+   * <pre> -relational-numeric &lt;num&gt;
+   *  The number of numeric attributes in a rel. attribute (default 0).</pre>
+   * 
+   * <pre> -relational-string &lt;num&gt;
+   *  The number of string attributes in a rel. attribute (default 0).</pre>
+   * 
+   * <pre> -relational-date &lt;num&gt;
+   *  The number of date attributes in a rel. attribute (default 0).</pre>
    * 
    * <pre> -num-instances-relational &lt;num&gt;
    *  The number of instances in relational/bag attributes (default 10).</pre>
@@ -527,6 +602,30 @@ public class TestInstances
     else if (!initialized)
       setNumRelational(0);
     
+    tmpStr = Utils.getOption("relational-nominal", options);
+    if (tmpStr.length() != 0)
+      setNumRelationalNominal(Integer.parseInt(tmpStr));
+    else if (!initialized)
+      setNumRelationalNominal(1);
+    
+    tmpStr = Utils.getOption("relational-nominal-values", options);
+    if (tmpStr.length() != 0)
+      setNumRelationalNominalValues(Integer.parseInt(tmpStr));
+    else if (!initialized)
+      setNumRelationalNominalValues(2);
+    
+    tmpStr = Utils.getOption("relational-numeric", options);
+    if (tmpStr.length() != 0)
+      setNumRelationalNumeric(Integer.parseInt(tmpStr));
+    else if (!initialized)
+      setNumRelationalNumeric(0);
+    
+    tmpStr = Utils.getOption("relational-string", options);
+    if (tmpStr.length() != 0)
+      setNumRelationalString(Integer.parseInt(tmpStr));
+    else if (!initialized)
+      setNumRelationalString(0);
+    
     tmpStr = Utils.getOption("num-instances-relational", options);
     if (tmpStr.length() != 0)
       setNumInstancesRelational(Integer.parseInt(tmpStr));
@@ -595,6 +694,21 @@ public class TestInstances
     
     result.add("-relational");
     result.add("" + getNumRelational());
+    
+    result.add("-relational-nominal");
+    result.add("" + getNumRelationalNominal());
+    
+    result.add("-relational-nominal-values");
+    result.add("" + getNumRelationalNominalValues());
+    
+    result.add("-relational-numeric");
+    result.add("" + getNumRelationalNumeric());
+    
+    result.add("-relational-string");
+    result.add("" + getNumRelationalString());
+    
+    result.add("-relational-date");
+    result.add("" + getNumRelationalDate());
     
     result.add("-num-instances-relational");
     result.add("" + getNumInstancesRelational());
@@ -907,7 +1021,7 @@ public class TestInstances
   }
   
   /**
-   * sets the number of data attributes
+   * sets the number of date attributes
    * 
    * @param value	the number of date attributes
    */
@@ -941,6 +1055,96 @@ public class TestInstances
    */
   public int getNumRelational() {
     return m_NumRelational;
+  }
+  
+  /**
+   * sets the number of nominal attributes in a relational attribute
+   * 
+   * @param value	the number of nominal attributes
+   */
+  public void setNumRelationalNominal(int value) {
+    m_NumRelationalNominal = value;
+  }
+  
+  /**
+   * returns the current number of nominal attributes in a relational attribute
+   * 
+   * @return 		the number of nominal attributes
+   */
+  public int getNumRelationalNominal() {
+    return m_NumRelationalNominal;
+  }
+  
+  /**
+   * sets the number of values for nominal attributes in a relational attribute
+   * 
+   * @param value	the number of values
+   */
+  public void setNumRelationalNominalValues(int value) {
+    m_NumRelationalNominalValues = value;
+  }
+  
+  /**
+   * returns the current number of values for nominal attributes in a relational attribute
+   * 
+   * @return 		the number of values
+   */
+  public int getNumRelationalNominalValues() {
+    return m_NumRelationalNominalValues;
+  }
+  
+  /**
+   * sets the number of numeric attributes in a relational attribute
+   * 
+   * @param value 	the number of numeric attributes
+   */
+  public void setNumRelationalNumeric(int value) {
+    m_NumRelationalNumeric = value;
+  }
+  
+  /**
+   * returns the current number of numeric attributes in a relational attribute
+   * 
+   * @return 		the number of numeric attributes
+   */
+  public int getNumRelationalNumeric() {
+    return m_NumRelationalNumeric;
+  }
+  
+  /**
+   * sets the number of string attributes in a relational attribute
+   * 
+   * @param value 	the number of string attributes
+   */
+  public void setNumRelationalString(int value) {
+    m_NumRelationalString = value;
+  }
+  
+  /**
+   * returns the current number of string attributes in a relational attribute
+   * 
+   * @return 		the number of string attributes
+   */
+  public int getNumRelationalString() {
+    return m_NumRelationalString;
+  }
+  
+  /**
+   * sets the number of date attributes in a relational attribute
+   * 
+   * @param value	the number of date attributes
+   */
+  public void setNumRelationalDate(int value) {
+    m_NumRelationalDate = value;
+  }
+  
+  /**
+   * returns the current number of date attributes in a relational attribute
+   * 
+   * @return		the number of date attributes
+   */
+  public int getNumRelationalDate() {
+    return m_NumRelationalDate;
   }
   
   /**
@@ -1157,9 +1361,12 @@ public class TestInstances
           rel = getRelationalFormat(index);
         
         if (rel == null) {
-          TestInstances dataset = (TestInstances) this.clone();
-          dataset.setMultiInstance(false);
-          dataset.setNumRelational(0);
+          TestInstances dataset = new TestInstances();
+          dataset.setNumNominal(getNumRelationalNominal());
+          dataset.setNumNominalValues(getNumRelationalNominalValues());
+          dataset.setNumNumeric(getNumRelationalNumeric());
+          dataset.setNumString(getNumRelationalString());
+          dataset.setNumDate(getNumRelationalDate());
           dataset.setNumInstances(0);
           dataset.setClassType(Attribute.NOMINAL);  // dummy to avoid endless recursion, will be deleted anyway
           rel = new Instances(dataset.generate());
@@ -1220,9 +1427,13 @@ public class TestInstances
           result = data.classAttribute().addRelation(getRelationalClassFormat());
         }
         else {
-          TestInstances dataset = (TestInstances) this.clone();
-          dataset.setMultiInstance(false);
-          dataset.setNumRelational(0);
+          TestInstances dataset = new TestInstances();
+          dataset.setNumNominal(getNumRelationalNominal());
+          dataset.setNumNominalValues(getNumRelationalNominalValues());
+          dataset.setNumNumeric(getNumRelationalNumeric());
+          dataset.setNumString(getNumRelationalString());
+          dataset.setNumDate(getNumRelationalDate());
+          dataset.setNumInstances(getNumInstancesRelational());
           dataset.setClassType(Attribute.NOMINAL);  // dummy to avoid endless recursion, will be deleted anyway
           Instances rel = new Instances(dataset.generate());
           int clsIndex = rel.classIndex();
@@ -1449,25 +1660,41 @@ public class TestInstances
 	result.setNumClasses(4);
       
       // attributes
-      if (c.handles(Capability.NOMINAL_ATTRIBUTES))
+      if (c.handles(Capability.NOMINAL_ATTRIBUTES)) {
 	result.setNumNominal(1);
-      else
+	result.setNumRelationalNominal(1);
+      }
+      else {
 	result.setNumNominal(0);
+	result.setNumRelationalNominal(0);
+      }
 
-      if (c.handles(Capability.NUMERIC_ATTRIBUTES))
+      if (c.handles(Capability.NUMERIC_ATTRIBUTES)) {
 	result.setNumNumeric(1);
-      else
+	result.setNumRelationalNumeric(1);
+      }
+      else {
 	result.setNumNumeric(0);
+	result.setNumRelationalNumeric(0);
+      }
 
-      if (c.handles(Capability.DATE_ATTRIBUTES))
+      if (c.handles(Capability.DATE_ATTRIBUTES)) {
 	result.setNumDate(1);
-      else
+	result.setNumRelationalDate(1);
+      }
+      else {
 	result.setNumDate(0);
+	result.setNumRelationalDate(0);
+      }
       
-      if (c.handles(Capability.STRING_ATTRIBUTES))
+      if (c.handles(Capability.STRING_ATTRIBUTES)) {
 	result.setNumString(1);
-      else
+	result.setNumRelationalString(1);
+      }
+      else {
 	result.setNumString(0);
+	result.setNumRelationalString(0);
+      }
       
       if (c.handles(Capability.RELATIONAL_ATTRIBUTES))
 	result.setNumRelational(1);
@@ -1499,7 +1726,12 @@ public class TestInstances
     result += "# String: " + getNumString() + "\n";
     result += "# Date: " + getNumDate() + "\n";
     result += "# Relational: " + getNumRelational() + "\n";
-    result += "# Relational Instances: " + getNumInstancesRelational() + "\n";
+    result += "  - # Nominal: " +     getNumRelationalNominal() + "\n";
+    result += "  - # Nominal values: " + getNumRelationalNominalValues() + "\n";
+    result += "  - # Numeric: " + getNumRelationalNumeric() + "\n";
+    result += "  - # String: " + getNumRelationalString() + "\n";
+    result += "  - # Date: " + getNumRelationalDate() + "\n";
+    result += "  - # Instances: " + getNumInstancesRelational() + "\n";
     result += "Multi-Instance: " + getMultiInstance() + "\n";
     result += "Words: " + getWords() + "\n";
     result += "Word separators: " + getWordSeparators() + "\n";
