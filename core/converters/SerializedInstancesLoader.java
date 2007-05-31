@@ -37,7 +37,7 @@ import java.io.ObjectInputStream;
  <!-- globalinfo-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class SerializedInstancesLoader 
@@ -160,11 +160,12 @@ public class SerializedInstancesLoader
    * determined by a call to getStructure then method should do so before
    * returning the next instance in the data set.
    *
+   * @param structure ignored
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @throws IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
 
     if (m_Dataset == null) {
       throw new IOException("No source has been specified");

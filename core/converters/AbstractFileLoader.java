@@ -35,7 +35,7 @@ import java.io.IOException;
  * Abstract superclass for all file loaders.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader
@@ -158,10 +158,11 @@ public abstract class AbstractFileLoader
 	loader.setFile(new File(options[0]));
 	// incremental
 	if (loader instanceof IncrementalConverter) {
-	  System.out.println(loader.getStructure());
+	  Instances structure = loader.getStructure();
+	  System.out.println(structure);
 	  Instance temp;
 	  do {
-	    temp = loader.getNextInstance();
+	    temp = loader.getNextInstance(structure);
 	    if (temp != null)
 	      System.out.println(temp);
 	  }

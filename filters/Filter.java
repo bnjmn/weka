@@ -70,7 +70,7 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision: 1.38 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -758,9 +758,8 @@ public abstract class Filter
     
     // Pass all the instances to the filter
     Instance inst;
-    while (input.hasMoreElements()) {
-      inst = input.nextElement();
-      inst.setDataset(data);
+    while (input.hasMoreElements(data)) {
+      inst = input.nextElement(data);
       if (debug) {
 	System.err.println("Input instance to filter");
       }
@@ -933,9 +932,8 @@ public abstract class Filter
     
     // Pass all the instances to the filter
     Instance inst;
-    while (firstInput.hasMoreElements()) {
-      inst = firstInput.nextElement();
-      inst.setDataset(firstData);
+    while (firstInput.hasMoreElements(firstData)) {
+      inst = firstInput.nextElement(firstData);
       if (filter.input(inst)) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from setInputFormat() "
@@ -964,9 +962,8 @@ public abstract class Filter
       printedHeader = true;
     }
     // Pass all the second instances to the filter
-    while (secondInput.hasMoreElements()) {
-      inst = secondInput.nextElement();
-      inst.setDataset(secondData);
+    while (secondInput.hasMoreElements(secondData)) {
+      inst = secondInput.nextElement(secondData);
       if (filter.input(inst)) {
 	if (!printedHeader) {
 	  throw new Error("Filter didn't return true from"

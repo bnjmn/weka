@@ -43,7 +43,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class CSVLoader 
@@ -267,11 +267,12 @@ public class CSVLoader
   /**
    * CSVLoader is unable to process a data set incrementally.
    *
+   * @param structure ignored
    * @return never returns without throwing an exception
    * @exception IOException always. CSVLoader is unable to process a data
    * set incrementally.
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("CSVLoader can't read data sets incrementally.");
   }
 

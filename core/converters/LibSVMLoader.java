@@ -48,7 +48,7 @@ import java.util.Vector;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Loader
  */
 public class LibSVMLoader 
@@ -366,11 +366,12 @@ public class LibSVMLoader
   /**
    * LibSVmLoader is unable to process a data set incrementally.
    *
+   * @param structure 		ignored
    * @return 			never returns without throwing an exception
    * @throws IOException 	always. LibSVMLoader is unable to process a 
    * 				data set incrementally.
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("LibSVMLoader can't read data sets incrementally.");
   }
 
