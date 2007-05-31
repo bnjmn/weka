@@ -102,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision: 1.10 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 
@@ -852,7 +852,7 @@ public class RandomProjection
    *      x = sqrt(3) * { -1 with prob. 1/6, 0 with prob. 2/3, 1 with prob. 1/6 }
    *      
    * @param useDstrWithZero
-   * @return
+   * @return the generated number
    */
   protected double rndmNum(boolean useDstrWithZero) {
       if(useDstrWithZero)
