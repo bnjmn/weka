@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.1 $
+ * @version $Revision: 1.9.2.2 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
@@ -228,28 +228,21 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    * determined by a call to getStructure then method should do so before
    * returning the next instance in the data set.
    *
+   * @param structure the dataset header information, will get updated in 
+   * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @exception IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
-
-    if (m_structure == null) {
-      getStructure();
-    }
+  public Instance getNextInstance(Instances structure) throws IOException {
+    m_structure = structure;
+	  
     if (getRetrieval() == BATCH) {
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(INCREMENTAL);
 
     if (!m_structure.readInstance(m_sourceReader)) {
-      // try to reset the loader if the source is a file
-      /*if (m_File != null) {
-	File temp = new File(m_File);
-	if (temp.exists()) {
-	  setSource(temp);
-	}
-      }*/
       return null;
     }
    
@@ -277,10 +270,11 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       try {
 	ArffLoader atf = new ArffLoader();
 	atf.setSource(inputfile);
-	System.out.println(atf.getStructure());
+	Instances structure = atf.getStructure();
+	System.out.println(structure);
 	Instance temp;
 	do {
-	  temp = atf.getNextInstance();
+	  temp = atf.getNextInstance(structure);
 	  if (temp != null) {
 	    System.out.println(temp);
 	  }

@@ -54,7 +54,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10.2.2 $
+ * @version $Revision: 1.10.2.3 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -135,7 +135,7 @@ public class Loader extends AbstractDataSource
 	    e.printStackTrace();
 	  }
 	  try {
-	    nextInstance = m_Loader.getNextInstance();
+	    nextInstance = m_Loader.getNextInstance(structure);
 	  } catch (IOException e) {
 	    e.printStackTrace();
 	  }
@@ -156,7 +156,7 @@ public class Loader extends AbstractDataSource
 	    m_ie.setInstance(nextInstance);
 	    //	    start = false;
 	    //	    System.err.println(z);
-	    nextInstance = m_Loader.getNextInstance();
+	    nextInstance = m_Loader.getNextInstance(structure);
 	    if (nextInstance == null) {
 	      m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
 	    }

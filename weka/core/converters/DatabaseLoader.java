@@ -66,7 +66,7 @@ import java.util.Vector;
  * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  * @see Loader
  */
 public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
@@ -1130,12 +1130,14 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
    * determined by a call to getStructure then method does so before
    * returning the next instance in the data set.
    *
+   * @param structure the dataset header information, will get updated in 
+   * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @exception IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
-
+  public Instance getNextInstance(Instances structure) throws IOException {
+	m_structure = structure;
       
     if (m_DataBaseConnection == null) 
       throw new IOException("No source database has been specified"); 
@@ -1144,10 +1146,6 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
     }
     //pseudoInremental: Load all instances into main memory in batch mode and give them incrementally to user
     if(m_pseudoIncremental){
-        if (m_structure == null){
-            setRetrieval(NONE);  
-            getStructure();
-        }
         setRetrieval(INCREMENTAL);
         if(m_datasetPseudoInc.numInstances() > 0){
             Instance current = m_datasetPseudoInc.instance(0);
@@ -1164,9 +1162,6 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
     try{
         if(!m_DataBaseConnection.isConnected())
             connectToDatabase();
-        //if no header determined yet, do it
-        if(m_structure == null)
-            m_structure = getStructure();
         //if no key columns specified by user, try to detect automatically
         if(m_firstTime && m_orderBy.size() == 0){
             if(!checkForKey())
@@ -1318,10 +1313,11 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
         if(!atf.m_inc)
             System.out.println(atf.getDataSet());
         else{
-            System.out.println(atf.getStructure());
+        	Instances structure = atf.getStructure();
+            System.out.println(structure);
             Instance temp;
             do {
-            temp = atf.getNextInstance();
+            temp = atf.getNextInstance(structure);
             if (temp != null) {
                 System.out.println(temp);
             }

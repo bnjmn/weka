@@ -34,7 +34,7 @@ import weka.core.Instance;
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision: 1.6.2.2 $
  */
 public interface Loader extends Serializable {
 
@@ -152,40 +152,15 @@ public interface Loader extends Serializable {
    * where the data set structure cannot be fully established before all
    * instances have been seen) then an exception should be thrown.
    *
+   * @param structure the dataset header information, will get updated in 
+   * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @exception IOException if there is an error during parsing or if
    * getDataSet has been called on this source (either incremental
    * or batch loading can be used, not both).
-   *
-   * <pre><jml>
-   *    public_normal_behavior
-   *    {|
-   *       requires: model_sourceSupplied == true
-   *                 && (* successful parse *);
-   *       modifiable: model_structureDetermined;
-   *       ensures: model_structureDetermined == true
-   *                && \result != null;
-   *     also
-   *       requires: model_sourceSupplied == true
-   *                 && (* no further input *);
-   *       modifiable: model_structureDetermined;
-   *       ensures: model_structureDetermined == true
-   *                && \result == null;
-   *    |}
-   *  also
-   *    public_exceptional_behavior
-   *    {|
-   *       requires: model_sourceSupplied == false
-   *                 || (* unsuccessful parse *);
-   *       signals: (IOException);
-   *     also
-   *       requires: (* unable to process data set incrementally *);
-   *       signals: (IOException);
-   *    |}
-   * </jml></pre>
    */
-  Instance getNextInstance() throws IOException;
+  Instance getNextInstance(Instances structure) throws IOException;
 }
 
 

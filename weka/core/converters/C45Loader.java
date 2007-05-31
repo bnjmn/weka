@@ -41,7 +41,7 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.1 $
+ * @version $Revision: 1.9.2.2 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader 
@@ -281,23 +281,19 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    * where the data set structure cannot be fully established before all
    * instances have been seen) then an exception should be thrown.
    *
+   * @param structure the dataset header information, will get updated in 
+   * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @exception IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
-    if (m_sourceFile == null) {
-      throw new IOException("No source has been specified");
-    }
+  public Instance getNextInstance(Instances structure) throws IOException {
+	m_structure = structure;
     
     if (getRetrieval() == BATCH) {
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(INCREMENTAL);
-
-    if (m_structure == null) {
-      getStructure();
-    }
 
     StreamTokenizer st = new StreamTokenizer(m_dataReader);
     initTokenizer(st);
@@ -518,11 +514,12 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       try {
 	C45Loader cta = new C45Loader();
 	cta.setSource(inputfile);
-	System.out.println(cta.getStructure());
-	Instance temp = cta.getNextInstance();
+	Instances structure = cta.getStructure();
+	System.out.println(structure);
+	Instance temp = cta.getNextInstance(structure);
 	while (temp != null) {
 	  System.out.println(temp);
-	  temp = cta.getNextInstance();
+	  temp = cta.getNextInstance(structure);
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();

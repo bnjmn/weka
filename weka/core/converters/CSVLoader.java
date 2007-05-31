@@ -41,7 +41,7 @@ import java.lang.String;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
 public class CSVLoader extends AbstractLoader 
@@ -305,11 +305,12 @@ implements FileSourcedConverter, BatchConverter {
   /**
    * CSVLoader is unable to process a data set incrementally.
    *
+   * @param structure ignored
    * @return never returns without throwing an exception
    * @exception IOException always. CSVLoader is unable to process a data
    * set incrementally.
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("CSVLoader can't read data sets incrementally.");
   }
 

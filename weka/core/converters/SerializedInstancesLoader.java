@@ -36,7 +36,7 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader 
@@ -180,11 +180,12 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
    * determined by a call to getStructure then method should do so before
    * returning the next instance in the data set.
    *
+   * @param structure ignored
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @exception IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
 
     if (m_Dataset == null) {
       throw new IOException("No source has been specified");
@@ -212,10 +213,11 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       try {
 	SerializedInstancesLoader lo = new SerializedInstancesLoader();
 	lo.setSource(inputfile);
-	System.out.println(lo.getStructure());
+	Instances structure = lo.getStructure();
+	System.out.println(structure);
 	Instance temp;
 	do {
-	  temp = lo.getNextInstance();
+	  temp = lo.getNextInstance(structure);
 	  if (temp != null) {
 	    System.out.println(temp);
 	  }
