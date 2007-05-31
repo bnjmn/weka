@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.70 $ 
+ * @version $Revision: 1.71 $ 
  */
 public class Instances 
   implements Serializable {
@@ -884,11 +884,10 @@ public class Instances
    * @see weka.core.converters.ArffLoader
    * @see weka.core.converters.ConverterUtils.DataSource
    */ 
-  @Deprecated public boolean readInstance(Reader reader) 
-       throws IOException {
+  @Deprecated public boolean readInstance(Reader reader) throws IOException {
 
     ArffReader arff = new ArffReader(reader, this, m_Lines, 1);
-    Instance inst = arff.readInstance(false);
+    Instance inst = arff.readInstance(arff.getData(), false);
     m_Lines = arff.getLineNo();
     if (inst != null) {
       add(inst);
@@ -2014,11 +2013,13 @@ public class Instances
 	DataSource source2 = new DataSource(args[2]);
 	if (!source1.getStructure().equalHeaders(source2.getStructure()))
 	  throw new Exception("The two datasets have different headers!");
-	i = source1.getDataSet();
-	source2.reset();
-	while (source2.hasMoreElements())
-	  i.add(source2.nextElement());
-	System.out.println(i);
+	Instances structure = source1.getStructure();
+	System.out.println(source1.getStructure());
+	while (source1.hasMoreElements(structure))
+	  System.out.println(source1.nextElement(structure));
+	structure = source2.getStructure();
+	while (source2.hasMoreElements(structure))
+	  System.out.println(source2.nextElement(structure));
       }
       // read file and seed value, randomize data and print result to stdout
       else if ((args.length == 3) && (args[0].toLowerCase().equals("randomize"))) {

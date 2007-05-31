@@ -42,7 +42,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -127,7 +127,7 @@ public class Loader
 	    e.printStackTrace();
 	  }
 	  try {
-	    nextInstance = m_Loader.getNextInstance();
+	    nextInstance = m_Loader.getNextInstance(structure);
 	  } catch (IOException e) {
 	    e.printStackTrace();
 	  }
@@ -148,7 +148,7 @@ public class Loader
 	    m_ie.setInstance(nextInstance);
 	    //	    start = false;
 	    //	    System.err.println(z);
-	    nextInstance = m_Loader.getNextInstance();
+	    nextInstance = m_Loader.getNextInstance(structure);
 	    if (nextInstance == null) {
 	      m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
 	    }

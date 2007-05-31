@@ -42,7 +42,7 @@ import java.io.StreamTokenizer;
  <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see Loader
  */
 public class C45Loader 
@@ -260,11 +260,13 @@ public class C45Loader
    * where the data set structure cannot be fully established before all
    * instances have been seen) then an exception should be thrown.
    *
+   * @param structure the dataset header information, will get updated in 
+   * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @exception IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
     if (m_sourceFile == null) {
       throw new IOException("No source has been specified");
     }

@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  * @see Loader
  */
 public class ArffLoader 
@@ -93,7 +93,7 @@ public class ArffLoader
    * Instances data = arff.getStructure();
    * data.setClassIndex(data.numAttributes() - 1);
    * Instance inst;
-   * while ((inst = arff.readInstance()) != null) {
+   * while ((inst = arff.readInstance(data)) != null) {
    *   data.add(inst);
    * }
    * </pre>
@@ -101,7 +101,7 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.17 $
+   * @version $Revision: 1.18 $
    */
   public static class ArffReader {
 
@@ -136,7 +136,7 @@ public class ArffLoader
       initBuffers();
       
       Instance inst;
-      while ((inst = readInstance()) != null) {
+      while ((inst = readInstance(m_Data)) != null) {
         m_Data.add(inst);
       };
       
@@ -152,7 +152,7 @@ public class ArffLoader
      * @throws IOException		if something goes wrong
      * @throws IllegalArgumentException	if capacity is negative
      * @see				#getStructure()
-     * @see				#readInstance()
+     * @see				#readInstance(Instances)
      */
     public ArffReader(Reader reader, int capacity) throws IOException {
       if (capacity < 0)
@@ -179,7 +179,7 @@ public class ArffLoader
       this(reader, template, lines, 100);
 
       Instance inst;
-      while ((inst = readInstance()) != null) {
+      while ((inst = readInstance(m_Data)) != null) {
         m_Data.add(inst);
       };
 
@@ -333,37 +333,45 @@ public class ArffLoader
     /**
      * Reads a single instance using the tokenizer and returns it. 
      *
+     * @param structure 	the dataset header information, will get updated 
+     * 				in case of string or relational attributes
      * @return 			null if end of file has been reached
      * @throws IOException 	if the information is not read 
      * successfully
      */ 
-    public Instance readInstance() throws IOException {
-      return readInstance(true);
+    public Instance readInstance(Instances structure) throws IOException {
+      return readInstance(structure, true);
     }
     
     /**
      * Reads a single instance using the tokenizer and returns it. 
      *
+     * @param structure 	the dataset header information, will get updated 
+     * 				in case of string or relational attributes
      * @param flag 		if method should test for carriage return after 
      * 				each instance
      * @return 			null if end of file has been reached
      * @throws IOException 	if the information is not read 
      * successfully
      */ 
-    public Instance readInstance(boolean flag) throws IOException {
-      return getInstance(flag);
+    public Instance readInstance(Instances structure, boolean flag) throws IOException {
+      return getInstance(structure, flag);
     }
     
     /**
      * Reads a single instance using the tokenizer and returns it. 
      *
+     * @param structure 	the dataset header information, will get updated 
+     * 				in case of string or relational attributes
      * @param flag 		if method should test for carriage return after 
      * 				each instance
      * @return 			null if end of file has been reached
      * @throws IOException 	if the information is not read 
      * 				successfully
      */ 
-    protected Instance getInstance(boolean flag) throws IOException {
+    protected Instance getInstance(Instances structure, boolean flag) throws IOException {
+      m_Data = structure;
+      
       // Check if any attributes have been declared.
       if (m_Data.numAttributes() == 0) {
         errorMessage("no header information available");
@@ -976,7 +984,7 @@ public class ArffLoader
 
     // Read all instances
     Instance inst;
-    while ((inst = m_ArffReader.readInstance()) != null)
+    while ((inst = m_ArffReader.readInstance(m_structure)) != null)
       m_structure.add(inst);
     
     Instances readIn = new Instances(m_structure);
@@ -991,21 +999,22 @@ public class ArffLoader
    * determined by a call to getStructure then method should do so before
    * returning the next instance in the data set.
    *
+   * @param structure the dataset header information, will get updated in 
+   * case of string or relational attributes
    * @return the next instance in the data set as an Instance object or null
    * if there are no more instances to be read
    * @throws IOException if there is an error during parsing
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
 
-    if (m_structure == null) {
-      getStructure();
-    }
+    m_structure = structure;
+
     if (getRetrieval() == BATCH) {
       throw new IOException("Cannot mix getting Instances in both incremental and batch modes");
     }
     setRetrieval(INCREMENTAL);
 
-    Instance current = m_ArffReader.readInstance();
+    Instance current = m_ArffReader.readInstance(m_structure);
     if (current == null) {
       try {
         reset();

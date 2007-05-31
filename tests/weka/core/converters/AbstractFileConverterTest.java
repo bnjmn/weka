@@ -34,7 +34,7 @@ import java.io.FileWriter;
  * Abstract Test class for file converters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class AbstractFileConverterTest 
   extends AbstractConverterTest {
@@ -247,7 +247,7 @@ public abstract class AbstractFileConverterTest
       ((AbstractFileLoader) m_Loader).setFile(new File(m_ExportFilename));
       data = new Instances(m_Loader.getStructure());
       do {
-	temp = m_Loader.getNextInstance();
+	temp = m_Loader.getNextInstance(data);
 	if (temp != null)
 	  data.add(temp);
       }

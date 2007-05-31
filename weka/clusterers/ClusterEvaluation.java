@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.39 $
+ * @version  $Revision: 1.40 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -234,7 +234,7 @@ public class ClusterEvaluation
     }
     
     i = 0;
-    while (source.hasMoreElements()) {
+    while (source.hasMoreElements(testRaw)) {
       // next instance
       inst = source.nextElement(testRaw);
       if (filter != null) {
@@ -337,7 +337,7 @@ public class ClusterEvaluation
     instances = source.getStructure(inst.classIndex());
 
     i = 0;
-    while (source.hasMoreElements()) {
+    while (source.hasMoreElements(instances)) {
       instance = source.nextElement(instances);
       counts[(int)m_clusterAssignments[i]][(int)instance.classValue()]++;
       clusterTotals[(int)m_clusterAssignments[i]]++;
@@ -666,7 +666,7 @@ public class ClusterEvaluation
       if (theClass == -1) {
 	if (updateable) {
 	  clusterer.buildClusterer(source.getStructure());
-	  while (source.hasMoreElements()) {
+	  while (source.hasMoreElements(train)) {
 	    inst = source.nextElement(train);
 	    ((UpdateableClusterer) clusterer).updateClusterer(inst);
 	  }
@@ -684,7 +684,7 @@ public class ClusterEvaluation
 	if (updateable) {
 	  Instances clusterTrain = Filter.useFilter(train, removeClass);
 	  clusterer.buildClusterer(clusterTrain);
-	  while (source.hasMoreElements()) {
+	  while (source.hasMoreElements(train)) {
 	    inst = source.nextElement(train);
 	    removeClass.input(inst);
 	    removeClass.batchFinished();
@@ -889,9 +889,10 @@ public class ClusterEvaluation
 
     if (fileName.length() != 0) {
       DataSource source = new DataSource(fileName);
+      Instances structure = source.getStructure();
       Instance inst;
-      while (source.hasMoreElements()) {
-	inst = source.nextElement();
+      while (source.hasMoreElements(structure)) {
+	inst = source.nextElement(structure);
 	try {
 	  cnum = clusterer.clusterInstance(inst);
 
@@ -981,14 +982,16 @@ public class ClusterEvaluation
     int cnum;
     DataSource source = null;
     Instance inst;
+    Instances structure;
     
     if (testFileName.length() != 0)
       source = new DataSource(testFileName);
     else
       source = new DataSource(trainFileName);
     
-    while (source.hasMoreElements()) {
-      inst = source.nextElement();
+    structure = source.getStructure();
+    while (source.hasMoreElements(structure)) {
+      inst = source.nextElement(structure);
       try {
 	cnum = clusterer.clusterInstance(inst);
 	

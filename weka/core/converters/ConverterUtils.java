@@ -46,7 +46,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Serializable
  */
 public class ConverterUtils
@@ -67,14 +67,14 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
-   * @see #hasMoreElements()
-   * @see #nextElement()
+   * @version $Revision: 1.13 $
+   * @see #hasMoreElements(Instances)
+   * @see #nextElement(Instances)
    * @see #reset()
    * @see DataSink
    */
   public static class DataSource
-    implements Serializable, Enumeration {
+    implements Serializable {
     
     /** for serialization */
     private static final long serialVersionUID = -613122395928757332L;
@@ -270,7 +270,7 @@ public class ConverterUtils
 	e.printStackTrace();
 	result = null;
       }
-      
+
       return result;
     }
     
@@ -351,9 +351,9 @@ public class ConverterUtils
      * 
      * @return		true if there are more Instance objects 
      * 			available
-     * @see		#nextElement()
+     * @see		#nextElement(Instances)
      */
-    public boolean hasMoreElements() {
+    public boolean hasMoreElements(Instances structure) {
       boolean	result;
       
       result = false;
@@ -365,7 +365,7 @@ public class ConverterUtils
 	}
 	else {
 	  try {
-	    m_IncrementalBuffer = m_Loader.getNextInstance();
+	    m_IncrementalBuffer = m_Loader.getNextInstance(structure);
 	    result              = (m_IncrementalBuffer != null);
 	  }
 	  catch (Exception e) {
@@ -382,11 +382,13 @@ public class ConverterUtils
     }
     
     /**
-     * returns the next element, null if none available
+     * returns the next element and sets the specified dataset, null if 
+     * none available
      * 
+     * @param dataset	the dataset to set for the instance
      * @return		the next Instance
      */
-    public Instance nextElement() {
+    public Instance nextElement(Instances dataset) {
       Instance	result;
       
       result = null;
@@ -399,7 +401,7 @@ public class ConverterUtils
 	}
 	else {
 	  try {
-	    result = m_Loader.getNextInstance();
+	    result = m_Loader.getNextInstance(dataset);
 	  }
 	  catch (Exception e) {
 	    e.printStackTrace();
@@ -414,22 +416,7 @@ public class ConverterUtils
 	}
       }
 
-      return result;
-    }
-    
-    /**
-     * returns the next element and sets the specified dataset, null if 
-     * none available
-     * 
-     * @param dataset	the dataset to set for the instance
-     * @return		the next Instance
-     */
-    public Instance nextElement(Instances dataset) {
-      Instance	result;
-      
-      result = nextElement();
-      if (result != null)
-	result.setDataset(dataset);
+      result.setDataset(dataset);
       
       return result;
     }
@@ -505,16 +492,17 @@ public class ConverterUtils
       System.out.println("Incremental? " + loader.isIncremental());
       System.out.println("Loader: " + loader.getLoader().getClass().getName());
       System.out.println("Data:\n");
-      System.out.println(loader.getStructure());
-      while (loader.hasMoreElements())
-	System.out.println(loader.nextElement());
+      Instances structure = loader.getStructure();
+      System.out.println(structure);
+      while (loader.hasMoreElements(structure))
+	System.out.println(loader.nextElement(structure));
       
       Instances inst = loader.getDataSet();
       loader = new DataSource(inst);
       System.out.println("\n\nProxy-Data:\n");
       System.out.println(loader.getStructure());
-      while (loader.hasMoreElements())
-	System.out.println(loader.nextElement());
+      while (loader.hasMoreElements(structure))
+	System.out.println(loader.nextElement(inst));
     }
   }
 
@@ -524,7 +512,7 @@ public class ConverterUtils
    * It is the logical counterpart to <code>DataSource</code>.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.13 $
    * @see DataSource
    */
   public static class DataSink

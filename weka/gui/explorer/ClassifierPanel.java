@@ -40,7 +40,6 @@ import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Version;
-import weka.core.Capabilities.Capability;
 import weka.core.converters.IncrementalConverter;
 import weka.core.converters.Loader;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -134,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.105 $
+ * @version $Revision: 1.106 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1321,9 +1320,8 @@ public class ClassifierPanel
 
 	      Instance instance;
 	      int jj = 0;
-	      while (source.hasMoreElements()) {
-		instance = source.nextElement();
-		instance.setDataset(userTestStructure);
+	      while (source.hasMoreElements(userTestStructure)) {
+		instance = source.nextElement(userTestStructure);
 		processClassifierPrediction(instance, classifier,
 		    eval, predInstances, plotShape,
 		    plotSize);
@@ -2177,9 +2175,8 @@ public class ClassifierPanel
 
 	      Instance instance;
 	      int jj = 0;
-	      while (source.hasMoreElements()) {
-		instance = source.nextElement();
-		instance.setDataset(userTestStructure);
+	      while (source.hasMoreElements(userTestStructure)) {
+		instance = source.nextElement(userTestStructure);
 		processClassifierPrediction(instance, classifier,
 		    eval, predInstances, plotShape,
 		    plotSize);

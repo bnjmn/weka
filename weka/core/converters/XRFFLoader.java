@@ -44,7 +44,7 @@ import java.util.zip.GZIPInputStream;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Loader
  */
 public class XRFFLoader 
@@ -265,11 +265,12 @@ public class XRFFLoader
   /**
    * XRFFLoader is unable to process a data set incrementally.
    *
+   * @param structure		ignored
    * @return 			never returns without throwing an exception
    * @throws IOException 	always. XRFFLoader is unable to process a 
    * 				data set incrementally.
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("XRFFLoader can't read data sets incrementally.");
   }
 

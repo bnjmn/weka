@@ -70,7 +70,7 @@ import java.util.Vector;
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby at cs.waikato.ac.nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see Loader
  */
 public class TextDirectoryLoader
@@ -407,11 +407,12 @@ public class TextDirectoryLoader
   /**
    * TextDirectoryLoader is unable to process a data set incrementally.
    *
+   * @param structure ignored
    * @return never returns without throwing an exception
    * @throws IOException always. TextDirectoryLoader is unable to process a data
    * set incrementally.
    */
-  public Instance getNextInstance() throws IOException {
+  public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("TextDirectoryLoader can't read data sets incrementally.");
   }
   

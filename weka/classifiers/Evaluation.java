@@ -171,7 +171,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.76 $
+ * @version  $Revision: 1.77 $
  */
 public class Evaluation
 implements Summarizable {
@@ -961,7 +961,7 @@ implements Summarizable {
 	classifier.buildClassifier(train);
       }
       Instance trainInst;
-      while (trainSource.hasMoreElements()) {
+      while (trainSource.hasMoreElements(train)) {
 	trainInst = trainSource.nextElement(train);
 	trainingEvaluation.updatePriors(trainInst);
 	testingEvaluation.updatePriors(trainInst);
@@ -1064,7 +1064,7 @@ implements Summarizable {
 	train = trainSource.getStructure(actualClassIndex);
 	testTimeStart = System.currentTimeMillis();
 	Instance trainInst;
-	while (trainSource.hasMoreElements()) {
+	while (trainSource.hasMoreElements(train)) {
 	  trainInst = trainSource.nextElement(train);
 	  trainingEvaluation.evaluateModelOnce((Classifier)classifier, trainInst);
 	}
@@ -1112,7 +1112,7 @@ implements Summarizable {
     if (testSource != null) {
       // Testing is on the supplied test data
       Instance testInst;
-      while (testSource.hasMoreElements()) {
+      while (testSource.hasMoreElements(test)) {
 	testInst = testSource.nextElement(test);
 	testingEvaluation.evaluateModelOnceAndRecordPrediction(
             (Classifier)classifier, testInst);
@@ -2676,7 +2676,7 @@ implements Summarizable {
       // print predictions
       int i = 0;
       testSource.reset();
-      while (testSource.hasMoreElements()) {
+      while (testSource.hasMoreElements(test)) {
 	Instance inst = testSource.nextElement(test);
 	text.append(
 	    predictionText(

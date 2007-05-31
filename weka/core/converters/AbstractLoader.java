@@ -31,7 +31,7 @@ import java.io.*;
  * methods. All other methods must be overridden.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public abstract class AbstractLoader implements Loader {
   
@@ -107,5 +107,5 @@ public abstract class AbstractLoader implements Loader {
   /*
    * To be overridden.
    */
-  public abstract Instance getNextInstance() throws IOException;
+  public abstract Instance getNextInstance(Instances structure) throws IOException;
 }
