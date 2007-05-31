@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58.2.3 $ 
+ * @version $Revision: 1.58.2.4 $ 
  */
 public class Instances implements Serializable {
  
@@ -250,6 +250,7 @@ public class Instances implements Serializable {
    * Shallow copies instance before it is added. Increases the
    * size of the dataset if it is not large enough. Does not
    * check if the instance is compatible with the dataset.
+   * Note: String values are not transferred.
    *
    * @param instance the instance to be added
    */
