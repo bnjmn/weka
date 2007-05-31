@@ -61,7 +61,7 @@ import javax.swing.JFrame;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class AttributeVisualizationPanel
   extends PrintablePanel {
@@ -380,10 +380,15 @@ public class AttributeVisualizationPanel
           histClassCounts=new int[m_data.attribute(m_attribIndex).numValues()]
                                  [m_data.attribute(m_classIndex).numValues()+1];
           
-          m_maxValue = m_as.nominalCounts[0];
-          for(int i=0; i<m_data.attribute(m_attribIndex).numValues(); i++) {
-            if(m_as.nominalCounts[i]>m_maxValue)
-              m_maxValue = m_as.nominalCounts[i];
+          if (m_as.nominalCounts.length > 0) {
+            m_maxValue = m_as.nominalCounts[0];
+            for(int i=0; i<m_data.attribute(m_attribIndex).numValues(); i++) {
+              if(m_as.nominalCounts[i]>m_maxValue)
+        	m_maxValue = m_as.nominalCounts[i];
+            }
+          }
+          else {
+            m_maxValue = 0;
           }
           
           if(m_colorList.size()==0)
@@ -436,10 +441,15 @@ public class AttributeVisualizationPanel
           int histCounts[];
           histCounts  = new int[m_data.attribute(m_attribIndex).numValues()];
           
-          m_maxValue = m_as.nominalCounts[0];
-          for(int i=0; i<m_data.attribute(m_attribIndex).numValues(); i++) {
-            if(m_as.nominalCounts[i]>m_maxValue)
-              m_maxValue = m_as.nominalCounts[i];
+          if (m_as.nominalCounts.length > 0) {
+            m_maxValue = m_as.nominalCounts[0];
+            for(int i=0; i<m_data.attribute(m_attribIndex).numValues(); i++) {
+              if(m_as.nominalCounts[i]>m_maxValue)
+        	m_maxValue = m_as.nominalCounts[i];
+            }
+          }
+          else {
+            m_maxValue = 0;
           }
           
           for(int k=0; k<m_data.numInstances(); k++) {
