@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -100,6 +100,8 @@ public class Capabilities
     BINARY_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Binary attributes"),
     /** can handle unary attributes */
     UNARY_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Unary attributes"),
+    /** can handle empty nominal attributes */
+    EMPTY_NOMINAL_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Empty nominal attributes"),
     /** can handle numeric attributes */
     NUMERIC_ATTRIBUTES(ATTRIBUTE + ATTRIBUTE_CAPABILITY, "Numeric attributes"),
     /** can handle date attributes */
@@ -119,6 +121,8 @@ public class Capabilities
     BINARY_CLASS(CLASS + CLASS_CAPABILITY, "Binary class"),
     /** can handle unary classes */
     UNARY_CLASS(CLASS + CLASS_CAPABILITY, "Unary class"),
+    /** can handle empty nominal classes */
+    EMPTY_NOMINAL_CLASS(CLASS + CLASS_CAPABILITY, "Empty nominal class"),
     /** can handle numeric classes */
     NUMERIC_CLASS(CLASS + CLASS_CAPABILITY, "Numeric class"),
     /** can handle date classes */
@@ -461,17 +465,25 @@ public class Capabilities
    * @param c     the capability to enable
    */
   public void enable(Capability c) {
+    // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       enable(Capability.BINARY_ATTRIBUTES);
     }
     else if (c == Capability.BINARY_ATTRIBUTES) {
       enable(Capability.UNARY_ATTRIBUTES);
     }
+    else if (c == Capability.UNARY_ATTRIBUTES) {
+      enable(Capability.EMPTY_NOMINAL_ATTRIBUTES);
+    }
+    // class
     else if (c == Capability.NOMINAL_CLASS) {
       enable(Capability.BINARY_CLASS);
     }
     else if (c == Capability.BINARY_CLASS) {
       enable(Capability.UNARY_CLASS);
+    }
+    else if (c == Capability.UNARY_CLASS) {
+      enable(Capability.EMPTY_NOMINAL_CLASS);
     }
 
     m_Capabilities.add(c);
@@ -483,17 +495,25 @@ public class Capabilities
    * @param c     the capability to enable the dependency flag for
    */
   public void enableDependency(Capability c) {
+    // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       enableDependency(Capability.BINARY_ATTRIBUTES);
     }
     else if (c == Capability.BINARY_ATTRIBUTES) {
       enableDependency(Capability.UNARY_ATTRIBUTES);
     }
+    else if (c == Capability.UNARY_ATTRIBUTES) {
+      enableDependency(Capability.EMPTY_NOMINAL_ATTRIBUTES);
+    }
+    // class
     else if (c == Capability.NOMINAL_CLASS) {
       enableDependency(Capability.BINARY_CLASS);
     }
     else if (c == Capability.BINARY_CLASS) {
       enableDependency(Capability.UNARY_CLASS);
+    }
+    else if (c == Capability.UNARY_CLASS) {
+      enableDependency(Capability.EMPTY_NOMINAL_CLASS);
     }
 
     m_Dependencies.add(c);
@@ -557,17 +577,25 @@ public class Capabilities
    * @param c     the capability to disable
    */
   public void disable(Capability c) {
+    // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       disable(Capability.BINARY_ATTRIBUTES);
     }
     else if (c == Capability.BINARY_ATTRIBUTES) {
       disable(Capability.UNARY_ATTRIBUTES);
     }
+    else if (c == Capability.UNARY_ATTRIBUTES) {
+      disable(Capability.EMPTY_NOMINAL_ATTRIBUTES);
+    }
+    // class
     else if (c == Capability.NOMINAL_CLASS) {
       disable(Capability.BINARY_CLASS);
     }
     else if (c == Capability.BINARY_CLASS) {
       disable(Capability.UNARY_CLASS);
+    }
+    else if (c == Capability.UNARY_CLASS) {
+      disable(Capability.EMPTY_NOMINAL_CLASS);
     }
 
     m_Capabilities.remove(c);
@@ -579,17 +607,25 @@ public class Capabilities
    * @param c     the capability to disable the dependency flag for
    */
   public void disableDependency(Capability c) {
+    // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       disableDependency(Capability.BINARY_ATTRIBUTES);
     }
     else if (c == Capability.BINARY_ATTRIBUTES) {
       disableDependency(Capability.UNARY_ATTRIBUTES);
     }
+    else if (c == Capability.UNARY_ATTRIBUTES) {
+      disableDependency(Capability.EMPTY_NOMINAL_ATTRIBUTES);
+    }
+    // class
     else if (c == Capability.NOMINAL_CLASS) {
       disableDependency(Capability.BINARY_CLASS);
     }
     else if (c == Capability.BINARY_CLASS) {
       disableDependency(Capability.UNARY_CLASS);
+    }
+    else if (c == Capability.UNARY_CLASS) {
+      disableDependency(Capability.EMPTY_NOMINAL_CLASS);
     }
 
     m_Dependencies.remove(c);
@@ -801,6 +837,7 @@ public class Capabilities
     Capability		cap;
     Capability		capBinary;
     Capability		capUnary;
+    Capability		capEmpty;
     String		errorStr;
     
     result = true;
@@ -821,11 +858,13 @@ public class Capabilities
 	  cap       = Capability.NOMINAL_CLASS;
 	  capBinary = Capability.BINARY_CLASS;
 	  capUnary  = Capability.UNARY_CLASS;
+	  capEmpty  = Capability.EMPTY_NOMINAL_CLASS;
 	}
 	else {
 	  cap       = Capability.NOMINAL_ATTRIBUTES;
 	  capBinary = Capability.BINARY_ATTRIBUTES;
 	  capUnary  = Capability.UNARY_ATTRIBUTES;
+	  capEmpty  = Capability.EMPTY_NOMINAL_ATTRIBUTES;
 	}
 	
         if (handles(cap) && (att.numValues() > 2))
@@ -834,7 +873,14 @@ public class Capabilities
           break;
         else if (handles(capUnary) && (att.numValues() == 1))
           break;
+        else if (handles(capEmpty) && (att.numValues() == 0))
+          break;
 
+        if (att.numValues() == 0) {
+          m_FailReason = new UnsupportedAttributeTypeException(
+              createMessage("Cannot handle empty nominal " + errorStr + "!"));
+          result = false;
+        }
         if (att.numValues() == 1) {
           m_FailReason = new UnsupportedAttributeTypeException(
               createMessage("Cannot handle unary " + errorStr + "!"));
