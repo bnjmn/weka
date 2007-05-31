@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.71 $ 
+ * @version $Revision: 1.72 $ 
  */
 public class Instances 
   implements Serializable {
@@ -267,6 +267,7 @@ public class Instances
    * Shallow copies instance before it is added. Increases the
    * size of the dataset if it is not large enough. Does not
    * check if the instance is compatible with the dataset.
+   * Note: String or relational values are not transferred.
    *
    * @param instance the instance to be added
    */
