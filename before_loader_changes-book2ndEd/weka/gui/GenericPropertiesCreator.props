@@ -1,0 +1,75 @@
+# Customises the list of options given by the GenericObjectEditor
+# for various superclasses.
+
+# Lists the ResultProducers-Packages I want to choose from
+weka.experiment.ResultProducer=\
+  weka.experiment
+
+# Lists the ResultListeners-Packages I want to choose from
+weka.experiment.ResultListener=\
+  weka.experiment
+
+# Lists the SplitEvaluators-Packages I want to choose from
+weka.experiment.SplitEvaluator=\
+  weka.experiment
+
+# Lists the Classifiers-Packages I want to choose from
+weka.classifiers.Classifier=\
+ weka.classifiers.bayes,\
+ weka.classifiers.functions,\
+ weka.classifiers.lazy,\
+ weka.classifiers.meta,\
+ weka.classifiers.misc,\
+ weka.classifiers.trees,\
+ weka.classifiers.rules
+
+# Lists the Filters-Packages I want to choose from
+weka.filters.Filter= \
+ weka.filters.supervised.attribute, \
+ weka.filters.supervised.instance, \
+ weka.filters.unsupervised.attribute, \
+ weka.filters.unsupervised.instance
+
+# Lists the UnsupervisedFilters-Packages I want to choose from
+weka.filters.UnsupervisedFilter = \
+ weka.filters.unsupervised.attribute, \
+ weka.filters.unsupervised.instance
+
+# Lists the Attribute Selection Evaluators-Packages I want to choose from
+weka.attributeSelection.ASEvaluation = \
+ weka.attributeSelection
+
+# Lists the Attribute Selection Search methods-Packages I want to choose from
+weka.attributeSelection.ASSearch = \
+ weka.attributeSelection
+
+# Lists the Associators-Packages I want to choose from
+weka.associations.Associator=\
+ weka.associations
+
+
+# Lists the Clusterers-Packages I want to choose from
+weka.clusterers.Clusterer=\
+ weka.clusterers
+
+# Lists the DensityBasedClusterers I want to choose from
+weka.clusterers.DensityBasedClusterer=\
+ weka.clusterers
+
+# Lists the Loaders-Packages I want to choose from
+weka.core.converters.Loader=\
+ weka.core.converters
+
+# Lists the Savers-Packages I want to choose from
+weka.core.converters.Saver=\
+ weka.core.converters
+
+# Lists the Search algorithm for Bayes net structure learning-Packages I want to choose from
+weka.classifiers.bayes.net.search.SearchAlgorithm=\
+ weka.classifiers.bayes.net.search.local, \
+ weka.classifiers.bayes.net.search.ci, \
+ weka.classifiers.bayes.net.search.global, \
+ weka.classifiers.bayes.net.search.fixed
+
+weka.classifiers.bayes.net.estimate.BayesNetEstimator =\
+ weka.classifiers.bayes.net.estimate
