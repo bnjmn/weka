@@ -1,0 +1,924 @@
+\documentclass[a4paper]{article}
+
+% Version: $Revision: 1.9 $
+
+\usepackage{epsfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/epsfig.html
+\usepackage{wrapfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/wrapfig.html
+
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-6}
+\author{Richard Kirkby\\Eibe Frank\\Peter Reutemann}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\begin{document}
+
+\begin{titlepage}
+
+\maketitle
+\thispagestyle{empty}
+
+\center
+\vspace{7.5cm}
+
+\copyright 2002-2007 University of Waikato
+
+\end{titlepage}
+
+\tableofcontents
+
+\newpage
+
+\section{Launching WEKA}
+
+The new menu-driven GUI in WEKA (class \texttt{weka.gui.Main}) succeeds the old GUI Chooser (class \texttt{weka.gui.GUIChooser}). Its MDI (``multiple document interface'') appearance makes it easier to keep track of all the open windows. If one prefers an SDI (``single document interface'') driven layout, one can invoke this with option \texttt{-gui sdi} on the commandline.
+
+\begin{center}
+	\epsfig{file=images/main.eps,height=3cm}
+\end{center}
+
+\begin{wrapfigure}{r}{0.1cm}
+	\vspace{0.2cm}
+	\epsfig{file=images/main_program.eps,height=1.2cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_applications.eps,height=1.8cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_tools.eps,height=1.5cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_visualization.eps,height=2.1cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_windows.eps,height=2.4cm}
+
+	\vspace{0.2cm}
+	\epsfig{file=images/main_help.eps,height=2.1cm}
+\end{wrapfigure}
+
+The menu consists of six sections:
+
+\begin{enumerate}
+	\item \textbf{Program}
+		\begin{itemize}
+			\item \textbf{LogWindow} Opens a log window that captures all that is printed to \textit{stdout} or \textit{stderr}. Useful for environments like MS Windows, where WEKA is normally not started from a terminal.
+			\item \textbf{Exit} Closes WEKA.
+		\end{itemize}
+		
+	\item \textbf{Applications} Lists the main applications within WEKA.
+		\begin{itemize}
+			\item \textbf{Explorer} An environment for exploring data with
+WEKA (the rest of this documentation deals with this application in more detail).
+			\item \textbf{Experimenter} An environment for performing experiments and conducting statistical tests
+between learning schemes.
+			\item \textbf{KnowledgeFlow} This environment supports essentially
+the same functions as the Explorer but with a drag-and-drop
+interface. One advantage is that it supports incremental learning.
+			\item \textbf{SimpleCLI} Provides a simple command-line interface
+that allows direct execution of WEKA commands for operating systems
+that do not provide their own command line interface.
+		\end{itemize}
+		
+	\item \textbf{Tools} Other useful applications.
+		\begin{itemize}
+			\item \textbf{ArffViewer} An MDI application for viewing ARFF files in spreadsheet format.
+			\item \textbf{SqlViewer} represents an SQL worksheet, for querying databases via JDBC.
+			\item \textbf{EnsembleLibrary} An interface for generating setups for Ensemble Selection \cite{ensemble} (a contribution by Robert Jung and David Michael from Cornell University, Ithaca, NY, USA).
+		\end{itemize}
+		
+	\item \textbf{Visualization} Ways of visualizing data with WEKA.
+		\begin{itemize}
+			\item \textbf{Plot} For plotting a 2D plot of a dataset.
+			\item \textbf{ROC} Displays a previously saved ROC curve.
+			\item \textbf{TreeVisualizer} For displaying directed graphs, e.g., a decision tree.
+			\item \textbf{GraphVisualizer} Visualizes XML BIF or DOT format graphs, e.g., for Bayesian networks.
+			\item \textbf{BoundaryVisualizer} Allows the visualization of classifier decision boundaries in two dimensions.
+		\end{itemize}
+		
+	\item \textbf{Windows} All open windows are listed here.
+		\begin{itemize}
+			\item \textbf{Minimize} Minimizes all current windows.
+			\item \textbf{Restore} Restores all minimized windows again.
+		\end{itemize}
+		
+	\item \textbf{Help} Online resources for WEKA can be found here.
+		\begin{itemize}
+			\item \textbf{Weka homepage} Opens a browser window with WEKA's homepage.
+			\item \textbf{Online documentation} Directs to the WekaDoc Wiki \cite{wekadoc}.
+			\item \textbf{HOWTOs, code snippets, etc.} The general WekaWiki \cite{wekawiki}, containing lots of examples and HOWTOs around the development and use of WEKA.
+			\item \textbf{Weka on Sourceforge} WEKA's project homepage on Sourceforge.net.
+			\item \textbf{SystemInfo} Lists some internals about the Java/WEKA environment, e.g., the \texttt{CLASSPATH}.
+			\item \textbf{About} The infamous ``About'' box.
+		\end{itemize}
+\end{enumerate}
+
+To make it easy for the user to add new functionality to the menu without having to modify 
+the code of WEKA itself, the GUI now offers a plugin mechanism for such add-ons. 
+Due to the inherent dynamic
+class discovery, plugins only need to implement the \texttt{weka.gui.MainMenuExtension}
+interface and WEKA notified of the package they reside in to be displayed in the menu under 
+``Extensions'' (this extra menu appears automatically as soon as extensions are discovered). 
+More details can be found in the Wiki article ``Extensions for Weka's main GUI'' 
+\cite{mainextensions}.
+
+If you launch WEKA from a terminal window, some text begins scrolling in the
+terminal. Ignore this text unless something goes wrong, in which case it can
+help in tracking down the cause (the \textit{LogWindow} from the \textit{Program} menu 
+displays that information as well).
+
+This User Manual, which is also available online on the \textit{WekaDoc Wiki} 
+\cite{wekadoc}, focuses on using the Explorer but does not explain
+the individual data preprocessing tools and learning algorithms in
+WEKA. For more information on the various filters and learning methods
+in WEKA, see the book {\em Data Mining} \cite{witten}.
+
+\newpage
+
+\section{The WEKA Explorer}
+
+\subsection{Section Tabs}
+
+At the very top of the window, just below the title bar, is a row of
+tabs. When the Explorer is first started only the first tab is active;
+the others are greyed out. This is because it is necessary to open
+(and potentially pre-process) a data set before starting to explore
+the data.
+
+The tabs are as follows:
+
+\begin{enumerate}
+\item \textbf{Preprocess}.
+Choose and modify the data being acted on.
+\item \textbf{Classify}.
+Train and test learning schemes that classify or perform regression.
+\item \textbf{Cluster}.
+Learn clusters for the data.
+\item \textbf{Associate}.
+Learn association rules for the data.
+\item \textbf{Select attributes}.
+Select the most relevant attributes in the data.
+\item \textbf{Visualize}.
+View an interactive 2D plot of the data.
+\end{enumerate}
+\noindent
+Once the tabs are active, clicking on them flicks between different
+screens, on which the respective actions can be performed.  The bottom
+area of the window (including the status box, the log button, and the
+Weka bird) stays visible regardless of which section you are in.
+
+The Explorer can be easily extended with custom tabs. The Wiki 
+article ``Adding tabs in the Explorer'' \cite{explorertabs} explains
+this in detail.
+
+
+\subsection{Status Box}
+
+The status box appears at the very bottom of the window. It displays
+messages that keep you informed about what's going on. For example, if
+the Explorer is busy loading a file, the status box will say that.
+
+\textbf{TIP}---right-clicking the mouse anywhere inside the status box brings
+up a little menu. The menu gives two options: 
+
+\begin{enumerate}
+\item \textbf{Memory information}.
+Display in the log box the amount of memory available to WEKA.
+\item \textbf{Run garbage collector}.
+Force the Java garbage collector to search for memory that is no longer needed
+and free it up, allowing more memory for new tasks. Note that the garbage
+collector is constantly running as a background task anyway.
+\end{enumerate}
+
+\subsection{Log Button}
+
+Clicking on this button brings up a separate window containing a scrollable text
+field. Each line of text is stamped with the time it was entered into the
+log. As you perform actions in WEKA, the log keeps a record of what has
+happened. For people using the command line or the SimpleCLI, the log now also 
+contains the full setup strings for classification, clustering, attribute selection, 
+etc., so that it is possible to copy/paste them elsewhere. 
+Options for dataset(s) and, if applicable, the class attribute still have to 
+be provided by the user (e.g., \texttt{-t} for classifiers or \texttt{-i} 
+and \texttt{-o} for filters).
+
+\subsection{WEKA Status Icon}
+
+To the right of the status box is the WEKA status icon. When no processes are
+running, the bird sits down and takes a nap. The number beside the $\times$
+symbol gives the number of concurrent processes running.  When the system is
+idle it is zero, but it increases as the number of processes increases.
+When any process is started, the bird gets up and starts moving around. If
+it's standing but stops moving for a long time, it's sick: something has gone
+wrong!  In that case you should restart the WEKA Explorer.
+
+\subsection{Graphical output}
+
+Most graphical displays in WEKA, e.g., the GraphVisualizer or the
+TreeVisualizer, support saving the output to a file. A dialog for saving 
+the output can be brought up with \textit{Alt+Shift+left-click}. 
+Supported formats are currently Windows Bitmap, JPEG, PNG and EPS 
+(encapsulated Postscript). The dialog also allows you to specify the
+dimensions of the generated image.
+
+\newpage
+
+\section{Preprocessing}
+
+\begin{center}
+\epsfig{file=images/explorer_preprocess.eps,height=7cm}
+\end{center}
+
+\subsection{Loading Data}
+
+The first four buttons at the top of the preprocess section enable
+you to load data into WEKA:
+
+\begin{enumerate}
+\item \textbf{Open file...}.
+Brings up a dialog box allowing you to browse for the data file on the local
+file system.
+\item \textbf{Open URL...}.
+Asks for a Uniform Resource Locator address for where the data is stored.
+\item \textbf{Open DB...}.  Reads data from a database. (Note that to
+make this work you might have to edit the file in
+weka/experiment/DatabaseUtils.props.)
+\item \textbf{Generate...}.  Enables you to generate artificial data
+from a variety of DataGenerators.
+\end{enumerate}
+\noindent
+Using the \textbf{Open file...} button you can read files in a variety
+of formats: WEKA's ARFF format, CSV format, C4.5 format, or serialized
+Instances format. ARFF files typically have a {\em .arff\/}
+extension, CSV files a {\em .csv\/} extension, C4.5 files a {\em
+.data\/} and {\em .names\/} extension, and serialized Instances
+objects a {\em .bsi\/} extension. 
+
+\textbf{NB:} This list of formats can be extended by adding custom file 
+converters to the \texttt{weka.core.converters} package.
+
+\subsection{The Current Relation}
+
+Once some data has been loaded, the Preprocess panel shows a variety
+of information.  The \textbf{Current relation} box (the ``current
+relation'' is the currently loaded data, which can be interpreted as a
+single relational table in database terminology)  has three entries:
+
+\begin{enumerate}
+\item \textbf{Relation}.
+The name of the relation, as given in the file it was loaded from. Filters
+(described below) modify the name of a relation. 
+\item \textbf{Instances}.
+The number of instances (data points/records) in the data.
+\item \textbf{Attributes}.
+The number of attributes (features) in the data.
+\end{enumerate}
+
+\subsection{Working With Attributes}
+
+Below the \textbf{Current relation} box is a box titled \textbf{Attributes}.
+There are four buttons, and beneath them is a list of the attributes in the
+current relation. The list has three columns:
+
+\begin{enumerate}
+\item \textbf{No.}.
+A number that identifies the attribute in the order they are specified in the
+data file. 
+\item \textbf{Selection tick boxes}.
+These allow you select which attributes are present in the relation.
+\item \textbf{Name}.
+The name of the attribute, as it was declared in the data file.
+\end{enumerate}
+
+When you click on different rows in the list of attributes, the fields
+change in the box to the right titled \textbf{Selected
+attribute}. This box displays the characteristics of the currently
+highlighted attribute in the list:
+
+\begin{enumerate}
+\item \textbf{Name}.
+The name of the attribute, the same as that given in the attribute list.
+\item \textbf{Type}.
+The type of attribute, most commonly Nominal or Numeric.
+\item \textbf{Missing}.
+The number (and percentage) of instances in the data for which this attribute
+is missing (unspecified).
+\item \textbf{Distinct}.
+The number of different values that the data contains for this attribute.
+\item \textbf{Unique}.
+The number (and percentage) of instances in the data having a value for this
+attribute that no other instances have.
+\end{enumerate}
+\noindent
+Below these statistics is a list showing more information about the
+values stored in this attribute, which differ depending on its type.
+If the attribute is nominal, the list consists of each possible value
+for the attribute along with the number of instances that have that
+value.  If the attribute is numeric, the list gives four statistics
+describing the distribution of values in the data---the minimum,
+maximum, mean and standard deviation.  And below these statistics
+there is a coloured histogram, colour-coded according to the attribute
+chosen as the {\it Class} using the box above the histogram. (This box
+will bring up a drop-down list of available selections when clicked.)
+Note that only nominal {\it Class} attributes will result in a
+colour-coding.  Finally, after pressing the \textbf{Visualize All}
+button, histograms for all the attributes in the data are shown in a
+separate window.
+
+Returning to the attribute list, to begin with all the tick boxes are unticked.
+They can be toggled on/off by clicking on them individually.  The four buttons
+above can also be used to change the selection:
+
+\begin{enumerate}
+\item \textbf{All}.
+All boxes are ticked.
+\item \textbf{None}.
+All boxes are cleared (unticked).
+\item \textbf{Invert}.
+Boxes that are ticked become unticked and {\em vice versa\/}.
+\item \textbf{Pattern}.
+Enables the user to select attributes based on a Perl 5 Regular Expression. E.g., 
+\texttt{.*\_id} selects all attributes which name ends with \texttt{\_id}.
+\end{enumerate}
+
+Once the desired attributes have been selected, they can be removed by
+clicking the \textbf{Remove} button below the list of attributes.
+Note that this can be undone by clicking the \textbf{Undo} button,
+which is located next to the \textbf{Edit} button in the top-right
+corner of the Preprocess panel.
+
+\subsection{Working With Filters}
+
+\begin{center}
+\epsfig{file=images/explorer_preprocess_filter.eps,height=7cm}
+\end{center}
+
+The preprocess section allows filters to be defined that transform the
+data in various ways.  The \textbf{Filter} box is used to set up the
+filters that are required.  At the left of the \textbf{Filter} box is
+a \textbf{Choose} button. By clicking this button it is possible to
+select one of the filters in WEKA. Once a filter has been selected,
+its name and options are shown in the field next to the
+\textbf{Choose} button. Clicking on this box with the \textit{left} mouse button
+brings up a GenericObjectEditor dialog box. A click with the \textit{right}
+mouse button (or \textit{Alt+Shift+left click}) brings up a menu where you can
+choose, either to display the properties in a GenericObjectEditor dialog
+box, or to copy the current setup string to the clipboard.
+
+\subsubsection*{The GenericObjectEditor Dialog Box}
+
+The GenericObjectEditor dialog box lets you configure a filter. The
+same kind of dialog box is used to configure other objects, such as
+classifiers and clusterers (see below). The fields in the window
+reflect the available options.
+
+Right-clicking (or \textit{Alt+Shift+Left-Click}) on such a field 
+will bring up a popup menu, listing the following options:
+\begin{enumerate}
+  \item \textbf{Show properties...} has the same effect as left-clicking
+  on the field, i.e., a dialog appears allowing you to alter the settings.
+  \item \textbf{Copy configuration to clipboard} copies the currently
+  displayed configuration string to the system's clipboard and therefore 
+  can be used anywhere else in WEKA or in the console. This is rather handy
+  if you have to setup complicated, nested schemes.
+  \item \textbf{Enter configuration...} is the ``receiving'' end for
+  configurations that got copied to the clipboard earlier on. In this dialog you
+  can enter a classname followed by options (if the class supports these).
+  This also allows you to transfer a filter setting from the Preprocess
+  panel to a \texttt{FilteredClassifier} used in the Classify panel.
+\end{enumerate}
+
+Left-Clicking on any of these gives an
+opportunity to alter the filters settings. For example, the setting
+may take a text string, in which case you type the string into the
+text field provided.  Or it may give a drop-down box listing several
+states to choose from. Or it may do something else, depending on the
+information required. Information on the options is provided in a tool
+tip if you let the mouse pointer hover of the corresponding
+field. More information on the filter and its options can be obtained
+by clicking on the \textbf{More} button in the \textbf{About} panel at
+the top of the GenericObjectEditor window.
+
+Some objects display a brief description of what they do in an \textbf{About}
+box, along with a \textbf{More} button. Clicking on the \textbf{More} button
+brings up a window describing what the different options do. Others have an 
+additional button, \textit{Capabilities}, which lists the types of
+attributes and classes the object can handle. 
+
+At the bottom of the GenericObjectEditor dialog are four buttons. The first
+two, \textbf{Open...} and \textbf{Save...} allow object configurations to be
+stored for future use. The \textbf{Cancel} button backs out without remembering
+any changes that have been made.  Once you are happy with the object and
+settings you have chosen, click \textbf{OK} to return to the main Explorer
+window.
+
+\subsubsection*{Applying Filters}
+
+Once you have selected and configured a filter, you can apply it to
+the data by pressing the \textbf{Apply} button at the right end of the
+\textbf{Filter} panel in the Preprocess panel. The Preprocess panel
+will then show the transformed data. The change can be undone by
+pressing the \textbf{Undo} button. You can also use the
+\textbf{Edit...} button to modify your data manually in a dataset
+editor.  Finally, the \textbf{Save...}  button at the top right of the
+Preprocess panel saves the current version of the relation in file
+formats that can represent the relation, allowing it to be kept for future
+use.  \\
+
+\noindent \textbf{Note:} Some of the filters behave differently
+depending on whether a class attribute has been set or not (using the
+box above the histogram, which will bring up a drop-down list of
+possible selections when clicked). In particular, the ``supervised
+filters'' require a class attribute to be set, and some of the
+``unsupervised attribute filters'' will skip the class attribute if
+one is set. Note that it is also possible to set {\em Class} to {\em
+None}, in which case no class is set.
+
+\newpage
+
+\section{Classification}
+
+\begin{center}
+\epsfig{file=images/explorer_classify.eps,height=7cm}
+\end{center}
+
+\subsection{Selecting a Classifier}
+
+\label{sec:classifier}
+At the top of the classify section is the \textbf{Classifier}
+box. This box has a text field that gives the name of the currently
+selected classifier, and its options. Clicking on the text box with 
+the left mouse button brings up a GenericObjectEditor dialog box, 
+just the same as for filters, that you can use to configure the options 
+of the current classifier. With a \textit{right click} (or 
+\textit{Alt+Shift+left click}) you can once again copy 
+the setup string to the clipboard or display the properties in a 
+GenericObjectEditor dialog box.
+The \textbf{Choose} button allows you to choose one of the classifiers
+that are available in WEKA.
+
+\subsection{Test Options}
+
+The result of applying the chosen classifier will be tested according to the
+options that are set by clicking in the \textbf{Test options} box.  There are
+four test modes:
+
+\begin{enumerate}
+\item \textbf{Use training set}.
+The classifier is evaluated on how well it predicts the class of the instances
+it was trained on. 
+\item \textbf{Supplied test set}.
+The classifier is evaluated on how well it predicts the class of a set of
+instances loaded from a file. Clicking the \textbf{Set...} button brings up a
+dialog allowing you to choose the file to test on.
+\item \textbf{Cross-validation}.
+The classifier is evaluated by cross-validation, using the number of folds that
+are entered in the \textbf{Folds} text field. 
+\item \textbf{Percentage split}.
+The classifier is evaluated on how well it predicts a certain percentage of the
+data which is held out for testing. The amount of data held out depends on the
+value entered in the \textbf{\%} field.
+\end{enumerate}
+\noindent
+\textbf{Note:} No matter which evaluation method is used, the model
+that is output is always the one build from \textbf{\em all} the training data.
+\noindent
+Further testing options can be set by clicking on the \textbf{More options...}
+button:
+
+\begin{enumerate}
+\item \textbf{Output model}.
+The classification model on the full training set is output so that it can be
+viewed, visualized, etc. This option is selected by default.
+\item \textbf{Output per-class stats}.  The precision/recall and
+true/false statistics for each class are output. This option is also
+selected by default.
+\item \textbf{Output entropy evaluation measures}.  Entropy evaluation
+measures are included in the output. This option is not selected by
+default.
+\item \textbf{Output confusion matrix}.
+The confusion matrix of the classifier's predictions is included in the output. This option is selected by default.
+\item \textbf{Store predictions for visualization}.  The classifier's
+predictions are remembered so that they can be visualized. This option
+is selected by default.
+\item \textbf{Output predictions}. The predictions on the evaluation
+data are output.  Note that in the case of a cross-validation the
+instance numbers do not correspond to the location in the data!
+\item \textbf{Cost-sensitive evaluation}.
+The errors is evaluated with respect to a cost matrix. The \textbf{Set...}
+button allows you to specify the cost matrix used. 
+\item \textbf{Random seed for xval / \% Split}.
+This specifies the random seed used when randomizing the data before it is
+divided up for evaluation purposes.
+\item \textbf{Preserve order for \% Split}.
+This suppresses the randomization of the data before splitting into train
+and test set.
+\item \textbf{Output source code}.
+If the classifier can output the built model as Java source code, you can 
+specify the class name here. The code will be printed in the ``Classifier 
+output'' area.
+\end{enumerate}
+
+\subsection{The Class Attribute}
+
+The classifiers in WEKA are designed to be trained to predict a single `class'
+attribute, which is the target for prediction. Some classifiers can only learn
+nominal classes; others can only learn numeric classes (regression problems);
+still others can learn both.
+
+By default, the class is taken to be the last attribute in the data.  If you
+want to train a classifier to predict a different attribute, click on the box
+below the \textbf{Test options} box to bring up a drop-down list of attributes
+to choose from.
+
+\subsection{Training a Classifier}
+
+Once the classifier, test options and class have all been set, the learning
+process is started by clicking on the \textbf{Start} button. While the
+classifier is busy being trained, the little bird moves around. You can stop
+the training process at any time by clicking on the \textbf{Stop} button.
+
+When training is complete, several things happen. The \textbf{Classifier
+output} area to the right of the display is filled with text describing the
+results of training and testing. A new entry appears in the \textbf{Result
+list} box. We look at the result list below; but first we investigate the text
+that has been output.
+
+\subsection{The Classifier Output Text}
+
+The text in the \textbf{Classifier output} area has scroll bars allowing you to
+browse the results. Clicking with the left mouse button into the text area, 
+while holding \texttt{Alt} and \texttt{Shift}, brings up a dialog that enables 
+you to save the displayed output in a variety of formats (currently, BMP, EPS, JPEG and PNG). 
+Of course, you can also resize the Explorer window to get a larger display area.  
+The output is split into several sections:
+
+\begin{enumerate}
+\item \textbf{Run information}.
+A list of information giving the learning scheme options, relation name,
+instances, attributes and test mode that were involved in the process.
+\item \textbf{Classifier model (full training set)}.
+A textual representation of the classification model that was produced on the
+full training data. 
+\item The results of the chosen test mode are broken down thus:
+\item \textbf{Summary}.
+A list of statistics summarizing how accurately the classifier was able to
+predict the true class of the instances under the chosen test mode. 
+\item \textbf{Detailed Accuracy By Class}.
+A more detailed per-class break down of the classifier's prediction accuracy. 
+\item \textbf{Confusion Matrix}.
+Shows how many instances have been assigned to each class. Elements show the
+number of test examples whose actual class is the row and whose predicted class
+is the column.
+\item \textbf{Source code} (optional).
+This section lists the Java source code if one chose ``Output source code'' in 
+the ``More options'' dialog.
+\end{enumerate}
+
+\subsection{The Result List}
+
+After training several classifiers, the result list will contain several
+entries.  Left-clicking the entries flicks back and forth between the various
+results that have been generated. Pressing \texttt{Delete} removes a selected 
+entry from the results. Right-clicking an entry invokes a menu containing these items:
+
+\begin{enumerate}
+\item \textbf{View in main window}.
+Shows the output in the main window (just like left-clicking the entry).
+\item \textbf{View in separate window}.
+Opens a new independent window for viewing the results.
+\item \textbf{Save result buffer}.
+Brings up a dialog allowing you to save a text file containing the textual
+output.
+\item \textbf{Load model}.
+Loads a pre-trained model object from a binary file.
+\item \textbf{Save model}.
+Saves a model object to a binary file. Objects are saved in Java `serialized
+object' form.
+\item \textbf{Re-evaluate model on current test set}.
+Takes the model that has been built and tests its performance on the data set
+that has been specified with the \textbf{Set..} button under the
+\textbf{Supplied test set} option.
+\item \textbf{Visualize classifier errors}.
+Brings up a visualization window that plots the results of classification.
+Correctly classified instances are represented by crosses, whereas incorrectly
+classified ones show up as squares.
+\item \textbf{Visualize tree} or \textbf{Visualize graph}.  Brings up
+a graphical representation of the structure of the classifier model,
+if possible (i.e. for decision trees or Bayesian networks). The
+graph visualization option only appears if a Bayesian network
+classifier has been built. In the tree visualizer, you can bring up a
+menu by right-clicking a blank area, pan around by dragging the mouse,
+and see the training instances at each node by clicking on
+it. CTRL-clicking zooms the view out, while SHIFT-dragging a box zooms
+the view in.  The graph visualizer should be self-explanatory.
+\item \textbf{Visualize margin curve}.
+Generates a plot illustrating the prediction margin. The margin is defined as
+the difference between the probability predicted for the actual class and the
+highest probability predicted for the other classes. For example, boosting
+algorithms may achieve better performance on test data by increasing the
+margins on the training data. 
+\item \textbf{Visualize threshold curve}.
+Generates a plot illustrating the trade-offs in prediction that are obtained by
+varying the threshold value between classes. For example, with the default
+threshold value of 0.5, the predicted probability of `positive' must be greater
+than 0.5 for the instance to be predicted as `positive'. The plot can be used
+to visualize the precision/recall trade-off, for ROC curve analysis (true
+positive rate {\em vs} false positive rate), and for other types of curves. 
+\item \textbf{Visualize cost curve}.
+Generates a plot that gives an explicit representation of the expected cost, as
+described by \cite{drummond}.
+\item \textbf{Plugins}.
+This menu item only appears if there are visualization plugins
+available (by default: none). More about these plugins can be found in the 
+\textit{WekaWiki} article ``Explorer visualization plugins'' \cite{explorervisplugins}.
+\end{enumerate}
+\noindent
+Options are greyed out if they do not apply to the specific set of results.
+
+\newpage
+
+\section{Clustering}
+
+\begin{center}
+\epsfig{file=images/explorer_cluster.eps,height=7cm}
+\end{center}
+
+\subsection{Selecting a Clusterer}
+
+By now you will be familiar with the process of selecting and configuring
+objects.  Clicking on the clustering scheme listed in the \textbf{Clusterer}
+box at the top of the window brings up a GenericObjectEditor dialog with which
+to choose a new clustering scheme.
+
+\subsection{Cluster Modes}
+
+The \textbf{Cluster mode} box is used to choose what to cluster and how to
+evaluate the results. The first three options are the same as for
+classification: \textbf{Use training set}, \textbf{Supplied test set} and
+\textbf{Percentage split} (Section~\ref{sec:classifier})---except that now the
+data is assigned to clusters instead of trying to predict a specific class.
+The fourth mode, \textbf{Classes to clusters evaluation}, compares how well the
+chosen clusters match up with a pre-assigned class in the data.  The drop-down
+box below this option selects the class, just as in the \textbf{Classify}
+panel.
+
+An additional option in the \textbf{Cluster mode} box, the \textbf{Store
+clusters for visualization} tick box, determines whether or not it will be
+possible to visualize the clusters once training is complete. When dealing
+with datasets that are so large that memory becomes a problem it may be
+helpful to disable this option.
+
+\subsection{Ignoring Attributes}
+
+Often, some attributes in the data should be ignored when clustering.  The
+\textbf{Ignore attributes} button brings up a small window that allows you to
+select which attributes are ignored.  Clicking on an attribute in the window
+highlights it, holding down the SHIFT key selects a range of consecutive
+attributes, and holding down CTRL toggles individual attributes on and off. To
+cancel the selection, back out with the \textbf{Cancel} button. To activate it,
+click the \textbf{Select} button. The next time clustering is invoked, the
+selected attributes are ignored.
+
+\subsection{Working with Filters}
+
+The \texttt{FilteredClusterer} meta-clusterer offers the user the possibility 
+to apply filters directly before the clusterer is learned. This approach
+eliminates the manual application of a filter in the \textbf{Preprocess} panel,
+since the data gets processed on the fly. Useful if one needs to try out 
+different filter setups.
+
+\subsection{Learning Clusters}
+
+The \textbf{Cluster} section, like the \textbf{Classify} section, has
+\textbf{Start}/\textbf{Stop} buttons, a result text area and a result
+list. These all behave just like their classification counterparts.
+Right-clicking an entry in the result list brings up a similar menu,
+except that it shows only two visualization options: \textbf{Visualize
+cluster assignments} and \textbf{Visualize tree}. The latter is grayed
+out when it is not applicable.
+
+\newpage
+
+\section{Associating}
+
+\begin{center}
+\epsfig{file=images/explorer_associate.eps,height=7cm}
+\end{center}
+
+\subsection{Setting Up}
+
+This panel contains schemes for learning association rules, and the
+learners are chosen and configured in the same way as the clusterers,
+filters, and classifiers in the other panels.
+
+\subsection{Learning Associations}
+
+Once appropriate parameters for the association rule learner bave been
+set, click the \textbf{Start} button.  When complete, right-clicking
+on an entry in the result list allows the results to be viewed or
+saved.
+
+\newpage
+
+\section{Selecting Attributes}
+
+\begin{center}
+\epsfig{file=images/explorer_selectattributes.eps,height=7cm}
+\end{center}
+
+\subsection{Searching and Evaluating}
+
+Attribute selection involves searching through all possible combinations of
+attributes in the data to find which subset of attributes works best for
+prediction.  To do this, two objects must be set up: an attribute evaluator and
+a search method.  The evaluator determines what method is used to assign a
+worth to each subset of attributes.  The search method determines what style of
+search is performed.
+
+\subsection{Options}
+
+The \textbf{Attribute Selection Mode} box has two options:
+
+\begin{enumerate}
+\item \textbf{Use full training set}.
+The worth of the attribute subset is determined using the full set of training
+data. 
+\item \textbf{Cross-validation}.
+The worth of the attribute subset is determined by a process of
+cross-validation.  The \textbf{Fold} and \textbf{Seed} fields set the number of
+folds to use and the random seed used when shuffling the data.
+\end{enumerate}
+\noindent
+As with \textbf{Classify} (Section~\ref{sec:classifier}), there is a drop-down
+box that can be used to specify which attribute to treat as the class.
+
+\subsection{Performing Selection}
+
+Clicking \textbf{Start} starts running the attribute selection
+process.  When it is finished, the results are output into the result
+area, and an entry is added to the result list.  Right-clicking on the
+result list gives several options. The first three, (\textbf{View in
+main window}, \textbf{View in separate window} and \textbf{Save result
+buffer}), are the same as for the classify panel.  It is also possible
+to \textbf{Visualize reduced data}, or if you have used an attribute
+transformer such as PrincipalComponents, \textbf{Visualize transformed
+data}. The reduced/transformed data can be saved to a file with the 
+\textbf{Save reduced data...} or \textbf{Save transformed data...}
+option.
+
+In case one wants to reduce/transform a training and a test at the same 
+time and not use the AttributeSelectedClassifier from the classifier 
+panel, it is best to use the AttributeSelection filter (a supervised 
+attribute filter) in batch mode ('\texttt{-b}') 
+from the command line or in the SimpleCLI. The batch mode allows one to 
+specify an additional input and output file pair (options \texttt{-r} 
+and \texttt{-s}), that is processed with the filter setup that 
+was determined based on the training data (specified by options 
+\texttt{-i} and \texttt{-o}). \\
+
+\noindent Here is an example for a Unix/Linux bash:
+\begin{verbatim}
+java weka.filters.supervised.attribute.AttributeSelection \
+       -E "weka.attributeSelection.CfsSubsetEval " \
+       -S "weka.attributeSelection.BestFirst -D 1 -N 5" \
+       -b \
+       -i <input1.arff> \
+       -o <output1.arff> \
+       -r <input2.arff> \
+       -s <output2.arff>
+\end{verbatim}
+
+\noindent \textbf{Notes:}
+\begin{itemize}
+	\item The ``backslashes'' at the end of each line tell the bash that 
+	the command is not finished yet. Using the SimpleCLI one has to  
+	use this command in one line without the backslashes.
+	
+	\item It is assumed that WEKA is available in the \texttt{CLASSPATH}, 
+	otherwise one has to use the \texttt{-classpath} option.
+	
+	\item The full filter setup is output in the log, as well as
+	the setup for running regular attribute selection.
+\end{itemize}
+
+\newpage
+
+\section{Visualizing}
+
+\begin{center}
+\epsfig{file=images/explorer_visualization.eps,height=7cm}
+\end{center}
+
+WEKA's visualization section allows you to visualize 2D plots of the
+current relation.  
+
+\subsection{The scatter plot matrix}
+
+When you select the {\em Visualize} panel, it shows a scatter plot
+matrix for all the attributes, colour coded according to the currently
+selected class. It is possible to change the size of each individual
+2D plot and the point size, and to randomly jitter the data (to
+uncover obscured points). It also possible to change the attribute
+used to colour the plots, to select only a subset of attributes for
+inclusion in the scatter plot matrix, and to sub sample the data. Note
+that changes will only come into effect once the \textbf{Update}
+button has been pressed.
+
+\subsection{Selecting an individual 2D scatter plot}
+ 
+When you click on a cell in the scatter plot matrix, this will bring
+up a separate window with a visualization of the scatter plot you
+selected.  (We described above how to visualize particular results in
+a separate window---for example, classifier errors---the same
+visualization controls are used here.)
+
+Data points are plotted in the main area of the window.  At the top
+are two drop-down list buttons for selecting the axes to plot.  The
+one on the left shows which attribute is used for the x-axis; the one
+on the right shows which is used for the y-axis.
+
+Beneath the x-axis selector is a drop-down list for choosing the
+colour scheme.  This allows you to colour the points based on the
+attribute selected.  Below the plot area, a legend describes what
+values the colours correspond to. If the values are discrete, you can
+modify the colour used for each one by clicking on them and making an
+appropriate selection in the window that pops up.
+
+To the right of the plot area is a series of horizontal strips. Each
+strip represents an attribute, and the dots within it show the
+distribution of values of the attribute.  These values are randomly
+scattered vertically to help you see concentrations of points.  You
+can choose what axes are used in the main graph by clicking on these
+strips.  Left-clicking an attribute strip changes the x-axis to that
+attribute, whereas right-clicking changes the y-axis. The `X' and `Y'
+written beside the strips shows what the current axes are (`B' is used
+for `both X and Y').
+
+Above the attribute strips is a slider labelled \textbf{Jitter}, which
+is a random displacement given to all points in the plot.  Dragging it
+to the right increases the amount of jitter, which is useful for
+spotting concentrations of points. Without jitter, a million instances
+at the same point would look no different to just a single lonely
+instance.
+
+\subsection{Selecting Instances}
+
+There may be situations where it is helpful to select a subset of the
+data using the visualization tool. (A special case of this is the
+UserClassifier in the {\em Classify} panel, which lets you build your
+own classifier by interactively selecting instances.)
+
+Below the y-axis selector button is a drop-down list button for choosing a
+selection method.  A group of data points can be selected in four ways:
+
+\begin{enumerate}
+\item \textbf{Select Instance}.
+Clicking on an individual data point brings up a window listing its attributes.
+If more than one point appears at the same location, more than one set of
+attributes is shown.
+\item \textbf{Rectangle}.
+You can create a rectangle, by dragging, that selects the points inside it.
+\item \textbf{Polygon}.
+You can build a free-form polygon that selects the points inside it. Left-click
+to add vertices to the polygon, right-click to complete it. The polygon will
+always be closed off by connecting the first point to the last.
+\item \textbf{Polyline}.
+You can build a polyline that distinguishes the points on one side from those
+on the other. Left-click to add vertices to the polyline, right-click to
+finish. The resulting shape is open (as opposed to a polygon, which is
+always closed).
+\end{enumerate}
+
+Once an area of the plot has been selected using \textbf{Rectangle},
+\textbf{Polygon} or \textbf{Polyline}, it turns grey.  At this point, clicking
+the \textbf{Submit} button removes all instances from the plot except those
+within the grey selection area.  Clicking on the \textbf{Clear} button erases
+the selected area without affecting the graph.
+
+Once any points have been removed from the graph, the \textbf{Submit} button
+changes to a \textbf{Reset} button.  This button undoes all previous removals
+and returns you to the original graph with all points included.  Finally,
+clicking the \textbf{Save} button allows you to save the currently visible
+instances to a new ARFF file.
+
+\newpage
+
+\begin{thebibliography}{999}
+   \bibitem{drummond} Drummond, C. and Holte, R. (2000) Explicitly representing expected cost: An alternative to ROC representation. \textit{Proceedings of the Sixth ACM SIGKDD International Conference on Knowledge Discovery and Data Mining.}
+Publishers, San Mateo, CA.
+	\bibitem{witten} Witten, I.H. and Frank, E. (2005) \textit{Data Mining: Practical machine
+learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
+Francisco.
+	\bibitem{wekawiki} \textit{WekaWiki} -- \texttt{http://weka.sourceforge.net/wiki/}
+	\bibitem{wekadoc} \textit{WekaDoc} -- \texttt{http://weka.sourceforge.net/wekadoc/}
+	\bibitem{ensemble} \textit{Ensemble Selection} on \textit{WekaDoc} -- \\ \small{\texttt{http://weka.sourceforge.net/wekadoc/index.php/en:Ensemble\_Selection}}
+	\bibitem{mainextensions} \textit{Extensions for Weka's main GUI} on \textit{WekaWiki} -- \\
+\small{\texttt{http://weka.sourceforge.net/wiki/index.php/Extensions\_for\_Weka\%27s\_main\_GUI}}
+	\bibitem{explorertabs} \textit{Adding tabs in the Explorer} on \textit{WekaWiki} -- \\
+\small{\texttt{http://weka.sourceforge.net/wiki/index.php/Adding\_tabs\_in\_the\_Explorer}}
+	\bibitem{explorervisplugins} \textit{Explorer visualization plugins} on \textit{WekaWiki} -- \\
+\small{\texttt{http://weka.sourceforge.net/wiki/index.php/Explorer\_visualization\_plugins}}
+\end{thebibliography}
+
+\end{document}
