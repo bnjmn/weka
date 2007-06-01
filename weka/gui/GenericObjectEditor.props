@@ -1,8 +1,8 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.116 $
-
+# Version: $Revision: 1.117 $
+ 
 # Lists the ResultProducers I want to choose from
 weka.experiment.ResultProducer=\
  weka.experiment.AveragingResultProducer,\
@@ -31,6 +31,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.bayes.HNB,\
  weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.NaiveBayesMultinomial,\
+ weka.classifiers.bayes.NaiveBayesMultinomialUpdateable,\
  weka.classifiers.bayes.NaiveBayesSimple,\
  weka.classifiers.bayes.NaiveBayesUpdateable,\
  weka.classifiers.bayes.WAODE,\
@@ -106,6 +107,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.misc.MinMaxExtension,\
  weka.classifiers.misc.OLM,\
  weka.classifiers.misc.OSDL,\
+ weka.classifiers.misc.SerializedClassifier,\
  weka.classifiers.misc.VFI,\
  weka.classifiers.trees.ADTree,\
  weka.classifiers.trees.BFTree,\
@@ -158,11 +160,13 @@ weka.filters.Filter=\
  weka.filters.unsupervised.attribute.Discretize,\
  weka.filters.unsupervised.attribute.FirstOrder,\
  weka.filters.unsupervised.attribute.InterquartileRange,\
+ weka.filters.unsupervised.attribute.KernelFilter,\
  weka.filters.unsupervised.attribute.MakeIndicator,\
  weka.filters.unsupervised.attribute.MathExpression,\
  weka.filters.unsupervised.attribute.MergeTwoValues,\
  weka.filters.unsupervised.attribute.MultiInstanceToPropositional,\
  weka.filters.unsupervised.attribute.NominalToBinary,\
+ weka.filters.unsupervised.attribute.NominalToString,\
  weka.filters.unsupervised.attribute.Normalize,\
  weka.filters.unsupervised.attribute.NumericCleaner,\
  weka.filters.unsupervised.attribute.NumericToBinary,\
@@ -211,11 +215,13 @@ weka.filters.UnsupervisedFilter=\
  weka.filters.unsupervised.attribute.Copy,\
  weka.filters.unsupervised.attribute.Discretize,\
  weka.filters.unsupervised.attribute.FirstOrder,\
+ weka.filters.unsupervised.attribute.KernelFilter,\
  weka.filters.unsupervised.attribute.MakeIndicator,\
  weka.filters.unsupervised.attribute.MathExpression,\
  weka.filters.unsupervised.attribute.MergeTwoValues,\
  weka.filters.unsupervised.attribute.MultiInstanceToPropositional,\
  weka.filters.unsupervised.attribute.NominalToBinary,\
+ weka.filters.unsupervised.attribute.NominalToString,\
  weka.filters.unsupervised.attribute.Normalize,\
  weka.filters.unsupervised.attribute.NumericToBinary,\
  weka.filters.unsupervised.attribute.NumericTransform,\
@@ -246,7 +252,7 @@ weka.filters.UnsupervisedFilter=\
  weka.filters.unsupervised.instance.Resample,\
  weka.filters.unsupervised.instance.SparseToNonSparse
  
-# Lists the Attribute Selection Evaluators I want to choose from
+# Lists the ASEvaluations I want to choose from
 weka.attributeSelection.ASEvaluation=\
  weka.attributeSelection.CfsSubsetEval,\
  weka.attributeSelection.ChiSquaredAttributeEval,\
@@ -262,7 +268,7 @@ weka.attributeSelection.ASEvaluation=\
  weka.attributeSelection.SymmetricalUncertAttributeSetEval,\
  weka.attributeSelection.WrapperSubsetEval
  
-# Lists the Attribute Selection Search methods I want to choose from
+# Lists the ASSearchs I want to choose from
 weka.attributeSelection.ASSearch=\
  weka.attributeSelection.BestFirst,\
  weka.attributeSelection.ExhaustiveSearch,\
@@ -277,6 +283,8 @@ weka.attributeSelection.ASSearch=\
 # Lists the Associators I want to choose from
 weka.associations.Associator=\
  weka.associations.Apriori,\
+ weka.associations.FilteredAssociator,\
+ weka.associations.GeneralizedSequentialPatterns,\
  weka.associations.PredictiveApriori,\
  weka.associations.Tertius
  
@@ -318,7 +326,7 @@ weka.core.converters.Saver=\
  weka.core.converters.SerializedInstancesSaver,\
  weka.core.converters.XRFFSaver
  
-# Lists the Search algorithm for Bayes net structure learning I want to choose from
+# Lists the SearchAlgorithms I want to choose from
 weka.classifiers.bayes.net.search.SearchAlgorithm=\
  weka.classifiers.bayes.net.search.local.GeneticSearch,\
  weka.classifiers.bayes.net.search.local.HillClimber,\
@@ -374,6 +382,7 @@ weka.core.stemmers.Stemmer=\
 weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.functions.supportVector.NormalizedPolyKernel,\
  weka.classifiers.functions.supportVector.PolyKernel,\
+ weka.classifiers.functions.supportVector.Puk,\
  weka.classifiers.functions.supportVector.RBFKernel,\
  weka.classifiers.functions.supportVector.StringKernel,\
  weka.classifiers.mi.supportVector.MIPolyKernel,\
@@ -389,9 +398,30 @@ weka.core.DistanceFunction=\
  weka.core.EuclideanDistance
  
 # Lists the NearestNeighbourSearchs I want to choose from
-weka.core.NearestNeighbourSearch=\
- weka.core.KDTree,\
- weka.core.LinearNN
+weka.core.neighboursearch.NearestNeighbourSearch=\
+ weka.core.neighboursearch.BallTree,\
+ weka.core.neighboursearch.CoverTree,\
+ weka.core.neighboursearch.KDTree,\
+ weka.core.neighboursearch.LinearNNSearch
+ 
+# Lists the BallSplitters I want to choose from
+weka.core.neighboursearch.balltrees.BallSplitter=\
+ weka.core.neighboursearch.balltrees.MedianDistanceFromArbitraryPoint,\
+ weka.core.neighboursearch.balltrees.MedianOfWidestDimension,\
+ weka.core.neighboursearch.balltrees.PointsClosestToFurthestChildren
+ 
+# Lists the BallTreeConstructors I want to choose from
+weka.core.neighboursearch.balltrees.BallTreeConstructor=\
+ weka.core.neighboursearch.balltrees.BottomUpConstructor,\
+ weka.core.neighboursearch.balltrees.MiddleOutConstructor,\
+ weka.core.neighboursearch.balltrees.TopDownConstructor
+ 
+# Lists the KDTreeNodeSplitters I want to choose from
+weka.core.neighboursearch.kdtrees.KDTreeNodeSplitter=\
+ weka.core.neighboursearch.kdtrees.KMeansInpiredMethod,\
+ weka.core.neighboursearch.kdtrees.MedianOfWidestDimension,\
+ weka.core.neighboursearch.kdtrees.MidPointOfWidestDimension,\
+ weka.core.neighboursearch.kdtrees.SlidingMidPointOfWidestSide
  
 # Lists the Estimators I want to choose from
 weka.estimators.Estimator=\
@@ -400,3 +430,13 @@ weka.estimators.Estimator=\
  weka.estimators.MahalanobisEstimator,\
  weka.estimators.NormalEstimator,\
  weka.estimators.PoissonEstimator
+ 
+# Lists the Tokenizers I want to choose from
+weka.core.tokenizers.Tokenizer=\
+ weka.core.tokenizers.AlphabeticTokenizer,\
+ weka.core.tokenizers.NGramTokenizer,\
+ weka.core.tokenizers.WordTokenizer
+ 
+# Lists the MainMenuExtensions I want to choose from
+weka.gui.MainMenuExtension=\
+ 
