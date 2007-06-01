@@ -1,0 +1,632 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-11 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-11 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://ant.apache.org/">Apache Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2007-05-31 23:13 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added note to Javadoc of add(Instance) method, that string values are not transferred</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instances.html?rev=1.58.2.4&content-type=text/x-cvsweb-markup">core/Instances.html (1.58.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-31 09:26 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>up till now, the loaders were broken regarding String attributes in the incremental case (the Instances structure they were added to didn't get updated regarding string values). hence an interface change was necessary, i.e., getNextInstances got a parameter, an Instances object that gets updated. All dependend classes had to be updated as well.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/AbstractLoader.html?rev=1.6.2.2&content-type=text/x-cvsweb-markup">core/converters/AbstractLoader.html (1.6.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/ArffLoader.html?rev=1.9.2.2&content-type=text/x-cvsweb-markup">core/converters/ArffLoader.html (1.9.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/C45Loader.html?rev=1.9.2.2&content-type=text/x-cvsweb-markup">core/converters/C45Loader.html (1.9.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/CSVLoader.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">core/converters/CSVLoader.html (1.9.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/DatabaseLoader.html?rev=1.1.2.4&content-type=text/x-cvsweb-markup">core/converters/DatabaseLoader.html (1.1.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/Loader.html?rev=1.6.2.2&content-type=text/x-cvsweb-markup">core/converters/Loader.html (1.6.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/converters/SerializedInstancesLoader.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">core/converters/SerializedInstancesLoader.html (1.9.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/Loader.html?rev=1.10.2.3&content-type=text/x-cvsweb-markup">gui/beans/Loader.html (1.10.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-31 04:29 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>Exceptions were thrown in case of nominal attributes with no labels (e.g., returned by the weka.core.converters.DatabaseLoader), added checks regarding the length of the AttributeStats.nominalCounts array</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/AttributeVisualizationPanel.html?rev=1.18.2.6&content-type=text/x-cvsweb-markup">gui/AttributeVisualizationPanel.html (1.18.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-29 02:54 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added "headless" property, in case the JUnit tests (via "run_tests") need to be run in a headless environment, e.g., via a cronjob</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.16&r2=1.19.2.15">build.xml (1.19.2.16)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-28 21:43 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>Date values are no longer output as Doubles but as Date strings again
+interestingly enough, the number of seconds seems to differ on Windows (= 986212800000; java 1.5.0_10) and Linux (= 986256000000; java 1.5.0_11) for the same  date (= 2001-04-03)</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/SparseInstance.html?rev=1.14.2.3&content-type=text/x-cvsweb-markup">core/SparseInstance.html (1.14.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-28 06:53 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated comments about program versions
+"run_tests_fail" property determines now whether target "run_tests" fails in case of errors ("false" in case of target "nightly_build")</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.15&r2=1.19.2.14">build.xml (1.19.2.15)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-28 05:59 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed mail-support in target "build_from_cvs_checkout"
+added target "nightly_build" for nightly builds (using "run_tests" instead of "junit")</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.14&r2=1.19.2.13">build.xml (1.19.2.14)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-24 02:30 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>calculated in-bag-error not out-of-bag-error (duh!) - thanks to Mahesh Joshi</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/Bagging.html?rev=1.31.2.3&content-type=text/x-cvsweb-markup">classifiers/meta/Bagging.html (1.31.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-22 23:16 cvs_rrb</td>
+</tr>
+<tr>
+<td>
+<pre>BDeu fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-22 23:15 cvs_rrb</td>
+</tr>
+<tr>
+<td>
+<pre>BDeu fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/DiscreteEstimatorBayes.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/DiscreteEstimatorBayes.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-22 23:15 cvs_rrb</td>
+</tr>
+<tr>
+<td>
+<pre>BDeu fix</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/Scoreable.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/Scoreable.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-11 05:08 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in output of coefficients and intercept: they needed to be multiplied by (J-1)/J, where J is the number of classes. This affected LMT and SimpleLogistic.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/lmt/LMTNode.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/lmt/LMTNode.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/lmt/LogisticBase.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/lmt/LogisticBase.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-10 22:42 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>creates a copy of the data now in buildAssociations to avoid modification of the original data</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/PredictiveApriori.html?rev=1.3.2.2&content-type=text/x-cvsweb-markup">associations/PredictiveApriori.html (1.3.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/Tertius.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">associations/Tertius.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-05-10 22:39 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>creates a copy of the data now in buildAssociations to avoid modification of the original data</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/Apriori.html?rev=1.19.2.4&content-type=text/x-cvsweb-markup">associations/Apriori.html (1.19.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-04-20 00:01 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed listOptions regarding number of sub-committees (it's 3 not 10)
+thanks to Juan Jose Rodriguez</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiBoostAB.html?r1=1.6.2.5&r2=1.6.2.4">classifiers/meta/MultiBoostAB.html (1.6.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-04-05 03:49 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>setOptions interpreted the -W option wrong: it expected it to contain classname and options, whereas the getOptions method returned only the classname of the base clusterer and the base clusterer options after "--"</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/MakeDensityBasedClusterer.html?rev=1.5.2.2&content-type=text/x-cvsweb-markup">clusterers/MakeDensityBasedClusterer.html (1.5.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-04-05 03:29 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>setOptions method used "-D" instead of "-N" for retrieving the on-demand directory</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/CostSensitiveClassifier.html?rev=1.18.2.4&content-type=text/x-cvsweb-markup">classifiers/meta/CostSensitiveClassifier.html (1.18.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-04-05 02:58 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>-T option was listed twice in listOptions and -J missing
+-T option was set twice in setOptions and -J missing
+search method no longer modifies original data, but a copy of it</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/RaceSearch.html?rev=1.14.2.2&content-type=text/x-cvsweb-markup">attributeSelection/RaceSearch.html (1.14.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-31 01:44 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug affecting probability estimates generated by Laplace correction option in multi-class problems. Probabilities did not sum to one.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/ClassifierTree.html?rev=1.17.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/j48/ClassifierTree.html (1.17.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/trees/j48/Distribution.html?rev=1.8.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/j48/Distribution.html (1.8.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-29 21:50 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed getOptions() method</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/AdaBoostM1.html?r1=1.24.2.6&r2=1.24.2.5">classifiers/meta/AdaBoostM1.html (1.24.2.6)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/RegressionByDiscretization.html?rev=1.30.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/RegressionByDiscretization.html (1.30.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-28 04:59 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed endless repainting problem of NodePanel in case the network doesn't fit completely in the viewport, for similar problem and solution see this thread:
+http://forum.html.sun.com/thread.jspa?threadID=580929&amp;messageID=2945011</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/MultilayerPerceptron.html?r1=1.2.2.3&r2=1.2.2.2">classifiers/functions/MultilayerPerceptron.html (1.2.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-25 23:20 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>general options are now lower case in order to avoid clashes with other options (GeneticSearch and SVMAttributeEval)
+fixed help request via commandline option -h</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/AttributeSelection.html?rev=1.35.2.4&content-type=text/x-cvsweb-markup">attributeSelection/AttributeSelection.html (1.35.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-25 21:12 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>initial import of MS SQL Server 2005 Express Edition setup</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.props.mssqlserver2005?rev=1.1.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.props.mssqlserver2005 (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-24 05:19 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>applied Bernhard's fixes regarding SparseInstance handling (generated incorrect output)</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/RandomProjection.html?rev=1.3.2.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/RandomProjection.html (1.3.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-03-20 03:24 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>corrected copyright</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesMultinomial.html?rev=1.9.2.2&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesMultinomial.html (1.9.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-26 05:24 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed Javadoc/globalInfo (duplicate "attributes")</pre>
+<ul>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/TimeSeriesTranslate.html?rev=1.3.2.3&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/TimeSeriesTranslate.html (1.3.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-26 00:12 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Current and max set numbers were not being set correctly for training and test set events.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/PredictionAppender.html?r1=1.9.2.4&r2=1.9.2.3">gui/beans/PredictionAppender.html (1.9.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-25 21:00 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small fix to the eventGeneratable method.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Classifier.html?r1=1.16.2.6&r2=1.16.2.5">gui/beans/Classifier.html (1.16.2.6)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/PredictionAppender.html?r1=1.9.2.3&r2=1.9.2.2">gui/beans/PredictionAppender.html (1.9.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-23 02:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small bug fix to BatchClassifierEvent. Changes to allow PredictonAppender to append to training and test sets as well as data sets. This should allow Cascade Generalization to be implemented in the KnowledgeFlow.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/BatchClassifierEvent.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">gui/beans/BatchClassifierEvent.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/Classifier.html?rev=1.16.2.5&content-type=text/x-cvsweb-markup">gui/beans/Classifier.html (1.16.2.5)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/PredictionAppender.html?rev=1.9.2.2&content-type=text/x-cvsweb-markup">gui/beans/PredictionAppender.html (1.9.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/PredictionAppenderBeanInfo.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/PredictionAppenderBeanInfo.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-21 01:34 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>classifier is defaulting back to ZeroR model if data contains only the class attribute</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/MultilayerPerceptron.html?r1=1.2.2.2&r2=1.2.2.1">classifiers/functions/MultilayerPerceptron.html (1.2.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/RBFNetwork.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/RBFNetwork.html (1.4.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/lazy/LWL.html?rev=1.12.2.1&content-type=text/x-cvsweb-markup">classifiers/lazy/LWL.html (1.12.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/AdaBoostM1.html?rev=1.24.2.5&content-type=text/x-cvsweb-markup">classifiers/meta/AdaBoostM1.html (1.24.2.5)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/AdditiveRegression.html?rev=1.17.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/AdditiveRegression.html (1.17.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/LogitBoost.html?rev=1.33.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/LogitBoost.html (1.33.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiBoostAB.html?rev=1.6.2.4&content-type=text/x-cvsweb-markup">classifiers/meta/MultiBoostAB.html (1.6.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/misc/HyperPipes.html?rev=1.15.2.1&content-type=text/x-cvsweb-markup">classifiers/misc/HyperPipes.html (1.15.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/rules/OneR.html?rev=1.17.2.1&content-type=text/x-cvsweb-markup">classifiers/rules/OneR.html (1.17.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-19 21:56 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>generates ZeroR model if a model cannot be built, e.g., if data contains only class attribute
+added check whether learning rate is getting too small (smaller than 1E-6 =&gt; throws Exception) in order to avoid endless recursion resulting in StackOverflow</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/functions/MultilayerPerceptron.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/MultilayerPerceptron.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-11 22:00 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>serializing of clusterer didn't work with class based evaluation (ObjectOutputStream was opened, but never filled) throwing an exception now if user tries to do that</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/ClusterEvaluation.html?rev=1.27.2.2&content-type=text/x-cvsweb-markup">clusterers/ClusterEvaluation.html (1.27.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-11 21:07 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added clone() to distribution array to copy it (thanks to Eibe)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/evaluation/NominalPrediction.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">classifiers/evaluation/NominalPrediction.html (1.9.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-09 03:52 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>crashed if there were too many nominal classes to display (tried to create strings with negative length in order to fit them all in one line)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/visualize/ClassPanel.html?rev=1.12.2.1&content-type=text/x-cvsweb-markup">gui/visualize/ClassPanel.html (1.12.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-02-08 00:47 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed NullPointerException in toDoubleArray method
+fixed mergeInstance method (was broken as in SparseInstance)
+fixed Javadoc</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/BinarySparseInstance.html?rev=1.7.2.2&content-type=text/x-cvsweb-markup">core/BinarySparseInstance.html (1.7.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-28 01:23 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>outputs SparseInstances now no longer in sparse format, but in CSV format (was due to call of toString() for writing an instance to the file)</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/converters/CSVSaver.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">core/converters/CSVSaver.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-26 02:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added more files to the release (from wekadocs module):
+documentation.html/css, weka.gif, weka.ico</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.13&content-type=text/x-cvsweb-markup">build.xml (1.19.2.13)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-26 02:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated version number</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?rev=1.1.2.5&content-type=text/x-cvsweb-markup">core/version.txt (1.1.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-25 23:37 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated copyright</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?rev=1.14.2.12&content-type=text/x-cvsweb-markup">gui/GUIChooser.html (1.14.2.12)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>
