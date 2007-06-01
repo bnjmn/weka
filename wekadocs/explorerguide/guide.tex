@@ -1,9 +1,11 @@
 \documentclass[a4paper]{article}
 
+% Version: $Revision: 1.9 $
+
 \usepackage{epsfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/epsfig.html
 \usepackage{wrapfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/wrapfig.html
 
-\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-5}
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA Explorer User Guide\\for Version 3-5-6}
 \author{Richard Kirkby\\Eibe Frank\\Peter Reutemann}
 
 \setcounter{secnumdepth}{3}
@@ -19,7 +21,7 @@
 \center
 \vspace{7.5cm}
 
-\copyright 2002-2006 University of Waikato
+\copyright 2002-2007 University of Waikato
 
 \end{titlepage}
 
@@ -29,7 +31,7 @@
 
 \section{Launching WEKA}
 
-The new menu-driven GUI in WEKA (class \texttt{weka.gui.Main}) succeeds the old GUI Chooser (class \texttt{weka.gui.GUIChooser}). Its MDI (``multiple document interface'') appearance makes it easier to keep track of all the open windows.
+The new menu-driven GUI in WEKA (class \texttt{weka.gui.Main}) succeeds the old GUI Chooser (class \texttt{weka.gui.GUIChooser}). Its MDI (``multiple document interface'') appearance makes it easier to keep track of all the open windows. If one prefers an SDI (``single document interface'') driven layout, one can invoke this with option \texttt{-gui sdi} on the commandline.
 
 \begin{center}
 	\epsfig{file=images/main.eps,height=3cm}
@@ -60,7 +62,7 @@ The menu consists of six sections:
 \begin{enumerate}
 	\item \textbf{Program}
 		\begin{itemize}
-			\item \textbf{LogWindow} Opens a log window that captures all that is printed to \textit{stdout} or \textit{stderr}. Useful for environments like MS Windows, where WEKA is not started from a terminal.
+			\item \textbf{LogWindow} Opens a log window that captures all that is printed to \textit{stdout} or \textit{stderr}. Useful for environments like MS Windows, where WEKA is normally not started from a terminal.
 			\item \textbf{Exit} Closes WEKA.
 		\end{itemize}
 		
@@ -82,7 +84,7 @@ that do not provide their own command line interface.
 		\begin{itemize}
 			\item \textbf{ArffViewer} An MDI application for viewing ARFF files in spreadsheet format.
 			\item \textbf{SqlViewer} represents an SQL worksheet, for querying databases via JDBC.
-			\item \textbf{EnsembleLibrary} An interface for generating setups for Ensemble Selection \cite{ensemble}.
+			\item \textbf{EnsembleLibrary} An interface for generating setups for Ensemble Selection \cite{ensemble} (a contribution by Robert Jung and David Michael from Cornell University, Ithaca, NY, USA).
 		\end{itemize}
 		
 	\item \textbf{Visualization} Ways of visualizing data with WEKA.
@@ -111,9 +113,19 @@ that do not provide their own command line interface.
 		\end{itemize}
 \end{enumerate}
 
+To make it easy for the user to add new functionality to the menu without having to modify 
+the code of WEKA itself, the GUI now offers a plugin mechanism for such add-ons. 
+Due to the inherent dynamic
+class discovery, plugins only need to implement the \texttt{weka.gui.MainMenuExtension}
+interface and WEKA notified of the package they reside in to be displayed in the menu under 
+``Extensions'' (this extra menu appears automatically as soon as extensions are discovered). 
+More details can be found in the Wiki article ``Extensions for Weka's main GUI'' 
+\cite{mainextensions}.
+
 If you launch WEKA from a terminal window, some text begins scrolling in the
 terminal. Ignore this text unless something goes wrong, in which case it can
-help in tracking down the cause (the \textit{LogWindow} displays that information as well).
+help in tracking down the cause (the \textit{LogWindow} from the \textit{Program} menu 
+displays that information as well).
 
 This User Manual, which is also available online on the \textit{WekaDoc Wiki} 
 \cite{wekadoc}, focuses on using the Explorer but does not explain
@@ -155,6 +167,11 @@ screens, on which the respective actions can be performed.  The bottom
 area of the window (including the status box, the log button, and the
 Weka bird) stays visible regardless of which section you are in.
 
+The Explorer can be easily extended with custom tabs. The Wiki 
+article ``Adding tabs in the Explorer'' \cite{explorertabs} explains
+this in detail.
+
+
 \subsection{Status Box}
 
 The status box appears at the very bottom of the window. It displays
@@ -194,6 +211,15 @@ idle it is zero, but it increases as the number of processes increases.
 When any process is started, the bird gets up and starts moving around. If
 it's standing but stops moving for a long time, it's sick: something has gone
 wrong!  In that case you should restart the WEKA Explorer.
+
+\subsection{Graphical output}
+
+Most graphical displays in WEKA, e.g., the GraphVisualizer or the
+TreeVisualizer, support saving the output to a file. A dialog for saving 
+the output can be brought up with \textit{Alt+Shift+left-click}. 
+Supported formats are currently Windows Bitmap, JPEG, PNG and EPS 
+(encapsulated Postscript). The dialog also allows you to specify the
+dimensions of the generated image.
 
 \newpage
 
@@ -344,11 +370,29 @@ box, or to copy the current setup string to the clipboard.
 The GenericObjectEditor dialog box lets you configure a filter. The
 same kind of dialog box is used to configure other objects, such as
 classifiers and clusterers (see below). The fields in the window
-reflect the available options.  Clicking on any of these gives an
+reflect the available options.
+
+Right-clicking (or \textit{Alt+Shift+Left-Click}) on such a field 
+will bring up a popup menu, listing the following options:
+\begin{enumerate}
+  \item \textbf{Show properties...} has the same effect as left-clicking
+  on the field, i.e., a dialog appears allowing you to alter the settings.
+  \item \textbf{Copy configuration to clipboard} copies the currently
+  displayed configuration string to the system's clipboard and therefore 
+  can be used anywhere else in WEKA or in the console. This is rather handy
+  if you have to setup complicated, nested schemes.
+  \item \textbf{Enter configuration...} is the ``receiving'' end for
+  configurations that got copied to the clipboard earlier on. In this dialog you
+  can enter a classname followed by options (if the class supports these).
+  This also allows you to transfer a filter setting from the Preprocess
+  panel to a \texttt{FilteredClassifier} used in the Classify panel.
+\end{enumerate}
+
+Left-Clicking on any of these gives an
 opportunity to alter the filters settings. For example, the setting
 may take a text string, in which case you type the string into the
 text field provided.  Or it may give a drop-down box listing several
-states to choose from.  Or it may do something else, depending on the
+states to choose from. Or it may do something else, depending on the
 information required. Information on the options is provided in a tool
 tip if you let the mouse pointer hover of the corresponding
 field. More information on the filter and its options can be obtained
@@ -466,6 +510,13 @@ button allows you to specify the cost matrix used.
 \item \textbf{Random seed for xval / \% Split}.
 This specifies the random seed used when randomizing the data before it is
 divided up for evaluation purposes.
+\item \textbf{Preserve order for \% Split}.
+This suppresses the randomization of the data before splitting into train
+and test set.
+\item \textbf{Output source code}.
+If the classifier can output the built model as Java source code, you can 
+specify the class name here. The code will be printed in the ``Classifier 
+output'' area.
 \end{enumerate}
 
 \subsection{The Class Attribute}
@@ -519,6 +570,9 @@ A more detailed per-class break down of the classifier's prediction accuracy.
 Shows how many instances have been assigned to each class. Elements show the
 number of test examples whose actual class is the row and whose predicted class
 is the column.
+\item \textbf{Source code} (optional).
+This section lists the Java source code if one chose ``Output source code'' in 
+the ``More options'' dialog.
 \end{enumerate}
 
 \subsection{The Result List}
@@ -557,7 +611,7 @@ classifier has been built. In the tree visualizer, you can bring up a
 menu by right-clicking a blank area, pan around by dragging the mouse,
 and see the training instances at each node by clicking on
 it. CTRL-clicking zooms the view out, while SHIFT-dragging a box zooms
-the view in. The graph visualizer should be self-explanatory.
+the view in.  The graph visualizer should be self-explanatory.
 \item \textbf{Visualize margin curve}.
 Generates a plot illustrating the prediction margin. The margin is defined as
 the difference between the probability predicted for the actual class and the
@@ -575,9 +629,9 @@ positive rate {\em vs} false positive rate), and for other types of curves.
 Generates a plot that gives an explicit representation of the expected cost, as
 described by \cite{drummond}.
 \item \textbf{Plugins}.
-This menu item only appears if there are \textit{Explorer visualization plugins}
-available (by default: none). More about these plugins can be found on the 
-\textit{WekaWiki} \cite{wekawiki}.
+This menu item only appears if there are visualization plugins
+available (by default: none). More about these plugins can be found in the 
+\textit{WekaWiki} article ``Explorer visualization plugins'' \cite{explorervisplugins}.
 \end{enumerate}
 \noindent
 Options are greyed out if they do not apply to the specific set of results.
@@ -625,6 +679,14 @@ attributes, and holding down CTRL toggles individual attributes on and off. To
 cancel the selection, back out with the \textbf{Cancel} button. To activate it,
 click the \textbf{Select} button. The next time clustering is invoked, the
 selected attributes are ignored.
+
+\subsection{Working with Filters}
+
+The \texttt{FilteredClusterer} meta-clusterer offers the user the possibility 
+to apply filters directly before the clusterer is learned. This approach
+eliminates the manual application of a filter in the \textbf{Preprocess} panel,
+since the data gets processed on the fly. Useful if one needs to try out 
+different filter setups.
 
 \subsection{Learning Clusters}
 
@@ -850,7 +912,13 @@ learning tools and techniques. 2nd edition}  Morgan Kaufmann, San
 Francisco.
 	\bibitem{wekawiki} \textit{WekaWiki} -- \texttt{http://weka.sourceforge.net/wiki/}
 	\bibitem{wekadoc} \textit{WekaDoc} -- \texttt{http://weka.sourceforge.net/wekadoc/}
-	\bibitem{ensemble} Ensemble Selection on \textit{WekaDoc} -- \\ \small{\texttt{http://weka.sourceforge.net/wekadoc/index.php/en:Ensemble\_Selection}}
+	\bibitem{ensemble} \textit{Ensemble Selection} on \textit{WekaDoc} -- \\ \small{\texttt{http://weka.sourceforge.net/wekadoc/index.php/en:Ensemble\_Selection}}
+	\bibitem{mainextensions} \textit{Extensions for Weka's main GUI} on \textit{WekaWiki} -- \\
+\small{\texttt{http://weka.sourceforge.net/wiki/index.php/Extensions\_for\_Weka\%27s\_main\_GUI}}
+	\bibitem{explorertabs} \textit{Adding tabs in the Explorer} on \textit{WekaWiki} -- \\
+\small{\texttt{http://weka.sourceforge.net/wiki/index.php/Adding\_tabs\_in\_the\_Explorer}}
+	\bibitem{explorervisplugins} \textit{Explorer visualization plugins} on \textit{WekaWiki} -- \\
+\small{\texttt{http://weka.sourceforge.net/wiki/index.php/Explorer\_visualization\_plugins}}
 \end{thebibliography}
 
 \end{document}
