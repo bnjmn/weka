@@ -47,7 +47,7 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
@@ -592,6 +592,9 @@ public class ConverterFileChooser
   protected void updateCurrentConverter() {
     String[]	extensions;
     Object	newConverter;
+    
+    if (getFileFilter() == null)
+      return;
     
     if (!isAcceptAllFileFilterUsed()) {
       // determine current converter
