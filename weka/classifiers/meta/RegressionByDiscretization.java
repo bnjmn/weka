@@ -99,7 +99,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision: 1.36 $
  */
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer {
@@ -161,6 +161,9 @@ public class RegressionByDiscretization
     result.disableAllClassDependencies();
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
+    
+    // other
+    result.setMinimumNumberInstances(getNumBins());  // for the filter, to have at least 1 instance per bin
     
     return result;
   }
