@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -460,7 +460,14 @@ public class Capabilities
   }
   
   /**
-   * enables the given capability
+   * enables the given capability. 
+   * Enabling NOMINAL_ATTRIBUTES also enables BINARY_ATTRIBUTES, 
+   * UNARY_ATTRIBUTES and EMPTY_NOMINAL_ATTRIBUTES. 
+   * Enabling BINARY_ATTRIBUTES also enables UNARY_ATTRIBUTES and 
+   * EMPTY_NOMINAL_ATTRIBUTES. 
+   * Enabling UNARY_ATTRIBUTES also enables EMPTY_NOMINAL_ATTRIBUTES.
+   * But NOMINAL_CLASS only enables BINARY_CLASS, since normal schemes in Weka
+   * don't work with datasets that have only 1 class label (or none).
    *
    * @param c     the capability to enable
    */
@@ -479,18 +486,19 @@ public class Capabilities
     else if (c == Capability.NOMINAL_CLASS) {
       enable(Capability.BINARY_CLASS);
     }
-    else if (c == Capability.BINARY_CLASS) {
-      enable(Capability.UNARY_CLASS);
-    }
-    else if (c == Capability.UNARY_CLASS) {
-      enable(Capability.EMPTY_NOMINAL_CLASS);
-    }
 
     m_Capabilities.add(c);
   }
   
   /**
    * enables the dependency flag for the given capability
+   * Enabling NOMINAL_ATTRIBUTES also enables BINARY_ATTRIBUTES, 
+   * UNARY_ATTRIBUTES and EMPTY_NOMINAL_ATTRIBUTES. 
+   * Enabling BINARY_ATTRIBUTES also enables UNARY_ATTRIBUTES and 
+   * EMPTY_NOMINAL_ATTRIBUTES. 
+   * Enabling UNARY_ATTRIBUTES also enables EMPTY_NOMINAL_ATTRIBUTES.
+   * But NOMINAL_CLASS only enables BINARY_CLASS, since normal schemes in Weka
+   * don't work with datasets that have only 1 class label (or none).
    *
    * @param c     the capability to enable the dependency flag for
    */
@@ -508,12 +516,6 @@ public class Capabilities
     // class
     else if (c == Capability.NOMINAL_CLASS) {
       enableDependency(Capability.BINARY_CLASS);
-    }
-    else if (c == Capability.BINARY_CLASS) {
-      enableDependency(Capability.UNARY_CLASS);
-    }
-    else if (c == Capability.UNARY_CLASS) {
-      enableDependency(Capability.EMPTY_NOMINAL_CLASS);
     }
 
     m_Dependencies.add(c);
@@ -573,6 +575,12 @@ public class Capabilities
 
   /**
    * disables the given capability
+   * Disabling NOMINAL_ATTRIBUTES also disables BINARY_ATTRIBUTES, 
+   * UNARY_ATTRIBUTES and EMPTY_NOMINAL_ATTRIBUTES. 
+   * Disabling BINARY_ATTRIBUTES also disables UNARY_ATTRIBUTES and 
+   * EMPTY_NOMINAL_ATTRIBUTES. 
+   * Disabling UNARY_ATTRIBUTES also disables EMPTY_NOMINAL_ATTRIBUTES.
+   * The same hierarchy applies to the class capabilities.
    *
    * @param c     the capability to disable
    */
@@ -603,6 +611,12 @@ public class Capabilities
 
   /**
    * disables the dependency of the given capability
+   * Disabling NOMINAL_ATTRIBUTES also disables BINARY_ATTRIBUTES, 
+   * UNARY_ATTRIBUTES and EMPTY_NOMINAL_ATTRIBUTES. 
+   * Disabling BINARY_ATTRIBUTES also disables UNARY_ATTRIBUTES and 
+   * EMPTY_NOMINAL_ATTRIBUTES. 
+   * Disabling UNARY_ATTRIBUTES also disables EMPTY_NOMINAL_ATTRIBUTES.
+   * The same hierarchy applies to the class capabilities.
    *
    * @param c     the capability to disable the dependency flag for
    */
