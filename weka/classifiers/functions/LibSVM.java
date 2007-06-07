@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */
@@ -1297,7 +1297,9 @@ public class LibSVM
   }
   
   /**
-   * classifies the given instance
+   * classifies the given instance.
+   * In case of 1-class classification, 0 is returned if libsvm returns 1 and
+   * NaN (= missing) if libsvm returns -1.
    * 
    * @param instance            the instance to classify
    * @return                    the classification
@@ -1320,12 +1322,25 @@ public class LibSVM
 	  new Object[]{
 	  m_Model, 
 	  x})).doubleValue();
+
+    double result;
+    if (instance.classAttribute().isNominal() && (m_SVMType == SVMTYPE_ONE_CLASS_SVM) ) {
+      if (v > 0)
+	result = 0;
+      else
+	result = Double.NaN;  // outlier
+    }
+    else {
+      result = v;
+    }
     
-    return v;
+    return result;
   }
   
   /**
-   * Computes the distribution for a given instance
+   * Computes the distribution for a given instance. 
+   * In case of 1-class classification, 1 is returned at index 0 if libsvm 
+   * returns 1 and NaN (= missing) if libsvm returns -1.
    *
    * @param instance 		the instance for which distribution is computed
    * @return 			the distribution
@@ -1395,7 +1410,15 @@ public class LibSVM
             x})).doubleValue();
       
       if (instance.classAttribute().isNominal()) {
-	result[(int) v] = 1;
+	if (m_SVMType == SVMTYPE_ONE_CLASS_SVM) {
+	  if (v > 0)
+	    result[0] = 1;
+	  else
+	    result[0] = Double.NaN;  // outlier
+	}
+	else {
+	  result[(int) v] = 1;
+	}
       }
       else {
 	result[0] = v;
@@ -1419,6 +1442,11 @@ public class LibSVM
     result.enable(Capability.DATE_ATTRIBUTES);
 
     // class
+    result.enableDependency(Capability.UNARY_CLASS);
+    result.enableDependency(Capability.NOMINAL_CLASS);
+    result.enableDependency(Capability.NUMERIC_CLASS);
+    result.enableDependency(Capability.DATE_CLASS);
+
     switch (m_SVMType) {
       case SVMTYPE_C_SVC:
       case SVMTYPE_NU_SVC:
