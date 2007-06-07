@@ -171,7 +171,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.77 $
+ * @version  $Revision: 1.78 $
  */
 public class Evaluation
 implements Summarizable {
@@ -2676,6 +2676,7 @@ implements Summarizable {
       // print predictions
       int i = 0;
       testSource.reset();
+      test = testSource.getStructure(test.classIndex());
       while (testSource.hasMoreElements(test)) {
 	Instance inst = testSource.nextElement(test);
 	text.append(
