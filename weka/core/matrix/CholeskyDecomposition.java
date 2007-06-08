@@ -30,7 +30,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CholeskyDecomposition 
   implements Serializable {
@@ -127,27 +127,24 @@ public class CholeskyDecomposition
 
     // Solve L*Y = B;
     for (int k = 0; k < n; k++) {
-      for (int i = k+1; i < n; i++) {
-        for (int j = 0; j < nx; j++) {
-          X[i][j] -= X[k][j]*L[i][k];
-        }
-      }
       for (int j = 0; j < nx; j++) {
-        X[k][j] /= L[k][k];
+	for (int i = 0; i < k ; i++) {
+	  X[k][j] -= X[i][j]*L[k][i];
+	}
+	X[k][j] /= L[k][k];
       }
     }
 
     // Solve L'*X = Y;
     for (int k = n-1; k >= 0; k--) {
       for (int j = 0; j < nx; j++) {
-        X[k][j] /= L[k][k];
-      }
-      for (int i = 0; i < k; i++) {
-        for (int j = 0; j < nx; j++) {
-          X[i][j] -= X[k][j]*L[k][i];
-        }
+	for (int i = k+1; i < n ; i++) {
+	  X[k][j] -= X[i][j]*L[i][k];
+	}
+	X[k][j] /= L[k][k];
       }
     }
+
     return new Matrix(X,n,nx);
   }
 }
