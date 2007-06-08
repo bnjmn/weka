@@ -34,7 +34,7 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class SingularValueDecomposition 
   implements Serializable {
@@ -71,6 +71,13 @@ public class SingularValueDecomposition
     double[][] A = Arg.getArrayCopy();
     m = Arg.getRowDimension();
     n = Arg.getColumnDimension();
+
+    /* Apparently the failing cases are only a proper subset of (m<n), 
+	 so let's not throw error.  Correct fix to come later?
+    if (m<n) {
+	  throw new IllegalArgumentException("Jama SVD only works for m >= n"); }
+    */
+
     int nu = Math.min(m,n);
     s = new double [Math.min(m+1,n)];
     U = new double [m][nu];
@@ -264,6 +271,7 @@ public class SingularValueDecomposition
     int pp = p-1;
     int iter = 0;
     double eps = Math.pow(2.0,-52.0);
+    double tiny = Math.pow(2.0,-966.0);
     while (p > 0) {
       int k,kase;
 
@@ -283,7 +291,8 @@ public class SingularValueDecomposition
         if (k == -1) {
           break;
         }
-        if (Math.abs(e[k]) <= eps*(Math.abs(s[k]) + Math.abs(s[k+1]))) {
+        if (Math.abs(e[k]) <=
+          tiny + eps*(Math.abs(s[k]) + Math.abs(s[k+1]))) {
           e[k] = 0.0;
           break;
         }
@@ -298,7 +307,7 @@ public class SingularValueDecomposition
           }
           double t = (ks != p ? Math.abs(e[ks]) : 0.) + 
                                                   (ks != k+1 ? Math.abs(e[ks-1]) : 0.);
-          if (Math.abs(s[ks]) <= eps*t)  {
+          if (Math.abs(s[ks]) <= tiny + eps*t)  {
             s[ks] = 0.0;
             break;
           }
