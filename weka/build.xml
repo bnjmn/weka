@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.19.2.16 $
+   $Revision: 1.19.2.17 $
   ===========================================================================
 -->
 
@@ -234,6 +234,7 @@
       <include name="weka/**/*.jpg"/>
       <include name="weka/**/*.props"/>
       <include name="weka/**/*.txt"/>
+      <include name="weka/**/*.xml"/>
       <include name="weka/**/DatabaseUtils.props.*"/>
       <include name="weka/gui/beans/README*"/>
     </jar>
