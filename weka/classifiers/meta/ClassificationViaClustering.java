@@ -73,13 +73,13 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ClassificationViaClustering
   extends Classifier {
   
   /** for serialization */
-  private static final long serialVersionUID = -9024949674487512057L;
+  private static final long serialVersionUID = -5687069451420259135L;
 
   /** the cluster algorithm used (template) */
   protected Clusterer m_Clusterer;
