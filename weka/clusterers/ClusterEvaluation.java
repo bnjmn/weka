@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.40 $
+ * @version  $Revision: 1.41 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -346,7 +346,7 @@ public class ClusterEvaluation
     numInstances = i;
    
     best[m_numClusters] = Double.MAX_VALUE;
-    mapClasses(0, counts, clusterTotals, current, best, 0);
+    mapClasses(m_numClusters, 0, counts, clusterTotals, current, best, 0);
 
     m_clusteringResults.append("\n\nClass attribute: "
 			+inst.classAttribute().name()
@@ -436,6 +436,8 @@ public class ClusterEvaluation
   /**
    * Finds the minimum error mapping of classes to clusters. Recursively
    * considers all possible class to cluster assignments.
+   * 
+   * @param numClusters the number of clusters
    * @param lev the cluster being processed
    * @param counts the counts of classes in clusters
    * @param clusterTotals the total number of examples in each cluster
@@ -444,13 +446,13 @@ public class ClusterEvaluation
    * @param best the best assignment path seen
    * @param error accumulates the error for a particular path
    */
-  private void mapClasses(int lev, int[][] counts, int[] clusterTotals,
+  public static void mapClasses(int numClusters, int lev, int[][] counts, int[] clusterTotals,
 			  double[] current, double[] best, int error) {
     // leaf
-    if (lev == m_numClusters) {
-      if (error < best[m_numClusters]) {
-	best[m_numClusters] = error;
-	for (int i = 0; i < m_numClusters; i++) {
+    if (lev == numClusters) {
+      if (error < best[numClusters]) {
+	best[numClusters] = error;
+	for (int i = 0; i < numClusters; i++) {
 	  best[i] = current[i];
 	}
       }
@@ -458,12 +460,12 @@ public class ClusterEvaluation
       // empty cluster -- ignore
       if (clusterTotals[lev] == 0) {
 	current[lev] = -1; // cluster ignored
-	mapClasses(lev+1, counts, clusterTotals, current, best,
+	mapClasses(numClusters, lev+1, counts, clusterTotals, current, best,
 		   error);
       } else {
 	// first try no class assignment to this cluster
 	current[lev] = -1; // cluster assigned no class (ie all errors)
-	mapClasses(lev+1, counts, clusterTotals, current, best,
+	mapClasses(numClusters, lev+1, counts, clusterTotals, current, best,
 		   error+clusterTotals[lev]);
 	// now loop through the classes in this cluster
 	for (int i = 0; i < counts[0].length; i++) {
@@ -478,7 +480,7 @@ public class ClusterEvaluation
 	    }
 	    if (ok) {
 	      current[lev] = i;
-	      mapClasses(lev+1, counts, clusterTotals, current, best, 
+	      mapClasses(numClusters, lev+1, counts, clusterTotals, current, best, 
 			 (error + (clusterTotals[lev] - counts[lev][i])));
 	    }
 	  }
