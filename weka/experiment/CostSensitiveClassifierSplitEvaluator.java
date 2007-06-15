@@ -35,8 +35,10 @@ import weka.core.Summarizable;
 import weka.core.Utils;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
+import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.Enumeration;
@@ -87,7 +89,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -102,7 +104,7 @@ public class CostSensitiveClassifierSplitEvaluator
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 27; //23;
+  private static final int RESULT_SIZE = 30;
 
   /**
    * Returns a string describing this split evaluator
@@ -297,6 +299,11 @@ public class CostSensitiveClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     
+    // sizes
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    
     resultTypes[current++] = "";
 
     // add any additional measures
@@ -358,6 +365,11 @@ public class CostSensitiveClassifierSplitEvaluator
     resultNames[current++] = "Elapsed_Time_testing";
     resultNames[current++] = "UserCPU_Time_training";
     resultNames[current++] = "UserCPU_Time_testing";
+
+    // sizes
+    resultNames[current++] = "Serialized_Model_Size";
+    resultNames[current++] = "Serialized_Train_Set_Size";
+    resultNames[current++] = "Serialized_Test_Set_Size";
 
     // Classifier defined extras
     resultNames[current++] = "Summary";
@@ -472,6 +484,20 @@ public class CostSensitiveClassifierSplitEvaluator
       result[current++] = new Double(Instance.missingValue());
       result[current++] = new Double(Instance.missingValue());
     }
+    
+    // sizes
+    ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+    ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(m_Classifier);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(train);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(test);
+    result[current++] = new Double(bastream.size());
     
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();

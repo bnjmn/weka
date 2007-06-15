@@ -35,6 +35,8 @@ import weka.core.OptionHandler;
 import weka.core.Summarizable;
 import weka.core.Utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -84,7 +86,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class ClassifierSplitEvaluator 
   implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
@@ -124,10 +126,10 @@ public class ClassifierSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 25;
+  private static final int RESULT_SIZE = 28;
 
   /** The number of IR statistics */
-  private static final int NUM_IR_STATISTICS = 14; //12;
+  private static final int NUM_IR_STATISTICS = 14;
   
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
@@ -504,6 +506,11 @@ public class ClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    
+    // sizes
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultTypes[current++] = "";
@@ -594,6 +601,11 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "UserCPU_Time_training";
     resultNames[current++] = "UserCPU_Time_testing";
 
+    // sizes
+    resultNames[current++] = "Serialized_Model_Size";
+    resultNames[current++] = "Serialized_Train_Set_Size";
+    resultNames[current++] = "Serialized_Test_Set_Size";
+    
     // ID/Targets/Predictions
     if (getAttributeID() >= 0) resultNames[current++] = "Instance_ID";
     if (getPredTargetColumn()){
@@ -727,6 +739,20 @@ public class ClassifierSplitEvaluator
       result[current++] = new Double(Instance.missingValue());
       result[current++] = new Double(Instance.missingValue());
     }
+
+    // sizes
+    ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+    ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(m_Classifier);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(train);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(test);
+    result[current++] = new Double(bastream.size());
     
     // IDs
     if (getAttributeID() >= 0){

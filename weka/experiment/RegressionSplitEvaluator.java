@@ -35,6 +35,8 @@ import weka.core.OptionHandler;
 import weka.core.Summarizable;
 import weka.core.Utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -66,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
 public class RegressionSplitEvaluator 
   implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
@@ -101,7 +103,7 @@ public class RegressionSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 17; //15;
+  private static final int RESULT_SIZE = 20;
 
   /**
    * No args constructor.
@@ -383,6 +385,11 @@ public class RegressionSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    
+    // sizes
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     resultTypes[current++] = "";
 
@@ -431,6 +438,11 @@ public class RegressionSplitEvaluator
     resultNames[current++] = "Elapsed_Time_testing";
     resultNames[current++] = "UserCPU_Time_training";
     resultNames[current++] = "UserCPU_Time_testing";
+
+    // sizes
+    resultNames[current++] = "Serialized_Model_Size";
+    resultNames[current++] = "Serialized_Train_Set_Size";
+    resultNames[current++] = "Serialized_Test_Set_Size";
     
     // Classifier defined extras
     resultNames[current++] = "Summary";
@@ -523,6 +535,20 @@ public class RegressionSplitEvaluator
       result[current++] = new Double(Instance.missingValue());
       result[current++] = new Double(Instance.missingValue());
     }
+    
+    // sizes
+    ByteArrayOutputStream bastream = new ByteArrayOutputStream();
+    ObjectOutputStream oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(m_Classifier);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(train);
+    result[current++] = new Double(bastream.size());
+    bastream = new ByteArrayOutputStream();
+    oostream = new ObjectOutputStream(bastream);
+    oostream.writeObject(test);
+    result[current++] = new Double(bastream.size());
     
     if (m_Classifier instanceof Summarizable) {
       result[current++] = ((Summarizable)m_Classifier).toSummaryString();
