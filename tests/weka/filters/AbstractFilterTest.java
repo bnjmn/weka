@@ -43,7 +43,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @authro FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public abstract class AbstractFilterTest
   extends TestCase {
@@ -653,6 +653,174 @@ public abstract class AbstractFilterTest
       result = null;
       if (m_Filter.isOutputFormatDefined())
 	result = m_Filter.getOutputFormat();
+      
+      for (int i = 0; i < icopy.numInstances(); i++) {
+	if (m_Filter.input(icopy.instance(i))) {
+	  if (result == null) {
+	    fail("Filter didn't return true from isOutputFormatDefined() (2. batch)");
+	  }
+	  else {
+	    Instance out = m_Filter.output();
+	    assertNotNull("Instance not made available immediately (2. batch)", out);
+	    result.add(out);
+	  }
+	}
+      }
+      m_Filter.batchFinished();
+      
+      if (result == null) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (2. batch)", result);
+	assertTrue("Pending output instances (2. batch)", m_Filter.numPendingOutput() > 0);
+      }
+
+      while (m_Filter.numPendingOutput() > 0)
+	result.add(m_Filter.output());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown during 2. batch: \n" + ex);
+    }
+  }
+  
+  /**
+   * simulates batch filtering (with the second dataset being smaller)
+   */
+  public void testBatchFilteringSmaller() {
+    Instances result = null;
+    Instances icopy = new Instances(m_Instances);
+    
+    // setup filter
+    try {
+      if (m_Filter.setInputFormat(icopy)) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (setup)", result);
+      }
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on setInputFormat(): \n" + ex);
+    }
+
+    // first batch
+    try {
+      for (int i = 0; i < icopy.numInstances(); i++) {
+	if (m_Filter.input(icopy.instance(i))) {
+	  Instance out = m_Filter.output();
+	  assertNotNull("Instance not made available immediately (1. batch)", out);
+	  result.add(out);
+	}
+      }
+      m_Filter.batchFinished();
+
+      if (result == null) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (1. batch)", result);
+	assertTrue("Pending output instances (1. batch)", m_Filter.numPendingOutput() > 0);
+      }
+
+      while (m_Filter.numPendingOutput() > 0)
+	result.add(m_Filter.output());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown during 1. batch: \n" + ex);
+    }
+
+    // second batch
+    try {
+      result = null;
+      if (m_Filter.isOutputFormatDefined())
+	result = m_Filter.getOutputFormat();
+      
+      // delete some instances
+      int num = (int) ((double) icopy.numInstances() * 0.3);
+      for (int i = 0; i < num; i++)
+	icopy.delete(0);
+      
+      for (int i = 0; i < icopy.numInstances(); i++) {
+	if (m_Filter.input(icopy.instance(i))) {
+	  if (result == null) {
+	    fail("Filter didn't return true from isOutputFormatDefined() (2. batch)");
+	  }
+	  else {
+	    Instance out = m_Filter.output();
+	    assertNotNull("Instance not made available immediately (2. batch)", out);
+	    result.add(out);
+	  }
+	}
+      }
+      m_Filter.batchFinished();
+      
+      if (result == null) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (2. batch)", result);
+	assertTrue("Pending output instances (2. batch)", m_Filter.numPendingOutput() > 0);
+      }
+
+      while (m_Filter.numPendingOutput() > 0)
+	result.add(m_Filter.output());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown during 2. batch: \n" + ex);
+    }
+  }
+  
+  /**
+   * simulates batch filtering (with the second dataset being bigger)
+   */
+  public void testBatchFilteringLarger() {
+    Instances result = null;
+    Instances icopy = new Instances(m_Instances);
+    
+    // setup filter
+    try {
+      if (m_Filter.setInputFormat(icopy)) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (setup)", result);
+      }
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on setInputFormat(): \n" + ex);
+    }
+
+    // first batch
+    try {
+      for (int i = 0; i < icopy.numInstances(); i++) {
+	if (m_Filter.input(icopy.instance(i))) {
+	  Instance out = m_Filter.output();
+	  assertNotNull("Instance not made available immediately (1. batch)", out);
+	  result.add(out);
+	}
+      }
+      m_Filter.batchFinished();
+
+      if (result == null) {
+	result = m_Filter.getOutputFormat();
+	assertNotNull("Output format defined (1. batch)", result);
+	assertTrue("Pending output instances (1. batch)", m_Filter.numPendingOutput() > 0);
+      }
+
+      while (m_Filter.numPendingOutput() > 0)
+	result.add(m_Filter.output());
+    }
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown during 1. batch: \n" + ex);
+    }
+
+    // second batch
+    try {
+      result = null;
+      if (m_Filter.isOutputFormatDefined())
+	result = m_Filter.getOutputFormat();
+      
+      // add some instances
+      int num = (int) ((double) icopy.numInstances() * 0.3);
+      for (int i = 0; i < num; i++)
+	icopy.add(icopy.instance(i));
       
       for (int i = 0; i < icopy.numInstances(); i++) {
 	if (m_Filter.input(icopy.instance(i))) {
