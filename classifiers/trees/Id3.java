@@ -23,6 +23,7 @@
 package weka.classifiers.trees;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -71,11 +72,11 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision: 1.21 $ 
  */
 public class Id3 
   extends Classifier 
-  implements TechnicalInformationHandler {
+  implements TechnicalInformationHandler, Sourcable {
 
   /** for serialization */
   static final long serialVersionUID = -2693678647096322561L;
@@ -373,6 +374,103 @@ public class Id3
       }
     }
     return text.toString();
+  }
+
+  /**
+   * Adds this tree recursively to the buffer.
+   * 
+   * @param id          the unqiue id for the method
+   * @param buffer      the buffer to add the source code to
+   * @return            the last ID being used
+   * @throws Exception  if something goes wrong
+   */
+  protected int toSource(int id, StringBuffer buffer) throws Exception {
+    int                 result;
+    int                 i;
+    int                 newID;
+    StringBuffer[]      subBuffers;
+    
+    buffer.append("\n");
+    buffer.append("  protected static double node" + id + "(Object[] i) {\n");
+    
+    // leaf?
+    if (m_Attribute == null) {
+      result = id;
+      if (Double.isNaN(m_ClassValue))
+        buffer.append("    return Double.NaN;");
+      else
+        buffer.append("    return " + m_ClassValue + ";");
+      if (m_ClassAttribute != null)
+        buffer.append(" // " + m_ClassAttribute.value((int) m_ClassValue));
+      buffer.append("\n");
+      buffer.append("  }\n");
+    }
+    else {
+      buffer.append("    // " + m_Attribute.name() + "\n");
+      
+      // subtree calls
+      subBuffers = new StringBuffer[m_Attribute.numValues()];
+      newID      = id;
+      for (i = 0; i < m_Attribute.numValues(); i++) {
+        newID++;
+
+        buffer.append("    ");
+        if (i > 0)
+          buffer.append("else ");
+        buffer.append("if (((String) i[" + m_Attribute.index() + "]).equals(\"" + m_Attribute.value(i) + "\"))\n");
+        buffer.append("      return node" + newID + "(i);\n");
+
+        subBuffers[i] = new StringBuffer();
+        newID         = m_Successors[i].toSource(newID, subBuffers[i]);
+      }
+      buffer.append("    else\n");
+      buffer.append("      throw new IllegalArgumentException(\"Value '\" + i[" + m_Attribute.index() + "] + \"' is not allowed!\");\n");
+      buffer.append("  }\n");
+
+      // output subtree code
+      for (i = 0; i < m_Attribute.numValues(); i++) {
+        buffer.append(subBuffers[i].toString());
+      }
+      subBuffers = null;
+      
+      result = newID;
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Returns a string that describes the classifier as source. The
+   * classifier will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain a method with the signature:
+   * <pre><code>
+   * public static double classify(Object[] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty. <br/>
+   * Note: works only if class attribute is the last attribute in the dataset.
+   *
+   * @param className the name that should be given to the source class.
+   * @return the object source described by a string
+   * @throws Exception if the souce can't be computed
+   */
+  public String toSource(String className) throws Exception {
+    StringBuffer        result;
+    int                 id;
+    
+    result = new StringBuffer();
+
+    result.append("public class " + className + " {\n");
+    result.append("  public static double classify(Object[] i) {\n");
+    id = 0;
+    result.append("    return node" + id + "(i);\n");
+    result.append("  }\n");
+    toSource(id, result);
+    result.append("}\n");
+
+    return result.toString();
   }
 
   /**
