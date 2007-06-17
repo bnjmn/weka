@@ -23,6 +23,7 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -49,11 +50,11 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ZeroR 
   extends Classifier 
-  implements WeightedInstancesHandler {
+  implements WeightedInstancesHandler, Sourcable {
 
   /** for serialization */
   static final long serialVersionUID = 48055541465867954L;
@@ -109,7 +110,7 @@ public class ZeroR
    * Generates the classifier.
    *
    * @param instances set of instances serving as training data 
-   * @exception Exception if the classifier has not been generated successfully
+   * @throws Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
     // can classifier handle the data?
@@ -173,7 +174,7 @@ public class ZeroR
    *
    * @param instance the instance to be classified
    * @return predicted class probability distribution
-   * @exception Exception if class is numeric
+   * @throws Exception if class is numeric
    */
   public double [] distributionForInstance(Instance instance) 
        throws Exception {
@@ -186,7 +187,39 @@ public class ZeroR
       return (double []) m_Counts.clone();
     }
   }
-  
+
+  /**
+   * Returns a string that describes the classifier as source. The
+   * classifier will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain a method with the signature:
+   * <pre><code>
+   * public static double classify(Object[] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty.
+   *
+   * @param className the name that should be given to the source class.
+   * @return the object source described by a string
+   * @throws Exception if the souce can't be computed
+   */
+  public String toSource(String className) throws Exception {
+    StringBuffer        result;
+    
+    result = new StringBuffer();
+    
+    result.append("class " + className + " {\n");
+    result.append("  public static double classify(Object[] i) {\n");
+    if (m_Counts != null)
+      result.append("    // always predicts label '" + m_Class.value((int) m_ClassValue) + "'\n");
+    result.append("    return " + m_ClassValue + ";\n");
+    result.append("  }\n");
+    result.append("}\n");
+    
+    return result.toString();
+  }
+ 
   /**
    * Returns a description of the classifier.
    *
