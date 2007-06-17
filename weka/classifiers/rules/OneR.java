@@ -23,12 +23,12 @@
 package weka.classifiers.rules;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.Sourcable;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -73,11 +73,11 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
 */
 public class OneR 
   extends Classifier 
-  implements OptionHandler, TechnicalInformationHandler {
+  implements TechnicalInformationHandler, Sourcable {
     
   /** for serialization */
   static final long serialVersionUID = -2459427002147861445L;
@@ -536,6 +536,87 @@ public class OneR
       options[current++] = "";
     }
     return options;
+  }
+
+  /**
+   * Returns a string that describes the classifier as source. The
+   * classifier will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain a method with the signature:
+   * <pre><code>
+   * public static double classify(Object[] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty.
+   *
+   * @param className the name that should be given to the source class.
+   * @return the object source described by a string
+   * @throws Exception if the souce can't be computed
+   */
+  public String toSource(String className) throws Exception {
+    StringBuffer        result;
+    int                 i;
+    int                 index;
+    
+    result = new StringBuffer();
+    
+    if (m_ZeroR != null) {
+      result.append(((ZeroR) m_ZeroR).toSource(className));
+    }
+    else {
+      // determine index of attribute
+      index = m_rule.m_attr.index();
+      if (index > m_rule.m_class.index())
+        index--;
+      
+      result.append("public class " + className + " {\n");
+      result.append("  public static double classify(Object[] i) {\n");
+      result.append("    // chosen attribute: " + m_rule.m_attr.name() + " (" + m_rule.m_attr.index() + ")\n");
+      result.append("\n");
+      // missing values
+      result.append("    // missing value?\n");
+      result.append("    if (i[" + index + "] == null)\n");
+      if (m_rule.m_missingValueClass != -1)
+        result.append("      return Double.NaN;\n");
+      else
+        result.append("      return 0;\n");
+      result.append("\n");
+      
+      // actual prediction
+      result.append("    // prediction\n");
+      result.append("    double v = 0;\n");
+      result.append("    double[] classifications = new double[]{" + Utils.arrayToString(m_rule.m_classifications) + "};");
+      result.append(" // ");
+      for (i = 0; i < m_rule.m_classifications.length; i++) {
+        if (i > 0)
+          result.append(", ");
+        result.append(m_rule.m_class.value(m_rule.m_classifications[i]));
+      }
+      result.append("\n");
+      if (m_rule.m_attr.isNominal()) {
+        for (i = 0; i < m_rule.m_attr.numValues(); i++) {
+          result.append("    ");
+          if (i > 0)
+            result.append("else ");
+          result.append("if (((String) i[" + index + "]).equals(\"" + m_rule.m_attr.value(i) + "\"))\n");
+          result.append("      v = " + i + "; // " + m_rule.m_class.value(m_rule.m_classifications[i]) + "\n");
+        }
+      }
+      else {
+        result.append("    double[] breakpoints = new double[]{" + Utils.arrayToString(m_rule.m_breakpoints) + "};\n");
+        result.append("    while (v < breakpoints.length && \n");
+        result.append("           ((Double) i[" + index + "]) >= breakpoints[(int) v]) {\n");
+        result.append("      v++;\n");
+        result.append("    }\n");
+      }
+      result.append("    return classifications[(int) v];\n");
+      
+      result.append("  }\n");
+      result.append("}\n");
+    }
+    
+    return result.toString();
   }
 
   /**
