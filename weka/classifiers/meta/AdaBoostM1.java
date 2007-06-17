@@ -109,7 +109,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $ 
+ * @version $Revision: 1.38 $ 
  */
 public class AdaBoostM1 
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -695,10 +695,10 @@ public class AdaBoostM1
 			  + " is not Sourcable");
     }
 
-    StringBuffer text = new StringBuffer("class ");
+    StringBuffer text = new StringBuffer("public class ");
     text.append(className).append(" {\n\n");
 
-    text.append("  public static double classify(Object [] i) {\n");
+    text.append("  public static double classify(Object[] i) {\n");
 
     if (m_NumIterationsPerformed == 1) {
       text.append("    return " + className + "_0.classify(i);\n");

@@ -111,7 +111,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class J48 
   extends Classifier 
@@ -308,8 +308,8 @@ public class J48
 
     StringBuffer [] source = m_root.toSource(className);
     return 
-    "class " + className + " {\n\n"
-    +"  public static double classify(Object [] i)\n"
+    "public class " + className + " {\n\n"
+    +"  public static double classify(Object[] i)\n"
     +"    throws Exception {\n\n"
     +"    double p = Double.NaN;\n"
     + source[0]  // Assignment code
