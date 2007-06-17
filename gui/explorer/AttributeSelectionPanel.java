@@ -101,7 +101,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.48 $
+ * @version $Revision: 1.49 $
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -633,43 +633,41 @@ public class AttributeSelectionPanel
 	  }
           
 	  // assemble commands
-          Vector list;
-          String[] opt;
+          String cmd;
 	  String cmdFilter;
-	  String cmd;
+          String cmdClassifier;
           
-          // attribute selection command
-          list = new Vector();
+          // 1. attribute selection command
+          Vector<String> list = new Vector<String>();
           list.add("-s");
           if (search instanceof OptionHandler)
             list.add(sname + " " + Utils.joinOptions(((OptionHandler) search).getOptions()));
           else
             list.add(sname);
           if (evaluator instanceof OptionHandler) {
-            opt = ((OptionHandler) evaluator).getOptions();
+            String[] opt = ((OptionHandler) evaluator).getOptions();
             for (int i = 0; i < opt.length; i++)
               list.add(opt[i]);
           }
-          opt = (String[]) list.toArray(new String[list.size()]);
-          cmd = ename;
-          cmd += " " + Utils.joinOptions(opt);
+          cmd =   ename + " " 
+                + Utils.joinOptions(list.toArray(new String[list.size()]));
 
-          // filter command
-          list = new Vector();
-          list.add("-E");
-          if (evaluator instanceof OptionHandler)
-            list.add(ename + " " + Utils.joinOptions(((OptionHandler) evaluator).getOptions()));
-          else
-            list.add(ename);
-          list.add("-S");
-          if (search instanceof OptionHandler)
-            list.add(sname + " " + Utils.joinOptions(((OptionHandler) search).getOptions()));
-          else
-            list.add(sname);
-          opt = (String[]) list.toArray(new String[list.size()]);
-	  cmdFilter = weka.filters.supervised.attribute.AttributeSelection.class.getName();
-          cmdFilter += " " + Utils.joinOptions(opt);
+          // 2. filter command
+          weka.filters.supervised.attribute.AttributeSelection filter = 
+            new weka.filters.supervised.attribute.AttributeSelection();
+          filter.setEvaluator((ASEvaluation) m_AttributeEvaluatorEditor.getValue());
+          filter.setSearch((ASSearch) m_AttributeSearchEditor.getValue());
+	  cmdFilter =   filter.getClass().getName() + " " 
+                      + Utils.joinOptions(((OptionHandler) filter).getOptions());
 
+          // 3. meta-classifier command
+          weka.classifiers.meta.AttributeSelectedClassifier cls = 
+            new weka.classifiers.meta.AttributeSelectedClassifier();
+          cls.setEvaluator((ASEvaluation) m_AttributeEvaluatorEditor.getValue());
+          cls.setSearch((ASSearch) m_AttributeSearchEditor.getValue());
+          cmdClassifier =   cls.getClass().getName() + " " 
+                          + Utils.joinOptions(cls.getOptions());
+          
 	  AttributeSelection eval = null;
 
 	  try {
@@ -686,7 +684,8 @@ public class AttributeSelectionPanel
 	    // Output some header information
 	    m_Log.logMessage("Started " + ename);
 	    m_Log.logMessage("Command: " + cmd);
-	    m_Log.logMessage("Filter command: " + cmdFilter);
+            m_Log.logMessage("Filter command: " + cmdFilter);
+            m_Log.logMessage("Meta-classifier command: " + cmdClassifier);
 	    if (m_Log instanceof TaskLogger) {
 	      ((TaskLogger)m_Log).taskStarted();
 	    }
