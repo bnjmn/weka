@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -595,6 +595,7 @@ public class TechnicalInformation {
     Field		field;
     Vector		list;
     int			i;
+    String		value;
     
     result = "@" + getType() + "{" + getID() + "";
     
@@ -610,7 +611,9 @@ public class TechnicalInformation {
       field = (Field) list.get(i);
       if (!exists(field))
 	continue;
-      result += ",\n   " + field + " = {" + getValue(field) +  "}";
+      value = getValue(field);
+      value = value.replaceAll("_", "\\\\_").replaceAll("\\~", "\\\\~");
+      result += ",\n   " + field + " = {" + value +  "}";
     }
     
     result += "\n}";
