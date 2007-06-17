@@ -65,7 +65,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     weka.classifiers.Sourcable
  */
 public class CheckSource
@@ -421,10 +421,15 @@ public class CheckSource
       predSource     = (Double) method.invoke(getSourceCode(), new Object[]{inst});
       
       // compare both results
-      if (numeric)
-        different = !Utils.eq(predClassifier, predSource);
-      else
-        different = ((int) predClassifier != (int) predSource);
+      if (Double.isNaN(predClassifier) && Double.isNaN(predSource)) {
+        different = false;
+      }
+      else {
+        if (numeric)
+          different = !Utils.eq(predClassifier, predSource);
+        else
+          different = ((int) predClassifier != (int) predSource);
+      }
       
       if (different) {
         result = false;
