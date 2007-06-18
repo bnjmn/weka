@@ -81,10 +81,20 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -S &lt;search method specification&gt;
+ *  Full class name of search method, followed
+ *  by its options.
+ *  eg: "weka.attributeSelection.BestFirst -D 1"
+ *  (default weka.attributeSelection.BestFirst)</pre>
+ * 
  * <pre> -X &lt;number of folds&gt;
  *  Use cross validation to evaluate features.
  *  Use number of folds = 1 for leave one out CV.
  *  (Default = leave one out CV)</pre>
+ * 
+ * <pre> -E &lt;acc | rmse | mae | auc&gt;
+ *  Performance evaluation measure to use for selecting attributes.
+ *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
  * 
  * <pre> -I
  *  Use nearest neighbour instead of global table majority.</pre>
@@ -93,10 +103,30 @@ import java.util.Vector;
  *  Display decision table rules.
  * </pre>
  * 
+ * <pre> 
+ * Options specific to search method weka.attributeSelection.BestFirst:
+ * </pre>
+ * 
+ * <pre> -P &lt;start set&gt;
+ *  Specify a starting set of attributes.
+ *  Eg. 1,3,5-7.</pre>
+ * 
+ * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
+ *  Direction of search. (default = 1).</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Number of non-improving nodes to
+ *  consider before terminating search.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Size of lookup cache for evaluated subsets.
+ *  Expressed as a multiple of the number of
+ *  attributes in the data set. (default = 1)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $ 
+ * @version $Revision: 1.43 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -833,16 +863,20 @@ public class DecisionTable
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   *  <pre> -S &lt;search method specification&gt;
+   * <pre> -S &lt;search method specification&gt;
    *  Full class name of search method, followed
    *  by its options.
    *  eg: "weka.attributeSelection.BestFirst -D 1"
    *  (default weka.attributeSelection.BestFirst)</pre>
-   *   
+   * 
    * <pre> -X &lt;number of folds&gt;
    *  Use cross validation to evaluate features.
    *  Use number of folds = 1 for leave one out CV.
    *  (Default = leave one out CV)</pre>
+   * 
+   * <pre> -E &lt;acc | rmse | mae | auc&gt;
+   *  Performance evaluation measure to use for selecting attributes.
+   *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
    * 
    * <pre> -I
    *  Use nearest neighbour instead of global table majority.</pre>
@@ -850,6 +884,26 @@ public class DecisionTable
    * <pre> -R
    *  Display decision table rules.
    * </pre>
+   * 
+   * <pre> 
+   * Options specific to search method weka.attributeSelection.BestFirst:
+   * </pre>
+   * 
+   * <pre> -P &lt;start set&gt;
+   *  Specify a starting set of attributes.
+   *  Eg. 1,3,5-7.</pre>
+   * 
+   * <pre> -D &lt;0 = backward | 1 = forward | 2 = bi-directional&gt;
+   *  Direction of search. (default = 1).</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  Number of non-improving nodes to
+   *  consider before terminating search.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Size of lookup cache for evaluated subsets.
+   *  Expressed as a multiple of the number of
+   *  attributes in the data set. (default = 1)</pre>
    * 
    <!-- options-end -->
    *
