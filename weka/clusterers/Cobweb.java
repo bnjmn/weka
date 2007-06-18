@@ -1,4 +1,4 @@
-	/*
+/*
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation; either version 2 of the License, or
@@ -101,7 +101,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @see RandomizableClusterer
  * @see Drawable
  */
