@@ -65,7 +65,7 @@ import java.util.Vector;
  *    title = {Cover trees for nearest neighbor},
  *    year = {2006},
  *    location = {Pittsburgh, Pennsylvania},
- *    HTTP = {http://hunch.net/~jl/projects/cover_tree/cover_tree.html}
+ *    HTTP = {http://hunch.net/\~jl/projects/cover_tree/cover_tree.html}
  * }
  * </pre>
  * <p/>
@@ -84,7 +84,7 @@ import java.util.Vector;
  * @author Sham Kakade (original C++ code)
  * @author John Langford (original C++ code)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz) (Java port)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CoverTree
   extends NearestNeighbourSearch
@@ -97,7 +97,7 @@ public class CoverTree
    * class representing a node of the cover tree.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   public class CoverTreeNode
     implements Serializable {
@@ -171,7 +171,7 @@ public class CoverTree
    * point p.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   private class DistanceNode {
     
@@ -662,7 +662,7 @@ public class CoverTree
    * i.e. the minimum size of the heap is k.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   protected class MyHeap {
     
@@ -866,7 +866,7 @@ public class CoverTree
    * A class for storing data about a neighboring instance.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   protected class MyHeapElement {
     
@@ -893,7 +893,7 @@ public class CoverTree
    * stores a CoverTreeNode and its distance to the current query node.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   private class d_node {
     

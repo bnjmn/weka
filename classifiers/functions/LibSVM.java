@@ -73,7 +73,7 @@ import java.util.Vector;
  *    note = {You don't need to include the WLSVM package in the CLASSPATH},
  *    title = {WLSVM},
  *    year = {2005},
- *    URL = {http://www.cs.iastate.edu/~yasser/wlsvm/}
+ *    URL = {http://www.cs.iastate.edu/\~yasser/wlsvm/}
  * }
  * 
  * &#64;misc{Chang2001,
@@ -81,7 +81,7 @@ import java.util.Vector;
  *    note = {The Weka classifier works with version 2.82 of LIBSVM},
  *    title = {LIBSVM - A Library for Support Vector Machines},
  *    year = {2001},
- *    URL = {http://www.csie.ntu.edu.tw/~cjlin/libsvm/}
+ *    URL = {http://www.csie.ntu.edu.tw/\~cjlin/libsvm/}
  * }
  * </pre>
  * <p/>
@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */

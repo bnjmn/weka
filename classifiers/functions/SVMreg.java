@@ -71,7 +71,7 @@ import java.util.Vector;
  *    booktitle = {IEEE Transactions on Neural Networks},
  *    title = {Improvements to the SMO Algorithm for SVM Regression},
  *    year = {1999},
- *    PS = {http://guppy.mpe.nus.edu.sg/~mpessk/svm/ieee_smo_reg.ps.gz}
+ *    PS = {http://guppy.mpe.nus.edu.sg/\~mpessk/svm/ieee_smo_reg.ps.gz}
  * }
  * 
  * &#64;techreport{Smola1998,
@@ -140,7 +140,8 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
  *  (default: 250007)</pre>
  * 
  * <pre> -E &lt;num&gt;
@@ -154,7 +155,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SVMreg 
   extends Classifier 
@@ -362,7 +363,8 @@ public class SVMreg
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number).
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
    *  (default: 250007)</pre>
    * 
    * <pre> -E &lt;num&gt;

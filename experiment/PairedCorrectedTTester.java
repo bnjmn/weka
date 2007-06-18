@@ -58,7 +58,7 @@ import java.util.Enumeration;
  *    journal = {Machine Learning},
  *    title = {Inference for the Generalization Error},
  *    year = {2001},
- *    PDF = {http://www.iro.umontreal.ca/~lisa/bib/pub_subject/comparative/pointeurs/nadeau_MLJ1597.pdf}
+ *    PDF = {http://www.iro.umontreal.ca/\~lisa/bib/pub_subject/comparative/pointeurs/nadeau_MLJ1597.pdf}
  * }
  * </pre>
  * <p/>
@@ -107,7 +107,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class PairedCorrectedTTester 
   extends PairedTTester

@@ -65,7 +65,7 @@ import java.util.Vector;
  *    publisher = {Morgan Kaufmann},
  *    title = {Generating Accurate Rule Sets Without Global Optimization},
  *    year = {1998},
- *    PS = {http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz}
+ *    PS = {http://www.cs.waikato.ac.nz/\~eibe/pubs/ML98-57.ps.gz}
  * }
  * </pre>
  * <p/>
@@ -102,7 +102,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PART 
   extends Classifier 

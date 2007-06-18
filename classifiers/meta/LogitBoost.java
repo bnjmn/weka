@@ -62,7 +62,7 @@ import java.util.Vector;
  *    author = {J. Friedman and T. Hastie and R. Tibshirani},
  *    title = {Additive Logistic Regression: a Statistical View of Boosting},
  *    year = {1998},
- *    PS = {http://www-stat.stanford.edu/~jhf/ftp/boost.ps}
+ *    PS = {http://www-stat.stanford.edu/\~jhf/ftp/boost.ps}
  * }
  * </pre>
  * <p/>
@@ -124,7 +124,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $ 
+ * @version $Revision: 1.41 $ 
  */
 public class LogitBoost 
   extends RandomizableIteratedSingleClassifierEnhancer

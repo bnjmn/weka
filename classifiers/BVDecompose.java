@@ -59,7 +59,7 @@ import java.util.Vector;
  *    publisher = {Morgan Kaufmann},
  *    title = {Bias Plus Variance Decomposition for Zero-One Loss Functions},
  *    year = {1996},
- *    PS = {http://robotics.stanford.edu/~ronnyk/biasVar.ps}
+ *    PS = {http://robotics.stanford.edu/\~ronnyk/biasVar.ps}
  * }
  * </pre>
  * <p/>
@@ -106,7 +106,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class BVDecompose
   implements OptionHandler, TechnicalInformationHandler {
@@ -706,4 +706,3 @@ public class BVDecompose
     }
   }
 }
-

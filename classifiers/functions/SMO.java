@@ -86,9 +86,9 @@ import java.util.Vector;
  *    publisher = {MIT Press},
  *    title = {Machines using Sequential Minimal Optimization},
  *    year = {1998},
- *    URL = {http://research.microsoft.com/~jplatt/smo.html},
- *    PS = {http://research.microsoft.com/~jplatt/smo-book.ps.gz},
- *    PDF = {http://research.microsoft.com/~jplatt/smo-book.pdf}
+ *    URL = {http://research.microsoft.com/\~jplatt/smo.html},
+ *    PS = {http://research.microsoft.com/\~jplatt/smo-book.ps.gz},
+ *    PDF = {http://research.microsoft.com/\~jplatt/smo-book.pdf}
  * }
  * 
  * &#64;article{Keerthi2001,
@@ -99,7 +99,7 @@ import java.util.Vector;
  *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
  *    volume = {13},
  *    year = {2001},
- *    PS = {http://guppy.mpe.nus.edu.sg/~mpessk/svm/smo_mod_nc.ps.gz}
+ *    PS = {http://guppy.mpe.nus.edu.sg/\~mpessk/svm/smo_mod_nc.ps.gz}
  * }
  * 
  * &#64;inproceedings{Hastie1998,
@@ -110,7 +110,7 @@ import java.util.Vector;
  *    title = {Classification by Pairwise Coupling},
  *    volume = {10},
  *    year = {1998},
- *    PS = {http://www-stat.stanford.edu/~hastie/Papers/2class.ps}
+ *    PS = {http://www-stat.stanford.edu/\~hastie/Papers/2class.ps}
  * }
  * </pre>
  * <p/>
@@ -171,7 +171,8 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
  *  (default: 250007)</pre>
  * 
  * <pre> -E &lt;num&gt;
@@ -187,7 +188,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.64 $
+ * @version $Revision: 1.65 $
  */
 public class SMO 
   extends Classifier 
@@ -1751,7 +1752,8 @@ public class SMO
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number).
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
    *  (default: 250007)</pre>
    * 
    * <pre> -E &lt;num&gt;
