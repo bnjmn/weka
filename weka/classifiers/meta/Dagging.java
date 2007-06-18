@@ -144,7 +144,8 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
  *  (default: 250007)</pre>
  * 
  * <pre> -E &lt;num&gt;
@@ -161,7 +162,7 @@ import java.util.Vector;
  *
  * @author Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see       Vote
  */
 public class Dagging
@@ -349,7 +350,8 @@ public class Dagging
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number).
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
    *  (default: 250007)</pre>
    * 
    * <pre> -E &lt;num&gt;
@@ -563,4 +565,3 @@ public class Dagging
     runClassifier(new Dagging(), args);
   }
 }
-
