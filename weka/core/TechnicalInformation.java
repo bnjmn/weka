@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation {
@@ -612,7 +612,7 @@ public class TechnicalInformation {
       if (!exists(field))
 	continue;
       value = getValue(field);
-      value = value.replaceAll("_", "\\\\_").replaceAll("\\~", "\\\\~");
+      value = value.replaceAll("\\~", "\\\\~");
       result += ",\n   " + field + " = {" + value +  "}";
     }
     
