@@ -81,7 +81,7 @@ import java.util.Vector;
  *    institution = {Monash University},
  *    title = {Estimating bias and variance from data},
  *    year = {2002},
- *    PDF = {http://www.csse.monash.edu.au/~webb/Files/WebbConilione04.pdf}
+ *    PDF = {http://www.csse.monash.edu.au/\~webb/Files/WebbConilione04.pdf}
  * }
  * 
  * &#64;inproceedings{Kohavi1996,
@@ -92,7 +92,7 @@ import java.util.Vector;
  *    publisher = {Morgan Kaufmann},
  *    title = {Bias Plus Variance Decomposition for Zero-One Loss Functions},
  *    year = {1996},
- *    PS = {http://robotics.stanford.edu/~ronnyk/biasVar.ps}
+ *    PS = {http://robotics.stanford.edu/\~ronnyk/biasVar.ps}
  * }
  * 
  * &#64;article{Webb2000,
@@ -151,7 +151,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-learner. <p>
  *
  * @author Paul Conilione (paulc4321@yahoo.com.au)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class BVDecomposeSegCVSub
     implements OptionHandler, TechnicalInformationHandler {
@@ -1105,4 +1105,3 @@ public class BVDecomposeSegCVSub
         }
     }
 }
-

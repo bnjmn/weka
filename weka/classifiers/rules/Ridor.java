@@ -68,7 +68,7 @@ import java.util.Vector;
  *    title = {Induction of Ripple-Down Rules Applied to Modeling Large Databases},
  *    volume = {5},
  *    year = {1995},
- *    PDF = {http://pages.cpsc.ucalgary.ca/~gaines/reports/ML/JIIS95/JIIS95.pdf}
+ *    PDF = {http://pages.cpsc.ucalgary.ca/\~gaines/reports/ML/JIIS95/JIIS95.pdf}
  * }
  * </pre>
  * <p/>
@@ -118,7 +118,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
  */
 public class Ridor 
   extends Classifier

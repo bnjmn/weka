@@ -60,7 +60,7 @@ import java.util.Vector;
  *    institution = {Stanford University},
  *    title = {Stochastic Gradient Boosting},
  *    year = {1999},
- *    PS = {http://www-stat.stanford.edu/~jhf/ftp/stobst.ps}
+ *    PS = {http://www-stat.stanford.edu/\~jhf/ftp/stobst.ps}
  * }
  * </pre>
  * <p/>
@@ -96,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class AdditiveRegression 
   extends IteratedSingleClassifierEnhancer 

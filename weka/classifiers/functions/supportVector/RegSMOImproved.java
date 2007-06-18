@@ -53,7 +53,7 @@ import java.util.Vector;
  *    booktitle = {IEEE Transactions on Neural Networks},
  *    title = {Improvements to the SMO Algorithm for SVM Regression},
  *    year = {1999},
- *    PS = {http://guppy.mpe.nus.edu.sg/~mpessk/svm/ieee_smo_reg.ps.gz}
+ *    PS = {http://guppy.mpe.nus.edu.sg/\~mpessk/svm/ieee_smo_reg.ps.gz}
  * }
  * 
  * &#64;techreport{Shevade1999,
@@ -63,7 +63,7 @@ import java.util.Vector;
  *    number = {CD-99-16},
  *    title = {Improvements to the SMO Algorithm for SVM Regression},
  *    year = {1999},
- *    PS = {http://guppy.mpe.nus.edu.sg/~mpessk/svm/smoreg_mod.ps.gz}
+ *    PS = {http://guppy.mpe.nus.edu.sg/\~mpessk/svm/smoreg_mod.ps.gz}
  * }
  * </pre>
  * <p/>
@@ -95,7 +95,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RegSMOImproved
   extends RegSMO

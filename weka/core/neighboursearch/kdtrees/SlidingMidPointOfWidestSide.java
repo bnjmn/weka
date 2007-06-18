@@ -45,7 +45,7 @@ import weka.core.TechnicalInformation.Type;
  *    organization = {Department of Computer Science, University of Maryland},
  *    title = {ANN Programming Manual},
  *    year = {2006},
- *    HTTP = {Available from http://www.cs.umd.edu/~mount/ANN/}
+ *    HTTP = {Available from http://www.cs.umd.edu/\~mount/ANN/}
  * }
  * </pre>
  * <p/>
@@ -55,7 +55,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author  Ashraf M. Kibriya (amk14@waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SlidingMidPointOfWidestSide
   extends KDTreeNodeSplitter 

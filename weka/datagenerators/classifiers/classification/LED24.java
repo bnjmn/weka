@@ -61,7 +61,7 @@ import java.util.Vector;
  *    title = {Classification and Regression Trees},
  *    year = {1984},
  *    ISBN = {0412048418},
- *    URL = {http://www.ics.uci.edu/~mlearn/databases/led-display-creator/}
+ *    URL = {http://www.ics.uci.edu/\~mlearn/databases/led-display-creator/}
  * }
  * </pre>
  * <p/>
@@ -96,7 +96,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class LED24

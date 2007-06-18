@@ -60,7 +60,7 @@ import org.w3c.dom.NodeList;
  *    author = {Fabio Cozman and Marek Druzdzel and Daniel Garcia},
  *    title = {XML BIF version 0.3},
  *    year = {1998},
- *    URL = {http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/}
+ *    URL = {http://www-2.cs.cmu.edu/\~fgcozman/Research/InterchangeFormat/}
  * }
  * </pre>
  * <p/>
@@ -88,7 +88,7 @@ import org.w3c.dom.NodeList;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class BIFReader 
     extends BayesNet

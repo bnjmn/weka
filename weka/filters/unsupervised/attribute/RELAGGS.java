@@ -62,7 +62,7 @@ import java.util.Vector;
  *    editor = {T. Horvath and A. Yamamoto},
  *    title = {Facets of Aggregation Approaches to Propositionalization},
  *    year = {2003},
- *    PDF = {http://kd.cs.uni-magdeburg.de/~krogel/papers/aggs.pdf}
+ *    PDF = {http://kd.cs.uni-magdeburg.de/\~krogel/papers/aggs.pdf}
  * }
  * </pre>
  * <p/>
@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class RELAGGS
   extends SimpleBatchFilter

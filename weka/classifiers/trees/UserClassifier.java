@@ -80,7 +80,7 @@ import javax.swing.JTabbedPane;
  *    title = {Interactive machine learning: letting users build classifiers},
  *    volume = {55},
  *    year = {2001},
- *    PS = {http://www.cs.waikato.ac.nz/~ml/publications/2000/00MW-etal-Interactive-ML.ps}
+ *    PS = {http://www.cs.waikato.ac.nz/\~ml/publications/2000/00MW-etal-Interactive-ML.ps}
  * }
  * </pre>
  * <p/>
@@ -96,7 +96,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  */
 public class UserClassifier 
   extends Classifier 
