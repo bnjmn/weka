@@ -55,6 +55,10 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
  * <pre> -B &lt;classifier specification&gt;
  *  Full class name of classifier to include, followed
  *  by scheme options. May be specified multiple times.
@@ -96,7 +100,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class Vote
   extends RandomizableMultipleClassifiersCombiner
@@ -197,6 +201,10 @@ public class Vote
    *
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
    * 
    * <pre> -B &lt;classifier specification&gt;
    *  Full class name of classifier to include, followed
