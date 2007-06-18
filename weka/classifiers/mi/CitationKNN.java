@@ -78,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public class CitationKNN 
   extends Classifier 
@@ -868,34 +868,39 @@ public class CitationKNN
     result.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
     result.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
 
-    // internal representation
-    result.append("Citers....: " + Utils.arrayToString(m_Citers) + "\n");
-    
-    result.append("References: " + Utils.arrayToString(m_References) + "\n");
-    
-    result.append("Min.......: ");
-    for (i = 0; i < m_Min.length; i++) {
-      if (i > 0)
-	result.append(",");
-      result.append(Utils.doubleToString(m_Min[i], 3));
+    if (m_Citers == null) {
+      result.append("no model built yet!\n");
     }
-    result.append("\n");
-    
-    result.append("Max.......: ");
-    for (i = 0; i < m_Max.length; i++) {
-      if (i > 0)
-	result.append(",");
-      result.append(Utils.doubleToString(m_Max[i], 3));
+    else {
+      // internal representation
+      result.append("Citers....: " + Utils.arrayToString(m_Citers) + "\n");
+
+      result.append("References: " + Utils.arrayToString(m_References) + "\n");
+
+      result.append("Min.......: ");
+      for (i = 0; i < m_Min.length; i++) {
+	if (i > 0)
+	  result.append(",");
+	result.append(Utils.doubleToString(m_Min[i], 3));
+      }
+      result.append("\n");
+
+      result.append("Max.......: ");
+      for (i = 0; i < m_Max.length; i++) {
+	if (i > 0)
+	  result.append(",");
+	result.append(Utils.doubleToString(m_Max[i], 3));
+      }
+      result.append("\n");
+
+      result.append("Diffs.....: ");
+      for (i = 0; i < m_Diffs.length; i++) {
+	if (i > 0)
+	  result.append(",");
+	result.append(Utils.doubleToString(m_Diffs[i], 3));
+      }
+      result.append("\n");
     }
-    result.append("\n");
-    
-    result.append("Diffs.....: ");
-    for (i = 0; i < m_Diffs.length; i++) {
-      if (i > 0)
-	result.append(",");
-      result.append(Utils.doubleToString(m_Diffs[i], 3));
-    }
-    result.append("\n");
     
     return result.toString();
   }
