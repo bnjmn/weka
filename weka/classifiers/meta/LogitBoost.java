@@ -124,7 +124,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $ 
+ * @version $Revision: 1.42 $ 
  */
 public class LogitBoost 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -1056,7 +1056,7 @@ public class LogitBoost
 			  + " is not Sourcable");
     }
 
-    StringBuffer text = new StringBuffer("public class ");
+    StringBuffer text = new StringBuffer("class ");
     text.append(className).append(" {\n\n");
     text.append("  private static double RtoP(double []R, int j) {\n"+
 		"    double Rcenter = 0;\n"+

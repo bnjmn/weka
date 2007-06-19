@@ -50,7 +50,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class ZeroR 
   extends Classifier 
@@ -209,7 +209,7 @@ public class ZeroR
     
     result = new StringBuffer();
     
-    result.append("public class " + className + " {\n");
+    result.append("class " + className + " {\n");
     result.append("  public static double classify(Object[] i) {\n");
     if (m_Counts != null)
       result.append("    // always predicts label '" + m_Class.value((int) m_ClassValue) + "'\n");

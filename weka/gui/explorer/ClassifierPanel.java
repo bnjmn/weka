@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.106 $
+ * @version $Revision: 1.107 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1363,7 +1363,9 @@ public class ClassifierPanel
                  && m_OutputSourceCode.isSelected()) {
               outBuff.append("=== Source code ===\n\n");
               outBuff.append(
-                ((Sourcable) fullClassifier).toSource(m_SourceCodeClass.getText()));
+                Evaluation.wekaStaticWrapper(
+                    ((Sourcable) fullClassifier),
+                    m_SourceCodeClass.getText()));
             }
 
 	    m_History.updateResult(name);
