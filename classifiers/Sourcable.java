@@ -26,7 +26,7 @@ package weka.classifiers;
  * Interface for classifiers that can be converted to Java source.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public interface Sourcable {
 
@@ -44,7 +44,7 @@ public interface Sourcable {
    *
    * @param className the name that should be given to the source class.
    * @return the object source described by a string
-   * @exception Exception if the souce can't be computed
+   * @throws Exception if the source can't be computed
    */
   String toSource(String className) throws Exception;
 }
