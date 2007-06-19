@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
 /** 
@@ -48,11 +49,11 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ReplaceMissingValues 
   extends PotentialClassIgnorer
-  implements UnsupervisedFilter {
+  implements UnsupervisedFilter, Sourcable {
 
   /** for serialization */
   static final long serialVersionUID = 8349568310991609867L;
@@ -267,6 +268,127 @@ public class ReplaceMissingValues
     } 
     inst.setDataset(instance.dataset());
     push(inst);
+  }
+  
+  /**
+   * Returns a string that describes the filter as source. The
+   * filter will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain two methods with these signatures:
+   * <pre><code>
+   * // converts one row
+   * public static Object[] filter(Object[] i);
+   * // converts a full dataset (first dimension is row index)
+   * public static Object[][] filter(Object[][] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty.
+   *
+   * @param className   the name that should be given to the source class.
+   * @param data	the dataset used for initializing the filter
+   * @return            the object source described by a string
+   * @throws Exception  if the source can't be computed
+   */
+  public String toSource(String className, Instances data) throws Exception {
+    StringBuffer        result;
+    boolean[]		numeric;
+    boolean[]		nominal;
+    String[]		modes;
+    double[]		means;
+    int			i;
+    
+    result = new StringBuffer();
+    
+    // determine what attributes were processed
+    numeric = new boolean[data.numAttributes()];
+    nominal = new boolean[data.numAttributes()];
+    modes   = new String[data.numAttributes()];
+    means   = new double[data.numAttributes()];
+    for (i = 0; i < data.numAttributes(); i++) {
+      numeric[i] = (data.attribute(i).isNumeric() && (i != data.classIndex()));
+      nominal[i] = (data.attribute(i).isNominal() && (i != data.classIndex()));
+      
+      if (numeric[i])
+	means[i] = m_ModesAndMeans[i];
+      else
+	means[i] = Double.NaN;
+
+      if (nominal[i])
+	modes[i] = data.attribute(i).value((int) m_ModesAndMeans[i]);
+      else
+	modes[i] = null;
+    }
+    
+    result.append("public class " + className + " {\n");
+    result.append("\n");
+    result.append("  /** lists which numeric attributes will be processed */\n");
+    result.append("  protected final static boolean[] NUMERIC = new boolean[]{" + Utils.arrayToString(numeric) + "};\n");
+    result.append("\n");
+    result.append("  /** lists which nominal attributes will be processed */\n");
+    result.append("  protected final static boolean[] NOMINAL = new boolean[]{" + Utils.arrayToString(nominal) + "};\n");
+    result.append("\n");
+    result.append("  /** the means */\n");
+    result.append("  protected final static double[] MEANS = new double[]{" + Utils.arrayToString(means).replaceAll("NaN", "Double.NaN") + "};\n");
+    result.append("\n");
+    result.append("  /** the modes */\n");
+    result.append("  protected final static String[] MODES = new String[]{");
+    for (i = 0; i < modes.length; i++) {
+      if (i > 0)
+	result.append(",");
+      if (nominal[i])
+	result.append("\"" + Utils.quote(modes[i]) + "\"");
+      else
+	result.append(modes[i]);
+    }
+    result.append("};\n");
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * filters a single row\n");
+    result.append("   * \n");
+    result.append("   * @param i the row to process\n");
+    result.append("   * @return the processed row\n");
+    result.append("   */\n");
+    result.append("  public static Object[] filter(Object[] i) {\n");
+    result.append("    Object[] result;\n");
+    result.append("\n");
+    result.append("    result = new Object[i.length];\n");
+    result.append("    for (int n = 0; n < i.length; n++) {\n");
+    result.append("      if (i[n] == null) {\n");
+    result.append("        if (NUMERIC[n])\n");
+    result.append("          result[n] = MEANS[n];\n");
+    result.append("        else if (NOMINAL[n])\n");
+    result.append("          result[n] = MODES[n];\n");
+    result.append("        else\n");
+    result.append("          result[n] = i[n];\n");
+    result.append("      }\n");
+    result.append("      else {\n");
+    result.append("        result[n] = i[n];\n");
+    result.append("      }\n");
+    result.append("    }\n");
+    result.append("\n");
+    result.append("    return result;\n");
+    result.append("  }\n");
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * filters multiple rows\n");
+    result.append("   * \n");
+    result.append("   * @param i the rows to process\n");
+    result.append("   * @return the processed rows\n");
+    result.append("   */\n");
+    result.append("  public static Object[] filter(Object[][] i) {\n");
+    result.append("    Object[][] result;\n");
+    result.append("\n");
+    result.append("    result = new Object[i.length][];\n");
+    result.append("    for (int n = 0; n < i.length; n++) {\n");
+    result.append("      result[n] = filter(i[n]);\n");
+    result.append("    }\n");
+    result.append("\n");
+    result.append("    return result;\n");
+    result.append("  }\n");
+    result.append("}\n");
+    
+    return result.toString();
   }
 
   /**

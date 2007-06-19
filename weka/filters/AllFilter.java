@@ -33,9 +33,11 @@ import weka.core.Capabilities.Capability;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class AllFilter extends Filter {
+public class AllFilter
+  extends Filter
+  implements Sourcable {
 
   /** for serialization */
   static final long serialVersionUID = 5022109283147503266L;
@@ -111,6 +113,57 @@ public class AllFilter extends Filter {
     }
     push((Instance)instance.copy());
     return true;
+  }
+  
+  /**
+   * Returns a string that describes the filter as source. The
+   * filter will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain two methods with these signatures:
+   * <pre><code>
+   * // converts one row
+   * public static Object[] filter(Object[] i);
+   * // converts a full dataset (first dimension is row index)
+   * public static Object[][] filter(Object[][] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty.
+   *
+   * @param className   the name that should be given to the source class.
+   * @param data	the dataset used for initializing the filter
+   * @return            the object source described by a string
+   * @throws Exception  if the source can't be computed
+   */
+  public String toSource(String className, Instances data) throws Exception {
+    StringBuffer        result;
+    
+    result = new StringBuffer();
+    
+    result.append("public class " + className + " {\n");
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * filters a single row\n");
+    result.append("   * \n");
+    result.append("   * @param i the row to process\n");
+    result.append("   * @return the processed row\n");
+    result.append("   */\n");
+    result.append("  public static Object[] filter(Object[] i) {\n");
+    result.append("    return i;\n");
+    result.append("  }\n");
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * filters multiple rows\n");
+    result.append("   * \n");
+    result.append("   * @param i the rows to process\n");
+    result.append("   * @return the processed rows\n");
+    result.append("   */\n");
+    result.append("  public static Object[] filter(Object[][] i) {\n");
+    result.append("    return i;\n");
+    result.append("  }\n");
+    result.append("}\n");
+    
+    return result.toString();
   }
 
   /**

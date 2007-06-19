@@ -26,7 +26,9 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
 /** 
@@ -46,11 +48,11 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
-  implements UnsupervisedFilter {
+  implements UnsupervisedFilter, Sourcable {
   
   /** for serialization */
   static final long serialVersionUID = -8158531150984362898L;
@@ -260,6 +262,96 @@ public class Normalize
     }
     inst.setDataset(instance.dataset());
     push(inst);
+  }
+  
+  /**
+   * Returns a string that describes the filter as source. The
+   * filter will be contained in a class with the given name (there may
+   * be auxiliary classes),
+   * and will contain two methods with these signatures:
+   * <pre><code>
+   * // converts one row
+   * public static Object[] filter(Object[] i);
+   * // converts a full dataset (first dimension is row index)
+   * public static Object[][] filter(Object[][] i);
+   * </code></pre>
+   * where the array <code>i</code> contains elements that are either
+   * Double, String, with missing values represented as null. The generated
+   * code is public domain and comes with no warranty.
+   *
+   * @param className   the name that should be given to the source class.
+   * @param data	the dataset used for initializing the filter
+   * @return            the object source described by a string
+   * @throws Exception  if the source can't be computed
+   */
+  public String toSource(String className, Instances data) throws Exception {
+    StringBuffer        result;
+    boolean[]		process;
+    int			i;
+    
+    result = new StringBuffer();
+    
+    // determine what attributes were processed
+    process = new boolean[data.numAttributes()];
+    for (i = 0; i < data.numAttributes(); i++) {
+      process[i] = (data.attribute(i).isNumeric() && (i != data.classIndex()));
+    }
+    
+    result.append("public class " + className + " {\n");
+    result.append("\n");
+    result.append("  /** lists which attributes will be processed */\n");
+    result.append("  protected final static boolean[] PROCESS = new boolean[]{" + Utils.arrayToString(process) + "};\n");
+    result.append("\n");
+    result.append("  /** the minimum values for numeric values */\n");
+    result.append("  protected final static double[] MIN = new double[]{" + Utils.arrayToString(m_MinArray).replaceAll("NaN", "Double.NaN") + "};\n");
+    result.append("\n");
+    result.append("  /** the maximum values for numeric values */\n");
+    result.append("  protected final static double[] MAX = new double[]{" + Utils.arrayToString(m_MaxArray) + "};\n");
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * filters a single row\n");
+    result.append("   * \n");
+    result.append("   * @param i the row to process\n");
+    result.append("   * @return the processed row\n");
+    result.append("   */\n");
+    result.append("  public static Object[] filter(Object[] i) {\n");
+    result.append("    Object[] result;\n");
+    result.append("\n");
+    result.append("    result = new Object[i.length];\n");
+    result.append("    for (int n = 0; n < i.length; n++) {\n");
+    result.append("      if (PROCESS[n] && (i[n] != null)) {\n");
+    result.append("        if (Double.isNaN(MIN[n]) || (MIN[n] == MAX[n]))\n");
+    result.append("          result[n] = 0;\n");
+    result.append("        else\n");
+    result.append("          result[n] = (((Double) i[n]) - MIN[n]) / (MAX[n] - MIN[n]);\n");
+    result.append("      }\n");
+    result.append("      else {\n");
+    result.append("        result[n] = i[n];\n");
+    result.append("      }\n");
+    result.append("    }\n");
+    result.append("\n");
+    result.append("    return result;\n");
+    result.append("  }\n");
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * filters multiple rows\n");
+    result.append("   * \n");
+    result.append("   * @param i the rows to process\n");
+    result.append("   * @return the processed rows\n");
+    result.append("   */\n");
+    result.append("  public static Object[] filter(Object[][] i) {\n");
+    result.append("    Object[][] result;\n");
+    result.append("\n");
+    result.append("    result = new Object[i.length][];\n");
+    result.append("    for (int n = 0; n < i.length; n++) {\n");
+    result.append("      result[n] = filter(i[n]);\n");
+    result.append("    }\n");
+    result.append("\n");
+    result.append("    return result;\n");
+    result.append("  }\n");
+    result.append("}\n");
+    
+    return result.toString();
   }
 
   /**
