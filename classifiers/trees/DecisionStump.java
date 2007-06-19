@@ -53,7 +53,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class DecisionStump 
   extends Classifier 
@@ -231,7 +231,7 @@ public class DecisionStump
    */
   public String toSource(String className) throws Exception {
 
-    StringBuffer text = new StringBuffer("public class ");
+    StringBuffer text = new StringBuffer("class ");
     Attribute c = m_Instances.classAttribute();
     text.append(className)
       .append(" {\n"

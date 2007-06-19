@@ -28,7 +28,6 @@ import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -50,10 +49,6 @@ import java.util.Vector;
  * <pre> -S &lt;classname&gt;
  *  The classname of the generated source code.</pre>
  * 
- * <pre> -M &lt;methodname&gt;
- *  The name of the method in the generated source used for predictions.
- *  (default: classify)</pre>
- * 
  * <pre> -t &lt;file&gt;
  *  The training set with which the source code was generated.</pre>
  * 
@@ -64,8 +59,10 @@ import java.util.Vector;
  * 
  <!-- options-end -->
  *
+ * Options after -- are passed to the designated classifier (specified with -W).
+ *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see     weka.classifiers.Sourcable
  */
 public class CheckSource
@@ -75,10 +72,7 @@ public class CheckSource
   protected Classifier m_Classifier = null;
   
   /** the generated source code */
-  protected Object m_SourceCode = null;
-  
-  /** the method name in the generated source code used for classification */
-  protected String m_MethodName = "classify";
+  protected Classifier m_SourceCode = null;
   
   /** the dataset to use for testing */
   protected File m_Dataset = null;
@@ -102,12 +96,6 @@ public class CheckSource
     result.addElement(new Option(
         "\tThe classname of the generated source code.",
         "S", 1, "-S <classname>"));
-    
-    result.addElement(new Option(
-        "\tThe name of the method in the generated source used for"
-        + "\tpredictions.\n"
-        + "\t(default: classify)",
-        "M", 1, "-M <methodname>"));
     
     result.addElement(new Option(
         "\tThe training set with which the source code was generated.",
@@ -135,10 +123,6 @@ public class CheckSource
    * <pre> -S &lt;classname&gt;
    *  The classname of the generated source code.</pre>
    * 
-   * <pre> -M &lt;methodname&gt;
-   *  The name of the method in the generated source used for predictions.
-   *  (default: classify)</pre>
-   * 
    * <pre> -t &lt;file&gt;
    *  The training set with which the source code was generated.</pre>
    * 
@@ -149,7 +133,8 @@ public class CheckSource
    * 
    <!-- options-end -->
    *
-   * Options after -- are passed to the designated classifier.<p>
+   * Options after -- are passed to the designated classifier (specified with 
+   * -W).
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -177,18 +162,14 @@ public class CheckSource
       spec = Utils.splitOptions(tmpStr);
       if (spec.length != 1)
         throw new IllegalArgumentException("Invalid source code specification string");
-      setSourceCode(Class.forName(spec[0]).newInstance());
+      classname = spec[0];
+      spec[0]   = "";
+      setSourceCode((Classifier) Utils.forName(Classifier.class, classname, spec));
     }
     else {
       throw new Exception("No source code (classname) provided!");
     }
     
-    tmpStr = Utils.getOption('M', options);
-    if (tmpStr.length() != 0)
-      setMethodName(tmpStr);
-    else
-      setMethodName("classify");
-
     tmpStr = Utils.getOption('t', options);
     if (tmpStr.length() != 0)
       setDataset(new File(tmpStr));
@@ -230,9 +211,6 @@ public class CheckSource
       result.add(getSourceCode().getClass().getName());
     }
 
-    result.add("-M");
-    result.add(getMethodName());
-
     if (getDataset() != null) {
       result.add("-t");
       result.add(m_Dataset.getAbsolutePath());
@@ -272,7 +250,7 @@ public class CheckSource
    * 
    * @param value       the class to test
    */
-  public void setSourceCode(Object value) {
+  public void setSourceCode(Classifier value) {
     m_SourceCode = value;
   }
   
@@ -281,28 +259,8 @@ public class CheckSource
    * 
    * @return            the currently set class, can be null.
    */
-  public Object getSourceCode() {
+  public Classifier getSourceCode() {
     return m_SourceCode;
-  }
-
-  /**
-   * Sets the name of the method used in the generated source to perform
-   * the predictions.
-   * 
-   * @param value       the method name
-   */
-  public void setMethodName(String value) {
-    m_MethodName = value;
-  }
-  
-  /**
-   * Gets the name of the method used in the generated source for performing
-   * the predictions.
-   * 
-   * @return            the method name
-   */
-  public String getMethodName() {
-    return m_MethodName;
   }
   
   /**
@@ -354,17 +312,14 @@ public class CheckSource
   public boolean execute() throws Exception {
     boolean     result;
     Classifier  cls;
+    Classifier	code;
     int         i;
-    int         n;
-    int         m;
     Instances   data;
     DataSource  source;
     boolean     numeric;
     boolean     different;
-    Object[]    inst;
     double      predClassifier;
     double      predSource;
-    Method      method;
     
     result = true;
     
@@ -392,33 +347,13 @@ public class CheckSource
     cls = Classifier.makeCopy(getClassifier());
     cls.buildClassifier(data);
     
-    // determine the method to call
-    method = getSourceCode().getClass().getMethod(
-        getMethodName(), new Class[]{Object[].class});
+    code = getSourceCode();
     
     // compare predictions
-    inst = new Object[data.numAttributes() - 1];
     for (i = 0; i < data.numInstances(); i++) {
-      // generate data for source code
-      m = 0;
-      for (n = 0 ; n < data.numAttributes(); n++) {
-        if (n == data.classIndex()) {
-          continue;
-        }
-        else {
-          if (data.instance(i).isMissing(n))
-            inst[m] = null;
-          else if (data.attribute(n).isNumeric())
-            inst[m] = data.instance(i).value(n);
-          else
-            inst[m] = data.instance(i).stringValue(n);
-          m++;
-        }
-      }
-      
       // perform predictions
       predClassifier = cls.classifyInstance(data.instance(i));
-      predSource     = (Double) method.invoke(getSourceCode(), new Object[]{inst});
+      predSource     = code.classifyInstance(data.instance(i));
       
       // compare both results
       if (Double.isNaN(predClassifier) && Double.isNaN(predSource)) {

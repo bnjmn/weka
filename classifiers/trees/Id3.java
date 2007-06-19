@@ -72,7 +72,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision: 1.22 $ 
  */
 public class Id3 
   extends Classifier 
@@ -462,7 +462,7 @@ public class Id3
     
     result = new StringBuffer();
 
-    result.append("public class " + className + " {\n");
+    result.append("class " + className + " {\n");
     result.append("  public static double classify(Object[] i) {\n");
     id = 0;
     result.append("    return node" + id + "(i);\n");

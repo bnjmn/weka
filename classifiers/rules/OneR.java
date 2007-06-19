@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
 */
 public class OneR 
   extends Classifier 
@@ -557,7 +557,6 @@ public class OneR
   public String toSource(String className) throws Exception {
     StringBuffer        result;
     int                 i;
-    int                 index;
     
     result = new StringBuffer();
     
@@ -565,18 +564,13 @@ public class OneR
       result.append(((ZeroR) m_ZeroR).toSource(className));
     }
     else {
-      // determine index of attribute
-      index = m_rule.m_attr.index();
-      if (index > m_rule.m_class.index())
-        index--;
-      
-      result.append("public class " + className + " {\n");
+      result.append("class " + className + " {\n");
       result.append("  public static double classify(Object[] i) {\n");
       result.append("    // chosen attribute: " + m_rule.m_attr.name() + " (" + m_rule.m_attr.index() + ")\n");
       result.append("\n");
       // missing values
       result.append("    // missing value?\n");
-      result.append("    if (i[" + index + "] == null)\n");
+      result.append("    if (i[" + m_rule.m_attr.index() + "] == null)\n");
       if (m_rule.m_missingValueClass != -1)
         result.append("      return Double.NaN;\n");
       else
@@ -599,14 +593,14 @@ public class OneR
           result.append("    ");
           if (i > 0)
             result.append("else ");
-          result.append("if (((String) i[" + index + "]).equals(\"" + m_rule.m_attr.value(i) + "\"))\n");
+          result.append("if (((String) i[" + m_rule.m_attr.index() + "]).equals(\"" + m_rule.m_attr.value(i) + "\"))\n");
           result.append("      v = " + i + "; // " + m_rule.m_class.value(m_rule.m_classifications[i]) + "\n");
         }
       }
       else {
         result.append("    double[] breakpoints = new double[]{" + Utils.arrayToString(m_rule.m_breakpoints) + "};\n");
         result.append("    while (v < breakpoints.length && \n");
-        result.append("           ((Double) i[" + index + "]) >= breakpoints[(int) v]) {\n");
+        result.append("           ((Double) i[" + m_rule.m_attr.index() + "]) >= breakpoints[(int) v]) {\n");
         result.append("      v++;\n");
         result.append("    }\n");
       }
