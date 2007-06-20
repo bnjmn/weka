@@ -73,7 +73,7 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler {
@@ -830,7 +830,7 @@ public abstract class Filter
       else if (output.attribute(i).isNominal()) {
 	result.append("    attValues = new FastVector();\n");
 	for (n = 0; n < output.attribute(i).numValues(); n++) {
-	  result.append("    attValues.addElement(\"" + Utils.quote(output.attribute(i).value(n)) + "\");\n");
+	  result.append("    attValues.addElement(\"" + output.attribute(i).value(n) + "\");\n");
 	}
 	result.append("    atts.addElement(new Attribute(\"" 
 	    + output.attribute(i).name() + "\", attValues));\n");
