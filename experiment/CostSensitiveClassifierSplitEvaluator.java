@@ -89,7 +89,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class CostSensitiveClassifierSplitEvaluator 
   extends ClassifierSplitEvaluator { 
@@ -104,7 +104,7 @@ public class CostSensitiveClassifierSplitEvaluator
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 30;
+  private static final int RESULT_SIZE = 31;
 
   /**
    * Returns a string describing this split evaluator
@@ -267,6 +267,7 @@ public class CostSensitiveClassifierSplitEvaluator
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -329,7 +330,8 @@ public class CostSensitiveClassifierSplitEvaluator
       : 0;
     String [] resultNames = new String[RESULT_SIZE+addm];
     int current = 0;
-    resultNames[current++] = "Number_of_instances";
+    resultNames[current++] = "Number_of_training_instances";
+    resultNames[current++] = "Number_of_testing_instances";
 
     // Basic performance stats - right vs wrong
     resultNames[current++] = "Number_correct";
@@ -445,6 +447,7 @@ public class CostSensitiveClassifierSplitEvaluator
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;
+    result[current++] = new Double(train.numInstances());
     result[current++] = new Double(eval.numInstances());
     
     result[current++] = new Double(eval.correct());

@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class RegressionSplitEvaluator 
   implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer {
@@ -103,7 +103,7 @@ public class RegressionSplitEvaluator
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 20;
+  private static final int RESULT_SIZE = 21;
 
   /**
    * No args constructor.
@@ -366,6 +366,7 @@ public class RegressionSplitEvaluator
     Double doub = new Double(0);
     int current = 0;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -416,7 +417,8 @@ public class RegressionSplitEvaluator
       : 0;
     String [] resultNames = new String[RESULT_SIZE+addm];
     int current = 0;
-    resultNames[current++] = "Number_of_instances";
+    resultNames[current++] = "Number_of_training_instances";
+    resultNames[current++] = "Number_of_testing_instances";
 
     // Sensitive stats - certainty of predictions
     resultNames[current++] = "Mean_absolute_error";
@@ -509,6 +511,7 @@ public class RegressionSplitEvaluator
     // The results stored are all per instance -- can be multiplied by the
     // number of instances to get absolute numbers
     int current = 0;
+    result[current++] = new Double(train.numInstances());
     result[current++] = new Double(eval.numInstances());
 
     result[current++] = new Double(eval.meanAbsoluteError());
