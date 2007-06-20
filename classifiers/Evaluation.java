@@ -173,7 +173,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.80 $
+ * @version  $Revision: 1.81 $
  */
 public class Evaluation
 implements Summarizable {
@@ -1474,7 +1474,7 @@ implements Summarizable {
     result.append("   */\n");
     result.append("  public void buildClassifier(Instances i) throws Exception {\n");
     result.append("    // can classifier handle the data?\n");
-    result.append("    getCapabilities().testWithFail(i);");
+    result.append("    getCapabilities().testWithFail(i);\n");
     result.append("  }\n");
     
     // classifyInstance
