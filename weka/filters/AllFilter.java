@@ -33,7 +33,7 @@ import weka.core.Capabilities.Capability;
  * through. Basically just for testing purposes.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AllFilter
   extends Filter
@@ -140,7 +140,7 @@ public class AllFilter
     
     result = new StringBuffer();
     
-    result.append("public class " + className + " {\n");
+    result.append("class " + className + " {\n");
     result.append("\n");
     result.append("  /**\n");
     result.append("   * filters a single row\n");
@@ -158,7 +158,7 @@ public class AllFilter
     result.append("   * @param i the rows to process\n");
     result.append("   * @return the processed rows\n");
     result.append("   */\n");
-    result.append("  public static Object[] filter(Object[][] i) {\n");
+    result.append("  public static Object[][] filter(Object[][] i) {\n");
     result.append("    return i;\n");
     result.append("  }\n");
     result.append("}\n");

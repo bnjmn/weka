@@ -49,7 +49,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class ReplaceMissingValues 
   extends PotentialClassIgnorer
@@ -320,7 +320,7 @@ public class ReplaceMissingValues
 	modes[i] = null;
     }
     
-    result.append("public class " + className + " {\n");
+    result.append("class " + className + " {\n");
     result.append("\n");
     result.append("  /** lists which numeric attributes will be processed */\n");
     result.append("  protected final static boolean[] NUMERIC = new boolean[]{" + Utils.arrayToString(numeric) + "};\n");
@@ -376,7 +376,7 @@ public class ReplaceMissingValues
     result.append("   * @param i the rows to process\n");
     result.append("   * @return the processed rows\n");
     result.append("   */\n");
-    result.append("  public static Object[] filter(Object[][] i) {\n");
+    result.append("  public static Object[][] filter(Object[][] i) {\n");
     result.append("    Object[][] result;\n");
     result.append("\n");
     result.append("    result = new Object[i.length][];\n");
