@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1294,6 +1294,70 @@ public class Capabilities
     
     // other stuff
     result.append("min # Instance: " + getMinimumNumberInstances() + "\n");
+    
+    return result.toString();
+  }
+  
+  /**
+   * turns the capabilities object into source code. The returned source code
+   * is a block that creates a Capabilities object named 'objectname' and
+   * enables all the capabilities of this Capabilities object.
+   * 
+   * @param objectname	the name of the Capabilities object being instantiated
+   * @return		the generated source code
+   */
+  public String toSource(String objectname) {
+    return toSource(objectname, 0);
+  }
+    
+  /**
+   * turns the capabilities object into source code. The returned source code
+   * is a block that creates a Capabilities object named 'objectname' and
+   * enables all the capabilities of this Capabilities object.
+   * 
+   * @param objectname	the name of the Capabilities object being instantiated
+   * @param indent	the number of blanks to indent
+   * @return		the generated source code
+   */
+  public String toSource(String objectname, int indent) {
+    StringBuffer	result;
+    String		capsName;
+    String		capName;
+    String		indentStr;
+    int			i;
+    
+    result = new StringBuffer();
+
+    capsName = Capabilities.class.getName();
+    capName  = Capabilities.Capability.class.getName().replaceAll("\\$", ".");
+    
+    indentStr = "";
+    for (i = 0; i < indent; i++)
+      indentStr += " ";
+    
+    // object name
+    result.append(indentStr + capsName + " " + objectname + " = new " + capsName + "(this);\n");
+    
+    // capabilities
+    result.append("\n");
+    for (Capability cap: Capability.values()) {
+      // capability
+      if (handles(cap))
+        result.append(
+            indentStr + objectname + ".enable(" + capName + "." + cap.name() + ");\n");
+      // dependency
+      if (hasDependency(cap))
+        result.append(
+            indentStr + objectname + ".enableDependency(" + capName + "." + cap.name() + ");\n");
+    }
+
+    // other
+    result.append("\n");
+    result.append(
+	indentStr + objectname + ".setMinimumNumberInstances(" 
+	+ getMinimumNumberInstances() + ");\n");
+
+    result.append("\n");
     
     return result.toString();
   }
