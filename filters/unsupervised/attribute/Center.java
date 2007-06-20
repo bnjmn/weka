@@ -49,7 +49,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class Center 
   extends PotentialClassIgnorer 
@@ -266,7 +266,7 @@ public class Center
       process[i] = (data.attribute(i).isNumeric() && (i != data.classIndex()));
     }
     
-    result.append("public class " + className + " {\n");
+    result.append("class " + className + " {\n");
     result.append("\n");
     result.append("  /** lists which attributes will be processed */\n");
     result.append("  protected final static boolean[] PROCESS = new boolean[]{" + Utils.arrayToString(process) + "};\n");
@@ -300,7 +300,7 @@ public class Center
     result.append("   * @param i the rows to process\n");
     result.append("   * @return the processed rows\n");
     result.append("   */\n");
-    result.append("  public static Object[] filter(Object[][] i) {\n");
+    result.append("  public static Object[][] filter(Object[][] i) {\n");
     result.append("    Object[][] result;\n");
     result.append("\n");
     result.append("    result = new Object[i.length][];\n");

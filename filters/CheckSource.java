@@ -29,7 +29,6 @@ import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -42,12 +41,29 @@ import java.util.Vector;
  * source. Use option '-h' to display all available commandline options.
  * 
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -W &lt;classname and options&gt;
+ *  The filter (incl. options) that was used to generate
+ *  the source code.</pre>
+ * 
+ * <pre> -S &lt;classname&gt;
+ *  The classname of the generated source code.</pre>
+ * 
+ * <pre> -t &lt;file&gt;
+ *  The training set with which the source code was generated.</pre>
+ * 
+ * <pre> -c &lt;index&gt;
+ *  The class index of the training set. 'first' and 'last' are
+ *  valid indices.
+ *  (default: none)</pre>
+ * 
  <!-- options-end -->
  *
  * Options after -- are passed to the designated filter.<p>
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  * @see     weka.filters.Sourcable
  */
 public class CheckSource
@@ -57,15 +73,7 @@ public class CheckSource
   protected Filter m_Filter = null;
   
   /** the generated source code */
-  protected Object m_SourceCode = null;
-  
-  /** the method name in the generated source code used for filtering a 
-   * single row */
-  protected String m_MethodNameSingle = "filter";
-  
-  /** the method name in the generated source code used for filtering
-   * multiple rows */
-  protected String m_MethodNameMultiple = "filter";
+  protected Filter m_SourceCode = null;
   
   /** the dataset to use for testing */
   protected File m_Dataset = null;
@@ -91,25 +99,13 @@ public class CheckSource
         "S", 1, "-S <classname>"));
     
     result.addElement(new Option(
-        "\tThe name of the method in the generated source used for \n"
-        + "\tfiltering a single row.\n"
-        + "\t(default: filter)",
-        "single", 1, "-single <methodname>"));
-    
-    result.addElement(new Option(
-        "\tThe name of the method in the generated source used for \n"
-        + "\tfiltering multiple rows.\n"
-        + "\t(default: filter)",
-        "multiple", 1, "-multiple <methodname>"));
-    
-    result.addElement(new Option(
         "\tThe training set with which the source code was generated.",
         "t", 1, "-t <file>"));
     
     result.addElement(new Option(
         "\tThe class index of the training set. 'first' and 'last' are\n"
         + "\tvalid indices.\n"
-        + "\t(default: last)",
+        + "\t(default: none)",
         "c", 1, "-c <index>"));
     
     return result.elements();
@@ -119,6 +115,23 @@ public class CheckSource
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -W &lt;classname and options&gt;
+   *  The filter (incl. options) that was used to generate
+   *  the source code.</pre>
+   * 
+   * <pre> -S &lt;classname&gt;
+   *  The classname of the generated source code.</pre>
+   * 
+   * <pre> -t &lt;file&gt;
+   *  The training set with which the source code was generated.</pre>
+   * 
+   * <pre> -c &lt;index&gt;
+   *  The class index of the training set. 'first' and 'last' are
+   *  valid indices.
+   *  (default: none)</pre>
+   * 
    <!-- options-end -->
    *
    * Options after -- are passed to the designated filter.<p>
@@ -149,23 +162,13 @@ public class CheckSource
       spec = Utils.splitOptions(tmpStr);
       if (spec.length != 1)
         throw new IllegalArgumentException("Invalid source code specification string");
-      setSourceCode(Class.forName(spec[0]).newInstance());
+      classname = spec[0];
+      spec[0]   = "";
+      setSourceCode((Filter) Utils.forName(Filter.class, classname, spec));
     }
     else {
       throw new Exception("No source code (classname) provided!");
     }
-    
-    tmpStr = Utils.getOption("single", options);
-    if (tmpStr.length() != 0)
-      setMethodNameSingle(tmpStr);
-    else
-      setMethodNameSingle("filter");
-
-    tmpStr = Utils.getOption("multiple", options);
-    if (tmpStr.length() != 0)
-      setMethodNameMultiple(tmpStr);
-    else
-      setMethodNameMultiple("filter");
 
     tmpStr = Utils.getOption('t', options);
     if (tmpStr.length() != 0)
@@ -178,7 +181,7 @@ public class CheckSource
       if (tmpStr.equals("first"))
         setClassIndex(0);
       else if (tmpStr.equals("last"))
-        setClassIndex(-1);
+        setClassIndex(-2);
       else 
         setClassIndex(Integer.parseInt(tmpStr) - 1);
     }
@@ -208,24 +211,20 @@ public class CheckSource
       result.add(getSourceCode().getClass().getName());
     }
 
-    result.add("-single");
-    result.add(getMethodNameSingle());
-
-    result.add("-multiple");
-    result.add(getMethodNameMultiple());
-
     if (getDataset() != null) {
       result.add("-t");
       result.add(m_Dataset.getAbsolutePath());
     }
 
-    result.add("-c");
-    if (getClassIndex() == -1)
-      result.add("last");
-    else if (getClassIndex() == 0)
-      result.add("first");
-    else 
-      result.add("" + (getClassIndex() + 1));
+    if (getClassIndex() != -1) {
+      result.add("-c");
+      if (getClassIndex() == -2)
+	result.add("last");
+      else if (getClassIndex() == 0)
+	result.add("first");
+      else 
+	result.add("" + (getClassIndex() + 1));
+    }
     
     return result.toArray(new String[result.size()]);
   }
@@ -253,7 +252,7 @@ public class CheckSource
    * 
    * @param value       the class to test
    */
-  public void setSourceCode(Object value) {
+  public void setSourceCode(Filter value) {
     m_SourceCode = value;
   }
   
@@ -262,48 +261,8 @@ public class CheckSource
    * 
    * @return            the currently set class, can be null.
    */
-  public Object getSourceCode() {
+  public Filter getSourceCode() {
     return m_SourceCode;
-  }
-
-  /**
-   * Sets the name of the method used in the generated source to filter a 
-   * single row.
-   * 
-   * @param value       the method name
-   */
-  public void setMethodNameSingle(String value) {
-    m_MethodNameSingle = value;
-  }
-  
-  /**
-   * Gets the name of the method used in the generated source for filtering
-   * a single row.
-   * 
-   * @return            the method name
-   */
-  public String getMethodNameSingle() {
-    return m_MethodNameSingle;
-  }
-
-  /**
-   * Sets the name of the method used in the generated source to filter 
-   * multiple rows.
-   * 
-   * @param value       the method name
-   */
-  public void setMethodNameMultiple(String value) {
-    m_MethodNameMultiple = value;
-  }
-  
-  /**
-   * Gets the name of the method used in the generated source for filtering
-   * multiple rows.
-   * 
-   * @return            the method name
-   */
-  public String getMethodNameMultiple() {
-    return m_MethodNameMultiple;
   }
   
   /**
@@ -347,71 +306,30 @@ public class CheckSource
   }
 
   /**
-   * turns the Instance object into an array of Objects
+   * compares two Instance
    * 
-   * @param inst	the instance to turn into an array
-   * @return		the Object array representing the instance
-   */
-  protected Object[] instanceToObjects(Instance inst) {
-    Object[]	result;
-    int		i;
-    
-    result = new Object[inst.numAttributes()];
-
-    for (i = 0 ; i < inst.numAttributes(); i++) {
-      if (inst.isMissing(i))
-	result[i] = null;
-      else if (inst.attribute(i).isNumeric())
-	result[i] = inst.value(i);
-      else
-	result[i] = inst.stringValue(i);
-    }
-    
-    return result;
-  }
-
-  /**
-   * turns the Instances object into an array of Objects
-   * 
-   * @param data	the instances to turn into an array
-   * @return		the Object array representing the instances
-   */
-  protected Object[][] instancesToObjects(Instances data) {
-    Object[][]	result;
-    int		i;
-    
-    result = new Object[data.numInstances()][];
-    
-    for (i = 0; i < data.numInstances(); i++)
-      result[i] = instanceToObjects(data.instance(i));
-    
-    return result;
-  }
-
-  /**
-   * compares the Instance object with the array of objects
-   * 
-   * @param inst	the Instance object to compare
-   * @param obj		the Object array to compare with
+   * @param inst1	the first Instance object to compare
+   * @param inst2	the second Instance object to compare
    * @return		true if both are the same
    */
-  protected boolean compare(Instance inst, Object[] obj) {
+  protected boolean compare(Instance inst1, Instance inst2) {
     boolean	result;
     int		i;
-    Object[]	instObj;
     
     // check dimension
-    result = (inst.numAttributes() == obj.length);
+    result = (inst1.numAttributes() == inst2.numAttributes());
     
     // check content
     if (result) {
-      instObj = instanceToObjects(inst);
-      for (i = 0; i < instObj.length; i++) {
-	if (!instObj[i].equals(obj[i])) {
+      for (i = 0; i < inst1.numAttributes(); i++) {
+	if (Double.isNaN(inst1.value(i)) && (Double.isNaN(inst2.value(i))))
+	  continue;
+	
+	if (inst1.value(i) != inst2.value(i)) {
 	  result = false;
 	  System.out.println(
 	      "Values at position " + (i+1) + " differ (Filter/Source code): " 
-	      + instObj[i] + " != " + obj[i]);
+	      + inst1.value(i) + " != " + inst2.value(i));
 	  break;
 	}
       }
@@ -421,23 +339,23 @@ public class CheckSource
   }
 
   /**
-   * compares the Instances object with the 2-dimensional array of objects
+   * compares the two Instances objects
    * 
-   * @param inst	the Instances object to compare
-   * @param obj		the Object array to compare with
+   * @param inst1	the first Instances object to compare
+   * @param inst2	the second Instances object to compare
    * @return		true if both are the same
    */
-  protected boolean compare(Instances inst, Object[][] obj) {
+  protected boolean compare(Instances inst1, Instances inst2) {
     boolean	result;
     int		i;
     
     // check dimensions
-    result = (inst.numInstances() == obj.length);
+    result = (inst1.numInstances() == inst2.numInstances());
 
     // check content
     if (result) {
-      for (i = 0; i < inst.numInstances(); i++) {
-	result = compare(inst.instance(i), obj[i]);
+      for (i = 0; i < inst1.numInstances(); i++) {
+	result = compare(inst1.instance(i), inst2.instance(i));
 	if (!result) {
 	  System.out.println(
 	      "Values in line " + (i+1) + " differ!");
@@ -460,12 +378,11 @@ public class CheckSource
     Instances   data;
     Instance	filteredInstance;
     Instances	filteredInstances;
-    Object[]	filteredRow;
-    Object[][]	filteredRows;
+    Instance	filteredInstanceSource;
+    Instances	filteredInstancesSource;
     DataSource  source;
     Filter	filter;
-    Method	multiple;
-    Method	single;
+    Filter	filterSource;
     int		i;
     
     result = true;
@@ -484,16 +401,10 @@ public class CheckSource
     // load data
     source = new DataSource(getDataset().getAbsolutePath());
     data   = source.getDataSet();
-    if (getClassIndex() == -1)
+    if (getClassIndex() == -2)
       data.setClassIndex(data.numAttributes() - 1);
     else
       data.setClassIndex(getClassIndex());
-    
-    // determine the method to calls
-    single = getSourceCode().getClass().getMethod(
-        getMethodNameSingle(), new Class[]{Object[].class});
-    multiple = getSourceCode().getClass().getMethod(
-        getMethodNameMultiple(), new Class[]{Object[][].class});
     
     // compare output
     // 1. batch filtering
@@ -501,10 +412,11 @@ public class CheckSource
     filter.setInputFormat(data);
     filteredInstances = Filter.useFilter(data, filter);
 
-    filteredRows = (Object[][]) multiple.invoke(
-	getSourceCode(), new Object[]{instancesToObjects(data)});
-    
-    result = compare(filteredInstances, filteredRows);
+    filterSource = Filter.makeCopy(getSourceCode());
+    filterSource.setInputFormat(data);
+    filteredInstancesSource = Filter.useFilter(data, filterSource);
+
+    result = compare(filteredInstances, filteredInstancesSource);
     
     // 2. instance by instance
     if (result) {
@@ -512,18 +424,22 @@ public class CheckSource
       filter.setInputFormat(data);
       Filter.useFilter(data, filter);
       
+      filterSource = Filter.makeCopy(getSourceCode());
+      filterSource.setInputFormat(data);
+
       for (i = 0; i < data.numInstances(); i++) {
 	filter.input(data.instance(i));
 	filter.batchFinished();
 	filteredInstance = filter.output();
 	
-	filteredRow = (Object[]) single.invoke(
-	    getSourceCode(), new Object[]{instanceToObjects(data.instance(i))});
-
-	if (!compare(filteredInstance, filteredRow))
+	filterSource.input(data.instance(i));
+	filterSource.batchFinished();
+	filteredInstanceSource = filterSource.output();
+	
+	if (!compare(filteredInstance, filteredInstanceSource))
 	  System.out.println(
 	      (i+1) + ". instance (Filter/Source code): " 
-	      + filteredInstance + " != " + Utils.arrayToString(filteredRow));
+	      + filteredInstance + " != " + filteredInstanceSource);
       }
     }
     
