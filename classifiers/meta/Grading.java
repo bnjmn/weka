@@ -16,7 +16,7 @@
 
 /*
  *    Grading.java
- *    Copyright (C) 2000 Alexander K. Seewald
+ *    Copyright (C) 2000 University of Waikato
  *
  */
 
@@ -89,7 +89,7 @@ import java.util.Random;
  *
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class Grading 
   extends Stacking
