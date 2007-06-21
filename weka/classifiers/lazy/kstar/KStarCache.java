@@ -16,7 +16,7 @@
 
 /**
  *    KStarCache.java
- *    Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).
+ *    Copyright (C) 1995 University of Waikato
  *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
  *
  */
@@ -32,7 +32,7 @@ import java.io.Serializable;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class KStarCache
   implements Serializable {

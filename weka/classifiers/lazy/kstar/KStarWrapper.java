@@ -16,7 +16,7 @@
 
 /**
  *    KStarWrapper.java
- *    Copyright (c) 1995-97 by Len Trigg (trigg@cs.waikato.ac.nz).
+ *    Copyright (C) 1995 Univeristy of Waikato
  *    Java port to Weka by Abdelaziz Mahoui (am14@cs.waikato.ac.nz).
  *
  */
