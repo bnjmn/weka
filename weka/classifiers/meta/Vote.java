@@ -16,7 +16,7 @@
 
 /*
  *    Vote.java
- *    Copyright (C) 2000 Alexander K. Seewald
+ *    Copyright (C) 2000 University of Waikato
  *
  */
 
@@ -100,7 +100,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class Vote
   extends RandomizableMultipleClassifiersCombiner

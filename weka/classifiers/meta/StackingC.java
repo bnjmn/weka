@@ -17,7 +17,6 @@
 /*
  *    StackingC.java
  *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
- *    Copyright (C) 2002 Alexander K. Seewald
  *
  */
 
@@ -94,7 +93,7 @@ import java.util.Random;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.13 $ 
+ * @version $Revision: 1.14 $ 
  */
 public class StackingC 
   extends Stacking 
