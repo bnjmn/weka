@@ -37,7 +37,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.PipedInputStream;
@@ -48,10 +50,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -65,7 +69,7 @@ import javax.swing.JTextField;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SimpleCLIPanel
   extends JPanel
@@ -73,7 +77,41 @@ public class SimpleCLIPanel
   
   /** for serialization */
   private static final long serialVersionUID = -7377739469759943231L;
+  
+  /** The filename of the properties file */
+  protected static String FILENAME = "SimpleCLI.props";
+  
+  /** The default location of the properties file */
+  protected static String PROPERTY_FILE = "weka/gui/" + FILENAME;
+  
+  /** Contains the SimpleCLI properties */
+  protected static Properties PROPERTIES;
 
+  static {
+    // Allow a properties file in the current directory to override
+    try {
+      PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+      java.util.Enumeration keys = 
+	(java.util.Enumeration) PROPERTIES.propertyNames();
+      if (!keys.hasMoreElements()) {
+	throw new Exception(
+	    "Failed to read a property file for the SimpleCLI");
+      }
+    }
+    catch (Exception ex) {
+      JOptionPane.showMessageDialog(
+	  null,
+	  "Could not read a configuration file for the SimpleCLI.\n"
+	  + "An example file is included with the Weka distribution.\n"
+	  + "This file should be named \"" + PROPERTY_FILE + "\" and\n"
+	  + "should be placed either in your user home (which is set\n"
+	  + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+	  + "or the directory that java was started from\n",
+	  "SimpleCLI",
+	  JOptionPane.ERROR_MESSAGE);
+    }
+  }
+  
   /** The output area canvas added to the frame */
   protected JTextArea m_OutputArea = new JTextArea();
 
@@ -108,7 +146,7 @@ public class SimpleCLIPanel
    * A class that sends all lines from a reader to a TextArea component
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   class ReaderToTextArea extends Thread {
 
@@ -155,7 +193,7 @@ public class SimpleCLIPanel
    * in a separate thread
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   class ClassRunner extends Thread {
 
@@ -244,7 +282,7 @@ public class SimpleCLIPanel
    * A class for commandline completion of classnames
    * 
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   public static class CommandlineCompletion {
     
@@ -628,6 +666,8 @@ public class SimpleCLIPanel
 	+ "<Alt+BackSpace> is used for deleting the text\n"
 	+ "in the commandline in chunks.\n");
     runCommand("help");
+    
+    loadHistory();
   }
 
   /**
@@ -676,7 +716,11 @@ public class SimpleCLIPanel
     } else if (commandArgs[0].equals("cls")) {
       // Clear the text area
       m_OutputArea.setText("");
-
+    } else if (commandArgs[0].equals("history")) {
+      System.out.println("Command history:");
+      for (int i = 0; i < m_CommandHistory.size(); i++)
+	System.out.println(m_CommandHistory.get(i));
+      System.out.println();
     } else if (commandArgs[0].equals("break")) {
       if (m_RunThread == null) {
 	System.err.println("Nothing is currently running.");
@@ -752,6 +796,10 @@ public class SimpleCLIPanel
 	System.err.println(
 	    "cls\n\n"
 	    + "Clears the output area.\n");
+      } else if (help && commandArgs[1].equals("history")) {
+	System.err.println(
+	    "history\n\n"
+	    + "Prints all issued commands.\n");
       } else if (help && commandArgs[1].equals("exit")) {
 	System.err.println(
 	    "exit\n\n"
@@ -764,6 +812,7 @@ public class SimpleCLIPanel
 	    + "\tbreak\n"
 	    + "\tkill\n"
 	    + "\tcls\n"
+	    + "\thistory\n"
 	    + "\texit\n"
 	    + "\thelp <command>\n");
       }
@@ -938,6 +987,7 @@ public class SimpleCLIPanel
 	    || !command.equals((String)m_CommandHistory.elementAt(last))) {
 	  m_CommandHistory.addElement(command);
 	  m_HistoryPos = m_CommandHistory.size();
+	  saveHistory();
 	}
 	runCommand(command);
 	
@@ -948,6 +998,61 @@ public class SimpleCLIPanel
     }
   }
 
+  /**
+   * loads the command history from the user's properties file
+   */
+  protected void loadHistory() {
+    int 	size;
+    int		i;
+    String	cmd;
+    
+    size = Integer.parseInt(PROPERTIES.getProperty("HistorySize", "50"));
+
+    m_CommandHistory.clear();
+    for (i = 0; i < size; i++) {
+      cmd = PROPERTIES.getProperty("Command" + i, "");
+      if (cmd.length() != 0)
+	m_CommandHistory.add(cmd);
+      else 
+	break;
+    }
+    
+    m_HistoryPos = m_CommandHistory.size();
+  }
+  
+  /**
+   * saves the current command history in the user's home directory
+   */
+  protected void saveHistory() {
+    int 			size;
+    int				from;
+    int				i;
+    String			filename;
+    BufferedOutputStream	stream;
+    
+    size = Integer.parseInt(PROPERTIES.getProperty("HistorySize", "50"));
+    
+    // determine first command to save
+    from = m_CommandHistory.size() - size;
+    if (from < 0)
+      from = 0;
+
+    // fill properties
+    PROPERTIES.setProperty("HistorySize", "" + size);
+    for (i = from; i < m_CommandHistory.size(); i++)
+      PROPERTIES.setProperty("Command" + (i-from), (String) m_CommandHistory.get(i));
+    
+    try {
+      filename = System.getProperties().getProperty("user.home") + File.separatorChar + FILENAME;
+      stream = new BufferedOutputStream(new FileOutputStream(filename));
+      PROPERTIES.store(stream, "SimpleCLI");
+      stream.close();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+  
   /**
    * Main method for testing this class.
    * 
