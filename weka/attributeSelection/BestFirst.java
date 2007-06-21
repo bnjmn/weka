@@ -31,22 +31,22 @@ import  weka.core.*;
  *
  * Valid options are: <p>
  *
- * -P <start set> <br>
+ * -P start set <br>
  * Specify a starting set of attributes. Eg 1,4,7-9. <p>
  *
- * -D <-1 = backward | 0 = bidirectional | 1 = forward> <br>
+ * -D 0 = backward | 1 = forward | 2 = bidirectional <br>
  * Direction of the search. (default = 1). <p>
  *
- * -N <num> <br>
+ * -N num <br>
  * Number of non improving nodes to consider before terminating search.
  * (default = 5). <p>
  *
- * -S <num> <br>
+ * -S num <br>
  * Size of lookup cache for evaluated subsets. Expressed as a multiple
  * of the number of attributes in the data set. (default = 1). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.1 $
+ * @version $Revision: 1.24.2.2 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
