@@ -16,7 +16,7 @@
 
 /*
  * SimpleCart.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007 Haijian Shi
  *
  */
 
@@ -106,7 +106,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Haijian Shi (hs69@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SimpleCart
   extends RandomizableClassifier
