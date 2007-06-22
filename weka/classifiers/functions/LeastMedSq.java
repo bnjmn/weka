@@ -17,7 +17,7 @@
 /*
  *    LeastMedSq.java
  *
- *    Copyright (C) 2001 Tony Voyle
+ *    Copyright (C) 2001 University of Waikato
  */
 
 package weka.classifiers.functions;
@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class LeastMedSq 
   extends Classifier 
