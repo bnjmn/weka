@@ -37,9 +37,11 @@ import weka.classifiers.Classifier;
  * higher than 0.5 for the instance to be predicted as "positive". The 
  * resulting dataset can be used to visualize precision/recall tradeoff, or 
  * for ROC curve analysis (true positive rate vs false positive rate).
+ * Weka just varies the threshold on the class probability estimates in each 
+ * case. The Mann Whitney statistic is used to calculate the AUC.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class ThresholdCurve {
 
