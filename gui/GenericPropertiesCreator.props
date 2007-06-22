@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.16 $
+# Version: $Revision: 1.16.2.1 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
@@ -125,10 +125,6 @@ weka.estimators.Estimator= \
 weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.functions.supportVector,\
  weka.classifiers.mi.supportVector
-
-# List of SVMreg learning algorithms
-weka.classifiers.functions.supportVector.RegOptimizer=\
- weka.classifiers.functions.supportVector
 
 # List of tokenizers
 weka.core.tokenizers.Tokenizer=\

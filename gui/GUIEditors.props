@@ -8,7 +8,7 @@
 # - full classname has to be provided
 #
 # author:  FracPete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.6.2.1 $
+# version: $Revision: 1.6.2.2 $
 
 # general
 java.lang.Object[]=weka.gui.GenericArrayEditor
@@ -44,7 +44,6 @@ weka.classifiers.CostMatrix=weka.gui.CostMatrixEditor
 weka.classifiers.bayes.net.search.SearchAlgorithm=weka.gui.GenericObjectEditor
 weka.classifiers.bayes.net.estimate.BayesNetEstimator=weka.gui.GenericObjectEditor
 weka.classifiers.functions.supportVector.Kernel=weka.gui.GenericObjectEditor
-weka.classifiers.functions.supportVector.RegOptimizer=weka.gui.GenericObjectEditor
 
 # experiment
 weka.experiment.ResultListener=weka.gui.GenericObjectEditor

@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.117 $
+# Version: $Revision: 1.117.2.1 $
  
 # Lists the ResultProducers I want to choose from
 weka.experiment.ResultProducer=\
@@ -387,12 +387,7 @@ weka.classifiers.functions.supportVector.Kernel=\
  weka.classifiers.functions.supportVector.StringKernel,\
  weka.classifiers.mi.supportVector.MIPolyKernel,\
  weka.classifiers.mi.supportVector.MIRBFKernel
- 
-# Lists the RegOptimizers I want to choose from
-weka.classifiers.functions.supportVector.RegOptimizer=\
- weka.classifiers.functions.supportVector.RegSMO,\
- weka.classifiers.functions.supportVector.RegSMOImproved
- 
+  
 # Lists the DistanceFunctions I want to choose from
 weka.core.DistanceFunction=\
  weka.core.EuclideanDistance
