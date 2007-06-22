@@ -22,7 +22,6 @@
 
 package weka.gui;
 
-import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Copyright;
 import weka.core.Instances;
@@ -87,7 +86,7 @@ import javax.swing.SwingConstants;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.32.2.1 $
  */
 public class GUIChooser
   extends JFrame {
@@ -144,12 +143,6 @@ public class GUIChooser
   /** The frame containing the SqlViewer */
   protected JFrame m_SqlViewerFrame;
   
-  /** Click to open the EnsembleLibrary */
-  protected Button m_EnsembleLibraryBut = new Button("Ensemble Library");
-
-  /** The frame containing the ensemble library interface */
-  protected JFrame m_EnsembleLibraryFrame;
-
   // Visualization
 
   /** the panel for the visualization buttons */
@@ -313,7 +306,6 @@ public class GUIChooser
     m_PanelTools.setLayout(new GridLayout(2, 2));
     m_PanelTools.add(m_ArffViewerBut);
     m_PanelTools.add(m_SqlViewerBut);
-    m_PanelTools.add(m_EnsembleLibraryBut);
     m_PanelTools.add(new JLabel(""));
     
     // visualization
@@ -505,32 +497,6 @@ public class GUIChooser
 	  });
 	  m_SqlViewerFrame.pack();
 	  m_SqlViewerFrame.setVisible(true);
-	}
-      }
-    });
-
-    m_EnsembleLibraryBut.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-	if (m_EnsembleLibraryFrame == null) {
-	  m_EnsembleLibraryBut.setEnabled(false);
-	  m_EnsembleLibraryFrame = new JFrame("EnsembleLibrary");
-	  m_EnsembleLibraryFrame.setIconImage(m_Icon);
-	  m_EnsembleLibraryFrame.getContentPane().setLayout(new BorderLayout());
-	  EnsembleLibrary value = new EnsembleLibrary();
-	  EnsembleLibraryEditor libraryEditor = new EnsembleLibraryEditor();
-	  libraryEditor.setValue(value);
-	  m_EnsembleLibraryFrame.getContentPane().add(libraryEditor.getCustomEditor(), BorderLayout.CENTER);
-	  m_EnsembleLibraryFrame.addWindowListener(new WindowAdapter() {
-	    public void windowClosing(WindowEvent w) {
-	      m_EnsembleLibraryFrame.dispose();
-	      m_EnsembleLibraryFrame = null;
-	      m_EnsembleLibraryBut.setEnabled(true);
-	      checkExit();
-	    }
-	  });
-	  m_EnsembleLibraryFrame.pack();
-	  m_EnsembleLibraryFrame.setSize(800, 600);
-	  m_EnsembleLibraryFrame.setVisible(true);
 	}
       }
     });
@@ -871,7 +837,6 @@ public class GUIChooser
 	// tools
 	&& (m_ArffViewers.size() == 0)
 	&& (m_SqlViewerFrame == null)
-	&& (m_EnsembleLibraryFrame == null)
 	// visualization
 	&& (m_Plots.size() == 0)
 	&& (m_ROCs.size() == 0)

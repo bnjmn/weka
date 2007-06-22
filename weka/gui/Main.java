@@ -22,7 +22,6 @@
 
 package weka.gui;
 
-import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Copyright;
 import weka.core.Instances;
@@ -111,7 +110,7 @@ import javax.swing.event.InternalFrameEvent;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class Main
   extends JFrame
@@ -124,7 +123,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.12.2.1 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -176,7 +175,7 @@ public class Main
    * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.12.2.1 $
    */
   public static class ChildFrameSDI 
     extends JFrame {
@@ -239,7 +238,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.12.2.1 $
    */
   public static class ChildFrameMDI
     extends JInternalFrame {
@@ -363,7 +362,6 @@ public class Main
   private JMenuItem jMenuItemVisualizationTreeVisualizer;
   private JMenuItem jMenuItemVisualizationROC;
   private JMenuItem jMenuItemVisualizationPlot;
-  private JMenuItem jMenuItemToolsEnsembleLibrary;
   private JMenuItem jMenuItemToolsSqlViewer;
   private JMenuItem jMenuItemToolsArffViewer;
   private JMenuItem jMenuItemApplicationsSimpleCLI;
@@ -791,28 +789,6 @@ public class Main
 		}
 	      });
 	    }
-	  }
-	  else {
-	    showWindow(getWindow(title));
-	  }
-	}
-      });
-
-      // Tools/EnsembleLibrary
-      jMenuItemToolsEnsembleLibrary = new JMenuItem();
-      jMenuTools.add(jMenuItemToolsEnsembleLibrary);
-      jMenuItemToolsEnsembleLibrary.setText("EnsembleLibrary");
-      jMenuItemToolsEnsembleLibrary.setMnemonic('E');
-      jMenuItemToolsEnsembleLibrary.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent evt) {
-	  String title = jMenuItemToolsEnsembleLibrary.getText();
-	  if (!containsWindow(title)) {
-	    EnsembleLibrary value = new EnsembleLibrary();
-	    EnsembleLibraryEditor libraryEditor = new EnsembleLibraryEditor();
-	    libraryEditor.setValue(value);
-	    createFrame(
-		m_Self, title, libraryEditor.getCustomEditor(), new BorderLayout(), 
-		BorderLayout.CENTER, 800, 600, null, true, true);
 	  }
 	  else {
 	    showWindow(getWindow(title));
