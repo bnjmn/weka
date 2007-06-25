@@ -77,7 +77,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -557,7 +557,8 @@ public class DatabaseSaver
                 insert.append(inst.value(j));
             else{
                 String stringInsert = "'"+inst.stringValue(j)+"'";
-                stringInsert = stringInsert.replaceAll("''","'");
+                if (stringInsert.length() > 2)
+                  stringInsert = stringInsert.replaceAll("''","'");
                 insert.append(stringInsert);
             }
         }
