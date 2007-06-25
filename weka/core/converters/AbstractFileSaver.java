@@ -46,7 +46,7 @@ import java.io.*;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public abstract class AbstractFileSaver extends AbstractSaver implements OptionHandler, FileSourcedConverter{
   
@@ -55,7 +55,7 @@ public abstract class AbstractFileSaver extends AbstractSaver implements OptionH
   private File m_outputFile;
   
   /** The writer. */
-  private BufferedWriter m_writer;
+  private transient BufferedWriter m_writer;
   
   /** The file extension of the destination file. */
   private String FILE_EXTENSION;
