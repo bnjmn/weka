@@ -58,7 +58,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -1716,11 +1716,10 @@ public class XMLBeans
 
     if ( (file != null) && (file.length() == 0) )
       file = null;
-    
-    if (file != null) {
-      ((weka.core.converters.AbstractFileSaver) result).setFile(new File(file));
-    }
-    else if ( (dir != null) && (prefix != null) ) {
+
+    // savers only get directory and prefix, not file (KnowledgeFlow sets the
+    // file/destination based on the relation, dir and prefix)
+    if ( (dir != null) && (prefix != null) ) {
       ((weka.core.converters.AbstractFileSaver) result).setDir(dir);
       ((weka.core.converters.AbstractFileSaver) result).setFilePrefix(prefix);
     }
