@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58.2.4 $ 
+ * @version $Revision: 1.58.2.5 $ 
  */
 public class Instances implements Serializable {
  
@@ -1778,9 +1778,6 @@ public class Instances implements Serializable {
 	  } else {
 	    attributeValues.addElement(tokenizer.sval);
 	  }
-	}
-	if (attributeValues.size() == 0) {
-	  errms(tokenizer,"no nominal values found");
 	}
 	m_Attributes.
 	  addElement(new Attribute(attributeName, attributeValues,
