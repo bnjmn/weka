@@ -54,7 +54,7 @@ import java.sql.*;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class DatabaseSaver extends AbstractSaver implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
     
@@ -416,7 +416,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
                 insert.append(inst.value(j));
             else{
                 String stringInsert = "'"+inst.stringValue(j)+"'";
-                stringInsert = stringInsert.replaceAll("''","'");
+                if (stringInsert.length() > 2)
+                  stringInsert = stringInsert.replaceAll("''","'");
                 insert.append(stringInsert);
             }
         }
