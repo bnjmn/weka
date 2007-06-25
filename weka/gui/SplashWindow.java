@@ -21,6 +21,8 @@
  * Staldenmattweg 2, Immensee, CH-6405, Switzerland.
  * All rights reserved.
  *
+ * This software is in the public domain
+ *
  */
 
 package weka.gui;
@@ -58,7 +60,7 @@ import java.net.URL;
  *
  * @author  Werner Randelshofer
  * @author  Mark Hall
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.2.2.1 $ 
  */
 public class SplashWindow
   extends Window {
