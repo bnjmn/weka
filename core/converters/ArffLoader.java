@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @see Loader
  */
 public class ArffLoader 
@@ -101,7 +101,7 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.18 $
+   * @version $Revision: 1.19 $
    */
   public static class ArffReader {
 
@@ -737,9 +737,6 @@ public class ArffLoader
           } else {
             attributeValues.addElement(m_Tokenizer.sval);
           }
-        }
-        if (attributeValues.size() == 0) {
-          errorMessage("no nominal values found");
         }
         attributes.
           addElement(new Attribute(attributeName, attributeValues,
