@@ -32,7 +32,7 @@ import java.sql.SQLException;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class DatabaseConnection 
   extends DatabaseUtils {
@@ -67,6 +67,9 @@ public class DatabaseConnection
    * @throws Exception if an error occurs
    */
   public DatabaseMetaData getMetaData() throws Exception{
+    if (!isConnected())
+      throw new IllegalStateException("Not connected, please connect first!");
+    
     return m_Connection.getMetaData();
   }
   
@@ -77,6 +80,9 @@ public class DatabaseConnection
    * @throws SQLException if an error occurs
    */
   public int getUpdateCount() throws SQLException {
+    if (!isConnected())
+      throw new IllegalStateException("Not connected, please connect first!");
+    
     return m_PreparedStatement.getUpdateCount();
   }
 }
