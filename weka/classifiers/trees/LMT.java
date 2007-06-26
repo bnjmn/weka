@@ -53,7 +53,7 @@ import java.util.Vector;
  * <br/>
  * For more information see: <br/>
  * <br/>
- * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees.<br/>
+ * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees. Machine Learning. 95(1-2):161-205.<br/>
  * <br/>
  * Marc Sumner, Eibe Frank, Mark Hall: Speeding up Logistic Model Tree Induction. In: 9th European Conference on Principles and Practice of Knowledge Discovery in Databases, 675-683, 2005.
  * <p/>
@@ -64,7 +64,7 @@ import java.util.Vector;
  * <pre>
  * &#64;article{Landwehr2005,
  *    author = {Niels Landwehr and Mark Hall and Eibe Frank},
- *    booktitle = {Machine Learning},
+ *    journal = {Machine Learning},
  *    number = {1-2},
  *    pages = {161-205},
  *    title = {Logistic Model Trees},
@@ -115,7 +115,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class LMT 
   extends Classifier 
@@ -673,7 +673,7 @@ public class LMT
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
     result.setValue(Field.TITLE, "Logistic Model Trees");
-    result.setValue(Field.BOOKTITLE, "Machine Learning");
+    result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.YEAR, "2005");
     result.setValue(Field.VOLUME, "95");
     result.setValue(Field.PAGES, "161-205");
