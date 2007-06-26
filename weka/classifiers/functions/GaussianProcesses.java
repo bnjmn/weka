@@ -26,7 +26,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
-import weka.classifiers.functions.supportVector.RBFKernel;
+import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -92,7 +92,7 @@ import java.util.Vector;
  *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
  * 
  * <pre> 
- * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+ * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
  * </pre>
  * 
  * <pre> -D
@@ -115,7 +115,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -189,8 +189,8 @@ public class GaussianProcesses
   public GaussianProcesses() {
     super();
     
-    m_kernel = new RBFKernel();
-    ((RBFKernel) m_kernel).setGamma(1.0);
+    m_kernel = new PolyKernel();
+    //    ((PolyKernel) m_kernel).setGamma(1.0);
   }
   
   /**
@@ -590,7 +590,7 @@ public class GaussianProcesses
    *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
    * 
    * <pre> 
-   * Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
+   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
    * </pre>
    * 
    * <pre> -D
