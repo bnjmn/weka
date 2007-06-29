@@ -86,7 +86,7 @@ import javax.swing.SwingConstants;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.32.2.1 $
+ * @version $Revision: 1.32.2.2 $
  */
 public class GUIChooser
   extends JFrame {
@@ -303,10 +303,9 @@ public class GUIChooser
     
     // tools
     m_PanelTools.setBorder(BorderFactory.createTitledBorder("Tools"));
-    m_PanelTools.setLayout(new GridLayout(2, 2));
+    m_PanelTools.setLayout(new GridLayout(1, 2));
     m_PanelTools.add(m_ArffViewerBut);
     m_PanelTools.add(m_SqlViewerBut);
-    m_PanelTools.add(new JLabel(""));
     
     // visualization
     m_PanelVisualization.setBorder(BorderFactory.createTitledBorder("Visualization"));
