@@ -111,7 +111,7 @@ import javax.swing.event.InternalFrameEvent;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class Main
   extends JFrame
@@ -124,7 +124,7 @@ public class Main
    * DesktopPane with background image
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.13 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -176,7 +176,7 @@ public class Main
    * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.13 $
    */
   public static class ChildFrameSDI 
     extends JFrame {
@@ -239,7 +239,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision: 1.13 $
    */
   public static class ChildFrameMDI
     extends JInternalFrame {
@@ -799,6 +799,7 @@ public class Main
       });
 
       // Tools/EnsembleLibrary
+      /* currently disabled due to bugs... FracPete
       jMenuItemToolsEnsembleLibrary = new JMenuItem();
       jMenuTools.add(jMenuItemToolsEnsembleLibrary);
       jMenuItemToolsEnsembleLibrary.setText("EnsembleLibrary");
@@ -819,6 +820,7 @@ public class Main
 	  }
 	}
       });
+      */
 
       // Visualization
       jMenuVisualization = new JMenu();
