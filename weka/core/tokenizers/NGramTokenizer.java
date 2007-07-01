@@ -16,7 +16,7 @@
 
 /*
  * NGramTokenizer.java
- * Copyright (C) 2007 Sebastian Germesin
+ * Copyright (C) 2007 University of Waikato
  */
 
 package weka.core.tokenizers;
@@ -51,7 +51,7 @@ import java.util.Vector;
  *
  * @author  Sebastian Germesin (sebastian.germesin@dfki.de)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class NGramTokenizer
   extends CharacterDelimitedTokenizer {
