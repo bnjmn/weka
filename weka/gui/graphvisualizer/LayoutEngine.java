@@ -33,7 +33,7 @@ import javax.swing.JProgressBar;
  * interface.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
+ * @version $Revision: 1.6 $ - 24 Apr 2003 - Initial version (Ashraf M. Kibriya)
  */
 public interface LayoutEngine {
   /**
@@ -50,6 +50,9 @@ public interface LayoutEngine {
    */
   void setNodeSize(int nodeWidth, int nodeHeight);
   
+  /** give access to set of graph nodes */
+   FastVector getNodes();
+
   /**
    * This method returns the extra controls panel
    * for the LayoutEngine, if there is any.
