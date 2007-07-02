@@ -36,6 +36,7 @@ import weka.core.AdditionalMeasureProducer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Drawable;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -84,13 +85,14 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.30 $
+ * @version $Revision: 1.31 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
     /** for serialization */
     static final long serialVersionUID = 746037443258775954L;
-  
+    
+    
     /**
      * The parent sets.
      */
@@ -103,13 +105,13 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 
 
    	/** filter used to quantize continuous variables, if any **/
-    Discretize m_DiscretizeFilter = null;
+    protected Discretize m_DiscretizeFilter = null;
     
     /** attribute index of a non-nominal attribute */
     int m_nNonDiscreteAttribute = -1;
 
     /** filter used to fill in missing values, if any **/
-    ReplaceMissingValues m_MissingValuesFilter = null;	
+    protected ReplaceMissingValues m_MissingValuesFilter = null;	
 	
     /**
      * The number of classes
@@ -221,7 +223,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	 * @return filtered instances
 	 * @throws Exception if a filter (Discretize, ReplaceMissingValues) fails
 	 */
-	Instances normalizeDataSet(Instances instances) throws Exception {
+	protected Instances normalizeDataSet(Instances instances) throws Exception {
 		m_DiscretizeFilter = null;
 		m_MissingValuesFilter = null;
 
@@ -266,7 +268,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 	 * @return filtered instance
 	 * @throws Exception if a filter (Discretize, ReplaceMissingValues) fails
 	 */
-	Instance normalizeInstance(Instance instance) throws Exception {
+	protected Instance normalizeInstance(Instance instance) throws Exception {
 		if ((m_DiscretizeFilter != null) &&
 			(instance.attribute(m_nNonDiscreteAttribute).type() != Attribute.NOMINAL)) {
 			m_DiscretizeFilter.input(instance);
@@ -740,7 +742,28 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
   public String graph() throws Exception {
 	  return toXMLBIF03();
   }
-       
+
+  public String getBIFHeader() {
+	    StringBuffer text = new StringBuffer();
+	    text.append("<?xml version=\"1.0\"?>\n");
+	    text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
+	    text.append("<!DOCTYPE BIF [\n");
+	    text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
+	    text.append("	      <!ATTLIST BIF VERSION CDATA #REQUIRED>\n");
+	    text.append("	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n");
+	    text.append("	<!ELEMENT NAME (#PCDATA)>\n");
+	    text.append("	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n");
+	    text.append("	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n");
+	    text.append("	<!ELEMENT OUTCOME (#PCDATA)>\n");
+	    text.append("	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n");
+	    text.append("	<!ELEMENT FOR (#PCDATA)>\n");
+	    text.append("	<!ELEMENT GIVEN (#PCDATA)>\n");
+	    text.append("	<!ELEMENT TABLE (#PCDATA)>\n");
+	    text.append("	<!ELEMENT PROPERTY (#PCDATA)>\n");
+	    text.append("]>\n");
+	    return text.toString();
+  } // getBIFHeader
+  
   /**
    * Returns a description of the classifier in XML BIF 0.3 format.
    * See http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/
@@ -753,23 +776,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
     }
     
     StringBuffer text = new StringBuffer();
-    
-    text.append("<?xml version=\"1.0\"?>\n");
-    text.append("<!-- DTD for the XMLBIF 0.3 format -->\n");
-    text.append("<!DOCTYPE BIF [\n");
-    text.append("	<!ELEMENT BIF ( NETWORK )*>\n");
-    text.append("	      <!ATTLIST BIF VERSION CDATA #REQUIRED>\n");
-    text.append("	<!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>\n");
-    text.append("	<!ELEMENT NAME (#PCDATA)>\n");
-    text.append("	<!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >\n");
-    text.append("	      <!ATTLIST VARIABLE TYPE (nature|decision|utility) \"nature\">\n");
-    text.append("	<!ELEMENT OUTCOME (#PCDATA)>\n");
-    text.append("	<!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >\n");
-    text.append("	<!ELEMENT FOR (#PCDATA)>\n");
-    text.append("	<!ELEMENT GIVEN (#PCDATA)>\n");
-    text.append("	<!ELEMENT TABLE (#PCDATA)>\n");
-    text.append("	<!ELEMENT PROPERTY (#PCDATA)>\n");
-    text.append("]>\n");
+    text.append(getBIFHeader());
     text.append("\n");
     text.append("\n");
     text.append("<BIF VERSION=\"0.3\">\n");
@@ -814,7 +821,7 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
    * @param sStr string to normalize
    * @return normalized string
    */
-  String XMLNormalize(String sStr) {
+  protected String XMLNormalize(String sStr) {
     StringBuffer sStr2 = new StringBuffer();
     for (int iStr = 0; iStr < sStr.length(); iStr++) {
       char c = sStr.charAt(iStr);
