@@ -33,6 +33,7 @@ import weka.core.TechnicalInformationHandler;
 import weka.estimators.Estimator;
 
 import java.io.File;
+import java.io.StringReader;
 import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -49,7 +50,7 @@ import org.w3c.dom.NodeList;
  * <br/>
  * For more details on XML BIF see:<br/>
  * <br/>
- * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/.
+ * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/\~fgcozman/Research/InterchangeFormat/.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -88,14 +89,14 @@ import org.w3c.dom.NodeList;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class BIFReader 
     extends BayesNet
     implements TechnicalInformationHandler {
   
-    private int [] m_nPositionX;
-    private int [] m_nPositionY;
+    protected int [] m_nPositionX;
+    protected int [] m_nPositionY;
     private int [] m_order;
     
     /** for serialization */
@@ -130,6 +131,17 @@ public class BIFReader
         return this;
 	} // processFile
 
+	public BIFReader processString(String sStr) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setValidating(true);
+		Document doc = factory.newDocumentBuilder().parse(new org.xml.sax.InputSource(new StringReader(sStr)));
+        doc.normalize();
+        buildInstances(doc, "from-string");
+        buildStructure(doc);
+        return this;
+	} // processString
+	
+	
 	/** the current filename */
 	String m_sFile;
 	
@@ -243,22 +255,6 @@ public class BIFReader
         }
     } // Sync
 
-	/** getNode finds the index of the node with name sNodeName
-	 * and throws an exception if no such node can be found.
-	 * @param sNodeName name of the node to get the index from
-	 * @return index of the node with name sNodeName
-	 * @throws Exception if node cannot be found
-	 */
-    public int getNode(String sNodeName) throws Exception {
-    	int iNode = 0;
-    	while (iNode < m_Instances.numAttributes()) {
-    		if (m_Instances.attribute(iNode).name().equals(sNodeName)) {
-    			return iNode;
-    		}
-	    	iNode++; 
-    	}
-    	throw new Exception("Could not find node [[" + sNodeName + "]]");
-    } // getNode
 
     /**
      * Returns all TEXT children of the given node in one string. Between
@@ -594,6 +590,22 @@ public class BIFReader
 			return 0;
 		}
 	} // reversedArcs
+	/** getNode finds the index of the node with name sNodeName
+	 * and throws an exception if no such node can be found.
+	 * @param sNodeName name of the node to get the index from
+	 * @return index of the node with name sNodeName
+	 * @throws Exception if node cannot be found
+	 */
+    public int getNode(String sNodeName) throws Exception {
+		int iNode = 0;
+		while (iNode < m_Instances.numAttributes()) {
+			if (m_Instances.attribute(iNode).name().equals(sNodeName)) {
+				return iNode;
+			}
+			iNode++;
+		}
+   		throw new Exception("Could not find node [[" + sNodeName + "]]");
+    } // getNode
 
 	/**
 	 * the default constructor
