@@ -51,7 +51,7 @@ import weka.classifiers.UpdateableClassifier;
  * Specify the frequency limit for parent attributes.<p>
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au) & Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.8.2.3 $
+ * @version $Revision: 1.8.2.4 $
  *  this version resolves errors in the handling of missing attribute values.
  */
 public class AODE extends Classifier
@@ -230,7 +230,7 @@ public class AODE extends Classifier
        return;   // ignore instances with missing class
 
     int classVal = (int)instance.classValue();
-    int weight = (int)instance.weight();
+    double weight = instance.weight();
  
     m_ClassCounts[classVal] += weight;
     m_SumInstances += weight;
