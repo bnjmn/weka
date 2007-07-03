@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.72 $ 
+ * @version $Revision: 1.72.2.1 $ 
  */
 public class Instances 
   implements Serializable {
@@ -698,7 +698,7 @@ public class Instances
       }
     }
 
-    if ((k < 0) || (k > j)) {
+    if ((k < 1) || (k > j+1)) {
       throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
     }
 
