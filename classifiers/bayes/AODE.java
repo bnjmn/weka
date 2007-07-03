@@ -96,7 +96,7 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class AODE extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
@@ -320,7 +320,7 @@ public class AODE extends Classifier
        return;   // ignore instances with missing class
 
     int classVal = (int)instance.classValue();
-    int weight = (int)instance.weight();
+    double weight = instance.weight();
  
     m_ClassCounts[classVal] += weight;
     m_SumInstances += weight;
