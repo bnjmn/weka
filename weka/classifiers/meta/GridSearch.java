@@ -36,6 +36,7 @@ import weka.core.OptionHandler;
 import weka.core.PropertyPath;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
+import weka.core.Summarizable;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -288,14 +289,14 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
  */
 public class GridSearch
   extends RandomizableSingleClassifierEnhancer
-  implements AdditionalMeasureProducer {
+  implements AdditionalMeasureProducer, Summarizable {
 
   /**
    * a serializable version of Point2D.Double
@@ -443,6 +444,18 @@ public class GridSearch
       m_LabelY = labelY;
       m_Height = (int) StrictMath.round((m_MaxY - m_MinY) / m_StepY) + 1;
       m_Width  = (int) StrictMath.round((m_MaxX - m_MinX) / m_StepX) + 1;
+      
+      // check borders
+      if (!Utils.eq(m_MinX + (m_Width-1)*m_StepX, m_MaxX))
+	throw new IllegalArgumentException(
+	    "X axis doesn't match! Provided max: " + m_MaxX 
+	    + ", calculated max via min and step size: " 
+	    + (m_MinX + (m_Width-1)*m_StepX));
+      if (!Utils.eq(m_MinY + (m_Height-1)*m_StepY, m_MaxY))
+	throw new IllegalArgumentException(
+	    "Y axis doesn't match! Provided max: " + m_MaxY 
+	    + ", calculated max via min and step size: " 
+	    + (m_MinY + (m_Height-1)*m_StepY));
     }
     
     /**
@@ -3301,6 +3314,23 @@ public class GridSearch
 	+ "\n\n"
 	+ m_Classifier.toString();
     }
+    
+    return result;
+  }
+
+  /**
+   * Returns a string that summarizes the object.
+   *
+   * @return 		the object summarized as a string
+   */
+  public String toSummaryString() {
+    String	result;
+    
+    result = 
+        "Best filter: " + getBestFilter().getClass().getName() 
+      + (getBestFilter() instanceof OptionHandler ? " " + Utils.joinOptions(((OptionHandler) getBestFilter()).getOptions()) : "") + "\n"
+      + "Best classifier: " + getBestClassifier().getClass().getName() 
+      + " " + Utils.joinOptions(getBestClassifier().getOptions());
     
     return result;
   }
