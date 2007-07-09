@@ -101,7 +101,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class K2 
 	extends GlobalScoreSearchAlgorithm
@@ -144,7 +144,7 @@ public class K2
 	}
 
 	/**
-	 * buildStructure determines the network structure/graph of the network
+	 * search determines the network structure/graph of the network
 	 * with the K2 algorithm, restricted by its initial structure (which can
 	 * be an empty graph, or a Naive Bayes graph.
 	 * 
@@ -152,8 +152,7 @@ public class K2
 	 * @param instances the data to work with
 	 * @throws Exception if something goes wrong
 	 */
-	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
-		super.buildStructure(bayesNet, instances);
+	public void search (BayesNet bayesNet, Instances instances) throws Exception {
 		int nOrder[] = new int [instances.numAttributes()];
 		nOrder[0] = instances.classIndex();
 
@@ -213,7 +212,7 @@ public class K2
 				}
 			}
 		}
-	} // buildStructure 
+	} // search 
 
 	/**
 	 * Sets the max number of parents

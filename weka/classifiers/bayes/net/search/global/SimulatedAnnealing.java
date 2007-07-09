@@ -90,7 +90,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SimulatedAnnealing 
 	extends GlobalScoreSearchAlgorithm
@@ -143,8 +143,7 @@ public class SimulatedAnnealing
      * @param instances the data to use
      * @throws Exception if something goes wrong
      */
-    public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
-        super.buildStructure(bayesNet, instances);
+    public void search (BayesNet bayesNet, Instances instances) throws Exception {
 		m_random = new Random(m_nSeed);
 		
         // determine base scores
