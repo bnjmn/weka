@@ -34,7 +34,7 @@ import java.util.Vector;
  * the props file <code>weka/gui/explorer/Explorer.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @see #PROPERTY_FILE
  */
 public class ExplorerDefaults
@@ -252,6 +252,16 @@ public class ExplorerDefaults
    */
   public static boolean getClassifierOutputPredictions() {
     return Boolean.parseBoolean(get("ClassifierOutputPredictions", "false"));
+  }
+
+  /**
+   * returns the string with the additional indices to output alongside the
+   * predictions. 
+   * 
+   * @return		the indices, 0 if none are output
+   */
+  public static String getClassifierOutputAdditionalAttributes() {
+    return get("ClassifierOutputAdditionalAttributes", "");
   }
 
   /**

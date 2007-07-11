@@ -37,6 +37,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Version;
@@ -133,7 +134,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.107 $
+ * @version $Revision: 1.107.2.1 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -206,6 +207,17 @@ public class ClassifierPanel
   /** Check to output text predictions */
   protected JCheckBox m_OutputPredictionsTextBut =
     new JCheckBox("Output predictions");
+  
+  /** Lists indices for additional attributes to output */
+  protected JTextField m_OutputAdditionalAttributesText =
+    new JTextField("", 10);
+
+  /** Label for the text field with additional attributes in the output */
+  protected JLabel m_OutputAdditionalAttributesLab = 
+    new JLabel("Output additional attributes");
+  
+  /** the range of attributes to output */
+  protected Range m_OutputAdditionalAttributesRange = null;
 
   /** Check to evaluate w.r.t a cost matrix */
   protected JCheckBox m_EvalWRTCostsBut =
@@ -352,7 +364,9 @@ public class ClassifierPanel
       .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_OutputPredictionsTextBut
       .setToolTipText("Include the predictions in the output buffer");
-    m_RandomLab.setToolTipText("The seed value for randomization");
+        m_OutputAdditionalAttributesText.setToolTipText(
+	"Outputs additional attributes for the predictions, 'first' and 'last' are valid indices.");
+m_RandomLab.setToolTipText("The seed value for randomization");
     m_RandomSeedText.setToolTipText(m_RandomLab.getToolTipText());
     m_PreserveOrderBut.setToolTipText("Preserves the order in a percentage split");
     m_OutputSourceCode.setToolTipText(
@@ -369,7 +383,14 @@ public class ClassifierPanel
     m_EvalWRTCostsBut.setSelected(ExplorerDefaults.getClassifierCostSensitiveEval());
     m_OutputEntropyBut.setSelected(ExplorerDefaults.getClassifierOutputEntropyEvalMeasures());
     m_OutputPredictionsTextBut.setSelected(ExplorerDefaults.getClassifierOutputPredictions());
-    m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
+        m_OutputPredictionsTextBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut.isSelected());
+      }
+    });
+    m_OutputAdditionalAttributesText.setText(ExplorerDefaults.getClassifierOutputAdditionalAttributes());
+    m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut.isSelected());
+m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
     m_PreserveOrderBut.setSelected(ExplorerDefaults.getClassifierPreserveOrder());
     m_OutputSourceCode.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -493,14 +514,18 @@ public class ClassifierPanel
 	m_MoreOptions.setEnabled(false);
 	JPanel moreOptionsPanel = new JPanel();
 	moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
-	moreOptionsPanel.setLayout(new GridLayout(10, 1));
+	moreOptionsPanel.setLayout(new GridLayout(11, 1));
 	moreOptionsPanel.add(m_OutputModelBut);
 	moreOptionsPanel.add(m_OutputPerClassBut);	  
 	moreOptionsPanel.add(m_OutputEntropyBut);	  
 	moreOptionsPanel.add(m_OutputConfusionBut);	  
 	moreOptionsPanel.add(m_StorePredictionsBut);
 	moreOptionsPanel.add(m_OutputPredictionsTextBut);
-	JPanel costMatrixOption = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	JPanel additionalAttsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	additionalAttsPanel.add(m_OutputAdditionalAttributesLab);
+	additionalAttsPanel.add(m_OutputAdditionalAttributesText);
+	moreOptionsPanel.add(additionalAttsPanel);
+        JPanel costMatrixOption = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	costMatrixOption.add(m_EvalWRTCostsBut);
 	costMatrixOption.add(m_SetCostsBut);
 	moreOptionsPanel.add(costMatrixOption);
@@ -963,6 +988,36 @@ public class ClassifierPanel
   }
 
   /**
+   * outputs the header for the predictions on the data
+   * 
+   * @param outBuff	the buffer to add the output to
+   * @param inst	the data header
+   * @param title	the title to print
+   */
+  protected void printPredictionsHeader(StringBuffer outBuff, Instances inst, String title) {
+    outBuff.append("=== Predictions on " + title + " ===\n\n");
+    outBuff.append(" inst#,    actual, predicted, error");
+    if (inst.classAttribute().isNominal()) {
+      outBuff.append(", probability distribution");
+    }
+    if (m_OutputAdditionalAttributesRange != null) {
+      outBuff.append(" (");
+      boolean first = true;
+      for (int i = 0; i < inst.numAttributes() - 1; i++) {
+	if (m_OutputAdditionalAttributesRange.isInRange(i)) {
+	  if (!first)
+	    outBuff.append(",");
+	  else
+	    first = false;
+	  outBuff.append(inst.attribute(i).name());
+	}
+      }
+      outBuff.append(")");
+    }
+    outBuff.append("\n");
+  }
+
+  /**
    * Starts running the currently configured classifier with the current
    * settings. This is run in a separate thread, and will only start if
    * there is no classifier already running. The classifier output is sent
@@ -1011,6 +1066,13 @@ public class ClassifierPanel
           boolean outputEntropy = m_OutputEntropyBut.isSelected();
 	  boolean saveVis = m_StorePredictionsBut.isSelected();
 	  boolean outputPredictionsText = m_OutputPredictionsTextBut.isSelected();
+	  if (m_OutputAdditionalAttributesText.getText().equals("")) {
+	    m_OutputAdditionalAttributesRange = null;
+	  }
+	  else {
+	    m_OutputAdditionalAttributesRange = new Range(m_OutputAdditionalAttributesText.getText());
+	    m_OutputAdditionalAttributesRange.setUpper(inst.numAttributes() - 1);
+	  }
 
 	  String grph = null;
 
@@ -1161,12 +1223,7 @@ public class ClassifierPanel
 	      eval = new Evaluation(inst, costMatrix);
 	      
 	      if (outputPredictionsText) {
-		outBuff.append("=== Predictions on training set ===\n\n");
-		outBuff.append(" inst#,    actual, predicted, error");
-		if (inst.classAttribute().isNominal()) {
-		  outBuff.append(", probability distribution");
-		}
-		outBuff.append("\n");
+		printPredictionsHeader(outBuff, inst, "training set");
 	      }
 
 	      for (int jj=0;jj<inst.numInstances();jj++) {
@@ -1207,12 +1264,7 @@ public class ClassifierPanel
 	      eval = new Evaluation(inst, costMatrix);
       
 	      if (outputPredictionsText) {
-		outBuff.append("=== Predictions on test data ===\n\n");
-		outBuff.append(" inst#,    actual, predicted, error");
-		if (inst.classAttribute().isNominal()) {
-		  outBuff.append(", probability distribution");
-		}
-		outBuff.append("\n");
+		printPredictionsHeader(outBuff, inst, "test data");
 	      }
 
 	      // Make some splits and do a CV
@@ -1279,12 +1331,7 @@ public class ClassifierPanel
 	      m_Log.statusMessage("Evaluating on test split...");
 	     
 	      if (outputPredictionsText) {
-		outBuff.append("=== Predictions on test split ===\n\n");
-		outBuff.append(" inst#,    actual, predicted, error");
-		if (inst.classAttribute().isNominal()) {
-		  outBuff.append(", probability distribution");
-		}
-		outBuff.append("\n");
+		printPredictionsHeader(outBuff, inst, "test split");
 	      }
      
 	      for (int jj=0;jj<test.numInstances();jj++) {
@@ -1310,12 +1357,7 @@ public class ClassifierPanel
 	      eval = new Evaluation(inst, costMatrix);
 	      
 	      if (outputPredictionsText) {
-		outBuff.append("=== Predictions on test set ===\n\n");
-		outBuff.append(" inst#,    actual, predicted, error");
-		if (inst.classAttribute().isNominal()) {
-		  outBuff.append(", probability distribution");
-		}
-		outBuff.append("\n");
+		printPredictionsHeader(outBuff, inst, "test set");
 	      }
 
 	      Instance instance;
@@ -1513,6 +1555,23 @@ public class ClassifierPanel
       if (!inst.classIsMissing() && !Instance.isMissingValue(pred))
 	text.append(Utils.doubleToString(pred - inst.classValue(), 10, 3));
     }
+        
+    // additional Attributes
+    if (m_OutputAdditionalAttributesRange != null) {
+      text.append(" (");
+      boolean first = true;
+      for (int i = 0; i < inst.numAttributes() - 1; i++) {
+	if (m_OutputAdditionalAttributesRange.isInRange(i)) {
+	  if (!first)
+	    text.append(",");
+	  else
+	    first = false;
+	  text.append(inst.toString(i));
+	}
+      }
+      text.append(")");
+    }
+    
     text.append("\n");
     return text.toString();
   }
