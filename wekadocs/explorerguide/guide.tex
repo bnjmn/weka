@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 
-% Version: $Revision: 1.10 $
+% Version: $Revision: 1.11 $
 
 \usepackage{epsfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/epsfig.html
 \usepackage{wrapfig}     % http://www.ctan.org/tex-archive/help/Catalogue/entries/wrapfig.html
@@ -496,13 +496,19 @@ selected by default.
 measures are included in the output. This option is not selected by
 default.
 \item \textbf{Output confusion matrix}.
-The confusion matrix of the classifier's predictions is included in the output. This option is selected by default.
+The confusion matrix of the classifier's predictions is included in the output.
+This option is selected by default.
 \item \textbf{Store predictions for visualization}.  The classifier's
 predictions are remembered so that they can be visualized. This option
 is selected by default.
 \item \textbf{Output predictions}. The predictions on the evaluation
 data are output.  Note that in the case of a cross-validation the
 instance numbers do not correspond to the location in the data!
+\item \textbf{Output additional attributes}. If additional attributes need to
+be output alongside the predictions, e.g., an ID attribute for tracking
+misclassifications, then the index of this attribute can be specified here. The
+usual Weka ranges are supported,``first'' and ``last'' are therefore valid
+indices as well (example: ``first-3,6,8,12-last'').
 \item \textbf{Cost-sensitive evaluation}.
 The errors is evaluated with respect to a cost matrix. The \textbf{Set...}
 button allows you to specify the cost matrix used. 
