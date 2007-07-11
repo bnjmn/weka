@@ -6,7 +6,7 @@
 #   is read).
 #
 # Author  FracPete (fracpete at waikato dot ac dot nz)
-# Version $Revision: 1.5 $
+# Version $Revision: 1.6 $
 
 # if set to true the Capabilities filters in the GOE will be initialized
 # based on the full dataset that has been loaded into the Explorer 
@@ -87,6 +87,10 @@ ClassifierStorePredictionsForVis=true
 # whether the predictions of the classifier output as well (true|false)
 # (default is false)
 ClassifierOutputPredictions=false
+
+# lists the attributes indices to output in addition to the predictions
+# (default is "")
+ClassifierOutputAdditionalAttributes=
 
 # whether the evaluation of the classifier is done cost-sensitively (true|false)
 # (default is false)
