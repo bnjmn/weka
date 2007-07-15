@@ -126,7 +126,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $ 
+ * @version $Revision: 1.43.2.1 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -1168,6 +1168,7 @@ public class DecisionTable
       m_theInstances = new Instances(m_theInstances, 0);
       m_dtInstances = new Instances(m_dtInstances, 0);
     }
+    m_evaluation = null;
   }
 
   /**
