@@ -289,7 +289,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -456,6 +456,30 @@ public class GridSearch
 	    "Y axis doesn't match! Provided max: " + m_MaxY 
 	    + ", calculated max via min and step size: " 
 	    + (m_MinY + (m_Height-1)*m_StepY));
+    }
+
+    /**
+     * Tests itself against the provided grid object
+     * 
+     * @param o		the grid object to compare against
+     * @return		if the two grids have the same setup
+     */
+    public boolean equals(Object o) {
+      boolean	result;
+      Grid	g;
+      
+      g = (Grid) o;
+      
+      result =    (width() == g.width())
+               && (height() == g.height())
+               && (getMinX() == g.getMinX())
+               && (getMinY() == g.getMinY())
+               && (getStepX() == g.getStepX())
+               && (getStepY() == g.getStepY())
+               && getLabelX().equals(g.getLabelX())
+               && getLabelY().equals(g.getLabelY());
+      
+      return result;
     }
     
     /**
@@ -661,9 +685,10 @@ public class GridSearch
       double	minY;
       double	maxY;
       double	distance;
+      Grid	result;
       
       // left
-      if (values.getX() <= getMinX()) {
+      if (Utils.smOrEq(values.getX(), getMinX())) {
 	distance = getMinX() - values.getX();
 	// exactly on grid point?
 	if (StrictMath.floor(distance / getStepX()) == StrictMath.round(distance / getStepX()))
@@ -676,7 +701,7 @@ public class GridSearch
       }
       
       // right
-      if (values.getX() >= getMaxX()) {
+      if (Utils.grOrEq(values.getX(), getMaxX())) {
 	distance = values.getX() - getMaxX();
 	// exactly on grid point?
 	if (StrictMath.floor(distance / getStepX()) == StrictMath.round(distance / getStepX()))
@@ -689,10 +714,10 @@ public class GridSearch
       }
       
       // bottom
-      if (values.getY() <= getMinY()) {
+      if (Utils.smOrEq(values.getY(), getMinY())) {
 	distance = getMinY() - values.getY();
 	// exactly on grid point?
-	if (StrictMath.floor(distance / getStepY()) == StrictMath.round(distance / getStepY()))
+	if (Utils.eq(distance, 0))
 	  minY = getMinY() - getStepY() * (StrictMath.round(distance / getStepY()) + 1);
 	else
 	  minY = getMinY() - getStepY() * (StrictMath.round(distance / getStepY()));
@@ -702,10 +727,10 @@ public class GridSearch
       }
       
       // top
-      if (values.getY() >= getMaxY()) {
+      if (Utils.grOrEq(values.getY(), getMaxY())) {
 	distance = values.getY() - getMaxY();
 	// exactly on grid point?
-	if (StrictMath.floor(distance / getStepY()) == StrictMath.round(distance / getStepY()))
+	if (Utils.eq(distance, 0))
 	  maxY = getMaxY() + getStepY() * (StrictMath.round(distance / getStepY()) + 1);
 	else
 	  maxY = getMaxY() + getStepY() * (StrictMath.round(distance / getStepY()));
@@ -714,7 +739,13 @@ public class GridSearch
 	maxY = getMaxY();
       }
       
-      return new Grid(minX, maxX, getStepX(), getLabelX(), minY, maxY, getStepY(), getLabelY());
+      result = new Grid(minX, maxX, getStepX(), getLabelX(), minY, maxY, getStepY(), getLabelY());
+      
+      // did the grid really extend?
+      if (equals(result))
+	throw new IllegalStateException("Grid extension failed!");
+      
+      return result;
     }
     
     /**
