@@ -39,7 +39,7 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $ 
+ * @version $Revision: 1.10.2.1 $ 
  */
 public class SerializedObject
   implements Serializable {
@@ -53,6 +53,9 @@ public class SerializedObject
   /** Whether or not the object is compressed. */
   private boolean m_isCompressed;
 
+  /** Whether it is a Jython object or not */
+  private boolean m_isJython;
+  
   /**
    * Creates a new serialized object (without compression).
    *
@@ -86,6 +89,7 @@ public class SerializedObject
     m_storedObjectArray = ostream.toByteArray();
 
     m_isCompressed = compress;
+    m_isJython     = (toStore instanceof JythonSerializableObject);
   }
 
   /*
@@ -117,7 +121,10 @@ public class SerializedObject
   }
 
   /**
-   * Returns a serialized object.
+   * Returns a serialized object. Uses org.python.util.PythonObjectInputStream 
+   * for Jython objects (read 
+   * <a href="http://aspn.activestate.com/ASPN/Mail/Message/Jython-users/1001401">here</a>
+   * for more details).
    *
    * @return the restored object
    * @exception Exception if the object couldn't be restored
@@ -127,11 +134,20 @@ public class SerializedObject
     try {
       ByteArrayInputStream istream = new ByteArrayInputStream(m_storedObjectArray);
       ObjectInputStream p;
-      if (!m_isCompressed)
-	p = new ObjectInputStream(new BufferedInputStream(istream));
-      else 
-	p = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(istream)));
-      Object toReturn = p.readObject();
+      Object toReturn = null;
+      if (m_isJython) {
+	if (!m_isCompressed)
+	  toReturn = Jython.deserialize(new BufferedInputStream(istream));
+	else 
+	  toReturn = Jython.deserialize(new BufferedInputStream(new GZIPInputStream(istream)));
+      }
+      else {
+	if (!m_isCompressed)
+	  p = new ObjectInputStream(new BufferedInputStream(istream));
+	else 
+	  p = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(istream)));
+	toReturn = p.readObject();
+      }
       istream.close();
       return toReturn;
     } catch (Exception e) {
