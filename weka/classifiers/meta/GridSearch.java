@@ -289,7 +289,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -607,7 +607,7 @@ public class GridSearch
       distance = m_StepX;
       for (i = 0; i < width(); i++) {
 	currDistance = StrictMath.abs(values.getX() - getValues(i, 0).getX());
-	if (currDistance < distance) {
+	if (Utils.sm(currDistance, distance)) {
 	  distance = currDistance;
 	  x        = i;
 	}
@@ -618,7 +618,7 @@ public class GridSearch
       distance = m_StepY;
       for (i = 0; i < height(); i++) {
 	currDistance = StrictMath.abs(values.getY() - getValues(0, i).getY());
-	if (currDistance < distance) {
+	if (Utils.sm(currDistance, distance)) {
 	  distance = currDistance;
 	  y        = i;
 	}
@@ -691,7 +691,7 @@ public class GridSearch
       if (Utils.smOrEq(values.getX(), getMinX())) {
 	distance = getMinX() - values.getX();
 	// exactly on grid point?
-	if (StrictMath.floor(distance / getStepX()) == StrictMath.round(distance / getStepX()))
+	if (Utils.eq(distance, 0))
 	  minX = getMinX() - getStepX() * (StrictMath.round(distance / getStepX()) + 1);
 	else
 	  minX = getMinX() - getStepX() * (StrictMath.round(distance / getStepX()));
@@ -704,7 +704,7 @@ public class GridSearch
       if (Utils.grOrEq(values.getX(), getMaxX())) {
 	distance = values.getX() - getMaxX();
 	// exactly on grid point?
-	if (StrictMath.floor(distance / getStepX()) == StrictMath.round(distance / getStepX()))
+	if (Utils.eq(distance, 0))
 	  maxX = getMaxX() + getStepX() * (StrictMath.round(distance / getStepX()) + 1);
 	else
 	  maxX = getMaxX() + getStepX() * (StrictMath.round(distance / getStepX()));
