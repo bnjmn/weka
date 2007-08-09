@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.core.converters.CSVTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CSVTest 
   extends AbstractFileConverterTest {
@@ -97,13 +97,6 @@ public class CSVTest
         }	  
       }
     }
-  }
-  
-  /**
-   * ignored, since not supported!
-   */
-  public void testLoaderWithStream() {
-    System.out.println("testLoaderWithStream is ignored!");
   }
 
   /**
