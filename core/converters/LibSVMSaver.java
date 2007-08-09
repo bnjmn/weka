@@ -61,7 +61,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see Saver
  */
 public class LibSVMSaver 
@@ -373,7 +373,7 @@ public class LibSVMSaver
     setRetrieval(BATCH);
     setWriteMode(WRITE);
 
-    if ((retrieveFile() == null) || (getWriter() == null)) {
+    if ((retrieveFile() == null) && (getWriter() == null)) {
       for (int i = 0; i < getInstances().numInstances(); i++)
 	System.out.println(instanceToLibsvm(getInstances().instance(i)));
       setWriteMode(WAIT);
