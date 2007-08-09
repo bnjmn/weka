@@ -44,7 +44,7 @@ import java.util.Enumeration;
  * 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  * @see Saver
  */
 public class CSVSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter, FileSourcedConverter {
@@ -182,7 +182,7 @@ public class CSVSaver extends AbstractFileSaver implements BatchConverter, Incre
           throw new IOException("Batch and incremental saving cannot be mixed.");
       setRetrieval(BATCH);
       setWriteMode(WRITE);
-      if(retrieveFile() == null || getWriter() == null){
+      if(retrieveFile() == null && getWriter() == null){
           // print out attribute names as first row
           for (int i = 0; i < getInstances().numAttributes(); i++) {
             System.out.print(getInstances().attribute(i).name());

@@ -50,7 +50,7 @@ import weka.core.Option;
  *
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @see Saver
  */
 public class ArffSaver extends AbstractFileSaver implements BatchConverter, IncrementalConverter {
@@ -178,7 +178,7 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter, Incr
           throw new IOException("Batch and incremental saving cannot be mixed.");
       setRetrieval(BATCH);
       setWriteMode(WRITE);
-      if(retrieveFile() == null || getWriter() == null){
+      if(retrieveFile() == null && getWriter() == null){
           System.out.println((getInstances()).toString());
           setWriteMode(WAIT);
           return;
