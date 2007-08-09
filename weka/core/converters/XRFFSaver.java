@@ -64,7 +64,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Saver
  */
 public class XRFFSaver 
@@ -373,7 +373,7 @@ public class XRFFSaver
     // generate XML
     m_XMLInstances.setInstances(getInstances());
     
-    if ((retrieveFile() == null) || (getWriter() == null)) {
+    if ((retrieveFile() == null) && (getWriter() == null)) {
       System.out.println(m_XMLInstances.toString());
       setWriteMode(WAIT);
     }
