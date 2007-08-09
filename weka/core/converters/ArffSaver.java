@@ -45,7 +45,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  * @see Saver
  */
 public class ArffSaver 
@@ -198,7 +198,7 @@ public class ArffSaver
           throw new IOException("Batch and incremental saving cannot be mixed.");
       setRetrieval(BATCH);
       setWriteMode(WRITE);
-      if(retrieveFile() == null || getWriter() == null){
+      if(retrieveFile() == null && getWriter() == null){
           System.out.println((getInstances()).toString());
           setWriteMode(WAIT);
           return;
