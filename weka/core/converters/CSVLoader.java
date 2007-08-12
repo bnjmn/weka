@@ -46,7 +46,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see Loader
  */
 public class CSVLoader 
@@ -365,7 +365,7 @@ public class CSVLoader
 	  current.addElement(new Double(val));
 	} catch (NumberFormatException e) {
 	  // otherwise assume its an enumerated value
-	  current.addElement(new String(tokenizer.sval.replace(' ','_')));
+	  current.addElement(new String(tokenizer.sval));
 	}
       }
       
