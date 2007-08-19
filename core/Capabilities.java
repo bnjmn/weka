@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.22.2.1 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1067,7 +1067,7 @@ public class Capabilities
       cap.disable(Capability.NO_CLASS);
       iter = cap.capabilities();
       if (!iter.hasNext()) {
-	m_FailReason = new UnassignedClassException(
+	m_FailReason = new WekaException(
 	    createMessage("Cannot handle any class attribute!"));
 	return false;
       }
