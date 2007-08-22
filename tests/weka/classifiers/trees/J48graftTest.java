@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.trees.J48graftTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class J48graftTest extends AbstractClassifierTest {
 
@@ -39,7 +39,7 @@ public class J48graftTest extends AbstractClassifierTest {
 
   /** Creates a default J48 */
   public Classifier getClassifier() {
-    return new J48();
+    return new J48graft();
   }
 
   public static Test suite() {
