@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.2 $
+ * @version $Revision: 1.8.2.3 $
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -407,7 +407,7 @@ public class RandomTree extends Classifier
       } else {
 	
 	// For numeric attributes
-	if (Utils.sm(instance.value(m_Attribute), m_SplitPoint)) {
+	if (instance.value(m_Attribute) < m_SplitPoint) {
 	  returnedDist = m_Successors[0].distributionForInstance(instance);
 	} else {
 	  returnedDist = m_Successors[1].distributionForInstance(instance);
@@ -581,7 +581,7 @@ public class RandomTree extends Classifier
     // Check if node doesn't contain enough instances or is pure
     m_ClassProbs = new double[classProbs.length];
     System.arraycopy(classProbs, 0, m_ClassProbs, 0, classProbs.length);
-    if (Utils.sm(Utils.sum(m_ClassProbs), 2 * m_MinNum) ||
+    if (Utils.sum(m_ClassProbs) < 2 * m_MinNum ||
 	Utils.eq(m_ClassProbs[Utils.maxIndex(m_ClassProbs)],
 		 Utils.sum(m_ClassProbs))) {
 
@@ -622,7 +622,7 @@ public class RandomTree extends Classifier
 				      weights[attIndex], data);
       vals[attIndex] = gain(dists[attIndex], priorVal(dists[attIndex]));
 
-      if (Utils.gr(vals[attIndex], 0)) gainFound = true;
+      if (vals[attIndex] > 0) gainFound = true;
     }
 
     // Find best attribute
@@ -630,7 +630,7 @@ public class RandomTree extends Classifier
     m_Distribution = dists[m_Attribute];
 
     // Any useful split found?
-    if (Utils.gr(vals[m_Attribute], 0)) {
+    if (vals[m_Attribute] > 0) {
 
       // Build subtrees
       m_SplitPoint = splits[m_Attribute];
@@ -707,7 +707,7 @@ public class RandomTree extends Classifier
 
 	      // Split instance up
 	      for (int k = 0; k < num.length; k++) {
-		if (Utils.gr(m_Prop[k], 0)) {
+		if (m_Prop[k] > 0) {
 		  subsetIndices[k][i][num[k]] = sortedIndices[i][j];
 		  subsetWeights[k][i][num[k]] = m_Prop[k] * weights[i][j];
 		  num[k]++;
@@ -734,14 +734,14 @@ public class RandomTree extends Classifier
 
 	      // Split instance up
 	      for (int k = 0; k < num.length; k++) {
-		if (Utils.gr(m_Prop[k], 0)) {
+		if (m_Prop[k] > 0) {
 		  subsetIndices[k][i][num[k]] = sortedIndices[i][j];
 		  subsetWeights[k][i][num[k]] = m_Prop[k] * weights[i][j];
 		  num[k]++;
 		}
 	      }
 	    } else {
-	      int subset = Utils.sm(inst.value(att), splitPoint) ? 0 : 1;
+	      int subset = (inst.value(att) < splitPoint) ? 0 : 1;
 	      subsetIndices[subset][i][num[subset]] = sortedIndices[i][j];
 	      subsetWeights[subset][i][num[subset]] = weights[i][j];
 	      num[subset]++;
@@ -813,9 +813,9 @@ public class RandomTree extends Classifier
 	if (inst.isMissing(att)) {
 	  break;
 	}
-	if (Utils.gr(inst.value(att), currSplit)) {
+	if (inst.value(att) > currSplit) {
 	  currVal = gain(currDist, priorVal);
-	  if (Utils.gr(currVal, bestVal)) {
+	  if (currVal > bestVal) {
 	    bestVal = currVal;
 	    splitPoint = (inst.value(att) + currSplit) / 2.0;
 	    for (int j = 0; j < currDist.length; j++) {
