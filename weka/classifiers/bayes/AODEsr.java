@@ -109,7 +109,7 @@ import java.util.Vector;
  *
  * @author Fei Zheng
  * @author Janice Boughton
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AODEsr extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier,
@@ -750,7 +750,7 @@ public class AODEsr extends Classifier
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String mWeightTipText() {
+  public String mestWeightTipText() {
     return "Set the weight for m-estimate.";
   }
 
