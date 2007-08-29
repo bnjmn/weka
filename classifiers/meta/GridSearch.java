@@ -289,7 +289,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -318,6 +318,21 @@ public class GridSearch
      */
     public PointDouble(double x, double y) {
       super(x, y);
+    }
+
+    /**
+     * Determines whether or not two points are equal.
+     * 
+     * @param obj 	an object to be compared with this PointDouble
+     * @return 		true if the object to be compared has the same values; 
+     * 			false otherwise.
+     */
+    public boolean equals(Object obj) {
+      PointDouble 	pd;
+      
+      pd = (PointDouble) obj;
+      
+      return (Utils.eq(this.getX(), pd.getX()) && Utils.eq(this.getY(), pd.getY()));
     }
     
     /**
