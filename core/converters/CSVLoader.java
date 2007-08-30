@@ -46,7 +46,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.2 $
+ * @version $Revision: 1.13.2.3 $
  * @see Loader
  */
 public class CSVLoader 
@@ -272,7 +272,7 @@ public class CSVLoader
       for (int j = 0; j < current.size(); j++) {
 	Object cval = current.elementAt(j);
 	if (cval instanceof String) {
-	  if (((String)cval).compareTo("?") == 0) {
+	  if (((String)cval).compareTo("'?'") == 0) {
 	    vals[j] = Instance.missingValue();
 	  } else {
 	    if (!dataSet.attribute(j).isNominal()) {
@@ -357,6 +357,9 @@ public class CSVLoader
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
 	current.addElement("?");
 	wasSep = true;
+      } else if (tokenizer.ttype == '?') {
+        wasSep = false;
+        current.addElement(new String("'?'"));
       } else {
 	wasSep = false;
 	// try to parse as a number
@@ -418,7 +421,7 @@ public class CSVLoader
     for (int i = 0; i < current.size(); i++) {
       Object ob = current.elementAt(i);
       if (ob instanceof String) {
-	if (((String)ob).compareTo("?") == 0) {
+	if (((String)ob).compareTo("'?'") == 0) {
 	} else {
 	  Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
 	  if (!tempHash.containsKey(ob)) {
