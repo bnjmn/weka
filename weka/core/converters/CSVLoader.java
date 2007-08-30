@@ -41,7 +41,7 @@ import java.lang.String;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.2 $
+ * @version $Revision: 1.9.2.3 $
  * @see Loader
  */
 public class CSVLoader extends AbstractLoader 
@@ -273,7 +273,7 @@ implements FileSourcedConverter, BatchConverter {
       for (int j = 0; j < current.size(); j++) {
 	Object cval = current.elementAt(j);
 	if (cval instanceof String) {
-	  if (((String)cval).compareTo("?") == 0) {
+	  if (((String)cval).compareTo("'?'") == 0) {
 	    vals[j] = Instance.missingValue();
 	  } else {
 	    if (!dataSet.attribute(j).isNominal()) {
@@ -358,6 +358,9 @@ implements FileSourcedConverter, BatchConverter {
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
 	current.addElement("?");
 	wasSep = true;
+      } else if (tokenizer.ttype == '?') {
+        wasSep = false;
+        current.addElement(new String("'?'"));
       } else {
 	wasSep = false;
 	/* // Check if token is valid.
@@ -424,7 +427,7 @@ implements FileSourcedConverter, BatchConverter {
     for (int i = 0; i < current.size(); i++) {
       Object ob = current.elementAt(i);
       if (ob instanceof String) {
-	if (((String)ob).compareTo("?") == 0) {
+	if (((String)ob).compareTo("'?'") == 0) {
 	} else {
 	  Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
 	  if (!tempHash.containsKey(ob)) {
