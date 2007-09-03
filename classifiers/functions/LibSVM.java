@@ -152,7 +152,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */
@@ -1297,47 +1297,6 @@ public class LibSVM
   }
   
   /**
-   * classifies the given instance.
-   * In case of 1-class classification, 0 is returned if libsvm returns 1 and
-   * NaN (= missing) if libsvm returns -1.
-   * 
-   * @param instance            the instance to classify
-   * @return                    the classification
-   * @throws Exception          if an error occurs
-   */
-  public double classifyInstance(Instance instance) throws Exception {
-    if (m_Filter != null) {
-      m_Filter.input(instance);
-      m_Filter.batchFinished();
-      instance = m_Filter.output();
-    }
-    
-    Object x = instanceToArray(instance);
-    double v = ((Double) invokeMethod(
-	Class.forName(CLASS_SVM).newInstance(),
-	"svm_predict",
-	new Class[]{
-	  Class.forName(CLASS_SVMMODEL), 
-	  Array.newInstance(Class.forName(CLASS_SVMNODE), Array.getLength(x)).getClass()},
-	  new Object[]{
-	  m_Model, 
-	  x})).doubleValue();
-
-    double result;
-    if (instance.classAttribute().isNominal() && (m_SVMType == SVMTYPE_ONE_CLASS_SVM) ) {
-      if (v > 0)
-	result = 0;
-      else
-	result = Double.NaN;  // outlier
-    }
-    else {
-      result = v;
-    }
-    
-    return result;
-  }
-  
-  /**
    * Computes the distribution for a given instance. 
    * In case of 1-class classification, 1 is returned at index 0 if libsvm 
    * returns 1 and NaN (= missing) if libsvm returns -1.
@@ -1351,23 +1310,17 @@ public class LibSVM
     double[] prob_estimates = null;
 
     if (m_ProbabilityEstimates) {
-      if (    (m_SVMType == SVMTYPE_EPSILON_SVR)
-	   || (m_SVMType == SVMTYPE_NU_SVR) ) {
-        throw new Exception("Do not use distributionForInstance for regression models!");
-      }
-      else {
-        invokeMethod(
-            Class.forName(CLASS_SVM).newInstance(),
-            "svm_get_labels",
-            new Class[]{
-              Class.forName(CLASS_SVMMODEL), 
-              Array.newInstance(Integer.TYPE, instance.numClasses()).getClass()},
-            new Object[]{
-              m_Model, 
-              labels});
-        
-        prob_estimates = new double[instance.numClasses()];
-      }
+      invokeMethod(
+	  Class.forName(CLASS_SVM).newInstance(),
+	  "svm_get_labels",
+	  new Class[]{
+	    Class.forName(CLASS_SVMMODEL), 
+	    Array.newInstance(Integer.TYPE, instance.numClasses()).getClass()},
+	    new Object[]{
+	    m_Model, 
+	    labels});
+
+      prob_estimates = new double[instance.numClasses()];
     }
 
     if (m_Filter != null) {
