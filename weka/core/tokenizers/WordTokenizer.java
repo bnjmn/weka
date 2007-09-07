@@ -39,7 +39,7 @@ import java.util.StringTokenizer;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class WordTokenizer
   extends CharacterDelimitedTokenizer {
@@ -48,7 +48,7 @@ public class WordTokenizer
   private static final long serialVersionUID = -930893034037880773L;
   
   /** the actual tokenizer */
-  protected StringTokenizer m_Tokenizer;
+  protected transient StringTokenizer m_Tokenizer;
   
   /**
    * Returns a string describing the stemmer
