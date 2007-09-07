@@ -101,7 +101,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class Vote
   extends RandomizableMultipleClassifiersCombiner
@@ -341,7 +341,7 @@ public class Vote
 	  if (dist[index] == 0)
 	    result = Instance.missingValue();
 	  else
-	    result = dist[index];
+	    result = index;
 	}
 	else if (instance.classAttribute().isNumeric()){
 	  result = dist[0];
