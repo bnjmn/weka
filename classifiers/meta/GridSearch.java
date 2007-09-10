@@ -289,7 +289,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -459,6 +459,18 @@ public class GridSearch
       m_LabelY = labelY;
       m_Height = (int) StrictMath.round((m_MaxY - m_MinY) / m_StepY) + 1;
       m_Width  = (int) StrictMath.round((m_MaxX - m_MinX) / m_StepX) + 1;
+      
+      // is min < max?
+      if (m_MinX >= m_MaxX)
+	throw new IllegalArgumentException("XMin must be smaller than XMax!");
+      if (m_MinY >= m_MaxY)
+	throw new IllegalArgumentException("YMin must be smaller than YMax!");
+      
+      // steps positive?
+      if (m_StepX <= 0)
+	throw new IllegalArgumentException("XStep must be a positive number!");
+      if (m_StepY <= 0)
+	throw new IllegalArgumentException("YStep must be a positive number!");
       
       // check borders
       if (!Utils.eq(m_MinX + (m_Width-1)*m_StepX, m_MaxX))
@@ -3065,6 +3077,8 @@ public class GridSearch
     boolean			allCached;
     Performance			p1;
     Performance			p2;
+    double			x;
+    double			y;
     
     performances = new Vector();
     
@@ -3097,9 +3111,12 @@ public class GridSearch
 	else {
 	  allCached = false;
 	  
+	  x = evaluate(values.getX(), true);
+	  y = evaluate(values.getY(), false);
+	  
 	  // data pass through filter
 	  if (filter == null) {
-	    filter = (Filter) setup(getFilter(), values.getX(), values.getY());
+	    filter = (Filter) setup(getFilter(), x, y);
 	    filter.setInputFormat(inst);
 	    data = Filter.useFilter(inst, filter);
 	    // make sure that the numbers don't get too small - otherwise NaNs!
@@ -3109,7 +3126,7 @@ public class GridSearch
 	  }
 
 	  // setup classifier
-	  classifier = (Classifier) setup(getClassifier(), values.getX(), values.getY());
+	  classifier = (Classifier) setup(getClassifier(), x, y);
 
 	  // evaluate
 	  eval = new Evaluation(data);
@@ -3260,6 +3277,8 @@ public class GridSearch
   public void buildClassifier(Instances data) throws Exception {
     String	strX;
     String	strY;
+    double	x;
+    double	y;
     
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
@@ -3294,16 +3313,18 @@ public class GridSearch
     m_Values = findBest();
 
     // setup best configurations
-    m_BestFilter     = (Filter) setup(getFilter(), m_Values.getX(), m_Values.getY());
-    m_BestClassifier = (Classifier) setup(getClassifier(), m_Values.getX(), m_Values.getY());
+    x                = evaluate(m_Values.getX(), true);
+    y                = evaluate(m_Values.getY(), false);
+    m_BestFilter     = (Filter) setup(getFilter(), x, y);
+    m_BestClassifier = (Classifier) setup(getClassifier(), x, y);
     
     // process data
-    m_Filter = (Filter) setup(getFilter(), m_Values.getX(), m_Values.getY());
+    m_Filter = (Filter) setup(getFilter(), x, y);
     m_Filter.setInputFormat(m_Data);
     Instances transformed = Filter.useFilter(m_Data, m_Filter);
     
     // train classifier
-    m_Classifier = (Classifier) setup(getClassifier(), m_Values.getX(), m_Values.getY());
+    m_Classifier = (Classifier) setup(getClassifier(), x, y);
     m_Classifier.buildClassifier(transformed);
   }
 
