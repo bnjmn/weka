@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -1144,7 +1144,7 @@ public class Capabilities
 	    }
 	  }
 	  else {
-	    for (n = fromIndex; n < toIndex; n++) {
+	    for (n = fromIndex; n <= toIndex; n++) {
 	      // skip class
 	      if (n == inst.classIndex())
 		continue;
