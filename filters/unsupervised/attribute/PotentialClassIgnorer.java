@@ -39,7 +39,7 @@ import java.util.Vector;
  * attribute that is originally the class attribute !
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz), Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public abstract class PotentialClassIgnorer
   extends Filter
@@ -131,7 +131,7 @@ public abstract class PotentialClassIgnorer
    * @throws NullPointerException if no input structure has been
    * defined (or the output format hasn't been determined yet) 
    */
-  public final Instances getOutputFormat() {
+  public Instances getOutputFormat() {
 
     if (m_IgnoreClass) {
       outputFormatPeek().setClassIndex(m_ClassIndex);
