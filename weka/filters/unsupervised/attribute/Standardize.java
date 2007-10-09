@@ -48,7 +48,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class Standardize 
   extends PotentialClassIgnorer 
@@ -124,7 +124,7 @@ public class Standardize
    * collected with output().
    * @throws IllegalStateException if no input format has been set.
    */
-  public boolean input(Instance instance) {
+  public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -148,9 +148,10 @@ public class Standardize
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception Exception if an error occurs
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() {
+  public boolean batchFinished() throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -184,8 +185,9 @@ public class Standardize
    * added to the end of the output queue.
    *
    * @param instance the instance to convert
+   * @exception Exception if an error occurs
    */
-  private void convertInstance(Instance instance) {
+  private void convertInstance(Instance instance) throws Exception {
   
     Instance inst = null;
     if (instance instanceof SparseInstance) {
@@ -205,6 +207,11 @@ public class Standardize
 	  } else {
 	    value = vals[j] - m_Means[j];
 	  }
+          if (Double.isNaN(value)) {
+            throw new Exception("A NaN value was generated "
+                                + "while standardizing attribute " 
+                                + instance.attribute(j).name());
+          }
 	  if (value != 0.0) {
 	    newVals[ind] = value;
 	    newIndices[ind] = j;
@@ -238,6 +245,11 @@ public class Standardize
 	  } else {
 	    vals[j] = (vals[j] - m_Means[j]);
 	  }
+          if (Double.isNaN(vals[j])) {
+            throw new Exception("A NaN value was generated "
+                                + "while standardizing attribute " 
+                                + instance.attribute(j).name());
+          }
 	}
       }	
       inst = new Instance(instance.weight(), vals);
