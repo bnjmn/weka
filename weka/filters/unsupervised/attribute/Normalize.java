@@ -48,7 +48,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
@@ -123,9 +123,10 @@ public class Normalize
    * @param instance the input instance
    * @return true if the filtered instance may now be
    * collected with output().
-   * @throws IllegalStateException if no input format has been set.
+   * @exception Exception if an error occurs
+   * @exception IllegalStateException if no input format has been set.
    */
-  public boolean input(Instance instance) {
+  public boolean input(Instance instance) throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -149,9 +150,10 @@ public class Normalize
    * output() may now be called to retrieve the filtered instances.
    *
    * @return true if there are instances pending output
-   * @throws IllegalStateException if no input structure has been defined
+   * @exception Exception if an error occurs
+   * @exception IllegalStateException if no input structure has been defined
    */
-  public boolean batchFinished() {
+  public boolean batchFinished() throws Exception {
 
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
@@ -203,7 +205,7 @@ public class Normalize
    *
    * @param instance the instance to convert
    */
-  private void convertInstance(Instance instance) {
+  private void convertInstance(Instance instance) throws Exception {
   
     Instance inst = null;
     if (instance instanceof SparseInstance) {
@@ -222,6 +224,11 @@ public class Normalize
 	  } else {
 	    value = (vals[j] - m_MinArray[j]) / 
 	      (m_MaxArray[j] - m_MinArray[j]);
+            if (Double.isNaN(value)) {
+              throw new Exception("A NaN value was generated "
+                                  + "while normalizing " 
+                                  + instance.attribute(j).name());
+            }
 	  }
 	  if (value != 0.0) {
 	    newVals[ind] = value;
@@ -255,6 +262,11 @@ public class Normalize
 	  } else {
 	    vals[j] = (vals[j] - m_MinArray[j]) / 
 	      (m_MaxArray[j] - m_MinArray[j]);
+            if (Double.isNaN(vals[j])) {
+              throw new Exception("A NaN value was generated "
+                                  + "while normalizing " 
+                                  + instance.attribute(j).name());
+            }
 	  }
 	}
       }	
