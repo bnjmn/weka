@@ -134,7 +134,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.108 $
+ * @version $Revision: 1.109 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -864,49 +864,51 @@ public class ClassifierPanel
       double pred = eval.evaluateModelOnceAndRecordPrediction(classifier, 
 							      toPredict);
 
-      double [] values = new double[plotInstances.numAttributes()];
-      for (int i = 0; i < plotInstances.numAttributes(); i++) {
-	if (i < toPredict.classIndex()) {
-	  values[i] = toPredict.value(i);
-	} else if (i == toPredict.classIndex()) {
-	  values[i] = pred;
-	  values[i+1] = toPredict.value(i);
-	  /* // if the class value of the instances to predict is missing then
-	  // set it to the predicted value
-	  if (toPredict.isMissing(i)) {
+      if (plotInstances != null) {
+        double [] values = new double[plotInstances.numAttributes()];
+        for (int i = 0; i < plotInstances.numAttributes(); i++) {
+          if (i < toPredict.classIndex()) {
+            values[i] = toPredict.value(i);
+          } else if (i == toPredict.classIndex()) {
+            values[i] = pred;
+            values[i+1] = toPredict.value(i);
+            /* // if the class value of the instances to predict is missing then
+            // set it to the predicted value
+            if (toPredict.isMissing(i)) {
 	    values[i+1] = pred;
 	    } */
-	  i++;
-	} else {
-	  values[i] = toPredict.value(i-1);
-	}
-      }
+            i++;
+          } else {
+            values[i] = toPredict.value(i-1);
+          }
+        }
 
-      plotInstances.add(new Instance(1.0, values));
-      if (toPredict.classAttribute().isNominal()) {
-	if (toPredict.isMissing(toPredict.classIndex()) 
-	    || Instance.isMissingValue(pred)) {
-	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
-	} else if (pred != toPredict.classValue()) {
-	  // set to default error point shape
-	  plotShape.addElement(new Integer(Plot2D.ERROR_SHAPE));
-	} else {
-	  // otherwise set to constant (automatically assigned) point shape
-	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
-	}
-	plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
-      } else {
-	// store the error (to be converted to a point size later)
-	Double errd = null;
-	if (!toPredict.isMissing(toPredict.classIndex()) && 
-	    !Instance.isMissingValue(pred)) {
-	  errd = new Double(pred - toPredict.classValue());
-	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
-	} else {
-	  // missing shape if actual class not present or prediction is missing
-	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
-	}
-	plotSize.addElement(errd);
+        plotInstances.add(new Instance(1.0, values));
+        if (toPredict.classAttribute().isNominal()) {
+          if (toPredict.isMissing(toPredict.classIndex()) 
+              || Instance.isMissingValue(pred)) {
+            plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+          } else if (pred != toPredict.classValue()) {
+            // set to default error point shape
+            plotShape.addElement(new Integer(Plot2D.ERROR_SHAPE));
+          } else {
+            // otherwise set to constant (automatically assigned) point shape
+            plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+          }
+          plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
+        } else {
+          // store the error (to be converted to a point size later)
+          Double errd = null;
+          if (!toPredict.isMissing(toPredict.classIndex()) && 
+              !Instance.isMissingValue(pred)) {
+            errd = new Double(pred - toPredict.classValue());
+            plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+          } else {
+            // missing shape if actual class not present or prediction is missing
+            plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+          }
+          plotSize.addElement(errd);
+        }
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -1132,8 +1134,10 @@ public class ClassifierPanel
 
 	    // set up the structure of the plottable instances for 
 	    // visualization
-	    predInstances = setUpVisualizableInstances(inst);
-	    predInstances.setClassIndex(inst.classIndex()+1);
+            if (saveVis) {
+              predInstances = setUpVisualizableInstances(inst);
+              predInstances.setClassIndex(inst.classIndex()+1);
+            } 
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
@@ -1424,7 +1428,18 @@ public class ClassifierPanel
 	    m_Log.statusMessage("Problem evaluating classifier");
 	  } finally {
 	    try {
-	      if (predInstances != null && predInstances.numInstances() > 0) {
+              if (!saveVis && outputModel) {
+		  FastVector vv = new FastVector();
+		  vv.addElement(fullClassifier);
+		  Instances trainHeader = new Instances(m_Instances, 0);
+		  trainHeader.setClassIndex(classIndex);
+		  vv.addElement(trainHeader);
+                  if (grph != null) {
+		    vv.addElement(grph);
+		  }
+		  m_History.addObject(name, vv);
+              } else if (saveVis && predInstances != null && 
+                  predInstances.numInstances() > 0) {
 		if (predInstances.attribute(predInstances.classIndex())
 		    .isNumeric()) {
 		  postProcessPlotInfo(plotSize);
@@ -1441,31 +1456,23 @@ public class ClassifierPanel
 		m_CurrentVis.addPlot(tempd);
 		m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
 	    
-		if (saveVis) {
 		  FastVector vv = new FastVector();
 		  if (outputModel) {
 		    vv.addElement(fullClassifier);
 		    Instances trainHeader = new Instances(m_Instances, 0);
 		    trainHeader.setClassIndex(classIndex);
 		    vv.addElement(trainHeader);
+                    if (grph != null) {
+                      vv.addElement(grph);
+                    }
 		  }
 		  vv.addElement(m_CurrentVis);
-		  if (grph != null) {
-		    vv.addElement(grph);
-		  }
+
 		  if ((eval != null) && (eval.predictions() != null)) {
 		    vv.addElement(eval.predictions());
 		    vv.addElement(inst.classAttribute());
 		  }
 		  m_History.addObject(name, vv);
-		} else if (outputModel) {
-		  FastVector vv = new FastVector();
-		  vv.addElement(fullClassifier);
-		  Instances trainHeader = new Instances(m_Instances, 0);
-		  trainHeader.setClassIndex(classIndex);
-		  vv.addElement(trainHeader);
-		  m_History.addObject(name, vv);
-		}
 	      }
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
@@ -2206,9 +2213,11 @@ public class ClassifierPanel
               eval.useNoPriors();
       
               // set up the structure of the plottable instances for 
-              // visualization
-              predInstances = setUpVisualizableInstances(userTestStructure);
-              predInstances.setClassIndex(userTestStructure.classIndex()+1);
+              // visualization if selected
+              if (saveVis) {
+                predInstances = setUpVisualizableInstances(userTestStructure);
+                predInstances.setClassIndex(userTestStructure.classIndex()+1);
+              }
       
               outBuff.append("\n=== Re-evaluation on test set ===\n\n");
               outBuff.append("User supplied test set\n");  
