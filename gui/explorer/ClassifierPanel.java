@@ -134,7 +134,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.107.2.1 $
+ * @version $Revision: 1.107.2.2 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -218,7 +218,7 @@ public class ClassifierPanel
   
   /** the range of attributes to output */
   protected Range m_OutputAdditionalAttributesRange = null;
-
+  
   /** Check to evaluate w.r.t a cost matrix */
   protected JCheckBox m_EvalWRTCostsBut =
     new JCheckBox("Cost-sensitive evaluation");
@@ -364,9 +364,9 @@ public class ClassifierPanel
       .setToolTipText("Evaluate errors with respect to a cost matrix");
     m_OutputPredictionsTextBut
       .setToolTipText("Include the predictions in the output buffer");
-        m_OutputAdditionalAttributesText.setToolTipText(
+    m_OutputAdditionalAttributesText.setToolTipText(
 	"Outputs additional attributes for the predictions, 'first' and 'last' are valid indices.");
-m_RandomLab.setToolTipText("The seed value for randomization");
+    m_RandomLab.setToolTipText("The seed value for randomization");
     m_RandomSeedText.setToolTipText(m_RandomLab.getToolTipText());
     m_PreserveOrderBut.setToolTipText("Preserves the order in a percentage split");
     m_OutputSourceCode.setToolTipText(
@@ -383,14 +383,14 @@ m_RandomLab.setToolTipText("The seed value for randomization");
     m_EvalWRTCostsBut.setSelected(ExplorerDefaults.getClassifierCostSensitiveEval());
     m_OutputEntropyBut.setSelected(ExplorerDefaults.getClassifierOutputEntropyEvalMeasures());
     m_OutputPredictionsTextBut.setSelected(ExplorerDefaults.getClassifierOutputPredictions());
-        m_OutputPredictionsTextBut.addActionListener(new ActionListener() {
+    m_OutputPredictionsTextBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
 	m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut.isSelected());
       }
     });
     m_OutputAdditionalAttributesText.setText(ExplorerDefaults.getClassifierOutputAdditionalAttributes());
     m_OutputAdditionalAttributesText.setEnabled(m_OutputPredictionsTextBut.isSelected());
-m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
+    m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
     m_PreserveOrderBut.setSelected(ExplorerDefaults.getClassifierPreserveOrder());
     m_OutputSourceCode.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -525,7 +525,7 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
 	additionalAttsPanel.add(m_OutputAdditionalAttributesLab);
 	additionalAttsPanel.add(m_OutputAdditionalAttributesText);
 	moreOptionsPanel.add(additionalAttsPanel);
-        JPanel costMatrixOption = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	JPanel costMatrixOption = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	costMatrixOption.add(m_EvalWRTCostsBut);
 	costMatrixOption.add(m_SetCostsBut);
 	moreOptionsPanel.add(costMatrixOption);
@@ -864,49 +864,51 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
       double pred = eval.evaluateModelOnceAndRecordPrediction(classifier, 
 							      toPredict);
 
-      double [] values = new double[plotInstances.numAttributes()];
-      for (int i = 0; i < plotInstances.numAttributes(); i++) {
-	if (i < toPredict.classIndex()) {
-	  values[i] = toPredict.value(i);
-	} else if (i == toPredict.classIndex()) {
-	  values[i] = pred;
-	  values[i+1] = toPredict.value(i);
-	  /* // if the class value of the instances to predict is missing then
-	  // set it to the predicted value
-	  if (toPredict.isMissing(i)) {
+      if (plotInstances != null) {
+        double [] values = new double[plotInstances.numAttributes()];
+        for (int i = 0; i < plotInstances.numAttributes(); i++) {
+          if (i < toPredict.classIndex()) {
+            values[i] = toPredict.value(i);
+          } else if (i == toPredict.classIndex()) {
+            values[i] = pred;
+            values[i+1] = toPredict.value(i);
+            /* // if the class value of the instances to predict is missing then
+            // set it to the predicted value
+            if (toPredict.isMissing(i)) {
 	    values[i+1] = pred;
 	    } */
-	  i++;
-	} else {
-	  values[i] = toPredict.value(i-1);
-	}
-      }
+            i++;
+          } else {
+            values[i] = toPredict.value(i-1);
+          }
+        }
 
-      plotInstances.add(new Instance(1.0, values));
-      if (toPredict.classAttribute().isNominal()) {
-	if (toPredict.isMissing(toPredict.classIndex()) 
-	    || Instance.isMissingValue(pred)) {
-	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
-	} else if (pred != toPredict.classValue()) {
-	  // set to default error point shape
-	  plotShape.addElement(new Integer(Plot2D.ERROR_SHAPE));
-	} else {
-	  // otherwise set to constant (automatically assigned) point shape
-	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
-	}
-	plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
-      } else {
-	// store the error (to be converted to a point size later)
-	Double errd = null;
-	if (!toPredict.isMissing(toPredict.classIndex()) && 
-	    !Instance.isMissingValue(pred)) {
-	  errd = new Double(pred - toPredict.classValue());
-	  plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
-	} else {
-	  // missing shape if actual class not present or prediction is missing
-	  plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
-	}
-	plotSize.addElement(errd);
+        plotInstances.add(new Instance(1.0, values));
+        if (toPredict.classAttribute().isNominal()) {
+          if (toPredict.isMissing(toPredict.classIndex()) 
+              || Instance.isMissingValue(pred)) {
+            plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+          } else if (pred != toPredict.classValue()) {
+            // set to default error point shape
+            plotShape.addElement(new Integer(Plot2D.ERROR_SHAPE));
+          } else {
+            // otherwise set to constant (automatically assigned) point shape
+            plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+          }
+          plotSize.addElement(new Integer(Plot2D.DEFAULT_SHAPE_SIZE));
+        } else {
+          // store the error (to be converted to a point size later)
+          Double errd = null;
+          if (!toPredict.isMissing(toPredict.classIndex()) && 
+              !Instance.isMissingValue(pred)) {
+            errd = new Double(pred - toPredict.classValue());
+            plotShape.addElement(new Integer(Plot2D.CONST_AUTOMATIC_SHAPE));
+          } else {
+            // missing shape if actual class not present or prediction is missing
+            plotShape.addElement(new Integer(Plot2D.MISSING_SHAPE));
+          }
+          plotSize.addElement(errd);
+        }
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -1016,7 +1018,7 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
     }
     outBuff.append("\n");
   }
-
+  
   /**
    * Starts running the currently configured classifier with the current
    * settings. This is run in a separate thread, and will only start if
@@ -1132,8 +1134,10 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
 
 	    // set up the structure of the plottable instances for 
 	    // visualization
-	    predInstances = setUpVisualizableInstances(inst);
-	    predInstances.setClassIndex(inst.classIndex()+1);
+            if (saveVis) {
+              predInstances = setUpVisualizableInstances(inst);
+              predInstances.setClassIndex(inst.classIndex()+1);
+            } 
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
@@ -1424,7 +1428,18 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
 	    m_Log.statusMessage("Problem evaluating classifier");
 	  } finally {
 	    try {
-	      if (predInstances != null && predInstances.numInstances() > 0) {
+              if (!saveVis && outputModel) {
+		  FastVector vv = new FastVector();
+		  vv.addElement(fullClassifier);
+		  Instances trainHeader = new Instances(m_Instances, 0);
+		  trainHeader.setClassIndex(classIndex);
+		  vv.addElement(trainHeader);
+                  if (grph != null) {
+		    vv.addElement(grph);
+		  }
+		  m_History.addObject(name, vv);
+              } else if (saveVis && predInstances != null && 
+                  predInstances.numInstances() > 0) {
 		if (predInstances.attribute(predInstances.classIndex())
 		    .isNumeric()) {
 		  postProcessPlotInfo(plotSize);
@@ -1441,31 +1456,23 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
 		m_CurrentVis.addPlot(tempd);
 		m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
 	    
-		if (saveVis) {
 		  FastVector vv = new FastVector();
 		  if (outputModel) {
 		    vv.addElement(fullClassifier);
 		    Instances trainHeader = new Instances(m_Instances, 0);
 		    trainHeader.setClassIndex(classIndex);
 		    vv.addElement(trainHeader);
+                    if (grph != null) {
+                      vv.addElement(grph);
+                    }
 		  }
 		  vv.addElement(m_CurrentVis);
-		  if (grph != null) {
-		    vv.addElement(grph);
-		  }
+
 		  if ((eval != null) && (eval.predictions() != null)) {
 		    vv.addElement(eval.predictions());
 		    vv.addElement(inst.classAttribute());
 		  }
 		  m_History.addObject(name, vv);
-		} else if (outputModel) {
-		  FastVector vv = new FastVector();
-		  vv.addElement(fullClassifier);
-		  Instances trainHeader = new Instances(m_Instances, 0);
-		  trainHeader.setClassIndex(classIndex);
-		  vv.addElement(trainHeader);
-		  m_History.addObject(name, vv);
-		}
 	      }
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
@@ -1555,7 +1562,7 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
       if (!inst.classIsMissing() && !Instance.isMissingValue(pred))
 	text.append(Utils.doubleToString(pred - inst.classValue(), 10, 3));
     }
-        
+    
     // additional Attributes
     if (m_OutputAdditionalAttributesRange != null) {
       text.append(" (");
@@ -2206,9 +2213,11 @@ m_RandomSeedText.setText("" + ExplorerDefaults.getClassifierRandomSeed());
               eval.useNoPriors();
       
               // set up the structure of the plottable instances for 
-              // visualization
-              predInstances = setUpVisualizableInstances(userTestStructure);
-              predInstances.setClassIndex(userTestStructure.classIndex()+1);
+              // visualization if selected
+              if (saveVis) {
+                predInstances = setUpVisualizableInstances(userTestStructure);
+                predInstances.setClassIndex(userTestStructure.classIndex()+1);
+              }
       
               outBuff.append("\n=== Re-evaluation on test set ===\n\n");
               outBuff.append("User supplied test set\n");  
