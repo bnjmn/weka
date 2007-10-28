@@ -25,15 +25,20 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
 /** 
  <!-- globalinfo-start -->
- * Normalizes all numeric values in the given dataset (apart from the class attribute, if set). The resulting values are in [0,1] for the data used to compute the normalization intervals.
+ * Normalizes all numeric values in the given dataset (apart from the class attribute, if set). The resulting values are by default in [0,1] for the data used to compute the normalization intervals. But with the scale and translation parameters one can change that, e.g., with scale = 2.0 and translation = -1.0 you get values in the range [-1,+1].
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -45,35 +50,141 @@ import weka.filters.UnsupervisedFilter;
  *  applied to the data.
  *  (default: no)</pre>
  * 
+ * <pre> -S &lt;num&gt;
+ *  The scaling factor for the output range.
+ *  (default: 1.0)</pre>
+ * 
+ * <pre> -T &lt;num&gt;
+ *  The translation of the output range.
+ *  (default: 0.0)</pre>
+ * 
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.11 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision: 1.12 $
  */
 public class Normalize 
   extends PotentialClassIgnorer 
-  implements UnsupervisedFilter, Sourcable {
+  implements UnsupervisedFilter, Sourcable, OptionHandler {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = -8158531150984362898L;
 
   /** The minimum values for numeric attributes. */
-  private double [] m_MinArray;
+  protected double[] m_MinArray;
   
   /** The maximum values for numeric attributes. */
-  private double [] m_MaxArray;
+  protected double[] m_MaxArray;
 
+  /** The translation of the output range. */
+  protected double m_Translation = 0;
+  
+  /** The scaling factor of the output range. */
+  protected double m_Scale = 1.0;
+  
   /**
-   * Returns a string describing this filter
+   * Returns a string describing this filter.
    *
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * @return 		a description of the filter suitable for
+   * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
+    return 
+        "Normalizes all numeric values in the given dataset (apart from the "
+      + "class attribute, if set). The resulting values are by default "
+      + "in [0,1] for the data used to compute the normalization intervals. "
+      + "But with the scale and translation parameters one can change that, "
+      + "e.g., with scale = 2.0 and translation = -1.0 you get values in the "
+      + "range [-1,+1].";
+  }
 
-    return "Normalizes all numeric values in the given dataset (apart from the "
-      + "class attribute, if set). The resulting values "
-      + "are in [0,1] for the data used to compute the normalization intervals. ";
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return 		an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector result = new Vector();
+
+    Enumeration en = super.listOptions();
+    while (en.hasMoreElements())
+      result.addElement(en.nextElement());
+
+    result.addElement(new Option(
+	"\tThe scaling factor for the output range.\n"
+	+ "\t(default: 1.0)",
+	"S", 1, "-S <num>"));
+
+    result.addElement(new Option(
+	"\tThe translation of the output range.\n"
+	+"\t(default: 0.0)",
+	"T", 1,"-T <num>"));
+
+    return result.elements();
+  }
+
+
+  /**
+   * Parses a given list of options. <p/>
+   * 
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -unset-class-temporarily
+   *  Unsets the class index temporarily before the filter is
+   *  applied to the data.
+   *  (default: no)</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  The scaling factor for the output range.
+   *  (default: 1.0)</pre>
+   * 
+   * <pre> -T &lt;num&gt;
+   *  The translation of the output range.
+   *  (default: 0.0)</pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    String      tmpStr;
+
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0)
+      setScale(Double.parseDouble(tmpStr));
+    else
+      setScale(1.0);
+    
+    tmpStr = Utils.getOption('T', options);
+    if (tmpStr.length() != 0)
+      setTranslation(Double.parseDouble(tmpStr));
+    else
+      setTranslation(0.0);
+
+    if (getInputFormat() != null)
+      setInputFormat(getInputFormat());
+  }
+
+  /**
+   * Gets the current settings of the filter.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector<String>	result;
+    
+    result = new Vector<String>();
+
+    result.add("-S");
+    result.add("" + getScale());
+
+    result.add("-T");
+    result.add("" + getTranslation());
+    
+    return result.toArray(new String[result.size()]);
   }
 
   /** 
@@ -100,12 +211,13 @@ public class Normalize
   /**
    * Sets the format of the input instances.
    *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
-   * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
-   * successfully
+   * @param instanceInfo 	an Instances object containing the input 
+   * 				instance structure (any instances contained in 
+   * 				the object are ignored - only the structure is 
+   * 				required).
+   * @return 			true if the outputFormat may be collected 
+   * 				immediately
+   * @throws Exception 		if the input format can't be set successfully
    */
   public boolean setInputFormat(Instances instanceInfo) 
        throws Exception {
@@ -120,17 +232,16 @@ public class Normalize
    * Input an instance for filtering. Filter requires all
    * training instances be read before producing output.
    *
-   * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
-   * @exception Exception if an error occurs
-   * @exception IllegalStateException if no input format has been set.
+   * @param instance 	the input instance
+   * @return 		true if the filtered instance may now be
+   * 			collected with output().
+   * @throws Exception 	if an error occurs
+   * @throws IllegalStateException 	if no input format has been set.
    */
   public boolean input(Instance instance) throws Exception {
-
-    if (getInputFormat() == null) {
+    if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
-    }
+    
     if (m_NewBatch) {
       resetQueue();
       m_NewBatch = false;
@@ -138,7 +249,8 @@ public class Normalize
     if (m_MinArray == null) {
       bufferInput(instance);
       return false;
-    } else {
+    }
+    else {
       convertInstance(instance);
       return true;
     }
@@ -149,23 +261,22 @@ public class Normalize
    * If the filter requires all instances prior to filtering,
    * output() may now be called to retrieve the filtered instances.
    *
-   * @return true if there are instances pending output
-   * @exception Exception if an error occurs
-   * @exception IllegalStateException if no input structure has been defined
+   * @return 		true if there are instances pending output
+   * @throws Exception 	if an error occurs
+   * @throws IllegalStateException 	if no input structure has been defined
    */
   public boolean batchFinished() throws Exception {
-
-    if (getInputFormat() == null) {
+    if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
-    }
+
     if (m_MinArray == null) {
       Instances input = getInputFormat();
       // Compute minimums and maximums
       m_MinArray = new double[input.numAttributes()];
       m_MaxArray = new double[input.numAttributes()];
-      for (int i = 0; i < input.numAttributes(); i++) {
+      for (int i = 0; i < input.numAttributes(); i++)
 	m_MinArray[i] = Double.NaN;
-      }
+
       for (int j = 0; j < input.numInstances(); j++) {
 	double[] value = input.instance(j).toDoubleArray();
 	for (int i = 0; i < input.numAttributes(); i++) {
@@ -174,13 +285,12 @@ public class Normalize
 	    if (!Instance.isMissingValue(value[i])) {
 	      if (Double.isNaN(m_MinArray[i])) {
 		m_MinArray[i] = m_MaxArray[i] = value[i];
-	      } else {
-		if (value[i] < m_MinArray[i]) {
+	      }
+	      else {
+		if (value[i] < m_MinArray[i])
 		  m_MinArray[i] = value[i];
-		}
-		if (value[i] > m_MaxArray[i]) {
+		if (value[i] > m_MaxArray[i])
 		  m_MaxArray[i] = value[i];
-		}
 	      }
 	    }
 	  }
@@ -188,9 +298,8 @@ public class Normalize
       }
 
       // Convert pending input instances
-      for(int i = 0; i < input.numInstances(); i++) {
+      for (int i = 0; i < input.numInstances(); i++)
 	convertInstance(input.instance(i));
-      }
     } 
     // Free memory
     flushInput();
@@ -203,10 +312,10 @@ public class Normalize
    * Convert a single instance over. The converted instance is 
    * added to the end of the output queue.
    *
-   * @param instance the instance to convert
+   * @param instance 	the instance to convert
+   * @throws Exception 	if conversion fails
    */
-  private void convertInstance(Instance instance) throws Exception {
-  
+  protected void convertInstance(Instance instance) throws Exception {
     Instance inst = null;
     if (instance instanceof SparseInstance) {
       double[] newVals = new double[instance.numAttributes()];
@@ -221,9 +330,10 @@ public class Normalize
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
 	    value = 0;
-	  } else {
+	  }
+	  else {
 	    value = (vals[j] - m_MinArray[j]) / 
-	      (m_MaxArray[j] - m_MinArray[j]);
+	      (m_MaxArray[j] - m_MinArray[j]) * m_Scale + m_Translation;
             if (Double.isNaN(value)) {
               throw new Exception("A NaN value was generated "
                                   + "while normalizing " 
@@ -235,7 +345,8 @@ public class Normalize
 	    newIndices[ind] = j;
 	    ind++;
 	  }
-	} else {
+	}
+	else {
 	  value = vals[j];
 	  if (value != 0.0) {
 	    newVals[ind] = value;
@@ -250,7 +361,8 @@ public class Normalize
       System.arraycopy(newIndices, 0, tempInd, 0, ind);
       inst = new SparseInstance(instance.weight(), tempVals, tempInd,
                                 instance.numAttributes());
-    } else {
+    }
+    else {
       double[] vals = instance.toDoubleArray();
       for (int j = 0; j < getInputFormat().numAttributes(); j++) {
 	if (instance.attribute(j).isNumeric() &&
@@ -259,9 +371,10 @@ public class Normalize
 	  if (Double.isNaN(m_MinArray[j]) ||
 	      (m_MaxArray[j] == m_MinArray[j])) {
 	    vals[j] = 0;
-	  } else {
+	  }
+	  else {
 	    vals[j] = (vals[j] - m_MinArray[j]) / 
-	      (m_MaxArray[j] - m_MinArray[j]);
+	      (m_MaxArray[j] - m_MinArray[j]) * m_Scale + m_Translation;
             if (Double.isNaN(vals[j])) {
               throw new Exception("A NaN value was generated "
                                   + "while normalizing " 
@@ -305,10 +418,9 @@ public class Normalize
     
     // determine what attributes were processed
     process = new boolean[data.numAttributes()];
-    for (i = 0; i < data.numAttributes(); i++) {
+    for (i = 0; i < data.numAttributes(); i++) 
       process[i] = (data.attribute(i).isNumeric() && (i != data.classIndex()));
-    }
-    
+  
     result.append("class " + className + " {\n");
     result.append("\n");
     result.append("  /** lists which attributes will be processed */\n");
@@ -319,6 +431,12 @@ public class Normalize
     result.append("\n");
     result.append("  /** the maximum values for numeric values */\n");
     result.append("  protected final static double[] MAX = new double[]{" + Utils.arrayToString(m_MaxArray) + "};\n");
+    result.append("\n");
+    result.append("  /** the scale factor */\n");
+    result.append("  protected final static double SCALE = " + m_Scale + ";\n");
+    result.append("\n");
+    result.append("  /** the translation */\n");
+    result.append("  protected final static double TRANSLATION = " + m_Translation + ";\n");
     result.append("\n");
     result.append("  /**\n");
     result.append("   * filters a single row\n");
@@ -335,7 +453,7 @@ public class Normalize
     result.append("        if (Double.isNaN(MIN[n]) || (MIN[n] == MAX[n]))\n");
     result.append("          result[n] = 0;\n");
     result.append("        else\n");
-    result.append("          result[n] = (((Double) i[n]) - MIN[n]) / (MAX[n] - MIN[n]);\n");
+    result.append("          result[n] = (((Double) i[n]) - MIN[n]) / (MAX[n] - MIN[n]) * SCALE + TRANSLATION;\n");
     result.append("      }\n");
     result.append("      else {\n");
     result.append("        result[n] = i[n];\n");
@@ -367,12 +485,85 @@ public class Normalize
   }
 
   /**
-   * Main method for testing this class.
-   *
-   * @param argv should contain arguments to the filter: 
-   * use -h for help
+   * Returns the calculated minimum values for the attributes in the data.
+   * 
+   * @return		the array with the minimum values
    */
-  public static void main(String [] argv) {
-    runFilter(new Normalize(), argv);
+  public double[] getMinArray() {
+    return m_MinArray;
+  }
+
+  /**
+   * Returns the calculated maximum values for the attributes in the data.
+   * 
+   * @return		the array with the maximum values
+   */
+  public double[] getMaxArray() {
+    return m_MaxArray;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String scaleTipText() {
+    return "The factor for scaling the output range (default: 1).";
+  }
+
+  /**
+   * Get the scaling factor.
+   *
+   * @return 		the factor
+   */
+  public double getScale() {
+    return m_Scale;
+  }
+
+  /**
+   * Sets the scaling factor.
+   *
+   * @param value 	the scaling factor
+   */
+  public void setScale(double value) {
+    m_Scale = value;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String translationTipText() {
+    return "The translation of the output range (default: 0).";
+  }
+
+  /**
+   * Get the translation.
+   *
+   * @return 		the translation
+   */
+  public double getTranslation() {
+    return m_Translation;
+  }
+
+  /**
+   * Sets the translation.
+   *
+   * @param value 	the translation
+   */
+  public void setTranslation(double value) {
+    m_Translation = value;
+  }
+  
+  /**
+   * Main method for running this filter.
+   *
+   * @param args 	should contain arguments to the filter, use -h for help
+   */
+  public static void main(String[] args) {
+    runFilter(new Normalize(), args);
   }
 }
