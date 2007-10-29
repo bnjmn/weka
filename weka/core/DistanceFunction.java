@@ -29,23 +29,53 @@ import weka.core.neighboursearch.PerformanceStats;
  * instances.
  *
  * @author  Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision: 1.7 $ 
  */
 public interface DistanceFunction extends OptionHandler {
 
   /**
-   * Sets the instances
+   * Sets the instances.
    * 
    * @param insts 	the instances to use
    */
   public void setInstances(Instances insts);
 
   /**
-   * returns the instances currently set
+   * returns the instances currently set.
    * 
    * @return 		the current instances
    */
   public Instances getInstances();
+
+  /**
+   * Sets the range of attributes to use in the calculation of the distance.
+   * The indices start from 1, 'first' and 'last' are valid as well. 
+   * E.g.: first-3,5,6-last
+   * 
+   * @param value	the new attribute index range
+   */
+  public void setAttributeIndices(String value);
+  
+  /**
+   * Gets the range of attributes used in the calculation of the distance.
+   * 
+   * @return		the attribute index range
+   */
+  public String getAttributeIndices();
+  
+  /**
+   * Sets whether the matching sense of attribute indices is inverted or not.
+   * 
+   * @param value	if true the matching sense is inverted
+   */
+  public void setInvertSelection(boolean value);
+  
+  /**
+   * Gets whether the matching sense of attribute indices is inverted or not.
+   * 
+   * @return		true if the matching sense is inverted
+   */
+  public boolean getInvertSelection();
 
   /**
    * Calculates the distance between two instances.
