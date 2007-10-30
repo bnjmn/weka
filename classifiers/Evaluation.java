@@ -173,7 +173,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.82 $
+ * @version  $Revision: 1.83 $
  */
 public class Evaluation
 implements Summarizable {
@@ -937,6 +937,19 @@ implements Summarizable {
       // Load classifier from file
       if (objectInputStream != null) {
 	classifier = (Classifier) objectInputStream.readObject();
+        // try and read a header (if present)
+        Instances savedStructure = null;
+        try {
+          savedStructure = (Instances) objectInputStream.readObject();
+        } catch (Exception ex) {
+          // don't make a fuss
+        }
+        if (savedStructure != null) {
+          // test for compatibility with template
+          if (!template.equalHeaders(savedStructure)) {
+            throw new Exception("training and test set are not compatible");
+          }
+        }
 	objectInputStream.close();
       }
       else {
@@ -994,6 +1007,9 @@ implements Summarizable {
 	}
 	ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
 	objectOutputStream.writeObject(classifier);
+        if (template != null) {
+          objectOutputStream.writeObject(template);
+        }
 	objectOutputStream.flush();
 	objectOutputStream.close();
       }
