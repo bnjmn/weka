@@ -252,7 +252,7 @@ import java.util.Vector;
  *
  * @author Florian Kleedorfer (kleedorfer@austria.fm)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class StringKernel 
   extends Kernel
@@ -1460,6 +1460,7 @@ public class StringKernel
     
     result.enable(Capability.STRING_ATTRIBUTES);
     result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
     
     return result;
   }
