@@ -73,7 +73,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class Puk 
   extends CachedKernel
@@ -380,6 +380,7 @@ public class Puk
     
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
     
     return result;
   }

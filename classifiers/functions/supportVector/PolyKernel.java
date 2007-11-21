@@ -66,7 +66,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class PolyKernel 
   extends CachedKernel {
@@ -254,6 +254,7 @@ public class PolyKernel
     
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
     
     return result;
   }
