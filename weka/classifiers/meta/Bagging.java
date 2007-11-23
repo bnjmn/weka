@@ -67,7 +67,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.3 $
+ * @version $Revision: 1.31.2.4 $
  */
 public class Bagging extends RandomizableIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer {
@@ -429,10 +429,14 @@ public class Bagging extends RandomizableIteratedSingleClassifierEnhancer
 	}
 	
 	// "vote"
-	if (numeric)
-	  vote = votes[0] / voteCount;    // average
-	else
+	if (numeric) {
+	  vote = votes[0];
+          if (voteCount > 0) {
+            vote  /= voteCount;    // average
+          }
+        } else {
 	  vote = Utils.maxIndex(votes);   // majority vote
+        }
 	
 	// error for instance
 	outOfBagCount += data.instance(i).weight();
