@@ -121,7 +121,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $
+ * @version $Revision: 1.40 $
  */
 public class Bagging
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -557,10 +557,14 @@ public class Bagging
 	}
 	
 	// "vote"
-	if (numeric)
-	  vote = votes[0] / voteCount;    // average
-	else
+	if (numeric) {
+	  vote = votes[0];
+          if (voteCount > 0) {
+            vote  /= voteCount;    // average
+          }
+        } else {
 	  vote = Utils.maxIndex(votes);   // majority vote
+        }
 	
 	// error for instance
 	outOfBagCount += data.instance(i).weight();
