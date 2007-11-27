@@ -46,7 +46,8 @@ import  weka.core.*;
  * of the number of attributes in the data set. (default = 1). <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.2 $
+ *         Martin Guetlein (cashing merit of expanded nodes) 
+ * @version $Revision: 1.24.2.3 $
  */
 public class BestFirst extends ASSearch 
   implements OptionHandler, StartSetHandler
@@ -604,7 +605,7 @@ public class BestFirst extends ASSearch
    * @return an array (not necessarily ordered) of selected attribute indexes
    * @exception Exception if the search can't be completed
    */
-  public int[] search (ASEvaluation ASEval, Instances data)
+    public int[] search (ASEvaluation ASEval, Instances data)
     throws Exception {
     m_totalEvals = 0;
     if (!(ASEval instanceof SubsetEvaluator)) {
@@ -628,11 +629,9 @@ public class BestFirst extends ASSearch
     int size = 0;
     int done;
     int sd = m_searchDirection;
-    int evals = 0;
     BitSet best_group, temp_group;
     int stale;
     double best_merit;
-    boolean ok = true;
     double merit;
     boolean z;
     boolean added;
@@ -686,7 +685,7 @@ public class BestFirst extends ASSearch
     bfList.addToList(best, best_merit);
     BitSet tt = (BitSet)best_group.clone();
     String hashC = tt.toString();
-    lookup.put(hashC, "");
+    lookup.put(hashC, new Double(best_merit));
 
     while (stale < m_maxStale) {
       added = false;
@@ -745,51 +744,55 @@ public class BestFirst extends ASSearch
 	       in the list (or has been fully expanded) */
 	    tt = (BitSet)temp_group.clone();
 	    hashC = tt.toString();
+	    
 	    if (lookup.containsKey(hashC) == false) {
 	      merit = ASEvaluator.evaluateSubset(temp_group);
 	      m_totalEvals++;
-
-	      if (m_debug) {
-		System.out.print("Group: ");
-		printGroup(tt, m_numAttribs);
-		System.out.println("Merit: " + merit);
-	      }
-
-	      // is this better than the best?
-	      if (sd == SELECTION_FORWARD) {
-		z = ((merit - best_merit) > 0.00001);
-	      }
-	      else {
-		//		z = ((merit >= best_merit) && ((size) < best_size));
-		if (merit == best_merit) {
-		  z = (size < best_size);
-		} else {
-		  z = (merit > best_merit);
-		}
-	      }
-
-	      if (z) {
-		added = true;
-		stale = 0;
-		best_merit = merit;
-		//		best_size = (size + best_size);
-		best_size = size;
-		best_group = (BitSet)(temp_group.clone());
-	      }
-
+	      
+	      // insert this one in the hashtable
 	      if (insertCount > m_cacheSize * m_numAttribs) {
 		lookup = new Hashtable(m_cacheSize * m_numAttribs);
 		insertCount = 0;
 	      }
-	      // insert this one in the list and in the hash table
-	      Object [] add = new Object[1];
-	      add[0] = tt.clone();
-	      bfList.addToList(add, merit);
 	      hashC = tt.toString();
-	      lookup.put(hashC, "");
-	      insertCount++;
-	    } else {
-	      cacheHits++;
+    	      lookup.put(hashC, new Double(merit));
+    	      insertCount++;
+	    }
+	    else {
+	      merit = ((Double)lookup.get(hashC)).doubleValue();
+	      cacheHits++;  
+	    }
+	    
+	    // insert this one in the list
+	    Object[] add = new Object[1];
+	    add[0] = tt.clone();
+	    bfList.addToList(add, merit);
+	    
+	    if (m_debug) {
+	      System.out.print("Group: ");
+	      printGroup(tt, m_numAttribs);
+	      System.out.println("Merit: " + merit);
+	    }
+
+	    // is this better than the best?
+	    if (sd == SELECTION_FORWARD) {
+	      z = ((merit - best_merit) > 0.00001);
+	    }
+	    else {
+	      if (merit == best_merit) {
+		z = (size < best_size);
+	      } else {
+		z = (merit >  best_merit);
+	      } 
+	    }
+
+	    if (z) {
+	      added = true;
+	      stale = 0;
+	      best_merit = merit;
+	      //		best_size = (size + best_size);
+	      best_size = size;
+	      best_group = (BitSet)(temp_group.clone());
 	    }
 
 	    // unset this addition(deletion)
