@@ -79,7 +79,7 @@ import java.lang.reflect.Method;
  * ------------------------------------------------------------------------ <p>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.35.2.4 $
+ * @version  $Revision: 1.35.2.5 $
  */
 public class AttributeSelection implements Serializable {
 
@@ -1017,16 +1017,16 @@ public class AttributeSelection implements Serializable {
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
     optionsText.append("-h display this help\n");
-    optionsText.append("-I <name of input file>\n");
+    optionsText.append("-i <name of input file>\n");
     optionsText.append("\tSets training file.\n");
-    optionsText.append("-C <class index>\n");
+    optionsText.append("-c <class index>\n");
     optionsText.append("\tSets the class index for supervised attribute\n");
     optionsText.append("\tselection. Default=last column.\n");
-    optionsText.append("-S <Class name>\n");
+    optionsText.append("-s <Class name>\n");
     optionsText.append("\tSets search method for subset evaluators.\n");
-    optionsText.append("-X <number of folds>\n");
+    optionsText.append("-x <number of folds>\n");
     optionsText.append("\tPerform a cross validation.\n");
-    optionsText.append("-N <random number seed>\n");
+    optionsText.append("-n <random number seed>\n");
     optionsText.append("\tUse in conjunction with -X.\n");
 
     // Get attribute evaluator-specific options
