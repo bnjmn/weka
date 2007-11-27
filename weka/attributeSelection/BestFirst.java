@@ -67,7 +67,8 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ *         Martin Guetlein (cashing merit of expanded nodes) 
+ * @version $Revision: 1.28 $
  */
 public class BestFirst 
   extends ASSearch 
@@ -658,8 +659,7 @@ public class BestFirst
 
     if (ASEval instanceof UnsupervisedSubsetEvaluator) {
       m_hasClass = false;
-    }
-    else {
+    } else {
       m_hasClass = true;
       m_classIndex = data.classIndex();
     }
@@ -700,8 +700,7 @@ public class BestFirst
 
       best_size = m_starting.length;
       m_totalEvals++;
-    }
-    else {
+    } else {
       if (m_searchDirection == SELECTION_BACKWARD) {
 	setStartSet("1-last");
 	m_starting = new int[m_numAttribs];
@@ -727,17 +726,16 @@ public class BestFirst
     bfList.addToList(best, best_merit);
     BitSet tt = (BitSet)best_group.clone();
     String hashC = tt.toString();
-    lookup.put(hashC, "");
+    lookup.put(hashC, new Double(best_merit));
 
     while (stale < m_maxStale) {
       added = false;
 
       if (m_searchDirection == SELECTION_BIDIRECTIONAL) {
 	// bi-directional search
-	  done = 2;
-	  sd = SELECTION_FORWARD;
-	}
-      else {
+        done = 2;
+        sd = SELECTION_FORWARD;
+      } else {
 	done = 1;
       }
 
@@ -766,18 +764,16 @@ public class BestFirst
 	for (i = 0; i < m_numAttribs; i++) {
 	  if (sd == SELECTION_FORWARD) {
 	    z = ((i != m_classIndex) && (!temp_group.get(i)));
-	  }
-	  else {
+	  } else {
 	    z = ((i != m_classIndex) && (temp_group.get(i)));
 	  }
-
+          
 	  if (z) {
 	    // set the bit (attribute to add/delete)
 	    if (sd == SELECTION_FORWARD) {
 	      temp_group.set(i);
 	      size++;
-	    }
-	    else {
+	    } else {
 	      temp_group.clear(i);
 	      size--;
 	    }
@@ -786,58 +782,60 @@ public class BestFirst
 	       in the list (or has been fully expanded) */
 	    tt = (BitSet)temp_group.clone();
 	    hashC = tt.toString();
+	    
 	    if (lookup.containsKey(hashC) == false) {
 	      merit = ASEvaluator.evaluateSubset(temp_group);
 	      m_totalEvals++;
-
-	      if (m_debug) {
-		System.out.print("Group: ");
-		printGroup(tt, m_numAttribs);
-		System.out.println("Merit: " + merit);
-	      }
-
-	      // is this better than the best?
-	      if (sd == SELECTION_FORWARD) {
-		z = ((merit - best_merit) > 0.00001);
-	      }
-	      else {
-		if (merit == best_merit) {
-		  z = (size < best_size);
-		} else {
-		  z = (merit >  best_merit);
-		} 
-	      }
-
-	      if (z) {
-		added = true;
-		stale = 0;
-		best_merit = merit;
-		//		best_size = (size + best_size);
-		best_size = size;
-		best_group = (BitSet)(temp_group.clone());
-	      }
-
+	      
+	      // insert this one in the hashtable
 	      if (insertCount > m_cacheSize * m_numAttribs) {
 		lookup = new Hashtable(m_cacheSize * m_numAttribs);
 		insertCount = 0;
 	      }
-	      // insert this one in the list and in the hash table
-	      Object [] add = new Object[1];
-	      add[0] = tt.clone();
-	      bfList.addToList(add, merit);
 	      hashC = tt.toString();
-	      lookup.put(hashC, "");
-	      insertCount++;
+    	      lookup.put(hashC, new Double(merit));
+    	      insertCount++;
 	    } else {
-	      cacheHits++;
+	      merit = ((Double)lookup.get(hashC)).doubleValue();
+	      cacheHits++;  
+	    }
+	    
+	    // insert this one in the list
+	    Object[] add = new Object[1];
+	    add[0] = tt.clone();
+	    bfList.addToList(add, merit);
+	    
+	    if (m_debug) {
+	      System.out.print("Group: ");
+	      printGroup(tt, m_numAttribs);
+	      System.out.println("Merit: " + merit);
+	    }
+
+	    // is this better than the best?
+	    if (sd == SELECTION_FORWARD) {
+	      z = ((merit - best_merit) > 0.00001);
+	    } else {
+	      if (merit == best_merit) {
+		z = (size < best_size);
+	      } else {
+		z = (merit >  best_merit);
+	      } 
+	    }
+
+	    if (z) {
+	      added = true;
+	      stale = 0;
+	      best_merit = merit;
+	      //		best_size = (size + best_size);
+	      best_size = size;
+	      best_group = (BitSet)(temp_group.clone());
 	    }
 
 	    // unset this addition(deletion)
 	    if (sd == SELECTION_FORWARD) {
 	      temp_group.clear(i);
 	      size--;
-	    }
-	    else {
+	    } else {
 	      temp_group.set(i);
 	      size++;
 	    }
