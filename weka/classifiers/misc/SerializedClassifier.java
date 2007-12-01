@@ -56,7 +56,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class SerializedClassifier
   extends Classifier {
@@ -186,6 +186,15 @@ public class SerializedClassifier
    */
   public void setModelFile(File value) {
     m_ModelFile = value;
+    
+    if (value.exists() && value.isFile()) {
+      try {
+	initModel();
+      }
+      catch (Exception e) {
+	throw new IllegalArgumentException("Cannot load model from file '" + value + "': " + e);
+      }
+    }
   }
 
   /**
@@ -231,6 +240,14 @@ public class SerializedClassifier
   public Capabilities getCapabilities() {
     Capabilities        result;
 
+    // init model if necessary
+    try {
+      initModel();
+    }
+    catch (Exception e) {
+      System.err.println(e);
+    }
+
     if (m_Model != null)
       result = m_Model.getCapabilities();
     else
@@ -271,6 +288,7 @@ public class SerializedClassifier
    * @throws Exception  if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
+    // init model if necessary
     initModel();
 
     // can classifier handle the data?
