@@ -81,6 +81,12 @@ import java.util.Vector;
  * <pre> -M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]
  *  Measure used for evaluation (default is FMEASURE).
  * </pre>
+ *
+ * <pre> -manual &lt;real&gt;
+ * Sets a manual threshold to use. If set (non-negative value
+ * between 0 and 1), then all options pertaining to automatic
+ * threshold selection are ignored (default -1, i.e. do not use
+ * a manual threshold).</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -112,7 +118,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $ 
+ * @version $Revision: 1.40 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 
@@ -217,6 +223,11 @@ public class ThresholdSelector
 
   /** evaluation measure used for determining threshold **/
   int m_nMeasure = FMEASURE;
+
+  /** True if a manually set threshold is being used */
+  protected boolean m_manualThreshold = false;
+  /** -1 = not used by default */
+  protected double m_manualThresholdValue = -1;
 
   /** The minimum value for the criterion. If threshold adjustment
       yields less than that, the default threshold of 0.5 is used. */
@@ -445,6 +456,13 @@ public class ThresholdSelector
     newVector.addElement(new Option(
 	      "\tMeasure used for evaluation (default is FMEASURE).\n",
 	      "M", 1, "-M [FMEASURE|ACCURACY|TRUE_POS|TRUE_NEG|TP_RATE|PRECISION|RECALL]"));
+    
+    newVector.addElement(new Option(
+              "\tSet a manual threshold to use. This option overrides\n"
+              + "\tautomatic selection and options pertaining to\n"
+              + "\tautomatic selection will be ignored.\n"
+              + "\t(default -1, i.e. do not use a manual threshold).",
+              "manual", 1, "-manual <real>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -523,6 +541,14 @@ public class ThresholdSelector
    */
   public void setOptions(String[] options) throws Exception {
     
+    String manualS = Utils.getOption("manual", options);
+    if (manualS.length() > 0) {
+      double val = Double.parseDouble(manualS);
+      if (val >= 0.0) {
+        setManualThresholdValue(val);
+      } 
+    }
+
     String classString = Utils.getOption('C', options);
     if (classString.length() != 0) {
       setDesignatedClass(new SelectedTag(Integer.parseInt(classString) - 1, 
@@ -572,10 +598,13 @@ public class ThresholdSelector
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 10];
+    String [] options = new String [superOptions.length + 12];
 
     int current = 0;
 
+    if (m_manualThreshold) {
+      options[current++] = "-manual"; options[current++] = "" + getManualThresholdValue();
+    }
     options[current++] = "-C"; options[current++] = "" + (m_DesignatedClass + 1);
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
@@ -625,10 +654,15 @@ public class ThresholdSelector
     instances.deleteWithMissingClass();
     
     AttributeStats stats = instances.attributeStats(instances.classIndex());
-    m_BestThreshold = 0.5;
+    if (m_manualThreshold) {
+      m_BestThreshold = m_manualThresholdValue;
+    } else {
+      m_BestThreshold = 0.5;
+    }
     m_BestValue = MIN_VALUE;
     m_HighThreshold = 1;
     m_LowThreshold = 0;
+
     // If data contains only one instance of positive data
     // optimize on training data
     if (stats.distinctCount != 2) {
@@ -677,7 +711,11 @@ public class ThresholdSelector
         + instances.classAttribute().value(m_DesignatedClass));
       */
       
-      
+      if (m_manualThreshold) {
+        m_Classifier.buildClassifier(instances);
+        return;
+      }
+
       if (stats.nominalCounts[m_DesignatedClass] == 1) {
         System.err.println("Only 1 positive found: optimizing on training data");
         findThreshold(getPredictions(instances, EVAL_TRAINING_SET, 0));
@@ -937,6 +975,48 @@ public class ThresholdSelector
     else throw new Exception("Classifier: " + getClassifierSpec()
 			     + " cannot be graphed");
   }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String manualThresholdValueTipText() {
+
+    return "Sets a manual threshold value to use. "
+      + "If this is set (non-negative value between 0 and 1), then "
+      + "all options pertaining to automatic threshold selection are "
+      + "ignored. ";
+  }
+
+  /**
+   * Sets the value for a manual threshold. If this option
+   * is set (non-negative value between 0 and 1), then options 
+   * pertaining to automatic threshold selection are ignored.
+   *
+   * @param threshold the manual threshold to use
+   */
+  public void setManualThresholdValue(double threshold) throws Exception {
+    m_manualThresholdValue = threshold;
+    if (threshold >= 0.0 && threshold <= 1.0) {
+      m_manualThreshold = true;
+    } else {
+      m_manualThreshold = false;
+      if (threshold >= 0) {
+        throw new IllegalArgumentException("Threshold must be in the "
+                                           + "range 0..1.");
+      }
+    }
+  }
+
+  /**
+   * Returns the value of the manual threshold. (a negative
+   * value indicates that no manual threshold is being used.
+   *
+   * @return the value of the manual threshold.
+   */
+  public double getManualThresholdValue() {
+    return m_manualThresholdValue;
+  }
  
   /**
    * Returns description of the cross-validated classifier.
@@ -953,27 +1033,31 @@ public class ThresholdSelector
 
     result += "Index of designated class: " + m_DesignatedClass + "\n";
 
-    result += "Evaluation mode: ";
-    switch (m_EvalMode) {
-    case EVAL_CROSS_VALIDATION:
-      result += m_NumXValFolds + "-fold cross-validation";
-      break;
-    case EVAL_TUNED_SPLIT:
-      result += "tuning on 1/" + m_NumXValFolds + " of the data";
-      break;
-    case EVAL_TRAINING_SET:
-    default:
-      result += "tuning on the training data";
-    }
-    result += "\n";
+    if (m_manualThreshold) {
+      result += "User supplied threshold: " + m_BestThreshold + "\n";
+    } else {
+      result += "Evaluation mode: ";
+      switch (m_EvalMode) {
+      case EVAL_CROSS_VALIDATION:
+        result += m_NumXValFolds + "-fold cross-validation";
+        break;
+      case EVAL_TUNED_SPLIT:
+        result += "tuning on 1/" + m_NumXValFolds + " of the data";
+        break;
+      case EVAL_TRAINING_SET:
+      default:
+        result += "tuning on the training data";
+      }
+      result += "\n";
 
-    result += "Threshold: " + m_BestThreshold + "\n";
-    result += "Best value: " + m_BestValue + "\n";
-    if (m_RangeMode == RANGE_BOUNDS) {
-      result += "Expanding range [" + m_LowThreshold + "," + m_HighThreshold
-        + "] to [0, 1]\n";
+      result += "Threshold: " + m_BestThreshold + "\n";
+      result += "Best value: " + m_BestValue + "\n";
+      if (m_RangeMode == RANGE_BOUNDS) {
+        result += "Expanding range [" + m_LowThreshold + "," + m_HighThreshold
+          + "] to [0, 1]\n";
+      }
+      result += "Measure: " + getMeasure().getSelectedTag().getReadable() + "\n";
     }
-    result += "Measure: " + getMeasure().getSelectedTag().getReadable() + "\n";
     result += m_Classifier.toString();
     return result;
   }
