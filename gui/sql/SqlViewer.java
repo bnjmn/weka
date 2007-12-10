@@ -53,7 +53,7 @@ import javax.swing.JPanel;
  * Represents a little tool for querying SQL databases.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.5 $
+ * @version     $Revision: 1.5.2.1 $
  */
 public class SqlViewer 
   extends    JPanel 
@@ -224,7 +224,7 @@ public class SqlViewer
       try {
         if (evt.hasResult()) {
           helper = new ResultSetHelper(evt.getResultSet());
-          if (evt.getMaxRows() > 0)
+          if ((evt.getMaxRows() > 0) && (helper.getRowCount() >= evt.getMaxRows()))
             m_InfoPanel.append(helper.getRowCount() + " rows selected (" 
                 + evt.getMaxRows() + " displayed).", 
                 "information_small.gif");
