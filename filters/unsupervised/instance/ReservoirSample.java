@@ -79,7 +79,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.1.2.2 $ 
+ * @version $Revision: 1.1.2.3 $ 
  */
 public class ReservoirSample 
   extends Filter 
@@ -226,7 +226,7 @@ public class ReservoirSample
    * displaying in the explorer/experimenter gui
    */
   public String sampleSizeTipText() {
-    return "Size of the subsample (reservoir), i.e. the number of instances.";
+    return "Size of the subsample (reservoir). i.e. the number of instances.";
   }
 
   /**
@@ -234,7 +234,7 @@ public class ReservoirSample
    *
    * @return the subsample size
    */
-  public double getSampleSize() {
+  public int getSampleSize() {
     return m_SampleSize;
   }
   
