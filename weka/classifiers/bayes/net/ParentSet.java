@@ -30,7 +30,7 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ParentSet 
   implements Serializable {
@@ -52,6 +52,7 @@ public class ParentSet
   public int getParent(int iParent) {
     return m_nParents[iParent];
   } 
+  public int [] getParents() {return m_nParents;}
 
   /**
    * sets index parent of parent specified by index
@@ -104,6 +105,18 @@ public class ParentSet
     return m_nCardinalityOfParents;
   } 
 
+  /**
+   * returns cardinality of parents after recalculation
+   * 
+   * @return the cardinality
+   */
+  public int getFreshCardinalityOfParents(Instances _Instances) {
+	  m_nCardinalityOfParents = 1;
+	  for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+		m_nCardinalityOfParents *= _Instances.attribute(m_nParents[iParent]).numValues();
+	  }
+      return m_nCardinalityOfParents;
+  }
   /**
    * default constructor
    */

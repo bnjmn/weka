@@ -173,7 +173,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.81 $
+ * @version  $Revision: 1.83 $
  */
 public class Evaluation
 implements Summarizable {
@@ -937,6 +937,19 @@ implements Summarizable {
       // Load classifier from file
       if (objectInputStream != null) {
 	classifier = (Classifier) objectInputStream.readObject();
+        // try and read a header (if present)
+        Instances savedStructure = null;
+        try {
+          savedStructure = (Instances) objectInputStream.readObject();
+        } catch (Exception ex) {
+          // don't make a fuss
+        }
+        if (savedStructure != null) {
+          // test for compatibility with template
+          if (!template.equalHeaders(savedStructure)) {
+            throw new Exception("training and test set are not compatible");
+          }
+        }
 	objectInputStream.close();
       }
       else {
@@ -994,6 +1007,9 @@ implements Summarizable {
 	}
 	ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
 	objectOutputStream.writeObject(classifier);
+        if (template != null) {
+          objectOutputStream.writeObject(template);
+        }
 	objectOutputStream.flush();
 	objectOutputStream.close();
       }
@@ -1650,7 +1666,7 @@ implements Summarizable {
   public final double errorRate() {
 
     if (!m_ClassIsNominal) {
-      return Math.sqrt(m_SumSqrErr / m_WithClass);
+      return Math.sqrt(m_SumSqrErr / (m_WithClass - m_Unclassified));
     }
     if (m_CostMatrix == null) {
       return m_Incorrect / m_WithClass;
@@ -1708,12 +1724,14 @@ implements Summarizable {
 
     double correlation = 0;
     double varActual = 
-      m_SumSqrClass - m_SumClass * m_SumClass / m_WithClass;
+      m_SumSqrClass - m_SumClass * m_SumClass / 
+      (m_WithClass - m_Unclassified);
     double varPredicted = 
       m_SumSqrPredicted - m_SumPredicted * m_SumPredicted / 
-      m_WithClass;
+      (m_WithClass - m_Unclassified);
     double varProd = 
-      m_SumClassPredicted - m_SumClass * m_SumPredicted / m_WithClass;
+      m_SumClassPredicted - m_SumClass * m_SumPredicted / 
+      (m_WithClass - m_Unclassified);
 
     if (varActual * varPredicted <= 0) {
       correlation = 0.0;
@@ -1733,7 +1751,7 @@ implements Summarizable {
    */
   public final double meanAbsoluteError() {
 
-    return m_SumAbsErr / m_WithClass;
+    return m_SumAbsErr / (m_WithClass - m_Unclassified);
   }
 
   /**
@@ -1770,7 +1788,7 @@ implements Summarizable {
    */
   public final double rootMeanSquaredError() {
 
-    return Math.sqrt(m_SumSqrErr / m_WithClass);
+    return Math.sqrt(m_SumSqrErr / (m_WithClass - m_Unclassified));
   }
 
   /**
@@ -1863,7 +1881,7 @@ implements Summarizable {
     if (m_NoPriors)
       return Double.NaN;
 
-    return m_SumKBInfo / m_WithClass;
+    return m_SumKBInfo / (m_WithClass - m_Unclassified);
   }
 
   /**
@@ -1935,7 +1953,7 @@ implements Summarizable {
     if (m_NoPriors)
       return Double.NaN;
 
-    return m_SumSchemeEntropy / m_WithClass;
+    return m_SumSchemeEntropy / (m_WithClass - m_Unclassified);
   }
 
   /**
@@ -1963,7 +1981,8 @@ implements Summarizable {
     if (m_NoPriors)
       return Double.NaN;
 
-    return (m_SumPriorEntropy - m_SumSchemeEntropy) / m_WithClass;
+    return (m_SumPriorEntropy - m_SumSchemeEntropy) / 
+      (m_WithClass - m_Unclassified);
   }
 
   /**

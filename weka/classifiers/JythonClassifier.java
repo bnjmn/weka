@@ -61,7 +61,7 @@ import java.util.Vector;
  * code.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1 $
  */
 public class JythonClassifier 
   extends Classifier {
