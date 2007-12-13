@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.39.2.2 $
+   $Revision: 1.39.2.3 $
   ===========================================================================
 -->
 
@@ -293,7 +293,7 @@
   </target>
 
   <!-- Make a release -->
-  <target name="release" depends="run_tests, release_sub_tasks"
+  <target name="release" depends="run_tests"
    description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
   </target>
 
@@ -334,6 +334,10 @@
        release has been run first!!!). Also requires Ant version 1.7.0 or higher -->
   <target name="osx_application" description="Make an OS X application. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;. Assumes a release target has been run first!">
     <mkdir dir="${macdistrib}"/>
+    <mkdir dir="${macdistrib}/weka-${release}"/>
+    <copy todir="${macdistrib}/weka-${release}">
+      <fileset dir="weka-${release}/weka-${release}"/>
+    </copy>
     <taskdef name="jarbundler" 
              classname="net.sourceforge.jarbundler.JarBundler" />
     <jarbundler dir="${macdistrib}"
@@ -349,15 +353,7 @@
                 jvmversion="1.5+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
-        <include name="*.jar"/>
-        <include name="*.pdf"/>
-        <include name="changelogs/*"/>
-        <include name="doc/**/*"/>
-        <include name="data/*"/>
-        <include name="COPYING"/>
-        <include name="README"/>
-        <include name="documentation.html"/>
-        <include name="documentation.css"/>
+        <include name="weka.jar"/>
       </jarfileset>
     </jarbundler>
 
