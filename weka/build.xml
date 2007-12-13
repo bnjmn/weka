@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.39 $
+   $Revision: 1.40 $
   ===========================================================================
 -->
 
@@ -23,6 +23,7 @@
   <property name="javac_max_memory" value="256m"/>
   <property name="run_tests_fail" value="true"/>
   <property name="headless" value="false"/>
+  <property name="macdistrib" value="osx-distrib"/>
 
   <target name="init_all">
      <available file="weka" type="dir" 
@@ -292,8 +293,15 @@
   </target>
 
   <!-- Make a release -->
-  <target name="release" depends="run_tests, set_version, exejar, remotejar, srcjar, docs, changelog"
+  <target name="release" depends="run_tests, release_sub_tasks"
    description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
+  </target>
+
+  <target name="release_no_junit" depends="compile, release_sub_tasks"
+   description="Make a release in ${release} without running junit tests. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
+  </target>
+
+  <target name="release_sub_tasks" depends="set_version, exejar, remotejar, srcjar, docs, changelog">
     <!-- copy the docs to dist/docs -->
 
     <copy todir="${path_modifier}weka-${release}/weka-${release}/doc" >
@@ -320,6 +328,49 @@
     </copy>
     <zip destfile="${path_modifier}weka-${release}.zip" 
      basedir="${path_modifier}weka-${release}"/>
+  </target>
+
+  <!-- Make a Max OSX application (NOTE: assumes that release/release_no_junit or something that calls
+       release has been run first!!!). Also requires Ant version 1.7.0 or higher -->
+  <target name="osx_application" description="Make an OS X application. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;. Assumes a release target has been run first!">
+    <mkdir dir="${macdistrib}"/>
+    <taskdef name="jarbundler" 
+             classname="net.sourceforge.jarbundler.JarBundler" />
+    <jarbundler dir="${macdistrib}"
+                name="weka-${release}"
+                mainclass="weka.gui.Main"
+                icon="${path_modifier}weka/gui/weka_icon.icns"
+                version="${release}"
+                verbose="true"
+                VMOptions="-Xmx256M"
+                shortname="Weka"
+                arguments=""
+                workingdirectory="$APP_PACKAGE/Contents/Resources"
+                jvmversion="1.5+">
+      <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
+      <jarfileset dir="weka-${release}/weka-${release}">
+        <include name="*.jar"/>
+        <include name="*.pdf"/>
+        <include name="changelogs/*"/>
+        <include name="doc/**/*"/>
+        <include name="data/*"/>
+        <include name="COPYING"/>
+        <include name="README"/>
+        <include name="documentation.html"/>
+        <include name="documentation.css"/>
+      </jarfileset>
+    </jarbundler>
+
+    <!-- Make a .dmg disk image -->
+    <exec executable="/usr/bin/hdiutil" os="Mac OS X">
+      <arg value="create"/>
+      <arg value="-srcfolder"/>
+      <arg value="${macdistrib}"/>
+      <arg value="-volname"/>
+      <arg value="weka-${release}"/>
+      <arg value="-ov"/>
+      <arg value="${macdistrib}/weka-${release}.dmg"/>
+    </exec>
   </target>
 
 <!--
@@ -353,6 +404,12 @@
   <target name="release_from_cvs" 
    depends="init_build_from_cvs_checkout, release"
    description="Makes a release from a cvs checkout (needs ant to be run with -Dtag=&lt;REVISION_TO_CHECKOUT&gt;, -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changelog generation (eg. 20 Aug 2004)&gt;).">
+      <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
+  </target>
+
+  <target name="release_from_cvs_no_junit" 
+   depends="init_build_from_cvs_checkout, release_no_junit"
+   description="Makes a release from a cvs checkout without running junit tests (needs ant to be run with -Dtag=&lt;REVISION_TO_CHECKOUT&gt;, -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changelog generation (eg. 20 Aug 2004)&gt;).">
       <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
   </target>
 
