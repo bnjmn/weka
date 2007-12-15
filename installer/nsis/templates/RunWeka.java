@@ -56,7 +56,7 @@ import java.util.Vector;
  * Additional parameters will be appended to the generated java call.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RunWeka {
 
@@ -134,6 +134,56 @@ public class RunWeka {
   }
 
   /**
+   * Replaces all occurring environment variables in the given string and
+   * returns the result.
+   *
+   * @param s         the string to work on
+   * @return          the processed string
+   */
+  protected static String replaceEnv(String s) {
+    Vector      envs;
+    String      tmp;
+    String      result;
+    String      key;
+    String      value;
+    String      env;
+    int         i;
+
+    result = s;
+
+    // determine any environment variables
+    envs = new Vector();
+    tmp  = s;
+    while (tmp.indexOf("%") > -1) {
+      tmp = tmp.substring(tmp.indexOf("%") + 1);
+      if (tmp.indexOf("%") > -1) {
+        env = tmp.substring(0, tmp.indexOf("%"));
+        tmp = tmp.substring(tmp.indexOf("%") + 1);
+        envs.add(env);
+      }
+      else {
+        System.err.println("Environment variable '" + tmp + "' not closed with '%'!");
+        break;
+      }
+    }
+
+    // replace environment variables
+    for (i = 0; i < envs.size(); i++) {
+      key = (String) envs.get(i);
+      if (System.getenv().containsKey(key)) {
+        value  = System.getenv(key);
+        value  = value.replaceAll("\\\\", "/");
+        result = result.replaceAll("%" + key + "%", value);
+      }
+      else {
+        System.err.println("Environment variable '" + key + "' does not exist!");
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * runs Weka, "-h" displays all the available commands in RunWeka.ini
    *
    * @param args        the command line parameters
@@ -150,7 +200,7 @@ public class RunWeka {
 
     // other weka.jar?
     String wekajar = getOption("-w", args, "weka.jar");
-    wekajar = wekajar.replaceAll("\\\\", "\\\\\\\\");
+    wekajar = wekajar.replaceAll("\\\\", "/");
     if (debug)
       System.out.println("weka.jar: " + wekajar);
 
@@ -202,6 +252,8 @@ public class RunWeka {
         continue;
       placeholders.add(name);
     }
+    if (debug)
+      System.out.println("placeholders: " + placeholders);
 
     // build command
     String key;
@@ -209,6 +261,7 @@ public class RunWeka {
     for (int i = 0; i < placeholders.size(); i++) {
       key   = (String) placeholders.get(i);
       value = props.getProperty(key, "");
+      value = replaceEnv(value);
       cmd   = cmd.replaceAll("#" + key + "#", value);
     }
     for (int i = 0; i < args.length; i++) {
