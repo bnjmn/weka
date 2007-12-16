@@ -105,54 +105,54 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.57 $
+ * @version $Revision: 1.58 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
-  /** The object being configured */
+  /** The object being configured. */
   protected Object m_Object;
   
   /** Holds a copy of the current object that can be reverted to
-      if the user decides to cancel */
+      if the user decides to cancel. */
   protected Object m_Backup;
     
-  /** Handles property change notification */
+  /** Handles property change notification. */
   protected PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
     
-  /** The Class of objects being edited */
+  /** The Class of objects being edited. */
   protected Class m_ClassType;
     
-  /** The model containing the list of names to select from */
+  /** The model containing the list of names to select from. */
   protected Hashtable m_ObjectNames;
 
-  /** The GUI component for editing values, created when needed */
+  /** The GUI component for editing values, created when needed. */
   protected GOEPanel m_EditorComponent;
     
-  /** True if the GUI component is needed */
+  /** True if the GUI component is needed. */
   protected boolean m_Enabled = true;
     
-  /** The name of the properties file */
+  /** The name of the properties file. */
   protected static String PROPERTY_FILE = "weka/gui/GenericObjectEditor.props";
     
-  /** Contains the editor properties */
+  /** Contains the editor properties. */
   protected static Properties EDITOR_PROPERTIES;
 
-  /** the properties files containing the class/editor mappings */
+  /** the properties files containing the class/editor mappings. */
   public static final String GUIEDITORS_PROPERTY_FILE = "weka/gui/GUIEditors.props";
 
-  /** The tree node of the current object so we can re-select it for the user */
+  /** The tree node of the current object so we can re-select it for the user. */
   protected GOETreeNode m_treeNodeOfCurrentObject;
 
-  /** The property panel created for the objects */
+  /** The property panel created for the objects. */
   protected PropertyPanel m_ObjectPropertyPanel;
     
-  /** whether the class can be changed */
+  /** whether the class can be changed. */
   protected boolean m_canChangeClassInDialog;
   
-  /** whether the Weka Editors were already registered */
+  /** whether the Weka Editors were already registered. */
   protected static boolean m_EditorsRegistered;
 
-  /** for filtering the tree based on the Capabilities of the leaves */
+  /** for filtering the tree based on the Capabilities of the leaves. */
   protected Capabilities m_CapabilitiesFilter = null;
   
   /** 
@@ -219,21 +219,21 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
-   * A specialized TreeNode for supporting filtering via Capabilities
+   * A specialized TreeNode for supporting filtering via Capabilities.
    */
   public class GOETreeNode
     extends DefaultMutableTreeNode {
     
-    /** for serialization */
+    /** for serialization. */
     static final long serialVersionUID = -1707872446682150133L;
     
-    /** color for "no support" */
+    /** color for "no support". */
     public final static String NO_SUPPORT = "red";
     
-    /** color for "maybe support" */
+    /** color for "maybe support". */
     public final static String MAYBE_SUPPORT = "blue";
     
-    /** the Capabilities object to use for filtering */
+    /** the Capabilities object to use for filtering. */
     protected Capabilities m_Capabilities = null;
     
     /**
@@ -269,7 +269,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * generates if necessary a Capabilities object for the given leaf
+     * generates if necessary a Capabilities object for the given leaf.
      */
     protected void initCapabilities() {
       String 	classname;
@@ -296,7 +296,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * returns a string representation of this treenode
+     * returns a string representation of this treenode.
      * 
      * @return 		the text to display 
      */
@@ -325,32 +325,32 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public class CapabilitiesFilterDialog 
     extends JDialog {
     
-    /** for serialization */
+    /** for serialization. */
     static final long serialVersionUID = -7845503345689646266L;
     
-    /** the dialog itself */
+    /** the dialog itself. */
     protected JDialog m_Self;
     
-    /** the popup to display again */
+    /** the popup to display again. */
     protected JPopupMenu m_Popup = null;
     
-    /** the capabilities used for initializing the dialog */
+    /** the capabilities used for initializing the dialog. */
     protected Capabilities m_Capabilities = new Capabilities(null);
 
-    /** the label, listing the name of the superclass */
+    /** the label, listing the name of the superclass. */
     protected JLabel m_InfoLabel = new JLabel();
     
-    /** the list with all the capabilities */
+    /** the list with all the capabilities. */
     protected CheckBoxList m_List = new CheckBoxList();
     
-    /** the OK button */
+    /** the OK button. */
     protected JButton m_OkButton = new JButton("OK");
     
-    /** the Cancel button */
+    /** the Cancel button. */
     protected JButton m_CancelButton = new JButton("Cancel");
     
     /**
-     * creates a dialog to choose Capabilities from
+     * creates a dialog to choose Capabilities from.
      */
     public CapabilitiesFilterDialog() {
       super();
@@ -361,7 +361,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * sets up the GUI
+     * sets up the GUI.
      */
     protected void initGUI() {
       JPanel			panel;
@@ -417,7 +417,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 
     /**
-     * transfers the Capabilities object to the JList
+     * transfers the Capabilities object to the JList.
      * 
      * @see #m_Capabilities
      * @see #m_List
@@ -433,7 +433,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * transfers the selected Capabilities from the JList to the 
-     * Capabilities object
+     * Capabilities object.
      * 
      * @see #m_Capabilities
      * @see #m_List
@@ -452,7 +452,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * sets the initial capabilities
+     * sets the initial capabilities.
      * 
      * @param value the capabilities to use
      */
@@ -466,7 +466,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * returns the currently selected capabilities
+     * returns the currently selected capabilities.
      * 
      * @return the currently selected capabilities
      */
@@ -475,7 +475,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * sets the JPopupMenu to display again after closing the dialog
+     * sets the JPopupMenu to display again after closing the dialog.
      * 
      * @param value the JPopupMenu to display again
      */
@@ -484,7 +484,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * returns the currently set JPopupMenu
+     * returns the currently set JPopupMenu.
      * 
      * @return the current JPopupMenu
      */
@@ -509,25 +509,25 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public class JTreePopupMenu 
     extends JPopupMenu {
     
-    /** for serialization */
+    /** for serialization. */
     static final long serialVersionUID = -3404546329655057387L;
 
-    /** the popup itself */
+    /** the popup itself. */
     private JPopupMenu m_Self;
     
-    /** The tree */
+    /** The tree. */
     private JTree m_tree;
 
-    /** The scroller */
+    /** The scroller. */
     private JScrollPane m_scroller;
 
-    /** The filter button in case of CapabilitiesHandlers */
+    /** The filter button in case of CapabilitiesHandlers. */
     private JButton m_FilterButton = new JButton("Filter...");
 
-    /** The remove filter button in case of CapabilitiesHandlers */
+    /** The remove filter button in case of CapabilitiesHandlers. */
     private JButton m_RemoveFilterButton = new JButton("Remove filter");
     
-    /** The button for closing the popup again */
+    /** The button for closing the popup again. */
     private JButton m_CloseButton = new JButton("Close");
     
     /**
@@ -637,31 +637,31 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public class GOEPanel 
     extends JPanel {
     
-    /** for serialization */
+    /** for serialization. */
     static final long serialVersionUID = 3656028520876011335L;
     
-    /** The component that performs classifier customization */
+    /** The component that performs classifier customization. */
     protected PropertySheetPanel m_ChildPropertySheet;
     
-    /** The name of the current class */
+    /** The name of the current class. */
     protected JLabel m_ClassNameLabel;
 
-    /** Open object from disk */
+    /** Open object from disk. */
     protected JButton m_OpenBut;
     
-    /** Save object to disk */
+    /** Save object to disk. */
     protected JButton m_SaveBut;
     
-    /** ok button */
+    /** ok button. */
     protected JButton m_okBut;
     
-    /** cancel button */
+    /** cancel button. */
     protected JButton m_cancelBut;
     
-    /** The filechooser for opening and saving object files */
+    /** The filechooser for opening and saving object files. */
     protected JFileChooser m_FileChooser;
     
-    /** Creates the GUI editor component */
+    /** Creates the GUI editor component. */
     public GOEPanel() {
     
       m_Backup = copyObject(m_Object);
@@ -859,7 +859,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * Makes a copy of an object using serialization
+     * Makes a copy of an object using serialization.
+     * 
      * @param source the object to copy
      * @return a copy of the source object
      */
@@ -880,6 +881,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     
     /**
      * Allows customization of the action label on the dialog.
+     * 
      * @param newLabel the new string for the ok button
      */
     public void setOkButtonText(String newLabel) {
@@ -888,7 +890,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 
     /** 
-     * This is used to hook an action listener to the ok button
+     * This is used to hook an action listener to the ok button.
+     * 
      * @param a The action listener.
      */
     public void addOkListener(ActionListener a) {
@@ -897,7 +900,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * This is used to hook an action listener to the cancel button
+     * This is used to hook an action listener to the cancel button.
+     * 
      * @param a The action listener.
      */
     public void addCancelListener(ActionListener a) {
@@ -906,7 +910,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 	
     /**
-     * This is used to remove an action listener from the ok button
+     * This is used to remove an action listener from the ok button.
+     * 
      * @param a The action listener
      */
     public void removeOkListener(ActionListener a) {
@@ -915,7 +920,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
     
     /**
-     * This is used to remove an action listener from the cancel button
+     * This is used to remove an action listener from the cancel button.
+     * 
      * @param a The action listener
      */
     public void removeCancelListener(ActionListener a) {
@@ -923,7 +929,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       m_cancelBut.removeActionListener(a);
     }
     
-    /** Updates the child property sheet, and creates if needed */
+    /**
+     * Updates the child property sheet, and creates if needed.
+     */
     public void updateChildPropertySheet() {
       
       // Update the object name displayed
@@ -964,7 +972,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
   
   /**
-   * registers all the editors in Weka
+   * registers all the editors in Weka.
    */
   public static void registerEditors() {
     Properties 		props;
@@ -1023,7 +1031,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   
   /**
    * returns the name of the root element of the given class name, 
-   * <code>null</code> if it doesn't contain the separator
+   * <code>null</code> if it doesn't contain the separator.
    * 
    * @param clsname the full classname
    * @param separator the separator 
@@ -1187,7 +1195,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   
   /**
    * Sets the current object to be the default, taken as the first item in
-   * the chooser
+   * the chooser.
    */
   public void setDefaultValue() {
     
@@ -1474,7 +1482,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
-   * creates a classname from the given path
+   * creates a classname from the given path.
    * 
    * @param path	the path to generate the classname from
    * @return		the generated classname
@@ -1662,7 +1670,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
-   * Makes a copy of an object using serialization
+   * Makes a copy of an object using serialization.
+   * 
    * @param source the object to copy
    * @return a copy of the source object
    * @exception Exception if the copy fails
@@ -1670,6 +1679,31 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public Object makeCopy(Object source) throws Exception {
     SerializedObject so = new SerializedObject(source);
     Object result = so.getObject();
+    return result;
+  }
+  
+  /**
+   * Returns the available classnames for a certain property in the 
+   * props file.
+   * 
+   * @param property	the property to get the classnames for
+   * @return		the classnames
+   */
+  public static Vector<String> getClassnames(String property) {
+    Vector<String>	result;
+    String		value;
+    String[]		items;
+    int			i;
+    
+    result = new Vector<String>();
+    
+    value = EDITOR_PROPERTIES.getProperty(property, "").replaceAll(" ", "").trim();
+    if (value.length() > 0) {
+      items = value.split(",");
+      for (i = 0; i < items.length; i++)
+	result.add(items[i]);
+    }
+    
     return result;
   }
 

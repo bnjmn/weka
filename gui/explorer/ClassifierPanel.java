@@ -31,7 +31,6 @@ import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.ClassDiscovery;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -134,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.109 $
+ * @version $Revision: 1.110 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1859,15 +1858,13 @@ public class ClassifierPanel
     resultListMenu.add(visCost);
     
     JMenu visPlugins = new JMenu("Plugins");
-    Vector pluginsVector = ClassDiscovery.find(VisualizePlugin.class, "weka.gui.visualize.plugins");
+    Vector pluginsVector = GenericObjectEditor.getClassnames(VisualizePlugin.class.getName());
     boolean availablePlugins = false;
     for (int i=0; i<pluginsVector.size(); i++) {
       String className = (String)(pluginsVector.elementAt(i));
       try {
-        if (className.matches(".*\\.VisualizePlugin"))
-          continue;
-        VisualizePlugin plugin = (VisualizePlugin)(Class.forName(className).newInstance());
-        if (plugin==null)
+        VisualizePlugin plugin = (VisualizePlugin) Class.forName(className).newInstance();
+        if (plugin == null)
           continue;
         availablePlugins = true;
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);

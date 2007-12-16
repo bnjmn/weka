@@ -1,11 +1,11 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.16 $
+# Version: $Revision: 1.17 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
-UseDynamic=true
+UseDynamic=false
 
 # Lists the ResultProducers-Packages I want to choose from
 weka.experiment.ResultProducer=\
@@ -137,3 +137,36 @@ weka.core.tokenizers.Tokenizer=\
 # List of extensions for the main GUI, package "weka.gui" is not allowed
 weka.gui.MainMenuExtension=
 
+# List of Explorer visualization plugins (classification panel)
+weka.gui.visualize.plugins.VisualizePlugin=\
+ weka.gui.visualize.plugins
+
+# List of writers for outputting graphics
+weka.gui.visualize.JComponentWriter=\
+ weka.gui.visualize
+
+# List of Experimenter result matrices
+weka.experiment.ResultMatrix=\
+ weka.experiment
+
+# List of Tester algorithms in the Experimenter
+weka.experiment.Tester=\
+ weka.experiment
+
+# List of file loaders
+weka.core.converters.AbstractFileLoader=\
+ weka.core.converters
+
+# List of file savers
+weka.core.converters.AbstractFileSaver=\
+ weka.core.converters
+
+# List of snowball stemmers.
+#
+# Note: the snowball jar needs to be in the CLASSPATH to make these stemmers
+#       available. See the following links for more information:
+#       http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers
+#       http://snowball.tartarus.org/
+#
+#org.tartarus.snowball.SnowballProgram=\
+# org.tartarus.snowball.ext

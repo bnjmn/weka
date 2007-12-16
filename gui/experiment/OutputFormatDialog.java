@@ -22,9 +22,9 @@
 
 package weka.gui.experiment;
 
-import weka.core.ClassDiscovery;
 import weka.experiment.ResultMatrix;
 import weka.experiment.ResultMatrixPlainText;
+import weka.gui.GenericObjectEditor;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -47,27 +47,27 @@ import javax.swing.SpinnerNumberModel;
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class OutputFormatDialog
   extends JDialog {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 2169792738187807378L;
 
-  /** Signifies an OK property selection */
+  /** Signifies an OK property selection. */
   public static final int APPROVE_OPTION = 0;
 
-  /** Signifies a cancelled property selection */
+  /** Signifies a cancelled property selection. */
   public static final int CANCEL_OPTION = 1;
 
-  /** the result of the user's action, either OK or CANCEL */
+  /** the result of the user's action, either OK or CANCEL. */
   protected int m_Result = CANCEL_OPTION;
   
-  /** the different classes for outputting the comparison tables */
+  /** the different classes for outputting the comparison tables. */
   protected static Vector m_OutputFormatClasses = null;
   
-  /** the different names of matrices for outputting the comparison tables */
+  /** the different names of matrices for outputting the comparison tables. */
   protected static Vector m_OutputFormatNames = null;
   
   /** determine all classes inheriting from the ResultMatrix (in the same
@@ -75,9 +75,7 @@ public class OutputFormatDialog
    * @see ResultMatrix
    * @see ClassDiscovery */
   static {
-    Vector classes = ClassDiscovery.find(
-                      ResultMatrix.class.getName(),
-                      ResultMatrix.class.getPackage().getName());
+    Vector classes = GenericObjectEditor.getClassnames(ResultMatrix.class.getName());
 
     // set names and classes
     m_OutputFormatClasses = new Vector();
@@ -95,45 +93,45 @@ public class OutputFormatDialog
     }
   }
 
-  /** the output format specific matrix */
+  /** the output format specific matrix. */
   protected Class m_ResultMatrix = ResultMatrixPlainText.class;
 
-  /** lets the user choose the format for the output */
+  /** lets the user choose the format for the output. */
   protected JComboBox m_OutputFormatComboBox = new JComboBox(m_OutputFormatNames);
 
-  /** the spinner to choose the precision for the mean from */
+  /** the spinner to choose the precision for the mean from. */
   protected JSpinner m_MeanPrecSpinner = new JSpinner();
 
   /** the spinner to choose the precision for the std. deviation from */
   protected JSpinner m_StdDevPrecSpinner = new JSpinner();
 
-  /** the checkbox for outputting the average */
+  /** the checkbox for outputting the average. */
   protected JCheckBox m_ShowAverageCheckBox = new JCheckBox("");
 
-  /** the checkbox for the removing of filter classnames */
+  /** the checkbox for the removing of filter classnames. */
   protected JCheckBox m_RemoveFilterNameCheckBox = new JCheckBox("");
   
-  /** Click to activate the current set parameters */
+  /** Click to activate the current set parameters. */
   protected JButton m_OkButton = new JButton("OK");
 
-  /** Click to cancel the dialog */
+  /** Click to cancel the dialog. */
   protected JButton m_CancelButton = new JButton("Cancel");
   
-  /** the number of digits after the period (= precision) for printing the mean */
+  /** the number of digits after the period (= precision) for printing the mean. */
   protected int m_MeanPrec = 2;
   
   /** the number of digits after the period (= precision) for printing the std.
    * deviation */
   protected int m_StdDevPrec = 2;
 
-  /** whether to remove the filter names from the names */
+  /** whether to remove the filter names from the names. */
   protected boolean m_RemoveFilterName = false;
 
-  /** whether to show the average too */
+  /** whether to show the average too. */
   protected boolean m_ShowAverage = false;
 
   /**
-   * initializes the dialog with the given parent frame
+   * initializes the dialog with the given parent frame.
    * 
    * @param parent the parent of this dialog
    */
@@ -143,7 +141,7 @@ public class OutputFormatDialog
   }
   
   /**
-   * performs the creation of the dialog and all its components
+   * performs the creation of the dialog and all its components.
    */
   protected void createDialog() {
     JPanel              panel;
@@ -227,7 +225,7 @@ public class OutputFormatDialog
   }
   
   /**
-   * initializes the GUI components with the data
+   * initializes the GUI components with the data.
    */
   private void setData() {
     // Precision
@@ -250,7 +248,7 @@ public class OutputFormatDialog
   }    
   
   /**
-   *  gets the data from GUI components
+   *  gets the data from GUI components.
    */
   private void getData() {
     // Precision
@@ -269,7 +267,8 @@ public class OutputFormatDialog
   }
   
   /**
-   * Sets the precision of the mean output
+   * Sets the precision of the mean output.
+   * 
    * @param precision the number of digits used in printing the mean
    */
   public void setMeanPrec(int precision) {
@@ -277,7 +276,8 @@ public class OutputFormatDialog
   }
 
   /**
-   * Gets the precision used for printing the mean
+   * Gets the precision used for printing the mean.
+   * 
    * @return the number of digits used in printing the mean
    */
   public int getMeanPrec() {
@@ -285,7 +285,8 @@ public class OutputFormatDialog
   }
 
   /**
-   * Sets the precision of the std. deviation output
+   * Sets the precision of the std. deviation output.
+   * 
    * @param precision the number of digits used in printing the std. deviation
    */
   public void setStdDevPrec(int precision) {
@@ -301,7 +302,8 @@ public class OutputFormatDialog
   }
 
   /**
-   * Sets the matrix to use as initial selected output format
+   * Sets the matrix to use as initial selected output format.
+   * 
    * @param matrix the matrix to use as initial selected output format
    */
   public void setResultMatrix(Class matrix) {
@@ -310,6 +312,7 @@ public class OutputFormatDialog
 
   /**
    * Gets the currently selected output format result matrix.
+   * 
    * @return the currently selected matrix to use as output
    */
   public Class getResultMatrix() {
@@ -317,35 +320,43 @@ public class OutputFormatDialog
   }
 
   /**
-   * sets whether to remove the filter classname from the dataset name
+   * sets whether to remove the filter classname from the dataset name.
+   * 
+   * @param remove if true then the filter classname is removed
    */
   public void setRemoveFilterName(boolean remove) {
     m_RemoveFilterName = remove;
   }
 
   /**
-   * returns whether the filter classname is removed from the dataset name
+   * returns whether the filter classname is removed from the dataset name.
+   * 
+   * @return true if the filter classname is removed
    */
   public boolean getRemoveFilterName() {
     return m_RemoveFilterName;
   }
 
   /**
-   * sets whether the average for each column is displayed
+   * sets whether the average for each column is displayed.
+   * 
+   * @param show if true then an additional row with the average is printed.
    */
   public void setShowAverage(boolean show) {
     m_ShowAverage = show;
   }
 
   /**
-   * returns whether the average for each column is displayed
+   * returns whether the average for each column is displayed.
+   * 
+   * @return true if an additional row with the average is displayed
    */
   public boolean getShowAverage() {
     return m_ShowAverage;
   }
 
   /**
-   * sets the class of the chosen result matrix
+   * sets the class of the chosen result matrix.
    */
   protected void setFormat() {
     for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
@@ -359,7 +370,7 @@ public class OutputFormatDialog
   
   /**
    * the result from the last display of the dialog, the same is returned
-   * from <code>showDialog</code>
+   * from <code>showDialog</code>.
    * 
    * @return the result from the last display of the dialog; 
    *         either APPROVE_OPTION, or CANCEL_OPTION
@@ -382,7 +393,9 @@ public class OutputFormatDialog
   }
 
   /**
-   * for testing only
+   * for testing only.
+   * 
+   * @param args ignored
    */
   public static void main(String[] args) {
     OutputFormatDialog      dialog;

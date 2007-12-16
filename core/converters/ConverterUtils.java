@@ -25,6 +25,7 @@ package weka.core.converters;
 import weka.core.ClassDiscovery;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 
 import java.io.File;
@@ -46,13 +47,13 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  * @see Serializable
  */
 public class ConverterUtils
   implements Serializable {
 
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = -2460855349276148760L;
 
   /**
@@ -67,7 +68,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    * @see #hasMoreElements(Instances)
    * @see #nextElement(Instances)
    * @see #reset()
@@ -76,28 +77,28 @@ public class ConverterUtils
   public static class DataSource
     implements Serializable {
     
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = -613122395928757332L;
 
-    /** the file to load */
+    /** the file to load. */
     protected File m_File;
     
-    /** the URL to load */
+    /** the URL to load. */
     protected URL m_URL;
     
-    /** the loader */
+    /** the loader.*/
     protected Loader m_Loader;
     
-    /** whether the loader is incremental */
+    /** whether the loader is incremental. */
     protected boolean m_Incremental;
     
-    /** the instance counter for the batch case */
+    /** the instance counter for the batch case. */
     protected int m_BatchCounter;
 
-    /** the last internally read instance */
+    /** the last internally read instance. */
     protected Instance m_IncrementalBuffer;
     
-    /** the batch buffer */
+    /** the batch buffer. */
     protected Instances m_BatchBuffer;
     
     /**
@@ -141,7 +142,7 @@ public class ConverterUtils
     }
     
     /**
-     * Initializes the datasource with the given dataset
+     * Initializes the datasource with the given dataset.
      * 
      * @param inst		the dataset to use
      */
@@ -156,7 +157,7 @@ public class ConverterUtils
     }
     
     /**
-     * Initializes the datasource with the given Loader
+     * Initializes the datasource with the given Loader.
      * 
      * @param loader		the Loader to use
      */
@@ -198,7 +199,7 @@ public class ConverterUtils
 
     /**
      * initializes the batch buffer if necessary, i.e., for non-incremental
-     * loaders
+     * loaders.
      */
     protected void initBatchBuffer() {
       try {
@@ -214,7 +215,7 @@ public class ConverterUtils
     
     /**
      * returns whether the extension of the location is likely to be of ARFF
-     * format, i.e., ending in ".arff" or ".arff.gz" (case-insensitive)
+     * format, i.e., ending in ".arff" or ".arff.gz" (case-insensitive).
      * 
      * @param location		the file location to check
      * @return			true if the location seems to be of ARFF format
@@ -228,7 +229,7 @@ public class ConverterUtils
     }
     
     /**
-     * returns whether the loader is an incremental one
+     * returns whether the loader is an incremental one.
      * 
      * @return		true if the loader is a true incremental one
      */
@@ -247,7 +248,7 @@ public class ConverterUtils
     }
     
     /**
-     * returns the full dataset, can be null in case of an error
+     * returns the full dataset, can be null in case of an error.
      * 
      * @return			the full dataset
      * @throws Exception 	if resetting of loader fails
@@ -276,7 +277,7 @@ public class ConverterUtils
     
     /**
      * returns the full dataset with the specified class index set, 
-     * can be null in case of an error
+     * can be null in case of an error.
      * 
      * @param classIndex	the class index for the dataset
      * @return			the full dataset
@@ -293,7 +294,7 @@ public class ConverterUtils
     }
     
     /**
-     * resets the loader
+     * resets the loader.
      * 
      * @throws Exception	if resetting fails
      */
@@ -317,7 +318,7 @@ public class ConverterUtils
     }
 
     /**
-     * returns the structure of the data
+     * returns the structure of the data.
      * 
      * @return			the structure of the data
      * @throws Exception	if something goes wrong
@@ -330,7 +331,7 @@ public class ConverterUtils
     }
 
     /**
-     * returns the structure of the data, with the defined class index
+     * returns the structure of the data, with the defined class index.
      * 
      * @param classIndex	the class index for the dataset
      * @return			the structure of the data
@@ -347,8 +348,9 @@ public class ConverterUtils
     }
     
     /**
-     * returns whether there are more Instance objects in the data
+     * returns whether there are more Instance objects in the data.
      * 
+     * @param structure	the structure of the dataset
      * @return		true if there are more Instance objects 
      * 			available
      * @see		#nextElement(Instances)
@@ -383,7 +385,7 @@ public class ConverterUtils
     
     /**
      * returns the next element and sets the specified dataset, null if 
-     * none available
+     * none available.
      * 
      * @param dataset	the dataset to set for the instance
      * @return		the next Instance
@@ -422,7 +424,7 @@ public class ConverterUtils
     }
     
     /**
-     * convencience method for loading a dataset in batch mode
+     * convencience method for loading a dataset in batch mode.
      * 
      * @param location		the dataset to load
      * @return			the dataset
@@ -440,7 +442,7 @@ public class ConverterUtils
     }
     
     /**
-     * convencience method for loading a dataset in batch mode from a stream
+     * convencience method for loading a dataset in batch mode from a stream.
      * 
      * @param stream		the stream to load the dataset from
      * @return			the dataset
@@ -458,7 +460,7 @@ public class ConverterUtils
     }
     
     /**
-     * convencience method for loading a dataset in batch mode
+     * convencience method for loading a dataset in batch mode.
      * 
      * @param loader		the loader to get the dataset from
      * @return			the dataset
@@ -476,7 +478,7 @@ public class ConverterUtils
     }
     
     /**
-     * for testing only - takes a data file as input
+     * for testing only - takes a data file as input.
      * 
      * @param args		the commandline arguments
      * @throws Exception 	if something goes wrong
@@ -512,23 +514,23 @@ public class ConverterUtils
    * It is the logical counterpart to <code>DataSource</code>.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    * @see DataSource
    */
   public static class DataSink
     implements Serializable {
 
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = -1504966891136411204L;
 
-    /** the saver to use for storing the data */
+    /** the saver to use for storing the data. */
     protected Saver m_Saver = null;
     
-    /** the stream to store the data in (always in ARFF format) */
+    /** the stream to store the data in (always in ARFF format). */
     protected OutputStream m_Stream = null;
     
     /**
-     * initializes the sink to save the data to the given file
+     * initializes the sink to save the data to the given file.
      * 
      * @param filename		the file to save data to
      * @throws Exception	if set of saver fails
@@ -546,7 +548,7 @@ public class ConverterUtils
     
     /**
      * initializes the sink to save the data to the given Saver (expected to be 
-     * fully configured)
+     * fully configured).
      * 
      * @param saver	the saver to use for saving the data
      */
@@ -557,7 +559,7 @@ public class ConverterUtils
     
     /**
      * initializes the sink to save the data in the stream (always in ARFF 
-     * format)
+     * format).
      * 
      * @param stream	the output stream to use for storing the data in ARFF
      * 			format
@@ -587,7 +589,7 @@ public class ConverterUtils
     }
     
     /**
-     * writes the data to the given file
+     * writes the data to the given file.
      * 
      * @param filename		the file to write the data to
      * @param data		the data to store
@@ -601,7 +603,7 @@ public class ConverterUtils
     }
     
     /**
-     * writes the data via the given saver
+     * writes the data via the given saver.
      * 
      * @param saver		the saver to use for writing the data
      * @param data		the data to store
@@ -615,7 +617,7 @@ public class ConverterUtils
     }
     
     /**
-     * writes the data to the given stream (always in ARFF format)
+     * writes the data to the given stream (always in ARFF format).
      * 
      * @param stream		the stream to write the data to (ARFF format)
      * @param data		the data to store
@@ -630,7 +632,7 @@ public class ConverterUtils
     
     /**
      * for testing only - takes a data file as input and a data file for the
-     * output
+     * output.
      * 
      * @param args		the commandline arguments
      * @throws Exception 	if something goes wrong
@@ -651,7 +653,7 @@ public class ConverterUtils
   }
   
   /** the core loaders - hardcoded list necessary for RMI/Remote Experiments 
-   * (comma-separated list) */
+   * (comma-separated list). */
   public final static String CORE_FILE_LOADERS = 
       weka.core.converters.ArffLoader.class.getName() + ","
     + weka.core.converters.C45Loader.class.getName() + ","
@@ -663,7 +665,7 @@ public class ConverterUtils
     + weka.core.converters.XRFFLoader.class.getName();
 
   /** the core savers - hardcoded list necessary for RMI/Remote Experiments 
-   * (comma-separated list) */
+   * (comma-separated list). */
   public final static String CORE_FILE_SAVERS =
       weka.core.converters.ArffSaver.class.getName() + ","
     + weka.core.converters.C45Saver.class.getName() + ","
@@ -673,13 +675,13 @@ public class ConverterUtils
     + weka.core.converters.SerializedInstancesSaver.class.getName() + ","
     + weka.core.converters.XRFFSaver.class.getName();
   
-  /** all available loaders (extension &lt;-&gt; classname) */
+  /** all available loaders (extension &lt;-&gt; classname). */
   protected static Hashtable<String,String> m_FileLoaders;
   
-  /** all available URL loaders (extension &lt;-&gt; classname) */
+  /** all available URL loaders (extension &lt;-&gt; classname). */
   protected static Hashtable<String,String> m_URLFileLoaders;
 
-  /** all available savers (extension &lt;-&gt; classname) */
+  /** all available savers (extension &lt;-&gt; classname). */
   protected static Hashtable<String,String> m_FileSavers;
   
   // determine all loaders/savers
@@ -721,9 +723,7 @@ public class ConverterUtils
     finally {
       // loaders
       if (m_FileLoaders.size() == 0) {
-	classnames = ClassDiscovery.find(
-	               AbstractFileLoader.class, 
-	               AbstractFileLoader.class.getPackage().getName());
+	classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class.getName());
 	if (classnames.size() > 0)
 	  m_FileLoaders = getFileConverters(
 	                    classnames,
@@ -736,9 +736,7 @@ public class ConverterUtils
 
       // URL loaders
       if (m_URLFileLoaders.size() == 0) {
-        classnames = ClassDiscovery.find(
-		       AbstractFileLoader.class, 
-		       AbstractFileLoader.class.getPackage().getName());
+        classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class.getName());
         if (classnames.size() > 0)
 	  m_URLFileLoaders = getFileConverters(
 	  		       classnames,
@@ -755,9 +753,7 @@ public class ConverterUtils
 
       // savers
       if (m_FileSavers.size() == 0) {
-	classnames = ClassDiscovery.find(
-		       AbstractFileSaver.class, 
-		       AbstractFileSaver.class.getPackage().getName());
+	classnames = GenericObjectEditor.getClassnames(AbstractFileSaver.class.getName());
 	if (classnames.size() > 0)
 	  m_FileSavers = getFileConverters(
 	  		   classnames,
@@ -899,7 +895,7 @@ public class ConverterUtils
 
   /**
    * returns a vector with the classnames of all the loaders from the 
-   * given hashtable
+   * given hashtable.
    * 
    * @param ht		the hashtable with the extension/converter relation
    * @return		the classnames of the loaders
@@ -927,7 +923,7 @@ public class ConverterUtils
   
   /**
    * tries to determine the converter to use for this kind of file, returns
-   * null if none can be found in the given hashtable
+   * null if none can be found in the given hashtable.
    * 
    * @param filename	the file to return a converter for
    * @param ht		the hashtable with the relation extension/converter
@@ -957,7 +953,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the loader to use for this kind of extension, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param extension	the file extension to return a converter for
    * @param ht		the hashtable with the relation extension/converter
@@ -983,7 +979,7 @@ public class ConverterUtils
   }
   
   /**
-   * checks whether the given class is one of the hardcoded core file loaders
+   * checks whether the given class is one of the hardcoded core file loaders.
    * 
    * @param classname	the class to check
    * @return		true if the class is one of the core loaders
@@ -1000,7 +996,7 @@ public class ConverterUtils
   }
   
   /**
-   * returns a vector with the classnames of all the file loaders
+   * returns a vector with the classnames of all the file loaders.
    * 
    * @return		the classnames of the loaders
    */
@@ -1010,7 +1006,7 @@ public class ConverterUtils
   
   /**
    * tries to determine the loader to use for this kind of file, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param filename	the file to return a converter for
    * @return		the converter if one was found, null otherwise
@@ -1021,7 +1017,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the loader to use for this kind of file, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param file	the file to return a converter for
    * @return		the converter if one was found, null otherwise
@@ -1032,7 +1028,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the loader to use for this kind of extension, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param extension	the file extension to return a converter for
    * @return		the converter if one was found, null otherwise
@@ -1042,7 +1038,7 @@ public class ConverterUtils
   }
 
   /**
-   * returns a vector with the classnames of all the URL file loaders
+   * returns a vector with the classnames of all the URL file loaders.
    * 
    * @return		the classnames of the loaders
    */
@@ -1052,7 +1048,7 @@ public class ConverterUtils
   
   /**
    * tries to determine the URL loader to use for this kind of file, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param filename	the file to return a URL converter for
    * @return		the converter if one was found, null otherwise
@@ -1063,7 +1059,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the URL loader to use for this kind of file, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param file	the file to return a URL converter for
    * @return		the converter if one was found, null otherwise
@@ -1074,7 +1070,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the URL loader to use for this kind of extension, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param extension	the file extension to return a URL converter for
    * @return		the converter if one was found, null otherwise
@@ -1084,7 +1080,7 @@ public class ConverterUtils
   }
   
   /**
-   * checks whether the given class is one of the hardcoded core file savers
+   * checks whether the given class is one of the hardcoded core file savers.
    * 
    * @param classname	the class to check
    * @return		true if the class is one of the core savers
@@ -1101,7 +1097,7 @@ public class ConverterUtils
   }
 
   /**
-   * returns a vector with the classnames of all the file savers
+   * returns a vector with the classnames of all the file savers.
    * 
    * @return		the classnames of the savers
    */
@@ -1111,7 +1107,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the saver to use for this kind of file, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param filename	the file to return a converter for
    * @return		the converter if one was found, null otherwise
@@ -1122,7 +1118,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the saver to use for this kind of file, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param file	the file to return a converter for
    * @return		the converter if one was found, null otherwise
@@ -1133,7 +1129,7 @@ public class ConverterUtils
 
   /**
    * tries to determine the saver to use for this kind of extension, returns
-   * null if none can be found
+   * null if none can be found.
    * 
    * @param extension	the file extension to return a converter for
    * @return		the converter if one was found, null otherwise

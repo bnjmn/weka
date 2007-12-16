@@ -22,7 +22,7 @@
 
 package weka.gui.experiment;
 
-import weka.core.ClassDiscovery;
+import weka.core.ClassDiscovery.StringCompare;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.Saver;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -63,43 +63,43 @@ import javax.swing.event.ListSelectionListener;
  * iterate over.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class DatasetListPanel
   extends JPanel
   implements ActionListener {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 7068857852794405769L;
 
-  /** The experiment to set the dataset list of */
+  /** The experiment to set the dataset list of. */
   protected Experiment m_Exp;
 
-  /** The component displaying the dataset list */
+  /** The component displaying the dataset list. */
   protected JList m_List;
 
-  /** Click to add a dataset */
+  /** Click to add a dataset. */
   protected JButton m_AddBut = new JButton("Add new...");
   
-  /** Click to edit the selected algorithm */
+  /** Click to edit the selected algorithm. */
   protected JButton m_EditBut = new JButton("Edit selected...");
 
-  /** Click to remove the selected dataset from the list */
+  /** Click to remove the selected dataset from the list. */
   protected JButton m_DeleteBut = new JButton("Delete selected");
   
-  /** Click to move the selected dataset(s) one up */
+  /** Click to move the selected dataset(s) one up. */
   protected JButton m_UpBut = new JButton("Up");
   
-  /** Click to move the selected dataset(s) one down */
+  /** Click to move the selected dataset(s) one down. */
   protected JButton m_DownBut = new JButton("Down");
 
-  /** Make file paths relative to the user (start) directory */
+  /** Make file paths relative to the user (start) directory. */
   protected JCheckBox m_relativeCheck = new JCheckBox("Use relative paths");
 
-  /** The user (start) directory */
+  /** The user (start) directory. */
   protected File m_UserDir = new File(System.getProperty("user.dir"));
 
-  /** The file chooser component */
+  /** The file chooser component. */
   protected ConverterFileChooser m_FileChooser = 
     new ConverterFileChooser(ExperimenterDefaults.getInitialDatasetsDirectory());
 
@@ -208,7 +208,9 @@ public class DatasetListPanel
   
   /**
    * sets the state of the buttons according to the selection state of the
-   * JList
+   * JList.
+   * 
+   * @param e the event
    */
   private void setButtons(ListSelectionEvent e) {
     if ( (e == null) || (e.getSource() == m_List) ) {
@@ -235,6 +237,9 @@ public class DatasetListPanel
   /**
    * Gets all the files in the given directory
    * that match the currently selected extension.
+   * 
+   * @param directory the directory to get the files for
+   * @param files the list to add the files to
    */
   protected void getFilesRecursively(File directory, Vector files) {
 
@@ -259,7 +264,8 @@ public class DatasetListPanel
 
   /**
    * Converts a File's absolute path to a path relative to the user
-   * (ie start) directory
+   * (ie start) directory.
+   * 
    * @param absolute the File to convert to relative path
    * @return a File with a path that is relative to the user's directory
    * @exception Exception if the path cannot be constructed
@@ -383,7 +389,7 @@ public class DatasetListPanel
 	      getFilesRecursively(selected[i], files);
     
 	      // sort the result
-	      Collections.sort(files, new ClassDiscovery().new StringCompare());
+	      Collections.sort(files, new StringCompare());
 
 	      for (int j = 0; j < files.size(); j++) {
 		File temp = (File)files.elementAt(j);
@@ -415,7 +421,7 @@ public class DatasetListPanel
 	    getFilesRecursively(m_FileChooser.getSelectedFile(), files);
     
 	    // sort the result
-	    Collections.sort(files, new ClassDiscovery().new StringCompare());
+	    Collections.sort(files, new StringCompare());
 
 	    for (int j = 0; j < files.size(); j++) {
 	      File temp = (File)files.elementAt(j);
