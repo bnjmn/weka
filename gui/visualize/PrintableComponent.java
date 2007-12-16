@@ -22,8 +22,8 @@
 
 package weka.gui.visualize;
 
-import weka.core.ClassDiscovery;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
 
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -59,57 +59,57 @@ import javax.swing.event.DocumentListener;
  * @see #getWriters()
  * @see #getWriter(String)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class PrintableComponent
   implements PrintableHandler {
   
-  /** the parent component of this print dialog */
+  /** the parent component of this print dialog. */
   protected JComponent m_Component;
   
-  /** the filechooser for saving the panel */
+  /** the filechooser for saving the panel. */
   protected static JFileChooser m_FileChooserPanel;
 
-  /** the checkbox for the custom dimensions */
+  /** the checkbox for the custom dimensions. */
   protected static JCheckBox m_CustomDimensionsCheckBox;
   
-  /** the edit field for the custom width */
+  /** the edit field for the custom width. */
   protected static JTextField m_CustomWidthText;
   
-  /** the edit field for the custom height */
+  /** the edit field for the custom height. */
   protected static JTextField m_CustomHeightText;
 
-  /** the checkbox for keeping the aspect ration */
+  /** the checkbox for keeping the aspect ration. */
   protected static JCheckBox m_AspectRatioCheckBox;
   
-  /** the title of the save dialog */
+  /** the title of the save dialog. */
   protected String m_SaveDialogTitle = "Save as...";
   
-  /** the x scale factor */
+  /** the x scale factor. */
   protected double m_xScale = 1.0;
   
-  /** the y scale factor */
+  /** the y scale factor. */
   protected double m_yScale = 1.0;
 
-  /** the aspect ratio */
+  /** the aspect ratio. */
   protected double m_AspectRatio;
 
-  /** whether to ignore the update of the text field (in case of "keep ratio") */
+  /** whether to ignore the update of the text field (in case of "keep ratio"). */
   protected boolean m_IgnoreChange;
   
-  /** whether to print some debug information */
+  /** whether to print some debug information. */
   private static final boolean DEBUG = false;
   
-  /** whether the user was already asked about the tooltip behavior */
+  /** whether the user was already asked about the tooltip behavior. */
   protected static boolean m_ToolTipUserAsked = false;
 
-  /** the property name for showing the tooltip */
+  /** the property name for showing the tooltip. */
   protected final static String PROPERTY_SHOW = "PrintableComponentToolTipShow";
 
-  /** the property name whether the user was already asked */
+  /** the property name whether the user was already asked. */
   protected final static String PROPERTY_USERASKED = "PrintableComponentToolTipUserAsked";
   
-  /** whether to display the tooltip or not */
+  /** whether to display the tooltip or not. */
   protected static boolean m_ShowToolTip = true;
   static {
     try {
@@ -136,7 +136,7 @@ public class PrintableComponent
   }
   
   /**
-   * initializes the panel
+   * initializes the panel.
    * 
    * @param component     the component to enhance with printing functionality
    */
@@ -152,7 +152,9 @@ public class PrintableComponent
   }
   
   /**
-   * returns the GUI component this print dialog is part of
+   * returns the GUI component this print dialog is part of.
+   * 
+   * @return		the GUI component
    */
   public JComponent getComponent() {
     return m_Component;
@@ -364,7 +366,7 @@ public class PrintableComponent
     accessory.add(m_AspectRatioCheckBox);
     
     // determine all available writers and add them to the filechooser
-    writerNames = ClassDiscovery.find(JComponentWriter.class.getName(), JComponentWriter.class.getPackage().getName());
+    writerNames = GenericObjectEditor.getClassnames(JComponentWriter.class.getName());
     Collections.sort(writerNames);
     for (i = 0; i < writerNames.size(); i++) {
       try {
@@ -387,7 +389,7 @@ public class PrintableComponent
   }
   
   /**
-   * updates the dimensions if necessary (i.e., if aspect ratio is to be kept)
+   * updates the dimensions if necessary (i.e., if aspect ratio is to be kept).
    * 
    * @param sender	the JTextField which send the notification to update
    */
@@ -457,8 +459,9 @@ public class PrintableComponent
   
   /**
    * returns the JComponentWriter associated with the given name, is 
-   * <code>null</code> if not found
+   * <code>null</code> if not found.
    * 
+   * @param name the name of the writer
    * @return the writer associated with the given name
    * @see JComponentWriter#getDescription()
    */
@@ -467,21 +470,26 @@ public class PrintableComponent
   }
 
   /**
-   * sets the title for the save dialog
+   * sets the title for the save dialog.
+   * 
+   * @param title the title of the save dialog
    */
   public void setSaveDialogTitle(String title) {
     m_SaveDialogTitle = title;
   }
   
   /**
-   * returns the title for the save dialog
+   * returns the title for the save dialog.
+   * 
+   * @return the title of the save dialog
    */
   public String getSaveDialogTitle() {
     return m_SaveDialogTitle;
   }
   
   /**
-   * sets the scale factor
+   * sets the scale factor.
+   * 
    * @param x the scale factor for the x-axis 
    * @param y the scale factor for the y-axis 
    */
@@ -493,14 +501,18 @@ public class PrintableComponent
   }
   
   /**
-   * returns the scale factor for the x-axis
+   * returns the scale factor for the x-axis.
+   * 
+   * @return the scale factor
    */
   public double getXScale() {
     return m_xScale;
   }
   
   /**
-   * returns the scale factor for the y-axis
+   * returns the scale factor for the y-axis.
+   * 
+   * @return the scale factor
    */
   public double getYScale() {
     return m_xScale;
@@ -557,14 +569,14 @@ public class PrintableComponent
   }
   
   /**
-   * a specialized filter that also contains the associated filter class
+   * a specialized filter that also contains the associated filter class.
    */
   protected class JComponentWriterFileFilter extends ExtensionFileFilter {
-    /** the associated writer */
+    /** the associated writer. */
     private JComponentWriter m_Writer; 
     
     /**
-     * Creates the ExtensionFileFilter
+     * Creates the ExtensionFileFilter.
      *
      * @param extension       the extension of accepted files.
      * @param description     a text description of accepted files.
@@ -576,7 +588,9 @@ public class PrintableComponent
     }
     
     /**
-     * returns the associated wrtier
+     * returns the associated writer.
+     * 
+     * @return		the writer
      */
     public JComponentWriter getWriter() {
       return m_Writer;
@@ -584,20 +598,25 @@ public class PrintableComponent
   }
 
   /**
-   * The listener to wait for Ctrl-Shft-Left Mouse Click
+   * The listener to wait for Ctrl-Shft-Left Mouse Click.
    */
-  private class PrintMouseListener extends MouseAdapter{
+  private class PrintMouseListener extends MouseAdapter {
+    /** the listener's component. */
     private PrintableComponent m_Component;
     
     /**
-     * initializes the listener
+     * initializes the listener.
+     * 
+     * @param component the component for which to create the listener
      */
-    PrintMouseListener(PrintableComponent component){
+    public PrintMouseListener(PrintableComponent component){
       m_Component = component;
     }
     
     /**
      * Invoked when the mouse has been clicked on a component.
+     * 
+     * @param e	the event
      */
     public void mouseClicked(MouseEvent e) {
       int modifiers = e.getModifiers();

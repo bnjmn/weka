@@ -40,15 +40,15 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  * @see StringCompare
  */
 public class ClassDiscovery {
 
-  /** whether to output some debug information */
+  /** whether to output some debug information. */
   public final static boolean VERBOSE = false;
   
-  /** for caching queries (classname+packagename &lt;-&gt; Vector with classnames) */
+  /** for caching queries (classname+packagename &lt;-&gt; Vector with classnames). */
   protected static Hashtable<String,Vector> m_Cache;
   
   /** notify if VERBOSE is still on */
@@ -289,7 +289,7 @@ public class ClassDiscovery {
       result.addAll(find(cls, pkgnames[i]));
 
     // sort result
-    Collections.sort(result, new ClassDiscovery().new StringCompare());
+    Collections.sort(result, new StringCompare());
 
     return result;
   }
@@ -424,12 +424,13 @@ public class ClassDiscovery {
 	    i++;
 	}
 	catch (Exception e) {
+	  System.err.println("Checking class: " + result.get(i));
 	  e.printStackTrace();
 	}
       }
 
       // sort result
-      Collections.sort(result, new ClassDiscovery().new StringCompare());
+      Collections.sort(result, new StringCompare());
 
       // add to cache
       addCache(cls, pkgname, result);
@@ -439,7 +440,7 @@ public class ClassDiscovery {
   }
 
   /**
-   * adds all the sub-directories recursively to the list
+   * adds all the sub-directories recursively to the list.
    * 
    * @param prefix	the path prefix
    * @param dir		the directory to look in for sub-dirs
@@ -529,13 +530,13 @@ public class ClassDiscovery {
     // sort result
     set.remove("META-INF");
     result.addAll(set);
-    Collections.sort(result, new ClassDiscovery().new StringCompare());
+    Collections.sort(result, new StringCompare());
 
     return result;
   }
 
   /**
-   * initializes the cache for the classnames 
+   * initializes the cache for the classnames.
    */
   protected static void initCache() {
     if (m_Cache == null)
@@ -543,7 +544,7 @@ public class ClassDiscovery {
   }
   
   /**
-   * adds the list of classnames to the cache
+   * adds the list of classnames to the cache.
    * 
    * @param cls		the class to cache the classnames for
    * @param pkgname	the package name the classes were found in
@@ -556,7 +557,7 @@ public class ClassDiscovery {
   
   /**
    * returns the list of classnames associated with this class and package, if
-   * available, otherwise null
+   * available, otherwise null.
    * 
    * @param cls		the class to get the classnames for
    * @param pkgname	the package name for the classes 
@@ -568,7 +569,7 @@ public class ClassDiscovery {
   }
   
   /**
-   * clears the cache for class/classnames relation
+   * clears the cache for class/classnames relation.
    */
   public static void clearCache() {
     initCache();
@@ -635,7 +636,7 @@ public class ClassDiscovery {
   }
   
   /**
-   * compares two strings with the following order:<br/>
+   * compares two strings. The following order is used:<br/>
    * <ul>
    *    <li>case insensitive</li>
    *    <li>german umlauts (&auml; , &ouml; etc.) or other non-ASCII letters
@@ -643,11 +644,11 @@ public class ClassDiscovery {
    *    <li>special chars &lt; numbers &lt; letters</li>
    * </ul>
    */
-  public class StringCompare 
+  public static class StringCompare 
     implements Comparator {
 
     /**
-     * appends blanks to the string if its shorter than <code>len</code>
+     * appends blanks to the string if its shorter than <code>len</code>.
      * 
      * @param s		the string to pad
      * @param len	the minimum length for the string to have
@@ -660,7 +661,7 @@ public class ClassDiscovery {
     }
     
     /**
-     * returns the group of the character: 0=special char, 1=number, 2=letter 
+     * returns the group of the character: 0=special char, 1=number, 2=letter.
      * 
      * @param c		the character to check
      * @return		the group
