@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.117 $
+# Version: $Revision: 1.118 $
  
 # Lists the ResultProducers I want to choose from
 weka.experiment.ResultProducer=\
@@ -440,3 +440,66 @@ weka.core.tokenizers.Tokenizer=\
 # Lists the MainMenuExtensions I want to choose from
 weka.gui.MainMenuExtension=\
  
+# List of VisualizePlugins I want to choose from
+weka.gui.visualize.plugins.VisualizePlugin=
+
+# Lists the JComponentWriters I want to choose from
+weka.gui.visualize.JComponentWriter=\
+ weka.gui.visualize.BMPWriter,\
+ weka.gui.visualize.JPEGWriter,\
+ weka.gui.visualize.PNGWriter,\
+ weka.gui.visualize.PostscriptWriter
+
+# List of ResultMatrixes I want to choose from
+weka.experiment.ResultMatrix=\
+ weka.experiment.ResultMatrixCSV,\
+ weka.experiment.ResultMatrixGnuPlot,\
+ weka.experiment.ResultMatrixHTML,\
+ weka.experiment.ResultMatrixLatex,\
+ weka.experiment.ResultMatrixPlainText,\
+ weka.experiment.ResultMatrixSignificance
+
+# List of Testers I want to choose from
+weka.experiment.Tester=\
+ weka.experiment.PairedCorrectedTTester,\
+ weka.experiment.PairedTTester
+
+# List of AbstractFileLoader I want to choose from
+weka.core.converters.AbstractFileLoader=\
+ weka.core.converters.ArffLoader,\
+ weka.core.converters.C45Loader,\
+ weka.core.converters.CSVLoader,\
+ weka.core.converters.LibSVMLoader,\
+ weka.core.converters.SerializedInstancesLoader,\
+ weka.core.converters.XRFFLoader
+
+# List of AbstractFileSaver I want to choose from
+weka.core.converters.AbstractFileSaver=\
+ weka.core.converters.ArffSaver,\
+ weka.core.converters.C45Saver,\
+ weka.core.converters.CSVSaver,\
+ weka.core.converters.LibSVMSaver,\
+ weka.core.converters.SerializedInstancesSaver,\
+ weka.core.converters.XRFFSaver
+
+# List of SnowballPrograms I want to choose from
+#
+# Note: the snowball jar needs to be in the CLASSPATH to make these stemmers
+#       available. See the following links for more information:
+#       http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers
+#       http://snowball.tartarus.org/
+#
+#org.tartarus.snowball.SnowballProgram=\
+# org.tartarus.snowball.ext.danishStemmer,\
+# org.tartarus.snowball.ext.dutchStemmer,\
+# org.tartarus.snowball.ext.englishStemmer,\
+# org.tartarus.snowball.ext.finnishStemmer,\
+# org.tartarus.snowball.ext.frenchStemmer,\
+# org.tartarus.snowball.ext.germanStemmer,\
+# org.tartarus.snowball.ext.italianStemmer,\
+# org.tartarus.snowball.ext.norwegianStemmer,\
+# org.tartarus.snowball.ext.porterStemmer,\
+# org.tartarus.snowball.ext.portugueseStemmer,\
+# org.tartarus.snowball.ext.russianStemmer,\
+# org.tartarus.snowball.ext.spanishStemmer,\
+# org.tartarus.snowball.ext.swedishStemmer

@@ -22,10 +22,11 @@
 
 package weka.core.stemmers;
 
+import weka.core.ClassDiscovery;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.ClassDiscovery;
 import weka.core.Utils;
+import weka.gui.GenericObjectEditor;
 
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -53,56 +54,56 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.6 $
+ * @version   $Revision: 1.7 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = -6111170431963015178L;
   
-  /** the package name for snowball */
+  /** the package name for snowball. */
   public final static String PACKAGE = "org.tartarus.snowball";
   
-  /** the package name where the stemmers are located */
+  /** the package name where the stemmers are located. */
   public final static String PACKAGE_EXT = PACKAGE + ".ext";
 
-  /** the snowball program, all stemmers are derived from */
+  /** the snowball program, all stemmers are derived from. */
   protected final static String SNOWBALL_PROGRAM = PACKAGE + ".SnowballProgram";
   
-  /** whether the snowball stemmers are in the Classpath */
+  /** whether the snowball stemmers are in the Classpath. */
   protected static boolean m_Present = false;
 
-  /** contains the all the found stemmers (language names) */
+  /** contains the all the found stemmers (language names). */
   protected static Vector m_Stemmers;
 
-  /** the current stemmer */
+  /** the current stemmer. */
   protected Object m_Stemmer;
 
-  /** the stem method */
+  /** the stem method. */
   protected transient Method m_StemMethod;
 
-  /** the setCurrent method */
+  /** the setCurrent method. */
   protected transient Method m_SetCurrentMethod;
 
-  /** the getCurrent method */
+  /** the getCurrent method. */
   protected transient Method m_GetCurrentMethod;
    
   /** check for Snowball statically (needs only to be done once) */
   static {
     checkForSnowball();
-    loadStemmers();
   }
 
   /**
-   * initializes the stemmer ("porter")
+   * initializes the stemmer ("porter").
    */
   public SnowballStemmer() {
     this("porter");
+    initStemmers();
   }
 
   /**
-   * initializes the stemmer with the given stemmer
+   * initializes the stemmer with the given stemmer.
    *
    * @param name        the name of the stemmer
    */
@@ -113,7 +114,7 @@ public class SnowballStemmer
   }
 
   /**
-   * checks whether Snowball is present in the classpath
+   * checks whether Snowball is present in the classpath.
    */
   private static void checkForSnowball() {
     try {
@@ -126,7 +127,8 @@ public class SnowballStemmer
   }
 
   /**
-   * Returns a string describing the stemmer
+   * Returns a string describing the stemmer.
+   * 
    * @return a description suitable for
    *         displaying in the explorer/experimenter gui
    */
@@ -134,8 +136,16 @@ public class SnowballStemmer
     return 
         "A wrapper class for the Snowball stemmers. Only available if the "
       + "Snowball classes are in the classpath.\n"
+      + "If the class discovery is not dynamic, i.e., the property 'UseDynamic' "
+      + "in the props file 'weka/gui/GenericPropertiesCreator.props' is 'false', "
+      + "then the property 'org.tartarus.snowball.SnowballProgram' in the "
+      + "'weka/gui/GenericObjectEditor.props' file has to be uncommented "
+      + "as well. If necessary you have to discover and fill in the snowball "
+      + "stemmers manually. You can use the 'weka.core.ClassDiscovery' for this:\n"
+      + "  java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext\n"
+      + "\n"
       + "For more information visit these web sites:\n"
-      + "  http://www.cs.waikato.ac.nz/~ml/weka/stemmers/\n"
+      + "  http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers\n"
       + "  http://snowball.tartarus.org/\n";
   }
   
@@ -205,7 +215,7 @@ public class SnowballStemmer
   }
 
   /**
-   * extracts the stemmer name form the classname
+   * extracts the stemmer name form the classname.
    * 
    * @param classname     the full classname of the stemmer
    * @return              the name of the stemmer
@@ -215,7 +225,7 @@ public class SnowballStemmer
   }
 
   /**
-   * returns the full classname of the stemmer
+   * returns the full classname of the stemmer.
    *
    * @param name          the name of the stemmer
    * @return              the full classname of the stemmer
@@ -226,20 +236,27 @@ public class SnowballStemmer
   }
 
   /**
-   * retrieves the language names of the availabel stemmers
+   * retrieves the language names of the availabel stemmers.
    */
-  private static void loadStemmers() {
+  private static void initStemmers() {
     Vector        classnames;
     int           i;
+    
+    if (m_Stemmers != null)
+      return;
     
     m_Stemmers = new Vector();
     
     if (!m_Present)
       return;
 
-    classnames = ClassDiscovery.find(SNOWBALL_PROGRAM, PACKAGE_EXT);
-    for (i = 0; i < classnames.size(); i++)
-      m_Stemmers.add(getStemmerName(classnames.get(i).toString()));
+    classnames = GenericObjectEditor.getClassnames(SNOWBALL_PROGRAM);
+    // try dynamic discovery if not in props file
+    if (classnames.size() == 0) {
+      classnames = ClassDiscovery.find(SNOWBALL_PROGRAM, PACKAGE_EXT);
+      for (i = 0; i < classnames.size(); i++)
+	m_Stemmers.add(getStemmerName(classnames.get(i).toString()));
+    }
   }
 
   /**
@@ -253,16 +270,18 @@ public class SnowballStemmer
   }
 
   /**
-   * returns an enumeration over all currently stored stemmer names
+   * returns an enumeration over all currently stored stemmer names.
    * 
    * @return all available stemmers
    */
   public static Enumeration listStemmers() {
+    initStemmers();
+    
     return m_Stemmers.elements();
   }
 
   /**
-   * generates a comma list of the available stemmers
+   * generates a comma list of the available stemmers.
    * 
    * @param lineLength    the max line length, before a linefeed is inserted
    *                      (0 is unlimited)
@@ -296,11 +315,13 @@ public class SnowballStemmer
   }
 
   /**
-   * returns the name of the current stemmer, null if none is set
+   * returns the name of the current stemmer, null if none is set.
    * 
    * @return the name of the stemmer
    */
   public String getStemmer() {
+    initStemmers();
+    
     if (m_Stemmer == null)
       return null;
     else
@@ -308,13 +329,15 @@ public class SnowballStemmer
   }
 
   /**
-   * sets the stemmer with the given name, e.g., "porter"
+   * sets the stemmer with the given name, e.g., "porter".
    *
    * @param name        the name of the stemmer, e.g., "porter"
    */
   public void setStemmer(String name) {
     Class       snowballClass;
     Class[]     argClasses;
+    
+    initStemmers();
     
     if (m_Stemmers.contains(name)) {
       try {
@@ -393,7 +416,7 @@ public class SnowballStemmer
   }
 
   /**
-   * returns a string representation of the stemmer
+   * returns a string representation of the stemmer.
    * 
    * @return a string representation of the stemmer
    */
@@ -407,7 +430,7 @@ public class SnowballStemmer
   }
 
   /**
-   * Runs the stemmer with the given options
+   * Runs the stemmer with the given options.
    *
    * @param args      the options
    */

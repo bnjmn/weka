@@ -23,7 +23,6 @@
 package weka.gui.experiment;
 
 import weka.core.Attribute;
-import weka.core.ClassDiscovery;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Range;
@@ -38,6 +37,7 @@ import weka.experiment.ResultMatrixPlainText;
 import weka.experiment.Tester;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
 import weka.gui.ListSelectorDialog;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
@@ -86,77 +86,75 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision: 1.43 $
  */
 public class ResultsPanel
   extends JPanel {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -4913007978534178569L;
 
-  /** Message shown when no experimental results have been loaded */
+  /** Message shown when no experimental results have been loaded. */
   protected static final String NO_SOURCE = "No source";
 
-  /** Click to load results from a file */
+  /** Click to load results from a file. */
   protected JButton m_FromFileBut = new JButton("File...");
 
-  /** Click to load results from a database */
+  /** Click to load results from a database. */
   protected JButton m_FromDBaseBut = new JButton("Database...");
 
-  /** Click to get results from the destination given in the experiment */
+  /** Click to get results from the destination given in the experiment. */
   protected JButton m_FromExpBut = new JButton("Experiment");
 
-  /** Displays a message about the current result set */
+  /** Displays a message about the current result set. */
   protected JLabel m_FromLab = new JLabel(NO_SOURCE);
 
   /**
    * This is needed to get around a bug in Swing <= 1.1 -- Once everyone
    * is using Swing 1.1.1 or higher just remove this variable and use the
-   * no-arg constructor to DefaultComboBoxModel
+   * no-arg constructor to DefaultComboBoxModel.
    */
   private static String [] FOR_JFC_1_1_DCBM_BUG = {""};
 
-  /** The model embedded in m_DatasetCombo */
+  /** The model embedded in m_DatasetCombo. */
   protected DefaultComboBoxModel m_DatasetModel =
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
   
-  /** The model embedded in m_CompareCombo */
+  /** The model embedded in m_CompareCombo. */
   protected DefaultComboBoxModel m_CompareModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
   
-  /** The model embedded in m_SortCombo */
+  /** The model embedded in m_SortCombo. */
   protected DefaultComboBoxModel m_SortModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
   
-  /** The model embedded in m_TestsList */
+  /** The model embedded in m_TestsList. */
   protected DefaultListModel m_TestsModel = new DefaultListModel();
   
-  /** The model embedded in m_DisplayedList */
+  /** The model embedded in m_DisplayedList. */
   protected DefaultListModel m_DisplayedModel = new DefaultListModel();
 
-  /** Displays the currently selected Tester-Class */
+  /** Displays the currently selected Tester-Class. */
   protected JLabel m_TesterClassesLabel = new JLabel("Testing with",
 						 SwingConstants.RIGHT);
   
   /** Contains all the available classes implementing the Tester-Interface 
-   * (the display names)
+   * (the display names).
    * @see Tester */
   protected static DefaultComboBoxModel m_TesterClassesModel = 
     new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
 
   /** Contains all the available classes implementing the Tester-Interface
-   * (the actual Classes) 
+   * (the actual Classes).
    * @see Tester */
   protected static Vector m_Testers = null;
   
   /** determine all classes implementing the Tester interface (in the same
-   * package!)
+   * package!).
    * @see Tester
    * @see ClassDiscovery */
   static {
-    Vector classes = ClassDiscovery.find(
-                      Tester.class.getName(),
-                      Tester.class.getPackage().getName());
+    Vector classes = GenericObjectEditor.getClassnames(Tester.class.getName());
 
     // set names and classes
     m_Testers            = new Vector();
@@ -174,113 +172,113 @@ public class ResultsPanel
     }
   }
 
-  /** Lists all the available classes implementing the Tester-Interface 
+  /** Lists all the available classes implementing the Tester-Interface.
    * @see Tester */
   protected JComboBox m_TesterClasses = 
     new JComboBox(m_TesterClassesModel);
 
-  /** Displays the currently selected column names for the scheme & options */
+  /** Displays the currently selected column names for the scheme & options. */
   protected JLabel m_DatasetKeyLabel = new JLabel("Row",
 						 SwingConstants.RIGHT);
 
-  /** Click to edit the columns used to determine the scheme */
+  /** Click to edit the columns used to determine the scheme. */
   protected JButton m_DatasetKeyBut = new JButton("Select");
 
-  /** Stores the list of attributes for selecting the scheme columns */
+  /** Stores the list of attributes for selecting the scheme columns. */
   protected DefaultListModel m_DatasetKeyModel = new DefaultListModel();
 
-  /** Displays the list of selected columns determining the scheme */
+  /** Displays the list of selected columns determining the scheme. */
   protected JList m_DatasetKeyList = new JList(m_DatasetKeyModel);
 
-  /** Displays the currently selected column names for the scheme & options */
+  /** Displays the currently selected column names for the scheme & options. */
   protected JLabel m_ResultKeyLabel = new JLabel("Column",
 						 SwingConstants.RIGHT);
 
-  /** Click to edit the columns used to determine the scheme */
+  /** Click to edit the columns used to determine the scheme. */
   protected JButton m_ResultKeyBut = new JButton("Select");
 
-  /** Stores the list of attributes for selecting the scheme columns */
+  /** Stores the list of attributes for selecting the scheme columns. */
   protected DefaultListModel m_ResultKeyModel = new DefaultListModel();
 
-  /** Displays the list of selected columns determining the scheme */
+  /** Displays the list of selected columns determining the scheme. */
   protected JList m_ResultKeyList = new JList(m_ResultKeyModel);
 
-  /** Lets the user select which scheme to base comparisons against */
+  /** Lets the user select which scheme to base comparisons against. */
   protected JButton m_TestsButton = new JButton("Select");
 
-  /** Lets the user select which schemes are compared to base */
+  /** Lets the user select which schemes are compared to base. */
   protected JButton m_DisplayedButton = new JButton("Select");
 
-  /** Holds the list of schemes to base the test against */
+  /** Holds the list of schemes to base the test against. */
   protected JList m_TestsList = new JList(m_TestsModel);
 
-  /** Holds the list of schemes to display */
+  /** Holds the list of schemes to display. */
   protected JList m_DisplayedList = new JList(m_DisplayedModel);
 
-  /** Lets the user select which performance measure to analyze */
+  /** Lets the user select which performance measure to analyze. */
   protected JComboBox m_CompareCombo = new JComboBox(m_CompareModel);
 
-  /** Lets the user select which column to use for sorting */
+  /** Lets the user select which column to use for sorting. */
   protected JComboBox m_SortCombo = new JComboBox(m_SortModel);
 
-  /** Lets the user edit the test significance */
+  /** Lets the user edit the test significance. */
   protected JTextField m_SigTex = new JTextField(
       "" + ExperimenterDefaults.getSignificance());
 
   /** Lets the user select whether standard deviations are to be output
-      or not */
+      or not. */
   protected JCheckBox m_ShowStdDevs = 
     new JCheckBox("");
   
-  /** lets the user choose the format for the output */
+  /** lets the user choose the format for the output. */
   protected JButton m_OutputFormatButton = new JButton("Select");
 
-  /** Click to start the test */
+  /** Click to start the test. */
   protected JButton m_PerformBut = new JButton("Perform test");
   
-  /** Click to save test output to a file */
+  /** Click to save test output to a file. */
   protected JButton m_SaveOutBut = new JButton("Save output");
 
-  /** The buffer saving object for saving output */
+  /** The buffer saving object for saving output. */
   SaveBuffer m_SaveOut = new SaveBuffer(null, this);
 
-  /** Displays the output of tests */
+  /** Displays the output of tests. */
   protected JTextArea m_OutText = new JTextArea();
 
-  /** A panel controlling results viewing */
+  /** A panel controlling results viewing. */
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
   
-  /** The file chooser for selecting result files */
+  /** The file chooser for selecting result files. */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
  
-  /** File filters for various file types */
+  // File filters for various file types.
+  /** CSV file filter. */
   protected ExtensionFileFilter m_csvFileFilter = 
-    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION,
-			    "CSV data files");
+    new ExtensionFileFilter(CSVLoader.FILE_EXTENSION, "CSV data files");
 
+  /** ARFF file filter. */
   protected ExtensionFileFilter m_arffFileFilter = 
-    new ExtensionFileFilter(Instances.FILE_EXTENSION,
-			    "Arff data files");
+    new ExtensionFileFilter(Instances.FILE_EXTENSION, "Arff data files");
 
-  /** The PairedTTester object */
+  /** The PairedTTester object. */
   protected Tester m_TTester = new PairedCorrectedTTester();
   
-  /** The instances we're extracting results from */
+  /** The instances we're extracting results from. */
   protected Instances m_Instances;
 
-  /** Does any database querying for us */
+  /** Does any database querying for us. */
   protected InstanceQuery m_InstanceQuery;
 
-  /** A thread to load results instances from a file or database */
+  /** A thread to load results instances from a file or database. */
   protected Thread m_LoadThread;
   
-  /** An experiment (used for identifying a result source) -- optional */
+  /** An experiment (used for identifying a result source) -- optional. */
   protected Experiment m_Exp;
-  
-  private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut
-					       .getPreferredSize().height);
 
-  /** the initial result matrix */
+  /** the size for a combobox. */
+  private Dimension COMBO_SIZE = new Dimension(150, m_ResultKeyBut.getPreferredSize().height);
+
+  /** the initial result matrix. */
   protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
   
   /**
@@ -685,7 +683,7 @@ public class ResultsPanel
 
   /**
    * Sets the combo-boxes to a fixed size so they don't take up too much room
-   * that would be better devoted to the test output box
+   * that would be better devoted to the test output box.
    */
   protected void setComboSizes() {
     
@@ -1076,7 +1074,7 @@ public class ResultsPanel
   }
 
   /**
-   * Updates the test chooser with possible tests
+   * Updates the test chooser with possible tests.
    */
   protected void setTTester() {
     
@@ -1242,7 +1240,7 @@ public class ResultsPanel
   
   /**
    * displays the Dialog for the output format and sets the chosen settings, 
-   * if the user approves
+   * if the user approves.
    */
   public void setOutputFormatFromDialog() {
     OutputFormatDialog dialog = new OutputFormatDialog(null);
@@ -1286,7 +1284,7 @@ public class ResultsPanel
   }
 
   /**
-   * sets the currently selected Tester-Class
+   * sets the currently selected Tester-Class.
    */
   protected void setTester() {
     Tester        tester;
