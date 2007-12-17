@@ -85,17 +85,18 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class NaiveBayes extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
+implements OptionHandler, WeightedInstancesHandler, 
+           TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5995231201785697655L;
-  
+
   /** The attribute estimators. */
   protected Estimator [][] m_Distributions;
-  
+
   /** The class estimator. */
   protected Estimator m_ClassDistribution;
 
@@ -155,7 +156,7 @@ public class NaiveBayes extends Classifier
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
-    
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "George H. John and Pat Langley");
     result.setValue(Field.TITLE, "Estimating Continuous Distributions in Bayesian Classifiers");
@@ -164,7 +165,7 @@ public class NaiveBayes extends Classifier
     result.setValue(Field.PAGES, "338-345");
     result.setValue(Field.PUBLISHER, "Morgan Kaufmann");
     result.setValue(Field.ADDRESS, "San Mateo");
-    
+
     return result;
   }
 
@@ -187,7 +188,7 @@ public class NaiveBayes extends Classifier
 
     // instances
     result.setMinimumNumberInstances(0);
-    
+
     return result;
   }
 
@@ -206,9 +207,9 @@ public class NaiveBayes extends Classifier
     // remove instances with missing class
     instances = new Instances(instances);
     instances.deleteWithMissingClass();
-    
+
     m_NumClasses = instances.numClasses();
-    
+
     // Copy the instances
     m_Instances = new Instances(instances);
 
@@ -223,9 +224,9 @@ public class NaiveBayes extends Classifier
 
     // Reserve space for the distributions
     m_Distributions = new Estimator[m_Instances.numAttributes() - 1]
-    [m_Instances.numClasses()];
+      [m_Instances.numClasses()];
     m_ClassDistribution = new DiscreteEstimator(m_Instances.numClasses(), 
-						true);
+                                                true);
     int attIndex = 0;
     Enumeration enu = m_Instances.enumerateAttributes();
     while (enu.hasMoreElements()) {
@@ -265,15 +266,15 @@ public class NaiveBayes extends Classifier
 	case Attribute.NUMERIC: 
 	  if (m_UseKernelEstimator) {
 	    m_Distributions[attIndex][j] = 
-	    new KernelEstimator(numPrecision);
+	      new KernelEstimator(numPrecision);
 	  } else {
 	    m_Distributions[attIndex][j] = 
-	    new NormalEstimator(numPrecision);
+	      new NormalEstimator(numPrecision);
 	  }
 	  break;
 	case Attribute.NOMINAL:
 	  m_Distributions[attIndex][j] = 
-	  new DiscreteEstimator(attribute.numValues(), true);
+	    new DiscreteEstimator(attribute.numValues(), true);
 	  break;
 	default:
 	  throw new Exception("Attribute type unknown to NaiveBayes");
@@ -311,12 +312,12 @@ public class NaiveBayes extends Classifier
 	Attribute attribute = (Attribute) enumAtts.nextElement();
 	if (!instance.isMissing(attribute)) {
 	  m_Distributions[attIndex][(int)instance.classValue()].
-	    addValue(instance.value(attribute), instance.weight());
+            addValue(instance.value(attribute), instance.weight());
 	}
 	attIndex++;
       }
       m_ClassDistribution.addValue(instance.classValue(),
-				   instance.weight());
+                                   instance.weight());
     }
   }
 
@@ -330,8 +331,8 @@ public class NaiveBayes extends Classifier
    * @exception Exception if there is a problem generating the prediction
    */
   public double [] distributionForInstance(Instance instance) 
-  throws Exception { 
-    
+    throws Exception { 
+
     if (m_UseDiscretization) {
       m_Disc.input(instance);
       instance = m_Disc.output();
@@ -347,16 +348,17 @@ public class NaiveBayes extends Classifier
       if (!instance.isMissing(attribute)) {
 	double temp, max = 0;
 	for (int j = 0; j < m_NumClasses; j++) {
-	  temp = Math.max(1e-75, m_Distributions[attIndex][j].
-	  getProbability(instance.value(attribute)));
+	  temp = Math.max(1e-75, Math.pow(m_Distributions[attIndex][j].
+                                          getProbability(instance.value(attribute)), 
+                                          m_Instances.attribute(attIndex).weight()));
 	  probs[j] *= temp;
 	  if (probs[j] > max) {
 	    max = probs[j];
 	  }
 	  if (Double.isNaN(probs[j])) {
 	    throw new Exception("NaN returned from estimator for attribute "
-				+ attribute.name() + ":\n"
-				+ m_Distributions[attIndex][j].toString());
+                                + attribute.name() + ":\n"
+                                + m_Distributions[attIndex][j].toString());
 	  }
 	}
 	if ((max > 0) && (max < 1e-75)) { // Danger of probability underflow
@@ -383,12 +385,12 @@ public class NaiveBayes extends Classifier
     Vector newVector = new Vector(2);
 
     newVector.addElement(
-    new Option("\tUse kernel density estimator rather than normal\n"
-	       +"\tdistribution for numeric attributes",
-	       "K", 0,"-K"));
+                         new Option("\tUse kernel density estimator rather than normal\n"
+                                    +"\tdistribution for numeric attributes",
+                                    "K", 0,"-K"));
     newVector.addElement(
-    new Option("\tUse supervised discretization to process numeric attributes\n",
-	       "D", 0,"-D"));
+                         new Option("\tUse supervised discretization to process numeric attributes\n",
+                                    "D", 0,"-D"));
     return newVector.elements();
   }
 
@@ -412,12 +414,12 @@ public class NaiveBayes extends Classifier
    * @exception Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-    
+
     boolean k = Utils.getFlag('K', options);
     boolean d = Utils.getFlag('D', options);
     if (k && d) {
       throw new IllegalArgumentException("Can't use both kernel density " +
-					 "estimation and discretization!");
+                                         "estimation and discretization!");
     }
     setUseSupervisedDiscretization(d);
     setUseKernelEstimator(k);
@@ -454,7 +456,7 @@ public class NaiveBayes extends Classifier
    * @return a description of the classifier as a string.
    */
   public String toString() {
-    
+
     StringBuffer text = new StringBuffer();
 
     text.append("Naive Bayes Classifier");
@@ -464,15 +466,17 @@ public class NaiveBayes extends Classifier
       try {
 	for (int i = 0; i < m_Distributions[0].length; i++) {
 	  text.append("\n\nClass " + m_Instances.classAttribute().value(i) +
-		      ": Prior probability = " + Utils.
-		      doubleToString(m_ClassDistribution.getProbability(i),
-				     4, 2) + "\n\n");
+                      ": Prior probability = " + Utils.
+                      doubleToString(m_ClassDistribution.getProbability(i),
+                                     4, 2) + "\n\n");
 	  Enumeration enumAtts = m_Instances.enumerateAttributes();
 	  int attIndex = 0;
 	  while (enumAtts.hasMoreElements()) {
 	    Attribute attribute = (Attribute) enumAtts.nextElement();
-	    text.append(attribute.name() + ":  " 
-			+ m_Distributions[attIndex][i]);
+	    if (attribute.weight() > 0) {
+	      text.append(attribute.name() + ":  " 
+                          + m_Distributions[attIndex][i]);
+	    }
 	    attIndex++;
 	  }
 	}
@@ -483,7 +487,7 @@ public class NaiveBayes extends Classifier
 
     return text.toString();
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -499,23 +503,23 @@ public class NaiveBayes extends Classifier
    * @return Value of m_UseKernelEstimatory.
    */
   public boolean getUseKernelEstimator() {
-    
+
     return m_UseKernelEstimator;
   }
-  
+
   /**
    * Sets if kernel estimator is to be used.
    *
    * @param v  Value to assign to m_UseKernelEstimatory.
    */
   public void setUseKernelEstimator(boolean v) {
-    
+
     m_UseKernelEstimator = v;
     if (v) {
       setUseSupervisedDiscretization(false);
     }
   }
-  
+
   /**
    * Returns the tip text for this property
    * @return tip text for this property suitable for
@@ -532,23 +536,23 @@ public class NaiveBayes extends Classifier
    * @return true if supervised discretization is to be used.
    */
   public boolean getUseSupervisedDiscretization() {
-    
+
     return m_UseDiscretization;
   }
-  
+
   /**
    * Set whether supervised discretization is to be used.
    *
    * @param newblah true if supervised discretization is to be used.
    */
   public void setUseSupervisedDiscretization(boolean newblah) {
-    
+
     m_UseDiscretization = newblah;
     if (newblah) {
       setUseKernelEstimator(false);
     }
   }
-  
+
   /**
    * Main method for testing this class.
    *
