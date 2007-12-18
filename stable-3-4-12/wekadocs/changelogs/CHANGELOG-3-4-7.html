@@ -1,0 +1,3192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-7 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-7 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://jakarta.apache.org/ant/">Ant</a>.</p>
+<hr>
+<table cellspacing="1" width="100%" border="0">
+<tr>
+<td class="dateAndAuthor">2005-12-19 05:21 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed Javadoc for gr-method</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Utils.html?rev=1.44.2.3&content-type=text/x-cvsweb-markup">core/Utils.html (1.44.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-12-12 22:01 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Minimum expected cost option has been broken since 2001</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/CostMatrix.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">classifiers/CostMatrix.html (1.9.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-12-05 22:00 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fix from Julien Nioche (J.Nioche at sheffield.ac.uk) to speed up generation of large nominal attributes (10-15 times faster)</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Attribute.html?rev=1.32.2.2&content-type=text/x-cvsweb-markup">core/Attribute.html (1.32.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-12-04 21:07 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Removed some old code that is not used</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/AttributeSelection.html?rev=1.35.2.3&content-type=text/x-cvsweb-markup">attributeSelection/AttributeSelection.html (1.35.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-12-03 23:14 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>no longer craps out if it encounters a missing class in the GenericPropertiesCreator.props file (e.g. happened if Developer-props-file was run with the book-version of Weka), just outputs an error message on the console</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.html?r1=1.1.2.7&r2=1.1.2.6">gui/GenericPropertiesCreator.html (1.1.2.7)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-24 03:20 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>deleting of instances now works with sorting (didn't determine the actual index)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffTableSorter.html?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffTableSorter.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-18 00:43 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Reversed the meaning of the -L option. Now locally predictive attributes are included by default.</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/CfsSubsetEval.html?rev=1.19.2.1&content-type=text/x-cvsweb-markup">attributeSelection/CfsSubsetEval.html (1.19.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-18 00:32 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Changed so that if all the instances in the training data have equal weight then no resampling is done</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/AttributeSelectedClassifier.html?rev=1.16.2.4&content-type=text/x-cvsweb-markup">classifiers/meta/AttributeSelectedClassifier.html (1.16.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>More new icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ArffSaver.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ArffSaver.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ArffSaver_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ArffSaver_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/C45Saver.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/C45Saver.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/C45Saver_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/C45Saver_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CSVSaver.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/CSVSaver.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CSVSaver_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/CSVSaver_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DatabaseSaver.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/DatabaseSaver.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DatabaseSaver_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/DatabaseSaver_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedInstancesSaver.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SerializedInstancesSaver.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedInstancesSaver_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SerializedInstancesSaver_animated.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updates from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ArffLoader.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ArffLoader.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ArffLoader_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ArffLoader_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/C45Loader.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/C45Loader.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/C45Loader_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/C45Loader_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CSVLoader.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CSVLoader.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CSVLoader_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CSVLoader_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultDataSink.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultDataSink.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultDataSink_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultDataSink_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultDataSource.gif?rev=1.2.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultDataSource.gif (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultDataSource_animated.gif?rev=1.2.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultDataSource_animated.gif (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedInstancesLoader.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SerializedInstancesLoader.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedInstancesLoader_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SerializedInstancesLoader_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file CSVSaver.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/CSVSaver.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CSVSaver.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SerializedInstancesSaver.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedInstancesSaver.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SerializedInstancesSaver.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ArffSaver.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ArffSaver.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ArffSaver.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SerializedInstancesSaver_animated.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SerializedInstancesSaver_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SerializedInstancesSaver_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseSaver.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DatabaseSaver.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DatabaseSaver.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ArffSaver_animated.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ArffSaver_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ArffSaver_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file DatabaseSaver_animated.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DatabaseSaver_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DatabaseSaver_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file CSVSaver_animated.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/CSVSaver_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CSVSaver_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file C45Saver_animated.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/C45Saver_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/C45Saver_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-11-01 00:19 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file C45Saver.gif was added on branch book2ndEd-branch on 2005-11-01 00:26:09 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/C45Saver.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/C45Saver.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:34 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>More new icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_bayesClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_bayesClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_bayesClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_bayesClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_functionsClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_functionsClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_functionsClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_functionsClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_lazyClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_lazyClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_lazyClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_lazyClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_metaClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_metaClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_metaClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_metaClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_miscClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_miscClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_miscClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_miscClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_rulesClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_rulesClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_rulesClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_rulesClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_treeClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_treeClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_treeClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Default_treeClassifier_animated.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:33 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Small modification to allow the loading of a default icon for a sub package of classifiers</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/Classifier.html?rev=1.16.2.4&content-type=text/x-cvsweb-markup">gui/beans/Classifier.html (1.16.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:26 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Update from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultAssociator.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/DefaultAssociator.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultAssociator_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/DefaultAssociator_animated.gif (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_treeClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_treeClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_treeClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_functionsClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_functionsClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_functionsClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_treeClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_treeClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_treeClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_metaClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_metaClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_metaClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_metaClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_metaClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_metaClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_miscClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_miscClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_miscClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_miscClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_miscClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_miscClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_bayesClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_bayesClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_bayesClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_lazyClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_lazyClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_lazyClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_rulesClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_rulesClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_rulesClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_bayesClassifier.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_bayesClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_bayesClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_lazyClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_lazyClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_lazyClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_functionsClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_functionsClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_functionsClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-31 03:24 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Default_rulesClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-31 03:34:31 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Default_rulesClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Default_rulesClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:13 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed naming bug</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ConjunctiveRule_animated.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:12 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Naming bug</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule_animted.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/ConjunctiveRule_animted.gif (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:12 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ConjunctiveRule_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:13:33 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ConjunctiveRule_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:05 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>More new icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ConjunctiveRule.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule_animted.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ConjunctiveRule_animted.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionTable.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/DecisionTable.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:05 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>More new icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionTable_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/DecisionTable_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/JRip.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/JRip.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/JRip_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/JRip_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5Rules.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/M5Rules.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5Rules_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/M5Rules_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NNge.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NNge.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NNge_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NNge_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/OneR.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/OneR.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/OneR_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/OneR_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/PART.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/PART.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/PART_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/PART_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Prism.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Prism.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Prism_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Prism_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ZeroR.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ZeroR.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ZeroR_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ZeroR_animated.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file DecisionTable.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:13 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionTable.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DecisionTable.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NNge_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NNge_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NNge_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file PART_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/PART_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/PART_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Prism.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Prism.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Prism.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file OneR.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/OneR.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/OneR.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file JRip.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/JRip.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/JRip.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ZeroR_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ZeroR_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ZeroR_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ConjunctiveRule_animted.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:13 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule_animted.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ConjunctiveRule_animted.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ConjunctiveRule.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:13 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ConjunctiveRule.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ConjunctiveRule.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file DecisionTable_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionTable_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DecisionTable_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file JRip_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/JRip_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/JRip_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file M5Rules.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5Rules.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/M5Rules.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ZeroR.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ZeroR.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ZeroR.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file OneR_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/OneR_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/OneR_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file M5Rules_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5Rules_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/M5Rules_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NNge.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NNge.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NNge.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file PART.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/PART.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/PART.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 02:03 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Prism_animated.gif was added on branch book2ndEd-branch on 2005-10-28 02:05:14 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Prism_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Prism_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:50 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>New icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiClassClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultiClassClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiScheme.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultiScheme.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiScheme_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultiScheme_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/OrdinalClassClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/OrdinalClassClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/OrdinalClassClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/OrdinalClassClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RacedIncrementalLogitBoost.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RacedIncrementalLogitBoost.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RacedIncrementalLogitBoost_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RacedIncrementalLogitBoost_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomCommittee.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RandomCommittee.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomCommittee_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RandomCommittee_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RegressionByDiscretization.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RegressionByDiscretization.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RegressionByDiscretization_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RegressionByDiscretization_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Stacking.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Stacking.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/StackingC.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/StackingC.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/StackingC_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/StackingC_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Stacking_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Stacking_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ThresholdSelector.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ThresholdSelector.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ThresholdSelector_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ThresholdSelector_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Vote.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Vote.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Vote_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Vote_animated.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:50 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>New icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdaBoostM1.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AdaBoostM1.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdaBoostM1_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AdaBoostM1_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdditiveRegression.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AdditiveRegression.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdditiveRegression_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AdditiveRegression_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AttributeSelectedClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AttributeSelectedClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AttributeSelectedClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AttributeSelectedClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Bagging.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Bagging.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Bagging_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Bagging_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CVParameterSelection.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/CVParameterSelection.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CVParameterSelection_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/CVParameterSelection_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ClassificationViaRegression.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ClassificationViaRegression.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ClassificationViaRegression_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ClassificationViaRegression_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CostSensitiveClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/CostSensitiveClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/CostSensitiveClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/CostSensitiveClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Decorate.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Decorate.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Decorate_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Decorate_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/FilteredClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/FilteredClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/FilteredClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/FilteredClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Grading.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Grading.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Grading_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Grading_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LogitBoost.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LogitBoost.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LogitBoost_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LogitBoost_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MetaCost.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MetaCost.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MetaCost_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MetaCost_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiBoostAB.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultiBoostAB.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiBoostAB_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultiBoostAB_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiClassClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultiClassClassifier.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultiBoostAB_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiBoostAB_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultiBoostAB_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultiClassClassifier.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiClassClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultiClassClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file FilteredClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/FilteredClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/FilteredClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultiBoostAB.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiBoostAB.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultiBoostAB.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Bagging.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Bagging.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Bagging.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file CostSensitiveClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/CostSensitiveClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CostSensitiveClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Bagging_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Bagging_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Bagging_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AdditiveRegression_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdditiveRegression_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AdditiveRegression_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ClassificationViaRegression_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ClassificationViaRegression_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ClassificationViaRegression_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ThresholdSelector.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ThresholdSelector.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ThresholdSelector.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RacedIncrementalLogitBoost.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RacedIncrementalLogitBoost.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RacedIncrementalLogitBoost.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Vote_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Vote_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Vote_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultiScheme_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiScheme_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultiScheme_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultiClassClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiClassClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultiClassClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Decorate_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Decorate_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Decorate_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AdaBoostM1.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdaBoostM1.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AdaBoostM1.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file CVParameterSelection_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/CVParameterSelection_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CVParameterSelection_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file CVParameterSelection.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/CVParameterSelection.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CVParameterSelection.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RegressionByDiscretization_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RegressionByDiscretization_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RegressionByDiscretization_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RacedIncrementalLogitBoost_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RacedIncrementalLogitBoost_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RacedIncrementalLogitBoost_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Grading.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Grading.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Grading.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file FilteredClassifier.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/FilteredClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/FilteredClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AttributeSelectedClassifier.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AttributeSelectedClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AttributeSelectedClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file StackingC_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/StackingC_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/StackingC_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Stacking.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Stacking.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Stacking.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file OrdinalClassClassifier.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/OrdinalClassClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/OrdinalClassClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file OrdinalClassClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/OrdinalClassClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/OrdinalClassClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MetaCost.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MetaCost.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MetaCost.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ClassificationViaRegression.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ClassificationViaRegression.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ClassificationViaRegression.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ThresholdSelector_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ThresholdSelector_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ThresholdSelector_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AttributeSelectedClassifier_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AttributeSelectedClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AttributeSelectedClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Stacking_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Stacking_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Stacking_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MetaCost_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MetaCost_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MetaCost_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LogitBoost_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LogitBoost_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LogitBoost_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Grading_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Grading_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Grading_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file CostSensitiveClassifier.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/CostSensitiveClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/CostSensitiveClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AdaBoostM1_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdaBoostM1_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AdaBoostM1_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Decorate.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Decorate.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Decorate.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LogitBoost.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LogitBoost.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LogitBoost.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RegressionByDiscretization.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RegressionByDiscretization.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RegressionByDiscretization.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RandomCommittee.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomCommittee.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RandomCommittee.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Vote.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Vote.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Vote.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RandomCommittee_animated.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomCommittee_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RandomCommittee_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AdditiveRegression.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:15 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AdditiveRegression.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AdditiveRegression.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultiScheme.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultiScheme.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultiScheme.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:46 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file StackingC.gif was added on branch book2ndEd-branch on 2005-10-28 01:50:16 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/StackingC.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/StackingC.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-28 01:22 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Updates from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LeastMedSq.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/LeastMedSq.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LeastMedSq_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/LeastMedSq_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LinearRegression.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/LinearRegression.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LinearRegression_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/LinearRegression_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Logistic.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/Logistic.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Logistic_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/Logistic_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/PaceRegression.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/PaceRegression.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/PaceRegression_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/PaceRegression_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RBFNetwork.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/RBFNetwork.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RBFNetwork_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/RBFNetwork_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMO.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/SMO.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMO_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/SMO_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMOreg.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/SMOreg.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMOreg_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/SMOreg_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLinearRegression.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/SimpleLinearRegression.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLinearRegression_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/SimpleLinearRegression_animated.gif (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-19 02:15 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed memory leak
+added garbage collector call</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/ResultHistoryPanel.html?rev=1.18.2.3&content-type=text/x-cvsweb-markup">gui/ResultHistoryPanel.html (1.18.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:28 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed getOptions (now returns inherited options)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/TAN.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/TAN.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:28 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed handling of inherited options
+added markovBlanketClassifier support (made methods public + option -mbc)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/LocalScoreSearchAlgorithm.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:27 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed getOptions (now returns inherited options)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/TAN.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/TAN.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:27 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed if-statement for m_nMaxNrOfParents (wrong value anyway)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/HillClimber.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/HillClimber.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:27 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed if-statement for m_nMaxNrOfParents (wrong value anyway)
+fixed handling of inherited options</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/local/K2.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/local/K2.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:26 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed if-statement for m_nMaxNrOfParents (wrong value anyway)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/HillClimber.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/HillClimber.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:26 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>removed if-statement for m_nMaxNrOfParents (wrong value anyway)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/K2.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/K2.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:25 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed handling of inherited options
+added markovBlanketClassifier support (made methods public + option -mbc)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/global/GlobalScoreSearchAlgorithm.html?rev=1.5.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/global/GlobalScoreSearchAlgorithm.html (1.5.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:24 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added get/set/listOptions methods for -cardinality parameter</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/ci/ICSSearchAlgorithm.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/ci/ICSSearchAlgorithm.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:24 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed handling of inherited options</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/fixed/FromFile.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/fixed/FromFile.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:23 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>changed markovBlanketClassifier methods to protected since derived classes have to implement that behavior</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/search/SearchAlgorithm.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/search/SearchAlgorithm.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:23 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added get/set/listOptions
+added initCPTs call in method estimateCPTs (fixes NullPointerEx)
+estimateCPTs method now generates correct nominal binary attributes</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/MultiNomialBMAEstimator.html?rev=1.3.2.3&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/MultiNomialBMAEstimator.html (1.3.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:22 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added get/set/listOptions
+added initCPTs call in method estimateCPTs (fixes NullPointerEx)</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/estimate/BMAEstimator.html?rev=1.4.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/estimate/BMAEstimator.html (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:22 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>parser now validates and normalizes
+modified retrieval of FOR/TABLE nodes</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/BIFReader.html?rev=1.7.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/net/BIFReader.html (1.7.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-17 03:21 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added missing option -F in listOptions</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/net/BayesNetGenerator.html?rev=1.4.2.3&content-type=text/x-cvsweb-markup">classifiers/bayes/net/BayesNetGenerator.html (1.4.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-11 20:07 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed casting bug in case sum(classProbability)=0 in distributionForInstance
+fixed javadoc/revision tag
+removed unnecessary imports</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/lazy/KStar.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/lazy/KStar.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-04 21:01 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Name fixes</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AODE.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/AODE.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AODE_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/AODE_animated.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/IB1.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/IB1.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/IB1_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/IB1_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5P.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/M5P.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5P_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/M5P_animated.gif (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-10-04 04:03 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed bug with selecting wrong columns in the ResultsPanel in case of CV used in experiments (RandomSplits were OK)</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/Experimenter.props?rev=1.1.2.3&content-type=text/x-cvsweb-markup">gui/experiment/Experimenter.props (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/ExperimenterDefaults.html?rev=1.1.2.3&content-type=text/x-cvsweb-markup">gui/experiment/ExperimenterDefaults.html (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/ResultsPanel.html?rev=1.28.2.4&content-type=text/x-cvsweb-markup">gui/experiment/ResultsPanel.html (1.28.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 04:49 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>fixed names</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Id3.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Id3.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Id3_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Id3_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 04:48 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Removed - wrong names</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ID3.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/ID3.gif (1.1.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ID3_animated.gif?r1=1.1.2.3&r2=1.1.2.2">gui/beans/icons/ID3_animated.gif (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 03:23 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>tooltip has been disabled in general for now...</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/visualize/PrintableComponent.html?rev=1.1.2.4&content-type=text/x-cvsweb-markup">gui/visualize/PrintableComponent.html (1.1.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 03:22 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added hack to remove ResultProducers from the ResultListener list</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.html?rev=1.1.2.6&content-type=text/x-cvsweb-markup">gui/GenericPropertiesCreator.html (1.1.2.6)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:21 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>New icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ADTree.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ADTree.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ADTree_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ADTree_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AODE.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AODE.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/AODE_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/AODE_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/BayesNet.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/BayesNet.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/BayesNet_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/BayesNet_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ComplementNaiveBayes.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ComplementNaiveBayes.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ComplementNaiveBayes_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ComplementNaiveBayes_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionStump.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/DecisionStump.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionStump_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/DecisionStump_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultAssociator.gif?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultAssociator.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/DefaultAssociator_animated.gif?rev=1.1.2.2&content-type=text/x-cvsweb-markup">gui/beans/icons/DefaultAssociator_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/IB1.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/IB1.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/IB1_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/IB1_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/IBk.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/IBk.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/IBk_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/IBk_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/ID3.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ID3.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:21 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>New icons from Jeffrey</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ID3_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/ID3_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/J48.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/J48.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/J48_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/J48_animated.gif (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/KStar.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/KStar.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/KStar_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/KStar_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LBR.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LBR.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LBR_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LBR_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LMT.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LMT.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LMT_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LMT_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LWL.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LWL.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LWL_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LWL_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LeastMedSq.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LeastMedSq.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LeastMedSq_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LeastMedSq_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LinearRegression.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LinearRegression.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/LinearRegression_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/LinearRegression_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Logistic.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Logistic.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Logistic_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Logistic_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5P.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/M5P.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5P_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/M5P_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultilayerPerceptron.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultilayerPerceptron.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultilayerPerceptron_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/MultilayerPerceptron_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NBTree.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NBTree.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NBTree_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NBTree_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayes.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayes.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesMultinomial.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayesMultinomial.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesMultinomial_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayesMultinomial_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesSimple.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayesSimple.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesSimple_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayesSimple_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesUpdateable.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayesUpdateable.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesUpdateable_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayesUpdateable_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayes_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/NaiveBayes_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/PaceRegression.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/PaceRegression.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/PaceRegression_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/PaceRegression_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RBFNetwork.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RBFNetwork.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RBFNetwork_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RBFNetwork_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/REPTree.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/REPTree.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/REPTree_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/REPTree_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomForest.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RandomForest.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomForest_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RandomForest_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomTree.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RandomTree.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomTree_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/RandomTree_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMO.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SMO.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMO_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SMO_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMOreg.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SMOreg.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMOreg_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SMOreg_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLinearRegression.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SimpleLinearRegression.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLinearRegression_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SimpleLinearRegression_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLogistic.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SimpleLogistic.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLogistic_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/SimpleLogistic_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/UserClassifier.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/UserClassifier.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/UserClassifier_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/UserClassifier_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/VotedPerceptron.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/VotedPerceptron.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/VotedPerceptron_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/VotedPerceptron_animated.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Winnow.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Winnow.gif (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/icons/Winnow_animated.gif?r1=1.1.2.2&r2=1.1.2.1">gui/beans/icons/Winnow_animated.gif (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Logistic_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Logistic_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Logistic_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LeastMedSq_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LeastMedSq_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LeastMedSq_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ComplementNaiveBayes.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ComplementNaiveBayes.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ComplementNaiveBayes.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayesUpdateable_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesUpdateable_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayesUpdateable_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayesMultinomial_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesMultinomial_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayesMultinomial_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayesMultinomial.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesMultinomial.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayesMultinomial.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file UserClassifier_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/UserClassifier_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/UserClassifier_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file M5P.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5P.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/M5P.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AODE_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AODE_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AODE_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SimpleLogistic.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLogistic.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SimpleLogistic.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LBR_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LBR_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LBR_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Logistic.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Logistic.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Logistic.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RandomTree_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomTree_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RandomTree_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SMO_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMO_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SMO_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SMOreg_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMOreg_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SMOreg_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file M5P_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/M5P_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/M5P_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LBR.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LBR.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LBR.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RandomForest_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomForest_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RandomForest_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LinearRegression.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LinearRegression.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LinearRegression.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RBFNetwork.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RBFNetwork.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RBFNetwork.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file DecisionStump_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionStump_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DecisionStump_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file BayesNet.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/BayesNet.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/BayesNet.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file AODE.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/AODE.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/AODE.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SMOreg.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMOreg.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SMOreg.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ADTree_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ADTree_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ADTree_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file KStar_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/KStar_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/KStar_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Winnow.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Winnow.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Winnow.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ADTree.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ADTree.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ADTree.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file PaceRegression.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/PaceRegression.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/PaceRegression.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NBTree_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NBTree_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NBTree_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file DecisionStump.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/DecisionStump.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/DecisionStump.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LMT.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LMT.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LMT.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SimpleLinearRegression.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLinearRegression.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SimpleLinearRegression.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayesSimple.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesSimple.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayesSimple.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayesUpdateable.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesUpdateable.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayesUpdateable.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LWL.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LWL.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LWL.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ID3.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ID3.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ID3.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file UserClassifier.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/UserClassifier.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/UserClassifier.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LinearRegression_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LinearRegression_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LinearRegression_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RandomForest.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomForest.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RandomForest.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file VotedPerceptron.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/VotedPerceptron.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/VotedPerceptron.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file Winnow_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/Winnow_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/Winnow_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayes.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayes.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayes.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file REPTree_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/REPTree_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/REPTree_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ComplementNaiveBayes_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ComplementNaiveBayes_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ComplementNaiveBayes_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NBTree.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NBTree.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NBTree.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file PaceRegression_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/PaceRegression_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/PaceRegression_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SimpleLogistic_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLogistic_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SimpleLogistic_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RBFNetwork_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RBFNetwork_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RBFNetwork_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SMO.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SMO.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SMO.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LeastMedSq.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LeastMedSq.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LeastMedSq.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultilayerPerceptron_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultilayerPerceptron_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultilayerPerceptron_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file ID3_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/ID3_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/ID3_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file BayesNet_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:21 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/BayesNet_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/BayesNet_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file SimpleLinearRegression_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/SimpleLinearRegression_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/SimpleLinearRegression_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file KStar.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/KStar.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/KStar.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LWL_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LWL_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LWL_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file LMT_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/LMT_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/LMT_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayesSimple_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayesSimple_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayesSimple_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file REPTree.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/REPTree.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/REPTree.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file RandomTree.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/RandomTree.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/RandomTree.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file VotedPerceptron_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/VotedPerceptron_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/VotedPerceptron_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file NaiveBayes_animated.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/NaiveBayes_animated.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/NaiveBayes_animated.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-09-30 02:14 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>file MultilayerPerceptron.gif was added on branch book2ndEd-branch on 2005-09-30 02:21:22 +0000</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/beans/icons/MultilayerPerceptron.gif?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/beans/icons/MultilayerPerceptron.gif (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>
