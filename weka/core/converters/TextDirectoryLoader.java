@@ -70,7 +70,7 @@ import java.util.Vector;
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby at cs.waikato.ac.nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @see Loader
  */
 public class TextDirectoryLoader
@@ -394,6 +394,7 @@ public class TextDirectoryLoader
 	    newInst[1] = (double) data.attribute(1).addStringValue(subdirPath + File.separator + files[j]);
 	  newInst[data.classIndex()] = (double) k;
 	  data.add(new Instance(1.0, newInst));
+          is.close();
 	}
 	catch (Exception e) {
 	  System.err.println("failed to convert file: " + directoryPath + File.separator + subdirPath + File.separator + files[j]);
