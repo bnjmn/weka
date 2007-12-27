@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -581,7 +581,7 @@ public class DatabaseLoader
    * incremental loading
    * 
    * @param rs The result set
-   * @param i the index of the nominal value
+   * @param i the index of the nominal attribute
    * @throws Exception exception if it cannot be converted
    */  
   private void stringToNominal(ResultSet rs, int i) throws Exception{
@@ -741,7 +741,14 @@ public class DatabaseLoader
                         rs1.next();
                         int count = rs1.getInt(1);
                         rs1.close();
-                        if(count > m_nominalToStringLimit || m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
+                        //                        if(count > m_nominalToStringLimit || m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
+                        if(count > m_nominalToStringLimit || 
+                           m_DataBaseConnection.execute("SELECT DISTINCT ( "
+                                                        + columnName
+                                                        + " ) FROM "
+                                                        + end
+                                                        + " ORDER BY "
+                                                        + columnName) == false){
                             attributeTypes[i - 1] = Attribute.STRING;
                             break;
                         }
@@ -908,7 +915,11 @@ public class DatabaseLoader
         String end = endOfQuery(false);
         m_nominalIndexes[i - 1] = new Hashtable();
         m_nominalStrings[i - 1] = new FastVector();
-        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "+columnName+" ) FROM "+ end) == false){
+        if(m_DataBaseConnection.execute("SELECT DISTINCT ( "
+                                        + columnName+" ) FROM "
+                                        + end
+                                        + " ORDER BY "
+                                        + columnName) == false){
             throw new Exception("Nominal values cannot be retrieved");
         }
         rs1 = m_DataBaseConnection.getResultSet();
