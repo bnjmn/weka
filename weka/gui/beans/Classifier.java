@@ -25,21 +25,24 @@ package weka.gui.beans;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
 import weka.gui.Logger;
+import weka.gui.ExtensionFileFilter;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
 
 /**
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -115,6 +118,9 @@ public class Classifier
   private IncrementalClassifierEvent m_ie = 
     new IncrementalClassifierEvent(this);
 
+  private transient JFileChooser m_fileChooser = 
+    new JFileChooser(new File(System.getProperty("user.dir")));
+
   /**
    * If the classifier is an incremental classifier, should we
    * update it (ie train it on incoming instances). This makes it
@@ -148,6 +154,8 @@ public class Classifier
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setClassifier(m_Classifier);
+    ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka classifier");
+    m_fileChooser.setFileFilter(ef);
   }
 
   /**
@@ -940,6 +948,91 @@ public class Classifier
     }
   }
 
+  public void loadModel() {
+    try {
+      if (m_fileChooser == null) {
+        // i.e. after de-serialization
+        m_fileChooser = 
+          new JFileChooser(new File(System.getProperty("user.dir")));
+        ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka classifier");
+        m_fileChooser.setFileFilter(ef);
+      }
+      int returnVal = m_fileChooser.showOpenDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File loadFrom = m_fileChooser.getSelectedFile();
+        ObjectInputStream is = 
+          new ObjectInputStream(new BufferedInputStream(
+                                new FileInputStream(loadFrom)));
+        // try and read the model
+        weka.classifiers.Classifier temp = (weka.classifiers.Classifier)is.readObject();
+
+        // Update name and icon
+        setClassifier(temp);
+        
+        // try and read the header (if present)
+        try {
+          m_trainingSet = (Instances)is.readObject();
+        } catch (Exception ex) {
+          // quietly ignore
+        }
+        is.close();
+        if (m_log != null) {
+          m_log.logMessage("Loaded classifier: "
+                           + m_Classifier.getClass().toString());
+        }
+      }
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(Classifier.this,
+                                    "Problem loading classifier.\n",
+                                    "Load Model",
+                                    JOptionPane.ERROR_MESSAGE);
+      if (m_log != null) {
+        m_log.logMessage("Problem loading classifier. " + ex.getMessage());
+      }
+    }
+  }
+
+  public void saveModel() {
+    try {
+      if (m_fileChooser == null) {
+        // i.e. after de-serialization
+        m_fileChooser = 
+          new JFileChooser(new File(System.getProperty("user.dir")));
+        ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka classifier");
+      m_fileChooser.setFileFilter(ef);
+      }
+      int returnVal = m_fileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File saveTo = m_fileChooser.getSelectedFile();
+        String fn = saveTo.getAbsolutePath();
+        if (!fn.endsWith(".model")) {
+          fn += ".model";
+          saveTo = new File(fn);
+        }
+        ObjectOutputStream os = 
+          new ObjectOutputStream(new BufferedOutputStream(
+                                                          new FileOutputStream(saveTo)));
+        os.writeObject(m_Classifier);
+        if (m_trainingSet != null) {
+          Instances header = new Instances(m_trainingSet, 0);
+          os.writeObject(header);
+        }
+        os.close();
+        if (m_log != null) {
+          m_log.logMessage("Saved classifier OK.");
+        }
+      }
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(Classifier.this,
+                                    "Problem saving classifier.\n",
+                                    "Save Model",
+                                    JOptionPane.ERROR_MESSAGE);
+      if (m_log != null) {
+        m_log.logMessage("Problem saving classifier. " + ex.getMessage());
+      }
+    }
+  }
+
   /**
    * Set a logger
    *
@@ -959,6 +1052,15 @@ public class Classifier
     if (m_buildThread != null) {
       newVector.addElement("Stop");
     }
+
+    if (m_buildThread == null && 
+        m_Classifier != null) {
+      newVector.addElement("Save model");
+    }
+
+    if (m_buildThread == null) {
+      newVector.addElement("Load model");
+    }
     return newVector.elements();
   }
 
@@ -971,6 +1073,10 @@ public class Classifier
   public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
+    } else if (request.compareTo("Save model") == 0) {
+      saveModel();
+    } else if (request.compareTo("Load model") == 0) {
+      loadModel();
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Classifier)");
