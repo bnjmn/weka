@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22.2.2 $
+ * @version $Revision: 1.22.2.3 $
  */
 public class Capabilities 
   implements Cloneable, Serializable {
@@ -712,7 +712,7 @@ public class Capabilities
     for (Capability cap: Capability.values()) {
       if (cap.isClassCapability()) {
 	if (handles(cap))
-	  result.enable(cap);
+	  result.m_Capabilities.add(cap);
       }
     }
     
@@ -734,7 +734,7 @@ public class Capabilities
     for (Capability cap: Capability.values()) {
       if (cap.isAttributeCapability()) {
 	if (handles(cap))
-	  result.enable(cap);
+	  result.m_Capabilities.add(cap);
       }
     }
     
@@ -755,7 +755,7 @@ public class Capabilities
     for (Capability cap: Capability.values()) {
       if (cap.isOtherCapability()) {
 	if (handles(cap))
-	  result.enable(cap);
+	  result.m_Capabilities.add(cap);
       }
     }
     

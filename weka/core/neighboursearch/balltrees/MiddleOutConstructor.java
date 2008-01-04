@@ -86,7 +86,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class MiddleOutConstructor
   extends BallTreeConstructor
@@ -104,6 +104,11 @@ public class MiddleOutConstructor
    * (if selecting randomly).
    */
   protected Random rand = new Random(m_RSeed);
+ 
+  /**
+   * The radius of the smallest ball enclosing all the data points.
+   */
+  private double rootRadius = -1;
   
   /** 
    * True if the initial anchor is chosen randomly. False if it is the furthest
@@ -168,6 +173,11 @@ public class MiddleOutConstructor
    */
   public BallNode buildTree() throws Exception {
     m_NumNodes = m_MaxDepth = m_NumLeaves = 0;
+    if(rootRadius == -1) {
+      rootRadius = BallNode.calcRadius(m_InstList, m_Instances, 
+                		BallNode.calcCentroidPivot(m_InstList, m_Instances),
+                		m_DistanceFunction);
+    }
     BallNode root = buildTreeMiddleOut(0, m_Instances.numInstances()-1);
     return root;
   }
@@ -186,29 +196,33 @@ public class MiddleOutConstructor
    */
   protected BallNode buildTreeMiddleOut(int startIdx, int endIdx) 
     throws Exception {
-    int numInsts = endIdx - startIdx + 1;
-    
-    if(numInsts <= m_MaxInstancesInLeaf) { //make leaf
-      Instance pivot;
-      BallNode node = new BallNode(startIdx, endIdx, m_NumNodes, 
-                      (pivot=BallNode.calcCentroidPivot(startIdx, endIdx, 
-                                                      m_InstList, m_Instances)), 
-                      BallNode.calcRadius(startIdx, endIdx, m_InstList, 
-                                          m_Instances, pivot, 
-                                          m_DistanceFunction)
-                         );
-      return node;
-    }
-    
-    int numAnchors = (int) Math.round(Math.sqrt(numInsts));
+	
+    Instance pivot;
+    double radius;
     Vector anchors;
+    int numInsts = endIdx - startIdx + 1;
+    int numAnchors = (int) Math.round(Math.sqrt(numInsts));
+    
     //create anchor's hierarchy
-    if(numAnchors > 1) {
+    if (numAnchors > 1) {
+      pivot = BallNode.calcCentroidPivot(startIdx, endIdx, m_InstList,m_Instances);
+      radius = BallNode.calcRadius(startIdx, endIdx, m_InstList, m_Instances, 
+    	  						   pivot, m_DistanceFunction);      
+      if(numInsts <= m_MaxInstancesInLeaf || 
+    	 (rootRadius==0 ? true : radius/rootRadius < m_MaxRelLeafRadius)) { //just make a leaf don't make anchors hierarchy 
+		BallNode node = new BallNode(startIdx, endIdx, m_NumNodes,pivot, radius);
+		return node;
+	  }
       anchors = new Vector(numAnchors);
       createAnchorsHierarchy(anchors, numAnchors, startIdx, endIdx);
-    }//end anchors hierarchy
+
+      BallNode node = mergeNodes(anchors, startIdx, endIdx);
+      
+      buildLeavesMiddleOut(node);
+      
+      return node;
+    }// end anchors hierarchy
     else {
-      Instance pivot;
       BallNode node = new BallNode(startIdx, endIdx, m_NumNodes, 
                       (pivot=BallNode.calcCentroidPivot(startIdx, endIdx, 
                                                       m_InstList, m_Instances)), 
@@ -217,12 +231,7 @@ public class MiddleOutConstructor
                                           m_DistanceFunction)
                          );
       return node;
-    }
-    BallNode node = mergeNodes(anchors, startIdx, endIdx);
-    
-    buildLeavesMiddleOut(node);
-    
-    return node;
+    }        
   }
   
   /**
@@ -248,7 +257,7 @@ public class MiddleOutConstructor
             getFurthestFromMeanAnchor(startIdx, endIdx);
 	              
     TempNode amax = anchr1; //double maxradius = anchr1.radius;
-    TempNode newAnchor;     
+    TempNode newAnchor;
     Vector anchorDistances = new Vector(numAnchors-1);
     anchors.add(anchr1);
 
@@ -262,8 +271,10 @@ public class MiddleOutConstructor
       newAnchor.idx = ((ListNode)amax.points.getFirst()).idx;
 
       setInterAnchorDistances(anchors, newAnchor, anchorDistances);
-      stealPoints(newAnchor, anchors, anchorDistances);        
-      newAnchor.radius = ((ListNode)newAnchor.points.getFirst()).distance;
+      if(stealPoints(newAnchor, anchors, anchorDistances)) //if points stolen
+    	newAnchor.radius = ((ListNode)newAnchor.points.getFirst()).distance;
+      else
+    	newAnchor.radius = 0.0;
       anchors.add(newAnchor);
 
       //find new amax        
@@ -539,8 +550,10 @@ public class MiddleOutConstructor
    * @param anchorDistances The distances
    * of new anchor to each of the old 
    * anchors.
+   * @return true if any points are removed
+   * from the old anchors
    */
-  public void stealPoints(TempNode newAnchor, Vector anchors, 
+  public boolean stealPoints(TempNode newAnchor, Vector anchors, 
                           Vector anchorDistances) {
                             
     int maxIdx = -1; 
@@ -552,7 +565,7 @@ public class MiddleOutConstructor
         maxDist = distArray[i]; maxIdx = i;
       }
     
-    boolean pointsStolen=false;
+    boolean anyPointsStolen=false, pointsStolen=false;
     TempNode anchorI;
     double newDist, distI, interAnchMidDist;
     Instance newAnchInst = newAnchor.anchor, anchIInst;
@@ -575,12 +588,13 @@ public class MiddleOutConstructor
         if(newDist < distI) {
           newAnchor.points.insertReverseSorted(tmp.idx, newDist);
           anchorI.points.remove(j);
-          pointsStolen=true;
+          anyPointsStolen=pointsStolen=true;
         }
       }
       if (pointsStolen)
         anchorI.radius = ((ListNode)anchorI.points.getFirst()).distance;
     }//end for
+    return anyPointsStolen;
   }//end stealPoints()
 
   /**
@@ -717,8 +731,8 @@ public class MiddleOutConstructor
   public int[] addInstance(BallNode node, Instance inst) throws Exception {
     throw new Exception("Addition of instances after the tree is built, not " +
                         "possible with MiddleOutConstructor.");
-  }  
-  
+  }
+
   /**
    * Sets the maximum number of instances allowed in a leaf.
    * @param num The maximum number of instances allowed in 
@@ -732,6 +746,28 @@ public class MiddleOutConstructor
                           "using MiddleOutConstructor must be >=2.");
     super.setMaxInstancesInLeaf(num);
   }  
+
+  /**
+   * Sets the instances on which the tree is to be built.
+   * @param inst The instances on which to build the 
+   * ball tree.
+   */
+  public void setInstances(Instances insts) {
+    super.setInstances(insts);
+    rootRadius = -1; //this needs to be re-calculated by buildTree()
+  }
+  
+  /**
+   * Sets the master index array that points to 
+   * instances in m_Instances, so that only this array
+   * is manipulated, and m_Instances is left 
+   * untouched.
+   * @param instList The master index array.
+   */
+  public void setInstanceList(int[] instList) {
+    super.setInstanceList(instList); 
+    rootRadius = -1; //this needs to be re-calculated by buildTree()
+  }
   
   /**
    * Returns the tip text for this property.
@@ -961,7 +997,7 @@ public class MiddleOutConstructor
    * node's centre/anchor point.
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class TempNode {
     
@@ -1012,7 +1048,7 @@ public class MiddleOutConstructor
    * anchor point). 
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class ListNode {
     
@@ -1040,7 +1076,7 @@ public class MiddleOutConstructor
    * centre/pivot/anchor, in a (reverse sorted) list.  
    * 
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */
   protected class MyIdxList
     extends FastVector {

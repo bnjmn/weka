@@ -37,13 +37,18 @@ import java.util.Vector;
  * Abstract class for constructing a BallTree .
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public abstract class BallTreeConstructor 
   implements OptionHandler, Serializable {
   
   /** The maximum number of instances allowed in a leaf. */
   protected int m_MaxInstancesInLeaf=40;
+  
+  /** The maximum relative radius of a leaf node 
+   * (relative to the smallest ball enclosing all the 
+   * data (training) points). */
+  protected double m_MaxRelLeafRadius=0.001;
   
   /** Should a parent ball completely enclose the balls
    * of its two children, or only the points inside
@@ -125,7 +130,47 @@ public abstract class BallTreeConstructor
                           "be >=1.");
     m_MaxInstancesInLeaf = num;
   }
-  
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui.
+   */
+  public String maxRelativeLeafRadiusTipText() {
+    return "The maximum relative radius allowed for a leaf node. " +
+    		"Itis relative to the radius of the smallest ball " +
+    		"enclosing all the data points (that were used to " +
+    		"build the tree). This smallest ball would be the " +
+    		"same as the root node's ball, if ContainChildBalls " +
+    		"property is set to false (default).";
+  }
+
+  /** Returns the maximum relative radius of a leaf node. 
+   * It is relative to the radius of the smallest ball enclosing all 
+   * the data points (that were used to build the tree). This smallest
+   * ball would be the same as the root node's ball, if 
+   * ContainChildBalls property is set to false (default).
+   * @return The maximum relative radius allowed for a leaf.
+   */
+  public double getMaxRelativeLeafRadius() {
+    return m_MaxRelLeafRadius;
+  }
+
+  /** Sets the maximum relative radius, allowed for a leaf node. The 
+   * radius is relative to the radius of the smallest ball enclosing all 
+   * the data points (that were used to build the tree). This smallest
+   * ball would be the same as the root node's ball, if 
+   * ContainChildBalls property is set to false (default).
+   * @param radius The maximum relative radius allowed for a leaf.
+   * @throws Exception If radius is < 0.0.
+   */
+  public void setMaxRelativeLeafRadius(double radius) throws Exception {
+	if(radius < 0.0)
+	  throw new Exception("The radius for the leaves should be >= 0.0");
+	m_MaxRelLeafRadius = radius;
+  }
+
   /**
    * Returns the tip text for this property.
    * 

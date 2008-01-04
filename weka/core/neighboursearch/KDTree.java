@@ -105,7 +105,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Malcolm Ware (mfw4[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class KDTree
   extends NearestNeighbourSearch
@@ -634,7 +634,10 @@ public class KDTree
   protected double getMaxRelativeNodeWidth(double[][] nodeRanges,
       double[][] universe) {
     int widest = widestDim(nodeRanges, universe);
-    return nodeRanges[widest][WIDTH] / universe[widest][WIDTH];
+    if(widest < 0)
+    	return 0.0;
+    else
+    	return nodeRanges[widest][WIDTH] / universe[widest][WIDTH];
   }
 
   /**
