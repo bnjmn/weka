@@ -65,7 +65,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end --> 
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BottomUpConstructor
   extends BallTreeConstructor 
@@ -195,7 +195,8 @@ public class BottomUpConstructor
     System.arraycopy(tmpRoot.points, 0, m_InstList, 0, tmpRoot.points.length);
 
     m_NumNodes = m_MaxDepth = m_NumLeaves = 0;
-    BallNode node = makeBallTree(tmpRoot, startIdx, endIdx, instList, 0); 
+    tmpRadius = BallNode.calcRadius(instList, m_Instances, tmpRoot.anchor, m_DistanceFunction);    
+    BallNode node = makeBallTree(tmpRoot, startIdx, endIdx, instList, 0, tmpRadius); 
     
     return node;    
   }
@@ -212,18 +213,22 @@ public class BottomUpConstructor
    * to be merged. 
    * @param instList The master index array.
    * @param depth The depth of the provided temp node.
+   * @param rootRadius The smallest ball enclosing all
+   * data points.
    * @return The proper top BallTreeNode. 
    * @throws Exception If there is some problem.
    */
   protected BallNode makeBallTree(TempNode node, int startidx, int endidx, 
-                                int[] instList, int depth) throws Exception {
+                                int[] instList, int depth, final double rootRadius) throws Exception {
     BallNode ball=null;
     Instance pivot;
     
     if(m_MaxDepth < depth)
       m_MaxDepth = depth;
     
-    if(node.points.length > m_MaxInstancesInLeaf && node.left!=null && node.right!=null) { //make an internal node
+    if(node.points.length > m_MaxInstancesInLeaf && 
+       (rootRadius==0 ? false : node.radius/rootRadius >= m_MaxRelLeafRadius) && 
+       node.left!=null && node.right!=null) { //make an internal node
       ball = new BallNode(
       startidx, endidx, m_NumNodes, 
       (pivot=BallNode.calcCentroidPivot(startidx, endidx, instList, m_Instances)),
@@ -231,8 +236,8 @@ public class BottomUpConstructor
                           m_DistanceFunction)
       );
       m_NumNodes += 1;
-      ball.m_Left = makeBallTree(node.left, startidx, startidx+node.left.points.length-1, instList, depth+1);
-      ball.m_Right= makeBallTree(node.right, startidx+node.left.points.length, endidx, instList, depth+1);
+      ball.m_Left = makeBallTree(node.left, startidx, startidx+node.left.points.length-1, instList, depth+1, rootRadius);
+      ball.m_Right= makeBallTree(node.right, startidx+node.left.points.length, endidx, instList, depth+1, rootRadius);
     }
     else { //make a leaf node
       ball = new BallNode(startidx, endidx, m_NumNodes,       
@@ -317,7 +322,7 @@ public class BottomUpConstructor
    * other another node).
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.2 $
    */
   protected class TempNode {
     
