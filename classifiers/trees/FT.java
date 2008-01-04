@@ -118,7 +118,7 @@ import java.util.Vector;
  *
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira  
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FT 
   extends Classifier 
@@ -703,15 +703,15 @@ public class FT
     result.setValue(Field.VOLUME, "55");
     result.setValue(Field.PAGES, "219-250");
     result.setValue(Field.NUMBER, "3");
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
-    result.setValue(Field.TITLE, "Logistic Model Trees");
-    result.setValue(Field.BOOKTITLE, "Machine Learning");
-    result.setValue(Field.YEAR, "2005");
-    result.setValue(Field.VOLUME, "95");
-    result.setValue(Field.PAGES, "161-205");
-    result.setValue(Field.NUMBER, "1-2");
+        
+    additional = result.add(Type.ARTICLE);
+    additional.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
+    additional.setValue(Field.TITLE, "Logistic Model Trees");
+    additional.setValue(Field.BOOKTITLE, "Machine Learning");
+    additional.setValue(Field.YEAR, "2005");
+    additional.setValue(Field.VOLUME, "95");
+    additional.setValue(Field.PAGES, "161-205");
+    additional.setValue(Field.NUMBER, "1-2");
     
     return result;
   }
