@@ -108,7 +108,7 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40.2.1 $
+ * @version $Revision: 1.40.2.2 $
  */
 public class IBk 
   extends Classifier 
@@ -741,22 +741,39 @@ public class IBk
 
   /**
    * Returns an enumeration of the additional measure names 
-   * produced by the neighbour search algorithm.
+   * produced by the neighbour search algorithm, plus the chosen K in case
+   * cross-validation is enabled.
+   * 
    * @return an enumeration of the measure names
    */
   public Enumeration enumerateMeasures() {
-    return m_NNSearch.enumerateMeasures();
+    if (m_CrossValidate) {
+      Enumeration enm = m_NNSearch.enumerateMeasures();
+      Vector measures = new Vector();
+      while (enm.hasMoreElements())
+	measures.add(enm.nextElement());
+      measures.add("measureKNN");
+      return measures.elements();
+    }
+    else {
+      return m_NNSearch.enumerateMeasures();
+    }
   }
   
   /**
    * Returns the value of the named measure from the 
-   * neighbour search algorithm.
+   * neighbour search algorithm, plus the chosen K in case
+   * cross-validation is enabled.
+   * 
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
    */
   public double getMeasure(String additionalMeasureName) {
-    return m_NNSearch.getMeasure(additionalMeasureName);
+    if (additionalMeasureName.equals("measureKNN"))
+      return m_kNN;
+    else
+      return m_NNSearch.getMeasure(additionalMeasureName);
   }
   
   
@@ -877,6 +894,10 @@ public class IBk
   protected void crossValidate() {
 
     try {
+      if (m_NNSearch instanceof weka.core.neighboursearch.CoverTree)
+	throw new Exception("CoverTree doesn't support hold-one-out "+
+			    "cross-validation. Use some other NN " +
+			    "method.");
 
       double [] performanceStats = new double [m_kNNUpper];
       double [] performanceStatsSq = new double [m_kNNUpper];

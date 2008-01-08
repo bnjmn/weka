@@ -29,6 +29,7 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
+import weka.core.neighboursearch.balltrees.BallNode;
 
 import java.util.Enumeration;
 import java.util.Vector;
@@ -67,7 +68,7 @@ import java.util.Vector;
  <!-- options-end --> 
  * 
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class TopDownConstructor
   extends BallTreeConstructor 
@@ -145,7 +146,7 @@ public class TopDownConstructor
     root.setPivot(BallNode.calcCentroidPivot(m_InstList, m_Instances));
     root.setRadius(BallNode.calcRadius(m_InstList, m_Instances, root.getPivot(), m_DistanceFunction));
     
-    splitNodes(root, m_MaxDepth+1);
+    splitNodes(root, m_MaxDepth+1, root.m_Radius);
     
     return root; 
   }
@@ -156,12 +157,15 @@ public class TopDownConstructor
    * @param node The node to split.
    * @param depth The depth of this node in the tree, 
    * so that m_MaxDepth is correctly updated.
+   * @param rootRadius The smallest ball enclosing all
+   * the data points.
    * @throws Exception If there is some problem in 
    * splitting.
    */
-  protected void splitNodes(BallNode node, int depth) throws Exception {
+  protected void splitNodes(BallNode node, int depth, final double rootRadius) throws Exception {
     
-    if(node.m_NumInstances<=m_MaxInstancesInLeaf)
+    if(node.m_NumInstances <= m_MaxInstancesInLeaf || 
+       (rootRadius==0 ? true : node.m_Radius/rootRadius < m_MaxRelLeafRadius))
       return;
     
     m_NumLeaves--;
@@ -172,21 +176,21 @@ public class TopDownConstructor
     if(m_MaxDepth < depth)
       m_MaxDepth = depth;
   
-    splitNodes(node.m_Left, depth+1);
-    splitNodes(node.m_Right, depth+1);
+    splitNodes(node.m_Left, depth+1, rootRadius);
+    splitNodes(node.m_Right, depth+1, rootRadius);
     
     if(m_FullyContainChildBalls) {
       double radius = BallNode.calcRadius(node.m_Left, node.m_Right, 
                                          node.getPivot(), m_DistanceFunction);
       Instance pivot = BallNode.calcPivot(node.m_Left, node.m_Right, m_Instances);
-      System.err.println("Left Radius: "+node.m_Left.getRadius()+
-                         " Right Radius: "+node.m_Right.getRadius()+
-                         " d(p1,p2): "+
-                         m_DistanceFunction.distance(node.m_Left.getPivot(), node.m_Right.getPivot())+
-                         " node's old radius: "+node.getRadius()+
-                         " node's new Radius: "+radius+
-                         " node;s old pivot: "+node.getPivot()+
-                         " node's new pivot: "+pivot);
+//      System.err.println("Left Radius: "+node.m_Left.getRadius()+
+//                         " Right Radius: "+node.m_Right.getRadius()+
+//                         " d(p1,p2): "+
+//                         m_DistanceFunction.distance(node.m_Left.getPivot(), node.m_Right.getPivot())+
+//                         " node's old radius: "+node.getRadius()+
+//                         " node's new Radius: "+radius+
+//                         " node;s old pivot: "+node.getPivot()+
+//                         " node's new pivot: "+pivot);
       node.setRadius(radius);
     }    
   }

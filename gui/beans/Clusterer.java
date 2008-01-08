@@ -27,13 +27,18 @@ import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.Logger;
+import weka.gui.ExtensionFileFilter;
 
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+
+import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
 
 import javax.swing.JPanel;
 
@@ -41,7 +46,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -109,6 +114,9 @@ public class Clusterer
   private transient Logger m_log = null;
 
   private Double m_dummy = new Double(0.0);
+
+  private transient JFileChooser m_fileChooser = 
+    new JFileChooser(new File(System.getProperty("user.dir")));
 
   /**
    * Global info (if it exists) for the wrapped classifier
@@ -636,6 +644,91 @@ public class Clusterer
     m_log = logger;
   }
 
+  public void saveModel() {
+    try {
+      if (m_fileChooser == null) {
+        // i.e. after de-serialization
+        m_fileChooser = 
+          new JFileChooser(new File(System.getProperty("user.dir")));
+        ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka clusterer");
+      m_fileChooser.setFileFilter(ef);
+      }
+      int returnVal = m_fileChooser.showSaveDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File saveTo = m_fileChooser.getSelectedFile();
+        String fn = saveTo.getAbsolutePath();
+        if (!fn.endsWith(".model")) {
+          fn += ".model";
+          saveTo = new File(fn);
+        }
+        ObjectOutputStream os = 
+          new ObjectOutputStream(new BufferedOutputStream(
+                                                          new FileOutputStream(saveTo)));
+        os.writeObject(m_Clusterer);
+        if (m_trainingSet != null) {
+          Instances header = new Instances(m_trainingSet, 0);
+          os.writeObject(header);
+        }
+        os.close();
+        if (m_log != null) {
+          m_log.logMessage("Saved clusterer OK.");
+        }
+      }
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(Clusterer.this,
+                                    "Problem saving clusterer.\n",
+                                    "Save Model",
+                                    JOptionPane.ERROR_MESSAGE);
+      if (m_log != null) {
+        m_log.logMessage("Problem saving clusterer. " + ex.getMessage());
+      }
+    }
+  }
+
+  public void loadModel() {
+    try {
+      if (m_fileChooser == null) {
+        // i.e. after de-serialization
+        m_fileChooser = 
+          new JFileChooser(new File(System.getProperty("user.dir")));
+        ExtensionFileFilter ef = new ExtensionFileFilter("model", "Serialized weka clusterer");
+        m_fileChooser.setFileFilter(ef);
+      }
+      int returnVal = m_fileChooser.showOpenDialog(this);
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File loadFrom = m_fileChooser.getSelectedFile();
+        ObjectInputStream is = 
+          new ObjectInputStream(new BufferedInputStream(
+                                new FileInputStream(loadFrom)));
+        // try and read the model
+        weka.clusterers.Clusterer temp = (weka.clusterers.Clusterer)is.readObject();
+
+        // Update name and icon
+        setClusterer(temp);
+        
+        // try and read the header (if present)
+        try {
+          m_trainingSet = (Instances)is.readObject();
+        } catch (Exception ex) {
+          // quietly ignore
+        }
+        is.close();
+        if (m_log != null) {
+          m_log.logMessage("Loaded clusterer: "
+                           + m_Clusterer.getClass().toString());
+        }
+      }
+    } catch (Exception ex) {
+      JOptionPane.showMessageDialog(Clusterer.this,
+                                    "Problem loading classifier.\n",
+                                    "Load Model",
+                                    JOptionPane.ERROR_MESSAGE);
+      if (m_log != null) {
+        m_log.logMessage("Problem loading classifier. " + ex.getMessage());
+      }
+    }
+  }
+
   /**
    * Return an enumeration of requests that can be made by the user
    *
@@ -646,6 +739,16 @@ public class Clusterer
     if (m_buildThread != null) {
       newVector.addElement("Stop");
     }
+
+    if (m_buildThread == null &&
+        m_Clusterer != null) {
+      newVector.addElement("Save model");
+    }
+
+    if (m_buildThread == null) {
+      newVector.addElement("Load model");
+    }
+    
     return newVector.elements();
   }
 
@@ -658,9 +761,13 @@ public class Clusterer
   public void performRequest(String request) {
     if (request.compareTo("Stop") == 0) {
       stop();
+    }  else if (request.compareTo("Save model") == 0) {
+      saveModel();
+    } else if (request.compareTo("Load model") == 0) {
+      loadModel();
     } else {
       throw new IllegalArgumentException(request
-					 + " not supported (Classifier)");
+					 + " not supported (Clusterer)");
     }
   }
 
