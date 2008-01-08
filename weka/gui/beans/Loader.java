@@ -42,7 +42,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -157,6 +157,7 @@ public class Loader
 	  }
 	  m_visual.setStatic();
 	} else {
+          m_Loader.reset();
 	  m_dataSet = m_Loader.getDataSet();
 	  m_visual.setStatic();
 	  m_visual.setText(m_dataSet.relationName());
