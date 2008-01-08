@@ -108,7 +108,7 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40.2.2 $
+ * @version $Revision: 1.40.2.3 $
  */
 public class IBk 
   extends Classifier 
@@ -894,11 +894,6 @@ public class IBk
   protected void crossValidate() {
 
     try {
-      if (m_NNSearch instanceof weka.core.neighboursearch.CoverTree)
-	throw new Exception("CoverTree doesn't support hold-one-out "+
-			    "cross-validation. Use some other NN " +
-			    "method.");
-
       double [] performanceStats = new double [m_kNNUpper];
       double [] performanceStatsSq = new double [m_kNNUpper];
 
