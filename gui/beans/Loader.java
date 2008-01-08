@@ -42,14 +42,14 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.1 $
+ * @version $Revision: 1.16.2.2 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
  */
 public class Loader
   extends AbstractDataSource 
-  implements UserRequestAcceptor, WekaWrapper,
+  implements Startable, UserRequestAcceptor, WekaWrapper,
 	     EventConstraints {
 
   /** for serialization */
@@ -409,6 +409,15 @@ public class Loader
       throw new IllegalArgumentException(request
 					 + " not supported (Loader)");
     }
+  }
+
+  /**
+   * Start loading
+   *
+   * @exception Exception if something goes wrong
+   */
+  public void start() throws Exception {
+    startLoading();
   }
 
   /**
