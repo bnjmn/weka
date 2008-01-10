@@ -37,6 +37,7 @@ import java.io.Reader;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
+import java.io.ObjectStreamException;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.util.Vector;
@@ -54,7 +55,7 @@ import weka.core.converters.*;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10.2.4 $
+ * @version $Revision: 1.10.2.5 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -462,10 +463,11 @@ public class Loader extends AbstractDataSource
     m_dataSetEventTargets ++;
     // pass on any current instance format
     try{
-        if(m_dbSet){
-            m_dataFormat = m_Loader.getStructure();
-            m_dbSet = false;
-        }
+      if((m_Loader instanceof DatabaseLoader && m_dbSet && m_dataFormat == null) || 
+         (!(m_Loader instanceof DatabaseLoader) && m_dataFormat == null)) {
+        m_dataFormat = m_Loader.getStructure();
+        m_dbSet = false;
+      }
     }catch(Exception ex){
     }
     notifyStructureAvailable(m_dataFormat);
@@ -490,10 +492,11 @@ public class Loader extends AbstractDataSource
     super.addInstanceListener(dsl);
     m_instanceEventTargets ++;
     try{
-        if(m_dbSet){
-            m_dataFormat = m_Loader.getStructure();
-            m_dbSet = false;
-        }
+      if((m_Loader instanceof DatabaseLoader && m_dbSet && m_dataFormat == null) || 
+         (!(m_Loader instanceof DatabaseLoader) && m_dataFormat == null)) {
+        m_dataFormat = m_Loader.getStructure();
+        m_dbSet = false;
+      }
     }catch(Exception ex){
     }
     // pass on any current instance format
@@ -508,6 +511,17 @@ public class Loader extends AbstractDataSource
   public synchronized void removeInstanceListener(InstanceListener dsl) {
     super.removeInstanceListener(dsl);
     m_instanceEventTargets --;
+  }
+
+  private Object readResolve() throws ObjectStreamException {
+    // try and reset the Loader
+    if (m_Loader != null) {
+      try {
+        m_Loader.reset();
+      } catch (Exception ex) {
+      }
+    }
+    return this;
   }
   
   public static void main(String [] args) {
