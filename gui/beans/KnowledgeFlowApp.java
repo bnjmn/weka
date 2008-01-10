@@ -113,7 +113,7 @@ import javax.swing.filechooser.FileFilter;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.19 $
+ * @version  $Revision: 1.20 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -297,7 +297,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.19 $
+   * @version $Revision: 1.20 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -421,28 +421,28 @@ public class KnowledgeFlowApp
       the chooser */
   protected FileFilter m_KfFilter = 
     new ExtensionFileFilter(FILE_EXTENSION, 
-                            "KnowledgeFlow configuration files (*" 
+                            "Binary KnowledgeFlow configuration files (*" 
                             + FILE_EXTENSION + ")");
 
   /** A filter to ensure only KnowledgeFlow files in KOML format 
       get shown in the chooser */
   protected FileFilter m_KOMLFilter = 
-    new ExtensionFileFilter(KOML.FILE_EXTENSION, 
-                            "KnowledgeFlow configuration files (*" 
-                            + KOML.FILE_EXTENSION + ")");
+    new ExtensionFileFilter(KOML.FILE_EXTENSION + "kf", 
+                            "XML KnowledgeFlow configuration files (*" 
+                            + KOML.FILE_EXTENSION + "kf)");
 
   /** A filter to ensure only KnowledgeFlow files in XStream format 
       get shown in the chooser */
   protected FileFilter m_XStreamFilter = 
-    new ExtensionFileFilter(XStream.FILE_EXTENSION, 
-                            "KnowledgeFlow configuration files (*" 
-                            + XStream.FILE_EXTENSION + ")");
+    new ExtensionFileFilter(XStream.FILE_EXTENSION + "kf", 
+                            "XML KnowledgeFlow configuration files (*" 
+                            + XStream.FILE_EXTENSION + "kf)");
 
   /** A filter to ensure only KnowledgeFlow layout files in XML format get 
       shown in the chooser */
   protected FileFilter m_XMLFilter = 
     new ExtensionFileFilter(FILE_EXTENSION_XML, 
-                            "KnowledgeFlow layout files (*" 
+                            "XML KnowledgeFlow layout files (*" 
                             + FILE_EXTENSION_XML + ")");
 
   /** the scrollbar increment of the layout scrollpane */
@@ -511,9 +511,9 @@ public class KnowledgeFlowApp
 
     if (m_PreferredExtension.equals(FILE_EXTENSION_XML)) {
       m_FileChooser.setFileFilter(m_XMLFilter);
-    } else if (KOML.isPresent() && m_PreferredExtension.equals(KOML.FILE_EXTENSION)) {
+    } else if (KOML.isPresent() && m_PreferredExtension.equals(KOML.FILE_EXTENSION + "kf")) {
       m_FileChooser.setFileFilter(m_KOMLFilter);
-    } else if (XStream.isPresent() && m_PreferredExtension.equals(XStream.FILE_EXTENSION)) {
+    } else if (XStream.isPresent() && m_PreferredExtension.equals(XStream.FILE_EXTENSION + "kf")) {
       m_FileChooser.setFileFilter(m_XStreamFilter);
     } else {
       m_FileChooser.setFileFilter(m_KfFilter);
@@ -1974,9 +1974,9 @@ public class KnowledgeFlowApp
                            oFile.getName() + FILE_EXTENSION);
         }
       } else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
-        if (!oFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION)) {
+        if (!oFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION + "kf")) {
           oFile = new File(oFile.getParent(), 
-                           oFile.getName() + KOML.FILE_EXTENSION);
+                           oFile.getName() + KOML.FILE_EXTENSION + "kf");
         }
       } else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
         if (!oFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
@@ -1984,9 +1984,9 @@ public class KnowledgeFlowApp
                            oFile.getName() + FILE_EXTENSION_XML);
         }
       } else if (m_FileChooser.getFileFilter() == m_XStreamFilter) {
-        if (!oFile.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION)) {
+        if (!oFile.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION +"kf")) {
           oFile = new File(oFile.getParent(), 
-                           oFile.getName() + XStream.FILE_EXTENSION);
+                           oFile.getName() + XStream.FILE_EXTENSION + "kf");
         }
       }
     
@@ -1997,13 +1997,13 @@ public class KnowledgeFlowApp
         // KOML?
         if ( (KOML.isPresent()) && 
              (oFile.getAbsolutePath().toLowerCase().
-              endsWith(KOML.FILE_EXTENSION)) ) {
+              endsWith(KOML.FILE_EXTENSION + "kf")) ) {
           Vector v     = (Vector) KOML.read(oFile.getAbsolutePath());
           beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
           connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
         } /* XStream */ else if ( (XStream.isPresent()) && 
              (oFile.getAbsolutePath().toLowerCase().
-              endsWith(XStream.FILE_EXTENSION)) ) {
+              endsWith(XStream.FILE_EXTENSION + "kf")) ) {
           Vector v     = (Vector) XStream.read(oFile.getAbsolutePath());
           beans        = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
           connections  = (Vector) v.get(XMLBeans.INDEX_BEANCONNECTIONS);
@@ -2127,14 +2127,14 @@ public class KnowledgeFlowApp
                            sFile.getName() + FILE_EXTENSION);
         }
       } else if (m_FileChooser.getFileFilter() == m_KOMLFilter) {
-        if (!sFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION)) {
+        if (!sFile.getName().toLowerCase().endsWith(KOML.FILE_EXTENSION + "kf")) {
           sFile = new File(sFile.getParent(), 
-                           sFile.getName() + KOML.FILE_EXTENSION);
+                           sFile.getName() + KOML.FILE_EXTENSION + "kf");
         }
       } else if (m_FileChooser.getFileFilter() == m_XStreamFilter) {
-        if (!sFile.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION)) {
+        if (!sFile.getName().toLowerCase().endsWith(XStream.FILE_EXTENSION + "kf")) {
           sFile = new File(sFile.getParent(), 
-                           sFile.getName() + XStream.FILE_EXTENSION);
+                           sFile.getName() + XStream.FILE_EXTENSION + "kf");
         }
       } else if (m_FileChooser.getFileFilter() == m_XMLFilter) {
         if (!sFile.getName().toLowerCase().endsWith(FILE_EXTENSION_XML)) {
@@ -2148,7 +2148,7 @@ public class KnowledgeFlowApp
         // KOML?
         if ((KOML.isPresent()) && 
             (sFile.getAbsolutePath().toLowerCase().
-             endsWith(KOML.FILE_EXTENSION)) ) {
+             endsWith(KOML.FILE_EXTENSION + "kf")) ) {
           Vector v = new Vector();
           v.setSize(2);
           v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
@@ -2156,7 +2156,7 @@ public class KnowledgeFlowApp
           KOML.write(sFile.getAbsolutePath(), v);
         } /* XStream */ else if ((XStream.isPresent()) && 
             (sFile.getAbsolutePath().toLowerCase().
-             endsWith(XStream.FILE_EXTENSION)) ) {
+             endsWith(XStream.FILE_EXTENSION + "kf")) ) {
           Vector v = new Vector();
           v.setSize(2);
           v.set(XMLBeans.INDEX_BEANINSTANCES, beans);
