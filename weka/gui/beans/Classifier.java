@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.27 $
+ * @version $Revision: 1.28 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -128,7 +128,7 @@ public class Classifier
     new JFileChooser(new File(System.getProperty("user.dir")));
 
   protected FileFilter m_binaryFilter =
-    new ExtensionFileFilter(FILE_EXTENSION, "Binary serialized model file (*"
+    new ExtensionFileFilter("."+FILE_EXTENSION, "Binary serialized model file (*"
                             + FILE_EXTENSION + ")");
 
   protected FileFilter m_KOMLFilter =
@@ -1017,6 +1017,7 @@ public class Classifier
         }
 
         weka.classifiers.Classifier temp = null;
+        Instances tempHeader = null;
         // KOML ?
         if ((KOML.isPresent()) &&
             (loadFrom.getAbsolutePath().toLowerCase().
@@ -1025,7 +1026,7 @@ public class Classifier
           temp = (weka.classifiers.Classifier) v.elementAt(0);
           if (v.size() == 2) {
             // try and grab the header
-            m_trainingSet = (Instances) v.elementAt(1);
+            tempHeader = (Instances) v.elementAt(1);
           }
         } /* XStream */ else if ((XStream.isPresent()) &&
                                  (loadFrom.getAbsolutePath().toLowerCase().
@@ -1034,8 +1035,8 @@ public class Classifier
           temp = (weka.classifiers.Classifier) v.elementAt(0);
           if (v.size() == 2) {
             // try and grab the header
-            m_trainingSet = (Instances) v.elementAt(1);
-          }
+            tempHeader = (Instances) v.elementAt(1);
+          } 
         } /* binary */ else {
 
           ObjectInputStream is = 
@@ -1045,8 +1046,9 @@ public class Classifier
           temp = (weka.classifiers.Classifier)is.readObject();
           // try and read the header (if present)
           try {
-            m_trainingSet = (Instances)is.readObject();
+            tempHeader = (Instances)is.readObject();
           } catch (Exception ex) {
+            //            System.err.println("No header...");
             // quietly ignore
           }
           is.close();
@@ -1054,6 +1056,8 @@ public class Classifier
 
         // Update name and icon
         setClassifier(temp);
+        // restore header
+        m_trainingSet = tempHeader;
 
         if (m_log != null) {
           m_log.logMessage("Loaded classifier: "
