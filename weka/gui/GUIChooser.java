@@ -50,10 +50,12 @@ import weka.gui.visualize.VisualizePanel;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -87,7 +89,7 @@ import javax.swing.SwingConstants;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.33 $
+ * @version $Revision: 1.34 $
  */
 public class GUIChooser
   extends JFrame {
@@ -215,6 +217,12 @@ public class GUIChooser
 
   /** Click to open the LogWindow */
   protected Button m_LogWindowBut = new Button("Log");
+
+  /** Click to open the MemoryUsage */
+  protected Button m_MemoryUsageBut = new Button("Memory usage");
+
+  /** The frame containing the memory usage */
+  protected JFrame m_MemoryUsageFrame;
   
   /** Click to exit Weka */
   protected Button m_ExitBut = new Button("Exit");
@@ -341,9 +349,11 @@ public class GUIChooser
     
     // other
     m_PanelOther.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    m_PanelOther.setLayout(new GridLayout(1, 2));
+    m_PanelOther.setLayout(new GridLayout(2, 2));
     m_PanelOther.add(m_LogWindowBut);
+    m_PanelOther.add(m_MemoryUsageBut);
     m_PanelOther.add(m_ExitBut);
+    m_PanelOther.add(new JLabel(""));
     
     JPanel wekaPan = new JPanel();
     wekaPan.setToolTipText("Weka, a native bird of New Zealand");
@@ -841,6 +851,36 @@ public class GUIChooser
     m_LogWindowBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         m_LogWindow.setVisible(true);
+      }
+    });
+
+    m_MemoryUsageBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	if (m_MemoryUsageFrame == null) {
+	  final MemoryUsagePanel panel = new MemoryUsagePanel(); 
+	  m_MemoryUsageBut.setEnabled(false);
+	  m_MemoryUsageFrame = new JFrame("Memory usage");
+	  m_MemoryUsageFrame.setIconImage(m_Icon);
+	  m_MemoryUsageFrame.getContentPane().setLayout(new BorderLayout());
+	  m_MemoryUsageFrame.getContentPane().add(panel, BorderLayout.CENTER);
+	  m_MemoryUsageFrame.addWindowListener(new WindowAdapter() {
+	    public void windowClosing(WindowEvent w) {
+	      panel.stopMonitoring();
+	      m_MemoryUsageFrame.dispose();
+	      m_MemoryUsageFrame = null;
+	      m_MemoryUsageBut.setEnabled(true);
+	      checkExit();
+	    }
+	  });
+	  m_MemoryUsageFrame.pack();
+	  m_MemoryUsageFrame.setSize(400, 50);
+	  Point l = panel.getFrameLocation();
+	  if ((l.x != -1) && (l.y != -1))
+	    m_MemoryUsageFrame.setLocation(l);
+	  m_MemoryUsageFrame.setVisible(true);
+	  Dimension size = m_MemoryUsageFrame.getPreferredSize();
+	  m_MemoryUsageFrame.setSize(new Dimension((int) size.getWidth(), (int) size.getHeight()));
+	}
       }
     });
 

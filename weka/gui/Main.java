@@ -22,7 +22,6 @@
 
 package weka.gui;
 
-import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Copyright;
 import weka.core.Instances;
@@ -55,10 +54,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.LayoutManager;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -111,32 +112,32 @@ import javax.swing.event.InternalFrameEvent;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class Main
   extends JFrame
   implements OptionHandler {
   
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 1453813254824253849L;
   
   /**
-   * DesktopPane with background image
+   * DesktopPane with background image.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
     
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 2046713123452402745L;
     
-    /** the actual background image */
+    /** the actual background image. */
     protected Image m_Background;
     
     /**
-     * intializes the desktop pane
+     * intializes the desktop pane.
      * 
      * @param image	the image to use as background
      */
@@ -152,7 +153,7 @@ public class Main
     }
     
     /**
-     * draws the background image
+     * draws the background image.
      * 
      * @param g		the graphics context
      */
@@ -176,19 +177,19 @@ public class Main
    * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    */
   public static class ChildFrameSDI 
     extends JFrame {
     
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 8588293938686425618L;
     
-    /** the parent frame */
+    /** the parent frame. */
     protected Main m_Parent;
     
     /**
-     * constructs a new internal frame that knows about its parent
+     * constructs a new internal frame that knows about its parent.
      * 
      * @param parent	the parent frame
      * @param title	the title of the frame
@@ -214,7 +215,7 @@ public class Main
     }
     
     /**
-     * returns the parent frame, can be null
+     * returns the parent frame, can be null.
      * 
      * @return		the parent frame
      */
@@ -223,7 +224,7 @@ public class Main
     }
     
     /**
-     * de-registers the child frame with the parent first
+     * de-registers the child frame with the parent first.
      */
     public void dispose() {
       if (getParentFrame() != null) {
@@ -239,19 +240,19 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.13 $
+   * @version $Revision: 1.14 $
    */
   public static class ChildFrameMDI
     extends JInternalFrame {
     
-    /** for serialization */
+    /** for serialization. */
     private static final long serialVersionUID = 3772573515346899959L;
     
-    /** the parent frame */
+    /** the parent frame. */
     protected Main m_Parent;
     
     /**
-     * constructs a new internal frame that knows about its parent
+     * constructs a new internal frame that knows about its parent.
      * 
      * @param parent	the parent frame
      * @param title	the title of the frame
@@ -277,7 +278,7 @@ public class Main
     }
     
     /**
-     * returns the parent frame, can be null
+     * returns the parent frame, can be null.
      * 
      * @return		the parent frame
      */
@@ -286,7 +287,7 @@ public class Main
     }
     
     /**
-     * de-registers the child frame with the parent first
+     * de-registers the child frame with the parent first.
      */
     public void dispose() {
       if (getParentFrame() != null) {
@@ -298,52 +299,52 @@ public class Main
     }
   }
 
-  /** displays the GUI as MDI */
+  /** displays the GUI as MDI. */
   public final static int GUI_MDI = 0;
-  /** displays the GUI as SDI */
+  /** displays the GUI as SDI. */
   public final static int GUI_SDI = 1;
-  /** GUI tags */
+  /** GUI tags. */
   public static final Tag[] TAGS_GUI = {
     new Tag(GUI_MDI, "MDI", "MDI Layout"),
     new Tag(GUI_SDI, "SDI", "SDI Layout")
- };
+  };
   
-  /** the frame itself */
+  /** the frame itself. */
   protected Main m_Self;
   
-  /** the type of GUI to display */
+  /** the type of GUI to display. */
   protected int m_GUIType = GUI_MDI;
   
-  /** variable for the Main class which would be set to null by the memory 
-   *  monitoring thread to free up some memory if we running out of memory */
+  /** variable for the Main class which would be set to null by the memory
+   *  monitoring thread to free up some memory if we running out of memory. */
   protected static Main m_MainCommandline;
   
-  /** singleton instance of the GUI */
+  /** singleton instance of the GUI. */
   protected static Main m_MainSingleton;
 
   /** list of things to be notified when the startup process of
-   *  the KnowledgeFlow is complete */
+   *  the KnowledgeFlow is complete. */
   protected static Vector m_StartupListeners = new Vector();
 
-  /** for monitoring the Memory consumption */
+  /** for monitoring the Memory consumption. */
   protected static Memory m_Memory = new Memory(true);
   
-  /** contains the child frames (title &lt;-&gt; object) */
+  /** contains the child frames (title &lt;-&gt; object). */
   protected HashSet<Container> m_ChildFrames = new HashSet<Container>();
 
-  /** The frame of the LogWindow */
+  /** The frame of the LogWindow. */
   protected static LogWindow m_LogWindow = new LogWindow();
 
-  /** filechooser for the TreeVisualizer */
+  /** filechooser for the TreeVisualizer. */
   protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  /** filechooser for the GraphVisualizer */
+  /** filechooser for the GraphVisualizer. */
   protected JFileChooser m_FileChooserGraphVisualizer = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  /** filechooser for Plots */
+  /** filechooser for Plots. */
   protected JFileChooser m_FileChooserPlot = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  /** filechooser for ROC curves */
+  /** filechooser for ROC curves. */
   protected JFileChooser m_FileChooserROC = new JFileChooser(new File(System.getProperty("user.dir")));
   
   // GUI components
@@ -372,6 +373,7 @@ public class Main
   private JMenuItem jMenuItemApplicationsExplorer;
   private JMenuItem jMenuItemProgramExit;
   private JMenuItem jMenuItemProgramLogWindow;
+  private JMenuItem jMenuItemProgramMemoryUsage;
   private JMenuItem jMenuItemProgramPreferences;  // TODO: see below
   private JMenu jMenuProgram;
   private JMenu jMenuExtensions;
@@ -379,14 +381,14 @@ public class Main
   private JMenuBar jMenuBar;
   
   /**
-   * default constructor
+   * default constructor.
    */
   public Main() {
     super();
   }
   
   /**
-   * creates a frame (depending on m_GUIType) and returns it
+   * creates a frame (depending on m_GUIType) and returns it.
    * 
    * @param parent		the parent of the generated frame
    * @param title		the title of the frame
@@ -491,7 +493,7 @@ public class Main
   }
   
   /**
-   * insert the menu item in a sorted fashion
+   * insert the menu item in a sorted fashion.
    * 
    * @param menu	the menu to add the item to
    * @param menuitem	the menu item to add
@@ -501,7 +503,7 @@ public class Main
   }
   
   /**
-   * insert the menu item in a sorted fashion
+   * insert the menu item in a sorted fashion.
    * 
    * @param menu	the menu to add the item to
    * @param menuitem	the menu item to add
@@ -537,7 +539,7 @@ public class Main
   }
   
   /**
-   * initializes the GUI
+   * initializes the GUI.
    */
   protected void initGUI() {
     m_Self = this;
@@ -608,6 +610,53 @@ public class Main
       jMenuItemProgramLogWindow.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
 	  m_LogWindow.setVisible(true);
+	}
+      });
+      
+      jMenuItemProgramMemoryUsage = new JMenuItem();
+      jMenuProgram.add(jMenuItemProgramMemoryUsage);
+      jMenuItemProgramMemoryUsage.setText("Memory usage");
+      jMenuItemProgramMemoryUsage.setMnemonic('M');
+      jMenuItemProgramMemoryUsage.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent evt) {
+	  String title = jMenuItemProgramMemoryUsage.getText();
+	  if (!containsWindow(title)) {
+	    final MemoryUsagePanel panel = new MemoryUsagePanel();
+	    Container c = createFrame(
+		m_Self, title, panel, new BorderLayout(), 
+		BorderLayout.CENTER, 400, 50, null, true, true);
+	    
+	    // optimize size
+	    Dimension size = c.getPreferredSize();
+	    c.setSize(new Dimension((int) size.getWidth(), (int) size.getHeight()));
+
+	    // stop threads
+	    if (m_GUIType == GUI_MDI) {
+	      final ChildFrameMDI frame = (ChildFrameMDI) c;
+	      Point l = panel.getFrameLocation();
+	      if ((l.x != -1) && (l.y != -1))
+		frame.setLocation(l);
+	      frame.addInternalFrameListener(new InternalFrameAdapter() {
+		public void internalFrameClosing(InternalFrameEvent e) {
+		  panel.stopMonitoring();
+		}
+	      });
+	    }
+	    else {
+	      final ChildFrameSDI frame = (ChildFrameSDI) c;
+	      Point l = panel.getFrameLocation();
+	      if ((l.x != -1) && (l.y != -1))
+		frame.setLocation(l);
+	      frame.addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent e) {
+		  panel.stopMonitoring();
+		}
+	      });
+	    }
+	  }
+	  else {
+	    showWindow(getWindow(title));
+	  }
 	}
       });
 
@@ -1264,7 +1313,7 @@ public class Main
   }
   
   /**
-   * creates and displays the title
+   * creates and displays the title.
    * 
    * @param title 	the additional part of the title
    */
@@ -1279,7 +1328,7 @@ public class Main
   }
   
   /**
-   * adds the given child frame to the list of frames
+   * adds the given child frame to the list of frames.
    * 
    * @param c 		the child frame to add
    */
@@ -1289,7 +1338,7 @@ public class Main
   }
   
   /**
-   * tries to remove the child frame, it returns true if it could do such
+   * tries to remove the child frame, it returns true if it could do such.
    * 
    * @param c 		the child frame to remove
    * @return 		true if the child frame could be removed
@@ -1301,7 +1350,7 @@ public class Main
   }
   
   /**
-   * brings child frame to the top
+   * brings child frame to the top.
    * 
    * @param c 		the frame to activate
    * @return 		true if frame was activated
@@ -1340,7 +1389,7 @@ public class Main
   
   /**
    * brings the first frame to the top that is of the specified
-   * window class
+   * window class.
    *  
    * @param windowClass	the class to display the first child for
    * @return		true, if a child was found and brought to front
@@ -1350,7 +1399,7 @@ public class Main
   }
   
   /**
-   * returns all currently open frames
+   * returns all currently open frames.
    * 
    * @return 		an iterator over all currently open frame
    */
@@ -1360,7 +1409,7 @@ public class Main
 
   /**
    * returns the first instance of the given window class, null if none can be 
-   * found
+   * found.
    * 
    * @param windowClass	the class to retrieve the first instance for
    * @return		null, if no instance can be found
@@ -1385,7 +1434,7 @@ public class Main
 
   /**
    * returns the first window with the given title, null if none can be 
-   * found
+   * found.
    * 
    * @param title	the title to look for
    * @return		null, if no instance can be found
@@ -1418,7 +1467,7 @@ public class Main
   
   /**
    * checks, whether an instance of the given window class is already in
-   * the Window list
+   * the Window list.
    * 
    * @param windowClass	the class to check for an instance in the current
    * 			window list
@@ -1430,7 +1479,7 @@ public class Main
   
   /**
    * checks, whether a window with the given title is already in
-   * the Window list
+   * the Window list.
    * 
    * @param title	the title to check for in the current window list
    * @return		true if a window with the given title is already 
@@ -1441,7 +1490,7 @@ public class Main
   }
   
   /**
-   * minimizes all windows
+   * minimizes all windows.
    */
   public void minimizeWindows() {
     Iterator	iter;
@@ -1463,7 +1512,7 @@ public class Main
   }
   
   /**
-   * restores all windows
+   * restores all windows.
    */
   public void restoreWindows() {
     Iterator	iter;
@@ -1485,14 +1534,14 @@ public class Main
   }
   
   /**
-   * is called when window list changed somehow (add or remove)
+   * is called when window list changed somehow (add or remove).
    */
   public void windowListChanged() {
     createWindowMenu();
   }
   
   /**
-   * creates the menu of currently open windows
+   * creates the menu of currently open windows.
    */
   protected synchronized void createWindowMenu() {
     Iterator          iter;
@@ -1565,7 +1614,7 @@ public class Main
   }
   
   /**
-   * Create the singleton instance of the Main GUI
+   * Create the singleton instance of the Main GUI.
    * 
    * @param args 	commandline options
    */
@@ -1587,7 +1636,7 @@ public class Main
   }
 
   /**
-   * Return the singleton instance of the Main GUI
+   * Return the singleton instance of the Main GUI.
    *
    * @return the singleton instance
    */
@@ -1596,7 +1645,7 @@ public class Main
   }
 
   /**
-   * Add a listener to be notified when startup is complete
+   * Add a listener to be notified when startup is complete.
    * 
    * @param s 		a listener to add
    */
@@ -1634,7 +1683,7 @@ public class Main
   }
   
   /**
-   * returns the options of the current setup
+   * returns the options of the current setup.
    *
    * @return		the current options
    */
@@ -1698,7 +1747,7 @@ public class Main
   }
   
   /**
-   * starts the application
+   * starts the application.
    * 
    * @param args	the commandline arguments - ignored
    */
