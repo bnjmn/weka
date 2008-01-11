@@ -16,7 +16,7 @@
 
 /*
  * CitationKNN.java
- * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005 Miguel Garcia Torres
  */
 
 package weka.classifiers.mi;
@@ -78,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class CitationKNN 
   extends Classifier 
