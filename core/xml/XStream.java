@@ -25,10 +25,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Writer;
+import java.io.Reader;
 import java.io.BufferedReader;
 import java.lang.StringBuffer;
 
@@ -38,7 +41,7 @@ import java.lang.StringBuffer;
  * XStream does not need to be present, since the class-calls are done generically via Reflection.
  *
  * @author Mark Hall (mhall[{at}]pentao[{dot}]org
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class XStream {
 
@@ -57,7 +60,7 @@ public class XStream {
   }
 
   /**
-   * checks whether the KOML is present in the class path
+   * checks whether the XStream is present in the class path
    */
   private static void checkForXStream() {
     try {
@@ -70,109 +73,15 @@ public class XStream {
   }
   
   /**
-   * returns whether KOML is present or not, i.e. whether the classes are in the
+   * returns whether XStream is present or not, i.e. whether the classes are in the
    * classpath or not
    *
-   * @return whether KOML is available
+   * @return whether XStream is available
    */
   public static boolean isPresent() {
     return m_Present;
   }
-
-  /**
-   * reads the XML-serialized object from the given file
-   * @param filename the file to deserialize the object from
-   * @return the deserialized object
-   * @throws Exception if something goes wrong while reading from the file
-   */
-  public static Object read(String filename) throws Exception {
-    return read(new FileInputStream(filename));
-  }
-  
-  /**
-   * reads the XML-serialized object from the given file
-   * @param file the file to deserialize the object from
-   * @return the deserialized object
-   * @throws Exception if something goes wrong while reading from the file
-   */
-  public static Object read(File file) throws Exception {
-    return read(new FileInputStream(file));
-  }
-
-  /**
-   * reads the XML-serialized object from the given input stream
-   *
-   * @param stream the input stream
-   * @return the deserialized object
-   * @throws Exception if something goes wrong while reading from stream
-   */
-  public static Object read(InputStream stream) throws Exception {
-    InputStreamReader isr = new InputStreamReader(stream);
-    BufferedReader br = new BufferedReader(isr);
-    String line;
-    StringBuffer buff = new StringBuffer();
-    
-    while ((line = br.readLine()) != null) {
-      buff.append(line+"\n");
-    }
-    br.close();
-    
-    String xml = buff.toString();
-
-    Object result = deSerialize(xml);
-    
-    return result;
-  }
-
-  /**
-   * writes the XML-serialized object to the given file
-   * @param filename the file to serialize the object to
-   * @param o the object to write to the file
-   * @return whether writing was successful or not
-   * @throws Exception if something goes wrong while writing to the file
-   */
-  public static boolean write(String filename, Object o) throws Exception {
-    return write(new FileOutputStream(filename), o);
-  }
-  
-  /**
-   * write the XML-serialized object to the given file
-   * @param file the file to serialize the object to
-   * @param o the object to write to the file
-   * @return whether writing was successful or not
-   * @throws Exception if something goes wrong while writing to the file
-   */
-  public static boolean write(File file, Object o) throws Exception {
-    return write(new FileOutputStream(file), o);
-  }
-
-  /**
-   * writes the XML-serialized object to the given output stream
-   *
-   * @param stream the output stream
-   * @param o the object to write
-   * @return true if everything goes ok
-   */
-  public static boolean write(OutputStream stream, Object o) {
-    BufferedOutputStream bos = new BufferedOutputStream(stream);
-    PrintWriter pw = new PrintWriter(bos, true);
-    boolean result = false;
-    
-    try {
-      String xmlOut = serialize(o);
-      
-      // write that sucker...
-      pw.println(xmlOut);
-      pw.close();
-      result = true;
-    } catch (Exception ex) {
-      result = false;
-      pw.close();
-    }
-
-    return result;
-  }
-
+ 
   /**
    * Serializes the supplied object xml
    *
@@ -201,6 +110,193 @@ public class XStream {
     try {
       result = (String)methodSerialize.invoke(xstream, serializeArgs);
     } catch (Exception ex) {
+      result = null;
+    }
+
+    return result;
+  }
+
+ /**
+   * writes the XML-serialized object to the given file
+   * @param filename the file to serialize the object to
+   * @param o the object to write to the file
+   * @return whether writing was successful or not
+   * @throws Exception if something goes wrong while writing to the file
+   */
+  public static boolean write(String filename, Object o) throws Exception {
+    return write(new File(filename), o);
+  }
+
+  /**
+   * write the XML-serialized object to the given file
+   * @param file the file to serialize the object to
+   * @param o the object to write to the file
+   * @return whether writing was successful or not
+   * @throws Exception if something goes wrong while writing to the file
+   */
+  public static boolean write(File file, Object o) throws Exception {
+    return write(new BufferedOutputStream(new FileOutputStream(file)), o);
+  }
+
+  /**
+   * writes the XML-serialized object to the given output stream
+   *
+   * @param stream the output stream
+   * @param o the object to write
+   * @return true if everything goes ok
+   */
+  public static boolean write(OutputStream stream, Object o) throws Exception {
+
+    Class xstreamClass;
+    java.lang.reflect.Constructor constructor;
+    Object xstream;
+    Class [] serializeArgsClasses = new Class[2];
+    Object [] serializeArgs = new Object[2];
+    java.lang.reflect.Method methodSerialize;
+    boolean result = false;
+    
+    xstreamClass = Class.forName("com.thoughtworks.xstream.XStream");
+    constructor = xstreamClass.getConstructor();
+    xstream = constructor.newInstance();
+
+    serializeArgsClasses[0] = Object.class;
+    serializeArgsClasses[1] = OutputStream.class;
+    serializeArgs[0] = o;
+    serializeArgs[1] = stream;
+    methodSerialize = xstreamClass.getMethod("toXML", serializeArgsClasses);
+    
+    // execute it
+    try {
+      methodSerialize.invoke(xstream, serializeArgs);
+      result = true;
+    } catch (Exception ex) {
+      result = false;
+    }
+
+    return result;
+  }
+
+  /**
+   * writes the XML-serialized object to the given Writer
+   *
+   * @param writer the Writer
+   * @param o the object to write
+   * @return true if everything goes ok
+   */
+  public static boolean write(Writer writer, Object toSerialize) throws Exception {
+    Class xstreamClass;
+    java.lang.reflect.Constructor constructor;
+    Object xstream;
+    Class [] serializeArgsClasses = new Class[2];
+    Object [] serializeArgs = new Object[2];
+    java.lang.reflect.Method methodSerialize;
+    boolean result = false;
+    
+    xstreamClass = Class.forName("com.thoughtworks.xstream.XStream");
+    constructor = xstreamClass.getConstructor();
+    xstream = constructor.newInstance();
+
+    serializeArgsClasses[0] = Object.class;
+    serializeArgsClasses[1] = Writer.class;
+    serializeArgs[0] = toSerialize;
+    serializeArgs[1] = writer;
+    methodSerialize = xstreamClass.getMethod("toXML", serializeArgsClasses);
+    
+    // execute it
+    try {
+      methodSerialize.invoke(xstream, serializeArgs);
+      result = true;
+    } catch (Exception ex) {
+      result = false;
+    }
+
+    return result;
+  }
+
+  /**
+   * reads the XML-serialized object from the given file
+   * @param filename the file to deserialize the object from
+   * @return the deserialized object
+   * @throws Exception if something goes wrong while reading from the file
+   */
+  public static Object read(String filename) throws Exception {
+    return read(new File(filename));
+  }
+  
+  /**
+   * reads the XML-serialized object from the given file
+   * @param file the file to deserialize the object from
+   * @return the deserialized object
+   * @throws Exception if something goes wrong while reading from the file
+   */
+  public static Object read(File file) throws Exception {
+    return read(new BufferedInputStream(new FileInputStream(file)));
+  }
+
+  /**
+   * reads the XML-serialized object from the given input stream
+   *
+   * @param stream the input stream
+   * @return the deserialized object
+   * @throws Exception if something goes wrong while reading from stream
+   */
+  public static Object read(InputStream stream) throws Exception {
+    Class xstreamClass;
+    java.lang.reflect.Constructor constructor;
+    Object xstream;
+    Class [] deSerializeArgsClasses = new Class[1];
+    Object [] deSerializeArgs = new Object[1];
+    java.lang.reflect.Method methodDeSerialize;
+    Object result;
+
+    xstreamClass = Class.forName("com.thoughtworks.xstream.XStream");
+    constructor = xstreamClass.getConstructor();
+    xstream = constructor.newInstance();
+
+    deSerializeArgsClasses[0] = InputStream.class;
+    deSerializeArgs[0] = stream;
+    methodDeSerialize = xstreamClass.getMethod("fromXML", deSerializeArgsClasses);
+
+    // execute it
+    try {
+      result = methodDeSerialize.invoke(xstream, deSerializeArgs);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      result = null;
+    }
+
+    return result;
+  }
+
+  /**
+   * reads the XML-serialized object from the given Reader
+   *
+   * @param r the reader
+   * @return the deserialized object
+   * @throws Exception if something goes wrong while reading from stream
+   */
+  public static Object read(Reader r) throws Exception {
+    Class xstreamClass;
+    java.lang.reflect.Constructor constructor;
+    Object xstream;
+    Class [] deSerializeArgsClasses = new Class[1];
+    Object [] deSerializeArgs = new Object[1];
+    java.lang.reflect.Method methodDeSerialize;
+    Object result;
+
+    xstreamClass = Class.forName("com.thoughtworks.xstream.XStream");
+    constructor = xstreamClass.getConstructor();
+    xstream = constructor.newInstance();
+
+    deSerializeArgsClasses[0] = Reader.class;
+    deSerializeArgs[0] = r;
+    methodDeSerialize = xstreamClass.getMethod("fromXML", deSerializeArgsClasses);
+
+    // execute it
+    try {
+      result = methodDeSerialize.invoke(xstream, deSerializeArgs);
+    } catch (Exception ex) {
+      ex.printStackTrace();
       result = null;
     }
 
