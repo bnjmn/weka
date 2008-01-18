@@ -27,6 +27,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.gui.visualize.JPEGWriter;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -40,20 +41,23 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Vector;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
-
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 /**
  * BoundaryPanel. A class to handle the plotting operations
@@ -61,7 +65,7 @@ import com.sun.image.codec.jpeg.JPEGImageEncoder;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.22.2.1 $
  * @since 1.0
  * @see JPanel
  */
@@ -987,25 +991,46 @@ public class BoundaryPanel
   }
 
   protected void saveImage(String fileName) {
-    try {
-      BufferedOutputStream out = 
-        new BufferedOutputStream(new FileOutputStream(fileName));
-      
-      JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
+    BufferedImage	bi;
+    Graphics2D 		gr2;
+    ImageWriter 	writer;
+    Iterator 		iter;
+    ImageOutputStream 	ios;
+    ImageWriteParam 	param;
 
-      BufferedImage bi = new BufferedImage(m_panelWidth, m_panelHeight,
-                                           BufferedImage.TYPE_INT_RGB);
-      Graphics2D gr2 = bi.createGraphics();
+    try {
+      // render image
+      bi  = new BufferedImage(m_panelWidth, m_panelHeight, BufferedImage.TYPE_INT_RGB);
+      gr2 = bi.createGraphics();
       gr2.drawImage(m_osi, 0, 0, m_panelWidth, m_panelHeight, null);
 
-      JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(bi);
-      param.setQuality(1.0f, false);
-      encoder.setJPEGEncodeParam(param);
-      encoder.encode(bi);
-      out.flush();
-      out.close();
-    } catch (Exception ex) {
-      ex.printStackTrace();
+      // get jpeg writer
+      writer = null;
+      iter   = ImageIO.getImageWritersByFormatName("jpg");
+      if (iter.hasNext())
+	writer = (ImageWriter) iter.next();
+      else
+	throw new Exception("No JPEG writer available!");
+
+      // prepare output file
+      ios = ImageIO.createImageOutputStream(new File(fileName));
+      writer.setOutput(ios);
+
+      // set the quality
+      param = new JPEGImageWriteParam(Locale.getDefault());
+      param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT) ;
+      param.setCompressionQuality(1.0f);
+
+      // write the image
+      writer.write(null, new IIOImage(bi, null, null), param);
+
+      // cleanup
+      ios.flush();
+      writer.dispose();
+      ios.close();    
+    }
+    catch (Exception e) {
+      e.printStackTrace();
     }
   }
   
