@@ -22,8 +22,6 @@
 
 package weka.gui.visualize;
 
-import com.sun.image.codec.jpeg.*;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -31,7 +29,15 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.Locale;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JComponent;
 
 /** 
@@ -40,7 +46,7 @@ import javax.swing.JComponent;
  *
  * @see #setScalingEnabled()
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class JPEGWriter extends JComponentWriter {
   /** the quality of the image */
@@ -153,28 +159,47 @@ public class JPEGWriter extends JComponentWriter {
    * @throws Exception  if component of file are <code>null</code>
    */
   public void toOutput() throws Exception {
-    BufferedImage                bi;
-    JPEGImageEncoder             encoder;
-    JPEGEncodeParam              param;
-    Graphics                     g;
-    BufferedOutputStream         ostream;
+    BufferedImage	bi;
+    Graphics		g;
+    ImageWriter 	writer;
+    Iterator 		iter;
+    ImageOutputStream 	ios;
+    ImageWriteParam 	param;
 
-    ostream = new BufferedOutputStream(new FileOutputStream(getFile()));
-    bi      = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
-    g       = bi.getGraphics();
+    // render image
+    bi = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
+    g  = bi.getGraphics();
     g.setPaintMode();
     g.setColor(getBackground());
     if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
     getComponent().paint(g);
-    encoder = JPEGCodec.createJPEGEncoder(ostream);
-    param   = encoder.getDefaultJPEGEncodeParam(bi);
-    param.setQuality(getQuality(), false);
-    encoder.setJPEGEncodeParam(param);
-    encoder.encode(bi);
-    ostream.flush();
-    ostream.close();
+    
+    // get jpeg writer
+    writer = null;
+    iter   = ImageIO.getImageWritersByFormatName(getExtension().replace(".", ""));
+    if (iter.hasNext())
+      writer = (ImageWriter) iter.next();
+    else
+      throw new Exception("No writer available for " + getDescription() + "!");
+
+    // prepare output file
+    ios = ImageIO.createImageOutputStream(getFile());
+    writer.setOutput(ios);
+
+    // set the quality
+    param = new JPEGImageWriteParam(Locale.getDefault());
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT) ;
+    param.setCompressionQuality(getQuality());
+
+    // write the image
+    writer.write(null, new IIOImage(bi, null, null), param);
+
+    // cleanup
+    ios.flush();
+    writer.dispose();
+    ios.close();    
   }
   
   /**
