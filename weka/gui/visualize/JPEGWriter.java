@@ -26,41 +26,43 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.Locale;
 
+import javax.imageio.IIOImage;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.JComponent;
-
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 /** 
  * This class takes any JComponent and outputs it to a JPEG-file.
  * Scaling is by default disabled, since we always take a screenshot.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class JPEGWriter
   extends JComponentWriter {
   
-  /** the quality of the image */
+  /** the quality of the image. */
   protected float m_Quality;
   
-  /** the background color */
+  /** the background color. */
   protected Color m_Background;
   
   /**
-   * initializes the object 
+   * initializes the object.
    */
   public JPEGWriter() {
     super();
   }
 
   /**
-   * initializes the object with the given Component
+   * initializes the object with the given Component.
    * 
    * @param c         the component to print in the output format
    */
@@ -69,7 +71,7 @@ public class JPEGWriter
   }
 
   /**
-   * initializes the object with the given Component and filename
+   * initializes the object with the given Component and filename.
    * 
    * @param c         the component to print in the output format
    * @param f         the file to store the output in
@@ -82,7 +84,7 @@ public class JPEGWriter
   }
   
   /**
-   * further initialization 
+   * further initialization.
    */
   public void initialize() {
     super.initialize();
@@ -114,7 +116,7 @@ public class JPEGWriter
   }
   
   /**
-   * returns the current background color
+   * returns the current background color.
    * 
    * @return the current background color
    */
@@ -123,7 +125,7 @@ public class JPEGWriter
   }
   
   /**
-   * sets the background color to use in creating the JPEG
+   * sets the background color to use in creating the JPEG.
    * 
    * @param c the color to use for background
    */
@@ -132,7 +134,7 @@ public class JPEGWriter
   }
   
   /**
-   * returns the quality the JPEG will be stored in
+   * returns the quality the JPEG will be stored in.
    * 
    * @return the quality
    */
@@ -141,7 +143,7 @@ public class JPEGWriter
   }
   
   /**
-   * sets the quality the JPEG is saved in 
+   * sets the quality the JPEG is saved in.
    * 
    * @param q the quality to use
    */
@@ -150,37 +152,56 @@ public class JPEGWriter
   }
   
   /**
-   * generates the actual output
+   * generates the actual output.
    * 
    * @throws Exception	if something goes wrong
    */
   public void generateOutput() throws Exception {
-    BufferedImage		bi;
-    JPEGImageEncoder		encoder;
-    JPEGEncodeParam		param;
-    Graphics			g;
-    BufferedOutputStream	ostream;
+    BufferedImage	bi;
+    Graphics		g;
+    ImageWriter 	writer;
+    Iterator 		iter;
+    ImageOutputStream 	ios;
+    ImageWriteParam 	param;
 
-    ostream = new BufferedOutputStream(new FileOutputStream(getFile()));
-    bi      = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
-    g       = bi.getGraphics();
+    // render image
+    bi = new BufferedImage(getComponent().getWidth(), getComponent().getHeight(), BufferedImage.TYPE_INT_RGB);
+    g  = bi.getGraphics();
     g.setPaintMode();
     g.setColor(getBackground());
     if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
     getComponent().paint(g);
-    encoder = JPEGCodec.createJPEGEncoder(ostream);
-    param   = encoder.getDefaultJPEGEncodeParam(bi);
-    param.setQuality(getQuality(), false);
-    encoder.setJPEGEncodeParam(param);
-    encoder.encode(bi);
-    ostream.flush();
-    ostream.close();
+    
+    // get jpeg writer
+    writer = null;
+    iter   = ImageIO.getImageWritersByFormatName(getExtension().replace(".", ""));
+    if (iter.hasNext())
+      writer = (ImageWriter) iter.next();
+    else
+      throw new Exception("No writer available for " + getDescription() + "!");
+
+    // prepare output file
+    ios = ImageIO.createImageOutputStream(getFile());
+    writer.setOutput(ios);
+
+    // set the quality
+    param = new JPEGImageWriteParam(Locale.getDefault());
+    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT) ;
+    param.setCompressionQuality(getQuality());
+
+    // write the image
+    writer.write(null, new IIOImage(bi, null, null), param);
+
+    // cleanup
+    ios.flush();
+    writer.dispose();
+    ios.close();    
   }
   
   /**
-   * for testing only 
+   * for testing only.
    * 
    * @param args the commandline arguments
    * @throws Exception if something goes wrong
