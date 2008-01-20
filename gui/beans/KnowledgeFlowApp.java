@@ -113,7 +113,7 @@ import javax.swing.filechooser.FileFilter;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.2 $
+ * @version  $Revision: 1.18.2.3 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -164,13 +164,18 @@ public class KnowledgeFlowApp
     try {
       TreeMap wrapList = new TreeMap();
       GenericPropertiesCreator creator = new GenericPropertiesCreator();
-      creator.execute(false);
-      /* now process the keys in the GenericObjectEditor.props. For each
-       key that has an entry in the Beans.props associating it with a
-      bean component a button tool bar will be created */
-      Properties GEOProps = 
-	//Utils.readProperties("weka/gui/GenericObjectEditor.props");
-      creator.getOutputProperties();
+      Properties GEOProps = null;
+
+      if (creator.useDynamic()) {
+        creator.execute(false);
+        /* now process the keys in the GenericObjectEditor.props. For each
+           key that has an entry in the Beans.props associating it with a
+           bean component a button tool bar will be created */
+      GEOProps = creator.getOutputProperties();
+      } else {
+        // Read the static information from the GenericObjectEditor.props
+        GEOProps = Utils.readProperties("weka/gui/GenericObjectEditor.props");
+      }
       Enumeration en = GEOProps.propertyNames();
       while (en.hasMoreElements()) {
 	String geoKey = (String)en.nextElement();
@@ -297,7 +302,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.2 $
+   * @version $Revision: 1.18.2.3 $
    * @since 1.0
    * @see PrintablePanel
    */
