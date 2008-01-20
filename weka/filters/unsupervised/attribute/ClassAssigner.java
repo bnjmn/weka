@@ -52,28 +52,28 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class ClassAssigner
   extends SimpleStreamFilter {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 1775780193887394115L;
 
-  /** use the first attribute as class */
+  /** use the first attribute as class. */
   public final static int FIRST = 0;
   
-  /** use the last attribute as class */
+  /** use the last attribute as class. */
   public final static int LAST = -2;
   
-  /** unset the class attribute */
+  /** unset the class attribute. */
   public final static int UNSET = -1;
   
-  /** the class index */
+  /** the class index. */
   protected int m_ClassIndex = LAST;
   
   /**
-   * Returns a string describing this classifier
+   * Returns a string describing this classifier.
    * 
    * @return 		a description of the classifier suitable for
    * 			displaying in the explorer/experimenter gui
@@ -157,7 +157,7 @@ public class ClassAssigner
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -185,7 +185,7 @@ public class ClassAssigner
     }
     else {
       try {
-	m_ClassIndex = Integer.parseInt(value);
+	m_ClassIndex = Integer.parseInt(value) - 1;
       }
       catch (Exception e) {
 	System.err.println("Error parsing '" + value + "'!");
