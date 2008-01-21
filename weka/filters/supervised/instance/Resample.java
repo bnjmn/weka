@@ -70,34 +70,34 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.11.2.1 $ 
  */
 public class Resample
   extends Filter 
   implements SupervisedFilter, OptionHandler {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 7079064953548300681L;
 
-  /** The subsample size, percent of original set, default 100% */
+  /** The subsample size, percent of original set, default 100%. */
   protected double m_SampleSizePercent = 100;
   
-  /** The random number generator seed */
+  /** The random number generator seed. */
   protected int m_RandomSeed = 1;
   
-  /** The degree of bias towards uniform (nominal) class distribution */
+  /** The degree of bias towards uniform (nominal) class distribution. */
   protected double m_BiasToUniformClass = 0;
 
-  /** Whether to perform sampling with replacement or without */
+  /** Whether to perform sampling with replacement or without. */
   protected boolean m_NoReplacement = false;
 
   /** Whether to invert the selection (only if instances are drawn WITHOUT 
-   * replacement)
+   * replacement).
    * @see #m_NoReplacement */
   protected boolean m_InvertSelection = false;
 
   /**
-   * Returns a string describing this filter
+   * Returns a string describing this filter.
    *
    * @return a description of the filter suitable for
    * displaying in the explorer/experimenter gui
@@ -241,7 +241,7 @@ public class Resample
   }
     
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -275,7 +275,7 @@ public class Resample
   }
     
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -303,7 +303,7 @@ public class Resample
   }
     
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -331,7 +331,7 @@ public class Resample
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -359,7 +359,7 @@ public class Resample
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -479,7 +479,7 @@ public class Resample
   }
 
   /**
-   * creates the subsample with replacement
+   * creates the subsample with replacement.
    * 
    * @param random		the random number generator to use
    * @param origSize		the original size of the dataset
@@ -496,11 +496,10 @@ public class Resample
 	// Pick a random class (of those classes that actually appear)
 	int cIndex = random.nextInt(actualClasses);
 	for (int j = 0, k = 0; j < classIndices.length - 1; j++) {
-	  if ((classIndices[j] != classIndices[j + 1]) 
-	      && (k++ >= cIndex)) {
+	  if ((classIndices[j] != classIndices[j + 1]) && (k++ >= cIndex)) {
 	    // Pick a random instance of the designated class
 	    index =   classIndices[j] 
-	                           + random.nextInt(classIndices[j + 1] - classIndices[j]);
+	            + random.nextInt(classIndices[j + 1] - classIndices[j]);
 	    break;
 	  }
 	}
@@ -513,7 +512,7 @@ public class Resample
   }
 
   /**
-   * creates the subsample without replacement
+   * creates the subsample without replacement.
    * 
    * @param random		the random number generator to use
    * @param origSize		the original size of the dataset
@@ -527,15 +526,15 @@ public class Resample
     if (sampleSize > origSize) {
       sampleSize = origSize;
       System.err.println(
-	  "Resampling with replacement can only use percentage <=100% - "
+	  "Resampling without replacement can only use percentage <=100% - "
 	  + "Using full dataset!");
     }
 
-    Vector<Integer>[] indices = new Vector[actualClasses];
-    Vector<Integer>[] indicesNew = new Vector[actualClasses];
+    Vector<Integer>[] indices = new Vector[classIndices.length - 1];
+    Vector<Integer>[] indicesNew = new Vector[classIndices.length - 1];
 
     // generate list of all indices to draw from
-    for (int i = 0; i < actualClasses; i++) {
+    for (int i = 0; i < classIndices.length - 1; i++) {
       indices[i] = new Vector<Integer>(classIndices[i + 1] - classIndices[i]);
       indicesNew[i] = new Vector<Integer>(indices[i].capacity());
       for (int n = classIndices[i]; n < classIndices[i + 1]; n++)
@@ -550,8 +549,12 @@ public class Resample
 	// Pick a random class (of those classes that actually appear)
 	int cIndex = random.nextInt(actualClasses);
 	for (int j = 0, k = 0; j < classIndices.length - 1; j++) {
-	  if ((classIndices[j] != classIndices[j + 1]) 
-	      && (k++ >= cIndex)) {
+	  if ((classIndices[j] != classIndices[j + 1]) && (k++ >= cIndex)) {
+	    // no more indices for this class left, try again
+	    if (indices[j].size() == 0) {
+	      i--;
+	      break;
+	    }
 	    // Pick a random instance of the designated class
 	    index = random.nextInt(indices[j].size());
 	    indicesNew[j].add(indices[j].get(index));
@@ -614,7 +617,7 @@ public class Resample
     getInputFormat().sort(getInputFormat().classIndex());
     
     // Create an index of where each class value starts
-    int [] classIndices = new int [getInputFormat().numClasses() + 1];
+    int[] classIndices = new int [getInputFormat().numClasses() + 1];
     int currentClass = 0;
     classIndices[currentClass] = 0;
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
