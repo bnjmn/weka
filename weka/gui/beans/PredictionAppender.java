@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9.2.4 $
+ * @version $Revision: 1.9.2.5 $
  */
 public class PredictionAppender
   extends JPanel
@@ -504,36 +504,61 @@ public class PredictionAppender
     }
   }
   
-  
-    /**
-   * Accept and process a batch classifier event
+  /**
+   * Accept and process a batch clusterer event
    *
    * @param e a <code>BatchClassifierEvent</code> value
    */
   public void acceptClusterer(BatchClustererEvent e) {
-    if (m_dataSourceListeners.size() > 0) {
-      if(e.getTestSet().isStructureOnly())
-          return;
+    if (m_dataSourceListeners.size() > 0
+        || m_trainingSetListeners.size() > 0
+	|| m_testSetListeners.size() > 0) {
+
+      if(e.getTestSet().isStructureOnly()) {
+        return;
+      }
       Instances testSet = e.getTestSet().getDataSet();
+
       weka.clusterers.Clusterer clusterer = e.getClusterer();
       String test;
-      if(e.getTestOrTrain()==0)
-          test = "test";
-      else
-          test = "training";
+      if(e.getTestOrTrain() == 0) {
+        test = "test";
+      } else {
+        test = "training";
+      }
       String relationNameModifier = "_"+test+"_"+e.getSetNumber()+"_of_"
 	+e.getMaxSetNumber();
       if (!m_appendProbabilities || !(clusterer instanceof DensityBasedClusterer)) {
 	if(m_appendProbabilities && !(clusterer instanceof DensityBasedClusterer)){
-            System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
-            if (m_logger != null) {
-                m_logger.logMessage("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
-            }
+          System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+          if (m_logger != null) {
+            m_logger.logMessage("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+          }
         }
         try {
 	  Instances newInstances = makeClusterDataSetClass(testSet, clusterer,
-						    relationNameModifier);
-	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+                                                           relationNameModifier);
+
+          // data source listeners get both train and test sets
+          if (m_dataSourceListeners.size() > 0) {
+            notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
+          }
+
+          if (m_trainingSetListeners.size() > 0 && e.getTestOrTrain() > 0) {
+             TrainingSetEvent tse = 
+               new TrainingSetEvent(this, new Instances(newInstances, 0));
+             tse.m_setNumber = e.getSetNumber();
+             tse.m_maxSetNumber = e.getMaxSetNumber();
+	    notifyTrainingSetAvailable(tse);
+          }
+
+          if (m_testSetListeners.size() > 0 && e.getTestOrTrain() == 0) {
+             TestSetEvent tse = 
+               new TestSetEvent(this, new Instances(newInstances, 0));
+             tse.m_setNumber = e.getSetNumber();
+             tse.m_maxSetNumber = e.getMaxSetNumber();
+	    notifyTestSetAvailable(tse);
+          }
           
 	  // fill in predicted values
 	  for (int i = 0; i < testSet.numInstances(); i++) {
@@ -543,7 +568,24 @@ public class PredictionAppender
 					      predCluster);
 	  }
 	  // notify listeners
-	  notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+          if (m_dataSourceListeners.size() > 0) {
+            notifyDataSetAvailable(new DataSetEvent(this, newInstances));
+          }
+          if (m_trainingSetListeners.size() > 0 && e.getTestOrTrain() > 0) {
+             TrainingSetEvent tse = 
+               new TrainingSetEvent(this, newInstances);
+             tse.m_setNumber = e.getSetNumber();
+             tse.m_maxSetNumber = e.getMaxSetNumber();
+	    notifyTrainingSetAvailable(tse);
+          }
+          if (m_testSetListeners.size() > 0 && e.getTestOrTrain() == 0) {
+             TestSetEvent tse = 
+               new TestSetEvent(this, newInstances);
+             tse.m_setNumber = e.getSetNumber();
+             tse.m_maxSetNumber = e.getMaxSetNumber();
+	    notifyTestSetAvailable(tse);
+          }
+
 	  return;
 	} catch (Exception ex) {
 	  ex.printStackTrace();
@@ -553,7 +595,7 @@ public class PredictionAppender
 	try {
 	  Instances newInstances = 
 	    makeClusterDataSetProbabilities(testSet,
-				     clusterer,relationNameModifier);
+                                            clusterer,relationNameModifier);
 	  notifyDataSetAvailable(new DataSetEvent(this, new Instances(newInstances,0)));
           
 	  // fill in predicted probabilities
@@ -572,7 +614,8 @@ public class PredictionAppender
 	}
       }
     }
-  }
+  }  
+
 
   private Instances 
     makeDataSetProbabilities(Instances format,
