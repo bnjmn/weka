@@ -133,7 +133,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.110 $
+ * @version $Revision: 1.111 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1078,7 +1078,8 @@ public class ClassifierPanel
 	  String grph = null;
 
 	  int testMode = 0;
-	  int numFolds = 10, percent = 66;
+	  int numFolds = 10;
+          double percent = 66;
 	  int classIndex = m_ClassCombo.getSelectedIndex();
 	  Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
 	  Classifier template = null;
@@ -1110,7 +1111,7 @@ public class ClassifierPanel
 	      }
 	    } else if (m_PercentBut.isSelected()) {
 	      testMode = 2;
-	      percent = Integer.parseInt(m_PercentText.getText());
+	      percent = Double.parseDouble(m_PercentText.getText());
 	      if ((percent <= 0) || (percent >= 100)) {
 		throw new Exception("Percentage must be between 0 and 100");
 	      }
@@ -1318,11 +1319,11 @@ public class ClassifierPanel
 		}
 		inst.randomize(new Random(rnd));
 	      }
-	      int trainSize = inst.numInstances() * percent / 100;
+	      int trainSize = (int) Math.round(inst.numInstances() * percent / 100);
 	      int testSize = inst.numInstances() - trainSize;
 	      Instances train = new Instances(inst, 0, trainSize);
 	      Instances test = new Instances(inst, trainSize, testSize);
-	      m_Log.statusMessage("Building model on training split...");
+	      m_Log.statusMessage("Building model on training split ("+trainSize+" instances)...");
 	      Classifier current = null;
 	      try {
 		current = Classifier.makeCopy(template);
@@ -1455,23 +1456,23 @@ public class ClassifierPanel
 		m_CurrentVis.addPlot(tempd);
 		m_CurrentVis.setColourIndex(predInstances.classIndex()+1);
 	    
-		  FastVector vv = new FastVector();
-		  if (outputModel) {
-		    vv.addElement(fullClassifier);
-		    Instances trainHeader = new Instances(m_Instances, 0);
-		    trainHeader.setClassIndex(classIndex);
-		    vv.addElement(trainHeader);
-                    if (grph != null) {
-                      vv.addElement(grph);
-                    }
-		  }
-		  vv.addElement(m_CurrentVis);
-
-		  if ((eval != null) && (eval.predictions() != null)) {
-		    vv.addElement(eval.predictions());
-		    vv.addElement(inst.classAttribute());
-		  }
-		  m_History.addObject(name, vv);
+                FastVector vv = new FastVector();
+                if (outputModel) {
+                  vv.addElement(fullClassifier);
+                  Instances trainHeader = new Instances(m_Instances, 0);
+                  trainHeader.setClassIndex(classIndex);
+                  vv.addElement(trainHeader);
+                  if (grph != null) {
+                    vv.addElement(grph);
+                  }
+                }
+                vv.addElement(m_CurrentVis);
+                
+                if ((eval != null) && (eval.predictions() != null)) {
+                  vv.addElement(eval.predictions());
+                  vv.addElement(inst.classAttribute());
+                }
+                m_History.addObject(name, vv);
 	      }
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
