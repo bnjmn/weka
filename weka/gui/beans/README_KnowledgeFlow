@@ -141,7 +141,9 @@ the layout area).
 Next specify an arff file to load by first right clicking the mouse
 over the ArffLoader icon on the layout. A pop-up menu will
 appear. Select "Configure" under "Edit" in the list from this menu and
-browse to the location of your arff file.
+browse to the location of your arff file. Alternatively, you can
+double-click on the icon to bring up the configuration dialog (if
+the component in question has one).
 
 Next click the "Evaluation" tab at the top of the window and choose the
 "ClassAssigner" (allows you to choose which column to be the class)
