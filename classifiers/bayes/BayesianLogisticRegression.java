@@ -81,6 +81,9 @@ import java.util.Vector;
  */
 public class BayesianLogisticRegression extends Classifier
   implements OptionHandler, TechnicalInformationHandler {
+  
+  static final long serialVersionUID = -8013478897911757631L;
+
   /** Log-likelihood values to be used to choose the best hyperparameter. */
   public static double[] LogLikelihood;
 
