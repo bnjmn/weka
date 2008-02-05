@@ -129,7 +129,7 @@ import java.util.Vector;
     * @author Stuart Inglis (stuart@reeltwo.com)
     * @author Gordon Paynter (gordon.paynter@ucr.edu)
 * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
-    * @version $Revision: 1.21 $ 
+    * @version $Revision: 1.22 $ 
     * @see Stopwords
     */
     public class StringToWordVector 
@@ -174,7 +174,7 @@ import java.util.Vector;
         /**
          * The percentage at which to periodically prune the dictionary.
          */
-        private float m_PeriodicPruningRate = -1;
+        private double m_PeriodicPruningRate = -1;
 
         /** True if word frequencies should be transformed into log(1+fi) 
           where fi is the frequency of word i
@@ -430,10 +430,11 @@ import java.util.Vector;
                 setWordsToKeep(1000);
 
             value = Utils.getOption("prune-rate", options);
-            if (value.length() != 0)
-                setPeriodicPruning(Float.valueOf(value).floatValue()/100);
-            else
-                setPeriodicPruning(-1);
+            if (value.length() > 0)
+              //                setPeriodicPruning(Double.valueOf(value).doubleValue()/100);
+              setPeriodicPruning(Double.parseDouble(value));
+            //            else
+            //              setPeriodicPruning(-1);
 
             value = Utils.getOption('M', options);
             if (value.length() != 0)
@@ -952,7 +953,7 @@ import java.util.Vector;
          *
          * @return the rate at which the dictionary is periodically pruned
          */
-        public float getPeriodicPruning() {
+        public double getPeriodicPruning() {
             return m_PeriodicPruningRate;
         }
 
@@ -962,7 +963,7 @@ import java.util.Vector;
          *
          * @param newPeriodicPruning the rate at which the dictionary is periodically pruned
          */
-        public void setPeriodicPruning(float newPeriodicPruning) {
+        public void setPeriodicPruning(double newPeriodicPruning) {
             m_PeriodicPruningRate = newPeriodicPruning;
         }
 
@@ -1373,7 +1374,8 @@ import java.util.Vector;
             determineSelectedRange();
 
             // Tokenize all training text into an orderedMap of "words".
-            int pruneRate = Math.round(m_PeriodicPruningRate*getInputFormat().numInstances());
+            long pruneRate = 
+              Math.round((m_PeriodicPruningRate/100.0)*getInputFormat().numInstances());
             for (int i = 0; i < getInputFormat().numInstances(); i++) {
                 Instance instance = getInputFormat().instance(i);
                 int vInd = 0;
