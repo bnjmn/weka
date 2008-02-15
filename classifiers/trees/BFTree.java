@@ -131,7 +131,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Haijian Shi (hs69@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BFTree
   extends RandomizableClassifier
@@ -956,6 +956,10 @@ public class BFTree
       // remove the first element
       BestFirstElements.removeElementAt(0);
       makeLeaf(train);
+      if (BestFirstElements.size() == 0) {
+        return;
+      }
+
       BFTree nextSplitNode = (BFTree)
       ((FastVector)BestFirstElements.elementAt(0)).elementAt(0);
       nextSplitNode.makeTree(BestFirstElements, root, train, test, modelError,
