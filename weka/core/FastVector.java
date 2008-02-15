@@ -31,7 +31,7 @@ import java.io.*;
  * be slow.)
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ */
+ * @version $Revision: 1.11.2.1 $ */
 public class FastVector implements Copyable, Serializable {
 
   /**
@@ -354,6 +354,9 @@ public class FastVector implements Copyable, Serializable {
 
     System.arraycopy(m_Objects, index + 1, m_Objects, index, 
                      m_Size - index - 1);
+
+    // clear last reference
+    m_Objects[m_Size - 1] = null;
     m_Size--;
   }
 
