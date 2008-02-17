@@ -34,7 +34,7 @@ import java.util.Vector;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer
@@ -213,7 +213,7 @@ public class TrainTestSplitMaker
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
 	System.err.println("Notifying test listeners "
-			   +"(cross validation fold maker)");
+			   +"(Train - test split maker)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -232,7 +232,7 @@ public class TrainTestSplitMaker
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
 	System.err.println("Notifying training listeners "
-			   +"(cross validation fold maker)");
+			   +"(Train - test split fold maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }
@@ -240,7 +240,7 @@ public class TrainTestSplitMaker
 
   /**
    * Function used to stop code that calls acceptDataSet. This is 
-   * needed as cross validation is performed inside a separate
+   * needed as split is performed inside a separate
    * thread of execution.
    *
    * @param tf a <code>boolean</code> value
