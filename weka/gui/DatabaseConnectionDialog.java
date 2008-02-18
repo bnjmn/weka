@@ -31,7 +31,7 @@ import java.awt.Font;
  * A dialog to enter URL, username and password for a database connection.
  *
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 
 public class DatabaseConnectionDialog extends JDialog {
@@ -171,6 +171,14 @@ public class DatabaseConnectionDialog extends JDialog {
 	  DatabaseConnectionDialog.this.dispose();
       }
     });
+
+    // Listen for window close events
+    addWindowListener(new java.awt.event.WindowAdapter() {
+        public void windowClosing(java.awt.event.WindowEvent e) {
+          System.err.println("Cancelled!!");
+          m_returnValue = JOptionPane.CLOSED_OPTION;
+        }
+      });
    
     DbP.add(buttonsP);
     this.getContentPane().add(DbP,BorderLayout.CENTER);
