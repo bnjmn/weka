@@ -86,7 +86,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class ResultsPanel
   extends JPanel {
@@ -763,6 +763,7 @@ public class ResultsPanel
       if (!m_InstanceQuery.experimentIndexExists()) {
 	System.err.println("not found");
 	m_FromLab.setText("No experiment index");
+        m_InstanceQuery.disconnectFromDatabase();
 	return;
       }
       System.err.println("found");
@@ -771,6 +772,7 @@ public class ResultsPanel
 				       + InstanceQuery.EXP_INDEX_TABLE);
       if (index.numInstances() == 0) {
 	m_FromLab.setText("No experiments available");
+        m_InstanceQuery.disconnectFromDatabase();
 	return;	
       }
       m_FromLab.setText("Got experiment index");
@@ -792,6 +794,7 @@ public class ResultsPanel
       }
       if (result != ListSelectorDialog.APPROVE_OPTION) {
 	m_FromLab.setText("Cancelled");
+        m_InstanceQuery.disconnectFromDatabase();
 	return;
       }
       Instance selInst = index.instance(jl.getSelectedIndex());
