@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 
-% Version: $Revision: 1.3 $
+% Version: $Revision: 1.4 $
 
 \usepackage{epsfig}
 
@@ -104,6 +104,8 @@ The KnowledgeFlow offers the following features:
 	\item visualize performance of incremental classifiers during 
   	processing (scrolling plots of classification accuracy, RMS error, 
   	predictions etc.)
+        \item plugin facility for allowing easy addition of new components
+        to the KnowledgeFlow
 \end{itemize}
 
 \newpage
@@ -364,6 +366,51 @@ evaluated on the class label \textit{good}:
 \begin{center}
 	\epsfig{file=images/example_multiple_roc_output.eps,height=8.5cm}
 \end{center}
+
+\newpage
+\section{Plugin Facility}
+
+The KnowledgeFlow offers the ability to easily add new components via
+a plugin mechanism. Plugins are installed in a directory called
+\verb=.knowledgeFlow/plugins= in the user's home directory. If this
+directory does not exist you must create it in order to install
+plugins. Plugins are installed in subdirectories of the
+\verb=.knowledgeFlow/plugins= directory. More than one plugin
+component may reside in the same subdirectory. Each subdirectory
+should contain jar file(s) that contain and support the plugin
+components. The KnowledgeFlow will dynamically load jar files and add
+them to the classpath. In order to tell the KnowledgeFlow which
+classes in the jar files to instantiate as components, a second file
+called \verb=Beans.props= needs to be created and placed into each
+plugin subdirectory. This file contains a list of fully qualified
+class names to be instantiated. Successfully instantiated components
+will appear in a ``Plugins'' tab in the KnowledgeFlow user
+interface.Below is an example plugin directory listing, the listing of
+the contents of the jar file and the contents of the associated
+Beans.props file:
+
+\begin{verbatim}
+cygnus:~ mhall$ ls -l $HOME/.knowledgeFlow/plugins/kettle/
+total 24
+-rw-r--r--   1 mhall  mhall   117 20 Feb 10:56 Beans.props
+-rw-r--r--   1 mhall  mhall  8047 20 Feb 14:01 kettleKF.jar
+
+cygnus:~ mhall$ jar tvf /Users/mhall/.knowledgeFlow/plugins/kettle/kettleKF.jar 
+     0 Wed Feb 20 14:01:34 NZDT 2008 META-INF/
+    70 Wed Feb 20 14:01:34 NZDT 2008 META-INF/MANIFEST.MF
+     0 Tue Feb 19 14:59:08 NZDT 2008 weka/
+     0 Tue Feb 19 14:59:08 NZDT 2008 weka/gui/
+     0 Wed Feb 20 13:55:52 NZDT 2008 weka/gui/beans/
+     0 Wed Feb 20 13:56:36 NZDT 2008 weka/gui/beans/icons/
+  2812 Wed Feb 20 14:01:20 NZDT 2008 weka/gui/beans/icons/KettleInput.gif
+  2812 Wed Feb 20 14:01:18 NZDT 2008 weka/gui/beans/icons/KettleInput_animated.gif
+  1839 Wed Feb 20 13:59:08 NZDT 2008 weka/gui/beans/KettleInput.class
+   174 Tue Feb 19 15:27:24 NZDT 2008 weka/gui/beans/KettleInputBeanInfo.class
+
+cygnus:~ mhall$ more /Users/mhall/.knowledgeFlow/plugins/kettle/Beans.props 
+# Specifies the tools to go into the Plugins toolbar
+weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.KettleInput
+\end{verbatim}
 
 \newpage
 \begin{thebibliography}{999}
