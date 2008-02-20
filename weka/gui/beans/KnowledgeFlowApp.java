@@ -28,6 +28,7 @@ import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
+import weka.core.ClassloaderUtil;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
@@ -93,6 +94,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -120,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.4 $
+ * @version  $Revision: 1.18.2.5 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -139,6 +141,8 @@ public class KnowledgeFlowApp
 
   /** Contains the editor properties */
   private static Properties BEAN_PROPERTIES;
+
+  private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES;
 
   /**
    * Holds the details needed to construct button bars for various supported
@@ -167,6 +171,50 @@ public class KnowledgeFlowApp
 				    "KnowledgeFlow",
 				    JOptionPane.ERROR_MESSAGE);
     }
+
+
+      // try and load any plugin beans properties
+      File pluginDir = new File(System.getProperty("user.home")
+                                +File.separator+".knowledgeFlow"
+                                +File.separator+"plugins");
+      if (pluginDir.exists() && pluginDir.isDirectory()) {
+        BEAN_PLUGINS_PROPERTIES = new ArrayList<Properties>();
+        // How many sub-dirs are there?
+        File[] contents = pluginDir.listFiles();
+        for (int i = 0; i < contents.length; i++) {
+          if (contents[i].isDirectory() && 
+              contents[i].listFiles().length > 0) {
+            try {      
+              Properties tempP = new Properties();
+              File propFile = new File(contents[i].getPath()
+                                       + File.separator
+                                       + "Beans.props");
+              tempP.load(new FileInputStream(propFile));
+              BEAN_PLUGINS_PROPERTIES.add(tempP);
+
+              // Now try and add all jar files in this directory to the classpath
+              File anyJars[] = contents[i].listFiles();
+              for (int j = 0; j < anyJars.length; j++) {
+                if (anyJars[j].getPath().endsWith(".jar")) {
+                  System.err.println("Plugins: adding "+anyJars[j].getPath()
+                                     +" to classpath...");
+                  ClassloaderUtil.addFile(anyJars[j].getPath());
+                }
+              }
+            } catch (Exception ex) {
+              // Don't make a fuss
+              System.err.println("Unable to load bean properties for plugin "
+                                 +"directory: " + contents[i].getPath());
+            }
+          }
+          //        BEAN_PLUGINS_PROPERTIES = new Properties();
+          //        BEAN_PLUGINS_PROPERTIES.load(new FileInputStream(pluginDir));
+        }
+      } else {
+        // make the plugin directory for the user
+        pluginDir.mkdir();
+      }
+
 
     try {
       TreeMap wrapList = new TreeMap();
@@ -309,7 +357,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.4 $
+   * @version $Revision: 1.18.2.5 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -383,6 +431,12 @@ public class KnowledgeFlowApp
    */
   private JTabbedPane m_toolBars = new JTabbedPane();
 
+  /**
+   * Stuff relating to plugin beans
+   */
+  private JToolBar m_pluginsToolBar = null;
+  private Box m_pluginsBoxPanel = null;
+  
   /**
    * Stuff relating to user created meta beans
    */
@@ -1005,6 +1059,28 @@ public class KnowledgeFlowApp
       m_toolBars.addTab(tempBarName, null, tempJScrollPane, tempBarName);
     }
 
+    // Any plugin components to process?
+    if (BEAN_PLUGINS_PROPERTIES != null && 
+        BEAN_PLUGINS_PROPERTIES.size() > 0) {
+      for (int i = 0; i < BEAN_PLUGINS_PROPERTIES.size(); i++) {
+        Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
+        JPanel tempBean = null;
+        String components = 
+        tempP.getProperty("weka.gui.beans.KnowledgeFlow.Plugins");
+        StringTokenizer st2 = new StringTokenizer(components, ", ");
+
+        while (st2.hasMoreTokens()) {
+          String tempBeanCompName = st2.nextToken().trim();
+          tempBean = instantiateToolBarBean(false, tempBeanCompName, "");
+          if (m_pluginsToolBar == null) {
+            // need to create the plugins tab and toolbar
+            setUpPluginsToolBar();
+          }
+          m_pluginsBoxPanel.add(tempBean);
+        }
+      }
+    }
+
     toolBarPanel.add(m_toolBars, BorderLayout.CENTER);
 
     //    add(m_toolBars, BorderLayout.NORTH);
@@ -1337,6 +1413,21 @@ public class KnowledgeFlowApp
     m_toolBars.addTab("User", null, 
                       tempJScrollPane,
                       "User created components");
+  }
+
+  private void setUpPluginsToolBar() {
+    m_pluginsBoxPanel = Box.createHorizontalBox();
+    m_pluginsBoxPanel.setBorder(javax.swing.BorderFactory.
+                                createTitledBorder("Plugins"));
+    m_pluginsToolBar = new JToolBar();
+    m_pluginsToolBar.add(m_pluginsBoxPanel);
+    JScrollPane tempJScrollPane = 
+      createScrollPaneForToolBar(m_pluginsToolBar);
+    // ok, now create tabbed pane to hold this toolbar
+    
+    m_toolBars.addTab("Plugins", null, 
+                      tempJScrollPane,
+                      "Plugin components");
   }
 
   /**
