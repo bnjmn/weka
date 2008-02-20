@@ -34,7 +34,7 @@ import java.util.Vector;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -251,7 +251,11 @@ public class IncrementalClassifierEvaluator
    * Stop all action
    */
   public void stop() {
-    // nothing to do
+    // tell the listenee (upstream bean) to stop
+    if (m_listenee instanceof BeanCommon) {
+      //      System.err.println("Listener is BeanCommon");
+      ((BeanCommon)m_listenee).stop();
+    }
   }
 
   private void notifyChartListeners(ChartEvent ce) {

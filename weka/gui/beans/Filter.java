@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.16.2.1 $
  */
 public class Filter
   extends JPanel
@@ -368,7 +368,13 @@ public class Filter
 		  if (isInterrupted()) {
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("Filter training set interrupted!");
+                      String titleString = m_Filter.getClass().getName();		      
+		      titleString = titleString.
+			substring(titleString.lastIndexOf('.') + 1,
+				  titleString.length());
+		      m_log.logMessage("Filter ("
+                                       + titleString
+                                       + ") training set interrupted!");
 		      m_log.statusMessage("OK");
 		    }
 		  }
@@ -435,7 +441,13 @@ public class Filter
 		if (isInterrupted()) {
 		  m_trainingSet = null;
 		  if (m_log != null) {
-		    m_log.logMessage("Filter test set interrupted!");
+                      String titleString = m_Filter.getClass().getName();		      
+		      titleString = titleString.
+			substring(titleString.lastIndexOf('.') + 1,
+				  titleString.length());
+		      m_log.logMessage("Filter ("
+                                       + titleString
+                                       + ") test set interrupted!");
 		    m_log.statusMessage("OK");
 		  }
 		}
@@ -744,7 +756,13 @@ public class Filter
       }
     }
     
-    //
+    // stop the filter thread
+    if (m_filterThread != null) {
+      m_filterThread.interrupt();
+      m_filterThread.stop();
+      m_filterThread = null;
+      m_visual.setStatic();
+    }
   }
   
   /**

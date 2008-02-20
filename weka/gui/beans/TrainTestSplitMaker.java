@@ -34,7 +34,7 @@ import java.util.Vector;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer
@@ -212,8 +212,11 @@ public class TrainTestSplitMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying test listeners "
-			   +"(Train - test split maker)");
+        if (m_splitThread == null) {
+          break;
+        }
+        //	System.err.println("Notifying test listeners "
+        //			   +"(Train - test split maker)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -231,8 +234,11 @@ public class TrainTestSplitMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
-	System.err.println("Notifying training listeners "
-			   +"(Train - test split fold maker)");
+        if (m_splitThread == null) {
+          break;
+        }
+        //	System.err.println("Notifying training listeners "
+        //			   +"(Train - test split fold maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
     }

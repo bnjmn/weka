@@ -34,7 +34,7 @@ import java.util.Vector;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -180,6 +180,9 @@ public class CrossValidationFoldMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
+        if (m_foldThread == null) {
+          break;
+        }
 	//	System.err.println("Notifying test listeners "
 	//			   +"(cross validation fold maker)");
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
@@ -199,6 +202,9 @@ public class CrossValidationFoldMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
+        if (m_foldThread == null) {
+          break;
+        }
 	//	System.err.println("Notifying training listeners "
 	//			   +"(cross validation fold maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);

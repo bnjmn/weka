@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -237,8 +237,13 @@ public class Associator
 		  m_state = IDLE;
 		  if (isInterrupted()) {
 		    if (m_log != null) {
-		      m_log.logMessage("Build associator interrupted!");
-		      m_log.statusMessage("OK");
+                      String titleString = m_Associator.getClass().getName();		      
+		      titleString = titleString.
+			substring(titleString.lastIndexOf('.') + 1,
+				  titleString.length());
+		      m_log.logMessage("Build associator ("
+                                       + titleString + ") interrupted!");
+		      m_log.statusMessage("Interupted");
 		    }
 		  }
 		  if (m_log != null) {

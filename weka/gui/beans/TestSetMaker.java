@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts data sets and produces test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class TestSetMaker
   extends AbstractTestSetProducer 
@@ -37,6 +37,8 @@ public class TestSetMaker
 
   /** for serialization */
   private static final long serialVersionUID = -8473882857628061841L;
+
+  protected boolean m_receivedStopNotification = false;
 
   public TestSetMaker() {
      m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -79,6 +81,13 @@ public class TestSetMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
+        if (m_receivedStopNotification) {
+          if (m_logger != null) {
+            m_logger.logMessage("TestSetMaker stopping.");
+          }
+          m_receivedStopNotification = false;
+          break;
+        }
 	((TestSetListener)l.elementAt(i)).acceptTestSet(tse);
       }
     }
@@ -86,6 +95,7 @@ public class TestSetMaker
 
   public void stop() {
     // do something
+    m_receivedStopNotification = true;
   }
 
   /**
