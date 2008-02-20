@@ -24,6 +24,7 @@
 package weka.gui;
 
 import java.io.File;
+import java.io.Serializable;
 import java.io.FilenameFilter;
 import javax.swing.filechooser.FileFilter;
 
@@ -33,11 +34,11 @@ import javax.swing.filechooser.FileFilter;
  * javax.swing.filechooser.FileFilter (why there are two I have no idea).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class ExtensionFileFilter
   extends FileFilter
-  implements FilenameFilter {
+  implements FilenameFilter, Serializable {
 
   /** The text description of the types of files accepted */
   protected String m_Description;
