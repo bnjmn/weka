@@ -53,7 +53,7 @@ import javax.swing.event.ChangeListener;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.17.2.1 $
  */
 public class LogPanel
   extends JPanel
@@ -293,7 +293,7 @@ public class LogPanel
    *
    * @param message a value of type 'String'
    */
-  public void logMessage(String message) {
+  public synchronized void logMessage(String message) {
 
     if (m_First) {
       m_First = false;
@@ -308,7 +308,7 @@ public class LogPanel
    *
    * @param message the status message
    */
-  public void statusMessage(String message) {
+  public synchronized void statusMessage(String message) {
 
     m_StatusLab.setText(message);
   }
