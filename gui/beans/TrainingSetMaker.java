@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
@@ -37,6 +37,8 @@ public class TrainingSetMaker
 
   /** for serialization */
   private static final long serialVersionUID = -6152577265471535786L;
+
+  protected boolean m_receivedStopNotification = false;
 
   public TrainingSetMaker() {
     m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -80,6 +82,13 @@ public class TrainingSetMaker
     }
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
+        if (m_receivedStopNotification) {
+          if (m_logger != null) {
+            m_logger.logMessage("TrainingSetMaker stopping.");
+          }
+          m_receivedStopNotification = false;
+          break;
+        }
 	System.err.println("Notifying listeners (training set maker)");
 	((TrainingSetListener)l.elementAt(i)).acceptTrainingSet(tse);
       }
@@ -91,6 +100,7 @@ public class TrainingSetMaker
    */
   public void stop() {
     // do something
+    m_receivedStopNotification = true;
   }
 
   /**

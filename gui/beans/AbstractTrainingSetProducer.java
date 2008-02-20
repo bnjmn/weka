@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see TrainingSetProducer
  */
@@ -63,7 +63,7 @@ public abstract class AbstractTrainingSetProducer
    */
   protected Object m_listenee = null;
 
-  private transient weka.gui.Logger m_logger = null;
+  protected transient weka.gui.Logger m_logger = null;
 
   /**
    * Creates a new <code>AbstractTrainingSetProducer</code> instance.
