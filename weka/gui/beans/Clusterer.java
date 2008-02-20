@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -326,7 +326,7 @@ public class Clusterer
 		    m_trainingSet = new Instances(m_trainingSet, 0);
 		  }
 		  if (m_log != null) {
-		    m_log.statusMessage("OK");
+		    m_log.statusMessage("Interrupted");
 		  }
 		  block(false);
 		}
