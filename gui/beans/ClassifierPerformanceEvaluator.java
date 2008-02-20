@@ -38,7 +38,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.15.2.1 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -248,6 +248,8 @@ public class ClassifierPerformanceEvaluator
     if (m_evaluateThread != null) {
       m_evaluateThread.interrupt();
       m_evaluateThread.stop();
+      m_evaluateThread = null;
+      m_visual.setStatic();
     }
   }
   

@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25.2.3 $
+ * @version $Revision: 1.25.2.4 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -605,8 +605,13 @@ public class Classifier
 		    // prevent any classifier events from being fired
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("Build classifier interrupted!");
-		      m_log.statusMessage("OK");
+                      String titleString = m_Classifier.getClass().getName();		      
+		      titleString = titleString.
+			substring(titleString.lastIndexOf('.') + 1,
+				  titleString.length());
+		      m_log.logMessage("Build classifier ("
+                                       + titleString + ") interrupted!");
+		      m_log.statusMessage("Interrupted");
 		    }
 		  } else {
 		    // save header
