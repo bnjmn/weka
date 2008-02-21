@@ -36,7 +36,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.NominalToStringTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class NominalToStringTest
   extends AbstractFilterTest {
@@ -48,7 +48,7 @@ public class NominalToStringTest
   /** Creates an example NominalToString */
   public Filter getFilter() {
     NominalToString f = new NominalToString();
-    f.setAttributeIndex("2");
+    f.setAttributeIndexes("2");
     return f;
   }
 
@@ -62,7 +62,7 @@ public class NominalToStringTest
     FilteredClassifier 	result;
     
     result = super.getFilteredClassifier();
-    ((NominalToString) result.getFilter()).setAttributeIndex("1");
+    ((NominalToString) result.getFilter()).setAttributeIndexes("1");
     result.setClassifier(new ZeroR());
     
     return result;
@@ -99,7 +99,7 @@ public class NominalToStringTest
   }
 
   public void testMissing() {
-    ((NominalToString)m_Filter).setAttributeIndex("5");
+    ((NominalToString)m_Filter).setAttributeIndexes("5");
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
@@ -126,7 +126,7 @@ public class NominalToStringTest
 	if (data.classIndex() == i)
 	  continue;
 	if (data.attribute(i).isNominal()) {
-	  ((NominalToString) m_FilteredClassifier.getFilter()).setAttributeIndex(
+	  ((NominalToString) m_FilteredClassifier.getFilter()).setAttributeIndexes(
 	      "" + (i + 1));
 	  break;
 	}
