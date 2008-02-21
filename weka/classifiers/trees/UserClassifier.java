@@ -96,7 +96,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.28.2.1 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -272,7 +272,10 @@ public class UserClassifier
 	  m_iView.setShapes(m_focus.m_ranges);
 	}
 	
-	
+	Classifier classifierAtNode = m_focus.getClassifier();
+        if (classifierAtNode != null) {
+          m_classifiers.setValue(classifierAtNode);
+        }
 	m_propertyDialog = new PropertyDialog(m_classifiers, 
 					      m_mainWin.getLocationOnScreen().x,
 					      m_mainWin.getLocationOnScreen().y);
@@ -552,11 +555,11 @@ public class UserClassifier
 	      m_focus.m_set2 = null;
 	      m_focus.setInfo(m_focus.m_attrib1, m_focus.m_attrib2, null);
 	      m_focus.setClassifier((Classifier)m_classifiers.getValue());
-	      m_classifiers = new GenericObjectEditor();
+              /*	      m_classifiers = new GenericObjectEditor();
 	      m_classifiers.setClassType(Classifier.class);
 	      m_classifiers.setValue(new weka.classifiers.rules.ZeroR());
 	      ((GenericObjectEditor.GOEPanel)m_classifiers.getCustomEditor())
-		.addOkListener(this);
+              .addOkListener(this); */
 	      m_tView = new TreeVisualizer(UserClassifier.this, graph(), 
 				     new PlaceNode2());
 	      m_tView.setHighlight(m_focus.m_identity);
@@ -565,6 +568,14 @@ public class UserClassifier
 	    } catch(Exception er) {
 	      System.out.println("Error : " + er);
 	      System.out.println("Part of user input so had to catch here");
+              JOptionPane.showMessageDialog(
+                         null,
+                         "Unable to use " + m_focus.getClassifier().getClass().getName() 
+                         + " at this node.\n"
+                         + "This exception was produced:\n"
+                         + er.toString(),
+                         "UserClassifier",
+                         JOptionPane.ERROR_MESSAGE);
 	    }
 	  }
 	});
@@ -784,6 +795,16 @@ public class UserClassifier
     public void setClassifier(Classifier c) throws Exception {
       m_classObject = c;
       m_classObject.buildClassifier(m_training);
+    }
+
+    /**
+     * Get the alternate classifier at this node. Returns null if there is
+     * no classifier.
+     *
+     * @return the alternate classifier at this node, or null if there is none.
+     */
+    public Classifier getClassifier() {
+      return m_classObject;
     }
     
     /**
