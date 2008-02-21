@@ -30,6 +30,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.SingleIndex;
+import weka.core.Range;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -41,7 +42,9 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * Converts a nominal attribute (i.e. set number of values) to string (i.e. unspecified number of values).
+ * Converts a range of nominal attributes (i.e. set number of values) to string 
+ * (i.e. unspecified number of values). Any non-nominal attributes in the supplied
+ * range are left untouched.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -49,12 +52,12 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -C &lt;col&gt;
- *  Sets the attribute index (default last).</pre>
+ *  Sets the range of attributes to convert (default last).</pre>
  * 
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NominalToString
   extends Filter 
@@ -64,7 +67,7 @@ public class NominalToString
   static final long serialVersionUID = 8655492378380068939L;
   
   /** The attribute's index setting. */
-  private SingleIndex m_AttIndex = new SingleIndex("last"); 
+  private Range m_AttIndex = new Range("last");
 
   /**
    * Returns a string describing this filter
@@ -118,9 +121,9 @@ public class NominalToString
 
     m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
     
-    if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal())
+    /*    if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal())
       throw new UnsupportedAttributeTypeException("Chosen attribute is not of "
-						  + "type nominal.");
+      + "type nominal."); */
 
     return false;
   }
@@ -190,7 +193,7 @@ public class NominalToString
     Vector result = new Vector();
 
     result.addElement(new Option(
-	"\tSets the attribute index (default last).",
+	"\tSets the range of attributes to convert (default last).",
 	"C", 1, "-C <col>"));
 
     return result.elements();
@@ -204,7 +207,7 @@ public class NominalToString
    * Valid options are: <p/>
    * 
    * <pre> -C &lt;col&gt;
-   *  Sets the attribute index (default last).</pre>
+   *  Sets the range of attributes to convert (default last).</pre>
    * 
    <!-- options-end -->
    *
@@ -216,9 +219,9 @@ public class NominalToString
     
     tmpStr = Utils.getOption('C', options);
     if (tmpStr.length() != 0)
-      setAttributeIndex(tmpStr);
+      setAttributeIndexes(tmpStr);
     else
-      setAttributeIndex("last");
+      setAttributeIndexes("last");
        
     if (getInputFormat() != null)
       setInputFormat(getInputFormat());
@@ -235,7 +238,7 @@ public class NominalToString
     result = new Vector();
 
     result.add("-C");
-    result.add("" + (getAttributeIndex()));
+    result.add("" + (getAttributeIndexes()));
 
     return (String[]) result.toArray(new String[result.size()]);	  
   }
@@ -247,8 +250,8 @@ public class NominalToString
    * 			displaying in the explorer/experimenter gui
    */
   public String attributeIndexTipText() {
-    return "Sets which attribute to process. This attribute "
-      + "must be a nominal attribute (\"first\" and \"last\" are valid values)";
+    return "Sets a range attributes to process. Any non-nominal "
+      + "attributes in the range are left untouched (\"first\" and \"last\" are valid values)";
   }
 
   /**
@@ -256,8 +259,9 @@ public class NominalToString
    *
    * @return 		the index of the attribute
    */
-  public String getAttributeIndex() {
-    return m_AttIndex.getSingleIndex();
+  public String getAttributeIndexes() {
+    //    return m_AttIndex.getSingleIndex();
+    return m_AttIndex.getRanges();
   }
 
   /**
@@ -265,8 +269,9 @@ public class NominalToString
    *
    * @param attIndex 	the index of the attribute
    */
-  public void setAttributeIndex(String attIndex) {
-    m_AttIndex.setSingleIndex(attIndex);
+  public void setAttributeIndexes(String attIndex) {
+    //    m_AttIndex.setSingleIndex(attIndex);
+    m_AttIndex.setRanges(attIndex);
   }
 
   /**
@@ -282,7 +287,8 @@ public class NominalToString
     newAtts = new FastVector(getInputFormat().numAttributes());
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
-      if (j != m_AttIndex.getIndex())
+
+      if (!att.isNominal() || !m_AttIndex.isInRange(j))
 	newAtts.addElement(att); 
       else
 	newAtts.addElement(new Attribute(att.name(), (FastVector) null));
