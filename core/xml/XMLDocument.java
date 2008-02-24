@@ -31,8 +31,12 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Vector;
 
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -48,101 +52,106 @@ import org.xml.sax.InputSource;
  * 
  * @see #PI 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision 1.0$
+ * @version $Revision: 1.6.2.1 $
  */
 public class XMLDocument {
   
   /** the parsing instructions "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;" 
-   * (may not show up in Javadoc due to tags!) */
+   * (may not show up in Javadoc due to tags!). */
   public final static String PI = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
   
   // DTD placeholders
-  /** the DocType definition */
+  /** the DocType definition. */
   public final static String DTD_DOCTYPE = "DOCTYPE";
   
-  /** the Element definition */
+  /** the Element definition. */
   public final static String DTD_ELEMENT = "ELEMENT";
   
-  /** the AttList definition */
+  /** the AttList definition. */
   public final static String DTD_ATTLIST = "ATTLIST";
   
-  /** the optional marker */
+  /** the optional marker. */
   public final static String DTD_OPTIONAL = "?";
   
-  /** the at least one marker */
+  /** the at least one marker. */
   public final static String DTD_AT_LEAST_ONE = "+";
   
-  /** the zero or more marker */
+  /** the zero or more marker. */
   public final static String DTD_ZERO_OR_MORE = "*";
   
-  /** the option separator */
+  /** the option separator. */
   public final static String DTD_SEPARATOR = "|";
   
-  /** the CDATA placeholder */
+  /** the CDATA placeholder. */
   public final static String DTD_CDATA = "CDATA"; 
   
-  /** the ANY placeholder */
+  /** the ANY placeholder. */
   public final static String DTD_ANY = "ANY"; 
   
-  /** the #PCDATA placeholder */
+  /** the #PCDATA placeholder. */
   public final static String DTD_PCDATA = "#PCDATA"; 
   
-  /** the #IMPLIED placeholder */
+  /** the #IMPLIED placeholder. */
   public final static String DTD_IMPLIED = "#IMPLIED"; 
   
-  /** the #REQUIRED placeholder */
+  /** the #REQUIRED placeholder. */
   public final static String DTD_REQUIRED = "#REQUIRED"; 
 
   // often used attributes
-  /** the "version" attribute */
+  /** the "version" attribute. */
   public final static String ATT_VERSION = "version";
  
-  /** the "name" attribute */
+  /** the "name" attribute. */
   public final static String ATT_NAME = "name";
 
   // often used values
-  /** the value "yes" */
+  /** the value "yes". */
   public final static String VAL_YES = "yes";
   
-  /** the value "no" */
+  /** the value "no". */
   public final static String VAL_NO = "no";
   
   // members
-  /** the factory for DocumentBuilder */
+  /** the factory for DocumentBuilder. */
   protected DocumentBuilderFactory m_Factory = null;
   
-  /** the instance of a DocumentBuilder */
+  /** the instance of a DocumentBuilder. */
   protected DocumentBuilder m_Builder = null;
   
-  /** whether to use a validating parser or not */
+  /** whether to use a validating parser or not. */
   protected boolean m_Validating = false;
   
-  /** the DOM document */
+  /** the DOM document. */
   protected Document m_Document = null;
   
-  /** the DOCTYPE node as String */
+  /** the DOCTYPE node as String. */
   protected String m_DocType = null;
   
-  /** the root node as String */
+  /** the root node as String. */
   protected String m_RootNode = null;
   
+  /** for XPath queries. */
+  protected XPath m_XPath = null;
+  
   /**
-   * initializes the factory with non-validating parser
+   * initializes the factory with non-validating parser.
    * 
-   * @throws Exception if the construction fails
+   * @throws Exception 	if the construction fails
    */
   public XMLDocument() throws Exception {
     m_Factory = DocumentBuilderFactory.newInstance();
+    m_XPath   = XPathFactory.newInstance(XPathFactory.DEFAULT_OBJECT_MODEL_URI).newXPath();
     setDocType(null);
     setRootNode(null);
     setValidating(false);
   }
   
   /** 
-   * Creates a new instance of XMLDocument 
-   * @param xml the xml to parse (if "<?xml" is not found then it is considered a file)
-   * @throws Exception if the construction of the DocumentBuilder fails
-   * @see #setValidating(boolean)
+   * Creates a new instance of XMLDocument.
+   * 
+   * @param xml 	the xml to parse (if "<?xml" is not found then it is considered a file)
+   * @throws Exception 	if the construction of the DocumentBuilder fails
+   * @see 		#setValidating(boolean)
    */
   public XMLDocument(String xml) throws Exception {
     this();
@@ -150,10 +159,11 @@ public class XMLDocument {
   }
   
   /** 
-   * Creates a new instance of XMLDocument 
-   * @param file the XML file to parse
-   * @throws Exception if the construction of the DocumentBuilder fails
-   * @see #setValidating(boolean)
+   * Creates a new instance of XMLDocument.
+   * 
+   * @param file 	the XML file to parse
+   * @throws Exception 	if the construction of the DocumentBuilder fails
+   * @see 		#setValidating(boolean)
    */
   public XMLDocument(File file) throws Exception {
     this();
@@ -161,10 +171,11 @@ public class XMLDocument {
   }
   
   /** 
-   * Creates a new instance of XMLDocument 
-   * @param stream the XML stream to parse
-   * @throws Exception if the construction of the DocumentBuilder fails
-   * @see #setValidating(boolean)
+   * Creates a new instance of XMLDocument.
+   * 
+   * @param stream 	the XML stream to parse
+   * @throws Exception 	if the construction of the DocumentBuilder fails
+   * @see 		#setValidating(boolean)
    */
   public XMLDocument(InputStream stream) throws Exception {
     this();
@@ -172,10 +183,11 @@ public class XMLDocument {
   }
   
   /** 
-   * Creates a new instance of XMLDocument 
-   * @param reader the XML reader to parse
-   * @throws Exception if the construction of the DocumentBuilder fails
-   * @see #setValidating(boolean)
+   * Creates a new instance of XMLDocument.
+   * 
+   * @param reader 	the XML reader to parse
+   * @throws Exception 	if the construction of the DocumentBuilder fails
+   * @see 		#setValidating(boolean)
    */
   public XMLDocument(Reader reader) throws Exception {
     this();
@@ -183,24 +195,27 @@ public class XMLDocument {
   }
   
   /**
-   * returns the DocumentBuilderFactory
-   * @return the DocumentBuilderFactory
+   * returns the DocumentBuilderFactory.
+   * 
+   * @return 		the DocumentBuilderFactory
    */
   public DocumentBuilderFactory getFactory() {
     return m_Factory;
   }
   
   /**
-   * returns the DocumentBuilder
-   * @return the DocumentBuilder
+   * returns the DocumentBuilder.
+   * 
+   * @return 		the DocumentBuilder
    */
   public DocumentBuilder getBuilder() {
     return m_Builder;
   }
   
   /**
-   * returns whether a validating parser is used
-   * @return whether a validating parser is used
+   * returns whether a validating parser is used.
+   * 
+   * @return 		whether a validating parser is used
    */
   public boolean getValidating() {
     return m_Validating;
@@ -209,8 +224,9 @@ public class XMLDocument {
   /**
    * sets whether to use a validating parser or not.<br>
    * Note: this does clear the current DOM document! 
-   * @param validating whether to use a validating parser
-   * @throws Exception if the instantiating of the DocumentBuilder fails
+   * 
+   * @param validating 	whether to use a validating parser
+   * @throws Exception 	if the instantiating of the DocumentBuilder fails
    */
   public void setValidating(boolean validating) throws Exception {
     m_Validating = validating;
@@ -220,15 +236,17 @@ public class XMLDocument {
   }
   
   /**
-   * returns the parsed DOM document
-   * @return the parsed DOM document
+   * returns the parsed DOM document.
+   * 
+   * @return 		the parsed DOM document
    */
   public Document getDocument() {
     return m_Document;
   }
   
   /**
-   * sets the DOM document to use
+   * sets the DOM document to use.
+   * 
    * @param newDocument the DOM document to use 
    */
   public void setDocument(Document newDocument) {
@@ -239,25 +257,26 @@ public class XMLDocument {
    * sets the DOCTYPE-String to use in the XML output. Performs NO checking!
    * if it is <code>null</code> the DOCTYPE is omitted. 
    *  
-   * @param docType the DOCTYPE definition to use in XML output 
+   * @param docType 	the DOCTYPE definition to use in XML output 
    */
   public void setDocType(String docType) {
     m_DocType = docType; 
   }
   
   /**
-   * returns the current DOCTYPE, can be <code>null</code>
+   * returns the current DOCTYPE, can be <code>null</code>.
    * 
-   * @return the current DOCTYPE definition, can be <code>null</code>
+   * @return 		the current DOCTYPE definition, can be <code>null</code>
    */
   public String getDocType()  {
     return m_DocType;
   }
   
   /**
-   * sets the root node to use in the XML output. Performs NO checking with DOCTYPE!
+   * sets the root node to use in the XML output. Performs NO checking with 
+   * DOCTYPE!
    *  
-   * @param rootNode the root node to use in the XML output
+   * @param rootNode 	the root node to use in the XML output
    */
   public void setRootNode(String rootNode) {
     if (rootNode == null)
@@ -267,31 +286,31 @@ public class XMLDocument {
   }
   
   /**
-   * returns the current root node
+   * returns the current root node.
    * 
-   * @return the current root node
+   * @return 		the current root node
    */
   public String getRootNode()  {
     return m_RootNode;
   }
   
   /**
-   * sets up an empty DOM document, with the current DOCTYPE and root node
+   * sets up an empty DOM document, with the current DOCTYPE and root node.
    * 
-   * @see #setRootNode(String)
-   * @see #setDocType(String)
+   * @see 		#setRootNode(String)
+   * @see 		#setDocType(String)
    */
   public void clear() {
     newDocument(getDocType(), getRootNode());
   }
   
   /**
-   * creates a new Document with the given information
+   * creates a new Document with the given information.
    * 
-   * @param docType the DOCTYPE definition (no checking happens!), can be null
-   * @param rootNode the name of the root node (must correspond to the one 
-   *        given in <code>docType</code>) 
-   * @return returns the just created DOM document for convenience
+   * @param docType 	the DOCTYPE definition (no checking happens!), can be null
+   * @param rootNode 	the name of the root node (must correspond to the one 
+   *        		given in <code>docType</code>) 
+   * @return 		returns the just created DOM document for convenience
    */
   public Document newDocument(String docType, String rootNode) {
     m_Document = getBuilder().newDocument();
@@ -303,10 +322,11 @@ public class XMLDocument {
   
   /**
    * parses the given XML string (can be XML or a filename) and returns a
-   * DOM Document
-   * @param xml the xml to parse (if "<?xml" is not found then it is considered a file)
-   * @return the parsed DOM document
-   * @throws Exception if something goes wrong with the parsing
+   * DOM Document.
+   * 
+   * @param xml 	the xml to parse (if "<?xml" is not found then it is considered a file)
+   * @return 		the parsed DOM document
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public Document read(String xml) throws Exception {
     if (xml.toLowerCase().indexOf("<?xml") > -1)
@@ -316,10 +336,11 @@ public class XMLDocument {
   }
   
   /**
-   * parses the given file and returns a DOM document
-   * @param file the XML file to parse
-   * @return the parsed DOM document
-   * @throws Exception if something goes wrong with the parsing
+   * parses the given file and returns a DOM document.
+   * 
+   * @param file 	the XML file to parse
+   * @return 		the parsed DOM document
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public Document read(File file) throws Exception {
     m_Document = getBuilder().parse(file);
@@ -327,10 +348,11 @@ public class XMLDocument {
   }
   
   /**
-   * parses the given stream and returns a DOM document
-   * @param stream the XML stream to parse
-   * @return the parsed DOM document
-   * @throws Exception if something goes wrong with the parsing
+   * parses the given stream and returns a DOM document.
+   * 
+   * @param stream 	the XML stream to parse
+   * @return 		the parsed DOM document
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public Document read(InputStream stream) throws Exception {
     m_Document = getBuilder().parse(stream);
@@ -338,10 +360,11 @@ public class XMLDocument {
   }
   
   /**
-   * parses the given reader and returns a DOM document
-   * @param reader the XML reader to parse
-   * @return the parsed DOM document
-   * @throws Exception if something goes wrong with the parsing
+   * parses the given reader and returns a DOM document.
+   * 
+   * @param reader 	the XML reader to parse
+   * @return 		the parsed DOM document
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public Document read(Reader reader) throws Exception {
     m_Document = getBuilder().parse(new InputSource(reader));
@@ -350,27 +373,30 @@ public class XMLDocument {
   
   
   /**
-   * writes the current DOM document into the given file
-   * @param file the filename to write to
-   * @throws Exception if something goes wrong with the parsing
+   * writes the current DOM document into the given file.
+   * 
+   * @param file 	the filename to write to
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public void write(String file) throws Exception {
     write(new File(file));
   }
   
   /**
-   * writes the current DOM document into the given file
-   * @param file the filename to write to
-   * @throws Exception if something goes wrong with the parsing
+   * writes the current DOM document into the given file.
+   * 
+   * @param file 	the filename to write to
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public void write(File file) throws Exception {
     write(new BufferedWriter(new FileWriter(file)));
   }
   
   /**
-   * writes the current DOM document into the given stream
-   * @param stream the filename to write to
-   * @throws Exception if something goes wrong with the parsing
+   * writes the current DOM document into the given stream.
+   * 
+   * @param stream 	the filename to write to
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public void write(OutputStream stream) throws Exception {
     String		xml;
@@ -381,9 +407,10 @@ public class XMLDocument {
   }
   
   /**
-   * writes the current DOM document into the given writer
-   * @param writer the filename to write to
-   * @throws Exception if something goes wrong with the parsing
+   * writes the current DOM document into the given writer.
+   * 
+   * @param writer 	the filename to write to
+   * @throws Exception 	if something goes wrong with the parsing
    */
   public void write(Writer writer) throws Exception {
     writer.write(toString());
@@ -391,21 +418,21 @@ public class XMLDocument {
   }
   
   /**
-   * returns all non tag-children from the given node
+   * returns all non tag-children from the given node.
    * 
-   * @param parent the node to get the children from
-   * @return a vector containing all the non-text children
+   * @param parent 	the node to get the children from
+   * @return 		a vector containing all the non-text children
    */
   public static Vector getChildTags(Node parent) {
     return getChildTags(parent, "");
   }
   
   /**
-   * returns all non tag-children from the given node
+   * returns all non tag-children from the given node.
    * 
-   * @param parent the node to get the children from
-   * @param name the name of the tags to return, "" for all
-   * @return a vector containing all the non-text children
+   * @param parent 	the node to get the children from
+   * @param name 	the name of the tags to return, "" for all
+   * @return 		a vector containing all the non-text children
    */
   public static Vector getChildTags(Node parent, String name) {
     Vector         result;
@@ -428,13 +455,88 @@ public class XMLDocument {
     
     return result;
   }
+
+  /**
+   * Returns the specified result of the XPath expression. 
+   * Can return null if an error occurred.
+   * 
+   * @param xpath	the XPath expression to run on the document
+   * @param type	the type of the result
+   * @return		the result
+   */
+  protected Object eval(String xpath, QName type) {
+    Object	result;
+    
+    try {
+      result = m_XPath.evaluate(xpath, m_Document, type);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      result = null;
+    }
+    
+    return result;
+  }
+
+  /**
+   * Returns the nodes that the given xpath expression will find in the 
+   * document. Can return null if an error occurred.
+   * 
+   * @param xpath	the XPath expression to run on the document
+   * @return		the nodelist
+   */
+  public NodeList findNodes(String xpath) {
+    return (NodeList) eval(xpath, XPathConstants.NODESET);
+  }
+
+  /**
+   * Returns the node represented by the XPath expression. 
+   * Can return null if an error occurred.
+   * 
+   * @param xpath	the XPath expression to run on the document
+   * @return		the node
+   */
+  public Node getNode(String xpath) {
+    return (Node) eval(xpath, XPathConstants.NODE);
+  }
+  
+  /**
+   * Evaluates and returns the boolean result of the XPath expression.
+   * 
+   * @param xpath	the expression to evaluate
+   * @return		the result of the evaluation, null in case of an error
+   */
+  public Boolean evalBoolean(String xpath) {
+    return (Boolean) eval(xpath, XPathConstants.BOOLEAN);
+  }
+  
+  /**
+   * Evaluates and returns the double result of the XPath expression.
+   * 
+   * @param xpath	the expression to evaluate
+   * @return		the result of the evaluation, null in case of
+   * 			an error
+   */
+  public Double evalDouble(String xpath) {
+    return (Double) eval(xpath, XPathConstants.NUMBER);
+  }
+  
+  /**
+   * Evaluates and returns the boolean result of the XPath expression.
+   * 
+   * @param xpath	the expression to evaluate
+   * @return		the result of the evaluation
+   */
+  public String evalString(String xpath) {
+    return (String) eval(xpath, XPathConstants.STRING);
+  }
   
   /**
    * returns the text between the opening and closing tag of a node
-   * (performs a <code>trim()</code> on the result)
+   * (performs a <code>trim()</code> on the result).
    * 
-   * @param node the node to get the text from
-   * @return the content of the given node
+   * @param node 	the node to get the text from
+   * @return 		the content of the given node
    */
   public static String getContent(Element node) {
     NodeList       list;
@@ -455,11 +557,12 @@ public class XMLDocument {
   }
   
   /**
-   * turns the given node into a XML-stringbuffer according to the depth
-   * @param buf the stringbuffer so far
-   * @param parent the current node
-   * @param depth the current depth
-   * @return the new XML-stringbuffer
+   * turns the given node into a XML-stringbuffer according to the depth.
+   * 
+   * @param buf 	the stringbuffer so far
+   * @param parent 	the current node
+   * @param depth 	the current depth
+   * @return 		the new XML-stringbuffer
    */
   protected StringBuffer toString(StringBuffer buf, Node parent, int depth) {
     NodeList       list;
@@ -519,16 +622,16 @@ public class XMLDocument {
   }
   
   /**
-   * prints the current DOM document to standard out
+   * prints the current DOM document to standard out.
    */
   public void print() {
     System.out.println(toString());
   }
   
   /**
-   * returns the current DOM document as XML-string
-   * @return the document as XML-string representation
-   * @throws Exception if anything goes wrong initializing the parsing
+   * returns the current DOM document as XML-string.
+   * 
+   * @return 		the document as XML-string representation
    */
   public String toString() {
     String         header;
@@ -544,6 +647,9 @@ public class XMLDocument {
    * for testing only. takes the name of an XML file as first arg, reads that
    * file, prints it to stdout and if a second filename is given, writes the
    * parsed document to that again.
+   * 
+   * @param args	the commandline arguments
+   * @throws Exception	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
     XMLDocument		doc;
