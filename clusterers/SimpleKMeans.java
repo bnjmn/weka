@@ -54,12 +54,15 @@ import java.util.Vector;
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 10)</pre>
+ * <pre> -V 
+ *  Display std. deviations for numeric atts..
+ * </pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.29.2.1 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -95,6 +98,18 @@ public class SimpleKMeans
    * nominal attribute
    */
   private int [][][] m_ClusterNominalCounts;
+  
+  /**
+   * Stats on the full data set for comparison purposes
+   */
+  private double[] m_FullMeansOrModes;
+  private double[] m_FullStdDevs;
+  //  private int[][] m_FullNominalCounts;
+
+  /**
+   * Display standard deviations for numeric atts
+   */
+  private boolean m_displayStdDevs;
 
   /**
    * The number of instances in each cluster
@@ -176,6 +191,16 @@ public class SimpleKMeans
     instances.setClassIndex(-1);
     m_ReplaceMissingFilter.setInputFormat(instances);
     instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
+
+    m_FullMeansOrModes = new double[instances.numAttributes()];
+    m_FullStdDevs = new double[instances.numAttributes()];
+    //m_FullNominalCounts = new int[instances.numAttributes()][0];
+    for (int i = 0; i < instances.numAttributes(); i++) {
+      m_FullMeansOrModes[i] = instances.meanOrMode(i);
+      if (instances.attribute(i).isNumeric()) {
+        m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
+      }
+    }
 
     m_Min = new double [instances.numAttributes()];
     m_Max = new double [instances.numAttributes()];
@@ -486,6 +511,9 @@ public class SimpleKMeans
 	"\tnumber of clusters.\n"
 	+ "\t(default 2).", 
 	"N", 1, "-N <num>"));
+    result.addElement(new Option(
+	"\tDisplay std. deviations for centroids.\n", 
+	"V", 0, "-V"));
 
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
@@ -538,6 +566,9 @@ public class SimpleKMeans
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 10)</pre>
+   * <pre> -V 
+   *  Display std. deviations for numeric atts..
+   * </pre>
    * 
    <!-- options-end -->
    *
@@ -546,6 +577,8 @@ public class SimpleKMeans
    */
   public void setOptions (String[] options)
     throws Exception {
+
+    m_displayStdDevs = Utils.getFlag("V", options);
 
     String optionString = Utils.getOption('N', options);
 
@@ -568,6 +601,10 @@ public class SimpleKMeans
 
     result = new Vector();
 
+    if (m_displayStdDevs) {
+      result.add("-V");
+    }
+
     result.add("-N");
     result.add("" + getNumClusters());
 
@@ -585,51 +622,156 @@ public class SimpleKMeans
    */
   public String toString() {
     int maxWidth = 0;
+    int maxAttWidth = 0;
+    boolean containsNumeric = false;
     for (int i = 0; i < m_NumClusters; i++) {
       for (int j = 0 ;j < m_ClusterCentroids.numAttributes(); j++) {
+        if (m_ClusterCentroids.attribute(j).name().length() > maxAttWidth) {
+          maxAttWidth = m_ClusterCentroids.attribute(j).name().length();
+        }
 	if (m_ClusterCentroids.attribute(j).isNumeric()) {
+          containsNumeric = true;
 	  double width = Math.log(Math.abs(m_ClusterCentroids.instance(i).value(j))) /
 	    Math.log(10.0);
-	  width += 1.0;
+          //          System.err.println(m_ClusterCentroids.instance(i).value(j) + " " + width);
+          if (width < 0) {
+            width = 1;
+          }
+          // decimal + # decimal places + 1
+	  width += 5.0;
 	  if ((int)width > maxWidth) {
 	    maxWidth = (int)width;
 	  }
-	}
+	} else {
+          int val = (int)m_ClusterCentroids.instance(i).value(j);
+          int length = 
+            m_ClusterCentroids.instance(i).attribute(j).value(val).length();
+          if (length > maxWidth) {
+            maxWidth = length;
+          }
+        }
       }
     }
-    StringBuffer temp = new StringBuffer();
-    String naString = "N/A";
-    for (int i = 0; i < maxWidth+2; i++) {
-      naString += " ";
+
+    String plusMinus = "+/-";
+    maxAttWidth += 2;
+    if (m_displayStdDevs && containsNumeric) {
+      maxWidth += plusMinus.length() + 1;
     }
+    if (maxAttWidth < "Attribute".length() + 2) {
+      maxAttWidth = "Attribute".length() + 2;
+    }
+
+    if (maxWidth < "Full Data".length()) {
+      maxWidth = "Full Data".length() + 1;
+    }
+    
+    StringBuffer temp = new StringBuffer();
+    //    String naString = "N/A";
+
+    
+    /*    for (int i = 0; i < maxWidth+2; i++) {
+      naString += " ";
+      } */
     temp.append("\nkMeans\n======\n");
     temp.append("\nNumber of iterations: " + m_Iterations+"\n");
     temp.append("Within cluster sum of squared errors: " + Utils.sum(m_squaredErrors));
 
     temp.append("\n\nCluster centroids:\n");
+    temp.append(pad("Cluster#", " ", (maxAttWidth + (maxWidth * 2 + 2)) - "Cluster#".length(), true));
+
+    temp.append("\n");
+    temp.append(pad("Attribute", " ", maxAttWidth - "Attribute".length(), false));
+
+    
+    temp.append(pad("Full Data", " ", maxWidth + 1 - "Full Data".length(), true));
+
     for (int i = 0; i < m_NumClusters; i++) {
-      temp.append("\nCluster "+i+"\n\t");
-      temp.append("Mean/Mode: ");
-      for (int j = 0; j < m_ClusterCentroids.numAttributes(); j++) {
-	if (m_ClusterCentroids.attribute(j).isNominal()) {
-	  temp.append(" "+m_ClusterCentroids.attribute(j).
-		      value((int)m_ClusterCentroids.instance(i).value(j)));
-	} else {
-	  temp.append(" "+Utils.doubleToString(m_ClusterCentroids.instance(i).value(j),
-					       maxWidth+5, 4));
-	}
+      String clustNum = "" + i;
+      temp.append(pad(clustNum, " ", maxWidth + 1 - clustNum.length(), true));
+    }
+      
+    temp.append("\n");
+
+    temp.append(pad("", "=", maxAttWidth + 
+                    (maxWidth * (m_ClusterCentroids.numInstances()+1) 
+                     + m_ClusterCentroids.numInstances() + 1), true));
+    temp.append("\n");
+
+    for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
+      String attName = m_ClusterCentroids.attribute(i).name();
+      temp.append(attName);
+      for (int j = 0; j < maxAttWidth - attName.length(); j++) {
+        temp.append(" ");
       }
-      temp.append("\n\tStd Devs:  ");
-      for (int j = 0; j < m_ClusterStdDevs.numAttributes(); j++) {
-	if (m_ClusterStdDevs.attribute(j).isNumeric()) {
-	  temp.append(" "+Utils.doubleToString(m_ClusterStdDevs.instance(i).value(j), 
-					       maxWidth+5, 4));
-	} else {
-	  temp.append(" "+naString);
-	}
+
+      String strVal;
+      String valMeanMode;
+      // full data
+      valMeanMode = (m_ClusterCentroids.attribute(i).isNominal())
+          ? pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_FullMeansOrModes[i])),
+                " ", maxWidth + 1 - strVal.length(), true)
+          : pad((strVal = Utils.doubleToString(m_FullMeansOrModes[i],
+                                               maxWidth,4).trim()), 
+                " ", maxWidth + 1 - strVal.length(), true);
+      temp.append(valMeanMode);
+
+      for (int j = 0; j < m_NumClusters; j++) {
+        valMeanMode = (m_ClusterCentroids.attribute(i).isNominal())
+          ? pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_ClusterCentroids.instance(j).value(i))),
+                " ", maxWidth + 1 - strVal.length(), true)
+          : pad((strVal = Utils.doubleToString(m_ClusterCentroids.instance(j).value(i),
+                                               maxWidth,4).trim()), 
+                " ", maxWidth + 1 - strVal.length(), true);
+        temp.append(valMeanMode);
+      }
+      temp.append("\n");
+
+      if (m_displayStdDevs) {
+        if (m_ClusterStdDevs.attribute(i).isNominal()) {
+          continue;
+        }
+        // Std devs
+        String stdDevVal;
+        // full data
+        stdDevVal = 
+          pad((strVal = plusMinus 
+               + Utils.doubleToString(m_FullStdDevs[i],
+                                      maxWidth,4).trim()), 
+              " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
+        temp.append(stdDevVal);
+
+        for (int j = 0; j < m_NumClusters; j++) {
+          stdDevVal = 
+            pad((strVal = plusMinus 
+                 + Utils.doubleToString(m_ClusterStdDevs.instance(j).value(i),
+                                        maxWidth,4).trim()), 
+                " ", maxWidth + 1 - strVal.length(), true);
+          temp.append(stdDevVal);
+        }
+        temp.append("\n");
       }
     }
+
     temp.append("\n\n");
+    return temp.toString();
+  }
+
+  private String pad(String source, String padChar, 
+                     int length, boolean leftPad) {
+    StringBuffer temp = new StringBuffer();
+
+    if (leftPad) {
+      for (int i = 0; i< length; i++) {
+        temp.append(padChar);
+      }
+      temp.append(source);
+    } else {
+      temp.append(source);
+      for (int i = 0; i< length; i++) {
+        temp.append(padChar);
+      }
+    }
     return temp.toString();
   }
 
