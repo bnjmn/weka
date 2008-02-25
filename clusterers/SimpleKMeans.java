@@ -62,7 +62,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29.2.2 $
+ * @version $Revision: 1.29.2.3 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -552,6 +552,38 @@ public class SimpleKMeans
    */
   public int getNumClusters() {
     return m_NumClusters;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String displayStdDevsTipText() {
+    return "Display std deviations of numeric attributes "
+      + "and counts of nominal attributes.";
+  }
+
+  /**
+   * Sets whether standard deviations and nominal count
+   * Should be displayed in the clustering output
+   *
+   * @param stdD true if std. devs and counts should be 
+   * displayed
+   */
+  public void setDisplayStdDevs(boolean stdD) {
+    m_displayStdDevs = stdD;
+  }
+
+  /**
+   * Gets whether standard deviations and nominal count
+   * Should be displayed in the clustering output
+   *
+   * @return true if std. devs and counts should be 
+   * displayed
+   */
+  public boolean getDisplayStdDevs() {
+    return m_displayStdDevs;
   }
 
   /**
