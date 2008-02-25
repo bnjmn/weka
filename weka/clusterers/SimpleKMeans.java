@@ -62,7 +62,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29.2.1 $
+ * @version $Revision: 1.29.2.2 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -104,7 +104,7 @@ public class SimpleKMeans
    */
   private double[] m_FullMeansOrModes;
   private double[] m_FullStdDevs;
-  //  private int[][] m_FullNominalCounts;
+  private int[][] m_FullNominalCounts;
 
   /**
    * Display standard deviations for numeric atts
@@ -194,12 +194,13 @@ public class SimpleKMeans
 
     m_FullMeansOrModes = new double[instances.numAttributes()];
     m_FullStdDevs = new double[instances.numAttributes()];
-    //m_FullNominalCounts = new int[instances.numAttributes()][0];
+    m_FullNominalCounts = new int[instances.numAttributes()][0];
     for (int i = 0; i < instances.numAttributes(); i++) {
       m_FullMeansOrModes[i] = instances.meanOrMode(i);
       if (instances.attribute(i).isNumeric()) {
         m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
       }
+      m_FullNominalCounts[i] = instances.attributeStats(i).nominalCounts;
     }
 
     m_Min = new double [instances.numAttributes()];
@@ -653,6 +654,30 @@ public class SimpleKMeans
       }
     }
 
+    if (m_displayStdDevs) {
+      // check for maximum width of maximum frequency count
+      for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
+        if (m_ClusterCentroids.attribute(i).isNominal()) {
+          int maxV = Utils.maxIndex(m_FullNominalCounts[i]);
+          int percent = (int)((double)m_FullNominalCounts[i][maxV] /
+                              Utils.sum(m_ClusterSizes) * 100.0);
+          String nomV = "" + m_FullNominalCounts[i][maxV]
+            + " (" + percent + "%)";
+          if (nomV.length() > maxWidth) {
+            maxWidth = nomV.length();
+          }
+        }
+      }
+    }
+
+    // check for size of cluster sizes
+    for (int i = 0; i < m_ClusterSizes.length; i++) {
+      String size = "(" + m_ClusterSizes[i] + ")";
+      if (size.length() > maxWidth) {
+        maxWidth = size.length();
+      }
+    }
+    
     String plusMinus = "+/-";
     maxAttWidth += 2;
     if (m_displayStdDevs && containsNumeric) {
@@ -686,11 +711,20 @@ public class SimpleKMeans
     
     temp.append(pad("Full Data", " ", maxWidth + 1 - "Full Data".length(), true));
 
+    // cluster numbers
     for (int i = 0; i < m_NumClusters; i++) {
       String clustNum = "" + i;
       temp.append(pad(clustNum, " ", maxWidth + 1 - clustNum.length(), true));
     }
-      
+    temp.append("\n");
+
+    // cluster sizes
+    String cSize = "(" + Utils.sum(m_ClusterSizes) + ")";
+    temp.append(pad(cSize, " ", maxAttWidth + maxWidth + 1 - cSize.length(), true));
+    for (int i = 0; i < m_NumClusters; i++) {
+      cSize = "(" + m_ClusterSizes[i] + ")";
+      temp.append(pad(cSize, " ",maxWidth + 1 - cSize.length(), true));
+    }
     temp.append("\n");
 
     temp.append(pad("", "=", maxAttWidth + 
@@ -728,25 +762,48 @@ public class SimpleKMeans
       temp.append("\n");
 
       if (m_displayStdDevs) {
-        if (m_ClusterStdDevs.attribute(i).isNominal()) {
-          continue;
-        }
-        // Std devs
+        // Std devs/max nominal
         String stdDevVal;
         // full data
-        stdDevVal = 
-          pad((strVal = plusMinus 
-               + Utils.doubleToString(m_FullStdDevs[i],
-                                      maxWidth,4).trim()), 
-              " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
+        if (m_ClusterCentroids.attribute(i).isNominal()) {
+          int maxV = Utils.maxIndex(m_FullNominalCounts[i]);
+          int percent = (int)((double)m_FullNominalCounts[i][maxV] /
+                              Utils.sum(m_ClusterSizes) * 100.0);
+          stdDevVal = "" + m_FullNominalCounts[i][maxV]
+            + " (" + percent + "%)";
+
+          stdDevVal = 
+            pad(stdDevVal, " ", maxWidth + maxAttWidth + 1 - stdDevVal.length(), true);
+        } else {
+          stdDevVal = pad((strVal = plusMinus 
+                           + Utils.doubleToString(m_FullStdDevs[i],
+                                                  maxWidth,4).trim()), 
+                          " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
+        }
         temp.append(stdDevVal);
 
+        /*        if (m_ClusterStdDevs.attribute(i).isNominal()) {
+          temp.append("\n");
+          continue;
+          } */
+
         for (int j = 0; j < m_NumClusters; j++) {
+          if (m_ClusterCentroids.attribute(i).isNominal()) {
+            int maxV = Utils.maxIndex(m_ClusterNominalCounts[j][i]);
+            int percent = (int)((double)m_ClusterNominalCounts[j][i][maxV] /
+                                m_ClusterSizes[j] * 100.0);
+            stdDevVal = "" + m_ClusterNominalCounts[j][i][maxV]
+              + " (" + percent + "%)";
+            
+          stdDevVal = 
+            pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
+          } else {
           stdDevVal = 
             pad((strVal = plusMinus 
                  + Utils.doubleToString(m_ClusterStdDevs.instance(j).value(i),
                                         maxWidth,4).trim()), 
                 " ", maxWidth + 1 - strVal.length(), true);
+          }
           temp.append(stdDevVal);
         }
         temp.append("\n");
