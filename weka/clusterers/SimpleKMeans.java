@@ -55,14 +55,18 @@ import java.util.Vector;
  *  Random number seed.
  *  (default 10)</pre>
  * <pre> -V 
- *  Display std. deviations for numeric atts..
+ *  Display std. deviations for numeric atts.
+ * </pre>
+ *
+ * <pre> -M
+ *  Replace missing values with mean/mode globally.
  * </pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -98,6 +102,7 @@ public class SimpleKMeans
    * nominal attribute
    */
   private int [][][] m_ClusterNominalCounts;
+  private int[][] m_ClusterMissingCounts;
   
   /**
    * Stats on the full data set for comparison purposes
@@ -105,11 +110,17 @@ public class SimpleKMeans
   private double[] m_FullMeansOrModes;
   private double[] m_FullStdDevs;
   private int[][] m_FullNominalCounts;
+  private int[] m_FullMissingCounts;
 
   /**
    * Display standard deviations for numeric atts
    */
   private boolean m_displayStdDevs;
+
+  /**
+   * Replace missing values globally?
+   */
+  private boolean m_replaceMissing = false;
 
   /**
    * The number of instances in each cluster
@@ -189,18 +200,30 @@ public class SimpleKMeans
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     Instances instances = new Instances(data);
     instances.setClassIndex(-1);
-    m_ReplaceMissingFilter.setInputFormat(instances);
-    instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
+    if (m_replaceMissing) {
+      m_ReplaceMissingFilter.setInputFormat(instances);
+      instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
+    }
 
     m_FullMeansOrModes = new double[instances.numAttributes()];
+    m_FullMissingCounts = new int[instances.numAttributes()];
     m_FullStdDevs = new double[instances.numAttributes()];
     m_FullNominalCounts = new int[instances.numAttributes()][0];
     for (int i = 0; i < instances.numAttributes(); i++) {
+      m_FullMissingCounts[i] = instances.attributeStats(i).missingCount;
       m_FullMeansOrModes[i] = instances.meanOrMode(i);
       if (instances.attribute(i).isNumeric()) {
         m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
+        if (m_FullMissingCounts[i] == instances.numInstances()) {
+          m_FullMeansOrModes[i] = Double.NaN; // mark missing as mean
+        }
+      } else {
+        m_FullNominalCounts[i] = instances.attributeStats(i).nominalCounts;
+        if (m_FullMissingCounts[i] 
+            > m_FullNominalCounts[i][Utils.maxIndex(m_FullNominalCounts[i])]) {
+          m_FullMeansOrModes[i] = -1; // mark missing as most common value
+        }
       }
-      m_FullNominalCounts[i] = instances.attributeStats(i).nominalCounts;
     }
 
     m_Min = new double [instances.numAttributes()];
@@ -244,6 +267,7 @@ public class SimpleKMeans
     Instances [] tempI = new Instances[m_NumClusters];
     m_squaredErrors = new double [m_NumClusters];
     m_ClusterNominalCounts = new int [m_NumClusters][instances.numAttributes()][0];
+    m_ClusterMissingCounts = new int[m_NumClusters][instances.numAttributes()];
     while (!converged) {
       emptyClusterCount = 0;
       m_Iterations++;
@@ -273,8 +297,19 @@ public class SimpleKMeans
 	} else {
 	  for (int j = 0; j < instances.numAttributes(); j++) {
 	    vals[j] = tempI[i].meanOrMode(j);
+            m_ClusterMissingCounts[i][j] = tempI[i].attributeStats(j).missingCount;
 	    m_ClusterNominalCounts[i][j] = 
 	      tempI[i].attributeStats(j).nominalCounts;
+            if (tempI[i].attribute(j).isNominal()) {
+              if (m_ClusterMissingCounts[i][j] >  
+                  m_ClusterNominalCounts[i][j][Utils.maxIndex(m_ClusterNominalCounts[i][j])]) {
+                vals[j] = Instance.missingValue(); // mark mode as missing
+              }
+            } else {
+              if (m_ClusterMissingCounts[i][j] == tempI[i].numInstances()) {
+                vals[j] = Instance.missingValue(); // mark mean as missing
+              }
+            }
 	  }
 	  m_ClusterCentroids.add(new Instance(1.0, vals));
 	}
@@ -338,9 +373,14 @@ public class SimpleKMeans
    * successfully
    */
   public int clusterInstance(Instance instance) throws Exception {
-    m_ReplaceMissingFilter.input(instance);
-    m_ReplaceMissingFilter.batchFinished();
-    Instance inst = m_ReplaceMissingFilter.output();
+    Instance inst = null;
+    if (m_replaceMissing) {
+      m_ReplaceMissingFilter.input(instance);
+      m_ReplaceMissingFilter.batchFinished();
+      inst = m_ReplaceMissingFilter.output();
+    } else {
+      inst = instance;
+    }
 
     return clusterProcessedInstance(inst, false);
   }
@@ -515,6 +555,9 @@ public class SimpleKMeans
     result.addElement(new Option(
 	"\tDisplay std. deviations for centroids.\n", 
 	"V", 0, "-V"));
+    result.addElement(new Option(
+	"\tReplace missing values with mean/mode.\n", 
+	"M", 0, "-M"));
 
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
@@ -587,6 +630,35 @@ public class SimpleKMeans
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String replaceMissingValuesTipText() {
+    return "Replace missing values globally with mean/mode.";
+  }
+
+  /**
+   * Sets whether missing values are to be replaced
+   *
+   * @param r true if missing values are to be
+   * replaced
+   */
+  public void setReplaceMissingValues(boolean r) {
+    m_replaceMissing = r;
+  }
+
+  /**
+   * Gets whether missing values are to be replaced
+   *
+   * @return true if missing values are to be
+   * replaced
+   */
+  public boolean getReplaceMissingValues() {
+    return m_replaceMissing;
+  }
+
+  /**
    * Parses a given list of options. <p/>
    * 
    <!-- options-start -->
@@ -600,7 +672,11 @@ public class SimpleKMeans
    *  Random number seed.
    *  (default 10)</pre>
    * <pre> -V 
-   *  Display std. deviations for numeric atts..
+   *  Display std. deviations for numeric atts.
+   * </pre>
+   *
+   * <pre> -M
+   *  Replace missing values with mean/mode globally.
    * </pre>
    * 
    <!-- options-end -->
@@ -612,6 +688,7 @@ public class SimpleKMeans
     throws Exception {
 
     m_displayStdDevs = Utils.getFlag("V", options);
+    m_replaceMissing = Utils.getFlag("M", options);
 
     String optionString = Utils.getOption('N', options);
 
@@ -636,6 +713,10 @@ public class SimpleKMeans
 
     if (m_displayStdDevs) {
       result.add("-V");
+    }
+
+    if (m_replaceMissing) {
+      result.add("-M");
     }
 
     result.add("-N");
@@ -666,7 +747,6 @@ public class SimpleKMeans
           containsNumeric = true;
 	  double width = Math.log(Math.abs(m_ClusterCentroids.instance(i).value(j))) /
 	    Math.log(10.0);
-          //          System.err.println(m_ClusterCentroids.instance(i).value(j) + " " + width);
           if (width < 0) {
             width = 1;
           }
@@ -675,12 +755,20 @@ public class SimpleKMeans
 	  if ((int)width > maxWidth) {
 	    maxWidth = (int)width;
 	  }
-	} else {
-          int val = (int)m_ClusterCentroids.instance(i).value(j);
-          int length = 
-            m_ClusterCentroids.instance(i).attribute(j).value(val).length();
-          if (length > maxWidth) {
-            maxWidth = length;
+	}
+      }
+    }
+
+    for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
+      if (m_ClusterCentroids.attribute(i).isNominal()) {
+        Attribute a = m_ClusterCentroids.attribute(i);
+        for (int j = 0; j < a.numValues(); j++) {
+          String val = a.value(j) + "  ";
+          if (val.length() > maxWidth) {
+            maxWidth = val.length();
+          }
+          if (val.length() > maxAttWidth) {
+            maxAttWidth = val.length();
           }
         }
       }
@@ -691,11 +779,12 @@ public class SimpleKMeans
       for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
         if (m_ClusterCentroids.attribute(i).isNominal()) {
           int maxV = Utils.maxIndex(m_FullNominalCounts[i]);
-          int percent = (int)((double)m_FullNominalCounts[i][maxV] /
-                              Utils.sum(m_ClusterSizes) * 100.0);
-          String nomV = "" + m_FullNominalCounts[i][maxV]
-            + " (" + percent + "%)";
-          if (nomV.length() > maxWidth) {
+          /*          int percent = (int)((double)m_FullNominalCounts[i][maxV] /
+                      Utils.sum(m_ClusterSizes) * 100.0); */
+          int percent = 6; // max percent width (100%)
+          String nomV = "" + m_FullNominalCounts[i][maxV];
+            //            + " (" + percent + "%)";
+          if (nomV.length() + percent > maxWidth) {
             maxWidth = nomV.length();
           }
         }
@@ -710,6 +799,10 @@ public class SimpleKMeans
       }
     }
     
+    if (m_displayStdDevs && maxAttWidth < "missing".length()) {
+      maxAttWidth = "missing".length();
+    }
+    
     String plusMinus = "+/-";
     maxAttWidth += 2;
     if (m_displayStdDevs && containsNumeric) {
@@ -722,6 +815,12 @@ public class SimpleKMeans
     if (maxWidth < "Full Data".length()) {
       maxWidth = "Full Data".length() + 1;
     }
+
+    if (maxWidth < "missing".length()) {
+      maxWidth = "missing".length() + 1;
+    }
+
+
     
     StringBuffer temp = new StringBuffer();
     //    String naString = "N/A";
@@ -733,6 +832,9 @@ public class SimpleKMeans
     temp.append("\nkMeans\n======\n");
     temp.append("\nNumber of iterations: " + m_Iterations+"\n");
     temp.append("Within cluster sum of squared errors: " + Utils.sum(m_squaredErrors));
+    if (m_replaceMissing) {
+      temp.append("\nMissing values globally replaced with mean/mode");
+    }
 
     temp.append("\n\nCluster centroids:\n");
     temp.append(pad("Cluster#", " ", (maxAttWidth + (maxWidth * 2 + 2)) - "Cluster#".length(), true));
@@ -774,71 +876,140 @@ public class SimpleKMeans
       String strVal;
       String valMeanMode;
       // full data
-      valMeanMode = (m_ClusterCentroids.attribute(i).isNominal())
-          ? pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_FullMeansOrModes[i])),
-                " ", maxWidth + 1 - strVal.length(), true)
-          : pad((strVal = Utils.doubleToString(m_FullMeansOrModes[i],
-                                               maxWidth,4).trim()), 
+      if (m_ClusterCentroids.attribute(i).isNominal()) {
+        if (m_FullMeansOrModes[i] == -1) { // missing
+          valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
+        } else {
+          valMeanMode = 
+            pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_FullMeansOrModes[i])),
                 " ", maxWidth + 1 - strVal.length(), true);
+        }
+      } else {
+        if (Double.isNaN(m_FullMeansOrModes[i])) {
+          valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
+        } else {
+          valMeanMode =  pad((strVal = Utils.doubleToString(m_FullMeansOrModes[i],
+                                                            maxWidth,4).trim()), 
+                             " ", maxWidth + 1 - strVal.length(), true);
+        }
+      }
       temp.append(valMeanMode);
 
       for (int j = 0; j < m_NumClusters; j++) {
-        valMeanMode = (m_ClusterCentroids.attribute(i).isNominal())
-          ? pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_ClusterCentroids.instance(j).value(i))),
-                " ", maxWidth + 1 - strVal.length(), true)
-          : pad((strVal = Utils.doubleToString(m_ClusterCentroids.instance(j).value(i),
-                                               maxWidth,4).trim()), 
-                " ", maxWidth + 1 - strVal.length(), true);
+        if (m_ClusterCentroids.attribute(i).isNominal()) {
+          if (m_ClusterCentroids.instance(j).isMissing(i)) {
+            valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
+          } else {
+            valMeanMode = 
+              pad((strVal = m_ClusterCentroids.attribute(i).value((int)m_ClusterCentroids.instance(j).value(i))),
+                  " ", maxWidth + 1 - strVal.length(), true);
+          }
+        } else {
+          if (m_ClusterCentroids.instance(j).isMissing(i)) {
+            valMeanMode = pad("missing", " ", maxWidth + 1 - "missing".length(), true);
+          } else {
+            valMeanMode = pad((strVal = Utils.doubleToString(m_ClusterCentroids.instance(j).value(i),
+                                                               maxWidth,4).trim()), 
+                                " ", maxWidth + 1 - strVal.length(), true);
+          }
+        }
         temp.append(valMeanMode);
       }
       temp.append("\n");
 
       if (m_displayStdDevs) {
         // Std devs/max nominal
-        String stdDevVal;
-        // full data
+        String stdDevVal = "";
+
         if (m_ClusterCentroids.attribute(i).isNominal()) {
-          int maxV = Utils.maxIndex(m_FullNominalCounts[i]);
-          int percent = (int)((double)m_FullNominalCounts[i][maxV] /
+          // Do the values of the nominal attribute
+          Attribute a = m_ClusterCentroids.attribute(i);
+          for (int j = 0; j < a.numValues(); j++) {
+            // full data
+            String val = "  " + a.value(j);
+            temp.append(pad(val, " ", maxAttWidth + 1 - val.length(), false));
+            int count = m_FullNominalCounts[i][j];
+            int percent = (int)((double)m_FullNominalCounts[i][j] /
                               Utils.sum(m_ClusterSizes) * 100.0);
-          stdDevVal = "" + m_FullNominalCounts[i][maxV]
-            + " (" + percent + "%)";
+            String percentS = "" + percent + "%)";
+            percentS = pad(percentS, " ", 5 - percentS.length(), true);
+            stdDevVal = "" + count + " (" + percentS;
+            stdDevVal = 
+              pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
+            temp.append(stdDevVal);
 
-          stdDevVal = 
-            pad(stdDevVal, " ", maxWidth + maxAttWidth + 1 - stdDevVal.length(), true);
-        } else {
-          stdDevVal = pad((strVal = plusMinus 
-                           + Utils.doubleToString(m_FullStdDevs[i],
-                                                  maxWidth,4).trim()), 
-                          " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
-        }
-        temp.append(stdDevVal);
+            // Clusters
+            for (int k = 0; k < m_NumClusters; k++) {
+              count = m_ClusterNominalCounts[k][i][j];
+              percent = (int)((double)m_ClusterNominalCounts[k][i][j] /
+                              m_ClusterSizes[k] * 100.0);
+              percentS = "" + percent + "%)";
+              percentS = pad(percentS, " ", 5 - percentS.length(), true);
+              stdDevVal = "" + count + " (" + percentS;
+              stdDevVal = 
+                pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
+              temp.append(stdDevVal);
+            }
+            temp.append("\n");
+          }
+          // missing (if any)
+          if (m_FullMissingCounts[i] > 0) {
+            // Full data
+            temp.append(pad("  missing", " ", maxAttWidth + 1 - "  missing".length(), false));
+            int count = m_FullMissingCounts[i];
+            int percent = (int)((double)m_FullMissingCounts[i] /
+                              Utils.sum(m_ClusterSizes) * 100.0);
+            String percentS = "" + percent + "%)";
+            percentS = pad(percentS, " ", 5 - percentS.length(), true);
+            stdDevVal = "" + count + " (" + percentS;
+            stdDevVal = 
+              pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
+            temp.append(stdDevVal);
+           
+            // Clusters
+            for (int k = 0; k < m_NumClusters; k++) {
+              count = m_ClusterMissingCounts[k][i];
+              percent = (int)((double)m_ClusterMissingCounts[k][i] /
+                              m_ClusterSizes[k] * 100.0);
+              percentS = "" + percent + "%)";
+              percentS = pad(percentS, " ", 5 - percentS.length(), true);
+              stdDevVal = "" + count + " (" + percentS;
+              stdDevVal = 
+                pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
+              temp.append(stdDevVal);
+            }
 
-        /*        if (m_ClusterStdDevs.attribute(i).isNominal()) {
+            temp.append("\n");
+          }
+
           temp.append("\n");
-          continue;
-          } */
-
-        for (int j = 0; j < m_NumClusters; j++) {
-          if (m_ClusterCentroids.attribute(i).isNominal()) {
-            int maxV = Utils.maxIndex(m_ClusterNominalCounts[j][i]);
-            int percent = (int)((double)m_ClusterNominalCounts[j][i][maxV] /
-                                m_ClusterSizes[j] * 100.0);
-            stdDevVal = "" + m_ClusterNominalCounts[j][i][maxV]
-              + " (" + percent + "%)";
-            
-          stdDevVal = 
-            pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
+        } else {
+          // Full data
+          if (Double.isNaN(m_FullMeansOrModes[i])) {
+            stdDevVal = pad("--", " ", maxAttWidth + maxWidth + 1 - 2, true);
           } else {
-          stdDevVal = 
-            pad((strVal = plusMinus 
-                 + Utils.doubleToString(m_ClusterStdDevs.instance(j).value(i),
-                                        maxWidth,4).trim()), 
-                " ", maxWidth + 1 - strVal.length(), true);
+            stdDevVal = pad((strVal = plusMinus 
+                             + Utils.doubleToString(m_FullStdDevs[i],
+                                                    maxWidth,4).trim()), 
+                            " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
           }
           temp.append(stdDevVal);
+
+          // Clusters
+          for (int j = 0; j < m_NumClusters; j++) {
+            if (m_ClusterCentroids.instance(j).isMissing(i)) {
+              stdDevVal = pad("--", " ", maxWidth + 1 - 2, true);
+            } else {
+              stdDevVal = 
+                pad((strVal = plusMinus 
+                     + Utils.doubleToString(m_ClusterStdDevs.instance(j).value(i),
+                                            maxWidth,4).trim()), 
+                    " ", maxWidth + 1 - strVal.length(), true);
+            }
+            temp.append(stdDevVal);
+          }
+          temp.append("\n\n");
         }
-        temp.append("\n");
       }
     }
 
