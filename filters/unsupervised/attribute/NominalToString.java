@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.1 $
+ * @version $Revision: 1.2.2.2 $
  */
 public class NominalToString
   extends Filter 
@@ -249,7 +249,7 @@ public class NominalToString
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
    */
-  public String attributeIndexTipText() {
+  public String attributeIndexesTipText() {
     return "Sets a range attributes to process. Any non-nominal "
       + "attributes in the range are left untouched (\"first\" and \"last\" are valid values)";
   }
