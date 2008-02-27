@@ -42,7 +42,7 @@ import weka.classifiers.rules.DecisionTable;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19.2.4 $
+ * @version $Revision: 1.19.2.5 $
  * @see Clusterer
  * @see OptionHandler
  */
@@ -213,7 +213,18 @@ public class SimpleKMeans extends Clusterer
 
       if (emptyClusterCount > 0) {
 	m_NumClusters -= emptyClusterCount;
-	tempI = new Instances[m_NumClusters];
+        if (converged) {
+          Instances[] t = new Instances[m_NumClusters];
+          int index = 0;
+          for (int k = 0; k < tempI.length; k++) {
+            if (tempI[k].numInstances() > 0) {
+              t[index++] = tempI[k];
+            }
+          }
+          tempI = t;
+        } else {
+          tempI = new Instances[m_NumClusters];
+        }
       }
       if (!converged) {
 	m_squaredErrors = new double [m_NumClusters];
