@@ -66,7 +66,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29.2.4 $
+ * @version $Revision: 1.29.2.5 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -120,7 +120,7 @@ public class SimpleKMeans
   /**
    * Replace missing values globally?
    */
-  private boolean m_replaceMissing = false;
+  private boolean m_dontReplaceMissing = false;
 
   /**
    * The number of instances in each cluster
@@ -200,7 +200,7 @@ public class SimpleKMeans
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     Instances instances = new Instances(data);
     instances.setClassIndex(-1);
-    if (m_replaceMissing) {
+    if (!m_dontReplaceMissing) {
       m_ReplaceMissingFilter.setInputFormat(instances);
       instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
     }
@@ -317,7 +317,18 @@ public class SimpleKMeans
 
       if (emptyClusterCount > 0) {
 	m_NumClusters -= emptyClusterCount;
-	tempI = new Instances[m_NumClusters];
+        if (converged) {
+          Instances[] t = new Instances[m_NumClusters];
+          int index = 0;
+          for (int k = 0; k < tempI.length; k++) {
+            if (tempI[k].numInstances() > 0) {
+              t[index++] = tempI[k];
+            }
+          }
+          tempI = t;
+        } else {
+          tempI = new Instances[m_NumClusters];
+        }
       }
       if (!converged) {
 	m_squaredErrors = new double [m_NumClusters];
@@ -374,7 +385,7 @@ public class SimpleKMeans
    */
   public int clusterInstance(Instance instance) throws Exception {
     Instance inst = null;
-    if (m_replaceMissing) {
+    if (!m_dontReplaceMissing) {
       m_ReplaceMissingFilter.input(instance);
       m_ReplaceMissingFilter.batchFinished();
       inst = m_ReplaceMissingFilter.output();
@@ -634,7 +645,7 @@ public class SimpleKMeans
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
-  public String replaceMissingValuesTipText() {
+  public String dontReplaceMissingValuesTipText() {
     return "Replace missing values globally with mean/mode.";
   }
 
@@ -644,8 +655,8 @@ public class SimpleKMeans
    * @param r true if missing values are to be
    * replaced
    */
-  public void setReplaceMissingValues(boolean r) {
-    m_replaceMissing = r;
+  public void setDontReplaceMissingValues(boolean r) {
+    m_dontReplaceMissing = r;
   }
 
   /**
@@ -654,8 +665,8 @@ public class SimpleKMeans
    * @return true if missing values are to be
    * replaced
    */
-  public boolean getReplaceMissingValues() {
-    return m_replaceMissing;
+  public boolean getDontReplaceMissingValues() {
+    return m_dontReplaceMissing;
   }
 
   /**
@@ -688,7 +699,7 @@ public class SimpleKMeans
     throws Exception {
 
     m_displayStdDevs = Utils.getFlag("V", options);
-    m_replaceMissing = Utils.getFlag("M", options);
+    m_dontReplaceMissing = Utils.getFlag("M", options);
 
     String optionString = Utils.getOption('N', options);
 
@@ -715,7 +726,7 @@ public class SimpleKMeans
       result.add("-V");
     }
 
-    if (m_replaceMissing) {
+    if (m_dontReplaceMissing) {
       result.add("-M");
     }
 
@@ -832,7 +843,7 @@ public class SimpleKMeans
     temp.append("\nkMeans\n======\n");
     temp.append("\nNumber of iterations: " + m_Iterations+"\n");
     temp.append("Within cluster sum of squared errors: " + Utils.sum(m_squaredErrors));
-    if (m_replaceMissing) {
+    if (!m_dontReplaceMissing) {
       temp.append("\nMissing values globally replaced with mean/mode");
     }
 
