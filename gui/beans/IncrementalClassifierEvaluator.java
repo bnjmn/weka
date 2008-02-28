@@ -34,7 +34,7 @@ import java.util.Vector;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -209,6 +209,9 @@ public class IncrementalClassifierEvaluator
 		+  "Scheme:   " + textTitle + "\n"
 		+  "Relation: "+ inst.dataset().relationName() + "\n\n"
 		+ m_eval.toSummaryString();
+              if (inst.classAttribute().isNominal()) {
+                results += "\n" + m_eval.toMatrixString();
+              }
 	      textTitle = "Results: " + textTitle;
 	      TextEvent te = 
 		new TextEvent(this, 
