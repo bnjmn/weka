@@ -34,7 +34,7 @@ import java.util.Vector;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.2 $
+ * @version $Revision: 1.11.2.3 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -59,6 +59,13 @@ public class IncrementalClassifierEvaluator
 
   private double m_min = Double.MAX_VALUE;
   private double m_max = Double.MIN_VALUE;
+
+  // how often to report # instances processed to the log
+  private int m_statusFrequency = 100;
+  private int m_instanceCount = 0;
+
+  // output info retrieval and auc stats for each class (if class is nominal)
+  private boolean m_outputInfoRetrievalStats = false;
 
   public IncrementalClassifierEvaluator() {
      m_visual.loadIcons(BeanVisual.ICON_PATH
@@ -93,6 +100,11 @@ public class IncrementalClassifierEvaluator
 	m_dataPoint = new double[0];
 	Instances inst = ce.getStructure();
 	System.err.println("NEW BATCH");
+        m_instanceCount = 0;
+        if (m_logger != null) {
+          m_logger.statusMessage("IncrementalClassifierEvaluator: started processing...");
+          m_logger.logMessage("IncrementalClassifierEvaluator: started processing...");
+        }
 	/* if (inst.classIndex() >= 0) {
 	  if (inst.attribute(inst.classIndex()).isNominal()) {
 	    if (inst.isMissing(inst.classIndex())) {
@@ -109,12 +121,24 @@ public class IncrementalClassifierEvaluator
 	  }
 	} */
       } else {
+        if (m_instanceCount > 0 && m_instanceCount % m_statusFrequency == 0) {
+          if (m_logger != null) {
+            m_logger.statusMessage("IncrementalClassifierEvaluator: processed "
+                                   + m_instanceCount + " instances.");
+          }
+        }
+        m_instanceCount++;
 	Instance inst = ce.getCurrentInstance();
 	//	if (inst.attribute(inst.classIndex()).isNominal()) {
 	double [] dist = ce.getClassifier().distributionForInstance(inst);
 	double pred = 0;
 	if (!inst.isMissing(inst.classIndex())) {
-	  m_eval.evaluateModelOnce(dist, inst);
+          if (m_outputInfoRetrievalStats) {
+            // store predictions so AUC etc can be output.
+            m_eval.evaluateModelOnceAndRecordPrediction(dist, inst);
+          } else {
+            m_eval.evaluateModelOnce(dist, inst);
+          }
 	} else {
 	  pred = ce.getClassifier().classifyInstance(inst);
 	}
@@ -200,6 +224,10 @@ public class IncrementalClassifierEvaluator
 	  notifyChartListeners(m_ce);
 
 	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
+            if (m_logger != null) {
+              m_logger.logMessage("IncrementalClassifierEvaluator: finished processing.");
+              m_logger.statusMessage("OK.");
+            }
 	    if (m_textListeners.size() > 0) {
 	      String textTitle = ce.getClassifier().getClass().getName();
 	      textTitle = 
@@ -209,7 +237,14 @@ public class IncrementalClassifierEvaluator
 		+  "Scheme:   " + textTitle + "\n"
 		+  "Relation: "+ inst.dataset().relationName() + "\n\n"
 		+ m_eval.toSummaryString();
-              if (inst.classAttribute().isNominal()) {
+              if (inst.classIndex() >= 0 && 
+                  inst.classAttribute().isNominal() &&
+                  (m_outputInfoRetrievalStats)) {
+                results += "\n" + m_eval.toClassDetailsString();
+              }
+
+              if (inst.classIndex() >= 0 && 
+                  inst.classAttribute().isNominal()) {
                 results += "\n" + m_eval.toMatrixString();
               }
 	      textTitle = "Results: " + textTitle;
@@ -290,6 +325,63 @@ public class IncrementalClassifierEvaluator
 	((TextListener)l.elementAt(i)).acceptText(te);
       }
     }
+  }
+
+  /**
+   * Set how often progress is reported to the status bar.
+   * 
+   * @param s report progress every s instances
+   */
+  public void setStatusFrequency(int s) {
+    m_statusFrequency = s;
+  }
+
+  /**
+   * Get how often progress is reported to the status bar.
+   * 
+   * @return after how many instances, progress is reported to the
+   * status bar
+   */
+  public int getStatusFrequency() {
+    return m_statusFrequency;
+  }
+
+  /**
+   * Return a tip text string for this property
+   * 
+   * @return a string for the tip text
+   */
+  public String statusFrequencyTipText() {
+    return "How often to report progress to the status bar.";
+  }
+
+  /**
+   * Set whether to output per-class information retrieval
+   * statistics (nominal class only).
+   * 
+   * @param i true if info retrieval stats are to be output
+   */
+  public void setOutputPerClassInfoRetrievalStats(boolean i) {
+    m_outputInfoRetrievalStats = i;
+  }
+
+  /**
+   * Get whether per-class information retrieval stats are to be output.
+   * 
+   * @return true if info retrieval stats are to be output
+   */
+  public boolean getOutputPerClassInfoRetrievalStats() {
+    return m_outputInfoRetrievalStats;
+  }
+
+  /**
+   * Return a tip text string for this property
+   * 
+   * @return a string for the tip text
+   */
+  public String outputPerClassInfoRetrievalStatsTipText() {
+    return "Output per-class info retrieval stats. If set to true, predictions get "
+      +"stored so that stats such as AUC can be computed. Note: this consumes some memory.";
   }
 
   /**
