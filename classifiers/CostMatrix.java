@@ -46,7 +46,7 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class CostMatrix implements Serializable {
 
@@ -156,17 +156,11 @@ public class CostMatrix implements Serializable {
   public Instances applyCostMatrix(Instances data, Random random)
     throws Exception {
     
-    if (replaceStrings()) {
-      // could reweight in the two class case
-      throw new Exception("Can't resample/reweight instances using "
-                          +"non-fixed cost values!");
-    }
-
     double sumOfWeightFactors = 0, sumOfMissClassWeights,
       sumOfWeights;
     double [] weightOfInstancesInClass, weightFactor, weightOfInstances;
     Instances newData;
-    
+
     if (data.classIndex() < 0) {
       throw new Exception("Class index is not set!");
     }
@@ -175,7 +169,47 @@ public class CostMatrix implements Serializable {
       throw new Exception("Misclassification cost matrix has "+
 			  "wrong format!");
     }
- 
+
+    // are there any non-fixed, per-instance costs defined in the matrix?
+    if (replaceStrings()) {
+      // could reweight in the two class case
+      if (data.classAttribute().numValues() > 2) {
+        throw new Exception("Can't resample/reweight instances using "
+                            +"non-fixed cost values when there are more "
+                            +"than two classes!");
+      } else {
+        // Store new weights
+        weightOfInstances = new double[data.numInstances()];
+        for (int i = 0; i < data.numInstances(); i++) {
+          Instance inst = data.instance(i);
+          int classValIndex = (int)inst.classValue();
+          double factor = 1.0;
+          Object element = (classValIndex == 0)
+            ? getCell(classValIndex, 1)
+            : getCell(classValIndex, 0);
+          if (element instanceof Double) {
+            factor = ((Double)element).doubleValue();
+          } else {
+            factor = ((AttributeExpression)element).evaluateExpression(inst);
+          }
+          weightOfInstances[i] = inst.weight() * factor;
+          /*          System.err.println("Multiplying " + inst.classAttribute().value((int)inst.classValue())
+                      +" by factor " + factor); */
+        }
+
+        // Change instances weight or do resampling
+        if (random != null) {
+          return data.resampleWithWeights(random, weightOfInstances);
+        } else { 
+          Instances instances = new Instances(data);
+          for (int i = 0; i < data.numInstances(); i++) {
+            instances.instance(i).setWeight(weightOfInstances[i]);
+          }
+          return instances;
+        }
+      }
+    }
+     
     weightFactor = new double[data.numClasses()];
     weightOfInstancesInClass = new double[data.numClasses()];
     for (int j = 0; j < data.numInstances(); j++) {
