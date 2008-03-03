@@ -80,7 +80,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class MathematicalExpression {
   
@@ -89,7 +89,7 @@ public class MathematicalExpression {
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   static public class Tokenizer 
     extends StreamTokenizer {
@@ -144,7 +144,7 @@ public class MathematicalExpression {
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.3 $
+   * @version $Revision: 1.4 $
    */
   static public class TreeNode 
     implements Serializable {
@@ -324,6 +324,7 @@ public class MathematicalExpression {
     return res;
   }
   
+
   /**
    * Parse the exp rule
    * 
@@ -333,20 +334,60 @@ public class MathematicalExpression {
    */
   protected static MathematicalExpression.TreeNode parseExp(MathematicalExpression.Tokenizer tokenizer) throws Exception {
     Vector operands = new Vector();
+    TreeNode result = null;
+
+    result = parseTerm(tokenizer);
+    operands.add(result);
+    while (tokenizer.ttype != Tokenizer.TT_EOF) {
+      switch (tokenizer.ttype) {
+      case '+':
+        tokenizer.nextToken();
+        result = parseTerm(tokenizer);
+        operands.add(result);
+        result = new TreeNode('+', operands);
+        break;
+      case '-':
+        tokenizer.nextToken();
+        result = parseTerm(tokenizer);
+        operands.add(result);
+        result = new TreeNode('-', operands);        
+        break;
+      case ')':
+        return result;
+      case ',':
+        return result;
+      }
+      operands = new Vector();
+      operands.add(result);
+    }
+
+    return result;
+  }
+
+  /**
+   * Parse the exp rule (old version that had right to left operator
+   * priority for expressions with only + or - operators)
+   * 
+   * @param tokenizer the tokenizer from which the token are extracted.
+   * @return the tree of the corresponding expression
+   * @throws Exception if something goes wrong
+   */
+  /*  protected static MathematicalExpression.TreeNode parseExp(MathematicalExpression.Tokenizer tokenizer) throws Exception {
+    Vector operands = new Vector();
     operands.add(parseTerm(tokenizer));
     switch (tokenizer.ttype) {
       case '+':
 	tokenizer.nextToken();
-	operands.add(parseExp(tokenizer));
-	return new TreeNode('+',operands);
+        operands.add(parseExp(tokenizer));
+        return new TreeNode('+',operands);
       case '-':
 	tokenizer.nextToken();
-	operands.add(parseExp(tokenizer));
-	return new TreeNode('-',operands);
+        operands.add(parseExp(tokenizer));
+        return new TreeNode('-',operands);
       default:
 	return (MathematicalExpression.TreeNode) operands.get(0);
     }
-  }    
+    } */
   
   /**
    * Parse the term rule
@@ -388,6 +429,7 @@ public class MathematicalExpression {
       case '(':
 	tokenizer.nextToken();
 	MathematicalExpression.TreeNode e = parseExp(tokenizer);
+
 	if (tokenizer.ttype != ')') {
 	  throw new Exception("Syntax Error: ')' expected.");
 	}
