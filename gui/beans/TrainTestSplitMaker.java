@@ -34,7 +34,7 @@ import java.util.Vector;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer
@@ -44,7 +44,7 @@ public class TrainTestSplitMaker
   /** for serialization */
   private static final long serialVersionUID = 7390064039444605943L;
 
-  private int m_trainPercentage = 66;
+  private double m_trainPercentage = 66;
   private int m_randomSeed = 1;
   
   private Thread m_splitThread = null;
@@ -80,7 +80,7 @@ public class TrainTestSplitMaker
    *
    * @param newTrainPercent an <code>int</code> value
    */
-  public void setTrainPercent(int newTrainPercent) {
+  public void setTrainPercent(double newTrainPercent) {
     m_trainPercentage = newTrainPercent;
   }
 
@@ -90,7 +90,7 @@ public class TrainTestSplitMaker
    *
    * @return an <code>int</code> value
    */
-  public int getTrainPercent() {
+  public double getTrainPercent() {
     return m_trainPercentage;
   }
 
@@ -155,7 +155,8 @@ public class TrainTestSplitMaker
 	  public void run() {
 	    try {
 	      dataSet.randomize(new Random(m_randomSeed));
-	      int trainSize = dataSet.numInstances() * m_trainPercentage / 100;
+	      int trainSize = 
+                (int)Math.round(dataSet.numInstances() * m_trainPercentage / 100);
 	      int testSize = dataSet.numInstances() - trainSize;
       
 	      Instances train = new Instances(dataSet, 0, trainSize);
