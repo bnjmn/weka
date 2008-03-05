@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -551,6 +551,17 @@ public class Classifier
 		      m_log.statusMessage("Classifier : building model...");
 		    }
 		    buildClassifier();
+
+                    if (m_batchClassifierListeners.size() > 0) {
+                      // notify anyone who might be interested in just the model
+                      // and training set
+                      BatchClassifierEvent ce = 
+                        new BatchClassifierEvent(this, m_Classifier, 
+                                                 new DataSetEvent(this, e.getTrainingSet()),
+                                                 null, // no test set
+                                                 e.getSetNumber(), e.getMaxSetNumber());
+                      notifyBatchClassifierListeners(ce);
+                    }
 
 		    if (m_Classifier instanceof weka.core.Drawable && 
 			m_graphListeners.size() > 0) {
@@ -1110,23 +1121,34 @@ public class Classifier
         if ((KOML.isPresent()) &&
             saveTo.getAbsolutePath().toLowerCase().
             endsWith(KOML.FILE_EXTENSION + FILE_EXTENSION)) {
-          Vector v = new Vector();
+          SerializedModelSaver.saveKOML(saveTo,
+                                        m_Classifier,
+                                        (m_trainingSet != null)
+                                        ? new Instances(m_trainingSet, 0)
+                                        : null);
+          /*          Vector v = new Vector();
           v.add(m_Classifier);
           if (m_trainingSet != null) {
             v.add(new Instances(m_trainingSet, 0));
           }
           v.trimToSize();
-          KOML.write(saveTo.getAbsolutePath(), v);
+          KOML.write(saveTo.getAbsolutePath(), v); */
         } /* XStream */ else if ((XStream.isPresent()) &&
                                  saveTo.getAbsolutePath().toLowerCase().
             endsWith(XStream.FILE_EXTENSION + FILE_EXTENSION)) {
-          Vector v = new Vector();
+
+          SerializedModelSaver.saveXStream(saveTo,
+                                           m_Classifier,
+                                           (m_trainingSet != null)
+                                           ? new Instances(m_trainingSet, 0)
+                                           : null);
+          /*          Vector v = new Vector();
           v.add(m_Classifier);
           if (m_trainingSet != null) {
             v.add(new Instances(m_trainingSet, 0));
           }
           v.trimToSize();
-          XStream.write(saveTo.getAbsolutePath(), v);
+          XStream.write(saveTo.getAbsolutePath(), v); */
         } else /* binary */ {
           ObjectOutputStream os = 
             new ObjectOutputStream(new BufferedOutputStream(
@@ -1264,12 +1286,16 @@ public class Classifier
     }
 
     if (eventName.compareTo("batchClassifier") == 0) {
-      if (!m_listenees.containsKey("testSet")) {
+      /*      if (!m_listenees.containsKey("testSet")) {
         return false;
       }
       if (!m_listenees.containsKey("trainingSet") && 
           m_trainingSet == null) {
 	return false;
+        } */
+      if (!m_listenees.containsKey("testSet") && 
+          !m_listenees.containsKey("trainingSet")) {
+        return false;
       }
       Object source = m_listenees.get("testSet");
       if (source instanceof EventConstraints) {
