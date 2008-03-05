@@ -22,13 +22,15 @@
 
 package weka.core;
 
+import java.io.Serializable;
+
 /**
  * A <code>Tag</code> simply associates a numeric ID with a String description.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
-public class Tag {
+public class Tag implements Serializable {
 
   /** The ID */
   protected int m_ID;
