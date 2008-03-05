@@ -31,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @since 1.0
  * @see EventObject
  */
@@ -68,8 +68,8 @@ public class BatchClustererEvent
    */
   protected int m_maxSetNumber;
   
-  private static int TEST = 0;
-  private static int TRAINING = 1;
+  public static int TEST = 0;
+  public static int TRAINING = 1;
 
   /**
    * Creates a new <code>BatchClustererEvent</code> instance.
