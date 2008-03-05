@@ -38,7 +38,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -95,8 +95,8 @@ public class ClassifierPerformanceEvaluator
    * @param ce a <code>BatchClassifierEvent</code> value
    */
   public void acceptClassifier(final BatchClassifierEvent ce) {
-    if (ce.getTestSet().isStructureOnly()) {
-      return; // cant evaluate empty instances
+    if (ce.getTestSet() == null || ce.getTestSet().isStructureOnly()) {
+      return; // cant evaluate empty/non-existent test instances
     }
     try {
       if (m_evaluateThread == null) {
