@@ -56,13 +56,13 @@ import javax.swing.filechooser.FileFilter;
  * GUI Customizer for the SerializedModelSaver bean
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
   implements Customizer, CustomizerCloseRequester {
 
-  /** for serialization CHANGE THIS WITH SERIALVER */
+  /** for serialization */
   private static final long serialVersionUID = -4874208115942078471L;
 
   static {
