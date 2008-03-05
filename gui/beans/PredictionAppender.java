@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15.2.1 $
+ * @version $Revision: 1.15.2.2 $
  */
 public class PredictionAppender
   extends JPanel
@@ -361,6 +361,12 @@ public class PredictionAppender
     if (m_dataSourceListeners.size() > 0 
 	|| m_trainingSetListeners.size() > 0
 	|| m_testSetListeners.size() > 0) {
+
+      if (e.getTestSet() == null) {
+        // can't append predictions
+        return;
+      }
+
       Instances testSet = e.getTestSet().getDataSet();
       Instances trainSet = e.getTrainSet().getDataSet();
       int setNum = e.getSetNumber();
