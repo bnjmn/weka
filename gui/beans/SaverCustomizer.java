@@ -52,12 +52,13 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.BorderFactory;
 
 /**
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class SaverCustomizer
   extends JPanel
@@ -303,9 +304,11 @@ public class SaverCustomizer
         m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25); 
         JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
         JPanel prefixP = new JPanel();   
-        prefixP.setLayout(new FlowLayout(FlowLayout.LEFT));
-        prefixP.add(prefixLab);//, BorderLayout.WEST);
-        prefixP.add(m_prefixText);
+        prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        prefixP.setLayout(new BorderLayout());
+        prefixP.add(prefixLab, BorderLayout.WEST);
+        prefixP.add(m_prefixText, BorderLayout.CENTER);
         innerPanel.add(prefixP, BorderLayout.SOUTH);
     } catch(Exception ex){
     }
