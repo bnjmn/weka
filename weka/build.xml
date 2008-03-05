@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.39.2.3 $
+   $Revision: 1.39.2.4 $
   ===========================================================================
 -->
 
@@ -65,7 +65,7 @@
      <property name="build.compiler" value="jikes"/>
      <property name="build.compiler.pedantic" value="true"/>
      <property name="build.compiler.emacs" value="true"/>
-     <javac srcdir="${path_modifier}weka"
+     <javac srcdir="${path_modifier}weka:${path_modifier}public_domain/weka"
       destdir="${path_modifier}"
       deprecation="on" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
@@ -77,7 +77,7 @@
   <!-- Compile the java code from ${path_modifier}weka into ${build}/classes -->
   <target name="compile" depends="init_compile" 
    description="Compile weka and deposit class files in ${path_modifier}/build/classes">
-    <javac srcdir="${path_modifier}weka" 
+    <javac srcdir="${path_modifier}weka:${path_modifier}public_domain/weka"
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${path_modifier}${build}/classes"
       source="1.5" target="1.5"/>
