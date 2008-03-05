@@ -58,7 +58,7 @@ import javax.swing.BorderFactory;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SaverCustomizer
   extends JPanel
@@ -305,7 +305,7 @@ public class SaverCustomizer
         JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
         JPanel prefixP = new JPanel();   
         prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        //        prefixP.setLayout(new FlowLayout(FlowLayout.LEFT));
+
         prefixP.setLayout(new BorderLayout());
         prefixP.add(prefixLab, BorderLayout.WEST);
         prefixP.add(m_prefixText, BorderLayout.CENTER);
