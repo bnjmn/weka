@@ -44,7 +44,7 @@ import weka.core.Tag;
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class SerializedModelSaver
   extends JPanel
@@ -52,7 +52,7 @@ public class SerializedModelSaver
              IncrementalClassifierListener, BatchClustererListener,
 	     Serializable {
 
-  /** for serialization SET THIS WITH SERIALVER */
+  /** for serialization */
   private static final long serialVersionUID = 3956528599473814287L;
 
   /**
