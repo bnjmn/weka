@@ -59,6 +59,10 @@ import java.util.Vector;
  *  Sets the method to use. Valid values are 0 (1-against-all),
  *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
  * </pre>
+ *
+ * <pre> -P
+ *  Use pairwise coupling (only has an effect for 1-against-1)
+ * </pre>
  * 
  * <pre> -R &lt;num&gt;
  *  Sets the multiplier when using random codes. (default 2.0)</pre>
@@ -93,7 +97,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.43 $
+ * @version $Revision: 1.44 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -104,6 +108,12 @@ public class MultiClassClassifier
   
   /** The classifiers. */
   private Classifier [] m_Classifiers;
+
+  /** Use pairwise coupling with 1-vs-1 */
+  private boolean m_pairwiseCoupling = false;
+
+  /** Needed for pairwise coupling */
+  private double [] m_SumOfWeights;
 
   /** The filters used to transform the class. */
   private Filter[] m_ClassFilters;
@@ -402,7 +412,6 @@ public class MultiClassClassifier
       m_ClassFilters = null;
 
     } else if (m_Method == METHOD_1_AGAINST_1) {
- 
       // generate fastvector of pairs
       FastVector pairs = new FastVector();
       for (int i=0; i<insts.numClasses(); i++) {
@@ -417,6 +426,7 @@ public class MultiClassClassifier
       numClassifiers = pairs.size();
       m_Classifiers = Classifier.makeCopies(m_Classifier, numClassifiers);
       m_ClassFilters = new Filter[numClassifiers];
+      m_SumOfWeights = new double[numClassifiers];
 
       // generate the classifiers
       for (int i=0; i<numClassifiers; i++) {
@@ -433,6 +443,7 @@ public class MultiClassClassifier
 	  newInsts.setClassIndex(insts.classIndex());
 	  m_Classifiers[i].buildClassifier(newInsts);
 	  m_ClassFilters[i] = classFilter;
+          m_SumOfWeights[i] = newInsts.sumOfWeights();
 	} else {
 	  m_Classifiers[i] = null;
 	  m_ClassFilters[i] = null;
@@ -537,7 +548,10 @@ public class MultiClassClassifier
     
     double[] probs = new double[inst.numClasses()];
 
-    if (m_Method == METHOD_1_AGAINST_1) {    
+    if (m_Method == METHOD_1_AGAINST_1) {
+      double[][] r = new double[inst.numClasses()][inst.numClasses()];
+      double[][] n = new double[inst.numClasses()][inst.numClasses()];
+
       for(int i = 0; i < m_ClassFilters.length; i++) {
 	if (m_Classifiers[i] != null) {
 	  Instance tempInst = (Instance)inst.copy(); 
@@ -547,9 +561,20 @@ public class MultiClassClassifier
 				  .getNominalIndices());
 	  range.setUpper(m_ClassAttribute.numValues());
 	  int[] pair = range.getSelection();
-	  if (current[0] > current[1]) probs[pair[0]] += 1.0;
-	  else probs[pair[1]] += 1.0;
-	}
+          if (m_pairwiseCoupling && inst.numClasses() > 2) {
+            r[pair[0]][pair[1]] = current[0];
+            n[pair[0]][pair[1]] = m_SumOfWeights[i];
+          } else {
+            if (current[0] > current[1]) {
+              probs[pair[0]] += 1.0;
+            } else {
+              probs[pair[1]] += 1.0;
+            }
+          }
+        }
+      }
+      if (m_pairwiseCoupling && inst.numClasses() > 2) {
+        return weka.classifiers.functions.SMO.pairwiseCoupling(n, r);
       }
     } else {
       // error correcting style methods
@@ -620,7 +645,7 @@ public class MultiClassClassifier
    */
   public Enumeration listOptions()  {
 
-    Vector vec = new Vector(3);
+    Vector vec = new Vector(4);
     
     vec.addElement(new Option(
        "\tSets the method to use. Valid values are 0 (1-against-all),\n"
@@ -629,6 +654,9 @@ public class MultiClassClassifier
     vec.addElement(new Option(
        "\tSets the multiplier when using random codes. (default 2.0)",
        "R", 1, "-R <num>"));
+    vec.addElement(new Option(
+        "\tUse pairwise coupling (only has an effect for 1-against1)",
+        "P", 0, "-P"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -646,6 +674,10 @@ public class MultiClassClassifier
    * <pre> -M &lt;num&gt;
    *  Sets the method to use. Valid values are 0 (1-against-all),
    *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
+   * </pre>
+   *
+   * <pre> -P
+   *  Use pairwise coupling (only has an effect for 1-against-1)
    * </pre>
    * 
    * <pre> -R &lt;num&gt;
@@ -698,6 +730,8 @@ public class MultiClassClassifier
       setRandomWidthFactor(2.0);
     }
 
+    setUsePairwiseCoupling(Utils.getFlag('P', options));
+
     super.setOptions(options);
   }
 
@@ -709,13 +743,17 @@ public class MultiClassClassifier
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 4];
+    String [] options = new String [superOptions.length + 5];
 
     int current = 0;
 
 
     options[current++] = "-M";
     options[current++] = "" + m_Method;
+
+    if (getUsePairwiseCoupling()) {
+      options[current++] = "-P";
+    }
     
     options[current++] = "-R";
     options[current++] = "" + m_RandomWidthFactor;
@@ -805,6 +843,26 @@ public class MultiClassClassifier
     if (newMethod.getTags() == TAGS_METHOD) {
       m_Method = newMethod.getSelectedTag().getID();
     }
+  }
+
+  /**
+   * Set whether to use pairwise coupling with 1-vs-1 
+   * classification to improve probability estimates.
+   *
+   * @param p true if pairwise coupling is to be used
+   */
+  public void setUsePairwiseCoupling(boolean p) {
+    m_pairwiseCoupling = p;
+  }
+
+  /**
+   * Gets whether to use pairwise coupling with 1-vs-1 
+   * classification to improve probability estimates.
+   *
+   * @return true if pairwise coupling is to be used
+   */
+  public boolean getUsePairwiseCoupling() {
+    return m_pairwiseCoupling;
   }
 
   /**
