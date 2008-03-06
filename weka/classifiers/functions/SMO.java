@@ -188,7 +188,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.65 $
+ * @version $Revision: 1.66 $
  */
 public class SMO 
   extends Classifier 
@@ -1424,7 +1424,7 @@ public class SMO
    * @param r the probability estimate from each model
    * @return the coupled estimates
    */
-  public double[] pairwiseCoupling(double[][] n, double[][] r) {
+  public static double[] pairwiseCoupling(double[][] n, double[][] r) {
 
     // Initialize p and u array
     double[] p = new double[r.length];
