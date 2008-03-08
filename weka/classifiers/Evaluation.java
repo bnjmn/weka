@@ -173,7 +173,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.83 $
+ * @version  $Revision: 1.84 $
  */
 public class Evaluation
 implements Summarizable {
@@ -2711,7 +2711,7 @@ implements Summarizable {
    * @return			the generated predictions for the attribute range
    * @throws Exception 		if test file cannot be opened
    */
-  protected static String printClassifications(Classifier classifier, 
+  public static String printClassifications(Classifier classifier, 
       Instances train,
       DataSource testSource,
       int classIndex,
@@ -2736,7 +2736,7 @@ implements Summarizable {
    * @return			the generated predictions for the attribute range
    * @throws Exception 		if test file cannot be opened
    */
-  protected static String printClassifications(Classifier classifier, 
+  public static String printClassifications(Classifier classifier, 
       Instances train,
       DataSource testSource,
       int classIndex,
