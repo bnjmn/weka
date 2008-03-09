@@ -25,6 +25,7 @@ package weka.classifiers.trees;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.Sourcable;
+import weka.classifiers.rules.ZeroR;
 import java.io.*;
 import java.util.*;
 import weka.core.*;
@@ -38,7 +39,7 @@ import weka.core.*;
  * -t training_data </code><p>
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class DecisionStump extends Classifier 
   implements WeightedInstancesHandler, Sourcable {
@@ -54,6 +55,9 @@ public class DecisionStump extends Classifier
 
   /** The instances used for training. */
   private Instances m_Instances;
+
+  /** a ZeroR model in case no model can be built from the data */
+  private Classifier m_ZeroR;
 
   /**
    * Returns a string describing classifier
@@ -83,6 +87,19 @@ public class DecisionStump extends Classifier
     if (instances.checkForStringAttributes()) {
       throw new UnsupportedAttributeTypeException("Can't handle string attributes!");
     }
+    
+    // only class? -> build ZeroR model
+    if (instances.numAttributes() == 1) {
+      System.err.println(
+	  "Cannot build model (only class attribute present in data!), "
+	  + "using ZeroR model instead!");
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(instances);
+      return;
+    }
+    else {
+      m_ZeroR = null;
+    }
 
     double[][] bestDist = new double[3][instances.numClasses()];
 
@@ -92,11 +109,6 @@ public class DecisionStump extends Classifier
     if (m_Instances.numInstances() == 0) {
       throw new IllegalArgumentException("No instances without missing " +
 					 "class values in training file!");
-    }
-
-    if (instances.numAttributes() == 1) {
-      throw new IllegalArgumentException("Attribute missing. Need at least one " +
-					 "attribute other than class attribute!");
     }
 
     if (m_Instances.classAttribute().isNominal()) {
@@ -164,6 +176,11 @@ public class DecisionStump extends Classifier
    */
   public double[] distributionForInstance(Instance instance) throws Exception {
 
+    // default model?
+    if (m_ZeroR != null) {
+      return m_ZeroR.distributionForInstance(instance);
+    }
+    
     return m_Distribution[whichSubset(instance)];
   }
 
@@ -217,6 +234,16 @@ public class DecisionStump extends Classifier
    */
   public String toString(){
 
+    // only ZeroR model?
+    if (m_ZeroR != null) {
+      StringBuffer buf = new StringBuffer();
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
+      buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+      buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
+      buf.append(m_ZeroR.toString());
+      return buf.toString();
+    }
+    
     if (m_Instances == null) {
       return "Decision Stump: No model built yet.";
     }
