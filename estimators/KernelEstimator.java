@@ -32,7 +32,7 @@ import weka.core.Statistics;
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class KernelEstimator extends Estimator implements IncrementalEstimator {
 
@@ -254,6 +254,51 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
       }
     }
     return result + "\n";
+  }
+
+  /**
+   * Return the number of kernels in this kernel estimator
+   *
+   * @return the number of kernels
+   */
+  public int getNumKernels() {
+    return m_NumValues;
+  }
+
+  /**
+   * Return the means of the kernels.
+   *
+   * @return the means of the kernels
+   */
+  public double[] getMeans() {
+    return m_Values;
+  }
+
+  /**
+   * Return the weights of the kernels.
+   *
+   * @return the weights of the kernels
+   */
+  public double[] getWeights() {
+    return m_Weights;
+  }
+
+  /**
+   * Return the precision of this kernel estimator.
+   *
+   * @return the precision
+   */
+  public double getPrecision() {
+    return m_Precision;
+  }
+
+  /**
+   * Return the standard deviation of this kernel estimator.
+   *
+   * @return the standard deviation
+   */
+  public double getStdDev() {
+    return m_StandardDev;
   }
 
   /**
