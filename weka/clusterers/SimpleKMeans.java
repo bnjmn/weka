@@ -66,7 +66,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.35 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -758,11 +758,12 @@ public class SimpleKMeans
           containsNumeric = true;
 	  double width = Math.log(Math.abs(m_ClusterCentroids.instance(i).value(j))) /
 	    Math.log(10.0);
+          //          System.err.println(m_ClusterCentroids.instance(i).value(j)+" "+width);
           if (width < 0) {
             width = 1;
           }
           // decimal + # decimal places + 1
-	  width += 5.0;
+	  width += 6.0;
 	  if ((int)width > maxWidth) {
 	    maxWidth = (int)width;
 	  }
@@ -773,11 +774,14 @@ public class SimpleKMeans
     for (int i = 0; i < m_ClusterCentroids.numAttributes(); i++) {
       if (m_ClusterCentroids.attribute(i).isNominal()) {
         Attribute a = m_ClusterCentroids.attribute(i);
-        for (int j = 0; j < a.numValues(); j++) {
-          String val = a.value(j) + "  ";
+        for (int j = 0; j < m_ClusterCentroids.numInstances(); j++) {
+          String val = a.value((int)m_ClusterCentroids.instance(j).value(i));
           if (val.length() > maxWidth) {
             maxWidth = val.length();
           }
+        }
+        for (int j = 0; j < a.numValues(); j++) {
+          String val = a.value(j) + " ";
           if (val.length() > maxAttWidth) {
             maxAttWidth = val.length();
           }
@@ -796,7 +800,7 @@ public class SimpleKMeans
           String nomV = "" + m_FullNominalCounts[i][maxV];
             //            + " (" + percent + "%)";
           if (nomV.length() + percent > maxWidth) {
-            maxWidth = nomV.length();
+            maxWidth = nomV.length() + 1;
           }
         }
       }
@@ -817,7 +821,7 @@ public class SimpleKMeans
     String plusMinus = "+/-";
     maxAttWidth += 2;
     if (m_displayStdDevs && containsNumeric) {
-      maxWidth += plusMinus.length() + 1;
+      maxWidth += plusMinus.length();
     }
     if (maxAttWidth < "Attribute".length() + 2) {
       maxAttWidth = "Attribute".length() + 2;
