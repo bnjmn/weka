@@ -32,7 +32,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class NormalEstimator
   extends Estimator
@@ -159,6 +159,42 @@ public class NormalEstimator
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     return result;
+  }
+
+  /**
+   * Return the value of the mean of this normal estimator.
+   *
+   * @return the mean
+   */
+  public double getMean() {
+    return m_Mean;
+  }
+
+  /**
+   * Return the value of the standard deviation of this normal estimator.
+   *
+   * @return the standard deviation
+   */
+  public double getStdDev() {
+    return m_StandardDev;
+  }
+
+  /**
+   * Return the value of the precision of this normal estimator.
+   *
+   * @return the precision
+   */
+  public double getPrecision() {
+    return m_Precision;
+  }
+
+  /**
+   * Return the sum of the weights for this normal estimator.
+   *
+   * @return the sum of the weights
+   */
+  public double getSumOfWeights() {
+    return m_SumOfWeights;
   }
 
   /**
