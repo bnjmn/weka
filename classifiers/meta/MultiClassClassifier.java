@@ -97,7 +97,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.43.2.1 $
+ * @version $Revision: 1.43.2.2 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -574,7 +574,7 @@ public class MultiClassClassifier
         }
       }
       if (m_pairwiseCoupling && inst.numClasses() > 2) {
-        return weka.classifiers.functions.SMO.pairwiseCoupling(n, r);
+        return pairwiseCoupling(n, r);
       }
     } else {
       // error correcting style methods
@@ -871,6 +871,72 @@ public class MultiClassClassifier
    */
   public String usePairwiseCouplingTipText() {
     return "Use pairwise coupling (only has an effect for 1-against-1).";
+  }
+
+  /**
+   * Implements pairwise coupling.
+   *
+   * @param n the sum of weights used to train each model
+   * @param r the probability estimate from each model
+   * @return the coupled estimates
+   */
+  public static double[] pairwiseCoupling(double[][] n, double[][] r) {
+
+    // Initialize p and u array
+    double[] p = new double[r.length];
+    for (int i =0; i < p.length; i++) {
+      p[i] = 1.0 / (double)p.length;
+    }
+    double[][] u = new double[r.length][r.length];
+    for (int i = 0; i < r.length; i++) {
+      for (int j = i + 1; j < r.length; j++) {
+	u[i][j] = 0.5;
+      }
+    }
+
+    // firstSum doesn't change
+    double[] firstSum = new double[p.length];
+    for (int i = 0; i < p.length; i++) {
+      for (int j = i + 1; j < p.length; j++) {
+	firstSum[i] += n[i][j] * r[i][j];
+	firstSum[j] += n[i][j] * (1 - r[i][j]);
+      }
+    }
+
+    // Iterate until convergence
+    boolean changed;
+    do {
+      changed = false;
+      double[] secondSum = new double[p.length];
+      for (int i = 0; i < p.length; i++) {
+	for (int j = i + 1; j < p.length; j++) {
+	  secondSum[i] += n[i][j] * u[i][j];
+	  secondSum[j] += n[i][j] * (1 - u[i][j]);
+	}
+      }
+      for (int i = 0; i < p.length; i++) {
+	if ((firstSum[i] == 0) || (secondSum[i] == 0)) {
+	  if (p[i] > 0) {
+	    changed = true;
+	  }
+	  p[i] = 0;
+	} else {
+	  double factor = firstSum[i] / secondSum[i];
+	  double pOld = p[i];
+	  p[i] *= factor;
+	  if (Math.abs(pOld - p[i]) > 1.0e-3) {
+	    changed = true;
+	  }
+	}
+      }
+      Utils.normalize(p);
+      for (int i = 0; i < r.length; i++) {
+	for (int j = i + 1; j < r.length; j++) {
+	  u[i][j] = p[i] / (p[i] + p[j]);
+	}
+      }
+    } while (changed);
+    return p;
   }
 
   /**
