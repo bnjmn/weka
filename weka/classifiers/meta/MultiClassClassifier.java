@@ -97,7 +97,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.45 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -863,6 +863,14 @@ public class MultiClassClassifier
    */
   public boolean getUsePairwiseCoupling() {
     return m_pairwiseCoupling;
+  }
+
+  /**
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String usePairwiseCouplingTipText() {
+    return "Use pairwise coupling (only has an effect for 1-against-1).";
   }
 
   /**
