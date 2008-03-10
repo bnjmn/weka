@@ -80,12 +80,16 @@ import java.util.Vector;
  * <pre> -D
  *  Use supervised discretization to process numeric attributes
  * </pre>
+ *
+ * <pre>
+ *  Display model in old format (good when there are many classes)
+ * </pre>
  * 
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.1 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
@@ -128,6 +132,8 @@ implements OptionHandler, WeightedInstancesHandler,
    * The discretization filter.
    */
   protected weka.filters.supervised.attribute.Discretize m_Disc = null;
+
+  protected boolean m_displayModelInOldFormat = false;
 
   /**
    * Returns a string describing this classifier
@@ -382,15 +388,21 @@ implements OptionHandler, WeightedInstancesHandler,
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(2);
+    Vector newVector = new Vector(3);
 
     newVector.addElement(
-                         new Option("\tUse kernel density estimator rather than normal\n"
-                                    +"\tdistribution for numeric attributes",
-                                    "K", 0,"-K"));
+              new Option("\tUse kernel density estimator rather than normal\n"
+                         +"\tdistribution for numeric attributes",
+                         "K", 0,"-K"));
     newVector.addElement(
-                         new Option("\tUse supervised discretization to process numeric attributes\n",
-                                    "D", 0,"-D"));
+              new Option("\tUse supervised discretization to process numeric attributes\n",
+                         "D", 0,"-D"));
+    
+    newVector.addElement(
+              new Option("\tDisplay model in old format (good when there are "
+                         + "many classes)\n",
+                         "O", 0, "-O"));
+    
     return newVector.elements();
   }
 
@@ -406,6 +418,10 @@ implements OptionHandler, WeightedInstancesHandler,
    * 
    * <pre> -D
    *  Use supervised discretization to process numeric attributes
+   * </pre>
+   *
+   * <pre>
+   *  Display model in old format (good when there are many classes)
    * </pre>
    * 
    <!-- options-end -->
@@ -423,6 +439,7 @@ implements OptionHandler, WeightedInstancesHandler,
     }
     setUseSupervisedDiscretization(d);
     setUseKernelEstimator(k);
+    setDisplayModelInOldFormat(Utils.getFlag('O', options));
     Utils.checkForRemainingOptions(options);
   }
 
@@ -433,7 +450,7 @@ implements OptionHandler, WeightedInstancesHandler,
    */
   public String [] getOptions() {
 
-    String [] options = new String [2];
+    String [] options = new String [3];
     int current = 0;
 
     if (m_UseKernelEstimator) {
@@ -442,6 +459,10 @@ implements OptionHandler, WeightedInstancesHandler,
 
     if (m_UseDiscretization) {
       options[current++] = "-D";
+    }
+
+    if (m_displayModelInOldFormat) {
+      options[current++] = "-O";
     }
 
     while (current < options.length) {
@@ -456,7 +477,297 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return a description of the classifier as a string.
    */
   public String toString() {
+    if (m_displayModelInOldFormat) {
+      return toStringOriginal();
+    }
 
+    StringBuffer temp = new StringBuffer();
+    temp.append("Naive Bayes Classifier");
+    if (m_Instances == null) {
+      temp.append(": No model built yet.");
+    } else {
+
+      int maxWidth = 0;
+      int maxAttWidth = 0;
+      boolean containsKernel = false;
+
+      // set up max widths
+      // class values
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+        if (m_Instances.classAttribute().value(i).length() > maxWidth) {
+          maxWidth = m_Instances.classAttribute().value(i).length();
+        }
+      }
+      // attributes
+      for (int i = 0; i < m_Instances.numAttributes(); i++) {
+        if (i != m_Instances.classIndex()) {
+          Attribute a = m_Instances.attribute(i);
+          if (a.name().length() > maxAttWidth) {
+            maxAttWidth = m_Instances.attribute(i).name().length();
+          }
+          if (a.isNominal()) {
+            // check values
+            for (int j = 0; j < a.numValues(); j++) {
+              String val = a.value(j) + "  ";
+              if (val.length() > maxAttWidth) {
+                maxAttWidth = val.length();
+              }
+            }
+          }
+        }
+      }
+
+      for (int i = 0; i < m_Distributions.length; i++) {
+        for (int j = 0; j < m_Instances.numClasses(); j++) {
+          if (m_Distributions[i][0] instanceof NormalEstimator) {
+            // check mean/precision dev against maxWidth
+            NormalEstimator n = (NormalEstimator)m_Distributions[i][j];
+            double mean = Math.log(Math.abs(n.getMean())) / Math.log(10.0);
+            double precision = Math.log(Math.abs(n.getPrecision())) / Math.log(10.0);
+            double width = (mean > precision)
+              ? mean
+              : precision;
+            if (width < 0) {
+              width = 1;
+            }
+            // decimal + # decimal places + 1
+            width += 6.0;
+            if ((int)width > maxWidth) {
+              maxWidth = (int)width;
+            }
+          } else if (m_Distributions[i][0] instanceof KernelEstimator) {
+            containsKernel = true;
+            KernelEstimator ke = (KernelEstimator)m_Distributions[i][j];
+            int numK = ke.getNumKernels();
+            String temps = "K" + numK + ": mean (weight)";
+            if (maxAttWidth < temps.length()) {
+              maxAttWidth = temps.length();
+            }
+            // check means + weights against maxWidth
+            if (ke.getNumKernels() > 0) {
+              double[] means = ke.getMeans();
+              double[] weights = ke.getWeights();
+              for (int k = 0; k < ke.getNumKernels(); k++) {
+                String m = Utils.doubleToString(means[k], maxWidth, 4).trim();
+                m += " (" + Utils.doubleToString(weights[k], maxWidth, 1).trim() + ")";
+                if (maxWidth < m.length()) {
+                  maxWidth = m.length();
+                }
+              }
+            }
+          } else if (m_Distributions[i][0] instanceof DiscreteEstimator) {
+            DiscreteEstimator d = (DiscreteEstimator)m_Distributions[i][j];
+            for (int k = 0; k < d.getNumSymbols(); k++) {
+              String size = "" + d.getCount(k);
+              if (size.length() > maxWidth) {
+                maxWidth = size.length();
+              }
+            }
+            int sum = ("" + d.getSumOfCounts()).length();
+            if (sum > maxWidth) {
+              maxWidth = sum;
+            }
+          }
+        }
+      }
+
+      // Check width of class labels
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+        String cSize = m_Instances.classAttribute().value(i);
+        if (cSize.length() > maxWidth) {
+          maxWidth = cSize.length();
+        }
+      }
+    
+      if (maxAttWidth < "Attribute".length()) {
+        maxAttWidth = "Attribute".length();
+      }
+
+      if (maxAttWidth < "  weight sum".length()) {
+        maxAttWidth = "  weight sum".length();
+      }
+
+      if (containsKernel) {
+        if (maxAttWidth < "  [precision]".length()) {
+          maxAttWidth = "  [precision]".length();
+        }
+      }
+
+      maxAttWidth += 2;
+    
+
+
+      temp.append("\n\n");
+      temp.append(pad("Class", " ", 
+                      (maxAttWidth + maxWidth + 1) - "Class".length(), 
+                      true));
+
+      temp.append("\n");
+      temp.append(pad("Attribute", " ", maxAttWidth - "Attribute".length(), false));
+      // class labels
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+        String classL = m_Instances.classAttribute().value(i);
+        temp.append(pad(classL, " ", maxWidth + 1 - classL.length(), true));
+      }
+      temp.append("\n");
+      // class priors
+      temp.append(pad("", " ", maxAttWidth, true));
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+        String priorP = 
+          Utils.doubleToString(((DiscreteEstimator)m_ClassDistribution).getProbability(i),
+                               maxWidth, 2).trim();
+        priorP = "(" + priorP + ")";
+        temp.append(pad(priorP, " ", maxWidth + 1 - priorP.length(), true));
+      }
+      temp.append("\n");
+      temp.append(pad("", "=", maxAttWidth + 
+                      (maxWidth * m_Instances.numClasses()) 
+                      + m_Instances.numClasses() + 1, true));
+      temp.append("\n");
+
+      // loop over the attributes
+      int counter = 0;
+      for (int i = 0; i < m_Instances.numAttributes(); i++) {
+        if (i == m_Instances.classIndex()) {
+          continue;
+        }
+        String attName = m_Instances.attribute(i).name();
+        temp.append(attName + "\n");
+          
+        if (m_Distributions[counter][0] instanceof NormalEstimator) {
+          String meanL = "  mean";
+          temp.append(pad(meanL, " ", maxAttWidth + 1 - meanL.length(), false));
+          for (int j = 0; j < m_Instances.numClasses(); j++) {            
+            // means
+            NormalEstimator n = (NormalEstimator)m_Distributions[counter][j];
+            String mean = 
+              Utils.doubleToString(n.getMean(), maxWidth, 4).trim();
+            temp.append(pad(mean, " ", maxWidth + 1 - mean.length(), true));
+          }
+          temp.append("\n");            
+          // now do std deviations
+          String stdDevL = "  std. dev.";
+          temp.append(pad(stdDevL, " ", maxAttWidth + 1 - stdDevL.length(), false));
+          for (int j = 0; j < m_Instances.numClasses(); j++) {
+            NormalEstimator n = (NormalEstimator)m_Distributions[counter][j];
+            String stdDev = 
+              Utils.doubleToString(n.getStdDev(), maxWidth, 4).trim();
+            temp.append(pad(stdDev, " ", maxWidth + 1 - stdDev.length(), true));
+          }
+          temp.append("\n");
+          // now the weight sums
+          String weightL = "  weight sum";
+          temp.append(pad(weightL, " ", maxAttWidth + 1 - weightL.length(), false));
+          for (int j = 0; j < m_Instances.numClasses(); j++) {
+            NormalEstimator n = (NormalEstimator)m_Distributions[counter][j];
+            String weight = 
+              Utils.doubleToString(n.getSumOfWeights(), maxWidth, 4).trim();
+            temp.append(pad(weight, " ", maxWidth + 1 - weight.length(), true));
+          }
+          temp.append("\n");
+          // now the precisions
+          String precisionL = "  precision";
+          temp.append(pad(precisionL, " ", maxAttWidth + 1 - precisionL.length(), false));
+          for (int j = 0; j < m_Instances.numClasses(); j++) {
+            NormalEstimator n = (NormalEstimator)m_Distributions[counter][j];
+            String precision = 
+              Utils.doubleToString(n.getPrecision(), maxWidth, 4).trim();
+            temp.append(pad(precision, " ", maxWidth + 1 - precision.length(), true));
+          }
+          temp.append("\n\n");
+            
+        } else if (m_Distributions[counter][0] instanceof DiscreteEstimator) {
+          Attribute a = m_Instances.attribute(i);
+          for (int j = 0; j < a.numValues(); j++) {
+            String val = "  " + a.value(j);
+            temp.append(pad(val, " ", maxAttWidth + 1 - val.length(), false));
+            for (int k = 0; k < m_Instances.numClasses(); k++) {
+              DiscreteEstimator d = (DiscreteEstimator)m_Distributions[counter][k];
+              String count = "" + d.getCount(j);
+              temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
+            }
+            temp.append("\n");
+          }
+          // do the totals
+          String total = "  [total]";
+          temp.append(pad(total, " ", maxAttWidth + 1 - total.length(), false));
+          for (int k = 0; k < m_Instances.numClasses(); k++) {
+            DiscreteEstimator d = (DiscreteEstimator)m_Distributions[counter][k];
+            String count = "" + d.getSumOfCounts();
+            temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
+          }
+          temp.append("\n");
+        } else if (m_Distributions[counter][0] instanceof KernelEstimator) {
+          String kL = "  [# kernels]";
+          temp.append(pad(kL, " ", maxAttWidth + 1 - kL.length(), false));
+          for (int k = 0; k < m_Instances.numClasses(); k++) {
+            KernelEstimator ke = (KernelEstimator)m_Distributions[counter][k];
+            String nk = "" + ke.getNumKernels();
+            temp.append(pad(nk, " ", maxWidth + 1 - nk.length(), true));
+          }
+          temp.append("\n");
+          // do num kernels, std. devs and precisions
+          String stdDevL = "  [std. dev]";
+          temp.append(pad(stdDevL, " ", maxAttWidth + 1 - stdDevL.length(), false));
+          for (int k = 0; k < m_Instances.numClasses(); k++) {
+            KernelEstimator ke = (KernelEstimator)m_Distributions[counter][k];
+            String stdD = Utils.doubleToString(ke.getStdDev(), maxWidth, 4).trim(); 
+            temp.append(pad(stdD, " ", maxWidth + 1 - stdD.length(), true));
+          }
+          temp.append("\n");
+          String precL = "  [precision]";
+          temp.append(pad(precL, " ", maxAttWidth + 1 - precL.length(), false));
+          for (int k = 0; k < m_Instances.numClasses(); k++) {
+            KernelEstimator ke = (KernelEstimator)m_Distributions[counter][k];
+            String prec = Utils.doubleToString(ke.getPrecision(), maxWidth, 4).trim(); 
+            temp.append(pad(prec, " ", maxWidth + 1 - prec.length(), true));
+          }
+          temp.append("\n");
+          // first determine max number of kernels accross the classes
+          int maxK = 0;
+          for (int k = 0; k < m_Instances.numClasses(); k++) {
+            KernelEstimator ke = (KernelEstimator)m_Distributions[counter][k];
+            if (ke.getNumKernels() > maxK) {
+              maxK = ke.getNumKernels();
+            }
+          }
+          for (int j = 0; j < maxK; j++) {
+            // means first
+            String meanL = "  K" + (j+1) + ": mean (weight)";
+            temp.append(pad(meanL, " ", maxAttWidth + 1 - meanL.length(), false));
+            for (int k = 0; k < m_Instances.numClasses(); k++) {
+              KernelEstimator ke = (KernelEstimator)m_Distributions[counter][k];
+              double[] means = ke.getMeans();
+              double[] weights = ke.getWeights();
+              String m = "--";
+              if (ke.getNumKernels() == 0) {
+                m = "" + 0;
+              } else if (j < ke.getNumKernels()) {
+                m = Utils.doubleToString(means[j], maxWidth, 4).trim();
+                m += " (" + Utils.doubleToString(weights[j], maxWidth, 1).trim() + ")";
+              }
+              temp.append(pad(m, " ", maxWidth + 1 - m.length(), true));
+            }
+            temp.append("\n");              
+          }
+          temp.append("\n");
+        }
+
+
+        counter++;
+      }
+    }
+      
+    return temp.toString();
+  }
+
+  /**
+   * Returns a description of the classifier in the old format.
+   *
+   * @return a description of the classifier as a string.
+   */
+  protected String toStringOriginal() {
+    
     StringBuffer text = new StringBuffer();
 
     text.append("Naive Bayes Classifier");
@@ -486,6 +797,24 @@ implements OptionHandler, WeightedInstancesHandler,
     }
 
     return text.toString();
+  } 
+
+  private String pad(String source, String padChar, 
+                     int length, boolean leftPad) {
+    StringBuffer temp = new StringBuffer();
+
+    if (leftPad) {
+      for (int i = 0; i< length; i++) {
+        temp.append(padChar);
+      }
+      temp.append(source);
+    } else {
+      temp.append(source);
+      for (int i = 0; i< length; i++) {
+        temp.append(padChar);
+      }
+    }
+    return temp.toString();
   }
 
   /**
@@ -551,6 +880,37 @@ implements OptionHandler, WeightedInstancesHandler,
     if (newblah) {
       setUseKernelEstimator(false);
     }
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String displayModelInOldFormatTipText() {
+    return "Use old format for model output. The old format is "
+      + "better when there are many class values. The new format "
+      + "is better when there are fewer classes and many attributes.";
+  }
+
+  /**
+   * Set whether to display model output in the old, original
+   * format.
+   *
+   * @param d true if model ouput is to be shown in the old format
+   */
+  public void setDisplayModelInOldFormat(boolean d) {
+    m_displayModelInOldFormat = d;
+  }
+
+  /**
+   * Get whether to display model output in the old, original
+   * format.
+   *
+   * @return true if model ouput is to be shown in the old format
+   */
+  public boolean getDisplayModelInOldFormat() {
+    return m_displayModelInOldFormat;
   }
 
   /**
