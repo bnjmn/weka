@@ -24,6 +24,7 @@ package  weka.clusterers;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
+import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
@@ -75,12 +76,16 @@ import java.util.Vector;
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 1)</pre>
+ *
+ * <pre>
+ *  Display model in old format (good when there are many clusters)
+ * </pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.40.2.1 $
  */
 public class EM
   extends RandomizableDensityBasedClusterer
@@ -143,6 +148,9 @@ public class EM
  /** globally replace missing values */
   private ReplaceMissingValues m_replaceMissing;
 
+  /** display model output in old-style format */
+  private boolean m_displayModelInOldFormat;
+
   /**
    * Returns a string describing this clusterer
    * @return a description of the evaluator suitable for
@@ -196,6 +204,11 @@ public class EM
 	+ "\t(default 1e-6)",
 	"M",1,"-M <num>"));
 
+    result.addElement(
+              new Option("\tDisplay model in old format (good when there are "
+                         + "many clusters)\n",
+                         "O", 0, "-O"));
+
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
       result.addElement(en.nextElement());
@@ -229,6 +242,10 @@ public class EM
    * <pre> -S &lt;num&gt;
    *  Random number seed.
    *  (default 1)</pre>
+   *
+   * <pre>
+   *  Display model in old format (good when there are many clusters)
+   * </pre>
    * 
    <!-- options-end -->
    * 
@@ -254,8 +271,41 @@ public class EM
     if (optionString.length() != 0) {
       setMinStdDev((new Double(optionString)).doubleValue());
     }
+
+    setDisplayModelInOldFormat(Utils.getFlag('O', options));
     
     super.setOptions(options);
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String displayModelInOldFormatTipText() {
+    return "Use old format for model output. The old format is "
+      + "better when there are many clusters. The new format "
+      + "is better when there are fewer clusters and many attributes.";
+  }
+
+  /**
+   * Set whether to display model output in the old, original
+   * format.
+   *
+   * @param d true if model ouput is to be shown in the old format
+   */
+  public void setDisplayModelInOldFormat(boolean d) {
+    m_displayModelInOldFormat = d;
+  }
+
+  /**
+   * Get whether to display model output in the old, original
+   * format.
+   *
+   * @return true if model ouput is to be shown in the old format
+   */
+  public boolean getDisplayModelInOldFormat() {
+    return m_displayModelInOldFormat;
   }
 
   /**
@@ -419,6 +469,9 @@ public class EM
     result.add("" + getNumClusters());
     result.add("-M");
     result.add("" + getMinStdDev());
+    if (m_displayModelInOldFormat) {
+      result.add("-O");
+    }
 
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
@@ -736,33 +789,216 @@ public class EM
    * 
    * @return the clusterer in string representation
    */
-  public String toString () {
+  public String toString() {
+    if (m_displayModelInOldFormat) {
+      return toStringOriginal();
+    }
+
     if (m_priors == null) {
       return "No clusterer built yet!";
     }
-    StringBuffer text = new StringBuffer();
-    text.append("\nEM\n==\n");
+    StringBuffer temp = new StringBuffer();
+    temp.append("\nEM\n==\n");
     if (m_initialNumClusters == -1) {
-      text.append("\nNumber of clusters selected by cross validation: "
+      temp.append("\nNumber of clusters selected by cross validation: "
 		  +m_num_clusters+"\n");
     } else {
-      text.append("\nNumber of clusters: " + m_num_clusters + "\n");
+      temp.append("\nNumber of clusters: " + m_num_clusters + "\n");
+    }
+
+    int maxWidth = 0;
+    int maxAttWidth = 0;
+    boolean containsKernel = false;
+    
+    // set up max widths
+    // attributes
+    for (int i = 0; i < m_num_attribs; i++) {
+      Attribute a = m_theInstances.attribute(i);
+      if (a.name().length() > maxAttWidth) {
+        maxAttWidth = m_theInstances.attribute(i).name().length();
+      }
+      if (a.isNominal()) {
+        // check values
+        for (int j = 0; j < a.numValues(); j++) {
+          String val = a.value(j) + "  ";
+          if (val.length() > maxAttWidth) {
+            maxAttWidth = val.length();
+          }
+        }
+      }
+    }
+
+    for (int i = 0; i < m_num_clusters; i++) {
+      for (int j = 0; j < m_num_attribs; j++) {
+        if (m_theInstances.attribute(j).isNumeric()) {
+          // check mean and std. dev. against maxWidth
+          double mean = Math.log(Math.abs(m_modelNormal[i][j][0])) / Math.log(10.0);
+          double stdD = Math.log(Math.abs(m_modelNormal[i][j][1])) / Math.log(10.0);
+          double width = (mean > stdD)
+            ? mean
+            : stdD;
+          if (width < 0) {
+            width = 1;
+          }
+          // decimal + # decimal places + 1
+          width += 6.0;
+          if ((int)width > maxWidth) {
+            maxWidth = (int)width;
+          }
+        } else {
+          // nominal distributions
+          DiscreteEstimator d = (DiscreteEstimator)m_model[i][j];
+          for (int k = 0; k < d.getNumSymbols(); k++) {
+            String size = Utils.doubleToString(d.getCount(k), maxWidth, 4).trim();
+            if (size.length() > maxWidth) {
+              maxWidth = size.length();
+            }
+          }
+          int sum = 
+            Utils.doubleToString(d.getSumOfCounts(), maxWidth, 4).trim().length();
+          if (sum > maxWidth) {
+            maxWidth = sum;
+          }
+        }
+      }
+    }
+
+    if (maxAttWidth < "Attribute".length()) {
+      maxAttWidth = "Attribute".length();
+    }    
+    
+    maxAttWidth += 2;
+
+    temp.append("\n\n");
+    temp.append(pad("Cluster", " ", 
+                    (maxAttWidth + maxWidth + 1) - "Cluster".length(), 
+                    true));
+    
+    temp.append("\n");
+    temp.append(pad("Attribute", " ", maxAttWidth - "Attribute".length(), false));
+
+    // cluster #'s
+    for (int i = 0; i < m_num_clusters; i++) {
+      String classL = "" + i;
+      temp.append(pad(classL, " ", maxWidth + 1 - classL.length(), true));
+    }
+    temp.append("\n");
+
+    // cluster priors
+    temp.append(pad("", " ", maxAttWidth, true));
+    for (int i = 0; i < m_num_clusters; i++) {
+      String priorP = Utils.doubleToString(m_priors[i], maxWidth, 2).trim();
+      priorP = "(" + priorP + ")";
+      temp.append(pad(priorP, " ", maxWidth + 1 - priorP.length(), true));
+    }
+
+    temp.append("\n");
+    temp.append(pad("", "=", maxAttWidth + 
+                    (maxWidth * m_num_clusters)
+                    + m_num_clusters + 1, true));
+    temp.append("\n");
+
+    for (int i = 0; i < m_num_attribs; i++) {
+      String attName = m_theInstances.attribute(i).name();
+      temp.append(attName + "\n");
+
+      if (m_theInstances.attribute(i).isNumeric()) {
+        String meanL = "  mean";
+        temp.append(pad(meanL, " ", maxAttWidth + 1 - meanL.length(), false));
+        for (int j = 0; j < m_num_clusters; j++) {
+          // means
+          String mean = 
+            Utils.doubleToString(m_modelNormal[j][i][0], maxWidth, 4).trim();
+          temp.append(pad(mean, " ", maxWidth + 1 - mean.length(), true));
+        }
+        temp.append("\n");            
+        // now do std deviations
+        String stdDevL = "  std. dev.";
+        temp.append(pad(stdDevL, " ", maxAttWidth + 1 - stdDevL.length(), false));
+        for (int j = 0; j < m_num_clusters; j++) {
+          String stdDev = 
+            Utils.doubleToString(m_modelNormal[j][i][1], maxWidth, 4).trim();
+          temp.append(pad(stdDev, " ", maxWidth + 1 - stdDev.length(), true));
+        }
+        temp.append("\n\n");
+      } else {
+        Attribute a = m_theInstances.attribute(i);
+        for (int j = 0; j < a.numValues(); j++) {
+          String val = "  " + a.value(j);
+          temp.append(pad(val, " ", maxAttWidth + 1 - val.length(), false));
+          for (int k = 0; k < m_num_clusters; k++) {
+            DiscreteEstimator d = (DiscreteEstimator)m_model[k][i];
+            String count = Utils.doubleToString(d.getCount(j), maxWidth, 4).trim();
+            temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
+          }
+          temp.append("\n");
+        }
+        // do the totals
+        String total = "  [total]";
+        temp.append(pad(total, " ", maxAttWidth + 1 - total.length(), false));
+        for (int k = 0; k < m_num_clusters; k++) {
+          DiscreteEstimator d = (DiscreteEstimator)m_model[k][i];
+          String count = 
+            Utils.doubleToString(d.getSumOfCounts(), maxWidth, 4).trim();
+            temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
+        }
+        temp.append("\n");        
+      }
+    }
+
+    return temp.toString();
+  }
+
+  private String pad(String source, String padChar, 
+                     int length, boolean leftPad) {
+    StringBuffer temp = new StringBuffer();
+
+    if (leftPad) {
+      for (int i = 0; i< length; i++) {
+        temp.append(padChar);
+      }
+      temp.append(source);
+    } else {
+      temp.append(source);
+      for (int i = 0; i< length; i++) {
+        temp.append(padChar);
+      }
+    }
+    return temp.toString();
+  }
+
+  /**
+   * Outputs the generated clusters into a string.
+   * 
+   * @return the clusterer in string representation
+   */
+  protected String toStringOriginal () {
+    if (m_priors == null) {
+      return "No clusterer built yet!";
+    }
+    StringBuffer temp = new StringBuffer();
+    temp.append("\nEM\n==\n");
+    if (m_initialNumClusters == -1) {
+      temp.append("\nNumber of clusters selected by cross validation: "
+		  +m_num_clusters+"\n");
+    } else {
+      temp.append("\nNumber of clusters: " + m_num_clusters + "\n");
     }
 
     for (int j = 0; j < m_num_clusters; j++) {
-      text.append("\nCluster: " + j + " Prior probability: " 
+      temp.append("\nCluster: " + j + " Prior probability: " 
 		  + Utils.doubleToString(m_priors[j], 4) + "\n\n");
 
       for (int i = 0; i < m_num_attribs; i++) {
-        text.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
+        temp.append("Attribute: " + m_theInstances.attribute(i).name() + "\n");
 
         if (m_theInstances.attribute(i).isNominal()) {
           if (m_model[j][i] != null) {
-            text.append(m_model[j][i].toString());
+            temp.append(m_model[j][i].toString());
           }
         }
         else {
-          text.append("Normal Distribution. Mean = " 
+          temp.append("Normal Distribution. Mean = " 
 		      + Utils.doubleToString(m_modelNormal[j][i][0], 4) 
 		      + " StdDev = " 
 		      + Utils.doubleToString(m_modelNormal[j][i][1], 4) 
@@ -771,7 +1007,7 @@ public class EM
       }
     }
 
-    return  text.toString();
+    return  temp.toString();
   }
 
 
