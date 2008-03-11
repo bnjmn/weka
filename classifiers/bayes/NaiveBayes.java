@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
@@ -696,7 +696,7 @@ implements OptionHandler, WeightedInstancesHandler,
             String count = "" + d.getSumOfCounts();
             temp.append(pad(count, " ", maxWidth + 1 - count.length(), true));
           }
-          temp.append("\n");
+          temp.append("\n\n");
         } else if (m_Distributions[counter][0] instanceof KernelEstimator) {
           String kL = "  [# kernels]";
           temp.append(pad(kL, " ", maxAttWidth + 1 - kL.length(), false));
