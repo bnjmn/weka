@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */
 public class SparseInstance
   extends Instance {
@@ -515,6 +515,10 @@ public class SparseInstance
       }
     }
     text.append('}');
+    if (m_Weight != 1.0) {
+      text.append(",{" + Utils.doubleToString(m_Weight, 6) + "}");
+    }
+
     return text.toString();
   }
 
