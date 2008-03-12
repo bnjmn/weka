@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class BinarySparseInstance
   extends SparseInstance {
@@ -310,6 +310,9 @@ public class BinarySparseInstance
       }
     }
     text.append('}');
+    if (m_Weight != 1.0) {
+      text.append(",{" + Utils.doubleToString(m_Weight, 6) + "}");
+    }
     return text.toString();
   }
 
