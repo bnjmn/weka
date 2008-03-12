@@ -54,7 +54,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.7 $
+ * @version   $Revision: 1.8 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -392,6 +392,11 @@ public class SnowballStemmer
       result = new String(word);
     }
     else {
+      // after de-serialization, the methods are null and need to be
+      // re-initialized
+      if (m_SetCurrentMethod == null)
+	setStemmer(getStemmer());
+      
       try {
         // set word
         args    = new Object[1];
