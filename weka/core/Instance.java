@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.26 $ 
  */
 public class Instance
   implements Copyable, Serializable {
@@ -875,6 +875,10 @@ public class Instance
     for (int i = 0; i < m_AttValues.length; i++) {
       if (i > 0) text.append(",");
       text.append(toString(i));
+    }
+
+    if (m_Weight != 1.0) {
+      text.append(",{" + Utils.doubleToString(m_Weight, 6) + "}");
     }
 
     return text.toString();
