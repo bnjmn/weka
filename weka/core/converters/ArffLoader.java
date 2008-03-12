@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.18.2.1 $
+ * @version $Revision: 1.18.2.2 $
  * @see Loader
  */
 public class ArffLoader 
@@ -101,7 +101,7 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.18.2.1 $
+   * @version $Revision: 1.18.2.2 $
    */
   public static class ArffReader {
 
@@ -295,6 +295,40 @@ public class ArffLoader
     }
 
     /**
+     * Gets the value of an instance's weight (if one exists)
+     *
+     * @return the value of the instance's weight, or NaN
+     * if no weight has been supplied in the file
+     */
+    protected double getInstanceWeight() throws IOException {
+      double weight = Double.NaN;
+      m_Tokenizer.nextToken();
+      if (m_Tokenizer.ttype == StreamTokenizer.TT_EOL || 
+          m_Tokenizer.ttype == StreamTokenizer.TT_EOF) {
+        return weight;
+      }
+      // see if we can read an instance weight
+      //      m_Tokenizer.pushBack();
+      if (m_Tokenizer.ttype == '{') {
+        m_Tokenizer.nextToken();
+        String weightS = m_Tokenizer.sval;
+        // try to parse weight as a double
+        try {
+          weight = Double.parseDouble(weightS);
+        } catch (NumberFormatException e) {
+          // quietly ignore
+          return weight;
+        }
+        // see if we have the closing brace
+        m_Tokenizer.nextToken();
+        if (m_Tokenizer.ttype != '}') {
+          errorMessage("Problem reading instance weight");
+        }
+      }
+      return weight;
+    }
+
+    /**
      * Gets next token, checking for a premature and of line.
      *
      * @throws IOException 	if it finds a premature end of line
@@ -485,9 +519,16 @@ public class ArffLoader
         }
         numValues++;
       } while (true);
-      
+
+      double weight = 1.0;
       if (flag) {
-        getLastToken(true);
+        // check for an instance weight
+        weight = getInstanceWeight();
+        if (!Double.isNaN(weight)) {
+          getLastToken(true);
+        } else {
+          weight = 1.0;
+        }        
       }
         
       // Add instance to dataset
@@ -495,7 +536,7 @@ public class ArffLoader
       int[] tempIndices = new int[numValues];
       System.arraycopy(m_ValueBuffer, 0, tempValues, 0, numValues);
       System.arraycopy(m_IndicesBuffer, 0, tempIndices, 0, numValues);
-      Instance inst = new SparseInstance(1, tempValues, tempIndices, m_Data.numAttributes());
+      Instance inst = new SparseInstance(weight, tempValues, tempIndices, m_Data.numAttributes());
       inst.setDataset(m_Data);
       
       return inst;
@@ -574,12 +615,19 @@ public class ArffLoader
         }
       }
       
+      double weight = 1.0;
       if (flag) {
-        getLastToken(true);
+        // check for an instance weight
+        weight = getInstanceWeight();
+        if (!Double.isNaN(weight)) {
+          getLastToken(true);
+        } else {
+          weight = 1.0;
+        }
       }
         
       // Add instance to dataset
-      Instance inst = new Instance(1, instance);
+      Instance inst = new Instance(weight, instance);
       inst.setDataset(m_Data);
       
       return inst;
