@@ -82,7 +82,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.41 $
+ * @version  $Revision: 1.41.2.1 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -659,9 +659,21 @@ public class ClusterEvaluation
 
     Utils.checkForRemainingOptions(options);
 
+    Instances trainHeader = train;
     if (objectInputFileName.length() != 0) {
       // Load the clusterer from file
-      clusterer = (Clusterer) SerializationHelper.read(objectInputFileName);
+      //      clusterer = (Clusterer) SerializationHelper.read(objectInputFileName);
+      java.io.ObjectInputStream ois = 
+        new java.io.ObjectInputStream(
+        new java.io.BufferedInputStream(
+        new java.io.FileInputStream(objectInputFileName)));
+      clusterer = (Clusterer) ois.readObject();
+      // try and get the training header
+      try {
+        trainHeader = (Instances) ois.readObject();
+      } catch (Exception ex) {
+        // don't moan if we cant
+      }
     }
     else {
       // Build the clusterer if no object file provided
@@ -686,6 +698,7 @@ public class ClusterEvaluation
 	if (updateable) {
 	  Instances clusterTrain = Filter.useFilter(train, removeClass);
 	  clusterer.buildClusterer(clusterTrain);
+          trainHeader = clusterTrain;
 	  while (source.hasMoreElements(train)) {
 	    inst = source.nextElement(train);
 	    removeClass.input(inst);
@@ -698,6 +711,7 @@ public class ClusterEvaluation
 	else {
 	  Instances clusterTrain = Filter.useFilter(source.getDataSet(), removeClass);
 	  clusterer.buildClusterer(clusterTrain);
+          trainHeader = clusterTrain;
 	}
 	ClusterEvaluation ce = new ClusterEvaluation();
 	ce.setClusterer(clusterer);
@@ -718,9 +732,17 @@ public class ClusterEvaluation
     text.append("\n\n=== Clustering stats for training data ===\n\n" 
 		+ printClusterStats(clusterer, trainFileName));
 
-    if (testFileName.length() != 0)
+    if (testFileName.length() != 0) {
+      // check header compatibility
+      DataSource test = new DataSource(testFileName);
+      Instances testStructure = test.getStructure();
+      if (!trainHeader.equalHeaders(testStructure)) {
+        throw new Exception("Training and testing data are not compatible");
+      }
+
       text.append("\n\n=== Clustering stats for testing data ===\n\n" 
 		  + printClusterStats(clusterer, testFileName));
+    }
 
     if ((clusterer instanceof DensityBasedClusterer) && 
 	(doXval == true) && 
@@ -737,8 +759,10 @@ public class ClusterEvaluation
     }
 
     // Save the clusterer if an object output file is provided
-    if (objectOutputFileName.length() != 0)
-      SerializationHelper.write(objectOutputFileName, clusterer);
+    if (objectOutputFileName.length() != 0) {
+      //SerializationHelper.write(objectOutputFileName, clusterer);
+      saveClusterer(objectOutputFileName, clusterer, trainHeader);
+    }
 
     // If classifier is drawable output string describing graph
     if ((clusterer instanceof Drawable) && (graphFileName.length() != 0)) {
@@ -750,6 +774,22 @@ public class ClusterEvaluation
     }
     
     return  text.toString();
+  }
+
+  private static void saveClusterer(String fileName, 
+                             Clusterer clusterer, 
+                             Instances header) throws Exception {
+    java.io.ObjectOutputStream oos = 
+      new java.io.ObjectOutputStream(
+      new java.io.BufferedOutputStream(
+      new java.io.FileOutputStream(fileName)));
+
+    oos.writeObject(clusterer);
+    if (header != null) {
+      oos.writeObject(header);
+    }
+    oos.flush();
+    oos.close();
   }
 
   /**
