@@ -42,7 +42,7 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ManhattanDataObject
     implements DataObject, Serializable {
@@ -119,7 +119,7 @@ public class ManhattanDataObject
         final ManhattanDataObject manhattanDataObject = (ManhattanDataObject) dataObject;
 
         if (getInstance().equalHeaders(manhattanDataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numAttributes(); i++) {
+            for (int i = 0; i < getInstance().numValues(); i++) {
                 double i_value_Instance_1 = getInstance().valueSparse(i);
                 double i_value_Instance_2 = manhattanDataObject.getInstance().valueSparse(i);
 
@@ -142,7 +142,7 @@ public class ManhattanDataObject
         if (!(dataObject instanceof ManhattanDataObject)) return Double.NaN;
 
         if (getInstance().equalHeaders(dataObject.getInstance())) {
-            for (int i = 0; i < getInstance().numAttributes(); i++) {
+            for (int i = 0; i < getInstance().numValues(); i++) {
                 double cDistance = computeDistance(getInstance().index(i),
                         getInstance().valueSparse(i),
                         dataObject.getInstance().valueSparse(i));
