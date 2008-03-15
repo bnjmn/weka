@@ -53,7 +53,7 @@ import javax.swing.JPanel;
  * Represents a little tool for querying SQL databases.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.6 $
+ * @version     $Revision: 1.7 $
  */
 public class SqlViewer 
   extends    JPanel 
@@ -62,50 +62,51 @@ public class SqlViewer
              QueryExecuteListener, 
              ResultChangedListener {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -4395028775566514329L;
 
-  /** the name of the history file (in the home directory) */
+  /** the name of the history file (in the home directory). */
   protected final static String HISTORY_FILE = "SqlViewerHistory.props";
 
-  /** the width property in the history file */
+  /** the width property in the history file. */
   public final static String WIDTH = "width";
 
-  /** the height property in the history file */
+  /** the height property in the history file. */
   public final static String HEIGHT = "height";
   
-  /** the parent of this panel */
+  /** the parent of this panel. */
   protected JFrame m_Parent;
 
-  /** the connection panel */
+  /** the connection panel. */
   protected ConnectionPanel m_ConnectionPanel;
 
-  /** the query panel */
+  /** the query panel. */
   protected QueryPanel m_QueryPanel;
 
-  /** the result panel */
+  /** the result panel. */
   protected ResultPanel m_ResultPanel;
 
-  /** the info panel */
+  /** the info panel. */
   protected InfoPanel m_InfoPanel;
 
-  /** the connect string with which the query was run */
+  /** the connect string with which the query was run. */
   protected String m_URL;
 
-  /** the user that was used to connect to the DB */
+  /** the user that was used to connect to the DB. */
   protected String m_User;
 
-  /** the password that was used to connect to the DB */
+  /** the password that was used to connect to the DB. */
   protected String m_Password;
 
-  /** the currently selected query */
+  /** the currently selected query. */
   protected String m_Query;
 
-  /** stores the history */
+  /** stores the history. */
   protected Properties m_History;
   
   /**
-   * initializes the SqlViewer
+   * initializes the SqlViewer.
+   * 
    * @param parent        the parent of this panel
    */
   public SqlViewer(JFrame parent) {
@@ -122,7 +123,7 @@ public class SqlViewer
   }
 
   /**
-   * builds the interface
+   * builds the interface.
    */
   protected void createPanel() {
     JPanel          panel;
@@ -184,6 +185,8 @@ public class SqlViewer
   /**
    * This method gets called when the connection is either established
    * or disconnected.
+   * 
+   * @param evt		the event
    */
   public void connectionChange(ConnectionEvent evt) {
     if (evt.getType() == ConnectionEvent.DISCONNECT) {
@@ -211,6 +214,8 @@ public class SqlViewer
   
   /**
    * This method gets called when a query has been executed.
+   * 
+   * @param evt		the event
    */
   public void queryExecuted(QueryExecuteEvent evt) {
     ResultSetHelper   helper;
@@ -228,6 +233,9 @@ public class SqlViewer
             m_InfoPanel.append(helper.getRowCount() + " rows selected (" 
                 + evt.getMaxRows() + " displayed).", 
                 "information_small.gif");
+          else if (helper.getRowCount() == -1)
+            m_InfoPanel.append("Unknown number of rows selected (due to JDBC driver restrictions).", 
+              "information_small.gif");
           else
             m_InfoPanel.append(helper.getRowCount() + " rows selected.", 
                 "information_small.gif");
@@ -247,6 +255,8 @@ public class SqlViewer
   
   /**
    * This method gets called when a query has been executed.
+   * 
+   * @param evt		the event
    */
   public void resultChanged(ResultChangedEvent evt) {
     m_URL      = evt.getURL();
@@ -258,6 +268,8 @@ public class SqlViewer
   /**
    * This method gets called when a history is modified.
    * It saves the history immediately to the users home directory.
+   * 
+   * @param evt		the event
    */
   public void historyChanged(HistoryChangedEvent evt) {
     // load history, in case some other process changed it!
@@ -271,7 +283,9 @@ public class SqlViewer
   }
 
   /**
-   * returns the filename of the history file
+   * returns the filename of the history file.
+   * 
+   * @return		the history file
    */
   protected String getHistoryFilename() {
     return   System.getProperties().getProperty("user.home")
@@ -280,7 +294,8 @@ public class SqlViewer
   }
 
   /**
-   * transforms the given, comma-separated string into a DefaultListModel
+   * transforms the given, comma-separated string into a DefaultListModel.
+   * 
    * @param s     the string to break up and transform into a list model
    * @return      the generated DefaultListModel
    */
@@ -348,7 +363,8 @@ public class SqlViewer
   }
 
   /**
-   * converts the given model into a comma-separated string
+   * converts the given model into a comma-separated string.
+   * 
    * @param m       the model to convert
    * @return        the string representation of the model
    */
@@ -388,7 +404,8 @@ public class SqlViewer
   }
 
   /**
-   * loads the history properties of the SqlViewer in the user's home directory
+   * loads the history properties of the SqlViewer in the user's home directory.
+   * 
    * @param set       whether to set the read properties in the panels or not
    * @see #HISTORY_FILE
    */
@@ -429,7 +446,8 @@ public class SqlViewer
   }
 
   /**
-   * saves the history properties of the SqlViewer in the user's home directory
+   * saves the history properties of the SqlViewer in the user's home directory.
+   * 
    * @see #HISTORY_FILE
    */
   protected void saveHistory() {
@@ -446,7 +464,7 @@ public class SqlViewer
   }
 
   /**
-   * obtains the size of the panel and saves it in the history
+   * obtains the size of the panel and saves it in the history.
    * 
    * @see #saveHistory()
    */
@@ -459,7 +477,7 @@ public class SqlViewer
   
   /**
    * calls the clear method of all sub-panels to set back to default values
-   * and free up memory
+   * and free up memory.
    */
   public void clear() {
     m_ConnectionPanel.clear();
@@ -471,8 +489,9 @@ public class SqlViewer
   /**
    * returns the database URL from the currently active tab in the ResultPanel,
    * otherwise an empty string.
-   * @see ResultPanel
-   * @return        the currently selected tab's URL
+   * 
+   * @see 		ResultPanel
+   * @return		the currently selected tab's URL
    */
   public String getURL() {
     return m_URL;
@@ -481,8 +500,9 @@ public class SqlViewer
   /**
    * returns the user from the currently active tab in the ResultPanel,
    * otherwise an empty string.
-   * @see ResultPanel
-   * @return        the currently selected tab's user
+   * 
+   * @see		ResultPanel
+   * @return		the currently selected tab's user
    */
   public String getUser() {
     return m_User;
@@ -491,8 +511,9 @@ public class SqlViewer
   /**
    * returns the password from the currently active tab in the ResultPanel,
    * otherwise an empty string.
-   * @see ResultPanel
-   * @return        the currently selected tab's password
+   * 
+   * @see 		ResultPanel
+   * @return		the currently selected tab's password
    */
   public String getPassword() {
     return m_Password;
@@ -501,64 +522,72 @@ public class SqlViewer
   /**
    * returns the query from the currently active tab in the ResultPanel,
    * otherwise an empty string.
-   * @see ResultPanel
-   * @return        the currently selected tab's query
+   * 
+   * @see		ResultPanel
+   * @return		the currently selected tab's query
    */
   public String getQuery() {
     return m_Query;
   }
 
   /**
-   * adds the given listener to the list of listeners
-   * @param l       the listener to add to the list
+   * adds the given listener to the list of listeners.
+   * 
+   * @param l		the listener to add to the list
    */
   public void addConnectionListener(ConnectionListener l) {
     m_ConnectionPanel.addConnectionListener(l);
   }
 
   /**
-   * removes the given listener from the list of listeners
-   * @param l       the listener to remove
+   * removes the given listener from the list of listeners.
+   * 
+   * @param l		the listener to remove
    */
   public void removeConnectionListener(ConnectionListener l) {
     m_ConnectionPanel.removeConnectionListener(l);
   }
 
   /**
-   * adds the given listener to the list of listeners
-   * @param l       the listener to add to the list
+   * adds the given listener to the list of listeners.
+   * 
+   * @param l		the listener to add to the list
    */
   public void addQueryExecuteListener(QueryExecuteListener l) {
     m_QueryPanel.addQueryExecuteListener(l);
   }
 
   /**
-   * removes the given listener from the list of listeners
-   * @param l       the listener to remove
+   * removes the given listener from the list of listeners.
+   * 
+   * @param l		the listener to remove
    */
   public void removeQueryExecuteListener(QueryExecuteListener l) {
     m_QueryPanel.removeQueryExecuteListener(l);
   }
 
   /**
-   * adds the given listener to the list of listeners
-   * @param l       the listener to add to the list
+   * adds the given listener to the list of listeners.
+   * 
+   * @param l		the listener to add to the list
    */
   public void addResultChangedListener(ResultChangedListener l) {
     m_ResultPanel.addResultChangedListener(l);
   }
 
   /**
-   * removes the given listener from the list of listeners
-   * @param l       the listener to remove
+   * removes the given listener from the list of listeners.
+   * 
+   * @param l		the listener to remove
    */
   public void removeResultChangedListener(ResultChangedListener l) {
     m_ResultPanel.removeResultChangedListener(l);
   }
 
   /**
-   * adds the given listener to the list of listeners
-   * @param l       the listener to add to the list
+   * adds the given listener to the list of listeners.
+   * 
+   * @param l		the listener to add to the list
    */
   public void addHistoryChangedListener(HistoryChangedListener l) {
     m_ConnectionPanel.addHistoryChangedListener(l);
@@ -566,22 +595,25 @@ public class SqlViewer
   }
 
   /**
-   * removes the given listener from the list of listeners
-   * @param l       the listener to remove
+   * removes the given listener from the list of listeners.
+   * 
+   * @param l		the listener to remove
    */
   public void removeHistoryChangedListener(HistoryChangedListener l) {
     m_ConnectionPanel.removeHistoryChangedListener(l);
     m_QueryPanel.removeHistoryChangedListener(l);
   }
 
-  /** for monitoring the Memory consumption */
+  /** for monitoring the Memory consumption. */
   private static Memory m_Memory = new Memory(true);
   
-  /** the sql viewer */
+  /** the sql viewer. */
   private static SqlViewer m_Viewer;
   
   /**
    * starts the SQL-Viewer interface.
+   * 
+   * @param args	the commandline arguments - ignored
    */
   public static void main(String[] args) {
     LookAndFeel.setLookAndFeel();

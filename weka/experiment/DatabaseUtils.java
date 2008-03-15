@@ -52,93 +52,93 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class DatabaseUtils
   implements Serializable {
 
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = -8252351994547116729L;
   
-  /** The name of the table containing the index to experiments */
+  /** The name of the table containing the index to experiments. */
   public static final String EXP_INDEX_TABLE = "Experiment_index";
 
-  /** The name of the column containing the experiment type (ResultProducer) */
+  /** The name of the column containing the experiment type (ResultProducer). */
   public static final String EXP_TYPE_COL = "Experiment_type";
 
-  /** The name of the column containing the experiment setup (parameters) */
+  /** The name of the column containing the experiment setup (parameters). */
   public static final String EXP_SETUP_COL = "Experiment_setup";
   
-  /** The name of the column containing the results table name */
+  /** The name of the column containing the results table name. */
   public static final String EXP_RESULT_COL = "Result_table";
 
-  /** The prefix for result table names */
+  /** The prefix for result table names. */
   public static final String EXP_RESULT_PREFIX = "Results";
 
-  /** The name of the properties file */
+  /** The name of the properties file. */
   public final static String PROPERTY_FILE = "weka/experiment/DatabaseUtils.props";
 
-  /** Holds the jdbc drivers to be used (only to stop them being gc'ed) */
+  /** Holds the jdbc drivers to be used (only to stop them being gc'ed). */
   protected Vector DRIVERS = new Vector();
 
-  /** keeping track of drivers that couldn't be loaded */
+  /** keeping track of drivers that couldn't be loaded. */
   protected static Vector DRIVERS_ERRORS;
 
-  /** Properties associated with the database connection */
+  /** Properties associated with the database connection. */
   protected Properties PROPERTIES;
 
   /* Type mapping used for reading experiment results */
-  /** Type mapping for STRING used for reading experiment results */
+  /** Type mapping for STRING used for reading experiment results. */
   public static final int STRING = 0;
-  /** Type mapping for BOOL used for reading experiment results */
+  /** Type mapping for BOOL used for reading experiment results. */
   public static final int BOOL = 1;
-  /** Type mapping for DOUBLE used for reading experiment results */
+  /** Type mapping for DOUBLE used for reading experiment results. */
   public static final int DOUBLE = 2;
-  /** Type mapping for BYTE used for reading experiment results */
+  /** Type mapping for BYTE used for reading experiment results. */
   public static final int BYTE = 3;
-  /** Type mapping for SHORT used for reading experiment results */
+  /** Type mapping for SHORT used for reading experiment results. */
   public static final int SHORT = 4;
-  /** Type mapping for INTEGER used for reading experiment results */
+  /** Type mapping for INTEGER used for reading experiment results. */
   public static final int INTEGER = 5;
-  /** Type mapping for LONG used for reading experiment results */
+  /** Type mapping for LONG used for reading experiment results. */
   public static final int LONG = 6;
-  /** Type mapping for FLOAT used for reading experiment results */
+  /** Type mapping for FLOAT used for reading experiment results. */
   public static final int FLOAT = 7;
-  /** Type mapping for DATE used for reading experiment results */
+  /** Type mapping for DATE used for reading experiment results. */
   public static final int DATE = 8; 
-  /** Type mapping for TEXT used for reading, e.g., text blobs */
+  /** Type mapping for TEXT used for reading, e.g., text blobs. */
   public static final int TEXT = 9; 
   
-  /** Database URL */
+  /** Database URL. */
   protected String m_DatabaseURL;
  
   /** The prepared statement used for database queries. */
   protected transient PreparedStatement m_PreparedStatement;
    
-  /** The database connection */
+  /** The database connection. */
   protected transient Connection m_Connection;
 
-  /** True if debugging output should be printed */
+  /** True if debugging output should be printed. */
   protected boolean m_Debug = false;
   
-  /** Database username */
+  /** Database username. */
   protected String m_userName = "";
 
-  /** Database Password */
+  /** Database Password. */
   protected String m_password = "";
 
   /* mappings used for creating Tables. Can be overridden in DatabaseUtils.props*/
-  /** string type for the create table statement */
+  /** string type for the create table statement. */
   protected String m_stringType = "LONGVARCHAR";
-  /** integer type for the create table statement */
+  /** integer type for the create table statement. */
   protected String m_intType = "INT";
-  /** double type for the create table statement */
+  /** double type for the create table statement. */
   protected String m_doubleType = "DOUBLE";
 
-  /** For databases where Tables and Columns are created in upper case */
+  /** For databases where Tables and Columns are created in upper case. */
   protected boolean m_checkForUpperCaseNames = false;
 
-  /** For databases where Tables and Columns are created in lower case */
+  /** For databases where Tables and Columns are created in lower case. */
   protected boolean m_checkForLowerCaseNames = false;
 
   /** setAutoCommit on the database? */
@@ -148,7 +148,7 @@ public class DatabaseUtils
   protected boolean m_createIndex = false;
 
   /**
-   * Reads properties and sets up the database drivers
+   * Reads properties and sets up the database drivers.
    *
    * @throws Exception 	if an error occurs
    */
@@ -353,7 +353,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -381,7 +381,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -391,7 +391,7 @@ public class DatabaseUtils
   }
   
   /**
-   * Sets whether there should be printed some debugging output to stderr or not
+   * Sets whether there should be printed some debugging output to stderr or not.
    * 
    * @param d 		true if output should be printed
    */
@@ -400,7 +400,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Gets whether there should be printed some debugging output to stderr or not
+   * Gets whether there should be printed some debugging output to stderr or not.
    * 
    * @return 		true if output should be printed
    */
@@ -409,7 +409,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -419,7 +419,7 @@ public class DatabaseUtils
   }
 
   /** 
-   * Set the database username 
+   * Set the database username.
    *
    * @param username 	Username for Database.
    */
@@ -428,7 +428,7 @@ public class DatabaseUtils
   }
   
   /** 
-   * Get the database username 
+   * Get the database username.
    *
    * @return 		Database username
    */
@@ -437,7 +437,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -447,7 +447,7 @@ public class DatabaseUtils
   }
 
   /** 
-   * Set the database password
+   * Set the database password.
    *
    * @param password 	Password for Database.
    */
@@ -456,7 +456,7 @@ public class DatabaseUtils
   }
   
   /** 
-   * Get the database password
+   * Get the database password.
    *
    * @return  		Password for Database.
    */
@@ -465,7 +465,7 @@ public class DatabaseUtils
   }
 
   /**
-   * Opens a connection to the database
+   * Opens a connection to the database.
    *
    * @throws Exception 	if an error occurs
    */
@@ -536,6 +536,34 @@ public class DatabaseUtils
   }
 
   /**
+   * Returns whether the cursors only support forward movement or are
+   * scroll sensitive (with ResultSet.CONCUR_READ_ONLY concurrency).
+   * Returns always false if not connected
+   * 
+   * @return		true if connected and the cursor is scroll-sensitive
+   * @see		ResultSet#TYPE_SCROLL_SENSITIVE
+   * @see		ResultSet#TYPE_FORWARD_ONLY
+   * @see		ResultSet#CONCUR_READ_ONLY
+   */
+  public boolean isCursorScrollSensitive() {
+    boolean	result;
+    
+    result = false;
+    
+    try {
+      if (isConnected())
+	result = m_Connection.getMetaData().supportsResultSetConcurrency(
+	    		ResultSet.TYPE_SCROLL_SENSITIVE, 
+	    		ResultSet.CONCUR_READ_ONLY);
+    }
+    catch (Exception e) {
+      // ignored
+    }
+    
+    return result;
+  }
+
+  /**
    * Executes a SQL query. Caller must clean up manually with 
    * <code>close()</code>.
    *
@@ -548,8 +576,12 @@ public class DatabaseUtils
     if (!isConnected())
       throw new IllegalStateException("Not connected, please connect first!");
     
-    m_PreparedStatement = m_Connection.prepareStatement(
-	query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    if (!isCursorScrollSensitive())
+      m_PreparedStatement = m_Connection.prepareStatement(
+	  query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    else
+      m_PreparedStatement = m_Connection.prepareStatement(
+	  query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
     
     return(m_PreparedStatement.execute());
   }
@@ -581,8 +613,13 @@ public class DatabaseUtils
     if (!isConnected())
       throw new IllegalStateException("Not connected, please connect first!");
     
-    Statement statement = m_Connection.createStatement(
-	ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    Statement statement;
+    if (!isCursorScrollSensitive())
+      statement = m_Connection.createStatement(
+	  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    else
+      statement = m_Connection.createStatement(
+	  ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
     int result = statement.executeUpdate(query);
     statement.close();
     
@@ -601,8 +638,13 @@ public class DatabaseUtils
     if (!isConnected())
       throw new IllegalStateException("Not connected, please connect first!");
     
-    Statement statement = m_Connection.createStatement(
-	ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    Statement statement;
+    if (!isCursorScrollSensitive())
+      statement = m_Connection.createStatement(
+	  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+    else
+      statement = m_Connection.createStatement(
+	  ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
     ResultSet result = statement.executeQuery(query);
     
     return result;
@@ -629,7 +671,7 @@ public class DatabaseUtils
   }
   
   /**
-   * closes the m_PreparedStatement to avoid memory leaks
+   * closes the m_PreparedStatement to avoid memory leaks.
    */
   public void close() {
     if (m_PreparedStatement != null) {
@@ -926,7 +968,7 @@ public class DatabaseUtils
   }
   
   /**
-   * Attempts to create the experiment index table
+   * Attempts to create the experiment index table.
    *
    * @throws Exception 	if an error occurs.
    */
