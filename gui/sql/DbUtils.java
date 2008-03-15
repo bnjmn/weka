@@ -25,27 +25,24 @@ package weka.gui.sql;
 import weka.experiment.DatabaseUtils;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
- * A little bit extended DatabaseUtils class.<p>
- * Note: needs at least HSQLDB 1.7.3.3 to work, older versions do not support
- * Cursors that can also move backwards - see <code>execute(String)</code>.
+ * A little bit extended DatabaseUtils class.
  *
  * @see       DatabaseUtils
  * @see       #execute(String)
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.2 $
+ * @version   $Revision: 1.3 $
  */
 public class DbUtils
   extends DatabaseUtils {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 103748569037426479L;
   
   /**
-   * initializes the object
+   * initializes the object.
+   * 
    * @throws Exception      in case something goes wrong in the init of the
    *                        DatabaseUtils constructor
    * @see     DatabaseUtils
@@ -53,23 +50,10 @@ public class DbUtils
   public DbUtils() throws Exception {
     super();
   }
-
+  
   /**
-   * Executes a SQL query. Modified to allow forward and backward scrolling.
-   *
-   * @param query the SQL query
-   * @return true if the query generated results
-   * @exception SQLException if an error occurs
-   */
-  public boolean execute(String query) throws SQLException {
-    m_PreparedStatement = m_Connection.prepareStatement(
-        query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-    return(m_PreparedStatement.execute());
-  }
-
-
-  /**
-   * returns the current database connection
+   * returns the current database connection.
+   * 
    * @return        the current connection instance
    */
   public Connection getConnection() {

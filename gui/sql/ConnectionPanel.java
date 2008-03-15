@@ -53,63 +53,63 @@ import javax.swing.event.CaretEvent;
  * to this database.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision: 1.3 $
  */
-
 public class ConnectionPanel 
   extends JPanel 
   implements CaretListener {
 
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 3499317023969723490L;
   
-  /** the name of the history */
+  /** the name of the history. */
   public final static String HISTORY_NAME = "connection";
   
-  /** the parent frame */
+  /** the parent frame. */
   protected JFrame m_Parent = null;
   
-  /** the databae connection dialog */
+  /** the databae connection dialog. */
   protected DatabaseConnectionDialog m_DbDialog;
 
-  /** the URL to use */
+  /** the URL to use. */
   protected String m_URL = "";
 
-  /** the user to use for connecting to the DB */
+  /** the user to use for connecting to the DB. */
   protected String m_User = "";
 
-  /** the password to use for connecting to the DB */
+  /** the password to use for connecting to the DB. */
   protected String m_Password = "";
 
-  /** the label for the URL */
+  /** the label for the URL. */
   protected JLabel m_LabelURL = new JLabel("URL ");
 
-  /** the textfield for the URL */
+  /** the textfield for the URL. */
   protected JTextField m_TextURL = new JTextField(40);
 
-  /** the button for the DB-Dialog */
+  /** the button for the DB-Dialog. */
   protected JButton m_ButtonDatabase = new JButton("User...");
 
-  /** the button for connecting to the database */
+  /** the button for connecting to the database. */
   protected JButton m_ButtonConnect = new JButton("Connect");
 
-  /** the button for the history */
+  /** the button for the history. */
   protected JButton m_ButtonHistory = new JButton("History...");
 
-  /** the connection listeners */
+  /** the connection listeners. */
   protected HashSet m_ConnectionListeners;
 
-  /** the history listeners */
+  /** the history listeners. */
   protected HashSet m_HistoryChangedListeners;
 
-  /** for connecting to the database */
+  /** for connecting to the database. */
   protected DbUtils m_DbUtils;
 
-  /** the history of connections */
+  /** the history of connections. */
   protected DefaultListModel m_History = new DefaultListModel();
 
   /**
-   * initializes the panel
+   * initializes the panel.
+   * 
    * @param parent      the parent of this panel
    */
   public ConnectionPanel(JFrame parent) {
@@ -136,7 +136,7 @@ public class ConnectionPanel
   }
 
   /**
-   * builds the panel with all its components
+   * builds the panel with all its components.
    */
   protected void createPanel() {
     JPanel        panel;
@@ -168,7 +168,7 @@ public class ConnectionPanel
       });
     panel.add(m_ButtonDatabase);
     
-    m_ButtonConnect.setMnemonic('o');
+    m_ButtonConnect.setMnemonic('n');
     m_ButtonConnect.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  connect();
@@ -187,7 +187,7 @@ public class ConnectionPanel
   }
 
   /**
-   * sets the buttons according to the connected-state
+   * sets the buttons according to the connected-state.
    */
   protected void setButtons() {
     boolean isEmpty;
@@ -200,7 +200,7 @@ public class ConnectionPanel
   }
 
   /**
-   * sets the parameters back to standard
+   * sets the parameters back to standard.
    */
   public void clear() {
     setURL(m_DbUtils.getDatabaseURL());
@@ -209,14 +209,15 @@ public class ConnectionPanel
   }
   
   /**
-   * sets the focus in a designated control
+   * sets the focus in a designated control.
    */
   public void setFocus() {
     m_TextURL.requestFocus();
   }
 
   /**
-   * sets the URL
+   * sets the URL.
+   * 
    * @param url       the new value of the URL
    */
   public void setURL(String url) {
@@ -225,7 +226,7 @@ public class ConnectionPanel
   }
 
   /**
-   * returns the current URL
+   * returns the current URL.
    * 
    * @return the current URL
    */
@@ -235,7 +236,8 @@ public class ConnectionPanel
   }
 
   /**
-   * sets the User
+   * sets the User.
+   * 
    * @param user       the new value of the User
    */
   public void setUser(String user) {
@@ -243,7 +245,7 @@ public class ConnectionPanel
   }
 
   /**
-   * returns the current User
+   * returns the current User.
    * 
    * @return the current user
    */
@@ -252,7 +254,8 @@ public class ConnectionPanel
   }
 
   /**
-   * sets the Password
+   * sets the Password.
+   * 
    * @param pw       the new value of the Password
    */
   public void setPassword(String pw) {
@@ -260,7 +263,7 @@ public class ConnectionPanel
   }
 
   /**
-   * returns the current Password
+   * returns the current Password.
    * 
    * @return the current password
    */
@@ -269,7 +272,8 @@ public class ConnectionPanel
   }
 
   /**
-   * adds the given string to the history (removes duplicates)
+   * adds the given string to the history (removes duplicates).
+   * 
    * @param s           the string to add
    */
   protected void addHistory(String s) {
@@ -287,7 +291,8 @@ public class ConnectionPanel
   }
 
   /**
-   * sets the local history to the given one
+   * sets the local history to the given one.
+   * 
    * @param history     the history to use
    */
   public void setHistory(DefaultListModel history) {
@@ -301,7 +306,8 @@ public class ConnectionPanel
   }
 
   /**
-   * returns the history
+   * returns the history.
+   * 
    * @return        the current history
    */
   public DefaultListModel getHistory() {
@@ -309,7 +315,7 @@ public class ConnectionPanel
   }
 
   /**
-   * displays the database dialog
+   * displays the database dialog.
    */
   protected void showDialog() {
     m_DbDialog = new DatabaseConnectionDialog(m_Parent, getURL(), getUser(), false);
@@ -324,7 +330,7 @@ public class ConnectionPanel
   }
 
   /**
-   * connects to the database, notifies the listeners
+   * connects to the database, notifies the listeners.
    */
   protected void connect() {
     // disconnect if still connected
@@ -358,7 +364,7 @@ public class ConnectionPanel
   }
 
   /**
-   * displays the query history
+   * displays the query history.
    */
   public void showHistory() {
     JList                 list;
@@ -387,7 +393,8 @@ public class ConnectionPanel
   }
 
   /**
-   * adds the given listener to the list of listeners
+   * adds the given listener to the list of listeners.
+   * 
    * @param l       the listener to add to the list
    */
   public void addConnectionListener(ConnectionListener l) {
@@ -395,7 +402,8 @@ public class ConnectionPanel
   }
 
   /**
-   * removes the given listener from the list of listeners
+   * removes the given listener from the list of listeners.
+   * 
    * @param l       the listener to remove
    */
   public void removeConnectionListener(ConnectionListener l) {
@@ -403,7 +411,8 @@ public class ConnectionPanel
   }
 
   /**
-   * notifies the connection listeners of the event
+   * notifies the connection listeners of the event.
+   * 
    * @param type      the type of the action, CONNECT or DISCONNECT
    */
   protected void notifyConnectionListeners(int type) {
@@ -411,7 +420,8 @@ public class ConnectionPanel
   }
 
   /**
-   * notifies the connection listeners of the event
+   * notifies the connection listeners of the event.
+   * 
    * @param type      the type of the action, CONNECT or DISCONNECT
    * @param ex        an optional exception that happened (indicates failure!)
    */
@@ -428,7 +438,8 @@ public class ConnectionPanel
   }
 
   /**
-   * adds the given listener to the list of listeners
+   * adds the given listener to the list of listeners.
+   * 
    * @param l       the listener to add to the list
    */
   public void addHistoryChangedListener(HistoryChangedListener l) {
@@ -436,7 +447,8 @@ public class ConnectionPanel
   }
 
   /**
-   * removes the given listener from the list of listeners
+   * removes the given listener from the list of listeners.
+   * 
    * @param l       the listener to remove
    */
   public void removeHistoryChangedListener(HistoryChangedListener l) {
@@ -444,7 +456,7 @@ public class ConnectionPanel
   }
 
   /**
-   * notifies the history listeners of the event
+   * notifies the history listeners of the event.
    */
   protected void notifyHistoryChangedListeners() {
     Iterator                iter;

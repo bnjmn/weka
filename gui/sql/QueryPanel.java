@@ -57,56 +57,57 @@ import javax.swing.event.CaretListener;
  * Represents a panel for entering an SQL query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision: 1.4 $
  */
 public class QueryPanel 
   extends JPanel 
   implements ConnectionListener, CaretListener {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 4348967824619706636L;
 
-  /** the name of the history */
+  /** the name of the history. */
   public final static String HISTORY_NAME = "query";
 
-  /** the name for the max rows in the history */
+  /** the name for the max rows in the history. */
   public final static String MAX_ROWS = "max_rows";
   
-  /** the parent of this panel */
+  /** the parent of this panel. */
   protected JFrame m_Parent;
 
-  /** the textarea for the query */
+  /** the textarea for the query. */
   protected JTextArea m_TextQuery;
 
-  /** the execute button */
+  /** the execute button. */
   protected JButton m_ButtonExecute = new JButton("Execute");
 
-  /** the clear button */
+  /** the clear button. */
   protected JButton m_ButtonClear = new JButton("Clear");
 
-  /** the history button */
+  /** the history button. */
   protected JButton m_ButtonHistory = new JButton("History...");
 
-  /** the spinner for the maximum number of rows */
+  /** the spinner for the maximum number of rows. */
   protected JSpinner m_SpinnerMaxRows = new JSpinner();
 
-  /** the connection listeners */
+  /** the connection listeners. */
   protected HashSet m_QueryExecuteListeners;
 
-  /** the history listeners */
+  /** the history listeners. */
   protected HashSet m_HistoryChangedListeners;
 
-  /** for working on the database */
+  /** for working on the database. */
   protected DbUtils m_DbUtils;
 
-  /** whether we have a connection to a database or not */
+  /** whether we have a connection to a database or not. */
   protected boolean m_Connected;
 
-  /** the query history */
+  /** the query history. */
   protected DefaultListModel m_History = new DefaultListModel();
   
   /**
-   * initializes the panel
+   * initializes the panel.
+   * 
    * @param parent        the parent of this panel
    */
   public QueryPanel(JFrame parent) {
@@ -122,7 +123,7 @@ public class QueryPanel
   }
 
   /**
-   * creates the panel with all its components
+   * creates the panel with all its components.
    */
   protected void createPanel() {
     JPanel              panel;
@@ -151,7 +152,7 @@ public class QueryPanel
     panel.add(m_ButtonExecute, BorderLayout.NORTH);
     panel2 = new JPanel(new BorderLayout());
     panel.add(panel2, BorderLayout.CENTER);
-    m_ButtonClear.setMnemonic('C');
+    m_ButtonClear.setMnemonic('r');
     m_ButtonClear.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  clear();
@@ -186,14 +187,14 @@ public class QueryPanel
   }
 
   /**
-   * sets the focus in a designated control
+   * sets the focus in a designated control.
    */
   public void setFocus() {
     m_TextQuery.requestFocus();
   }
 
   /**
-   * sets the buttons according to the connected-state
+   * sets the buttons according to the connected-state.
    */
   protected void setButtons() {
     boolean isEmpty;
@@ -208,6 +209,8 @@ public class QueryPanel
   /**
    * This method gets called when the connection is either established
    * or disconnected.
+   * 
+   * @param evt		the event
    */
   public void connectionChange(ConnectionEvent evt) {
     m_Connected = evt.isConnected();
@@ -216,7 +219,7 @@ public class QueryPanel
   }
 
   /**
-   * executes the current query
+   * executes the current query.
    */
   public void execute() {
     Exception     ex;
@@ -259,7 +262,7 @@ public class QueryPanel
   }
 
   /**
-   * clears the textarea
+   * clears the textarea.
    */
   public void clear() {
     m_TextQuery.setText("");
@@ -267,7 +270,8 @@ public class QueryPanel
   }
 
   /**
-   * adds the given string to the history (removes duplicates)
+   * adds the given string to the history (removes duplicates).
+   * 
    * @param s           the string to add
    */
   protected void addHistory(String s) {
@@ -285,7 +289,8 @@ public class QueryPanel
   }
 
   /**
-   * sets the local history to the given one
+   * sets the local history to the given one.
+   * 
    * @param history     the history to use
    */
   public void setHistory(DefaultListModel history) {
@@ -299,7 +304,8 @@ public class QueryPanel
   }
 
   /**
-   * returns the history
+   * returns the history.
+   * 
    * @return        the current history
    */
   public DefaultListModel getHistory() {
@@ -307,7 +313,7 @@ public class QueryPanel
   }
 
   /**
-   * displays the query history
+   * displays the query history.
    */
   public void showHistory() {
     JList                 list;
@@ -325,7 +331,8 @@ public class QueryPanel
   }
 
   /**
-   * sets the query in the textarea
+   * sets the query in the textarea.
+   * 
    * @param query         the query to display
    */
   public void setQuery(String query) {
@@ -333,7 +340,9 @@ public class QueryPanel
   }
 
   /**
-   * returns the currently displayed query
+   * returns the currently displayed query.
+   * 
+   * @return		the query
    */
   public String getQuery() {
     return m_TextQuery.getText();
@@ -341,6 +350,8 @@ public class QueryPanel
 
   /**
    * sets the maximum number of rows to display. 0 means unlimited.
+   * 
+   * @param rows	the maximum number of rows
    */
   public void setMaxRows(int rows) {
     if (rows >= 0)
@@ -350,13 +361,16 @@ public class QueryPanel
   /**
    * returns the current value for the maximum number of rows. 0 means
    * unlimited.
+   * 
+   * @return		the maximum number of rows
    */
   public int getMaxRows() {
     return ((Integer) m_SpinnerMaxRows.getValue()).intValue();
   }
 
   /**
-   * adds the given listener to the list of listeners
+   * adds the given listener to the list of listeners.
+   * 
    * @param l       the listener to add to the list
    */
   public void addQueryExecuteListener(QueryExecuteListener l) {
@@ -364,7 +378,8 @@ public class QueryPanel
   }
 
   /**
-   * removes the given listener from the list of listeners
+   * removes the given listener from the list of listeners.
+   * 
    * @param l       the listener to remove
    */
   public void removeQueryExecuteListener(QueryExecuteListener l) {
@@ -372,7 +387,10 @@ public class QueryPanel
   }
 
   /**
-   * notifies the listeners of the event
+   * notifies the listeners of the event.
+   * 
+   * @param rs		the resultset
+   * @param ex		the exception
    */
   protected void notifyQueryExecuteListeners(ResultSet rs, Exception ex) {
     Iterator              iter;
@@ -388,7 +406,8 @@ public class QueryPanel
   }
 
   /**
-   * adds the given listener to the list of listeners
+   * adds the given listener to the list of listeners.
+   * 
    * @param l       the listener to add to the list
    */
   public void addHistoryChangedListener(HistoryChangedListener l) {
@@ -396,7 +415,8 @@ public class QueryPanel
   }
 
   /**
-   * removes the given listener from the list of listeners
+   * removes the given listener from the list of listeners.
+   * 
    * @param l       the listener to remove
    */
   public void removeHistoryChangedListener(HistoryChangedListener l) {
@@ -404,7 +424,7 @@ public class QueryPanel
   }
 
   /**
-   * notifies the history listeners of the event
+   * notifies the history listeners of the event.
    */
   protected void notifyHistoryChangedListeners() {
     Iterator                iter;
@@ -420,6 +440,8 @@ public class QueryPanel
 
   /**
    * Called when the caret position is updated.
+   * 
+   * @param event	the event
    */
   public void caretUpdate(CaretEvent event) {
     setButtons();
