@@ -81,7 +81,7 @@ import java.util.Vector;
  *  Use supervised discretization to process numeric attributes
  * </pre>
  *
- * <pre>
+ * <pre> -O
  *  Display model in old format (good when there are many classes)
  * </pre>
  * 
@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.25 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
@@ -420,7 +420,7 @@ implements OptionHandler, WeightedInstancesHandler,
    *  Use supervised discretization to process numeric attributes
    * </pre>
    *
-   * <pre>
+   * <pre> -O
    *  Display model in old format (good when there are many classes)
    * </pre>
    * 
