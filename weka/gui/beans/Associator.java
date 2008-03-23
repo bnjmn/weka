@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -219,7 +219,7 @@ public class Associator
 		      modelString = "=== Associator model ===\n\n" +
 			"Scheme:   " +titleString+"\n" +
 			"Relation: "  + trainingData.relationName() + 
-                        "/n/m"
+                        "\n\n"
 			+ modelString;
 		      titleString = "Model: " + titleString;
 
