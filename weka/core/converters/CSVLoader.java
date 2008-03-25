@@ -41,7 +41,7 @@ import java.lang.String;
  * Reads a text file that is comma or tab delimited..
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.3 $
+ * @version $Revision: 1.9.2.4 $
  * @see Loader
  */
 public class CSVLoader extends AbstractLoader 
@@ -356,7 +356,7 @@ implements FileSourcedConverter, BatchConverter {
 
       if (tokenizer.ttype == ',' || tokenizer.ttype == '\t' || 
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
-	current.addElement("?");
+	current.addElement("'?'");
 	wasSep = true;
       } else if (tokenizer.ttype == '?') {
         wasSep = false;
