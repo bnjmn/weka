@@ -53,7 +53,7 @@ import java.util.Vector;
  * is set then the class is automatically ignored during clustering.<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class AddCluster extends Filter implements UnsupervisedFilter, OptionHandler {
 
@@ -208,8 +208,14 @@ public class AddCluster extends Filter implements UnsupervisedFilter, OptionHand
     }
 
     // add cluster to end
-    instanceVals[instance.numAttributes()]
-      = m_Clusterer.clusterInstance(filteredI);
+    try {
+      instanceVals[instance.numAttributes()] = m_Clusterer.clusterInstance(filteredI);
+    }
+    catch (Exception e) {
+      // clusterer couldn't cluster instance -> missing
+      instanceVals[instance.numAttributes()] = Instance.missingValue();
+    }
+
 
     // create new instance
     if (original instanceof SparseInstance) {
