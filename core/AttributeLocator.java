@@ -29,7 +29,7 @@ import java.util.Vector;
  * recursively in case of Relational attributes.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @see Attribute#RELATIONAL
  */
 public class AttributeLocator 
@@ -111,7 +111,7 @@ public class AttributeLocator
    * @param indices	the indices that are allowed to check
    */
   protected void initialize(Instances data, int type, int[] indices) {
-    m_Data = data;
+    m_Data = new Instances(data, 0);
     m_Type = type;
     
     m_AllowedIndices = new int[indices.length];
