@@ -43,7 +43,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.3 $
+ * @version $Revision: 1.16.2.4 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -75,6 +75,11 @@ public class Loader
    * Thread for doing IO in
    */
   private LoadThread m_ioThread;
+
+  private static int IDLE = 0;
+  private static int BATCH_LOADING = 1;
+  private static int INCREMENTAL_LOADING = 2;
+  private int m_state = IDLE;
 
   /**
    * Loader
@@ -112,9 +117,11 @@ public class Loader
 	  } */
 	if (m_dataSetEventTargets > 0) {
 	  instanceGeneration = false;
+          m_state = BATCH_LOADING;
 	}
 
 	if (instanceGeneration) {
+          m_state = INCREMENTAL_LOADING;
 	  //	  boolean start = true;
 	  Instance nextInstance = null;
 	  // load and pass on the structure first
@@ -171,6 +178,8 @@ public class Loader
 	//	m_visual.setText("Finished");
 	//	m_visual.setIcon(m_inactive.getVisual());
 	m_visual.setStatic();
+        m_state = IDLE;
+        block(false);
       }
     }
   }
@@ -366,11 +375,13 @@ public class Loader
   public void startLoading() {
     if (m_ioThread == null) {
       //      m_visual.setText(m_dataSetFile.getName());
+      m_state = BATCH_LOADING;
       m_ioThread = new LoadThread(Loader.this);
       m_ioThread.setPriority(Thread.MIN_PRIORITY);
       m_ioThread.start();
     } else {
       m_ioThread = null;
+      m_state = IDLE;
     }
   }
 
@@ -419,6 +430,29 @@ public class Loader
    */
   public void start() throws Exception {
     startLoading();
+    block(true);
+  }
+  
+  /**
+   * Function used to stop code that calls acceptTrainingSet. This is 
+   * needed as classifier construction is performed inside a separate
+   * thread of execution.
+   *
+   * @param tf a <code>boolean</code> value
+   */
+  private synchronized void block(boolean tf) {
+
+    if (tf) {
+      try {
+	  // only block if thread is still doing something useful!
+	if (m_ioThread.isAlive() && m_state != IDLE) {
+	  wait();
+        }
+      } catch (InterruptedException ex) {
+      }
+    } else {
+      notifyAll();
+    }
   }
 
   /**
