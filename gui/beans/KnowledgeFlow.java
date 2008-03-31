@@ -26,7 +26,7 @@ package weka.gui.beans;
  * Startup class for the KnowledgeFlow. Displays a splash screen.
  *
  * @author Mark Hall
- * @version  $Revision: 1.29 $
+ * @version  $Revision: 1.29.2.1 $
  */
 public class KnowledgeFlow {
 
@@ -47,7 +47,7 @@ public class KnowledgeFlow {
     Thread nt = new Thread() {
         public void run() {
           weka.gui.SplashWindow.invokeMethod("weka.gui.beans.KnowledgeFlowApp", 
-                                             "createSingleton", new String [1]);
+                                             "createSingleton", null);
         }};
       nt.start();
   }
