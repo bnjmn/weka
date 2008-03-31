@@ -28,7 +28,7 @@ import java.io.Serializable;
  * A <code>Tag</code> simply associates a numeric ID with a String description.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Tag implements Serializable {
 
@@ -40,7 +40,15 @@ public class Tag implements Serializable {
   
   /** The descriptive text */
   protected String m_Readable;
-  
+
+  /**
+   * Creates a new default Tag
+   *
+   */
+  public Tag() {
+    this(0, "A new tag", "A new tag", true);
+  }
+
   /**
    * Creates a new <code>Tag</code> instance.
    *
@@ -85,6 +93,15 @@ public class Tag implements Serializable {
   }
 
   /**
+   * Sets the numeric ID of the Tag.
+   *
+   * @param id the ID of the Tag.
+   */
+  public void setID(int id) {
+    m_ID = id;
+  } 
+
+  /**
    * Gets the string ID of the Tag.
    *
    * @return the string ID of the Tag.
@@ -94,12 +111,30 @@ public class Tag implements Serializable {
   }
 
   /**
+   * Sets the string ID of the Tag.
+   *
+   * @param str the string ID of the Tag.
+   */
+  public void setIDStr(String str) {
+    m_IDStr = str;
+  }
+
+  /**
    * Gets the string description of the Tag.
    *
    * @return the description of the Tag.
    */
   public String getReadable() {
     return m_Readable;
+  }
+
+  /**
+   * Sets the string description of the Tag.
+   *
+   * @param r the description of the Tag.
+   */
+  public void setReadable(String r) {
+    m_Readable = r;
   }
   
   /**
