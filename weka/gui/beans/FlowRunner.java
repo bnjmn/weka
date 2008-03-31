@@ -40,7 +40,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class FlowRunner {
 
@@ -48,6 +48,14 @@ public class FlowRunner {
   protected Vector m_beans;
 
   protected int m_runningCount = 0;
+
+  /**
+   * Constructor
+   */
+  public FlowRunner() {
+    // make sure that properties and plugins are loaded
+    KnowledgeFlowApp.loadProperties();
+  }
 
   protected void launchThread(final Startable s, final int flowNum) {
     Thread t = new Thread() {
