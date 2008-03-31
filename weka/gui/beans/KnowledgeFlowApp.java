@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.6 $
+ * @version  $Revision: 1.18.2.7 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -155,70 +155,72 @@ public class KnowledgeFlowApp
    * the classpath)
    */
   public static void loadProperties() {
-    System.err.println("Loading properties and plugins...");
-    /** Loads the configuration property file */
-    //  static {
-    // Allow a properties file in the current directory to override
-    try {
-      BEAN_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
-      java.util.Enumeration keys =
-        (java.util.Enumeration)BEAN_PROPERTIES.propertyNames();
-      if (!keys.hasMoreElements()) {
-        throw new Exception( "Could not read a configuration file for the bean\n"
-                             +"panel. An example file is included with the Weka distribution.\n"
-                             +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
-                             +"should be placed either in your user home (which is set\n"
-                             + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-                             + "or the directory that java was started from\n");
-      }
-    } catch (Exception ex) {
-      JOptionPane.showMessageDialog(null,
-				    ex.getMessage(),
-				    "KnowledgeFlow",
-				    JOptionPane.ERROR_MESSAGE);
-    }
-
-
-    // try and load any plugin beans properties
-    File pluginDir = new File(System.getProperty("user.home")
-                              +File.separator+".knowledgeFlow"
-                              +File.separator+"plugins");
-    if (pluginDir.exists() && pluginDir.isDirectory()) {
-      BEAN_PLUGINS_PROPERTIES = new ArrayList<Properties>();
-      // How many sub-dirs are there?
-      File[] contents = pluginDir.listFiles();
-      for (int i = 0; i < contents.length; i++) {
-        if (contents[i].isDirectory() && 
-            contents[i].listFiles().length > 0) {
-          try {      
-            Properties tempP = new Properties();
-            File propFile = new File(contents[i].getPath()
-                                     + File.separator
-                                     + "Beans.props");
-            tempP.load(new FileInputStream(propFile));
-            BEAN_PLUGINS_PROPERTIES.add(tempP);
-
-            // Now try and add all jar files in this directory to the classpath
-            File anyJars[] = contents[i].listFiles();
-            for (int j = 0; j < anyJars.length; j++) {
-              if (anyJars[j].getPath().endsWith(".jar")) {
-                System.err.println("Plugins: adding "+anyJars[j].getPath()
-                                   +" to classpath...");
-                ClassloaderUtil.addFile(anyJars[j].getPath());
-              }
-            }
-          } catch (Exception ex) {
-            // Don't make a fuss
-            System.err.println("Unable to load bean properties for plugin "
-                               +"directory: " + contents[i].getPath());
-          }
+    if (BEAN_PROPERTIES == null) {
+      System.err.println("Loading properties and plugins...");
+      /** Loads the configuration property file */
+      //  static {
+      // Allow a properties file in the current directory to override
+      try {
+        BEAN_PROPERTIES = Utils.readProperties(PROPERTY_FILE);
+        java.util.Enumeration keys =
+          (java.util.Enumeration)BEAN_PROPERTIES.propertyNames();
+        if (!keys.hasMoreElements()) {
+          throw new Exception( "Could not read a configuration file for the bean\n"
+                               +"panel. An example file is included with the Weka distribution.\n"
+                               +"This file should be named \"" + PROPERTY_FILE + "\" and\n"
+                               +"should be placed either in your user home (which is set\n"
+                               + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
+                               + "or the directory that java was started from\n");
         }
-        //        BEAN_PLUGINS_PROPERTIES = new Properties();
-        //        BEAN_PLUGINS_PROPERTIES.load(new FileInputStream(pluginDir));
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(null,
+                                      ex.getMessage(),
+                                      "KnowledgeFlow",
+                                      JOptionPane.ERROR_MESSAGE);
       }
-    } else {
-      // make the plugin directory for the user
-      pluginDir.mkdir();
+
+
+      // try and load any plugin beans properties
+      File pluginDir = new File(System.getProperty("user.home")
+                                +File.separator+".knowledgeFlow"
+                                +File.separator+"plugins");
+      if (pluginDir.exists() && pluginDir.isDirectory()) {
+        BEAN_PLUGINS_PROPERTIES = new ArrayList<Properties>();
+        // How many sub-dirs are there?
+        File[] contents = pluginDir.listFiles();
+        for (int i = 0; i < contents.length; i++) {
+          if (contents[i].isDirectory() && 
+              contents[i].listFiles().length > 0) {
+            try {      
+              Properties tempP = new Properties();
+              File propFile = new File(contents[i].getPath()
+                                       + File.separator
+                                       + "Beans.props");
+              tempP.load(new FileInputStream(propFile));
+              BEAN_PLUGINS_PROPERTIES.add(tempP);
+
+              // Now try and add all jar files in this directory to the classpath
+              File anyJars[] = contents[i].listFiles();
+              for (int j = 0; j < anyJars.length; j++) {
+                if (anyJars[j].getPath().endsWith(".jar")) {
+                  System.err.println("Plugins: adding "+anyJars[j].getPath()
+                                     +" to classpath...");
+                  ClassloaderUtil.addFile(anyJars[j].getPath());
+                }
+              }
+            } catch (Exception ex) {
+              // Don't make a fuss
+              System.err.println("Unable to load bean properties for plugin "
+                                 +"directory: " + contents[i].getPath());
+            }
+          }
+          //        BEAN_PLUGINS_PROPERTIES = new Properties();
+          //        BEAN_PLUGINS_PROPERTIES.load(new FileInputStream(pluginDir));
+        }
+      } else {
+        // make the plugin directory for the user
+        pluginDir.mkdir();
+      }
     }
   }
 
@@ -226,7 +228,7 @@ public class KnowledgeFlowApp
    * Initializes the temporary files necessary to construct the toolbars
    * from.
    */
-  public static void init() {
+  private static void init() {
     System.err.println("Initializing KF...");
 
     try {
@@ -370,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.6 $
+   * @version $Revision: 1.18.2.7 $
    * @since 1.0
    * @see PrintablePanel
    */
