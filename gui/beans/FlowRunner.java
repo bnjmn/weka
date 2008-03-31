@@ -33,59 +33,129 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import weka.gui.beans.xml.*;
+
 /**
  * Small utility class for executing KnowledgeFlow
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class FlowRunner {
 
-  protected void launchThread(final Startable s) {
+  /** The potential flow(s) to execute */
+  protected Vector m_beans;
+
+  protected int m_runningCount = 0;
+
+  protected void launchThread(final Startable s, final int flowNum) {
     Thread t = new Thread() {
+        private int m_num = flowNum;
         public void run() {
           try {
             s.start();
           } catch (Exception ex) {
             ex.printStackTrace();
             System.err.println(ex.getMessage());
+          } finally {
+            System.err.println("Flow " + m_num + " finished.");
+            decreaseCount();
           }
         }
       };
     
+    m_runningCount++;
     t.setPriority(Thread.MIN_PRIORITY);
     t.start();
   }
 
-  protected void loadAndRun(String fileName) throws Exception {
+  protected synchronized void decreaseCount() {
+    m_runningCount--;
+  }
+
+  /**
+   * Waits until all flows have finished executing before returning
+   *
+   */
+  public void waitUntilFinished() {
+    try {
+      while (m_runningCount > 0) {
+        Thread.sleep(200);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Load a binary serialized KnowledgeFlow
+   *
+   * @param fileName the name of the file to load from
+   * @throws Exception if something goes wrong
+   */
+  public void loadBinary(String fileName) throws Exception {
     if (!fileName.endsWith(".kf")) {
-      throw new Exception("Can only load and run binary serialized KnowledgeFlows (*.kf)");
+      throw new Exception("File must be a binary flow (*.kf)");
     }
 
-    Vector beans = null;
     InputStream is = new FileInputStream(fileName);
     ObjectInputStream ois = new ObjectInputStream(is);
-    beans = (Vector)ois.readObject();
+    m_beans = (Vector)ois.readObject();
     
     // don't need the graphical connections
     ois.close();
+  }
+
+  /**
+   * Load an XML serialized KnowledgeFlow
+   *
+   * @param fileName the name of the file to load from
+   * @throws Exception if something goes wrong
+   */
+  public void loadXML(String fileName) throws Exception {
+    if (!fileName.endsWith(".kfml")) {
+      throw new Exception("File must be an XML flow (*.kfml)");
+    }
+
+    XMLBeans xml = new XMLBeans(null, null);
+    Vector v = (Vector) xml.read(new File(fileName));
+    m_beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+  }
+
+  /**
+   * Launch all loaded KnowledgeFlow
+   *
+   * @throws Exception if something goes wrong during execution
+   */
+  public void run() throws Exception {
+
+    if (m_beans == null) {
+      throw new Exception("Don't seem to have any beans I can execute.");
+    }
     
     int numFlows = 1;
 
     // look for a Startable bean...
-    for (int i = 0; i < beans.size(); i++) {
-      BeanInstance tempB = (BeanInstance)beans.elementAt(i);
+    for (int i = 0; i < m_beans.size(); i++) {
+      BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
       if (tempB.getBean() instanceof Startable) {
         Startable s = (Startable)tempB.getBean();
         // start that sucker...
-        System.out.println("Launching flow "+numFlows+"...");
+        System.err.println("Launching flow "+numFlows+"...");
+        launchThread(s, numFlows);
         numFlows++;
-        launchThread(s);
       }
     }
   }
 
+  /**
+   * Main method for testing this class. <p>
+   * <br>Usage:<br><br>
+   * <pre>Usage:\n\nFlowRunner <serialized kf file></pre>
+   *
+   * @param args command line arguments
+   */
   public static void main(String[] args) {
     
     if (args.length != 1) {
@@ -93,7 +163,21 @@ public class FlowRunner {
     } else {
       try {
         FlowRunner fr = new FlowRunner();
-        fr.loadAndRun(args[0]);
+        String fileName = args[0];
+        if (!fileName.endsWith(".kf") && !fileName.endsWith(".kfml")) {
+          throw new Exception("Can only load and run binary or xml serialized KnowledgeFlows "
+                              + "(*.kf | *.kfml)");
+        }
+        
+        if (fileName.endsWith(".kf")) {
+          fr.loadBinary(fileName);
+        } else if (fileName.endsWith(".kfml")) {
+          fr.loadXML(fileName);
+        }
+
+        fr.run();
+        fr.waitUntilFinished();
+        System.err.println("Finished all flows.");
       } catch (Exception ex) {
         ex.printStackTrace();
         System.err.println(ex.getMessage());
