@@ -40,7 +40,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FlowRunner {
 
@@ -93,6 +93,25 @@ public class FlowRunner {
       }
     } catch (Exception ex) {
       ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Load a serialized KnowledgeFlow (either binary or xml)
+   *
+   * @param fileName the name of the file to load from
+   * @throws Exception if something goes wrong
+   */
+  public void load(String fileName) throws Exception {
+    if (!fileName.endsWith(".kf") && !fileName.endsWith(".kfml")) {
+      throw new Exception("Can only load and run binary or xml serialized KnowledgeFlows "
+                          + "(*.kf | *.kfml)");
+    }
+    
+    if (fileName.endsWith(".kf")) {
+      loadBinary(fileName);
+    } else if (fileName.endsWith(".kfml")) {
+      loadXML(fileName);
     }
   }
 
@@ -172,17 +191,8 @@ public class FlowRunner {
       try {
         FlowRunner fr = new FlowRunner();
         String fileName = args[0];
-        if (!fileName.endsWith(".kf") && !fileName.endsWith(".kfml")) {
-          throw new Exception("Can only load and run binary or xml serialized KnowledgeFlows "
-                              + "(*.kf | *.kfml)");
-        }
-        
-        if (fileName.endsWith(".kf")) {
-          fr.loadBinary(fileName);
-        } else if (fileName.endsWith(".kfml")) {
-          fr.loadXML(fileName);
-        }
 
+        fr.load(fileName);
         fr.run();
         fr.waitUntilFinished();
         System.err.println("Finished all flows.");
