@@ -40,7 +40,7 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.zip.GZIPInputStream;
+
 
 /**
  <!-- globalinfo-start -->
@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.18.2.2 $
+ * @version $Revision: 1.18.2.3 $
  * @see Loader
  */
 public class ArffLoader 
@@ -62,8 +62,6 @@ public class ArffLoader
   
   /** the file extension */
   public static String FILE_EXTENSION = Instances.FILE_EXTENSION;
-
-  /** the extension for compressed files */
   public static String FILE_EXTENSION_COMPRESSED = FILE_EXTENSION + ".gz";
 
   /** the url */
@@ -101,7 +99,7 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.18.2.2 $
+   * @version $Revision: 1.18.2.3 $
    */
   public static class ArffReader {
 
@@ -916,35 +914,6 @@ public class ArffLoader
   public void setFile(File file) throws IOException {
     m_File = file.getAbsolutePath();
     setSource(file);
-  }
-
-  /**
-   * Resets the Loader object and sets the source of the data set to be 
-   * the supplied File object.
-   *
-   * @param file 		the source file.
-   * @throws IOException 	if an error occurs
-   */
-  public void setSource(File file) throws IOException {
-    m_structure = null;
-    
-    setRetrieval(NONE);
-
-    if (file == null)
-      throw new IOException("Source file object is null!");
-
-    try {
-      if (file.getName().endsWith(FILE_EXTENSION_COMPRESSED))
-	setSource(new GZIPInputStream(new FileInputStream(file)));
-      else
-	setSource(new FileInputStream(file));
-    }
-    catch (FileNotFoundException ex) {
-      throw new IOException("File not found");
-    }
-    
-    m_sourceFile = file;
-    m_File       = file.getAbsolutePath();
   }
 
   /**
