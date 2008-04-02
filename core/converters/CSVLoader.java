@@ -46,7 +46,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.4 $
+ * @version $Revision: 1.13.2.5 $
  * @see Loader
  */
 public class CSVLoader 
@@ -135,8 +135,9 @@ public class CSVLoader
 
     m_StreamBuffer = new StringBuffer();
     reader         = new BufferedReader(new InputStreamReader(input));
-    while ((line = reader.readLine()) != null)
+    while ((line = reader.readLine()) != null) {
       m_StreamBuffer.append(line + "\n");
+    }
   }
 
   /**
@@ -148,8 +149,6 @@ public class CSVLoader
    */
   public void setSource(File file) throws IOException {
     super.setSource(file);
-    
-    m_StreamBuffer = null;
   }
 
   /**
@@ -204,13 +203,13 @@ public class CSVLoader
       throw new IOException("No source has been specified");
     }
     BufferedReader br;
-    if (m_sourceFile != null) {
+    /*    if (m_sourceFile != null) {
       setSource(m_sourceFile);
       br = new BufferedReader(new FileReader(m_sourceFile));
-    }
-    else {
-      br = new BufferedReader(new StringReader(m_StreamBuffer.toString()));
-    }
+      }
+      else { */
+    br = new BufferedReader(new StringReader(m_StreamBuffer.toString()));
+   
     StreamTokenizer st = new StreamTokenizer(br);
     initTokenizer(st);
     readStructure(st);
