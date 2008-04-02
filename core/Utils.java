@@ -36,7 +36,7 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.57 $
+ * @version $Revision: 1.57.2.1 $
  */
 public final class Utils {
 
@@ -72,7 +72,8 @@ public final class Utils {
     try {
       // Apparently hardcoded slashes are OK here
       // jdk1.1/docs/guide/misc/resources.html
-      defaultProps.load(ClassLoader.getSystemResourceAsStream(resourceName));
+      //      defaultProps.load(ClassLoader.getSystemResourceAsStream(resourceName));
+      defaultProps.load((new Utils()).getClass().getClassLoader().getResourceAsStream(resourceName));
     } catch (Exception ex) {
 /*      throw new Exception("Problem reading default properties: "
 	+ ex.getMessage()); */
