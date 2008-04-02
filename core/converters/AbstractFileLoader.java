@@ -29,13 +29,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.zip.GZIPInputStream;
 
 
 /**
  * Abstract superclass for all file loaders.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader
@@ -49,6 +50,9 @@ public abstract class AbstractFileLoader
 
   /** Holds the source of the data set. */
   protected File m_sourceFile = null;
+
+  /** the extension for compressed files */
+  public static String FILE_EXTENSION_COMPRESSED = ".gz";
 
   /**
    * get the File specified as the source
@@ -87,9 +91,39 @@ public abstract class AbstractFileLoader
    * Resets the Loader object and sets the source of the data set to be 
    * the supplied File object.
    *
+   * @param file 		the source file.
+   * @throws IOException 	if an error occurs
+   */
+  public void setSource(File file) throws IOException {
+    m_structure = null;
+    
+    setRetrieval(NONE);
+
+    if (file == null)
+      throw new IOException("Source file object is null!");
+
+    try {
+      if (file.getName().endsWith(getFileExtension() + FILE_EXTENSION_COMPRESSED)) {
+	setSource(new GZIPInputStream(new FileInputStream(file)));
+      } else {
+	setSource(new FileInputStream(file));
+      }
+    }
+    catch (FileNotFoundException ex) {
+      throw new IOException("File not found");
+    }
+    
+    m_sourceFile = file;
+    m_File       = file.getAbsolutePath();
+    }
+
+  /**
+   * Resets the Loader object and sets the source of the data set to be 
+   * the supplied File object.
+   *
    * @param file the source file.
    * @exception IOException if an error occurs
-   */
+   *
   public void setSource(File file) throws IOException {
     m_structure = null;
     setRetrieval(NONE);
@@ -107,7 +141,7 @@ public abstract class AbstractFileLoader
 
     m_sourceFile = file;
     m_File       = file.getAbsolutePath();
-  }
+    } */
 
   /**
    * generates a string suitable for output on the command line displaying
