@@ -58,7 +58,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -95,6 +95,8 @@ public class XMLBeans
   
   /** the value of the prefix property */
   public final static String VAL_PREFIX = "prefix";
+
+  public final static String VAL_RELATIVE_PATH = "useRelativePath";
   
   /** the value of the options property */
   public final static String VAL_OPTIONS = "options";
@@ -1550,12 +1552,28 @@ public class XMLBeans
 
     if (!known)
       System.out.println("WARNING: unknown loader class '" + loader.getClass().getName() + "' - cannot retrieve file!");
+
+    Boolean relativeB = null;
+    if (loader instanceof weka.core.converters.FileSourcedConverter) {
+      boolean relative = ((weka.core.converters.FileSourcedConverter)loader).getUseRelativePath();
+      relativeB = new Boolean(relative);
+    }
     
     // only save it, if it's a real file!
-    if ( (file == null) || (file.isDirectory()) )
+    if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "", VAL_FILE);
-    else
-      invokeWriteToXML(node, file.getAbsolutePath(), VAL_FILE);
+    } else {
+      String path = (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath())
+        ? file.getPath()
+        : file.getAbsolutePath();
+      // Replace any windows file separators with forward slashes (Java under windows can
+      // read paths with forward slashes (apparantly)
+      path = path.replace('\\', '/');
+      invokeWriteToXML(node, path, VAL_FILE);
+    }
+    if (relativeB != null) {
+      invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
+    }
     
     return node;
   }
@@ -1585,15 +1603,27 @@ public class XMLBeans
     result   = Class.forName(node.getAttribute(ATT_CLASS)).newInstance();
     children = XMLDocument.getChildTags(node);
     file     = "";
+    Object relativeB = null;
+    boolean relative = false;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
       name  = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_FILE))
+      if (name.equals(VAL_FILE)) {
         file = (String) invokeReadFromXML(child);
-      else
+      } else if (name.equals(VAL_RELATIVE_PATH)) {
+        relativeB = readFromXML(child);
+        if (relativeB instanceof Boolean) {
+          relative = ((Boolean)relativeB).booleanValue();
+        }
+      } else {
         readFromXML(result, name, child);
+      }
+    }
+
+    if (result instanceof weka.core.converters.FileSourcedConverter) {
+      ((weka.core.converters.FileSourcedConverter)result).setUseRelativePath(relative);
     }
 
     if (file.equals(""))
@@ -1602,10 +1632,11 @@ public class XMLBeans
     // set file only, if it exists
     if (file != null) {
       fl = new File(file);
-      if (fl.exists())
+      if (fl.exists()) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(fl);
-      else
+      } else {
         System.out.println("WARNING: The file '" + file + "' does not exist!");
+      }
     }
     
     return result;
@@ -1648,6 +1679,9 @@ public class XMLBeans
       file   = ((weka.core.converters.AbstractFileSaver) saver).retrieveFile();
       prefix = ((weka.core.converters.AbstractFileSaver) saver).filePrefix();
       dir    = ((weka.core.converters.AbstractFileSaver) saver).retrieveDir();
+      // Replace any windows file separators with forward slashes (Java under windows can
+      // read paths with forward slashes (apparantly)
+      dir = dir.replace('\\', '/');
     }
     else {
       known = false;
@@ -1655,6 +1689,12 @@ public class XMLBeans
     
     if (!known)
       System.out.println("WARNING: unknown saver class '" + saver.getClass().getName() + "' - cannot retrieve file!");
+
+    Boolean relativeB = null;
+    if (saver instanceof weka.core.converters.FileSourcedConverter) {
+      boolean relative = ((weka.core.converters.FileSourcedConverter)saver).getUseRelativePath();
+      relativeB = new Boolean(relative);
+    }
     
     // only save it, if it's a real file!
     if ( (file == null) || (file.isDirectory()) ) {
@@ -1663,9 +1703,19 @@ public class XMLBeans
       invokeWriteToXML(node, prefix, VAL_PREFIX);
     }
     else {
-      invokeWriteToXML(node, file.getAbsolutePath(), VAL_FILE);
+      String path = (((weka.core.converters.AbstractFileSaver) saver).getUseRelativePath())
+        ? file.getPath()
+        : file.getAbsolutePath();
+      // Replace any windows file separators with forward slashes (Java under windows can
+      // read paths with forward slashes (apparantly)
+      path = path.replace('\\', '/');
+      invokeWriteToXML(node, path, VAL_FILE);
       invokeWriteToXML(node, "", VAL_DIR);
       invokeWriteToXML(node, "", VAL_PREFIX);
+    }
+
+    if (relativeB != null) {
+      invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
     }
     
     return node;
@@ -1700,18 +1750,27 @@ public class XMLBeans
     dir      = null;
     prefix   = null;
 
+    Object relativeB = null;
+    boolean relative = false;
+
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
       name  = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_FILE))
+      if (name.equals(VAL_FILE)) {
         file = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_DIR))
+      } else if (name.equals(VAL_DIR)) {
         dir = (String) invokeReadFromXML(child);
-      else if (name.equals(VAL_PREFIX))
+      } else if (name.equals(VAL_PREFIX)) {
         prefix = (String) invokeReadFromXML(child);
-      else
+      } else if (name.equals(VAL_RELATIVE_PATH)) {
+        relativeB = readFromXML(child);
+        if (relativeB instanceof Boolean) {
+          relative = ((Boolean)relativeB).booleanValue();
+        }
+      } else {
         readFromXML(result, name, child);
+      }
     }
 
     if ( (file != null) && (file.length() == 0) )
@@ -1722,6 +1781,10 @@ public class XMLBeans
     if ( (dir != null) && (prefix != null) ) {
       ((weka.core.converters.AbstractFileSaver) result).setDir(dir);
       ((weka.core.converters.AbstractFileSaver) result).setFilePrefix(prefix);
+    }
+
+    if (result instanceof weka.core.converters.FileSourcedConverter) {
+      ((weka.core.converters.FileSourcedConverter)result).setUseRelativePath(relative);
     }
     
     return result;
