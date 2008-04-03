@@ -53,12 +53,13 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 
 /**
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class SaverCustomizer
   extends JPanel
@@ -98,6 +99,8 @@ public class SaverCustomizer
   private JComboBox m_tabBox;
   
   private JTextField m_prefixText;
+
+  private JCheckBox m_relativeFilePath;
   
 
   /** Constructor */  
@@ -286,30 +289,33 @@ public class SaverCustomizer
   public void setUpFile() {
     removeAll();
     m_fileChooser.setFileFilter(new FileFilter()
-        { public boolean accept(File f)
-            { return f.isDirectory();}
-          public String getDescription()
-            { return "Directory";}
-         });
+      { public boolean accept(File f)
+        { return f.isDirectory();}
+        public String getDescription()
+        { return "Directory";}
+      });
     m_fileChooser.setAcceptAllFileFilterUsed(false);
     try{
-        if(!(((m_dsSaver.getSaver()).retrieveDir()).equals("")))
-            m_fileChooser.setCurrentDirectory(new File(m_dsSaver.getSaver().retrieveDir()));
+      if(!(((m_dsSaver.getSaver()).retrieveDir()).equals(""))) {
+        File tmp = new File(m_dsSaver.getSaver().retrieveDir());
+        tmp = new File(tmp.getAbsolutePath());
+        m_fileChooser.setCurrentDirectory(tmp);
+      }
     }catch(Exception ex){
-        System.out.println(ex);
+      System.out.println(ex);
     }
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
     try{
-        m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25); 
-        JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
-        JPanel prefixP = new JPanel();   
-        prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25); 
+      JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
+      JPanel prefixP = new JPanel();   
+      prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        prefixP.setLayout(new BorderLayout());
-        prefixP.add(prefixLab, BorderLayout.WEST);
-        prefixP.add(m_prefixText, BorderLayout.CENTER);
-        innerPanel.add(prefixP, BorderLayout.SOUTH);
+      prefixP.setLayout(new BorderLayout());
+      prefixP.add(prefixLab, BorderLayout.WEST);
+      prefixP.add(m_prefixText, BorderLayout.CENTER);
+      innerPanel.add(prefixP, BorderLayout.SOUTH);
     } catch(Exception ex){
     }
     //innerPanel.add(m_SaverEditor, BorderLayout.SOUTH);
@@ -319,7 +325,21 @@ public class SaverCustomizer
     }
     add(innerPanel, BorderLayout.NORTH);
     add(m_fileChooser, BorderLayout.CENTER);
-    
+
+    m_relativeFilePath = new JCheckBox("Use relative file paths");
+    m_relativeFilePath.
+      setSelected(((FileSourcedConverter)m_dsSaver.getSaver()).getUseRelativePath());
+
+    m_relativeFilePath.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          ((FileSourcedConverter)m_dsSaver.getSaver()).
+            setUseRelativePath(m_relativeFilePath.isSelected());
+        }
+      });
+    JPanel holderPanel = new JPanel();
+    holderPanel.setLayout(new FlowLayout());
+    holderPanel.add(m_relativeFilePath);
+    add(holderPanel, BorderLayout.SOUTH);
   }
 
   /**

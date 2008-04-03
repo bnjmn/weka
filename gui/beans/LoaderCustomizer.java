@@ -49,12 +49,13 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.JCheckBox;
 
 /**
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class LoaderCustomizer
   extends JPanel
@@ -93,6 +94,8 @@ public class LoaderCustomizer
   
   private JPasswordField m_passwordText;
 
+  private JCheckBox m_relativeFilePath;
+
   public LoaderCustomizer() {
     /*    m_fileEditor.addPropertyChangeListener(new PropertyChangeListener() {
 	public void propertyChange(PropertyChangeEvent e) {
@@ -128,8 +131,9 @@ public class LoaderCustomizer
 	public void actionPerformed(ActionEvent e) {
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
+              File selectedFile = m_fileChooser.getSelectedFile();
 	      ((FileSourcedConverter)m_dsLoader.getLoader()).
-		setFile(m_fileChooser.getSelectedFile());
+		setFile(selectedFile);
 	      // tell the loader that a new file has been selected so
 	      // that it can attempt to load the header
 	      m_dsLoader.setLoader(m_dsLoader.getLoader());
@@ -261,8 +265,14 @@ public class LoaderCustomizer
 
   public void setUpFile() {
     removeAll();
-    m_fileChooser.setSelectedFile(
-	((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile());
+
+    File tmp = ((FileSourcedConverter)m_dsLoader.getLoader()).retrieveFile();
+    tmp = new File(tmp.getAbsolutePath());
+    if (tmp.isDirectory()) {
+      m_fileChooser.setCurrentDirectory(tmp);
+    } else {
+      m_fileChooser.setSelectedFile(tmp);
+    }
     FileSourcedConverter loader = (FileSourcedConverter) m_dsLoader.getLoader();
     String[] ext = loader.getFileExtensions();
     ExtensionFileFilter firstFilter = null;
@@ -281,6 +291,21 @@ public class LoaderCustomizer
       add(about, BorderLayout.NORTH);
     }
     add(m_fileChooser, BorderLayout.CENTER);
+
+    m_relativeFilePath = new JCheckBox("Use relative file paths");
+    m_relativeFilePath.
+      setSelected(((FileSourcedConverter)m_dsLoader.getLoader()).getUseRelativePath());
+
+    m_relativeFilePath.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          ((FileSourcedConverter)m_dsLoader.getLoader()).
+            setUseRelativePath(m_relativeFilePath.isSelected());
+        }
+      });
+    JPanel holderPanel = new JPanel();
+    holderPanel.setLayout(new FlowLayout());
+    holderPanel.add(m_relativeFilePath);
+    add(holderPanel, BorderLayout.SOUTH);
   }
 
   /**
