@@ -28,7 +28,7 @@ import java.io.IOException;
  * Interface to a loader/saver that loads/saves from a file source.
  *
  * @author Mark Hall
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public interface FileSourcedConverter {
 
@@ -67,5 +67,19 @@ public interface FileSourcedConverter {
    * @return a <code>File</code> value
    */
   public File retrieveFile();
+
+  /**
+   * Set whether to use relative rather than absolute paths
+   *
+   * @param rp true if relative paths are to be used
+   */
+  public void setUseRelativePath(boolean rp);
+
+  /**
+   * Gets whether relative paths are to be used
+   *
+   * @return true if relative paths are to be used
+   */
+  public boolean getUseRelativePath();
 
 }

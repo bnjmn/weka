@@ -36,7 +36,7 @@ import java.util.zip.GZIPInputStream;
  * Abstract superclass for all file loaders.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader
@@ -53,6 +53,9 @@ public abstract class AbstractFileLoader
 
   /** the extension for compressed files */
   public static String FILE_EXTENSION_COMPRESSED = ".gz";
+
+  /** use relative file paths */
+  protected boolean m_useRelativePath = false;
 
   /**
    * get the File specified as the source
@@ -73,7 +76,7 @@ public abstract class AbstractFileLoader
     m_structure = null;
     setRetrieval(NONE);
 
-    m_File = file.getAbsolutePath();
+    //m_File = file.getAbsolutePath();
     setSource(file);
   }
   
@@ -112,10 +115,21 @@ public abstract class AbstractFileLoader
     catch (FileNotFoundException ex) {
       throw new IOException("File not found");
     }
-    
-    m_sourceFile = file;
-    m_File       = file.getAbsolutePath();
+
+    if (m_useRelativePath) {
+      try {
+        m_sourceFile = Utils.convertToRelativePath(file);
+        m_File = m_sourceFile.getPath();
+      } catch (Exception ex) {
+        //        System.err.println("[AbstractFileLoader] can't convert path to relative path.");
+        m_sourceFile = file;
+        m_File       = file.getPath();
+      }
+    } else {
+      m_sourceFile = file;
+      m_File       = file.getAbsolutePath();
     }
+  }
 
   /**
    * Resets the Loader object and sets the source of the data set to be 
@@ -142,6 +156,33 @@ public abstract class AbstractFileLoader
     m_sourceFile = file;
     m_File       = file.getAbsolutePath();
     } */
+
+  /**
+   * Tip text suitable for displaying int the GUI
+   *
+   * @return a description of this property as a String
+   */
+  public String useRelativePathTipText() {
+    return "Use relative rather than absolute paths";
+  }
+
+  /**
+   * Set whether to use relative rather than absolute paths
+   *
+   * @param rp true if relative paths are to be used
+   */
+  public void setUseRelativePath(boolean rp) {
+    m_useRelativePath = rp;
+  }
+
+  /**
+   * Gets whether relative paths are to be used
+   *
+   * @return true if relative paths are to be used
+   */
+  public boolean getUseRelativePath() {
+    return m_useRelativePath;
+  }
 
   /**
    * generates a string suitable for output on the command line displaying

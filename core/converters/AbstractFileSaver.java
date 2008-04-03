@@ -49,7 +49,7 @@ import java.util.Enumeration;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class AbstractFileSaver
   extends AbstractSaver
@@ -74,6 +74,9 @@ public abstract class AbstractFileSaver
   
   /** Counter. In incremental mode after reading 100 instances they will be written to a file.*/
   protected int m_incrementalCounter;
+
+  /** use relative file paths */
+  protected boolean m_useRelativePath = false;
   
   
   /**
@@ -181,8 +184,16 @@ public abstract class AbstractFileSaver
    * @param dir a string containing the directory path and name
    */  
   public void setDir(String dir){
-   
-      m_dir = dir;
+
+    m_dir = dir;
+    if (m_useRelativePath) {
+      try {
+        File tmp = new File((new File(m_dir)).getAbsolutePath());
+        tmp = Utils.convertToRelativePath(tmp);
+        m_dir = tmp.getPath();
+      } catch (Exception ex) {
+      }
+    }
   }
   
   /** Gets the directory
@@ -337,8 +348,16 @@ public abstract class AbstractFileSaver
                 }
             }
             if(success){ 
+              if (m_useRelativePath) {
+                try {
+                  m_outputFile = Utils.convertToRelativePath(file);
+                } catch (Exception e) {
+                  m_outputFile = file;
+                }
+              } else {
                 m_outputFile = file;
-                setDestination(new FileOutputStream(m_outputFile));
+              }
+              setDestination(new FileOutputStream(m_outputFile));
             }
         } catch(Exception ex){
             throw new IOException("Cannot create a new output file (Reason: " + ex.toString() + "). Standard out is used.");
@@ -370,8 +389,17 @@ public abstract class AbstractFileSaver
   public void setDirAndPrefix(String relationName, String add){
   
       try{
-        if(m_dir.equals(""))
-            m_dir = System.getProperty("user.dir");
+        if(m_dir.equals("")) {
+          m_dir = System.getProperty("user.dir");
+          if (m_useRelativePath) {
+            try {
+              File tmp = new File(m_dir);
+              tmp = Utils.convertToRelativePath(tmp);
+              m_dir = tmp.getPath();
+            } catch (Exception e) {
+            }
+          }
+        }
         if(m_prefix.equals(""))
             setFile(new File(m_dir + File.separator + relationName+ add + FILE_EXTENSION));
         else
@@ -382,12 +410,39 @@ public abstract class AbstractFileSaver
       }
   }
   
-    /**
+  /**
    * to be pverridden
    *
    * @return the file type description.
    */
   public abstract String getFileDescription();
+
+  /**
+   * Tip text suitable for displaying int the GUI
+   *
+   * @return a description of this property as a String
+   */
+  public String useRelativePathTipText() {
+    return "Use relative rather than absolute paths";
+  }
+
+  /**
+   * Set whether to use relative rather than absolute paths
+   *
+   * @param rp true if relative paths are to be used
+   */
+  public void setUseRelativePath(boolean rp) {
+    m_useRelativePath = rp;
+  }
+
+  /**
+   * Gets whether relative paths are to be used
+   *
+   * @return true if relative paths are to be used
+   */
+  public boolean getUseRelativePath() {
+    return m_useRelativePath;
+  }
 
   /**
    * generates a string suitable for output on the command line displaying
