@@ -70,7 +70,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class MakeDensityBasedClusterer 
   extends DensityBasedClusterer
@@ -352,6 +352,10 @@ public class MakeDensityBasedClusterer
    * @return a string containing a description of the clusterer
    */
   public String toString() {
+    if (m_priors == null) {
+      return "No clusterer built yet!";
+    }
+
     StringBuffer text = new StringBuffer();
     text.append("MakeDensityBasedClusterer: \n\nWrapped clusterer: " 
 		+ m_wrappedClusterer.toString());
