@@ -66,7 +66,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.29.2.6 $
+ * @version $Revision: 1.29.2.7 $
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -746,6 +746,10 @@ public class SimpleKMeans
    * @return a description of the clusterer as a string
    */
   public String toString() {
+    if (m_ClusterCentroids == null) {
+      return "No clusterer built yet!";
+    }
+
     int maxWidth = 0;
     int maxAttWidth = 0;
     boolean containsNumeric = false;
