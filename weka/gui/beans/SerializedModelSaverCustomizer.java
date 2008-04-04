@@ -41,6 +41,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -56,7 +57,7 @@ import javax.swing.filechooser.FileFilter;
  * GUI Customizer for the SerializedModelSaver bean
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
@@ -86,6 +87,8 @@ public class SerializedModelSaverCustomizer
   private JTextField m_prefixText;
 
   private JComboBox m_fileFormatBox;
+
+  private JCheckBox m_relativeFilePath;
   
 
   /** Constructor */  
@@ -154,7 +157,11 @@ public class SerializedModelSaverCustomizer
     m_fileChooser.setAcceptAllFileFilterUsed(false);
 
     try{
-      m_fileChooser.setCurrentDirectory(m_smSaver.getDirectory());
+      if (!m_smSaver.getDirectory().getPath().equals("")) {
+        File tmp = m_smSaver.getDirectory();
+        tmp = new File(tmp.getAbsolutePath());
+        m_fileChooser.setCurrentDirectory(tmp);
+      }
     } catch(Exception ex) {
       System.out.println(ex);
     }
@@ -188,6 +195,21 @@ public class SerializedModelSaverCustomizer
     }
     add(innerPanel, BorderLayout.NORTH);
     add(m_fileChooser, BorderLayout.CENTER);
+
+    m_relativeFilePath = new JCheckBox("Use relative file paths");
+    m_relativeFilePath.
+      setSelected(m_smSaver.getUseRelativePath());
+
+    m_relativeFilePath.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          m_smSaver.setUseRelativePath(m_relativeFilePath.isSelected());
+        }
+      });
+
+    JPanel holderPanel = new JPanel();
+    holderPanel.setLayout(new FlowLayout());
+    holderPanel.add(m_relativeFilePath);
+    add(holderPanel, BorderLayout.SOUTH);
   }
 
   /**

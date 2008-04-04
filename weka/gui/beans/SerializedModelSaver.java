@@ -39,12 +39,13 @@ import weka.core.Instances;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
 import weka.core.Tag;
+import weka.core.Utils;
 
 /**
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 public class SerializedModelSaver
   extends JPanel
@@ -96,6 +97,9 @@ public class SerializedModelSaver
 
   /** the extension for serialized models (binary Java serialization) */
   public final static String FILE_EXTENSION = "model";
+
+  /** relative path for the directory (relative to the user.dir (startup directory))? */
+  private boolean m_useRelativePath = false;
 
   /**
    * Available file formats. Reflection is used to check if classes
@@ -424,6 +428,32 @@ public class SerializedModelSaver
    */
   public void setDirectory(File d) {
     m_directory = d;
+    if (m_useRelativePath) {
+      try {
+        m_directory = Utils.convertToRelativePath(m_directory);
+      } catch (Exception ex) {
+      }
+    }
+  }
+
+  /**
+   * Set whether to use relative paths for the directory.
+   * I.e. relative to the startup (user.dir) directory
+   *
+   * @param rp true if relative paths are to be used
+   */
+  public void setUseRelativePath(boolean rp) {
+    m_useRelativePath = rp;
+  }
+  
+  /**
+   * Get whether to use relative paths for the directory.
+   * I.e. relative to the startup (user.dir) directory
+   *
+   * @return true if relative paths are to be used
+   */
+  public boolean getUseRelativePath() {
+    return m_useRelativePath;
   }
 
   /**
