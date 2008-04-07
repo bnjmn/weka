@@ -29,6 +29,7 @@ import weka.gui.beans.BeanInstance;
 import weka.gui.beans.BeanVisual;
 import weka.gui.beans.MetaBean;
 import weka.gui.beans.Visible;
+import weka.gui.beans.BeanCommon;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -58,7 +59,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7.2.2 $
+ * @version $Revision: 1.7.2.3 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -74,6 +75,9 @@ public class XMLBeans
 
   /** the value of the bean property */
   public final static String VAL_BEAN = "bean";
+
+  /** the value of the customName property */
+  public final static String VAL_CUSTOM_NAME = "custom_name";
  
   /** the value of the source property */
   public final static String VAL_SOURCEID = "source_id";
@@ -1247,6 +1251,11 @@ public class XMLBeans
     writeIntToXML(node, m_BeanInstances.indexOf(beaninst), VAL_ID);
     writeIntToXML(node, beaninst.getX() + beaninst.getWidth()  / 2, VAL_X);   // x is thought to be in the center?
     writeIntToXML(node, beaninst.getY() + beaninst.getHeight() / 2, VAL_Y);   // y is thought to be in the center?
+    if (beaninst.getBean() instanceof BeanCommon) {
+      // write the custom name of this bean
+      String custName = ((BeanCommon)beaninst.getBean()).getCustomName();
+      invokeWriteToXML(node, custName, VAL_CUSTOM_NAME);
+    }
     invokeWriteToXML(node, beaninst.getBean(), VAL_BEAN);
     
     return node;
@@ -1284,22 +1293,26 @@ public class XMLBeans
     x        = 0;
     y        = 0;
     bean     = null;
+    String customName = null;
 
     for (i = 0; i < children.size(); i++) {
       child = (Element) children.get(i);
       name  = child.getAttribute(ATT_NAME);
 
-      if (name.equals(VAL_ID))
+      if (name.equals(VAL_ID)) {
         id = readIntFromXML(child);
-      else if (name.equals(VAL_X))
+      } else if (name.equals(VAL_X)) {
         x = readIntFromXML(child);
-      else if (name.equals(VAL_Y))
+      } else if (name.equals(VAL_Y)) {
         y = readIntFromXML(child);
-      else if (name.equals(VAL_BEAN))
+      } else if (name.equals(VAL_CUSTOM_NAME)) {
+        customName = (String)invokeReadFromXML(child);
+      } else if (name.equals(VAL_BEAN)) {
         bean = invokeReadFromXML(child);
-      else
+      } else {
         System.out.println("WARNING: '" + name
             + "' is not a recognized name for " + node.getAttribute(ATT_NAME) + "!");
+      }
     }
     
     result   = new BeanInstance(m_BeanLayout, bean, x, y);
@@ -1312,6 +1325,11 @@ public class XMLBeans
       if (visual.getParent() == null) {
         ((JPanel) beaninst.getBean()).add(visual);
       }
+    }
+
+    if (beaninst.getBean() instanceof BeanCommon &&
+        customName != null) {
+      ((BeanCommon)beaninst.getBean()).setCustomName(customName);
     }
     
     // no IDs -> get next null position
