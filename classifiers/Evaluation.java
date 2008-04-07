@@ -173,7 +173,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.84 $
+ * @version  $Revision: 1.85 $
  */
 public class Evaluation
 implements Summarizable {
@@ -964,10 +964,9 @@ implements Summarizable {
 
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier) &&
-	(testSetPresent) &&
+	(testSetPresent || noCrossValidation) &&
 	(costMatrix == null) &&
 	(trainSetPresent)) {
-
       // Build classifier incrementally
       trainingEvaluation.setPriors(train);
       testingEvaluation.setPriors(train);
@@ -2868,7 +2867,7 @@ implements Summarizable {
 	      result.append(",");
 	    if (n == (int) predValue)
 	      result.append("*");
-	    result.append(Utils.doubleToString(dist[n], prec));
+            result.append(Utils.doubleToString(dist[n], prec));
 	  }
 	}
       }
