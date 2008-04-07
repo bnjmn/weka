@@ -118,7 +118,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.39.2.1 $ 
+ * @version $Revision: 1.39.2.2 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 
@@ -554,7 +554,7 @@ public class ThresholdSelector
       setDesignatedClass(new SelectedTag(Integer.parseInt(classString) - 1, 
                                          TAGS_OPTIMIZE));
     } else {
-      setDesignatedClass(new SelectedTag(OPTIMIZE_LFREQ, TAGS_OPTIMIZE));
+      setDesignatedClass(new SelectedTag(OPTIMIZE_POS_NAME, TAGS_OPTIMIZE));
     }
 
     String modeString = Utils.getOption('E', options);
@@ -605,7 +605,7 @@ public class ThresholdSelector
     if (m_manualThreshold) {
       options[current++] = "-manual"; options[current++] = "" + getManualThresholdValue();
     }
-    options[current++] = "-C"; options[current++] = "" + (m_DesignatedClass + 1);
+    options[current++] = "-C"; options[current++] = "" + (m_ClassMode + 1);
     options[current++] = "-X"; options[current++] = "" + getNumXValFolds();
     options[current++] = "-E"; options[current++] = "" + m_EvalMode;
     options[current++] = "-R"; options[current++] = "" + m_RangeMode;
