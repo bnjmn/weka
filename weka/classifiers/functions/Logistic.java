@@ -112,7 +112,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.37.2.1 $
+ * @version $Revision: 1.37.2.2 $
  */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -748,7 +748,7 @@ public class Logistic extends Classifier
    * 
    * @return the coefficients for this logistic model
    */
-  public double [][] coefficents() {
+  public double [][] coefficients() {
     return m_Par;
   }
     
