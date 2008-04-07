@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25.2.5 $
+ * @version $Revision: 1.25.2.6 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -176,6 +176,24 @@ public class Classifier
     setClassifier(m_Classifier);
     
     setupFileChooser();
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   protected void setupFileChooser() {

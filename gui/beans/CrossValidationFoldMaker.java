@@ -34,7 +34,7 @@ import java.util.Vector;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9.2.1 $
+ * @version $Revision: 1.9.2.2 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -55,6 +55,24 @@ public class CrossValidationFoldMaker
 		       BeanVisual.ICON_PATH
 		       +"CrossValidationFoldMaker_animated.gif");
     m_visual.setText("CrossValidationFoldMaker");
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**

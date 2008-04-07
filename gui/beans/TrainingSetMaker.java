@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
@@ -46,6 +46,24 @@ public class TrainingSetMaker
 		       BeanVisual.ICON_PATH
 		       +"TrainingSetMaker_animated.gif");
     m_visual.setText("TrainingSetMaker");
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**

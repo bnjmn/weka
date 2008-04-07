@@ -31,7 +31,7 @@ import weka.core.converters.DatabaseSaver;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  *
  */
 public class Saver
@@ -141,7 +141,23 @@ public class Saver
     
   }
 
-  
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
+  }  
 
   /** Set the loader to use
    * @param saver a Saver

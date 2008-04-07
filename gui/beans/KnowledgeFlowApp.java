@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.7 $
+ * @version  $Revision: 1.18.2.8 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -156,7 +156,7 @@ public class KnowledgeFlowApp
    */
   public static void loadProperties() {
     if (BEAN_PROPERTIES == null) {
-      System.err.println("Loading properties and plugins...");
+      System.out.println("[KnowledgeFlow] Loading properties and plugins...");
       /** Loads the configuration property file */
       //  static {
       // Allow a properties file in the current directory to override
@@ -203,14 +203,14 @@ public class KnowledgeFlowApp
               File anyJars[] = contents[i].listFiles();
               for (int j = 0; j < anyJars.length; j++) {
                 if (anyJars[j].getPath().endsWith(".jar")) {
-                  System.err.println("Plugins: adding "+anyJars[j].getPath()
+                  System.out.println("[KnowledgeFlow] Plugins: adding "+anyJars[j].getPath()
                                      +" to classpath...");
                   ClassloaderUtil.addFile(anyJars[j].getPath());
                 }
               }
             } catch (Exception ex) {
               // Don't make a fuss
-              System.err.println("Unable to load bean properties for plugin "
+              System.err.println("[KnowledgeFlow] Warning: Unable to load bean properties for plugin "
                                  +"directory: " + contents[i].getPath());
             }
           }
@@ -229,7 +229,7 @@ public class KnowledgeFlowApp
    * from.
    */
   private static void init() {
-    System.err.println("Initializing KF...");
+    System.out.println("[KnowledgeFlow] Initializing KF...");
 
     try {
       TreeMap wrapList = new TreeMap();
@@ -372,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.7 $
+   * @version $Revision: 1.18.2.8 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -984,7 +984,7 @@ public class KnowledgeFlowApp
           // end modifications by Zerbetto
         } catch (Exception ex) {
           // ignore
-          System.err.println("Failed to instantiate: " + tempBeanCompName);
+          System.err.println("[KnowledgeFlow] Failed to instantiate: " + tempBeanCompName);
 
           break;
         }
@@ -1008,7 +1008,7 @@ public class KnowledgeFlowApp
           hpp = (HierarchyPropertyParser) hpps.get(root);
 
           if (!hpp.goTo(rootPackage)) {
-            System.err.println("**** Processing user package... ");
+            System.out.println("[KnowledgeFlow] Processing user package... ");
             //            System.exit(1);
             userPrefix = root + ".";
           }
@@ -1170,7 +1170,7 @@ public class KnowledgeFlowApp
         
         // end modifications by Zerbetto
       } catch (Exception ex) {
-	System.err.println("Failed to instantiate :"+tempBeanCompName
+	System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
 			   +"KnowledgeFlowApp.instantiateToolBarBean()");
 	return null;
       }
@@ -1180,14 +1180,14 @@ public class KnowledgeFlowApp
 	try {
 	  c = Class.forName(algName);
 	} catch (Exception ex) {
-	  System.err.println("Can't find class called: "+algName);
+	  System.err.println("[KnowledgeFlow] Can't find class called: "+algName);
 	  return null;
 	}
 	try {
 	  Object o = c.newInstance();
 	  ((WekaWrapper)tempBean).setWrappedAlgorithm(o);
 	} catch (Exception ex) {
-	  System.err.println("Failed to configure "+tempBeanCompName
+	  System.err.println("[KnowledgeFlow] Failed to configure "+tempBeanCompName
 			     +" with "+algName);
 	  return null;
 	}
@@ -1202,7 +1202,7 @@ public class KnowledgeFlowApp
         // end modifications
       } catch (Exception ex) {
 	ex.printStackTrace();
-	System.err.println("Failed to instantiate :"+tempBeanCompName
+	System.err.println("[KnowledgeFlow] Failed to instantiate :"+tempBeanCompName
 			   +"KnowledgeFlowApp.setUpToolBars()");
 	return null;
       }
@@ -1347,7 +1347,7 @@ public class KnowledgeFlowApp
             }
 	  } catch (Exception ex) {
 	    System.err.
-	      println("Problem adding bean to data flow layout");
+	      println("[KnowledgeFlow] Problem adding bean to data flow layout");
 	  }
 	}
       });
@@ -1589,6 +1589,23 @@ public class KnowledgeFlowApp
     beanContextMenu.add(deleteItem);
     menuItemCount++;
 
+    if (bc instanceof BeanCommon) {
+      MenuItem nameItem = new MenuItem("Set name");
+      nameItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            String oldName = ((BeanCommon)bc).getCustomName();
+            String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
+                                                      "Enter a name for this component",
+                                                      oldName);
+            if (name != null) {
+              ((BeanCommon)bc).setCustomName(name);
+            }
+          }
+        });
+      beanContextMenu.add(nameItem);
+      menuItemCount++;
+    }
+
     try {
       //BeanInfo [] compInfo = null;
       //JComponent [] associatedBeans = null;
@@ -1611,7 +1628,7 @@ public class KnowledgeFlowApp
       final Vector tempAssociatedBeans = associatedBeans;
 
       if (compInfo == null) {
-        System.err.println("Error");
+        System.err.println("[KnowledgeFlow] Error in doPopup()");
       } else {
         //	System.err.println("Got bean info");
         for (int zz = 0; zz < compInfo.size(); zz++) {
@@ -1661,7 +1678,7 @@ public class KnowledgeFlowApp
             beanContextMenu.add(custItem);
             menuItemCount++;
           } else {
-            System.err.println("No customizer class");
+            System.err.println("[KnowledgeFlow] No customizer class");
           }
         }
 
@@ -2175,7 +2192,8 @@ public class KnowledgeFlowApp
         group.setOutputs(outputs);
         group.setSubFlowPreview(new ImageIcon(subFlowPreview));
         if (name.length() > 0) {
-          group.getVisual().setText(name);
+          //          group.getVisual().setText(name);
+          group.setCustomName(name);
         }
         
         if (group instanceof BeanContextChild) {
@@ -2545,7 +2563,7 @@ public class KnowledgeFlowApp
           ois.close();
         }
       } catch (Exception ex) {
-        System.err.println("Problem reading user components.");
+        System.err.println("[KnowledgeFlow] Problem reading user components.");
         ex.printStackTrace();
         return;
       }
@@ -2563,13 +2581,13 @@ public class KnowledgeFlowApp
     ((JFrame)getTopLevelAncestor()).
       addWindowListener(new java.awt.event.WindowAdapter() {
           public void windowClosing(java.awt.event.WindowEvent e) {
-            System.err.println("Saving user components....");
+            System.out.println("[KnowledgeFlow] Saving user components....");
             File sFile = 
               new File(System.getProperty("user.home")
                        +File.separator+".knowledgeFlow");
             if (!sFile.exists()) {
               if (!sFile.mkdir()) {
-                System.err.println("Unable to create .knowledgeFlow "
+                System.err.println("[KnowledgeFlow] Unable to create .knowledgeFlow "
                                    +"directory in your HOME.");
               }
             }
@@ -2594,7 +2612,7 @@ public class KnowledgeFlowApp
                 oos.close();
               }
             } catch (Exception ex) {
-              System.err.println("Unable to save user components");
+              System.err.println("[KnowledgeFlow] Unable to save user components");
               ex.printStackTrace();
             } 
 
@@ -2735,7 +2753,7 @@ public class KnowledgeFlowApp
         }
       }
     } else {
-      System.err.println("File '" + fileName + "' does not exists.");
+      System.err.println("[KnowledgeFlow] File '" + fileName + "' does not exists.");
     }
 
     try {
@@ -2857,7 +2875,7 @@ public class KnowledgeFlowApp
                 m_Memory.stopThreads();
                
                 // display error
-                System.err.println("\ndisplayed message:");
+                System.err.println("\n[KnowledgeFlow] displayed message:");
                 m_Memory.showOutOfMemory();
                 System.err.println("\nexiting");
                 System.exit(-1);

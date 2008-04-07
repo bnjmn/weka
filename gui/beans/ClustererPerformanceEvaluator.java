@@ -33,7 +33,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class ClustererPerformanceEvaluator
   extends AbstractEvaluator
@@ -63,6 +63,24 @@ public class ClustererPerformanceEvaluator
 		       BeanVisual.ICON_PATH
 		       +"ClustererPerformanceEvaluator_animated.gif");
     m_visual.setText("ClustererPerformanceEvaluator");
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
   
   /**
@@ -174,7 +192,7 @@ public class ClustererPerformanceEvaluator
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      System.err.println("Listener is BeanCommon");
+      //      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
@@ -182,6 +200,8 @@ public class ClustererPerformanceEvaluator
     if (m_evaluateThread != null) {
       m_evaluateThread.interrupt();
       m_evaluateThread.stop();
+      m_evaluateThread = null;
+      m_visual.setStatic();
     }
   }
   

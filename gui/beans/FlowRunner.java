@@ -40,7 +40,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.5 $
+ * @version $Revision: 1.1.2.6 $
  */
 public class FlowRunner {
 
@@ -148,6 +148,15 @@ public class FlowRunner {
     XMLBeans xml = new XMLBeans(null, null);
     Vector v = (Vector) xml.read(new File(fileName));
     m_beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+  }
+  
+  /**
+   * Get the vector holding the flow(s)
+   *
+   * @return the Vector holding the flow(s)
+   */
+  public Vector getFlows() {
+    return m_beans;
   }
 
   /**
