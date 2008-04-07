@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.26 $
+ * @version  $Revision: 1.27 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -372,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.26 $
+   * @version $Revision: 1.27 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1589,6 +1589,23 @@ public class KnowledgeFlowApp
     beanContextMenu.add(deleteItem);
     menuItemCount++;
 
+    if (bc instanceof BeanCommon) {
+      MenuItem nameItem = new MenuItem("Set name");
+      nameItem.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            String oldName = ((BeanCommon)bc).getCustomName();
+            String name = JOptionPane.showInputDialog(KnowledgeFlowApp.this,
+                                                      "Enter a name for this component",
+                                                      oldName);
+            if (name != null) {
+              ((BeanCommon)bc).setCustomName(name);
+            }
+          }
+        });
+      beanContextMenu.add(nameItem);
+      menuItemCount++;
+    }
+
     try {
       //BeanInfo [] compInfo = null;
       //JComponent [] associatedBeans = null;
@@ -2175,7 +2192,8 @@ public class KnowledgeFlowApp
         group.setOutputs(outputs);
         group.setSubFlowPreview(new ImageIcon(subFlowPreview));
         if (name.length() > 0) {
-          group.getVisual().setText(name);
+          //          group.getVisual().setText(name);
+          group.setCustomName(name);
         }
         
         if (group instanceof BeanContextChild) {

@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -134,6 +134,24 @@ public class Clusterer
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setClusterer(m_Clusterer);
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**
