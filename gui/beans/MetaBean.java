@@ -50,7 +50,7 @@ import javax.swing.JWindow;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class MetaBean
   extends JPanel 
@@ -82,6 +82,24 @@ public class MetaBean
   public MetaBean() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   public void setAssociatedConnections(Vector ac) {

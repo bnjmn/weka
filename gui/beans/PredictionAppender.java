@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class PredictionAppender
   extends JPanel
@@ -110,6 +110,24 @@ public class PredictionAppender
   public PredictionAppender() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**

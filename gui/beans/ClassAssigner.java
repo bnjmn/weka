@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class ClassAssigner
   extends JPanel
@@ -84,6 +84,24 @@ public class ClassAssigner
   public ClassAssigner() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);    
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**
