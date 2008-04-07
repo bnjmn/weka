@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.1 $
+ * @version $Revision: 1.16.2.2 $
  */
 public class Filter
   extends JPanel
@@ -127,6 +127,24 @@ public class Filter
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     setFilter(m_Filter);
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**

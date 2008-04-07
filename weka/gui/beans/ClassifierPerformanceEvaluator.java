@@ -38,7 +38,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15.2.1 $
+ * @version $Revision: 1.15.2.2 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -71,6 +71,24 @@ public class ClassifierPerformanceEvaluator
 		       +"ClassifierPerformanceEvaluator_animated.gif");
     m_visual.setText("ClassifierPerformanceEvaluator");
   }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
+  }
   
   /**
    * Global info for this bean
@@ -95,8 +113,8 @@ public class ClassifierPerformanceEvaluator
    * @param ce a <code>BatchClassifierEvent</code> value
    */
   public void acceptClassifier(final BatchClassifierEvent ce) {
-    if (ce.getTestSet().isStructureOnly()) {
-      return; // cant evaluate empty instances
+    if (ce.getTestSet() == null || ce.getTestSet().isStructureOnly()) {
+      return; // cant evaluate empty/non-existent test instances
     }
     try {
       if (m_evaluateThread == null) {
@@ -240,7 +258,7 @@ public class ClassifierPerformanceEvaluator
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      System.err.println("Listener is BeanCommon");
+      //      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 

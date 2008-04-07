@@ -45,7 +45,7 @@ import weka.core.Utils;
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.4 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class SerializedModelSaver
   extends JPanel
@@ -131,6 +131,24 @@ public class SerializedModelSaver
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     m_fileFormat = s_fileFormatsAvailable.get(0);
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**

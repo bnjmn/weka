@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class ClassValuePicker
   extends JPanel
@@ -76,6 +76,24 @@ public class ClassValuePicker
   public ClassValuePicker() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);    
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
   }
 
   /**
