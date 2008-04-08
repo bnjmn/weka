@@ -43,7 +43,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.4 $
+ * @version $Revision: 1.16.2.5 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -128,7 +128,7 @@ public class Loader
 	  Instances structure = null;
 	  try {
             m_Loader.reset();
-	    System.err.println("NOTIFYING STRUCTURE AVAIL");
+            //	    System.err.println("NOTIFYING STRUCTURE AVAIL");
 	    structure = m_Loader.getStructure();
 	    notifyStructureAvailable(structure);
 	  } catch (IOException e) {
@@ -265,15 +265,15 @@ public class Loader
     }
     m_visual.setText(loaderName);
     
-    if(! (loader instanceof DatabaseLoader)){
-        // try to load structure (if possible) and notify any listeners
-        try {
-            m_dataFormat = m_Loader.getStructure();
-            //      System.err.println(m_dataFormat);
-            System.err.println("Notifying listeners of instance structure avail. (Loader).");
-            notifyStructureAvailable(m_dataFormat);
-        }catch (Exception ex) {
-        }
+    if(! (loader instanceof DatabaseLoader)) {
+      // try to load structure (if possible) and notify any listeners
+      try {
+        m_dataFormat = m_Loader.getStructure();
+        //      System.err.println(m_dataFormat);
+        System.out.println("[Loader] Notifying listeners of instance structure avail.");
+        notifyStructureAvailable(m_dataFormat);
+      }catch (Exception ex) {
+      }
     }
     
     // get global info
