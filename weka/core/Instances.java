@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.72.2.1 $ 
+ * @version $Revision: 1.72.2.2 $ 
  */
 public class Instances 
   implements Serializable {
@@ -239,26 +239,35 @@ public class Instances
     m_Instances = new FastVector(capacity);
   }
  
+
   /**
-   * Create a copy of the structure, but "cleanse" string types (i.e.
-   * doesn't contain references to the strings seen in the past).
-   * Also cleanses all relational attributes.
+   * Create a copy of the structure if the data has string or
+   * relational attributes, "cleanses" string types (i.e. doesn't
+   * contain references to the strings seen in the past) and all
+   * relational attributes.
    *
    * @return a copy of the instance structure.
    */
   public Instances stringFreeStructure() {
 
-    FastVector atts = (FastVector)m_Attributes.copy();
-    for (int i = 0 ; i < atts.size(); i++) {
-      Attribute att = (Attribute)atts.elementAt(i);
+    FastVector newAtts = new FastVector();
+    for (int i = 0 ; i < m_Attributes.size(); i++) {
+      Attribute att = (Attribute)m_Attributes.elementAt(i);
       if (att.type() == Attribute.STRING) {
-        atts.setElementAt(new Attribute(att.name(), (FastVector)null), i);
+        newAtts.addElement(new Attribute(att.name(), (FastVector)null, i));
       } else if (att.type() == Attribute.RELATIONAL) {
-        atts.setElementAt(new Attribute(att.name(), new Instances(att.relation(), 0)), i);
+        newAtts.addElement(new Attribute(att.name(), new Instances(att.relation(), 0), i));
       }
     }
-    Instances result = new Instances(relationName(), atts, 0);
-    result.m_ClassIndex = m_ClassIndex;
+    if (newAtts.size() == 0) {
+      return new Instances(this, 0);
+    }
+    FastVector atts = (FastVector)m_Attributes.copy();
+    for (int i = 0; i < newAtts.size(); i++) {
+      atts.setElementAt(newAtts.elementAt(i), ((Attribute)newAtts.elementAt(i)).index());
+    }
+    Instances result = new Instances(this, 0);
+    result.m_Attributes = atts;
     return result;
   }
 
