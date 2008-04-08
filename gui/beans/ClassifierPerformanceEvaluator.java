@@ -38,7 +38,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15.2.2 $
+ * @version $Revision: 1.15.2.3 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -153,7 +153,7 @@ public class ClassifierPerformanceEvaluator
 		}
 		
 		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
-		  System.err.println(m_eval.toSummaryString());
+                  //		  System.err.println(m_eval.toSummaryString());
 		  // m_resultsString.append(m_eval.toSummaryString());
 		  // m_outText.setText(m_resultsString.toString());
 		  String textTitle = m_classifier.getClass().getName();
