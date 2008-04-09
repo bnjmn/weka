@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ */
+ * @version $Revision: 1.12 $ */
 
 public class PredictiveApriori 
   extends Associator 
@@ -305,6 +305,7 @@ public class PredictiveApriori
             m_allTheRules[0].insertElementAt((ItemSet)((RuleItem)m_best.last()).premise(),k);
             m_allTheRules[1].insertElementAt((ItemSet)((RuleItem)m_best.last()).consequence(),k);
             m_allTheRules[2].insertElementAt(new Double(((RuleItem)m_best.last()).accuracy()),k);
+            m_best.remove(m_best.last());
             k++;
             exactNumber--;
         }
@@ -330,6 +331,7 @@ public class PredictiveApriori
         m_allTheRules[0].insertElementAt((ItemSet)((RuleItem)m_best.last()).premise(),k);
         m_allTheRules[1].insertElementAt((ItemSet)((RuleItem)m_best.last()).consequence(),k);
         m_allTheRules[2].insertElementAt(new Double(((RuleItem)m_best.last()).accuracy()),k);
+        m_best.remove(m_best.last());
         k++;
         exactNumber--;
     }
@@ -680,14 +682,14 @@ public class PredictiveApriori
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) { 
         currentItemSet = new RuleGeneration((ItemSet)enumItemSets.nextElement());
-        m_best = currentItemSet.generateRules(m_numRules, m_midPoints,m_priors,m_expectation,
+        m_best = currentItemSet.generateRules(m_numRules-5, m_midPoints,m_priors,m_expectation,
                                         m_instances,m_best,m_count);
           
         m_count = currentItemSet.m_count;
         if(!m_bestChanged && currentItemSet.m_change)
            m_bestChanged = true;
         //update minimum expected predictive accuracy to get into the n best
-        if(m_best.size() >0)
+        if(m_best.size() >= m_numRules-5)
             m_expectation = ((RuleItem)m_best.first()).accuracy();
         else m_expectation =0;
       }
@@ -747,15 +749,15 @@ public class PredictiveApriori
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) {
         currentLItemSet = new CaRuleGeneration((ItemSet)enumItemSets.nextElement());
-        m_best = currentLItemSet.generateRules(m_numRules, m_midPoints,m_priors,m_expectation,
+        m_best = currentLItemSet.generateRules(m_numRules-5, m_midPoints,m_priors,m_expectation,
                                         m_instances,m_best,m_count);
         m_count = currentLItemSet.count();
         if(!m_bestChanged && currentLItemSet.change())
                 m_bestChanged = true;
-        if(m_best.size() >0)
+        if(m_best.size() == m_numRules-5)
             m_expectation = ((RuleItem)m_best.first()).accuracy();
         else 
-            m_expectation =0;
+            m_expectation = 0;
       }
     }
   }
