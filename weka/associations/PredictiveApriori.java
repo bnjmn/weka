@@ -61,7 +61,7 @@ import weka.associations.RuleGeneration;
  * The required number of rules (default: 100). <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3.2.2 $ */
+ * @version $Revision: 1.3.2.3 $ */
 
 public class PredictiveApriori extends Associator implements OptionHandler {
   
@@ -404,14 +404,14 @@ public class PredictiveApriori extends Associator implements OptionHandler {
       Enumeration enumItemSets = currentItemSets.elements();
       while (enumItemSets.hasMoreElements()) { 
         currentItemSet = new RuleGeneration((ItemSet)enumItemSets.nextElement());
-        m_best = currentItemSet.generateRules(m_numRules, m_midPoints,m_priors,m_expectation,
+        m_best = currentItemSet.generateRules(m_numRules-5, m_midPoints,m_priors,m_expectation,
                                         m_instances,m_best,m_count);
           
         m_count = currentItemSet.m_count;
         if(!m_bestChanged && currentItemSet.m_change)
            m_bestChanged = true;
         //update minimum expected predictive accuracy to get into the n best
-        if(m_best.size() >0)
+        if(m_best.size() >= m_numRules-5)
             m_expectation = ((RuleItem)m_best.first()).accuracy();
         else m_expectation =0;
       }
