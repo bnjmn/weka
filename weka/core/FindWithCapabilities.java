@@ -72,6 +72,9 @@ import java.util.Vector;
  * <pre> -relational-class
  *  Must handle relational classes.</pre>
  * 
+ * <pre> -missing-class-values
+ *  Must handle missing class values.</pre>
+ * 
  * <pre> -no-class
  *  Doesn't need a class.</pre>
  * 
@@ -95,6 +98,9 @@ import java.util.Vector;
  * 
  * <pre> -relational-atts
  *  Must handle relational attributes.</pre>
+ * 
+ * <pre> -missing-att-values
+ *  Must handle missing attribute values.</pre>
  * 
  * <pre> -only-multiinstance
  *  Must handle multi-instance data.</pre>
@@ -134,7 +140,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator
@@ -142,34 +148,34 @@ import java.util.Vector;
 public class FindWithCapabilities 
 implements OptionHandler, CapabilitiesHandler {
 
-  /** the capabilities to look for */
+  /** the capabilities to look for. */
   protected Capabilities m_Capabilities = new Capabilities(this);
 
-  /** the capabilities to look for to "not have" */
+  /** the capabilities to look for to "not have". */
   protected Capabilities m_NotCapabilities = new Capabilities(this);
 
-  /** the packages to search in */
+  /** the packages to search in. */
   protected Vector m_Packages = new Vector();
 
-  /** a capabilities handler to retrieve the capabilities from */
+  /** a capabilities handler to retrieve the capabilities from. */
   protected CapabilitiesHandler m_Handler = null;
 
-  /** a file the capabilities can be based on */
+  /** a file the capabilities can be based on. */
   protected String m_Filename = "";
 
-  /** the class index, in case the capabilities are based on a file */
+  /** the class index, in case the capabilities are based on a file. */
   protected SingleIndex m_ClassIndex = new SingleIndex();
 
-  /** the superclass from the GenericPropertiesCreator to retrieve the packages from */
+  /** the superclass from the GenericPropertiesCreator to retrieve the packages from. */
   protected String m_Superclass = "";
 
-  /** whether to use the GenericPropertiesCreator with the superclass */
+  /** whether to use the GenericPropertiesCreator with the superclass. */
   protected boolean m_GenericPropertiesCreator = false;
 
-  /** the classes that matched */
+  /** the classes that matched. */
   protected Vector m_Matches = new Vector();
 
-  /** the class that didn't match */
+  /** the class that didn't match. */
   protected Vector m_Misses = new Vector();
 
   /**
@@ -219,6 +225,10 @@ implements OptionHandler, CapabilitiesHandler {
 	"relational-class", 0, "-relational-class"));
 
     result.addElement(new Option(
+	"\tMust handle missing class values.",
+	"missing-class-values", 0, "-missing-class-values"));
+
+    result.addElement(new Option(
 	"\tDoesn't need a class.",
 	"no-class", 0, "-no-class"));
 
@@ -249,6 +259,10 @@ implements OptionHandler, CapabilitiesHandler {
     result.addElement(new Option(
 	"\tMust handle relational attributes.",
 	"relational-atts", 0, "-relational-atts"));
+
+    result.addElement(new Option(
+	"\tMust handle missing attribute values.",
+	"missing-att-values", 0, "-missing-att-values"));
 
     result.addElement(new Option(
 	"\tMust handle multi-instance data.",
@@ -371,6 +385,8 @@ implements OptionHandler, CapabilitiesHandler {
 	enable(Capability.DATE_CLASS);
       if (Utils.getFlag("relational-class", options))
 	enable(Capability.RELATIONAL_CLASS);
+      if (Utils.getFlag("missing-class-values", options))
+	enable(Capability.MISSING_CLASS_VALUES);
     }
     // not allowed
     if (Utils.getFlag("not-nominal-class", options)) {
@@ -391,6 +407,10 @@ implements OptionHandler, CapabilitiesHandler {
       enableNot(Capability.DATE_CLASS);
     if (Utils.getFlag("not-relational-class", options))
       enableNot(Capability.RELATIONAL_CLASS);
+    if (Utils.getFlag("not-relational-class", options))
+      enableNot(Capability.RELATIONAL_CLASS);
+    if (Utils.getFlag("not-missing-class-values", options))
+      enableNot(Capability.MISSING_CLASS_VALUES);
 
     // allowed
     if (Utils.getFlag("nominal-atts", options)) {
@@ -411,6 +431,8 @@ implements OptionHandler, CapabilitiesHandler {
       enable(Capability.DATE_ATTRIBUTES);
     if (Utils.getFlag("relational-atts", options))
       enable(Capability.RELATIONAL_ATTRIBUTES);
+    if (Utils.getFlag("missing-att-values", options))
+      enable(Capability.MISSING_VALUES);
     // not allowed
     if (Utils.getFlag("not-nominal-atts", options)) {
       enableNot(Capability.NOMINAL_ATTRIBUTES);
@@ -430,6 +452,8 @@ implements OptionHandler, CapabilitiesHandler {
       enableNot(Capability.DATE_ATTRIBUTES);
     if (Utils.getFlag("not-relational-atts", options))
       enableNot(Capability.RELATIONAL_ATTRIBUTES);
+    if (Utils.getFlag("not-missing-att-values", options))
+      enableNot(Capability.MISSING_VALUES);
 
     if (Utils.getFlag("only-multiinstance", options))
       enable(Capability.ONLY_MULTIINSTANCE);
@@ -492,6 +516,8 @@ implements OptionHandler, CapabilitiesHandler {
 	result.add("-date-class");
       if (isEnabled(Capability.RELATIONAL_CLASS))
 	result.add("-relational-class");
+      if (isEnabled(Capability.MISSING_CLASS_VALUES))
+	result.add("-missing-class-values");
     }
 
     if (isEnabled(Capability.UNARY_ATTRIBUTES))
@@ -508,6 +534,8 @@ implements OptionHandler, CapabilitiesHandler {
       result.add("-date-atts");
     if (isEnabled(Capability.RELATIONAL_ATTRIBUTES))
       result.add("-relational-atts");
+    if (isEnabled(Capability.MISSING_VALUES))
+      result.add("-missing-att-values");
 
     // not allowed
     if (isEnabledNot(Capability.NO_CLASS))
@@ -526,6 +554,8 @@ implements OptionHandler, CapabilitiesHandler {
       result.add("-not-date-class");
     if (isEnabledNot(Capability.RELATIONAL_CLASS))
       result.add("-not-relational-class");
+    if (isEnabledNot(Capability.MISSING_CLASS_VALUES))
+      result.add("-not-missing-class-values");
 
     if (isEnabledNot(Capability.UNARY_ATTRIBUTES))
       result.add("-not-unary-atts");
@@ -541,6 +571,8 @@ implements OptionHandler, CapabilitiesHandler {
       result.add("-not-date-atts");
     if (isEnabledNot(Capability.RELATIONAL_ATTRIBUTES))
       result.add("-not-relational-atts");
+    if (isEnabledNot(Capability.MISSING_VALUES))
+      result.add("-not-missing-att-values");
 
     if (isEnabled(Capability.ONLY_MULTIINSTANCE))
       result.add("-only-multi-instance");
@@ -575,7 +607,9 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * sets the Capabilities handler to generate the data for
+   * sets the Capabilities handler to generate the data for.
+   * 
+   * @param value	the handler
    */
   public void setHandler(CapabilitiesHandler value) {
     m_Handler = value;
@@ -584,7 +618,9 @@ implements OptionHandler, CapabilitiesHandler {
 
   /**
    * returns the current set CapabilitiesHandler to generate the dataset
-   * for, can be null
+   * for, can be null.
+   * 
+   * @return		the handler
    */
   public CapabilitiesHandler getHandler() {
     return m_Handler;
@@ -593,6 +629,8 @@ implements OptionHandler, CapabilitiesHandler {
   /**
    * Sets the dataset filename to base the capabilities on. It immediately
    * loads the dataset and retrieves the capabilities from it.
+   * 
+   * @param value	the filename of the dataset
    */
   public void setFilename(String value) {
     Instances		insts;
@@ -614,14 +652,18 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * returns the current filename for the dataset to base the capabilities on
+   * returns the current filename for the dataset to base the capabilities on.
+   * 
+   * @return		the filename of the dataset
    */
   public String getFilename() {
     return m_Filename;
   }
 
   /**
-   * sets the class index, -1 for none, first and last are also valid
+   * sets the class index, -1 for none, first and last are also valid.
+   * 
+   * @param value	the class index
    */
   public void setClassIndex(String value) {
     if (value.equals("-1"))
@@ -631,7 +673,9 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * returns the current current class index, -1 if no class attribute
+   * returns the current current class index, -1 if no class attribute.
+   * 
+   * @return		the class index
    */
   public String getClassIndex() {
     if (m_ClassIndex == null)
@@ -641,7 +685,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * enables the given capability
+   * enables the given capability.
    * 
    * @param c		the capability to enable
    */
@@ -650,7 +694,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * whether the given capability is enabled
+   * whether the given capability is enabled.
    * 
    * @param c		the capability to enable
    * @return		true if the capability is enabled
@@ -660,7 +704,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * disables the given capability
+   * disables the given capability.
    * 
    * @param c		the capability to disable
    */
@@ -669,7 +713,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * enables the given "not to have" capability
+   * enables the given "not to have" capability.
    * 
    * @param c		the capability to enable
    */
@@ -678,7 +722,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * whether the given "not to have" capability is enabled
+   * whether the given "not to have" capability is enabled.
    * 
    * @param c		the capability to enable
    * @return		true if the capability is enabled
@@ -688,7 +732,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * disables the given "not to have" capability
+   * disables the given "not to have" capability.
    * 
    * @param c		the capability to disable
    */
@@ -697,7 +741,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * returns true if the given capability can be handled
+   * returns true if the given capability can be handled.
    * 
    * @param c		the capability to check
    * @return		true if the capability can be handled
@@ -745,7 +789,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * returns the matches from the last find call
+   * returns the matches from the last find call.
    * 
    * @return		the matching classname from the last find run
    */
@@ -754,7 +798,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * returns the misses from the last find call
+   * returns the misses from the last find call.
    * 
    * @return		the classnames that didn't match from the last find run
    */
@@ -763,7 +807,7 @@ implements OptionHandler, CapabilitiesHandler {
   }
 
   /**
-   * returns a list with all the classnames that fit the criteria
+   * returns a list with all the classnames that fit the criteria.
    * 
    * @return		contains all classnames that fit the criteria
    */
