@@ -37,7 +37,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.5.2.2 $
+ * @version $Revision: 1.5.2.3 $
  */
 public class MakeDensityBasedClusterer extends DensityBasedClusterer
   implements NumberOfClustersRequestable, 
@@ -120,6 +120,7 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
     double[][] weights =  new double[m_wrappedClusterer.numberOfClusters()][data.numAttributes()];
     m_priors = new double[m_wrappedClusterer.numberOfClusters()]; 
      for (int i = 0; i < m_wrappedClusterer.numberOfClusters(); i++) {
+       m_priors[i] = 1.0; // laplace correction
        for (int j = 0; j < data.numAttributes(); j++) {
 	 if (data.attribute(j).isNominal()) {
 	   m_model[i][j] = new DiscreteEstimator(data.attribute(j).numValues(),
@@ -196,6 +197,8 @@ public class MakeDensityBasedClusterer extends DensityBasedClusterer
 
   /**
    * Returns the cluster priors.
+   *
+   * @return the cluster priors
    */
   public double[] clusterPriors() {
 
