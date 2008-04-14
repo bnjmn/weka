@@ -56,7 +56,7 @@ import javax.swing.JTextArea;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.1 $
+ * @version $Revision: 1.11.2.2 $
  */
 public class TextViewer 
   extends JPanel
@@ -78,13 +78,12 @@ public class TextViewer
   /**
    * Output area for a piece of text
    */
-  private transient JTextArea m_outText = new JTextArea(20, 80);
+  private transient JTextArea m_outText = null;// = new JTextArea(20, 80);
 
   /**
    * List of text revieved so far
    */
-  protected transient ResultHistoryPanel m_history = 
-    new ResultHistoryPanel(m_outText);
+  protected transient ResultHistoryPanel m_history;
 
   /**
    * True if this bean's appearance is the design mode appearance
@@ -114,7 +113,11 @@ public class TextViewer
     /*    setUpResultHistory();
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER); */
-    appearanceFinal();
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    if (!ge.isHeadless()) {
+      appearanceFinal();
+    }
   }
 
   protected void appearanceDesign() {
@@ -155,29 +158,33 @@ public class TextViewer
   }
 
   private void setUpResultHistory() {
-    if (m_outText == null) {
-      m_outText = new JTextArea(20, 80);
-      m_history = new ResultHistoryPanel(m_outText);
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    if(!ge.isHeadless()) {
+      if (m_outText == null) {
+        m_outText = new JTextArea(20, 80);
+        m_history = new ResultHistoryPanel(m_outText);
+      }
+      m_outText.setEditable(false);
+      m_outText.setFont(new Font("Monospaced", Font.PLAIN, 12));
+      m_outText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
+      m_history.setHandleRightClicks(false);
+      m_history.getList().addMouseListener(new MouseAdapter() {
+          public void mouseClicked(MouseEvent e) {
+            if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+                 != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
+              int index = m_history.getList().locationToIndex(e.getPoint());
+              if (index != -1) {
+                String name = m_history.getNameAtIndex(index);
+                visualize(name, e.getX(), e.getY());
+              } else {
+                visualize(null, e.getX(), e.getY());
+              }
+            }
+          }
+        });
     }
-    m_outText.setEditable(false);
-    m_outText.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    m_outText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
-    m_history.setHandleRightClicks(false);
-    m_history.getList().addMouseListener(new MouseAdapter() {
-	public void mouseClicked(MouseEvent e) {
-	  if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
-	       != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
-	    int index = m_history.getList().locationToIndex(e.getPoint());
-	    if (index != -1) {
-	      String name = m_history.getNameAtIndex(index);
-	      visualize(name, e.getX(), e.getY());
-	    } else {
-	      visualize(null, e.getX(), e.getY());
-	    }
-	  }
-	}
-    });
   }
 
   /**
@@ -304,16 +311,18 @@ public class TextViewer
       name = name.substring(0, 30);
     }
 
-    // see if there is an entry with this name already in the list -
-    // could happen if two items with the same name arrive at the same second
-    int mod = 2;
-    String nameOrig = new String(name);
-    while (m_history.getNamedBuffer(name) != null) {
-      name = new String(nameOrig+""+mod);
-      mod++;
+    if (m_outText != null) {
+      // see if there is an entry with this name already in the list -
+      // could happen if two items with the same name arrive at the same second
+      int mod = 2;
+      String nameOrig = new String(name);
+      while (m_history.getNamedBuffer(name) != null) {
+        name = new String(nameOrig+""+mod);
+        mod++;
+      }
+      m_history.addResult(name, result);
+      m_history.setSingle(name);
     }
-    m_history.addResult(name, result);
-    m_history.setSingle(name);
 
     // pass on the event to any listeners
     notifyTextListeners(e);
@@ -457,7 +466,11 @@ public class TextViewer
     if (m_design) {
       appearanceDesign();
     } else {
-      appearanceFinal();
+      java.awt.GraphicsEnvironment ge = 
+        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+      if (!ge.isHeadless()){
+        appearanceFinal();
+      }
     }
   }
 
