@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the data visualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class DataVisualizerBeanInfo extends SimpleBeanInfo {
   
@@ -38,8 +38,17 @@ public class DataVisualizerBeanInfo extends SimpleBeanInfo {
    * @return an <code>EventSetDescriptor[]</code> value
    */
   public EventSetDescriptor [] getEventSetDescriptors() {
-    // hide all gui events
-    EventSetDescriptor [] esds = { };
-    return esds;
+    try {
+      EventSetDescriptor [] esds = { 
+        new EventSetDescriptor(DataVisualizer.class,
+                               "dataSet",
+                               DataSourceListener.class,
+                               "acceptDataSet")
+      };      
+      return esds;
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return null;
   }
 }
