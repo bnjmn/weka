@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -72,6 +72,11 @@ public class DataVisualizer extends JPanel
   protected transient BeanContext m_beanContext = null;
 
   private VisualizePanel m_visPanel;
+
+  /**
+   * Objects listening for data set events
+   */
+  private Vector m_dataSetListeners = new Vector();
   
   /**
    * BeanContextChild support
@@ -104,9 +109,14 @@ public class DataVisualizer extends JPanel
   }
 
   protected void appearanceFinal() {
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    
     removeAll();
-    setLayout(new BorderLayout());
-    setUpFinal();
+    if (!ge.isHeadless()) {
+      setLayout(new BorderLayout());
+      setUpFinal();
+    }
   }
 
   protected void setUpFinal() {
@@ -159,6 +169,9 @@ public class DataVisualizer extends JPanel
 	ex.printStackTrace();
       }
     }
+
+    // pass on the event to any listeners
+    notifyDataSetListeners(e);
   }
 
   /**
@@ -291,6 +304,23 @@ public class DataVisualizer extends JPanel
       ex.printStackTrace();
     }
   }
+
+  /**
+   * Notify all data set listeners of a data set event
+   *
+   * @param ge a <code>DataSetEvent</code> value
+   */
+  private void notifyDataSetListeners(DataSetEvent ge) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_dataSetListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	((DataSourceListener)l.elementAt(i)).acceptDataSet(ge);
+      }
+    }
+  }
   
   /**
    * Describe <code>performRequest</code> method here.
@@ -337,6 +367,24 @@ public class DataVisualizer extends JPanel
       throw new IllegalArgumentException(request
 					 + " not supported (DataVisualizer)");
     }
+  }
+
+  /**
+   * Add a listener
+   *
+   * @param dsl a <code>DataSourceListener</code> value
+   */
+  public synchronized void addDataSourceListener(DataSourceListener dsl) {
+    m_dataSetListeners.addElement(dsl);
+  }
+
+  /**
+   * Remove a listener
+   *
+   * @param dsl a <code>DataSourceListener</code> value
+   */
+  public synchronized void removeDataSourceListener(DataSourceListener dsl) {
+    m_dataSetListeners.remove(dsl);
   }
 
   public static void main(String [] args) {
