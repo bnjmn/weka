@@ -40,7 +40,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.7 $
+ * @version $Revision: 1.1.2.8 $
  */
 public class FlowRunner {
 
@@ -178,7 +178,7 @@ public class FlowRunner {
       if (tempB.getBean() instanceof Startable) {
         Startable s = (Startable)tempB.getBean();
         // start that sucker...
-        System.err.println("[FlowRunner] Launching flow "+numFlows+"...");
+        System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
         launchThread(s, numFlows);
         numFlows++;
       }
@@ -204,7 +204,7 @@ public class FlowRunner {
         fr.load(fileName);
         fr.run();
         fr.waitUntilFinished();
-        System.err.println("Finished all flows.");
+        System.out.println("Finished all flows.");
       } catch (Exception ex) {
         ex.printStackTrace();
         System.err.println(ex.getMessage());
