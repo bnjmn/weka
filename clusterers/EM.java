@@ -85,7 +85,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class EM
   extends RandomizableDensityBasedClusterer
@@ -497,6 +497,7 @@ public class EM
       SimpleKMeans sk = new SimpleKMeans();
       sk.setSeed(m_rr.nextInt());
       sk.setNumClusters(m_num_clusters);
+      sk.setDisplayStdDevs(true);
       sk.buildClusterer(inst);
       if (sk.getSquaredError() < bestSqE) {
 	bestSqE = sk.getSquaredError();
