@@ -78,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LinearForwardSelection 
   extends ASSearch 
@@ -740,7 +740,7 @@ public class LinearForwardSelection
       m_classIndex = data.classIndex();
     }
 
-    ((SubsetEvaluator) ASEval).buildEvaluator(data);
+    ((ASEvaluation) ASEval).buildEvaluator(data);
 
     m_numAttribs = data.numAttributes();
 

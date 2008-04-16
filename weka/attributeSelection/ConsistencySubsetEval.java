@@ -68,12 +68,13 @@ import java.util.Hashtable;
  <!-- technical-bibtex-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @see Discretize
  */
 public class ConsistencySubsetEval 
-  extends SubsetEvaluator
-  implements TechnicalInformationHandler {
+  extends ASEvaluation
+  implements SubsetEvaluator,
+             TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = -2880323763295270402L;

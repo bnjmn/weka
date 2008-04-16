@@ -107,11 +107,13 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision: 1.30 $
  */
 public class WrapperSubsetEval
-  extends SubsetEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
+  extends ASEvaluation
+  implements SubsetEvaluator,
+             OptionHandler, 
+             TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = -4573057658746728675L;

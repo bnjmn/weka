@@ -80,7 +80,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class SubsetSizeForwardSelection extends ASSearch
   implements OptionHandler {
@@ -106,7 +106,7 @@ public class SubsetSizeForwardSelection extends ASSearch
   protected int m_linearSelectionType;
 
   /** the subset evaluator to use for subset size determination */
-  private SubsetEvaluator m_setSizeEval;
+  private ASEvaluation m_setSizeEval;
 
   /**
    * Number of cross validation folds for subset size determination (default =
@@ -477,12 +477,12 @@ public class SubsetSizeForwardSelection extends ASSearch
    */
   public void setSubsetSizeEvaluator(ASEvaluation eval)
     throws Exception {
-    if (!SubsetEvaluator.class.isInstance(eval)) {
+    if (!(eval instanceof SubsetEvaluator)) {
       throw new Exception(eval.getClass().getName() +
                           " is no subset evaluator.");
     }
 
-    m_setSizeEval = (SubsetEvaluator) eval;
+    m_setSizeEval = eval;
   }
 
   /**
@@ -688,7 +688,7 @@ public class SubsetSizeForwardSelection extends ASSearch
     }
 
     if (m_setSizeEval == null) {
-      m_setSizeEval = (SubsetEvaluator) ASEval;
+      m_setSizeEval = ASEval;
     }
 
     m_numAttribs = data.numAttributes();
@@ -722,7 +722,7 @@ public class SubsetSizeForwardSelection extends ASSearch
     int[] ranking;
 
     if (m_performRanking) {
-      ((SubsetEvaluator) ASEval).buildEvaluator(data);
+      ASEval.buildEvaluator(data);
       ranking = LSF.rankAttributes(data, (SubsetEvaluator) ASEval, m_verbose);
     } else {
       ranking = new int[m_numAttribs];
@@ -745,7 +745,7 @@ public class SubsetSizeForwardSelection extends ASSearch
       searchResults[f].forwardSearch(m_cacheSize, new BitSet(m_numAttribs),
                                      ranking, m_numUsedAttributes,
                                      m_linearSelectionType == TYPE_FIXED_WIDTH, 1, -1, trainData[f],
-                                     m_setSizeEval, m_verbose);
+                                     (SubsetEvaluator)m_setSizeEval, m_verbose);
 
       maxSubsetSize = Math.max(maxSubsetSize,
                                searchResults[f].getBestGroup().cardinality());
@@ -770,7 +770,7 @@ public class SubsetSizeForwardSelection extends ASSearch
         searchResults[f].forwardSearch(m_cacheSize,
                                        searchResults[f].getBestGroup(), ranking, m_numUsedAttributes,
                                        m_linearSelectionType == TYPE_FIXED_WIDTH, 1, maxSubsetSize,
-                                       trainData[f], m_setSizeEval, m_verbose);
+                                       trainData[f], (SubsetEvaluator)m_setSizeEval, m_verbose);
       }
     }
 
@@ -784,7 +784,7 @@ public class SubsetSizeForwardSelection extends ASSearch
                                                                                                                         s), testData[f]);
         } else {
           m_setSizeEval.buildEvaluator(testData[f]);
-          testMerit[f][s] = m_setSizeEval.evaluateSubset(searchResults[f].getBestGroupOfSize(
+          testMerit[f][s] = ((SubsetEvaluator)m_setSizeEval).evaluateSubset(searchResults[f].getBestGroupOfSize(
                                                                                              s));
         }
       }
@@ -815,7 +815,7 @@ public class SubsetSizeForwardSelection extends ASSearch
                          finalSubsetSize);
     }
 
-    ((SubsetEvaluator) ASEval).buildEvaluator(data);
+    ASEval.buildEvaluator(data);
     LSF.forwardSearch(m_cacheSize, new BitSet(m_numAttribs), ranking,
                       m_numUsedAttributes, m_linearSelectionType == TYPE_FIXED_WIDTH, 1,
                       finalSubsetSize, data, (SubsetEvaluator) ASEval, m_verbose);

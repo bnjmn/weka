@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class RankSearch 
   extends ASSearch 
@@ -403,19 +403,19 @@ public class RankSearch
     if (m_ASEval instanceof AttributeEvaluator) {
       // generate the attribute ranking first
       Ranker ranker = new Ranker();
-      ((AttributeEvaluator)m_ASEval).buildEvaluator(m_Instances);
+      m_ASEval.buildEvaluator(m_Instances);
       if (m_ASEval instanceof AttributeTransformer) {
         // get the transformed data a rebuild the subset evaluator
         m_Instances = ((AttributeTransformer)m_ASEval).
           transformedData();
-        ((SubsetEvaluator)m_SubsetEval).buildEvaluator(m_Instances);
+        ((ASEvaluation)m_SubsetEval).buildEvaluator(m_Instances);
       }
-      m_Ranking = ranker.search((AttributeEvaluator)m_ASEval, m_Instances);
+      m_Ranking = ranker.search(m_ASEval, m_Instances);
     } else {
       GreedyStepwise fs = new GreedyStepwise();
       double [][]rankres; 
       fs.setGenerateRanking(true);
-      ((SubsetEvaluator)m_ASEval).buildEvaluator(m_Instances);
+      ((ASEvaluation)m_ASEval).buildEvaluator(m_Instances);
       fs.search(m_ASEval, m_Instances);
       rankres = fs.rankedAttributes();
       m_Ranking = new int[rankres.length];

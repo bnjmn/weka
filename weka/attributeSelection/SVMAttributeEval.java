@@ -117,11 +117,13 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Kieran Holland
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class SVMAttributeEval 
-  extends AttributeEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator, 
+             OptionHandler, 
+             TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = -6489975709033967447L;

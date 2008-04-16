@@ -58,13 +58,13 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $ 
+ * @version $Revision: 1.15 $ 
  * @see Discretize
  * @see NumericToBinary
  */
 public class ChiSquaredAttributeEval
-  extends AttributeEvaluator
-  implements OptionHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator, OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = -8316857822521717692L;
