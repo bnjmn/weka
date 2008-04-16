@@ -16,7 +16,7 @@
 
 /*
  *    LFSMethods.java
- *    Copyright (C) 2007 Martin Gütlein
+ *    Copyright (C) 2007 Martin Guetlein
  *
  */
 package weka.attributeSelection;
@@ -33,7 +33,7 @@ import java.util.Hashtable;
 
 /**
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class LFSMethods {
   /** max-size of array bestGroupOfSize, should be suffient */

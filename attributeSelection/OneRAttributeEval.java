@@ -66,11 +66,11 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class OneRAttributeEval
-  extends AttributeEvaluator 
-  implements OptionHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator, OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 4386514823886856980L;

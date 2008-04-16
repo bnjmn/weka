@@ -55,12 +55,12 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @see Discretize
  */
 public class GainRatioAttributeEval
-  extends AttributeEvaluator
-  implements OptionHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator, OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = -8504656625598579926L;

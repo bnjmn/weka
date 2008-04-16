@@ -81,12 +81,14 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  * @see Discretize
  */
 public class CfsSubsetEval
-  extends SubsetEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
+  extends ASEvaluation
+  implements SubsetEvaluator, 
+             OptionHandler, 
+             TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = 747878400813276317L;

@@ -55,12 +55,12 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  * @see Discretize
  */
 public class SymmetricalUncertAttributeEval
-  extends AttributeEvaluator
-  implements OptionHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator, OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = -8096505776132296416L;
