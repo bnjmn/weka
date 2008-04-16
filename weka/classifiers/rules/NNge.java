@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -88,7 +89,7 @@ import java.util.Vector;
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NNge 
   extends Classifier 
@@ -669,7 +670,15 @@ public class NNge
       s += "  ("+numInstances() +")";
       return s;
     }
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7 $");
+    }
   }
 
 
@@ -1686,7 +1695,6 @@ public class NNge
     return m_NumFoldersMI;
   }
 
-
   /**
    * Sets the number of folder for mutual information.
    *
@@ -1695,11 +1703,15 @@ public class NNge
   public void setNumFoldersMIOption(int newIntParameter) {
     m_NumFoldersMI = newIntParameter;
   }
-
-
-
-  /** ENTRY POINT */
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
+  }
 
   /**
    * Main method for testing this class.

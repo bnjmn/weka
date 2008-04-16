@@ -24,6 +24,7 @@ package weka.classifiers.functions.supportVector;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 /**
  <!-- globalinfo-start -->
@@ -58,7 +59,7 @@ import weka.core.Instances;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class NormalizedPolyKernel 
   extends PolyKernel {
@@ -155,5 +156,14 @@ public class NormalizedPolyKernel
                getExponent() + "*" + "<y,y>^" + getExponent() + ")^(1/2)";
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 }

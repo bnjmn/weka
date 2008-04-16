@@ -80,19 +80,21 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class MathematicalExpression {
+public class MathematicalExpression
+  implements RevisionHandler {
   
   /**
    * A tokenizer for MathematicalExpression
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   static public class Tokenizer 
-    extends StreamTokenizer {
+    extends StreamTokenizer
+    implements RevisionHandler {
     
     /** token for a variable */
     final static int  TT_VAR = -5;
@@ -137,6 +139,15 @@ public class MathematicalExpression {
       }
       return ttype;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.5 $");
+    }
   }
   
   /**
@@ -144,10 +155,10 @@ public class MathematicalExpression {
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.4 $
+   * @version $Revision: 1.5 $
    */
   static public class TreeNode 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -654720966350007711L;
@@ -304,6 +315,15 @@ public class MathematicalExpression {
 	
 	default:throw new Exception("Unknow Tree Node Type.");
       }
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
   
@@ -584,5 +604,14 @@ public class MathematicalExpression {
    */
   public static double evaluate(MathematicalExpression.TreeNode parseTree, Map symbols) throws Exception {
     return parseTree.eval(symbols);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

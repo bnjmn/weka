@@ -27,6 +27,8 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Capabilities.Capability;
@@ -72,7 +74,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $ 
+ * @version $Revision: 1.23 $ 
 */
 public class Prism 
   extends Classifier
@@ -120,7 +122,7 @@ public class Prism
    * Class for storing a PRISM ruleset, i.e. a list of rules
    */
   private class PrismRule 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 4248784350656508583L;
@@ -268,13 +270,22 @@ public class Prism
 	return "Can't print Prism classifier!";
       }
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.23 $");
+    }
   }
   
   /**
    * Class for storing a list of attribute-value tests
    */
   private class Test 
-    implements Serializable { 
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -8925333011350280799L;
@@ -304,6 +315,15 @@ public class Prism
 	}
       }
       return false;    
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.23 $");
     }
   }
 
@@ -514,6 +534,15 @@ public class Prism
       return "Prism: No model built yet.";
     }
     return "Prism rules\n----------\n" + m_rules.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.23 $");
   }
 
   /**

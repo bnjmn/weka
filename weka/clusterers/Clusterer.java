@@ -26,21 +26,21 @@ import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
 import java.io.Serializable;
 
-
 /** 
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public abstract class Clusterer
-  implements Cloneable, Serializable, CapabilitiesHandler {
+  implements Cloneable, Serializable, CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6099962589663877632L;

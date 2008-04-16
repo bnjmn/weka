@@ -23,6 +23,8 @@
 package weka.classifiers.misc.monotone;
 
 import weka.core.Instance;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -42,10 +44,10 @@ import java.io.Serializable;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Coordinates
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 2319016195345994738L;
@@ -237,5 +239,14 @@ public class Coordinates
       s += m_coord[i] + ",";
     }
     return s + m_coord[m_coord.length - 1] + ")";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

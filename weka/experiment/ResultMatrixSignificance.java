@@ -22,6 +22,8 @@
 
 package weka.experiment;
 
+import weka.core.RevisionUtils;
+
 /**
  * This matrix is a container for the datasets and classifier setups and 
  * their statistics. It outputs only the significance indicators - sometimes
@@ -29,7 +31,7 @@ package weka.experiment;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ResultMatrixSignificance
   extends ResultMatrix {
@@ -184,6 +186,15 @@ public class ResultMatrixSignificance
    */
   public String toStringRanking() {
     return new ResultMatrixPlainText(this).toStringRanking();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

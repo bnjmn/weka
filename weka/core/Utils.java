@@ -36,14 +36,15 @@ import java.util.Random;
  * @author Yong Wang 
  * @author Len Trigg 
  * @author Julien Prados
- * @version $Revision: 1.59 $
+ * @version $Revision: 1.60 $
  */
-public final class Utils {
+public final class Utils
+  implements RevisionHandler {
 
   /** The natural logarithm of 2. */
   public static double log2 = Math.log(2);
 
-  /** The small deviation allowed in double comparisons */
+  /** The small deviation allowed in double comparisons. */
   public static double SMALL = 1e-6;
 
   
@@ -1866,6 +1867,15 @@ public final class Utils {
         return select(array, index, middle + 1, right, k - (middle - left + 1));
       }
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.60 $");
   }
 
   /**

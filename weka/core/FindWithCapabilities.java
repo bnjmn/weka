@@ -140,13 +140,13 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Capabilities
  * @see Capabilities.Capability
  * @see GenericPropertiesCreator
  */
 public class FindWithCapabilities 
-implements OptionHandler, CapabilitiesHandler {
+implements OptionHandler, CapabilitiesHandler, RevisionHandler {
 
   /** the capabilities to look for. */
   protected Capabilities m_Capabilities = new Capabilities(this);
@@ -883,6 +883,15 @@ implements OptionHandler, CapabilitiesHandler {
     }
 
     return m_Matches;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

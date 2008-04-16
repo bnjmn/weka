@@ -22,6 +22,9 @@
 
 package weka.classifiers.misc.monotone;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 /**
  * Class implementing the zero-one loss function, this is 
  * an incorrect prediction always accounts for one unit loss.
@@ -33,10 +36,10 @@ package weka.classifiers.misc.monotone;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ZeroOneLossFunction
-  implements NominalLossFunction {
+  implements NominalLossFunction, RevisionHandler {
 
   /**
    * Returns the zero-one loss function between two class values.
@@ -56,5 +59,14 @@ public class ZeroOneLossFunction
    */
   public String toString() {
     return "ZeroOneLossFunction";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

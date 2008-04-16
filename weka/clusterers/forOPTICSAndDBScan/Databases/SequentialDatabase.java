@@ -28,6 +28,8 @@ import weka.clusterers.forOPTICSAndDBScan.Utils.EpsilonRange_ListElement;
 import weka.clusterers.forOPTICSAndDBScan.Utils.PriorityQueue;
 import weka.clusterers.forOPTICSAndDBScan.Utils.PriorityQueueElement;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -47,10 +49,10 @@ import java.util.TreeMap;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SequentialDatabase
-    implements Database, Serializable {
+    implements Database, Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = 787245523118665778L;
@@ -298,9 +300,13 @@ public class SequentialDatabase
     public Instances getInstances() {
         return instances;
     }
-
-    // *****************************************************************************************************************
-    // inner classes
-    // *****************************************************************************************************************
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.4 $");
+    }
 }

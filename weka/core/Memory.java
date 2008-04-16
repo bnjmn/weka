@@ -32,10 +32,11 @@ import javax.swing.JOptionPane;
  * method.
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.6 $
+ * @version   $Revision: 1.7 $
  * @see       #setEnabled(boolean)
  */
-public class Memory {
+public class Memory
+  implements RevisionHandler {
   
   /** whether memory management is enabled */
   protected static boolean m_Enabled = true;
@@ -216,6 +217,15 @@ public class Memory {
     thGroup = null;
 
     System.gc();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

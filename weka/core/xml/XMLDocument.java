@@ -21,6 +21,9 @@
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -52,9 +55,10 @@ import org.xml.sax.InputSource;
  * 
  * @see #PI 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
-public class XMLDocument {
+public class XMLDocument
+  implements RevisionHandler {
   
   /** the parsing instructions "&lt;?xml version=\"1.0\" encoding=\"utf-8\"?&gt;" 
    * (may not show up in Javadoc due to tags!). */
@@ -641,6 +645,15 @@ public class XMLDocument {
       header += getDocType() + "\n\n";
     
     return toString(new StringBuffer(header), getDocument().getDocumentElement(), 0).toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
   
   /**

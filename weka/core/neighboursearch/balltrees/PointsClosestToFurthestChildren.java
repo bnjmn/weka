@@ -24,6 +24,7 @@ package weka.core.neighboursearch.balltrees;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
@@ -69,7 +70,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 //better rename to MidPoint of Furthest Pair/Children
 public class PointsClosestToFurthestChildren
@@ -211,5 +212,14 @@ public class PointsClosestToFurthestChildren
                                               m_Instlist, m_Instances, pivot, 
                                               m_DistanceFunction)
                               );
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

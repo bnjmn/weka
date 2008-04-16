@@ -21,10 +21,11 @@
 
 package weka.classifiers.functions.pace;
 
+import weka.core.RevisionHandler;
 import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformationHandler;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.IntVector;
 
@@ -41,10 +42,10 @@ import weka.core.matrix.IntVector;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ */
+ * @version $Revision: 1.5 $ */
 
 public abstract class MixtureDistribution
-  implements TechnicalInformationHandler {
+  implements TechnicalInformationHandler, RevisionHandler {
   
   protected DiscreteFunction mixingDistribution;
 

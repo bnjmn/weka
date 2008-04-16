@@ -38,10 +38,10 @@ import java.io.Serializable;
  * set or get numbers not in string format should use 0-based numbers).
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class SingleIndex
-  implements Serializable {
+  implements Serializable, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 5285169134430839303L;
@@ -201,6 +201,15 @@ public class SingleIndex
 	throw new IllegalArgumentException("Index is too large");
       }
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

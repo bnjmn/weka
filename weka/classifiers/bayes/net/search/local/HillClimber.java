@@ -26,6 +26,8 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -63,7 +65,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class HillClimber 
     extends LocalScoreSearchAlgorithm {
@@ -75,7 +77,7 @@ public class HillClimber
 	 * on the current Bayesian network.
 	 */
     class Operation 
-    	implements Serializable {
+    	implements Serializable, RevisionHandler {
       
       	/** for serialization */
         static final long serialVersionUID = -4880888790432547895L;
@@ -126,11 +128,21 @@ public class HillClimber
         
         /** change of score due to this operation **/
         public double m_fDeltaScore = -1E100;
+        
+        /**
+         * Returns the revision string.
+         * 
+         * @return		the revision
+         */
+        public String getRevision() {
+          return RevisionUtils.extract("$Revision: 1.9 $");
+        }
     } // class Operation
 
 	/** cache for remembering the change in score for steps in the search space
 	 */
-	class Cache {
+	class Cache implements RevisionHandler {
+	  
 		/** change in score due to adding an arc **/
 		double [] [] m_fDeltaScoreAdd;
 		/** change in score due to deleting an arc **/
@@ -172,6 +184,15 @@ public class HillClimber
 			// should never get here
 			return 0;
 		} // get
+
+		/**
+		 * Returns the revision string.
+		 * 
+		 * @return		the revision
+		 */
+		public String getRevision() {
+		  return RevisionUtils.extract("$Revision: 1.9 $");
+		}
 	} // class Cache
 
 	/** cache for storing score differences **/
@@ -624,5 +645,14 @@ public class HillClimber
 	public String useArcReversalTipText() {
 	  return "When set to true, the arc reversal operation is used in the search.";
 	} // useArcReversalTipText
+
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.9 $");
+	}
 
 } // HillClimber

@@ -28,6 +28,7 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
@@ -36,7 +37,7 @@ import weka.filters.unsupervised.attribute.Remove;
  * Constructs a node for use in an m5 tree or rule
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class RuleNode 
   extends Classifier {
@@ -1094,5 +1095,14 @@ public class RuleNode
    */
   protected void setSaveInstances(boolean save) {
     m_saveInstances = save;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 }

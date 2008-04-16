@@ -27,6 +27,7 @@ import weka.core.FastVector;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Queue;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.xml.KOML;
@@ -181,7 +182,7 @@ import javax.swing.DefaultListModel;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class RemoteExperiment 
   extends Experiment {
@@ -834,6 +835,15 @@ public class RemoteExperiment
     for (int i = 0; i < totalHosts; i++) {
       availableHost(-1);
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.16 $");
   }
 
   /**

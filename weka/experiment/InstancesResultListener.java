@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -50,7 +51,7 @@ import java.util.Hashtable;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class InstancesResultListener 
   extends CSVResultListener {
@@ -250,5 +251,14 @@ public class InstancesResultListener
       }
     }
     m_Instances.addElement(newInst);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 } // InstancesResultListener

@@ -26,16 +26,19 @@ package weka.associations.tertius;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
+
 import java.util.Iterator;
 
 /**
  * Class representing the body of a rule.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
-public class Body extends LiteralSet {
+public class Body
+  extends LiteralSet {
   
   /** for serialization */
   private static final long serialVersionUID = 4870689270432218016L;
@@ -108,9 +111,13 @@ public class Body extends LiteralSet {
     }
     return text.toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
+  }
 }
-
-
-
-
-

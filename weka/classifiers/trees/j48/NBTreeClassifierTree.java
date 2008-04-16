@@ -26,6 +26,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
 
 /**
@@ -33,7 +34,7 @@ import weka.core.Capabilities.Capability;
  * classification.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class NBTreeClassifierTree
   extends ClassifierTree {
@@ -266,5 +267,13 @@ public class NBTreeClassifierTree
       }
     }
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
+  }
 }
-

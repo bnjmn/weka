@@ -30,6 +30,7 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -89,7 +90,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class TLD 
   extends RandomizableClassifier 
@@ -845,6 +846,15 @@ public class TLD
   public boolean getUsingCutOff() {
     return m_UseEmpiricalCutOff;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
+  }
 
   /**
    * Main method for testing.
@@ -856,7 +866,7 @@ public class TLD
   }
 }
 
-class TLD_Optm extends Optimization{
+class TLD_Optm extends Optimization {
 
   private double[] num;
   private double[] sSq;
@@ -1134,5 +1144,14 @@ class TLD_Optm extends Optimization{
     }
 
     return h;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 }

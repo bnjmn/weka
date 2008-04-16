@@ -27,6 +27,7 @@ import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Randomizable;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
@@ -80,7 +81,7 @@ import java.util.Random;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class RandomCommittee 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -201,6 +202,15 @@ public class RandomCommittee
       text.append(m_Classifiers[i].toString() + "\n\n");
 
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.12 $");
   }
 
   /**

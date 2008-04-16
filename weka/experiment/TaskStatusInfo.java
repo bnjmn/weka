@@ -22,6 +22,9 @@
 
 package weka.experiment;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /**
@@ -33,10 +36,10 @@ import java.io.Serializable;
  * execute.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TaskStatusInfo
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6129343303703560015L;
@@ -115,5 +118,14 @@ public class TaskStatusInfo
    */
   public Object getTaskResult() {
     return m_TaskResult;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 }

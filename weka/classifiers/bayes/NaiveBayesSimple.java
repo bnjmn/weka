@@ -27,6 +27,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -70,7 +71,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $ 
+ * @version $Revision: 1.20 $ 
 */
 public class NaiveBayesSimple 
   extends Classifier
@@ -406,6 +407,15 @@ public class NaiveBayesSimple
     
     return (1 / (NORM_CONST * stdDev)) 
       * Math.exp(-(diff * diff / (2 * stdDev * stdDev)));
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.20 $");
   }
 
   /**

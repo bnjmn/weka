@@ -22,6 +22,7 @@
 
 package weka.experiment;
 
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -30,7 +31,7 @@ import weka.core.Utils;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ResultMatrixHTML
   extends ResultMatrix {
@@ -275,6 +276,15 @@ public class ResultMatrixHTML
     result += "</table>\n";
 
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

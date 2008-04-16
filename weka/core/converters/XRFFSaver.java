@@ -25,6 +25,7 @@ package weka.core.converters;
 import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -64,7 +65,7 @@ import java.util.zip.GZIPOutputStream;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Saver
  */
 public class XRFFSaver 
@@ -387,6 +388,15 @@ public class XRFFSaver
       resetWriter();
       setWriteMode(CANCEL);
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
   
   /**

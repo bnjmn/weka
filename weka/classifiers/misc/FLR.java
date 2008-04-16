@@ -29,6 +29,8 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -113,7 +115,7 @@ import java.util.Vector;
  *
  * @author Ioannis N. Athanasiadis (email: ionathan@iti.gr, alias: ionathan@ieee.org)
  * @version 5.0
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class FLR
     extends Classifier
@@ -719,6 +721,15 @@ public class FLR
     
     return result;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -740,7 +751,7 @@ public class FLR
    * @version 5.0
    */
   private class FuzzyLattice
-      implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = -3568003680327062404L;
@@ -931,6 +942,15 @@ public class FLR
       }
       rule = rule + "in Class:  " + className + " \n";
       return rule;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.10 $");
     }
   }
 }

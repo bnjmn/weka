@@ -25,6 +25,7 @@ package weka.attributeSelection;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.BitSet;
@@ -67,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class RankSearch 
   extends ASSearch 
@@ -508,5 +509,14 @@ public class RankSearch
                                      fieldwidth+(int)precision,
                                      (int)precision)+"\n");
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.19 $");
   }
 }

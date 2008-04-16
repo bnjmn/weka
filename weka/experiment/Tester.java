@@ -23,10 +23,9 @@
 
 package weka.experiment;
 
-import weka.core.Instances;
 import weka.core.Instance;
+import weka.core.Instances;
 import weka.core.Range;
-import weka.core.Statistics;
 
 import java.io.Serializable;
 
@@ -34,9 +33,11 @@ import java.io.Serializable;
  * Interface for different kinds of Testers in the Experimenter.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
-public interface Tester extends Serializable {
+public interface Tester
+  extends Serializable {
+  
   /**
    * returns the name of the testing algorithm
    */

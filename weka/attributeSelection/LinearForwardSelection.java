@@ -16,15 +16,17 @@
 
 /*
  *    LinearForwardSelection.java
- *    Copyright (C) 2007 Martin Gütlein
+ *    Copyright (C) 2007 Martin Guetlein
  *
  */
+
 package weka.attributeSelection;
 
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -78,7 +80,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class LinearForwardSelection 
   extends ASSearch 
@@ -187,7 +189,7 @@ public class LinearForwardSelection
     result.setValue(Field.AUTHOR, "Martin Guetlein");
     result.setValue(Field.YEAR, "2006");
     result.setValue(Field.TITLE, "Large Scale Attribute Selection Using Wrappers");
-    result.setValue(Field.SCHOOL, "Albert-Ludwigs-Universitat");
+    result.setValue(Field.SCHOOL, "Albert-Ludwigs-Universitaet");
     result.setValue(Field.ADDRESS, "Freiburg, Germany");
     
     return result;
@@ -841,5 +843,14 @@ public class LinearForwardSelection
     }
 
     return list;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

@@ -56,9 +56,10 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class Stopwords {
+public class Stopwords
+  implements RevisionHandler {
   
   /** The hash set containing the list of stopwords */
   protected HashSet m_Words = null;
@@ -782,6 +783,15 @@ public class Stopwords {
    */
   public static boolean isStopword(String str) {
     return m_Stopwords.is(str.toLowerCase());
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
   
   /**

@@ -22,7 +22,10 @@
 
 package weka.classifiers.misc.monotone;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.estimators.DiscreteEstimator;
+
 import java.util.Arrays;
 
 /** 
@@ -40,9 +43,10 @@ import java.util.Arrays;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class DistributionUtils {
+public class DistributionUtils
+  implements RevisionHandler {
 
   /**
    * Constant indicating the maximal number of classes
@@ -334,5 +338,14 @@ public class DistributionUtils {
     double[] dd = new double[numClasses];
     dd[dd.length - 1] = 1;
     return new CumulativeDiscreteDistribution(dd);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

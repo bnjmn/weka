@@ -22,7 +22,6 @@
 
 package weka.classifiers.bayes.net;
 
-import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -30,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.estimators.Estimator;
 
@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class BayesNetGenerator extends EditableBayesNet {
     /** the seed value */
@@ -574,6 +574,15 @@ public class BayesNetGenerator extends EditableBayesNet {
         System.out.println(option.synopsis());
         System.out.println(option.description());
       }
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.14 $");
     }
 
     /**

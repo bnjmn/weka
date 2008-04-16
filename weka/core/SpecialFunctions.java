@@ -28,9 +28,10 @@ import java.lang.Math;
  * Class implementing some mathematical functions.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
-public final class SpecialFunctions {
+public final class SpecialFunctions
+  implements RevisionHandler {
 
   /** Some constants */
   private static double log2 = Math.log(2);
@@ -83,6 +84,15 @@ public final class SpecialFunctions {
       }
     }
     return (lnFactorial(a)-sum)/log2;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

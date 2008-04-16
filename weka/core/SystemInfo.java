@@ -34,9 +34,11 @@ import java.util.Vector;
  * version, JVM settings etc. Useful for Bug-Reports.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class SystemInfo {
+public class SystemInfo
+  implements RevisionHandler {
+  
   /** for storing the information */
   private Hashtable m_Info = null;
   
@@ -134,6 +136,15 @@ public class SystemInfo {
     }
 
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

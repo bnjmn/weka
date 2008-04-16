@@ -23,16 +23,19 @@
 
 package weka.experiment;
 
-import weka.core.Utils;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
+import weka.core.Utils;
 
 /**
  * A class for storing stats on a paired comparison (t-test and correlation)
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
-public class PairedStats {
+public class PairedStats
+  implements RevisionHandler {
   
   /** The stats associated with the data in column 1 */
   public Stats xStats;
@@ -266,6 +269,15 @@ public class PairedStats {
       + " (sigflag " + differencesSignificance + ")\n"
       + "Correlation       "
       + Utils.doubleToString(correlation,4) + "\n";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**

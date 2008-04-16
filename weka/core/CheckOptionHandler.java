@@ -62,7 +62,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CheckOptionHandler
   extends Check {
@@ -573,6 +573,15 @@ public class CheckOptionHandler
 
     if (m_Success)
       m_Success = checkResettingOptions();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
   
   /** 

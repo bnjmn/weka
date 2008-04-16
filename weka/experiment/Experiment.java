@@ -28,6 +28,8 @@ import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.ConverterUtils;
@@ -144,10 +146,10 @@ import javax.swing.DefaultListModel;
  * All options after -- will be passed to the result producer. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class Experiment 
-  implements Serializable, OptionHandler {
+  implements Serializable, OptionHandler, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 44945596742646663L;
@@ -1169,5 +1171,14 @@ public class Experiment
     } catch (Exception ex) {
       System.err.println(ex.getMessage());
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.27 $");
   }
 } // Experiment

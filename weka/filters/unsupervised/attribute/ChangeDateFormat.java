@@ -30,6 +30,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
@@ -61,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class ChangeDateFormat 
   extends Filter 
@@ -348,6 +349,15 @@ public class ChangeDateFormat
     newData.setClassIndex(getInputFormat().classIndex());
     m_OutputAttribute = newData.attribute(m_AttIndex.getIndex());
     setOutputFormat(newData);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
   
   /**

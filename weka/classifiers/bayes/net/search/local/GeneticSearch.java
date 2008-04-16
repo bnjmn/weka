@@ -26,6 +26,8 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -77,7 +79,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class GeneticSearch 
     extends LocalScoreSearchAlgorithm {
@@ -115,7 +117,8 @@ public class GeneticSearch
 	 */
 	static boolean [] g_bIsSquare;
 	
-	class BayesNetRepresentation {
+	class BayesNetRepresentation implements RevisionHandler {
+	  
 		/** number of nodes in network **/		
 		int m_nNodes = 0;
 
@@ -290,6 +293,15 @@ public class GeneticSearch
 			}
 			return g_bIsSquare[nNum];
 		} // isSquare
+
+		/**
+		 * Returns the revision string.
+		 * 
+		 * @return		the revision
+		 */
+		public String getRevision() {
+		  return RevisionUtils.extract("$Revision: 1.5 $");
+		}
 	} // class BayesNetRepresentation 
 	    	
 	/**
@@ -717,4 +729,13 @@ public class GeneticSearch
 			"selection is used (pick two at random and the highest is allowed to continue). " +
 			"When set to false, the top scoring network structures are selected.";
 	} // useTournamentSelectionTipText
+
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.5 $");
+	}
 } // GeneticSearch

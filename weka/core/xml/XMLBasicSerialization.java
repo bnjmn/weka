@@ -22,6 +22,8 @@
 
 package weka.core.xml;
 
+import weka.core.RevisionUtils;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -64,9 +66,10 @@ import org.w3c.dom.Element;
  * </ul>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
-public class XMLBasicSerialization extends XMLSerialization {
+public class XMLBasicSerialization
+   extends XMLSerialization {
 
    /** the value for mapping, e.g., Maps */
    public final static String VAL_MAPPING = "mapping";
@@ -556,5 +559,14 @@ public class XMLBasicSerialization extends XMLSerialization {
       matrix    = new weka.classifiers.CostMatrix(new StringReader(writer.toString()));
       
       return matrix;
+   }
+   
+   /**
+    * Returns the revision string.
+    * 
+    * @return		the revision
+    */
+   public String getRevision() {
+     return RevisionUtils.extract("$Revision: 1.6 $");
    }
 }

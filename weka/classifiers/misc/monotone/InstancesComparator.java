@@ -23,6 +23,8 @@
 package weka.classifiers.misc.monotone;
 
 import weka.core.Instance;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.util.Comparator;
 
@@ -38,10 +40,10 @@ import java.util.Comparator;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class InstancesComparator
-  implements Comparator {
+  implements Comparator, RevisionHandler {
 
   /** index of the attribute  */
   private int m_Index;
@@ -93,5 +95,14 @@ public class InstancesComparator
       return 1 * m_Reverse;
     }
     return 0;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

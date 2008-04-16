@@ -34,6 +34,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -185,7 +186,7 @@ import java.util.zip.GZIPOutputStream;
  * 
  * @author Robert Jung
  * @author David Michael
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class EnsembleSelection 
   extends RandomizableClassifier 
@@ -1648,6 +1649,15 @@ public class EnsembleSelection
     result.setValue(Field.YEAR, "2004");
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

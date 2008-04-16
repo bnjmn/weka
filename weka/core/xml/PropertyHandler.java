@@ -21,6 +21,9 @@
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -30,9 +33,11 @@ import java.util.Hashtable;
  * that are allowed for a certain class.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
-public class PropertyHandler {
+public class PropertyHandler
+   implements RevisionHandler {
+  
    /** 
     * contains display names of properties to ignore in the serialization
     * process
@@ -346,5 +351,14 @@ public class PropertyHandler {
       }
       
       return result;
+   }
+   
+   /**
+    * Returns the revision string.
+    * 
+    * @return		the revision
+    */
+   public String getRevision() {
+     return RevisionUtils.extract("$Revision: 1.4 $");
    }
 }

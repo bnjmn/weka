@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.core.Utils;
@@ -153,7 +154,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -1310,6 +1311,15 @@ public class CheckClusterer
     str = " (" + str + " predictors)";
     
     print(str);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
   
   /**

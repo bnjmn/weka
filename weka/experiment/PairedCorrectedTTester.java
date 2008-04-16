@@ -28,6 +28,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
@@ -107,7 +108,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PairedCorrectedTTester 
   extends PairedTTester
@@ -327,5 +328,14 @@ public class PairedCorrectedTTester
    */
   public String getToolTipText() {
     return "Performs test using corrected resampled t-test statistic (Nadeau and Bengio)";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 }

@@ -25,6 +25,7 @@ package weka.core.converters;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Capabilities.Capability;
 
@@ -49,7 +50,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see Saver
  */
 public class CSVSaver 
@@ -274,6 +275,15 @@ public class CSVSaver
     }
 
     return outInst.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

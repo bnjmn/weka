@@ -22,6 +22,9 @@
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.lang.reflect.Method;
 
 import org.w3c.dom.Element;
@@ -39,9 +42,11 @@ import org.w3c.dom.Element;
  * @see XMLSerialization
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
-public class XMLSerializationMethodHandler {
+public class XMLSerializationMethodHandler
+   implements RevisionHandler {
+  
    /** for storing read methods */
    protected MethodHandler m_ReadMethods = null;
    
@@ -258,5 +263,14 @@ public class XMLSerializationMethodHandler {
     */
    public String toString() {
       return "Read Methods:\n" + read() + "\n\n" + "Write Methods:\n" + write();
+   }
+   
+   /**
+    * Returns the revision string.
+    * 
+    * @return		the revision
+    */
+   public String getRevision() {
+     return RevisionUtils.extract("$Revision: 1.5 $");
    }
 }

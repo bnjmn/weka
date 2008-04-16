@@ -65,7 +65,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end --> 
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class ChebyshevDistance
   extends NormalizableDistance
@@ -143,5 +143,14 @@ public class ChebyshevDistance
       result = diff;
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

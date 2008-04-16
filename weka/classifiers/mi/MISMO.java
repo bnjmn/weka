@@ -35,6 +35,8 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Tag;
@@ -180,7 +182,7 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (code for adapting to MI data)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class MISMO 
   extends Classifier 
@@ -251,7 +253,7 @@ public class MISMO
    * Class for building a binary support vector machine.
    */
   protected class BinaryMISMO 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = -7107082483475433531L;
@@ -959,6 +961,15 @@ public class MISMO
         } 
       }
     }  
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.6 $");
+    }
   }
 
   /** Normalize training data */
@@ -2096,6 +2107,15 @@ public class MISMO
     }
 
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 
   /**

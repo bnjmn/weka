@@ -25,6 +25,7 @@ import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -68,7 +69,7 @@ import weka.core.TechnicalInformation.Type;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class HNB  
   extends Classifier
@@ -365,6 +366,15 @@ public class HNB
   public String toString() {
 
     return "HNB (Hidden Naive Bayes)";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**

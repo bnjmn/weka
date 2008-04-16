@@ -23,8 +23,12 @@
 
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
-import javax.swing.filechooser.FileFilter;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.File;
+
+import javax.swing.filechooser.FileFilter;
 
 /**
  * <p>
@@ -37,9 +41,11 @@ import java.io.File;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class SERFileFilter extends FileFilter {
+public class SERFileFilter
+    extends FileFilter
+    implements RevisionHandler {
 
     /**
      * Holds the extension of the FileFilter
@@ -91,9 +97,13 @@ public class SERFileFilter extends FileFilter {
     public String getDescription() {
         return description;
     }
-
-    // *****************************************************************************************************************
-    // inner classes
-    // *****************************************************************************************************************
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.3 $");
+    }
 }

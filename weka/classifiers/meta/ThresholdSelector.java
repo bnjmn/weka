@@ -34,6 +34,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -118,7 +119,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $ 
+ * @version $Revision: 1.42 $ 
  */
 public class ThresholdSelector 
   extends RandomizableSingleClassifierEnhancer 
@@ -1060,6 +1061,15 @@ public class ThresholdSelector
     }
     result += m_Classifier.toString();
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.42 $");
   }
   
   /**

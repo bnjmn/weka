@@ -30,6 +30,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Queue;
 import weka.core.RelationalLocator;
+import weka.core.RevisionHandler;
 import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.UnsupportedAttributeTypeException;
@@ -73,10 +74,10 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public abstract class Filter
-  implements Serializable, CapabilitiesHandler {
+  implements Serializable, CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8835063755891851218L;

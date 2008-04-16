@@ -62,10 +62,10 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class Capabilities 
-  implements Cloneable, Serializable {
+  implements Cloneable, Serializable, RevisionHandler {
   
   /** serialversion UID */
   static final long serialVersionUID = -5478590032325567849L;  
@@ -1603,5 +1603,14 @@ public class Capabilities
     iter = cap.capabilities();
     while (iter.hasNext())
       System.out.println("- " + iter.next());
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.26 $");
   }
 }

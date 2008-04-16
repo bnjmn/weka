@@ -33,6 +33,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Tag;
@@ -188,7 +189,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.67 $
+ * @version $Revision: 1.68 $
  */
 public class SMO 
   extends Classifier 
@@ -1113,6 +1114,15 @@ public class SMO
 	} 
       }
     }  
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.68 $");
+    }
   }
 
   /** filter: Normalize training data */
@@ -2106,6 +2116,15 @@ public class SMO
     }
     
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.68 $");
   }
   
   /**

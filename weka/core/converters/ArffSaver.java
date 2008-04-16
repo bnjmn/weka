@@ -25,6 +25,7 @@ package weka.core.converters;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see Saver
  */
 public class ArffSaver 
@@ -211,6 +212,15 @@ public class ArffSaver
       outW = null;
       resetWriter();
       setWriteMode(CANCEL);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

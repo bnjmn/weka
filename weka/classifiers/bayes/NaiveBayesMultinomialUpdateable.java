@@ -25,6 +25,7 @@ package weka.classifiers.bayes;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -68,7 +69,7 @@ import weka.core.Utils;
  * @author Andrew Golightly (acg4@cs.waikato.ac.nz)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Jiang Su
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NaiveBayesMultinomialUpdateable
   extends NaiveBayesMultinomial
@@ -223,6 +224,15 @@ public class NaiveBayesMultinomialUpdateable
     }
 
     return result.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**

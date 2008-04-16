@@ -27,6 +27,7 @@ import weka.classifiers.EnsembleLibrary;
 import weka.classifiers.EnsembleLibraryModel;
 import weka.classifiers.meta.EnsembleSelection;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -54,7 +55,7 @@ import java.util.zip.Adler32;
  *
  * @author  Robert Jung
  * @author  David Michael
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EnsembleSelectionLibrary 
   extends EnsembleLibrary 
@@ -579,5 +580,14 @@ public class EnsembleSelectionLibrary
       m_workingDirectoryPropertySupport.addPropertyChangeListener(listener);
       
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

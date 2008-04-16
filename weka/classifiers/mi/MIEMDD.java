@@ -31,6 +31,7 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -93,7 +94,7 @@ import java.util.Vector;
  *     
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.6 $ 
  */
 public class MIEMDD 
   extends RandomizableClassifier 
@@ -359,6 +360,15 @@ public class MIEMDD
       } // one bag
 
       return grad;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.6 $");
     }
   }
 
@@ -730,6 +740,15 @@ public class MIEMDD
 
     return result;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -741,4 +760,3 @@ public class MIEMDD
     runClassifier(new MIEMDD(), argv);
   }
 }
-

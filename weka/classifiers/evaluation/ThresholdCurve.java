@@ -27,6 +27,8 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
@@ -40,9 +42,10 @@ import weka.core.Utils;
  * case. The Mann Whitney statistic is used to calculate the AUC.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  */
-public class ThresholdCurve {
+public class ThresholdCurve
+  implements RevisionHandler {
 
   /** The name of the relation used in threshold curve datasets */
   public static final String RELATION_NAME = "ThresholdCurve";
@@ -407,6 +410,15 @@ public class ThresholdCurve {
   }
   
   /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.23 $");
+  }
+  
+  /**
    * Tests the ThresholdCurve generation from the command line.
    * The classifier is currently hardcoded. Pipe in an arff file.
    *
@@ -438,6 +450,3 @@ public class ThresholdCurve {
     }
   }
 }
-
-
-

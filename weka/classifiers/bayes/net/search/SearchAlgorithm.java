@@ -25,6 +25,8 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -39,10 +41,10 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class SearchAlgorithm 
-    implements OptionHandler, Serializable {
+    implements OptionHandler, Serializable, RevisionHandler {
   
     /** for serialization */
     static final long serialVersionUID = 6164792240778525312L;
@@ -398,4 +400,13 @@ public class SearchAlgorithm
             + " that all nodes in the network are part of the Markov blanket of the classifier"
             + " node.";
     } // markovBlanketClassifierTipText
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
 } // class SearchAlgorithm

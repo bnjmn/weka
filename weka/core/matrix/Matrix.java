@@ -15,6 +15,8 @@
 
 package weka.core.matrix;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.BufferedReader;
@@ -77,10 +79,10 @@ import java.util.StringTokenizer;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class Matrix 
-  implements Cloneable, Serializable {
+  implements Cloneable, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 7856794138418366180L;
@@ -1432,6 +1434,15 @@ public class Matrix
     }
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
   
   /**

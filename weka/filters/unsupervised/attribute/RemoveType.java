@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -59,7 +60,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class RemoveType 
   extends Filter
@@ -397,6 +398,15 @@ public class RemoveType
     else if (typeString.equals("string")) m_attTypeToDelete = Attribute.STRING;
     else if (typeString.equals("date")) m_attTypeToDelete = Attribute.DATE;
     else if (typeString.equals("relational")) m_attTypeToDelete = Attribute.RELATIONAL;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

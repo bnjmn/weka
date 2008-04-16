@@ -26,6 +26,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.EnsembleLibraryModel;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.File;
@@ -65,7 +66,7 @@ import java.util.zip.Adler32;
  * exception.
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.1 $ 
+ * @version $Revision: 1.2 $ 
  */
 public class EnsembleSelectionLibraryModel
   extends EnsembleLibraryModel
@@ -834,5 +835,14 @@ public class EnsembleSelectionLibraryModel
     m_validationPredictions = new double[predictions.length][];
     System.arraycopy(predictions, 0, m_validationPredictions, 0,
 	predictions.length);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

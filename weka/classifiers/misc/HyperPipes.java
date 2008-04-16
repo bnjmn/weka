@@ -27,6 +27,8 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -51,7 +53,7 @@ import java.io.Serializable;
  *
  * @author Lucio de Souza Coelho (lucio@intelligenesis.net)
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.20 $
+ * @version $Revision: 1.21 $
  */ 
 public class HyperPipes 
   extends Classifier {
@@ -93,7 +95,7 @@ public class HyperPipes
    * passed to it (generally all of a given class value).
    */
   class HyperPipe 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 3972254260367902025L;
@@ -201,6 +203,15 @@ public class HyperPipes
       }
 
       return ((double)count) / (instance.numAttributes() - 1);
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.21 $");
     }
   }
 
@@ -354,7 +365,15 @@ public class HyperPipes
 
     return text.toString();
   }
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.21 $");
+  }
 
   /**
    * Main method for testing this class.

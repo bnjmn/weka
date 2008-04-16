@@ -31,7 +31,12 @@ import weka.core.*;
  * @author Janice Boughton (jrbought@infotech.monash.edu.au)
  * @version $Revision 1.0 $
  */
-public class GraftSplit extends ClassifierSplitModel implements Comparable {
+public class GraftSplit
+  extends ClassifierSplitModel
+  implements Comparable {
+
+  /** for serialzation. */
+  private static final long serialVersionUID = 722773260393182051L;
 
   /** the distribution for graft values, from cases in atbop */
   private Distribution m_graftdistro;
@@ -536,5 +541,14 @@ public class GraftSplit extends ClassifierSplitModel implements Comparable {
     return data.attribute(m_attIndex).name() + theTest
            + " (" + Double.toString(m_laplace) + ") --> " 
            + data.attribute(data.classIndex()).value(m_maxClass);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

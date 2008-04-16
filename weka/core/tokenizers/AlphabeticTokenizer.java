@@ -21,6 +21,8 @@
 
 package weka.core.tokenizers;
 
+import weka.core.RevisionUtils;
+
 import java.util.NoSuchElementException;
 
 /**
@@ -31,7 +33,7 @@ import java.util.NoSuchElementException;
  * 
  * @author  Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AlphabeticTokenizer
   extends Tokenizer {
@@ -123,6 +125,15 @@ public class AlphabeticTokenizer
     m_CurrentPos = 0;
     m_Str = new char[s.length()];
     s.getChars(0, s.length(), m_Str, 0);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**

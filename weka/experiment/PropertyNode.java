@@ -22,6 +22,9 @@
 
 package weka.experiment;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
@@ -33,10 +36,10 @@ import java.io.Serializable;
  * value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class PropertyNode
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8718165742572631384L;
@@ -125,5 +128,14 @@ public class PropertyNode
 				       + parentClass.getName() + "::"
 				       + name);
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 } // PropertyNode

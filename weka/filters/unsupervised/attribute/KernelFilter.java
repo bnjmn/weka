@@ -33,6 +33,7 @@ import weka.core.Instances;
 import weka.core.MathematicalExpression;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -158,7 +159,7 @@ import java.util.Vector;
  *
  * @author Jonathan Miles (jdm18@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class KernelFilter
   extends SimpleBatchFilter 
@@ -863,6 +864,15 @@ public class KernelFilter
       setOutputFormat(result);
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**
