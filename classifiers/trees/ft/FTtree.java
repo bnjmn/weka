@@ -22,27 +22,23 @@
 
 package weka.classifiers.trees.ft;
 
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SimpleLinearRegression;
 import weka.classifiers.trees.j48.BinC45ModelSelection;
 import weka.classifiers.trees.j48.BinC45Split;
-import weka.classifiers.trees.j48.ClassifierSplitModel;
-import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.C45Split;
+import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.Distribution;
-import weka.classifiers.trees.j48.NoSplit;
+import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.Stats;
-
+import weka.classifiers.trees.lmt.LogisticBase;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.Filter;
-import weka.filters.SupervisedFilter;
 import weka.filters.supervised.attribute.NominalToBinary;
-import weka.classifiers.trees.lmt.LogisticBase;
 
-import java.util.Collections;
 import java.util.Vector;
 
 /**
@@ -51,10 +47,10 @@ import java.util.Vector;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class FTtree 
-    extends LogisticBase {   
+  extends LogisticBase {   
   
   /** for serialization */
   static final long serialVersionUID = 1862737145870398755L;
@@ -695,5 +691,14 @@ public abstract class FTtree
     if (!m_isLeaf) {
       for (int i = 0; i < m_sons.length; i++) m_sons[i].cleanup();
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

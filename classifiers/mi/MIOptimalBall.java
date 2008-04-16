@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -84,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class MIOptimalBall 
   extends Classifier 
@@ -529,6 +530,15 @@ public class MIOptimalBall
 
     return new SelectedTag(m_filterType, TAGS_FILTER);
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -540,4 +550,3 @@ public class MIOptimalBall
     runClassifier(new MIOptimalBall(), argv);
   }
 }
-

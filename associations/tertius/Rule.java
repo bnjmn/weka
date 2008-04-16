@@ -26,6 +26,8 @@ package weka.associations.tertius;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -37,10 +39,11 @@ import java.util.Enumeration;
  * Class representing a rule with a body and a head.
  *
  * @author  <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
-public class Rule implements Serializable, Cloneable {
+public class Rule
+  implements Serializable, Cloneable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -7763378359090435505L;
@@ -59,7 +62,7 @@ public class Rule implements Serializable, Cloneable {
 
   /** Can there be negations in the body ? */
   private boolean m_negBody;
-  
+
   /** Can there be negations in the head ? */
   private boolean m_negHead;
 
@@ -96,7 +99,7 @@ public class Rule implements Serializable, Cloneable {
    * @param horn True if the rule is a horn clause.
    */
   public Rule(boolean repeatPredicate, int maxLiterals, boolean negBody, 
-	      boolean negHead, boolean classRule, boolean horn) {
+      boolean negHead, boolean classRule, boolean horn) {
 
     m_body = new Body();
     m_head = new Head();
@@ -107,7 +110,7 @@ public class Rule implements Serializable, Cloneable {
     m_classRule = classRule;
     m_singleHead = classRule || horn;
   }
-    
+
   /**
    * Constructor for a rule when the counter-instances are stored,
    * giving all the constraints applied to this rule.
@@ -122,8 +125,8 @@ public class Rule implements Serializable, Cloneable {
    * @param horn True if the rule is a horn clause.
    */
   public Rule(Instances instances,
-	      boolean repeatPredicate, int maxLiterals, boolean negBody, 
-	      boolean negHead, boolean classRule, boolean horn) {
+      boolean repeatPredicate, int maxLiterals, boolean negBody, 
+      boolean negHead, boolean classRule, boolean horn) {
 
     m_body = new Body(instances);
     m_head = new Head(instances);
@@ -158,7 +161,7 @@ public class Rule implements Serializable, Cloneable {
       /* Clone the set of counter-instances. */
       if (m_counterInstances != null) {
 	((Rule) result).m_counterInstances
-	  = (ArrayList) m_counterInstances.clone();
+	= (ArrayList) m_counterInstances.clone();
       }
     } catch (Exception e) {
       /* An exception is not supposed to happen here. */
@@ -177,7 +180,7 @@ public class Rule implements Serializable, Cloneable {
   public boolean counterInstance(Instance instance) {
 
     return ((m_body.counterInstance(instance) 
-	     && m_head.counterInstance(instance)));
+	&& m_head.counterInstance(instance)));
   }
 
   /**
@@ -231,8 +234,8 @@ public class Rule implements Serializable, Cloneable {
   public double getExpectedNumber() {
 
     return (double) m_body.getCounterInstancesNumber() 
-      * (double) m_head.getCounterInstancesNumber() 
-      / (double) m_numInstances;
+    * (double) m_head.getCounterInstancesNumber() 
+    / (double) m_numInstances;
   }
 
   /**
@@ -320,20 +323,20 @@ public class Rule implements Serializable, Cloneable {
     /* optimistic expected number of counter-instances */
     if (counterInstances <= body - notHead) {
       expectedOptimistic = (double) (notHead * (body - counterInstances)) 
-	/ (double) (n * n);
+      / (double) (n * n);
     } else if (counterInstances <= notHead - body) {
       expectedOptimistic = (double) (body * (notHead - counterInstances)) 
-	/ (double) (n * n);
+      / (double) (n * n);
     } else {
       expectedOptimistic = (double) ((notHead + body - counterInstances)
-				     * (notHead + body - counterInstances)) 
-	/ (double) (4 * n * n);
+	  * (notHead + body - counterInstances)) 
+	  / (double) (4 * n * n);
     }
     if ((expectedOptimistic == 0) || (expectedOptimistic == 1)) {
       m_optimistic = 0;
     } else {
       m_optimistic = expectedOptimistic 
-	/ (Math.sqrt(expectedOptimistic) - expectedOptimistic);
+      / (Math.sqrt(expectedOptimistic) - expectedOptimistic);
     }
   }
 
@@ -367,12 +370,12 @@ public class Rule implements Serializable, Cloneable {
   private Rule addTermToBody(Literal newLit) {
 
     if (!m_negBody && newLit.negative()
-     	|| (m_classRule && newLit.getPredicate().isClass())
+	|| (m_classRule && newLit.getPredicate().isClass())
 	|| (newLit instanceof IndividualLiteral
 	    && (((IndividualLiteral) newLit).getType() 
 		- m_body.getType()) > 1
-	    && (((IndividualLiteral) newLit).getType() 
-		- m_head.getType()) > 1)) {
+		&& (((IndividualLiteral) newLit).getType() 
+		    - m_head.getType()) > 1)) {
       return null;
     } else {
       Rule result = (Rule) this.clone();
@@ -399,8 +402,8 @@ public class Rule implements Serializable, Cloneable {
    */
   private Rule addTermToHead(Literal newLit) {
     if ((!m_negHead && newLit.negative())
-     	|| (m_classRule && !newLit.getPredicate().isClass()) 
-     	|| (m_singleHead && !m_head.isEmpty())
+	|| (m_classRule && !newLit.getPredicate().isClass()) 
+	|| (m_singleHead && !m_head.isEmpty())
 	|| (newLit instanceof IndividualLiteral
 	    && ((IndividualLiteral) newLit).getType() 
 	    != IndividualLiteral.INDIVIDUAL_PROPERTY)) {
@@ -433,7 +436,7 @@ public class Rule implements Serializable, Cloneable {
    * @return A list of rules obtained by refinement.
    */
   private SimpleLinkedList refine(Predicate pred, int firstIndex, int lastIndex, 
-				 boolean addToBody, boolean addToHead) {
+      boolean addToBody, boolean addToHead) {
 
     SimpleLinkedList result = new SimpleLinkedList();
     Literal currentLit;
@@ -494,8 +497,8 @@ public class Rule implements Serializable, Cloneable {
       for (int i = 0; i < predicates.size(); i++) {
 	currentPred = (Predicate) predicates.get(i);
 	result.addAll(refine(currentPred,
-			     0, currentPred.numLiterals(),
-			     true, true));
+	    0, currentPred.numLiterals(),
+	    true, true));
       }
     } else if (m_body.isEmpty() || m_head.isEmpty()) {
       /* Literals can be added to the empty side only. */
@@ -514,16 +517,16 @@ public class Rule implements Serializable, Cloneable {
       currentPred = last.getPredicate();
       if (m_repeatPredicate) {
 	result.addAll(refine(currentPred,
-			     currentPred.indexOf(last) + 1, 
-			     currentPred.numLiterals(),
-			     addToBody, addToHead));
+	    currentPred.indexOf(last) + 1, 
+	    currentPred.numLiterals(),
+	    addToBody, addToHead));
       }
       for (int i = predicates.indexOf(currentPred) + 1; i < predicates.size(); 
-	   i++) {
+      i++) {
 	currentPred = (Predicate) predicates.get(i);
 	result.addAll(refine(currentPred,
-			     0, currentPred.numLiterals(),
-			     addToBody, addToHead));		
+	    0, currentPred.numLiterals(),
+	    addToBody, addToHead));		
       }
     } else {
       Literal lastLitBody = m_body.getLastLiteral();
@@ -539,13 +542,13 @@ public class Rule implements Serializable, Cloneable {
       int inferiorLit;
       int superiorLit;
       addToBody = (m_head.numLiterals() == 1
-		   && (lastPredBodyIndex < lastPredHeadIndex 
-		       || (lastPredBodyIndex == lastPredHeadIndex 
-			   && lastLitBodyIndex < lastLitHeadIndex)));
+	  && (lastPredBodyIndex < lastPredHeadIndex 
+	      || (lastPredBodyIndex == lastPredHeadIndex 
+		  && lastLitBodyIndex < lastLitHeadIndex)));
       addToHead = (m_body.numLiterals() == 1
-		   && (lastPredHeadIndex < lastPredBodyIndex
-		       || (lastPredHeadIndex == lastPredBodyIndex
-			   && lastLitHeadIndex < lastLitBodyIndex)));      
+	  && (lastPredHeadIndex < lastPredBodyIndex
+	      || (lastPredHeadIndex == lastPredBodyIndex
+		  && lastLitHeadIndex < lastLitBodyIndex)));      
       if (addToBody || addToHead) {
 	/* Add literals in the gap between the body and the head. */
 	if (addToBody) {
@@ -563,28 +566,28 @@ public class Rule implements Serializable, Cloneable {
 	    < predicates.indexOf(superiorPred)) {
 	  if (m_repeatPredicate) {
 	    result.addAll(refine(inferiorPred, 
-				 inferiorLit + 1, inferiorPred.numLiterals(),
-				 addToBody, addToHead));
+		inferiorLit + 1, inferiorPred.numLiterals(),
+		addToBody, addToHead));
 	  }
 	  for (int j = predicates.indexOf(inferiorPred) + 1; 
-	       j < predicates.indexOf(superiorPred); j++) {
+	  j < predicates.indexOf(superiorPred); j++) {
 	    currentPred = (Predicate) predicates.get(j);
 	    result.addAll(refine(currentPred,
-				 0, currentPred.numLiterals(),
-				 addToBody, addToHead));
+		0, currentPred.numLiterals(),
+		addToBody, addToHead));
 	  }
 	  if (m_repeatPredicate) {
 	    result.addAll(refine(superiorPred,
-				 0, superiorLit,
-				 addToBody, addToHead));
+		0, superiorLit,
+		addToBody, addToHead));
 	  }
 	} else { 
 	  //((inferiorPred.getIndex() == superiorPred.getIndex())
 	  //&& (inferiorLit < superiorLit))
 	  if (m_repeatPredicate) {
 	    result.addAll(refine(inferiorPred,
-				 inferiorLit + 1, superiorLit,
-				 addToBody, addToHead));
+		inferiorLit + 1, superiorLit,
+		addToBody, addToHead));
 	  }
 	}	
       }	
@@ -593,7 +596,7 @@ public class Rule implements Serializable, Cloneable {
 	superiorPred = lastPredBody;
 	superiorLit = lastPredBody.indexOf(lastLitBody);
       } else if (predicates.indexOf(lastPredBody) 
-		 < predicates.indexOf(lastPredHead)) {
+	  < predicates.indexOf(lastPredHead)) {
 	superiorPred = lastPredHead;
 	superiorLit = lastPredHead.indexOf(lastLitHead);
       } else {
@@ -606,15 +609,15 @@ public class Rule implements Serializable, Cloneable {
       }
       if (m_repeatPredicate) {
 	result.addAll(refine(superiorPred,
-			     superiorLit + 1, superiorPred.numLiterals(),
-			     true, true));
+	    superiorLit + 1, superiorPred.numLiterals(),
+	    true, true));
       }
       for (int j = predicates.indexOf(superiorPred) + 1; j < predicates.size(); 
-	   j++) {
+      j++) {
 	currentPred = (Predicate) predicates.get(j);
 	result.addAll(refine(currentPred,
-			     0, currentPred.numLiterals(),
-			     true, true));
+	    0, currentPred.numLiterals(),
+	    true, true));
       }
     }
     return result;
@@ -643,7 +646,7 @@ public class Rule implements Serializable, Cloneable {
   public boolean sameClauseAs(Rule otherRule) {
 
     return (this.numLiterals() == otherRule.numLiterals()
-	    && this.subsumes(otherRule));
+	&& this.subsumes(otherRule));
   }
 
   /**
@@ -655,8 +658,8 @@ public class Rule implements Serializable, Cloneable {
   public boolean equivalentTo(Rule otherRule) {
 
     return (this.numLiterals() == otherRule.numLiterals()
-	    && m_head.negationIncludedIn(otherRule.m_body)
-	    && m_body.negationIncludedIn(otherRule.m_head));
+	&& m_head.negationIncludedIn(otherRule.m_body)
+	&& m_body.negationIncludedIn(otherRule.m_head));
   }
 
   /**
@@ -690,7 +693,7 @@ public class Rule implements Serializable, Cloneable {
   public boolean overFrequencyThreshold(double minFrequency) {
 
     return (m_body.overFrequencyThreshold(minFrequency) 
-	    && m_head.overFrequencyThreshold(minFrequency));
+	&& m_head.overFrequencyThreshold(minFrequency));
   }
 
   /**
@@ -701,7 +704,7 @@ public class Rule implements Serializable, Cloneable {
   public boolean hasTrueBody() {
 
     return (!m_body.isEmpty()
-	    && m_body.hasMaxCounterInstances());
+	&& m_body.hasMaxCounterInstances());
   }
 
   /**
@@ -712,7 +715,7 @@ public class Rule implements Serializable, Cloneable {
   public boolean hasFalseHead() {
 
     return (!m_head.isEmpty()
-	    && m_head.hasMaxCounterInstances());
+	&& m_head.hasMaxCounterInstances());
   }
 
   /**
@@ -768,21 +771,21 @@ public class Rule implements Serializable, Cloneable {
    */
   public static Comparator confirmationComparator = new Comparator() {
 
-      public int compare(Object o1, Object o2) {
+    public int compare(Object o1, Object o2) {
 
-	Rule r1 = (Rule) o1;
-	Rule r2 = (Rule) o2;
-	double conf1 = r1.getConfirmation();
-	double conf2 = r2.getConfirmation();
-	if (conf1 > conf2) {
-	  return -1;
-	} else if (conf1 < conf2) {
-	  return 1;
-	} else {
-	  return 0;
-	}
+      Rule r1 = (Rule) o1;
+      Rule r2 = (Rule) o2;
+      double conf1 = r1.getConfirmation();
+      double conf2 = r2.getConfirmation();
+      if (conf1 > conf2) {
+	return -1;
+      } else if (conf1 < conf2) {
+	return 1;
+      } else {
+	return 0;
       }
-    };
+    }
+  };
 
   /**
    * Comparator used to compare two rules according to their observed number
@@ -790,74 +793,80 @@ public class Rule implements Serializable, Cloneable {
    */
   public static Comparator observedComparator = new Comparator() {
 
-      public int compare(Object o1, Object o2) {
+    public int compare(Object o1, Object o2) {
 
-	Rule r1 = (Rule) o1;
-	Rule r2 = (Rule) o2;
-	double obs1 = r1.getObservedFrequency();
-	double obs2 = r2.getObservedFrequency();
-	if (obs1 < obs2) {
-	  return -1;
-	} else if (obs1 > obs2) {
-	  return 1;
-	} else {
-	  return 0;
-	}
+      Rule r1 = (Rule) o1;
+      Rule r2 = (Rule) o2;
+      double obs1 = r1.getObservedFrequency();
+      double obs2 = r2.getObservedFrequency();
+      if (obs1 < obs2) {
+	return -1;
+      } else if (obs1 > obs2) {
+	return 1;
+      } else {
+	return 0;
       }
-    };
+    }
+  };
 
   /**
    * Comparator used to compare two rules according to their optimistic estimate.
    */
   public static Comparator optimisticComparator = new Comparator() {
 
-      public int compare(Object o1, Object o2) {
+    public int compare(Object o1, Object o2) {
 
-	Rule r1 = (Rule) o1;
-	Rule r2 = (Rule) o2;
-	double opt1 = r1.getOptimistic();
-	double opt2 = r2.getOptimistic();
-	if (opt1 > opt2) {
-	  return -1;
-	} else if (opt1 < opt2) {
-	  return 1;
-	} else {
-	  return 0;
-	}
+      Rule r1 = (Rule) o1;
+      Rule r2 = (Rule) o2;
+      double opt1 = r1.getOptimistic();
+      double opt2 = r2.getOptimistic();
+      if (opt1 > opt2) {
+	return -1;
+      } else if (opt1 < opt2) {
+	return 1;
+      } else {
+	return 0;
       }
-    };
+    }
+  };
 
   /**
    * Comparator used to compare two rules according to their confirmation and 
    * then their observed number of counter-instances.
    */
-  public static Comparator confirmationThenObservedComparator 
-    = new Comparator() {
-	public int compare(Object o1, Object o2) {
+  public static Comparator confirmationThenObservedComparator = new Comparator() {
+    public int compare(Object o1, Object o2) {
 
-	  int confirmationComparison = confirmationComparator.compare(o1, o2);
-	  if (confirmationComparison != 0) {
-	    return confirmationComparison;
-	  } else {
-	    return observedComparator.compare(o1, o2);
-	  }
-	}
-      };
-  
+      int confirmationComparison = confirmationComparator.compare(o1, o2);
+      if (confirmationComparison != 0) {
+	return confirmationComparison;
+      } else {
+	return observedComparator.compare(o1, o2);
+      }
+    }
+  };
+
   /**
    * Comparator used to compare two rules according to their optimistic estimate
    * and then their observed number of counter-instances.
    */
   public static Comparator optimisticThenObservedComparator = new Comparator() {
-      public int compare(Object o1, Object o2) {
-	int optimisticComparison = optimisticComparator.compare(o1, o2);
-	if (optimisticComparison != 0) {
-	  return optimisticComparison;
-	} else {
-	  return observedComparator.compare(o1, o2);
-	}
+    public int compare(Object o1, Object o2) {
+      int optimisticComparison = optimisticComparator.compare(o1, o2);
+      if (optimisticComparison != 0) {
+	return optimisticComparison;
+      } else {
+	return observedComparator.compare(o1, o2);
       }
-    };
+    }
+  };
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
+  }
 }
-
-

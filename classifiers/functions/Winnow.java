@@ -27,6 +27,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -113,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author J. Lindgren (jtlindgr at cs.helsinki.fi)
- * @version $Revision: 1.12 $ 
+ * @version $Revision: 1.13 $ 
 */
 public class Winnow 
   extends Classifier 
@@ -844,6 +845,15 @@ public class Winnow
   public void setSeed(int v) {
     
     m_Seed = v;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
   
   /**

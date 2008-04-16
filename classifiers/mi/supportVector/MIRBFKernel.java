@@ -27,6 +27,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
+import weka.core.RevisionUtils;
 import weka.core.Capabilities.Capability;
 
 /**
@@ -61,7 +62,7 @@ import weka.core.Capabilities.Capability;
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.3 $ 
  */
 public class MIRBFKernel 
   extends RBFKernel
@@ -201,5 +202,14 @@ public class MIRBFKernel
       for (int j = 0; j < insts.numInstances(); j++)
         m_kernelPrecalc[i][j] = dotProd(insts.instance(j), insts.instance(j));
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

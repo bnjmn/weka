@@ -21,6 +21,9 @@
 
 package weka.core.neighboursearch.covertrees;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,10 +38,10 @@ import java.util.List;
  * @author Sham Kakade (original C++ code)
  * @author John Langford (original C++ code)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz) (Java port)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class Stack<T>
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization. */
   private static final long serialVersionUID = 5604056321825539264L;
@@ -165,5 +168,14 @@ public class Stack<T>
   public void push(Stack<T> v, T new_ele) {
     length++; 
     v.elements.add(new_ele);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

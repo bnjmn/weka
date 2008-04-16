@@ -30,6 +30,7 @@ import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -89,7 +90,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Sebastian Beer
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GeneralizedSequentialPatterns
   extends Associator
@@ -607,6 +608,15 @@ public class GeneralizedSequentialPatterns
     }
 
     return result.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**

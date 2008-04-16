@@ -24,6 +24,8 @@
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
 import weka.core.FastVector;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -38,10 +40,10 @@ import java.io.Serializable;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SERObject
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -6022057864970639151L;
@@ -166,9 +168,13 @@ public class SERObject
     public String getElapsedTime() {
         return elapsedTime + " sec";
     }
-
-    // *****************************************************************************************************************
-    // inner classes
-    // *****************************************************************************************************************
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.4 $");
+    }
 }

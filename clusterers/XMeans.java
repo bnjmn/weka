@@ -28,6 +28,7 @@ import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.neighboursearch.KDTree;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -148,7 +149,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -2383,6 +2384,15 @@ public class XMeans
   protected void PFD_CURR(String output) {
     if (m_CurrDebugFlag)
       System.out.println(output);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.24 $");
   }
 
   /**

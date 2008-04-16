@@ -35,6 +35,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -123,7 +124,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class OLM
   extends RandomizableClassifier 
@@ -1418,6 +1419,15 @@ public class OLM
       result.add("-sort");
 
     return (String[]) result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**

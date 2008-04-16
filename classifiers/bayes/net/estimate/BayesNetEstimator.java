@@ -26,6 +26,8 @@ import weka.classifiers.bayes.BayesNet;
 import weka.core.Instance;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -48,10 +50,10 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class BayesNetEstimator 
-    implements OptionHandler, Serializable {
+    implements OptionHandler, Serializable, RevisionHandler {
   
     /** for serialization */
     static final long serialVersionUID = 2184330197666253884L;
@@ -195,6 +197,15 @@ public class BayesNetEstimator
             "BayesNetEstimator is the base class for estimating the "
           + "conditional probability tables of a Bayes network once the "
           + "structure has been learned.";
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
 
 } // BayesNetEstimator

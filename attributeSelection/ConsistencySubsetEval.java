@@ -25,6 +25,8 @@ package  weka.attributeSelection;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -68,7 +70,7 @@ import java.util.Hashtable;
  <!-- technical-bibtex-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  * @see Discretize
  */
 public class ConsistencySubsetEval 
@@ -101,7 +103,7 @@ public class ConsistencySubsetEval
    * Class providing keys to the hash table.
    */
   public class hashKey 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 6144138512017017408L;
@@ -263,6 +265,15 @@ public class ConsistencySubsetEval
     public void print_hash_code() {
       
       System.out.println("Hash val: "+hashCode());
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.17 $");
     }
   }
 
@@ -489,6 +500,15 @@ public class ConsistencySubsetEval
 
     return text.toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.17 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -499,4 +519,3 @@ public class ConsistencySubsetEval
     runEvaluator(new ConsistencySubsetEval(), args);
   }
 }
-

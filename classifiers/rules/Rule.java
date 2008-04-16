@@ -21,10 +21,11 @@
 
 package weka.classifiers.rules;
 
+import weka.core.Copyable;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
 import weka.core.WeightedInstancesHandler;
-import weka.core.Copyable;
 
 import java.io.Serializable;
 
@@ -32,10 +33,10 @@ import java.io.Serializable;
  * Abstract class of generic rule
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class Rule 
-    implements WeightedInstancesHandler, Copyable, Serializable {
+    implements WeightedInstancesHandler, Copyable, Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = 8815687740470471229L;

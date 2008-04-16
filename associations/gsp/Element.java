@@ -25,6 +25,8 @@ package weka.associations.gsp;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -32,10 +34,10 @@ import java.io.Serializable;
  * Class representing an Element, i.e., a set of events/items.
  * 
  * @author  Sebastian Beer
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Element
-  implements Cloneable, Serializable {
+  implements Cloneable, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -7900701276019516371L;
@@ -287,5 +289,14 @@ public class Element
     result += "}";
 
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

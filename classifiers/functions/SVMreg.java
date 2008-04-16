@@ -33,6 +33,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -155,7 +156,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class SVMreg 
   extends Classifier 
@@ -793,6 +794,15 @@ public class SVMreg
     } else {
       return 0; 
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
   
   /**

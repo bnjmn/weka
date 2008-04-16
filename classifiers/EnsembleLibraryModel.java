@@ -23,6 +23,8 @@
 package weka.classifiers;
 
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.gui.GenericObjectEditor;
 
@@ -49,10 +51,10 @@ import java.lang.reflect.Method;
  * that have been trained on data (as we have for Ensemble Selection)
  * 
  * @author  Robert Jung (mrbobjung@gmail.com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class EnsembleLibraryModel 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
   
   /** this stores the class of the classifier */
   //private Class m_ModelClass;
@@ -390,5 +392,14 @@ public class EnsembleLibraryModel
     toolTipText += "</TABLE>";
     toolTipText += "</html>";
     m_DescriptionText = toolTipText;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

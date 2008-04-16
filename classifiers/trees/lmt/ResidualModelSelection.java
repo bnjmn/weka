@@ -27,13 +27,14 @@ import weka.classifiers.trees.j48.Distribution;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.classifiers.trees.j48.NoSplit;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 /**
  * Helper class for logistic model trees (weka.classifiers.trees.lmt.LMT) to implement the 
  * splitting criterion based on residuals.
  * 
  * @author Niels Landwehr
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ResidualModelSelection
   extends ModelSelection {
@@ -118,17 +119,13 @@ public class ResidualModelSelection
     //method not in use
     return null;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

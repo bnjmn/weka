@@ -48,6 +48,8 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -96,7 +98,7 @@ import java.util.ArrayList;
  *
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class LBR 
   extends Classifier
@@ -112,7 +114,7 @@ public class LBR
    * when manipulating and referencing Instances and their Attributes.  
    */
   public class Indexes
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -2771490019751421307L;
@@ -596,6 +598,15 @@ public class LBR
       
       m_SequentialAttIndex_valid = true;
       m_NumSeqAttsSet = j;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.12 $");
     }
   } /* end of Indexes inner-class */
   
@@ -1204,6 +1215,15 @@ public class LBR
     
     if (n == r) return 1.0;
     return Statistics.incompleteBeta(n-r, r+1.0, 1.0-p);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.12 $");
   }
   
   /**

@@ -14,6 +14,9 @@
 
 package weka.core.matrix;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /** 
@@ -35,10 +38,10 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class EigenvalueDecomposition 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4011654467211422319L;
@@ -971,5 +974,14 @@ public class EigenvalueDecomposition
       }
     }
     return X;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

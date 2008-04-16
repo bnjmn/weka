@@ -25,6 +25,7 @@ package weka.classifiers.misc;
 import weka.classifiers.misc.monotone.OSDLCore;
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.RevisionUtils;
 
 /**
  <!-- globalinfo-start -->
@@ -133,7 +134,7 @@ import weka.core.Instance;
  * </p>
  *
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class OSDL
   extends OSDLCore {
@@ -186,6 +187,15 @@ public class OSDL
 	return dist;
     }
   }    
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
+  }
 
   /**
    * Main method for testing this class and for using it from the

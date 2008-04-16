@@ -26,6 +26,8 @@ import weka.core.AttributeExpression;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Matrix;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.LineNumberReader;
@@ -46,9 +48,9 @@ import java.util.StringTokenizer;
  *
  * @author Mark Hall
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
-public class CostMatrix implements Serializable {
+public class CostMatrix implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1973792250544554965L;
@@ -795,4 +797,13 @@ public class CostMatrix implements Serializable {
 
     return text.toString();
   } 
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.17 $");
+  }
 }

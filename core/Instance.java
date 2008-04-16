@@ -62,10 +62,10 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $ 
+ * @version $Revision: 1.27 $ 
  */
 public class Instance
-  implements Copyable, Serializable {
+  implements Copyable, Serializable, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 1482635194499365122L;
@@ -1177,5 +1177,14 @@ public class Instance
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.27 $");
   }
 }

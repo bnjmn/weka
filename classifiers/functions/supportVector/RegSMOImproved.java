@@ -24,6 +24,7 @@ package weka.classifiers.functions.supportVector;
 
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -95,7 +96,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class RegSMOImproved
   extends RegSMO
@@ -958,5 +959,14 @@ public class RegSMOImproved
     
     // clean up
     wrapUp();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }

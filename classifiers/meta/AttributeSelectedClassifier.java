@@ -33,6 +33,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -111,7 +112,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class AttributeSelectedClassifier 
   extends SingleClassifierEnhancer
@@ -660,6 +661,15 @@ public class AttributeSelectedClassifier
       throw new IllegalArgumentException(additionalMeasureName 
 			  + " not supported (AttributeSelectedClassifier)");
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.26 $");
   }
 
   /**

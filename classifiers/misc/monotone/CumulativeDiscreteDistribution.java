@@ -22,6 +22,8 @@
 
 package weka.classifiers.misc.monotone;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.estimators.DiscreteEstimator;
 
@@ -42,10 +44,10 @@ import java.io.Serializable;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CumulativeDiscreteDistribution
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -2959806903004453176L;
@@ -240,5 +242,14 @@ public class CumulativeDiscreteDistribution
       }
     }
     return true;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

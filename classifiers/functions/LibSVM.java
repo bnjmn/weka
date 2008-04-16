@@ -28,6 +28,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -152,7 +153,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */
@@ -1502,6 +1503,15 @@ public class LibSVM
    */
   public String toString() {
     return "LibSVM wrapper, original code by Yasser EL-Manzalawy (= WLSVM)";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
   
   /**

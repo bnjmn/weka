@@ -27,6 +27,7 @@ import weka.classifiers.bayes.net.search.local.K2;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 import weka.estimators.Estimator;
@@ -54,7 +55,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class BMAEstimator 
     extends SimpleEstimator {
@@ -301,4 +302,13 @@ public class BMAEstimator
 
         return options;
     } // getOptions
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.8 $");
+    }
 } // class BMAEstimator

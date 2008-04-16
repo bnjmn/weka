@@ -23,6 +23,8 @@
 package weka.classifiers.trees.m5;
 
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.experiment.PairedStats;
 
@@ -32,10 +34,10 @@ import java.io.Serializable;
  * Finds split points using correlation.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public final class CorrelationSplitInfo
-  implements Cloneable, Serializable, SplitEvaluate {
+  implements Cloneable, Serializable, SplitEvaluate, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4212734895125452770L;
@@ -239,8 +241,13 @@ public final class CorrelationSplitInfo
   public double splitValue() {
     return m_splitValue;
   } 
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
+  }
 }
-
-
-
-

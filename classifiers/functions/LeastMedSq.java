@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -87,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Tony Voyle (tv6@waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class LeastMedSq 
   extends Classifier 
@@ -708,6 +709,15 @@ public class LeastMedSq
       System.out.println( "n: "+n+" r: "+orig+" num: "+num+
 			  " denom: "+denom+" c: "+c);
     return c;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.17 $");
   }
 
   /**

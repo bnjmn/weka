@@ -37,6 +37,7 @@ import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.estimators.Estimator;
 import weka.filters.Filter;
@@ -77,7 +78,7 @@ import weka.filters.unsupervised.attribute.Reorder;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class EditableBayesNet extends BayesNet {
@@ -2651,6 +2652,15 @@ public class EditableBayesNet extends BayesNet {
 			}
 		} // redo
 	} // class PasteAction
+	  
+	  /**
+	   * Returns the revision string.
+	   * 
+	   * @return		the revision
+	   */
+	  public String getRevision() {
+	    return RevisionUtils.extract("$Revision: 1.2 $");
+	  }
 
 	/**
 	 * @param args

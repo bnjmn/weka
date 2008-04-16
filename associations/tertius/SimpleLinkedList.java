@@ -24,6 +24,9 @@
 
 package weka.associations.tertius;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
@@ -31,15 +34,16 @@ import java.util.NoSuchElementException;
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
-public class SimpleLinkedList implements Serializable {
+public class SimpleLinkedList
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1491148276509976299L;
 
   public class LinkedListIterator
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     private static final long serialVersionUID = -2448555236100426759L;
@@ -79,11 +83,19 @@ public class SimpleLinkedList implements Serializable {
       lastReturned.previous.next = newEntry;
       lastReturned.previous = newEntry;
     }
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.6 $");
+    }
   }
 
   public class LinkedListInverseIterator
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     private static final long serialVersionUID = 6290379064027832108L;
@@ -114,12 +126,20 @@ public class SimpleLinkedList implements Serializable {
       current = lastReturned.next;
       lastReturned = null;
     }
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.6 $");
+    }
   }
 
 
   private static class Entry
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     private static final long serialVersionUID = 7888492479685339831L;
@@ -132,6 +152,15 @@ public class SimpleLinkedList implements Serializable {
       this.element = element;
       this.next = next;
       this.previous = previous;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.6 $");
     }
   }
 
@@ -310,6 +339,13 @@ public class SimpleLinkedList implements Serializable {
 	for (int i=0; i<size; i++)
             add(s.readObject());
     }
-
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.6 $");
+    }
 }

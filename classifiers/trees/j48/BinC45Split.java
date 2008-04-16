@@ -24,6 +24,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -32,7 +33,7 @@ import java.util.Enumeration;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 public class BinC45Split
   extends ClassifierSplitModel {
@@ -475,5 +476,14 @@ public class BinC45Split
 	else
 	  return 1;
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.14 $");
   }
 }

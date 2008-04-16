@@ -30,6 +30,8 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -130,7 +132,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class JRip 
   extends Classifier 
@@ -667,7 +669,7 @@ public class JRip
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */    
   private abstract class Antd 
-    implements WeightedInstancesHandler, Copyable, Serializable {
+    implements WeightedInstancesHandler, Copyable, Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -8929754772994154334L;
@@ -724,6 +726,15 @@ public class JRip
     public double getAccuRate(){ return accuRate; } 
     public double getAccu(){ return accu; } 
     public double getCover(){ return cover; } 
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.22 $");
+    }
   }
     
   /** 
@@ -917,6 +928,15 @@ public class JRip
       String symbol = ((int)value == 0) ? " <= " : " >= ";
       return (att.name() + symbol + Utils.doubleToString(splitPoint, 6));
     }   
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.22 $");
+    }
   }
     
     
@@ -924,7 +944,7 @@ public class JRip
    * The antecedent with nominal attribute
    */
   private class NominalAntd 
-    extends Antd{
+    extends Antd {
 	
     /** for serialization */
     static final long serialVersionUID = -9102297038837585135L;
@@ -1032,6 +1052,15 @@ public class JRip
     public String toString() {
       return (att.name() + " = " +att.value((int)value));
     } 
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.22 $");
+    }
   }
 
     
@@ -1045,7 +1074,7 @@ public class JRip
    * of accuracy rate p/(p+n) or (TP+TN)/(P+N) is used to prune the rule. 
    */    
   protected class RipperRule 
-    extends Rule{
+    extends Rule {
     
     /** for serialization */
     static final long serialVersionUID = -2410020717305262952L;
@@ -1385,6 +1414,15 @@ public class JRip
 		  "=" + classAttr.value((int)m_Consequent));
 	    
       return text.toString();
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.22 $");
     }
   }
 
@@ -1996,6 +2034,15 @@ public class JRip
 	      + m_Ruleset.size() + "\n");
     return sb.toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.22 $");
+  }
     
   /**
    * Main method.
@@ -2006,4 +2053,3 @@ public class JRip
     runClassifier(new JRip(), args);
   } 
 }
-

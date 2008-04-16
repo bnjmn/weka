@@ -27,6 +27,7 @@ import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -162,7 +163,7 @@ import java.util.Vector;
  *
  * @author Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see       Vote
  */
 public class Dagging
@@ -554,6 +555,15 @@ public class Dagging
              + ": No model built yet.";
     else
       return m_Vote.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 
   /**

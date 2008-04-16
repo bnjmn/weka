@@ -21,6 +21,7 @@
 
 package weka.core.neighboursearch.kdtrees;
 
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
@@ -55,7 +56,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MidPointOfWidestDimension
   extends KDTreeNodeSplitter 
@@ -179,5 +180,14 @@ public class MidPointOfWidestDimension
       }//end if valueIsSmallerEqual
     }//end for
     return left + 1;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

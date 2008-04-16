@@ -31,6 +31,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -88,7 +90,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.16 $ 
  */
 public class ConjunctiveRule 
   extends Classifier 
@@ -166,7 +168,7 @@ public class ConjunctiveRule
    * and NominalAntd in which the attributes are numeric and nominal respectively.
    */
   private abstract class Antd
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -8729076306737827571L;
@@ -263,6 +265,15 @@ public class ConjunctiveRule
       entropy += sum * Utils.log2(sum);
       entropy /= sum;
       return entropy;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.16 $");
     }
   }
     
@@ -535,6 +546,15 @@ public class ConjunctiveRule
       String symbol = Utils.eq(value, 0.0) ? " <= " : " > ";
       return (att.name() + symbol + Utils.doubleToString(splitPoint, 6));
     }   
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.16 $");
+    }
   }
     
     
@@ -787,6 +807,15 @@ public class ConjunctiveRule
       String symbol = isIn ? " = " : " != ";	    
       return (att.name() + symbol + att.value((int)value));
     } 
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.16 $");
+    }
   }
     
   /**
@@ -1641,6 +1670,15 @@ public class ConjunctiveRule
 	body = toString(m_ClassAttribute.name(), Utils.doubleToString(m_Cnsqt[0], 6));
     }
     return (title + body + text.toString());
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.16 $");
   }
     
   /**

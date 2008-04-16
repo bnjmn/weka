@@ -29,6 +29,7 @@ import weka.core.Capabilities;
 import weka.core.ContingencyTables;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -53,7 +54,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.26 $
  */
 public class DecisionStump 
   extends Classifier 
@@ -747,6 +748,15 @@ public class DecisionStump
 	return 1;
       }
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.26 $");
   }
  
   /**

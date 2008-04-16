@@ -30,9 +30,10 @@ package weka.core;
  * <code>Option myOption = new Option("Uses extended mode.", "E", 0, "-E")); </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
-public class Option {
+public class Option
+  implements RevisionHandler {
 
   /** What does this option do? */
   private String m_Description;
@@ -100,6 +101,15 @@ public class Option {
   public String synopsis() {
   
     return m_Synopsis;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
   }
 }
 

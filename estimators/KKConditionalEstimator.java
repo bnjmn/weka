@@ -24,6 +24,7 @@ package weka.estimators;
 
 import java.util.Random;
 
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 
@@ -32,7 +33,7 @@ import weka.core.Utils;
  * a numeric domain.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class KKConditionalEstimator implements ConditionalEstimator {
 
@@ -245,6 +246,15 @@ public class KKConditionalEstimator implements ConditionalEstimator {
     }
     return result;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
+  }
 
   /**
    * Main method for testing this class. Creates some random points
@@ -292,11 +302,3 @@ public class KKConditionalEstimator implements ConditionalEstimator {
     }
   }
 }
-
-
-
-
-
-
-
-

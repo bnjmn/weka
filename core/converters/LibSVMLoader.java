@@ -26,6 +26,7 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -48,7 +49,7 @@ import java.util.Vector;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
 public class LibSVMLoader 
@@ -373,6 +374,15 @@ public class LibSVMLoader
    */
   public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("LibSVMLoader can't read data sets incrementally.");
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**

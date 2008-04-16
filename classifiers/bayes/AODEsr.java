@@ -30,6 +30,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -109,7 +110,7 @@ import java.util.Vector;
  *
  * @author Fei Zheng
  * @author Janice Boughton
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class AODEsr extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier,
@@ -207,10 +208,7 @@ public class AODEsr extends Classifier
       +"values at classification time and deletes the generalization "
       +"attribute value.\n"
       +"For more information, see:\n"
-      +"Zheng, F., Webb, G.I. (2006): Efficient lazy elimination for "
-      +"averaged-one dependence "
-      +"estimators. In: Proc. 23th Int. Conf. Machine Learning (ICML 2006), "
-      +"1113-1120";
+      + getTechnicalInformation().toString();
   }
  
   /**
@@ -902,7 +900,15 @@ public class AODEsr extends Classifier
     }
     return text.toString();
   }
-    
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
+  }
     
   /**
    * Main method for testing this class.

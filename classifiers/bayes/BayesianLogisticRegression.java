@@ -23,61 +23,60 @@
 package weka.classifiers.bayes;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-
 import weka.classifiers.bayes.blr.GaussianPriorImpl;
 import weka.classifiers.bayes.blr.LaplacePriorImpl;
 import weka.classifiers.bayes.blr.Prior;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-
-import weka.core.Capabilities.Capability;
-
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
 import weka.core.SerializedObject;
+import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.Utils;
-
 import weka.filters.Filter;
-
-import weka.filters.unsupervised.attribute.*;
+import weka.filters.unsupervised.attribute.Normalize;
 
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-
 /**
- *        This class implements Bayesian Logistic Regression classifier
- *        for both Gaussian and Laplace Priors. The function is implemented based
- *        on the following paper:
- *
+ <!-- globalinfo-start -->
+ * Implements Bayesian Logistic Regression for both Gaussian and Laplace Priors.<br/>
+ * <br/>
+ * For more information, see<br/>
+ * <br/>
+ * Alexander Genkin, David D. Lewis, David Madigan (2004). Large-scale bayesian logistic regression for text categorization. URL http://www.stat.rutgers.edu/~madigan/PAPERS/shortFat-v3a.pdf.
+ * <p/>
+ <!-- globalinfo-end -->
+ * 
  <!-- technical-bibtex-start -->
- *<pre>
- * &#64;TechReport{blrtext04,
- * author = {Alexander Genkin and David D. Lewis and David Madigan},
- * title = {Large-scale bayesian logistic regression for text categorization},
- * institution = {DIMACS},
- * year = {2004},
- * url = "http://www.stat.rutgers.edu/~madigan/PAPERS/shortFat-v3a.pdf",
- * OPTannote = {}
- *}</pre>
+ * BibTeX:
+ * <pre>
+ * &#64;techreport{Genkin2004,
+ *    author = {Alexander Genkin and David D. Lewis and David Madigan},
+ *    institution = {DIMACS},
+ *    title = {Large-scale bayesian logistic regression for text categorization},
+ *    year = {2004},
+ *    URL = {http://www.stat.rutgers.edu/\~madigan/PAPERS/shortFat-v3a.pdf}
+ * }
+ * </pre>
  * <p/>
  <!-- technical-bibtex-end -->
  *
  *
  *  @author Navendu Garg (gargnav at iit dot edu)
- *  @version 1.0
+ *  @version $Revision: 1.3 $
  */
 public class BayesianLogisticRegression extends Classifier
   implements OptionHandler, TechnicalInformationHandler {
@@ -780,64 +779,47 @@ public class BayesianLogisticRegression extends Classifier
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   *
+   * 
    * <pre> -D
-   *  Produce debugging output.
-   *  (default no debugging output)</pre>
-   *
-   * <pre> -P &lt;Prior&gt;
-   *  Set the type of prior to be used.
-   *  1 = weka.classifiers.bayes.priors.GaussianPriorImpl(Gaussian Prior)
-   *  2 =  weka.classifiers.bayes.priorsLaplacePriorImpl(Laplace Prior)
-   *  (default 1=Gaussian Prior)</pre>
-   *
-   * <pre> -H &lt;Hyperparameter type&gt;
-   *  Select the type of Hyperparameter to be used.  1=Norm-based, 2 = Cross-Validation, 3 = Specific Value.
-   *  (default 1 = Norm-based)</pre>
-   *
-    * <pre> -V &lt;Hyperparameter value (Use in conjunction with -H 3.)&gt;
-   *  (default 0.27)</pre>
-   *
-   * <pre> -R &lt;Hyperparameter value range ()&gt;
-    *        Incase of Cross Validation based Hyperparameters, you can specify the range in two ways:
-    *        <ul>
-    *        <li>Comma-Separated: L: 3,5,6         (This will be a list of possible values.)</li>
-    *        <li>Range: R:0.01-316,3.16 (This will take values from 0.01-316 (inclusive) in multiplications of 3.16</li>
-    *        </ul
-    *        Only applicable when "Hyperparameter Type is 2".
-   *
-   *  (default R:0.01-316,3.16)</pre>
-   *
-   * <pre> -Tl &lt;Tolerance Level&gt;
-   * This value decides the stopping criterion.
-   * (default 0.0005) </pre>
+   *  Show Debugging Output
    * </pre>
-   *
-   *
-   * <pre> -S &lt;Threshold Level &gt;
-   * Logistic function doesn't return a class label but an
-   * estimate of p(y=+1|B,x(i)). These estimates need to be
-   * converted to binary class label predictions. values above Threshold
-   *  are assigned class +1.
-   * (default 0.5)
-   * </pre>
-   *
-   * <pre> -F &lt; Number of folds &gt;
-   * Number of folds for CV based hyperparameter selection.
-   * </pre>
-   * (default 2)
-   *
-   * <pre> -I &lt; Maximum number of iterations &gt;
-   * Maximum number of iterations before the algorithm stops.
-   * </pre>
-   * (default 100)
-   *
-   * <pre> -N &lt; Normalize data &gt;
-   * Parameter which asks whether to normalize the attributes except
-   * for the class attribute or not.
-   * </pre>
-   * (default false)
-   *
+   * 
+   * <pre> -P &lt;integer&gt;
+   *  Distribution of the Prior (1=Gaussian, 2=Laplacian)
+   *  (default: 1=Gaussian)</pre>
+   * 
+   * <pre> -H &lt;integer&gt;
+   *  Hyperparameter Selection Method (1=Norm-based, 2=CV-based, 3=specific value)
+   *  (default: 1=Norm-based)</pre>
+   * 
+   * <pre> -V &lt;double&gt;
+   *  Specified Hyperparameter Value (use in conjunction with -H 3)
+   *  (default: 0.27)</pre>
+   * 
+   * <pre> -R &lt;string&gt;
+   *  Hyperparameter Range (use in conjunction with -H 2)
+   *  (format: R:start-end,multiplier OR L:val(1), val(2), ..., val(n))
+   *  (default: R:0.01-316,3.16)</pre>
+   * 
+   * <pre> -Tl &lt;double&gt;
+   *  Tolerance Value
+   *  (default: 0.0005)</pre>
+   * 
+   * <pre> -S &lt;double&gt;
+   *  Threshold Value
+   *  (default: 0.5)</pre>
+   * 
+   * <pre> -F &lt;integer&gt;
+   *  Number Of Folds (use in conjuction with -H 2)
+   *  (default: 2)</pre>
+   * 
+   * <pre> -I &lt;integer&gt;
+   *  Max Number of Iterations
+   *  (default: 100)</pre>
+   * 
+   * <pre> -N
+   *  Normalize the data</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -951,14 +933,8 @@ public class BayesianLogisticRegression extends Classifier
    * @param argv the options
    */
   public static void main(String[] argv) {
-    try {
-      System.out.println(Evaluation.evaluateModel(
-          new BayesianLogisticRegression(), argv));
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    }
-  } // main
+    runClassifier(new BayesianLogisticRegression(), argv);
+  }
 
   /**
    * Returns the tip text for this property
@@ -1269,4 +1245,14 @@ public class BayesianLogisticRegression extends Classifier
   public boolean isDebug() {
     return debug;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
+  }
 }
+

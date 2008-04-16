@@ -30,6 +30,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -96,9 +97,10 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  * @author Zhihai Wang (zhw@csse.monash.edu.au)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
-public class AODE extends Classifier
+public class AODE
+    extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier, 
                TechnicalInformationHandler {
     
@@ -758,7 +760,15 @@ public class AODE extends Classifier
         
     return text.toString();
   }
-    
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.19 $");
+  }
     
   /**
    * Main method for testing this class.

@@ -28,6 +28,7 @@ import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -125,7 +126,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class Apriori 
   extends Associator 
@@ -1429,6 +1430,15 @@ public class Apriori
    */
   public FastVector[] getAllTheRules() {
     return m_allTheRules;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.29 $");
   }
 
   /**

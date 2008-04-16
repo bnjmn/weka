@@ -26,6 +26,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -56,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SerializedClassifier
   extends Classifier {
@@ -315,6 +316,15 @@ public class SerializedClassifier
     }
     
     return result.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

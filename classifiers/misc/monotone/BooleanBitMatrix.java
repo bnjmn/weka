@@ -22,6 +22,9 @@
 
 package weka.classifiers.misc.monotone;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 /**
  * This class is a very simple implementation of a BitMatrix.
  * In fact, it uses a two-dimensional array of booleans, so it is 
@@ -34,10 +37,10 @@ package weka.classifiers.misc.monotone;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class BooleanBitMatrix
-  implements BitMatrix {
+  implements BitMatrix, RevisionHandler {
 
   /** The two-dimensional array of booleans. */
   private boolean[][] m_bits;
@@ -239,5 +242,14 @@ public class BooleanBitMatrix
       sb.append("\n");
     }
     return sb.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

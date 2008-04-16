@@ -33,6 +33,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -97,7 +99,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $
+ * @version $Revision: 1.47 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -174,7 +176,7 @@ public class MultiClassClassifier
    * Interface for the code constructors 
    */
   private abstract class Code 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = 418095077487120846L;
@@ -228,6 +230,15 @@ public class MultiClassClassifier
       }
       return sb.toString();
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.47 $");
+    }
   }
 
   /** 
@@ -250,6 +261,15 @@ public class MultiClassClassifier
         m_Codebits[i][i] = true;
       }
       //System.err.println("Code:\n" + this);
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.47 $");
     }
   }
 
@@ -324,6 +344,15 @@ public class MultiClassClassifier
         }
       }
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.47 $");
+    }
   }
 
   /*
@@ -359,6 +388,15 @@ public class MultiClassClassifier
         }
       }
       //System.err.println("Code:\n" + this);
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.47 $");
     }
   }
 
@@ -937,6 +975,15 @@ public class MultiClassClassifier
       }
     } while (changed);
     return p;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.47 $");
   }
 
   /**

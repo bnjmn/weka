@@ -40,10 +40,11 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @see StringCompare
  */
-public class ClassDiscovery {
+public class ClassDiscovery
+  implements RevisionHandler {
 
   /** whether to output some debug information. */
   public final static boolean VERBOSE = false;
@@ -575,6 +576,15 @@ public class ClassDiscovery {
     initCache();
     m_Cache.clear();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7 $");
+  }
 
   /**
    * Possible calls:
@@ -645,7 +655,7 @@ public class ClassDiscovery {
    * </ul>
    */
   public static class StringCompare 
-    implements Comparator {
+    implements Comparator, RevisionHandler {
 
     /**
      * appends blanks to the string if its shorter than <code>len</code>.
@@ -742,6 +752,15 @@ public class ClassDiscovery {
      */
     public boolean equals(Object obj) {
       return (obj instanceof StringCompare);
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7 $");
     }
   }
 }

@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializationHelper;
 import weka.core.TestInstances;
 import weka.core.Utils;
@@ -165,7 +166,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  * @see TestInstances
  */
 public class CheckKernel
@@ -1423,6 +1424,15 @@ public class CheckKernel
     }
     
     print(str);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
   
   /**

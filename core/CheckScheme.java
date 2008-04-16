@@ -32,14 +32,16 @@ import java.util.Vector;
  * also used for JUnit tests.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see TestInstances
  */
 public abstract class CheckScheme
   extends Check {
   
   /** a class for postprocessing the test-data */
-  public static class PostProcessor {
+  public static class PostProcessor
+    implements RevisionHandler {
+    
     /**
      * Provides a hook for derived classes to further modify the data. Currently,
      * the data is just passed through.
@@ -49,6 +51,15 @@ public abstract class CheckScheme
      */
     public Instances process(Instances data) {
       return data;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
   

@@ -24,6 +24,8 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -33,10 +35,10 @@ import java.util.Enumeration;
  * Class for handling a distribution of class values.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class Distribution
-  implements Cloneable, Serializable {
+  implements Cloneable, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 8526859638230806576L;
@@ -736,11 +738,13 @@ public class Distribution
       m_perBag[to] += weight;
     }
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.12 $");
+  }
 }
-
-
-
-
-
-
-

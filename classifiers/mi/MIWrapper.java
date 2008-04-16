@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -109,7 +110,7 @@ import java.util.Vector;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.5 $ 
  */
 public class MIWrapper 
   extends SingleClassifierEnhancer
@@ -526,6 +527,15 @@ public class MIWrapper
    */
   public String toString() {	
     return "MIWrapper with base classifier: \n"+m_Classifier.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

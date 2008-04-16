@@ -30,6 +30,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -122,7 +123,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.23 $ 
+ * @version $Revision: 1.24 $ 
  */
 public class MetaCost 
   extends RandomizableSingleClassifierEnhancer
@@ -647,6 +648,15 @@ public class MetaCost
     
     return result;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.24 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -658,4 +668,3 @@ public class MetaCost
     runClassifier(new MetaCost(), argv);
   }
 }
-

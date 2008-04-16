@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -125,7 +126,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class VFI 
   extends Classifier 
@@ -614,6 +615,15 @@ public class VFI
       return dist;
     }
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.15 $");
+  }
 	
   /**
    * Main method for testing this class.
@@ -625,4 +635,3 @@ public class VFI
     runClassifier(new VFI(), args);
   }
 }
-

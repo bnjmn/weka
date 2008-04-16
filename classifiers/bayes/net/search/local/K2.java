@@ -24,6 +24,7 @@ package weka.classifiers.bayes.net.search.local;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -98,7 +99,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class K2 
  	extends LocalScoreSearchAlgorithm
@@ -393,4 +394,13 @@ public class K2
 	  " In any case, when the network was initialized as Naive Bayes Network, the" +
 	  " class variable is first in the ordering though.";
 	} // randomOrderTipText
+
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.8 $");
+	}
 }

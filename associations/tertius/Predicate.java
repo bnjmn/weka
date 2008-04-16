@@ -24,15 +24,19 @@
 
 package weka.associations.tertius;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * @author Peter A. Flach
  * @author Nicolas Lachiche
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-public class Predicate implements Serializable {
+public class Predicate
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8374702481965026640L;
@@ -102,5 +106,13 @@ public class Predicate implements Serializable {
     }
     return text.toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5 $");
+  }
 }
-

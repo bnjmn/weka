@@ -26,6 +26,7 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -46,7 +47,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  * @see Loader
  */
 public class CSVLoader 
@@ -515,6 +516,15 @@ public class CSVLoader
     tokenizer.quoteChar('"');
     tokenizer.quoteChar('\'');
     tokenizer.eolIsSignificant(true);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.19 $");
   }
 
   /**

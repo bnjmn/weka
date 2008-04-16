@@ -24,16 +24,18 @@ package weka.core.stemmers;
 
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
-import java.io.Reader;
-import java.io.Writer;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.FileOutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -42,9 +44,10 @@ import java.util.Vector;
  * all the available options.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class Stemming {
+public class Stemming
+  implements RevisionHandler {
 
   /**
    * lists all the options on the command line
@@ -179,5 +182,14 @@ public class Stemming {
       }
     }
     output.flush();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }

@@ -24,6 +24,7 @@ package weka.estimators;
 
 import weka.core.Capabilities.Capability;
 import weka.core.Capabilities;
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 
@@ -32,7 +33,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class NormalEstimator
   extends Estimator
@@ -196,6 +197,15 @@ public class NormalEstimator
   public double getSumOfWeights() {
     return m_SumOfWeights;
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -223,11 +233,3 @@ public class NormalEstimator
     }
   }
 }
-
-
-
-
-
-
-
-

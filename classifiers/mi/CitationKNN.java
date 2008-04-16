@@ -28,6 +28,8 @@ import weka.core.Instances;
 import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -78,7 +80,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
  */
 public class CitationKNN 
   extends Classifier 
@@ -906,6 +908,15 @@ public class CitationKNN
   }
   
   /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9 $");
+  }
+  
+  /**
    * Main method for testing this class.
    *
    * @param argv should contain the command line arguments to the
@@ -925,7 +936,7 @@ public class CitationKNN
    * A class for storing data about a neighboring instance
    */
   private class NeighborNode 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = -3947320761906511289L;
@@ -967,6 +978,15 @@ public class CitationKNN
     public NeighborNode(double distance, Instance bag, int position) {
       this(distance, bag, position, null);
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
   
   //##################################################
@@ -977,7 +997,7 @@ public class CitationKNN
    * i.e. the minimum length of the list is k.
    */
   private class NeighborList 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 3432555644456217394L;
@@ -1129,6 +1149,14 @@ public class CitationKNN
         System.out.println();
       }
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
 }
-

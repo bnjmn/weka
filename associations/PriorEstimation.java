@@ -23,6 +23,8 @@
 package weka.associations;
 
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SpecialFunctions;
 import weka.core.Utils;
 
@@ -40,9 +42,10 @@ import java.util.Random;
  * pp. 424-435. Freiburg, Germany: Springer-Verlag. <p>
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ */
+ * @version $Revision: 1.7 $ */
 
- public class PriorEstimation implements Serializable{
+ public class PriorEstimation
+   implements Serializable, RevisionHandler {
     
     /** for serialization */
     private static final long serialVersionUID = 5570863216522496271L;
@@ -476,6 +479,13 @@ import java.util.Random;
         for (int i = 0; i < m_instances.numInstances(); i++) 
             itemSet.upDateCounter(m_instances.instance(i));
     }
-  
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7 $");
+    }
 }

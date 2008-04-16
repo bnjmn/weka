@@ -31,6 +31,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -109,7 +110,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.39 $ 
+ * @version $Revision: 1.40 $ 
  */
 public class AdaBoostM1 
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -758,6 +759,15 @@ public class AdaBoostM1
     }
     
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.40 $");
   }
 
   /**

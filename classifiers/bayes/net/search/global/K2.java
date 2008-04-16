@@ -28,6 +28,7 @@ import java.util.Random;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -101,7 +102,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class K2 
 	extends GlobalScoreSearchAlgorithm
@@ -395,5 +396,14 @@ public class K2
 	    + "For more information see:\n\n"
 	    + getTechnicalInformation().toString() + "\n\n"
 	    + "Works with nominal variables and no missing values only.";
+	}
+
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.8 $");
 	}
 }

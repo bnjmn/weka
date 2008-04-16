@@ -34,6 +34,8 @@ import weka.core.MathematicalExpression;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.PropertyPath;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.SerializedObject;
 import weka.core.Summarizable;
@@ -289,7 +291,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -305,7 +307,7 @@ public class GridSearch
    */
   protected class PointDouble
     extends java.awt.geom.Point2D.Double
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = 7151661776161898119L;
@@ -343,6 +345,15 @@ public class GridSearch
     public String toString() {
       return super.toString().replaceAll(".*\\[", "[");
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
 
   /**
@@ -352,7 +363,7 @@ public class GridSearch
    */
   protected class PointInt
     extends java.awt.Point
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -5900415163698021618L;
@@ -375,13 +386,22 @@ public class GridSearch
     public String toString() {
       return super.toString().replaceAll(".*\\[", "[");
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
   
   /**
    * for generating the parameter pairs in a grid
    */
   protected class Grid
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = 7290732613611243139L;
@@ -835,6 +855,15 @@ public class GridSearch
       
       return result;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
   
   
@@ -845,7 +874,7 @@ public class GridSearch
    * @see PerformanceComparator
    */
   protected class Performance
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -4374706475277588755L;
@@ -1004,6 +1033,15 @@ public class GridSearch
       
       return result;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
   
   /**
@@ -1012,7 +1050,7 @@ public class GridSearch
    * @see Performance
    */
   protected class PerformanceComparator
-    implements Comparator<Performance>, Serializable {
+    implements Comparator<Performance>, Serializable, RevisionHandler {
     
     /** for serialization */
     private static final long serialVersionUID = 6507592831825393847L;
@@ -1089,6 +1127,15 @@ public class GridSearch
       
       return (m_Evaluation == ((PerformanceComparator) obj).m_Evaluation);
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
   
   /**
@@ -1105,7 +1152,7 @@ public class GridSearch
    * </pre>
    */
   protected class PerformanceTable 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     private static final long serialVersionUID = 5486491313460338379L;
@@ -1302,13 +1349,22 @@ public class GridSearch
 
       return result.toString();
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
+    }
   }
   
   /**
    * Represents a simple cache for performance objects.
    */
   protected class PerformanceCache
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = 5838863230451530252L;
@@ -1366,6 +1422,15 @@ public class GridSearch
      */
     public String toString() {
       return m_Cache.toString();
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9 $");
     }
   }
   
@@ -3400,6 +3465,15 @@ public class GridSearch
       + " " + Utils.joinOptions(getBestClassifier().getOptions());
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
   
   /**

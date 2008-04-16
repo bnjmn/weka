@@ -24,6 +24,8 @@
 package weka.clusterers.forOPTICSAndDBScan.Utils;
 
 import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 /**
  * <p>
@@ -37,9 +39,10 @@ import weka.clusterers.forOPTICSAndDBScan.DataObjects.DataObject;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
-public class EpsilonRange_ListElement {
+public class EpsilonRange_ListElement
+    implements RevisionHandler {
 
     /**
      * Holds the dataObject
@@ -91,9 +94,13 @@ public class EpsilonRange_ListElement {
     public DataObject getDataObject() {
         return dataObject;
     }
-
-    // *****************************************************************************************************************
-    // inner classes
-    // *****************************************************************************************************************
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.3 $");
+    }
 }

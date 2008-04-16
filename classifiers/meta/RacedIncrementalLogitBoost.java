@@ -32,6 +32,8 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -97,7 +99,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $ 
+ * @version $Revision: 1.12 $ 
  */
 public class RacedIncrementalLogitBoost 
   extends RandomizableSingleClassifierEnhancer
@@ -194,7 +196,7 @@ public class RacedIncrementalLogitBoost
    * Class representing a committee of LogitBoosted models
    */
   protected class Committee 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 5559880306684082199L;
@@ -632,6 +634,15 @@ public class RacedIncrementalLogitBoost
       text.append("Chunk size per model: " + m_chunkSize + "\n");
       
       return text.toString();
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.12 $");
     }
   }
 
@@ -1258,6 +1269,15 @@ public class RacedIncrementalLogitBoost
       }
       else return ("RacedIncrementalLogitBoost: no model built yet.");
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.12 $");
   }
 
   /**

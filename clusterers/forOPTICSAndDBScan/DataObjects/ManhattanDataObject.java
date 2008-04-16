@@ -26,6 +26,8 @@ package weka.clusterers.forOPTICSAndDBScan.DataObjects;
 import weka.clusterers.forOPTICSAndDBScan.Databases.Database;
 import weka.core.Attribute;
 import weka.core.Instance;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -42,10 +44,10 @@ import java.io.Serializable;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ManhattanDataObject
-    implements DataObject, Serializable {
+    implements DataObject, Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -3417720553766544582L;
@@ -287,9 +289,13 @@ public class ManhattanDataObject
     public String toString() {
         return instance.toString();
     }
-
-    // *****************************************************************************************************************
-    // inner classes
-    // *****************************************************************************************************************
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.5 $");
+    }
 }

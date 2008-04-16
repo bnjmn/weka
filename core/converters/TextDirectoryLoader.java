@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.BufferedInputStream;
@@ -70,7 +71,7 @@ import java.util.Vector;
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby at cs.waikato.ac.nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see Loader
  */
 public class TextDirectoryLoader
@@ -415,6 +416,15 @@ public class TextDirectoryLoader
    */
   public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("TextDirectoryLoader can't read data sets incrementally.");
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**

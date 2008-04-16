@@ -27,6 +27,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Randomizable;
+import weka.core.RevisionHandler;
 import weka.core.Utils;
 
 import java.io.FileOutputStream;
@@ -44,10 +45,10 @@ import java.util.Vector;
  * classifiers and clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public abstract class DataGenerator 
-  implements OptionHandler, Randomizable, Serializable {
+  implements OptionHandler, Randomizable, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -3698585946221802578L;

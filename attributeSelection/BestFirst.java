@@ -27,6 +27,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
@@ -68,7 +70,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  *         Martin Guetlein (cashing merit of expanded nodes) 
- * @version $Revision: 1.28 $
+ * @version $Revision: 1.29 $
  */
 public class BestFirst 
   extends ASSearch 
@@ -83,7 +85,7 @@ public class BestFirst
    * @author Mark Hall (mhall@cs.waikato.ac.nz)
    **/
   public class Link2 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = -8236598311516351420L;
@@ -112,7 +114,15 @@ public class BestFirst
     public String toString () {
       return  ("Node: " + m_data.toString() + "  " + m_merit);
     }
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.29 $");
+    }
   }
 
 
@@ -231,7 +241,15 @@ public class BestFirst
       }
       }
     }
-
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.29 $");
+    }
   }
 
   // member variables
@@ -902,5 +920,13 @@ public class BestFirst
 
     return  list;
   }
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.29 $");
+  }
 }

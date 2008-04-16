@@ -22,8 +22,12 @@
 
 package weka.classifiers.misc.monotone;
 
-import weka.estimators.DiscreteEstimator;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.estimators.DiscreteEstimator;
+
+import java.io.Serializable;
 
 /**
  * This class represents a discrete probability distribution 
@@ -41,9 +45,13 @@ import weka.core.Utils;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
-public class DiscreteDistribution {
+public class DiscreteDistribution
+  implements Serializable, RevisionHandler {
+
+  /** for serialization. */
+  private static final long serialVersionUID = 1954630934425689828L;
 
   /**
    * small tolerance to account for rounding errors when working
@@ -270,5 +278,14 @@ public class DiscreteDistribution {
       sum += dd[i];
     }
     return !(Math.abs(sum - 1) > TOLERANCE); 
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

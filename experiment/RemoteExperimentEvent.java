@@ -22,13 +22,16 @@
 
 package weka.experiment;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /**
  * Class encapsulating information on progress of a remote experiment
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RemoteExperimentEvent
   implements Serializable {

@@ -28,10 +28,11 @@ import java.util.Random;
  * Class implementing some simple random variates generator.
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public final class RandomVariates
-    extends Random {
+    extends Random
+    implements RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -4763742718209460354L;
@@ -223,6 +224,15 @@ public final class RandomVariates
 	    
 	    return x;
 	}	
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
     
     

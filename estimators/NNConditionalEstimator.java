@@ -26,6 +26,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import weka.core.matrix.Matrix;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /** 
@@ -33,7 +34,7 @@ import weka.core.Utils;
  * a numeric domain (using Mahalanobis distance).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class NNConditionalEstimator implements ConditionalEstimator {
 
@@ -221,6 +222,15 @@ public class NNConditionalEstimator implements ConditionalEstimator {
       + "  Conditional mean = " + Utils.doubleToString(m_CondMean, 4, 2);
     result += "  Covariance Matrix: \n" + m_Covariance;
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**

@@ -22,6 +22,7 @@
 package weka.core.tokenizers;
 
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -51,7 +52,7 @@ import java.util.Vector;
  *
  * @author  Sebastian Germesin (sebastian.germesin@dfki.de)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class NGramTokenizer
   extends CharacterDelimitedTokenizer {
@@ -307,6 +308,15 @@ public class NGramTokenizer
 
     m_CurrentPosition = 0;
     m_MaxPosition     = m_SplitString.length;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**

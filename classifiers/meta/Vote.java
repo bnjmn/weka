@@ -28,6 +28,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -101,7 +102,7 @@ import java.util.Vector;
  * @author Alexander K. Seewald (alex@seewald.at)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Roberto Perdisci (roberto.perdisci@gmail.com)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Vote
   extends RandomizableMultipleClassifiersCombiner
@@ -646,6 +647,15 @@ public class Vote
     result += "' combination rule \n";
 
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.19 $");
   }
 
   /**

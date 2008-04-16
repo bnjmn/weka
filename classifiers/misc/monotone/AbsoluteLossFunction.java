@@ -22,6 +22,9 @@
 
 package weka.classifiers.misc.monotone;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 /**
  * Class implementing the absolute loss function, this means 
  * the returned loss is the abolute value of the difference
@@ -34,10 +37,10 @@ package weka.classifiers.misc.monotone;
  * </p>
  * 
  * @author Stijn Lievens (stijn.lievens@ugent.be)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class AbsoluteLossFunction
-  implements NominalLossFunction {
+  implements NominalLossFunction, RevisionHandler {
 
   /**
    * Returns the absolute loss function between two class values.
@@ -58,5 +61,14 @@ public class AbsoluteLossFunction
    */
   public String toString() {
     return "AbsoluteLossFunction";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }
