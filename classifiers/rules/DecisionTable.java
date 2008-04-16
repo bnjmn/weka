@@ -25,6 +25,7 @@ package weka.classifiers.rules;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.BestFirst;
 import weka.attributeSelection.SubsetEvaluator;
+import weka.attributeSelection.ASEvaluation;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.lazy.IBk;
@@ -126,7 +127,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $ 
+ * @version $Revision: 1.45 $ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -189,7 +190,7 @@ public class DecisionTable
   protected ASSearch m_search = new BestFirst();
 
   /** Our own internal evaluator */
-  protected SubsetEvaluator m_evaluator;
+  protected ASEvaluation m_evaluator;
 
   /** The evaluation object used to evaluate subsets */
   protected Evaluation m_evaluation;
@@ -1038,32 +1039,33 @@ public class DecisionTable
 
     return result;
   }
+  
+  private class DummySubsetEvaluator extends ASEvaluation implements SubsetEvaluator {
+    /** for serialization */
+    private static final long serialVersionUID = 3927442457704974150L;
+      
+    public void buildEvaluator(Instances data) throws Exception {
+    }
+
+    public double evaluateSubset(BitSet subset) throws Exception {
+
+      int fc = 0;
+      for (int jj = 0;jj < m_numAttributes; jj++) {
+        if (subset.get(jj)) {
+          fc++;
+        }
+      }
+
+      return estimatePerformance(subset, fc);
+    }
+  }
 
   /**
    * Sets up a dummy subset evaluator that basically just delegates
    * evaluation to the estimatePerformance method in DecisionTable
    */
   protected void setUpEvaluator() throws Exception {
-    m_evaluator = new SubsetEvaluator () {
-
-      /** for serialization */
-      private static final long serialVersionUID = 3927442457704974150L;
-      
-      public void buildEvaluator(Instances data) throws Exception {
-      }
-
-      public double evaluateSubset(BitSet subset) throws Exception {
-
-	int fc = 0;
-	for (int jj = 0;jj < m_numAttributes; jj++) {
-	  if (subset.get(jj)) {
-	    fc++;
-	  }
-	}
-
-	return estimatePerformance(subset, fc);
-      }
-    };		
+    m_evaluator = new DummySubsetEvaluator();
   }
 
   protected boolean m_saveMemory = true;

@@ -105,7 +105,7 @@ import weka.core.Utils;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  *
  */
 public class DTNB extends DecisionTable {
@@ -393,7 +393,7 @@ public class DTNB extends DecisionTable {
     m_evaluator.buildEvaluator(m_theInstances);
   }
   
-  protected class EvalWithDelete extends SubsetEvaluator {
+  protected class EvalWithDelete extends ASEvaluation implements SubsetEvaluator {
     
     // holds the list of attributes that are no longer in the model at all
     private BitSet m_deletedFromDTNB;
