@@ -24,6 +24,7 @@ import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.classifiers.Classifier;
 
 /**
@@ -31,7 +32,7 @@ import weka.classifiers.Classifier;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see ThresholdSelectorTest
  */
 public class ThresholdSelectorDummyClassifier 
@@ -83,6 +84,15 @@ public class ThresholdSelectorDummyClassifier
     }
     m_Pos = (m_Pos + 1) % m_Preds.length;
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
 
