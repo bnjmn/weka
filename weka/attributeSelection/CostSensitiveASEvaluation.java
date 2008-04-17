@@ -47,14 +47,10 @@ import java.util.Vector;
 import java.util.ArrayList;
 
 /**
- <!-- globalinfo-start -->
- <!-- globalinfo-end -->
- *
- <!-- options-start -->
- <!-- options-end -->
+ * Abstract base class for cost-sensitive subset and attribute evaluators.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class CostSensitiveASEvaluation
   extends ASEvaluation
@@ -104,33 +100,33 @@ public abstract class CostSensitiveASEvaluation
     Vector newVector = new Vector(4);
 
     newVector.addElement(new Option(
-	      "\tFile name of a cost matrix to use. If this is not supplied,\n"
-              +"\ta cost matrix will be loaded on demand. The name of the\n"
-              +"\ton-demand file is the relation name of the training data\n"
-              +"\tplus \".cost\", and the path to the on-demand file is\n"
-              +"\tspecified with the -N option.",
-	      "C", 1, "-C <cost file name>"));
+                                    "\tFile name of a cost matrix to use. If this is not supplied,\n"
+                                    +"\ta cost matrix will be loaded on demand. The name of the\n"
+                                    +"\ton-demand file is the relation name of the training data\n"
+                                    +"\tplus \".cost\", and the path to the on-demand file is\n"
+                                    +"\tspecified with the -N option.",
+                                    "C", 1, "-C <cost file name>"));
     newVector.addElement(new Option(
-              "\tName of a directory to search for cost files when loading\n"
-              +"\tcosts on demand (default current directory).",
-              "N", 1, "-N <directory>"));
+                                    "\tName of a directory to search for cost files when loading\n"
+                                    +"\tcosts on demand (default current directory).",
+                                    "N", 1, "-N <directory>"));
     newVector.addElement(new Option(
-              "\tThe cost matrix in Matlab single line format.",
-              "cost-matrix", 1, "-cost-matrix <matrix>"));
+                                    "\tThe cost matrix in Matlab single line format.",
+                                    "cost-matrix", 1, "-cost-matrix <matrix>"));
     newVector.addElement(new Option(
-              "\tThe seed to use for random number generation.",
-              "S", 1, "-S <integer>"));
+                                    "\tThe seed to use for random number generation.",
+                                    "S", 1, "-S <integer>"));
 
     newVector.addElement(new Option(
-	      "\tFull name of base evaluator.\n"
-	      + "\t(default: " + defaultEvaluatorString() +")",
-	      "W", 1, "-W"));
+                                    "\tFull name of base evaluator.\n"
+                                    + "\t(default: " + defaultEvaluatorString() +")",
+                                    "W", 1, "-W"));
 
     if (m_evaluator instanceof OptionHandler) {
       newVector.addElement(new Option(
-                  "",
-                  "", 0, "\nOptions specific to evaluator "
-                  + m_evaluator.getClass().getName() + ":"));
+                                      "",
+                                      "", 0, "\nOptions specific to evaluator "
+                                      + m_evaluator.getClass().getName() + ":"));
       Enumeration enu = ((OptionHandler)m_evaluator).listOptions();
       while (enu.hasMoreElements()) {
         newVector.addElement(enu.nextElement());
@@ -144,8 +140,28 @@ public abstract class CostSensitiveASEvaluation
   /**
    * Parses a given list of options. <p/>
    *
-   <!-- options-start -->
-   <!-- options-end -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -C &lt;cost file name&gt;
+   *  File name of a cost matrix to use. If this is not supplied,
+   *  a cost matrix will be loaded on demand. The name of the
+   *  on-demand file is the relation name of the training data
+   *  plus ".cost", and the path to the on-demand file is
+   *  specified with the -N option.</pre>
+   * 
+   * <pre> -N &lt;directory&gt;
+   *  Name of a directory to search for cost files when loading
+   *  costs on demand (default current directory).</pre>
+   * 
+   * <pre> -cost-matrix &lt;matrix&gt;
+   *  The cost matrix in Matlab single line format.</pre>
+   * 
+   * <pre> -S &lt;integer&gt;
+   *  The seed to use for random number generation.</pre>
+   * 
+   * <pre> -W
+   *  Full name of base evaluator.
+   *  (default: weka.attributeSelection.CfsSubsetEval)</pre>
    *
    * Options after -- are passed to the designated subset evaluator.<p>
    *
@@ -157,7 +173,7 @@ public abstract class CostSensitiveASEvaluation
     if (costFile.length() != 0) {
       try {
 	setCostMatrix(new CostMatrix(new BufferedReader(
-				     new FileReader(costFile))));
+                                                        new FileReader(costFile))));
       } catch (Exception ex) {
 	// now flag as possible old format cost matrix. Delay cost matrix
 	// loading until buildClassifer is called
@@ -200,14 +216,14 @@ public abstract class CostSensitiveASEvaluation
       // parsing fails.
       setEvaluator(ASEvaluation.forName(evaluatorName, null));
       setEvaluator(ASEvaluation.forName(evaluatorName,
-                                         Utils.partitionOptions(options)));
+                                        Utils.partitionOptions(options)));
     } else {
       
       // This is just to set the classifier in case the option 
       // parsing fails.
       setEvaluator(ASEvaluation.forName(defaultEvaluatorString(), null));
       setEvaluator(ASEvaluation.forName(defaultEvaluatorString(),
-				       Utils.partitionOptions(options)));
+                                        Utils.partitionOptions(options)));
     }
   }
 
@@ -499,12 +515,12 @@ public abstract class CostSensitiveASEvaluation
         throw new Exception("On-demand cost file doesn't exist: " + costFile);
       }
       setCostMatrix(new CostMatrix(new BufferedReader(
-                                   new FileReader(costFile))));
+                                                      new FileReader(costFile))));
     } else if (m_CostMatrix == null) {
       // try loading an old format cost file
       m_CostMatrix = new CostMatrix(data.numClasses());
       m_CostMatrix.readOldFormat(new BufferedReader(
-			       new FileReader(m_CostFile)));
+                                                    new FileReader(m_CostFile)));
     }
     
     Random random = null;
@@ -558,6 +574,6 @@ public abstract class CostSensitiveASEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }

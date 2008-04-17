@@ -30,13 +30,69 @@ import java.io.Serializable;
 
 /**
  <!-- globalinfo-start -->
+ * A meta subset evaluator that makes its base subset evaluator cost-sensitive.
+ * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -C &lt;cost file name&gt;
+ *  File name of a cost matrix to use. If this is not supplied,
+ *  a cost matrix will be loaded on demand. The name of the
+ *  on-demand file is the relation name of the training data
+ *  plus ".cost", and the path to the on-demand file is
+ *  specified with the -N option.</pre>
+ * 
+ * <pre> -N &lt;directory&gt;
+ *  Name of a directory to search for cost files when loading
+ *  costs on demand (default current directory).</pre>
+ * 
+ * <pre> -cost-matrix &lt;matrix&gt;
+ *  The cost matrix in Matlab single line format.</pre>
+ * 
+ * <pre> -S &lt;integer&gt;
+ *  The seed to use for random number generation.</pre>
+ * 
+ * <pre> -W
+ *  Full name of base evaluator.
+ *  (default: weka.attributeSelection.ReliefFAttributeEval)</pre>
+ * 
+ * <pre> 
+ * Options specific to evaluator weka.attributeSelection.ReliefFAttributeEval:
+ * </pre>
+ * 
+ * <pre> -M &lt;num instances&gt;
+ *  Specify the number of instances to
+ *  sample when estimating attributes.
+ *  If not specified, then all instances
+ *  will be used.</pre>
+ * 
+ * <pre> -D &lt;seed&gt;
+ *  Seed for randomly sampling instances.
+ *  (Default = 1)</pre>
+ * 
+ * <pre> -K &lt;number of neighbours&gt;
+ *  Number of nearest neighbours (k) used
+ *  to estimate attribute relevances
+ *  (Default = 10).</pre>
+ * 
+ * <pre> -W
+ *  Weight nearest neighbours by distance</pre>
+ * 
+ * <pre> -A &lt;num&gt;
+ *  Specify sigma value (used in an exp
+ *  function to control how quickly
+ *  weights for more distant instances
+ *  decrease. Use in conjunction with -W.
+ *  Sensible value=1/5 to 1/10 of the
+ *  number of nearest neighbours.
+ *  (Default = 2)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class CostSensitiveAttributeEval
   extends CostSensitiveASEvaluation
@@ -93,7 +149,7 @@ public class CostSensitiveAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**
@@ -105,3 +161,4 @@ public class CostSensitiveAttributeEval
     runEvaluator(new CostSensitiveAttributeEval(), args);
   }
 }
+
