@@ -21,6 +21,7 @@
 
 package weka.classifiers.functions.pace;
 
+import weka.core.RevisionUtils;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.FlexibleDecimalFormat;
 import weka.core.matrix.IntVector;
@@ -43,7 +44,7 @@ import java.text.DecimalFormat;
  * prediction." Proceedings of ICML'2002. Sydney. <p>
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class PaceMatrix 
   extends Matrix {
@@ -986,6 +987,15 @@ public class PaceMatrix
       }
     }
     return A;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
   }
 
   /**

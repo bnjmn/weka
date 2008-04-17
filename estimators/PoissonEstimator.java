@@ -24,6 +24,7 @@ package weka.estimators;
 
 import weka.core.Capabilities.Capability;
 import weka.core.Capabilities;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /** 
@@ -31,7 +32,7 @@ import weka.core.Utils;
  * over the observed values.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class PoissonEstimator
   extends Estimator
@@ -125,6 +126,15 @@ public class PoissonEstimator
   }
   
   /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+  }
+  
+  /**
    * Main method for testing this class.
    *
    * @param argv should contain a sequence of numeric values
@@ -150,11 +160,3 @@ public class PoissonEstimator
     }
   }
 }
-
-
-
-
-
-
-
-

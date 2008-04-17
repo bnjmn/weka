@@ -35,10 +35,11 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @see TechnicalInformationHandler
  */
-public class TechnicalInformation {
+public class TechnicalInformation
+  implements RevisionHandler {
 
   /** the different types of information */
   public enum Type {
@@ -625,6 +626,15 @@ public class TechnicalInformation {
     }
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
   
   /**

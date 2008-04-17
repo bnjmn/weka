@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * Bean that assigns a class attribute to a data set.
  *
  * @author Mark Hall
- * @version $Revision: 1.13.2.1 $
+ * @version $Revision: 1.13.2.2 $
  */
 public class ClassAssigner
   extends JPanel

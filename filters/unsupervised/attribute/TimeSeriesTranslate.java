@@ -26,6 +26,7 @@ package weka.filters.unsupervised.attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Capabilities.Capability;
@@ -59,7 +60,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class TimeSeriesTranslate 
   extends AbstractTimeSeries {
@@ -173,6 +174,15 @@ public class TimeSeriesTranslate
     }
     inst.setDataset(dest.dataset());
     return inst;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
   
   /**

@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Randomizable;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -124,7 +125,7 @@ import java.util.Collections;
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Peter Reutemann (fracpete@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class RandomSubSpace
   extends RandomizableIteratedSingleClassifierEnhancer 
@@ -508,6 +509,15 @@ public class RandomSubSpace
       text.append(m_Classifiers[i].toString() + "\n\n");
 
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   /**

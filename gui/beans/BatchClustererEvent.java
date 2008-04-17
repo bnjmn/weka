@@ -31,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  * @since 1.0
  * @see EventObject
  */

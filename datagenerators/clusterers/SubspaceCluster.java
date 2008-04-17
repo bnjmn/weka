@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Range;
+import weka.core.RevisionUtils;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.datagenerators.ClusterDefinition;
@@ -111,7 +112,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $ 
+ * @version $Revision: 1.4.2.1 $ 
  */
 public class SubspaceCluster 
   extends ClusterGenerator {
@@ -980,7 +981,15 @@ public class SubspaceCluster
 
     return docu.toString();
   }
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+  }
 
   /**
    * Main method for testing this class.

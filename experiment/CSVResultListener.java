@@ -25,6 +25,8 @@ package weka.experiment;
 
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.BufferedOutputStream;
@@ -50,10 +52,10 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class CSVResultListener 
-  implements ResultListener, OptionHandler {
+  implements ResultListener, OptionHandler, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = -623185072785174658L;
@@ -349,5 +351,14 @@ public class CSVResultListener
       }
     }
     m_Out.println("");
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 } // CSVResultListener

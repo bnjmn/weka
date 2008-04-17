@@ -22,21 +22,24 @@
 
 package weka.core.converters;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import weka.core.Instances;
 import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionHandler;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 
 /** 
  * Interface to something that can load Instances from an input source in some
  * format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
-public interface Loader extends Serializable {
+public interface Loader
+  extends Serializable, RevisionHandler {
 
   /**
    * Resets the Loader object ready to begin loading.

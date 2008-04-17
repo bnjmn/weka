@@ -14,6 +14,9 @@
 
 package weka.core.matrix;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /** 
@@ -31,10 +34,10 @@ import java.io.Serializable;
  *
  * @author The Mathworks and NIST 
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public class QRDecomposition 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -5013090736132211418L;
@@ -227,5 +230,14 @@ public class QRDecomposition
       }
     }
     return (new Matrix(X,n,nx).getMatrix(0,n-1,0,nx-1));
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

@@ -22,13 +22,14 @@
 
 package weka.attributeSelection;
 
-import weka.core.*;
+import weka.core.Instance;
+import weka.core.Instances;
 
 /** 
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public interface AttributeTransformer {
     // ===============

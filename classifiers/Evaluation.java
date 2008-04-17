@@ -32,6 +32,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.Utils;
 import weka.core.Version;
@@ -173,10 +175,10 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.81.2.2 $
+ * @version  $Revision: 1.81.2.3 $
  */
 public class Evaluation
-implements Summarizable {
+  implements Summarizable, RevisionHandler {
 
   /** The number of classes. */
   protected int m_NumClasses;
@@ -3314,5 +3316,14 @@ implements Summarizable {
       m_PriorErrorEstimator.addValue(m_TrainClassVals[i],
 	  m_TrainClassWeights[i]);
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.81.2.3 $");
   }
 }

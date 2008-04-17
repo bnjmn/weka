@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the incremental classifier evaluator bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class IncrementalClassifierEvaluatorBeanInfo extends SimpleBeanInfo {
   

@@ -22,6 +22,8 @@
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Version;
 
@@ -88,9 +90,11 @@ import org.w3c.dom.Element;
  * @see #writeToXML(Element, Object, String)
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $ 
+ * @version $Revision: 1.15.2.1 $ 
  */
-public class XMLSerialization {
+public class XMLSerialization
+   implements RevisionHandler {
+  
    /** for debugging purposes only */
    protected static boolean DEBUG = false;
   
@@ -1687,5 +1691,14 @@ public class XMLSerialization {
             oo.close();
          }
       }
+   }
+   
+   /**
+    * Returns the revision string.
+    * 
+    * @return		the revision
+    */
+   public String getRevision() {
+     return RevisionUtils.extract("$Revision: 1.15.2.1 $");
    }
 }

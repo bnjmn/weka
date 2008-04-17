@@ -26,6 +26,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.BitSet;
@@ -68,7 +69,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class GreedyStepwise 
   extends ASSearch 
@@ -799,5 +800,14 @@ public class GreedyStepwise
     m_Instances = null;
     m_rankedSoFar = -1;
     m_rankedAtts = null;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 }

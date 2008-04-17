@@ -49,7 +49,7 @@ import java.util.Enumeration;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 public abstract class AbstractFileSaver
   extends AbstractSaver

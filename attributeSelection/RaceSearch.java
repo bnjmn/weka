@@ -26,6 +26,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
@@ -134,7 +135,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.24.2.1 $
  */
 public class RaceSearch 
   extends ASSearch 
@@ -1207,13 +1208,13 @@ public class RaceSearch
     if (m_ASEval instanceof AttributeEvaluator) {
       // generate the attribute ranking first
       Ranker ranker = new Ranker();
-      ((AttributeEvaluator)m_ASEval).buildEvaluator(data);
-      m_Ranking = ranker.search((AttributeEvaluator)m_ASEval,data);
+      m_ASEval.buildEvaluator(data);
+      m_Ranking = ranker.search(m_ASEval,data);
     } else {
       GreedyStepwise fs = new GreedyStepwise();
       double [][]rankres; 
       fs.setGenerateRanking(true);
-      ((SubsetEvaluator)m_ASEval).buildEvaluator(data);
+      ((ASEvaluation)m_ASEval).buildEvaluator(data);
       fs.search(m_ASEval, data);
       rankres = fs.rankedAttributes();
       m_Ranking = new int[rankres.length];
@@ -1765,5 +1766,14 @@ public class RaceSearch
     m_theEvaluator = null;
     m_bestMerit = -Double.MAX_VALUE;
     m_numFolds = 10;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.24.2.1 $");
   }
 }

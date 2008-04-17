@@ -21,7 +21,7 @@
  * Staldenmattweg 2, Immensee, CH-6405, Switzerland.
  * All rights reserved.
  *
- * This software is in the public domain
+ * This software is in the public domain.
  *
  */
 
@@ -60,7 +60,7 @@ import java.net.URL;
  *
  * @author  Werner Randelshofer
  * @author  Mark Hall
- * @version $Revision: 1.2.2.1 $ 
+ * @version $Revision: 1.2.2.2 $ 
  */
 public class SplashWindow
   extends Window {

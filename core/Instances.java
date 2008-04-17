@@ -62,10 +62,10 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.72.2.2 $ 
+ * @version $Revision: 1.72.2.3 $ 
  */
 public class Instances 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = -19412345060742748L;
@@ -2055,5 +2055,14 @@ public class Instances
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.72.2.3 $");
   }
 }

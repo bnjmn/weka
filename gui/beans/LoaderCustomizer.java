@@ -55,7 +55,7 @@ import javax.swing.JCheckBox;
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14.2.1 $
+ * @version $Revision: 1.14.2.2 $
  */
 public class LoaderCustomizer
   extends JPanel

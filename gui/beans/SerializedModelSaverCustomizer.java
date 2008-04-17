@@ -57,7 +57,7 @@ import javax.swing.filechooser.FileFilter;
  * GUI Customizer for the SerializedModelSaver bean
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.4 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class SerializedModelSaverCustomizer
   extends JPanel

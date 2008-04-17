@@ -32,6 +32,7 @@ import weka.core.neighboursearch.LinearNNSearch;
 import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -108,7 +109,7 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40.2.3 $
+ * @version $Revision: 1.40.2.4 $
  */
 public class IBk 
   extends Classifier 
@@ -1026,6 +1027,15 @@ public class IBk
     }
 
     return neighbours;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.40.2.4 $");
   }
   
   /**

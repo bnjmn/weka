@@ -24,6 +24,8 @@
 package weka.experiment;
 
 import weka.core.Queue;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.net.InetAddress;
 import java.net.URL;
@@ -39,11 +41,11 @@ import java.util.Hashtable;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class RemoteEngine
   extends UnicastRemoteObject
-  implements Compute {
+  implements Compute, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1021538162895448259L;
@@ -271,6 +273,15 @@ public class RemoteEngine
     if (m_TaskStatus.size() == 0) {
       purgeClasses();
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 
   /**

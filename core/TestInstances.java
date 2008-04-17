@@ -114,11 +114,11 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @see weka.classifiers.CheckClassifier
  */
 public class TestInstances 
-  implements Cloneable, Serializable, OptionHandler {
+  implements Cloneable, Serializable, OptionHandler, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6263968936330390469L;
@@ -1737,6 +1737,15 @@ public class TestInstances
     result += "Word separators: " + getWordSeparators() + "\n";
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
   
   /**

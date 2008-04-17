@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.8 $
+ * @version  $Revision: 1.18.2.9 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -372,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.8 $
+   * @version $Revision: 1.18.2.9 $
    * @since 1.0
    * @see PrintablePanel
    */

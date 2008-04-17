@@ -27,6 +27,7 @@ import weka.classifiers.bayes.net.ParentSet;
 import weka.classifiers.bayes.net.search.SearchAlgorithm;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -48,7 +49,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class FromFile 
 	extends SearchAlgorithm {
@@ -177,6 +178,15 @@ public class FromFile
 		options[current++] = "";
 	  }
 	  return options;
+	}
+
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.7.2.1 $");
 	}
 
 } // class FromFile

@@ -31,6 +31,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Summarizable;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
@@ -111,7 +113,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $ 
+ * @version $Revision: 1.35.2.1 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -125,7 +127,7 @@ public class CVParameterSelection
    * cross-validation search parameter
    */
   protected class CVParameter 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -4668812017709421953L;
@@ -226,6 +228,15 @@ public class CVParameterSelection
 	result += " R";
       }
       return result;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.35.2.1 $");
     }
   }
 
@@ -819,6 +830,15 @@ public class CVParameterSelection
     String result = "Selected values: "
       + Utils.joinOptions(m_BestClassifierOptions);
     return result + '\n';
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.35.2.1 $");
   }
   
   /**

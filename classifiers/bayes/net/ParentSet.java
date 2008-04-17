@@ -22,6 +22,8 @@
 package weka.classifiers.bayes.net;
 
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 
@@ -30,10 +32,10 @@ import java.io.Serializable;
  * represent a set of parents in a graph.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class ParentSet 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 4155021284407181838L;
@@ -52,6 +54,7 @@ public class ParentSet
   public int getParent(int iParent) {
     return m_nParents[iParent];
   } 
+  public int [] getParents() {return m_nParents;}
 
   /**
    * sets index parent of parent specified by index
@@ -104,6 +107,18 @@ public class ParentSet
     return m_nCardinalityOfParents;
   } 
 
+  /**
+   * returns cardinality of parents after recalculation
+   * 
+   * @return the cardinality
+   */
+  public int getFreshCardinalityOfParents(Instances _Instances) {
+	  m_nCardinalityOfParents = 1;
+	  for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+		m_nCardinalityOfParents *= _Instances.attribute(m_nParents[iParent]).numValues();
+	  }
+      return m_nCardinalityOfParents;
+  }
   /**
    * default constructor
    */
@@ -228,21 +243,26 @@ public class ParentSet
       m_nCardinalityOfParents 
       / _Instances.attribute(m_nParents[m_nNrOfParents]).numValues();
   }    // DeleteLastParent
- 
- 	/** Copy makes current parents set equal to other parent set
- 	 * 
- 	 * @param other : parent set to make a copy from
- 	 */
- 	public void copy(ParentSet other) {
- 		m_nCardinalityOfParents = other.m_nCardinalityOfParents;
- 		m_nNrOfParents = other.m_nNrOfParents;
- 		for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
-			m_nParents[iParent] = other.m_nParents[iParent];
- 		}
- 	} // Copy
+
+  /** Copy makes current parents set equal to other parent set
+   * 
+   * @param other : parent set to make a copy from
+   */
+  public void copy(ParentSet other) {
+    m_nCardinalityOfParents = other.m_nCardinalityOfParents;
+    m_nNrOfParents = other.m_nNrOfParents;
+    for (int iParent = 0; iParent < m_nNrOfParents; iParent++) {
+      m_nParents[iParent] = other.m_nParents[iParent];
+    }
+  } // Copy
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+  }
  
 }      // class ParentSet
-
-
-
-

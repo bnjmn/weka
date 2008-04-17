@@ -59,7 +59,7 @@ import javax.swing.JCheckBox;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.7.2.2 $
+ * @version $Revision: 1.7.2.3 $
  */
 public class SaverCustomizer
   extends JPanel

@@ -37,12 +37,12 @@ import java.io.Writer;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (eibe@cs.waikato.ac.nz)
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.24 $
+ * @version $Revision: 1.24.2.1 $
  * @deprecated Use <code>weka.core.matrix.Matrix</code> instead - only for
  * backwards compatibility. 
  */
 public class Matrix 
-  implements Cloneable, Serializable {
+  implements Cloneable, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -3604757095849145838L;
@@ -468,6 +468,15 @@ public class Matrix
    */
   public static Matrix parseMatlab(String matlab) throws Exception {
     return new Matrix(weka.core.matrix.Matrix.parseMatlab(matlab).getArray());
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.24.2.1 $");
   }
   
   /**

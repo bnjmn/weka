@@ -25,6 +25,8 @@ package weka.associations;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.UnassignedClassException;
 
 import java.io.Serializable;
@@ -48,26 +50,22 @@ import java.util.TreeSet;
  * (out of an unpublished manuscript from T. Scheffer). 
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
-public class CaRuleGeneration extends RuleGeneration implements Serializable {
+ * @version $Revision: 1.3.2.1 $ */
+public class CaRuleGeneration
+  extends RuleGeneration
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 3065752149646517703L;
 
-
   /**
-    * Constructor
-    * @param itemSet the item set that forms the premise of the rule
-    */
+   * Constructor
+   * @param itemSet the item set that forms the premise of the rule
+   */
   public CaRuleGeneration(ItemSet itemSet){
-       
-       super(itemSet);  
-   }
-  
-  
- 
+    super(itemSet);  
+  }
 
- 
   /**
    * Generates all rules for an item set. The item set is the premise.
    * @param numRules the number of association rules the use wants to mine.
@@ -84,14 +82,14 @@ public class CaRuleGeneration extends RuleGeneration implements Serializable {
    * @return all the rules with minimum confidence for the given item set
    */
   public TreeSet generateRules(int numRules, double[] midPoints, Hashtable priors, double expectation, Instances instances, TreeSet best, int genTime) {
-  
+
     boolean redundant = false;
     FastVector consequences = new FastVector();
     ItemSet premise;
     RuleItem current = null, old = null;
-    
+
     Hashtable hashtable;
-    
+
     m_change = false;
     m_midPoints = midPoints;
     m_priors = priors;
@@ -99,7 +97,7 @@ public class CaRuleGeneration extends RuleGeneration implements Serializable {
     m_expectation = expectation;
     m_count = genTime;
     m_instances = instances;
-   
+
     //create rule body
     premise =null;
     premise = new ItemSet(m_totalTransactions);
@@ -107,63 +105,59 @@ public class CaRuleGeneration extends RuleGeneration implements Serializable {
     System.arraycopy(m_items, 0, premiseItems, 0, m_items.length);
     premise.setItem(premiseItems);
     premise.setCounter(m_counter);
-    
+
     consequences = singleConsequence(instances);
-               
-            
-    
+
     //create n best rules
     do{
-        if(premise == null || consequences.size() == 0)
-            return m_best;
-        m_minRuleCount = 1;
-        while(expectation((double)m_minRuleCount,premise.counter(),m_midPoints,m_priors) <= m_expectation){
-            m_minRuleCount++;
-            if(m_minRuleCount > premise.counter())
-                return m_best;
-        }
-        redundant = false;
-            
-        //create possible heads  
-        FastVector allRuleItems = new FastVector();
-        int h = 0;
-        while(h < consequences.size()){
-            RuleItem dummie = new RuleItem();
-            m_count++;
-            current = dummie.generateRuleItem(premise,(ItemSet)consequences.elementAt(h),instances,m_count,m_minRuleCount,m_midPoints,m_priors);
-            if(current != null)
-                allRuleItems.addElement(current);
-            h++;
-        }
-        
-        //update best
-        for(h =0; h< allRuleItems.size();h++){
-            current = (RuleItem)allRuleItems.elementAt(h);
-            if(m_best.size() < numRules){
-                 m_change =true;
-                 redundant = removeRedundant(current);  
-            }
-            else{
-                m_expectation = ((RuleItem)(m_best.first())).accuracy();
-                if(current.accuracy() > m_expectation){
-                    boolean remove = m_best.remove(m_best.first());
-                    m_change = true;
-                    redundant = removeRedundant(current);
-                    m_expectation = ((RuleItem)(m_best.first())).accuracy();
-                    while(expectation((double)m_minRuleCount, (current.premise()).counter(),m_midPoints,m_priors) < m_expectation){
-                        m_minRuleCount++;
-                        if(m_minRuleCount > (current.premise()).counter())
-                            break;
-                    } 
-                }  
-            }   
-        }   
+      if(premise == null || consequences.size() == 0)
+	return m_best;
+      m_minRuleCount = 1;
+      while(expectation((double)m_minRuleCount,premise.counter(),m_midPoints,m_priors) <= m_expectation){
+	m_minRuleCount++;
+	if(m_minRuleCount > premise.counter())
+	  return m_best;
+      }
+      redundant = false;
+
+      //create possible heads  
+      FastVector allRuleItems = new FastVector();
+      int h = 0;
+      while(h < consequences.size()){
+	RuleItem dummie = new RuleItem();
+	m_count++;
+	current = dummie.generateRuleItem(premise,(ItemSet)consequences.elementAt(h),instances,m_count,m_minRuleCount,m_midPoints,m_priors);
+	if(current != null)
+	  allRuleItems.addElement(current);
+	h++;
+      }
+
+      //update best
+      for(h =0; h< allRuleItems.size();h++){
+	current = (RuleItem)allRuleItems.elementAt(h);
+	if(m_best.size() < numRules){
+	  m_change =true;
+	  redundant = removeRedundant(current);  
+	}
+	else{
+	  m_expectation = ((RuleItem)(m_best.first())).accuracy();
+	  if(current.accuracy() > m_expectation){
+	    boolean remove = m_best.remove(m_best.first());
+	    m_change = true;
+	    redundant = removeRedundant(current);
+	    m_expectation = ((RuleItem)(m_best.first())).accuracy();
+	    while(expectation((double)m_minRuleCount, (current.premise()).counter(),m_midPoints,m_priors) < m_expectation){
+	      m_minRuleCount++;
+	      if(m_minRuleCount > (current.premise()).counter())
+		break;
+	    } 
+	  }  
+	}   
+      }   
     }while(redundant); 
     return m_best;
   }
-  
-  
-  
+
   /**
    * Methods that decides whether or not rule a subsumes rule b.
    * The defintion of subsumption is:
@@ -175,28 +169,24 @@ public class CaRuleGeneration extends RuleGeneration implements Serializable {
    * @return true if rule a subsumes rule b or false otherwise.
    */  
   public static boolean aSubsumesB(RuleItem a, RuleItem b){
-        
-      if(!a.consequence().equals(b.consequence()))
-          return false;
-      if(a.accuracy() < b.accuracy())
-          return false;
-      for(int k = 0; k < ((a.premise()).items()).length;k++){
-        if((a.premise()).itemAt(k) != (b.premise()).itemAt(k)){
-            if(((a.premise()).itemAt(k) != -1 && (b.premise()).itemAt(k) != -1) || (b.premise()).itemAt(k) == -1)
-                return false;
-        }
-        /*if(a.m_consequence.m_items[k] != b.m_consequence.m_items[k]){
+
+    if(!a.consequence().equals(b.consequence()))
+      return false;
+    if(a.accuracy() < b.accuracy())
+      return false;
+    for(int k = 0; k < ((a.premise()).items()).length;k++){
+      if((a.premise()).itemAt(k) != (b.premise()).itemAt(k)){
+	if(((a.premise()).itemAt(k) != -1 && (b.premise()).itemAt(k) != -1) || (b.premise()).itemAt(k) == -1)
+	  return false;
+      }
+      /*if(a.m_consequence.m_items[k] != b.m_consequence.m_items[k]){
             if((a.m_consequence.m_items[k] != -1 && b.m_consequence.m_items[k] != -1) || a.m_consequence.m_items[k] == -1)
                 return false;
         }*/
-      }
-      return true;
-     
+    }
+    return true;
+
   }
-
-
-
-
 
   /**
    * Converts the header info of the given set of instances into a set 
@@ -207,55 +197,61 @@ public class CaRuleGeneration extends RuleGeneration implements Serializable {
    * @return a set of item sets, each containing a single item
    * @exception Exception if singletons can't be generated successfully
    */
- public static FastVector singletons(Instances instances) throws Exception {
+  public static FastVector singletons(Instances instances) throws Exception {
 
     FastVector setOfItemSets = new FastVector();
     ItemSet current;
 
     if(instances.classIndex() == -1)
-        throw new UnassignedClassException("Class index is negative (not set)!");
+      throw new UnassignedClassException("Class index is negative (not set)!");
     Attribute att = instances.classAttribute();
     for (int i = 0; i < instances.numAttributes(); i++) {
       if (instances.attribute(i).isNumeric())
 	throw new Exception("Can't handle numeric attributes!");
       if(i != instances.classIndex()){
-        for (int j = 0; j < instances.attribute(i).numValues(); j++) {
-            current = new ItemSet(instances.numInstances());
-            int[] currentItems = new int[instances.numAttributes()];
-            for (int k = 0; k < instances.numAttributes(); k++)
-                currentItems[k] = -1;
-            currentItems[i] = j;
-            current.setItem(currentItems);
-            setOfItemSets.addElement(current);
-        }
+	for (int j = 0; j < instances.attribute(i).numValues(); j++) {
+	  current = new ItemSet(instances.numInstances());
+	  int[] currentItems = new int[instances.numAttributes()];
+	  for (int k = 0; k < instances.numAttributes(); k++)
+	    currentItems[k] = -1;
+	  currentItems[i] = j;
+	  current.setItem(currentItems);
+	  setOfItemSets.addElement(current);
+	}
       }
     }
     return setOfItemSets;
   }
-  
-  
-   /**
+
+  /**
    * generates a consequence of length 1 for a class association rule.
    * @param instances the instances under consideration
    * @return FastVector with consequences of length 1
    */  
   public static FastVector singleConsequence(Instances instances){
-   
-      ItemSet consequence;
-      FastVector consequences = new FastVector();
 
-      for (int j = 0; j < (instances.classAttribute()).numValues(); j++) {
-        consequence = new ItemSet(instances.numInstances());
-        int[] consequenceItems = new int[instances.numAttributes()];
-        consequence.setItem(consequenceItems);
-        for (int k = 0; k < instances.numAttributes(); k++) 
-            consequence.setItemAt(-1,k);
-        consequence.setItemAt(j,instances.classIndex());
-        consequences.addElement(consequence);
-      }
-      return consequences;
-      
+    ItemSet consequence;
+    FastVector consequences = new FastVector();
+
+    for (int j = 0; j < (instances.classAttribute()).numValues(); j++) {
+      consequence = new ItemSet(instances.numInstances());
+      int[] consequenceItems = new int[instances.numAttributes()];
+      consequence.setItem(consequenceItems);
+      for (int k = 0; k < instances.numAttributes(); k++) 
+	consequence.setItemAt(-1,k);
+      consequence.setItemAt(j,instances.classIndex());
+      consequences.addElement(consequence);
+    }
+    return consequences;
+
   }
-  
-}
 
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+  }
+}

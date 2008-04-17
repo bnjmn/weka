@@ -40,7 +40,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.8 $
+ * @version $Revision: 1.1.2.9 $
  */
 public class FlowRunner {
 

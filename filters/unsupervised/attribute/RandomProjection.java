@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -102,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
+ * @version $Revision: 1.10.2.1 $ [1.0 - 22 July 2003 - Initial version (Ashraf M. Kibriya)]
  */
 public class RandomProjection 
   extends Filter 
@@ -882,6 +883,15 @@ public class RandomProjection
       }
       return -1;
   }  
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
+  }
 
   /**
    * Main method for testing this class.

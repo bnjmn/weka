@@ -32,7 +32,7 @@ import javax.swing.JMenuItem;
  * visualize classifier results in the explorer.
  *
  * @author Jeffery Grajkowski (grajkows@cs.ualberta.ca)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public interface VisualizePlugin {
 

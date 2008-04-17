@@ -36,7 +36,7 @@ import java.util.zip.GZIPInputStream;
  * Abstract superclass for all file loaders.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2.2.2 $
+ * @version $Revision: 1.2.2.3 $
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader

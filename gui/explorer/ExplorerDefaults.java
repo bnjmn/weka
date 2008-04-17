@@ -34,7 +34,7 @@ import java.util.Vector;
  * the props file <code>weka/gui/explorer/Explorer.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  * @see #PROPERTY_FILE
  */
 public class ExplorerDefaults

@@ -31,7 +31,7 @@ import java.util.EventObject;
  * ResultPanel.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.1.2.1 $
  */
 
 public interface ResultChangedListener extends EventListener {

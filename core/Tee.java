@@ -48,11 +48,12 @@ import java.util.Vector;
 * </pre>
 *
 * @author   FracPete (fracpete at waikato dot ac dot nz)
-* @version  $Revision: 1.3 $
+* @version  $Revision: 1.3.2.1 $
 */
 
 public class Tee
-  extends PrintStream {
+  extends PrintStream
+  implements RevisionHandler {
   
   /** the different PrintStreams */
   protected Vector m_Streams = new Vector();
@@ -372,5 +373,14 @@ public class Tee
    */
   public String toString() {
     return this.getClass().getName() + ": " + m_Streams.size();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

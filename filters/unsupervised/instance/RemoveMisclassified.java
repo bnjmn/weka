@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
@@ -74,7 +75,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class RemoveMisclassified 
   extends Filter 
@@ -715,6 +716,15 @@ public class RemoveMisclassified
   public boolean getInvert() {
     
     return m_invertMatching;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**

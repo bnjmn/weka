@@ -31,6 +31,7 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -94,7 +95,7 @@ import java.util.Vector;
  *    
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.3.2.1 $ 
  */
 public class MDD 
   extends Classifier 
@@ -274,7 +275,7 @@ public class MDD
 
 
   private class OptEng 
-    extends Optimization{
+    extends Optimization {
     
     /** 
      * Evaluate objective function
@@ -358,6 +359,15 @@ public class MDD
       }
 
       return grad;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
     }
   }
 
@@ -612,6 +622,15 @@ public class MDD
     }
 
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   /**

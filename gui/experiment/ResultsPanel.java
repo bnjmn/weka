@@ -86,7 +86,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42.2.2 $
+ * @version $Revision: 1.42.2.3 $
  */
 public class ResultsPanel
   extends JPanel {

@@ -22,13 +22,14 @@
 
 package weka.classifiers.trees.j48;
 
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
  * Class for computing the information gain for a given distribution.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public final class InfoGainSplitCrit
   extends EntropyBasedSplitCrit{
@@ -109,13 +110,13 @@ public final class InfoGainSplitCrit
     
     return numerator/bags.total();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
+  }
 }
-
-
-
-
-
-
-
-
-

@@ -28,7 +28,7 @@ import java.io.IOException;
  * Interface to a loader/saver that loads/saves from a file source.
  *
  * @author Mark Hall
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision: 1.4.2.2 $
  */
 public interface FileSourcedConverter {
 

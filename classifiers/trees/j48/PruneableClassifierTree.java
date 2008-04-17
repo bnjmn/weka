@@ -24,6 +24,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -34,7 +35,7 @@ import java.util.Random;
  * be pruned using a pruning set. 
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class PruneableClassifierTree 
   extends ClassifierTree {
@@ -226,11 +227,13 @@ public class PruneableClassifierTree
 
     return (PruneableClassifierTree)m_sons[index];
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
+  }
 }
-
-
-
-
-
-
-

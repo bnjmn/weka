@@ -25,6 +25,8 @@ import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.ParentSet;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -39,10 +41,10 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class SearchAlgorithm 
-    implements OptionHandler, Serializable {
+    implements OptionHandler, Serializable, RevisionHandler {
   
     /** for serialization */
     static final long serialVersionUID = 6164792240778525312L;
@@ -327,11 +329,9 @@ public class SearchAlgorithm
                 }
             }
         }
-
         for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
-            boolean bIsInMarkovBoundary = (iAttribute == iClass);
-            bIsInMarkovBoundary =
-                bayesNet.getParentSet(iAttribute).contains(iClass)
+            boolean bIsInMarkovBoundary = (iAttribute == iClass)
+                    || bayesNet.getParentSet(iAttribute).contains(iClass)
                     || bayesNet.getParentSet(iClass).contains(iAttribute);
             for (int iAttribute2 = 0; !bIsInMarkovBoundary && iAttribute2 < instances.numAttributes(); iAttribute2++) {
                 bIsInMarkovBoundary =
@@ -339,8 +339,12 @@ public class SearchAlgorithm
                         && bayesNet.getParentSet(iAttribute2).contains(iClass);
             }
             if (!bIsInMarkovBoundary) {
-                if (ancestors.contains(iAttribute) && bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
-                    bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
+                if (ancestors.contains(iAttribute)) {
+                	if (bayesNet.getParentSet(iClass).getCardinalityOfParents() < 1024) {
+                		bayesNet.getParentSet(iClass).addParent(iAttribute, instances);
+                	} else {
+                		// too bad
+                	}
                 } else {
                     bayesNet.getParentSet(iAttribute).addParent(iClass, instances);
                 }
@@ -396,4 +400,13 @@ public class SearchAlgorithm
             + " that all nodes in the network are part of the Markov blanket of the classifier"
             + " node.";
     } // markovBlanketClassifierTipText
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    }
 } // class SearchAlgorithm

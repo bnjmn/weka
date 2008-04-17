@@ -105,7 +105,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.57.2.1 $
+ * @version $Revision: 1.57.2.2 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   

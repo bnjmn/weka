@@ -51,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  * @see #OPTIONS_STARTTAG
  * @see #OPTIONS_ENDTAG
  */
@@ -200,6 +200,15 @@ public class OptionHandlerJavadoc
     }
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
   
   /**

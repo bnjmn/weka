@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
@@ -85,7 +86,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  */
 public class AddClassification
   extends SimpleBatchFilter {
@@ -693,10 +694,23 @@ public class AddClassification
 	newInstance = new SparseInstance(oldInstance.weight(), newValues);
       else
 	newInstance = new Instance(oldInstance.weight(), newValues);
+
+      // copy string/relational values from input to output
+      copyValues(newInstance, false, oldInstance.dataset(), getOutputFormat());
+
       result.add(newInstance);
     }
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 
   /**

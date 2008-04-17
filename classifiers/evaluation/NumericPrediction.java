@@ -22,6 +22,9 @@
 
 package weka.classifiers.evaluation;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /**
@@ -29,10 +32,10 @@ import java.io.Serializable;
  * plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class NumericPrediction
-  implements Prediction, Serializable {
+  implements Prediction, Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4880216423674233887L;
@@ -132,5 +135,14 @@ public class NumericPrediction
     sb.append("NUM: ").append(actual()).append(' ').append(predicted());
     sb.append(' ').append(weight());
     return sb.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 }

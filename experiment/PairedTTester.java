@@ -30,6 +30,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.BufferedReader;
@@ -85,10 +87,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.34 $
+ * @version $Revision: 1.34.2.1 $
  */
 public class PairedTTester 
-  implements OptionHandler, Tester {
+  implements OptionHandler, Tester, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 8370014624008728610L;
@@ -155,7 +157,8 @@ public class PairedTTester
   protected ResultMatrix m_ResultMatrix = new ResultMatrixPlainText();
   
   /** A list of unique "dataset" specifiers that have been observed */
-  protected class DatasetSpecifiers {
+  protected class DatasetSpecifiers
+    implements RevisionHandler {
 
     /** the specifiers that have been observed */
     FastVector m_Specifiers = new FastVector();
@@ -211,10 +214,20 @@ public class PairedTTester
 
       return m_Specifiers.size();
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.34.2.1 $");
+    }
   }
 
   /** Utility class to store the instances pertaining to a dataset */
-  protected class Dataset {
+  protected class Dataset
+    implements RevisionHandler {
 
     /** the template */
     Instance m_Template;
@@ -290,10 +303,20 @@ public class PairedTTester
       }
       m_Dataset = newDataset;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.34.2.1 $");
+    }
   }
  
   /** Utility class to store the instances in a resultset */
-  protected class Resultset {
+  protected class Resultset
+    implements RevisionHandler {
 
     /** the template */
     Instance m_Template;
@@ -396,6 +419,15 @@ public class PairedTTester
       for (int i = 0; i < m_Datasets.size(); i++) {
 	((Dataset)m_Datasets.elementAt(i)).sort(runColumn);
       }
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.34.2.1 $");
     }
   } // Resultset
 
@@ -1405,6 +1437,15 @@ public class PairedTTester
    */
   public String getDisplayName() {
     return "Paired T-Tester";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.34.2.1 $");
   }
   
   /**

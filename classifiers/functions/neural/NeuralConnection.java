@@ -21,6 +21,8 @@
 
 package weka.classifiers.functions.neural;
 
+import weka.core.RevisionHandler;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
@@ -29,10 +31,10 @@ import java.io.Serializable;
  * Abstract unit in a NeuralNetwork.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public abstract class NeuralConnection
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -286208828571059163L;

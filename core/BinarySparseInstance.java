@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * necessary. Missing values are not supported, and will be treated as 
  * 1 (true).
  *
- * @version $Revision: 1.11.2.1 $
+ * @version $Revision: 1.11.2.2 $
  */
 public class BinarySparseInstance
   extends SparseInstance {
@@ -593,6 +593,13 @@ public class BinarySparseInstance
       e.printStackTrace();
     }
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.11.2.2 $");
+  }
 }
-
-

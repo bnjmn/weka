@@ -28,6 +28,8 @@ import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.ModelSelection;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 
@@ -39,7 +41,7 @@ import java.util.Vector;
  * Auxiliary class for list of LMTNodes
  */
 class CompareNode 
-    implements Comparator {
+    implements Comparator, RevisionHandler {
 
     /**
      * Compares its two arguments for order.
@@ -54,6 +56,15 @@ class CompareNode
 	if ( ((LMTNode)o1).m_alpha > ((LMTNode)o2).m_alpha) return 1;
 	return 0;	
     }        
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    }
 }
 
 /**
@@ -62,10 +73,10 @@ class CompareNode
  * 
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class LMTNode 
-    extends LogisticBase {   
+    extends LogisticBase {
   
     /** for serialization */
     static final long serialVersionUID = 1862737145870398755L;
@@ -936,9 +947,13 @@ public class LMTNode
 	    for (int i = 0; i < m_sons.length; i++) m_sons[i].cleanup();
 	}
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    }
 }
-
-
-
-
-

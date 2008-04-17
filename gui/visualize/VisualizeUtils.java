@@ -34,7 +34,7 @@ import javax.swing.JOptionPane;
  * This class contains utility routines for visualization
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  */
 
 public class VisualizeUtils {

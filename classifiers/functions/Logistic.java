@@ -29,6 +29,7 @@ import weka.core.Instances;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -112,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.37.2.2 $
+ * @version $Revision: 1.37.2.3 $
  */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -489,6 +490,15 @@ public class Logistic extends Classifier
 	    
       return grad;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.37.2.3 $");
+    }
   }
 
   /**
@@ -789,6 +799,15 @@ public class Logistic extends Classifier
       result += "\n";
     }
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.37.2.3 $");
   }
     
   /**

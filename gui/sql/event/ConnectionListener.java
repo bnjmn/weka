@@ -30,7 +30,7 @@ import java.util.EventObject;
  * A listener for connect/disconnect events.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.1.2.1 $
  */
 
 public interface ConnectionListener extends EventListener {

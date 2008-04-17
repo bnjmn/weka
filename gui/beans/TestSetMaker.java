@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts data sets and produces test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5.2.2 $
+ * @version $Revision: 1.5.2.3 $
  */
 public class TestSetMaker
   extends AbstractTestSetProducer 

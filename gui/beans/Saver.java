@@ -31,7 +31,7 @@ import weka.core.converters.DatabaseSaver;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  *
  */
 public class Saver

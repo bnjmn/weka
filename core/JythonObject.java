@@ -26,7 +26,7 @@ package weka.core;
  * An indicator interface for Jython objects.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public interface JythonObject {
 

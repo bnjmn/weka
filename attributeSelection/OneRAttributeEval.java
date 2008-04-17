@@ -28,6 +28,7 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -66,11 +67,11 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.19.2.1 $
  */
 public class OneRAttributeEval
-  extends AttributeEvaluator 
-  implements OptionHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator, OptionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 4386514823886856980L;
@@ -458,7 +459,15 @@ public class OneRAttributeEval
     text.append("\n");
     return  text.toString();
   }
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.19.2.1 $");
+  }
 
   // ============
   // Test method.

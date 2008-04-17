@@ -21,6 +21,9 @@
 
 package weka.core.matrix;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -28,9 +31,10 @@ import java.util.Arrays;
  * A vector specialized on doubles.
  * 
  * @author Yong Wang
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
-public class  DoubleVector implements Cloneable {
+public class  DoubleVector
+  implements Cloneable, RevisionHandler {
 
   double[] V; // array for internal storage of elements.
 
@@ -719,6 +723,15 @@ public class  DoubleVector implements Cloneable {
     }
 	
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   public static void  main( String args[] ) {

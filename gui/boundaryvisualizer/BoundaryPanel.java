@@ -65,7 +65,7 @@ import javax.swing.ToolTipManager;
  * boundaries.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.22.2.1 $
+ * @version $Revision: 1.22.2.2 $
  * @since 1.0
  * @see JPanel
  */

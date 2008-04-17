@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the serialized model saver bean
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class SerializedModelSaverBeanInfo extends SimpleBeanInfo {
   

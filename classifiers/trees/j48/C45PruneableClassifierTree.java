@@ -24,6 +24,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -32,7 +33,7 @@ import weka.core.Capabilities.Capability;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.14.2.1 $
  */
 
 public class C45PruneableClassifierTree 
@@ -359,11 +360,13 @@ public class C45PruneableClassifierTree
 
     return (C45PruneableClassifierTree)m_sons[index];
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
+  }
 }
-
-
-
-
-
-
-

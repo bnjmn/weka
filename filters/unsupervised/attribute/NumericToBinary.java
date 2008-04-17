@@ -27,6 +27,7 @@ import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Capabilities.Capability;
 import weka.filters.StreamableFilter;
@@ -49,7 +50,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.7.2.1 $ 
  */
 public class NumericToBinary 
   extends PotentialClassIgnorer
@@ -208,6 +209,15 @@ public class NumericToBinary
     }
     inst.setDataset(instance.dataset());
     push(inst);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**

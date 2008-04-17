@@ -24,6 +24,8 @@ package weka.core.neighboursearch.balltrees;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.TechnicalInformation.Field;
@@ -65,7 +67,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end --> 
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class BottomUpConstructor
   extends BallTreeConstructor 
@@ -322,9 +324,10 @@ public class BottomUpConstructor
    * other another node).
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1.2.1 $
+   * @version $Revision: 1.1.2.2 $
    */
-  protected class TempNode {
+  protected class TempNode
+    implements RevisionHandler {
     
     /** The centre/pivot of the node. */
     Instance anchor;
@@ -351,5 +354,23 @@ public class BottomUpConstructor
           bf.append(""+points[i]);
       return bf.toString();
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.1.2.2 $");
+    }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
   }
 }

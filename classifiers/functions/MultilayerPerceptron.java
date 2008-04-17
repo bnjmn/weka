@@ -32,6 +32,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -140,7 +142,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -405,7 +407,14 @@ public class MultilayerPerceptron
       return m_link;
     }
     
-
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.11.2.1 $");
+    }
   }
   
 
@@ -413,7 +422,8 @@ public class MultilayerPerceptron
   /** Inner class used to draw the nodes onto.(uses the node lists!!) 
    * This will also handle the user input. */
   private class NodePanel 
-    extends JPanel {
+    extends JPanel
+    implements RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -3067621833388149984L;
@@ -647,19 +657,25 @@ public class MultilayerPerceptron
 	((NeuralConnection)m_selected.elementAt(noa)).drawHighlight(g, x, y);
       }
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.11.2.1 $");
+    }
   }
-
-
-
-
 
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.11 $
+   * @version $Revision: 1.11.2.1 $
    */
   class ControlPanel 
-    extends JPanel {
+    extends JPanel
+    implements RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 7393543302294142271L;
@@ -843,6 +859,15 @@ public class MultilayerPerceptron
 	    }
 	  }
 	});
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.11.2.1 $");
     }
   }
   
@@ -2617,5 +2642,14 @@ public class MultilayerPerceptron
       " rate will not be shown in the gui, only the original learning rate" +
       ". If the learning rate is changed in the gui, this is treated as the" +
       " starting learning rate.";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 }

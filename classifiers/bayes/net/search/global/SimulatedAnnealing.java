@@ -25,6 +25,7 @@ package weka.classifiers.bayes.net.search.global;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -90,7 +91,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class SimulatedAnnealing 
 	extends GlobalScoreSearchAlgorithm
@@ -143,8 +144,7 @@ public class SimulatedAnnealing
      * @param instances the data to use
      * @throws Exception if something goes wrong
      */
-    public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
-        super.buildStructure(bayesNet, instances);
+    public void search (BayesNet bayesNet, Instances instances) throws Exception {
 		m_random = new Random(m_nSeed);
 		
         // determine base scores
@@ -431,4 +431,12 @@ public class SimulatedAnnealing
 	  " Setting the seed allows replicability of experiments.";
 	} // seedTipText
 
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.4.2.1 $");
+	}
 } // SimulatedAnnealing

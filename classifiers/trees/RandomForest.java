@@ -31,6 +31,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Randomizable;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -91,7 +92,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.12.2.1 $
  */
 public class RandomForest 
   extends Classifier 
@@ -514,6 +515,15 @@ public class RandomForest
 	   + Utils.doubleToString(m_bagger.measureOutOfBagError(), 4) + "\n"
 	   + (getMaxDepth() > 0 ? ("Max. depth of trees: " + getMaxDepth() + "\n") : (""))
 	   + "\n";
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.12.2.1 $");
   }
 
   /**

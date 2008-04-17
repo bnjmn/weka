@@ -26,6 +26,8 @@ package weka.attributeSelection;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -35,10 +37,10 @@ import java.io.Serializable;
  * Abstract attribute selection evaluation class
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.14.2.1 $
  */
 public abstract class ASEvaluation
-  implements Serializable, CapabilitiesHandler {
+  implements Serializable, CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 2091705669885950849L;
@@ -124,6 +126,15 @@ public abstract class ASEvaluation
    */
   public Capabilities getCapabilities() {
     return new Capabilities(this);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
   
   /**

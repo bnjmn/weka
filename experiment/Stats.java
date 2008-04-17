@@ -22,6 +22,8 @@
 
 package weka.experiment;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -30,10 +32,10 @@ import java.io.Serializable;
  * A class to store simple statistics
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
 public class Stats
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8610544539090024102L;
@@ -152,6 +154,15 @@ public class Stats
       + "SumSq   " + Utils.doubleToString(sumSq, 8) + '\n'
       + "Mean    " + Utils.doubleToString(mean, 8) + '\n'
       + "StdDev  " + Utils.doubleToString(stdDev, 8) + '\n';
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 
   /**

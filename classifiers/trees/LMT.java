@@ -34,6 +34,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -115,7 +116,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.10.2.1 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class LMT 
   extends Classifier 
@@ -758,28 +759,37 @@ public class LMT
     return "Set the minimum number of instances at which a node is considered for splitting. "
       +"The default value is 15.";
   }  
-    
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String weightTrimBetaTipText() {
-        return "Set the beta value used for weight trimming in LogitBoost. "
-        +"Only instances carrying (1 - beta)% of the weight from previous iteration "
-        +"are used in the next iteration. Set to 0 for no weight trimming. "
-        +"The default value is 0.";
-    }
 
-    /**
-     * Returns the tip text for this property
-     * @return tip text for this property suitable for
-     * displaying in the explorer/experimenter gui
-     */
-    public String useAICTipText() {
-        return "The AIC is used to determine when to stop LogitBoost iterations. "
-        +"The default is not to use AIC.";
-    }
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String weightTrimBetaTipText() {
+    return "Set the beta value used for weight trimming in LogitBoost. "
+    +"Only instances carrying (1 - beta)% of the weight from previous iteration "
+    +"are used in the next iteration. Set to 0 for no weight trimming. "
+    +"The default value is 0.";
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useAICTipText() {
+    return "The AIC is used to determine when to stop LogitBoost iterations. "
+    +"The default is not to use AIC.";
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
+  }
 
   /**
    * Main method for testing this class
@@ -790,4 +800,3 @@ public class LMT
     runClassifier(new LMT(), argv);
   }  
 }
-

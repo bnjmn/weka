@@ -29,7 +29,7 @@ import weka.core.neighboursearch.PerformanceStats;
  * instances.
  *
  * @author  Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.6.2.1 $ 
+ * @version $Revision: 1.6.2.2 $ 
  */
 public interface DistanceFunction extends OptionHandler {
 

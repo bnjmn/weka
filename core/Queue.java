@@ -33,11 +33,11 @@ import java.io.Serializable;
  * Class representing a FIFO queue.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class Queue
   extends Object
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1141282001146389780L;
@@ -46,7 +46,7 @@ public class Queue
    * Represents one node in the queue.
    */
   protected class QueueNode
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = -5119358279412097455L;
@@ -104,6 +104,15 @@ public class Queue
       //@ ensures \result == m_Contents;
     public /*@ pure @*/ Object contents() {
       return m_Contents;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.9.2.1 $");
     }
   }
 
@@ -258,6 +267,15 @@ public class Queue
     }
     return retval;
   } //@ nowarn Post;
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
+  }
 
   /**
    * Main method for testing this class.

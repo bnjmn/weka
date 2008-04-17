@@ -26,43 +26,44 @@ package weka.gui.sql;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Types;
+import java.util.Vector;
 
 /**
  * Represents an extended JTable, containing a table model based on a ResultSet
  * and the corresponding query.
  *
- *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2 $
+ * @version     $Revision: 1.2.2.1 $
  */
-
 public class ResultSetHelper {
-  /** the resultset to work on */
+  
+  /** the resultset to work on. */
   protected ResultSet m_ResultSet;
 
-  /** whether we initialized */
+  /** whether we initialized. */
   protected boolean m_Initialized = false;
 
-  /** the maximum number of rows to retrieve */
+  /** the maximum number of rows to retrieve. */
   protected int m_MaxRows = 0;
 
-  /** the number of columns */
+  /** the number of columns. */
   protected int m_ColumnCount = 0;
 
-  /** the number of rows */
+  /** the number of rows. */
   protected int m_RowCount = 0;
 
-  /** the column names */
+  /** the column names. */
   protected String[] m_ColumnNames = null;
 
-  /** whether a column is numeric */
+  /** whether a column is numeric. */
   protected boolean[] m_NumericColumns = null;
 
-  /** the class for each column */
+  /** the class for each column. */
   protected Class[] m_ColumnClasses = null;
 
   /**
-   * initializes the helper, with unlimited number of rows
+   * initializes the helper, with unlimited number of rows.
+   * 
    * @param rs        the resultset to work on
    */
   public ResultSetHelper(ResultSet rs) {
@@ -71,7 +72,8 @@ public class ResultSetHelper {
 
   /**
    * initializes the helper, with the given maximum number of rows (less than
-   * 1 means unlimited)
+   * 1 means unlimited).
+   * 
    * @param rs        the resultset to work on
    * @param max       the maximum number of rows to retrieve
    */
@@ -126,36 +128,43 @@ public class ResultSetHelper {
       // dimensions
       m_ColumnCount = meta.getColumnCount();
 
-      m_RowCount = 0;
-      m_ResultSet.first();
-      if (m_MaxRows > 0) {
-        try {
-          m_ResultSet.absolute(m_MaxRows);
-          m_RowCount = m_ResultSet.getRow();
-        }
-        catch (Exception ex) {
-          // ignore it
-        }
+      // if the JDBC driver doesn't support scrolling we can't determine
+      // the row count here
+      if (m_ResultSet.getType() == ResultSet.TYPE_FORWARD_ONLY) {
+	m_RowCount = -1;
       }
       else {
-        m_ResultSet.last();
-        m_RowCount = m_ResultSet.getRow();
-      }
+	m_RowCount = 0;
+	m_ResultSet.first();
+	if (m_MaxRows > 0) {
+	  try {
+	    m_ResultSet.absolute(m_MaxRows);
+	    m_RowCount = m_ResultSet.getRow();
+	  }
+	  catch (Exception ex) {
+	    // ignore it
+	  }
+	}
+	else {
+	  m_ResultSet.last();
+	  m_RowCount = m_ResultSet.getRow();
+	}
 
-      // sometimes, e.g. with a "desc <table>", we can't use absolute(int)
-      // and getRow()???
-      try {
-        if ( (m_RowCount == 0) && (m_ResultSet.first()) ) {
-          m_RowCount = 1;
-          while (m_ResultSet.next()) {
-            m_RowCount++;
-            if (m_ResultSet.getRow() == m_MaxRows)
-              break;
-          };
-        }
-      }
-      catch (Exception e) {
-        // ignore it
+	// sometimes, e.g. with a "desc <table>", we can't use absolute(int)
+	// and getRow()???
+	try {
+	  if ( (m_RowCount == 0) && (m_ResultSet.first()) ) {
+	    m_RowCount = 1;
+	    while (m_ResultSet.next()) {
+	      m_RowCount++;
+	      if (m_ResultSet.getRow() == m_MaxRows)
+		break;
+	    };
+	  }
+	}
+	catch (Exception e) {
+	  // ignore it
+	}
       }
 
       m_Initialized = true;
@@ -166,14 +175,18 @@ public class ResultSetHelper {
   }
 
   /**
-   * the underlying resultset
+   * the underlying resultset.
+   * 
+   * @return		the resultset
    */
   public ResultSet getResultSet() {
     return m_ResultSet;
   }
 
   /**
-   * returns the number of columns in the resultset
+   * returns the number of columns in the resultset.
+   * 
+   * @return		the number of columns
    */
   public int getColumnCount() {
     initialize();
@@ -182,7 +195,11 @@ public class ResultSetHelper {
   }
 
   /**
-   * returns the number of rows in the resultset
+   * returns the number of rows in the resultset. If -1 then the number of
+   * rows couldn't be determined, i.e., the cursors aren't scrollable.
+   * 
+   * @return		the number of rows, -1 if it wasn't possible to 
+   * 			determine
    */
   public int getRowCount() {
     initialize();
@@ -191,7 +208,9 @@ public class ResultSetHelper {
   }
 
   /**
-   * returns an array with the names of the columns in the resultset
+   * returns an array with the names of the columns in the resultset.
+   * 
+   * @return		the column names
    */
   public String[] getColumnNames() {
     initialize();
@@ -200,7 +219,9 @@ public class ResultSetHelper {
   }
 
   /**
-   * returns an array that indicates whether a column is numeric or nor
+   * returns an array that indicates whether a column is numeric or nor.
+   * 
+   * @return		the numeric columns
    */
   public boolean[] getNumericColumns() {
     initialize();
@@ -209,7 +230,9 @@ public class ResultSetHelper {
   }
 
   /**
-   * returns the classes for the columns
+   * returns the classes for the columns.
+   * 
+   * @return		the column classes
    */
   public Class[] getColumnClasses() {
     initialize();
@@ -218,14 +241,18 @@ public class ResultSetHelper {
   }
 
   /**
-   * whether a limit on the rows to retrieve was set
+   * whether a limit on the rows to retrieve was set.
+   * 
+   * @return		true if there's a limit
    */
   public boolean hasMaxRows() {
     return (m_MaxRows > 0);
   }
 
   /**
-   * the maximum number of rows to retrieve, less than 1 means unlimited
+   * the maximum number of rows to retrieve, less than 1 means unlimited.
+   * 
+   * @return		the maximum number of rows
    */
   public int getMaxRows() {
     return m_MaxRows;
@@ -235,42 +262,64 @@ public class ResultSetHelper {
    * returns an 2-dimensional array with the content of the resultset, the first
    * dimension is the row, the second the column (i.e., getCells()[y][x]).
    * Note: the data is not cached! It is always retrieved anew.
+   * 
+   * @return		the data
    */
   public Object[][] getCells() {
-    int           i;
-    int           n;
-    Object[][]    result;
+    int			i;
+    int			n;
+    Vector<Object[]>	result;
+    Object[]		row;
+    int			rowCount;
+    boolean		proceed;
     
     initialize();
 
-    result = new Object[getRowCount()][getColumnCount()];
+    result = new Vector<Object[]>();
 
     try {
-      m_ResultSet.first();
       
-      for (i = 0; i < getRowCount(); i++) {
+      // do know the number of rows?
+      rowCount = getRowCount();
+      if (rowCount == -1) {
+	rowCount = getMaxRows();
+	proceed  = m_ResultSet.next();
+      }
+      else {
+	proceed = m_ResultSet.first();
+      }
+      
+      if (proceed) {
+	for (i = 0; i < rowCount; i++) {
+	  row = new Object[getColumnCount()];
+	  result.add(row);
 
-        for (n = 0; n < getColumnCount(); n++) {
-          try {
-            result[i][n] = m_ResultSet.getObject(n + 1);
-          }
-          catch (Exception e) {
-            result[i][n] = null;
-          }
-        }
+	  for (n = 0; n < getColumnCount(); n++) {
+	    try {
+	      row[n] = m_ResultSet.getObject(n + 1);
+	    }
+	    catch (Exception e) {
+	      row[n] = null;
+	    }
+	  }
 
-        // get next row
-        if (i == getRowCount() - 1)
-          break;
-        else
-          m_ResultSet.next();
+	  // get next row, if possible
+	  if (i == rowCount - 1) {
+	    break;
+	  }
+	  else {
+	    // no more rows -> exit
+	    if (!m_ResultSet.next())
+	      break;
+	  }
+	}
       }
     }
     catch (Exception e) {
       e.printStackTrace();
     }
 
-    return result;
+    return result.toArray(new Object[result.size()][getColumnCount()]);
   }
 
   /**
@@ -354,7 +403,8 @@ public class ResultSetHelper {
 
   /**
    * returns whether the SQL type is numeric (and therefore the justification
-   * should be right)
+   * should be right).
+   * 
    * @param type      the SQL type
    * @return          whether the given type is numeric
    */

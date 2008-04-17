@@ -29,10 +29,10 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  */
 public class AttributeStats
-  implements Serializable {    
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4434688832743939380L;
@@ -138,5 +138,14 @@ public class AttributeStats
     }
     sb.append('\n');
     return sb.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.9.2.1 $");
   }
 }

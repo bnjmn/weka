@@ -31,6 +31,7 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.core.Optimization;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -97,7 +98,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision: 1.5.2.1 $ 
  */
 public class MIBoost 
   extends SingleClassifierEnhancer
@@ -387,6 +388,15 @@ public class MIBoost
       }
       return grad;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+    }
   }
 
   /**
@@ -673,6 +683,15 @@ iterations:
 
     return text.toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+  }
 
   /**
    * Main method for testing this class.
@@ -684,4 +703,3 @@ iterations:
     runClassifier(new MIBoost(), argv);
   }
 }
-

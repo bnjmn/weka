@@ -28,6 +28,7 @@ import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -50,7 +51,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class ZeroR 
   extends Classifier 
@@ -235,6 +236,15 @@ public class ZeroR
     } else {
       return "ZeroR predicts class value: " + m_Class.value((int) m_ClassValue);
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.18.2.1 $");
   }
 
   /**

@@ -38,7 +38,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15.2.3 $
+ * @version $Revision: 1.15.2.4 $
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator

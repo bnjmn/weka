@@ -28,6 +28,7 @@ import java.util.Random;
 import weka.classifiers.bayes.BayesNet;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformation.Field;
@@ -101,7 +102,7 @@ import weka.core.Utils;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class K2 
 	extends GlobalScoreSearchAlgorithm
@@ -144,7 +145,7 @@ public class K2
 	}
 
 	/**
-	 * buildStructure determines the network structure/graph of the network
+	 * search determines the network structure/graph of the network
 	 * with the K2 algorithm, restricted by its initial structure (which can
 	 * be an empty graph, or a Naive Bayes graph.
 	 * 
@@ -152,8 +153,7 @@ public class K2
 	 * @param instances the data to work with
 	 * @throws Exception if something goes wrong
 	 */
-	public void buildStructure (BayesNet bayesNet, Instances instances) throws Exception {
-		super.buildStructure(bayesNet, instances);
+	public void search (BayesNet bayesNet, Instances instances) throws Exception {
 		int nOrder[] = new int [instances.numAttributes()];
 		nOrder[0] = instances.classIndex();
 
@@ -213,7 +213,7 @@ public class K2
 				}
 			}
 		}
-	} // buildStructure 
+	} // search 
 
 	/**
 	 * Sets the max number of parents
@@ -396,5 +396,14 @@ public class K2
 	    + "For more information see:\n\n"
 	    + getTechnicalInformation().toString() + "\n\n"
 	    + "Works with nominal variables and no missing values only.";
+	}
+
+	/**
+	 * Returns the revision string.
+	 * 
+	 * @return		the revision
+	 */
+	public String getRevision() {
+	  return RevisionUtils.extract("$Revision: 1.6.2.1 $");
 	}
 }

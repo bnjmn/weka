@@ -25,6 +25,7 @@ package weka.classifiers.trees.m5;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -37,7 +38,7 @@ import java.io.Serializable;
  * header for use in printing the model to the console.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class PreConstructedLinearModel 
   extends Classifier 
@@ -165,5 +166,13 @@ public class PreConstructedLinearModel
 	     + Utils.doubleToString(Math.abs(m_intercept), 12, 4).trim());
     return b.toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+  }
 }
-

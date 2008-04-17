@@ -31,6 +31,7 @@ import weka.core.Instances;
 import weka.core.NoSupportForMissingValuesException;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -119,7 +120,7 @@ import java.util.Vector;
  *
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class PaceRegression 
   extends Classifier 
@@ -764,6 +765,15 @@ public class PaceRegression
     }
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 
   /**

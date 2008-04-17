@@ -25,6 +25,7 @@ package  weka.attributeSelection;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.math.BigInteger;
@@ -50,7 +51,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class ExhaustiveSearch 
   extends ASSearch 
@@ -437,5 +438,14 @@ public class ExhaustiveSearch
   private void resetOptions() {
     m_verbose = false;
     m_evaluations = 0;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.14.2.1 $");
   }
 }
