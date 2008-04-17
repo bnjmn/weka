@@ -25,13 +25,15 @@ import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.classifiers.Classifier;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 /**
  * Dummy classifier - used in ThresholdSelectorTest.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpet at waikato dor ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @see ThresholdSelectorTest
  */
 public class ThresholdSelectorDummyClassifier 
@@ -69,6 +71,15 @@ public class ThresholdSelectorDummyClassifier
   }
 
   public void buildClassifier(Instances train) { 
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   public double[] distributionForInstance(Instance test) throws Exception {
