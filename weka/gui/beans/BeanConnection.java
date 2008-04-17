@@ -46,7 +46,7 @@ import javax.swing.SwingConstants;
  * maintains a list of all connections
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class BeanConnection
   implements Serializable {

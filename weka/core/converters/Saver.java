@@ -22,12 +22,14 @@
 
 package weka.core.converters;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import weka.core.Instances;
 import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionHandler;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
 
 /** 
  * Interface to something that can save Instances to an output destination in some
@@ -35,9 +37,10 @@ import weka.core.Instance;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
-public interface Saver extends Serializable {
+public interface Saver
+  extends Serializable, RevisionHandler {
     
     /** The retrieval modes */
   static final int NONE = 0;

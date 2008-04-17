@@ -28,6 +28,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TestInstances;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -135,10 +137,10 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @see TestInstances
  */
-public class CheckEstimator implements OptionHandler {
+public class CheckEstimator implements OptionHandler, RevisionHandler {
 
   /*
    * Note about test methods:
@@ -152,7 +154,8 @@ public class CheckEstimator implements OptionHandler {
   
   /** a class for postprocessing the test-data 
    */
-  public class PostProcessor {
+  public class PostProcessor
+    implements RevisionHandler {
     /**
      * Provides a hook for derived classes to further modify the data. Currently,
      * the data is just passed through.
@@ -162,6 +165,15 @@ public class CheckEstimator implements OptionHandler {
      */
     protected Instances process(Instances data) {
       return data;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
     }
   }
   
@@ -193,7 +205,9 @@ public class CheckEstimator implements OptionHandler {
    * class that contains info about the attribute types the estimator can estimate
    * estimator work on one attribute only
    */
-  public static class AttrTypes{
+  public static class AttrTypes
+    implements RevisionHandler {
+    
     boolean nominal = false;
     boolean numeric = false; 
     boolean string = false;
@@ -247,13 +261,24 @@ public class CheckEstimator implements OptionHandler {
       if (relational) attrs.add(new Integer(Attribute.RELATIONAL));
       return attrs;
     }   
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+    }
   }
 
   /**
    * public class that contains info about the chosen attribute type
    * estimator work on one attribute only
    */
-  public static class EstTypes {
+  public static class EstTypes
+    implements RevisionHandler {
+    
     boolean incremental = false;
     boolean weighted = false;
     boolean supervised = false;
@@ -271,6 +296,15 @@ public class CheckEstimator implements OptionHandler {
       incremental = i;
       weighted    = w;
       supervised  = s;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.3.2.1 $");
     }
   }
 
@@ -2076,6 +2110,15 @@ public class CheckEstimator implements OptionHandler {
     }
     
     print(str);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   /**

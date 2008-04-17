@@ -14,16 +14,19 @@
 
 package weka.core.matrix;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
  * Class for performing (ridged) linear regression.
  *
  * @author Fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
  
-public class LinearRegression {
+public class LinearRegression
+  implements RevisionHandler {
 
   /** the coefficients */
   protected double[] m_Coefficients = null;
@@ -126,5 +129,14 @@ public class LinearRegression {
    */
   public String toString() {
     return Utils.arrayToString(getCoefficients());
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

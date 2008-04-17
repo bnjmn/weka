@@ -22,7 +22,6 @@
 
 package weka.core.converters;
 
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -30,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -39,7 +39,6 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
-
 
 /**
  <!-- globalinfo-start -->
@@ -77,7 +76,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.10.2.1 $
+ * @version $Revision: 1.10.2.2 $
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -853,6 +852,15 @@ public class DatabaseSaver
   }
   
   /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
+  }
+  
+  /**
    * Main method.
    *
    * @param options should contain the options of a Saver.
@@ -895,4 +903,3 @@ public class DatabaseSaver
       
     }
 }
-

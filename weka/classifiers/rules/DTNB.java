@@ -22,29 +22,25 @@
 
 package weka.classifiers.rules;
 
-import java.util.BitSet;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.attributeSelection.SubsetEvaluator;
-import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.SubsetEvaluator;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
-import weka.core.SelectedTag;
-import weka.core.Tag;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
+import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.TechnicalInformation;
 import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+
+import java.util.BitSet;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  *
@@ -105,7 +101,7 @@ import weka.core.Utils;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
  *
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  *
  */
 public class DTNB extends DecisionTable {
@@ -393,7 +389,7 @@ public class DTNB extends DecisionTable {
     m_evaluator.buildEvaluator(m_theInstances);
   }
   
-  protected class EvalWithDelete extends SubsetEvaluator {
+  protected class EvalWithDelete extends ASEvaluation implements SubsetEvaluator {
     
     // holds the list of attributes that are no longer in the model at all
     private BitSet m_deletedFromDTNB;
@@ -460,6 +456,15 @@ public class DTNB extends DecisionTable {
     
     public BitSet getDeletedList() {
       return m_deletedFromDTNB;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.1.2.3 $");
     }
   }
 
@@ -610,6 +615,15 @@ public class DTNB extends DecisionTable {
 	}
 
 	return  list;
+      }
+      
+      /**
+       * Returns the revision string.
+       * 
+       * @return		the revision
+       */
+      public String getRevision() {
+        return RevisionUtils.extract("$Revision: 1.1.2.3 $");
       }
   }
 
@@ -951,6 +965,15 @@ public class DTNB extends DecisionTable {
       options[current++] = "";
     }
     return options;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
   }
 
   /**

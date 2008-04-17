@@ -22,16 +22,19 @@
 
 package weka.classifiers.bayes.net;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /**
  * Part of ADTree implementation. See ADNode.java for more details.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class VaryNode
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6196294370675872424L;
@@ -120,5 +123,14 @@ public class VaryNode
 	m_ADNodes[iValue].print();
       }
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
   }
 }

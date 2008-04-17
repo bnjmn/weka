@@ -22,6 +22,8 @@
 
 package weka.estimators;
 
+import weka.core.RevisionHandler;
+
  
 /** 
  * Interface for conditional probability estimators. Example code: <p>
@@ -50,9 +52,9 @@ package weka.estimators;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
-public interface ConditionalEstimator {
+public interface ConditionalEstimator extends RevisionHandler {
 
   /**
    * Add a new data value to the current estimator.

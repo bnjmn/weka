@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
@@ -66,7 +67,7 @@ import java.util.Vector;
  * Based on code from AddValues.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @see     AddValues
  */
 public class AddValues 
@@ -450,6 +451,15 @@ public class AddValues
    */
   public void setSort(boolean value) {
     m_Sort = value;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
   
   /**

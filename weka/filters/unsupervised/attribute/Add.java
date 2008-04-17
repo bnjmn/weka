@@ -31,6 +31,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -65,7 +66,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class Add 
   extends Filter 
@@ -417,6 +418,15 @@ public class Add
     } else {
       m_AttributeType = Attribute.NOMINAL; 
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
   }
 
   /**

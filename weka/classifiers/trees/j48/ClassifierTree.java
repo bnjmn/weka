@@ -27,6 +27,8 @@ import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -36,10 +38,10 @@ import java.io.Serializable;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.21.2.1 $
  */
 public class ClassifierTree 
-  implements Drawable, Serializable, CapabilitiesHandler {
+  implements Drawable, Serializable, CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8722249377542734193L;
@@ -696,8 +698,13 @@ public class ClassifierTree
     
     return (ClassifierTree)m_sons[index];
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+  }
 }
-
-
-
-

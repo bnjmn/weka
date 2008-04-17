@@ -141,11 +141,11 @@ import weka.core.TechnicalInformation.Type;
  * No.126, pp 505-535. <p/>
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.8.2.1 $ 
  * @see #getTechnicalInformation()
  */
 public abstract class Optimization
-    implements TechnicalInformationHandler {
+    implements TechnicalInformationHandler, RevisionHandler {
     
     protected double m_ALF = 1.0e-4;
 
@@ -1254,7 +1254,8 @@ public abstract class Optimization
   /**
    * Implements a simple dynamic array for ints.
    */
-  private class DynamicIntArray {
+  private class DynamicIntArray
+    implements RevisionHandler {
 
     /** The int array. */
     private int[] m_Objects;
@@ -1379,6 +1380,15 @@ public abstract class Optimization
     public final int size() {
       
       return m_Size;
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
     }
   }
 }

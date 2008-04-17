@@ -21,6 +21,8 @@
 
 package weka.classifiers.functions.pace;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.matrix.DoubleVector;
 import weka.core.matrix.FlexibleDecimalFormat;
 import weka.core.matrix.IntVector;
@@ -32,9 +34,10 @@ import weka.core.matrix.IntVector;
  * set of points. <p>
  * 
  * @author Yong Wang (yongwang@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $ */
+ * @version $Revision: 1.3.2.1 $ */
 
-public class  DiscreteFunction {
+public class  DiscreteFunction
+  implements RevisionHandler {
     
   protected DoubleVector  points;
   protected DoubleVector  values;
@@ -272,6 +275,15 @@ public class  DiscreteFunction {
     }
 	
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   public static void main( String args[] )

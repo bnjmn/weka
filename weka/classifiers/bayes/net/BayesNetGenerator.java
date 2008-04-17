@@ -22,7 +22,6 @@
 
 package weka.classifiers.bayes.net;
 
-import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.bayes.net.estimate.DiscreteEstimatorBayes;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -30,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.estimators.Estimator;
 
@@ -82,9 +82,9 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.12.2.1 $
  */
-public class BayesNetGenerator extends BayesNet {
+public class BayesNetGenerator extends EditableBayesNet {
     /** the seed value */
     int m_nSeed = 1;
     
@@ -172,6 +172,22 @@ public class BayesNetGenerator extends BayesNet {
 		for (int iNode = 0; iNode < nNodes; iNode++) {
 			m_Distributions[iNode][0] = 
 			  new DiscreteEstimatorBayes(nValues, getEstimator().getAlpha());
+		}
+		m_nEvidence = new FastVector(nNodes);
+		for (int i = 0; i < nNodes; i++) {
+			m_nEvidence.addElement(-1);
+		}
+		m_fMarginP = new FastVector(nNodes);
+		for (int i = 0; i < nNodes; i++) {
+			double[] P = new double[getCardinality(i)];
+			m_fMarginP.addElement(P);
+		}
+
+		m_nPositionX = new FastVector(nNodes);
+		m_nPositionY = new FastVector(nNodes);
+		for (int iNode = 0; iNode < nNodes; iNode++) {
+			m_nPositionX.addElement(iNode%10 * 50);
+			m_nPositionY.addElement(((int)(iNode/10)) * 50);
 		}
 	} // DefineNodes
 
@@ -558,6 +574,15 @@ public class BayesNetGenerator extends BayesNet {
         System.out.println(option.synopsis());
         System.out.println(option.description());
       }
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.12.2.1 $");
     }
 
     /**

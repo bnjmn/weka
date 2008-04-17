@@ -25,20 +25,13 @@ package weka.attributeSelection;
 import java.util.BitSet;
 
 /** 
- * Abstract attribute subset evaluator.
+ * Interface for attribute subset evaluators.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
-public abstract class SubsetEvaluator extends ASEvaluation {
-
-  /** for serialization */
-  private static final long serialVersionUID = 917898857215312640L;
-  
-  // ===============
-  // Public methods.
-  // ===============
-  
+public interface SubsetEvaluator {
+    
   /**
    * evaluates a subset of attributes
    *
@@ -47,6 +40,6 @@ public abstract class SubsetEvaluator extends ASEvaluation {
    * @return the "merit" of the subset
    * @exception Exception if the subset could not be evaluated
    */
-  public abstract double evaluateSubset(BitSet subset) throws Exception;
+  double evaluateSubset(BitSet subset) throws Exception;
 }
 

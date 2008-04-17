@@ -29,6 +29,8 @@ import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -96,7 +98,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.28.2.1 $
+ * @version $Revision: 1.28.2.2 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -698,7 +700,7 @@ public class UserClassifier
    * Inner class used to represent the actual decision tree structure and data.
    */
   private class TreeClass 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 595663560871347434L;
@@ -1481,5 +1483,23 @@ public class UserClassifier
       }
       //return t.toString();
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.28.2.2 $");
+    }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.28.2.2 $");
   }
 }

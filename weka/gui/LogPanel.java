@@ -53,7 +53,7 @@ import javax.swing.event.ChangeListener;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17.2.1 $
+ * @version $Revision: 1.17.2.2 $
  */
 public class LogPanel
   extends JPanel

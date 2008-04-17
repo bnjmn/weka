@@ -26,12 +26,12 @@ import weka.classifiers.Classifier;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
-import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
@@ -115,7 +115,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -801,6 +801,15 @@ public class GaussianProcesses
     }
 
     return text.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.2 $");
   }
  
  /**

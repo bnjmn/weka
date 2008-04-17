@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * visual representation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision: 1.6.2.2 $
  * @since 1.0
  * @see TrainingSetProducer
  */

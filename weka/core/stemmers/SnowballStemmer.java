@@ -25,6 +25,7 @@ package weka.core.stemmers;
 import weka.core.ClassDiscovery;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.gui.GenericObjectEditor;
 
@@ -54,7 +55,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.6.2.2 $
+ * @version   $Revision: 1.6.2.3 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -432,6 +433,15 @@ public class SnowballStemmer
     result += " " + Utils.joinOptions(getOptions());
 
     return result.trim();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6.2.3 $");
   }
 
   /**

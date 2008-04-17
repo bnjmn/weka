@@ -27,6 +27,7 @@ import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.Discretize;
 
@@ -37,7 +38,7 @@ import java.util.Random;
  * trees.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  */
 public final class NBTreeNoSplit
   extends ClassifierSplitModel {
@@ -202,5 +203,14 @@ public final class NBTreeNoSplit
       eval.evaluateModel(copies[j], test);
     }
     return eval.incorrect();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

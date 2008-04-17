@@ -28,6 +28,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.io.Serializable;
@@ -39,10 +41,11 @@ import java.util.Vector;
  * do nearest neighbour search should extend this class.
  *
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  */
 public abstract class NearestNeighbourSearch
-  implements Serializable, OptionHandler, AdditionalMeasureProducer {
+  implements Serializable, OptionHandler, AdditionalMeasureProducer,
+             RevisionHandler {
 
   /**
    * A class for a heap to store the nearest k neighbours to an instance. 
@@ -51,9 +54,10 @@ public abstract class NearestNeighbourSearch
    * i.e. the minimum size of the heap is k.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */
-  protected class MyHeap {
+  protected class MyHeap
+    implements RevisionHandler {
     
     /** the heap. */
     MyHeapElement m_heap[] = null;
@@ -257,15 +261,25 @@ public abstract class NearestNeighbourSearch
     public int totalSize() {
       return size()+noOfKthNearest();
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
+    }
   }
   
   /**
    * A class for storing data about a neighboring instance.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */
-  protected class MyHeapElement {
+  protected class MyHeapElement
+    implements RevisionHandler {
     
     /** the index of this element. */
     public int index;
@@ -283,15 +297,25 @@ public abstract class NearestNeighbourSearch
       distance = d;
       index = i;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
+    }
   }
   
   /**
    * A class for storing data about a neighboring instance.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */ //better to change this into a heap element
-  protected class NeighborNode {
+  protected class NeighborNode
+    implements RevisionHandler {
 
     /** The neighbor instance. */
     public Instance m_Instance;
@@ -325,6 +349,15 @@ public abstract class NearestNeighbourSearch
 
       this(distance, instance, null);
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
+    }
   } 
 
   /**
@@ -334,9 +367,10 @@ public abstract class NearestNeighbourSearch
    * i.e. the minimum length of the list is k.
    *
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
-   * @version $Revision: 1.1 $
+   * @version $Revision: 1.1.2.1 $
    */ //better to change this into a heap
-  protected class NeighborList {
+  protected class NeighborList
+    implements RevisionHandler {
 
     /** The first node in the list. */
     protected NeighborNode m_First;
@@ -486,6 +520,14 @@ public abstract class NearestNeighbourSearch
       return m_Last;
     }
     
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.1.2.1 $");
+    }
   }
   
   /** The neighbourhood of instances to find neighbours in. */

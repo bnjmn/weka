@@ -30,6 +30,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SingleIndex;
 import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
@@ -55,7 +56,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class StringToNominal 
   extends Filter 
@@ -313,6 +314,15 @@ public class StringToNominal
     newData = new Instances(getInputFormat().relationName(), newAtts, 0);
     newData.setClassIndex(getInputFormat().classIndex());
     setOutputFormat(newData);
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
   
   /**

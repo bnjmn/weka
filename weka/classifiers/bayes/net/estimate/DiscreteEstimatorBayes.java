@@ -23,6 +23,7 @@
 package weka.classifiers.bayes.net.estimate;
 
 import weka.classifiers.bayes.net.search.local.Scoreable;
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 import weka.estimators.DiscreteEstimator;
@@ -32,10 +33,10 @@ import weka.estimators.Estimator;
  * Symbolic probability estimator based on symbol counts and a prior.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
 public class DiscreteEstimatorBayes extends Estimator
-  implements  Scoreable {
+  implements Scoreable {
 
   /** for serialization */
   static final long serialVersionUID = 4215400230843212684L;
@@ -212,6 +213,15 @@ public class DiscreteEstimatorBayes extends Estimator
   } 
   
   /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+  }
+  
+  /**
    * Main method for testing this class.
    * 
    * @param argv should contain a sequence of integers which
@@ -252,7 +262,3 @@ public class DiscreteEstimatorBayes extends Estimator
   }    // main
  
 }      // class DiscreteEstimatorBayes
-
-
-
-

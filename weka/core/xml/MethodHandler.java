@@ -21,6 +21,9 @@
 
 package weka.core.xml;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -30,9 +33,11 @@ import java.util.Hashtable;
  * (or classes) and Methods that are associated with them. 
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $ 
+ * @version $Revision: 1.2.2.1 $ 
  */
-public class MethodHandler {
+public class MethodHandler
+   implements RevisionHandler {
+  
    /** 
     * stores the properties/class - Method relationship
     * 
@@ -187,5 +192,14 @@ public class MethodHandler {
     */
    public String toString() {
       return m_Methods.toString();
+   }
+   
+   /**
+    * Returns the revision string.
+    * 
+    * @return		the revision
+    */
+   public String getRevision() {
+     return RevisionUtils.extract("$Revision: 1.2.2.1 $");
    }
 }

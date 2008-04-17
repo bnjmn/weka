@@ -23,10 +23,11 @@
 
 package weka.classifiers.lazy.kstar;
 
-import java.io.*;
-import java.util.*;
-import weka.core.*;
-import weka.classifiers.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 /**
  * A custom class which provides the environment for computing the
@@ -37,7 +38,8 @@ import weka.classifiers.*;
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz)
  * @version $Revision 1.0 $
  */
-public class KStarNumericAttribute implements KStarConstants {
+public class KStarNumericAttribute
+  implements KStarConstants, RevisionHandler {
 
   /** The training instances used for classification. */
   protected Instances m_TrainSet;
@@ -631,14 +633,13 @@ public class KStarNumericAttribute implements KStarConstants {
   public void setBlendFactor(int factor) {
     m_BlendFactor = factor;
   }
-
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+  }
 } // class
-
-
-
-
-
-
-
-

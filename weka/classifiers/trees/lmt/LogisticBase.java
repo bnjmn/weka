@@ -28,6 +28,7 @@ import weka.classifiers.functions.SimpleLinearRegression;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
@@ -47,7 +48,7 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author Niels Landwehr
  * @author Marc Sumner
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
 public class LogisticBase 
     extends Classifier 
@@ -1024,5 +1025,14 @@ public class LogisticBase
 	//save just header info
 	m_train = new Instances(m_train,0);
 	m_numericData = null;	
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
     }
 }

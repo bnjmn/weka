@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class ClassValuePicker
   extends JPanel

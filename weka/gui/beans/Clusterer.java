@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5.2.3 $
+ * @version $Revision: 1.5.2.4 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -115,8 +115,7 @@ public class Clusterer
 
   private Double m_dummy = new Double(0.0);
 
-  private transient JFileChooser m_fileChooser = 
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  private transient JFileChooser m_fileChooser = null;
 
   /**
    * Global info (if it exists) for the wrapped classifier

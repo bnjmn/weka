@@ -27,6 +27,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -71,19 +72,19 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.2.2.1 $
  * @see weka.classifiers.meta.FilteredClassifier
  */
 public class FilteredClusterer
   extends SingleClustererEnhancer {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 1420005943163412943L;
   
-  /** The filter */
+  /** The filter. */
   protected Filter m_Filter;
 
-  /** The instance structure of the filtered instances */
+  /** The instance structure of the filtered instances. */
   protected Instances m_FilteredInstances;
 
   /**
@@ -95,7 +96,7 @@ public class FilteredClusterer
   }
 
   /**
-   * Returns a string describing this clusterer
+   * Returns a string describing this clusterer.
    * 
    * @return 		a description of the clusterer suitable for
    * 			displaying in the explorer/experimenter gui
@@ -214,7 +215,7 @@ public class FilteredClusterer
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return 		tip text for this property suitable for
    * 			displaying in the explorer/experimenter gui
@@ -224,7 +225,7 @@ public class FilteredClusterer
   }
 
   /**
-   * Sets the filter
+   * Sets the filter.
    *
    * @param filter 	the filter with all options set.
    */
@@ -248,7 +249,7 @@ public class FilteredClusterer
   
   /**
    * Gets the filter specification string, which contains the class name of
-   * the filter and any options to the filter
+   * the filter and any options to the filter.
    *
    * @return 		the filter string.
    */
@@ -336,7 +337,7 @@ public class FilteredClusterer
   }
 
   /**
-   * Output a representation of this clusterer
+   * Output a representation of this clusterer.
    * 
    * @return 		a representation of this clusterer
    */
@@ -356,6 +357,15 @@ public class FilteredClusterer
 	+ m_Clusterer.toString();
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 
   /**

@@ -21,16 +21,18 @@
  */
 package weka.classifiers.rules;
 
-import java.io.Serializable;
-
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
+import java.io.Serializable;
 
 /**
  * Class providing hash table keys for DecisionTable
  */
 public class DecisionTableHashKey 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5674163500154964602L;
@@ -191,7 +193,15 @@ public class DecisionTableHashKey
    * Prints the hash code
    */
   public void print_hash_code() {
-
     System.out.println("Hash val: "+hashCode());
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.2.2.1 $");
   }
 }

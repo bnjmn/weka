@@ -24,6 +24,7 @@ package weka.classifiers.trees.j48;
 
 import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 import java.util.Enumeration;
@@ -32,10 +33,10 @@ import java.util.Enumeration;
  * Class for selecting a C4.5-like binary (!) split for a given dataset.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.10.2.1 $
  */
 public class BinC45ModelSelection
-  extends ModelSelection{
+  extends ModelSelection {
 
   /** for serialization */
   private static final long serialVersionUID = 179170923545122001L;
@@ -180,7 +181,13 @@ public class BinC45ModelSelection
 
     return selectModel(train);
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10.2.1 $");
+  }
 }
-
-
-

@@ -29,6 +29,8 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -73,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Ian H. Witten (ihw@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.25.2.1 $ 
 */
 public class OneR 
   extends Classifier 
@@ -120,7 +122,7 @@ public class OneR
    * Class for storing store a 1R rule.
    */
   private class OneRRule 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = 1152814630957092281L;
@@ -211,6 +213,15 @@ public class OneR
       } catch (Exception e) {
 	return "Can't print OneR classifier!";
       }
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.25.2.1 $");
     }
   }
   
@@ -662,6 +673,15 @@ public class OneR
   public void setMinBucketSize(int v) {
     
     m_minBucketSize = v;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.25.2.1 $");
   }
   
   /**

@@ -26,12 +26,12 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -50,7 +50,7 @@ import java.text.ParseException;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.18.2.3 $
+ * @version $Revision: 1.18.2.4 $
  * @see Loader
  */
 public class ArffLoader 
@@ -99,9 +99,10 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.18.2.3 $
+   * @version $Revision: 1.18.2.4 $
    */
-  public static class ArffReader {
+  public static class ArffReader
+    implements RevisionHandler {
 
     /** the tokenizer for reading the stream */
     protected StreamTokenizer m_Tokenizer;
@@ -824,6 +825,15 @@ public class ArffLoader
     public Instances getData() {
       return m_Data;
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.18.2.4 $");
+    }
   }
 
   /**
@@ -1037,6 +1047,15 @@ public class ArffLoader
       }
     }
     return current;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.18.2.4 $");
   }
 
   /**

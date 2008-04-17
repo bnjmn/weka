@@ -28,6 +28,7 @@ import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Randomizable;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -151,7 +152,7 @@ import java.util.Random;
  *
  * @author Eibe Frank
  * @author Lin Dong
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class END 
   extends RandomizableIteratedSingleClassifierEnhancer
@@ -337,6 +338,15 @@ public class END
   }
   
   /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+  }
+  
+  /**
    * Main method for testing this class.
    *
    * @param argv the options
@@ -345,4 +355,3 @@ public class END
     runClassifier(new END(), argv);
   }
 }
-

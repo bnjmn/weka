@@ -33,9 +33,11 @@ import java.util.BitSet;
  * train the subset evaluator.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  */
-public abstract class HoldOutSubsetEvaluator extends SubsetEvaluator {
+public abstract class HoldOutSubsetEvaluator 
+  extends ASEvaluation
+  implements SubsetEvaluator {
 
   /** for serialization */
   private static final long serialVersionUID = 8280529785412054174L;

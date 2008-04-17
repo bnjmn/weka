@@ -22,6 +22,9 @@
 
 package weka.experiment;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.File;
 
 /**
@@ -29,9 +32,10 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  */
-public class RemoteExperimentSubTask implements Task {
+public class RemoteExperimentSubTask
+  implements Task, RevisionHandler {
 
   /* Info on the task */
   private TaskStatusInfo m_result = new TaskStatusInfo();
@@ -105,6 +109,15 @@ public class RemoteExperimentSubTask implements Task {
 
   public TaskStatusInfo getTaskStatus() {
     return m_result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
   }
 }
 

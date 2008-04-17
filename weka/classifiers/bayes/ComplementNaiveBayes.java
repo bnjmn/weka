@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -78,7 +79,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.8.2.1 $ 
  */
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -474,6 +475,14 @@ public class ComplementNaiveBayes extends Classifier
         return result.toString();
     }
     
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+    }
     
     /**
      * Main method for testing this class.

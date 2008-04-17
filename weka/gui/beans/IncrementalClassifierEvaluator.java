@@ -34,7 +34,7 @@ import java.util.Vector;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.4 $
+ * @version $Revision: 1.11.2.5 $
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator

@@ -27,6 +27,8 @@ import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 
@@ -39,10 +41,10 @@ import java.util.Vector;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.16.2.1 $
  */
 public class MakeDecList
-  implements Serializable, CapabilitiesHandler {
+  implements Serializable, CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1427481323245079123L;
@@ -293,17 +295,13 @@ public class MakeDecList
 
     return theRules.size();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.16.2.1 $");
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

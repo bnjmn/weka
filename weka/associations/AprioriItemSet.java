@@ -25,6 +25,8 @@ package weka.associations;
 import weka.core.ContingencyTables;
 import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -41,11 +43,11 @@ import java.util.Hashtable;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class AprioriItemSet 
   extends ItemSet 
-  implements Serializable {
+  implements Serializable, RevisionHandler {
   
   /** for serialization */
   static final long serialVersionUID = 7684467755712672058L;
@@ -528,13 +530,13 @@ public class AprioriItemSet
     }
     return newVector;
   }
- 
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+  }
 }
-
-
-
-
-
-
-
-

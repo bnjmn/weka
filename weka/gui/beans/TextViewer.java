@@ -56,7 +56,7 @@ import javax.swing.JTextArea;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.2 $
+ * @version $Revision: 1.11.2.3 $
  */
 public class TextViewer 
   extends JPanel

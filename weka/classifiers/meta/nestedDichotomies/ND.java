@@ -30,6 +30,8 @@ import weka.core.Capabilities;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Capabilities.Capability;
@@ -147,7 +149,7 @@ public class ND
    * a node class
    */
   protected class NDTree
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     private static final long serialVersionUID = 4284655952754474880L;
@@ -330,6 +332,15 @@ public class ND
 	id[0]++;
 	m_right.toString(text, id, level + 1);
       }
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.8.2.1 $");
     }
   }
 
@@ -599,6 +610,15 @@ public class ND
       + "For more info, check\n\n"
       + getTechnicalInformation().toString();
   }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+  }
     
   /**
    * Main method for testing this class.
@@ -609,4 +629,3 @@ public class ND
     runClassifier(new ND(), argv);
   }
 }
-

@@ -33,7 +33,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision: 1.3.2.2 $
  */
 public class ClustererPerformanceEvaluator
   extends AbstractEvaluator

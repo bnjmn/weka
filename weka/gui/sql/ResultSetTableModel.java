@@ -20,37 +20,34 @@
  *
  */
 
-
 package weka.gui.sql;
 
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Types;
-import java.util.Iterator;
 import java.util.HashSet;
 
-import javax.swing.table.TableModel;
 import javax.swing.event.TableModelListener;
-import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableModel;
 
 /**
 * The model for an SQL ResultSet.
 *
-*
 * @author     FracPete (fracpete at waikato dot ac dot nz)
-* @version    $Revision: 1.2 $
+* @version    $Revision: 1.2.2.1 $
 */
-
 public class ResultSetTableModel implements TableModel {
-  // the listeners
-  protected HashSet             m_Listeners;
-  // the data
-  protected Object[][]          m_Data;
-  // for retrieving the data etc.
-  protected ResultSetHelper     m_Helper;
+  
+  /** the listeners. */
+  protected HashSet m_Listeners;
+  
+  /** the data. */
+  protected Object[][] m_Data;
+  
+  /** for retrieving the data etc. */
+  protected ResultSetHelper m_Helper;
 
   /**
-   * initializes the model, retrieves all rows
+   * initializes the model, retrieves all rows.
+   * 
    * @param rs          the ResultSet to get the data from
    */
   public ResultSetTableModel(ResultSet rs) {
@@ -59,7 +56,8 @@ public class ResultSetTableModel implements TableModel {
 
   /**
    * initializes the model, retrieves only the given amount of rows (0 means
-   * all)
+   * all).
+   * 
    * @param rs          the ResultSet to get the data from
    * @param rows        the maximum number of rows to retrieve, 0 retrieves all
    */
@@ -73,7 +71,9 @@ public class ResultSetTableModel implements TableModel {
 
   /**
    * adds a listener to the list that is notified each time a change to data 
-   * model occurs
+   * model occurs.
+   * 
+   * @param l		the listener to add
    */
   public void addTableModelListener(TableModelListener l) {
     m_Listeners.add(l);
@@ -81,7 +81,10 @@ public class ResultSetTableModel implements TableModel {
 
   /**
    * returns the most specific superclass for all the cell values in the 
-   * column (always String)
+   * column (always String).
+   * 
+   * @param columnIndex	the index of the column
+   * @return		the class
    */
   public Class getColumnClass(int columnIndex) {
     Class       result;
@@ -101,14 +104,19 @@ public class ResultSetTableModel implements TableModel {
   }
 
   /**
-   * returns the number of columns in the model
+   * returns the number of columns in the model.
+   * 
+   * @return		the number of columns
    */
   public int getColumnCount() {
     return m_Helper.getColumnCount() + 1;
   }
 
   /**
-   * returns the name of the column at columnIndex
+   * returns the name of the column at columnIndex.
+   * 
+   * @param columnIndex	the index of the column
+   * @return		the name
    */
   public String getColumnName(int columnIndex) {
     String         result;
@@ -128,14 +136,20 @@ public class ResultSetTableModel implements TableModel {
   }
 
   /**
-   * returns the number of rows in the model
+   * returns the number of rows in the model.
+   * 
+   * @return		the number of data rows
    */
   public int getRowCount() {
-    return m_Helper.getRowCount();
+    return m_Data.length;
   }
 
   /**
-   * returns the value for the cell at columnindex and rowIndex
+   * returns the value for the cell at columnindex and rowIndex.
+   * 
+   * @param rowIndex	the row of the cell
+   * @param columnIndex	the column of the cell
+   * @return		the data value
    */
   public Object getValueAt(int rowIndex, int columnIndex) {
     Object            result;
@@ -154,14 +168,19 @@ public class ResultSetTableModel implements TableModel {
   }
 
   /**
-   * checks whether the value of the cell is NULL
+   * checks whether the value of the cell is NULL.
+   * 
+   * @param rowIndex	the row of the cell
+   * @param columnIndex	the column of the cell
+   * @return		true if the cell value is NULL
    */
   public boolean isNullAt(int rowIndex, int columnIndex) {
     return (getValueAt(rowIndex, columnIndex) == null);
   }
 
   /**
-   * returns whether the column at the given index is numeric
+   * returns whether the column at the given index is numeric.
+   * 
    * @param columnIndex       the column to check
    * @return                  whether the column is numeric
    */
@@ -186,7 +205,11 @@ public class ResultSetTableModel implements TableModel {
   }
 
   /**
-   * returns true if the cell at rowindex and columnindexis editable
+   * returns true if the cell at rowindex and columnindexis editable.
+   * 
+   * @param rowIndex	the row of the cell
+   * @param columnIndex	the column of the cell
+   * @return		always false
    */
   public boolean isCellEditable(int rowIndex, int columnIndex) {
     return false;
@@ -194,7 +217,9 @@ public class ResultSetTableModel implements TableModel {
 
   /**
    * removes a listener from the list that is notified each time a change to
-   * the data model occurs
+   * the data model occurs.
+   * 
+   * @param l		the listener to remove
    */
   public void removeTableModelListener(TableModelListener l) {
     m_Listeners.remove(l);
@@ -202,30 +227,20 @@ public class ResultSetTableModel implements TableModel {
 
   /**
    * sets the value in the cell at columnIndex and rowIndex to aValue.
-   * but only the value and the value can be changed
+   * Ignored.
+   * 
+   * @param aValue	the value to set - ignored
+   * @param rowIndex	the row of the cell
+   * @param columnIndex	the column of the cell
    */
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     // ignore
   }
 
   /**
-   * notfies all listener of the change in the specified cell
-   */
-  private void notifyListener(int rowIndex, int columnIndex) {
-    Iterator                iter;
-    TableModelListener      l;
-
-    if (m_Listeners.size() > 0) {
-      iter = m_Listeners.iterator();
-      while (iter.hasNext()) {
-        l = (TableModelListener) iter.next();
-        l.tableChanged(new TableModelEvent(this, rowIndex, columnIndex));
-      }
-    }
-  }
-
-  /**
-   * frees up the memory
+   * frees up the memory.
+   * 
+   * @throws Throwable	if something goes wrong
    */
   public void finalize() throws Throwable {
     try {

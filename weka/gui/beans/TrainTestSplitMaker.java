@@ -34,7 +34,7 @@ import java.util.Vector;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8.2.4 $
+ * @version $Revision: 1.8.2.5 $
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer

@@ -28,7 +28,7 @@ package weka.core;
  * used for copying the Strings from one Instances object to another.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @see Attribute#STRING
  * @see Attribute#RELATIONAL
  */
@@ -164,5 +164,14 @@ public class StringLocator
         copyStringValues(rel.instance(n), instSrcCompat, srcDatasetNew, srcStrAttsNew, destDatasetNew, destStrAttsNew);
       }
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 }

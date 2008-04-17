@@ -20,13 +20,14 @@
  *
  */
 
-package  weka.clusterers;
+package weka.clusterers;
 
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.estimators.DiscreteEstimator;
@@ -85,7 +86,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40.2.1 $
+ * @version $Revision: 1.40.2.2 $
  */
 public class EM
   extends RandomizableDensityBasedClusterer
@@ -497,6 +498,7 @@ public class EM
       SimpleKMeans sk = new SimpleKMeans();
       sk.setSeed(m_rr.nextInt());
       sk.setNumClusters(m_num_clusters);
+      sk.setDisplayStdDevs(true);
       sk.buildClusterer(inst);
       if (sk.getSquaredError() < bestSqE) {
 	bestSqE = sk.getSquaredError();
@@ -1426,7 +1428,15 @@ public class EM
 
     return  llk;
   }
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.40.2.2 $");
+  }
 
   // ============
   // Test method.

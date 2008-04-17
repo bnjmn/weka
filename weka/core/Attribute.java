@@ -22,16 +22,16 @@
 
 package weka.core;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
-import java.io.IOException;
 
 /** 
  * Class for handling an attribute. Once an attribute has been created,
@@ -87,10 +87,10 @@ import java.io.IOException;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision: 1.44.2.1 $
  */
 public class Attribute
-  implements Copyable, Serializable {
+  implements Copyable, Serializable, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -742180568732916383L;
@@ -1477,6 +1477,15 @@ public class Attribute
 					 + ") on numeric range is"
 					 + " less than lower bound ("
 					 + m_LowerBound + ")!");
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.44.2.1 $");
   }
 
   /**

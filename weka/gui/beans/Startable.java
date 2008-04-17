@@ -27,7 +27,7 @@ package weka.gui.beans;
  * can be launched programatically.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  * @since 1.0
  */
 public interface Startable {

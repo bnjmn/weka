@@ -47,7 +47,7 @@ import javax.swing.SpinnerNumberModel;
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class OutputFormatDialog
   extends JDialog {

@@ -23,6 +23,7 @@
 package weka.classifiers.trees.j48;
 
 import weka.core.Instances;
+import weka.core.RevisionHandler;
 
 import java.io.Serializable;
 
@@ -30,10 +31,10 @@ import java.io.Serializable;
  * Abstract class for model selection criteria.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public abstract class ModelSelection
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4850147125096133642L;

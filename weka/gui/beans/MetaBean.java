@@ -50,7 +50,7 @@ import javax.swing.JWindow;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.9.2.1 $
+ * @version $Revision: 1.9.2.2 $
  */
 public class MetaBean
   extends JPanel 

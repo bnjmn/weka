@@ -22,6 +22,9 @@
 
 package weka.classifiers.evaluation;
 
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+
 import java.io.Serializable;
 
 /**
@@ -29,9 +32,10 @@ import java.io.Serializable;
  * distribution plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.11.2.1 $
  */
-public class NominalPrediction implements Prediction, Serializable {
+public class NominalPrediction
+  implements Prediction, Serializable, RevisionHandler {
 
   /**
    * Remove this if you change this class so that serialization would be
@@ -230,6 +234,15 @@ public class NominalPrediction implements Prediction, Serializable {
       sb.append(' ').append(dist[i]);
     }
     return sb.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
   }
 }
 

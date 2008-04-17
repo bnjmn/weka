@@ -27,6 +27,8 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -144,7 +146,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.7.2.1 $ 
  */
 public class BIRCHCluster 
   extends ClusterGenerator
@@ -220,7 +222,7 @@ public class BIRCHCluster
    * class to represent cluster
    */
   private class Cluster 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = -8336901069823498140L;    
@@ -332,13 +334,21 @@ public class BIRCHCluster
       return m_Center[dimension];
     }
     
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    }
   } // end class Cluster
 
   /**
    * class to represent Vector for placement of the center in space
    */
   private class GridVector 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
 
     /** for serialization */
     static final long serialVersionUID = -1900309948991039522L;
@@ -411,6 +421,15 @@ public class BIRCHCluster
 	i++;
       }
 	
+    }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.7.2.1 $");
     }
   } // end class GridVector
   
@@ -1485,6 +1504,15 @@ public class BIRCHCluster
       docu.append("RANDOM\n");
 
     return docu.toString();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
   }
 
   /**

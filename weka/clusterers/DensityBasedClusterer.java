@@ -33,12 +33,12 @@ import weka.core.Utils;
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version  $Revision: 1.7 $
+ * @version  $Revision: 1.7.2.1 $
  */
 public abstract class DensityBasedClusterer
   extends Clusterer {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -5950728041704213845L;
 
   // ===============

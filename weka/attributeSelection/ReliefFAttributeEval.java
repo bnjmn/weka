@@ -28,6 +28,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -124,11 +125,13 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.21.2.1 $
  */
 public class ReliefFAttributeEval
-  extends AttributeEvaluator
-  implements OptionHandler, TechnicalInformationHandler {
+  extends ASEvaluation
+  implements AttributeEvaluator,
+             OptionHandler, 
+             TechnicalInformationHandler {
   
   /** for serialization */
   static final long serialVersionUID = -8422186665795839379L;
@@ -1320,7 +1323,15 @@ public class ReliefFAttributeEval
       }
     }
   }
-
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+  }
 
   // ============
   // Test method.

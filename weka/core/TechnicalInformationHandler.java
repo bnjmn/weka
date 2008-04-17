@@ -26,7 +26,7 @@ package weka.core;
  * a TechnicalInformation object filled with the data of the publication.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.1.2.1 $
  * @see TechnicalInformation
  */
 public interface TechnicalInformationHandler {

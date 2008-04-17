@@ -29,6 +29,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -89,7 +90,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.4 $
+ * @version $Revision: 1.21.2.5 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
@@ -911,6 +912,15 @@ implements OptionHandler, WeightedInstancesHandler,
    */
   public boolean getDisplayModelInOldFormat() {
     return m_displayModelInOldFormat;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.21.2.5 $");
   }
 
   /**

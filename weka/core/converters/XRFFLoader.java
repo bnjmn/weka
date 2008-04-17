@@ -24,6 +24,7 @@ package weka.core.converters;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.RevisionUtils;
 import weka.core.xml.XMLInstances;
 
 import java.io.BufferedReader;
@@ -44,7 +45,7 @@ import java.util.zip.GZIPInputStream;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.3.2.1 $
  * @see Loader
  */
 public class XRFFLoader 
@@ -272,6 +273,15 @@ public class XRFFLoader
    */
   public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("XRFFLoader can't read data sets incrementally.");
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
   }
 
   /**

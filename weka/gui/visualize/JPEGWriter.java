@@ -43,7 +43,7 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  */
 public class JPEGWriter
   extends JComponentWriter {

@@ -20,22 +20,22 @@
  *
  */
 
-
 package weka.gui.sql.event;
 
 import java.util.EventListener;
-import java.util.EventObject;
 
 /**
  * A listener for executing queries.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.1 $
+ * @version     $Revision: 1.1.2.1 $
  */
 
 public interface QueryExecuteListener extends EventListener {
   /**
    * This method gets called when a query has been executed.
+   * 
+   * @param evt		the event
    */
   public void queryExecuted(QueryExecuteEvent evt);
 }

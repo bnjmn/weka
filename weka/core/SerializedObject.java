@@ -39,10 +39,10 @@ import java.util.zip.GZIPOutputStream;
  * memory. <p>
  *
  * @author Richard Kirkby (rbk1@cs.waikato.ac.nz)
- * @version $Revision: 1.10.2.1 $ 
+ * @version $Revision: 1.10.2.2 $ 
  */
 public class SerializedObject
-  implements Serializable {
+  implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 6635502953928860434L;
@@ -154,5 +154,14 @@ public class SerializedObject
       e.printStackTrace();
       return null;
     }
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.10.2.2 $");
   }
 }

@@ -34,7 +34,7 @@ import javax.swing.filechooser.FileFilter;
  * javax.swing.filechooser.FileFilter (why there are two I have no idea).
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class ExtensionFileFilter
   extends FileFilter

@@ -34,6 +34,8 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
@@ -74,7 +76,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision: 1.25.2.1 $ 
  */
 public class REPTree 
   extends Classifier 
@@ -103,7 +105,7 @@ public class REPTree
 
   /** An inner class for building and storing the tree structure */
   protected class Tree 
-    implements Serializable {
+    implements Serializable, RevisionHandler {
     
     /** for serialization */
     static final long serialVersionUID = -1635481717888437935L;
@@ -1317,6 +1319,15 @@ public class REPTree
 	}
       }
     }
+    
+    /**
+     * Returns the revision string.
+     * 
+     * @return		the revision
+     */
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision: 1.25.2.1 $");
+    }
   }
 
   /** The Tree object */
@@ -1937,6 +1948,15 @@ public class REPTree
     return     
       "\nREPTree\n============\n" + m_Tree.toString(0, null) + "\n" +
       "\nSize of the tree : " + numNodes();
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return		the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 1.25.2.1 $");
   }
 
   /**

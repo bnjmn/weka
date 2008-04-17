@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.2 $
+ * @version $Revision: 1.16.2.3 $
  */
 public class Filter
   extends JPanel
