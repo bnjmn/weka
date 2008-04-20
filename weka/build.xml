@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.41 $
+   $Revision: 1.42 $
   ===========================================================================
 -->
 
@@ -155,6 +155,7 @@
           <include name="**/*.arff"/>
           <include name="**/*.cost"/>
           <include name="**/*.xml"/>
+          <include name="**/*.matrix"/>
        </fileset>
      </copy>
   </target>
