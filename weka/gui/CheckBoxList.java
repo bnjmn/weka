@@ -41,7 +41,7 @@ import javax.swing.ListModel;
  * the wrapper is removed and only the payload object is returned.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class CheckBoxList
   extends JList {
@@ -53,7 +53,7 @@ public class CheckBoxList
    * represents an item in the CheckBoxListModel
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   protected class CheckBoxListItem {
     
@@ -131,7 +131,7 @@ public class CheckBoxList
    * A specialized model.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    */
   public class CheckBoxListModel
     extends DefaultListModel {
@@ -315,7 +315,7 @@ public class CheckBoxList
      * @throws NoSuchElementException
      */
     public Object lastElement() {
-      return ((CheckBoxListItem) lastElement()).getContent();
+      return ((CheckBoxListItem) super.lastElement()).getContent();
     }
     
     /**
@@ -357,7 +357,7 @@ public class CheckBoxList
      * @throws ArrayIndexOutOfBoundsException
      */
     public Object remove(int index) {
-      return ((CheckBoxListItem) remove(index)).getContent();
+      return ((CheckBoxListItem) super.remove(index)).getContent();
     }
     
     /**
@@ -450,7 +450,7 @@ public class CheckBoxList
    * A specialized CellRenderer for the CheckBoxList
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.2 $
+   * @version $Revision: 1.3 $
    * @see CheckBoxList
    */
   public class CheckBoxListRenderer 
