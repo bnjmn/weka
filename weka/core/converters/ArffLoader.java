@@ -50,7 +50,7 @@ import java.text.ParseException;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  * @see Loader
  */
 public class ArffLoader 
@@ -99,7 +99,7 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.22 $
+   * @version $Revision: 1.23 $
    */
   public static class ArffReader
     implements RevisionHandler {
@@ -832,7 +832,7 @@ public class ArffLoader
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.22 $");
+      return RevisionUtils.extract("$Revision: 1.23 $");
     }
   }
 
@@ -884,7 +884,7 @@ public class ArffLoader
     
     if (m_File != null && (new File(m_File)).isFile()) {
       setFile(new File(m_File));
-    } else if (m_URL != null & !m_URL.equals("http://")) {
+    } else if (m_URL != null && !m_URL.equals("http://")) {
       setURL(m_URL);
     }
   }
@@ -1055,7 +1055,7 @@ public class ArffLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
+    return RevisionUtils.extract("$Revision: 1.23 $");
   }
 
   /**
