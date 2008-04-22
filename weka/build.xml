@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.42 $
+   $Revision: 1.43 $
   ===========================================================================
 -->
 
@@ -85,6 +85,7 @@
        <fileset dir="${path_modifier}.">
          <include name="weka/**/*.excludes"/>
          <include name="weka/**/*.gif"/>
+         <include name="weka/**/*.png"/>
          <include name="weka/**/*.jpeg"/>
          <include name="weka/**/*.jpg"/>
          <include name="weka/**/*.props"/>
