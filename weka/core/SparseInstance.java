@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.20.2.2 $
+ * @version $Revision: 1.20.2.3 $
  */
 public class SparseInstance
   extends Instance {
@@ -448,6 +448,58 @@ public class SparseInstance
   }
 
   /**
+   * Modifies the instances value for an attribute (floating point
+   * representation). Unlike in <code>setValue</code> no deep copy is
+   * produced, i.e. the actual value is modified. Note, this implementation
+   * actually performs an internal copying of protected arrays if the old or
+   * the new value are different from zero, i.e. if classes of the same package
+   * hold references to these arrays they will not see the modified attribute
+   * instance value (avoid direct access to these protected arrays).
+   *
+   * @param attIndex the attribute's index 
+   * @param value the new attribute value (If the corresponding
+   * attribute is nominal (or a string) then this is the new value's
+   * index as a double).  
+   * @author Arne Muller (arne.muller@gmail.com)
+   */
+  public void modifyValue(int attIndex, double value) {
+
+    int index = locateIndex(attIndex);
+    
+    if ((index >= 0) && (m_Indices[index] == attIndex)) {
+      if (value != 0) {
+	m_AttValues[index] = value;
+      } else {
+	double[] tempValues = new double[m_AttValues.length - 1];
+	int[] tempIndices = new int[m_Indices.length - 1];
+	System.arraycopy(m_AttValues, 0, tempValues, 0, index);
+	System.arraycopy(m_Indices, 0, tempIndices, 0, index);
+	System.arraycopy(m_AttValues, index + 1, tempValues, index, 
+			 m_AttValues.length - index - 1);
+	System.arraycopy(m_Indices, index + 1, tempIndices, index, 
+			 m_Indices.length - index - 1);
+	m_AttValues = tempValues;
+	m_Indices = tempIndices;
+      }
+    } else {
+      if (value != 0) {
+	double[] tempValues = new double[m_AttValues.length + 1];
+	int[] tempIndices = new int[m_Indices.length + 1];
+	System.arraycopy(m_AttValues, 0, tempValues, 0, index + 1);
+	System.arraycopy(m_Indices, 0, tempIndices, 0, index + 1);
+	tempIndices[index + 1] = attIndex;
+	tempValues[index + 1] = value;
+	System.arraycopy(m_AttValues, index + 1, tempValues, index + 2, 
+			 m_AttValues.length - index - 1);
+	System.arraycopy(m_Indices, index + 1, tempIndices, index + 2, 
+			 m_Indices.length - index - 1);
+	m_AttValues = tempValues;
+	m_Indices = tempIndices;
+      }
+    }
+  }
+  
+  /**
    * Returns the values of each attribute as an array of doubles.
    *
    * @return an array containing all the instance attribute values
@@ -808,6 +860,6 @@ public class SparseInstance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.20.2.3 $");
   }
 }
