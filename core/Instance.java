@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $ 
+ * @version $Revision: 1.28 $ 
  */
 public class Instance
   implements Copyable, Serializable, RevisionHandler {
@@ -750,6 +750,22 @@ public class Instance
   }
 
   /**
+   * Modifies the instances value for an attribute (floating point
+   * representation). Unlike in <code>setValue</code> no deep copy is
+   * produced, i.e. the actual value is modified.
+   *
+   * @param attIndex the attribute's index 
+   * @param value the new attribute value (If the corresponding
+   * attribute is nominal (or a string) then this is the new value's
+   * index as a double).
+   * @author Arne Muller (arne.muller@gmail.com)
+   */
+  public void modifyValue(int attIndex, double value) {
+    
+    m_AttValues[attIndex] = value;
+  }
+  
+  /**
    * Sets the weight of an instance.
    *
    * @param weight the weight
@@ -1185,6 +1201,6 @@ public class Instance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision: 1.28 $");
   }
 }
