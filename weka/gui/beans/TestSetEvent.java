@@ -30,7 +30,7 @@ import java.util.EventObject;
  * Event encapsulating a test set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class TestSetEvent
   extends EventObject {
@@ -54,12 +54,33 @@ public class TestSetEvent
    */
   protected int m_maxSetNumber;
 
+  /**
+   * Creates a new <code>TestSetEvent</code>
+   *
+   * @param source the source of the event
+   * @param testSet the test instances
+   */
   public TestSetEvent(Object source, Instances testSet) {
     super(source);
     m_testSet = testSet;
     if (m_testSet != null && m_testSet.numInstances() == 0) {
       m_structureOnly = true;
     }
+  }
+
+  /**
+   * Creates a new <code>TestSetEvent</code>
+   *
+   * @param source the source of the event
+   * @param testSet the test instances
+   * @param setNum the number of the test set
+   * @param maxSetNum the maximum number of sets
+   */
+  public TestSetEvent(Object source, Instances testSet, 
+                      int setNum, int maxSetNum) {
+    this(source, testSet);
+    m_setNumber = setNum;
+    m_maxSetNumber = maxSetNum;
   }
 
   /**
