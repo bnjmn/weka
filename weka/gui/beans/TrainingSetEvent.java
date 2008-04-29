@@ -30,7 +30,7 @@ import java.util.EventObject;
  * Event encapsulating a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class TrainingSetEvent
   extends EventObject {
@@ -66,6 +66,20 @@ public class TrainingSetEvent
     if (m_trainingSet != null && m_trainingSet.numInstances() == 0) {
       m_structureOnly = true;
     }
+  }
+
+  /**
+   * Creates a new <code>TrainingSetEvent</code>
+   *
+   * @param source the source of the event
+   * @param trainSet the training instances
+   * @param setNum the number of the training set
+   * @param maxSetNum the maximum number of sets
+   */
+  public TrainingSetEvent(Object source, Instances trainSet, int setNum, int maxSetNum) {
+    this(source, trainSet);
+    m_setNumber = setNum;
+    m_maxSetNumber = maxSetNum;
   }
 
   /**
