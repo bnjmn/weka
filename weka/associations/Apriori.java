@@ -126,7 +126,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.28.2.1 $
+ * @version $Revision: 1.28.2.2 $
  */
 public class Apriori 
   extends Associator 
@@ -353,7 +353,8 @@ public class Apriori
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
 
-    // class
+    // class (can handle a nominal class if CAR rules are selected). This
+    result.enable(Capability.NO_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     
@@ -382,12 +383,16 @@ public class Apriori
     if(m_car && m_metricType != CONFIDENCE)
       throw new Exception("For CAR-Mining metric type has to be confidence!");
     
-    if (m_classIndex == -1)
-      instances.setClassIndex(instances.numAttributes()-1);     
-    else if (m_classIndex < instances.numAttributes() && m_classIndex >= 0)
-      instances.setClassIndex(m_classIndex);
-    else
-      throw new Exception("Invalid class index.");
+    // only set class index if CAR is requested
+    if (m_car) {
+      if (m_classIndex == -1 ) {
+        instances.setClassIndex(instances.numAttributes()-1);     
+      } else if (m_classIndex <= instances.numAttributes() && m_classIndex > 0) {
+        instances.setClassIndex(m_classIndex - 1);
+      } else {
+        throw new Exception("Invalid class index.");
+      }
+    }
 
     // can associator handle the data?
     getCapabilities().testWithFail(instances);
@@ -697,7 +702,13 @@ public class Apriori
       m_numRules = Integer.parseInt(numRulesString);
     }
     if (classIndexString.length() != 0) {
-      m_classIndex = Integer.parseInt(classIndexString);
+      if (classIndexString.equalsIgnoreCase("last")) {
+        m_classIndex = -1;
+      } else if (classIndexString.equalsIgnoreCase("first")) {
+        m_classIndex = 0;
+      } else {
+        m_classIndex = Integer.parseInt(classIndexString);
+      }
     }
     if (minConfidenceString.length() != 0) {
       m_minMetric = (new Double(minConfidenceString)).doubleValue();
@@ -1438,7 +1449,7 @@ public class Apriori
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.28.2.2 $");
   }
 
   /**
