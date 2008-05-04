@@ -99,13 +99,13 @@ import java.util.Vector;
  *  If set class association rules are mined. (default = no)</pre>
  * 
  * <pre> -c &lt;the class index&gt;
- *  The class index. (default = last)</pre>
+ *  The class index. (default = unset)</pre>
  * 
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  */
 public class FilteredAssociator 
   extends SingleAssociatorEnhancer {
@@ -174,7 +174,7 @@ public class FilteredAssociator
 
     result.addElement(new Option(
 	"\tThe class index.\n"
-	+ "\t(default: -1, i.e., last)", 
+	+ "\t(default: -1, i.e. unset)", 
 	"c", 1, "-c <the class index>"));
     
     Enumeration enm = super.listOptions();
@@ -199,7 +199,7 @@ public class FilteredAssociator
    * 
    * <pre> -c &lt;the class index&gt;
    *  The class index.
-   *  (default: -1, i.e., last)</pre>
+   *  (default: -1, i.e., unset)</pre>
    * 
    * <pre> -W
    *  Full name of base associator.
@@ -245,7 +245,7 @@ public class FilteredAssociator
    *  If set class association rules are mined. (default = no)</pre>
    * 
    * <pre> -c &lt;the class index&gt;
-   *  The class index. (default = last)</pre>
+   *  The class index. (default unset)</pre>
    * 
    <!-- options-end -->
    *
@@ -269,10 +269,17 @@ public class FilteredAssociator
     }
     
     tmpStr = Utils.getOption('c', options);
-    if (tmpStr.length() > 0)
-      setClassIndex(Integer.parseInt(tmpStr));
-    else
+    if (tmpStr.length() > 0) {
+      if (tmpStr.equalsIgnoreCase("last")) {
+        setClassIndex(0);
+      } else if (tmpStr.equalsIgnoreCase("first")) {
+        setClassIndex(1);
+      } else {
+        setClassIndex(Integer.parseInt(tmpStr));
+      }
+    } else {
       setClassIndex(-1);
+    }
 
     super.setOptions(options);
   }
@@ -387,8 +394,7 @@ public class FilteredAssociator
     else
       result = getFilter().getCapabilities();
     
-    // the filtered associator always needs a class
-    result.disable(Capability.NO_CLASS);
+    result.enable(Capability.NO_CLASS);
     
     // set dependencies
     for (Capability cap: Capability.values())
@@ -409,13 +415,16 @@ public class FilteredAssociator
 
     // create copy and set class-index
     data = new Instances(data);
-    if (getClassIndex() == -1)
+    if (getClassIndex() == 0) {
       data.setClassIndex(data.numAttributes() - 1);
-    else
-      data.setClassIndex(getClassIndex());
+    } else {
+      data.setClassIndex(getClassIndex() - 1);
+    }
     
-    // remove instances with missing class
-    data.deleteWithMissingClass();
+    if (getClassIndex() != -1) {
+      // remove instances with missing class
+      data.deleteWithMissingClass();
+    }
     
     m_Filter.setInputFormat(data);  // filter capabilities are checked here
     data = Filter.useFilter(data, m_Filter);
@@ -458,7 +467,7 @@ public class FilteredAssociator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
   }
 
   /**
