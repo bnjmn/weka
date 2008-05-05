@@ -37,10 +37,10 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public abstract class SingleAssociatorEnhancer
-  extends Associator
+  extends AbstractAssociator
   implements OptionHandler {
 
   /** for serialization */
@@ -103,14 +103,14 @@ public abstract class SingleAssociatorEnhancer
     if (tmpStr.length() > 0) { 
       // This is just to set the associator in case the option 
       // parsing fails.
-      setAssociator(Associator.forName(tmpStr, null));
-      setAssociator(Associator.forName(tmpStr, Utils.partitionOptions(options)));
+      setAssociator(AbstractAssociator.forName(tmpStr, null));
+      setAssociator(AbstractAssociator.forName(tmpStr, Utils.partitionOptions(options)));
     }
     else {
       // This is just to set the associator in case the option 
       // parsing fails.
-      setAssociator(Associator.forName(defaultAssociatorString(), null));
-      setAssociator(Associator.forName(defaultAssociatorString(), Utils.partitionOptions(options)));
+      setAssociator(AbstractAssociator.forName(defaultAssociatorString(), null));
+      setAssociator(AbstractAssociator.forName(defaultAssociatorString(), Utils.partitionOptions(options)));
     }
   }
 
