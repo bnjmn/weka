@@ -96,7 +96,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class HotSpot
   implements Associator, OptionHandler, RevisionHandler, 
@@ -868,7 +868,6 @@ public class HotSpot
     public int assignIDs(int lastID) {
       int currentLastID = lastID + 1;
       m_id = currentLastID;
-      System.err.println("Assigning " + currentLastID);
       if (m_children != null) {
         for (int i = 0; i < m_children.length; i++) {
           currentLastID = m_children[i].assignIDs(currentLastID);
@@ -1292,7 +1291,7 @@ public class HotSpot
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
   }
 
   /**
