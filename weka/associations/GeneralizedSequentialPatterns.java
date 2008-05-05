@@ -90,10 +90,10 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Sebastian Beer
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GeneralizedSequentialPatterns
-  extends Associator
+  extends AbstractAssociator
   implements OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -616,7 +616,7 @@ public class GeneralizedSequentialPatterns
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**

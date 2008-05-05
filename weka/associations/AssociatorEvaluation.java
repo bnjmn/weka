@@ -27,15 +27,18 @@ import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.Drawable;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.util.Enumeration;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 
 /**
  * Class for evaluating Associaters.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class AssociatorEvaluation
   implements RevisionHandler {
@@ -67,6 +70,8 @@ public class AssociatorEvaluation
     text.append("\nGeneral options:\n\n");
     text.append("-t <training file>\n");
     text.append("\tThe name of the training file.\n");
+    text.append("-g <name of graph file>\n");
+    text.append("\tOutputs the graph representation (if supported) of the associator to a file.\n");
     
     // associator specific options, if any
     if (associator instanceof OptionHandler) {
@@ -120,6 +125,7 @@ public class AssociatorEvaluation
     throws Exception {
 
     String trainFileString = "";
+    String graphFileName = "";
     AssociatorEvaluation eval;
     DataSource loader;
 
@@ -133,6 +139,8 @@ public class AssociatorEvaluation
       if (trainFileString.length() == 0) 
 	throw new Exception("No training file given!");
       loader = new DataSource(trainFileString);
+
+      graphFileName = Utils.getOption('g', options);
 
       // associator specific options
       if (associator instanceof OptionHandler) {
@@ -151,7 +159,18 @@ public class AssociatorEvaluation
     
     // load file and build associations
     eval = new AssociatorEvaluation();
-    return eval.evaluate(associator, new Instances(loader.getDataSet()));
+    String results = eval.evaluate(associator, new Instances(loader.getDataSet()));
+
+    // If associator is drawable output string describing graph
+    if ((associator instanceof Drawable) && (graphFileName.length() != 0)) {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(graphFileName));
+      writer.write(((Drawable) associator).graph());
+      writer.newLine();
+      writer.flush();
+      writer.close();
+    }
+
+    return results;
   }
   
   /**
@@ -246,7 +265,7 @@ public class AssociatorEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

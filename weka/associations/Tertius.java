@@ -146,11 +146,11 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class Tertius 
-  extends Associator 
+  extends AbstractAssociator 
   implements OptionHandler, Runnable, TechnicalInformationHandler {
 
   /** for serialization */
@@ -2008,7 +2008,7 @@ public class Tertius
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**
