@@ -188,7 +188,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision: 1.5.2.2 $
  * @see TestInstances
  */
 public class CheckAssociator
@@ -871,7 +871,7 @@ public class CheckAssociator
         addMissing(train2, missingLevel, predictorMissing, classMissing);
       }
       
-      associator = Associator.makeCopies(getAssociator(), 1)[0];
+      associator = AbstractAssociator.makeCopies(getAssociator(), 1)[0];
       evaluation1A = new AssociatorEvaluation();
       evaluation1B = new AssociatorEvaluation();
       evaluation2 = new AssociatorEvaluation();
@@ -1059,7 +1059,7 @@ public class CheckAssociator
                               multiInstance);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing, classMissing);
-      associators = Associator.makeCopies(getAssociator(), 2);
+      associators = AbstractAssociator.makeCopies(getAssociator(), 2);
       evaluationB = new AssociatorEvaluation();
       evaluationI = new AssociatorEvaluation();
       evaluationB.evaluate(associators[0], train);
@@ -1169,7 +1169,7 @@ public class CheckAssociator
                               multiInstance);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing, classMissing);
-      associator = Associator.makeCopies(getAssociator(), 1)[0];
+      associator = AbstractAssociator.makeCopies(getAssociator(), 1)[0];
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
@@ -1300,7 +1300,7 @@ public class CheckAssociator
                               multiInstance);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing, classMissing);
-      associator = Associator.makeCopies(getAssociator(), 1)[0];
+      associator = AbstractAssociator.makeCopies(getAssociator(), 1)[0];
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new Error("Error setting up for tests: " + ex.getMessage());
@@ -1528,7 +1528,7 @@ public class CheckAssociator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.5.2.2 $");
   }
   
   /**
