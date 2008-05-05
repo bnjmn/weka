@@ -36,7 +36,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>testsPerClassType</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.6.2.1 $
  *
  * @see CheckAssociator
  * @see CheckAssociator#testsPerClassType(int, boolean, boolean)
@@ -735,7 +735,7 @@ public abstract class AbstractAssociatorTest
     Associator associator = null;
     
     try {
-      associator = Associator.makeCopy(m_Associator);
+      associator = AbstractAssociator.makeCopy(m_Associator);
     } 
     catch (Exception e) {
       e.printStackTrace();
