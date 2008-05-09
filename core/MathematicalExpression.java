@@ -80,7 +80,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class MathematicalExpression
   implements RevisionHandler {
@@ -90,7 +90,7 @@ public class MathematicalExpression
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   static public class Tokenizer 
     extends StreamTokenizer
@@ -146,7 +146,7 @@ public class MathematicalExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 1.6 $");
     }
   }
   
@@ -155,7 +155,7 @@ public class MathematicalExpression
    *
    * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
    * @author Prados Julien (julien.prados@cui.unige.ch) 
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   static public class TreeNode 
     implements Serializable, RevisionHandler {
@@ -323,7 +323,7 @@ public class MathematicalExpression
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision: 1.6 $");
     }
   }
   
@@ -355,7 +355,7 @@ public class MathematicalExpression
   protected static MathematicalExpression.TreeNode parseExp(MathematicalExpression.Tokenizer tokenizer) throws Exception {
     Vector operands = new Vector();
     TreeNode result = null;
-
+    
     result = parseTerm(tokenizer);
     operands.add(result);
     while (tokenizer.ttype != Tokenizer.TT_EOF) {
@@ -373,9 +373,19 @@ public class MathematicalExpression
         result = new TreeNode('-', operands);        
         break;
       case ')':
-        return result;
+        //        return result;
       case ',':
+        //        return result;
+      case '<':
+      case '>':
+      case '=':
+      case '&':
+      case '|':
+      case ']':
         return result;
+      default:
+        System.err.println("[MathematicalExpression] Problem in parsing...");
+        System.exit(1);
       }
       operands = new Vector();
       operands.add(result);
@@ -568,14 +578,15 @@ public class MathematicalExpression
 	return new TreeNode(n);                
       default:
 	Vector params = new Vector(2);
-      params.add(parseExp(tokenizer));
-      int op = tokenizer.ttype;
-      if (op != '<' && op != '>' && op != '=') {
-	throw new Exception("Unknow test " + (char) tokenizer.ttype);
-      }
-      tokenizer.nextToken();
-      params.add(parseExp(tokenizer));
-      return new TreeNode(op,params);
+        params.add(parseExp(tokenizer));
+
+        int op = tokenizer.ttype;
+        if (op != '<' && op != '>' && op != '=') {
+          throw new Exception("Unknow test " + (char) tokenizer.ttype);
+        }
+        tokenizer.nextToken();
+        params.add(parseExp(tokenizer));
+        return new TreeNode(op,params);
     }
   }
   
@@ -612,6 +623,6 @@ public class MathematicalExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
 }
