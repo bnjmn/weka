@@ -33,8 +33,13 @@ import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
+import weka.core.mathematicalexpression.Parser;
+import weka.core.mathematicalexpression.Scanner;
+import weka.core.parser.java_cup.runtime.DefaultSymbolFactory;
+import weka.core.parser.java_cup.runtime.SymbolFactory;
 import weka.filters.UnsupervisedFilter;
 
+import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Vector;
@@ -70,7 +75,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see MathematicalExpression
  */
 public class MathExpression 
@@ -88,9 +93,6 @@ public class MathExpression
 
   /** The modification expression */
   private String m_expression = m_defaultExpression;
-  
-  /** The expression tree */
-  private MathematicalExpression.TreeNode m_expTree = null;
   
   /** Attributes statistics */
   private AttributeStats[] m_attStats;
@@ -151,7 +153,6 @@ public class MathExpression
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
     m_attStats = null;
-    m_expTree = null;
     return true;
   }
 
@@ -198,7 +199,6 @@ public class MathExpression
     if (m_attStats == null) {
       Instances input = getInputFormat();
 
-      m_expTree = MathematicalExpression.parse(getExpression());
       m_attStats = new AttributeStats [input.numAttributes()];
       
       for (int i = 0; i < input.numAttributes(); i++) {
@@ -218,6 +218,34 @@ public class MathExpression
 
     m_NewBatch = true;
     return (numPendingOutput() != 0);
+  }
+  
+  /**
+   * Evaluates the symbols.
+   * 
+   * @param symbols 	the symbols to use for evaluation
+   * @return		the calculated value, Double.NaN in case of an error
+   */
+  protected double eval(HashMap symbols) {
+    SymbolFactory 		sf;
+    ByteArrayInputStream 	parserInput;
+    Parser 			parser;
+    double			result;
+    
+    try {
+      sf          = new DefaultSymbolFactory();
+      parserInput = new ByteArrayInputStream(m_expression.getBytes());
+      parser      = new Parser(new Scanner(parserInput, sf), sf);
+      parser.setSymbols(symbols);
+      parser.parse();
+      result = parser.getResult();
+    }
+    catch (Exception e) {
+      result = Double.NaN;
+      e.printStackTrace();
+    }
+    
+    return result;
   }
   
   /**
@@ -250,7 +278,7 @@ public class MathExpression
               symbols.put("COUNT", new Double(m_attStats[j].numericStats.count));
               symbols.put("SUM", new Double(m_attStats[j].numericStats.sum));
               symbols.put("SUMSQUARED", new Double(m_attStats[j].numericStats.sumSq));
-              value = m_expTree.eval(symbols);
+              value = eval(symbols);
               if (Double.isNaN(value) || Double.isInfinite(value)) {
                   System.err.println("WARNING:Error in evaluating the expression: missing value set");
                   value = Instance.missingValue();
@@ -291,7 +319,7 @@ public class MathExpression
               symbols.put("COUNT", new Double(m_attStats[j].numericStats.count));
               symbols.put("SUM", new Double(m_attStats[j].numericStats.sum));
               symbols.put("SUMSQUARED", new Double(m_attStats[j].numericStats.sumSq));
-              vals[j] = m_expTree.eval(symbols);
+              vals[j] = eval(symbols);
               if (Double.isNaN(vals[j]) || Double.isInfinite(vals[j])) {
                   System.err.println("WARNING:Error in Evaluation the Expression: missing value set");
                   vals[j] = Instance.missingValue();
@@ -523,7 +551,7 @@ public class MathExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
   
   /**

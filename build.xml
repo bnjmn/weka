@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.43 $
+   $Revision: 1.44 $
   ===========================================================================
 -->
 
@@ -93,6 +93,11 @@
          <include name="weka/**/*.xml"/>
          <include name="weka/**/DatabaseUtils.props.*"/>
          <include name="weka/gui/beans/README*"/>
+         <include name="**/*.cup"/>
+         <include name="**/*.flex"/>
+         <include name="**/*.jflex"/>
+         <include name="**/*.properties"/>
+         <include name="**/*.default"/>
        </fileset>
     </copy>
     <rmic base="${path_modifier}${build}/classes"
@@ -244,6 +249,11 @@
       <include name="weka/**/*.xml"/>
       <include name="weka/**/DatabaseUtils.props.*"/>
       <include name="weka/gui/beans/README*"/>
+      <include name="**/*.cup"/>
+      <include name="**/*.flex"/>
+      <include name="**/*.jflex"/>
+      <include name="**/*.properties"/>
+      <include name="**/*.default"/>
     </jar>
   </target>
 
