@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
  * java weka.core.MathematicalTest
  *
  * @author mhall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class MathematicalExpressionTest 
   extends TestCase {
@@ -96,7 +96,7 @@ public class MathematicalExpressionTest
   } 
 
   public void testExpressionWithIFELSE() throws Exception {
-    double result = getExpressionResult("ifelse([C<1000|C>5000],(A+B),C+C)");
+    double result = getExpressionResult("ifelse((C<1000|C>5000),(A+B),C+C)");
     assertEquals(6.0, result);
   }
 
