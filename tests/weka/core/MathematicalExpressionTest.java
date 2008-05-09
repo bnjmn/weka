@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
  * java weka.core.MathematicalTest
  *
  * @author mhall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class MathematicalExpressionTest 
   extends TestCase {
@@ -93,6 +93,11 @@ public class MathematicalExpressionTest
   public void testExpressionWithFunction() throws Exception {
     double result = getExpressionResult("pow(A,B*1)-C*2");
     assertEquals(12.0, result);
+  } 
+
+  public void testExpressionWithIFELSE() throws Exception {
+    double result = getExpressionResult("ifelse([C<1000|C>5000],(A+B),C+C)");
+    assertEquals(6.0, result);
   }
 
   public static void main(String[] args){
