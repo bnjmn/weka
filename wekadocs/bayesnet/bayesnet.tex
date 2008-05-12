@@ -1,6 +1,6 @@
 \documentclass[a4paper]{article}
 
-% Version: $Revision: 1.7 $
+% Version: $Revision: 1.8 $
 
 \usepackage{epsfig}
 
@@ -1206,6 +1206,368 @@ values of the parents listed on the left.
 
 So, the graph visualizer allows you to inspect both network structure and probability tables. 
 
+\section{Bayes Network GUI}
+
+The Bayesian network editor is a stand alone application with the following features\\
+$\bullet$ Edit Bayesian network completely by hand, with unlimited undo/redo stack,
+cut/copy/paste and layout support.\\
+$\bullet$ Learn Bayesian network from data using learning algorithms in Weka.\\
+$\bullet$ Edit structure by hand and learn conditional probability tables (CPTs) using learning algorithms in Weka.\\
+$\bullet$ Generate dataset from Bayesian network.\\
+$\bullet$ Inference (using junction tree method) of evidence through the network,
+interactively changing values of nodes.\\
+$\bullet$ Viewing cliques in junction tree.\\
+$\bullet$ Accelerator key support for most common operations.\\
+
+
+The Bayes network GUI is started as\\
+java weka.classifiers.bayes.net.GUI <bif file> \\
+The following window pops up when an XML BIF file is specified (if none is
+specified an empty graph is shown).
+
+\begin{center}
+\epsfig{file=editor/viewgraph.eps,height=12cm}
+\end{center}
+
+
+\subsubsection*{Moving a node}
+Click a node with the left mouse button and drag the node to the desired position.
+
+\subsubsection*{Selecting groups of nodes}
+
+Drag the left mouse button in the graph panel. A rectangle is shown and
+all nodes intersecting with the rectangle are selected when the mouse is
+released. Selected nodes are made visible with four little black squares at the 
+corners (see screenshot above).
+
+The selection can be extended by keeping the shift key pressed while selecting
+another set of nodes.
+
+The selection can be toggled by keeping the ctrl key pressed. All nodes in the
+selection selected in the rectangle are de-selected, while the ones not in the
+selection but intersecting with the rectangle are added to the selection.
+
+Groups of nodes can be moved by keeping the left mouse pressed on one of the
+selected nodes and dragging the group to the desired position.
+
+\subsubsection*{File menu}
+
+\begin{center}
+\epsfig{file=editor/menufile.eps,height=4cm}
+\end{center}
+
+The New, Save, Save As, and Exit menu provide functionality as expected.
+The file format used is XML BIF \cite{cozman}.
+
+There are two file formats supported for opening\\
+$\bullet$ {\bf .xml} for XML BIF files. The Bayesian network is reconstructed
+from the information in the file. Node width information is not stored so the nodes
+are shown with the default width. This can be changed by laying out the graph
+(menu Tools/Layout).\\
+$\bullet$ {\bf .arff} Weka data files. When an arff file is selected, a new
+empty Bayesian network is created with nodes for each of the attributes
+in the arff file. Continuous variables are discretized using the 
+{\tt weka.filters.supervised.attribute.Discretize} filter (see note at end of
+this section for more details). The network
+structure can be specified and the CPTs learned using the Tools/Learn CPT
+menu.
+
+The Print menu works (sometimes) as expected.
+
+The Export menu allows for writing the graph panel to image (currently
+supported are bmp, jpg, png and eps formats). This can also be activated
+using the Alt-Shift-Left Click action in the graph panel.
+
+\subsubsection*{Edit menu}
+
+\begin{center}
+\epsfig{file=editor/menuedit.eps,height=8cm}
+\end{center}
+
+Unlimited undo/redo support. Most edit operations on the Bayesian network
+are undoable. A notable exception is learning of network and CPTs.
+
+Cut/copy/paste support. When a set of nodes is selected these can be placed on
+a clipboard (internal, so no interaction with other applications yet) and
+a paste action will add the nodes. Nodes are renamed by adding "Copy of" before
+the name and adding numbers if necessary to ensure uniqueness of name.
+Only the arrows to parents are copied, not these of the children.
+
+The Add Node menu brings up a dialog (see below) that allows to specify the name of the
+new node and the cardinality of the new node. Node values are assigned the
+names 'Value1', 'Value2' etc. These values can be renamed (right click the node
+in the graph panel and select Rename Value). Another option is to copy/paste
+a node with values that are already properly named and rename the node.
+
+\begin{center}
+\epsfig{file=editor/dlg.addnode.eps,height=2.5cm}
+\end{center}
+
+The Add Arc menu brings up a dialog to choose a child node first;
+
+\begin{center}
+\epsfig{file=editor/dlg.addarc.eps,height=2cm}
+\end{center}
+
+Then a dialog is shown to select a parent. Descendants of the child
+node, parents of the child node and the node itself are not listed since
+these cannot be selected as child node since they would introduce cycles
+or already have an arc in the network.
+
+\begin{center}
+\epsfig{file=editor/dlg.addarc2.eps,height=2cm}
+\end{center}
+
+The Delete Arc menu brings up a dialog with a list of all arcs that
+can be deleted.
+
+\begin{center}
+\epsfig{file=editor/dlg.delarc.eps,height=2cm}
+\end{center}
+
+The list of eight items at the bottom are active only when a group of at least
+two nodes are selected.\\
+$\bullet$ Align Left/Right/Top/Bottom moves the nodes in the selection such
+that all nodes align to the utmost left, right, top or bottom node in the
+selection respectively.\\
+$\bullet$ Center Horizontal/Vertical moves nodes in the selection halfway
+between left and right most (or top and bottom most respectively).\\
+$\bullet$ Space Horizontal/Vertical spaces out nodes in the selection evenly
+between left and right most (or top and bottom most respectively). The order
+in which the nodes are selected impacts the place the node is moved to.\\
+
+\subsubsection*{Tools menu}
+
+\begin{center}
+\epsfig{file=editor/menutools.eps,height=5cm}
+\end{center}
+
+
+The Generate Network menu allows generation of a complete random Bayesian 
+network. It brings up a dialog to specify the number of nodes, number of
+arcs, cardinality and a random seed to generate a network.
+
+\begin{center}
+\epsfig{file=editor/dlg.generate.eps,height=3.5cm}
+\end{center}
+
+
+The Generate Data menu allows for generating a data set from the Bayesian
+network in the editor. A dialog is shown to specify the number of instances
+to be generated, a random seed and the file to save the data set into. The
+file format is arff. When no file is selected (field left blank) no file is 
+written and only the internal data set is set.
+
+\begin{center}
+\epsfig{file=editor/dlg.generated.eps,height=3.5cm}
+\end{center}
+
+The Set Data menu sets the current data set. From this data set a new
+Bayesian network can be learned, or the CPTs of a network can be estimated.
+A file choose menu pops up to select the arff file containing the data.
+
+The Learn Network and Learn CPT menus are only active when a data set is 
+specified either through
+\\$\bullet$ Tools/Set Data menu, or
+\\$\bullet$ Tools/Generate Data menu, or
+\\$\bullet$ File/Open menu when an arff file is selected.
+
+The Learn Network action learns the whole Bayesian network from the data set.
+The learning algorithms can be selected from the set available in Weka
+by selecting the Options button in the dialog below.
+Learning a network clears the undo stack.
+
+\begin{center}
+\epsfig{file=editor/dlg.learn.eps,height=2cm}
+\end{center}
+
+The Learn CPT menu does not change the structure of the Bayesian network,
+only the probability tables.
+Learning the CPTs clears the undo stack.
+
+The Layout menu runs a graph layout algorithm on the network and tries to 
+make the graph a bit more readable. When the menu item is selected, the node
+size can be specified or left to calculate by the algorithm based on the size
+of the labels by deselecting the custom node size check box.
+
+\begin{center}
+\epsfig{file=editor/dlg.layout.eps,height=3cm}
+\end{center}
+
+The Show Margins menu item makes marginal distributions visible.
+These are calculated using the junction tree algorithm \cite{lauritzen}.
+Marginal probabilities for nodes are shown in green next to the node.
+The value of a node can be set (right click node, set evidence, select
+a value) and the color is changed to red to indicate evidence is set
+for the node. Rounding errors may occur in the marginal probabilities.
+
+\begin{center}
+\epsfig{file=editor/viewevidence.eps,height=8cm}
+\end{center}
+
+
+The Show Cliques menu item makes the cliques visible that are used
+by the junction tree algorithm. Cliques are visualized using colored
+undirected edges. Both margins and cliques can be shown at the same time,
+but that makes for rather crowded graphs.
+
+\begin{center}
+\epsfig{file=editor/viewcliques.eps,height=8cm}
+\end{center}
+
+
+\subsubsection*{View menu}
+The view menu allows for zooming in and out of the graph panel.
+Also, it allows for hiding or showing the status and toolbars.
+
+\begin{center}
+\epsfig{file=editor/menuview.eps,height=5cm}
+\end{center}
+
+\subsubsection*{Help menu}
+
+The help menu points to this document.
+
+\begin{center}
+\epsfig{file=editor/menuhelp.eps,height=2cm}
+\end{center}
+
+
+\subsubsection*{Toolbar}
+
+\begin{center}
+\epsfig{file=editor/toolbar.eps, height=0.6cm}
+\end{center}
+
+The toolbar allows a shortcut to many functions. Just hover the mouse
+over the toolbar buttons and a tooltiptext pops up that tells which 
+function is activated. The toolbar can be shown or hidden with the View/View 
+Toolbar menu.
+
+\subsubsection*{Statusbar}
+
+At the bottom of the screen the statusbar shows messages. This can be 
+helpful when an undo/redo action is performed that does not have any
+visible effects, such as edit actions on a CPT. The statusbar can be shown 
+or hidden with the View/View Statusbar menu.
+
+\subsubsection*{Click right mouse button}
+
+Clicking the right mouse button in the graph panel outside a node
+brings up the following popup menu. It allows to add a node
+at the location that was clicked, or add select a parent to
+add to all nodes in the selection. If no node is selected, or no node
+can be added as parent, this function is disabled.
+\begin{center}
+\epsfig{file=editor/popupmenuleft.eps,height=2.5cm}
+\end{center}
+
+Clicking the right mouse button on a node brings up a popup menu.
+
+The popup menu shows list of values that can be set as evidence to selected node.
+This is only visible when margins are shown (menu Tools/Show margins).
+By selecting 'Clear', the value of the node is removed and the margins
+calculated based on CPTs again.
+\begin{center}
+\epsfig{file=editor/pop.r.setevidence.eps,height=6cm}
+\end{center}
+	
+A node can be renamed by right click and select Rename in the popup menu.
+The following dialog appears that allows entering a new node name.
+\begin{center}
+\epsfig{file=editor/dlg.renamenode.eps,height=2.5cm}
+\end{center}
+
+
+
+The CPT of a node can be edited manually by selecting a node,
+right click/Edit CPT. A dialog is shown with a table representing the
+CPT. When a value is edited, the values of the remainder of the table
+are update in order to ensure that the probabilities add up to 1.
+It attempts to adjust the last column first, then goes backward from there.
+\begin{center}
+\epsfig{file=editor/dlg.CPT.eps,height=6cm}
+\end{center}
+The whole table can be filled with randomly generated distributions by
+selecting the Randomize button.
+
+
+
+The popup menu shows list of parents that can be added to selected node.
+CPT for the node is updated by making copies for each value of the new parent.
+\begin{center}
+\epsfig{file=editor/pop.r.addparent.eps,height=6cm}
+\end{center}
+
+The popup menu shows list of parents that can be deleted from selected node.
+CPT of the node keeps only the one conditioned on the first value of the
+parent node.
+\begin{center}
+\epsfig{file=editor/pop.r.delparent.eps,height=6cm}
+\end{center}
+
+The popup menu shows list of children that can be deleted from selected node.
+CPT of the child node keeps only the one conditioned on the first value 
+of the parent node.
+\begin{center}
+\epsfig{file=editor/pop.r.delchild.eps,height=6cm}
+\end{center}
+
+
+Selecting the Add Value from the popup menu brings up this dialog,
+in which the name of the new value for the node can be specified.
+The distribution for the node assign zero probability to the value.
+Child node CPTs are updated by copying distributions conditioned on
+the new value.
+\begin{center}
+\epsfig{file=editor/dlg.addvalue.eps,height=2.5cm}
+\end{center}
+
+The popup menu shows list of values that can be renamed for selected node.
+\begin{center}
+\epsfig{file=editor/pop.r.renvalue.eps,height=6cm}
+\end{center}
+
+Selecting a value brings up the following dialog in which a new name
+can be specified.
+\begin{center}
+\epsfig{file=editor/dlg.renamevalue.eps,height=2.5cm}
+\end{center}
+
+The popup menu shows list of values that can be deleted from selected node.
+This is only active when there are more then two values for the node (single
+valued nodes do not make much sense).
+By selecting the value the CPT of the node is updated in order to ensure
+that the CPT adds up to unity. The CPTs of children are updated by dropping
+the distributions conditioned on the value.
+\begin{center}
+\epsfig{file=editor/pop.r.delvalue.eps,height=6cm}
+\end{center}
+
+
+\subsection*{A note on CPT learning}
+
+Continuous variables are discretized by the Bayes network class.
+The discretization algorithm chooses its values based on the information
+in the data set. However, these values are not stored anywhere. So,
+reading an arff file with continuous variables using the File/Open menu
+allows one to specify a network, then learn the CPTs from it since the
+discretization bounds are still known. However, opening an arff file, specifying
+a structure, then closing the application, reopening and trying to learn the
+network from another file containing continuous variables may not give the
+desired result since a the discretization algorithm is re-applied and new
+boundaries may have been found. Unexpected behavior may be the result.
+
+Learning from a dataset that contains more attributes than there are nodes
+in the network is ok. The extra attributes are just ignored.
+
+Learning from a dataset with differently ordered attributes is ok. Attributes
+are matched to nodes based on name. However, attribute values are matched
+with node values based on the order of the values.
+
+The attributes in the dataset should have the same number of values as the
+corresponding nodes in the network (see above for continuous variables).
+
 \section{Bayesian nets in the experimenter}
 
 Bayesian networks generate extra measures that can be examined in the experimenter.
@@ -1452,6 +1814,10 @@ can be handled.
 	G. Cooper, E. Herskovits. 
 	A Bayesian method for the induction of probabilistic networks from data. 
 	Machine Learning, 9: 309--347, 1992.
+\bibitem{cozman}
+	Cozman.
+	See {\sf http://www-2.cs.cmu.edu/\~{}fgcozman/Research/	InterchangeFormat/}
+for details on XML BIF.
 \bibitem{friedman97} 
 	N. Friedman, D. Geiger, M. Goldszmidt. 
 	Bayesian Network Classifiers. 
@@ -1460,6 +1826,13 @@ can be handled.
 	D. Heckerman, D. Geiger, D. M. Chickering. 
 	Learning Bayesian networks: the combination of knowledge and statistical data. 
 	Machine Learining, 20(3): 197--243, 1995.
+\bibitem{lauritzen}	
+    S.L. Lauritzen and D.J. Spiegelhalter.
+    Local Computations with Probabilities on graphical structures and their applications to expert systems (with discussion).
+    Journal of the Royal Statistical Society B.
+    1988,
+    50,
+    157-224
 \bibitem{Moore}
   Moore, A. and Lee, M.S. Cached Sufficient Statistics for Efficient Machine Learning with Large Datasets,
   JAIR, 
