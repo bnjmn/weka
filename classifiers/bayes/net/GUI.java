@@ -105,7 +105,7 @@ import javax.swing.table.AbstractTableModel;
  * Bayesion network inference.
  * 
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class GUI extends JPanel implements LayoutCompleteEventListener {
 
@@ -2960,6 +2960,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	/* apply graph layout algorithm to Bayesian network 
 	 */
 	void layoutGraph() {
+		if (m_BayesNet.getNrOfNodes() == 0) {
+			return;
+		}
 		try {
 			FastVector m_nodes = new FastVector();
 			FastVector m_edges = new FastVector();
@@ -2980,7 +2983,10 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	 */
 	void updateStatus() {
 		a_undo.setEnabled(m_BayesNet.canUndo());
-		a_redo.setEnabled(m_BayesNet.canRedo());		
+		a_redo.setEnabled(m_BayesNet.canRedo());
+
+		a_datagenerator.setEnabled(m_BayesNet.getNrOfNodes() > 0);
+
 		if (!m_bViewMargins && !m_bViewCliques) {
 			repaint();
 			return;
