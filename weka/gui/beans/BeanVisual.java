@@ -45,7 +45,7 @@ import javax.swing.JPanel;
  * versions of a bean's icon.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.9.2.1 $
  * @since 1.0
  * @see JPanel
  * @see Serializable
@@ -173,7 +173,8 @@ public class BeanVisual
    */
   public boolean loadIcons(String iconPath, String animatedIconPath) {
     boolean success = true;
-    java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
+    //    java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
+    java.net.URL imageURL = this.getClass().getClassLoader().getResource(iconPath);
     if (imageURL == null) {
       //      System.err.println("Warning: unable to load "+iconPath);
     } else {
@@ -186,7 +187,8 @@ public class BeanVisual
       }
     }
     
-    imageURL = ClassLoader.getSystemResource(animatedIconPath);
+    //    imageURL = ClassLoader.getSystemResource(animatedIconPath);
+    imageURL = this.getClass().getClassLoader().getResource(animatedIconPath);
     if (imageURL == null) {
       //      System.err.println("Warning: unable to load "+animatedIconPath);
       success = false;
