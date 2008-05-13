@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.27 $
+ * @version  $Revision: 1.28 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -372,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.27 $
+   * @version $Revision: 1.28 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1263,6 +1263,7 @@ public class KnowledgeFlowApp
     final JPanel tempP = new JPanel();
     JLabel tempL = new JLabel();
     tempL.setFont(new Font("Monospaced", Font.PLAIN, 10));
+
     String labelName = (wekawrapper == true) 
       ? algName 
       : tempName;
@@ -1271,8 +1272,10 @@ public class KnowledgeFlowApp
     tempL.setText(" "+labelName+" ");
     tempL.setHorizontalAlignment(JLabel.CENTER);
     tempP.setLayout(new BorderLayout());
+
     if (tempBean instanceof Visible) {
       BeanVisual bv = ((Visible)tempBean).getVisual();
+
       tempButton = 
 	new JToggleButton(bv.getStaticIcon());
       int width = bv.getStaticIcon().getIconWidth();
@@ -1349,6 +1352,7 @@ public class KnowledgeFlowApp
 	    System.err.
 	      println("[KnowledgeFlow] Problem adding bean to data flow layout");
 	  }
+          notifyIsDirty();
 	}
       });
     
@@ -2305,41 +2309,93 @@ public class KnowledgeFlowApp
           ois.close();
         }
 
-	java.awt.Color bckC = getBackground();
-	m_bcSupport = new BeanContextSupport();
-	m_bcSupport.setDesignTime(true);
-
-	// register this panel as a property change listener with each
-	// bean
-	for (int i = 0; i < beans.size(); i++) {
-	  BeanInstance tempB = (BeanInstance)beans.elementAt(i);
-	  if (tempB.getBean() instanceof Visible) {
-	    ((Visible)(tempB.getBean())).getVisual().
-	      addPropertyChangeListener(this);
-
-	    // A workaround to account for JPanel's with their default
-	    // background colour not being serializable in Apple's JRE
-	    ((Visible)(tempB.getBean())).getVisual().
-	      setBackground(bckC);
-	    ((JComponent)(tempB.getBean())).setBackground(bckC);
-	  }
-	  if (tempB.getBean() instanceof BeanCommon) {
-	    ((BeanCommon)(tempB.getBean())).setLog(m_logPanel);
-	  }
-	  if (tempB.getBean() instanceof BeanContextChild) {
-	    m_bcSupport.add(tempB.getBean());
-	  }
-	}
-	BeanInstance.setBeanInstances(beans, m_beanLayout);
-	BeanConnection.setConnections(connections);
-	m_beanLayout.revalidate();
-	m_beanLayout.repaint();
+        integrateFlow(beans, connections);
       } catch (Exception ex) {
 	ex.printStackTrace();
       }
     }
     m_loadB.setEnabled(true);
     m_saveB.setEnabled(true);
+  }
+
+  // Link the supplied beans into the KnowledgeFlow gui
+  private void integrateFlow(Vector beans, Vector connections) {
+    java.awt.Color bckC = getBackground();
+    m_bcSupport = new BeanContextSupport();
+    m_bcSupport.setDesignTime(true);
+
+    // register this panel as a property change listener with each
+    // bean
+    for (int i = 0; i < beans.size(); i++) {
+      BeanInstance tempB = (BeanInstance)beans.elementAt(i);
+      if (tempB.getBean() instanceof Visible) {
+        ((Visible)(tempB.getBean())).getVisual().
+          addPropertyChangeListener(this);
+
+        // A workaround to account for JPanel's with their default
+        // background colour not being serializable in Apple's JRE
+        ((Visible)(tempB.getBean())).getVisual().
+          setBackground(bckC);
+        ((JComponent)(tempB.getBean())).setBackground(bckC);
+      }
+      if (tempB.getBean() instanceof BeanCommon) {
+        ((BeanCommon)(tempB.getBean())).setLog(m_logPanel);
+      }
+      if (tempB.getBean() instanceof BeanContextChild) {
+        m_bcSupport.add(tempB.getBean());
+      }
+    }
+    BeanInstance.setBeanInstances(beans, m_beanLayout);
+    BeanConnection.setConnections(connections);
+    m_beanLayout.revalidate();
+    m_beanLayout.repaint();
+  }
+
+  /**
+   * Set the flow for the KnowledgeFlow to edit. Assumes that client
+   * has loaded a Vector of beans and a Vector of connections. the supplied
+   * beans and connections are deep-copied via serialization before being
+   * set in the layout.
+   *
+   * @param v a Vector containing a Vector of beans and a Vector of connections
+   * @exception Exception if something goes wrong
+   */
+  public void setFlow(Vector v) throws Exception {
+    //    Vector beansCopy = null, connectionsCopy = null;
+    clearLayout();
+    SerializedObject so = new SerializedObject(v);
+    Vector copy = (Vector)so.getObject();
+    
+    Vector beans = (Vector)copy.elementAt(0);
+    Vector connections = (Vector)copy.elementAt(1);
+    integrateFlow(beans, connections);
+  }
+
+  /**
+   * Gets the current flow being edited. The flow is returned as a single
+   * Vector containing two other Vectors: the beans and the connections.
+   * These two vectors are deep-copied via serialization before being
+   * returned.
+   *
+   * @returns the current flow being edited
+   */
+  public Vector getFlow() throws Exception {
+    Vector v = new Vector();
+    Vector beans = BeanInstance.getBeanInstances();
+    Vector connections = BeanConnection.getConnections();
+    detachFromLayout(beans);
+    v.add(beans);
+    v.add(connections);
+
+    SerializedObject so = new SerializedObject(v);
+    Vector copy = (Vector)so.getObject();
+
+    //    tempWrite(beans, connections);
+    
+    integrateFlow(beans, connections);
+    clearLayout();
+
+    return copy;
   }
   
   /**
@@ -2365,6 +2421,31 @@ public class KnowledgeFlowApp
     return image;
   }
 
+  // Remove this panel as a property changle listener from
+  // each bean
+  private void detachFromLayout(Vector beans) {
+    for (int i = 0; i < beans.size(); i++) {
+      BeanInstance tempB = (BeanInstance)beans.elementAt(i);
+      if (tempB.getBean() instanceof Visible) {
+        ((Visible)(tempB.getBean())).getVisual().
+          removePropertyChangeListener(this);
+          
+        if (tempB.getBean() instanceof MetaBean) {
+          ((MetaBean)tempB.getBean()).
+            removePropertyChangeListenersSubFlow(this);
+        }
+
+        // A workaround to account for JPanel's with their default
+        // background colour not being serializable in Apple's JRE.
+        // JComponents are rendered with a funky stripy background
+        // under OS X using java.awt.TexturePaint - unfortunately
+        // TexturePaint doesn't implement Serializable.
+        ((Visible)(tempB.getBean())).getVisual().
+          setBackground(java.awt.Color.white);
+        ((JComponent)(tempB.getBean())).setBackground(java.awt.Color.white);
+      }
+    }
+  }
 
   /**
    * Serialize the layout to a file
@@ -2377,28 +2458,9 @@ public class KnowledgeFlowApp
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       // temporarily remove this panel as a property changle listener from
       // each bean
-      Vector beans = BeanInstance.getBeanInstances();
-      for (int i = 0; i < beans.size(); i++) {
-	BeanInstance tempB = (BeanInstance)beans.elementAt(i);
-	if (tempB.getBean() instanceof Visible) {
-	  ((Visible)(tempB.getBean())).getVisual().
-	    removePropertyChangeListener(this);
-          
-          if (tempB.getBean() instanceof MetaBean) {
-            ((MetaBean)tempB.getBean()).
-              removePropertyChangeListenersSubFlow(this);
-          }
 
-	  // A workaround to account for JPanel's with their default
-	  // background colour not being serializable in Apple's JRE.
-	  // JComponents are rendered with a funky stripy background
-	  // under OS X using java.awt.TexturePaint - unfortunately
-	  // TexturePaint doesn't implement Serializable.
-	  ((Visible)(tempB.getBean())).getVisual().
-	    setBackground(java.awt.Color.white);
-	  ((JComponent)(tempB.getBean())).setBackground(java.awt.Color.white);
-	}
-      }
+      Vector beans = BeanInstance.getBeanInstances();
+      detachFromLayout(beans);
 
       // determine filename
       File sFile = m_FileChooser.getSelectedFile();
