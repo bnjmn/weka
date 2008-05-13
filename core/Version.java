@@ -35,7 +35,7 @@ import java.io.LineNumberReader;
  * of WEKA the file was produced.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $ 
+ * @version $Revision: 1.8 $ 
  */
 public class Version
   implements Comparable, RevisionHandler {
@@ -54,7 +54,8 @@ public class Version
 
   static {
     try {
-      InputStream inR = ClassLoader.getSystemResourceAsStream(VERSION_FILE);
+      InputStream inR = (new Version()).getClass().getClassLoader().getResourceAsStream(VERSION_FILE);
+      //      InputStream inR = ClassLoader.getSystemResourceAsStream(VERSION_FILE);
       LineNumberReader lnr = new LineNumberReader(new InputStreamReader(inR));
       
       String line = lnr.readLine();
@@ -235,7 +236,7 @@ public class Version
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
   
   /**
