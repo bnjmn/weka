@@ -40,7 +40,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.9 $
+ * @version $Revision: 1.1.2.10 $
  */
 public class FlowRunner {
 
@@ -157,6 +157,15 @@ public class FlowRunner {
    */
   public Vector getFlows() {
     return m_beans;
+  }
+
+  /**
+   * Set the vector holding the flows(s) to run
+   *
+   * @param beans the Vector holding the flows to run
+   */
+  public void setFlows(Vector beans) {
+    m_beans = beans;
   }
 
   /**
