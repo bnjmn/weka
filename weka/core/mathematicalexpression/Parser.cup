@@ -41,7 +41,7 @@ import java.util.*;
  * A parser for parsing mathematical expressions.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 parser code {:
@@ -149,7 +149,7 @@ parser code {:
   }
 :}
 
-terminal COMMA, LPAREN, RPAREN, EOL;
+terminal COMMA, LPAREN, RPAREN;
 terminal MINUS, PLUS, TIMES, DIVISION;
 terminal ABS, SQRT, LOG, EXP, SIN, COS, TAN, RINT, FLOOR, POW, CEIL, IFELSE;
 terminal TRUE, FALSE, LT, LE, GT, GE, EQ, NOT, AND, OR;
@@ -171,7 +171,7 @@ precedence left ABS, SQRT, LOG, EXP, SIN, COS, TAN, RINT, FLOOR, POW, CEIL;
 precedence left AND, OR;
 precedence left NOT;
 
-expr_list ::= expr_list expr_part | expr_part ;
+expr_list ::= expr_list expr_part | expr_part;
 expr_part ::= expr:e {: parser.setResult(e); :} ;
 expr      ::=   NUMBER:n
                 {: RESULT = n; :}
@@ -186,13 +186,13 @@ expr      ::=   NUMBER:n
               ;
 
 opexpr    ::=   expr:l PLUS expr:r
-                {: RESULT = new Double(l + r); :}
+                {: RESULT = new Double(l.doubleValue() + r.doubleValue()); :}
               | expr:l MINUS expr:r
-                {: RESULT = new Double(l - r); :}
+                {: RESULT = new Double(l.doubleValue() - r.doubleValue()); :}
               | expr:l TIMES expr:r
-                {: RESULT = new Double(l * r); :}
+                {: RESULT = new Double(l.doubleValue() * r.doubleValue()); :}
               | expr:l DIVISION expr:r
-                {: RESULT = new Double(l / r); :}
+                {: RESULT = new Double(l.doubleValue() / r.doubleValue()); :}
               ;
 
 varexpr  ::=    VARIABLE:v
@@ -240,15 +240,15 @@ boolexpr ::=    BOOLEAN:b
               | FALSE
                 {: RESULT = new Boolean(false); :}
               | expr:l LT expr:r
-                {: RESULT = new Boolean(l < r); :}
+                {: RESULT = new Boolean(l.doubleValue() < r.doubleValue()); :}
               | expr:l LE expr:r
-                {: RESULT = new Boolean(l <= r); :}
+                {: RESULT = new Boolean(l.doubleValue() <= r.doubleValue()); :}
               | expr:l GT expr:r
-                {: RESULT = new Boolean(l > r); :}
+                {: RESULT = new Boolean(l.doubleValue() > r.doubleValue()); :}
               | expr:l GE expr:r
-                {: RESULT = new Boolean(l >= r); :}
+                {: RESULT = new Boolean(l.doubleValue() >= r.doubleValue()); :}
               | expr:l EQ expr:r
-                {: RESULT = new Boolean(l == r); :}
+                {: RESULT = new Boolean(l.doubleValue() == r.doubleValue()); :}
               | LPAREN boolexpr:b RPAREN
                 {: RESULT = b; :}
               | NOT boolexpr:b

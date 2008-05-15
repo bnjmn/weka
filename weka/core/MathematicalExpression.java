@@ -104,14 +104,14 @@ import java.util.HashMap;
  * </pre>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class MathematicalExpression
   implements RevisionHandler {
   
   /**
-   * generates a new parse tree from the given expression and evalutes and
-   * returns the result of a mathematical expression, based on the given 
+   * Parses and evaluates the given expression.
+   * Returns the result of the mathematical expression, based on the given 
    * values of the symbols.
    * 
    * @param expr	the expression to evaluate
@@ -139,6 +139,6 @@ public class MathematicalExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 }
