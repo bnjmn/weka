@@ -3,15 +3,14 @@
 <!--
   ANT file for generating JFlex/CUP parsers.
 
-  If you want to add new parsers, you basically only need to do the
-  following three things:
-  - write JFlex and CUP files for your parser
-  - add a new target for you Parser, for generating code from the JFLex and CUP
-    files, at the end of this ANT file
-  - add the name of this target as "antcall" to the "parsers" target
+  If you want to add a new parser, you basically only need to do the
+  following two things:
+  - write JFlex and CUP files, i.e., Parser.cup and Scanner.jflex, for your 
+    parser and place them in a separated sub-package
+  - add an "antcall" to the "parsers" target, with the sub-package as parameter
+    (the sub-package your parser files reside in)
 
-  For an example, please refer to the "mathematicalexpression" parser (here in
-  this ANT file and also the respective JFLex and CUP files).
+  For an example, please refer to the "weka.core.mathematicalexpression" parser.
 
   URLs:
   - JFlex
@@ -20,7 +19,7 @@
     http://www2.cs.tum.edu/projects/cup/
 
   Author:  FracPete (fracpete at waikato dot ac dot nz)
-  Version: $Revision: 1.1 $
+  Version: $Revision: 1.2 $
 -->
 
 <project name="weka-parsers" default="compile_inline" basedir=".">
@@ -29,6 +28,7 @@
    <property name="deprecation"    value="off" />
    <property name="optimization"   value="off" />
    <property name="build"          value="build"/>
+   <property name="parserpkg"      value="" />
 
    <target name="init" description="Sets up the environment.">
       <available file="weka" type="dir" property="path_modifier" value=""/>
@@ -57,38 +57,43 @@
    
    <!-- central target for calling the parser targets -->
    <target name="parsers" depends="init" description="Generates all the parsers subsequently.">
-      <antcall target="mathexpression"/>
-      <!-- add calls to further parsers here -->
+      <antcall target="parser">
+         <param name="parserpkg" value="weka/core/mathematicalexpression"/>
+      </antcall>
+      <antcall target="parser">
+         <param name="parserpkg" value="weka/filters/unsupervised/instance/subsetbyexpression"/>
+      </antcall>
+      <!-- add calls for more parsers here -->
    </target>
 
-   <target name="mathexpression" depends="init" description="Generates the MathematicalExpression parser.">
-      <echo message="Generating lexer."/>
+   <!-- generates a parser situated in the ${parserpkg} sub-package 
+        (using Parser.cup and Scanner.jflex). -->
+   <target name="parser" description="Generates the parser ${parserpkg}.">
+      <echo message="Generating lexer (${parserpkg})."/>
       <java classname="weka.core.parser.JFlex.Main">
-	 <classpath>
-            <pathelement location="${classpath}"/>
-            <pathelement path="${path_modifier}${java.class.path}"/>
-	 </classpath>
+      	 <classpath>
+           <pathelement location="${classpath}"/>
+           <pathelement path="${path_modifier}${java.class.path}"/>
+      	 </classpath>
          <arg value="--jlex"/>
          <arg value="--quiet"/>
          <arg value="--nobak"/>
          <arg value="--outdir"/>
-         <arg value="${path_modifier}weka/core/mathematicalexpression"/>
-         <arg value="${path_modifier}weka/core/mathematicalexpression/Scanner.jflex"/>
+         <arg value="${path_modifier}/${parserpkg}"/>
+         <arg value="${path_modifier}/${parserpkg}/Scanner.jflex"/>
       </java>
-      <echo message="Generating parser."/>
+      <echo message="Generating parser (${parserpkg})."/>
       <java classname="weka.core.parser.java_cup.Main">
-	 <classpath>
-            <pathelement location="${classpath}"/>
-            <pathelement path="${path_modifier}${java.class.path}"/>
-	 </classpath>
+      	 <classpath>
+           <pathelement location="${classpath}"/>
+           <pathelement path="${path_modifier}${java.class.path}"/>
+      	 </classpath>
          <arg value="-parser"/>
          <arg value="Parser"/>
          <arg value="-interface"/>
          <arg value="-destdir"/>
-         <arg value="${path_modifier}weka/core/mathematicalexpression"/>
-         <arg value="${path_modifier}weka/core/mathematicalexpression/Parser.cup"/>
+         <arg value="${path_modifier}/${parserpkg}"/>
+         <arg value="${path_modifier}/${parserpkg}/Parser.cup"/>
       </java>
    </target>
-
-   <!-- add further parser targets here -->
 </project>

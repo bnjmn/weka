@@ -21,16 +21,17 @@
  * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core.mathematicalexpression;
+package weka.filters.unsupervised.instance.subsetbyexpression;
 
 import weka.core.parser.java_cup.runtime.SymbolFactory;
 import java.io.*;
 
 /**
- * A scanner for mathematical expressions.
+ * A scanner for evaluating whether an Instance is to be included in a subset
+ * or not.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 
 public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
@@ -48,14 +49,14 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
    * Translates characters to character classes
    */
   private static final char [] ZZ_CMAP = {
-     0,  0,  0,  0,  0,  0,  0,  0,  0, 32, 32,  0, 32, 32,  0,  0, 
+     0,  0,  0,  0,  0,  0,  0,  0,  0, 35, 35,  0, 35, 35,  0,  0, 
      0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 
-    32,  8,  0,  0,  0,  0,  9,  0, 34, 35,  3,  2, 33,  1, 30,  4, 
-    29, 29, 29, 29, 29, 29, 29, 29, 29, 29,  0,  0,  5,  6,  7,  0, 
-     0, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 
-    31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31,  0,  0,  0,  0,  0, 
-     0, 16, 19, 27,  0, 14, 15, 22,  0, 25,  0,  0, 17,  0, 26, 21, 
-    24, 20, 12, 18, 11, 13,  0, 28, 23,  0,  0,  0, 10,  0,  0,  0
+    35,  0,  0,  0,  0,  0,  0, 34, 37, 38,  3,  2, 36,  1, 28,  4, 
+    27, 27, 27, 27, 27, 27, 27, 27, 27, 27,  0,  0,  5,  6,  7,  0, 
+     0, 29,  0, 31,  0,  0,  0,  0,  0,  0,  0,  0, 32,  0,  0,  0, 
+     0,  0,  0, 33, 30,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 
+     0, 13, 20, 25, 14, 17, 18, 22,  0,  8,  0,  0, 19, 39, 10, 11, 
+    24, 21, 15,  9, 12, 16,  0, 26, 23,  0,  0,  0,  0,  0,  0,  0
   };
 
   /** 
@@ -65,14 +66,15 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
 
   private static final String ZZ_ACTION_PACKED_0 =
     "\1\0\1\1\1\2\1\3\1\4\1\5\1\6\1\7"+
-    "\1\10\1\11\1\12\1\13\12\1\1\14\1\15\1\16"+
-    "\1\17\1\20\1\21\1\22\1\23\16\0\1\14\1\0"+
-    "\1\24\1\0\1\25\2\0\1\26\1\27\1\0\1\30"+
-    "\1\31\2\0\1\32\1\33\1\34\2\0\1\35\1\0"+
-    "\1\36\1\37\1\40\1\0\1\41";
+    "\1\10\14\1\1\11\3\1\1\12\1\13\1\14\1\15"+
+    "\1\16\1\17\1\20\3\0\1\21\14\0\1\11\3\0"+
+    "\1\22\1\0\1\23\1\0\1\24\1\25\1\0\1\26"+
+    "\1\27\1\0\1\30\2\0\1\31\1\32\1\33\4\0"+
+    "\1\34\1\35\1\36\2\0\1\37\1\40\2\0\1\41"+
+    "\1\42\1\43\3\0\1\44";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[70];
+    int [] result = new int[88];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -97,18 +99,20 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\44\0\110\0\44\0\44\0\44\0\154\0\44"+
-    "\0\220\0\44\0\44\0\44\0\264\0\330\0\374\0\u0120"+
-    "\0\u0144\0\u0168\0\u018c\0\u01b0\0\u01d4\0\u01f8\0\u021c\0\u0240"+
-    "\0\44\0\44\0\44\0\44\0\44\0\44\0\u0264\0\u0288"+
-    "\0\u02ac\0\u02d0\0\u02f4\0\u0318\0\u033c\0\u0360\0\u0384\0\u03a8"+
-    "\0\u03cc\0\u03f0\0\u0414\0\u0438\0\u045c\0\u0480\0\44\0\u04a4"+
-    "\0\44\0\u04c8\0\u04ec\0\44\0\44\0\u0510\0\44\0\44"+
-    "\0\u0534\0\u0558\0\44\0\44\0\44\0\u057c\0\u05a0\0\44"+
-    "\0\u05c4\0\44\0\44\0\44\0\u05e8\0\44";
+    "\0\0\0\50\0\120\0\50\0\50\0\50\0\170\0\50"+
+    "\0\240\0\310\0\360\0\u0118\0\u0140\0\u0168\0\u0190\0\u01b8"+
+    "\0\u01e0\0\u0208\0\u0230\0\u0258\0\u0280\0\u02a8\0\u02d0\0\u02f8"+
+    "\0\u0320\0\50\0\50\0\50\0\50\0\50\0\50\0\u0348"+
+    "\0\u0370\0\u0398\0\u03c0\0\50\0\u03e8\0\u0410\0\u0438\0\u0460"+
+    "\0\u0488\0\u04b0\0\u04d8\0\u0500\0\u0528\0\u0550\0\u0578\0\u05a0"+
+    "\0\u05c8\0\u05f0\0\u0618\0\u0320\0\50\0\u0640\0\50\0\u0668"+
+    "\0\50\0\50\0\u0690\0\50\0\50\0\u06b8\0\50\0\u06e0"+
+    "\0\u0708\0\50\0\50\0\50\0\u0730\0\u0758\0\u0780\0\u07a8"+
+    "\0\50\0\50\0\50\0\u07d0\0\u07f8\0\50\0\u0758\0\u0820"+
+    "\0\u0848\0\50\0\50\0\50\0\u0870\0\u0898\0\u08c0\0\50";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[70];
+    int [] result = new int[88];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -132,24 +136,29 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
 
   private static final String ZZ_TRANS_PACKED_0 =
     "\1\2\1\3\1\4\1\5\1\6\1\7\1\10\1\11"+
-    "\1\12\1\13\1\14\1\15\1\16\1\2\1\17\1\20"+
-    "\1\21\1\22\1\23\5\2\1\24\1\25\1\2\1\26"+
-    "\1\2\1\27\1\2\1\30\1\31\1\32\1\33\1\34"+
-    "\101\0\1\27\14\0\1\35\43\0\1\36\51\0\1\37"+
-    "\3\0\1\40\54\0\1\41\41\0\1\42\34\0\1\43"+
-    "\1\44\45\0\1\45\45\0\1\46\42\0\1\47\4\0"+
-    "\1\50\37\0\1\51\35\0\1\52\42\0\1\53\6\0"+
-    "\1\54\53\0\1\27\1\55\44\0\1\30\21\0\1\56"+
-    "\60\0\1\57\43\0\1\60\41\0\1\61\34\0\1\62"+
-    "\47\0\1\63\40\0\1\64\47\0\1\65\31\0\1\66"+
-    "\61\0\1\67\45\0\1\70\25\0\1\71\56\0\1\72"+
-    "\34\0\1\73\56\0\1\55\24\0\1\74\40\0\1\75"+
-    "\52\0\1\76\46\0\1\77\31\0\1\100\51\0\1\101"+
-    "\43\0\1\102\40\0\1\103\41\0\1\104\51\0\1\105"+
-    "\37\0\1\106\25\0";
+    "\1\12\1\13\1\14\1\15\1\16\1\17\1\2\1\20"+
+    "\1\2\1\21\1\22\1\23\4\2\1\24\1\25\1\2"+
+    "\1\26\1\2\1\27\1\2\1\30\2\2\1\31\1\32"+
+    "\1\33\1\34\1\35\1\2\103\0\1\26\22\0\1\36"+
+    "\47\0\1\37\52\0\1\40\46\0\1\41\14\0\1\42"+
+    "\35\0\1\43\53\0\1\44\45\0\1\45\1\0\1\46"+
+    "\42\0\1\47\11\0\1\50\33\0\1\51\66\0\1\52"+
+    "\35\0\1\53\5\0\1\54\37\0\1\55\47\0\1\56"+
+    "\47\0\1\57\5\0\1\60\61\0\1\26\1\61\51\0"+
+    "\1\62\51\0\1\63\7\0\34\64\1\0\5\64\1\65"+
+    "\5\64\47\0\1\66\12\0\1\67\54\0\1\70\44\0"+
+    "\1\71\45\0\1\72\55\0\1\73\45\0\1\74\42\0"+
+    "\1\75\50\0\1\76\65\0\1\77\42\0\1\100\37\0"+
+    "\1\101\62\0\1\102\53\0\1\103\26\0\1\104\46\0"+
+    "\1\105\72\0\1\61\52\0\1\106\46\0\1\107\22\0"+
+    "\1\110\53\0\1\111\54\0\1\112\42\0\1\113\44\0"+
+    "\1\114\51\0\1\115\57\0\1\116\57\0\1\117\55\0"+
+    "\1\120\17\0\1\121\57\0\1\122\45\0\1\123\71\0"+
+    "\1\124\17\0\1\125\46\0\1\126\51\0\1\127\63\0"+
+    "\1\130\21\0";
 
   private static int [] zzUnpackTrans() {
-    int [] result = new int[1548];
+    int [] result = new int[2280];
     int offset = 0;
     offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -187,13 +196,14 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
   private static final int [] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-    "\1\0\1\11\1\1\3\11\1\1\1\11\1\1\3\11"+
-    "\14\1\6\11\16\0\1\1\1\0\1\11\1\0\1\11"+
-    "\2\0\2\11\1\0\2\11\2\0\3\11\2\0\1\11"+
-    "\1\0\3\11\1\0\1\11";
+    "\1\0\1\11\1\1\3\11\1\1\1\11\21\1\6\11"+
+    "\1\1\3\0\1\11\14\0\1\1\3\0\1\11\1\0"+
+    "\1\11\1\0\2\11\1\0\2\11\1\0\1\11\2\0"+
+    "\3\11\4\0\3\11\2\0\1\11\1\1\2\0\3\11"+
+    "\3\0\1\11";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[70];
+    int [] result = new int[88];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -262,7 +272,7 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
 
   /* user code: */
   // Author: FracPete (fracpete at waikato dot ac dot nz)
-  // Version: $Revision: 1.2 $
+  // Version: $Revision: 1.1 $
   protected SymbolFactory sf;
 
   public Scanner(InputStream r, SymbolFactory sf){
@@ -540,138 +550,150 @@ public class Scanner implements weka.core.parser.java_cup.runtime.Scanner {
       zzMarkedPos = zzMarkedPosL;
 
       switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
-        case 11: 
-          { return sf.newSymbol("Or", sym.OR);
-          }
-        case 34: break;
-        case 24: 
-          { return sf.newSymbol("Sin", sym.SIN);
-          }
-        case 35: break;
-        case 23: 
-          { return sf.newSymbol("Log", sym.LOG);
-          }
-        case 36: break;
-        case 16: 
-          { return sf.newSymbol("Left Bracket", sym.LPAREN);
+        case 32: 
+          { return sf.newSymbol("Attribute", sym.ATTRIBUTE, new String(yytext()));
           }
         case 37: break;
-        case 27: 
-          { return sf.newSymbol("True", sym.TRUE);
-          }
-        case 38: break;
-        case 1: 
-          { System.err.println("Illegal character: "+yytext());
-          }
-        case 39: break;
-        case 29: 
-          { return sf.newSymbol("Sqrt", sym.SQRT);
-          }
-        case 40: break;
-        case 30: 
-          { return sf.newSymbol("Ceil", sym.CEIL);
-          }
-        case 41: break;
-        case 31: 
-          { return sf.newSymbol("False", sym.FALSE);
-          }
-        case 42: break;
-        case 18: 
-          { return sf.newSymbol("Less or equal than", sym.LE);
-          }
-        case 43: break;
-        case 17: 
-          { return sf.newSymbol("Right Bracket", sym.RPAREN);
-          }
-        case 44: break;
-        case 26: 
-          { return sf.newSymbol("Cos", sym.COS);
-          }
-        case 45: break;
-        case 21: 
-          { return sf.newSymbol("Exp", sym.EXP);
-          }
-        case 46: break;
-        case 12: 
-          { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext()));
-          }
-        case 47: break;
-        case 3: 
-          { return sf.newSymbol("Plus", sym.PLUS);
-          }
-        case 48: break;
-        case 13: 
-          { return sf.newSymbol("Variable", sym.VARIABLE, new String(yytext()));
-          }
-        case 49: break;
-        case 22: 
+        case 23: 
           { return sf.newSymbol("Abs", sym.ABS);
           }
-        case 50: break;
-        case 20: 
-          { return sf.newSymbol("Tan", sym.TAN);
+        case 38: break;
+        case 19: 
+          { return sf.newSymbol("Sin", sym.SIN);
           }
-        case 51: break;
-        case 15: 
+        case 39: break;
+        case 10: 
+          { /* ignore white space. */
+          }
+        case 40: break;
+        case 11: 
           { return sf.newSymbol("Comma", sym.COMMA);
           }
-        case 52: break;
-        case 33: 
-          { return sf.newSymbol("IfElse", sym.IFELSE);
+        case 41: break;
+        case 18: 
+          { return sf.newSymbol("String", sym.STRING, new String(yytext().substring(1, yytext().length() - 1)));
           }
-        case 53: break;
-        case 28: 
-          { return sf.newSymbol("Rint", sym.RINT);
-          }
-        case 54: break;
-        case 8: 
-          { return sf.newSymbol("Greater than", sym.GT);
-          }
-        case 55: break;
-        case 19: 
-          { return sf.newSymbol("Greater or equal than", sym.GE);
-          }
-        case 56: break;
-        case 5: 
-          { return sf.newSymbol("Division", sym.DIVISION);
-          }
-        case 57: break;
-        case 7: 
-          { return sf.newSymbol("Equals", sym.EQ);
-          }
-        case 58: break;
-        case 10: 
-          { return sf.newSymbol("And", sym.AND);
-          }
-        case 59: break;
-        case 9: 
-          { return sf.newSymbol("Not", sym.NOT);
-          }
-        case 60: break;
+        case 42: break;
         case 4: 
           { return sf.newSymbol("Times", sym.TIMES);
           }
-        case 61: break;
-        case 32: 
+        case 43: break;
+        case 35: 
+          { return sf.newSymbol("Class", sym.ATTRIBUTE, new String(yytext()));
+          }
+        case 44: break;
+        case 34: 
           { return sf.newSymbol("Floor", sym.FLOOR);
           }
-        case 62: break;
+        case 45: break;
+        case 33: 
+          { return sf.newSymbol("False", sym.FALSE);
+          }
+        case 46: break;
+        case 9: 
+          { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext()));
+          }
+        case 47: break;
+        case 26: 
+          { return sf.newSymbol("Pow", sym.POW);
+          }
+        case 48: break;
         case 6: 
           { return sf.newSymbol("Less than", sym.LT);
           }
-        case 63: break;
+        case 49: break;
+        case 31: 
+          { return sf.newSymbol("Ceil", sym.CEIL);
+          }
+        case 50: break;
+        case 13: 
+          { return sf.newSymbol("Right Bracket", sym.RPAREN);
+          }
+        case 51: break;
+        case 21: 
+          { return sf.newSymbol("Tan", sym.TAN);
+          }
+        case 52: break;
+        case 29: 
+          { return sf.newSymbol("True", sym.TRUE);
+          }
+        case 53: break;
+        case 7: 
+          { return sf.newSymbol("Equals", sym.EQ);
+          }
+        case 54: break;
+        case 15: 
+          { return sf.newSymbol("Greater or equal than", sym.GE);
+          }
+        case 55: break;
+        case 27: 
+          { return sf.newSymbol("Cos", sym.COS);
+          }
+        case 56: break;
+        case 28: 
+          { return sf.newSymbol("Sqrt", sym.SQRT);
+          }
+        case 57: break;
         case 25: 
-          { return sf.newSymbol("Pow", sym.POW);
+          { return sf.newSymbol("Log", sym.LOG);
           }
-        case 64: break;
-        case 14: 
-          { /* ignore white space. */
+        case 58: break;
+        case 16: 
+          { return sf.newSymbol("Is", sym.IS);
           }
-        case 65: break;
+        case 59: break;
         case 2: 
           { return sf.newSymbol("Minus", sym.MINUS);
           }
+        case 60: break;
+        case 3: 
+          { return sf.newSymbol("Plus", sym.PLUS);
+          }
+        case 61: break;
+        case 30: 
+          { return sf.newSymbol("Rint", sym.RINT);
+          }
+        case 62: break;
+        case 14: 
+          { return sf.newSymbol("Less or equal than", sym.LE);
+          }
+        case 63: break;
+        case 12: 
+          { return sf.newSymbol("Left Bracket", sym.LPAREN);
+          }
+        case 64: break;
+        case 24: 
+          { return sf.newSymbol("Exp", sym.EXP);
+          }
+        case 65: break;
+        case 5: 
+          { return sf.newSymbol("Division", sym.DIVISION);
+          }
         case 66: break;
+        case 1: 
+          { System.err.println("Illegal character: "+yytext());
+          }
+        case 67: break;
+        case 20: 
+          { return sf.newSymbol("Not", sym.NOT);
+          }
+        case 68: break;
+        case 36: 
+          { return sf.newSymbol("Missing", sym.ISMISSING);
+          }
+        case 69: break;
+        case 17: 
+          { return sf.newSymbol("Or", sym.OR);
+          }
+        case 70: break;
+        case 8: 
+          { return sf.newSymbol("Greater than", sym.GT);
+          }
+        case 71: break;
+        case 22: 
+          { return sf.newSymbol("And", sym.AND);
+          }
+        case 72: break;
         default: 
           if (zzInput == YYEOF && zzStartRead == zzCurrentPos) {
             zzAtEOF = true;

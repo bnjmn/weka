@@ -19,16 +19,17 @@
  * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core.mathematicalexpression;
+package weka.filters.unsupervised.instance.subsetbyexpression;
 
 import weka.core.parser.java_cup.runtime.SymbolFactory;
 import java.io.*;
 
 /**
- * A scanner for mathematical expressions.
+ * A scanner for evaluating whether an Instance is to be included in a subset
+ * or not.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.1 $
  */
 %%
 %cup
@@ -36,7 +37,7 @@ import java.io.*;
 %class Scanner
 %{
   // Author: FracPete (fracpete at waikato dot ac dot nz)
-  // Version: $Revision: 1.2 $
+  // Version: $Revision: 1.1 $
   protected SymbolFactory sf;
 
   public Scanner(InputStream r, SymbolFactory sf){
@@ -61,9 +62,10 @@ import java.io.*;
 ">" { return sf.newSymbol("Greater than", sym.GT); }
 ">=" { return sf.newSymbol("Greater or equal than", sym.GE); }
 "=" { return sf.newSymbol("Equals", sym.EQ); }
-"!" { return sf.newSymbol("Not", sym.NOT); }
-"&" { return sf.newSymbol("And", sym.AND); }
-"|" { return sf.newSymbol("Or", sym.OR); }
+"is" { return sf.newSymbol("Is", sym.IS); }
+"not" { return sf.newSymbol("Not", sym.NOT); }
+"and" { return sf.newSymbol("And", sym.AND); }
+"or" { return sf.newSymbol("Or", sym.OR); }
 "true" { return sf.newSymbol("True", sym.TRUE); }
 "false" { return sf.newSymbol("False", sym.FALSE); }
 
@@ -79,12 +81,13 @@ import java.io.*;
 "floor" { return sf.newSymbol("Floor", sym.FLOOR); }
 "pow" { return sf.newSymbol("Pow", sym.POW); }
 "ceil" { return sf.newSymbol("Ceil", sym.CEIL); }
-"ifelse" { return sf.newSymbol("IfElse", sym.IFELSE); }
 
 // numbers and variables
 [0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
 -[0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
-[A-Z]+ { return sf.newSymbol("Variable", sym.VARIABLE, new String(yytext())); }
+[A][T][T][0-9][0-9]* { return sf.newSymbol("Attribute", sym.ATTRIBUTE, new String(yytext())); }
+"CLASS" { return sf.newSymbol("Class", sym.ATTRIBUTE, new String(yytext())); }
+\'[^\'.]*\' { return sf.newSymbol("String", sym.STRING, new String(yytext().substring(1, yytext().length() - 1))); }
 
 // whitespaces
 [ \r\n\t\f] { /* ignore white space. */ }
@@ -93,6 +96,7 @@ import java.io.*;
 "," { return sf.newSymbol("Comma", sym.COMMA); }
 "(" { return sf.newSymbol("Left Bracket", sym.LPAREN); }
 ")" { return sf.newSymbol("Right Bracket", sym.RPAREN); }
+"ismissing" { return sf.newSymbol("Missing", sym.ISMISSING); }
 
 // catch all
 . { System.err.println("Illegal character: "+yytext()); }
