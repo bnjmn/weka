@@ -68,7 +68,7 @@ import java.util.Vector;
  *  <p>
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.3.2.1 $ 
+ * @version $Revision: 1.3.2.2 $ 
  **/
 public class SpreadSubsample extends Filter implements SupervisedFilter,
 						       OptionHandler {
@@ -457,11 +457,14 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
     }
     
     // find the class with the minimum number of instances
+    int minIndex = -1;
     for (int i = 0; i < counts.length; i++) {
       if ( (min < 0) && (counts[i] > 0) ) {
         min = counts[i];
+        minIndex = i;
       } else if ((counts[i] < min) && (counts[i] > 0)) {
         min = counts[i];
+        minIndex = i;
       }
     }
 
@@ -475,6 +478,13 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
     for (int i = 0; i < counts.length; i++) {
       new_counts[i] = (int)Math.abs(Math.min(counts[i],
                                              min * m_DistributionSpread));
+
+      if (i == minIndex) {
+        if (m_DistributionSpread > 0 && m_DistributionSpread < 1.0) {
+          // don't undersample the minority class!
+          new_counts[i] = counts[i];
+        }
+      }
       if (m_DistributionSpread == 0) {
         new_counts[i] = counts[i];
       }
