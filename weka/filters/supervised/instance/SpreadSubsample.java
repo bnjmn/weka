@@ -70,7 +70,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stuart Inglis (stuart@reeltwo.com)
- * @version $Revision: 1.7.2.1 $ 
+ * @version $Revision: 1.7.2.2 $ 
  **/
 public class SpreadSubsample 
   extends Filter 
@@ -482,11 +482,14 @@ public class SpreadSubsample
     }
     
     // find the class with the minimum number of instances
+    int minIndex = -1;
     for (int i = 0; i < counts.length; i++) {
       if ( (min < 0) && (counts[i] > 0) ) {
         min = counts[i];
+        minIndex = i;
       } else if ((counts[i] < min) && (counts[i] > 0)) {
         min = counts[i];
+        minIndex = i;
       }
     }
 
@@ -500,6 +503,12 @@ public class SpreadSubsample
     for (int i = 0; i < counts.length; i++) {
       new_counts[i] = (int)Math.abs(Math.min(counts[i],
                                              min * m_DistributionSpread));
+      if (i == minIndex) {
+        if (m_DistributionSpread > 0 && m_DistributionSpread < 1.0) {
+          // don't undersample the minority class!
+          new_counts[i] = counts[i];
+        }
+      }
       if (m_DistributionSpread == 0) {
         new_counts[i] = counts[i];
       }
@@ -588,7 +597,7 @@ public class SpreadSubsample
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.7.2.2 $");
   }
 
   /**
