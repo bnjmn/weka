@@ -23,6 +23,7 @@
 package weka.gui.beans;
 
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.DatabaseConverter;
 import weka.core.converters.DatabaseSaver;
@@ -31,7 +32,7 @@ import weka.core.converters.DatabaseSaver;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5.2.2 $
+ * @version $Revision: 1.5.2.3 $
  *
  */
 public class Saver
@@ -193,13 +194,26 @@ public class Saver
 
   /**
    * makes sure that the filename is valid, i.e., replaces slashes,
-   * backslashes and colons with underscores ("_").
+   * backslashes and colons with underscores ("_"). Also try to prevent
+   * filename from becoming insanely long by removing package part
+   * of class names.
    * 
    * @param filename	the filename to cleanse
    * @return		the cleansed filename
    */
   protected String sanitizeFilename(String filename) {
-    return filename.replaceAll("\\\\", "_").replaceAll(":", "_").replaceAll("/", "_");
+    filename = filename.replaceAll("\\\\", "_").replaceAll(":", "_").replaceAll("/", "_");
+    filename = Utils.removeSubstring(filename, "weka.filters.supervised.instance.");
+    filename = Utils.removeSubstring(filename, "weka.filters.supervised.attribute.");
+    filename = Utils.removeSubstring(filename, "weka.filters.unsupervised.instance.");
+    filename = Utils.removeSubstring(filename, "weka.filters.unsupervised.attribute.");
+    filename = Utils.removeSubstring(filename, "weka.clusterers.");
+    filename = Utils.removeSubstring(filename, "weka.associations.");
+    filename = Utils.removeSubstring(filename, "weka.attributeSelection.");
+    filename = Utils.removeSubstring(filename, "weka.estimators.");
+    filename = Utils.removeSubstring(filename, "weka.datagenerators.");
+
+    return filename;
   }
   
   /** Method reacts to a dataset event and starts the writing process in batch mode
