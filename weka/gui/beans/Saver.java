@@ -47,6 +47,7 @@ import javax.swing.JButton;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.core.converters.*;
 
 
@@ -54,7 +55,7 @@ import weka.core.converters.*;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision: 1.1.2.2 $
  *
  */
 public class Saver extends AbstractDataSink implements WekaWrapper {
@@ -200,15 +201,37 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
         m_isDBSaver = false;
   }
   
-  
+  /**
+   * makes sure that the filename is valid, i.e., replaces slashes,
+   * backslashes and colons with underscores ("_"). Also try to prevent
+   * filename from becoming insanely long by removing package part
+   * of class names.
+   * 
+   * @param filename	the filename to cleanse
+   * @return		the cleansed filename
+   */
+  protected String sanitizeFilename(String filename) {
+    filename = filename.replaceAll("\\\\", "_").replaceAll(":", "_").replaceAll("/", "_");
+    filename = Utils.removeSubstring(filename, "weka.filters.supervised.instance.");
+    filename = Utils.removeSubstring(filename, "weka.filters.supervised.attribute.");
+    filename = Utils.removeSubstring(filename, "weka.filters.unsupervised.instance.");
+    filename = Utils.removeSubstring(filename, "weka.filters.unsupervised.attribute.");
+    filename = Utils.removeSubstring(filename, "weka.clusterers.");
+    filename = Utils.removeSubstring(filename, "weka.associations.");
+    filename = Utils.removeSubstring(filename, "weka.attributeSelection.");
+    filename = Utils.removeSubstring(filename, "weka.estimators.");
+    filename = Utils.removeSubstring(filename, "weka.datagenerators.");
+
+    return filename;
+  }
   
   /** Method reacts to a dataset event and starts the writing process in batch mode
    * @param e a dataset event
    */  
   public synchronized void acceptDataSet(DataSetEvent e) {
   
-      m_fileName = e.getDataSet().relationName();
-      m_dataSet = e.getDataSet();
+    m_fileName = sanitizeFilename(e.getDataSet().relationName());
+    m_dataSet = e.getDataSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
           ((DatabaseSaver)m_Saver).setTableName(m_fileName);
       }
@@ -230,27 +253,27 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
   
-      m_fileName = e.getTestSet().relationName();
-      m_dataSet = e.getTestSet();
-      if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
-          ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    m_fileName = sanitizeFilename(e.getTestSet().relationName());
+    m_dataSet = e.getTestSet();
+    if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
+      ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    }
+    if(!e.isStructureOnly()){
+      if(!m_isDBSaver){
+        try{
+          m_Saver.setDirAndPrefix(m_fileName,"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
+        }catch (Exception ex){
+          System.out.println(ex);
+        }
       }
-      if(!e.isStructureOnly()){
-          if(!m_isDBSaver){
-            try{
-                m_Saver.setDirAndPrefix(m_fileName,"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-            }catch (Exception ex){
-                System.out.println(ex);
-            }
-          }
-          else{
-              String setName = ((DatabaseSaver)m_Saver).getTableName();
-              setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
-              ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
-          }
-          saveBatch();
-          System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+      else{
+        String setName = ((DatabaseSaver)m_Saver).getTableName();
+        setName = setName.replaceFirst("_[tT][eE][sS][tT]_[0-9]+_[oO][fF]_[0-9]+","");
+        ((DatabaseSaver)m_Saver).setTableName(setName+"_test_"+e.getSetNumber()+"_of_"+e.getMaxSetNumber());
       }
+      saveBatch();
+      System.out.println("... test set "+e.getSetNumber()+" of "+e.getMaxSetNumber()+" for relation "+ m_fileName +" saved.");
+    }
   }
   
   /** Method reacts to a training set event and starts the writing process in batch
@@ -259,7 +282,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
   
-      m_fileName = e.getTrainingSet().relationName();
+    m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
       m_dataSet = e.getTrainingSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
            ((DatabaseSaver)m_Saver).setTableName(m_fileName);
@@ -304,7 +327,7 @@ public class Saver extends AbstractDataSink implements WekaWrapper {
       if(e.getStatus() == e.FORMAT_AVAILABLE){
         m_Saver.setRetrieval(m_Saver.INCREMENTAL);
         m_structure = e.getStructure();
-        m_fileName = m_structure.relationName();
+        m_fileName = sanitizeFilename(m_structure.relationName());
         m_Saver.setInstances(m_structure);
         if(m_isDBSaver)
             if(((DatabaseSaver)m_Saver).getRelationForTableName())
