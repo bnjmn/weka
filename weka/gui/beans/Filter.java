@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.19 $
  */
 public class Filter
   extends JPanel
@@ -379,6 +379,10 @@ public class Filter
 		  }
 		} catch (Exception ex) {
 		  ex.printStackTrace();
+                  if (m_log != null) {
+                    m_log.logMessage("[KF: Filter] " + ex.toString());
+                    m_log.statusMessage("Problem filtering: see log for details.");
+                  }
 		} finally {
 		  m_visual.setText(oldText);
 		  m_visual.setStatic();
@@ -452,6 +456,10 @@ public class Filter
 		}
 	      } catch (Exception ex) {
 		ex.printStackTrace();
+                if (m_log != null) {
+                  m_log.logMessage("[KF: Filter] " + ex.toString());
+                  m_log.statusMessage("Problem filtering: see log for details.");
+                }
 	      } finally {
 		m_visual.setText(oldText);
 		m_visual.setStatic();
