@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27.2.3 $ 
+ * @version $Revision: 1.27.2.4 $ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -214,7 +214,8 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
       CVParameter cvParam = (CVParameter)m_CVParams.elementAt(i);
       double paramValue = cvParam.m_ParamValue;
       if (cvParam.m_RoundParam) {
-	paramValue = (double)((int) (paramValue + 0.5));
+        //	paramValue = (double)((int) (paramValue + 0.5));
+        paramValue = Math.rint(paramValue);
       }
       if (cvParam.m_AddAtEnd) {
 	options[--end] = "" + 
