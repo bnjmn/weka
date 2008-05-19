@@ -113,7 +113,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35.2.1 $ 
+ * @version $Revision: 1.35.2.2 $ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -236,7 +236,7 @@ public class CVParameterSelection
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35.2.1 $");
+      return RevisionUtils.extract("$Revision: 1.35.2.2 $");
     }
   }
 
@@ -286,7 +286,8 @@ public class CVParameterSelection
       CVParameter cvParam = (CVParameter)m_CVParams.elementAt(i);
       double paramValue = cvParam.m_ParamValue;
       if (cvParam.m_RoundParam) {
-	paramValue = (double)((int) (paramValue + 0.5));
+        //	paramValue = (double)((int) (paramValue + 0.5));
+        paramValue = Math.rint(paramValue);
       }
       if (cvParam.m_AddAtEnd) {
 	options[--end] = "" + 
@@ -838,7 +839,7 @@ public class CVParameterSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.35.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.35.2.2 $");
   }
   
   /**
