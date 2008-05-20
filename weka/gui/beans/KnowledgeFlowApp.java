@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.10 $
+ * @version  $Revision: 1.18.2.11 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -372,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.10 $
+   * @version $Revision: 1.18.2.11 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1318,6 +1318,7 @@ public class KnowledgeFlowApp
                 if (m_userComponents.size() == 0) {
                   m_toolBars.removeTabAt(m_toolBars.getTabCount() - 1);
                   m_userToolBar = null;
+                  notifyIsDirty();
                 }
               } else {
                 SerializedObject so = new SerializedObject(tempBN);
@@ -1351,6 +1352,7 @@ public class KnowledgeFlowApp
 	  } catch (Exception ex) {
 	    System.err.
 	      println("[KnowledgeFlow] Problem adding bean to data flow layout");
+            ex.printStackTrace();
 	  }
           notifyIsDirty();
 	}
@@ -2640,7 +2642,7 @@ public class KnowledgeFlowApp
   }
 
   private void installWindowListenerForSavingUserBeans() {
-    ((JFrame)getTopLevelAncestor()).
+    ((java.awt.Window)getTopLevelAncestor()).
       addWindowListener(new java.awt.event.WindowAdapter() {
           public void windowClosing(java.awt.event.WindowEvent e) {
             System.out.println("[KnowledgeFlow] Saving user components....");
