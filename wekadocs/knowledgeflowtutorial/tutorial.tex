@@ -1,8 +1,9 @@
 \documentclass[a4paper]{article}
 
-% Version: $Revision: 1.4 $
+% Version: $Revision: 1.5 $
 
 \usepackage{epsfig}
+\usepackage{graphicx}
 
 \newenvironment{tight_itemize}{
 \begin{itemize}
@@ -11,7 +12,7 @@
   \setlength{\parsep}{0pt}}{\end{itemize}
 }
 
-\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA KnowledgeFlow Tutorial\\for Version 3-5-7}
+\title{\epsfig{file=images/coat_of_arms.eps,width=10cm}\vspace{3cm}\\WEKA KnowledgeFlow Tutorial\\for Version 3-5-8}
 \author{Mark Hall\\Peter Reutemann}
 
 \setcounter{secnumdepth}{3}
@@ -365,6 +366,92 @@ evaluated on the class label \textit{good}:
 
 \begin{center}
 	\epsfig{file=images/example_multiple_roc_output.eps,height=8.5cm}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Example: processing data incrementally  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\subsection{Processing data incrementally}
+
+Some classifiers, clusterers and filters in Weka can handle data incrementally
+in a streaming fashion. Here is an example of training and testing \textit{naive Bayes}
+incrementally. The results are sent to a \textit{TextViewer} and predictions are plotted
+by a \textit{StripChart} component.
+
+\begin{center}
+  \includegraphics[angle=270,width=13cm]{images/IncrementalFlow.eps}
+\end{center}
+
+\begin{itemize}
+        \item Click on the DataSources tab and choose \textit{ArffLoader} from the
+	toolbar (the mouse pointer will change to a \textit{cross hairs}).
+
+	\item Next place the ArffLoader component on the layout area by clicking
+	somewhere on the layout (a copy of the ArffLoader icon will appear on
+	the layout area).
+
+	\item Next specify an ARFF file to load by first right clicking the mouse
+	over the ArffLoader icon on the layout. A pop-up menu will
+	appear. Select \textit{Configure} under \textit{Edit} in the list from this menu and
+	browse to the location of your ARFF file.
+
+	\item Next click the \textit{Evaluation} tab at the top of the window and choose the
+	\textit{ClassAssigner} (allows you to choose which column to be the class)
+	component from the toolbar. Place this on the layout.
+
+	\item Now connect the ArffLoader to the ClassAssigner: first right click
+	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
+	the menu. A \textit{rubber band} line will appear. Move the mouse over the
+	ClassAssigner component and left click - a red line labeled \textit{dataSet}
+	will connect the two components.
+
+	\item Next right click over the \textit{ClassAssigner} and choose \textit{Configure} from
+	the menu. This will pop up a window from which you can specify which
+	column is the class in your data (last is the default).
+
+        \item Now grab a \textit{NaiveBayesUpdateable} component from the \textit{bayes}
+        section of the \textit{Classifiers} panel and place it on the layout.
+
+        \item Next connect the \textit{ClassAssigner} to \textit{NaiveBayesUpdateable}
+        using a \textit{instance} connection.
+
+        \item Next place an \textit{IncrementalClassiferEvaluator} from the \textit{Evaluation}
+        panel onto the layout and connect \textit{NaiveBayesUpdateable} to it using a
+        \textit{incrementalClassifier} connection.
+
+        \item Next place a \textit{TextViewer} component from the \textit{Visualization}
+        panel on the Layout. Connect the \textit{IncrementalClassifierEvaluator} to
+        it using a \textit{text} connection.
+
+        \item Next place a \textit{StripChart} component from the \textit{Visualization}
+        panel on the layout and connect \textit{IncrementalClassifierEvaluator} to it
+        using a \textit{chart} connection.
+
+        \item Display the \textit{StripChart's} chart by right-clicking over it and choosing
+        \textit{Show chart} from the pop-up menu. Note: the \textit{StripChart} can be configured
+        with options that control how often data points and labels are displayed.
+
+        \item Finally, start the flow by right-clicking over the \textit{ArffLoader} and
+        selecting \textit{Start loading} from the pop-up menu.        
+\end{itemize}
+
+\begin{center}
+  \includegraphics[angle=270,width=12cm]{images/IncrementalChart.eps}
+\end{center}
+
+Note that, in this example, a prediction is obtained from naive Bayes
+for each incoming instance {\bf before} the classifier is trained
+(updated) with the instance. If you have a pre-trained classifier, you
+can specify that the classifier {\bf not} be updated on incoming
+instances by unselecting the check box in the configuration dialog for
+the classifier. If the pre-trained classifier is a {\bf batch}
+classifier (i.e. it is not capable of incremental training) then you
+will only be able to test it in an incremental fashion.
+
+\begin{center}
+  \includegraphics[angle=270,width=12cm]{images/IncrementalClassifierConfig.eps}
 \end{center}
 
 \newpage
