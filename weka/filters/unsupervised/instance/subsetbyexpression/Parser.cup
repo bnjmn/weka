@@ -43,7 +43,7 @@ import java.util.*;
  * or not.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 parser code {:
@@ -269,7 +269,7 @@ boolexpr ::=    BOOLEAN:b
                 {: RESULT = l || r; :}
               | ATTRIBUTE:a IS STRING:s
                 {: if (parser.getSymbols().containsKey(a)) 
-                     RESULT = ((String) parser.getSymbols().get(a)).equals(s);
+                     RESULT = (parser.getSymbols().get(a) instanceof String) && ((String) parser.getSymbols().get(a)).equals(s);
                    else 
                      throw new IllegalStateException("Unknown symbol '" + a + "'!"); 
                 :}
