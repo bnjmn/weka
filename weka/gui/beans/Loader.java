@@ -43,7 +43,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -107,6 +107,8 @@ public class Loader
     public void run() {
       try {
 	m_visual.setAnimated();
+        m_visual.setText("Loading...");
+        
 	boolean instanceGeneration = true;
 	// determine if we are going to produce data set or instance events
 	/*	for (int i = 0; i < m_listeners.size(); i++) {
@@ -164,6 +166,7 @@ public class Loader
 	    z++;
 	  }
 	  m_visual.setStatic();
+	  m_visual.setText(m_dataSet.relationName());
 	} else {
           m_Loader.reset();
 	  m_dataSet = m_Loader.getDataSet();
