@@ -96,7 +96,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class HotSpot
   implements Associator, OptionHandler, RevisionHandler, 
@@ -418,11 +418,13 @@ public class HotSpot
   /**
    * Inner class representing a node/leaf in the tree
    */
-  protected class HotNode {
+  protected class HotNode implements Serializable {
     /**
      * An inner class holding data on a particular attribute value test
      */
-    protected class HotTestDetails implements Comparable<HotTestDetails> {
+    protected class HotTestDetails 
+      implements Comparable<HotTestDetails>,
+                 Serializable {
       public double m_merit;
       public int m_support;
       public int m_subsetSize;
@@ -1291,7 +1293,7 @@ public class HotSpot
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 
   /**
