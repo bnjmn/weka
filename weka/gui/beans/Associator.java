@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -87,6 +87,11 @@ public class Associator
    * Objects listening for text events
    */
   private Vector m_textListeners = new Vector();
+
+  /**
+   * Objects listening for graph events
+   */
+  private Vector m_graphListeners = new Vector();
 
   private weka.associations.Associator m_Associator = new Apriori();
 
@@ -246,6 +251,26 @@ public class Associator
 						   titleString);
 		      notifyTextListeners(nt);
 		    }
+
+                    if (m_Associator instanceof weka.core.Drawable && 
+			m_graphListeners.size() > 0) {
+		      String grphString = 
+			((weka.core.Drawable)m_Associator).graph();
+                      int grphType = ((weka.core.Drawable)m_Associator).graphType();
+		      String grphTitle = m_Associator.getClass().getName();
+		      grphTitle = grphTitle.substring(grphTitle.
+						      lastIndexOf('.')+1, 
+						      grphTitle.length());
+		      grphTitle = " ("
+			+e.getDataSet().relationName() + ") "
+			+grphTitle;
+		      
+		      GraphEvent ge = new GraphEvent(Associator.this, 
+						     grphString, 
+						     grphTitle,
+                                                     grphType);
+		      notifyGraphListeners(ge);
+		    }
 		  }
 		} catch (Exception ex) {
 		  ex.printStackTrace();
@@ -335,6 +360,24 @@ public class Associator
   }
 
   /**
+   * Add a graph listener
+   *
+   * @param cl a <code>GraphListener</code> value
+   */
+  public synchronized void addGraphListener(GraphListener cl) {
+    m_graphListeners.addElement(cl);
+  }
+
+  /**
+   * Remove a graph listener
+   *
+   * @param cl a <code>GraphListener</code> value
+   */
+  public synchronized void removeGraphListener(GraphListener cl) {
+    m_graphListeners.remove(cl);
+  }
+
+  /**
    * Notify all text listeners of a text event
    *
    * @param ge a <code>TextEvent</code> value
@@ -347,6 +390,23 @@ public class Associator
     if (l.size() > 0) {
       for(int i = 0; i < l.size(); i++) {
 	((TextListener)l.elementAt(i)).acceptText(ge);
+      }
+    }
+  }
+
+  /**
+   * Notify all graph listeners of a graph event
+   *
+   * @param ge a <code>GraphEvent</code> value
+   */
+  private void notifyGraphListeners(GraphEvent ge) {
+    Vector l;
+    synchronized (this) {
+      l = (Vector)m_graphListeners.clone();
+    }
+    if (l.size() > 0) {
+      for(int i = 0; i < l.size(); i++) {
+	((GraphListener)l.elementAt(i)).acceptGraph(ge);
       }
     }
   }
@@ -511,7 +571,8 @@ public class Associator
    * time
    */
   public boolean eventGeneratable(String eventName) {
-    if (eventName.compareTo("text") == 0) {
+    if (eventName.compareTo("text") == 0 ||
+        eventName.compareTo("graph") == 0) {
       if (!m_listenees.containsKey("dataSet") &&
 	  !m_listenees.containsKey("trainingSet")) {
 	return false;
@@ -527,6 +588,11 @@ public class Associator
 	if (!((EventConstraints)source).eventGeneratable("dataSet")) {
 	  return false;
 	}
+      }
+
+      if (eventName.compareTo("graph") == 0 &&
+          !(m_Associator instanceof weka.core.Drawable)) {
+        return false;
       }
     }
     return true;
