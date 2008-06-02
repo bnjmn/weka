@@ -113,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision: 1.41 $
  */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -156,6 +156,8 @@ public class Logistic extends Classifier
     
   /** The maximum number of iterations. */
   private int m_MaxIts = -1;
+
+  private Instances m_structure;
     
   /**
    * Returns a string describing this classifier
@@ -497,7 +499,7 @@ public class Logistic extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.40 $");
+      return RevisionUtils.extract("$Revision: 1.41 $");
     }
   }
 
@@ -551,6 +553,9 @@ public class Logistic extends Classifier
     m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(train);
     train = Filter.useFilter(train, m_NominalToBinary);
+    
+    // Save the structure for printing the model
+    m_structure = new Instances(train, 0);
 	
     // Extract data
     m_ClassIndex = train.classIndex();
@@ -768,37 +773,110 @@ public class Logistic extends Classifier
    * @return a string describing the classifer built.
    */
   public String toString() {
-	
-    String result = "Logistic Regression with ridge parameter of "+m_Ridge;
+    StringBuffer temp = new StringBuffer();
+
+    String result = "";
+    temp.append("Logistic Regression with ridge parameter of " + m_Ridge);
     if (m_Par == null) {
       return result + ": No model built yet.";
     }
-	
-    result += "\nCoefficients...\n"
-      + "Variable      Coeff.\n";
-    for (int j = 1; j <= m_NumPredictors; j++) {
-      result += Utils.doubleToString(j, 8, 0);
-      for (int k = 0; k < m_NumClasses-1; k++)
-	result += " "+Utils.doubleToString(m_Par[j][k], 12, 4); 
-      result += "\n";
-    }
-	
-    result += "Intercept ";
-    for (int k = 0; k < m_NumClasses-1; k++)
-      result += " "+Utils.doubleToString(m_Par[0][k], 10, 4); 
-    result += "\n";
-	
-    result += "\nOdds Ratios...\n"
-      + "Variable         O.R.\n";
-    for (int j = 1; j <= m_NumPredictors; j++) {
-      result += Utils.doubleToString(j, 8, 0); 
-      for (int k = 0; k < m_NumClasses-1; k++){
-	double ORc = Math.exp(m_Par[j][k]);
-	result += " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
+
+    // find longest attribute name
+    int attLength = 0;
+    for (int i = 0; i < m_structure.numAttributes(); i++) {
+      if (i != m_structure.classIndex() && 
+          m_structure.attribute(i).name().length() > attLength) {
+        attLength = m_structure.attribute(i).name().length();
       }
-      result += "\n";
     }
-    return result;
+
+    if ("Intercept".length() > attLength) {
+      attLength = "Intercept".length();
+    }
+
+    if ("Variable".length() > attLength) {
+      attLength = "Variable".length();
+    }
+    attLength += 2;
+
+    int colWidth = 0;
+    // check length of class names
+    for (int i = 0; i < m_structure.classAttribute().numValues() - 1; i++) {
+      if (m_structure.classAttribute().value(i).length() > colWidth) {
+        colWidth = m_structure.classAttribute().value(i).length();
+      }
+    }
+
+    // check against coefficients and odds ratios
+    for (int j = 1; j <= m_NumPredictors; j++) {
+      for (int k = 0; k < m_NumClasses - 1; k++) {
+        if (Utils.doubleToString(m_Par[j][k], 12, 4).trim().length() > colWidth) {
+          colWidth = Utils.doubleToString(m_Par[j][k], 12, 4).trim().length();
+        }
+        double ORc = Math.exp(m_Par[j][k]);
+	String t = " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
+        if (t.trim().length() > colWidth) {
+          colWidth = t.trim().length();
+        }
+      }
+    }
+    colWidth += 2;
+    
+    
+    temp.append("\nCoefficients...\n");
+    temp.append(Utils.padLeft(" ", attLength) + Utils.padLeft("Class", colWidth) + "\n");
+    temp.append(Utils.padRight("Variable", attLength));
+
+    for (int i = 0; i < m_NumClasses - 1; i++) {
+      String className = m_structure.classAttribute().value(i);
+      temp.append(Utils.padLeft(className, colWidth));
+    }
+    temp.append("\n");
+    int separatorL = attLength + ((m_NumClasses - 1) * colWidth);
+    for (int i = 0; i < separatorL; i++) {
+      temp.append("=");
+    }
+    temp.append("\n");
+                
+    for (int j = 1; j <= m_NumPredictors; j++) {
+      temp.append(Utils.padRight(m_structure.attribute(j - 1).name(), attLength));
+      for (int k = 0; k < m_NumClasses-1; k++) {
+        temp.append(Utils.padLeft(Utils.doubleToString(m_Par[j][k], 12, 4).trim(), colWidth));
+      }
+      temp.append("\n");
+    }
+	
+    temp.append(Utils.padRight("Intercept", attLength));
+    for (int k = 0; k < m_NumClasses-1; k++) {
+      temp.append(Utils.padLeft(Utils.doubleToString(m_Par[0][k], 10, 4).trim(), colWidth)); 
+    }
+    temp.append("\n");
+	
+    temp.append("\n\nOdds Ratios...\n");
+    temp.append(Utils.padLeft(" ", attLength) + Utils.padLeft("Class", colWidth) + "\n");
+    temp.append(Utils.padRight("Variable", attLength));
+
+    for (int i = 0; i < m_NumClasses - 1; i++) {
+      String className = m_structure.classAttribute().value(i);
+      temp.append(Utils.padLeft(className, colWidth));
+    }
+    temp.append("\n");
+    for (int i = 0; i < separatorL; i++) {
+      temp.append("=");
+    }
+    temp.append("\n");
+
+    for (int j = 1; j <= m_NumPredictors; j++) {
+      temp.append(Utils.padRight(m_structure.attribute(j - 1).name(), attLength));
+      for (int k = 0; k < m_NumClasses-1; k++) {
+        double ORc = Math.exp(m_Par[j][k]);
+	String ORs = " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
+        temp.append(Utils.padLeft(ORs.trim(), colWidth));
+      }
+      temp.append("\n");
+    }
+
+    return temp.toString();
   }
   
   /**
@@ -807,7 +885,7 @@ public class Logistic extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.40 $");
+    return RevisionUtils.extract("$Revision: 1.41 $");
   }
     
   /**
