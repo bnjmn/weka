@@ -96,7 +96,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class HotSpot
   implements Associator, OptionHandler, RevisionHandler, 
@@ -788,7 +788,7 @@ public class HotSpot
         : bestMerit - m_targetValue;
 
       // Have we found a candidate split?
-      if (bestSupport > 0 && (delta / m_targetValue > m_minImprovement)) {
+      if (bestSupport > 0 && (delta / m_targetValue >= m_minImprovement)) {
         /*        System.err.println("Evaluating " + tempInsts.attribute(attIndex).name());
         System.err.println("Merit : " + bestMerit);
         System.err.println("Support : " + bestSupport); */
@@ -850,7 +850,7 @@ public class HotSpot
               ? m_targetValue - merit
               : merit - m_targetValue;
 
-            if (delta / m_targetValue > m_minImprovement) {
+            if (delta / m_targetValue >= m_minImprovement) {
               double support =
                 (m_insts.attribute(m_target).isNominal())
                 ? subsetMerit[i]
@@ -1293,7 +1293,7 @@ public class HotSpot
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**
