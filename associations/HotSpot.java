@@ -96,7 +96,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.4 $
+ * @version $Revision: 1.1.2.5 $
  */
 public class HotSpot
   implements Associator, OptionHandler, RevisionHandler, 
@@ -841,9 +841,9 @@ public class HotSpot
         for (int i = 0; i < m_insts.attribute(attIndex).numValues(); i++) {
           // does the subset based on this value have enough instances, and, furthermore,
           // does the target value (nominal only) occur enough times to exceed min support
-          if (counts[i] > m_supportCount &&  
+          if (counts[i] >= m_supportCount &&  
               ((m_insts.attribute(m_target).isNominal())
-              ? (subsetMerit[i] > m_supportCount) // nominal only test
+              ? (subsetMerit[i] >= m_supportCount) // nominal only test
                : true)) { 
             double merit = subsetMerit[i] / counts[i]; //subsetMerit[i][1];
             double delta = (m_minimize)
@@ -1293,7 +1293,7 @@ public class HotSpot
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.4 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.5 $");
   }
 
   /**
