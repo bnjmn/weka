@@ -90,7 +90,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class NaiveBayes extends Classifier 
 implements OptionHandler, WeightedInstancesHandler, 
@@ -579,6 +579,17 @@ implements OptionHandler, WeightedInstancesHandler,
           maxWidth = cSize.length();
         }
       }
+
+      // Check width of class priors
+      for (int i = 0; i < m_Instances.numClasses(); i++) {
+        String priorP = 
+          Utils.doubleToString(((DiscreteEstimator)m_ClassDistribution).getProbability(i),
+                               maxWidth, 2).trim();
+        priorP = "(" + priorP + ")";
+        if (priorP.length() > maxWidth) {
+          maxWidth = priorP.length();
+        }
+      }
     
       if (maxAttWidth < "Attribute".length()) {
         maxAttWidth = "Attribute".length();
@@ -920,7 +931,7 @@ implements OptionHandler, WeightedInstancesHandler,
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.26 $");
+    return RevisionUtils.extract("$Revision: 1.27 $");
   }
 
   /**
