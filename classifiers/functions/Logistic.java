@@ -113,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision: 1.42 $
  */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -499,7 +499,7 @@ public class Logistic extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.41 $");
+      return RevisionUtils.extract("$Revision: 1.42 $");
     }
   }
 
@@ -820,6 +820,10 @@ public class Logistic extends Classifier
         }
       }
     }
+
+    if ("Class".length() > colWidth) {
+      colWidth = "Class".length();
+    }
     colWidth += 2;
     
     
@@ -885,7 +889,7 @@ public class Logistic extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.41 $");
+    return RevisionUtils.extract("$Revision: 1.42 $");
   }
     
   /**
