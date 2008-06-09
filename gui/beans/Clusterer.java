@@ -46,7 +46,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -638,7 +638,6 @@ public class Clusterer
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
-	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }

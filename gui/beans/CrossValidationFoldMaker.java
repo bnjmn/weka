@@ -34,7 +34,7 @@ import java.util.Vector;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -290,7 +290,7 @@ public class CrossValidationFoldMaker
   public void stop() {
     // tell the listenee (upstream bean) to stop
     if (m_listenee instanceof BeanCommon) {
-      System.err.println("Listener is BeanCommon");
+      //      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
 
