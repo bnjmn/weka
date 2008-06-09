@@ -34,7 +34,7 @@ import java.util.Vector;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -296,11 +296,10 @@ public class CrossValidationFoldMaker
 
     // stop the fold thread
     if (m_foldThread != null) {
-      //      m_buildThread.interrupt();
       Thread temp = m_foldThread;
-      //      m_buildThread.stop();
       m_foldThread = null;
       temp.interrupt();
+      temp.stop();
     }
   }
 

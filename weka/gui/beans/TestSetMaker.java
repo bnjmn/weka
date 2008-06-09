@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts data sets and produces test sets
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class TestSetMaker
   extends AbstractTestSetProducer 
@@ -114,6 +114,11 @@ public class TestSetMaker
   public void stop() {
     // do something
     m_receivedStopNotification = true;
+
+    // tell the listenee (upstream bean) to stop
+    if (m_listenee instanceof BeanCommon) {
+      ((BeanCommon)m_listenee).stop();
+    }
   }
 
   /**
