@@ -45,7 +45,7 @@ import weka.core.Utils;
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.6 $
+ * @version $Revision: 1.1.2.7 $
  */
 public class SerializedModelSaver
   extends JPanel
@@ -245,7 +245,10 @@ public class SerializedModelSaver
    * Stop any processing that the bean might be doing.
    */
   public void stop() {
-    // do something here
+    // tell the listenee (upstream bean) to stop
+    if (m_listenee instanceof BeanCommon) {
+      ((BeanCommon)m_listenee).stop();
+    }
   }
 
   /**
