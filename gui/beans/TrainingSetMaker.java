@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
@@ -117,8 +117,13 @@ public class TrainingSetMaker
    * Stop any action
    */
   public void stop() {
-    // do something
     m_receivedStopNotification = true;
+
+    // tell the listenee (upstream bean) to stop
+    if (m_listenee instanceof BeanCommon) {
+      //      System.err.println("Listener is BeanCommon");
+      ((BeanCommon)m_listenee).stop();
+    }
   }
 
   /**
