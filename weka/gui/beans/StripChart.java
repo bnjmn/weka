@@ -50,7 +50,7 @@ import javax.swing.border.TitledBorder;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14.2.2 $
+ * @version $Revision: 1.14.2.3 $
  */
 public class StripChart 
   extends JPanel 
@@ -703,7 +703,10 @@ public class StripChart
    * Stop any processing that the bean might be doing.
    */
   public void stop() {
-    // nothing to be done
+    // tell the listenee (upstream bean) to stop
+    if (m_listenee instanceof BeanCommon) {
+      ((BeanCommon)m_listenee).stop();
+    }
   }
 
   /**

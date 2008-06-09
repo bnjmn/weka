@@ -32,7 +32,7 @@ import weka.core.converters.DatabaseSaver;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5.2.3 $
+ * @version $Revision: 1.5.2.4 $
  *
  */
 public class Saver
@@ -399,6 +399,18 @@ public class Saver
 
   /** Stops the bean */  
   public void stop() {
+    // tell the listenee (upstream bean) to stop
+    if (m_listenee instanceof BeanCommon) {
+      ((BeanCommon)m_listenee).stop();
+    }
+    
+    // stop the io thread
+    if (m_ioThread != null) {
+      m_ioThread.interrupt();
+      m_ioThread.stop();
+      m_ioThread = null;
+      m_visual.setStatic();
+    }
   }
   
   
