@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25.2.7 $
+ * @version $Revision: 1.25.2.8 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -1003,7 +1003,6 @@ public class Classifier
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
-	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }
