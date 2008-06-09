@@ -39,7 +39,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -498,7 +498,6 @@ public class Associator
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
-	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }

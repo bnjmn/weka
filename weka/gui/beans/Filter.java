@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.19 $
+ * @version $Revision: 1.20 $
  */
 public class Filter
   extends JPanel
@@ -777,7 +777,6 @@ public class Filter
     while (en.hasMoreElements()) {
       Object tempO = m_listenees.get(en.nextElement());
       if (tempO instanceof BeanCommon) {
-	System.err.println("Listener is BeanCommon");
 	((BeanCommon)tempO).stop();
       }
     }
