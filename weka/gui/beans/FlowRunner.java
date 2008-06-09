@@ -33,6 +33,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import weka.gui.Logger;
 import weka.gui.beans.xml.*;
 
 /**
@@ -40,7 +41,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class FlowRunner {
 
@@ -48,6 +49,8 @@ public class FlowRunner {
   protected Vector m_beans;
 
   protected int m_runningCount = 0;
+
+  protected transient Logger m_log = null;
 
   /**
    * Constructor
@@ -57,7 +60,11 @@ public class FlowRunner {
     KnowledgeFlowApp.loadProperties();
   }
 
-  protected void launchThread(final Startable s, final int flowNum) {
+  public void setLog(Logger log) {
+    m_log = log;
+  }
+
+  protected synchronized void launchThread(final Startable s, final int flowNum) {
     Thread t = new Thread() {
         private int m_num = flowNum;
         public void run() {
@@ -65,14 +72,21 @@ public class FlowRunner {
             s.start();
           } catch (Exception ex) {
             ex.printStackTrace();
-            System.err.println(ex.getMessage());
+            if (m_log != null) {
+              m_log.logMessage(ex.getMessage());
+            } else {
+              System.err.println(ex.getMessage());
+            }
           } finally {
-            System.out.println("[FlowRunner] Flow " + m_num + " finished.");
+            if (m_log != null) { 
+              m_log.logMessage("[FlowRunner] flow " + m_num + " finished.");
+            } else {
+              System.out.println("[FlowRunner] Flow " + m_num + " finished.");
+            }
             decreaseCount();
           }
         }
       };
-    
     m_runningCount++;
     t.setPriority(Thread.MIN_PRIORITY);
     t.start();
@@ -80,6 +94,16 @@ public class FlowRunner {
 
   protected synchronized void decreaseCount() {
     m_runningCount--;
+  }
+
+  public synchronized void stopAllFlows() {
+    for (int i = 0; i < m_beans.size(); i++) {
+      BeanInstance temp = (BeanInstance)m_beans.elementAt(i);
+      if (temp.getBean() instanceof BeanCommon) {
+        // try to stop any execution
+        ((BeanCommon)temp.getBean()).stop();
+      }
+    }
   }
 
   /**
@@ -92,7 +116,13 @@ public class FlowRunner {
         Thread.sleep(200);
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
+      if (m_log != null) {
+        m_log.logMessage("[FlowRunner] Attempting to stop all flows...");
+      } else {
+        System.err.println("[FlowRunner] Attempting to stop all flows...");
+      }
+      stopAllFlows();
+      //      ex.printStackTrace();
     }
   }
 
@@ -174,7 +204,6 @@ public class FlowRunner {
    * @throws Exception if something goes wrong during execution
    */
   public void run() throws Exception {
-
     if (m_beans == null) {
       throw new Exception("Don't seem to have any beans I can execute.");
     }
@@ -187,7 +216,11 @@ public class FlowRunner {
       if (tempB.getBean() instanceof Startable) {
         Startable s = (Startable)tempB.getBean();
         // start that sucker...
-        System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
+        if (m_log != null) {
+          m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
+        } else {
+          System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
+        }
         launchThread(s, numFlows);
         numFlows++;
       }
