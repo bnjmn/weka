@@ -44,7 +44,7 @@ import weka.classifiers.bayes.net.estimate.*;
  * user documentation.
  * 
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.21.2.4 $
+ * @version $Revision: 1.21.2.5 $
  */
 public class BayesNet extends Classifier implements OptionHandler, WeightedInstancesHandler, Drawable, AdditionalMeasureProducer {
 
@@ -427,9 +427,9 @@ public class BayesNet extends Classifier implements OptionHandler, WeightedInsta
 			while ((j < options.length) && !(options[j].equals("-E"))) {
 			  j++;
 			}
-			if (j >= options.length) {
+                        /*			if (j >= options.length) {
 				return new String[0];
-			}
+                                } */
   	options[i++] = "";
   	String [] result = new String [options.length - i];
 	j = i;
