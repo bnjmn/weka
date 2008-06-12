@@ -85,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.32 $
+ * @version $Revision: 1.33 $
  */
 public class BayesNet
   extends Classifier
@@ -527,9 +527,9 @@ public class BayesNet
 	while ((j < options.length) && !(options[j].equals("-E"))) {
 	  j++;
 	}
-	if (j >= options.length) {
+        /*	if (j >= options.length) {
 	  return new String[0];
-	}
+          } */
 	options[i++] = "";
 	String [] result = new String [options.length - i];
 	j = i;
@@ -1123,6 +1123,6 @@ public class BayesNet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.32 $");
+    return RevisionUtils.extract("$Revision: 1.33 $");
   }
 } // class BayesNet
