@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * Bean that encapsulates weka.gui.visualize.VisualizePanel
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.2 $
+ * @version $Revision: 1.11.2.3 $
  */
 public class DataVisualizer extends JPanel
   implements DataSourceListener, TrainingSetListener,
@@ -85,7 +85,11 @@ public class DataVisualizer extends JPanel
     new BeanContextChildSupport(this);
 
   public DataVisualizer() {
-    appearanceFinal();
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+    if (!ge.isHeadless()) {
+      appearanceFinal();
+    }
   }
 
   /**
@@ -266,7 +270,11 @@ public class DataVisualizer extends JPanel
     if (m_design) {
       appearanceDesign();
     } else {
-      appearanceFinal();
+      java.awt.GraphicsEnvironment ge = 
+        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+      if (!ge.isHeadless()) {
+        appearanceFinal();
+      }
     }
   }
 
