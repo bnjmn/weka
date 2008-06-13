@@ -37,6 +37,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.beans.beancontext.BeanContext;
+import java.beans.beancontext.BeanContextChild;
+import java.beans.beancontext.BeanContextChildSupport;
+import java.beans.PropertyChangeListener;
+import java.beans.VetoableChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -46,31 +51,71 @@ import javax.swing.JPanel;
  * A bean encapsulating weka.gui.treevisualize.TreeVisualizer
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class GraphViewer 
   extends JPanel
   implements Visible, GraphListener,
-	     UserRequestAcceptor, Serializable {
+	     UserRequestAcceptor, 
+             Serializable, BeanContextChild {
 
   /** for serialization */
   private static final long serialVersionUID = -5183121972114900617L;
 
-  protected BeanVisual m_visual = 
-    new BeanVisual("GraphViewer", 
-		   BeanVisual.ICON_PATH+"DefaultGraph.gif",
-		   BeanVisual.ICON_PATH+"DefaultGraph_animated.gif");
-
+  protected BeanVisual m_visual;
 
   private transient JFrame m_resultsFrame = null;
 
-  protected transient ResultHistoryPanel m_history = 
-    new ResultHistoryPanel(null);
+  protected transient ResultHistoryPanel m_history;
+
+  /**
+   * BeanContex that this bean might be contained within
+   */
+  protected transient BeanContext m_beanContext = null;
+
+  /**
+   * BeanContextChild support
+   */
+  protected BeanContextChildSupport m_bcSupport = 
+    new BeanContextChildSupport(this);
+
+  /**
+   * True if this bean's appearance is the design mode appearance
+   */
+  protected boolean m_design;
 
   public GraphViewer() {
+    /*    setUpResultHistory();
+    setLayout(new BorderLayout());
+    add(m_visual, BorderLayout.CENTER); */
+
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    if (!ge.isHeadless()) {
+      appearanceFinal();
+    }
+  }
+
+  protected void appearanceDesign() {
     setUpResultHistory();
+    removeAll();
+    m_visual = 
+      new BeanVisual("GraphViewer", 
+                     BeanVisual.ICON_PATH+"DefaultGraph.gif",
+		   BeanVisual.ICON_PATH+"DefaultGraph_animated.gif");
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
+  }
+
+  protected void appearanceFinal() {
+    removeAll();
+    setLayout(new BorderLayout());
+    setUpFinal();
+  }
+
+  protected void setUpFinal() {
+    setUpResultHistory();
+    add(m_history, BorderLayout.CENTER);
   }
 
   /**
@@ -101,6 +146,56 @@ public class GraphViewer
 	    }
 	  }
 	});
+  }
+
+  /**
+   * Set a bean context for this bean
+   *
+   * @param bc a <code>BeanContext</code> value
+   */
+  public void setBeanContext(BeanContext bc) {
+    m_beanContext = bc;
+    m_design = m_beanContext.isDesignTime();
+    if (m_design) {
+      appearanceDesign();
+    } else {
+      java.awt.GraphicsEnvironment ge = 
+        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+      if (!ge.isHeadless()){
+        appearanceFinal();
+      }
+    }
+  }
+
+  /**
+   * Return the bean context (if any) that this bean is embedded in
+   *
+   * @return a <code>BeanContext</code> value
+   */
+  public BeanContext getBeanContext() {
+    return m_beanContext;
+  }
+
+  /**
+   * Add a vetoable change listener to this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void addVetoableChangeListener(String name,
+				       VetoableChangeListener vcl) {
+    m_bcSupport.addVetoableChangeListener(name, vcl);
+  }
+  
+  /**
+   * Remove a vetoable change listener from this bean
+   *
+   * @param name the name of the property of interest
+   * @param vcl a <code>VetoableChangeListener</code> value
+   */
+  public void removeVetoableChangeListener(String name,
+					   VetoableChangeListener vcl) {
+    m_bcSupport.removeVetoableChangeListener(name, vcl);
   }
 
   /**

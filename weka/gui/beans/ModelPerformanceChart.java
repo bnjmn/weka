@@ -44,7 +44,7 @@ import javax.swing.JPanel;
  * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class ModelPerformanceChart
   extends JPanel
@@ -82,7 +82,11 @@ public class ModelPerformanceChart
     new BeanContextChildSupport(this);
 
   public ModelPerformanceChart() {
-    appearanceFinal();
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
+    if (!ge.isHeadless()) {
+      appearanceFinal();
+    }
   }
 
     /**
@@ -264,7 +268,11 @@ public class ModelPerformanceChart
     if (m_design) {
       appearanceDesign();
     } else {
-      appearanceFinal();
+      java.awt.GraphicsEnvironment ge = 
+        java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+      if (!ge.isHeadless()) {
+        appearanceFinal();
+      }
     }
   }
 
