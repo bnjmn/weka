@@ -42,7 +42,7 @@ import javax.swing.JScrollPane;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class AttributeSummarizer
   extends DataVisualizer {
@@ -69,7 +69,11 @@ public class AttributeSummarizer
    * Creates a new <code>AttributeSummarizer</code> instance.
    */
   public AttributeSummarizer() {
-    appearanceFinal();
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    if (!ge.isHeadless()) {
+      appearanceFinal();
+    }
   }
 
   /**
@@ -238,13 +242,13 @@ public class AttributeSummarizer
    *
    * @param bc a <code>BeanContext</code> value
    */
-  public void setBeanContext(BeanContext bc) {
+  /*  public void setBeanContext(BeanContext bc) {
     m_beanContext = bc;
     m_design = m_beanContext.isDesignTime();
     if (m_design) {
       appearanceDesign();
-    }
-  }
+    } 
+    } */
 
   /**
    * Set instances for this bean. This method is a convenience method

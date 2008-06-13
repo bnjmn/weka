@@ -32,7 +32,7 @@ import java.awt.BorderLayout;
  * scatter plot matrix.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class ScatterPlotMatrix
   extends DataVisualizer {
@@ -43,7 +43,11 @@ public class ScatterPlotMatrix
   protected MatrixPanel m_matrixPanel;
 
   public ScatterPlotMatrix() {
-    appearanceFinal();
+    java.awt.GraphicsEnvironment ge = 
+      java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment(); 
+    if (!ge.isHeadless()) {
+      appearanceFinal();
+    }
   }
 
   /**
