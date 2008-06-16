@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22.2.4 $
+ * @version $Revision: 1.22.2.5 $
  */
 public class Capabilities 
   implements Cloneable, Serializable, RevisionHandler {
@@ -907,7 +907,7 @@ public class Capabilities
         }
         else {
           m_FailReason = new UnsupportedAttributeTypeException(
-              createMessage("Cannot handle nominal " + errorStr + "!"));
+              createMessage("Cannot handle multi-valued nominal " + errorStr + "!"));
           result = false;
         }
         break;
@@ -1611,6 +1611,6 @@ public class Capabilities
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22.2.4 $");
+    return RevisionUtils.extract("$Revision: 1.22.2.5 $");
   }
 }
