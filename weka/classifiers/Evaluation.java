@@ -175,7 +175,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.86 $
+ * @version  $Revision: 1.87 $
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -405,11 +405,16 @@ public class Evaluation
    * performed 
    * @param numFolds the number of folds for the cross-validation
    * @param random random number generator for randomization 
+   * @param forPredictionsString varargs parameter that, if supplied, is
+   * expected to hold a StringBuffer to print predictions to, 
+   * a Range of attributes to output and a Boolean (true if the distribution
+   * is to be printed)
    * @throws Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
   public void crossValidateModel(Classifier classifier,
-      Instances data, int numFolds, Random random) 
+                                 Instances data, int numFolds, Random random,
+                                 Object... forPredictionsPrinting) 
   throws Exception {
 
     // Make a copy of the data we can reorder
@@ -418,6 +423,18 @@ public class Evaluation
     if (data.classAttribute().isNominal()) {
       data.stratify(numFolds);
     }
+
+    // We assume that the first element is a StringBuffer, the second a Range (attributes
+    // to output) and the third a Boolean (whether or not to output a distribution instead
+    // of just a classification)
+    if (forPredictionsPrinting.length > 0) {
+      // print the header first
+      StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
+      Range attsToOutput = (Range)forPredictionsPrinting[1];
+      boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+      printClassificationsHeader(data, attsToOutput, printDist, buff);
+    }
+
     // Do the folds
     for (int i = 0; i < numFolds; i++) {
       Instances train = data.trainCV(numFolds, i, random);
@@ -425,7 +442,7 @@ public class Evaluation
       Classifier copiedClassifier = Classifier.makeCopy(classifier);
       copiedClassifier.buildClassifier(train);
       Instances test = data.testCV(numFolds, i);
-      evaluateModel(copiedClassifier, test);
+      evaluateModel(copiedClassifier, test, forPredictionsPrinting);
     }
     m_NumFolds = numFolds;
   }
@@ -699,6 +716,7 @@ public class Evaluation
     boolean testSetPresent = false;
     String thresholdFile;
     String thresholdLabel;
+    StringBuffer predsBuff = null; // predictions from cross-validation
 
     // help requested?
     if (Utils.getFlag("h", options) || Utils.getFlag("help", options)) {
@@ -1060,12 +1078,23 @@ public class Evaluation
     // Output test instance predictions only
     if (printClassifications) {
       DataSource source = testSource;
+      predsBuff = new StringBuffer();
       // no test set -> use train set
-      if (source == null)
+      if (source == null && noCrossValidation) {
 	source = trainSource;
-      return printClassifications(classifierClassifications, new Instances(template, 0),
-	  source, actualClassIndex + 1, attributesToOutput,
-	  printDistribution);
+        predsBuff.append("\n=== Predictions on training data ===\n\n");
+      } else {
+        predsBuff.append("\n=== Predictions on test data ===\n\n");
+      }
+      if (source != null) {
+        /*      return printClassifications(classifierClassifications, new Instances(template, 0),
+                source, actualClassIndex + 1, attributesToOutput,
+                printDistribution); */
+        printClassifications(classifierClassifications, new Instances(template, 0),
+                             source, actualClassIndex + 1, attributesToOutput,
+                             printDistribution, predsBuff);
+        //        return predsText.toString();
+      }
     }
 
     // Compute error estimate from training data
@@ -1130,6 +1159,8 @@ public class Evaluation
     // Compute proper error estimates
     if (testSource != null) {
       // Testing is on the supplied test data
+      testSource.reset();
+      test = testSource.getStructure(test.classIndex());
       Instance testInst;
       while (testSource.hasMoreElements(test)) {
 	testInst = testSource.nextElement(test);
@@ -1152,26 +1183,51 @@ public class Evaluation
 	Random random = new Random(seed);
 	// use untrained (!) classifier for cross-validation
 	classifier = Classifier.makeCopy(classifierBackup);
-	testingEvaluation.crossValidateModel(
-	    classifier, trainSource.getDataSet(actualClassIndex), folds, random);
-	if (template.classAttribute().isNumeric()) {
-	  text.append("\n\n\n" + testingEvaluation.
-	      toSummaryString("=== Cross-validation ===\n",
-		  printComplexityStatistics));
-	} else {
-	  text.append("\n\n\n" + testingEvaluation.
-	      toSummaryString("=== Stratified " + 
-		  "cross-validation ===\n",
-		  printComplexityStatistics));
-	}
+        if (!printClassifications) {
+          testingEvaluation.crossValidateModel(classifier, 
+                                               trainSource.getDataSet(actualClassIndex), 
+                                               folds, random);
+          if (template.classAttribute().isNumeric()) {
+            text.append("\n\n\n" + testingEvaluation.
+                        toSummaryString("=== Cross-validation ===\n",
+                                        printComplexityStatistics));
+          } else {
+            text.append("\n\n\n" + testingEvaluation.
+                        toSummaryString("=== Stratified " + 
+                                        "cross-validation ===\n",
+                                        printComplexityStatistics));
+          }
+        } else {
+          predsBuff = new StringBuffer();
+          predsBuff.append("\n=== Predictions under cross-validation ===\n\n");
+          testingEvaluation.crossValidateModel(classifier,
+                                               trainSource.getDataSet(actualClassIndex),
+                                               folds, random, predsBuff, attributesToOutput, 
+                                               new Boolean(printDistribution));
+          if (template.classAttribute().isNumeric()) {
+            text.append("\n\n\n" + testingEvaluation.
+                        toSummaryString("=== Cross-validation ===\n",
+                                        printComplexityStatistics));
+          } else {
+            text.append("\n\n\n" + testingEvaluation.
+                        toSummaryString("=== Stratified " + 
+                                        "cross-validation ===\n",
+                                        printComplexityStatistics));
+          }
+        }
       }
     }
     if (template.classAttribute().isNominal()) {
-      if (classStatistics) {
+      if (classStatistics && !noCrossValidation) {
 	text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
       if (!noCrossValidation)
         text.append("\n\n" + testingEvaluation.toMatrixString());
+      
+      // predictions from cross-validation?
+      if (predsBuff != null) {
+        text.append("\n" + predsBuff);
+      }
     }
 
     if ((thresholdFile.length() != 0) && template.classAttribute().isNominal()) {
@@ -1245,7 +1301,7 @@ public class Evaluation
       return null;
     }
   }
-
+      
   /**
    * Evaluates the classifier on a given set of instances. Note that
    * the data must have exactly the same format (e.g. order of
@@ -1254,20 +1310,39 @@ public class Evaluation
    *
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
+   * @param forPredictionsString varargs parameter that, if supplied, is
+   * expected to hold a StringBuffer to print predictions to, 
+   * a Range of attributes to output and a Boolean (true if the distribution
+   * is to be printed)
    * @return the predictions
    * @throws Exception if model could not be evaluated 
    * successfully 
    */
   public double[] evaluateModel(Classifier classifier,
-      Instances data) throws Exception {
+                                Instances data, 
+                                Object... forPredictionsPrinting) throws Exception {
+    // for predictions printing
+    StringBuffer buff = null;
+    Range attsToOutput = null;
+    boolean printDist = false;
 
     double predictions[] = new double[data.numInstances()];
+
+    if (forPredictionsPrinting.length > 0) {
+      buff = (StringBuffer)forPredictionsPrinting[0];
+      attsToOutput = (Range)forPredictionsPrinting[1];
+      printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+    }
 
     // Need to be able to collect predictions if appropriate (for AUC)
 
     for (int i = 0; i < data.numInstances(); i++) {
       predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier, 
 	  data.instance(i));
+      if (buff != null) {
+        buff.append(predictionText(classifier, data.instance(i), i, 
+                                   attsToOutput, printDist));
+      }
     }
 
     return predictions;
@@ -2712,18 +2787,61 @@ public class Evaluation
    * @return			the generated predictions for the attribute range
    * @throws Exception 		if test file cannot be opened
    */
-  public static String printClassifications(Classifier classifier, 
-      Instances train,
-      DataSource testSource,
-      int classIndex,
-      Range attributesToOutput) throws Exception {
+  public static void printClassifications(Classifier classifier, 
+                                            Instances train,
+                                            DataSource testSource,
+                                            int classIndex,
+                                            Range attributesToOutput,
+                                            StringBuffer predsText) throws Exception {
     
-    return printClassifications(
-	classifier, train, testSource, classIndex, attributesToOutput, false);
+    printClassifications(classifier, train, 
+                         testSource, classIndex, 
+                         attributesToOutput, false, predsText);
   }
 
   /**
-   * Prints the predictions for the given dataset into a String variable.
+   * Prints the header for the predictions output into a supplied StringBuffer
+   *
+   * @param test structure of the test set to print predictions for
+   * @param attributesToOutput indices of the attributes to output
+   * @param printDistribution prints the complete distribution for nominal
+   * attributes, not just the predicted value
+   * @param text the StringBuffer to print to
+   */
+  protected static void printClassificationsHeader(Instances test, 
+                                                   Range attributesToOutput, 
+                                                   boolean printDistribution,
+                                                   StringBuffer text) {
+    // print header
+    if (test.classAttribute().isNominal())
+      if (printDistribution)
+        text.append(" inst#     actual  predicted error distribution");
+      else
+        text.append(" inst#     actual  predicted error prediction");
+    else
+      text.append(" inst#     actual  predicted      error");
+    if (attributesToOutput != null) {
+      attributesToOutput.setUpper(test.numAttributes() - 1);
+      text.append(" (");
+      boolean first = true;
+      for (int i = 0; i < test.numAttributes(); i++) {
+        if (i == test.classIndex())
+          continue;
+
+        if (attributesToOutput.isInRange(i)) {
+          if (!first)
+            text.append(",");
+          text.append(test.attribute(i).name());
+          first = false;
+        }
+      }
+      text.append(")");
+    }
+    text.append("\n");
+  }
+
+  /**
+   * Prints the predictions for the given dataset into a supplied StringBuffer
    * 
    * @param classifier		the classifier to use
    * @param train		the training data
@@ -2734,17 +2852,17 @@ public class Evaluation
    * @param attributesToOutput	the indices of the attributes to output
    * @param printDistribution	prints the complete distribution for nominal 
    * 				classes, not just the predicted value
-   * @return			the generated predictions for the attribute range
+   * @param text                StringBuffer to hold the printed predictions
    * @throws Exception 		if test file cannot be opened
    */
-  public static String printClassifications(Classifier classifier, 
-      Instances train,
-      DataSource testSource,
-      int classIndex,
-      Range attributesToOutput,
-      boolean printDistribution) throws Exception {
+  public static void printClassifications(Classifier classifier, 
+                                          Instances train,
+                                          DataSource testSource,
+                                          int classIndex,
+                                          Range attributesToOutput,
+                                          boolean printDistribution,
+                                          StringBuffer text) throws Exception {
 
-    StringBuffer text = new StringBuffer();
     if (testSource != null) {
       Instances test = testSource.getStructure();
       if (classIndex != -1) {
@@ -2754,32 +2872,8 @@ public class Evaluation
 	  test.setClassIndex(test.numAttributes() - 1);
       }
 
-      // print header
-      if (test.classAttribute().isNominal())
-	if (printDistribution)
-	  text.append(" inst#     actual  predicted error distribution");
-	else
-	  text.append(" inst#     actual  predicted error prediction");
-      else
-	text.append(" inst#     actual  predicted      error");
-      if (attributesToOutput != null) {
-	attributesToOutput.setUpper(test.numAttributes() - 1);
-	text.append(" (");
-	boolean first = true;
-	for (int i = 0; i < test.numAttributes(); i++) {
-	  if (i == test.classIndex())
-	    continue;
-
-	  if (attributesToOutput.isInRange(i)) {
-	    if (!first)
-	      text.append(",");
-	    text.append(test.attribute(i).name());
-	    first = false;
-	  }
-	}
-	text.append(")");
-      }
-      text.append("\n");
+      // print the header
+      printClassificationsHeader(test, attributesToOutput, printDistribution, text);
 
       // print predictions
       int i = 0;
@@ -2787,17 +2881,16 @@ public class Evaluation
       test = testSource.getStructure(test.classIndex());
       while (testSource.hasMoreElements(test)) {
 	Instance inst = testSource.nextElement(test);
-	text.append(
-	    predictionText(
-		classifier, inst, i, attributesToOutput, printDistribution));
+        text.append(predictionText(classifier, inst, i, 
+                                   attributesToOutput, printDistribution));
 	i++;
       }
     }
-    return text.toString();
+    //    return text.toString();
   }
 
   /**
-   * returns the prediction made by the classifier as a string
+   * store the prediction made by the classifier as a string
    * 
    * @param classifier		the classifier to use
    * @param inst		the instance to generate text from
@@ -2805,16 +2898,17 @@ public class Evaluation
    * @param attributesToOutput	the indices of the attributes to output
    * @param printDistribution	prints the complete distribution for nominal 
    * 				classes, not just the predicted value
-   * @return			the generated text
+   * @return                    the prediction as a String
    * @throws Exception		if something goes wrong
    * @see			#printClassifications(Classifier, Instances, String, int, Range, boolean)
    */
   protected static String predictionText(Classifier classifier, 
-      Instance inst, 
-      int instNum,
-      Range attributesToOutput,
-      boolean printDistribution) 
-  throws Exception {
+                                         Instance inst, 
+                                         int instNum,
+                                         Range attributesToOutput,
+                                         boolean printDistribution)
+    
+    throws Exception {
 
     StringBuffer result = new StringBuffer();
     int width = 10;
@@ -3324,6 +3418,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.86 $");
+    return RevisionUtils.extract("$Revision: 1.87 $");
   }
 }
