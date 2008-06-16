@@ -39,8 +39,8 @@ import java.io.Writer;
  * <a href="http://xstream.codehaus.org" target="_blank">XStream</a> .
  * XStream does not need to be present, since the class-calls are done generically via Reflection.
  *
- * @author Mark Hall (mhall[{at}]pentao[{dot}]org
- * @version $Revision: 1.3 $
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
+ * @version $Revision: 1.4 $
  */
 public class XStream
   implements RevisionHandler {
@@ -344,6 +344,6 @@ public class XStream
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
