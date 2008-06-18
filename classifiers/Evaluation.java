@@ -122,7 +122,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * -p range <br/>
  * Outputs predictions for test instances (or the train instances if no test
- * instances provided), along with the attributes in the specified range 
+ * instances provided and -no-cv is used), along with the attributes in the specified range 
  * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
  * 
  * -distribution <br/>
@@ -175,7 +175,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.81.2.4 $
+ * @version  $Revision: 1.81.2.5 $
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -529,7 +529,7 @@ public class Evaluation
    *
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
-   * instances provided), along with the attributes in the specified range (and 
+   * instances provided  and -no-cv is used), along with the attributes in the specified range (and 
    *  nothing else). Use '-p 0' if no attributes are desired. <p/>
    *
    * -distribution <br/>
@@ -658,7 +658,7 @@ public class Evaluation
    *
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
-   * instances provided), along with the attributes in the specified range 
+   * instances provided and -no-cv is used), along with the attributes in the specified range 
    * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
    *
    * -distribution <br/>
@@ -3055,8 +3055,8 @@ public class Evaluation
     optionsText.append("\tOutputs information-theoretic statistics.\n");
     optionsText.append("-p <attribute range>\n");
     optionsText.append("\tOnly outputs predictions for test instances (or the train\n"
-	+ "\tinstances if no test instances provided), along with attributes\n"
-	+ "\t(0 for none).\n");
+	+ "\tinstances if no test instances provided and -no-cv is used),\n"
+	+ "\talong with attributes (0 for none).\n");
     optionsText.append("-distribution\n");
     optionsText.append("\tOutputs the distribution instead of only the prediction\n");
     optionsText.append("\tin conjunction with the '-p' option (only nominal classes).\n");
@@ -3418,6 +3418,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.81.2.4 $");
+    return RevisionUtils.extract("$Revision: 1.81.2.5 $");
   }
 }
