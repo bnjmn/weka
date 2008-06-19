@@ -29,74 +29,87 @@ import java.io.*;
  * or not.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 %%
+%unicode
+%char
 %cup
 %public
 %class Scanner
 %{
   // Author: FracPete (fracpete at waikato dot ac dot nz)
-  // Version: $Revision: 1.1 $
-  protected SymbolFactory sf;
+  // Version: $Revision: 1.2 $
+  protected SymbolFactory m_SymFactory;
 
-  public Scanner(InputStream r, SymbolFactory sf){
+  protected StringBuffer m_String = new StringBuffer();
+
+  public Scanner(InputStream r, SymbolFactory sf) {
     this(r);
-    this.sf = sf;
+    m_SymFactory = sf;
   }
 %}
 %eofval{
-    return sf.newSymbol("EOF",sym.EOF);
+    return m_SymFactory.newSymbol("EOF",sym.EOF);
 %eofval}
 
+%state STRING
+
 %%
-// operands
-"-" { return sf.newSymbol("Minus", sym.MINUS); }
-"+" { return sf.newSymbol("Plus", sym.PLUS); }
-"*" { return sf.newSymbol("Times", sym.TIMES); }
-"/" { return sf.newSymbol("Division", sym.DIVISION); }
+<YYINITIAL> {
+  // operands
+  "-" { return m_SymFactory.newSymbol("Minus", sym.MINUS); }
+  "+" { return m_SymFactory.newSymbol("Plus", sym.PLUS); }
+  "*" { return m_SymFactory.newSymbol("Times", sym.TIMES); }
+  "/" { return m_SymFactory.newSymbol("Division", sym.DIVISION); }
 
-// boolean stuff
-"<" { return sf.newSymbol("Less than", sym.LT); }
-"<=" { return sf.newSymbol("Less or equal than", sym.LE); }
-">" { return sf.newSymbol("Greater than", sym.GT); }
-">=" { return sf.newSymbol("Greater or equal than", sym.GE); }
-"=" { return sf.newSymbol("Equals", sym.EQ); }
-"is" { return sf.newSymbol("Is", sym.IS); }
-"not" { return sf.newSymbol("Not", sym.NOT); }
-"and" { return sf.newSymbol("And", sym.AND); }
-"or" { return sf.newSymbol("Or", sym.OR); }
-"true" { return sf.newSymbol("True", sym.TRUE); }
-"false" { return sf.newSymbol("False", sym.FALSE); }
+  // boolean stuff
+  "<" { return m_SymFactory.newSymbol("Less than", sym.LT); }
+  "<=" { return m_SymFactory.newSymbol("Less or equal than", sym.LE); }
+  ">" { return m_SymFactory.newSymbol("Greater than", sym.GT); }
+  ">=" { return m_SymFactory.newSymbol("Greater or equal than", sym.GE); }
+  "=" { return m_SymFactory.newSymbol("Equals", sym.EQ); }
+  "is" { return m_SymFactory.newSymbol("Is", sym.IS); }
+  "not" { return m_SymFactory.newSymbol("Not", sym.NOT); }
+  "and" { return m_SymFactory.newSymbol("And", sym.AND); }
+  "or" { return m_SymFactory.newSymbol("Or", sym.OR); }
+  "true" { return m_SymFactory.newSymbol("True", sym.TRUE); }
+  "false" { return m_SymFactory.newSymbol("False", sym.FALSE); }
 
-// functions
-"abs" { return sf.newSymbol("Abs", sym.ABS); }
-"sqrt" { return sf.newSymbol("Sqrt", sym.SQRT); }
-"log" { return sf.newSymbol("Log", sym.LOG); }
-"exp" { return sf.newSymbol("Exp", sym.EXP); }
-"sin" { return sf.newSymbol("Sin", sym.SIN); }
-"cos" { return sf.newSymbol("Cos", sym.COS); }
-"tan" { return sf.newSymbol("Tan", sym.TAN); }
-"rint" { return sf.newSymbol("Rint", sym.RINT); }
-"floor" { return sf.newSymbol("Floor", sym.FLOOR); }
-"pow" { return sf.newSymbol("Pow", sym.POW); }
-"ceil" { return sf.newSymbol("Ceil", sym.CEIL); }
+  // functions
+  "abs" { return m_SymFactory.newSymbol("Abs", sym.ABS); }
+  "sqrt" { return m_SymFactory.newSymbol("Sqrt", sym.SQRT); }
+  "log" { return m_SymFactory.newSymbol("Log", sym.LOG); }
+  "exp" { return m_SymFactory.newSymbol("Exp", sym.EXP); }
+  "sin" { return m_SymFactory.newSymbol("Sin", sym.SIN); }
+  "cos" { return m_SymFactory.newSymbol("Cos", sym.COS); }
+  "tan" { return m_SymFactory.newSymbol("Tan", sym.TAN); }
+  "rint" { return m_SymFactory.newSymbol("Rint", sym.RINT); }
+  "floor" { return m_SymFactory.newSymbol("Floor", sym.FLOOR); }
+  "pow" { return m_SymFactory.newSymbol("Pow", sym.POW); }
+  "ceil" { return m_SymFactory.newSymbol("Ceil", sym.CEIL); }
 
-// numbers and variables
-[0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
--[0-9][0-9]*\.?[0-9]* { return sf.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
-[A][T][T][0-9][0-9]* { return sf.newSymbol("Attribute", sym.ATTRIBUTE, new String(yytext())); }
-"CLASS" { return sf.newSymbol("Class", sym.ATTRIBUTE, new String(yytext())); }
-\'[^\'.]*\' { return sf.newSymbol("String", sym.STRING, new String(yytext().substring(1, yytext().length() - 1))); }
+  // numbers and variables
+  "'" { yybegin(STRING); m_String.setLength(0); }
+  [0-9][0-9]*\.?[0-9]* { return m_SymFactory.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
+  -[0-9][0-9]*\.?[0-9]* { return m_SymFactory.newSymbol("Number", sym.NUMBER, new Double(yytext())); }
+  [A][T][T][0-9][0-9]* { return m_SymFactory.newSymbol("Attribute", sym.ATTRIBUTE, new String(yytext())); }
+  "CLASS" { return m_SymFactory.newSymbol("Class", sym.ATTRIBUTE, new String(yytext())); }
 
-// whitespaces
-[ \r\n\t\f] { /* ignore white space. */ }
+  // whitespaces
+  [ \r\n\t\f] { /* ignore white space. */ }
 
-// various
-"," { return sf.newSymbol("Comma", sym.COMMA); }
-"(" { return sf.newSymbol("Left Bracket", sym.LPAREN); }
-")" { return sf.newSymbol("Right Bracket", sym.RPAREN); }
-"ismissing" { return sf.newSymbol("Missing", sym.ISMISSING); }
+  // various
+  "," { return m_SymFactory.newSymbol("Comma", sym.COMMA); }
+  "(" { return m_SymFactory.newSymbol("Left Bracket", sym.LPAREN); }
+  ")" { return m_SymFactory.newSymbol("Right Bracket", sym.RPAREN); }
+  "ismissing" { return m_SymFactory.newSymbol("Missing", sym.ISMISSING); }
+}
+
+<STRING> {
+  "'" { yybegin(YYINITIAL); return m_SymFactory.newSymbol("String", sym.STRING, new String(m_String.toString())); }
+  . { m_String.append(yytext()); }
+}
 
 // catch all
-. { System.err.println("Illegal character: "+yytext()); }
+. { System.err.println("Illegal character: " + yytext()); }
