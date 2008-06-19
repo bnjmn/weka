@@ -1,6 +1,6 @@
 # Customises the list of options given by the GenericObjectEditor
 #
-# Sun May 18 22:36:52 GMT 2008
+# Thu Jun 19 02:47:27 GMT 2008
  
 # Lists the SearchAlgorithms I want to choose from
 weka.classifiers.bayes.net.search.SearchAlgorithm=\
@@ -112,6 +112,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.bayes.BayesianLogisticRegression,\
  weka.classifiers.bayes.BayesNet,\
  weka.classifiers.bayes.ComplementNaiveBayes,\
+ weka.classifiers.bayes.DMNBtext,\
  weka.classifiers.bayes.HNB,\
  weka.classifiers.bayes.NaiveBayes,\
  weka.classifiers.bayes.NaiveBayesMultinomial,\
