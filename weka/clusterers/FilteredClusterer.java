@@ -60,10 +60,19 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
+ *  number of clusters.
+ *  (default 2).</pre>
+ * 
+ * <pre> -V
+ *  Display std. deviations for centroids.
+ * </pre>
+ * 
+ * <pre> -M
+ *  Replace missing values with mean/mode.
+ * </pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed.
+ *  Random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -72,7 +81,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  * @see weka.classifiers.meta.FilteredClassifier
  */
 public class FilteredClusterer
@@ -161,10 +170,19 @@ public class FilteredClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
+   *  number of clusters.
+   *  (default 2).</pre>
+   * 
+   * <pre> -V
+   *  Display std. deviations for centroids.
+   * </pre>
+   * 
+   * <pre> -M
+   *  Replace missing values with mean/mode.
+   * </pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed.
+   *  Random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -365,7 +383,7 @@ public class FilteredClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**
@@ -377,3 +395,4 @@ public class FilteredClusterer
     runClusterer(new FilteredClusterer(), args);
   }
 }
+

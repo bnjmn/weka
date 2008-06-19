@@ -58,10 +58,19 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
+ *  number of clusters.
+ *  (default 2).</pre>
+ * 
+ * <pre> -V
+ *  Display std. deviations for centroids.
+ * </pre>
+ * 
+ * <pre> -M
+ *  Replace missing values with mean/mode.
+ * </pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed.
+ *  Random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -71,7 +80,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision: 1.17 $
  */
 public class MakeDensityBasedClusterer 
   extends DensityBasedClusterer
@@ -499,10 +508,19 @@ public class MakeDensityBasedClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
+   *  number of clusters.
+   *  (default 2).</pre>
+   * 
+   * <pre> -V
+   *  Display std. deviations for centroids.
+   * </pre>
+   * 
+   * <pre> -M
+   *  Replace missing values with mean/mode.
+   * </pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed.
+   *  Random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -563,7 +581,7 @@ public class MakeDensityBasedClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.16 $");
+    return RevisionUtils.extract("$Revision: 1.17 $");
   }
 
   /**
@@ -575,3 +593,4 @@ public class MakeDensityBasedClusterer
     runClusterer(new MakeDensityBasedClusterer(), argv);
   }
 }
+

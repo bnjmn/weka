@@ -41,46 +41,53 @@ import java.util.Vector;
 
 /**
   <!-- globalinfo-start -->
- * LinearForwardSelection:<br/>
- * Class for performing a linear forward selection (Extension of
- * BestFirstSearch)
- * </p>
+  * LinearForwardSelection:<br/>
+  * <br/>
+  * Extension of BestFirst. Takes a restricted number of k attributes into account. Fixed-set selects a fixed number k of attributes, whereas k is increased in each step when fixed-width is selected. The search uses either the initial ordering to select the top k attributes, or performs a ranking (with the same evalutator the search uses later on). The search direction can be forward, or floating forward selection (with opitional backward search steps).<br/>
+  * <br/>
+  * For more information see:<br/>
+  * <br/>
+  * Martin Guetlein (2006). Large Scale Attribute Selection Using Wrappers. Freiburg, Germany.
+  * <p/>
   <!-- globalinfo-end -->
  *
   <!-- options-start -->
- * Valid options are:
- * <p/>
- *
- * <pre> -P &lt;start set&gt;
- *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7.</pre>
- *
- * <pre> -D &lt;0 = forward selection | 1 = floating forward selection&gt;
- * Forward selection method of the search. (default = 0).</pre>
- *
- * <pre> -N &lt;num&gt;
- * Number of non improving nodes to consider before terminating search. (default = 5).</pre>
- *
- * <pre> -I
- * Perform initial ranking to select top-ranked attributes. </pre>
- *
- * <pre> -K &lt;num&gt;
- * Number of top-ranked attributes that are taken into account.</pre>
- *
- * <pre> -T &lt;0 = fixed-set | 1 = fixed-width&gt;
- * Type of Linear Forward Selection (default = 0).</pre>
- *
- * <pre> -S &lt;num&gt;
- * Size of lookup cache for evaluated subsets. Expressed as a multiple of the
- * number of attributes in the data set. (default = 1).</pre>
- *
- * <pre> -Z
- * verbose on/off. </pre>
- *
- <!-- options-end -->
+  * Valid options are: <p/>
+  * 
+  * <pre> -P &lt;start set&gt;
+  *  Specify a starting set of attributes.
+  *  Eg. 1,3,5-7.</pre>
+  * 
+  * <pre> -D &lt;0 = forward selection | 1 = floating forward selection&gt;
+  *  Forward selection method. (default = 0).</pre>
+  * 
+  * <pre> -N &lt;num&gt;
+  *  Number of non-improving nodes to
+  *  consider before terminating search.</pre>
+  * 
+  * <pre> -I
+  *  Perform initial ranking to select the
+  *  top-ranked attributes.</pre>
+  * 
+  * <pre> -K &lt;num&gt;
+  *  Number of top-ranked attributes that are 
+  *  taken into account by the search.</pre>
+  * 
+  * <pre> -T &lt;0 = fixed-set | 1 = fixed-width&gt;
+  *  Type of Linear Forward Selection (default = 0).</pre>
+  * 
+  * <pre> -S &lt;num&gt;
+  *  Size of lookup cache for evaluated subsets.
+  *  Expressed as a multiple of the number of
+  *  attributes in the data set. (default = 1)</pre>
+  * 
+  * <pre> -Z
+  *  verbose on/off</pre>
+  * 
+  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class LinearForwardSelection 
   extends ASSearch 
@@ -851,6 +858,7 @@ public class LinearForwardSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
+

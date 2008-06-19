@@ -45,72 +45,56 @@ import java.util.Vector;
 /**
  *
  <!-- globalinfo-start -->
- * AODEsr augments AODE with Subsumption Resolution.
- * AODEsr detects specializations between two attribute values at
- * classification time and deletes the generalization attribute value.
- * <br/>
- * For more information, see<br/>
- * <br/>
- * Zheng, F., Webb, G.I. (2006): Efficient lazy elimination for
- * averaged-one dependence
- * estimators. In: Proc. 23th Int. Conf. Machine Learning (ICML 2006),
- * 1113-1120
- * <br/>
- * Note: the subsumption resolution technique is called lazy elimination
- * in the ICML paper.
- * <br/>
+ * AODEsr augments AODE with Subsumption Resolution.AODEsr detects specializations between two attribute values at classification time and deletes the generalization attribute value.<br/>
+ * For more information, see:<br/>
+ * Fei Zheng, Geoffrey I. Webb: Efficient Lazy Elimination for Averaged-One Dependence Estimators. In: Proceedings of the Twenty-third International Conference on Machine  Learning (ICML 2006), 1113-1120, 2006.
+ * <p/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;INPROCEEDINGS{ZhengWebbICML2006,
- *    AUTHOR = {Fei Zheng and Geoffrey I. Webb},
- *    TITLE = {Efficient Lazy Elimination for Averaged-One Dependence
- *             Estimators},
- *    BOOKTITLE = {Proceedings of the Twenty-third International
- *                 Conference on Machine  Learning (ICML 2006)},
- *    ISBN = {1-59593-383-2},
- *    PAGES = {1113--1120},
- *    PUBLISHER = {ACM Press},
- *    YEAR = {2006},  }
+ * &#64;inproceedings{Zheng2006,
+ *    author = {Fei Zheng and Geoffrey I. Webb},
+ *    booktitle = {Proceedings of the Twenty-third International Conference on Machine  Learning (ICML 2006)},
+ *    pages = {1113-1120},
+ *    publisher = {ACM Press},
+ *    title = {Efficient Lazy Elimination for Averaged-One Dependence Estimators},
+ *    year = {2006},
+ *    ISBN = {1-59593-383-2}
  * }
  * </pre>
  * <p/>
  <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
- * Valid options are:<p/>
- *
+ * Valid options are: <p/>
+ * 
  * <pre> -D
  *  Output debugging information
  * </pre>
  * 
- * <pre> -F &lt;int&gt;
+ * <pre> -C
+ *  Impose a critcal value for specialization-generalization relationship
+ *  (default is 50)</pre>
+ * 
+ * <pre> -F
  *  Impose a frequency limit for superParents
  *  (default is 1)</pre>
- *
+ * 
  * <pre> -L
- *  Use Laplace estimation
- *  (default is m-estimation)</pre>
- *
- * <pre> -M &lt;double&gt;
- *  Specify the m value of m-estimation
- *  (default is 1)</pre>
- *
- * <pre>-C &lt;int&gt;
- *  Specify critical value for specialization-generalization.
- *  (default is 50).
- *  Larger values than the default of 50 substantially reduce
- *  the risk of incorrectly inferring that one value subsumes
- *  another, but also reduces the number of true subsumptions
- *  that are detected.</pre>
- *
+ *  Using Laplace estimation
+ *  (default is m-esimation (m=1))</pre>
+ * 
+ * <pre> -M
+ *  Weight value for m-estimation
+ *  (default is 1.0)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Fei Zheng
  * @author Janice Boughton
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AODEsr extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier,
@@ -656,32 +640,28 @@ public class AODEsr extends Classifier
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
-   * Valid options are:<p/>
-   *
+   * Valid options are: <p/>
+   * 
    * <pre> -D
    *  Output debugging information
    * </pre>
    * 
-   * <pre> -F &lt;int&gt;
+   * <pre> -C
+   *  Impose a critcal value for specialization-generalization relationship
+   *  (default is 50)</pre>
+   * 
+   * <pre> -F
    *  Impose a frequency limit for superParents
    *  (default is 1)</pre>
-   *
+   * 
    * <pre> -L
-   *  Use Laplace estimation
-   *  (default is m-estimation)</pre>
-   *
-   * <pre> -M &lt;double&gt;
-   *  Specify the m value of m-estimation
-   *  (default is 1)</pre>
-   *
-   * <pre>-C &lt;int&gt;
-   *  Specify critical value for specialization-generalization.
-   *  (default is 50).
-   *  Larger values than the default of 50 substantially reduce
-   *  the risk of incorrectly inferring that one value subsumes
-   *  another, but also reduces the number of true subsumptions
-   *  that are detected.</pre>
-   *
+   *  Using Laplace estimation
+   *  (default is m-esimation (m=1))</pre>
+   * 
+   * <pre> -M
+   *  Weight value for m-estimation
+   *  (default is 1.0)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -907,7 +887,7 @@ public class AODEsr extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
     
   /**
@@ -919,3 +899,4 @@ public class AODEsr extends Classifier
     runClassifier(new AODEsr(), argv);
   }
 }
+

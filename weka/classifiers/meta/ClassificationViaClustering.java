@@ -67,6 +67,14 @@ import java.util.Vector;
  *  number of clusters.
  *  (default 2).</pre>
  * 
+ * <pre> -V
+ *  Display std. deviations for centroids.
+ * </pre>
+ * 
+ * <pre> -M
+ *  Replace missing values with mean/mode.
+ * </pre>
+ * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 10)</pre>
@@ -74,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class ClassificationViaClustering
   extends Classifier {
@@ -211,6 +219,14 @@ public class ClassificationViaClustering
    * <pre> -N &lt;num&gt;
    *  number of clusters.
    *  (default 2).</pre>
+   * 
+   * <pre> -V
+   *  Display std. deviations for centroids.
+   * </pre>
+   * 
+   * <pre> -M
+   *  Replace missing values with mean/mode.
+   * </pre>
    * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
@@ -483,7 +499,7 @@ public class ClassificationViaClustering
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**
@@ -495,3 +511,4 @@ public class ClassificationViaClustering
     runClassifier(new ClassificationViaClustering(), args);
   }
 }
+

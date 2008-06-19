@@ -36,8 +36,11 @@ import java.util.Vector;
 /**
  <!-- globalinfo-start -->
  * A wrapper class for the Snowball stemmers. Only available if the Snowball classes are in the classpath.<br/>
+ * If the class discovery is not dynamic, i.e., the property 'UseDynamic' in the props file 'weka/gui/GenericPropertiesCreator.props' is 'false', then the property 'org.tartarus.snowball.SnowballProgram' in the 'weka/gui/GenericObjectEditor.props' file has to be uncommented as well. If necessary you have to discover and fill in the snowball stemmers manually. You can use the 'weka.core.ClassDiscovery' for this:<br/>
+ *   java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext<br/>
+ * <br/>
  * For more information visit these web sites:<br/>
- *   http://www.cs.waikato.ac.nz/~ml/weka/stemmers/<br/>
+ *   http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers<br/>
  *   http://snowball.tartarus.org/<br/>
  * <p/>
  <!-- globalinfo-end -->
@@ -55,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.9 $
+ * @version   $Revision: 1.10 $
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -441,7 +444,7 @@ public class SnowballStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
 
   /**
@@ -458,3 +461,4 @@ public class SnowballStemmer
     }
   }
 }
+

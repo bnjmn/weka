@@ -40,7 +40,7 @@ import java.util.Vector;
  * 
  * <pre> -delimiters &lt;value&gt;
  *  The delimiters to use
- *  (default ' \n\t.,;:'"()?!').</pre>
+ *  (default ' \r\n\t.,;:'"()?!').</pre>
  * 
  * <pre> -max &lt;int&gt;
  *  The max size of the Ngram (default = 3).</pre>
@@ -52,7 +52,7 @@ import java.util.Vector;
  *
  * @author  Sebastian Germesin (sebastian.germesin@dfki.de)
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class NGramTokenizer
   extends CharacterDelimitedTokenizer {
@@ -148,7 +148,7 @@ public class NGramTokenizer
    * 
    * <pre> -delimiters &lt;value&gt;
    *  The delimiters to use
-   *  (default ' \n\t.,;:'"()?!').</pre>
+   *  (default ' \r\n\t.,;:'"()?!').</pre>
    * 
    * <pre> -max &lt;int&gt;
    *  The max size of the Ngram (default = 3).</pre>
@@ -316,7 +316,7 @@ public class NGramTokenizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**
@@ -329,3 +329,4 @@ public class NGramTokenizer
     runTokenizer(new NGramTokenizer(), args);
   }
 }
+

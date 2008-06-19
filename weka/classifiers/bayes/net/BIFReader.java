@@ -51,7 +51,7 @@ import org.w3c.dom.NodeList;
  * <br/>
  * For more details on XML BIF see:<br/>
  * <br/>
- * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/\~fgcozman/Research/InterchangeFormat/.
+ * Fabio Cozman, Marek Druzdzel, Daniel Garcia (1998). XML BIF version 0.3. URL http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -90,7 +90,7 @@ import org.w3c.dom.NodeList;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 public class BIFReader 
     extends BayesNet
@@ -620,7 +620,7 @@ public class BIFReader
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.14 $");
+      return RevisionUtils.extract("$Revision: 1.15 $");
     }
 
     /**
@@ -640,3 +640,4 @@ public class BIFReader
         }
     } // main
 } // class BIFReader
+

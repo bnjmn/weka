@@ -52,11 +52,11 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Classifier for building 'Functional trees', which are classification trees that could have logistic regression functions at the all nodes(uses LMT algorithm logistic regression technique) . The algorithm can deal with binary and multi-class target variables, numeric and nominal attributes and missing values.<br/>
+ * Classifier for building 'Functional trees', which are classification trees  that could have logistic regression functions at the inner nodes and/or leaves. The algorithm can deal with binary and multi-class target variables, numeric and nominal attributes and missing values.<br/>
  * <br/>
  * For more information see: <br/>
  * <br/>
- * Jo\~{a}o Gama (2004). Functional Trees.<br/>
+ * Joao Gama (2004). Functional Trees.<br/>
  * <br/>
  * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees.
  * <p/>
@@ -65,13 +65,13 @@ import java.util.Vector;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;article{990395,
- *    author = {Jo\~{a}o Gama},
+ * &#64;article{Gama2004,
+ *    author = {Joao Gama},
  *    booktitle = {Machine Learning},
+ *    number = {3},
  *    pages = {219-250},
  *    title = {Functional Trees},
  *    volume = {55},
- *    number= {3},
  *    year = {2004}
  * }
  * 
@@ -92,8 +92,8 @@ import java.util.Vector;
  * Valid options are: <p/>
  * 
  * <pre> -B
- *  Binary splits(convert nominal attributes to binary ones) </pre> 
- *   
+ *  Binary splits (convert nominal attributes to binary ones) </pre>
+ * 
  * <pre> -P
  *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.</pre>
  * 
@@ -101,8 +101,8 @@ import java.util.Vector;
  *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)</pre>
  * 
  * <pre> -F &lt;modelType&gt;
- *  Set the type of tree to bee generated: 0 for FT, 1 for FTLeaves or 2 for FTInner
- *
+ *  Set Funtional Tree type to be generate:  0 for FT, 1 for FTLeaves and 2 for FTInner</pre>
+ * 
  * <pre> -M &lt;numInstances&gt;
  *  Set minimum number of instances at which a node can be split (default 15)</pre>
  * 
@@ -116,7 +116,7 @@ import java.util.Vector;
  *
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira  
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class FT 
   extends Classifier 
@@ -363,7 +363,7 @@ public class FT
    * Valid options are: <p/>
    * 
    * <pre> -B
-   *  Binary splits (convert nominal attributes to binary ones)</pre>
+   *  Binary splits (convert nominal attributes to binary ones) </pre>
    * 
    * <pre> -P
    *  Use error on probabilities instead of misclassification error for stopping criterion of LogitBoost.</pre>
@@ -372,8 +372,8 @@ public class FT
    *  Set fixed number of iterations for LogitBoost (instead of using cross-validation)</pre>
    * 
    * <pre> -F &lt;modelType&gt;
-   *  Set the type of tree to bee generated: 0 for FT, 1 for FTLeaves or 2 for FTInner
-   *
+   *  Set Funtional Tree type to be generate:  0 for FT, 1 for FTLeaves and 2 for FTInner</pre>
+   * 
    * <pre> -M &lt;numInstances&gt;
    *  Set minimum number of instances at which a node can be split (default 15)</pre>
    * 
@@ -784,7 +784,7 @@ public class FT
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision: 1.6 $");
   }
   
   /**
@@ -796,3 +796,4 @@ public class FT
     runClassifier(new FT(), argv);
   } 
 }
+

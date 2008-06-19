@@ -53,7 +53,7 @@ import java.util.Vector;
  * 
  * <pre> -c &lt;the class index&gt;
  *  The class index.
- *  (default: -1, i.e., last)</pre>
+ *  (default: -1, i.e. unset)</pre>
  * 
  * <pre> -W
  *  Full name of base associator.
@@ -99,13 +99,13 @@ import java.util.Vector;
  *  If set class association rules are mined. (default = no)</pre>
  * 
  * <pre> -c &lt;the class index&gt;
- *  The class index. (default = unset)</pre>
+ *  The class index. (default = last)</pre>
  * 
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class FilteredAssociator 
   extends SingleAssociatorEnhancer {
@@ -199,7 +199,7 @@ public class FilteredAssociator
    * 
    * <pre> -c &lt;the class index&gt;
    *  The class index.
-   *  (default: -1, i.e., unset)</pre>
+   *  (default: -1, i.e. unset)</pre>
    * 
    * <pre> -W
    *  Full name of base associator.
@@ -245,7 +245,7 @@ public class FilteredAssociator
    *  If set class association rules are mined. (default = no)</pre>
    * 
    * <pre> -c &lt;the class index&gt;
-   *  The class index. (default unset)</pre>
+   *  The class index. (default = last)</pre>
    * 
    <!-- options-end -->
    *
@@ -467,7 +467,7 @@ public class FilteredAssociator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**
@@ -479,3 +479,4 @@ public class FilteredAssociator
     runAssociator(new FilteredAssociator(), args);
   }
 }
+

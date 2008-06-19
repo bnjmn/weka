@@ -45,18 +45,11 @@ import java.util.Vector;
 /**
  *
  <!-- globalinfo-start -->
- * Class for building and using a decision table/naive bayes hybrid classifier. At each point 
- * in the search, the algorithm evaluates the merit of dividing the attributes into two disjoint
- * subsets: one for the decision table, the other for naive Bayes. A forward selection search is
- * used, where at each step, selected attributes are modeled by naive Bayes and the remainder
- * by the decision table, and all attributes are modelled by the decision table initially. At each
- * step, the algorithm also considers dropping an attribute entirely from the model.
- *
+ * Class for building and using a decision table/naive bayes hybrid classifier. At each point in the search, the algorithm evaluates the merit of dividing the attributes into two disjoint subsets: one for the decision table, the other for naive Bayes. A forward selection search is used, where at each step, selected attributes are modeled by naive Bayes and the remainder by the decision table, and all attributes are modelled by the decision table initially. At each step, the algorithm also considers dropping an attribute entirely from the model.<br/>
  * <br/>
- * For more information see: <br/>
+ * For more information, see: <br/>
  * <br/>
- * Mark Hall and Eibe Frank: Combining Naive Bayes and Decision Tables. (In Press). 
- * Proceedings of the 21st Florida Artificial Intelligence Society Conference (FLAIRS). AAAI press.
+ * Mark Hall, Eibe Frank: Combining Naive Bayes and Decision Tables. In: Proceedings of the 21st Florida Artificial Intelligence Society Conference (FLAIRS), ???-???, 2008.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -78,7 +71,6 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * 
  * <pre> -X &lt;number of folds&gt;
  *  Use cross validation to evaluate features.
  *  Use number of folds = 1 for leave one out CV.
@@ -95,13 +87,12 @@ import java.util.Vector;
  *  Display decision table rules.
  * </pre>
  * 
- * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @author Eibe Frank (eibe{[at]}cs{[dot]}waikato{[dot]}ac{[dot]}nz)
  *
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  *
  */
 public class DTNB extends DecisionTable {
@@ -464,7 +455,7 @@ public class DTNB extends DecisionTable {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision: 1.4 $");
     }
   }
 
@@ -623,7 +614,7 @@ public class DTNB extends DecisionTable {
        * @return		the revision
        */
       public String getRevision() {
-        return RevisionUtils.extract("$Revision: 1.3 $");
+        return RevisionUtils.extract("$Revision: 1.4 $");
       }
   }
 
@@ -973,7 +964,7 @@ public class DTNB extends DecisionTable {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**
@@ -985,3 +976,4 @@ public class DTNB extends DecisionTable {
     runClassifier(new DTNB(), argv);
   }
 }
+
