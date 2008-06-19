@@ -41,7 +41,7 @@ import weka.core.Capabilities.Capability;
  <!-- globalinfo-end -->
  *
  * Typical usage: <p>
- * <code>java weka.classifiers.trees.LogitBoost -I 100 -W weka.classifiers.trees.DecisionStump 
+ * <code>java weka.classifiers.meta.LogitBoost -I 100 -W weka.classifiers.trees.DecisionStump 
  * -t training_data </code><p>
  * 
  <!-- options-start -->
@@ -54,7 +54,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision: 1.27 $
  */
 public class DecisionStump 
   extends Classifier 
@@ -756,7 +756,7 @@ public class DecisionStump
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.26 $");
+    return RevisionUtils.extract("$Revision: 1.27 $");
   }
  
   /**
