@@ -40,15 +40,7 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * Produces a random subsample of a dataset using the reservoir sampling 
- * algorithm "R" of Vitter. The original data set does not have to fit 
- * into main memory, only the resevoir does.
- * <br/>
- * For more information, see:<br/>
- * <br/>
- *  Vitter, J. S. Random Sampling with a Reservoir. ACM
- * Transactions on Mathematical Software, Vol. 11, No. 1,
- * March 1985. Pages 37-57.
+ * Produces a random subsample of a dataset using the reservoir sampling Algorithm "R" by Vitter. The original data set does not have to fit into main memory, but the reservoir does.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -73,14 +65,13 @@ import java.util.Vector;
  *  Specify the random number seed (default 1)</pre>
  * 
  * <pre> -Z &lt;num&gt;
- *  The size of the output dataset, as a percentage of
- *  the input dataset (default 100)</pre>
- * 
+ *  The size of the output dataset - number of instances
+ *  (default 100)</pre>
  * 
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class ReservoirSample 
   extends Filter 
@@ -147,9 +138,9 @@ public class ReservoirSample
    *  Specify the random number seed (default 1)</pre>
    * 
    * <pre> -Z &lt;num&gt;
-   *  The size of the output dataset, as a percentage of
-   *  the input dataset (default 100)</pre>
-   *
+   *  The size of the output dataset - number of instances
+   *  (default 100)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -392,7 +383,7 @@ public class ReservoirSample
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
   
   /**
@@ -405,3 +396,4 @@ public class ReservoirSample
     runFilter(new ReservoirSample(), argv);
   }
 }
+

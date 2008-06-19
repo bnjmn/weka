@@ -48,35 +48,36 @@ import java.util.ArrayList;
 
 /**
 <!-- globalinfo-start -->
- *  Yiling Yang, Xudong Guan, Jinyuan You: CLOPE: A Fast and Effective Clustering Algorithm for Transactional Data. Proc.\ KDD'02, 682--687, 2002.
- * <p/>
+* Yiling Yang, Xudong Guan, Jinyuan You: CLOPE: a fast and effective clustering algorithm for transactional data. In: Proceedings of the eighth ACM SIGKDD international conference on Knowledge discovery and data mining, 682-687, 2002.
+* <p/>
 <!-- globalinfo-end -->
  *
 <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;inproceedings{yang-clope,
- *    author = {Yiling Yang and Xudong Guan and Jinyuan You},
- *    booktitle = {"Proc.\ KDD'02"},
- *    pages = {682--687},
- *    publisher = {ACM  New York, NY, USA},
- *    title = {CLOPE: A Fast and Effective Clustering Algorithm for Transactional Data},
- *    year = {2002}
- * }
- * </pre>
- * <p/>
+* BibTeX:
+* <pre>
+* &#64;inproceedings{Yang2002,
+*    author = {Yiling Yang and Xudong Guan and Jinyuan You},
+*    booktitle = {Proceedings of the eighth ACM SIGKDD international conference on Knowledge discovery and data mining},
+*    pages = {682-687},
+*    publisher = {ACM  New York, NY, USA},
+*    title = {CLOPE: a fast and effective clustering algorithm for transactional data},
+*    year = {2002}
+* }
+* </pre>
+* <p/>
 <!-- technical-bibtex-end -->
  *
 <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -R &lt;double&gt;
- *  repulsion (default = 2.6)</pre>
- *
+* Valid options are: <p/>
+* 
+* <pre> -R &lt;num&gt;
+*  Repulsion
+*  (default 2.6)</pre>
+* 
 <!-- options-end -->
  *
  * @author Alexander Smirnov (austellus@gmail.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class CLOPE
   extends Clusterer
@@ -330,12 +331,12 @@ public class CLOPE
    * Parses a given list of options. <p/>
    * 
     <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -R &lt;num&gt;
-   *  Repulsion.
-   *  (default 2.6).</pre>
-   * 
+    * Valid options are: <p/>
+    * 
+    * <pre> -R &lt;num&gt;
+    *  Repulsion
+    *  (default 2.6)</pre>
+    * 
     <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -616,7 +617,7 @@ public class CLOPE
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 
   /**
@@ -629,5 +630,4 @@ public class CLOPE
     runClusterer(new CLOPE(), argv);
   }
 }
-
 

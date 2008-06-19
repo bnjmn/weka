@@ -142,10 +142,19 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
+ *  number of clusters.
+ *  (default 2).</pre>
+ * 
+ * <pre> -V
+ *  Display std. deviations for centroids.
+ * </pre>
+ * 
+ * <pre> -M
+ *  Replace missing values with mean/mode.
+ * </pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed.
+ *  Random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -154,7 +163,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -265,10 +274,19 @@ public class CheckClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
+   *  number of clusters.
+   *  (default 2).</pre>
+   * 
+   * <pre> -V
+   *  Display std. deviations for centroids.
+   * </pre>
+   * 
+   * <pre> -M
+   *  Replace missing values with mean/mode.
+   * </pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed.
+   *  Random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -1319,7 +1337,7 @@ public class CheckClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
   
   /**
@@ -1331,3 +1349,4 @@ public class CheckClusterer
     runCheck(new CheckClusterer(), args);
   }
 }
+

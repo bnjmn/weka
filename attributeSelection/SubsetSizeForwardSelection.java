@@ -40,47 +40,79 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * SubsetSizeForwardSelection :<br/>
- * Class for performing a subset size forward selection
- * <p>
+ * SubsetSizeForwardSelection:<br/>
+ * <br/>
+ * Extension of LinearForwardSelection. The search performs an interior cross-validation (seed and number of folds can be specified). A LinearForwardSelection is performed on each foldto determine the optimal subset-size (using the given SubsetSizeEvaluator). Finally, a LinearForwardSelection up to the optimal subset-size is performed on the whole data.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Martin Guetlein (2006). Large Scale Attribute Selection Using Wrappers. Freiburg, Germany.
+ * <p/>
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
- * Valid options are:
- * <p>
- *
+ * Valid options are: <p/>
+ * 
  * <pre> -I
- * Perform initial ranking to select top-ranked attributes.</pre>
- *
+ *  Perform initial ranking to select the
+ *  top-ranked attributes.</pre>
+ * 
  * <pre> -K &lt;num&gt;
- * Number of top-ranked attributes that are taken into account.</pre>
- *
+ *  Number of top-ranked attributes that are 
+ *  taken into account by the search.</pre>
+ * 
  * <pre> -T &lt;0 = fixed-set | 1 = fixed-width&gt;
- * Type of Linear Forward Selection (default = 0).</pre>
- *
+ *  Type of Linear Forward Selection (default = 0).</pre>
+ * 
  * <pre> -S &lt;num&gt;
- * Size of lookup cache for evaluated subsets. Expressed as a multiple of the
- * number of attributes in the data set. (default = 1).</pre>
- *
- * <pre> -E &lt;string&gt;
- * class name of subset evaluator to use for subset size determination (default =
- * null, same subset evaluator as for ranking and final forward selection is
- * used). Place any evaluator options LAST on the command line following a "--".
- * eg. -A weka.attributeSelection.ClassifierSubsetEval ... -- -M<pre>
- *
+ *  Size of lookup cache for evaluated subsets.
+ *  Expressed as a multiple of the number of
+ *  attributes in the data set. (default = 1)</pre>
+ * 
+ * <pre> -E &lt;subset evaluator&gt;
+ *  Subset-evaluator used for subset-size determination.-- -M</pre>
+ * 
  * <pre> -F &lt;num&gt;
- * Number of cross validation folds for subset size determination (default = 5).</pre>
- *
+ *  Number of cross validation folds
+ *  for subset size determination (default = 5).</pre>
+ * 
  * <pre> -R &lt;num&gt;
- * Seed for cross validation subset size determination. (default = 1)</pre>
- *
+ *  Seed for cross validation
+ *  subset size determination. (default = 1)</pre>
+ * 
  * <pre> -Z
- * verbose on/off.</pre>
- *
+ *  verbose on/off</pre>
+ * 
+ * <pre> 
+ * Options specific to evaluator weka.attributeSelection.ClassifierSubsetEval:
+ * </pre>
+ * 
+ * <pre> -B &lt;classifier&gt;
+ *  class name of the classifier to use for accuracy estimation.
+ *  Place any classifier options LAST on the command line
+ *  following a "--". eg.:
+ *   -B weka.classifiers.bayes.NaiveBayes ... -- -K
+ *  (default: weka.classifiers.rules.ZeroR)</pre>
+ * 
+ * <pre> -T
+ *  Use the training data to estimate accuracy.</pre>
+ * 
+ * <pre> -H &lt;filename&gt;
+ *  Name of the hold out/test set to 
+ *  estimate accuracy on.</pre>
+ * 
+ * <pre> 
+ * Options specific to scheme weka.classifiers.rules.ZeroR:
+ * </pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
  <!-- options-end -->
  *
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class SubsetSizeForwardSelection extends ASSearch
   implements OptionHandler {
@@ -876,6 +908,7 @@ public class SubsetSizeForwardSelection extends ASSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
+

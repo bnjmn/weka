@@ -61,13 +61,12 @@ import java.util.Vector;
  *  Sets the method to use. Valid values are 0 (1-against-all),
  *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
  * </pre>
- *
- * <pre> -P
- *  Use pairwise coupling (only has an effect for 1-against-1)
- * </pre>
  * 
  * <pre> -R &lt;num&gt;
  *  Sets the multiplier when using random codes. (default 2.0)</pre>
+ * 
+ * <pre> -P
+ *  Use pairwise coupling (only has an effect for 1-against1)</pre>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
@@ -99,7 +98,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.47 $
+ * @version $Revision: 1.48 $
  */
 public class MultiClassClassifier 
   extends RandomizableSingleClassifierEnhancer 
@@ -237,7 +236,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.47 $");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -269,7 +268,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.47 $");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -351,7 +350,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.47 $");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -396,7 +395,7 @@ public class MultiClassClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.47 $");
+      return RevisionUtils.extract("$Revision: 1.48 $");
     }
   }
 
@@ -713,13 +712,12 @@ public class MultiClassClassifier
    *  Sets the method to use. Valid values are 0 (1-against-all),
    *  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)
    * </pre>
-   *
-   * <pre> -P
-   *  Use pairwise coupling (only has an effect for 1-against-1)
-   * </pre>
    * 
    * <pre> -R &lt;num&gt;
    *  Sets the multiplier when using random codes. (default 2.0)</pre>
+   * 
+   * <pre> -P
+   *  Use pairwise coupling (only has an effect for 1-against1)</pre>
    * 
    * <pre> -S &lt;num&gt;
    *  Random number seed.
@@ -983,7 +981,7 @@ public class MultiClassClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.47 $");
+    return RevisionUtils.extract("$Revision: 1.48 $");
   }
 
   /**
@@ -995,3 +993,4 @@ public class MultiClassClassifier
     runClassifier(new MultiClassClassifier(), argv);
   }
 }
+

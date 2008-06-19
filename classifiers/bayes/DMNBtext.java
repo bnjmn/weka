@@ -41,21 +41,24 @@ import weka.core.OptionHandler;
 
 /**
  <!-- globalinfo-start -->
- * Learn parameters in Multinomial Naive Bayes model using Discriminative Frequency Estimate<br/>
+ * Class for building and using a Discriminative Multinomial Naive Bayes classifier. For more information see,<br/>
  * <br/>
- * For more information, see<br/>
- * Jiang Su,Harry Zhang,Charles X. Ling,Stan Matwin. In: Machine Learning, Proceedings of the Twenty-Third International               Conference (ICML 2008)
+ * Jiang Su,Harry Zhang,Charles X. Ling,Stan Matwin: Discriminative Parameter Learning for Bayesian Networks. In: ICML 2008', 2008.<br/>
+ * <br/>
+ * The core equation for this classifier:<br/>
+ * <br/>
+ * P[Ci|D] = (P[D|Ci] x P[Ci]) / P[D] (Bayes rule)<br/>
+ * <br/>
+ * where Ci is class i and D is a document.
  * <p/>
- * <br/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;inproceedings{Jiang&Harry2008,
+ * &#64;inproceedings{JiangSu2008,
  *    author = {Jiang Su,Harry Zhang,Charles X. Ling,Stan Matwin},
- *    Conference= {Machine Learning, Proceedings of the Twenty-Third International
-               Conference (ICML 2008)},
+ *    booktitle = {ICML 2008'},
  *    title = {Discriminative Parameter Learning for Bayesian Networks},
  *    year = {2008}
  * }
@@ -65,16 +68,15 @@ import weka.core.OptionHandler;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- *
- * <pre> -B &lt;boolean&gt;
- *  If set, all frequency of words appearing in documents are treated as 1</pre>
- * <pre> -I &lt;number&gt;
- *  Set the maximum number of iterations (default 1). Each iteration will scan the whole data once</pre>
- *
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
  <!-- options-end -->
 
  /* @author Jiang Su (Jiang.Su@unb.ca) 2008
-  * @version $Revision: 1.1 $
+  * @version $Revision: 1.2 $
   */
 public class DMNBtext extends Classifier
     implements OptionHandler, WeightedInstancesHandler, 
@@ -546,3 +548,4 @@ public class DMNBtext extends Classifier
     runClassifier(c, argv);
   }
 }
+

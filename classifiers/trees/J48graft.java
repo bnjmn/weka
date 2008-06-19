@@ -51,38 +51,21 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Class for generating a grafted (pruned or unpruned) C4.5 decision tree. For more information, see:<br/>
+ * Class for generating a grafted (pruned or unpruned) C4.5 decision tree. For more information, see<br/>
  * <br/>
- * Geoff Webb (1999). Decision Tree Grafting From the All-Tests-But-One Partition. Morgan Kaufmann, San Francisco, CA.
- * <br/>
- *  also:<br/>
- * Webb, G. I. (1996). Further Experimental Evidence Against The Utility Of Occams Razor. Journal of Artificial Intelligence Research 4. Menlo Park, CA: AAAI Press, pages 397-417.
+ * Geoff Webb: Decision Tree Grafting From the All-Tests-But-One Partition. In: , San Francisco, CA, 1999.
  * <p/>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;INPROCEEDINGS{Webb99,
- *   year = {1999},
- *   title = {Decision Tree Grafting From The All Tests But One Partition},
- *   booktitle = {Proceedings of the Sixteenth International Joint Conference on Artificial Intelligence (IJCAI 99)},
- *   publisher = {Morgan Kaufmann},
- *   editor = {T. Dean},
- *   address = {San Francisco},
- *   author = {G. I. Webb},
- *   location = {Stockholm, Sweden},
- *   pages = {702-707},
- * }
- * &#64:article{Webb96b,
- *   year = {1996},
- *   title = {Further Experimental Evidence Against The Utility Of Occams Razor},
- *   journal = {Journal of Artificial Intelligence Research},
- *   volume = {4},
- *   pages = {397-417},
- *   publisher = {AAAI Press},
- *   address = {Menlo Park, CA},
- *   author = {G. I. Webb}
+ * &#64;inproceedings{Webb1999,
+ *    address = {San Francisco, CA},
+ *    author = {Geoff Webb},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Decision Tree Grafting From the All-Tests-But-One Partition},
+ *    year = {1999}
  * }
  * </pre>
  * <p/>
@@ -90,39 +73,38 @@ import java.util.Vector;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- *
+ * 
  * <pre> -U
  *  Use unpruned tree.</pre>
- *
+ * 
  * <pre> -C &lt;pruning confidence&gt;
  *  Set confidence threshold for pruning.
  *  (default 0.25)</pre>
- *
+ * 
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.
  *  (default 2)</pre>
- *
+ * 
  * <pre> -B
  *  Use binary splits only.</pre>
- *
+ * 
  * <pre> -S
  *  Don't perform subtree raising.</pre>
- *
+ * 
  * <pre> -L
  *  Do not clean up after the tree has been built.</pre>
- *
+ * 
  * <pre> -A
- *  Laplace smoothing for predicted probabilities.
- *  (note: this option only affects initial tree; grafting process always uses laplace).</pre>
- *
+ *  Laplace smoothing for predicted probabilities.  (note: this option only affects initial tree; grafting process always uses laplace).</pre>
+ * 
  * <pre> -E
- * Option to allow relabeling during grafting.</pre>
- *
+ *  Relabel when grafting.</pre>
+ * 
  <!-- options-end -->
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  *  (based on J48.java written by Eibe Frank)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class J48graft 
   extends Classifier
@@ -392,34 +374,33 @@ public class J48graft
    *
    <!-- options-start -->
    * Valid options are: <p/>
-   *
+   * 
    * <pre> -U
    *  Use unpruned tree.</pre>
-   *
+   * 
    * <pre> -C &lt;pruning confidence&gt;
    *  Set confidence threshold for pruning.
    *  (default 0.25)</pre>
-   *
+   * 
    * <pre> -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf.
    *  (default 2)</pre>
-   *
+   * 
    * <pre> -B
    *  Use binary splits only.</pre>
-   *
+   * 
    * <pre> -S
    *  Don't perform subtree raising.</pre>
-   *
+   * 
    * <pre> -L
    *  Do not clean up after the tree has been built.</pre>
-   *
+   * 
    * <pre> -A
-   *  Laplace smoothing for predicted probabilities.
-   *  (note: this option only affects initial tree; grafting process always uses laplace). </pre>
-   *
+   *  Laplace smoothing for predicted probabilities.  (note: this option only affects initial tree; grafting process always uses laplace).</pre>
+   * 
    * <pre> -E
-   * Allow relabelling when performing grafting.</pre>
-   *
+   *  Relabel when grafting.</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -820,7 +801,7 @@ public class J48graft
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
  
   /**
@@ -832,3 +813,4 @@ public class J48graft
     runClassifier(new J48graft(), argv);
   }
 }
+

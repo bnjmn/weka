@@ -121,10 +121,10 @@ import java.util.Vector;
  * 
  * <pre> -W
  *  Full name of the estimator analysed.
- *  eg: weka.estimators.bayes.NaiveBayes</pre>
+ *  eg: weka.estimators.NormalEstimator</pre>
  * 
  * <pre> 
- * Options specific to estimator weka.estimators.rules.ZeroR:
+ * Options specific to estimator weka.estimators.NormalEstimator:
  * </pre>
  * 
  * <pre> -D
@@ -137,7 +137,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see TestInstances
  */
 public class CheckEstimator implements OptionHandler, RevisionHandler {
@@ -173,7 +173,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
   
@@ -268,7 +268,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
 
@@ -304,7 +304,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision: 1.5 $");
     }
   }
 
@@ -2118,7 +2118,7 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**
@@ -2149,3 +2149,4 @@ public class CheckEstimator implements OptionHandler, RevisionHandler {
     }
   }
 }
+

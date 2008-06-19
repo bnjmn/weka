@@ -48,7 +48,8 @@ import weka.core.Capabilities.Capability;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
  *  (default: 250007)</pre>
  * 
  * <pre> -G &lt;num&gt;
@@ -62,7 +63,7 @@ import weka.core.Capabilities.Capability;
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Lin Dong (ld21@cs.waikato.ac.nz) (MIkernel)
- * @version $Revision: 1.3 $ 
+ * @version $Revision: 1.4 $ 
  */
 public class MIRBFKernel 
   extends RBFKernel
@@ -210,6 +211,7 @@ public class MIRBFKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision: 1.4 $");
   }
 }
+

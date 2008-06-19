@@ -82,6 +82,11 @@ import java.util.Vector;
  *  Surplus words will be discarded..
  *  (default: 1000)</pre>
  * 
+ * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
+ *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
+ *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
+ *  (default: no periodic pruning)</pre>
+ * 
  * <pre> -T
  *  Transform the word frequencies into log(1+fij)
  *  where fij is the frequency of word i in jth document(instance).
@@ -131,7 +136,7 @@ import java.util.Vector;
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $ 
+ * @version $Revision: 1.25 $ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -334,76 +339,76 @@ public class StringToWordVector
    * Parses a given list of options. <p/>
    * 
          <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -C
-   *  Output word counts rather than boolean word presence.
-   * </pre>
-   * 
-   * <pre> -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of string attributes to convert to words (as weka Range).
-   *  (default: select all string attributes)</pre>
-   * 
-   * <pre> -V
-   *  Invert matching sense of column indexes.</pre>
-   * 
-   * <pre> -P &lt;attribute name prefix&gt;
-   *  Specify a prefix for the created attribute names.
-   *  (default: "")</pre>
-   * 
-   * <pre> -W &lt;number of words to keep&gt;
-   *  Specify approximate number of word fields to create.
-   *  Surplus words will be discarded..
-   *  (default: 1000)</pre>
-   *
-   * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
-   *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
-   *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
-   *  (default: no periodic pruning)"</pre>
-   * 
-   * <pre> -T
-   *  Transform the word frequencies into log(1+fij)
-   *  where fij is the frequency of word i in jth document(instance).
-   * </pre>
-   * 
-   * <pre> -I
-   *  Transform each word frequency into:
-   *  fij*log(num of Documents/num of documents containing word i)
-   *    where fij if frequency of word i in jth document(instance)</pre>
-   * 
-   * <pre> -N
-   *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
-   *  to average length of training documents (default 0=don't normalize).</pre>
-   * 
-   * <pre> -L
-   *  Convert all tokens to lowercase before adding to the dictionary.</pre>
-   * 
-   * <pre> -S
-   *  Ignore words that are in the stoplist.</pre>
-   * 
-   * <pre> -stemmer &lt;spec&gt;
-   *  The stemmering algorihtm (classname plus parameters) to use.</pre>
-   * 
-   * <pre> -M &lt;int&gt;
-   *  The minimum term frequency (default = 1).</pre>
-   * 
-   * <pre> -O
-   *  If this is set, the maximum number of words and the 
-   *  minimum term frequency is not enforced on a per-class 
-   *  basis but based on the documents in all the classes 
-   *  (even if a class attribute is set).</pre>
-   * 
-   * <pre> -stopwords &lt;file&gt;
-   *  A file containing stopwords to override the default ones.
-   *  Using this option automatically sets the flag ('-S') to use the
-   *  stoplist if the file exists.
-   *  Format: one stopword per line, lines starting with '#'
-   *  are interpreted as comments and ignored.</pre>
-   * 
-   * <pre> -tokenizer &lt;spec&gt;
-   *  The tokenizing algorihtm (classname plus parameters) to use.
-   *  (default: weka.core.tokenizers.WordTokenizer)</pre>
-   * 
+         * Valid options are: <p/>
+         * 
+         * <pre> -C
+         *  Output word counts rather than boolean word presence.
+         * </pre>
+         * 
+         * <pre> -R &lt;index1,index2-index4,...&gt;
+         *  Specify list of string attributes to convert to words (as weka Range).
+         *  (default: select all string attributes)</pre>
+         * 
+         * <pre> -V
+         *  Invert matching sense of column indexes.</pre>
+         * 
+         * <pre> -P &lt;attribute name prefix&gt;
+         *  Specify a prefix for the created attribute names.
+         *  (default: "")</pre>
+         * 
+         * <pre> -W &lt;number of words to keep&gt;
+         *  Specify approximate number of word fields to create.
+         *  Surplus words will be discarded..
+         *  (default: 1000)</pre>
+         * 
+         * <pre> -prune-rate &lt;rate as a percentage of dataset&gt;
+         *  Specify the rate (e.g., every 10% of the input dataset) at which to periodically prune the dictionary.
+         *  -W prunes after creating a full dictionary. You may not have enough memory for this approach.
+         *  (default: no periodic pruning)</pre>
+         * 
+         * <pre> -T
+         *  Transform the word frequencies into log(1+fij)
+         *  where fij is the frequency of word i in jth document(instance).
+         * </pre>
+         * 
+         * <pre> -I
+         *  Transform each word frequency into:
+         *  fij*log(num of Documents/num of documents containing word i)
+         *    where fij if frequency of word i in jth document(instance)</pre>
+         * 
+         * <pre> -N
+         *  Whether to 0=not normalize/1=normalize all data/2=normalize test data only
+         *  to average length of training documents (default 0=don't normalize).</pre>
+         * 
+         * <pre> -L
+         *  Convert all tokens to lowercase before adding to the dictionary.</pre>
+         * 
+         * <pre> -S
+         *  Ignore words that are in the stoplist.</pre>
+         * 
+         * <pre> -stemmer &lt;spec&gt;
+         *  The stemmering algorihtm (classname plus parameters) to use.</pre>
+         * 
+         * <pre> -M &lt;int&gt;
+         *  The minimum term frequency (default = 1).</pre>
+         * 
+         * <pre> -O
+         *  If this is set, the maximum number of words and the 
+         *  minimum term frequency is not enforced on a per-class 
+         *  basis but based on the documents in all the classes 
+         *  (even if a class attribute is set).</pre>
+         * 
+         * <pre> -stopwords &lt;file&gt;
+         *  A file containing stopwords to override the default ones.
+         *  Using this option automatically sets the flag ('-S') to use the
+         *  stoplist if the file exists.
+         *  Format: one stopword per line, lines starting with '#'
+         *  are interpreted as comments and ignored.</pre>
+         * 
+         * <pre> -tokenizer &lt;spec&gt;
+         *  The tokenizing algorihtm (classname plus parameters) to use.
+         *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+         * 
          <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -615,7 +620,7 @@ public class StringToWordVector
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.24 $");
+      return RevisionUtils.extract("$Revision: 1.25 $");
     }
   }
 
@@ -1727,7 +1732,7 @@ public class StringToWordVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
+    return RevisionUtils.extract("$Revision: 1.25 $");
   }
 
   /**
@@ -1740,3 +1745,4 @@ public class StringToWordVector
     runFilter(new StringToWordVector(), argv);
   }
 }
+

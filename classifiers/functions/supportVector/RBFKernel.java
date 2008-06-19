@@ -52,7 +52,8 @@ import java.util.Vector;
  *  (default: checks on)</pre>
  * 
  * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number).
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
  *  (default: 250007)</pre>
  * 
  * <pre> -G &lt;num&gt;
@@ -65,7 +66,7 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RBFKernel 
   extends CachedKernel {
@@ -154,7 +155,8 @@ public class RBFKernel
    *  (default: checks on)</pre>
    * 
    * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number).
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
    *  (default: 250007)</pre>
    * 
    * <pre> -G &lt;num&gt;
@@ -314,6 +316,7 @@ public class RBFKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 }
+
