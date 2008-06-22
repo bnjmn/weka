@@ -50,7 +50,7 @@ import java.util.ArrayList;
  * Abstract base class for cost-sensitive subset and attribute evaluators.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public abstract class CostSensitiveASEvaluation
   extends ASEvaluation
@@ -118,7 +118,8 @@ public abstract class CostSensitiveASEvaluation
                                     "S", 1, "-S <integer>"));
 
     newVector.addElement(new Option(
-                                    "\tFull name of base evaluator.\n"
+                                    "\tFull name of base evaluator. Options after -- are "
+                                    +"passed to the evaluator.\n"
                                     + "\t(default: " + defaultEvaluatorString() +")",
                                     "W", 1, "-W"));
 
@@ -163,7 +164,7 @@ public abstract class CostSensitiveASEvaluation
    *  Full name of base evaluator.
    *  (default: weka.attributeSelection.CfsSubsetEval)</pre>
    *
-   * Options after -- are passed to the designated subset evaluator.<p>
+   * Options after -- are passed to the designated evaluator.<p>
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -574,6 +575,6 @@ public abstract class CostSensitiveASEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision: 1.3 $");
   }
 }
