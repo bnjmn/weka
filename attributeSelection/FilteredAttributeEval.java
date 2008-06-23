@@ -61,7 +61,7 @@ import java.io.Serializable;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class FilteredAttributeEval
   extends ASEvaluation
@@ -188,7 +188,7 @@ public class FilteredAttributeEval
       filterSpec[0] = "";
       setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
     } else {
-      setFilter(new weka.filters.unsupervised.attribute.Remove());
+      setFilter(new weka.filters.supervised.instance.SpreadSubsample());
     }
   }
 
@@ -300,7 +300,7 @@ public class FilteredAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 
   /**
