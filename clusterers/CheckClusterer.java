@@ -142,10 +142,19 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
+ *  number of clusters.
+ *  (default 2).</pre>
+ * 
+ * <pre> -V
+ *  Display std. deviations for centroids.
+ * </pre>
+ * 
+ * <pre> -M
+ *  Replace missing values with mean/mode.
+ * </pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed.
+ *  Random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -154,7 +163,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -265,10 +274,19 @@ public class CheckClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
+   *  number of clusters.
+   *  (default 2).</pre>
+   * 
+   * <pre> -V
+   *  Display std. deviations for centroids.
+   * </pre>
+   * 
+   * <pre> -M
+   *  Replace missing values with mean/mode.
+   * </pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed.
+   *  Random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -682,7 +700,7 @@ public class CheckClusterer
         addMissing(train2, missingLevel, predictorMissing);
       }
       
-      clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
+      clusterer = AbstractClusterer.makeCopies(getClusterer(), 1)[0];
       evaluation1A = new ClusterEvaluation();
       evaluation1B = new ClusterEvaluation();
       evaluation2 = new ClusterEvaluation();
@@ -872,7 +890,7 @@ public class CheckClusterer
         train.deleteAttributeAt(0);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-      clusterers = Clusterer.makeCopies(getClusterer(), 2);
+      clusterers = AbstractClusterer.makeCopies(getClusterer(), 2);
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
       clusterers[0].buildClusterer(train);
@@ -986,7 +1004,7 @@ public class CheckClusterer
         train.deleteAttributeAt(0);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-      clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
+      clusterer = AbstractClusterer.makeCopies(getClusterer(), 1)[0];
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
@@ -1061,7 +1079,7 @@ public class CheckClusterer
                               multiInstance);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing, classMissing);
-      clusterers = Clusterer.makeCopies(getClusterer(), 2);
+      clusterers = AbstractClusterer.makeCopies(getClusterer(), 2);
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
       clusterers[0].buildClusterer(train);
@@ -1155,7 +1173,7 @@ public class CheckClusterer
         train.deleteAttributeAt(0);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-      clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
+      clusterer = AbstractClusterer.makeCopies(getClusterer(), 1)[0];
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new Error("Error setting up for tests: " + ex.getMessage());
@@ -1319,7 +1337,7 @@ public class CheckClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.2 $");
   }
   
   /**
@@ -1331,3 +1349,4 @@ public class CheckClusterer
     runCheck(new CheckClusterer(), args);
   }
 }
+

@@ -83,7 +83,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.41.2.2 $
+ * @version  $Revision: 1.41.2.3 $
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -1182,7 +1182,7 @@ public class ClusterEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.41.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.41.2.3 $");
   }
 
   /**
@@ -1199,7 +1199,7 @@ public class ClusterEvaluation
 
       String ClustererString = args[0];
       args[0] = "";
-      Clusterer newClusterer = Clusterer.forName(ClustererString, null);
+      Clusterer newClusterer = AbstractClusterer.forName(ClustererString, null);
       System.out.println(evaluateClusterer(newClusterer, args));
     }
     catch (Exception e) {

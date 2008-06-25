@@ -25,6 +25,8 @@ package weka.experiment;
 
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
+import weka.clusterers.AbstractClusterer;
+import weka.clusterers.AbstractDensityBasedClusterer;
 import weka.clusterers.DensityBasedClusterer;
 import weka.clusterers.EM;
 import weka.core.AdditionalMeasureProducer;
@@ -49,7 +51,7 @@ import java.util.Vector;
  * Specify the full class name of the clusterer to evaluate. <p>
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision: 1.1.2.4 $
  */
 
 public class DensityBasedClustererSplitEvaluator 
@@ -156,7 +158,7 @@ public class DensityBasedClustererSplitEvaluator
     // Do it first without options, so if an exception is thrown during
     // the option setting, listOptions will contain options for the actual
     // Classifier.
-    setClusterer((DensityBasedClusterer)Clusterer.forName(cName, null));
+    setClusterer((DensityBasedClusterer)AbstractClusterer.forName(cName, null));
     if (getClusterer() instanceof OptionHandler) {
       ((OptionHandler) getClusterer())
 	.setOptions(Utils.partitionOptions(options));
@@ -629,6 +631,6 @@ public class DensityBasedClustererSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+    return RevisionUtils.extract("$Revision: 1.1.2.4 $");
   }
 }
