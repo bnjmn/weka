@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.clusterers.Clusterer;
+import weka.clusterers.AbstractClusterer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -62,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class AddCluster 
   extends Filter 
@@ -347,7 +348,7 @@ public class AddCluster
     }
     String clustererName = clustererSpec[0];
     clustererSpec[0] = "";
-    setClusterer(Clusterer.forName(clustererName, clustererSpec));
+    setClusterer(AbstractClusterer.forName(clustererName, clustererSpec));
         
     setIgnoredAttributeIndices(Utils.getOption('I', options));
 
@@ -484,7 +485,7 @@ public class AddCluster
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision: 1.13 $");
   }
 
   /**

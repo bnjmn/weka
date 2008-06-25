@@ -25,6 +25,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
+import weka.clusterers.AbstractClusterer;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Capabilities;
 import weka.core.Instance;
@@ -82,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class ClassificationViaClustering
   extends Classifier {
@@ -246,14 +247,14 @@ public class ClassificationViaClustering
     if (tmpStr.length() > 0) { 
       // This is just to set the classifier in case the option 
       // parsing fails.
-      setClusterer(Clusterer.forName(tmpStr, null));
-      setClusterer(Clusterer.forName(tmpStr, Utils.partitionOptions(options)));
+      setClusterer(AbstractClusterer.forName(tmpStr, null));
+      setClusterer(AbstractClusterer.forName(tmpStr, Utils.partitionOptions(options)));
     }
     else {
       // This is just to set the classifier in case the option 
       // parsing fails.
-      setClusterer(Clusterer.forName(defaultClustererString(), null));
-      setClusterer(Clusterer.forName(defaultClustererString(), Utils.partitionOptions(options)));
+      setClusterer(AbstractClusterer.forName(defaultClustererString(), null));
+      setClusterer(AbstractClusterer.forName(defaultClustererString(), Utils.partitionOptions(options)));
     }
   }
 
@@ -399,7 +400,7 @@ public class ClassificationViaClustering
       m_ZeroR = null;
       
       // build clusterer
-      m_ActualClusterer = Clusterer.makeCopy(m_Clusterer);
+      m_ActualClusterer = AbstractClusterer.makeCopy(m_Clusterer);
       m_ActualClusterer.buildClusterer(clusterData);
 
       // evaluate clusterer on training set
@@ -499,7 +500,7 @@ public class ClassificationViaClustering
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
   
   /**

@@ -23,6 +23,7 @@
 package weka.filters.unsupervised.attribute;
 
 import weka.clusterers.DensityBasedClusterer;
+import weka.clusterers.AbstractDensityBasedClusterer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -64,7 +65,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  */
 public class ClusterMembership 
   extends Filter 
@@ -224,10 +225,10 @@ public class ClusterMembership
 
       // build the clusterers
       if ((toFilter.classIndex() <= 0) || !toFilter.classAttribute().isNominal()) {
-	m_clusterers = DensityBasedClusterer.makeCopies(m_clusterer, 1);
+	m_clusterers = AbstractDensityBasedClusterer.makeCopies(m_clusterer, 1);
 	m_clusterers[0].buildClusterer(toFilterIgnoringAttributes[0]);
       } else {
-	m_clusterers = DensityBasedClusterer.makeCopies(m_clusterer, toFilter.numClasses());
+	m_clusterers = AbstractDensityBasedClusterer.makeCopies(m_clusterer, toFilter.numClasses());
 	for (int i = 0; i < m_clusterers.length; i++) {
 	  if (toFilterIgnoringAttributes[i].numInstances() == 0) {
 	    m_clusterers[i] = null;
@@ -544,7 +545,7 @@ public class ClusterMembership
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.16 $");
   }
 
   /**
