@@ -58,10 +58,19 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -N &lt;num&gt;
- *  number of clusters. (default = 2).</pre>
+ *  number of clusters.
+ *  (default 2).</pre>
+ * 
+ * <pre> -V
+ *  Display std. deviations for centroids.
+ * </pre>
+ * 
+ * <pre> -M
+ *  Replace missing values with mean/mode.
+ * </pre>
  * 
  * <pre> -S &lt;num&gt;
- *  random number seed.
+ *  Random number seed.
  *  (default 10)</pre>
  * 
  <!-- options-end -->
@@ -71,10 +80,10 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.3 $
+ * @version $Revision: 1.13.2.4 $
  */
 public class MakeDensityBasedClusterer 
-  extends DensityBasedClusterer
+  extends AbstractDensityBasedClusterer
   implements NumberOfClustersRequestable, 
 	     OptionHandler, 
 	     WeightedInstancesHandler {
@@ -499,10 +508,19 @@ public class MakeDensityBasedClusterer
    * </pre>
    * 
    * <pre> -N &lt;num&gt;
-   *  number of clusters. (default = 2).</pre>
+   *  number of clusters.
+   *  (default 2).</pre>
+   * 
+   * <pre> -V
+   *  Display std. deviations for centroids.
+   * </pre>
+   * 
+   * <pre> -M
+   *  Replace missing values with mean/mode.
+   * </pre>
    * 
    * <pre> -S &lt;num&gt;
-   *  random number seed.
+   *  Random number seed.
    *  (default 10)</pre>
    * 
    <!-- options-end -->
@@ -521,7 +539,7 @@ public class MakeDensityBasedClusterer
     String wString = Utils.getOption('W', options);
     if (wString.length() == 0)
       wString = defaultClustererString();
-    setClusterer(Clusterer.forName(wString, Utils.partitionOptions(options)));
+    setClusterer(AbstractClusterer.forName(wString, Utils.partitionOptions(options)));
   }
 
   /**
@@ -563,7 +581,7 @@ public class MakeDensityBasedClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13.2.3 $");
+    return RevisionUtils.extract("$Revision: 1.13.2.4 $");
   }
 
   /**
@@ -575,3 +593,4 @@ public class MakeDensityBasedClusterer
     runClusterer(new MakeDensityBasedClusterer(), argv);
   }
 }
+
