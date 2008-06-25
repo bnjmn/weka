@@ -90,10 +90,10 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class DBScan 
-    extends Clusterer 
+    extends AbstractClusterer 
     implements OptionHandler, TechnicalInformationHandler {
 
     /** for serialization */
@@ -623,7 +623,7 @@ public class DBScan
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision: 1.9 $");
     }
 
     /**

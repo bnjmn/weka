@@ -80,10 +80,10 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.18 $
  */
 public class MakeDensityBasedClusterer 
-  extends DensityBasedClusterer
+  extends AbstractDensityBasedClusterer
   implements NumberOfClustersRequestable, 
 	     OptionHandler, 
 	     WeightedInstancesHandler {
@@ -539,7 +539,7 @@ public class MakeDensityBasedClusterer
     String wString = Utils.getOption('W', options);
     if (wString.length() == 0)
       wString = defaultClustererString();
-    setClusterer(Clusterer.forName(wString, Utils.partitionOptions(options)));
+    setClusterer(AbstractClusterer.forName(wString, Utils.partitionOptions(options)));
   }
 
   /**
@@ -581,7 +581,7 @@ public class MakeDensityBasedClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision: 1.18 $");
   }
 
   /**
