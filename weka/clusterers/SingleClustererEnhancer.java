@@ -35,10 +35,10 @@ import java.util.Vector;
  * Meta-clusterer for enhancing a base clusterer.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public abstract class SingleClustererEnhancer
-  extends Clusterer
+  extends AbstractClusterer
   implements OptionHandler {
 
   /** for serialization */
@@ -96,14 +96,14 @@ public abstract class SingleClustererEnhancer
     if (tmpStr.length() > 0) { 
       // This is just to set the classifier in case the option 
       // parsing fails.
-      setClusterer(Clusterer.forName(tmpStr, null));
-      setClusterer(Clusterer.forName(tmpStr, Utils.partitionOptions(options)));
+      setClusterer(AbstractClusterer.forName(tmpStr, null));
+      setClusterer(AbstractClusterer.forName(tmpStr, Utils.partitionOptions(options)));
     } 
     else {
       // This is just to set the classifier in case the option 
       // parsing fails.
-      setClusterer(Clusterer.forName(defaultClustererString(), null));
-      setClusterer(Clusterer.forName(defaultClustererString(), Utils.partitionOptions(options)));
+      setClusterer(AbstractClusterer.forName(defaultClustererString(), null));
+      setClusterer(AbstractClusterer.forName(defaultClustererString(), Utils.partitionOptions(options)));
     }
   }
 

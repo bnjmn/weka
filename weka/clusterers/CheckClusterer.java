@@ -163,7 +163,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see TestInstances
  */
 public class CheckClusterer 
@@ -700,7 +700,7 @@ public class CheckClusterer
         addMissing(train2, missingLevel, predictorMissing);
       }
       
-      clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
+      clusterer = AbstractClusterer.makeCopies(getClusterer(), 1)[0];
       evaluation1A = new ClusterEvaluation();
       evaluation1B = new ClusterEvaluation();
       evaluation2 = new ClusterEvaluation();
@@ -890,7 +890,7 @@ public class CheckClusterer
         train.deleteAttributeAt(0);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-      clusterers = Clusterer.makeCopies(getClusterer(), 2);
+      clusterers = AbstractClusterer.makeCopies(getClusterer(), 2);
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
       clusterers[0].buildClusterer(train);
@@ -1004,7 +1004,7 @@ public class CheckClusterer
         train.deleteAttributeAt(0);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-      clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
+      clusterer = AbstractClusterer.makeCopies(getClusterer(), 1)[0];
     } catch (Exception ex) {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
@@ -1079,7 +1079,7 @@ public class CheckClusterer
                               multiInstance);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing, classMissing);
-      clusterers = Clusterer.makeCopies(getClusterer(), 2);
+      clusterers = AbstractClusterer.makeCopies(getClusterer(), 2);
       evaluationB = new ClusterEvaluation();
       evaluationI = new ClusterEvaluation();
       clusterers[0].buildClusterer(train);
@@ -1173,7 +1173,7 @@ public class CheckClusterer
         train.deleteAttributeAt(0);
       if (missingLevel > 0)
         addMissing(train, missingLevel, predictorMissing);
-      clusterer = Clusterer.makeCopies(getClusterer(), 1)[0];
+      clusterer = AbstractClusterer.makeCopies(getClusterer(), 1)[0];
     } catch (Exception ex) {
       ex.printStackTrace();
       throw new Error("Error setting up for tests: " + ex.getMessage());
@@ -1337,7 +1337,7 @@ public class CheckClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
   
   /**

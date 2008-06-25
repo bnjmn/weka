@@ -77,10 +77,10 @@ import java.util.ArrayList;
 <!-- options-end -->
  *
  * @author Alexander Smirnov (austellus@gmail.com)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class CLOPE
-  extends Clusterer
+  extends AbstractClusterer
   implements OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -617,7 +617,7 @@ public class CLOPE
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**
