@@ -189,7 +189,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.68 $
+ * @version $Revision: 1.69 $
  */
 public class SMO 
   extends Classifier 
@@ -384,9 +384,11 @@ public class SMO
 	insts.stratify(numFolds);
 	for (int i = 0; i < numFolds; i++) {
 	  Instances train = insts.trainCV(numFolds, i, random);
-	  SerializedObject so = new SerializedObject(this);
-	  BinarySMO smo = (BinarySMO)so.getObject();
-	  smo.buildClassifier(train, cl1, cl2, false, -1, -1);
+          /*	  SerializedObject so = new SerializedObject(this);
+                  BinarySMO smo = (BinarySMO)so.getObject(); */
+          BinarySMO smo = new BinarySMO();
+          smo.setKernel(Kernel.makeCopy(SMO.this.m_kernel));
+          smo.buildClassifier(train, cl1, cl2, false, -1, -1);
 	  Instances test = insts.testCV(numFolds, i);
 	  for (int j = 0; j < test.numInstances(); j++) {
 	    double[] vals = new double[2];
@@ -1121,7 +1123,7 @@ public class SMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.68 $");
+      return RevisionUtils.extract("$Revision: 1.69 $");
     }
   }
 
@@ -2124,7 +2126,7 @@ public class SMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.68 $");
+    return RevisionUtils.extract("$Revision: 1.69 $");
   }
   
   /**
