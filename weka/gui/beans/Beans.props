@@ -59,3 +59,9 @@ FlowWidth=1024
 FlowHeight=768
 PreferredExtension=.kf
 UserComponentsInXML=false
+
+# colours
+weka.gui.beans.StripChart.backgroundColour=black
+weka.gui.beans.StripChart$LegendPanel.borderColour=blue
+#weka.gui.beans.StripChart.backgroundColour=white
+#weka.gui.beans.StripChart$LegendPanel.borderColour=black

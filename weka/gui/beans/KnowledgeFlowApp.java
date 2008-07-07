@@ -122,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.30 $
+ * @version  $Revision: 1.31 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -140,7 +140,7 @@ public class KnowledgeFlowApp
   protected static String PROPERTY_FILE = "weka/gui/beans/Beans.props";
 
   /** Contains the editor properties */
-  private static Properties BEAN_PROPERTIES;
+  protected static Properties BEAN_PROPERTIES;
 
   private static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES;
 
@@ -372,7 +372,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.30 $
+   * @version $Revision: 1.31 $
    * @since 1.0
    * @see PrintablePanel
    */
