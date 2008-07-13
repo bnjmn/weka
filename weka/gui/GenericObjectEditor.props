@@ -74,8 +74,11 @@ weka.attributeSelection.ASEvaluation=\
  weka.attributeSelection.ConsistencySubsetEval,\
  weka.attributeSelection.CostSensitiveAttributeEval,\
  weka.attributeSelection.CostSensitiveSubsetEval,\
+ weka.attributeSelection.FilteredAttributeEval,\
+ weka.attributeSelection.FilteredSubsetEval,\
  weka.attributeSelection.GainRatioAttributeEval,\
  weka.attributeSelection.InfoGainAttributeEval,\
+ weka.attributeSelection.LatentSemanticAnalysis,\
  weka.attributeSelection.OneRAttributeEval,\
  weka.attributeSelection.PrincipalComponents,\
  weka.attributeSelection.ReliefFAttributeEval,\
