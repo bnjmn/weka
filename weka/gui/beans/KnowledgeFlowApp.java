@@ -29,6 +29,7 @@ import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
 import weka.core.ClassloaderUtil;
+import weka.core.Environment;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
@@ -122,7 +123,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.13 $
+ * @version  $Revision: 1.18.2.14 $
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -372,7 +373,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.13 $
+   * @version $Revision: 1.18.2.14 $
    * @since 1.0
    * @see PrintablePanel
    */
@@ -2255,6 +2256,8 @@ public class KnowledgeFlowApp
 
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
+      // set internal flow directory environment variable
+      Environment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
