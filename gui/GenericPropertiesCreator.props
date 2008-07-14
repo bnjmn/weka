@@ -1,11 +1,11 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.18 $
+# Version: $Revision: 1.19 $
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
-UseDynamic=true
+UseDynamic=false
 
 # Lists the ResultProducers-Packages I want to choose from
 weka.experiment.ResultProducer=\
