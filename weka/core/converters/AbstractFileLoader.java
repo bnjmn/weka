@@ -36,7 +36,7 @@ import java.util.zip.GZIPInputStream;
  * Abstract superclass for all file loaders.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader
@@ -106,6 +106,13 @@ public abstract class AbstractFileLoader
       throw new IOException("Source file object is null!");
 
     try {
+      String fName = file.getPath();
+      try {
+        fName = weka.core.Environment.substitute(fName);
+      } catch (Exception e) {
+        throw new IOException(e.getMessage());
+      }
+      file = new File(fName);
       if (file.getName().endsWith(getFileExtension() + FILE_EXTENSION_COMPRESSED)) {
 	setSource(new GZIPInputStream(new FileInputStream(file)));
       } else {

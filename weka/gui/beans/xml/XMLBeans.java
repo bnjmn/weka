@@ -24,6 +24,7 @@ package weka.gui.beans.xml;
 import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
+import weka.core.Environment;
 import weka.gui.beans.BeanConnection;
 import weka.gui.beans.BeanInstance;
 import weka.gui.beans.BeanVisual;
@@ -59,7 +60,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -1649,11 +1650,20 @@ public class XMLBeans
 
     // set file only, if it exists
     if (file != null) {
-      fl = new File(file);
+      String tempFile = file;
+      // try and replace any environment variables before we
+      // test for existence
+      try {
+        tempFile = Environment.substitute(file);
+      } catch (Exception ex) {
+        System.out.println(ex.getMessage());
+      }
+      //      fl = new File(file);
+      fl = new File(tempFile);
       if (fl.exists()) {
-        ((weka.core.converters.AbstractFileLoader) result).setSource(fl);
+        ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
-        System.out.println("WARNING: The file '" + file + "' does not exist!");
+        System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
       }
     }
     

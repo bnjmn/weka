@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 
 import weka.classifiers.Classifier;
 import weka.core.Instances;
+import weka.core.Environment;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
 import weka.core.Tag;
@@ -45,7 +46,7 @@ import weka.core.Utils;
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SerializedModelSaver
   extends JPanel
@@ -280,14 +281,42 @@ public class SerializedModelSaver
       substring(titleString.lastIndexOf('.') + 1,
                 titleString.length());
 
+    String prefix = "";
+    try {
+      prefix = Environment.substitute(m_filenamePrefix);
+    } catch (Exception ex) {
+      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+        + ex.getMessage();
+      if (m_logger != null) {
+        m_logger.logMessage(message);
+      } else {
+        System.err.println(message);
+      }
+      return;
+    }
     String fileName = "" 
+      + prefix
       + titleString
       + "_"
       + ce.getSetNumber() 
       + "_" + ce.getMaxSetNumber();
     fileName = sanitizeFilename(fileName);
     
-    fileName = m_directory.getAbsolutePath() 
+    String dirName = m_directory.getPath();
+    try {
+      dirName = Environment.substitute(dirName);
+    } catch (Exception ex) {
+      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+                           + ex.getMessage();
+      if (m_logger != null) {
+        m_logger.logMessage(message);
+      } else {
+        System.err.println(message);
+      }
+      return;
+    }
+    File tempFile = new File(dirName);
+    fileName = tempFile.getAbsolutePath() 
       + File.separator
       + fileName;
 
@@ -307,10 +336,40 @@ public class SerializedModelSaver
       titleString = titleString.
         substring(titleString.lastIndexOf('.') + 1,
                   titleString.length());
+
+      String prefix = "";
+      try {
+        prefix = Environment.substitute(m_filenamePrefix);
+      } catch (Exception ex) {
+        String message = "[SerializedModelSaver] Can't save model. Reason: " 
+          + ex.getMessage();
+        if (m_logger != null) {
+          m_logger.logMessage(message);
+        } else {
+          System.err.println(message);
+        }
+        return;
+      }
       
-      String fileName = "" + titleString;
+      String fileName = "" + prefix + titleString;
       fileName = sanitizeFilename(fileName);
-      fileName = m_directory.getAbsolutePath() 
+
+      String dirName = m_directory.getPath();
+      try {
+        dirName = Environment.substitute(dirName);
+      } catch (Exception ex) {
+        String message = "[SerializedModelSaver] Can't save model. Reason: " 
+          + ex.getMessage();
+        if (m_logger != null) {
+          m_logger.logMessage(message);
+        } else {
+          System.err.println(message);
+        }
+        return;
+      }
+      File tempFile = new File(dirName);
+
+      fileName = tempFile.getAbsolutePath() 
         + File.separator
         + fileName;
       
@@ -334,14 +393,44 @@ public class SerializedModelSaver
       substring(titleString.lastIndexOf('.') + 1,
                 titleString.length());
 
+    String prefix = "";
+    try {
+      prefix = Environment.substitute(m_filenamePrefix);
+    } catch (Exception ex) {
+      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+        + ex.getMessage();
+      if (m_logger != null) {
+        m_logger.logMessage(message);
+      } else {
+        System.err.println(message);
+      }
+      return;
+    }
+
     String fileName = "" 
+      + prefix
       + titleString
       + "_"
       + ce.getSetNumber() 
       + "_" + ce.getMaxSetNumber();
     fileName = sanitizeFilename(fileName);
     
-    fileName = m_directory.getAbsolutePath() 
+    String dirName = m_directory.getPath();
+    try {
+      dirName = Environment.substitute(dirName);
+    } catch (Exception ex) {
+      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+                           + ex.getMessage();
+      if (m_logger != null) {
+        m_logger.logMessage(message);
+      } else {
+        System.err.println(message);
+      }
+      return;
+    }
+    File tempFile = new File(dirName);
+
+    fileName = tempFile.getAbsolutePath() 
       + File.separator
       + fileName;
 
