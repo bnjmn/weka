@@ -1,0 +1,1027 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-4 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-4 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://jakarta.apache.org/ant/">Ant</a>.</p>
+<hr>
+<table cellspacing="1" width="100%" border="0">
+<tr>
+<td class="dateAndAuthor">2005-03-07 01:56 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Removed some stuff that shouldn't have been there</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.html?r1=1.38.2.3&r2=1.38.2.2">gui/GenericObjectEditor.html (1.38.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-03-04 03:47 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>The *.props files in the the gui package know support multiple roots (i.e. roots other than weka.*). Thanks, Peter.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.html?r1=1.38.2.2&r2=1.38.2.1">gui/GenericObjectEditor.html (1.38.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.html?r1=1.1.2.2&r2=1.1.2.1">gui/GenericPropertiesCreator.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-28 03:43 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Made Instance(Instance) constructor protected. copy() method should be used instead. Changed some other classes accordingly. (Note that these classes may not have worked properly with sparse instances before.)</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/ClassifierSubsetEval.html?rev=1.12.2.1&content-type=text/x-cvsweb-markup">attributeSelection/ClassifierSubsetEval.html (1.12.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SMOreg.html?r1=1.3.2.2&r2=1.3.2.1">classifiers/functions/SMOreg.html (1.3.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiClassClassifier.html?rev=1.37.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/MultiClassClassifier.html (1.37.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Instance.html?rev=1.19.2.1&content-type=text/x-cvsweb-markup">core/Instance.html (1.19.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/datagenerators/RDG1.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">datagenerators/RDG1.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/filters/unsupervised/attribute/AddNoise.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">filters/unsupervised/attribute/AddNoise.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-28 00:12 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in Conviction measure computation</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/AprioriItemSet.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">associations/AprioriItemSet.html (1.2.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-24 20:37 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Changed so that the training data is randomized the same way for every learning scheme/parameter combination/set of attributes being compared. This is important if the base learner is sensitive to the order of the instances.</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/RaceSearch.html?rev=1.14.2.1&content-type=text/x-cvsweb-markup">attributeSelection/RaceSearch.html (1.14.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/CVParameterSelection.html?rev=1.27.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/CVParameterSelection.html (1.27.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/meta/MultiScheme.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/MultiScheme.html (1.18.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-21 22:03 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Small bug fix from Peter.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?r1=1.1.2.5&r2=1.1.2.4">core/xml/XMLSerialization.html (1.1.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-21 04:13 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Small fix in result producers for when additional measure has value NaN (i.e. missing).</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/ClassifierSplitEvaluator.html?r1=1.21.2.2&r2=1.21.2.1">experiment/ClassifierSplitEvaluator.html (1.21.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/CostSensitiveClassifierSplitEvaluator.html?r1=1.10.2.2&r2=1.10.2.1">experiment/CostSensitiveClassifierSplitEvaluator.html (1.10.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RegressionSplitEvaluator.html?r1=1.17.2.2&r2=1.17.2.1">experiment/RegressionSplitEvaluator.html (1.17.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-17 01:04 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Datasets are now sorted alphabetically in Experimenter SetupPanel. Small bug fix in setting precision for output in Experimenter ResultPanel. Workaround for XMLSerialization for Java 1.5.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/RTSI.html?r1=1.2.2.4&r2=1.2.2.3">core/RTSI.html (1.2.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?r1=1.1.2.4&r2=1.1.2.3">core/xml/XMLSerialization.html (1.1.2.4)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PairedTTester.html?r1=1.22.2.2&r2=1.22.2.1">experiment/PairedTTester.html (1.22.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/DatasetListPanel.html?rev=1.13.4.1&content-type=text/x-cvsweb-markup">gui/experiment/DatasetListPanel.html (1.13.4.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-15 19:16 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>AODE is now and updateable classifier, thanks to Nicolas Saunier.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/AODE.html?rev=1.8.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/AODE.html (1.8.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-13 23:59 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Changes for making evaluation return correct results for a classifier even if buildClassifier() does not initialize the classifier correctly. This is for those people who are not aware of the requirement for initialization (given in the Javadoc and the book) and do not run CheckClassifier to test their classifier for correct behaviour. Note that classifiers that are not initialized correctly in buildClassifier() may still not work properly when used with meta classifiers that perform cross-validation.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/BVDecompose.html?rev=1.9.2.1&content-type=text/x-cvsweb-markup">classifiers/BVDecompose.html (1.9.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/BVDecomposeSegCVSub.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">classifiers/BVDecomposeSegCVSub.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/Classifier.html?rev=1.11.2.1&content-type=text/x-cvsweb-markup">classifiers/Classifier.html (1.11.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?r1=1.53.2.2&r2=1.53.2.1">classifiers/Evaluation.html (1.53.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/ClassifierSplitEvaluator.html?rev=1.21.2.1&content-type=text/x-cvsweb-markup">experiment/ClassifierSplitEvaluator.html (1.21.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/CostSensitiveClassifierSplitEvaluator.html?rev=1.10.2.1&content-type=text/x-cvsweb-markup">experiment/CostSensitiveClassifierSplitEvaluator.html (1.10.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RegressionSplitEvaluator.html?rev=1.17.2.1&content-type=text/x-cvsweb-markup">experiment/RegressionSplitEvaluator.html (1.17.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-13 23:59 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Changes for making evaluation return correct results for a classifier even if buildClassifier() does not initialize the classifier correctly. This is for those people who are not aware of the requirement for initialization (given in the Javadoc and the book) and do not run CheckClassifier to test their classifier for correct behaviour. Note that classifiers that are not initialized correctly in buildClassifier() may still not work properly when used with meta classifiers that perform cross-validation.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?r1=1.79.2.3&r2=1.79.2.2">gui/explorer/ClassifierPanel.html (1.79.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-11 01:00 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Checking in improvements by Steve Hugg: (a) change to the PrincipalComponents to shorten the names of the transformed attributes, sorting them by highest-magnitude coefficient first, and (b) LRU cache for kernels. Also put in Bernhard's full cache for all kernels.</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/PrincipalComponents.html?rev=1.25.2.1&content-type=text/x-cvsweb-markup">attributeSelection/PrincipalComponents.html (1.25.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SMO.html?rev=1.53.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/SMO.html (1.53.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/SMOreg.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/SMOreg.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/CachedKernel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/CachedKernel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/Kernel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/Kernel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/PolyKernel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/PolyKernel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/classifiers/functions/supportVector/RBFKernel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">classifiers/functions/supportVector/RBFKernel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Version.html?r1=1.1.2.2&r2=1.1.2.1">core/Version.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-10 05:14 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Serialization now includes the version number.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?r1=1.1.2.3&r2=1.1.2.2">core/xml/XMLSerialization.html (1.1.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-10 03:53 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>There is now a class Version in core that should hold the release number. This is automatically displayed in the GUIChooser. Thanks, Peter.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Version.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/Version.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-10 03:53 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>There is now a class Version in core that should hold the release number. This is automatically displayed in the GUIChooser. Thanks, Peter.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?r1=1.14.2.2&r2=1.14.2.1">gui/GUIChooser.html (1.14.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-10 03:35 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Changed sort order for names in RTSI. Small fix in AlgorithmListPanel. Thanks, Peter.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/RTSI.html?r1=1.2.2.3&r2=1.2.2.2">core/RTSI.html (1.2.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?r1=1.7.2.5&r2=1.7.2.4">gui/experiment/AlgorithmListPanel.html (1.7.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-10 03:13 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Notes are now in a separate window.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/SetupModePanel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/experiment/SetupModePanel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SetupPanel.html?r1=1.23.2.3&r2=1.23.2.2">gui/experiment/SetupPanel.html (1.23.2.3)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SimpleSetupPanel.html?r1=1.6.2.3&r2=1.6.2.2">gui/experiment/SimpleSetupPanel.html (1.6.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-09 21:25 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Changed date.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?rev=1.14.2.1&content-type=text/x-cvsweb-markup">gui/GUIChooser.html (1.14.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 20:33 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixes to component printing and dynamic class discovery</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/AttributeVisualizationPanel.html?r1=1.18.2.2&r2=1.18.2.1">gui/AttributeVisualizationPanel.html (1.18.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/ResultHistoryPanel.html?r1=1.18.2.2&r2=1.18.2.1">gui/ResultHistoryPanel.html (1.18.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/KnowledgeFlow.html?r1=1.23.2.2&r2=1.23.2.1">gui/beans/KnowledgeFlow.html (1.23.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/PrintableComponent.html?r1=1.1.2.2&r2=1.1.2.1">gui/visualize/PrintableComponent.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 20:33 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixes to component printing and dynamic class discovery</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/RTSI.html?r1=1.2.2.2&r2=1.2.2.1">core/RTSI.html (1.2.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 03:48 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Forgot to commit this puppy.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.props?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/GenericPropertiesCreator.props (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 03:46 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>CAR was back in there...</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?r1=1.7.2.4&r2=1.7.2.3">gui/experiment/AlgorithmListPanel.html (1.7.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 03:44 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Didn't work the first time round.</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/xml/XMLExperiment.html?r1=1.1.2.2&r2=1.1.2.1">experiment/xml/XMLExperiment.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 03:43 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Didn't work the first time round.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffPanel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffPanel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffTable.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffTable.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffTableCellRenderer.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffTableCellRenderer.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffTableModel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffTableModel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffTableSorter.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffTableSorter.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/arffviewer/ArffViewer.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/ArffViewer.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/arffviewer/FileChooser.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/arffviewer/FileChooser.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 03:43 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Didn't work the first time round.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/xml/KOML.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/KOML.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/MethodHandler.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/MethodHandler.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/PropertyHandler.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/PropertyHandler.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/SerialUIDChanger.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/SerialUIDChanger.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLBasicSerialization.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/XMLBasicSerialization.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLDocument.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/XMLDocument.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLOptions.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/XMLOptions.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/XMLSerialization.html (1.1.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerializationMethodHandler.html?r1=1.1.2.2&r2=1.1.2.1">core/xml/XMLSerializationMethodHandler.html (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-08 03:38 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>This didn't work the first time round.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/xml/XMLClassifier.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">classifiers/xml/XMLClassifier.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 20:21 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Buttons are now only enabled when functional. .xml now appended automatically if missing.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?r1=1.7.2.3&r2=1.7.2.2">gui/experiment/AlgorithmListPanel.html (1.7.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 08:06 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Added into the wrong directory.</pre>
+<ul>
+<li>
+<a href="../doc/weka/GenericPropertiesCreator.props?r1=1.1.2.2&r2=1.1.2.1">GenericPropertiesCreator.props (1.1.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 08:04 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Forgot to add the new properties file.</pre>
+<ul>
+<li>
+<a href="../doc/weka/GenericPropertiesCreator.props?rev=1.1.2.1&content-type=text/x-cvsweb-markup">GenericPropertiesCreator.props (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 07:45 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Added (almost) all of Peter's contributions to the book branch: dynamic discovery of classes for GenericObjectEditor, data editor for PreprocessPanel, JPGEP/EPS output for various panels, GUI improvements for setting up and analyzing experiments, and saving and loading experiments in XML format.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/RTSI.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">core/RTSI.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/Undoable.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/Undoable.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/Experiment.html?r1=1.22.2.2&r2=1.22.2.1">experiment/Experiment.html (1.22.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/PairedTTester.html?rev=1.22.2.1&content-type=text/x-cvsweb-markup">experiment/PairedTTester.html (1.22.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 07:45 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Added (almost) all of Peter's contributions to the book branch: dynamic discovery of classes for GenericObjectEditor, data editor for PreprocessPanel, JPGEP/EPS output for various panels, GUI improvements for setting up and analyzing experiments, and saving and loading experiments in XML format.</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/RemoteExperiment.html?r1=1.13.2.2&r2=1.13.2.1">experiment/RemoteExperiment.html (1.13.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/AttributeSummaryPanel.html?r1=1.7.2.2&r2=1.7.2.1">gui/AttributeSummaryPanel.html (1.7.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/AttributeVisualizationPanel.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">gui/AttributeVisualizationPanel.html (1.18.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/ComponentHelper.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/ComponentHelper.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.html?rev=1.38.2.1&content-type=text/x-cvsweb-markup">gui/GenericObjectEditor.html (1.38.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/GenericPropertiesCreator.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/GenericPropertiesCreator.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/JTableHelper.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/JTableHelper.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/Loader.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/Loader.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/ResultHistoryPanel.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">gui/ResultHistoryPanel.html (1.18.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/TableMap.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/TableMap.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/TableSorter.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/TableSorter.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/ViewerDialog.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/ViewerDialog.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/beans/KnowledgeFlow.html?rev=1.23.2.1&content-type=text/x-cvsweb-markup">gui/beans/KnowledgeFlow.html (1.23.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?r1=1.7.2.2&r2=1.7.2.1">gui/experiment/AlgorithmListPanel.html (1.7.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/OutputFormatDialog.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/experiment/OutputFormatDialog.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/ResultsPanel.html?r1=1.28.2.2&r2=1.28.2.1">gui/experiment/ResultsPanel.html (1.28.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SetupPanel.html?r1=1.23.2.2&r2=1.23.2.1">gui/experiment/SetupPanel.html (1.23.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SimpleSetupPanel.html?r1=1.6.2.2&r2=1.6.2.1">gui/experiment/SimpleSetupPanel.html (1.6.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?r1=1.79.2.2&r2=1.79.2.1">gui/explorer/ClassifierPanel.html (1.79.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/ClustererPanel.html?r1=1.45.2.2&r2=1.45.2.1">gui/explorer/ClustererPanel.html (1.45.2.2)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/PreprocessPanel.html?rev=1.50.2.1&content-type=text/x-cvsweb-markup">gui/explorer/PreprocessPanel.html (1.50.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/graphvisualizer/GraphVisualizer.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">gui/graphvisualizer/GraphVisualizer.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/treevisualizer/TreeVisualizer.html?rev=1.8.2.1&content-type=text/x-cvsweb-markup">gui/treevisualizer/TreeVisualizer.html (1.8.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/JComponentWriter.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/visualize/JComponentWriter.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/JPEGWriter.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/visualize/JPEGWriter.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/Plot2D.html?rev=1.20.2.1&content-type=text/x-cvsweb-markup">gui/visualize/Plot2D.html (1.20.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 07:45 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Added (almost) all of Peter's contributions to the book branch: dynamic discovery of classes for GenericObjectEditor, data editor for PreprocessPanel, JPGEP/EPS output for various panels, GUI improvements for setting up and analyzing experiments, and saving and loading experiments in XML format.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/visualize/PostscriptGraphics.html?rev=1.2.2.1&content-type=text/x-cvsweb-markup">gui/visualize/PostscriptGraphics.html (1.2.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/PostscriptWriter.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/visualize/PostscriptWriter.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/PrintableComponent.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/visualize/PrintableComponent.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/PrintableHandler.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/visualize/PrintableHandler.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/PrintablePanel.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">gui/visualize/PrintablePanel.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/visualize/VisualizePanel.html?rev=1.21.2.1&content-type=text/x-cvsweb-markup">gui/visualize/VisualizePanel.html (1.21.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 06:49 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Slightly improved error message for exception.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Attribute.html?rev=1.32.2.1&content-type=text/x-cvsweb-markup">core/Attribute.html (1.32.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 06:47 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Now globally replaces missing values with the mean or mode.</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/MakeDensityBasedClusterer.html?rev=1.5.2.1&content-type=text/x-cvsweb-markup">clusterers/MakeDensityBasedClusterer.html (1.5.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 06:46 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>EM now globally replaces missing values with the mean or mode.</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/EM.html?rev=1.30.2.1&content-type=text/x-cvsweb-markup">clusterers/EM.html (1.30.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-07 06:42 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Removed some superfluous output statements.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/bayes/NaiveBayesSimple.html?rev=1.13.2.1&content-type=text/x-cvsweb-markup">classifiers/bayes/NaiveBayesSimple.html (1.13.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-02-03 20:39 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in Javadoc.</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instances.html?rev=1.58.2.1&content-type=text/x-cvsweb-markup">core/Instances.html (1.58.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-01-20 00:51 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Type date didn't show up in the Preprocess panel. Thanks, Peter!</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/AttributeSummaryPanel.html?rev=1.7.2.1&content-type=text/x-cvsweb-markup">gui/AttributeSummaryPanel.html (1.7.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-01-18 02:11 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>It was not possible to get N distinct cluster centers when there were N distinct instances (just N-1).</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/SimpleKMeans.html?r1=1.19.2.2&r2=1.19.2.1">clusterers/SimpleKMeans.html (1.19.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-01-18 01:51 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug in backward mode</pre>
+<ul>
+<li>
+<a href="../doc/weka/attributeSelection/BestFirst.html?rev=1.24.2.1&content-type=text/x-cvsweb-markup">attributeSelection/BestFirst.html (1.24.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2005-01-17 21:29 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Computation of correlation coefficient was incorrect for weighted data (e.g. correlation coefficient could be larger than 1 on weighted data). No code in Weka was affected by this bug.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/Evaluation.html?rev=1.53.2.1&content-type=text/x-cvsweb-markup">classifiers/Evaluation.html (1.53.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-12-11 02:30 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Committed bug fix from Alex Seewald.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/meta/Stacking.html?rev=1.23.2.1&content-type=text/x-cvsweb-markup">classifiers/meta/Stacking.html (1.23.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-12-04 00:25 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Small wording changes in GUI.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/ResultsPanel.html?rev=1.28.2.1&content-type=text/x-cvsweb-markup">gui/experiment/ResultsPanel.html (1.28.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-12-02 21:15 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Now only outputs clustering model once when evaluating on training data</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/explorer/ClustererPanel.html?rev=1.45.2.1&content-type=text/x-cvsweb-markup">gui/explorer/ClustererPanel.html (1.45.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-12-02 21:15 mhall</td>
+</tr>
+<tr>
+<td>
+<pre>Fixed bug that caused squared errors statistic to be updated on test data.</pre>
+<ul>
+<li>
+<a href="../doc/weka/clusterers/SimpleKMeans.html?rev=1.19.2.1&content-type=text/x-cvsweb-markup">clusterers/SimpleKMeans.html (1.19.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-12-01 21:48 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Made Id3 slightly more efficient.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/trees/Id3.html?rev=1.14.2.1&content-type=text/x-cvsweb-markup">classifiers/trees/Id3.html (1.14.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 20:52 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Could be simplified further.</pre>
+<ul>
+<li>
+<a href="../doc/weka/experiment/remote.policy?r1=1.4.2.2&r2=1.4.2.1">experiment/remote.policy (1.4.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 09:00 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>A couple of small changes due to the fact that CARuleMiner is now gone from the book branch.</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/experiment/AlgorithmListPanel.html?rev=1.7.2.1&content-type=text/x-cvsweb-markup">gui/experiment/AlgorithmListPanel.html (1.7.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/explorer/ClassifierPanel.html?rev=1.79.2.1&content-type=text/x-cvsweb-markup">gui/explorer/ClassifierPanel.html (1.79.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 08:56 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>File wasn't deleted due to typo.</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/CARuleMiner.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">associations/CARuleMiner.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 08:55 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>A couple of files I forgot to delete.</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/CaRuleGeneration.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">associations/CaRuleGeneration.html (1.1.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 08:54 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Deleted class-association-rules-related stuff for book version. Also undid a seemingly random change in the online doc for Apriori.</pre>
+<ul>
+<li>
+<a href="../doc/weka/associations/Apriori.html?rev=1.19.2.1&content-type=text/x-cvsweb-markup">associations/Apriori.html (1.19.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/associations/PredictiveApriori.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">associations/PredictiveApriori.html (1.3.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 06:53 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Changed DatabaseUtils.html so that remote engines do not require a DatabaseUtils.props file anymore. Adjusted remote.policy and ant build file accordingly.</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.1&content-type=text/x-cvsweb-markup">build.xml (1.19.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/DatabaseUtils.html?rev=1.18.2.1&content-type=text/x-cvsweb-markup">experiment/DatabaseUtils.html (1.18.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/remote.policy?rev=1.4.2.1&content-type=text/x-cvsweb-markup">experiment/remote.policy (1.4.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2004-11-30 06:44 eibe</td>
+</tr>
+<tr>
+<td>
+<pre>Removed some XML stuff and one of the misc classifiers for book version.</pre>
+<ul>
+<li>
+<a href="../doc/weka/classifiers/misc/FLR.html?rev=1.3.2.1&content-type=text/x-cvsweb-markup">classifiers/misc/FLR.html (1.3.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/KOML.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/KOML.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/MethodHandler.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/MethodHandler.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/PropertyHandler.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/PropertyHandler.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/SerialUIDChanger.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/SerialUIDChanger.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLBasicSerialization.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/XMLBasicSerialization.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLDocument.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/XMLDocument.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLOptions.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/XMLOptions.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerialization.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/XMLSerialization.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/core/xml/XMLSerializationMethodHandler.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">core/xml/XMLSerializationMethodHandler.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/Experiment.html?rev=1.22.2.1&content-type=text/x-cvsweb-markup">experiment/Experiment.html (1.22.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/RemoteExperiment.html?rev=1.13.2.1&content-type=text/x-cvsweb-markup">experiment/RemoteExperiment.html (1.13.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/experiment/xml/XMLExperiment.html?rev=1.1.2.1&content-type=text/x-cvsweb-markup">experiment/xml/XMLExperiment.html (1.1.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/GenericObjectEditor.props?rev=1.105.2.1&content-type=text/x-cvsweb-markup">gui/GenericObjectEditor.props (1.105.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SetupPanel.html?rev=1.23.2.1&content-type=text/x-cvsweb-markup">gui/experiment/SetupPanel.html (1.23.2.1)</a>
+</li>
+<li>
+<a href="../doc/weka/gui/experiment/SimpleSetupPanel.html?rev=1.6.2.1&content-type=text/x-cvsweb-markup">gui/experiment/SimpleSetupPanel.html (1.6.2.1)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>

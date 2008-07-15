@@ -1,0 +1,773 @@
+2004-01-27 12:56  mhall
+
+	* weka/build.xml (1.12): Removed javadoc old flag
+
+2004-01-27 11:04  eibe
+
+	* weka/gui/explorer/ClassifierPanel.java (1.72): Changed number of
+	decimal places.
+
+2004-01-27 10:54  dale
+
+	* weka/gui/explorer/ClassifierPanel.java (1.71): Use
+	ThresholdVisualisePanel to show area under ROC
+
+2004-01-27 10:53  dale
+
+	* weka/gui/visualize/ThresholdVisualizePanel.java (1.1): Panel to
+	show area under ROC
+
+2004-01-23 16:46  dale
+
+	* weka/gui/experiment/SimpleSetupPanel.java (1.3): Added button for
+	Database username,password
+
+2004-01-23 16:43  eibe
+
+	* weka/experiment/DatabaseUtils.props (1.3): Made idb the default
+	again.
+
+2004-01-23 16:37  dale
+
+	* weka/gui/experiment/ResultsPanel.java (1.26): Added button for
+	Database username,password
+
+2004-01-23 16:35  dale
+
+	* weka/experiment/DatabaseResultListener.java (1.8): Changes for
+	Hypersonic Table/Column name case issues.
+
+2004-01-23 16:33  dale
+
+	* weka/experiment/DatabaseUtils.props.hsql (1.1): Properties file
+	for Hypersonic
+
+2004-01-23 16:29  eibe
+
+	* weka/: filters/unsupervised/attribute/MergeTwoValues.java (1.4),
+	filters/unsupervised/attribute/RandomProjection.java (1.2),
+	filters/unsupervised/attribute/Remove.java (1.4),
+	gui/GenericObjectEditor.props (1.93): Some small fixes/changes
+
+2004-01-23 16:29  dale
+
+	* weka/experiment/: DatabaseUtils.java (1.17), InstanceQuery.java
+	(1.15), DatabaseUtils.props (1.2): Changes for more generic
+	database access
+
+2004-01-23 16:27  dale
+
+	* weka/gui/DatabaseConnectionDialog.java (1.1): Dailog box for
+	Database URL, username, password
+
+2004-01-23 12:36  mhall
+
+	* weka/gui/GenericObjectEditor.props (1.92): Added RBFNetwork.java
+
+2004-01-23 12:35  mhall
+
+	* weka/classifiers/functions/RBFNetwork.java (1.1): Initial import
+
+2004-01-22 10:43  mhall
+
+	* weka/classifiers/trees/m5/Rule.java (1.10): Made serializable
+
+2004-01-21 21:24  eibe
+
+	* weka/: associations/Tertius.java (1.1),
+	associations/tertius/AttributeValueLiteral.java (1.3),
+	associations/tertius/Tertius.java (1.3),
+	attributeSelection/SVMAttributeEval.java (1.17),
+	classifiers/functions/MultilayerPerceptron.java (1.1),
+	classifiers/functions/PaceRegression.java (1.1),
+	classifiers/functions/SMO.java (1.50),
+	classifiers/functions/SMOreg.java (1.1),
+	classifiers/functions/neural/NeuralNetwork.java (1.13),
+	classifiers/functions/pace/PaceRegression.java (1.6),
+	classifiers/functions/supportVector/SMO.java (1.9),
+	classifiers/functions/supportVector/SMOreg.java (1.6),
+	classifiers/lazy/KStar.java (1.1),
+	classifiers/lazy/kstar/KStar.java (1.15),
+	classifiers/meta/ClassificationViaRegression.java (1.20),
+	classifiers/meta/Decorate.java (1.2),
+	classifiers/meta/RegressionByDiscretization.java (1.29),
+	classifiers/rules/PART.java (1.1), classifiers/rules/part/PART.java
+	(1.22), classifiers/trees/ADTree.java (1.1),
+	classifiers/trees/J48.java (1.1), classifiers/trees/LMT.java (1.1),
+	classifiers/trees/M5P.java (1.1),
+	classifiers/trees/adtree/ADTree.java (1.9),
+	classifiers/trees/adtree/PredictionNode.java (1.4),
+	classifiers/trees/j48/J48.java (1.30),
+	classifiers/trees/lmt/LMT.java (1.6), classifiers/trees/m5/M5P.java
+	(1.7), classifiers/trees/m5/Rule.java (1.9),
+	classifiers/trees/m5/RuleNode.java (1.8),
+	gui/GenericObjectEditor.props (1.91),
+	gui/boundaryvisualizer/BoundaryPanel.java (1.19),
+	gui/boundaryvisualizer/BoundaryPanelDistributed.java (1.5): Moved
+	the main classes for several classifiers (and Tertius) out of their
+	packages, e.g., weka.classifiers.trees.j48.J48 is now just
+	weka.classifiers.trees.J48
+
+2004-01-21 16:17  mhall
+
+	* weka/classifiers/trees/m5/PreConstructedLinearModel.java (1.2):
+	Made serializable
+
+2004-01-21 11:38  mhall
+
+	* weka/classifiers/trees/m5/: M5Base.java (1.9), M5P.java (1.6),
+	PreConstructedLinearModel.java (1.1), Rule.java (1.8),
+	RuleNode.java (1.7): M5 now prints smoothed linear models at the
+	leaves. Code is now a bit more efficient - runs a little faster and
+	uses less memory
+
+2004-01-20 12:02  akibriya
+
+	* weka/classifiers/bayes/NaiveBayesMultinomial.java (1.8): Fixed
+	some small bugs.
+
+2004-01-20 11:44  akibriya
+
+	* weka/filters/unsupervised/attribute/StringToWordVector.java
+	(1.7): Now the document frequencies are normalized to average
+	document length instead of one.
+
+2004-01-19 16:20  eibe
+
+	* weka/classifiers/meta/: CVParameterSelection.java (1.26),
+	RegressionByDiscretization.java (1.28): Fixed small bugs.
+
+2004-01-19 14:56  eibe
+
+	* weka/classifiers/functions/supportVector/SMO.java (1.8): Fixed a
+	bug occuring with > 1 empty classes and E > 1.
+
+2004-01-19 12:44  mhall
+
+	* weka/filters/unsupervised/attribute/SwapValues.java (1.4): Fixed
+	a couple tip text method names
+
+2004-01-19 12:36  eibe
+
+	* weka/filters/: supervised/attribute/AttributeSelection.java
+	(1.2), supervised/attribute/ClassOrder.java (1.4),
+	supervised/attribute/NominalToBinary.java (1.2),
+	supervised/instance/Resample.java (1.3),
+	supervised/instance/SpreadSubsample.java (1.3),
+	unsupervised/attribute/FirstOrder.java (1.2),
+	unsupervised/attribute/MergeTwoValues.java (1.3),
+	unsupervised/attribute/NominalToBinary.java (1.4),
+	unsupervised/attribute/Normalize.java (1.4),
+	unsupervised/attribute/NumericToBinary.java (1.3),
+	unsupervised/attribute/NumericTransform.java (1.2),
+	unsupervised/attribute/ReplaceMissingValues.java (1.4),
+	unsupervised/attribute/Standardize.java (1.4),
+	unsupervised/attribute/StringToNominal.java (1.4),
+	unsupervised/attribute/SwapValues.java (1.3): more filters with
+	tool tips, etc.
+
+2004-01-19 12:34  mhall
+
+	* weka/filters/unsupervised/attribute/: AbstractTimeSeries.java
+	(1.2), TimeSeriesDelta.java (1.2), TimeSeriesTranslate.java (1.3):
+	Added online docs
+
+2004-01-19 12:18  mhall
+
+	* weka/filters/unsupervised/instance/: Randomize.java (1.2),
+	RemoveWithValues.java (1.5), Resample.java (1.3): Added online docs
+
+2004-01-19 11:27  eibe
+
+	* weka/gui/: beans/PredictionAppender.java (1.3),
+	visualize/PlotData2D.java (1.16): Fixed a few bugs related to
+	yesterday's changes.
+
+2004-01-18 20:51  eibe
+
+	* weka/filters/unsupervised/attribute/Add.java (1.2): Changed index
+	handling for Add.java
+
+2004-01-18 20:22  eibe
+
+	* weka/classifiers/: RandomizableClassifier.java (1.1),
+	evaluation/MarginCurve.java (1.9), functions/supportVector/SMO.java
+	(1.7), functions/supportVector/SMOreg.java (1.5): Some more changes
+	related to tool tips. All the classifiers should have tool tips and
+	global info now... Introduced super class RandomizableClassifier,
+	which isn't currently extended by anything.
+
+2004-01-18 17:51  eibe
+
+	* weka/classifiers/: functions/Winnow.java (1.7),
+	functions/supportVector/SMO.java (1.6), lazy/IB1.java (1.12),
+	lazy/IBk.java (1.29), lazy/LWL.java (1.9), lazy/kstar/KStar.java
+	(1.14): Some more tool tips, etc.
+
+2004-01-18 14:57  mhall
+
+	* weka/classifiers/functions/VotedPerceptron.java (1.17): Added
+	online docs
+
+2004-01-18 11:18  eibe
+
+	* weka/classifiers/: IteratedSingleClassifierEnhancer.java (1.1),
+	MultipleClassifiersCombiner.java (1.1),
+	RandomizableIteratedSingleClassifierEnhancer.java (1.1),
+	RandomizableMultipleClassifiersCombiner.java (1.1),
+	RandomizableSingleClassifierEnhancer.java (1.1),
+	SingleClassifierEnhancer.java (1.1), meta/AdaBoostM1.java (1.23),
+	meta/Bagging.java (1.29), meta/CVParameterSelection.java (1.25),
+	meta/ClassificationViaRegression.java (1.19),
+	meta/IteratedSingleClassifierEnhancer.java (1.2),
+	meta/LogitBoost.java (1.31), meta/MetaCost.java (1.14),
+	meta/MultiScheme.java (1.17), meta/MultipleClassifiersCombiner.java
+	(1.2), meta/RandomCommittee.java (1.5),
+	meta/RandomizableIteratedSingleClassifierEnhancer.java (1.2),
+	meta/RandomizableMultipleClassifiersCombiner.java (1.2),
+	meta/RandomizableSingleClassifierEnhancer.java (1.2),
+	meta/RegressionByDiscretization.java (1.27),
+	meta/SingleClassifierEnhancer.java (1.3), meta/Stacking.java
+	(1.22), meta/Vote.java (1.6): Moved some helper classes out of the
+	meta package into the classifiers package.
+
+2004-01-18 10:40  eibe
+
+	* weka/classifiers/: bayes/BayesNetB2.java (1.3),
+	bayes/BayesNetK2.java (1.3), functions/supportVector/SMO.java
+	(1.5), meta/AdaBoostM1.java (1.22), meta/Bagging.java (1.28),
+	meta/CVParameterSelection.java (1.24),
+	meta/ClassificationViaRegression.java (1.18),
+	meta/CostSensitiveClassifier.java (1.18),
+	meta/FilteredClassifier.java (1.20), meta/LogitBoost.java (1.30),
+	meta/MetaCost.java (1.13), meta/RandomCommittee.java (1.4),
+	meta/RegressionByDiscretization.java (1.26),
+	meta/SingleClassifierEnhancer.java (1.2), misc/FLR.java (1.2),
+	trees/REPTree.java (1.17): More changes related to option handling,
+	tool tips, etc. Small bug fix in SMO (initizliation wasn't correct
+	in special case). Changed RegressionByDiscretization back to old
+	behaviour.
+
+2004-01-17 22:21  eibe
+
+	* weka/classifiers/meta/: AdaBoostM1.java (1.21), Bagging.java
+	(1.27), ClassificationViaRegression.java (1.17), Grading.java
+	(1.4), LogitBoost.java (1.29), MetaCost.java (1.12),
+	RandomizableSingleClassifierEnhancer.java (1.1), Stacking.java
+	(1.21), StackingC.java (1.8): Some more changes relating to tool
+	tips, etc. Tightened up some code.
+
+2004-01-17 20:13  eibe
+
+	* weka/classifiers/meta/: MultiScheme.java (1.16),
+	MultipleClassifiersCombiner.java (1.1),
+	RandomizableMultipleClassifiersCombiner.java (1.1), Stacking.java
+	(1.20), StackingC.java (1.7), Vote.java (1.5): Some more changes
+	related to option handling.
+
+2004-01-17 15:56  eibe
+
+	* weka/classifiers/: Classifier.java (1.10), meta/AdaBoostM1.java
+	(1.20), meta/Bagging.java (1.26),
+	meta/IteratedSingleClassifierEnhancer.java (1.1),
+	meta/MultiBoostAB.java (1.5),
+	meta/RandomizableIteratedSingleClassifierEnhancer.java (1.1),
+	meta/RegressionByDiscretization.java (1.25),
+	meta/SingleClassifierEnhancer.java (1.1): Every classifier now
+	implements OptionHandler. Added some super classes for unifying the
+	option handling in some meta classifiers.
+
+2004-01-17 13:44  eibe
+
+	* weka/gui/GenericObjectEditor.props (1.90): Name change.
+
+2004-01-17 10:42  mhall
+
+	* weka/classifiers/: bayes/AODE.java (1.7),
+	functions/SimpleLinearRegression.java (1.5): Added online docs
+
+2004-01-17 10:03  eibe
+
+	* weka/classifiers/meta/: AdaBoostM1.java (1.19), MultiBoostAB.java
+	(1.4), MultiScheme.java (1.15), RegressionByDiscretization.java
+	(1.24), Stacking.java (1.19), StackingC.java (1.6), Vote.java
+	(1.4): Added some more tool tips. Tightened up some code. Note:
+	behaviour of MultiBoostAB has changed slightly because
+	num_subcommittees_parameter is used slightly differently.
+
+2004-01-16 17:09  mhall
+
+	* weka/classifiers/: functions/pace/PaceRegression.java (1.5),
+	functions/LeastMedSq.java (1.9), functions/LinearRegression.java
+	(1.19), functions/Logistic.java (1.32), bayes/NaiveBayes.java
+	(1.15), bayes/NaiveBayesMultinomial.java (1.7),
+	bayes/NaiveBayesSimple.java (1.12), bayes/NaiveBayesUpdateable.java
+	(1.4): Added online docs
+
+2004-01-16 17:09  eibe
+
+	* weka/classifiers/: misc/HyperPipes.java (1.15), trees/Id3.java
+	(1.11), trees/RandomForest.java (1.5), trees/adtree/ADTree.java
+	(1.8), trees/j48/J48.java (1.29): Added tool tips for a few more
+	classifiers.
+
+2004-01-16 16:29  eibe
+
+	* weka/classifiers/: rules/ConjunctiveRule.java (1.10),
+	rules/DecisionTable.java (1.27), rules/JRip.java (1.13),
+	rules/M5Rules.java (1.3), rules/NNge.java (1.1), rules/Nnge.java
+	(1.3), rules/OneR.java (1.16), rules/Prism.java (1.16),
+	rules/Ridor.java (1.10), rules/ZeroR.java (1.10),
+	rules/part/PART.java (1.21), trees/DecisionStump.java (1.18),
+	trees/REPTree.java (1.16), trees/RandomTree.java (1.7),
+	trees/m5/M5Base.java (1.8), trees/m5/M5P.java (1.5): Added tool
+	tips and global info to several classifiers. Renamed Nnge to NNge
+	(based on name of class).
+
+2004-01-16 12:35  eibe
+
+	* weka/filters/unsupervised/attribute/ClusterMembership.java (1.4):
+	Changed to use density rather than cluster membership probability.
+
+2004-01-16 12:16  eibe
+
+	* weka/clusterers/: ClusterEvaluation.java (1.23), Clusterer.java
+	(1.10), DensityBasedClusterer.java (1.1),
+	DistributionClusterer.java (1.11), DistributionMetaClusterer.java
+	(1.11), EM.java (1.25), MakeDensityBasedClusterer.java (1.1): Some
+	renaming and restructuring.
+
+2004-01-15 17:16  eibe
+
+	* weka/clusterers/SimpleKMeans.java (1.13): SimpleKMeans uses less
+	memory now.
+
+2004-01-15 16:04  eibe
+
+	* weka/clusterers/: DistributionMetaClusterer.java (1.10), EM.java
+	(1.24): Changed computation of variance in
+	DistributionMetaClusterer back to ML estimate. EM should now be
+	able to deal with weighted instances.
+
+2004-01-15 14:02  eibe
+
+	* weka/clusterers/DistributionMetaClusterer.java (1.9): Now
+	implements WeightedInstancesHandler. Standard deviations are
+	computed differently. Minimum standard deviation can be set by the
+	user.
+
+2004-01-15 13:49  eibe
+
+	* weka/clusterers/SimpleKMeans.java (1.12): Eliminated sqrt() from
+	distance calculation. Implements WeightedInstancesHandler.
+
+2004-01-15 12:17  eibe
+
+	* weka/clusterers/SimpleKMeans.java (1.11): Fixed bug in
+	computation of standard deviations. Made it a bit faster. Initial
+	cluster centers are now chosen based on distribution closer to
+	uniform distribution over instances.
+
+2004-01-14 17:05  mhall
+
+	* weka/gui/beans/: CrossValidationFoldMaker.java (1.5),
+	TrainTestSplitMaker.java (1.4): Changed seed to be consistent with
+	Explorer
+
+2004-01-14 16:29  eibe
+
+	* weka/filters/unsupervised/attribute/ClusterMembership.java (1.3):
+	Some changes.
+
+2004-01-14 16:24  mhall
+
+	* weka/filters/unsupervised/attribute/AddCluster.java (1.3): Some
+	fixes to make it work properly. It now automatically ignores the
+	class (if set) during clustering
+
+2004-01-14 14:57  eibe
+
+	* weka/core/Utils.java (1.38): logs2probs had unintended side
+	effect.
+
+2004-01-14 14:57  eibe
+
+	* weka/clusterers/: ClusterEvaluation.java (1.22),
+	DistributionClusterer.java (1.10), DistributionMetaClusterer.java
+	(1.8), EM.java (1.23): Logification: things are numerically more
+	stable now.
+
+2004-01-14 12:07  eibe
+
+	* weka/clusterers/DistributionClusterer.java (1.9): resurrected
+
+2004-01-13 16:44  eibe
+
+	* weka/filters/unsupervised/attribute/ClusterMembership.java (1.2):
+	Some fixes.
+
+2004-01-13 15:12  mhall
+
+	* weka/gui/GenericObjectEditor.props (1.89): Added
+	ClusterMembership filter
+
+2004-01-13 15:11  mhall
+
+	* weka/filters/unsupervised/attribute/ClusterMembership.java (1.1):
+	Initial import
+
+2004-01-12 17:28  mhall
+
+	* weka/attributeSelection/OneRAttributeEval.java (1.14): Added
+	options to control cross validation parameters and to allow the
+	user to opt for using the training data to evaluate attribute
+	goodness (rather than x-val). Can now also specify the minimum
+	bucket size for OneR.
+
+2004-01-10 20:39  eibe
+
+	* weka/classifiers/meta/MultiClassClassifier.java (1.35): Pairwise
+	classification works now if two classes are empty.
+
+2004-01-09 14:00  mhall
+
+	* weka/classifiers/functions/neural/NeuralNetwork.java (1.12):
+	Fixed so that option click acts as right button on Macs
+
+2004-01-09 12:09  eibe
+
+	* weka/classifiers/functions/Logistic.java (1.31): Finished model
+	uses a lot less memory now.
+
+2004-01-09 11:17  mhall
+
+	* weka/gui/treevisualizer/TreeVisualizer.java (1.7): Fixed so that
+	option click acts as right button on Macs
+
+2004-01-08 16:49  mhall
+
+	* weka/clusterers/DistributionMetaClusterer.java (1.7): Now fits
+	normal and discrete estimators to clusters produced by the wrapped
+	clusterer
+
+2004-01-08 16:47  mhall
+
+	* weka/clusterers/DistributionClusterer.java (1.8): Removed from
+	repository
+
+2004-01-08 12:37  mhall
+
+	* weka/gui/LogPanel.java (1.14): Fixed so that right click (using
+	option/alt key) on Macs with one mouse button now works
+
+2004-01-06 10:17  eibe
+
+	* weka/classifiers/meta/MultiClassClassifier.java (1.34): Changed
+	random code generation dependend on input data (i.e. seed is now
+	based on an instance chosen from the input data).
+
+2004-01-05 09:17  eibe
+
+	* weka/: classifiers/meta/Decorate.java (1.1),
+	classifiers/misc/FLR.java (1.1), gui/GenericObjectEditor.props
+	(1.88): Added to classifiers that have been contributed:
+	Decorate.java and FLR.java
+
+2003-12-19 10:48  eibe
+
+	* weka/filters/unsupervised/instance/RemoveMisclassified.java
+	(1.2): Changed RemoveMisclassified to just remove instances from
+	the first batch. Now it can be used together with the
+	FilteredClassifier.
+
+2003-12-18 11:28  eibe
+
+	* weka/: core/Utils.java (1.37),
+	experiment/RandomSplitResultProducer.java (1.16): Added method for
+	probabilistic rounding in Utils.java and changed the
+	RandomSplitResultsProducer to use this method. Previously there was
+	the potential for slight bias in the class distribution due to
+	rounding in the stratification phase.
+
+2003-12-17 14:15  akibriya
+
+	* weka/classifiers/bayes/ComplementNaiveBayes.java (1.2): Fixed a
+	bug so it can be used without setting any options.
+
+2003-12-16 17:26  eibe
+
+	* weka/gui/: GUIChooser.java (1.12), ResultHistoryPanel.java
+	(1.18), explorer/AssociationsPanel.java (1.17),
+	explorer/AttributeSelectionPanel.java (1.30),
+	explorer/ClassifierPanel.java (1.70), explorer/ClustererPanel.java
+	(1.42), explorer/Explorer.java (1.28),
+	explorer/PreprocessPanel.java (1.37), visualize/AttributePanel.java
+	(1.9), visualize/ClassPanel.java (1.12), visualize/LegendPanel.java
+	(1.4), visualize/MatrixPanel.java (1.7), visualize/Plot2D.java
+	(1.20), visualize/VisualizePanel.java (1.20): Weka Explorer is now
+	just Explorer.
+
+2003-12-16 13:42  eibe
+
+	* weka/classifiers/functions/supportVector/SMO.java (1.4): SMO
+	should be quite a bit faster now: the data wasn't randomized after
+	it was split into two-class problems (even if the original problem
+	only had two classes).
+
+2003-12-15 09:33  mhall
+
+	* weka/attributeSelection/: BestFirst.java (1.23),
+	CfsSubsetEval.java (1.19): Modified to improve memory usage on data
+	sets with many features
+
+2003-12-12 12:42  eibe
+
+	* weka/gui/visualize/Plot2D.java (1.19): Changed access for some
+	variables from private to protected.
+
+2003-12-05 17:41  eibe
+
+	* weka/core/Instances.java (1.49): Fixed a bug that I just
+	introduced with my new code.
+
+2003-12-05 16:39  eibe
+
+	* weka/: attributeSelection/AttributeSelection.java (1.31),
+	attributeSelection/OneRAttributeEval.java (1.13),
+	attributeSelection/RaceSearch.java (1.12),
+	attributeSelection/WrapperSubsetEval.java (1.21),
+	classifiers/Evaluation.java (1.49),
+	classifiers/evaluation/EvaluationUtils.java (1.9),
+	classifiers/functions/supportVector/SMO.java (1.3),
+	classifiers/meta/CVParameterSelection.java (1.23),
+	classifiers/meta/Grading.java (1.3),
+	classifiers/meta/LogitBoost.java (1.28),
+	classifiers/meta/MultiScheme.java (1.14),
+	classifiers/meta/OrdinalClassClassifier.java (1.10),
+	classifiers/meta/RandomCommittee.java (1.3),
+	classifiers/meta/Stacking.java (1.18),
+	classifiers/meta/StackingC.java (1.5),
+	classifiers/meta/ThresholdSelector.java (1.29),
+	classifiers/rules/ConjunctiveRule.java (1.9),
+	classifiers/rules/JRip.java (1.12), classifiers/rules/Ridor.java
+	(1.9), classifiers/rules/part/MakeDecList.java (1.12),
+	classifiers/rules/part/PART.java (1.20),
+	classifiers/trees/REPTree.java (1.15),
+	classifiers/trees/RandomTree.java (1.6),
+	classifiers/trees/j48/J48.java (1.28),
+	classifiers/trees/j48/PruneableClassifierTree.java (1.8),
+	clusterers/ClusterEvaluation.java (1.21), clusterers/EM.java
+	(1.22), core/Instances.java (1.48),
+	experiment/CrossValidationResultProducer.java (1.13),
+	gui/beans/CrossValidationFoldMaker.java (1.4),
+	gui/explorer/AttributeSelectionPanel.java (1.29),
+	gui/explorer/ClassifierPanel.java (1.69): Cross-validation now
+	randomizes the data within each training fold before it is passed
+	to the learning scheme. This is important for schemes that are
+	sensitive to the order in the training data (in particular, those
+	ones that create a random number generator based on a selected
+	instance in the training data). Previously we have assumed that the
+	Classifier itself will randomize the data if necessary. (The same
+	change applies to various meta-classifiers, etc, as well.)
+
+2003-12-05 13:49  eibe
+
+	* weka/filters/supervised/attribute/ClassOrder.java (1.3): Re-wrote
+	large chunks of ClassOrder.
+
+2003-12-01 17:10  akibriya
+
+	* weka/classifiers/bayes/NaiveBayesMultinomial.java (1.6):
+	Commented out the factorial terms used in calculating
+	prob(word|class), as it doesn't make any difference in classifier's
+	results and is unnecessary.
+
+2003-11-28 12:12  eibe
+
+	* weka/classifiers/BVDecomposeSegCVSub.java (1.1): Initial import.
+
+2003-11-27 17:31  akibriya
+
+	* weka/gui/GenericObjectEditor.props (1.87): Added RandomProjection
+	filter.
+
+2003-11-27 17:30  akibriya
+
+	* weka/filters/unsupervised/attribute/RandomProjection.java (1.1):
+	Initial import.
+
+2003-11-27 13:43  akibriya
+
+	* weka/core/Stopwords.java (1.1): Initial import.
+
+2003-11-27 13:39  akibriya
+
+	* weka/filters/unsupervised/attribute/StringToWordVector.java
+	(1.6): Added a range of options to complement the new
+	ComplementNaiveBayes classifier.
+
+2003-11-27 13:35  akibriya
+
+	* weka/gui/GenericObjectEditor.props (1.86): Added
+	ComplementNaiveBayes classifier.
+
+2003-11-27 13:34  akibriya
+
+	* weka/classifiers/bayes/ComplementNaiveBayes.java (1.1): Initial
+	import.
+
+2003-11-27 12:14  mhall
+
+	* weka/classifiers/trees/m5/: Rule.java (1.7), RuleNode.java (1.6):
+	Fixed a bug relating to minNumInstances
+
+2003-11-26 09:54  eibe
+
+	* weka/gui/experiment/ResultsPanel.java (1.25): Fixed bug
+
+2003-11-24 17:38  eibe
+
+	* weka/gui/experiment/ResultsPanel.java (1.24): Introduced a split
+	panel in the results panel.
+
+2003-11-24 09:01  eibe
+
+	* weka/gui/explorer/ClassifierPanel.java (1.68): Relative errors
+	for cross-validation were different from command-line estimates
+	because calculation of the mean was not done based on each training
+	fold.
+
+2003-11-24 08:57  eibe
+
+	* weka/classifiers/trees/j48/C45PruneableClassifierTree.java
+	(1.11): Fixed bug in J48. Empty leaves didn't get flagged as
+	non-empty if they became populated after subtree raising had
+	occurred. This could affect probability estimates for instances
+	with missing values (in cases where leaves were empty before
+	pruning, subtree raising actually occurred, and the missing
+	attribute was tested immediately above the previously empty leaf).
+
+2003-11-20 16:38  eibe
+
+	* weka/classifiers/trees/j48/: BinC45Split.java (1.8),
+	C45Split.java (1.8): Made a change that affects probability
+	estimates for empty leaves.
+
+2003-11-20 11:15  eibe
+
+	* weka/classifiers/meta/RegressionByDiscretization.java (1.23):
+	Fixed bug: didn't use to work for datasets with missing class
+	values
+
+2003-11-19 14:03  eibe
+
+	* weka/: classifiers/meta/RegressionByDiscretization.java (1.22),
+	filters/unsupervised/attribute/Discretize.java (1.6): Another small
+	fix.
+
+2003-11-19 11:11  eibe
+
+	* weka/filters/: supervised/attribute/Discretize.java (1.3),
+	unsupervised/attribute/Discretize.java (1.5),
+	unsupervised/attribute/PotentialClassIgnorer.java (1.2): Fixed a
+	bug. Also: split points are now put half-way between values in
+	supervised.attribute.Discretize.
+
+2003-11-18 17:45  eibe
+
+	* weka/: classifiers/functions/supportVector/SMOreg.java (1.4),
+	classifiers/meta/RegressionByDiscretization.java (1.21),
+	filters/Filter.java (1.23),
+	filters/unsupervised/attribute/Discretize.java (1.4),
+	filters/unsupervised/attribute/Normalize.java (1.3),
+	filters/unsupervised/attribute/NumericToBinary.java (1.2),
+	filters/unsupervised/attribute/PotentialClassIgnorer.java (1.1),
+	filters/unsupervised/attribute/ReplaceMissingValues.java (1.3),
+	filters/unsupervised/attribute/Standardize.java (1.3): Made it
+	possible for some unsupervised attribute filters to ignore class
+	(or not).
+
+2003-11-17 14:08  eibe
+
+	* weka/: core/Instances.java (1.47),
+	filters/supervised/attribute/Discretize.java (1.2),
+	filters/unsupervised/instance/RemoveWithValues.java (1.4): Removed
+	numeric padding in tests.
+
+2003-11-14 11:10  eibe
+
+	* weka/classifiers/meta/AdditiveRegression.java (1.14): Yesterday's
+	fix wasn't quite the right thing. Fixed it properly (and made it
+	faster, too :-).
+
+2003-11-13 17:31  eibe
+
+	* weka/classifiers/meta/AdditiveRegression.java (1.13): Fixed bug
+	that resulted in reduced performance when shrinkage parameter was
+	set to value different from 1.
+
+2003-11-13 12:03  eibe
+
+	* weka/: classifiers/meta/AttributeSelectedClassifier.java (1.14),
+	classifiers/meta/CVParameterSelection.java (1.22),
+	classifiers/meta/CostSensitiveClassifier.java (1.17),
+	classifiers/meta/FilteredClassifier.java (1.19),
+	classifiers/meta/ThresholdSelector.java (1.28), core/Drawable.java
+	(1.7): Made a few more meta classifiers implement Drawable.
+
+2003-11-12 14:06  mhall
+
+	* weka/build.xml (1.11): Updated build file
+
+2003-11-12 13:27  eibe
+
+	* weka/: Makefile (1.40), associations/Makefile (1.4),
+	attributeSelection/Makefile (1.16), classifiers/Makefile (1.30),
+	classifiers/bayes/Makefile (1.8), classifiers/evaluation/Makefile
+	(1.6), classifiers/functions/Makefile (1.8),
+	classifiers/functions/neural/Makefile (1.2),
+	classifiers/functions/pace/Makefile (1.3),
+	classifiers/functions/supportVector/Makefile (1.2),
+	classifiers/lazy/Makefile (1.6), classifiers/lazy/kstar/Makefile
+	(1.4), classifiers/meta/Makefile (1.8), classifiers/misc/Makefile
+	(1.2), classifiers/rules/Makefile (1.6),
+	classifiers/rules/part/Makefile (1.2), classifiers/trees/Makefile
+	(1.6), classifiers/trees/adtree/Makefile (1.2),
+	classifiers/trees/j48/Makefile (1.4),
+	classifiers/trees/lmt/Makefile (1.2), classifiers/trees/m5/Makefile
+	(1.4), clusterers/Makefile (1.6), core/Makefile (1.14),
+	core/converters/Makefile (1.2), datagenerators/Makefile (1.2),
+	estimators/Makefile (1.3), experiment/Makefile (1.14),
+	filters/Makefile (1.27), filters/supervised/Makefile (1.2),
+	filters/supervised/attribute/Makefile (1.2),
+	filters/supervised/instance/Makefile (1.2),
+	filters/unsupervised/Makefile (1.2),
+	filters/unsupervised/attribute/Makefile (1.6),
+	filters/unsupervised/instance/Makefile (1.2), gui/Makefile (1.22),
+	gui/beans/Makefile (1.4), gui/boundaryvisualizer/Makefile (1.3),
+	gui/experiment/Makefile (1.6), gui/explorer/Makefile (1.7),
+	gui/graphvisualizer/Makefile (1.2), gui/streams/Makefile (1.3),
+	gui/treevisualizer/Makefile (1.2), gui/visualize/Makefile (1.6):
+	Removed all Makefiles because we use ant to compile weka. There is
+	no point in maintaining them.
+
+2003-11-12 11:39  eibe
+
+	* weka/classifiers/meta/Bagging.java (1.25): Changed bagging so
+	that weights are properly taken into account even if out-of-bag
+	error is calculated.
+
+2003-11-12 11:07  eibe
+
+	* weka/classifiers/functions/LeastMedSq.java (1.8): Behaviour of
+	RemoveRange has changed.
+
+2003-11-12 11:00  mhall
+
+	* weka/gui/beans/FilterBeanInfo.java (1.3): Javadoc fix
+
+2003-11-12 10:13  eibe
+
+	* weka/classifiers/: meta/CVParameterSelection.java (1.21),
+	trees/RandomTree.java (1.5): Two tiny changes.
+
