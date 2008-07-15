@@ -61,7 +61,7 @@ import java.awt.image.*;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.30.2.3 $
+ * @version $Revision: 1.30.2.4 $
  */
 public class Explorer extends JPanel {
 
@@ -100,7 +100,7 @@ public class Explorer extends JPanel {
     String date = (new SimpleDateFormat("EEEE, d MMMM yyyy"))
       .format(new Date());
     m_LogPanel.logMessage("Weka Explorer");
-    m_LogPanel.logMessage("(c) 1999-2005 The University of Waikato, Hamilton,"
+    m_LogPanel.logMessage("(c) 1999-2008 The University of Waikato, Hamilton,"
 			  + " New Zealand");
     m_LogPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/weka");
     m_LogPanel.logMessage("Started on " + date);
