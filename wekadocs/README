@@ -4,12 +4,12 @@
                               README                                   
                               ======                                   
                                                                        
-                            WEKA 3.4.12
-                            19 Dec 2007
+                            WEKA 3.4.13
+                            16 July 2008
                                                                        
                  Java Programs for Machine Learning 
 
-           Copyright (C) 1998-2007  University of Waikato
+           Copyright (C) 1998-2008 University of Waikato
 
               web: http://www.cs.waikato.ac.nz/~ml/weka            
                                                                        
@@ -397,5 +397,5 @@ the file COPYING.
 -----------------------------------------------------------------------
 
 
-$Revision: 1.2.2.11 $
+$Revision: 1.2.2.12 $
 
