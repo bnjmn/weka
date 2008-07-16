@@ -113,7 +113,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.37.2.5 $
+ * @version $Revision: 1.37.2.6 $
  */
 public class Logistic extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -499,7 +499,7 @@ public class Logistic extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.37.2.5 $");
+      return RevisionUtils.extract("$Revision: 1.37.2.6 $");
     }
   }
 
@@ -842,12 +842,16 @@ public class Logistic extends Classifier
     }
     temp.append("\n");
                 
-    for (int j = 1; j <= m_NumPredictors; j++) {
-      temp.append(Utils.padRight(m_structure.attribute(j - 1).name(), attLength));
-      for (int k = 0; k < m_NumClasses-1; k++) {
-        temp.append(Utils.padLeft(Utils.doubleToString(m_Par[j][k], 12, 4).trim(), colWidth));
+    int j = 1;
+    for (int i = 0; i < m_structure.numAttributes(); i++) {
+      if (i != m_structure.classIndex()) {
+        temp.append(Utils.padRight(m_structure.attribute(i).name(), attLength));
+        for (int k = 0; k < m_NumClasses-1; k++) {
+          temp.append(Utils.padLeft(Utils.doubleToString(m_Par[j][k], 12, 4).trim(), colWidth));
+        }
+        temp.append("\n");
+        j++;
       }
-      temp.append("\n");
     }
 	
     temp.append(Utils.padRight("Intercept", attLength));
@@ -870,14 +874,18 @@ public class Logistic extends Classifier
     }
     temp.append("\n");
 
-    for (int j = 1; j <= m_NumPredictors; j++) {
-      temp.append(Utils.padRight(m_structure.attribute(j - 1).name(), attLength));
-      for (int k = 0; k < m_NumClasses-1; k++) {
-        double ORc = Math.exp(m_Par[j][k]);
-	String ORs = " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
-        temp.append(Utils.padLeft(ORs.trim(), colWidth));
+    j = 1;
+    for (int i = 0; i < m_structure.numAttributes(); i++) {
+      if (i != m_structure.classIndex()) {
+        temp.append(Utils.padRight(m_structure.attribute(i).name(), attLength));
+        for (int k = 0; k < m_NumClasses-1; k++) {
+          double ORc = Math.exp(m_Par[j][k]);
+          String ORs = " " + ((ORc > 1e10) ?  "" + ORc : Utils.doubleToString(ORc, 12, 4));
+          temp.append(Utils.padLeft(ORs.trim(), colWidth));
+        }
+        temp.append("\n");
+        j++;
       }
-      temp.append("\n");
     }
 
     return temp.toString();
@@ -889,7 +897,7 @@ public class Logistic extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.37.2.5 $");
+    return RevisionUtils.extract("$Revision: 1.37.2.6 $");
   }
     
   /**
