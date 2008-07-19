@@ -33,7 +33,7 @@ import weka.core.*;
  * dataset with the modes and means from the training data.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.4.2.1 $
  */
 public class ReplaceMissingValues extends PotentialClassIgnorer
   implements UnsupervisedFilter {
@@ -120,7 +120,8 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
       for (int i = 0; i < getInputFormat().numAttributes(); i++) {
 	if (getInputFormat().attribute(i).isNominal()) {
 	  counts[i] = new double[getInputFormat().attribute(i).numValues()];
-	  counts[i][0] = sumOfWeights;
+          if (counts[i].length > 0)
+            counts[i][0] = sumOfWeights;
 	}
       }
       double[] sums = new double[getInputFormat().numAttributes()];
@@ -134,14 +135,18 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
 	  if (!inst.isMissingSparse(i)) {
 	    double value = inst.valueSparse(i);
 	    if (inst.attributeSparse(i).isNominal()) {
-	      counts[inst.index(i)][(int)value] += inst.weight();
-	      counts[inst.index(i)][0] -= inst.weight();
+              if (counts[inst.index(i)].length > 0) {
+	        counts[inst.index(i)][(int)value] += inst.weight();
+	        counts[inst.index(i)][0] -= inst.weight();
+              }
 	    } else if (inst.attributeSparse(i).isNumeric()) {
 	      results[inst.index(i)] += inst.weight() * inst.valueSparse(i);
 	    }
 	  } else {
 	    if (inst.attributeSparse(i).isNominal()) {
-	      counts[inst.index(i)][0] -= inst.weight();
+              if (counts[inst.index(i)].length > 0) {
+	        counts[inst.index(i)][0] -= inst.weight();
+              }
 	    } else if (inst.attributeSparse(i).isNumeric()) {
 	      sums[inst.index(i)] -= inst.weight();
 	    }
@@ -151,7 +156,10 @@ public class ReplaceMissingValues extends PotentialClassIgnorer
       m_ModesAndMeans = new double[getInputFormat().numAttributes()];
       for (int i = 0; i < getInputFormat().numAttributes(); i++) {
 	if (getInputFormat().attribute(i).isNominal()) {
-	  m_ModesAndMeans[i] = (double)Utils.maxIndex(counts[i]);
+          if (counts[i].length == 0)
+            m_ModesAndMeans[i] = Instance.missingValue();
+          else
+            m_ModesAndMeans[i] = (double)Utils.maxIndex(counts[i]);
 	} else if (getInputFormat().attribute(i).isNumeric()) {
 	  if (Utils.gr(sums[i], 0)) {
 	    m_ModesAndMeans[i] = results[i] / sums[i];
