@@ -41,7 +41,7 @@ import java.io.StreamTokenizer;
  * in the directory of the supplied filestem.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.2 $
+ * @version $Revision: 1.9.2.3 $
  * @see Loader
  */
 public class C45Loader extends AbstractLoader 
@@ -263,7 +263,9 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
       current = getInstance(st);
     }
     try {
-      reset();
+      // close the stream
+      m_dataReader.close();
+      //      reset();
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -304,7 +306,8 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     }
     else{
       try {
-        reset();
+        m_dataReader.close();
+        //        reset();
       } catch (Exception ex) {
         ex.printStackTrace();
       }

@@ -36,7 +36,7 @@ import weka.core.Instances;
  * Reads a source that contains serialized Instances.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.9.2.1 $
+ * @version $Revision: 1.9.2.2 $
  * @see Loader
  */
 public class SerializedInstancesLoader extends AbstractLoader 
@@ -133,6 +133,7 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(in));
     try {
       m_Dataset = (Instances)oi.readObject();
+      oi.close();
     } catch (ClassNotFoundException ex) {
       throw new IOException("Could not deserialize instances from this source.");
     }

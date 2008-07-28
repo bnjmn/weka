@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  * Reads a source that is in arff text format.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.2 $
+ * @version $Revision: 1.9.2.3 $
  * @see Loader
  */
 public class ArffLoader extends AbstractLoader 
@@ -217,6 +217,12 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
 	  setSource(temp);
 	}
     }*/
+
+    // close the stream
+    try {
+      m_sourceReader.close();
+    } catch (Exception ex) {
+    }
     
     return readIn;
   }
@@ -250,7 +256,9 @@ implements FileSourcedConverter, BatchConverter, IncrementalConverter {
     m_structure.delete(0);
     if (current == null) {
       try {
-        reset();
+        // close the stream
+        m_sourceReader.close();
+        //        reset();
       } catch (Exception ex) {
         ex.printStackTrace();
       }
