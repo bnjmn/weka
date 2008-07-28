@@ -49,7 +49,7 @@ import java.util.Vector;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  * @see Loader
  */
 public class LibSVMLoader 
@@ -360,6 +360,13 @@ public class LibSVMLoader
       
       result.add(new Instance(1, data));
     }
+
+    try {
+      // close the stream
+      m_sourceReader.close();
+    } catch (Exception ex) {
+
+    }
     
     return result;
   }
@@ -382,7 +389,7 @@ public class LibSVMLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision: 1.5 $");
   }
 
   /**

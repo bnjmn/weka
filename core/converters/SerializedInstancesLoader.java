@@ -38,7 +38,7 @@ import java.io.ObjectInputStream;
  <!-- globalinfo-end -->
  * 
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  * @see Loader
  */
 public class SerializedInstancesLoader 
@@ -117,6 +117,9 @@ public class SerializedInstancesLoader
     } catch (ClassNotFoundException ex) {
       throw new IOException("Could not deserialize instances from this source.");
     }
+
+    // close the stream
+    oi.close();
   }
 
   /**
@@ -187,7 +190,7 @@ public class SerializedInstancesLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
+    return RevisionUtils.extract("$Revision: 1.15 $");
   }
 
   /**

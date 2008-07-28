@@ -43,7 +43,7 @@ import java.io.StreamTokenizer;
  <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision: 1.16 $
  * @see Loader
  */
 public class C45Loader 
@@ -100,7 +100,8 @@ public class C45Loader
   }
   
   /**
-   * Resets the Loader ready to read a new data set
+   * Resets the Loader ready to read a new data set or the
+   * same data set again.
    * 
    * @throws IOException if something goes wrong
    */
@@ -243,7 +244,9 @@ public class C45Loader
       current = getInstance(st);
     }
     try {
-      reset();
+      // close the stream
+      m_dataReader.close();
+      //      reset();
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -290,7 +293,9 @@ public class C45Loader
     }
     else{
       try {
-        reset();
+        // close the stream
+        m_dataReader.close();
+        //        reset();
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -500,7 +505,7 @@ public class C45Loader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision: 1.16 $");
   }
 
   /**
