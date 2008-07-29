@@ -39,7 +39,7 @@ import java.util.Vector;
  * The maximum variance allowed before an attribute will be deleted (default 99).<p>
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.5.2.1 $
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
 						     OptionHandler {
@@ -119,7 +119,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
 	} else if (toFilter.attribute(i).isNominal()) {
 	  // remove nominal attributes that vary too much
 	  double variancePercent = (double) stats.distinctCount
-	    / (double) stats.totalCount * 100.0;
+	    / (double)(stats.totalCount - stats.missingCount) * 100.0;
 	  if (variancePercent > m_maxVariancePercentage) {
 	      attsToDelete[numToDelete++] = i;
 	  }
