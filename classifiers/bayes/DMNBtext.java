@@ -74,10 +74,10 @@ import weka.core.OptionHandler;
  *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
-
- /* @author Jiang Su (Jiang.Su@unb.ca) 2008
-  * @version $Revision: 1.2 $
-  */
+ * 
+ * @author Jiang Su (Jiang.Su@unb.ca) 2008
+ * @version $Revision: 1.3 $
+ */
 public class DMNBtext extends Classifier
     implements OptionHandler, WeightedInstancesHandler, 
                TechnicalInformationHandler, UpdateableClassifier {
