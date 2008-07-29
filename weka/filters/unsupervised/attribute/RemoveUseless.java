@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RemoveUseless 
   extends Filter 
@@ -162,7 +162,7 @@ public class RemoveUseless
 	} else if (toFilter.attribute(i).isNominal()) {
 	  // remove nominal attributes that vary too much
 	  double variancePercent = (double) stats.distinctCount
-	    / (double) stats.totalCount * 100.0;
+	    / ((double) stats.totalCount - stats.missingCount) * 100.0;
 	  if (variancePercent > m_maxVariancePercentage) {
 	      attsToDelete[numToDelete++] = i;
 	  }
@@ -319,7 +319,7 @@ public class RemoveUseless
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 
   /**
