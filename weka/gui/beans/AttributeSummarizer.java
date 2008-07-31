@@ -47,7 +47,7 @@ import java.beans.beancontext.*;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.7.2.1 $
  */
 public class AttributeSummarizer extends DataVisualizer {
 
@@ -218,7 +218,11 @@ public class AttributeSummarizer extends DataVisualizer {
 
       AttributeVisualizationPanel ap = new AttributeVisualizationPanel();
       ap.setInstances(m_visualizeDataSet);
-      ap.setColoringIndex(m_coloringIndex);
+      if (m_coloringIndex < 0 && m_visualizeDataSet.classIndex() >= 0) {
+        ap.setColoringIndex(m_visualizeDataSet.classIndex());
+      } else {
+        ap.setColoringIndex(m_coloringIndex);
+      }
       temp.add(ap, BorderLayout.CENTER);
       ap.setAttribute(i);
       hp.add(temp);
