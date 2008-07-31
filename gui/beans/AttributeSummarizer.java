@@ -42,7 +42,7 @@ import javax.swing.JScrollPane;
  * a data set.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class AttributeSummarizer
   extends DataVisualizer {
@@ -221,7 +221,11 @@ public class AttributeSummarizer
 
       AttributeVisualizationPanel ap = new AttributeVisualizationPanel();
       ap.setInstances(m_visualizeDataSet);
-      ap.setColoringIndex(m_coloringIndex);
+      if (m_coloringIndex < 0 && m_visualizeDataSet.classIndex() >= 0) {
+        ap.setColoringIndex(m_visualizeDataSet.classIndex());
+      } else {
+        ap.setColoringIndex(m_coloringIndex);
+      }
       temp.add(ap, BorderLayout.CENTER);
       ap.setAttribute(i);
       hp.add(temp);
