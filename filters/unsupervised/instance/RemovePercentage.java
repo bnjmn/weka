@@ -58,7 +58,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (eibe@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision: 1.9 $ 
 */
 public class RemovePercentage 
   extends Filter
@@ -68,7 +68,7 @@ public class RemovePercentage
   static final long serialVersionUID = 2150341191158533133L;
   
   /** Percentage of instances to select. */
-  private int m_Percentage = 50;
+  private double m_Percentage = 50;
 
   /** Indicates if inverse of selection is to be output. */
   private boolean m_Inverse = false;
@@ -116,9 +116,9 @@ public class RemovePercentage
 
     String percent = Utils.getOption('P', options);
     if (percent.length() != 0) {
-      setPercentage(Integer.parseInt(percent));
+      setPercentage(Double.parseDouble(percent));
     } else {
-      setPercentage(50);
+      setPercentage(50.0);
     }
     setInvertSelection(Utils.getFlag('V', options));
 
@@ -175,7 +175,7 @@ public class RemovePercentage
    * 
    * @return the percentage.
    */
-  public int getPercentage() {
+  public double getPercentage() {
 
     return m_Percentage;
   }
@@ -184,9 +184,9 @@ public class RemovePercentage
    * Sets the percentage of intances to select.
    *
    * @param percent the percentage
-   * @throws IllegalArgumentException if percenatge out of range
+   * @throws IllegalArgumentException if percentage out of range
    */
-  public void setPercentage(int percent) {
+  public void setPercentage(double percent) {
 
     if (percent < 0 || percent > 100) {
       throw new IllegalArgumentException("Percentage must be between 0 and 100.");
@@ -308,8 +308,8 @@ public class RemovePercentage
 
     // Push instances for output into output queue
     Instances toFilter = getInputFormat();
-    int cutOff = toFilter.numInstances() * m_Percentage / 100;
-
+    int cutOff = (int) Math.round(toFilter.numInstances() * m_Percentage / 100);
+    
     if (m_Inverse) {
       for (int i = 0; i < cutOff; i++) {
 	push(toFilter.instance(i));
@@ -333,7 +333,7 @@ public class RemovePercentage
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision: 1.9 $");
   }
 
   /**
