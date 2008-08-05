@@ -102,7 +102,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.71 $
+ * @version $Revision: 1.72 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -980,7 +980,12 @@ public class PreprocessPanel
     } catch (Exception ex) {
     }
 
-    PropertyDialog pd = new PropertyDialog(convEd, 100, 100);
+    PropertyDialog pd;
+    if (PropertyDialog.getParentDialog(this) != null)
+      pd = new PropertyDialog(PropertyDialog.getParentDialog(this), convEd, 100, 100);
+    else
+      pd = new PropertyDialog(PropertyDialog.getParentFrame(this), convEd, 100, 100);
+    pd.setVisible(true);
   }
 
   /**

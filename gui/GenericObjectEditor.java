@@ -36,6 +36,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -105,7 +106,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.58 $
+ * @version $Revision: 1.59 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -1731,7 +1732,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       else	  
 	ce.setValue(initial);
       
-      PropertyDialog pd = new PropertyDialog(ce, 100, 100);
+      PropertyDialog pd = new PropertyDialog((Frame) null, ce, 100, 100);
       pd.addWindowListener(new WindowAdapter() {
 	  public void windowClosing(WindowEvent e) {
 	    PropertyEditor pe = ((PropertyDialog)e.getSource()).getEditor();
@@ -1744,6 +1745,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    System.exit(0);
 	  }
 	});
+      pd.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
