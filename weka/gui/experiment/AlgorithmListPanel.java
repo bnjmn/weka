@@ -73,7 +73,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $
+ * @version $Revision: 1.22 $
  */
 public class AlgorithmListPanel
   extends JPanel
@@ -473,7 +473,15 @@ public class AlgorithmListPanel
       if (m_PD == null) {
 	int x = getLocationOnScreen().x;
 	int y = getLocationOnScreen().y;
-	m_PD = new PropertyDialog(m_ClassifierEditor, x, y);
+	if (PropertyDialog.getParentDialog(this) != null)
+	  m_PD = new PropertyDialog(
+	      PropertyDialog.getParentDialog(this), 
+	      m_ClassifierEditor, x, y);
+	else
+	  m_PD = new PropertyDialog(
+	      PropertyDialog.getParentFrame(this), 
+	      m_ClassifierEditor, x, y);
+	m_PD.setVisible(true);
       } else {
 	m_PD.setVisible(true);
       }
@@ -484,7 +492,15 @@ public class AlgorithmListPanel
          if (m_PD == null) {
             int x = getLocationOnScreen().x;
             int y = getLocationOnScreen().y;
-            m_PD = new PropertyDialog(m_ClassifierEditor, x, y);
+            if (PropertyDialog.getParentDialog(this) != null)
+              m_PD = new PropertyDialog(
+        	  PropertyDialog.getParentDialog(this), 
+        	  m_ClassifierEditor, x, y);
+            else
+              m_PD = new PropertyDialog(
+        	  PropertyDialog.getParentFrame(this), 
+        	  m_ClassifierEditor, x, y);
+            m_PD.setVisible(true);
          } else {
             m_PD.setVisible(true);
          }

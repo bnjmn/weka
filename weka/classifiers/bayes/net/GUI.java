@@ -105,7 +105,7 @@ import javax.swing.table.AbstractTableModel;
  * Bayesion network inference.
  * 
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class GUI extends JPanel implements LayoutCompleteEventListener {
 
@@ -719,7 +719,11 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 							ce.setClassType(weka.classifiers.Classifier.class);
 							ce.setValue(m_BayesNet);
 
-							PropertyDialog pd = new PropertyDialog(ce, 100, 100);
+							PropertyDialog pd;
+							if (PropertyDialog.getParentDialog(GUI.this) != null)
+								pd = new PropertyDialog(PropertyDialog.getParentDialog(GUI.this), ce, 100, 100);
+							else
+								pd = new PropertyDialog(PropertyDialog.getParentFrame(GUI.this), ce, 100, 100);
 							pd.addWindowListener(new WindowAdapter() {
 								public void windowClosing(WindowEvent e) {
 									PropertyEditor pe = ((PropertyDialog) e.getSource()).getEditor();
@@ -737,6 +741,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 									System.exit(0);
 								}
 							});
+							pd.setVisible(true);
 						} catch (Exception ex) {
 							ex.printStackTrace();
 							System.err.println(ex.getMessage());
