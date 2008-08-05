@@ -50,6 +50,7 @@ import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.VisualizePanelEvent;
 import weka.gui.visualize.VisualizePanelListener;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -98,7 +99,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.28.2.2 $
+ * @version $Revision: 1.28.2.3 $
  */
 public class UserClassifier 
   extends Classifier 
@@ -278,9 +279,10 @@ public class UserClassifier
         if (classifierAtNode != null) {
           m_classifiers.setValue(classifierAtNode);
         }
-	m_propertyDialog = new PropertyDialog(m_classifiers, 
+	m_propertyDialog = new PropertyDialog((Frame) null, m_classifiers, 
 					      m_mainWin.getLocationOnScreen().x,
 					      m_mainWin.getLocationOnScreen().y);
+	m_propertyDialog.setVisible(true);
 	
 	//note property dialog may change all the time
 	//but the generic editor which has the listeners does not
@@ -1490,7 +1492,7 @@ public class UserClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.28.2.2 $");
+      return RevisionUtils.extract("$Revision: 1.28.2.3 $");
     }
   }
   
@@ -1500,6 +1502,6 @@ public class UserClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.28.2.3 $");
   }
 }

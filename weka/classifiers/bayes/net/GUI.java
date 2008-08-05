@@ -105,7 +105,7 @@ import javax.swing.table.AbstractTableModel;
  * Bayesion network inference.
  * 
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision: 1.1.2.3 $
  */
 public class GUI extends JPanel implements LayoutCompleteEventListener {
 
@@ -719,7 +719,11 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 							ce.setClassType(weka.classifiers.Classifier.class);
 							ce.setValue(m_BayesNet);
 
-							PropertyDialog pd = new PropertyDialog(ce, 100, 100);
+							PropertyDialog pd;
+							if (PropertyDialog.getParentDialog(GUI.this) != null)
+								pd = new PropertyDialog(PropertyDialog.getParentDialog(GUI.this), ce, 100, 100);
+							else
+								pd = new PropertyDialog(PropertyDialog.getParentFrame(GUI.this), ce, 100, 100);
 							pd.addWindowListener(new WindowAdapter() {
 								public void windowClosing(WindowEvent e) {
 									PropertyEditor pe = ((PropertyDialog) e.getSource()).getEditor();
@@ -737,6 +741,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 									System.exit(0);
 								}
 							});
+							pd.setVisible(true);
 						} catch (Exception ex) {
 							ex.printStackTrace();
 							System.err.println(ex.getMessage());
@@ -2960,6 +2965,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	/* apply graph layout algorithm to Bayesian network 
 	 */
 	void layoutGraph() {
+		if (m_BayesNet.getNrOfNodes() == 0) {
+			return;
+		}
 		try {
 			FastVector m_nodes = new FastVector();
 			FastVector m_edges = new FastVector();
@@ -2980,7 +2988,10 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	 */
 	void updateStatus() {
 		a_undo.setEnabled(m_BayesNet.canUndo());
-		a_redo.setEnabled(m_BayesNet.canRedo());		
+		a_redo.setEnabled(m_BayesNet.canRedo());
+
+		a_datagenerator.setEnabled(m_BayesNet.getNrOfNodes() > 0);
+
 		if (!m_bViewMargins && !m_bViewCliques) {
 			repaint();
 			return;

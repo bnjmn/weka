@@ -23,7 +23,6 @@
 
 package weka.gui;
 
-import weka.core.ClassDiscovery;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 
@@ -45,17 +44,17 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
 
 import javax.swing.BorderFactory;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
 
 /** 
  * Support for drawing a property value in a component.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.13.2.1 $
  */
 public class PropertyPanel 
   extends JPanel {
@@ -200,7 +199,11 @@ public class PropertyPanel
       if (m_PD == null) {
 	int x = getLocationOnScreen().x;
 	int y = getLocationOnScreen().y;
-	m_PD = new PropertyDialog(m_Editor, x, y);
+	if (PropertyDialog.getParentDialog(this) != null)
+	  m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this), m_Editor, x, y);
+	else
+	  m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this), m_Editor, x, y);
+	m_PD.setVisible(true);
       } else {
 	m_PD.setVisible(true);
       }

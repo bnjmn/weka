@@ -29,6 +29,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Insets;
@@ -65,7 +66,7 @@ import javax.swing.event.ListSelectionListener;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision: 1.18.2.1 $
  */
 public class GenericArrayEditor
   extends JPanel
@@ -138,7 +139,15 @@ public class GenericArrayEditor
           if (m_PD == null) {
             int x = getLocationOnScreen().x;
             int y = getLocationOnScreen().y;
-            m_PD = new PropertyDialog(m_Editor, x, y);
+            if (PropertyDialog.getParentDialog(GenericArrayEditor.this) != null)
+              m_PD = new PropertyDialog(
+        	  PropertyDialog.getParentDialog(GenericArrayEditor.this), 
+        	  m_Editor, x, y);
+            else
+              m_PD = new PropertyDialog(
+        	  PropertyDialog.getParentFrame(GenericArrayEditor.this), 
+        	  m_Editor, x, y);
+            m_PD.setVisible(true);
           } 
           else {
             m_PD.setVisible(true);
@@ -595,7 +604,7 @@ public class GenericArrayEditor
 	"There",
 	"Bob"
 	};*/
-      PropertyDialog pd = new PropertyDialog(ce, 100, 100);
+      PropertyDialog pd = new PropertyDialog((Frame) null, ce, 100, 100);
       pd.setSize(200,200);
       pd.addWindowListener(new WindowAdapter() {
 	private static final long serialVersionUID = -3124434678426673334L;
@@ -604,6 +613,7 @@ public class GenericArrayEditor
 	}
       });
       ce.setValue(initial);
+      pd.setVisible(true);
       //ce.validate();
     } catch (Exception ex) {
       ex.printStackTrace();

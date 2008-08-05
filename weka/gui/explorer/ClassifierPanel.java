@@ -104,6 +104,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -133,7 +134,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.107.2.5 $
+ * @version $Revision: 1.107.2.6 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -442,7 +443,14 @@ public class ClassifierPanel
       public void actionPerformed(ActionEvent e) {
 	m_SetCostsBut.setEnabled(false);
 	if (m_SetCostsFrame == null) {
-	  m_SetCostsFrame = new PropertyDialog(m_CostMatrixEditor, 100, 100);
+	  if (PropertyDialog.getParentDialog(ClassifierPanel.this) != null)
+	    m_SetCostsFrame = new PropertyDialog(
+		PropertyDialog.getParentDialog(ClassifierPanel.this), 
+		m_CostMatrixEditor, 100, 100);
+	  else
+	    m_SetCostsFrame = new PropertyDialog(
+		PropertyDialog.getParentFrame(ClassifierPanel.this), 
+		m_CostMatrixEditor, 100, 100);
 	  m_SetCostsFrame.setTitle("Cost Matrix Editor");
 	  //	pd.setSize(250,150);
 	  m_SetCostsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -454,6 +462,7 @@ public class ClassifierPanel
 	      }
 	    }
 	  });
+	  m_SetCostsFrame.setVisible(true);
 	}
 	
 	// do we need to change the size of the matrix?
@@ -552,25 +561,25 @@ public class ClassifierPanel
 	all.add(moreOptionsPanel, BorderLayout.CENTER);
 	all.add(okP, BorderLayout.SOUTH);
 	
-	final javax.swing.JFrame jf = 
-	  new javax.swing.JFrame("Classifier evaluation options");
-	jf.getContentPane().setLayout(new BorderLayout());
-	jf.getContentPane().add(all, BorderLayout.CENTER);
-	jf.addWindowListener(new java.awt.event.WindowAdapter() {
+	final JDialog jd = 
+	  new JDialog(PropertyDialog.getParentFrame(ClassifierPanel.this), "Classifier evaluation options");
+	jd.getContentPane().setLayout(new BorderLayout());
+	jd.getContentPane().add(all, BorderLayout.CENTER);
+	jd.addWindowListener(new java.awt.event.WindowAdapter() {
 	  public void windowClosing(java.awt.event.WindowEvent w) {
-	    jf.dispose();
+	    jd.dispose();
 	    m_MoreOptions.setEnabled(true);
 	  }
 	});
 	oK.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent a) {
 	    m_MoreOptions.setEnabled(true);
-	    jf.dispose();
+	    jd.dispose();
 	  }
 	});
-	jf.pack();
-	jf.setLocation(m_MoreOptions.getLocationOnScreen());
-	jf.setVisible(true);
+	jd.pack();
+	jd.setLocation(m_MoreOptions.getLocationOnScreen());
+	jd.setVisible(true);
       }
     });
 
