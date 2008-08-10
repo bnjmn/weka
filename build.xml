@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.45 $
+   $Revision: 1.46 $
   ===========================================================================
 -->
 
@@ -262,7 +262,7 @@
    description="Create a jar file containing classes for remote experiments in ${path_modifier}/dist">
      <jar jarfile="${path_modifier}${dist}/remoteEngine.jar"
       basedir="${path_modifier}${build}/classes"
-      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class"/>
+      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core/Utils.class"/>
      <copy todir="${path_modifier}${dist}" >
        <fileset dir="${path_modifier}weka/experiment">
           <include name="remote.policy"/>
