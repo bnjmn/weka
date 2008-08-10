@@ -26,6 +26,7 @@ package weka.experiment;
 import weka.core.Queue;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.net.InetAddress;
 import java.net.URL;
@@ -41,7 +42,7 @@ import java.util.Hashtable;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class RemoteEngine
   extends UnicastRemoteObject
@@ -64,6 +65,9 @@ public class RemoteEngine
 
   /** Is there a task running */
   private boolean m_TaskRunning = false;
+  
+  /** Clean up interval (in ms) */
+  protected static long CLEANUPTIMEOUT = 3600000;
 
   /**
    * Constructor
@@ -82,8 +86,8 @@ public class RemoteEngine
 	public void run() {
 	  while (true) {
 	    try {
-	      // sleep for an hour
-	      Thread.sleep(3600000);
+	      // sleep for a while
+	      Thread.sleep(CLEANUPTIMEOUT);
 	    } catch (InterruptedException ie) {}
 
 	    if (m_TaskStatus.size() > 0) {
@@ -95,6 +99,7 @@ public class RemoteEngine
 	}
       };
     cleanUpThread.setPriority(Thread.MIN_PRIORITY);
+    cleanUpThread.setDaemon(true);
     cleanUpThread.start();
   }
   
@@ -160,11 +165,11 @@ public class RemoteEngine
     m_TaskIdQueue.push(taskId);
     newTask.setStatusMessage("RemoteEngine ("
 			     +m_HostName
-			     +") : task queued at postion: "
+			     +") : task " + taskId + " queued at postion: "
 			     +m_TaskQueue.size());
     // add task status to HashTable
     m_TaskStatus.put(taskId, newTask);
-    System.err.println("Task id : " + taskId + "Queued.");
+    System.err.println("Task id : " + taskId + " Queued.");
     if (m_TaskRunning == false) {
       startTask();
     }
@@ -187,7 +192,7 @@ public class RemoteEngine
 	    tsi.setExecutionStatus(TaskStatusInfo.PROCESSING);
 	    tsi.setStatusMessage("RemoteEngine ("
 				 +m_HostName
-				 +") : task running...");
+				 +") : task " + taskId + " running...");
 	    try {
 	      System.err.println("Launching task id : "
 				 + taskId + "...");
@@ -202,8 +207,8 @@ public class RemoteEngine
 	      tsi.setExecutionStatus(TaskStatusInfo.FAILED);
 	      tsi.setStatusMessage("RemoteEngine ("
 				   +m_HostName
-				   +") : task failed.");
-	      System.err.println("Task id " + taskId + "Failed!");
+				   +") : task " + taskId + " failed.");
+	      System.err.println("Task id " + taskId + " Failed!");
 	    } finally {
 	      if (m_TaskStatus.size() == 0) {
 		purgeClasses();
@@ -238,7 +243,7 @@ public class RemoteEngine
   
   /**
    * Checks the hash table for failed/finished tasks. Any that have been
-   * around for an hour or more are removed. Clients are expected to check
+   * around for an @seeCLEANUPTIMEOUT or more are removed. Clients are expected to check
    * on the status of their remote tasks. Checking on the status of a
    * finished/failed task will remove it from the hash table, therefore
    * any failed/finished tasks left lying around for more than an hour
@@ -250,19 +255,18 @@ public class RemoteEngine
     long currentTime = System.currentTimeMillis();
     System.err.println("RemoteEngine purge. Current time : " + currentTime);
     while (keys.hasMoreElements()) {
-      String tk = (String)keys.nextElement();
-      System.err.print("Examining task id : " + tk + "...");
-      String timeString = tk.substring(0, tk.indexOf(':'));
+      String taskId = (String)keys.nextElement();
+      System.err.print("Examining task id : " + taskId + "... ");
+      String timeString = taskId.substring(0, taskId.indexOf(':'));
       long ts = Long.valueOf(timeString).longValue();
-      if (currentTime - ts > 3600000) {
-	TaskStatusInfo tsi = null;
-	tsi = (TaskStatusInfo)m_TaskStatus.get(tsi);
+      if (currentTime - ts > CLEANUPTIMEOUT) {
+	TaskStatusInfo tsi = (TaskStatusInfo)m_TaskStatus.get(taskId);
 	if ((tsi != null) 
 	    && (tsi.getExecutionStatus() == TaskStatusInfo.FINISHED ||
-	    tsi.getExecutionStatus() == TaskStatusInfo.FAILED)) {
+                tsi.getExecutionStatus() == TaskStatusInfo.FAILED)) {
 	  System.err.println("\nTask id : " 
-			     + tk + " has gone stale. Removing.");
-	  m_TaskStatus.remove(tk);
+			     + taskId + " has gone stale. Removing.");
+	  m_TaskStatus.remove(taskId);
 	  tsi.setTaskResult(null);
 	  tsi = null;
 	}
@@ -281,7 +285,7 @@ public class RemoteEngine
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 
   /**
@@ -295,6 +299,8 @@ public class RemoteEngine
     if (System.getSecurityManager() == null) {
       System.setSecurityManager(new RMISecurityManager());
     }
+    
+    int port = 1099;
     InetAddress localhost = null;
     try {
       localhost = InetAddress.getLocalHost();
@@ -304,28 +310,43 @@ public class RemoteEngine
     }
     String name;
     if (localhost != null) {
-      name = "//"+localhost.getHostName()+"/RemoteEngine";
+      name = localhost.getHostName();
     } else {
-      name = "//localhost/RemoteEngine";
+      name = "localhost";
     }
+    
+    // get optional port
+    try {
+      String portOption = Utils.getOption("p", args);
+      if (!portOption.equals("")) 
+        port = Integer.parseInt(portOption);
+    } catch (Exception ex) {
+      System.err.println("Usage : -p <port>");
+    }
+
+    if (port != 1099) {
+      name = name + ":" + port;
+    }
+    name = "//"+name+"/RemoteEngine";
     
     try {
       Compute engine = new RemoteEngine(name);
-      Naming.rebind(name, engine);
-      System.out.println("RemoteEngine bound in RMI registry");
+      
+      try {      
+        Naming.rebind(name, engine);
+        System.out.println("RemoteEngine bound in RMI registry");
+      } catch (RemoteException ex) {
+        // try to bootstrap a new registry
+        System.err.println("Attempting to start RMI registry on port " + port + "...");
+        java.rmi.registry.LocateRegistry.createRegistry(port);
+        Naming.bind(name, engine);
+        System.out.println("RemoteEngine bound in RMI registry");
+      }
+      
     } catch (Exception e) {
       System.err.println("RemoteEngine exception: " + 
 			 e.getMessage());
-      // try to bootstrap a new registry
-      try {
-	System.err.println("Attempting to start rmi registry...");
-	java.rmi.registry.LocateRegistry.createRegistry(1099);
-	Compute engine = new RemoteEngine(name);
-	Naming.rebind(name, engine);
-	System.out.println("RemoteEngine bound in RMI registry");
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
+      e.printStackTrace();
     }
   }
 }
