@@ -29,8 +29,10 @@ import weka.core.MultiInstanceCapabilitiesHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -57,6 +59,7 @@ import java.util.Iterator;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -71,32 +74,54 @@ import javax.swing.SwingConstants;
  * object may be edited.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision: 1.17.2.1 $
  */
 public class PropertySheetPanel extends JPanel
   implements PropertyChangeListener {
 
-  /** for serialization */
-  static final long serialVersionUID = -557854258929870536L;
-  
+  /** for serialization. */
+  private static final long serialVersionUID = -8939835593429918345L;
+
   /**
-   * A specialized frame for displaying the capabilities
+   * A specialized dialog for displaying the capabilities.
    */
-  protected class CapabilitiesHelpFrame
-    extends JFrame
+  protected class CapabilitiesHelpDialog
+    extends JDialog
     implements PropertyChangeListener {
     
-    /** for serialization */
-    private static final long serialVersionUID = 3591124039176891020L;
+    /** for serialization. */
+    private static final long serialVersionUID = -1404770987103289858L;
     
-    /** the frame itself */
-    private CapabilitiesHelpFrame m_Self;
+    /** the dialog itself. */
+    private CapabilitiesHelpDialog m_Self;
     
     /**
-     * default constructor
+     * default constructor.
+     * 
+     * @param owner	the owning frame
      */
-    public CapabilitiesHelpFrame() {
-      super("Information about Capabilities");
+    public CapabilitiesHelpDialog(Frame owner) {
+      super(owner);
+      
+      initialize();
+    }
+    
+    /**
+     * default constructor.
+     * 
+     * @param owner	the owning dialog
+     */
+    public CapabilitiesHelpDialog(Dialog owner) {
+      super(owner);
+      
+      initialize();
+    }
+
+    /**
+     * Initializes the dialog.
+     */
+    protected void initialize() {
+      setTitle("Information about Capabilities");
 
       m_Self = this;
       
@@ -109,7 +134,7 @@ public class PropertySheetPanel extends JPanel
       addWindowListener(new WindowAdapter() {
 	public void windowClosing(WindowEvent e) {
 	  m_Self.dispose();
-	  if (m_CapabilitiesFrame == m_Self) {
+	  if (m_CapabilitiesDialog == m_Self) {
 	    m_CapabilitiesBut.setEnabled(true);
 	  }
 	}
@@ -120,7 +145,7 @@ public class PropertySheetPanel extends JPanel
     }
 
     /**
-     * returns a comma-separated list of all the capabilities
+     * returns a comma-separated list of all the capabilities.
      * 
      * @param c		the capabilities to get a string representation from
      * @return		the string describing the capabilities
@@ -187,7 +212,7 @@ public class PropertySheetPanel extends JPanel
     }  
 
     /**
-     * updates the content of the capabilities help frame
+     * updates the content of the capabilities help dialog.
      */
     protected void updateText() {
       StringBuffer helpText = new StringBuffer();
@@ -218,53 +243,53 @@ public class PropertySheetPanel extends JPanel
     }
   }
   
-  /** The target object being edited */
+  /** The target object being edited. */
   private Object m_Target;
 
-  /** Holds properties of the target */
+  /** Holds properties of the target. */
   private PropertyDescriptor m_Properties[];
 
-  /** Holds the methods of the target */
+  /** Holds the methods of the target. */
   private MethodDescriptor m_Methods[];
 
-  /** Holds property editors of the object */
+  /** Holds property editors of the object. */
   private PropertyEditor m_Editors[];
 
-  /** Holds current object values for each property */
+  /** Holds current object values for each property. */
   private Object m_Values[];
 
-  /** Stores GUI components containing each editing component */
+  /** Stores GUI components containing each editing component. */
   private JComponent m_Views[];
 
-  /** The labels for each property */
+  /** The labels for each property. */
   private JLabel m_Labels[];
 
-  /** The tool tip text for each property */
+  /** The tool tip text for each property. */
   private String m_TipTexts[];
 
-  /** StringBuffer containing help text for the object being edited */
+  /** StringBuffer containing help text for the object being edited. */
   private StringBuffer m_HelpText;
 
-  /** Help frame */
-  private JFrame m_HelpFrame;
+  /** Help dialog. */
+  private JDialog m_HelpDialog;
 
-  /** Capabilities Help frame */
-  private CapabilitiesHelpFrame m_CapabilitiesFrame;
+  /** Capabilities Help dialog. */
+  private CapabilitiesHelpDialog m_CapabilitiesDialog;
 
-  /** Button to pop up the full help text in a separate frame */
+  /** Button to pop up the full help text in a separate dialog. */
   private JButton m_HelpBut;
 
-  /** Button to pop up the capabilities in a separate frame */
+  /** Button to pop up the capabilities in a separate dialog. */
   private JButton m_CapabilitiesBut;
   
-  /** the TextArea of the Capabilities help frame */
+  /** the TextArea of the Capabilities help dialog. */
   private JTextArea m_CapabilitiesText;
 
-  /** A count of the number of properties we have an editor for */
+  /** A count of the number of properties we have an editor for. */
   private int m_NumEditable = 0;
 
   /** The panel holding global info and help, if provided by
-      the object being editied */
+      the object being editied. */
   private JPanel m_aboutPanel;
 
   /**
@@ -287,7 +312,7 @@ public class PropertySheetPanel extends JPanel
     return m_aboutPanel;
   }
 
-  /** A support object for handling property change listeners */ 
+  /** A support object for handling property change listeners. */ 
   private PropertyChangeSupport support = new PropertyChangeSupport(this);
 
   /**
@@ -387,7 +412,7 @@ public class PropertySheetPanel extends JPanel
 	      
 	      m_CapabilitiesBut.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent a) {
-		  openCapabilitiesHelpFrame();
+		  openCapabilitiesHelpDialog();
 		  m_CapabilitiesBut.setEnabled(false);
 		}
 	      });
@@ -623,7 +648,7 @@ public class PropertySheetPanel extends JPanel
   }
 
   /**
-   * opens the help frame
+   * opens the help dialog.
    */
   protected void openHelpFrame() {
 
@@ -635,37 +660,45 @@ public class PropertySheetPanel extends JPanel
     ta.setEditable(false);
     ta.setText(m_HelpText.toString());
     ta.setCaretPosition(0);
-    final JFrame jf = new JFrame("Information");
-    jf.addWindowListener(new WindowAdapter() {
+    JDialog jdtmp;
+    if (PropertyDialog.getParentDialog(this) != null)
+      jdtmp = new JDialog(PropertyDialog.getParentDialog(this), "Information");
+    else
+      jdtmp = new JDialog(PropertyDialog.getParentFrame(this), "Information");
+    final JDialog jd = jdtmp;
+    jd.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
-        jf.dispose();
-        if (m_HelpFrame == jf) {
+        jd.dispose();
+        if (m_HelpDialog == jd) {
           m_HelpBut.setEnabled(true);
         }
       }
     });
-    jf.getContentPane().setLayout(new BorderLayout());
-    jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
-    jf.pack();
-    jf.setSize(400, 350);
-    jf.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
+    jd.getContentPane().setLayout(new BorderLayout());
+    jd.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
+    jd.pack();
+    jd.setSize(400, 350);
+    jd.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
                    + m_aboutPanel.getTopLevelAncestor().getSize().width,
                    m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().y);
-    jf.setVisible(true);
-    m_HelpFrame = jf;
+    jd.setVisible(true);
+    m_HelpDialog = jd;
   }
   
   /**
-   * opens the help frame for the capabilities
+   * opens the help dialog for the capabilities.
    */
-  protected void openCapabilitiesHelpFrame() {
-    m_CapabilitiesFrame = new CapabilitiesHelpFrame();
-    m_CapabilitiesFrame.setSize(400, 350);
-    m_CapabilitiesFrame.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
+  protected void openCapabilitiesHelpDialog() {
+    if (PropertyDialog.getParentDialog(this) != null)
+      m_CapabilitiesDialog = new CapabilitiesHelpDialog(PropertyDialog.getParentDialog(this));
+    else
+      m_CapabilitiesDialog = new CapabilitiesHelpDialog(PropertyDialog.getParentFrame(this));
+    m_CapabilitiesDialog.setSize(400, 350);
+    m_CapabilitiesDialog.setLocation(m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().x 
                    + m_aboutPanel.getTopLevelAncestor().getSize().width,
                    m_aboutPanel.getTopLevelAncestor().getLocationOnScreen().y);
-    m_CapabilitiesFrame.setVisible(true);
-    addPropertyChangeListener(m_CapabilitiesFrame);
+    m_CapabilitiesDialog.setVisible(true);
+    addPropertyChangeListener(m_CapabilitiesDialog);
   }
 
   /**
