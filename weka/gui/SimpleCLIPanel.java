@@ -69,22 +69,22 @@ import javax.swing.JTextField;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class SimpleCLIPanel
   extends JPanel
   implements ActionListener {
   
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -7377739469759943231L;
   
-  /** The filename of the properties file */
+  /** The filename of the properties file. */
   protected static String FILENAME = "SimpleCLI.props";
   
-  /** The default location of the properties file */
+  /** The default location of the properties file. */
   protected static String PROPERTY_FILE = "weka/gui/" + FILENAME;
   
-  /** Contains the SimpleCLI properties */
+  /** Contains the SimpleCLI properties. */
   protected static Properties PROPERTIES;
 
   static {
@@ -112,52 +112,52 @@ public class SimpleCLIPanel
     }
   }
   
-  /** The output area canvas added to the frame */
+  /** The output area canvas added to the frame. */
   protected JTextArea m_OutputArea = new JTextArea();
 
-  /** The command input area */
+  /** The command input area. */
   protected JTextField m_Input = new JTextField();
 
-  /** The history of commands entered interactively */
+  /** The history of commands entered interactively. */
   protected Vector m_CommandHistory = new Vector();
 
-  /** The current position in the command history */
+  /** The current position in the command history. */
   protected int m_HistoryPos = 0;
 
-  /** The new output stream for System.out */
+  /** The new output stream for System.out. */
   protected PipedOutputStream m_POO = new PipedOutputStream();
 
-  /** The new output stream for System.err */
+  /** The new output stream for System.err. */
   protected PipedOutputStream m_POE = new PipedOutputStream();
 
-  /** The thread that sends output from m_POO to the output box */
+  /** The thread that sends output from m_POO to the output box. */
   protected Thread m_OutRedirector;
 
-  /** The thread that sends output from m_POE to the output box */
+  /** The thread that sends output from m_POE to the output box. */
   protected Thread m_ErrRedirector;
 
-  /** The thread currently running a class main method */
+  /** The thread currently running a class main method. */
   protected Thread m_RunThread;
 
-  /** The commandline completion */
+  /** The commandline completion. */
   protected CommandlineCompletion m_Completion;
   
   /**
-   * A class that sends all lines from a reader to a TextArea component
+   * A class that sends all lines from a reader to a TextArea component.
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   class ReaderToTextArea extends Thread {
 
-    /** The reader being monitored */
+    /** The reader being monitored. */
     protected LineNumberReader m_Input;
 
-    /** The output text component */
+    /** The output text component. */
     protected JTextArea m_Output;
     
     /**
-     * Sets up the ReaderToTextArea
+     * Sets up the ReaderToTextArea.
      *
      * @param input the Reader to monitor
      * @param output the TextArea to send output to
@@ -190,17 +190,17 @@ public class SimpleCLIPanel
 
   /**
    * A class that handles running the main method of the class
-   * in a separate thread
+   * in a separate thread.
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   class ClassRunner extends Thread {
 
-    /** Stores the main method to call */
+    /** Stores the main method to call. */
     protected Method m_MainMethod;
 
-    /** Stores the command line arguments to pass to the main method */
+    /** Stores the command line arguments to pass to the main method. */
     String[] m_CommandArgs;
     
     /**
@@ -279,24 +279,24 @@ public class SimpleCLIPanel
   }
 
   /**
-   * A class for commandline completion of classnames
+   * A class for commandline completion of classnames.
    * 
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.5 $
+   * @version $Revision: 1.6 $
    */
   public static class CommandlineCompletion {
     
-    /** all the available packages */
+    /** all the available packages. */
     protected static Vector<String> m_Packages;
 
-    /** a trie for storing the packages */
+    /** a trie for storing the packages. */
     protected static Trie m_Trie;
     
-    /** debug mode on/off */
+    /** debug mode on/off. */
     protected boolean m_Debug = false;
     
     /**
-     * default constructor
+     * default constructor.
      */
     public CommandlineCompletion() {
       super();
@@ -332,7 +332,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * returns whether debug mode is on
+     * returns whether debug mode is on.
      * 
      * @return		true if debug is on
      */
@@ -341,7 +341,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * sets debug mode on/off
+     * sets debug mode on/off.
      * 
      * @param value	if true then debug mode is on
      */
@@ -362,7 +362,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * returns the packages part of the partial classname
+     * returns the packages part of the partial classname.
      * 
      * @param partial	the partial classname
      * @return		the package part of the partial classname
@@ -402,7 +402,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * returns the classname part of the partial classname
+     * returns the classname part of the partial classname.
      * 
      * @param partial	the partial classname
      * @return		the class part of the classname
@@ -421,7 +421,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * returns all the file/dir matches with the partial search string
+     * returns all the file/dir matches with the partial search string.
      * 
      * @param partial	the partial search string
      * @return		all the matches
@@ -443,6 +443,10 @@ public class SimpleCLIPanel
       caseSensitive = (File.separatorChar != '\\');
       if (m_Debug)
 	System.out.println("case-sensitive=" + caseSensitive);
+      
+      // is "~" used for home directory? -> replace with actual home directory
+      if (partial.startsWith("~"))
+	partial = System.getProperty("user.home") + partial.substring(1);
       
       // determine dir and possible prefix
       file   = new File(partial);
@@ -470,28 +474,33 @@ public class SimpleCLIPanel
       // list all files in dir
       if (dir != null) {
 	files = dir.listFiles();
-	for (i = 0; i < files.length; i++) {
-	  name = files[i].getName();
-	  
-	  // does the name match?
-	  if ((prefix != null) && caseSensitive)
-	    match = name.startsWith(prefix);
-	  else if ((prefix != null) && !caseSensitive)
-	    match = name.toLowerCase().startsWith(prefix.toLowerCase());
-	  else
-	    match = true;
+	if (files != null) {
+	  for (i = 0; i < files.length; i++) {
+	    name = files[i].getName();
 
-	  if (match) {
-	    if (prefix != null) {
-	      result.add(partial.substring(0, partial.length() - prefix.length()) + name);
-	    }
-	    else {
-	      if (partial.endsWith("\\") || partial.endsWith("/"))
-		result.add(partial + name);
-	      else
-		result.add(partial + File.separator + name);
+	    // does the name match?
+	    if ((prefix != null) && caseSensitive)
+	      match = name.startsWith(prefix);
+	    else if ((prefix != null) && !caseSensitive)
+	      match = name.toLowerCase().startsWith(prefix.toLowerCase());
+	    else
+	      match = true;
+
+	    if (match) {
+	      if (prefix != null) {
+		result.add(partial.substring(0, partial.length() - prefix.length()) + name);
+	      }
+	      else {
+		if (partial.endsWith("\\") || partial.endsWith("/"))
+		  result.add(partial + name);
+		else
+		  result.add(partial + File.separator + name);
+	      }
 	    }
 	  }
+	}
+	else {
+	  System.err.println("Invalid path: " + partial);
 	}
       }
       
@@ -510,7 +519,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * returns all the class/package matches with the partial search string
+     * returns all the class/package matches with the partial search string.
      * 
      * @param partial	the partial search string
      * @return		all the matches
@@ -594,7 +603,7 @@ public class SimpleCLIPanel
     }
     
     /**
-     * returns the common prefix for all the items in the list
+     * returns the common prefix for all the items in the list.
      * 
      * @param list	the list to return the common prefix for
      * @return		the common prefix of all the items
@@ -615,7 +624,7 @@ public class SimpleCLIPanel
   }
   
   /**
-   * Constructor
+   * Constructor.
    *
    * @throws Exception if an error occurs
    */
@@ -662,7 +671,8 @@ public class SimpleCLIPanel
 	+ "Command completion for classnames and files is \n"
 	+ "initiated with <Tab>. In order to distinguish \n"
 	+ "between files and classnames, file names must \n"
-	+ "be either absolute or start with '." + File.separator + "'.\n"
+	+ "be either absolute or start with '." + File.separator + "' or '~/'\n"
+	+ "(the latter is a shortcut for the home directory).\n"
 	+ "<Alt+BackSpace> is used for deleting the text\n"
 	+ "in the commandline in chunks.\n");
     runCommand("help");
@@ -854,7 +864,7 @@ public class SimpleCLIPanel
   }
 
   /**
-   * performs commandline completion on packages and classnames
+   * performs commandline completion on packages and classnames.
    * 
    * @param e a value of type 'KeyEvent'
    */
@@ -986,9 +996,9 @@ public class SimpleCLIPanel
 	if ((last < 0)
 	    || !command.equals((String)m_CommandHistory.elementAt(last))) {
 	  m_CommandHistory.addElement(command);
-	  m_HistoryPos = m_CommandHistory.size();
 	  saveHistory();
 	}
+	m_HistoryPos = m_CommandHistory.size();
 	runCommand(command);
 	
 	m_Input.setText("");
@@ -999,7 +1009,7 @@ public class SimpleCLIPanel
   }
 
   /**
-   * loads the command history from the user's properties file
+   * loads the command history from the user's properties file.
    */
   protected void loadHistory() {
     int 	size;
@@ -1021,7 +1031,7 @@ public class SimpleCLIPanel
   }
   
   /**
-   * saves the current command history in the user's home directory
+   * saves the current command history in the user's home directory.
    */
   protected void saveHistory() {
     int 			size;
