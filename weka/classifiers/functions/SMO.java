@@ -114,7 +114,7 @@ import weka.core.*;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.53.2.2 $ */
+ * @version $Revision: 1.53.2.3 $ */
 public class SMO extends Classifier implements WeightedInstancesHandler {
 
   /**
@@ -1450,10 +1450,12 @@ public class SMO extends Classifier implements WeightedInstancesHandler {
     
     for (int i = 0; i < numValues; i++) {
       for (int j = i + 1; j < numValues; j++) {
-	int numAttributes = m_classifiers[i][j].m_data.numAttributes();
+        //	int numAttributes = m_classifiers[i][j].m_data.numAttributes();
+	int numAttributes = m_classifiers[i][j].m_sparseIndices.length;
 	String [] attrNames = new String[numAttributes];
 	for (int k = 0; k < numAttributes; k++) {
-	  attrNames[k] = m_classifiers[i][j].m_data.attribute(k).name();
+	  attrNames[k] = m_classifiers[i][j].
+            m_data.attribute(m_classifiers[i][j].m_sparseIndices[k]).name();
 	}
 	attributeNames[i][j] = attrNames;          
       }
