@@ -189,7 +189,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.69 $
+ * @version $Revision: 1.70 $
  */
 public class SMO 
   extends Classifier 
@@ -1123,7 +1123,7 @@ public class SMO
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.69 $");
+      return RevisionUtils.extract("$Revision: 1.70 $");
     }
   }
 
@@ -1555,10 +1555,12 @@ public class SMO
     
     for (int i = 0; i < numValues; i++) {
       for (int j = i + 1; j < numValues; j++) {
-	int numAttributes = m_classifiers[i][j].m_data.numAttributes();
+        //	int numAttributes = m_classifiers[i][j].m_data.numAttributes();
+	int numAttributes = m_classifiers[i][j].m_sparseIndices.length;
 	String [] attrNames = new String[numAttributes];
 	for (int k = 0; k < numAttributes; k++) {
-	  attrNames[k] = m_classifiers[i][j].m_data.attribute(k).name();
+	  attrNames[k] = m_classifiers[i][j].
+            m_data.attribute(m_classifiers[i][j].m_sparseIndices[k]).name();
 	}
 	attributeNames[i][j] = attrNames;          
       }
@@ -2126,7 +2128,7 @@ public class SMO
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.69 $");
+    return RevisionUtils.extract("$Revision: 1.70 $");
   }
   
   /**
