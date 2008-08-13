@@ -35,7 +35,7 @@ import java.util.Vector;
  * <a href="http://bib2web.djvuzone.org/bibtex.html" target="_blank">http://bib2web.djvuzone.org/bibtex.html</a>
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  * @see TechnicalInformationHandler
  */
 public class TechnicalInformation
@@ -172,12 +172,14 @@ public class TechnicalInformation
     AFFILIATION("affiliation", "The authors affiliation."),
     /** An abstract of the work. */
     ABSTRACT("abstract", "An abstract of the work."),
-    /** A Table of Contents  */
+    /** A Table of Contents.  */
     CONTENTS("contents", "A Table of Contents "),
     /** Copyright information. */
     COPYRIGHT("copyright", "Copyright information."),
-    /** The International Standard Book Number. */
-    ISBN("ISBN", "The International Standard Book Number."),
+    /** The International Standard Book Number (10 digits). */
+    ISBN("ISBN", "The International Standard Book Number (10 digits)."),
+    /** The International Standard Book Number (13 digits). */
+    ISBN13("ISBN-13", "The International Standard Book Number (13 digits)."),
     /** The International Standard Serial Number. Used to identify a journal. */
     ISSN("ISSN", "The International Standard Serial Number. Used to identify a journal."),
     /** Key words used for searching or possibly for annotation. */
@@ -634,7 +636,7 @@ public class TechnicalInformation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
   
   /**
