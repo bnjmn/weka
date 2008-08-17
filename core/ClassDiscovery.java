@@ -40,7 +40,7 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  * @see StringCompare
  */
 public class ClassDiscovery
@@ -424,7 +424,7 @@ public class ClassDiscovery
 	  else
 	    i++;
 	}
-	catch (Exception e) {
+	catch (Throwable e) {
 	  System.err.println("Checking class: " + result.get(i));
 	  e.printStackTrace();
 	}
@@ -583,7 +583,7 @@ public class ClassDiscovery
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision: 1.8 $");
   }
 
   /**
@@ -760,7 +760,7 @@ public class ClassDiscovery
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.7 $");
+      return RevisionUtils.extract("$Revision: 1.8 $");
     }
   }
 }
