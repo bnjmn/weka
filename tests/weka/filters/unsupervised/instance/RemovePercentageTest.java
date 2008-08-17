@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.instance.RemovePercentageTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RemovePercentageTest 
   extends AbstractFilterTest {
@@ -63,12 +63,12 @@ public class RemovePercentageTest
   public void testInverting() {
     // non-inverted
     m_Filter = getFilter();
-    ((RemovePercentage) m_Filter).setPercentage(20);
+    ((RemovePercentage) m_Filter).setPercentage(20.0);
     Instances result = useFilter();
 
     // inverted
     m_Filter = getFilter();
-    ((RemovePercentage) m_Filter).setPercentage(20);
+    ((RemovePercentage) m_Filter).setPercentage(20.0);
     ((RemovePercentage) m_Filter).setInvertSelection(true);
     Instances resultInv = useFilter();
 
