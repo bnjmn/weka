@@ -54,7 +54,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.2 $
+ * @version $Revision: 1.31.2.3 $
  */
 public class DatabaseUtils
   implements Serializable, RevisionHandler {
@@ -564,6 +564,54 @@ public class DatabaseUtils
     
     return result;
   }
+  
+  /**
+   * Checks whether cursors are scrollable in general, false otherwise 
+   * (also if not connected).
+   * 
+   * @return		true if scrollable and connected
+   * @see		#getSupportedCursorScrollType()
+   */
+  public boolean isCursorScrollable() {
+    return (getSupportedCursorScrollType() != -1);
+  }
+  
+  /**
+   * Returns the type of scrolling that the cursor supports, -1 if not
+   * supported or not connected. Checks first for TYPE_SCROLL_SENSITIVE
+   * and then for TYPE_SCROLL_INSENSITIVE. In both cases CONCUR_READ_ONLY
+   * as concurrency is used.
+   * 
+   * @return		the scroll type, or -1 if not connected or no scrolling supported
+   * @see		ResultSet#TYPE_SCROLL_SENSITIVE
+   * @see		ResultSet#TYPE_SCROLL_INSENSITIVE
+   */
+  public int getSupportedCursorScrollType() {
+    int		result;
+    
+    result = -1;
+    
+    try {
+      if (isConnected()) {
+	if (m_Connection.getMetaData().supportsResultSetConcurrency(
+	    		ResultSet.TYPE_SCROLL_SENSITIVE, 
+	    		ResultSet.CONCUR_READ_ONLY))
+	  result = ResultSet.TYPE_SCROLL_SENSITIVE;
+	
+	if (result == -1) {
+	  if (m_Connection.getMetaData().supportsResultSetConcurrency(
+	      		ResultSet.TYPE_SCROLL_INSENSITIVE, 
+	      		ResultSet.CONCUR_READ_ONLY))
+	    result = ResultSet.TYPE_SCROLL_INSENSITIVE;
+	}
+      }
+    }
+    catch (Exception e) {
+      // ignored
+    }
+    
+    return result;
+  }
 
   /**
    * Executes a SQL query. Caller must clean up manually with 
@@ -578,12 +626,12 @@ public class DatabaseUtils
     if (!isConnected())
       throw new IllegalStateException("Not connected, please connect first!");
     
-    if (!isCursorScrollSensitive())
+    if (!isCursorScrollable())
       m_PreparedStatement = m_Connection.prepareStatement(
 	  query, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     else
       m_PreparedStatement = m_Connection.prepareStatement(
-	  query, ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+	  query, getSupportedCursorScrollType(), ResultSet.CONCUR_READ_ONLY);
     
     return(m_PreparedStatement.execute());
   }
@@ -616,12 +664,12 @@ public class DatabaseUtils
       throw new IllegalStateException("Not connected, please connect first!");
     
     Statement statement;
-    if (!isCursorScrollSensitive())
+    if (!isCursorScrollable())
       statement = m_Connection.createStatement(
 	  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     else
       statement = m_Connection.createStatement(
-	  ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+	  getSupportedCursorScrollType(), ResultSet.CONCUR_READ_ONLY);
     int result = statement.executeUpdate(query);
     statement.close();
     
@@ -641,12 +689,12 @@ public class DatabaseUtils
       throw new IllegalStateException("Not connected, please connect first!");
     
     Statement statement;
-    if (!isCursorScrollSensitive())
+    if (!isCursorScrollable())
       statement = m_Connection.createStatement(
 	  ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
     else
       statement = m_Connection.createStatement(
-	  ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+	  getSupportedCursorScrollType(), ResultSet.CONCUR_READ_ONLY);
     ResultSet result = statement.executeQuery(query);
     
     return result;
@@ -1242,6 +1290,6 @@ public class DatabaseUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.31.2.3 $");
   }
 }
