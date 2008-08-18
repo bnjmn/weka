@@ -48,7 +48,7 @@ import javax.swing.JTextArea;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.25.2.1 $
  */
 public class Plot2D
   extends JPanel {
@@ -509,7 +509,7 @@ public class Plot2D
 		(y >= py-size) && (y <= py+size)) {
 	      {
 		insts.append("\nPlot : "+temp_plot.m_plotName
-			     +"\nInstance: "+i+"\n");
+			     + "\nInstance: " + (i + 1 ) + "\n");
 		for (int j=0;j<temp_plot.m_plotInstances.numAttributes();j++) {
 		  for (int k = 0;k < 
 			 (longest-temp_plot.m_plotInstances.
