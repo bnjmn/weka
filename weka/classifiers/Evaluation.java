@@ -175,7 +175,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.88 $
+ * @version  $Revision: 1.89 $
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -374,6 +374,33 @@ public class Evaluation
       Instances result = tc.getCurve(m_Predictions, classIndex);
       return ThresholdCurve.getROCArea(result);
     }
+  }
+
+  /**
+   * Calculates the weighted (by class size) AUC.
+   *
+   * @return the weighted AUC.
+   */
+  public double weightedAreaUnderROC() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double aucTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = areaUnderROC(i);
+      if (!Instance.isMissingValue(temp)) {
+        aucTotal += (temp * classCounts[i]);
+      }
+    }
+
+    return aucTotal / classCountSum;
   }
 
   /**
@@ -2336,13 +2363,14 @@ public class Evaluation
     if (!m_ClassIsNominal) {
       throw new Exception("Evaluation: No confusion matrix possible!");
     }
+
     StringBuffer text = new StringBuffer(title 
-	+ "\nTP Rate   FP Rate"
+	+ "\n               TP Rate   FP Rate"
 	+ "   Precision   Recall"
 	+ "  F-Measure   ROC Area  Class\n");
     for(int i = 0; i < m_NumClasses; i++) {
-      text.append(Utils.doubleToString(truePositiveRate(i), 7, 3))
-      .append("   ");
+      text.append("               " + Utils.doubleToString(truePositiveRate(i), 7, 3))
+      .append("   ");      
       text.append(Utils.doubleToString(falsePositiveRate(i), 7, 3))
       .append("    ");
       text.append(Utils.doubleToString(precision(i), 7, 3))
@@ -2351,6 +2379,7 @@ public class Evaluation
       .append("   ");
       text.append(Utils.doubleToString(fMeasure(i), 7, 3))
       .append("    ");
+
       double rocVal = areaUnderROC(i);
       if (Instance.isMissingValue(rocVal)) {
 	text.append("  ?    ")
@@ -2361,6 +2390,15 @@ public class Evaluation
       }
       text.append(m_ClassNames[i]).append('\n');
     }
+
+    text.append("Weighted Avg.  " + Utils.doubleToString(weightedTruePositiveRate(), 7, 3));
+    text.append("   " + Utils.doubleToString(weightedFalsePositiveRate(), 7 ,3));
+    text.append("    " + Utils.doubleToString(weightedPrecision(), 7 ,3));
+    text.append("   " + Utils.doubleToString(weightedRecall(), 7 ,3));
+    text.append("   " + Utils.doubleToString(weightedFMeasure(), 7 ,3));
+    text.append("    " + Utils.doubleToString(weightedAreaUnderROC(), 7 ,3));
+    text.append("\n");
+    
     return text.toString();
   }
 
@@ -2410,6 +2448,31 @@ public class Evaluation
       return 0;
     }
     return correct / total;
+  }
+
+  /**
+   * Calculates the weighted (by class size) true positive rate.
+   *
+   * @return the weighted true positive rate.
+   */
+  public double weightedTruePositiveRate() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double truePosTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = truePositiveRate(i);
+      truePosTotal += (temp * classCounts[i]);
+    }
+
+    return truePosTotal / classCountSum;
   }
 
   /**
@@ -2469,6 +2532,31 @@ public class Evaluation
   }
 
   /**
+   * Calculates the weighted (by class size) true negative rate.
+   *
+   * @return the weighted true negative rate.
+   */
+  public double weightedTrueNegativeRate() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double trueNegTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = trueNegativeRate(i);
+      trueNegTotal += (temp * classCounts[i]);
+    }
+
+    return trueNegTotal / classCountSum;
+  }
+
+  /**
    * Calculate number of false positives with respect to a particular class. 
    * This is defined as<p/>
    * <pre>
@@ -2523,6 +2611,33 @@ public class Evaluation
     }
     return incorrect / total;
   }
+
+  /**
+   * Calculates the weighted (by class size) false positive rate.
+   *
+   * @return the weighted false positive rate.
+   */
+  public double weightedFalsePositiveRate() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double falsePosTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = falsePositiveRate(i);
+      falsePosTotal += (temp * classCounts[i]);
+    }
+
+    return falsePosTotal / classCountSum;
+  }
+
+
 
   /**
    * Calculate number of false negatives with respect to a particular class. 
@@ -2581,6 +2696,31 @@ public class Evaluation
   }
 
   /**
+   * Calculates the weighted (by class size) false negative rate.
+   *
+   * @return the weighted false negative rate.
+   */
+  public double weightedFalseNegativeRate() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double falseNegTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = falseNegativeRate(i);
+      falseNegTotal += (temp * classCounts[i]);
+    }
+
+    return falseNegTotal / classCountSum;
+  }
+
+  /**
    * Calculate the recall with respect to a particular class. 
    * This is defined as<p/>
    * <pre>
@@ -2596,6 +2736,15 @@ public class Evaluation
   public double recall(int classIndex) {
 
     return truePositiveRate(classIndex);
+  }
+
+  /**
+   * Calculates the weighted (by class size) recall.
+   *
+   * @return the weighted recall.
+   */
+  public double weightedRecall() {
+    return weightedTruePositiveRate();
   }
 
   /**
@@ -2626,6 +2775,31 @@ public class Evaluation
   }
 
   /**
+   * Calculates the weighted (by class size) false precision.
+   *
+   * @return the weighted precision.
+   */
+  public double weightedPrecision() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double precisionTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = precision(i);
+      precisionTotal += (temp * classCounts[i]);
+    }
+
+    return precisionTotal / classCountSum;
+  }
+
+  /**
    * Calculate the F-Measure with respect to a particular class. 
    * This is defined as<p/>
    * <pre>
@@ -2645,6 +2819,31 @@ public class Evaluation
       return 0;
     }
     return 2 * precision * recall / (precision + recall);
+  }
+
+  /**
+   * Calculates the weighted (by class size) F-Measure.
+   *
+   * @return the weighted F-Measure.
+   */
+  public double weightedFMeasure() {
+    double[] classCounts = new double[m_NumClasses];
+    double classCountSum = 0;
+    
+    for (int i = 0; i < m_NumClasses; i++) {
+      for (int j = 0; j < m_NumClasses; j++) {
+        classCounts[i] += m_ConfusionMatrix[i][j];
+      }
+      classCountSum += classCounts[i];
+    }
+
+    double fMeasureTotal = 0;
+    for(int i = 0; i < m_NumClasses; i++) {
+      double temp = fMeasure(i);
+      fMeasureTotal += (temp * classCounts[i]);
+    }
+
+    return fMeasureTotal / classCountSum;
   }
 
   /**
@@ -3418,6 +3617,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.88 $");
+    return RevisionUtils.extract("$Revision: 1.89 $");
   }
 }
