@@ -45,7 +45,7 @@ import java.util.Vector;
  * classifiers and clusterers.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public abstract class DataGenerator 
   implements OptionHandler, Randomizable, Serializable, RevisionHandler {
@@ -405,7 +405,7 @@ public abstract class DataGenerator
    * Gets the number of examples the dataset should have.
    * @return the number of examples the dataset should have
    */
-  protected int getNumExamplesAct() { 
+  public int getNumExamplesAct() { 
     return m_NumExamplesAct; 
   }
   
