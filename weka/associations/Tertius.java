@@ -146,7 +146,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:adeltour@netcourrier.com">Amelie Deltour</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class Tertius 
@@ -756,8 +756,10 @@ public class Tertius
       result.add("-O");
 
     /* Individual-based learning. */
-    result.add("-p");
-    result.add("" + m_partsString);
+    if (m_partsString.length() > 0) {
+      result.add("-p");
+      result.add("" + m_partsString);
+    }
 
     /* Values output. */
     result.add("-P");
@@ -2008,7 +2010,7 @@ public class Tertius
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision: 1.11 $");
   }
 
   /**
