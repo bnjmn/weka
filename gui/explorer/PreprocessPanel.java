@@ -102,7 +102,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.71.2.1 $
+ * @version $Revision: 1.71.2.2 $
  */
 public class PreprocessPanel
   extends JPanel 
@@ -140,7 +140,7 @@ public class PreprocessPanel
   protected AttributeSelectionPanel m_AttPanel = new AttributeSelectionPanel();
 
   /** Button for removing attributes */
-  JButton m_RemoveButton = new JButton("Remove");
+  protected JButton m_RemoveButton = new JButton("Remove");
 
   /** Displays summary stats on the selected attribute */
   protected AttributeSummaryPanel m_AttSummaryPanel =
