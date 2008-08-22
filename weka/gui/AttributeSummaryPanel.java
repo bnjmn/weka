@@ -40,6 +40,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /** 
@@ -49,7 +50,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 public class AttributeSummaryPanel 
   extends JPanel {
@@ -272,13 +273,18 @@ public class AttributeSummaryPanel
 
     if (as.nominalCounts != null) {
       Attribute att = m_Instances.attribute(index);
-      Object [] colNames = {"Label", "Count"};
-      Object [][] data = new Object [as.nominalCounts.length][2];
+      Object [] colNames = {"No.", "Label", "Count"};
+      Object [][] data = new Object [as.nominalCounts.length][3];
       for (int i = 0; i < as.nominalCounts.length; i++) {
-	data[i][0] = att.value(i);
-	data[i][1] = new Integer(as.nominalCounts[i]);
+	data[i][0] = new Integer(i + 1);
+	data[i][1] = att.value(i);
+	data[i][2] = new Integer(as.nominalCounts[i]);
       }
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
+      m_StatsTable.getColumnModel().getColumn(0).setMaxWidth(60);
+      DefaultTableCellRenderer tempR = new DefaultTableCellRenderer();
+      tempR.setHorizontalAlignment(JLabel.RIGHT);
+      m_StatsTable.getColumnModel().getColumn(0).setCellRenderer(tempR);
     } else if (as.numericStats != null) {
       Object [] colNames = {"Statistic", "Value"};
       Object [][] data = new Object [4][2];
@@ -290,6 +296,7 @@ public class AttributeSummaryPanel
     } else {
       m_StatsTable.setModel(new DefaultTableModel());
     }
+    m_StatsTable.getColumnModel().setColumnMargin(4);
   }
   
   /**
