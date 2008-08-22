@@ -56,7 +56,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (len@reeltwo.com) 
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class StringToNominal 
   extends Filter 
@@ -76,8 +76,8 @@ public class StringToNominal
    */
   public String globalInfo() {
 
-    return "Converts a string attribute (i.e. unspecified number of values) to nominal "
-      + "(i.e. set number of values). You should ensure that all string values that "
+    return "Converts a string attribute (unspecified number of values) to nominal "
+      + "(set number of values). You should ensure that all string values that "
       + "will appear are represented in the first batch of the data.";
   }
 
@@ -322,7 +322,7 @@ public class StringToNominal
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision: 1.10 $");
   }
   
   /**
