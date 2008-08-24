@@ -18,7 +18,7 @@ jdbcURL=jdbc:idb=experiments.prp
 # short, getByte()= 4;        --> numeric
 # int, getInteger() = 5;      --> numeric
 # long, getLong() = 6;        --> numeric
-# gloat, getFloat() = 7;      --> numeric
+# float, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
