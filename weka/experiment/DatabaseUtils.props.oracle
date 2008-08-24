@@ -3,7 +3,7 @@
 # url:     http://www.oracle.com/
 # jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.4 $
+# version: $Revision: 1.5 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=oracle.jdbc.driver.OracleDriver
@@ -22,7 +22,7 @@ jdbcURL=jdbc:oracle:thin:@server_name:1521:XE
 # gloat, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
-# time, getTime() = 10;       --> numeric
+# time, getTime() = 10;       --> date
 
 VARCHAR2=0
 NUMBER=2

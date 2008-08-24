@@ -21,7 +21,7 @@ jdbcURL=jdbc:idb=experiments.prp
 # gloat, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
-# time, getTime() = 10;       --> numeric
+# time, getTime() = 10;       --> date
 # the original conversion: <column type>=<conversion>
 #char=0
 #varchar=0
