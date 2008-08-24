@@ -34,6 +34,7 @@ import weka.core.Utils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.Time;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -74,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.1 $
+ * @version $Revision: 1.21.2.2 $
  */
 public class InstanceQuery 
   extends DatabaseUtils 
@@ -366,6 +367,9 @@ public class InstanceQuery
       case DATE:
 	attributeTypes[i - 1] = Attribute.DATE;
 	break;
+      case TIME:
+	attributeTypes[i - 1] = Attribute.DATE;
+	break;
       default:
 	//System.err.println("Unknown column type");
 	attributeTypes[i - 1] = Attribute.STRING;
@@ -492,6 +496,15 @@ public class InstanceQuery
             vals[i - 1] = (double)date.getTime();
           }
           break;
+	case TIME:
+          Time time = rs.getTime(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double) time.getTime();
+          }
+          break;
 	default:
 	  vals[i - 1] = Instance.missingValue();
 	}
@@ -598,6 +611,6 @@ public class InstanceQuery
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.21.2.2 $");
   }
 }

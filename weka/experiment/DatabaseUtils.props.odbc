@@ -2,7 +2,7 @@
 #
 # url:     http://www.cs.waikato.ac.nz/~ml/weka/opening_windows_DBs.html
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.4 $
+# version: $Revision: 1.4.2.1 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver
@@ -18,9 +18,11 @@ jdbcURL=jdbc:odbc:DSN_name
 # short, getByte()= 4;        --> numeric
 # int, getInteger() = 5;      --> numeric
 # long, getLong() = 6;        --> numeric
-# gloat, getFloat() = 7;      --> numeric
+# float, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
+# time, getTime() = 10;       --> date
+
 varchar=0
 float=2
 tinyint=3

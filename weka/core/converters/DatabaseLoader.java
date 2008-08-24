@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12.2.2 $
+ * @version $Revision: 1.12.2.3 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -815,6 +815,9 @@ public class DatabaseLoader
                 case DatabaseConnection.DATE:
                     attributeTypes[i - 1] = Attribute.DATE;
                     break;
+                case DatabaseConnection.TIME:
+                  attributeTypes[i - 1] = Attribute.DATE;
+                  break;
                 default:
                     //System.err.println("Unknown column type");
                     attributeTypes[i - 1] = Attribute.STRING;
@@ -979,6 +982,9 @@ public class DatabaseLoader
       case DatabaseConnection.DATE:
 	attributeTypes[i - 1] = Attribute.DATE;
 	break;
+      case DatabaseConnection.TIME:
+	attributeTypes[i - 1] = Attribute.DATE;
+	break;
       default:
 	//System.err.println("Unknown column type");
 	attributeTypes[i - 1] = Attribute.STRING;
@@ -1082,6 +1088,15 @@ public class DatabaseLoader
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double)date.getTime();
+          }
+          break;
+	case DatabaseConnection.TIME:
+          Time time = rs.getTime(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double) time.getTime();
           }
           break;
 	default:
@@ -1260,6 +1275,15 @@ public class DatabaseLoader
 	  } else {
             // TODO: Do a value check here.
             vals[i - 1] = (double)date.getTime();
+          }
+          break;
+	case DatabaseConnection.TIME:
+          Time time = rs.getTime(i);
+          if (rs.wasNull()) {
+	    vals[i - 1] = Instance.missingValue();
+	  } else {
+            // TODO: Do a value check here.
+            vals[i - 1] = (double) time.getTime();
           }
           break;
 	default:
@@ -1558,7 +1582,7 @@ public class DatabaseLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.3 $");
   }
 
   /** Main method.

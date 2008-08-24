@@ -18,9 +18,10 @@ jdbcURL=jdbc:idb=experiments.prp
 # short, getByte()= 4;        --> numeric
 # int, getInteger() = 5;      --> numeric
 # long, getLong() = 6;        --> numeric
-# gloat, getFloat() = 7;      --> numeric
+# float, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
+# time, getTime() = 10;       --> date
 # the original conversion: <column type>=<conversion>
 #char=0
 #varchar=0
@@ -39,7 +40,7 @@ jdbcURL=jdbc:idb=experiments.prp
 #float=2
 #double=2
 #date=8
-#time=8
+#time=10
 #timestamp=8
 #mysql-conversion
 CHAR=0
@@ -63,7 +64,7 @@ BIGINT=6
 LONG=6
 REAL=7
 DATE=8
-TIME=8
+TIME=10
 TIMESTAMP=8 
 
 #mappings for table creation
