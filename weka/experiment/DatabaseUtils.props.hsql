@@ -4,7 +4,7 @@
 # jdbc:    http://sourceforge.net/projects/hsqldb/
 # howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
 # author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
-# version: $Revision: 1.4 $
+# version: $Revision: 1.5 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.hsqldb.jdbcDriver
@@ -23,6 +23,7 @@ jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
 # gloat, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
+# time, getTime() = 10;       --> numeric
 
 # other options
 CREATE_INT=INT
