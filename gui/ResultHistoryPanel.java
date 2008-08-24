@@ -61,7 +61,7 @@ import javax.swing.text.JTextComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $
+ * @version $Revision: 1.25.2.1 $
  */
 public class ResultHistoryPanel
   extends JPanel {
@@ -231,6 +231,17 @@ public class ResultHistoryPanel
       m_Objs.remove(name);
       System.gc();
     } 
+  }
+
+  /**
+   * Removes all of the result buffers from the history. Any windows currently
+   * displaying the contents of the buffer are not affected.
+   */
+  public void clearResults() {
+    m_Results.clear();
+    m_Model.clear();
+    m_Objs.clear();
+    System.gc();
   }
 
   /**
