@@ -32,7 +32,7 @@ import java.io.File;
  * a remote host.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision: 1.8.2.2 $
  */
 public class RemoteExperimentSubTask
   implements Task, RevisionHandler {
@@ -84,7 +84,10 @@ public class RemoteExperimentSubTask
       System.err.println("Initializing " + subTaskType + ")...");
       m_experiment.initialize();
       System.err.println("Iterating " + subTaskType + ")...");
-      m_experiment.runExperiment();
+      // Do not invoke runExperiment(): every exception will be lost
+      while (m_experiment.hasMoreIterations()) {
+        m_experiment.nextIteration();
+      }
       System.err.println("Postprocessing " + subTaskType + ")...");
       m_experiment.postProcess();
     } catch (Exception ex) {
@@ -117,7 +120,7 @@ public class RemoteExperimentSubTask
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8.2.1 $");
+    return RevisionUtils.extract("$Revision: 1.8.2.2 $");
   }
 }
 

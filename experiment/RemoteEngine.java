@@ -42,7 +42,7 @@ import java.util.Hashtable;
  * A general purpose server for executing Task objects sent via RMI.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9.2.2 $
+ * @version $Revision: 1.9.2.3 $
  */
 public class RemoteEngine
   extends UnicastRemoteObject
@@ -203,12 +203,35 @@ public class RemoteEngine
 				   +m_HostName+") "
 				   +runStatus.getStatusMessage());
 	      tsi.setTaskResult(runStatus.getTaskResult());
+	    } catch (Error er) {
+              // Object initialization can raise Error, which are not subclass of Exception
+	      tsi.setExecutionStatus(TaskStatusInfo.FAILED);
+              if (er.getCause() instanceof java.security.AccessControlException) {
+                tsi.setStatusMessage("RemoteEngine ("
+                                     +m_HostName
+                                     +") : security error, check remote policy file.");
+                System.err.println("Task id " + taskId + " Failed! Check remote policy file");
+              }
+              else {
+                tsi.setStatusMessage("RemoteEngine ("
+                                     +m_HostName
+                                     +") : unknown initialization error.");
+                System.err.println("Task id " + taskId + " Unknown initialization error");
+              }
 	    } catch (Exception ex) {
 	      tsi.setExecutionStatus(TaskStatusInfo.FAILED);
-	      tsi.setStatusMessage("RemoteEngine ("
-				   +m_HostName
-				   +") : task " + taskId + " failed.");
-	      System.err.println("Task id " + taskId + " Failed!");
+              if (ex instanceof java.io.FileNotFoundException) {
+                tsi.setStatusMessage("RemoteEngine ("
+                                     +m_HostName
+                                     +") : " + ex.getMessage());
+                System.err.println("Task id " + taskId + " Failed, " + ex.getMessage());
+              }
+              else {
+                tsi.setStatusMessage("RemoteEngine ("
+                                     +m_HostName
+                                     +") : task " + taskId + " failed.");
+                System.err.println("Task id " + taskId + " Failed!");
+              }
 	    } finally {
 	      if (m_TaskStatus.size() == 0) {
 		purgeClasses();
@@ -285,7 +308,7 @@ public class RemoteEngine
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9.2.2 $");
+    return RevisionUtils.extract("$Revision: 1.9.2.3 $");
   }
 
   /**
