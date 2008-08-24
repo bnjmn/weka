@@ -3,7 +3,7 @@
 # url:     http://www.sqlite.org/
 # jdbc:    http://www.zentus.com/sqlitejdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.4 $
+# version: $Revision: 1.5 $
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.sqlite.JDBC
@@ -19,7 +19,7 @@ jdbcURL=jdbc:sqlite:/path/to/database.db
 # short, getByte()= 4;        --> numeric
 # int, getInteger() = 5;      --> numeric
 # long, getLong() = 6;        --> numeric
-# gloat, getFloat() = 7;      --> numeric
+# float, getFloat() = 7;      --> numeric
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
