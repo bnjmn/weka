@@ -77,7 +77,7 @@ import weka.filters.unsupervised.attribute.Reorder;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class EditableBayesNet extends BayesNet {
@@ -196,7 +196,7 @@ public class EditableBayesNet extends BayesNet {
 	 * the data set must be put if correct order first and possibly discretized/missing
 	 * values filled in before proceeding to CPT learning.
 	 * @param instances data set to learn from
-	 * @exception when data sets are not compatible, e.g., a variable is missing
+	 * @exception Exception when data sets are not compatible, e.g., a variable is missing
 	 * or a variable has different nr of values.
 	 */
 	public void setData(Instances instances) throws Exception {
@@ -2658,7 +2658,7 @@ public class EditableBayesNet extends BayesNet {
 	   * @return		the revision
 	   */
 	  public String getRevision() {
-	    return RevisionUtils.extract("$Revision: 1.3 $");
+	    return RevisionUtils.extract("$Revision: 1.4 $");
 	  }
 
 	/**

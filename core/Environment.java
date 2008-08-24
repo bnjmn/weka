@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * replacing key names (enclosed by ${}) with their associated value in Strings.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public class Environment implements RevisionHandler {
   
@@ -70,7 +70,7 @@ public class Environment implements RevisionHandler {
    * 
    * @param source the source string to replace variables in
    * @return a String with all variable names replaced with their values
-   * @exception if an unknown variable name is encountered
+   * @throws Exception if an unknown variable name is encountered
    */
   public static String substitute(String source) throws Exception {
     // Grab each variable out of the string
@@ -157,6 +157,6 @@ public class Environment implements RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision: 1.2 $");
   }
 }
