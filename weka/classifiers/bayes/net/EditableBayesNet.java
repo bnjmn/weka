@@ -46,9 +46,8 @@ import weka.filters.unsupervised.attribute.Reorder;
 
 /**
  <!-- globalinfo-start -->
- * Bayes Network that allows for editing operations on a Bayesian network
- * with undo/redo facilities.
- *
+ * Bayes Network learning using various search algorithms and quality measures.<br/>
+ * Base class for a Bayes Network classifier. Provides datastructures (network structure, conditional probability distributions, etc.) and facilities common to Bayes Network learning algorithms like K2 and B.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
@@ -58,27 +57,27 @@ import weka.filters.unsupervised.attribute.Reorder;
  *
  <!-- options-start -->
  * Valid options are: <p/>
- *
+ * 
  * <pre> -D
  *  Do not use ADTree data structure
  * </pre>
- *
+ * 
  * <pre> -B &lt;BIF file&gt;
  *  BIF file to compare with
  * </pre>
- *
+ * 
  * <pre> -Q weka.classifiers.bayes.net.search.SearchAlgorithm
  *  Search algorithm
  * </pre>
- *
+ * 
  * <pre> -E weka.classifiers.bayes.net.estimate.SimpleEstimator
  *  Estimator algorithm
  * </pre>
- *
+ * 
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.2.2.2 $
+ * @version $Revision: 1.2.2.3 $
  */
 
 public class EditableBayesNet extends BayesNet {
@@ -197,7 +196,7 @@ public class EditableBayesNet extends BayesNet {
 	 * the data set must be put if correct order first and possibly discretized/missing
 	 * values filled in before proceeding to CPT learning.
 	 * @param instances data set to learn from
-	 * @exception when data sets are not compatible, e.g., a variable is missing
+	 * @exception Exception when data sets are not compatible, e.g., a variable is missing
 	 * or a variable has different nr of values.
 	 */
 	public void setData(Instances instances) throws Exception {
@@ -2659,7 +2658,7 @@ public class EditableBayesNet extends BayesNet {
 	   * @return		the revision
 	   */
 	  public String getRevision() {
-	    return RevisionUtils.extract("$Revision: 1.2.2.2 $");
+	    return RevisionUtils.extract("$Revision: 1.2.2.3 $");
 	  }
 
 	/**
@@ -2668,3 +2667,4 @@ public class EditableBayesNet extends BayesNet {
 	public static void main(String[] args) {
 	} // main
 } // class EditableBayesNet
+
