@@ -54,7 +54,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.31.2.3 $
+ * @version $Revision: 1.31.2.4 $
  */
 public class DatabaseUtils
   implements Serializable, RevisionHandler {
@@ -110,6 +110,8 @@ public class DatabaseUtils
   public static final int DATE = 8; 
   /** Type mapping for TEXT used for reading, e.g., text blobs. */
   public static final int TEXT = 9; 
+  /** Type mapping for TIME used for reading TIME columns. */
+  public static final int TIME = 10; 
   
   /** Database URL. */
   protected String m_DatabaseURL;
@@ -1290,6 +1292,10 @@ public class DatabaseUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31.2.3 $");
+<<<<<<< DatabaseUtils.java
+    return RevisionUtils.extract("$Revision: 1.31.2.4 $");
+=======
+    return RevisionUtils.extract("$Revision: 1.31.2.4 $");
+>>>>>>> 1.31.2.3
   }
 }
