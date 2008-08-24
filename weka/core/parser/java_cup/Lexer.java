@@ -454,7 +454,7 @@ public class Lexer implements sym, weka.core.parser.java_cup.runtime.Scanner {
    *
    * @return      <code>false</code>, iff there was new input.
    * 
-   * @exception   IOException  if any I/O-Error occurs
+   * @exception   java.io.IOException  if any I/O-Error occurs
    */
   private boolean yy_refill() throws java.io.IOException {
 
@@ -638,7 +638,7 @@ public class Lexer implements sym, weka.core.parser.java_cup.runtime.Scanner {
    * the end of input is encountered or an I/O-Error occurs.
    *
    * @return      the next token
-   * @exception   IOException  if any I/O-Error occurs
+   * @exception   java.io.IOException  if any I/O-Error occurs
    */
   public weka.core.parser.java_cup.runtime.Symbol next_token() throws java.io.IOException {
     int yy_input;
