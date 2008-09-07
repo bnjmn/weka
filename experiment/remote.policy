@@ -19,7 +19,7 @@
  * Note:
  * replace <db.jar> with actual jar filename, e.g., mysql.jar
  *
- * Version: $Revision: 1.7 $
+ * Version: $Revision: 1.8 $
  */
 
 grant {
@@ -28,6 +28,10 @@ grant {
   // This enables the unloading of types from the remote engine
   permission java.lang.RuntimePermission
     "setContextClassLoader";
+
+  // allow the remote engine access to environment variables
+  permission java.lang.RuntimePermission
+    "getenv.*";
 
   // file permission for data sets
   permission java.io.FilePermission
