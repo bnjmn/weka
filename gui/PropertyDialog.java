@@ -38,18 +38,18 @@ import javax.swing.JDialog;
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision: 1.7.2.2 $
  */
 public class PropertyDialog
   extends JDialog {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -2314850859392433539L;
 
-  /** The property editor */
+  /** The property editor. */
   private PropertyEditor m_Editor;
 
-  /** The custom editor component */
+  /** The custom editor component. */
   private Component m_EditorComponent;
   
   /**
@@ -90,7 +90,7 @@ public class PropertyDialog
    * @param y 		initial y coord for the dialog
    */
   public PropertyDialog(Dialog owner, PropertyEditor pe, int x, int y) {
-    super(owner, pe.getClass().getName());
+    super(owner, pe.getClass().getName(), true);
     initialize(pe, x, y);
   }
   
