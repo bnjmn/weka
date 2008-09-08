@@ -106,7 +106,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.59 $
+ * @version $Revision: 1.60 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -1349,14 +1349,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       gfx.setFont(originalFont.deriveFont(java.awt.Font.BOLD));
 
       FontMetrics fm = gfx.getFontMetrics();
-      int vpad = (box.height - fm.getHeight()) / 2;
-      gfx.drawString(rep, 2, fm.getHeight() + vpad);
+      int vpad = (box.height - fm.getHeight());
+      gfx.drawString(rep, 2, fm.getAscent() + vpad);
       int repwidth = fm.stringWidth(rep);
 
       gfx.setFont(originalFont);
       if (m_Object instanceof OptionHandler) {
 	gfx.drawString(" " + Utils.joinOptions(((OptionHandler)m_Object).getOptions()),
-					       repwidth + 2, fm.getHeight() + vpad);
+					       repwidth + 2, fm.getAscent() + vpad);
       }
     }
   }
