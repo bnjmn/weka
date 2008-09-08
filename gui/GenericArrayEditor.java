@@ -66,55 +66,55 @@ import javax.swing.event.ListSelectionListener;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.1 $
+ * @version $Revision: 1.18.2.2 $
  */
 public class GenericArrayEditor
   extends JPanel
   implements PropertyEditor {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 3914616975334750480L;
 
-  /** Handles property change notification */
+  /** Handles property change notification. */
   private PropertyChangeSupport m_Support = new PropertyChangeSupport(this);
 
-  /** The label for when we can't edit that type */
+  /** The label for when we can't edit that type. */
   private JLabel m_Label = new JLabel("Can't edit", SwingConstants.CENTER);
   
-  /** The list component displaying current values */
+  /** The list component displaying current values. */
   private JList m_ElementList = new JList();
 
-  /** The class of objects allowed in the array */
+  /** The class of objects allowed in the array. */
   private Class m_ElementClass = String.class;
 
-  /** The defaultlistmodel holding our data */
+  /** The defaultlistmodel holding our data. */
   private DefaultListModel m_ListModel;
 
-  /** The property editor for the class we are editing */
+  /** The property editor for the class we are editing. */
   private PropertyEditor m_ElementEditor;
 
-  /** Click this to delete the selected array values */
+  /** Click this to delete the selected array values. */
   private JButton m_DeleteBut = new JButton("Delete");
 
-  /** Click this to edit the selected array value */
+  /** Click this to edit the selected array value. */
   private JButton m_EditBut = new JButton("Edit");
 
-  /** Click this to move the selected array value(s) one up */
+  /** Click this to move the selected array value(s) one up. */
   private JButton m_UpBut = new JButton("Up");
 
-  /** Click this to move the selected array value(s) one down */
+  /** Click this to move the selected array value(s) one down. */
   private JButton m_DownBut = new JButton("Down");
 
-  /** Click to add the current object configuration to the array */
+  /** Click to add the current object configuration to the array. */
   private JButton m_AddBut = new JButton("Add");
 
-  /** The property editor for editing existing elements */
+  /** The property editor for editing existing elements. */
   private PropertyEditor m_Editor = new GenericObjectEditor();
 
-  /** The currently displayed property dialog, if any */
+  /** The currently displayed property dialog, if any. */
   private PropertyDialog m_PD;
 
-  /** Listens to buttons being pressed and taking the appropriate action */
+  /** Listens to buttons being pressed and taking the appropriate action. */
   private ActionListener m_InnerActionListener =
     new ActionListener() {
 
@@ -152,8 +152,7 @@ public class GenericArrayEditor
           else {
             m_PD.setVisible(true);
           }
-          m_ElementList.setSelectedValue(m_Editor.getValue(), false);
-	  m_Support.firePropertyChange("", null, null);
+          m_Support.firePropertyChange("", null, null);
         }
       } else if (e.getSource() == m_UpBut) {
         JListHelper.moveUp(m_ElementList);
@@ -185,7 +184,7 @@ public class GenericArrayEditor
     }
   };
 
-  /** Listens to list items being selected and takes appropriate action */
+  /** Listens to list items being selected and takes appropriate action. */
   private ListSelectionListener m_InnerSelectionListener =
     new ListSelectionListener() {
 
@@ -210,7 +209,7 @@ public class GenericArrayEditor
       }
   };
 
-  /** Listens to mouse events and takes appropriate action */
+  /** Listens to mouse events and takes appropriate action. */
   private MouseListener m_InnerMouseListener =
     new MouseAdapter() {
 
@@ -257,10 +256,10 @@ public class GenericArrayEditor
    */
   private class EditorListCellRenderer implements ListCellRenderer {
 
-    /** The class of the property editor for array objects */
+    /** The class of the property editor for array objects. */
     private Class m_EditorClass;
 
-    /** The class of the array values */
+    /** The class of the array values. */
     private Class m_ValueClass;
 
     /**
@@ -277,11 +276,11 @@ public class GenericArrayEditor
     /**
      * Creates a cell rendering component.
      *
-     * @param JList the list that will be rendered in
-     * @param Object the cell value
-     * @param int which element of the list to render
-     * @param boolean true if the cell is selected
-     * @param boolean true if the cell has the focus
+     * @param list the list that will be rendered in
+     * @param value the cell value
+     * @param index which element of the list to render
+     * @param isSelected true if the cell is selected
+     * @param cellHasFocus true if the cell has the focus
      * @return the rendering component
      */
     public Component getListCellRendererComponent(final JList list,
@@ -494,7 +493,7 @@ public class GenericArrayEditor
 
   /**
    * Returns true to indicate that we can paint a representation of the
-   * string array
+   * string array.
    *
    * @return true
    */
@@ -511,9 +510,9 @@ public class GenericArrayEditor
   public void paintValue(java.awt.Graphics gfx, java.awt.Rectangle box) {
 
     FontMetrics fm = gfx.getFontMetrics();
-    int vpad = (box.height - fm.getAscent()) / 2;
+    int vpad = (box.height - fm.getHeight()) / 2;
     String rep = m_ListModel.getSize() + " " + m_ElementClass.getName();
-    gfx.drawString(rep, 2, fm.getHeight() + vpad);
+    gfx.drawString(rep, 2, fm.getAscent() + vpad + 2);
   }
 
   /**
