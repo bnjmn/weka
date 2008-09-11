@@ -89,7 +89,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12.2.3 $
+ * @version $Revision: 1.12.2.4 $
  * @see Loader
  */
 public class DatabaseLoader 
@@ -1050,7 +1050,7 @@ public class DatabaseLoader
 	  }
 	  break;
 	case DatabaseConnection.SHORT:
-	  short sh = rs.getByte(i);
+	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
 	  } else {
@@ -1237,7 +1237,7 @@ public class DatabaseLoader
 	  }
 	  break;
 	case DatabaseConnection.SHORT:
-	  short sh = rs.getByte(i);
+	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
 	  } else {
@@ -1582,7 +1582,7 @@ public class DatabaseLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12.2.3 $");
+    return RevisionUtils.extract("$Revision: 1.12.2.4 $");
   }
 
   /** Main method.
