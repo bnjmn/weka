@@ -75,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.23 $
+ * @version $Revision: 1.24 $
  */
 public class InstanceQuery 
   extends DatabaseUtils 
@@ -456,7 +456,7 @@ public class InstanceQuery
 	  }
 	  break;
 	case SHORT:
-	  short sh = rs.getByte(i);
+	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
 	  } else {
@@ -611,6 +611,6 @@ public class InstanceQuery
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision: 1.24 $");
   }
 }
