@@ -50,7 +50,7 @@ import java.text.*;
  * @see #m_PSFontReplacement
  * @author Dale Fletcher (dale@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class PostscriptGraphics extends Graphics2D {
@@ -573,6 +573,27 @@ public class PostscriptGraphics extends Graphics2D {
   public void drawString(AttributedCharacterIterator iterator, int x, int y){}
   
   /**
+   * Escapes brackets in the string with backslashes.
+   * 
+   * @param s the string to escape
+   * @return the escaped string
+   */
+  protected String escape(String s) {
+    StringBuffer	result;
+    int			i;
+    
+    result = new StringBuffer();
+    
+    for (i = 0; i < s.length(); i++) {
+      if ( (s.charAt(i) == '(') || (s.charAt(i) == ')') )
+	result.append('\\');
+      result.append(s.charAt(i));
+    }
+    
+    return result.toString();
+  }
+  
+  /**
    * Draw text in current pen color.
    *
    * @param str Text to output
@@ -581,7 +602,7 @@ public class PostscriptGraphics extends Graphics2D {
    */
   public void drawString(String str, int x, int y){
     setStateToLocal();
-    m_printstream.println(xTransform(xScale(x)) + " " + yTransform(yScale(y)) + " moveto" + " (" + str + ") show stroke");
+    m_printstream.println(xTransform(xScale(x)) + " " + yTransform(yScale(y)) + " moveto" + " (" + escape(str) + ") show stroke");
   }
   
   /**
