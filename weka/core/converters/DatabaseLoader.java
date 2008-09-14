@@ -66,7 +66,7 @@ import java.util.Vector;
  * Sets incremental loading
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.4 $
+ * @version $Revision: 1.1.2.5 $
  * @see Loader
  */
 public class DatabaseLoader extends AbstractLoader implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
@@ -899,7 +899,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	  }
 	  break;
 	case SHORT:
-	  short sh = rs.getByte(i);
+	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
 	  } else {
@@ -1059,7 +1059,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter, In
 	  }
 	  break;
 	case SHORT:
-	  short sh = rs.getByte(i);
+	  short sh = rs.getShort(i);
 	  if (rs.wasNull()) {
 	    vals[i - 1] = Instance.missingValue();
 	  } else {
