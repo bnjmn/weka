@@ -106,7 +106,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.57.2.4 $
+ * @version $Revision: 1.57.2.5 $
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -1020,6 +1020,24 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
   }
 
+  /**
+   * Sets whether the user can change the class in the dialog.
+   * 
+   * @param value	if true then the user can change the class
+   */
+  public void setCanChangeClassInDialog(boolean value) {
+    m_canChangeClassInDialog = value;
+  }
+  
+  /**
+   * Returns whether the user can change the class in the dialog.
+   * 
+   * @return		true if the user can change the class
+   */
+  public boolean getCanChangeClassInDialog() {
+    return m_canChangeClassInDialog;
+  }
+  
   /**
    * Returns the backup object (may be null if there is no
    * backup.
