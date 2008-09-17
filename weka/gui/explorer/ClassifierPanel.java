@@ -29,6 +29,7 @@ import weka.classifiers.Sourcable;
 import weka.classifiers.evaluation.CostCurve;
 import weka.classifiers.evaluation.MarginCurve;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Drawable;
@@ -43,6 +44,8 @@ import weka.core.Version;
 import weka.core.converters.IncrementalConverter;
 import weka.core.converters.Loader;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.pmml.PMMLFactory;
+import weka.core.pmml.PMMLModel;
 import weka.gui.CostMatrixEditor;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
@@ -134,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.112 $
+ * @version $Revision: 1.113 $
  */
 public class ClassifierPanel 
   extends JPanel
@@ -148,6 +151,9 @@ public class ClassifierPanel
 
   /** The filename extension that should be used for model files */
   public static String MODEL_FILE_EXTENSION = ".model";
+  
+  /** The filename extension that should be used for PMML xml files */
+  public static String PMML_FILE_EXTENSION = ".xml";
 
   /** Lets the user configure the classifier */
   protected GenericObjectEditor m_ClassifierEditor =
@@ -304,6 +310,9 @@ public class ClassifierPanel
   /** Filter to ensure only model files are selected */  
   protected FileFilter m_ModelFilter =
     new ExtensionFileFilter(MODEL_FILE_EXTENSION, "Model object files");
+  
+  protected FileFilter m_PMMLModelFilter =
+    new ExtensionFileFilter(PMML_FILE_EXTENSION, "PMML model files");
 
   /** The file chooser for selecting model files */
   protected JFileChooser m_FileChooser 
@@ -373,7 +382,9 @@ public class ClassifierPanel
       "Whether to output the built classifier as Java source code");
     m_SourceCodeClass.setToolTipText("The classname of the built classifier");
 
+    m_FileChooser.addChoosableFileFilter(m_PMMLModelFilter);
     m_FileChooser.setFileFilter(m_ModelFilter);
+    
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
     m_StorePredictionsBut.setSelected(ExplorerDefaults.getClassifierStorePredictionsForVis());
@@ -2069,6 +2080,16 @@ public class ClassifierPanel
 
       try {
 	InputStream is = new FileInputStream(selected);
+	if (selected.getName().endsWith(PMML_FILE_EXTENSION)) {
+	  PMMLModel model = PMMLFactory.getPMMLModel(is, m_Log);
+	  if (model instanceof PMMLClassifier) {
+	    classifier = (PMMLClassifier)model;
+	    /*trainHeader = 
+	      ((PMMLClassifier)classifier).getMiningSchema().getMiningSchemaAsInstances(); */
+	  } else {
+	    throw new Exception("PMML model is not a classification/regression model!");
+	  }
+	} else {
 	if (selected.getName().endsWith(".gz")) {
 	  is = new GZIPInputStream(is);
 	}
@@ -2078,6 +2099,7 @@ public class ClassifierPanel
 	  trainHeader = (Instances) objectInputStream.readObject();
 	} catch (Exception e) {} // don't fuss if we can't
 	objectInputStream.close();
+	}
       } catch (Exception e) {
 	
 	JOptionPane.showMessageDialog(null, e, "Load Failed",
@@ -2207,8 +2229,22 @@ public class ClassifierPanel
                   throw new Exception("Train and test set are not compatible");
                 }
               } else {
-                userTestStructure.
-                  setClassIndex(userTestStructure.numAttributes()-1);
+        	if (classifier instanceof PMMLClassifier) {
+        	  // set the class based on information in the mining schema
+        	  Instances miningSchemaStructure = 
+        	    ((PMMLClassifier)classifier).getMiningSchema().getMiningSchemaAsInstances();
+        	  String className = miningSchemaStructure.classAttribute().name();
+        	  Attribute classMatch = userTestStructure.attribute(className);
+        	  if (classMatch == null) {
+        	    throw new Exception("Can't find a match for the PMML target field " 
+        		+ className + " in the "
+        		+ "test instances!");
+        	  }
+        	  userTestStructure.setClass(classMatch);
+        	} else {
+        	  userTestStructure.
+        	    setClassIndex(userTestStructure.numAttributes()-1);
+        	}
               }
               if (m_Log instanceof TaskLogger) {
                 ((TaskLogger)m_Log).taskStarted();
@@ -2303,6 +2339,14 @@ public class ClassifierPanel
               m_Log.statusMessage("Problem evaluating classifier");
             } finally {
               try {
+        	if (classifier instanceof PMMLClassifier) {
+        	  // signal the end of the scoring run so
+        	  // that the initialized state can be reset
+        	  // (forces the field mapping to be recomputed
+        	  // for the next scoring run).
+        	  ((PMMLClassifier)classifier).done();
+        	}
+        	
                 if (predInstances != null && predInstances.numInstances() > 0) {
                   if (predInstances.attribute(predInstances.classIndex())
                       .isNumeric()) {
