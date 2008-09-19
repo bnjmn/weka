@@ -24,6 +24,7 @@ package weka.classifiers;
 
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.xml.XMLClassifier;
 import weka.core.Drawable;
 import weka.core.FastVector;
@@ -39,6 +40,8 @@ import weka.core.Utils;
 import weka.core.Version;
 import weka.core.converters.ConverterUtils.DataSink;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.pmml.PMMLFactory;
+import weka.core.pmml.PMMLModel;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.core.xml.XMLSerialization;
@@ -101,8 +104,8 @@ import java.util.zip.GZIPOutputStream;
  * The name of a file containing a cost matrix. <p/>
  *
  * -l filename <br/>
- * Loads classifier from the given file. In case the filename ends with ".xml" 
- * the options are loaded from XML. <p/>
+ * Loads classifier from the given file. In case the filename ends with ".xml", 
+ * a PMML file is loaded or, if that fails, options are loaded from XML. <p/>
  *
  * -d filename <br/>
  * Saves classifier built from the training data into the given file. In case 
@@ -175,7 +178,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.81.2.6 $
+ * @version  $Revision: 1.81.2.7 $
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -536,7 +539,7 @@ public class Evaluation
    *
    * -l filename <br/>
    * Loads classifier from the given file. In case the filename ends with
-   * ".xml" the options are loaded from XML. <p/>
+   * ".xml",a PMML file is loaded or, if that fails, options are loaded from XML. <p/>
    *
    * -d filename <br/>
    * Saves classifier built from the training data into the given file. In case 
@@ -665,7 +668,7 @@ public class Evaluation
    *
    * -l filename <br/>
    * Loads classifier from the given file. In case the filename ends with
-   * ".xml" the options are loaded from XML. <p/>
+   * ".xml",a PMML file is loaded or, if that fails, options are loaded from XML. <p/>
    *
    * -d filename <br/>
    * Saves classifier built from the training data into the given file. In case 
@@ -761,15 +764,31 @@ public class Evaluation
       for (int i = 0; i < options.length; i++)
 	optionsTmp[i] = options[i];
 
-      if (Utils.getOption('l', optionsTmp).toLowerCase().endsWith(".xml")) {
-	// load options from serialized data ('-l' is automatically erased!)
-	XMLClassifier xmlserial = new XMLClassifier();
-	Classifier cl = (Classifier) xmlserial.read(Utils.getOption('l', options));
-	// merge options
-	optionsTmp = new String[options.length + cl.getOptions().length];
-	System.arraycopy(cl.getOptions(), 0, optionsTmp, 0, cl.getOptions().length);
-	System.arraycopy(options, 0, optionsTmp, cl.getOptions().length, options.length);
-	options = optionsTmp;
+      String tmpO = Utils.getOption('l', optionsTmp);
+      //if (Utils.getOption('l', optionsTmp).toLowerCase().endsWith(".xml")) {
+      if (tmpO.endsWith(".xml")) {
+	// try to load file as PMML first
+	boolean success = false;
+	try {
+	  PMMLModel pmmlModel = PMMLFactory.getPMMLModel(tmpO);
+	  if (pmmlModel instanceof PMMLClassifier) {
+	    classifier = ((PMMLClassifier)pmmlModel);
+	    success = true;
+	  }
+	} catch (IllegalArgumentException ex) {
+	  success = false;
+	}
+	if (!success) {
+	  // load options from serialized data  ('-l' is automatically erased!)
+	  XMLClassifier xmlserial = new XMLClassifier();
+	  Classifier cl = (Classifier) xmlserial.read(Utils.getOption('l', options));
+	  
+	  // merge options
+	  optionsTmp = new String[options.length + cl.getOptions().length];
+	  System.arraycopy(cl.getOptions(), 0, optionsTmp, 0, cl.getOptions().length);
+	  System.arraycopy(options, 0, optionsTmp, cl.getOptions().length, options.length);
+	  options = optionsTmp;
+	}
       }
 
       noCrossValidation = Utils.getFlag("no-cv", options);
@@ -821,18 +840,25 @@ public class Evaluation
 	  testSource = new DataSource(testFileName);
 	}
 	if (objectInputFileName.length() != 0) {
-	  InputStream is = new FileInputStream(objectInputFileName);
-	  if (objectInputFileName.endsWith(".gz")) {
-	    is = new GZIPInputStream(is);
-	  }
-	  // load from KOML?
-	  if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent()) ) {
-	    objectInputStream = new ObjectInputStream(is);
-	    xmlInputStream    = null;
-	  }
-	  else {
+	  if (objectInputFileName.endsWith(".xml")) {
+	    // if this is the case then it means that a PMML classifier was
+	    // successfully loaded earlier in the code
 	    objectInputStream = null;
-	    xmlInputStream    = new BufferedInputStream(is);
+	    xmlInputStream = null;
+	  } else {
+	    InputStream is = new FileInputStream(objectInputFileName);
+	    if (objectInputFileName.endsWith(".gz")) {
+	      is = new GZIPInputStream(is);
+	    }
+	    // load from KOML?
+	    if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent()) ) {
+	      objectInputStream = new ObjectInputStream(is);
+	      xmlInputStream    = null;
+	    }
+	    else {
+	      objectInputStream = null;
+	      xmlInputStream    = new BufferedInputStream(is);
+	    }
 	  }
 	}
       } catch (Exception e) {
@@ -999,7 +1025,7 @@ public class Evaluation
         }
 	objectInputStream.close();
       }
-      else {
+      else if (xmlInputStream != null) {
 	// whether KOML is available has already been checked (objectInputStream would null otherwise)!
 	classifier = (Classifier) KOML.read(xmlInputStream);
 	xmlInputStream.close();
@@ -1251,10 +1277,11 @@ public class Evaluation
       if (!noCrossValidation)
         text.append("\n\n" + testingEvaluation.toMatrixString());
       
-      // predictions from cross-validation?
-      if (predsBuff != null) {
-        text.append("\n" + predsBuff);
-      }
+    }
+    
+    // predictions from cross-validation?
+    if (predsBuff != null) {
+      text.append("\n" + predsBuff);
     }
 
     if ((thresholdFile.length() != 0) && template.classAttribute().isNominal()) {
@@ -3239,7 +3266,8 @@ public class Evaluation
     optionsText.append("\tSets file with cost matrix.\n");
     optionsText.append("-l <name of input file>\n");
     optionsText.append("\tSets model input file. In case the filename ends with '.xml',\n");
-    optionsText.append("\tthe options are loaded from the XML file.\n");
+    optionsText.append("\ta PMML file is loaded or, if that fails, options are loaded\n");
+    optionsText.append("\tfrom the XML file.\n");
     optionsText.append("-d <name of output file>\n");
     optionsText.append("\tSets model output file. In case the filename ends with '.xml',\n");
     optionsText.append("\tonly the options are saved to the XML file, not the model.\n");
@@ -3617,6 +3645,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.81.2.6 $");
+    return RevisionUtils.extract("$Revision: 1.81.2.7 $");
   }
 }
