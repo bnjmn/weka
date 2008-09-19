@@ -178,7 +178,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.90 $
+ * @version  $Revision: 1.91 $
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -1277,10 +1277,11 @@ public class Evaluation
       if (!noCrossValidation)
         text.append("\n\n" + testingEvaluation.toMatrixString());
       
-      // predictions from cross-validation?
-      if (predsBuff != null) {
-        text.append("\n" + predsBuff);
-      }
+    }
+    
+    // predictions from cross-validation?
+    if (predsBuff != null) {
+      text.append("\n" + predsBuff);
     }
 
     if ((thresholdFile.length() != 0) && template.classAttribute().isNominal()) {
@@ -3644,6 +3645,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.90 $");
+    return RevisionUtils.extract("$Revision: 1.91 $");
   }
 }
