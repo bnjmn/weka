@@ -20,6 +20,9 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.SelectedTag;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
@@ -31,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.AddTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 public class AddTest extends AbstractFilterTest {
   
@@ -59,10 +62,47 @@ public class AddTest extends AbstractFilterTest {
     testBuffered();
   }
 
+  /**
+   * Checks the generated attribute type.
+   */
+  protected void testType(int attType) {
+    Instances icopy = new Instances(m_Instances);
+    Instances result = null;
+    try {
+      m_Filter.setInputFormat(icopy);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
+    }
+    try {
+      result = Filter.useFilter(icopy, m_Filter);
+      assertNotNull(result);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on useFilter(): \n" + ex.getMessage());
+    }
+    assertEquals(attType, result.attribute(result.numAttributes() - 1).type());
+  }
+  
   public void testAddNominal() {
     m_Filter = getFilter();
     ((Add)m_Filter).setNominalLabels("hello,there,bob");
     testBuffered();
+    testType(Attribute.NOMINAL);
+  }
+
+  public void testAddString() {
+    m_Filter = getFilter();
+    ((Add) m_Filter).setAttributeType(new SelectedTag(Attribute.STRING, Add.TAGS_TYPE));
+    testBuffered();
+    testType(Attribute.STRING);
+  }
+
+  public void testAddDate() {
+    m_Filter = getFilter();
+    ((Add) m_Filter).setAttributeType(new SelectedTag(Attribute.DATE, Add.TAGS_TYPE));
+    testBuffered();
+    testType(Attribute.DATE);
   }
 
   public static Test suite() {
