@@ -34,7 +34,7 @@ import junit.framework.TestCase;
  * tests. It follows basically the <code>runTests</code> method.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.8.2.1 $
  *
  * @see CheckClusterer
  * @see CheckClusterer#runTests(boolean, boolean, boolean)
@@ -475,7 +475,7 @@ public abstract class AbstractClustererTest
     double	cluster;
     
     try {
-      clusterer = Clusterer.makeCopy(m_Clusterer);
+      clusterer = AbstractClusterer.makeCopy(m_Clusterer);
     } 
     catch (Exception e) {
       clusterer = null;
