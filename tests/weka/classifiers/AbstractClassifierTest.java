@@ -39,7 +39,7 @@ import junit.framework.TestCase;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.22 $
+ * @version $Revision: 1.23 $
  *
  * @see CheckClassifier
  * @see CheckClassifier#testsPerClassType(int, boolean, boolean, boolean)
@@ -893,7 +893,7 @@ public abstract class AbstractClassifierTest
    * @param predictions a <code>FastVector</code> containing the predictions
    * @return a <code>String</code> representing the vector of predictions.
    */
-  protected String predictionsToString(FastVector predictions) {
+  public static String predictionsToString(FastVector predictions) {
     StringBuffer sb = new StringBuffer();
     sb.append(predictions.size()).append(" predictions\n");
     for (int i = 0; i < predictions.size(); i++) {
