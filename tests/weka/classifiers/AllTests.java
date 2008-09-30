@@ -31,14 +31,15 @@ import junit.framework.TestSuite;
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
  * @author FracPete (frapcete at waikato dot ac dot nz)
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.14.2.1 $
  */
 public class AllTests 
   extends WekaTestSuite {
 
   public static Test suite() {
     TestSuite suite = new TestSuite();
-
+    
+    suite.addTest(weka.classifiers.pmml.consumer.AllTests.suite());
     suite.addTest(suite("weka.classifiers.Classifier"));
     suite.addTest(suite("weka.classifiers.functions.supportVector.Kernel"));
 
