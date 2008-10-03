@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.39.2.7 $
+   $Revision: 1.39.2.8 $
   ===========================================================================
 -->
 
@@ -43,6 +43,26 @@
   <target name="init_compile" depends="init_all">
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${path_modifier}${build}/classes"/>
+    <mkdir dir="${path_modifier}/public_domain/weka/core/matrix"/>
+    <mkdir dir="${path_modifier}/public_domain/weka/gui"/>
+
+    <!-- Move the public domain classes out of weka -->
+    <move file="${path_modifier}/weka/core/matrix/CholeskyDecomposition.java" 
+          tofile="${path_modifier}/weka/core/matrix" failonerror="false"/>
+    <move file="${path_modifier}/weka/core/matrix/EigenvalueDecomposition.java" 
+          tofile="${path_modifier}/weka/core/matrix" failonerror="false"/>
+    <move file="${path_modifier}/weka/core/matrix/LUDecomposition.java" 
+          tofile="${path_modifier}/weka/core/matrix" failonerror="false"/>
+    <move file="${path_modifier}/weka/core/matrix/Maths.java" 
+          tofile="${path_modifier}/weka/core/matrix" failonerror="false"/>
+    <move file="${path_modifier}/weka/core/matrix/QRDecomposition.java" 
+          tofile="${path_modifier}/weka/core/matrix" failonerror="false"/>
+    <move file="${path_modifier}/weka/core/matrix/SingularValueDecomposition.java" 
+          tofile="${path_modifier}/weka/core/matrix" failonerror="false"/>
+    <move file="${path_modifier}/weka/core/Statistics.java" 
+          tofile="${path_modifier}/weka/core/" failonerror="false"/>
+    <move file="${path_modifier}/weka/gui/SplashWindow.java" 
+          tofile="${path_modifier}/weka/gui/" failonerror="false"/>
   </target>
 
   <!-- Compile and leave class files in source tree -->
@@ -251,7 +271,7 @@
    description="Create a jar file containing classes for remote experiments in ${path_modifier}/dist">
      <jar jarfile="${path_modifier}${dist}/remoteEngine.jar"
       basedir="${path_modifier}${build}/classes"
-      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core.Utils.class,weka/core/RevisionUtils.class"/>
+      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core.Utils.class"/>
      <copy todir="${path_modifier}${dist}" >
        <fileset dir="${path_modifier}weka/experiment">
           <include name="remote.policy"/>
