@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $ 
+ * @version $Revision: 1.29 $ 
  */
 public class Instance
   implements Copyable, Serializable, RevisionHandler {
@@ -901,6 +901,30 @@ public class Instance
   }
 
   /**
+   * Returns the description of one instance (without weight
+   * appended). If the instance
+   * doesn't have access to a dataset, it returns the internal
+   * floating-point values. Quotes string
+   * values that contain whitespace characters.
+   *
+   * This method is used by getRandomNumberGenerator() in
+   * Instances.java in order to maintain backwards compatibility
+   * with weka 3.4.
+   *
+   * @return the instance's description as a string
+   */
+  protected String toStringNoWeight() {
+    StringBuffer text = new StringBuffer();
+    
+    for (int i = 0; i < m_AttValues.length; i++) {
+      if (i > 0) text.append(",");
+      text.append(toString(i));
+    }
+
+    return text.toString();
+  }
+
+  /**
    * Returns the description of one value of the instance as a 
    * string. If the instance doesn't have access to a dataset, it 
    * returns the internal floating-point value. Quotes string
@@ -1201,6 +1225,6 @@ public class Instance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
+    return RevisionUtils.extract("$Revision: 1.29 $");
   }
 }
