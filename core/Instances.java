@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.72.2.4 $ 
+ * @version $Revision: 1.72.2.5 $ 
  */
 public class Instances 
   implements Serializable, RevisionHandler {
@@ -616,7 +616,7 @@ public class Instances
   public Random getRandomNumberGenerator(long seed) {
 
     Random r = new Random(seed);
-    r.setSeed(instance(r.nextInt(numInstances())).toString().hashCode() + seed);
+    r.setSeed(instance(r.nextInt(numInstances())).toStringNoWeight().hashCode() + seed);
     return r;
   }
  
@@ -2134,6 +2134,6 @@ public class Instances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.72.2.4 $");
+    return RevisionUtils.extract("$Revision: 1.72.2.5 $");
   }
 }
