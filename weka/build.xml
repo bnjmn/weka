@@ -9,7 +9,7 @@
    Build file can reside and be executed from either inside weka or the
    directory containing weka.
 
-   $Revision: 1.39.2.9 $
+   $Revision$
   ===========================================================================
 -->
 
@@ -19,7 +19,6 @@
   <property name="doc"  value="doc"/>
   <property name="reports"  value="reports"/>
   <property name="path_modifier" value=""/>
-  <property name="cvsroot_anon" value=":pserver:cvs_anon@cvs.scms.waikato.ac.nz:/usr/local/global-cvs/ml_cvs"/>
   <property name="javac_max_memory" value="256m"/>
   <property name="run_tests_fail" value="true"/>
   <property name="headless" value="false"/>
@@ -43,6 +42,7 @@
   <target name="init_compile" depends="init_all">
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${path_modifier}${build}/classes"/>
+
     <mkdir dir="${path_modifier}public_domain/weka/core/matrix"/>
     <mkdir dir="${path_modifier}public_domain/weka/gui"/>
 
@@ -271,7 +271,7 @@
    description="Create a jar file containing classes for remote experiments in ${path_modifier}/dist">
      <jar jarfile="${path_modifier}${dist}/remoteEngine.jar"
       basedir="${path_modifier}${build}/classes"
-      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core.Utils.class"/>
+      includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class,weka/core/RevisionHandler.class,weka/core.Utils.class,weka/core/RevisionUtils.class"/>
      <copy todir="${path_modifier}${dist}" >
        <fileset dir="${path_modifier}weka/experiment">
           <include name="remote.policy"/>
@@ -285,27 +285,6 @@
      <delete file="${path_modifier}${dist}/remote.policy"/>
      <delete file="${path_modifier}${dist}/remote.policy.example"/>
    </target>
-
-   <target name="changelog"
-    description="Create a changelog file for a release of Weka. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changes (eg. 20 Aug 2004)&gt;, -Dtag=&lt;REVISION_FOR_CHANGELOG&gt;.">
-    <cvschangelog cvsroot="${cvsroot_anon}" 
-                tag="${tag}"
-                dir="${path_modifier}weka"
-                destfile="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"
-		start="${start_date}"/>
-   <style in="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"
-          out="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.html"
-	  style="${ant.home}/etc/changelog.xsl">
-	  <param name="title" expression="Weka-${release} Changelog"/>
-   </style>
-   <delete file="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}.xml"/>
-   <replace dir="${path_modifier}wekadocs/changelogs" token="&#34;/" value="&#34;../doc/weka/">
-     <include name="CHANGELOG-${release}.html"/>
-   </replace>
-   <replace dir="${path_modifier}wekadocs/changelogs" token=".java" value=".html">
-     <include name="CHANGELOG-${release}.html"/>
-   </replace>
-  </target>
 
   <!-- Writes $release version number to weka/core/version.txt -->    
   <target name="set_version">
@@ -390,81 +369,104 @@
     </exec>
   </target>
 
-<!--
-  ===========================================================================
-  Targets for building from a cvs checkout/export
-  ===========================================================================
--->
-  <!-- Initialization for build from cvs checkout -->
-  <target name = "init_build_from_cvs_checkout"
-   depends="init_compile, init_dist">
-     <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
-     <cvspass cvsroot="${cvsroot_anon}" password=""/>
-     <cvs command="checkout -P -r ${tag}" 
-      cvsRoot="${cvsroot_anon}" package="weka" dest="."/>
-     <cvs command="checkout -P -r ${tag}" cvsRoot="${cvsroot_anon}" package="tests" dest="."/>
-      <cvs command="checkout -P -r ${tag}" cvsRoot="${cvsroot_anon}" package="wekadocs" dest="."/>
+<!-- New subversion stuff -->
+ <target name="svnCheckout" description="Checkout from subversion. Run with -Dsvn_username=username -Dsvn_password=password -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
+    <property name="source-root" value="."/>
+    <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
+    <java classname="org.tmatesoft.svn.cli.SVN"
+       dir="${source-root}/" fork="true">
+      <arg value="co"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
+      <arg value="${repository.URL}/${weka_branch}/weka"/>
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
+    <java classname="org.tmatesoft.svn.cli.SVN"
+       dir="${source-root}/" fork="true">
+      <arg value="co"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
+      <arg value="${repository.URL}/${weka_branch}/tests"/>
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
+    <java classname="org.tmatesoft.svn.cli.SVN"
+       dir="${source-root}/" fork="true">
+      <arg value="co"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
+      <arg value="${repository.URL}/${weka_branch}/wekadocs"/>
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
+    <java classname="org.tmatesoft.svn.cli.SVN"
+       dir="${source-root}/" fork="true">
+      <arg value="co"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
+      <arg value="${repository.URL}/${weka_branch}/installer"/>
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
   </target>
 
-  <!-- Initialization for build from cvs export. User must supply revision tag to export by specifying -Dtag=tag_name_of_release when starting ant -->
-  <target name = "init_build_from_cvs_export"
-   depends="init_compile, init_dist">
-     <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
-     <cvspass cvsroot="${cvsroot_anon}" password=""/>
-     <cvs command="export -r ${tag}" 
-      cvsRoot="${cvsroot_anon}" package="weka" dest="."/>
-     <cvs cvsRoot="${cvsroot_anon}" package="tests" dest="."/>
-      <cvs cvsRoot="${cvsroot_anon}" package="wekadocs" dest="."/>
-  </target>
-
-  <!-- Make a release via cvs export -->
-  <target name="release_from_cvs" 
-   depends="init_build_from_cvs_checkout, release"
-   description="Makes a release from a cvs checkout (needs ant to be run with -Dtag=&lt;REVISION_TO_CHECKOUT&gt;, -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changelog generation (eg. 20 Aug 2004)&gt;).">
-      <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
-  </target>
-
-  <target name="release_from_cvs_no_junit" 
-   depends="init_build_from_cvs_checkout, release_no_junit"
-   description="Makes a release from a cvs checkout without running junit tests (needs ant to be run with -Dtag=&lt;REVISION_TO_CHECKOUT&gt;, -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Dstart_date=&lt;start date for changelog generation (eg. 20 Aug 2004)&gt;).">
-      <echo message="!!!!!!DON'T FORGET TO TAG THE REPOSITORY BEFORE MAKING THE RELEASE!!!!!!!"/>
-  </target>
-
-  <!-- This target could be used for an automated nightly/weekly build job -->
-  <target name="build_from_cvs_checkout" 
-   depends="init_build_from_cvs_checkout, junit"
-   description="Does a cvs checkout, builds, runs unit tests, and mails html summary to mail recipients (run ant with -Dmail_recipients=&lt;email,email,...&gt;)">
-     <!-- mail the junit test results -->
-     <mail messageMimeType="text/html"
-          messageFile="${path_modifier}${reports}/junit-noframes.html"
-	       tolist="${mail_recipients}"
-	       mailhost="${mail_smtp_host}"
-	       subject="JUnit test results (${tag}): ${TODAY}"
-	       from="${mail_sender}">
-       <fileset dir="${path_modifier}${reports}">
-         <include name="TESTS-*.xml"/>
-       </fileset>
-     </mail>
+   <target name="changelog"
+    description="Create a changelog file for a release of Weka. Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;, -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
+    <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
+    <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
+          output="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}">
+      <arg value="log"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
+      <arg value="-r"/>
+      <arg value="${date_range}"/>
+      <arg value="-v"/>
+      <arg value="${repository.URL}/${weka_branch}/weka"/>
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
   </target>
 
   <!-- This target is used for an automated nightly/weekly build job -->
   <target name="nightly_build"
           depends="init_tests"
-          description="Does a cvs checkout, builds, runs unit tests, and mails the output to mail recipients (run ant with -Dmail_recipients=&lt;email,email,...&gt; -Dmail_sender=email -Dmail_smtp_host=smtp-server)">
+          description="Does a svn checkout, builds, runs unit tests, and mails the output to mail recipients (run ant with -Dsvn_username=username -Dsvn_password=password -Dweka_branch=branch -Dmail_recipients=&lt;email,email,...&gt; -Dmail_sender=email -Dmail_smtp_host=smtp-server)">
 
      <!-- run the build process -->
-     <ant antfile="${ant.file}" target="init_build_from_cvs_checkout" output="${path_modifier}${reports}/nightly_build-init.txt">
+     <ant antfile="${ant.file}" target="svnCheckout" output="${path_modifier}${reports}/nightly_build-init.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
-       <property name="tag" value="${tag}"/>
+       <property name="svn_username" value="${svn_username}"/>
+       <property name="svn_password" value="${svn_password}"/>
+       <property name="weka_branch" value="${weka_branch}"/>
      </ant>
 
      <ant antfile="${ant.file}" target="run_tests" output="${path_modifier}${reports}/nightly_build-results.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
-       <property name="tag" value="${tag}"/>
        <property name="run_tests_fail" value="false"/>
        <property name="headless" value="${headless}"/>
      </ant>
@@ -473,7 +475,7 @@
      <mail messageMimeType="text/html"
 	       tolist="${mail_recipients}"
 	       mailhost="${mail_smtp_host}"
-	       subject="nightly build results (${tag}): ${TODAY}"
+	       subject="nightly build results (${weka_branch}): ${TODAY}"
 	       from="${mail_sender}">
        <fileset dir="${path_modifier}${reports}">
          <include name="nightly_build*.*"/>
