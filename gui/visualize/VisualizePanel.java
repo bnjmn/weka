@@ -86,7 +86,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision$
  */
 public class VisualizePanel
   extends PrintablePanel {
@@ -2366,6 +2366,15 @@ public class VisualizePanel
     }
     m_saveBut.setEnabled(true);
     repaint();
+  }
+  
+  /**
+   * Returns the underlying plot panel.
+   * 
+   * @return		the plot panel
+   */
+  public PlotPanel getPlotPanel() {
+    return m_plot;
   }
 
   /**
