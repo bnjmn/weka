@@ -16,7 +16,7 @@
 
 /*
  *    VisualizePanel.java
- *    Copyright (C) 1999-2008 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999 University of Waikato, Hamilton, New Zealand
  *
  */
 
