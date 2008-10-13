@@ -677,6 +677,13 @@ public class VisualizePanel
 	});
       ////////////
     }
+
+    /**
+     * Removes all the plots.
+     */
+    public void removeAllPlots() {
+      m_plot2D.removeAllPlots();
+    }
     
     /**
      * @return The FastVector containing all the shapes.
@@ -1026,7 +1033,7 @@ public class VisualizePanel
       m_sIndex = s;
       this.repaint();
     }
-
+    
     /**
      * Clears all existing plots and sets a new master plot
      * @param newPlot the new master plot
@@ -2342,6 +2349,13 @@ public class VisualizePanel
     }
   }
 
+  /**
+   * Removes all the plots.
+   */
+  public void removeAllPlots() {
+    m_plot.removeAllPlots();
+  }
+  
   /**
    * Set the master plot for the visualize panel
    * @param newPlot the new master plot
