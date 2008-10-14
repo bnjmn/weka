@@ -31,12 +31,10 @@ import weka.core.RevisionUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
-import java.io.StringReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -47,7 +45,7 @@ import java.util.Hashtable;
  <!-- globalinfo-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.6 $
+ * @version $Revision$
  * @see Loader
  */
 public class CSVLoader 
@@ -70,8 +68,11 @@ public class CSVLoader
    */
   private FastVector m_cumulativeInstances;
   
-  /** the data collected from an InputStream */
-  private StringBuffer m_StreamBuffer;
+  /** The reader for the data */         
+  private BufferedReader m_sourceReader;
+  
+  /** Tokenizer for the data */
+  private StreamTokenizer m_st;
   
   /**
    * default constructor
@@ -126,19 +127,13 @@ public class CSVLoader
    * @param input the input stream
    * @exception IOException if an error occurs
    */
-  public void setSource(InputStream input) throws IOException {
-    BufferedReader	reader;
-    String		line;
-    
+  @Override
+  public void setSource(InputStream input) throws IOException {    
     m_structure    = null;
     m_sourceFile   = null;
     m_File         = null;
 
-    m_StreamBuffer = new StringBuffer();
-    reader         = new BufferedReader(new InputStreamReader(input));
-    while ((line = reader.readLine()) != null) {
-      m_StreamBuffer.append(line + "\n");
-    }
+    m_sourceReader = new BufferedReader(new InputStreamReader(input));
   }
 
   /**
@@ -148,6 +143,7 @@ public class CSVLoader
    * @param file the source file.
    * @exception IOException if an error occurs
    */
+  @Override
   public void setSource(File file) throws IOException {
     super.setSource(file);
   }
@@ -159,21 +155,17 @@ public class CSVLoader
    * @return the structure of the data set as an empty set of Instances
    * @exception IOException if an error occurs
    */
+  @Override
   public Instances getStructure() throws IOException {
-    if ((m_sourceFile == null) && (m_StreamBuffer == null)) {
+    if ((m_sourceFile == null) && (m_sourceReader == null)) {
       throw new IOException("No source has been specified");
     }
 
     if (m_structure == null) {
       try {
-	BufferedReader br;
-	if (m_StreamBuffer != null)
-	  br = new BufferedReader(new StringReader(m_StreamBuffer.toString()));
-	else
-	  br = new BufferedReader(new FileReader(m_sourceFile));
-	StreamTokenizer st = new StreamTokenizer(br);
-	initTokenizer(st);
-	readStructure(st);
+	m_st = new StreamTokenizer(m_sourceReader);
+	initTokenizer(m_st);
+	readStructure(m_st);
       } catch (FileNotFoundException ex) {
       }
     }
@@ -199,39 +191,30 @@ public class CSVLoader
    * @return the structure of the data set as an empty set of Instances
    * @exception IOException if there is no source or parsing fails
    */
+  @Override
   public Instances getDataSet() throws IOException {
-    if ((m_sourceFile == null) && (m_StreamBuffer == null)) {
+    if ((m_sourceFile == null) && (m_sourceReader == null)) {
       throw new IOException("No source has been specified");
     }
-    BufferedReader br;
-    /*    if (m_sourceFile != null) {
-      setSource(m_sourceFile);
-      br = new BufferedReader(new FileReader(m_sourceFile));
-      }
-      else { */
-    br = new BufferedReader(new StringReader(m_StreamBuffer.toString()));
-   
-    StreamTokenizer st = new StreamTokenizer(br);
-    initTokenizer(st);
-    readStructure(st);
     
-    st.ordinaryChar(',');
-    st.ordinaryChar('\t');
+    if (m_structure == null) {
+      getStructure();
+    }
+        
+    m_st.ordinaryChar(',');
+    m_st.ordinaryChar('\t');
     
     m_cumulativeStructure = new FastVector(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
       m_cumulativeStructure.addElement(new Hashtable());
     }
     
-
-    // Instances result = new Instances(m_structure);
     m_cumulativeInstances = new FastVector();
     FastVector current;
-    while ((current = getInstance(st)) != null) {
+    while ((current = getInstance(m_st)) != null) {
       m_cumulativeInstances.addElement(current);
     }
-    br.close();
-    // now determine the true structure of the data set
+
     FastVector atts = new FastVector(m_structure.numAttributes());
     for (int i = 0; i < m_structure.numAttributes(); i++) {
       String attname = m_structure.attribute(i).name();
@@ -282,13 +265,13 @@ public class CSVLoader
 	    // find correct index
 	    Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
 	    int index = ((Integer)lookup.get(cval)).intValue();
-	    vals[j] = (double)index;
+	    vals[j] = index;
 	  }
 	} else if (dataSet.attribute(j).isNominal()) {
 	  // find correct index
 	  Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
 	  int index = ((Integer)lookup.get(cval)).intValue();
-	  vals[j] = (double)index;
+	  vals[j] = index;
 	} else {
 	  vals[j] = ((Double)cval).doubleValue();
 	}
@@ -298,6 +281,10 @@ public class CSVLoader
     m_structure = new Instances(dataSet, 0);
     setRetrieval(BATCH);
     m_cumulativeStructure = null; // conserve memory
+    
+    // close the stream
+    m_sourceReader.close();
+    
     return dataSet;
   }
 
@@ -309,6 +296,7 @@ public class CSVLoader
    * @exception IOException always. CSVLoader is unable to process a data
    * set incrementally.
    */
+  @Override
   public Instance getNextInstance(Instances structure) throws IOException {
     throw new IOException("CSVLoader can't read data sets incrementally.");
   }
@@ -519,12 +507,29 @@ public class CSVLoader
   }
   
   /**
+   * Resets the Loader ready to read a new data set or the
+   * same data set again.
+   * 
+   * @throws IOException if something goes wrong
+   */
+  @Override
+  public void reset() throws IOException {
+    m_structure = null;
+    m_st = null;
+    setRetrieval(NONE);
+    
+    if (m_File != null && (new File(m_File).isFile())) {
+      setFile(new File(m_File));
+    }
+  }
+  
+  /**
    * Returns the revision string.
    * 
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13.2.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
