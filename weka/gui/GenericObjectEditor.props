@@ -438,6 +438,7 @@ weka.filters.Filter=\
  weka.filters.supervised.instance.Resample,\
  weka.filters.supervised.instance.SpreadSubsample,\
  weka.filters.supervised.instance.StratifiedRemoveFolds,\
+ weka.filters.supervised.instance.SMOTE,\
  weka.filters.unsupervised.attribute.Add,\
  weka.filters.unsupervised.attribute.AddCluster,\
  weka.filters.unsupervised.attribute.AddExpression,\
