@@ -1,3 +1,25 @@
+/*
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/*
+ * StringKernel.java
+ * 
+ * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ */
+
 package weka.classifiers.functions.supportVector;
 
 import weka.core.Attribute;
@@ -26,7 +48,7 @@ import java.util.Vector;
  * <br/>
  * Huma Lodhi, Craig Saunders, John Shawe-Taylor, Nello Cristianini, Christopher J. C. H. Watkins (2002). Text Classification using String Kernels. Journal of Machine Learning Research. 2:419-444.<br/>
  * <br/>
- * Seewald A. K., Kleedorfer F. (2007). An Approximation of the String Subsequence KErnel for Practical SVM Classification and Redundancy Clustering. Journal for Advances in Data Analysis and Classification. Springer.
+ * F. Kleedorfer, A. Seewald (2005). Implementation of a String Kernel for WEKA. Wien, Austria.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -43,13 +65,13 @@ import java.util.Vector;
  *    HTTP = {http://www.jmlr.org/papers/v2/lodhi02a.html}
  * }
  * 
- * &#64;article{Seewald2007,
- *    author = {A. K. Seewald and F. Kleedorfer},
- *    journal = {Journal for Advances in Data Analysis and Classification},
- *    number = {3},
- *    title = {AN Approximation of the String Subsequence Kernel for Practical SVM Classifcation and Redundancy Clustering},
- *    year = {2007},
- *    publisher = {Springer)
+ * &#64;techreport{Kleedorfer2005,
+ *    address = {Wien, Austria},
+ *    author = {F. Kleedorfer and A. Seewald},
+ *    institution = {Oesterreichisches Forschungsinstitut fuer Artificial Intelligence},
+ *    number = {TR-2005-13},
+ *    title = {Implementation of a String Kernel for WEKA},
+ *    year = {2005}
  * }
  * </pre>
  * <p/>
@@ -253,7 +275,7 @@ import java.util.Vector;
  *
  * @author Florian Kleedorfer (kleedorfer@austria.fm)
  * @author Alexander K. Seewald (alex@seewald.at)
- * @version $Revision: 1.5.2.3 $
+ * @version $Revision$
  */
 public class StringKernel 
   extends Kernel
@@ -1483,6 +1505,7 @@ public class StringKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
+
