@@ -14,6 +14,12 @@
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/*
+ * CachedKernel.java
+ * 
+ * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ */
+
 package weka.classifiers.functions.supportVector;
 
 import weka.core.Instance;
@@ -35,7 +41,7 @@ import java.util.Vector;
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
  * @author Steven Hugg (hugg@fasterlight.com) (refactored, LRU cache)
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz) (full cache)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public abstract class CachedKernel 
   extends Kernel {
