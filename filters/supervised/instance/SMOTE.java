@@ -273,12 +273,6 @@ public class SMOTE
     String classValueIndexStr = Utils.getOption( 'C', options);
     if (classValueIndexStr.length() != 0) {
       setClassValue(classValueIndexStr);
-
-      if (classValueIndexStr.equals("0")) {
-	m_DetectMinorityClass = true;
-      } else {
-	m_DetectMinorityClass = false;
-      }
     } else {
       m_DetectMinorityClass = true;
     }
@@ -417,6 +411,11 @@ public class SMOTE
    */
   public void setClassValue(String value) {
     m_ClassValueIndex = value;
+    if (m_ClassValueIndex.equals("0")) {
+      m_DetectMinorityClass = true;
+    } else {
+      m_DetectMinorityClass = false;
+    }
   }
 
   /**
