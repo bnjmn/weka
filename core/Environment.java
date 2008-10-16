@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * replacing key names (enclosed by ${}) with their associated value in Strings.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 public class Environment implements RevisionHandler {
   
@@ -115,6 +115,16 @@ public class Environment implements RevisionHandler {
   public static void removeVariable(String key) {
     ENV_VARS.remove(key);
   }
+  
+  /**
+   * Get the names of the variables (keys) stored in the 
+   * internal map.
+   * 
+   * @return a Set of variable names (keys)
+   */
+  public static Set<String> getVariableNames() {
+    return ENV_VARS.keySet();
+  }
 
   /**
    * Get the value for a particular variable.
@@ -123,10 +133,10 @@ public class Environment implements RevisionHandler {
    * @return the associated value or null if this variable
    * is not in the internal map
    */
-  public static String getVariable(String key) {
+  public static String getVariableValue(String key) {
     return ENV_VARS.get(key);
   }
-
+  
   /**
    * Main method for testing this class.
    *
@@ -157,6 +167,6 @@ public class Environment implements RevisionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
