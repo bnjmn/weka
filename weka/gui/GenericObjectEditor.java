@@ -106,7 +106,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.61 $
+ * @version $Revision$
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -229,7 +229,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     static final long serialVersionUID = -1707872446682150133L;
     
     /** color for "no support". */
-    public final static String NO_SUPPORT = "red";
+    public final static String NO_SUPPORT = "silver";
     
     /** color for "maybe support". */
     public final static String MAYBE_SUPPORT = "blue";
@@ -1554,6 +1554,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    return;
 	  
 	  if (node.isLeaf()) {
+	    if (m_CapabilitiesFilter != null) {
+	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
+	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
+	        return;
+	      }
+	    }
 	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
 	    popup.setVisible(false);
 	  }
