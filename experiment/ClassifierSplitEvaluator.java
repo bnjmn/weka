@@ -88,7 +88,7 @@ import java.util.Vector;
  * All options after -- will be passed to the classifier.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.29 $
+ * @version $Revision$
  */
 public class ClassifierSplitEvaluator 
   implements SplitEvaluator, OptionHandler, AdditionalMeasureProducer, 
@@ -133,6 +133,9 @@ public class ClassifierSplitEvaluator
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 14;
+  
+  /** The number of averaged IR statistics */
+  private static final int NUM_WEIGHTED_IR_STATISTICS = 8;
   
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
@@ -458,6 +461,7 @@ public class ClassifierSplitEvaluator
       : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
+    overall_length += NUM_WEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
     Object [] resultTypes = new Object[overall_length];
@@ -495,6 +499,16 @@ public class ClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    
+    // Weighted IR stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
@@ -548,6 +562,7 @@ public class ClassifierSplitEvaluator
       : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
+    overall_length += NUM_WEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
 
@@ -597,7 +612,17 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "IR_recall";
     resultNames[current++] = "F_measure";
     resultNames[current++] = "Area_under_ROC";
-
+    
+    // Weighted IR stats
+    resultNames[current++] = "Weighted_avg_true_positive_rate";
+    resultNames[current++] = "Weighted_avg_false_positive_rate";
+    resultNames[current++] = "Weighted_avg_true_negative_rate";
+    resultNames[current++] = "Weighted_avg_false_negative_rate";
+    resultNames[current++] = "Weighted_avg_IR_precision";
+    resultNames[current++] = "Weighted_avg_IR_recall";
+    resultNames[current++] = "Weighted_avg_F_measure";
+    resultNames[current++] = "Weighted_avg_area_under_ROC";
+    
     // Timing stats
     resultNames[current++] = "Elapsed_Time_training";
     resultNames[current++] = "Elapsed_Time_testing";
@@ -651,6 +676,7 @@ public class ClassifierSplitEvaluator
     int addm = (m_AdditionalMeasures != null) ? m_AdditionalMeasures.length : 0;
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
+    overall_length += NUM_WEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
     
@@ -730,6 +756,16 @@ public class ClassifierSplitEvaluator
     result[current++] = new Double(eval.recall(m_IRclass));
     result[current++] = new Double(eval.fMeasure(m_IRclass));
     result[current++] = new Double(eval.areaUnderROC(m_IRclass));
+    
+    // Weighted IR stats
+    result[current++] = new Double(eval.weightedTruePositiveRate());
+    result[current++] = new Double(eval.weightedFalsePositiveRate());
+    result[current++] = new Double(eval.weightedTrueNegativeRate());
+    result[current++] = new Double(eval.weightedFalseNegativeRate());
+    result[current++] = new Double(eval.weightedPrecision());
+    result[current++] = new Double(eval.weightedRecall());
+    result[current++] = new Double(eval.weightedFMeasure());
+    result[current++] = new Double(eval.weightedAreaUnderROC());
     
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
@@ -968,7 +1004,7 @@ public class ClassifierSplitEvaluator
 
   /**
    * Gets the raw output from the classifier
-   * @return the raw output from the classifier
+   * @return the raw output from th,0e classifier
    */
   public String getRawResultOutput() {
     StringBuffer result = new StringBuffer();
@@ -1026,6 +1062,6 @@ public class ClassifierSplitEvaluator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.29 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // ClassifierSplitEvaluator
