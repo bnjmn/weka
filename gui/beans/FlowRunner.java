@@ -33,6 +33,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import weka.core.Environment;
 import weka.gui.Logger;
 import weka.gui.beans.xml.*;
 
@@ -41,7 +42,7 @@ import weka.gui.beans.xml.*;
  * flows outside of the KnowledgeFlow application
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class FlowRunner {
 
@@ -162,6 +163,8 @@ public class FlowRunner {
     
     // don't need the graphical connections
     ois.close();
+    
+    Environment.addVariable("Internal.knowledgeflow.directory", (new File(fileName).getParent()));
   }
 
   /**
@@ -178,6 +181,8 @@ public class FlowRunner {
     XMLBeans xml = new XMLBeans(null, null);
     Vector v = (Vector) xml.read(new File(fileName));
     m_beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+    
+    Environment.addVariable("Internal.knowledgeflow.directory", (new File(fileName).getParent()));
   }
   
   /**
