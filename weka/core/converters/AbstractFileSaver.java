@@ -49,7 +49,7 @@ import java.util.Enumeration;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public abstract class AbstractFileSaver
   extends AbstractSaver
@@ -186,14 +186,6 @@ public abstract class AbstractFileSaver
   public void setDir(String dir){
 
     m_dir = dir;
-    if (m_useRelativePath) {
-      try {
-        File tmp = new File((new File(m_dir)).getAbsolutePath());
-        tmp = Utils.convertToRelativePath(tmp);
-        m_dir = tmp.getPath();
-      } catch (Exception ex) {
-      }
-    }
   }
   
   /** Gets the directory
@@ -325,6 +317,13 @@ public abstract class AbstractFileSaver
   public void setDestination(File file) throws IOException {
 
     boolean success = false;
+    String tempOut = file.getPath();
+    try {
+      tempOut = weka.core.Environment.substitute(tempOut);
+    } catch (Exception ex) {
+      throw new IOException("[AbstractFileSaver]: " + ex.getMessage());
+    }
+    file = new File(tempOut);
     String out = file.getAbsolutePath();
     if(m_outputFile != null){
         try{
@@ -390,15 +389,7 @@ public abstract class AbstractFileSaver
   
       try{
         if(m_dir.equals("")) {
-          m_dir = System.getProperty("user.dir");
-          if (m_useRelativePath) {
-            try {
-              File tmp = new File(m_dir);
-              tmp = Utils.convertToRelativePath(tmp);
-              m_dir = tmp.getPath();
-            } catch (Exception e) {
-            }
-          }
+          setDir(System.getProperty("user.dir"));
         }
         if(m_prefix.equals(""))
             setFile(new File(m_dir + File.separator + relationName+ add + FILE_EXTENSION));
