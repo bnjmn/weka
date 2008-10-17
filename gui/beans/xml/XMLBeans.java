@@ -60,7 +60,7 @@ import org.w3c.dom.NodeList;
  * <br>
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7.2.5 $
+ * @version $Revision$
  */
 public class XMLBeans 
   extends XMLBasicSerialization {
@@ -1724,23 +1724,23 @@ public class XMLBeans
       relativeB = new Boolean(relative);
     }
     
-    // only save it, if it's a real file!
-    if ( (file == null) || (file.isDirectory()) ) {
+
+//    if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "",     VAL_FILE);
       invokeWriteToXML(node, dir,    VAL_DIR);
       invokeWriteToXML(node, prefix, VAL_PREFIX);
-    }
+/*    }
     else {
-      String path = (((weka.core.converters.AbstractFileSaver) saver).getUseRelativePath())
+      String path = (((weka.core.converters.FileSourcedConverter) saver).getUseRelativePath())
         ? file.getPath()
         : file.getAbsolutePath();
       // Replace any windows file separators with forward slashes (Java under windows can
       // read paths with forward slashes (apparantly)
       path = path.replace('\\', '/');
       invokeWriteToXML(node, path, VAL_FILE);
-      invokeWriteToXML(node, "", VAL_DIR);
-      invokeWriteToXML(node, "", VAL_PREFIX);
-    }
+      invokeWriteToXML(node, dir, VAL_DIR);
+      invokeWriteToXML(node, prefix, VAL_PREFIX);
+    }*/
 
     if (relativeB != null) {
       invokeWriteToXML(node, relativeB.toString(), VAL_RELATIVE_PATH);
