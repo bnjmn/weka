@@ -49,7 +49,126 @@ What is ANT? This is how the ANT homepage (\verb=http://ant.apache.org/=) define
 % $http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
 
 \section{CLASSPATH}
-$http://weka.sourceforge.net/wekadoc/index.php/en:CLASSPATH_(3.5.6)$
+The CLASSPATH environment variable tells Java where to look for
+classes. Since Java does the search in a first-come-first-serve kind
+of manner, you'll have to take care where and what to put in your
+CLASSPATH. I, personally, never use the environment variable, since
+I'm working often on a project in different versions in parallel. The
+CLASSPATH would just mess up things, if you're not careful (or just
+forget to remove an entry). ANT (\verb=http://ant.apache.org/=) offers
+a nice way for building (and separating source code and class files)
+Java projects. But still, if you're only working on totally separate
+projects, it might be easiest for you to use the environment variable.
+
+\subsection{Setting the CLASSPATH} 
+In the following we add the \verb=mysql-connector-java-3.1.8-bin.jar=
+to our \verb=CLASSPATH= variable (this works for any other jar archive) to make it possible to
+access MySQL databases via JDBC.
+
+\subsubsection*{Win32 (2k and XP)}
+We assume that the \verbmysql-connector-java-3.1.8-bin.jar= archive is located in the following directory:\\
+
+\verb=C:\Program Files\Weka-3-5=\\
+
+\noindent In the \emph{Control Panel} click on \emph{System} (or right click on
+\emph{My Computer} and select \emp{Properties}) and then go to the
+\emph{Avanced} tab. There you'll find a button called \emph{Environment
+Variables}, click it. Depending on, whether you're the only person
+using this computer or it's a lab computer shared by many, you can
+either create a new system-wide (you're the only user) environment
+variable or a user dependent one (recommended for multi-user
+machines). Enter the following name for the variable.\\
+
+\verb=CLASSPATH=\\
+
+\noindent and add this value\\
+
+\verb=C:\Program Files\Weka-3-5\mysql-connector-java-3.1.8-bin.jar=\\
+
+\noindent If you want to add additional jars, you'll have to separate them with the path separator, the semicolon ; (no spaces!). 
+
+\subsubsection*{Unix/Linux}
+
+We make the assumption that the mysql jar is located in the following directory:\\
+
+\verb=/home/johndoe/jars/=\\
+
+\noindent Open a shell and execute the following command, depending on the shell you're using:
+
+\begin{itemize}
+\item bash
+\end{itemize}
+
+\verb_export CLASSPATH=$CLASSPATH:/home/johndoe/jars/mysql-connector-java-3.1.8-bin.jar_
+
+\begin{itemize}
+\item c shell
+\end{itemize}
+
+\verb_setenv CLASSPATH $CLASSPATH:/home/johndoe/jars/mysql-connector-java-3.1.8-bin.jar_
+
+\subsubsection*{Cygwin}
+
+The process is like with Unix/Linux systems, but since the host system
+is Win32 and therefore the Java installation also a Win32 application,
+you'll have to use the semicolon ; as separator for several jars.
+
+\subsection{RunWeka.bat}
+
+With version 3.5.4, Weka is launched differently under Win32. The
+simple batch file got replaced by a central launcher class
+(\verb_= RunWeka.class_) in combination with an INI-file
+ (\verb_= RunWeka.ini_). The \verb=RunWeka.bat= only calls this
+ launcher class now with the appropriate parameters. With this
+ launcher approach it is possible to define different launch
+ scenarios, but with the advantage of having placeholders, e.g., for
+ the max heap size, which enables one to change the memory for all
+ setups easily.
+
+The key of a command in the INI-file is prefixed with \verb=cmd_=, all
+other keys are considered placeholders:\\
+
+\verb^cmd_blah=java ...    ^ \emph{command \textbf{blah}}
+
+\verb^bloerk= ...   ^ \emph{placeholder \textbf{bloerk}}\\
+
+\noindent A placeholder is surrounded in a command with \#:\\
+
+\verb^cmd_blah=java #bloerk#^\\
+
+\noindent \textbf{Note:} The key \emph{wekajar} is determined by the
+-w parameter with which the launcher class is called.\\
+
+\noindent By default, the following commands are predefined:
+
+\begin{itemize}
+\item default\\ The default Weka start, without a terminal window.
+\item console\\ For debugging purposes. Useful as Weka gets started from a terminal window.
+\item explorer\\ The command that's executed if one double-clicks on an ARFF or XRFF file.
+\end{itemize}
+
+\noindent In order to change the \textbf{maximum heap size} for all those commands, one only has
+to modify the \textbf{maxheap} placeholder.\\
+
+\noindent For more information check out the comments in the INI-file.
+
+\subsection{java -jar}
+
+When you're using the Java interpreter with the \textbf{-jar} option,
+be aware of the fact that it \textbf{overwrites} your \verb=CLASSPATH=
+and not \textbf{augments it}. Out of convenience, people often only
+use the \textbf{-jar} option to skip the declaration of the main class to
+start. But as soon as you need more jars, e.g., for database access,
+you need to use the \textbf{-classpath} option and specify the main class.\\
+
+\noindent Here's once again how you start the Weka Main-GUI \textbf{with} your current \verb=CLASSPATH= variable (and 128MB for the JVM):
+
+\begin{itemize}
+\item Linux\\ \verb=java -Xmx128m -classpath $CLASSPATH:weka.jar weka.gui.Main=
+\item Win32\\ \verb=java -Xmx128m -classpath "%CLASSPATH%;weka.jar" weka.gui.Main=
+\end{itemize}
+
+%$http://weka.sourceforge.net/wekadoc/index.php/en:CLASSPATH_(3.5.6)$
 
 \section{Subversion}
 
