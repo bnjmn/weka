@@ -1,7 +1,52 @@
 % Version: $Revision$
 
 \section{ANT}
-$http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
+
+What is ANT? This is how the ANT homepage (\verb=http://ant.apache.org/=) defines its tool:\\
+
+\noindent \emph{Apache Ant is a Java-based build tool. In theory, it is kind of like Make, but without Make's wrinkles.}
+
+\subsection{Basics}
+
+\begin{itemize}
+\item the ANT build file is based on XML
+\item the usual name for the build file is:
+\end{itemize}
+
+\verb=  build.xml=
+
+\begin{itemize}
+\item invocation---the usual build file needs not be specified explicitly, if it's in the current directory; if not target is specified, the default one is used
+\end{itemize}
+
+\verb=  ant [-f <build-file>] [<target>]=
+
+\begin{itemize}
+\item displaying all the available targets of a build file
+\end{itemize}
+
+\verb=  ant [-f <build-file>] -projecthelp=
+
+\subsection{Weka and ANT}
+
+\begin{itemize}
+\item a build file for Weka is available from subversion
+\item some targets of interest
+  \begin{itemize}
+  \item \verb=clean=--Removes the build, dist and reports directories; also any class files in the source tree
+  \item \verb=compile=--Compile weka and deposit class files in\\ \verb=${path_modifier}/build/classes=
+  \item \verb=docs=--Make javadocs into \verb=${path_modifier}/doc=
+  \item \verb=exejar=--Create an executable jar file in \verb=${path_modifier}/dist=
+  \end{itemize}
+\end{itemize}
+
+\subsection{Links}
+\begin{itemize}
+\item ANT homepage: \verb=http://ant.apache.org/=
+\item XML: \verb=http://www.w3.org/XML/=
+\end{itemize}
+
+% $http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
 
 \section{CLASSPATH}
 $http://weka.sourceforge.net/wekadoc/index.php/en:CLASSPATH_(3.5.6)$
