@@ -173,7 +173,49 @@ you need to use the \textbf{-classpath} option and specify the main class.\\
 \section{Subversion}
 
 \section{GenericObjectEditor}
-$http://weka.sourceforge.net/wekadoc/index.php/en:GenericObjectEditor_(3.5.6)$
+
+\subsection{Introduction}
+As of version 3.4.4 it is possible for Weka to dynamically discover
+classes at runtime (rather than using only those specified in the
+\verb=GenericObjectEditor.props= (GOE) file). In version 3.5.8 and higher
+this facility is not enabled by default as it is slower than the props file
+approach, and, furthermore, does not function in environments that do
+not have a CLASSPATH (e.g. application servers).
+
+If you wish to use dynamic class discovery, the relevant file to edit
+is\\ \verb=GenericPropertiesCreator.props= (GPC, located in
+weka.gui). All that is required is to change the \verb=UseDynamic=
+property in this file from \verb=false= to \verb=true=.
+
+If dynamic class discovery is too slow, e.g., due to an enormous CLASSPATH, you can
+generate a new \verb=GenericObjectEditor.props= file and then turn dynamic
+class discovery off again. Just follow these steps:
+
+\begin{itemize}
+\item generate a new \verb=GenericObjectEditor.props= file, based on your current setup (assuming the weka classes are in your CLASSPATH and you're currently just above the root package):\\ \\
+\verb=java weka.gui.GenericPropertiesCreator \= \\
+\verb=weka/gui/GenericPropertiesCreator.props \= \\
+\verb=$HOME/GenericObjectEditor.props=\\ \\
+this will generate a new props file in your home directory (Windows users have to replace the \verb=$HOME= 
+\verb=with %USERPROFILE%=).
+
+\item edit the \verb=GenericPropertiesCreator.props= file and set \verb=UseDynamic= to \verb=false=
+\end{itemize}
+
+\noindent Like with the GOE file the GPC can be either modified in its original
+position (inside the source tree), or you can place a copy of it in
+your home directory and modify this one - which makes installing WEKA
+updates easier, by just replacing the weka.jar.
+
+A limitation of the GOE was so far that additional classifiers,
+filters etc. had to fit into the same package structure as the already
+existing ones, i.e. all had to be located below weka. WEKA can now
+display multiple class hierarchies in the GUI, which makes adding new
+functionality quite easy as we will see later in an example (it is not
+restricted to classifiers only, but also works with all the other
+entries in the GPC file).
+
+%$http://weka.sourceforge.net/wekadoc/index.php/en:GenericObjectEditor_(3.5.6)$
 
 \section{Properties}
 $file http://weka.sourceforge.net/wekadoc/index.php/en:Properties_File_(3.5.6)$
