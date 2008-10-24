@@ -1554,7 +1554,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    return;
 	  
 	  if (node.isLeaf()) {
-	    if (m_CapabilitiesFilter != null) {
+	    if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
 	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
 	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
 	        return;
