@@ -46,7 +46,7 @@ import javax.swing.JComponent;
  *
  * @see #setScalingEnabled()
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 public class JPEGWriter extends JComponentWriter {
   /** the quality of the image */
@@ -178,7 +178,7 @@ public class JPEGWriter extends JComponentWriter {
     
     // get jpeg writer
     writer = null;
-    iter   = ImageIO.getImageWritersByFormatName(getExtension().replace(".", ""));
+    iter   = ImageIO.getImageWritersByFormatName(getExtension().substring(1));
     if (iter.hasNext())
       writer = (ImageWriter) iter.next();
     else
