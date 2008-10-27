@@ -215,6 +215,131 @@ functionality quite easy as we will see later in an example (it is not
 restricted to classifiers only, but also works with all the other
 entries in the GPC file).
 
+\subsection{File Structure}
+The structure of the GOE is a key-value-pair, separated by an
+equals-sign. The value is a comma separated list of classes that are
+all derived from the superclass/superinterface \textit{key}. The GPC is
+slightly different, instead of declaring all the classes/interfaces
+one need only to specify all the packages descendants are located in
+(only non-abstract ones are then listed). E.g., the
+\verb=weka.classifiers.Classifier= entry in the GOE file looks like this:
+
+\begin{verbatim}
+weka.classifiers.Classifier=\
+ weka.classifiers.bayes.AODE,\
+ weka.classifiers.bayes.BayesNet,\
+ weka.classifiers.bayes.ComplementNaiveBayes,\
+ weka.classifiers.bayes.NaiveBayes,\
+ weka.classifiers.bayes.NaiveBayesMultinomial,\
+ weka.classifiers.bayes.NaiveBayesSimple,\
+ weka.classifiers.bayes.NaiveBayesUpdateable,\
+ weka.classifiers.functions.LeastMedSq,\
+ weka.classifiers.functions.LinearRegression,\
+ weka.classifiers.functions.Logistic,\
+ ...
+\end{verbatim}
+
+\noindent The entry producing the same output for the classifiers in the GPC looks like this (7 lines instead of over 70):
+
+\begin{verbatim}
+weka.classifiers.Classifier=\
+ weka.classifiers.bayes,\
+ weka.classifiers.functions,\
+ weka.classifiers.lazy,\
+ weka.classifiers.meta,\
+ weka.classifiers.trees,\
+ weka.classifiers.rules
+\end{verbatim}
+
+\subsection{Exclusion}
+It may not always be desired to list all the classes that can be found
+along the \verb=CLASSPATH=. Sometimes, classes cannot be declared \verb=abstract=
+but still shouldn't be listed in the GOE. For that reason one can list
+classes, interfaces, superclasses for certain packages to be excluded
+from display. This exclusion is done with the following file:\\
+
+\verb=weka/gui/GenericPropertiesCreator.excludes=\\
+
+\noindent The format of this properties file is fairly simple:\\
+
+\verb^<key>=<prefix>:<class>[,<prefix>:<class>]^\\
+
+\noindent Where the \verb=<key>= corresponds to a key in the
+\verb=GenericPropertiesCreator.props= file and the \verb=<prefix>= can
+be one of the following:
+
+\begin{itemize}
+\item \textbf{S} -- \textit{Superclass}\\
+  any class derived from this will be excluded
+\item \textbf{I} -- \textit{Interface}\\
+  any class implementing this interface will be excluded
+\item \textbf{C} -- \textit{Class}\\
+  exactly this class will be excluded
+\end{itemize}
+
+\noindent Here are a few examples:
+
+\begin{verbatim}
+# exclude all ResultListeners that also implement the ResultProducer interface
+# (all ResultProducers do that!)
+weka.experiment.ResultListener=\
+  I:weka.experiment.ResultProducer
+
+# exclude J48 and all SingleClassifierEnhancers
+weka.classifiers.Classifier=\
+  C:weka.classifiers.trees.J48,\
+  S:weka.classifiers.SingleClassifierEnhancer
+\end{verbatim}
+
+\subsection{Class Discovery}
+Unlike the \verb=Class.forName(String)= method that grabs the first class it
+can find in the \verb=CLASSPATH=, and therefore fixes the location of the
+package it found the class in, the dynamic discovery examines the
+complete \verb=CLASSPATH= you're starting the Java Virtual Machine (= JVM)
+with. This means that you can have several parallel directories with
+the same WEKA package structure, e.g. the standard release of WEKA in
+one directory (\verb=/distribution/weka.jar=) and another one with your own
+classes (\verb=/development/weka/...=), and display all of the classifiers in
+the GUI. In case of a name conflict, i.e. two directories contain the
+same class, the first one that can be found is used. In a nutshell,
+your java call of the Experimenter can look like this:\\
+
+\verb=java -classpath "/development:/distribution/weka.jar" weka.gui.experiment.Experimenter=\\
+
+\noindent \textit{Note: Windows users have to replace the ``:'' with ``;''}\\
+
+\subsection{Multiple Class Hierarchies}
+In case you're developing your own framework, but still want to use
+your classifiers within WEKA that wasn't possible so far. With the
+release 3.4.4 it is possible to have multiple class hierarchies being
+displayed in the GUI. If you've developed a modified version of NaiveBayes,
+let's call it \textit{DummyBayes} and it's located in the package\verb= dummy.classifiers=
+then you'll have to add this package to the classifiers list in the
+GPC file like this:
+
+\begin{verbatim}
+weka.classifiers.Classifier=\
+ weka.classifiers.bayes,\
+ weka.classifiers.functions,\
+ weka.classifiers.lazy,\
+ weka.classifiers.meta,\
+ weka.classifiers.trees,\
+ weka.classifiers.rules,\
+ dummy.classifiers
+\end{verbatim}
+
+\noindent Your java call for the Experimenter might look like this:
+
+\verb=java -classpath "weka.jar:dummy.jar" weka.gui.experiment.Experimenter=\\
+
+\noindent Starting up the GUI you'll now have another root node in the
+tree view of the classifiers, called \textit{root}, and below it the weka and
+the \textit{dummy} package hierarchy as you can see here:
+
+\begin{center}
+\epsfig{file=images/technical/En-goe-353.eps,height=7cm}
+\end{center}
+
 %$http://weka.sourceforge.net/wekadoc/index.php/en:GenericObjectEditor_(3.5.6)$
 
 \section{Properties}
