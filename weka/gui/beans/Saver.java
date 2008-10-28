@@ -32,7 +32,7 @@ import weka.core.converters.DatabaseSaver;
  * Saves data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5.2.4 $
+ * @version $Revision$
  *
  */
 public class Saver
@@ -74,6 +74,14 @@ public class Saver
   
   /** Flag indicating that instances will be saved to database. Used because structure information can only be sent after a database has been configured.*/
   private boolean m_isDBSaver;
+  
+  /** 
+   * For file-based savers - if true (default), relation name is used
+   * as the primary part of the filename. If false, then the prefix is
+   * used as the filename. Useful for preventing filenames from getting
+   * too long when there are many filters in a flow. 
+   */
+  private boolean m_relationNameForFilename = true;
  
   /**
    * Count for structure available messages
@@ -212,6 +220,17 @@ public class Saver
     filename = Utils.removeSubstring(filename, "weka.attributeSelection.");
     filename = Utils.removeSubstring(filename, "weka.estimators.");
     filename = Utils.removeSubstring(filename, "weka.datagenerators.");
+    
+    if (!m_isDBSaver && !m_relationNameForFilename) {
+      filename = "";
+      try {
+        if (m_Saver.filePrefix().equals("")) {
+          m_Saver.setFilePrefix("no-name");
+        }
+      } catch (Exception ex) {
+        System.err.println(ex);
+      }
+    }
 
     return filename;
   }
@@ -300,7 +319,12 @@ public class Saver
   public synchronized void saveBatch(){
   
       m_Saver.setRetrieval(m_Saver.BATCH);
-      m_visual.setText(m_fileName);
+      String visText = this.getName();
+      try {
+        visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
+      } catch (Exception ex) {        
+      }
+      m_visual.setText(visText);
       m_ioThread = new SaveBatchThread(Saver.this);
       m_ioThread.setPriority(Thread.MIN_PRIORITY);
       m_ioThread.start();
@@ -337,7 +361,9 @@ public class Saver
             }
             m_count ++;
         }
-        try{  
+        try{
+          String visText = this.getName();
+          visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
             m_visual.setText(m_fileName);
             m_Saver.writeIncremental(e.getInstance());
         } catch (Exception ex) {
@@ -353,6 +379,9 @@ public class Saver
             //m_firstNotice = true;
             m_visual.setStatic();
             System.out.println("...relation "+ m_fileName +" saved.");
+            String visText = this.getName();
+            visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
+            m_visual.setText(visText);     
             m_count = 0;
         } catch (Exception ex) {
             m_visual.setStatic();
@@ -395,6 +424,25 @@ public class Saver
    */
   public Object getWrappedAlgorithm() {
     return getSaver();
+  }
+  
+  /**
+   * Set whether to use the relation name as the primary part
+   * of the filename. If false, then the prefix becomes the filename.
+   * 
+   * @param r true if the relation name is to be part of the filename.
+   */
+  public void setRelationNameForFilename(boolean r) {
+    m_relationNameForFilename = r;
+  }
+  
+  /**
+   * Get whether the relation name is the primary part of the filename.
+   * 
+   * @return true if the relation name is part of the filename.
+   */
+  public boolean getRelationNameForFilename() {
+    return m_relationNameForFilename;
   }
 
   /** Stops the bean */  
