@@ -391,10 +391,17 @@ public abstract class AbstractFileSaver
         if(m_dir.equals("")) {
           setDir(System.getProperty("user.dir"));
         }
-        if(m_prefix.equals(""))
+        if(m_prefix.equals("")) {
+          if (relationName.length() == 0) {
+            throw new IOException("[Saver] Empty filename!!");
+          }
             setFile(new File(m_dir + File.separator + relationName+ add + FILE_EXTENSION));
-        else
-           setFile(new File(m_dir + File.separator + m_prefix + "_" + relationName+ add + FILE_EXTENSION)); 
+        } else {
+          if (relationName.length() > 0) {
+            relationName = "_" + relationName;
+          }
+           setFile(new File(m_dir + File.separator + m_prefix + relationName+ add + FILE_EXTENSION));
+        }
       }catch(Exception ex){
         System.err.println("File prefix and/or directory could not have been set.");
         ex.printStackTrace();
