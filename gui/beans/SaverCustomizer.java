@@ -59,7 +59,7 @@ import javax.swing.JCheckBox;
  * GUI Customizer for the saver bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class SaverCustomizer
   extends JPanel
@@ -102,6 +102,8 @@ public class SaverCustomizer
 
   private JCheckBox m_relativeFilePath;
   
+  private JCheckBox m_relationNameForFilename;
+  
 
   /** Constructor */  
   public SaverCustomizer() {
@@ -130,7 +132,9 @@ public class SaverCustomizer
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
                 (m_dsSaver.getSaver()).setFilePrefix(m_prefixText.getText());
-                (m_dsSaver.getSaver()).setDir(m_fileChooser.getSelectedFile().getAbsolutePath());
+                (m_dsSaver.getSaver()).setDir(m_fileChooser.getSelectedFile().getPath());
+                m_dsSaver.
+                  setRelationNameForFilename(m_relationNameForFilename.isSelected());
                
 	      // tell the saver that a new file has been selected so
 	      m_dsSaver.setSaver(m_dsSaver.getSaver());
@@ -307,14 +311,33 @@ public class SaverCustomizer
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
     try{
-      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25); 
-      JLabel prefixLab = new JLabel(" Prefix for file name:", SwingConstants.LEFT);
+      m_prefixText = new JTextField(m_dsSaver.getSaver().filePrefix(),25);
+      m_prefixText.setToolTipText("Prefix for file name "
+          + "(or filename itself if relation name is not used)");
+      final JLabel prefixLab = 
+        new JLabel(" Prefix for file name:", SwingConstants.LEFT);
+      
+      m_relationNameForFilename = new JCheckBox("Relation name for filename");
+      m_relationNameForFilename.setSelected(m_dsSaver.getRelationNameForFilename());
+      m_relationNameForFilename.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          if (m_relationNameForFilename.isSelected()) {
+            prefixLab.setText("Prefix for file name");
+            m_fileChooser.setApproveButtonText("Select directory and prefix");
+          } else {
+            prefixLab.setText("File name");
+            m_fileChooser.setApproveButtonText("Select directory and filename");
+          }
+        }
+      });
+      
       JPanel prefixP = new JPanel();   
       prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
       prefixP.setLayout(new BorderLayout());
       prefixP.add(prefixLab, BorderLayout.WEST);
       prefixP.add(m_prefixText, BorderLayout.CENTER);
+      prefixP.add(m_relationNameForFilename, BorderLayout.SOUTH);
       innerPanel.add(prefixP, BorderLayout.SOUTH);
     } catch(Exception ex){
     }
