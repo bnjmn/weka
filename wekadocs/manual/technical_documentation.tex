@@ -172,6 +172,8 @@ you need to use the \textbf{-classpath} option and specify the main class.\\
 
 \section{Subversion}
 
+%TODO
+
 \section{GenericObjectEditor}
 
 \subsection{Introduction}
@@ -340,10 +342,75 @@ the \textit{dummy} package hierarchy as you can see here:
 \epsfig{file=images/technical/En-goe-353.eps,height=7cm}
 \end{center}
 
-%$http://weka.sourceforge.net/wekadoc/index.php/en:GenericObjectEditor_(3.5.6)$
+\subsection{Capabilities}
+Version \textbf{3.5.3} of Weka introduces the notion of
+\textit{Capabilities}. Capabilities basically list what kind of data a
+certain object can handle, e.g., one classifier can handle numeric
+classes, but another cannot. In case a class supports capabilities the
+additional buttons \textbf{Filter...} and \textbf{Remove filter} will
+be available in the GOE. The Filter... button pops up a dialog which
+lists all available Capabilities:
+
+\begin{center}
+\epsfig{file=images/technical/En-goe-filter-353.eps,height=7cm}
+\end{center}
+
+\noindent One can then choose those capabilities an object, e.g., a
+classifier, should have. If one is looking for classification problem,
+then the \textit{Nominal} class Capability can be selected. On the other hand,
+if one needs a regression scheme, then the Capability \textit{Numeric} class
+can be selected. This filtering mechanism makes the search for an
+appropriate learning scheme easier. After applying that filter, the
+tree with the objects will be displayed again and lists all objects
+that can handle all the selected Capabilities black, the ones that
+cannot grey and the ones that might be able to handle them blue (e.g.,
+meta classifiers which depend on their base classifier(s)).
 
 \section{Properties}
-$file http://weka.sourceforge.net/wekadoc/index.php/en:Properties_File_(3.5.6)$
+A properties file is a simple text file with this structure:\\
+
+\verb^<key>=<value>^\\
+
+\noindent Comments start with the hash sign \#.\\
+
+\noindent To make a rather long property line more readable, one can
+use a backslash to continue on the next line. The Filter property,
+e.g., looks like this:
+
+\begin{verbatim}
+weka.filters.Filter= \
+ weka.filters.supervised.attribute, \
+ weka.filters.supervised.instance, \
+ weka.filters.unsupervised.attribute, \
+ weka.filters.unsupervised.instance
+\end{verbatim}
+
+\subsection{Precedence}
+The Weka property files (extension .props) are searched for in the following order:
+
+\begin{itemize}
+\item current directory
+\item the user's home directory (*nix \verb=$HOME=, Windows \verb=%USERPROFILE%=)
+\item the class path (normally the weka.jar file) 
+\end{itemize}
+
+\noindent If Weka encounters those files it only supplements the
+properties, never overrides them. In other words, a property in the
+property file of the current directory has a higher precedence than
+the one in the user's home directory.\\
+
+\noindent Note: Under Cywgin (http://cygwin.com/), the home directory
+is still the Windows one, since the java installation will be still
+one for Windows.
+
+\subsection{Examples}
+
+\begin{itemize}
+\item weka/gui/LookAndFeel.props
+\item weka/gui/GenericPropertiesCreator.props
+\item weka/gui/beans/Beans.props
+\end{itemize}
+
 
 \section{XML}
 $http://weka.sourceforge.net/wekadoc/index.php/en:XML_(3.5.6)$
