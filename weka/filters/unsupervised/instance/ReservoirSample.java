@@ -31,6 +31,7 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
+import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 import java.util.Collections;
@@ -71,11 +72,11 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.4 $ 
+ * @version $Revision$ 
  */
 public class ReservoirSample 
   extends Filter 
-  implements UnsupervisedFilter, OptionHandler {
+  implements UnsupervisedFilter, OptionHandler, StreamableFilter {
   
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;
@@ -383,7 +384,7 @@ public class ReservoirSample
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
