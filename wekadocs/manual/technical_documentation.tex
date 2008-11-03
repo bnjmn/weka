@@ -488,4 +488,73 @@ one for Windows.
 
 
 \section{XML}
-$http://weka.sourceforge.net/wekadoc/index.php/en:XML_(3.5.6)$
+Weka now supports XML (\verb=http://www.w3c.org/XML/=) (eXtensible
+Markup Language) in several places.
+
+\subsection{Command Line}
+WEKA now allows Classifiers and Experiments to be started using an
+\verb=-xml= option followed by a filename to retrieve the command line
+options from the XML file instead of the command line.
+
+For such simple classifiers like e.g. J48 this looks like overkill,
+but as soon as one uses Meta-Classifiers or Meta-Meta-Classifiers the
+handling gets tricky and one spends a lot of time looking for missing
+quotes. With the hierarchical structure of XML files it is simple to
+plug in other classifiers by just exchanging tags.
+
+The DTD for the XML options is quite simple:
+
+\begin{verbatim}
+<!DOCTYPE options
+[
+   <!ELEMENT options (option)*>
+   <!ATTLIST options type CDATA "classifier">
+   <!ATTLIST options value CDATA "">
+   <!ELEMENT option (#PCDATA | options)*>
+   <!ATTLIST option name CDATA #REQUIRED>
+   <!ATTLIST option type (flag | single | hyphens | quotes) "single">
+]
+>
+\end{verbatim}
+
+\noindent The type attribute of the option tag needs some
+explanations. There are currently four different types of options in
+WEKA:
+
+\begin{itemize}
+\item \textbf{flag}\\
+The simplest option that takes no arguments, like e.g. the -V flag for inversing an selection.\\\\
+\verb^<option name="V" type="flag"/>^
+\item \textbf{single}\\ 
+The option takes exactly one parameter,
+  directly following after the option, e.g., for specifying the
+  trainings file with \verb=-t somefile.arff=. Here the parameter value is
+  just put between the opening and closing tag. Since single is the
+  default value for the type tag we don't need to specify it
+  explicitly.\\\\
+\verb^<option name="t">somefile.arff</option>^
+\item \textbf{hyphens}\\
+Meta-Classifiers like \verb=AdaBoostM1= take another classifier as option
+with the \verb=-W= option, where the options for the base classifier follow
+after the \verb=--=. And here it is where the fun starts: where to put
+parameters for the base classifier if the Meta-Classifier itself is a
+base classifier for another Meta-Classifier?\\
+
+E.g., does \verb=-W weka.classifiers.trees.J48 -- -C 0.001= become this:
+\begin{verbatim}
+<option name="W" type="hyphens">
+   <options type="classifier" value="weka.classifiers.trees.J48">
+      <option name="C">0.001</option>
+   </options>
+</option>
+\end{verbatim}
+
+\noindent Internally, all the options enclosed by the \verb=options= tag are
+pushed to the end after the \verb=--= if one transforms the XML into a
+command line string.
+
+\item \textbf{quotes}\\
+
+\end{itemize}
+
+%$http://weka.sourceforge.net/wekadoc/index.php/en:XML_(3.5.6)$
