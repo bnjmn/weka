@@ -49,6 +49,7 @@ What is ANT? This is how the ANT homepage (\verb=http://ant.apache.org/=) define
 % $http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
 
 \section{CLASSPATH}
+\label{CLASSPATH}
 The CLASSPATH environment variable tells Java where to look for
 classes. Since Java does the search in a first-come-first-serve kind
 of manner, you'll have to take care where and what to put in your
@@ -114,6 +115,7 @@ is Win32 and therefore the Java installation also a Win32 application,
 you'll have to use the semicolon ; as separator for several jars.
 
 \subsection{RunWeka.bat}
+\label{RunWeka.ini}
 
 With version 3.5.4, Weka is launched differently under Win32. The
 simple batch file got replaced by a central launcher class
@@ -172,7 +174,80 @@ you need to use the \textbf{-classpath} option and specify the main class.\\
 
 \section{Subversion}
 
-%TODO
+\subsection{General}
+The Weka \textit{Subversion} repository is accessible and browseable via the following URL:\\
+
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/=\\
+
+\noindent A Subversion repository has usually the following layout:
+
+\begin{verbatim}
+root
+ |
+ +- trunk
+ |
+ +- tags
+ |
+ +- branches
+\end{verbatim}
+
+\noindent Where \textit{trunk} contains the \textit{main trunk} of the
+development, \textit{tags} snapshots in time of the repository (e.g.,
+when a new version got released) and \textit{branches} development branches
+that forked off the main trunk at some stage (e.g., legacy versions
+that still get bugfixed).
+
+\subsection{Source code}
+The latest version of the Weka source code can be obtained with this URL:\\
+
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka=\\
+
+\noindent If you want to obtain the source code of the book version, use this URL:\\
+
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/branches/book2ndEd-branch/weka=\\
+
+\subsection{JUnit}
+The latest version of Weka's JUnit tests can be obtained with this URL:\\
+
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/trunk/tests=
+
+\noindent And if you want to obtain the JUnit tests of the book version, use this URL:\\
+
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/branches/book2ndEd-branch/tests=
+
+\subsection{Specific version}
+Whenever a release of Weka is generated, the repository gets \textit{tagged}
+
+\begin{itemize}
+\item \verb=dev-X-Y-Z=\\the tag for a release of the developer version, e.g., \textit{dev-3.5.8} for Weka 3.5.8\\
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/tags/dev-3-5-8=
+\item \verb=stable-X-Y-Z=\\ the tag for a release of the book version, e.g., \textit{stable-3-4-13} for Weka 3.4.13\\
+\verb=https://svn.scms.waikato.ac.nz/svn/weka/tags/stable-3-4-13=
+\end{itemize}
+
+\subsection{Clients}
+\subsubsection*{Commandline}
+Modern Linux distributions already come with Subversion either
+pre-installed or easily installed via the package manager of the
+distribution. If that shouldn't be case, or if you are using Windows,
+you have to download the appropriate client from the Subversion
+homepage (\verb=http://subversion.tigris.org/=).
+
+\noindent A checkout of the current developer version of Weka looks like this:\\
+
+\verb=svn co https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka=\\
+
+\subsubsection*{SmartSVN}
+SmartSVN (\verb=http://smartsvn.com/=) is a Java-based, graphical,
+cross-platform client for Subversion. Though it is not
+open-source/free software, the \textit{foundation} version is for free.
+
+\subsubsection*{TortoiseSVN}
+Under Windows, TortoiseCVS was a CVS client, neatly integrated into
+the Windows Explorer. TortoiseSVN
+(\verb=http://tortoisesvn.tigris.org/=) is the equivalent for
+Subversion.
+
 
 \section{GenericObjectEditor}
 
