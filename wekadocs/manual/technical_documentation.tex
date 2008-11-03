@@ -117,7 +117,7 @@ you'll have to use the semicolon ; as separator for several jars.
 \subsection{RunWeka.bat}
 \label{RunWeka.ini}
 
-With version 3.5.4, Weka is launched differently under Win32. The
+From version 3.5.4, Weka is launched differently under Win32. The
 simple batch file got replaced by a central launcher class
 (\verb_= RunWeka.class_) in combination with an INI-file
  (\verb_= RunWeka.ini_). The \verb=RunWeka.bat= only calls this
@@ -418,7 +418,7 @@ the \textit{dummy} package hierarchy as you can see here:
 \end{center}
 
 \subsection{Capabilities}
-Version \textbf{3.5.3} of Weka introduces the notion of
+Version \textbf{3.5.3} of Weka introduced the notion of
 \textit{Capabilities}. Capabilities basically list what kind of data a
 certain object can handle, e.g., one classifier can handle numeric
 classes, but another cannot. In case a class supports capabilities the
@@ -492,6 +492,7 @@ Weka now supports XML (\verb=http://www.w3c.org/XML/=) (eXtensible
 Markup Language) in several places.
 
 \subsection{Command Line}
+\label{xml_command_line}
 WEKA now allows Classifiers and Experiments to be started using an
 \verb=-xml= option followed by a filename to retrieve the command line
 options from the XML file instead of the command line.
@@ -554,7 +555,233 @@ pushed to the end after the \verb=--= if one transforms the XML into a
 command line string.
 
 \item \textbf{quotes}\\
+A Meta-Classifier like \verb=Stacking= can take several \verb=-B= options, where
+each single one encloses other options in quotes (this itself can
+contain a Meta-Classifier!). From \verb=-B ``weka.classifiers.trees.J48''= we
+then get this XML:\\
+\begin{verbatim}
+<option name="B" type="quotes">
+   <options type="classifier" value="weka.classifiers.trees.J48"/>
+</option>
+\end{verbatim}
 
+\noindent With the XML representation one doesn't have to worry
+anymore about the level of quotes one is using and therefore doesn't
+have to care about the correct escaping (i.e. \verb=`` ... \" ... \" ...''=)
+since this is done automatically.
+
+And if we now put all together we can transform this more complicated
+command line (\verb=java= and the \verb=CLASSPATH= omitted):
+
+\begin{verbatim}
+<options type="class" value="weka.classifiers.meta.Stacking">
+   <option name="B" type="quotes">
+      <options type="classifier" value="weka.classifiers.meta.AdaBoostM1">
+         <option name="W" type="hyphens">
+            <options type="classifier" value="weka.classifiers.trees.J48">
+               <option name="C">0.001</option>
+            </options>
+         </option>
+      </options>
+   </option>
+   
+   <option name="B" type="quotes">
+      <options type="classifier" value="weka.classifiers.meta.Bagging">
+         <option name="W" type="hyphens">
+            <options type="classifier" value="weka.classifiers.meta.AdaBoostM1">
+               <option name="W" type="hyphens">
+                  <options type="classifier" value="weka.classifiers.trees.J48"/>
+               </option>
+            </options>
+         </option>
+      </options>
+   </option>
+
+   <option name="B" type="quotes">
+      <options type="classifier" value="weka.classifiers.meta.Stacking">
+         <option name="B" type="quotes">
+            <options type="classifier" value="weka.classifiers.trees.J48"/>
+         </option>
+      </options>
+   </option>
+
+   <option name="t">test/datasets/hepatitis.arff</option>
+</options>
+\end{verbatim}
 \end{itemize}
+
+\noindent \textbf{Note}: The \verb=type= and \verb=value= attribute of the outermost
+\verb=option=s tag is not used while reading the parameters. It is merely for
+documentation purposes, so that one knows which class was actually
+started from the command line.\\
+
+\noindent \textbf{Responsible Class(es)}:
+
+\begin{verbatim}
+weka.core.xml.XMLOptions
+\end{verbatim}
+
+\subsection{Serialization of Experiments}
+It is now possible to serialize the Experiments from the WEKA
+Experimenter not only in the proprietary binary format Java offers
+with serialization (with this you run into problems trying to read old
+experiments with a newer WEKA version, due to different SerialUIDs),
+but also in XML. There are currently two different ways to do this:
+
+\begin{itemize}
+\item \textbf{built-in}\\
+The built-in serialization captures only the necessary informations of
+an experiment and doesn't serialize anything else. It's sole purpose
+is to save the setup of a specific experiment and can therefore not
+store any built models. Thanks to this limitation we'll never run into
+problems with mismatching SerialUIDs.
+
+This kind of serialization is always available and can be selected via
+a Filter (*.xml) in the Save/Open-Dialog of the Experimenter.
+
+The DTD is very simple and looks like this (for version 3.4.5): 
+
+\begin{verbatim}
+<!DOCTYPE object[
+   <!ELEMENT object (#PCDATA | object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   
+   <!ATTLIST object null      CDATA "no">   
+   <!ATTLIST object version   CDATA "3.4.5">
+]>
+\end{verbatim}
+
+\noindent Prior to versions 3.4.5 and 3.5.0 it looked like this: 
+
+\begin{verbatim}
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA | object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "yes">
+   <!ATTLIST object array     CDATA "no">
+]
+>
+\end{verbatim}
+
+\noindent \textbf{Responsible Class(es)}:\\
+
+\verb=weka.experiment.xml.XMLExperiment=\\
+
+\noindent \textbf{for general Serialization}:
+
+\begin{verbatim}
+weka.core.xml.XMLSerialization
+weka.core.xml.XMLBasicSerialization 
+\end{verbatim}
+
+\item \textbf{KOML} (\verb=http://koala.ilog.fr/XML/serialization/=)\\
+The Koala Object Markup Language (KOML) is published under the LGPL
+(http://www.gnu.org/copyleft/lgpl.html) and is an alternative way of
+serializing and derserializing Java Objects in an XML file. Like the
+normal serialization it serializes everything into XML via an
+ObjectOutputStream, including the SerialUID of each class. Even though
+we have the same problems with mismatching SerialUIDs it is at least
+possible edit the XML files by hand and replace the offending IDs with
+the new ones.
+
+In order to use KOML one only has to assure that the KOML classes are
+in the CLASSPATH with which the Experimenter is launched. As soon as
+KOML is present another Filter (\verb=*.koml=) will show up in the
+Save/Open-Dialog.
+
+The DTD for KOML can be found at \verb=http://koala.ilog.fr/XML/koml12.dtd=\\
+
+\noindent \textbf{Responsible Class(es)}:\\
+
+\verb=weka.core.xml.KOML=\\
+\end{itemize}
+
+\noindent The experiment class can of course read those XML files if passed as
+input or output file (see options of \verb=weka.experiment.Experiment= and
+\verb=weka.experiment.RemoteExperiment=
+
+\subsection{Serialization of Classifiers}
+The options for models of a classifier, \verb=-l= for the input model and \verb=-d=
+for the output model, now also supports XML serialized files. Here we
+have to differentiate between two different formats:
+
+\begin{itemize}
+\item \textbf{built-in}\\
+The built-in serialization captures only the options of a classifier
+but not the built model. With the \verb=-l= one still has to provide a
+training file, since we only retrieve the options from the XML
+file. It is possible to add more options on the command line, but it
+is no check performed whether they collide with the ones stored in the
+XML file.
+
+The file is expected to end with \verb=.xml=.
+
+\item \textbf{KOML}\\
+Since the KOML serialization captures everything of a Java Object we
+can use it just like the normal Java serialization.
+
+The file is expected to end with \verb=.koml=.
+\end{itemize}
+
+\noindent The \textbf{built-in} serialization can be used in the
+\textbf{Experimenter} for loading/saving options from algorithms that
+have been added to a Simple Experiment. Unfortunately it is not
+possible to create such a hierarchical structure like mentioned in
+Section~\ref{xml_command_line}. This is because of the loss of
+information caused by the \verb=getOptions()= method of classifiers: it
+returns only a flat String-Array and not a tree structure.\\
+
+\noindent \textbf{Responsible Class(es)}:
+
+\begin{verbatim}
+weka.core.xml.KOML
+weka.classifiers.xml.XMLClassifier
+\end{verbatim}
+
+\subsection{Bayesian Networks}
+The GraphVisualizer (\verb=weka.gui.graphvisualizer.GraphVisualizer=) can
+save graphs into the Interchange Format\\
+(\verb=http://www-2.cs.cmu.edu/~fgcozman/Research/InterchangeFormat/=) for
+Bayesian Networks (BIF). If started from command line with an XML
+filename as first parameter and not from the Explorer it can display
+the given file directly.
+
+The DTD for BIF is this:
+
+\begin{verbatim}
+<!DOCTYPE BIF [
+   <!ELEMENT BIF ( NETWORK )*>
+         <!ATTLIST BIF VERSION CDATA #REQUIRED>
+   <!ELEMENT NETWORK ( NAME, ( PROPERTY | VARIABLE | DEFINITION )* )>
+   <!ELEMENT NAME (#PCDATA)>
+
+   <!ELEMENT VARIABLE ( NAME, ( OUTCOME |  PROPERTY )* ) >
+         <!ATTLIST VARIABLE TYPE (nature|decision|utility) "nature">
+   <!ELEMENT OUTCOME (#PCDATA)>
+   <!ELEMENT DEFINITION ( FOR | GIVEN | TABLE | PROPERTY )* >
+   <!ELEMENT FOR (#PCDATA)>
+   <!ELEMENT GIVEN (#PCDATA)>
+
+   <!ELEMENT TABLE (#PCDATA)>
+   <!ELEMENT PROPERTY (#PCDATA)>
+]>
+\end{verbatim}
+
+\noindent \textbf{Responsible Class(es)}:
+
+\begin{verbatim}
+weka.classifiers.bayes.BayesNet#toXMLBIF03()
+weka.classifiers.bayes.net.BIFReader
+weka.gui.graphvisualizer.BIFParser
+\end{verbatim}
+
+\subsection{XRFF files}
+With Weka 3.5.4 a new, more feature-rich, XML-based data format got introduced: \textbf{XRFF}
+
+For more information, please see Chapter~\ref{xrff}.
 
 %$http://weka.sourceforge.net/wekadoc/index.php/en:XML_(3.5.6)$

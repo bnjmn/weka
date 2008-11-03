@@ -61,6 +61,17 @@ You have to modify the link in the Windows Start menu, if you're starting the co
 Due to the new launching scheme, you no longer modify the batch file, but the \verb=RunWeka.ini= file. In that particular file, you'll have to change the \textbf{maxheap} placeholder. See section~\ref{RunWeka.ini}.
 \end{itemize}
 
+\subsection{Mac OSX}
+In your Weka installation directory (\verb=weka-3-x-y.app=) locate the \verb=Contents= subdirectory and edit the
+\verb=Info.plist= file. Near the bottom of the file you should see some text like:
+
+\begin{verbatim}
+<key>VMOptions</key>
+<string>-Xmx256M</string>
+\end{verbatim}
+
+\noindent Alter the \verb=256M= to something higher.
+
 \subsection{StackOverflowError}
 Try increasing the stack of your virtual machine. With Sun's JDK you
 can use this command to increase the stacksize:\\
