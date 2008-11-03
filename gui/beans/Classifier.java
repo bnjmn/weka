@@ -45,7 +45,7 @@ import javax.swing.filechooser.FileFilter;
  * Bean that wraps around weka.classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25.2.8 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -378,7 +378,7 @@ public class Classifier
       Instances dataset = m_incrementalEvent.getStructure();
       // default to the last column if no class is set
       if (dataset.classIndex() < 0) {
-	//	System.err.println("Classifier : setting class index...");
+	// System.err.println("Classifier : setting class index...");
 	dataset.setClassIndex(dataset.numAttributes()-1);
       }
       try {
@@ -437,6 +437,12 @@ public class Classifier
 
     try {
       // test on this instance
+      if (m_incrementalEvent.getInstance().dataset().classIndex() < 0) {
+        // System.err.println("Classifier : setting class index...");
+        m_incrementalEvent.getInstance().dataset().setClassIndex(
+            m_incrementalEvent.getInstance().dataset().numAttributes()-1);
+      }
+      
       int status = IncrementalClassifierEvent.WITHIN_BATCH;
       /*      if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
 	      status = IncrementalClassifierEvent.NEW_BATCH; */

@@ -43,7 +43,7 @@ import javax.swing.JPanel;
  * A wrapper bean for Weka filters
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.5 $
+ * @version $Revision$
  */
 public class Filter
   extends JPanel
@@ -272,6 +272,7 @@ public class Filter
 	m_structurePassedOn = false;
 	try {
 	  if (m_Filter.isOutputFormatDefined()) {
+	    System.err.println("Filter - passing on output format...");
 	    //	    System.err.println(m_Filter.getOutputFormat());
 	    m_ie.setStructure(m_Filter.getOutputFormat());
 	    notifyInstanceListeners(m_ie);
@@ -286,35 +287,98 @@ public class Filter
       return;
     }
    
-    // pass instance through the filter
-    try {
-      if (!m_Filter.input(e.getInstance())) {
-	if (m_log != null) {
-	  m_log.logMessage("ERROR : filter not ready to output instance");
-	}
-	return;
+    if (e.getStatus() == InstanceEvent.BATCH_FINISHED) {
+      // get the last instance (if available)
+      try {
+        if (m_Filter.input(e.getInstance())) {
+          Instance filteredInstance = m_Filter.output();
+          if (filteredInstance != null) {
+            if (!m_structurePassedOn) {
+              // pass on the new structure first
+              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+              notifyInstanceListeners(m_ie);
+              m_structurePassedOn = true;
+            }
+
+            m_ie.setInstance(filteredInstance);
+            m_ie.setStatus(e.getStatus());
+            notifyInstanceListeners(m_ie);
+          }
+        }
+      } catch (Exception ex) {
+        if (m_log != null) {
+          m_log.logMessage(ex.toString());
+        }
+        ex.printStackTrace();
       }
       
-      // collect output instance.
-      Instance filteredInstance = m_Filter.output();
-      if (filteredInstance == null) {
-	return;
-      }
-      if (!m_structurePassedOn) {
-	// pass on the new structure first
-	m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
-	notifyInstanceListeners(m_ie);
-	m_structurePassedOn = true;
-      }
+      // check for any pending instances that we might need to pass on
+      try {
+        if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
+          Instance filteredInstance = m_Filter.output();
+          if (filteredInstance != null) {
+            if (!m_structurePassedOn) {
+              // pass on the new structure first
+              m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+              notifyInstanceListeners(m_ie);
+              m_structurePassedOn = true;
+            }
 
-      m_ie.setInstance(filteredInstance);
-      m_ie.setStatus(e.getStatus());
-      notifyInstanceListeners(m_ie);
-    } catch (Exception ex) {
-      if (m_log != null) {
-	m_log.logMessage(ex.toString());
+            m_ie.setInstance(filteredInstance);
+            m_ie.setStatus(e.getStatus());
+            notifyInstanceListeners(m_ie);
+          }
+          while (m_Filter.numPendingOutput() > 0) {
+            filteredInstance = m_Filter.output();
+            m_ie.setInstance(filteredInstance);
+            if (m_Filter.numPendingOutput() == 0) {
+              m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
+            } else {
+              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+            }
+            notifyInstanceListeners(m_ie);
+          }
+        }
+      } catch (Exception ex) {
+        if (m_log != null) {
+          m_log.logMessage(ex.toString());
+        }
+        ex.printStackTrace();
       }
-      ex.printStackTrace();
+    } else {
+      // pass instance through the filter
+      try {
+        if (!m_Filter.input(e.getInstance())) {
+          /* if (m_log != null) {
+            m_log.logMessage("ERROR : filter not ready to output instance");
+          } */
+          
+          // quietly return. Filter might be able to output some instances
+          // once the batch is finished.
+          return;
+        }
+
+        // collect output instance.
+        Instance filteredInstance = m_Filter.output();
+        if (filteredInstance == null) {
+          return;
+        }
+        if (!m_structurePassedOn) {
+          // pass on the new structure first
+          m_ie.setStructure(new Instances(filteredInstance.dataset(), 0));
+          notifyInstanceListeners(m_ie);
+          m_structurePassedOn = true;
+        }
+
+        m_ie.setInstance(filteredInstance);
+        m_ie.setStatus(e.getStatus());
+        notifyInstanceListeners(m_ie);
+      } catch (Exception ex) {
+        if (m_log != null) {
+          m_log.logMessage(ex.toString());
+        }
+        ex.printStackTrace();
+      }
     }
   }
 
