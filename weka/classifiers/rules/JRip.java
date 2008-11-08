@@ -132,7 +132,7 @@ import java.util.Vector;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.1 $
+ * @version $Revision$
  */
 public class JRip 
   extends Classifier 
@@ -733,7 +733,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -935,7 +935,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -1059,7 +1059,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1422,7 +1422,7 @@ public class JRip
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1458,7 +1458,7 @@ public class JRip
    * @throws Exception if classifier can't be built successfully
    */
   public void buildClassifier(Instances instances) throws Exception {
-     
+    
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
@@ -1564,6 +1564,10 @@ public class JRip
 		m_Distributions.addElement(((ClassOrder)m_Filter).distributionsByOriginalIndex(classDist));
 	}	
     }    
+
+    // free up memory
+    for (int i = 0; i < m_RulesetStats.size(); i++)
+      ((RuleStats) m_RulesetStats.elementAt(i)).cleanUp();
   }
     
   /**
@@ -2041,7 +2045,7 @@ public class JRip
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**

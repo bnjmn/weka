@@ -45,7 +45,7 @@ import java.util.Random;
  * an object of this class. <p>
  *  
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6.2.1 $
+ * @version $Revision$
  */
 public class RuleStats 
   implements Serializable, RevisionHandler {
@@ -101,6 +101,13 @@ public class RuleStats
     m_Ruleset = rules;	
   }
 
+  /**
+   * Frees up memory after classifier has been built.
+   */
+  public void cleanUp() {
+    m_Data     = null;
+    m_Filtered = null;
+  }
 
   /**
    * Set the number of all conditions that could appear 
@@ -907,6 +914,6 @@ public class RuleStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
