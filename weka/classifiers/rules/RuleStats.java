@@ -44,7 +44,7 @@ import weka.core.Utils;
  * an object of this class. <p>
  *  
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class RuleStats implements Serializable {
 
@@ -96,6 +96,13 @@ public class RuleStats implements Serializable {
     m_Ruleset = rules;	
   }
 
+  /**
+   * Frees up memory after classifier has been built.
+   */
+  public void cleanUp() {
+    m_Data     = null;
+    m_Filtered = null;
+  }
 
   /**
    * Set the number of all conditions that could appear 

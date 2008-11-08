@@ -134,7 +134,7 @@ import weka.classifiers.Classifier;
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class JRip extends Classifier 
   implements OptionHandler, 
@@ -1298,6 +1298,10 @@ public class JRip extends Classifier
 		m_Distributions.addElement(((ClassOrder)m_Filter).distributionsByOriginalIndex(classDist));
 	}	
     }    
+
+    // free up memory
+    for (int i = 0; i < m_RulesetStats.size(); i++)
+      ((RuleStats) m_RulesetStats.elementAt(i)).cleanUp();
   }
     
   /**
