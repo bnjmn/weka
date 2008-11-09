@@ -170,6 +170,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.meta.RandomCommittee,\
  weka.classifiers.meta.RandomSubSpace,\
  weka.classifiers.meta.RegressionByDiscretization,\
+ weka.classifiers.meta.RotationForest,\
  weka.classifiers.meta.Stacking,\
  weka.classifiers.meta.StackingC,\
  weka.classifiers.meta.ThresholdSelector,\
