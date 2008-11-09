@@ -17,6 +17,7 @@
 /*
  *    RotationForest.java
  *    Copyright (C) 2008 Juan Jose Rodriguez
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
