@@ -29,7 +29,7 @@ import weka.core.Instances;
  * Abstract attribute transformer. Transforms the dataset.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision$
  */
 public interface AttributeTransformer {
     // ===============
@@ -48,11 +48,12 @@ public interface AttributeTransformer {
   Instances transformedHeader() throws Exception;
 
   /**
-   * Returns the transformed data
+   * Transform the supplied data set (assumed to be the same format
+   * as the training data)
    * @return A set of instances representing the transformed data
    * @exception Exception if the attribute could not be evaluated
    */
-  Instances transformedData() throws Exception;
+  Instances transformedData(Instances data) throws Exception;
 
   /**
    * Transforms an instance in the format of the original data to the
