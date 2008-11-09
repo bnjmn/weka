@@ -80,7 +80,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Amri Napolitano
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 
 public class LatentSemanticAnalysis 
@@ -94,7 +94,7 @@ implements AttributeTransformer, OptionHandler {
   private Instances m_trainInstances;
   
   /** Keep a copy for the class attribute (if set) */
-  private Instances m_trainCopy;
+  private Instances m_trainHeader;
   
   /** The header for the transformed data format */
   private Instances m_transformedFormat;
@@ -402,7 +402,7 @@ implements AttributeTransformer, OptionHandler {
     m_sumSquaredSingularValues = 0.0;
     
     m_trainInstances = new Instances(data);
-    m_trainCopy = null;
+    m_trainHeader = null;
     
     m_attributeFilter = null;
     m_nominalToBinaryFilter = null;
@@ -419,7 +419,7 @@ implements AttributeTransformer, OptionHandler {
     if (m_trainInstances.classIndex() >= 0) {
       // make copy of training data so the class values can be appended to final 
       // transformed instances
-      m_trainCopy = new Instances(m_trainInstances);
+      m_trainHeader = new Instances(m_trainInstances);
       
       m_hasClass = true;
       m_classIndex = m_trainInstances.classIndex();
@@ -568,7 +568,7 @@ implements AttributeTransformer, OptionHandler {
     }
     // add original class attribute if present
     if (m_hasClass) {
-      attributes.addElement(m_trainCopy.classAttribute().copy());
+      attributes.addElement(m_trainHeader.classAttribute().copy());
     }
     // create blank header
     Instances outputFormat = new Instances(m_trainInstances.relationName() + "_LSA", 
@@ -599,11 +599,12 @@ implements AttributeTransformer, OptionHandler {
   }
   
   /**
-   * Gets the transformed training data.
+   * Transform the supplied data set (assumed to be the same format
+   * as the training data)
    * @return the transformed training data
    * @throws Exception if transformed data can't be returned
    */
-  public Instances transformedData() throws Exception {
+  public Instances transformedData(Instances data) throws Exception {
     if (m_s == null) {
       throw new Exception("Latent Semantic Analysis hasn't been built yet");
     }
@@ -612,8 +613,8 @@ implements AttributeTransformer, OptionHandler {
     
     // the transformed version of instance i from the training data
     // is stored as the i'th row vector in v (the right singular vectors)
-    for (int i = 0; i < m_numInstances; i++) {
-      Instance currentInstance = m_trainCopy.instance(i);
+    for (int i = 0; i < data.numInstances(); i++) {
+      Instance currentInstance = data.instance(i);
       // record attribute values for converted instance
       double [] newValues = new double[m_outputNumAttributes];
       for (int j = 0; j < m_actualRank; j++) { // fill in values from v
@@ -670,7 +671,7 @@ implements AttributeTransformer, OptionHandler {
     
     // apply filters so new instance is in same format as training instances
     Instance tempInstance = (Instance)instance.copy();
-    if (!instance.equalHeaders(m_trainCopy.instance(0))) {
+    if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: headers don't match: " +
       "LatentSemanticAnalysis");
     }
@@ -786,7 +787,7 @@ implements AttributeTransformer, OptionHandler {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

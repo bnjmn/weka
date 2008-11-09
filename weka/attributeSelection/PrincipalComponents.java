@@ -72,7 +72,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision$
  */
 public class PrincipalComponents 
   extends UnsupervisedAttributeEvaluator 
@@ -85,7 +85,7 @@ public class PrincipalComponents
   private Instances m_trainInstances;
 
   /** Keep a copy for the class attribute (if set) */
-  private Instances m_trainCopy;
+  private Instances m_trainHeader;
 
   /** The header for the transformed data format */
   private Instances m_transformedFormat;
@@ -438,7 +438,7 @@ public class PrincipalComponents
 
     // make a copy of the training data so that we can get the class
     // column to append to the transformed data (if necessary)
-    m_trainCopy = new Instances(m_trainInstances);
+    m_trainHeader = new Instances(m_trainInstances, 0);
     
     m_replaceMissingFilter = new ReplaceMissingValues();
     m_replaceMissingFilter.setInputFormat(m_trainInstances);
@@ -546,7 +546,7 @@ public class PrincipalComponents
    * Returns just the header for the transformed data (ie. an empty
    * set of instances. This is so that AttributeSelection can
    * determine the structure of the transformed data without actually
-   * having to get all the transformed data through getTransformedData().
+   * having to get all the transformed data through transformedData().
    * @return the header of the transformed data.
    * @throws Exception if the header of the transformed data can't
    * be determined.
@@ -567,20 +567,20 @@ public class PrincipalComponents
    * @return the transformed training data
    * @throws Exception if transformed data can't be returned
    */
-  public Instances transformedData() throws Exception {
+  public Instances transformedData(Instances data) throws Exception {
     if (m_eigenvalues == null) {
       throw new Exception("Principal components hasn't been built yet");
     }
 
-    Instances output;
+    Instances output = null;
 
     if (m_transBackToOriginal) {
       output = new Instances(m_originalSpaceFormat);
     } else {
       output = new Instances(m_transformedFormat);
     }
-    for (int i=0;i<m_trainCopy.numInstances();i++) {
-      Instance converted = convertInstance(m_trainCopy.instance(i));
+    for (int i = 0; i < data.numInstances(); i++) {
+      Instance converted = convertInstance(data.instance(i));
       output.add(converted);
     }
 
@@ -783,7 +783,7 @@ public class PrincipalComponents
 
     double[] newVals = new double[m_outputNumAtts];
     Instance tempInst = (Instance)instance.copy();
-    if (!instance.equalHeaders(m_trainCopy.instance(0))) {
+    if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: header's don't match: "
                           +"PrincipalComponents");
     }
@@ -858,11 +858,11 @@ public class PrincipalComponents
     }
     
     if (m_hasClass) {
-      attributes.addElement(m_trainCopy.classAttribute().copy());
+      attributes.addElement(m_trainHeader.classAttribute().copy());
     }
 
     Instances outputFormat = 
-      new Instances(m_trainCopy.relationName()+"->PC->original space",
+      new Instances(m_trainHeader.relationName()+"->PC->original space",
                     attributes, 0);
     
     // set the class to be the last attribute if necessary
@@ -923,7 +923,7 @@ public class PrincipalComponents
      }
      
      if (m_hasClass) {
-       attributes.addElement(m_trainCopy.classAttribute().copy());
+       attributes.addElement(m_trainHeader.classAttribute().copy());
      }
 
      Instances outputFormat = 
@@ -945,7 +945,7 @@ public class PrincipalComponents
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.36 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
