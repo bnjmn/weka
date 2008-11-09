@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.17.2.1 $
+ * @version $Revision$
  */
 public class RankSearch 
   extends ASSearch 
@@ -408,7 +408,7 @@ public class RankSearch
       if (m_ASEval instanceof AttributeTransformer) {
         // get the transformed data a rebuild the subset evaluator
         m_Instances = ((AttributeTransformer)m_ASEval).
-          transformedData();
+          transformedData(m_Instances);
         ((ASEvaluation)m_SubsetEval).buildEvaluator(m_Instances);
       }
       m_Ranking = ranker.search(m_ASEval, m_Instances);
@@ -517,6 +517,6 @@ public class RankSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
