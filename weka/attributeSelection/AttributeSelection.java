@@ -82,7 +82,7 @@ import java.util.Random;
  * ------------------------------------------------------------------------ <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.46.2.1 $
+ * @version  $Revision$
  */
 public class AttributeSelection 
   implements Serializable, RevisionHandler {
@@ -1098,6 +1098,6 @@ public class AttributeSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.46.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
