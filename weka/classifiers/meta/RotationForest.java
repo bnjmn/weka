@@ -813,6 +813,7 @@ public class RotationForest
           }
         }
 
+        dataSubSet.randomize(random);
         // Remove a percentage of the instances
 	Instances originalDataSubSet = dataSubSet;
 	dataSubSet.randomize(random);
