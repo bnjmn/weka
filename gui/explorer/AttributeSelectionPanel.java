@@ -101,7 +101,7 @@ import javax.swing.event.ChangeListener;
  * so that previous results are accessible.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.49 $
+ * @version $Revision$
  */
 public class AttributeSelectionPanel 
   extends JPanel
@@ -783,7 +783,7 @@ public class AttributeSelectionPanel
 	    if (evaluator instanceof AttributeTransformer) {
 	      try {
 		Instances transformed = 
-		  ((AttributeTransformer)evaluator).transformedData();
+		  ((AttributeTransformer)evaluator).transformedData(inst);
 		transformed.
 		  setRelationName("AT: "+transformed.relationName());
 
