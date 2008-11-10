@@ -105,7 +105,7 @@ import javax.swing.table.AbstractTableModel;
  * Bayesion network inference.
  * 
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 public class GUI extends JPanel implements LayoutCompleteEventListener {
 
@@ -137,6 +137,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	 */
 	boolean m_bViewMargins = false;
 	boolean m_bViewCliques = false;
+	
+	/** The menu bar */
+	private JMenuBar m_menuBar;
 
 	/** data selected from file. Used to train a Bayesian network on */
 	Instances m_Instances = null;
@@ -1907,6 +1910,109 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
 		updateStatus();
 		a_datagenerator.setEnabled(false);
+		
+		makeMenuBar();
+	}
+	
+	/**
+	 * Get the menu bar for this application.
+	 * 
+	 * @return the menu bar
+	 */
+	public JMenuBar getMenuBar() {
+	  return m_menuBar;
+	}
+	
+	private void makeMenuBar() {
+          m_menuBar = new JMenuBar();
+          JMenu fileMenu = new JMenu("File");
+          fileMenu.setMnemonic('F');
+
+          m_menuBar.add(fileMenu);
+          fileMenu.add(a_new);
+          fileMenu.add(a_load);
+          fileMenu.add(a_save);
+          fileMenu.add(a_saveas);
+          fileMenu.addSeparator();
+          fileMenu.add(a_print);
+          fileMenu.add(a_export);
+          fileMenu.addSeparator();
+          fileMenu.add(a_quit);
+          JMenu editMenu = new JMenu("Edit");
+          editMenu.setMnemonic('E');
+          m_menuBar.add(editMenu);
+          editMenu.add(a_undo);
+          editMenu.add(a_redo);
+          editMenu.addSeparator();
+          editMenu.add(a_selectall);
+          editMenu.add(a_delnode);
+          editMenu.add(a_cutnode);
+          editMenu.add(a_copynode);
+          editMenu.add(a_pastenode);
+          editMenu.addSeparator();
+          editMenu.add(a_addnode);
+          editMenu.add(a_addarc);
+          editMenu.add(a_delarc);
+          editMenu.addSeparator();
+          editMenu.add(a_alignleft);
+          editMenu.add(a_alignright);
+          editMenu.add(a_aligntop);
+          editMenu.add(a_alignbottom);
+          editMenu.add(a_centerhorizontal);
+          editMenu.add(a_centervertical);
+          editMenu.add(a_spacehorizontal);
+          editMenu.add(a_spacevertical);
+
+          JMenu toolMenu = new JMenu("Tools");
+          toolMenu.setMnemonic('T');
+          toolMenu.add(a_networkgenerator);
+          toolMenu.add(a_datagenerator);
+          toolMenu.add(a_datasetter);
+          toolMenu.add(a_learn);
+          toolMenu.add(a_learnCPT);
+          toolMenu.addSeparator();
+          toolMenu.add(a_layout);
+          toolMenu.addSeparator();
+          final JCheckBoxMenuItem viewMargins = new JCheckBoxMenuItem("Show Margins", false);
+          viewMargins.addActionListener(new ActionListener() {
+                  public void actionPerformed(ActionEvent ae) {
+                          boolean bPrev = m_bViewMargins; 
+                          m_bViewMargins = viewMargins.getState();
+                          if (bPrev == false && viewMargins.getState() == true) {
+                                  updateStatus();
+                          }
+                          repaint();
+                  }
+          });
+          toolMenu.add(viewMargins);
+          final JCheckBoxMenuItem viewCliques = new JCheckBoxMenuItem("Show Cliques", false);
+          viewCliques.addActionListener(new ActionListener() {
+                  public void actionPerformed(ActionEvent ae) {
+                          boolean bPrev = m_bViewCliques; 
+                          m_bViewCliques = viewCliques.getState();
+                          if (bPrev == false && viewCliques.getState() == true) {
+                                  updateStatus();
+                          }
+                          repaint();
+                  }
+          });
+          toolMenu.add(viewCliques);
+
+          m_menuBar.add(toolMenu);
+          JMenu viewMenu = new JMenu("View");
+          viewMenu.setMnemonic('V');
+          m_menuBar.add(viewMenu);
+          viewMenu.add(a_zoomin);
+          viewMenu.add(a_zoomout);
+          viewMenu.addSeparator();
+          viewMenu.add(a_viewtoolbar);
+          viewMenu.add(a_viewstatusbar);
+
+          JMenu helpMenu = new JMenu("Help");
+          helpMenu.setMnemonic('H');
+          m_menuBar.add(helpMenu);
+          helpMenu.add(a_help);
+          helpMenu.add(a_about);
 	}
 
 	/**
@@ -3374,6 +3480,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	public static void main(String[] args) {
 		JFrame jf = new JFrame("Bayes Network Editor");
 		final GUI g = new GUI();
+		JMenuBar menuBar = g.getMenuBar();
 
 		if (args.length>0) {
 			try {
@@ -3386,98 +3493,10 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 			}
 		}
 
-		JMenuBar menuBar = new JMenuBar();
-		JMenu fileMenu = new JMenu("File");
-		fileMenu.setMnemonic('F');
-
-		menuBar.add(fileMenu);
-		fileMenu.add(g.a_new);
-		fileMenu.add(g.a_load);
-		fileMenu.add(g.a_save);
-		fileMenu.add(g.a_saveas);
-		fileMenu.addSeparator();
-		fileMenu.add(g.a_print);
-		fileMenu.add(g.a_export);
-		fileMenu.addSeparator();
-		fileMenu.add(g.a_quit);
-		JMenu editMenu = new JMenu("Edit");
-		editMenu.setMnemonic('E');
-		menuBar.add(editMenu);
-		editMenu.add(g.a_undo);
-		editMenu.add(g.a_redo);
-		editMenu.addSeparator();
-		editMenu.add(g.a_selectall);
-		editMenu.add(g.a_delnode);
-		editMenu.add(g.a_cutnode);
-		editMenu.add(g.a_copynode);
-		editMenu.add(g.a_pastenode);
-		editMenu.addSeparator();
-		editMenu.add(g.a_addnode);
-		editMenu.add(g.a_addarc);
-		editMenu.add(g.a_delarc);
-		editMenu.addSeparator();
-		editMenu.add(g.a_alignleft);
-		editMenu.add(g.a_alignright);
-		editMenu.add(g.a_aligntop);
-		editMenu.add(g.a_alignbottom);
-		editMenu.add(g.a_centerhorizontal);
-		editMenu.add(g.a_centervertical);
-		editMenu.add(g.a_spacehorizontal);
-		editMenu.add(g.a_spacevertical);
-
-		JMenu toolMenu = new JMenu("Tools");
-		toolMenu.setMnemonic('T');
-		toolMenu.add(g.a_networkgenerator);
-		toolMenu.add(g.a_datagenerator);
-		toolMenu.add(g.a_datasetter);
-		toolMenu.add(g.a_learn);
-		toolMenu.add(g.a_learnCPT);
-		toolMenu.addSeparator();
-		toolMenu.add(g.a_layout);
-		toolMenu.addSeparator();
-		final JCheckBoxMenuItem viewMargins = new JCheckBoxMenuItem("Show Margins", false);
-		viewMargins.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				boolean bPrev = g.m_bViewMargins; 
-				g.m_bViewMargins = viewMargins.getState();
-				if (bPrev == false && viewMargins.getState() == true) {
-					g.updateStatus();
-				}
-				g.repaint();
-			}
-		});
-		toolMenu.add(viewMargins);
-		final JCheckBoxMenuItem viewCliques = new JCheckBoxMenuItem("Show Cliques", false);
-		viewCliques.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ae) {
-				boolean bPrev = g.m_bViewCliques; 
-				g.m_bViewCliques = viewCliques.getState();
-				if (bPrev == false && viewCliques.getState() == true) {
-					g.updateStatus();
-				}
-				g.repaint();
-			}
-		});
-		toolMenu.add(viewCliques);
-
-		menuBar.add(toolMenu);
-		JMenu viewMenu = new JMenu("View");
-		viewMenu.setMnemonic('V');
-		menuBar.add(viewMenu);
-		viewMenu.add(g.a_zoomin);
-		viewMenu.add(g.a_zoomout);
-		viewMenu.addSeparator();
-		viewMenu.add(g.a_viewtoolbar);
-		viewMenu.add(g.a_viewstatusbar);
-		jf.setJMenuBar(menuBar);
-		JMenu helpMenu = new JMenu("Help");
-		helpMenu.setMnemonic('H');
-		menuBar.add(helpMenu);
-		helpMenu.add(g.a_help);
-		helpMenu.add(g.a_about);
 
 
-		
+
+	        jf.setJMenuBar(menuBar);		
 		jf.getContentPane().add(g);
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jf.setSize(800, 600);
