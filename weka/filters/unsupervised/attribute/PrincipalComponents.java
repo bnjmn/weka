@@ -629,7 +629,7 @@ public class PrincipalComponents
 
     // make a copy of the training data so that we can get the class
     // column to append to the transformed data (if necessary)
-    m_TrainCopy = new Instances(m_TrainInstances);
+    m_TrainCopy = new Instances(m_TrainInstances, 0);
 
     m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(m_TrainInstances);
