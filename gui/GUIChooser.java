@@ -22,40 +22,11 @@
 
 package weka.gui;
 
-import weka.classifiers.EnsembleLibrary;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Copyright;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.SystemInfo;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.classifiers.bayes.net.GUI;
-import weka.gui.arffviewer.ArffViewer;
-import weka.gui.beans.KnowledgeFlow;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.boundaryvisualizer.BoundaryVisualizer;
-import weka.gui.experiment.Experimenter;
-import weka.gui.explorer.Explorer;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.sql.SqlViewer;
-import weka.gui.treevisualizer.Node;
-import weka.gui.treevisualizer.NodePlace;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeBuild;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
-
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.LayoutManager;
@@ -79,11 +50,12 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -91,7 +63,31 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
+
+import weka.classifiers.bayes.net.GUI;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Copyright;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.SystemInfo;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.gui.arffviewer.ArffViewer;
+import weka.gui.beans.KnowledgeFlow;
+import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.boundaryvisualizer.BoundaryVisualizer;
+import weka.gui.experiment.Experimenter;
+import weka.gui.explorer.Explorer;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.sql.SqlViewer;
+import weka.gui.treevisualizer.Node;
+import weka.gui.treevisualizer.NodePlace;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeBuild;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
 
 /** 
  * The main class for the Weka GUIChooser. Lets the user choose
@@ -124,25 +120,25 @@ public class GUIChooser
   protected JPanel m_PanelApplications = new JPanel();
   
   /** Click to open the Explorer */
-  protected Button m_ExplorerBut = new Button("Explorer");
+  protected JButton m_ExplorerBut = new JButton("Explorer");
 
   /** The frame containing the explorer interface */
   protected JFrame m_ExplorerFrame;
 
   /** Click to open the Explorer */
-  protected Button m_ExperimenterBut = new Button("Experimenter");
+  protected JButton m_ExperimenterBut = new JButton("Experimenter");
 
   /** The frame containing the experiment interface */
   protected JFrame m_ExperimenterFrame;
 
   /** Click to open the KnowledgeFlow */
-  protected Button m_KnowledgeFlowBut = new Button("KnowledgeFlow");
+  protected JButton m_KnowledgeFlowBut = new JButton("KnowledgeFlow");
 
   /** The frame containing the knowledge flow interface */
   protected JFrame m_KnowledgeFlowFrame;
 
   /** Click to open the simplecli */
-  protected Button m_SimpleBut = new Button("Simple CLI");
+  protected JButton m_SimpleBut = new JButton("Simple CLI");
   
   /** The SimpleCLI */
   protected SimpleCLI m_SimpleCLI;
@@ -156,9 +152,6 @@ public class GUIChooser
   /** The frame containing the Bayes net GUI */
   protected JFrame m_BayesNetGUIFrame;
   
-  /** Click to open the EnsembleLibrary */
-  protected Button m_EnsembleLibraryBut = new Button("Ensemble Library");
-
   /** The frame containing the ensemble library interface */
   protected JFrame m_EnsembleLibraryFrame;
 
@@ -281,7 +274,6 @@ public class GUIChooser
 
     // Menu bar
     m_jMenuBar = new JMenuBar();
-    setJMenuBar(m_jMenuBar);
     
     // Program
     m_jMenuProgram = new JMenu();
@@ -1012,6 +1004,8 @@ public class GUIChooser
 	}
       }
     }); */
+    
+    setJMenuBar(m_jMenuBar);
 
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent w) {
