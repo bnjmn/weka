@@ -22,6 +22,7 @@
 
 package weka.gui;
 
+import weka.classifiers.bayes.net.GUI;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.Copyright;
 import weka.core.Instances;
@@ -112,7 +113,7 @@ import javax.swing.event.InternalFrameEvent;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.12.2.3 $
+ * @version $Revision$
  */
 public class Main
   extends JFrame
@@ -125,7 +126,7 @@ public class Main
    * DesktopPane with background image.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12.2.3 $
+   * @version $Revision$
    */
   public static class BackgroundDesktopPane
     extends JDesktopPane {
@@ -177,7 +178,7 @@ public class Main
    * Specialized JFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12.2.3 $
+   * @version $Revision$
    */
   public static class ChildFrameSDI 
     extends JFrame {
@@ -240,7 +241,7 @@ public class Main
    * Specialized JInternalFrame class.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.12.2.3 $
+   * @version $Revision$
    */
   public static class ChildFrameMDI
     extends JInternalFrame {
@@ -845,6 +846,29 @@ public class Main
 	    showWindow(getWindow(title));
 	  }
 	}
+      });
+      
+      // Tools/Bayes net editor
+      // Tools/Bayes net editor
+      final JMenuItem jMenuItemBayesNet = new JMenuItem();
+      jMenuTools.add(jMenuItemBayesNet);
+      jMenuItemBayesNet.setText("Bayes net editor");
+      jMenuItemBayesNet.setMnemonic('N');
+
+      jMenuItemBayesNet.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          String title = jMenuItemBayesNet.getText();
+          
+          if (!containsWindow(title)) {
+            final GUI bayesNetGUI = new GUI();
+            final Container frame = createFrame(
+                m_Self, title, bayesNetGUI, new BorderLayout(), 
+                BorderLayout.CENTER, 800, 600, bayesNetGUI.getMenuBar(), false, true);
+          }
+          else {
+            showWindow(getWindow(title));
+          }          
+        }       
       });
 
       // Tools/EnsembleLibrary
