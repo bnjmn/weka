@@ -73,7 +73,7 @@ import javax.swing.filechooser.FileFilter;
  * iterate over.
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.21.2.1 $
+ * @version $Revision$
  */
 public class AlgorithmListPanel
   extends JPanel
@@ -488,6 +488,9 @@ public class AlgorithmListPanel
       
     } else if (e.getSource() == m_EditBut) {
       if (m_List.getSelectedValue() != null) {
+        m_ClassifierEditor.setClassType(weka.classifiers.Classifier.class);
+        // m_PD.getEditor().setValue(m_List.getSelectedValue());
+        m_ClassifierEditor.setValue(m_List.getSelectedValue());
          m_Editing = true;
          if (m_PD == null) {
             int x = getLocationOnScreen().x;
@@ -504,7 +507,6 @@ public class AlgorithmListPanel
          } else {
             m_PD.setVisible(true);
          }
-         m_PD.getEditor().setValue(m_List.getSelectedValue());
       }
 
     } else if (e.getSource() == m_DeleteBut) {
