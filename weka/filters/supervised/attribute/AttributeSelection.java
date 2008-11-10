@@ -97,7 +97,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class AttributeSelection 
   extends Filter
@@ -491,7 +491,7 @@ public class AttributeSelection
 
     int i;
     if (m_ASEvaluator instanceof AttributeTransformer) {
-      informat = ((AttributeTransformer)m_ASEvaluator).transformedData();
+      informat = ((AttributeTransformer)m_ASEvaluator).transformedHeader();
     } else {
       informat = getInputFormat();
     }
@@ -562,7 +562,7 @@ public class AttributeSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
