@@ -1192,7 +1192,7 @@ public class Main
 
       jMenuHelp.add(new JSeparator());
 
-      // Help/WekaDoc
+/*      // Help/WekaDoc
       jMenuItemHelpWekaDoc = new JMenuItem();
       jMenuHelp.add(jMenuItemHelpWekaDoc);
       jMenuItemHelpWekaDoc.setText("Online documentation");
@@ -1201,7 +1201,7 @@ public class Main
 	public void actionPerformed(ActionEvent evt) {
 	  BrowserHelper.openURL(m_Self, "http://weka.sourceforge.net/wekadoc/");
 	}
-      });
+      }); */
 
       // Help/WekaWiki
       jMenuItemHelpWekaWiki = new JMenuItem();
@@ -1210,7 +1210,7 @@ public class Main
       jMenuItemHelpWekaWiki.setMnemonic('W');
       jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
-	  BrowserHelper.openURL(m_Self, "http://weka.sourceforge.net/wiki/");
+	  BrowserHelper.openURL(m_Self, "http://weka.wiki.sourceforge.net/");
 	}
       });
 
