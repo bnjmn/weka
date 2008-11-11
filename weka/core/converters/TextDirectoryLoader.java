@@ -63,15 +63,15 @@ import java.util.Vector;
  *
  * Based on code from the TextDirectoryToArff tool:
  * <ul>
- *    <li><a href="http://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2002-October/000681.html" target="_blank">Original tool</a></li>
- *    <li><a href="http://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2004-January/002152.html" target="_blank">Current version</a></li>
- *    <li><a href="http://weka.sourceforge.net/wiki/index.php/ARFF_files_from_Text_Collections" target="_blank">Wiki article</a></li>
+ *    <li><a href="https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2002-October/000685.html" target="_blank">Original tool</a></li>
+ *    <li><a href="https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2004-January/002160.html" target="_blank">Current version</a></li>
+ *    <li><a href="http://weka.wiki.sourceforge.net/ARFF+files+from+Text+Collections" target="_blank">Wiki article</a></li>
  * </ul>
  *
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby at cs.waikato.ac.nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see Loader
  */
 public class TextDirectoryLoader
@@ -424,7 +424,7 @@ public class TextDirectoryLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
