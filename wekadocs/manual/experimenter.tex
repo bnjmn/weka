@@ -31,7 +31,6 @@ Both setups allow you to setup \textit{standard} experiments, that are run local
 
 The next section covers the \textit{standard} experiments (both, simple and advanced), followed by the \textit{remote} experiments and finally the \textit{analysing} of the results.
 
-This manual is also available online on the \textit{WekaDoc Wiki} \cite{wekadoc}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Standard Experiments %
@@ -611,7 +610,7 @@ To run a remote experiment you will need:
    \item The directory for the datasets is \texttt{/home/johndoe/datasets}.
 \end{itemize}
 
-\noindent \textbf{Note:} The example policy file \texttt{remote.policy.example} is using this setup (available in \texttt{weka/experiment}\footnote{Weka's source code can be found in the \texttt{weka-src.jar} archive or obtained from CVS \cite{cvs}.}).
+\noindent \textbf{Note:} The example policy file \texttt{remote.policy.example} is using this setup (available in \texttt{weka/experiment}\footnote{Weka's source code can be found in the \texttt{weka-src.jar} archive or obtained from Subversion \cite{subversion}.}).
 
 \subsection{Database Server Setup}
 
@@ -654,7 +653,7 @@ We won't go into the details of setting up a MySQL server, but this is rather st
 /home/johndoe/remote_engine
 		\end{verbatim}
 
-   \item Unzip the \texttt{remoteExperimentServer.jar} (from the Weka distribution; or build it from the sources\footnote{Weka's source code can be found in the \texttt{weka-src.jar} archive or obtained from CVS \cite{cvs}.} with \texttt{ant remotejar}) into a temporary directory.
+   \item Unzip the \texttt{remoteExperimentServer.jar} (from the Weka distribution; or build it from the sources\footnote{Weka's source code can be found in the \texttt{weka-src.jar} archive or obtained from Subversion \cite{subversion}.} with \texttt{ant remotejar}) into a temporary directory.
 
    \item Next, copy \texttt{remoteEngine.jar} and \texttt{remote.policy.example} to the \\ \texttt{/home/johndoe/remote\_engine} directory.
 
@@ -757,7 +756,7 @@ Now we will configure the experiment:
 
    \item If you serialized an experiment and then modify your \textit{DatabaseUtils.props} file due to an error (e.g., a missing type-mapping), the Experimenter will use the \textit{DatabaseUtils.props} you had \textit{at the time you serialized the experiment}. Keep in mind that the serialization process also serializes the \textit{DatabaseUtils} class and therefore stored your props-file! This is another reason for storing your experiments as XML and not in the properietary binary format the Java serialization produces. 
 
-   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the ''User'' button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from CVS \cite{cvs}. 
+   \item Using a corrupt or incomplete \textit{DatabaseUtils.props} file can cause peculiar interface errors, for example disabling the use of the ''User'' button alongside the database URL. If in doubt copy a clean \textit{DatabaseUtils.props} from Subversion \cite{subversion}. 
 
    \item If you get \texttt{NullPointerException at java.util.Hashtable.get()} in the Remote Engine do not be alarmed. This will have no effect on the results of your experiment. 
 \end{itemize}
