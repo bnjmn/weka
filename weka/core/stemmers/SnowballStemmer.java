@@ -40,7 +40,7 @@ import java.util.Vector;
  *   java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext<br/>
  * <br/>
  * For more information visit these web sites:<br/>
- *   http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers<br/>
+ *   http://weka.wiki.sourceforge.net/Stemmers<br/>
  *   http://snowball.tartarus.org/<br/>
  * <p/>
  <!-- globalinfo-end -->
@@ -58,7 +58,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author    FracPete (fracpete at waikato dot ac dot nz)
- * @version   $Revision: 1.10 $
+ * @version   $Revision$
  */
 public class SnowballStemmer 
   implements Stemmer, OptionHandler {
@@ -149,7 +149,7 @@ public class SnowballStemmer
       + "  java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext\n"
       + "\n"
       + "For more information visit these web sites:\n"
-      + "  http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers\n"
+      + "  http://weka.wiki.sourceforge.net/Stemmers\n"
       + "  http://snowball.tartarus.org/\n";
   }
   
@@ -444,7 +444,7 @@ public class SnowballStemmer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -461,4 +461,3 @@ public class SnowballStemmer
     }
   }
 }
-
