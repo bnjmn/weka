@@ -1,7 +1,7 @@
 # Customises the list of options given by the GenericObjectEditor
 # for various superclasses.
 #
-# Version: $Revision: 1.16.2.4 $
+# Version: $Revision$
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
@@ -165,7 +165,7 @@ weka.core.converters.AbstractFileSaver=\
 #
 # Note: the snowball jar needs to be in the CLASSPATH to make these stemmers
 #       available. See the following links for more information:
-#       http://weka.sourceforge.net/wekadoc/index.php/en:Stemmers
+#       http://weka.wiki.sourceforge.net/Stemmers
 #       http://snowball.tartarus.org/
 #
 #org.tartarus.snowball.SnowballProgram=\
