@@ -52,6 +52,14 @@ import java.util.Vector;
  *  (default 10).
  * </pre>
  * 
+ * <pre> -E
+ *  Whether to delete empty bins after discretization
+ *  (default false).
+ * </pre>
+ * 
+ * <pre> -F
+ *  Use equal-frequency instead of equal-width discretization.</pre>
+ * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
@@ -341,17 +349,68 @@ public class RegressionByDiscretization
   /**
    * Parses a given list of options. <p/>
    *
-   <!-- options-end -->
-   * -D <br>
-   * Produce debugging output. <p>
-   *
-   * -W classifierstring <br>
-   * Classifierstring should contain the full class name of a classifier
-   * followed by options to the classifier
-   * (default: weka.classifiers.rules.ZeroR).<p>
-   *
-   * -B int <br>
-   * Number of bins for equal-width discretization (default 10).<p>
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -B &lt;int&gt;
+   *  Number of bins for equal-width discretization
+   *  (default 10).
+   * </pre>
+   * 
+   * <pre> -E
+   *  Whether to delete empty bins after discretization
+   *  (default false).
+   * </pre>
+   * 
+   * <pre> -F
+   *  Use equal-frequency instead of equal-width discretization.</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -W
+   *  Full name of base classifier.
+   *  (default: weka.classifiers.trees.J48)</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.trees.J48:
+   * </pre>
+   * 
+   * <pre> -U
+   *  Use unpruned tree.</pre>
+   * 
+   * <pre> -C &lt;pruning confidence&gt;
+   *  Set confidence threshold for pruning.
+   *  (default 0.25)</pre>
+   * 
+   * <pre> -M &lt;minimum number of instances&gt;
+   *  Set minimum number of instances per leaf.
+   *  (default 2)</pre>
+   * 
+   * <pre> -R
+   *  Use reduced error pruning.</pre>
+   * 
+   * <pre> -N &lt;number of folds&gt;
+   *  Set number of folds for reduced error
+   *  pruning. One fold is used as pruning set.
+   *  (default 3)</pre>
+   * 
+   * <pre> -B
+   *  Use binary splits only.</pre>
+   * 
+   * <pre> -S
+   *  Don't perform subtree raising.</pre>
+   * 
+   * <pre> -L
+   *  Do not clean up after the tree has been built.</pre>
+   * 
+   * <pre> -A
+   *  Laplace smoothing for predicted probabilities.</pre>
+   * 
+   * <pre> -Q &lt;seed&gt;
+   *  Seed for random data shuffling (default 1).</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -542,3 +601,4 @@ public class RegressionByDiscretization
     runClassifier(new RegressionByDiscretization(), argv);
   }
 }
+
