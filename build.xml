@@ -14,24 +14,35 @@
 -->
 
   <!-- set global properties for this build -->
+  <property name="src" value="src/main/java"/>
+  <property name="src-test" value="src/test/java"/>
+  <property name="lib" value="lib" />
+  <property name="regression_tests_root" value="src/test/resources/wekarefs"/>
   <property name="build" value="build"/>
   <property name="dist"  value="dist"/>
   <property name="doc"  value="doc"/>
   <property name="reports"  value="reports"/>
-  <property name="path_modifier" value=""/>
   <property name="javac_max_memory" value="256m"/>
   <property name="run_tests_fail" value="true"/>
   <property name="headless" value="false"/>
   <property name="macdistrib" value="osx-distrib"/>
 
   <target name="init_all">
-     <available file="weka" type="dir" 
-     property="path_modifier" value=""/>
-     <available file="../weka" type ="dir"
-     property="path_modifier" value="../"/>
     <!-- Create the time stamp -->
     <tstamp/>
   </target>
+
+   <!-- general classpath definition, incl. CLASSPATH env. variable,
+   // but jars in lib directory have precedence over the CLASSPATH variable -->
+  <path id="project.class.path">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+      <include name="*.zip"/>
+    </fileset>
+    <pathelement location="${build}/classes"/>
+    <pathelement location="${build}/testcases"/>
+    <pathelement path="${java.class.path}" />
+  </path>
 
 <!-- 
  ============================================================================
@@ -41,47 +52,24 @@
 
   <target name="init_compile" depends="init_all">
     <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${path_modifier}${build}/classes"/>
+    <mkdir dir="${build}/classes"/>
   </target>
 
-  <!-- Compile and leave class files in source tree -->
-  <target name="compile_inline" depends="init_all"
-   description="Compile weka and leave class files in the source tree">
-     <javac srcdir="${path_modifier}weka"
-       fork="yes" memoryMaximumSize="${javac_max_memory}"
-       destdir="${path_modifier}"
-       source="1.4" target="1.4"/>
-      <rmic base="${path_modifier}" 
-       classname="weka.experiment.RemoteEngine"/>
-  </target>
-
-  <!--
-        Compile and leave class files in source tree using jikes in super pedantic mode.
-        This takes about half the time of regular javac-based target.
-    -->
-  <target name="compile_inline_jikes" depends="init_all"
-   description="Pedantically compile weka, leaving class files in the source tree">
-     <property name="build.compiler" value="jikes"/>
-     <property name="build.compiler.pedantic" value="true"/>
-     <property name="build.compiler.emacs" value="true"/>
-     <javac srcdir="${path_modifier}weka"
-      destdir="${path_modifier}"
-      deprecation="on" 
-      fork="yes" memoryMaximumSize="${javac_max_memory}"
-      source="1.4" target="1.4"/>
-     <rmic base="${path_modifier}" 
-      classname="weka.experiment.RemoteEngine"/>
-  </target>
-
-  <!-- Compile the java code from ${path_modifier}weka into ${build}/classes -->
+  <!-- Compile the java code from ${src}weka into ${build}/classes -->
   <target name="compile" depends="init_compile" 
-   description="Compile weka and deposit class files in ${path_modifier}/build/classes">
-    <javac srcdir="${path_modifier}weka" 
+   description="Compile weka and deposit class files in build/classes">
+    <javac srcdir="${src}" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
-      destdir="${path_modifier}${build}/classes"
-      source="1.4" target="1.4"/>
-    <copy todir="${path_modifier}${build}/classes" >
-       <fileset dir="${path_modifier}.">
+      destdir="${build}/classes"
+      optimize="${optimization}"
+      debug="${debug}"
+      deprecation="${deprecation}"
+      source="1.4" target="1.4">
+
+      <classpath refid="project.class.path" /> 
+    </javac>
+    <copy todir="${build}/classes" >
+       <fileset dir="${src}">
          <include name="weka/**/*.gif"/>
          <include name="weka/**/*.jpeg"/>
          <include name="weka/**/*.jpg"/>
@@ -91,30 +79,30 @@
          <include name="weka/gui/beans/README*"/>
        </fileset>
     </copy>
-    <rmic base="${path_modifier}${build}/classes"
+    <rmic base="${build}/classes"
        classname="weka.experiment.RemoteEngine"/>
   </target>
 
   <!-- Make the javadocs -->
   <target name="docs" 
           depends="init_all" 
-          description="Make javadocs into ${path_modifier}/doc">
-    <mkdir dir="${path_modifier}${doc}"/>
-    <javadoc sourcepath="${path_modifier}." 
-             destdir="${path_modifier}${doc}" 
+          description="Make javadocs into ./doc">
+    <mkdir dir="${doc}"/>
+    <javadoc sourcepath="${src}." 
+             destdir="${doc}" 
              packagenames="weka.*"
              Author="yes" 
              Public="yes" 
              maxmemory="128m"/>
     
     <!-- insert the links to our homepage and documentation.html -->
-    <replace dir="${path_modifier}${doc}" 
+    <replace dir="${doc}" 
              token="&#34;help-doc.html&#34;" 
              value="&#34;../documentation.html&#34; target=&#34;_blank&#34;">
       <include name="**/*.html"/>
     </replace>
       
-    <replace dir="${path_modifier}${doc}" 
+    <replace dir="${doc}" 
              token="Help&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt;" 
              value="Help&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt; &lt;TD BGCOLOR=&#34;&#35;EEEEFF&#34; CLASS=&#34;NavBarCell1&#34;&gt; &lt;A HREF=&#34;http://www.cs.waikato.ac.nz/ml/weka/&#34; target=&#34;_blank&#34;&gt;&lt;FONT CLASS=&#34;NavBarFont1&#34;&gt;&lt;B&gt;Weka's home&lt;/B&gt;&lt;/FONT&gt;&lt;/A&gt;&#38;nbsp;&lt;/TD&gt;">
       <include name="**/*.html"/>
@@ -131,24 +119,24 @@
   <target name="init_tests" depends="init_all">
     <available property="junit.present" classname="junit.framework.TestCase"/>
     <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${path_modifier}${build}/testcases"/>
-    <mkdir dir="${path_modifier}${reports}"/>
+    <mkdir dir="${build}/testcases"/>
+    <mkdir dir="${reports}"/>
   </target>
 
   <!-- compile the testcases -->
   <target name="compile_tests" depends="init_tests, compile" 
-   description="Compile unit tests into ${path_modifier}/build/testcases">
-     <javac srcdir="${path_modifier}tests" 
+   description="Compile unit tests into ./build/testcases">
+     <javac srcdir="${src-test}" 
        fork="yes" memoryMaximumSize="${javac_max_memory}"
-       destdir="${path_modifier}${build}/testcases"
-       source="1.4" target="1.4">
-        <classpath>
-	   <pathelement location="${path_modifier}${build}/classes"/>
-	   <pathelement path="${path_modifier}${java.class.path}"/>
-	</classpath>
+            destdir="${build}/testcases"
+            optimize="${optimization}"
+            debug="${debug}"
+            deprecation="${deprecation}"
+            source="1.4" target="1.4">
+       <classpath refid="project.class.path" /> 
      </javac>
-     <copy todir="${path_modifier}${build}/testcases" >
-       <fileset dir="${path_modifier}tests">
+     <copy todir="${build}/testcases" >
+       <fileset dir="${src-test}">
           <include name="**/*.arff"/>
           <include name="**/*.cost"/>
        </fileset>
@@ -158,64 +146,58 @@
   <!-- Run the test cases via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
   <target name="run_tests" depends="compile_tests" 
-   description="Execute unit tests (fast)" if="junit.present">
-     <java fork="yes" dir="${path_modifier}."
+   description="Execute unit tests (fast)">
+     <java fork="yes" dir="."
       classname="junit.textui.TestRunner"
       taskname="junit" failonerror="${run_tests_fail}">
 	 <arg value="weka.AllTests"/>
-	 <classpath>
-	    <pathelement location="${path_modifier}${build}/classes"/>
-	    <pathelement location="${path_modifier}${build}/testcases"/>
-	    <pathelement path="${java.class.path}"/>
-	 </classpath>
+         <classpath refid="project.class.path" /> 
          <jvmarg value="-Djava.awt.headless=${headless}"/>
+         <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
      </java>
   </target>
 
-<!-- Run the test cases and produce an html summary (in ${path_modifier}${reports}-->
+<!-- Run the test cases and produce an html summary (in ${reports}-->
   <target name="junit" depends="compile_tests" 
-   description="Execute unit tests and produce html summary (in ${path_modifier}/reports)" 
-   if="junit.present">
-     <junit fork="yes" dir="${path_modifier}.">
+   description="Execute unit tests and produce html summary (in ./reports)">
+     <junit fork="yes" dir=".">
+       <jvmarg value="-Djava.awt.headless=${headless}"/> 
+       <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
         <formatter type="xml"/>
-        <classpath>
-	    <pathelement location="${path_modifier}${build}/classes"/>
-	    <pathelement location="${path_modifier}${build}/testcases"/>
-	    <pathelement path="${java.class.path}"/>
-	 </classpath>
-         <batchtest todir="${path_modifier}${reports}">
-	    <fileset dir="${path_modifier}${build}/testcases">
+        <classpath refid="project.class.path" /> 
+         <batchtest todir="${reports}">
+	    <fileset dir="${build}/testcases">
 	       <include name="**/*Test.class"/>
 	       <exclude name="**/AllTests.class"/>
 	    </fileset>
 	 </batchtest>
      </junit>
 
-     <junitreport todir="${path_modifier}${reports}">
-        <fileset dir="${path_modifier}${reports}">
+     <junitreport todir="${reports}">
+        <fileset dir="${reports}">
 	   <include name="TEST-*.xml"/>
 	</fileset>
-	<report format="noframes" todir="${path_modifier}${reports}"/>
+	<report format="noframes" todir="${reports}"/>
      </junitreport>
   </target>
 
 
 <!--
   ===========================================================================
-  Release making stuff (needs a bit more work)
+  Release making stuff
   ===========================================================================
 -->
 
   <target name = "init_dist" depends="init_all">
     <!-- Create the distribution directory -->
-    <mkdir dir="${path_modifier}${dist}"/>
+    <mkdir dir="${dist}"/>
   </target>
 
   <!-- Put everything in ${path_modifier}${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
-   description="Create an executable jar file in ${path_modifier}/dist">
-    <jar jarfile="${path_modifier}${dist}/weka.jar" 
-      basedir="${path_modifier}${build}/classes">
+   description="Create an executable jar file in ./dist">
+    <jar jarfile="${dist}/weka.jar" 
+      basedir="${build}/classes">
      <manifest>
        <attribute name="Main-Class" value="weka.gui.GUIChooser"/>
      </manifest>
@@ -224,47 +206,47 @@
 
   <!-- Put all .java, and .props files into ${path_modifier}${dist}/weka-src.jar-->
   <target name="srcjar" depends="init_dist, init_all"
-   description="Create a jar file containing weka source in ${path_modifier}/dist">  
+   description="Create a jar file containing weka source in ./dist">  
     <!-- jar up the source -->
-    <jar jarfile="${path_modifier}${dist}/weka-src.jar" 
-      basedir="${path_modifier}.">
-      <include name="weka/**/*.gif"/>
-      <include name="weka/**/*.java"/>
-      <include name="weka/**/*.jpeg"/>
-      <include name="weka/**/*.jpg"/>
-      <include name="weka/**/*.props"/>
-      <include name="weka/**/*.txt"/>
-      <include name="weka/**/*.xml"/>
-      <include name="weka/**/DatabaseUtils.props.*"/>
-      <include name="weka/gui/beans/README*"/>
+    <jar jarfile="${dist}/weka-src.jar" 
+      basedir=".">
+      <include name="src/**/*.gif"/>
+      <include name="src/**/*.java"/>
+      <include name="src/**/*.jpeg"/>
+      <include name="src/**/*.jpg"/>
+      <include name="src/**/*.props"/>
+      <include name="src/**/*.txt"/>
+      <include name="src/**/*.xml"/>
+      <include name="src/**/DatabaseUtils.props.*"/>
+      <include name="src/**/weka/gui/beans/README*"/>
     </jar>
   </target>
 
   <!-- make a jar file containing just the stuff needed for running a remote experiment server -->
   <target name="remotejar" depends="compile, init_dist"
-   description="Create a jar file containing classes for remote experiments in ${path_modifier}/dist">
-     <jar jarfile="${path_modifier}${dist}/remoteEngine.jar"
-      basedir="${path_modifier}${build}/classes"
+   description="Create a jar file containing classes for remote experiments in ./dist">
+     <jar jarfile="${dist}/remoteEngine.jar"
+      basedir="${build}/classes"
       includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class"/>
-     <copy todir="${path_modifier}${dist}" >
-       <fileset dir="${path_modifier}weka/experiment">
+     <copy todir="${dist}" >
+       <fileset dir="${src}weka/experiment">
           <include name="remote.policy"/>
           <include name="remote.policy.example"/>
        </fileset>
     </copy>
-    <jar jarfile="${path_modifier}${dist}/remoteExperimentServer.jar"
-     basedir="${path_modifier}${dist}"
+    <jar jarfile="${dist}/remoteExperimentServer.jar"
+     basedir="${dist}"
      includes="remoteEngine.jar,remote.policy,remote.policy.example"/>
-     <delete file="${path_modifier}${dist}/remoteEngine.jar"/>
-     <delete file="${path_modifier}${dist}/remote.policy"/>
-     <delete file="${path_modifier}${dist}/remote.policy.example"/>
+     <delete file="${dist}/remoteEngine.jar"/>
+     <delete file="${dist}/remote.policy"/>
+     <delete file="${dist}/remote.policy.example"/>
    </target>
 
 
   <!-- Writes $release version number to weka/core/version.txt -->    
   <target name="set_version">
-    <echo message="${release}" file="${path_modifier}weka/core/version.txt"/>
-    <echo message="${release}" file="${path_modifier}${build}/classes/weka/core/version.txt"/>
+    <echo message="${release}" file="${src}weka/core/version.txt"/>
+    <echo message="${release}" file="${build}/classes/weka/core/version.txt"/>
   </target>
 
   <!-- Make a release -->
@@ -272,20 +254,20 @@
    description="Make a release in ${release}. Run with -Drelease=&lt;number of release (eg. 3-4-1)&gt;.">
     <!-- copy the docs to dist/docs -->
 
-    <copy todir="${path_modifier}weka-${release}/weka-${release}/doc" >
-       <fileset dir="${path_modifier}${doc}"/>
+    <copy todir="weka-${release}/weka-${release}/doc" >
+       <fileset dir="${doc}"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}/weka-${release}">
-       <fileset dir="${path_modifier}${dist}"/>
+    <copy todir="weka-${release}/weka-${release}">
+       <fileset dir="${dist}"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}/weka-${release}/changelogs">
-       <fileset dir="${path_modifier}wekadocs/changelogs"/>
+    <copy todir="weka-${release}/weka-${release}/changelogs">
+       <fileset dir="wekadocs/changelogs"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}/weka-${release}/data">
-       <fileset dir="${path_modifier}wekadocs/data"/>
+    <copy todir="weka-${release}/weka-${release}/data">
+       <fileset dir="wekadocs/data"/>
     </copy>
-    <copy todir="${path_modifier}weka-${release}/weka-${release}">
-       <fileset dir="${path_modifier}wekadocs">
+    <copy todir="weka-${release}/weka-${release}">
+       <fileset dir="wekadocs">
          <include name="README*"/>
 	 <include name="*.pdf"/>
 	 <include name="COPYING"/>
@@ -294,8 +276,8 @@
          <include name="weka.ico"/>
        </fileset>
     </copy>
-    <zip destfile="${path_modifier}weka-${release}.zip" 
-     basedir="${path_modifier}weka-${release}"/>
+    <zip destfile="weka-${release}.zip" 
+     basedir="weka-${release}"/>
   </target>
 
   <!-- Make a Max OSX application (NOTE: assumes that release/release_no_junit or something that calls
@@ -318,7 +300,7 @@
                 shortname="Weka"
                 arguments=""
                 workingdirectory="$APP_PACKAGE/Contents/Resources"
-                jvmversion="1.5+">
+                jvmversion="1.4+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
         <include name="weka.jar"/>
@@ -349,7 +331,7 @@
       <arg value="${svn_username}"/>
       <arg value="--password"/>
       <arg value="${svn_password}"/>
-      <arg value="${repository.URL}/${weka_branch}/weka"/>
+      <arg value="${repository.URL}/${weka_branch}/src"/>
       <classpath>
         <pathelement location="${ant.home}/lib/svnkit.jar" />
         <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
@@ -362,7 +344,7 @@
       <arg value="${svn_username}"/>
       <arg value="--password"/>
       <arg value="${svn_password}"/>
-      <arg value="${repository.URL}/${weka_branch}/tests"/>
+      <arg value="${repository.URL}/${weka_branch}/lib"/>
       <classpath>
         <pathelement location="${ant.home}/lib/svnkit.jar" />
         <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
@@ -400,7 +382,7 @@
     description="Create a changelog file for a release of Weka. Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;, -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
     <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
     <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
-          output="${path_modifier}wekadocs/changelogs/CHANGELOG-${release}">
+          output="wekadocs/changelogs/CHANGELOG-${release}">
       <arg value="log"/>
       <arg value="--username"/>
       <arg value="${svn_username}"/>
@@ -409,7 +391,7 @@
       <arg value="-r"/>
       <arg value="${date_range}"/>
       <arg value="-v"/>
-      <arg value="${repository.URL}/${weka_branch}/weka"/>
+      <arg value="${repository.URL}/${weka_branch}/src/main/java/weka"/>
       <classpath>
         <pathelement location="${ant.home}/lib/svnkit.jar" />
         <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
@@ -423,7 +405,7 @@
           description="Does a svn checkout, builds, runs unit tests, and mails the output to mail recipients (run ant with -Dsvn_username=username -Dsvn_password=password -Dweka_branch=branch -Dmail_recipients=&lt;email,email,...&gt; -Dmail_sender=email -Dmail_smtp_host=smtp-server)">
 
      <!-- run the build process -->
-     <ant antfile="${ant.file}" target="svnCheckout" output="${path_modifier}${reports}/nightly_build-init.txt">
+     <ant antfile="${ant.file}" target="svnCheckout" output="${reports}/nightly_build-init.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
@@ -432,7 +414,7 @@
        <property name="weka_branch" value="${weka_branch}"/>
      </ant>
 
-     <ant antfile="${ant.file}" target="run_tests" output="${path_modifier}${reports}/nightly_build-results.txt">
+     <ant antfile="${ant.file}" target="run_tests" output="${reports}/nightly_build-results.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
@@ -446,7 +428,7 @@
 	       mailhost="${mail_smtp_host}"
 	       subject="nightly build results (${weka_branch}): ${TODAY}"
 	       from="${mail_sender}">
-       <fileset dir="${path_modifier}${reports}">
+       <fileset dir="${reports}">
          <include name="nightly_build*.*"/>
        </fileset>
      </mail>
@@ -456,9 +438,9 @@
   <target name="clean" depends="init_all"
    description="Removes the build, dist and reports directories; also any class files in the source tree">
     <!-- Delete the ${build} and ${dist} directory trees -->
-    <delete dir="${path_modifier}${build}"/>
-    <delete dir="${path_modifier}${dist}"/>
-    <delete dir="${path_modifier}${reports}"/>
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+    <delete dir="${reports}"/>
     <delete>
        <fileset dir="${path_modifier}." includes="weka/**/*.class"/>
     </delete>
@@ -467,8 +449,7 @@
   <target name="superclean" depends="clean"
    description="Clean plus removes source trees! and doc directories">
   <!-- WARNING, this deletes the source and doc directories -->
-    <delete dir="${path_modifier}weka"/>
-    <delete dir="${path_modifier}tests"/>
-    <delete dir="${path_modifier}${doc}"/>
+    <delete dir="${src}"/>
+    <delete dir="${doc}"/>
   </target>
 </project>
