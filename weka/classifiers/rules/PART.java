@@ -1,0 +1,596 @@
+/*
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/*
+ *    PART.java
+ *    Copyright (C) 1999 Eibe Frank
+ *
+ */
+
+package weka.classifiers.rules;
+
+import weka.classifiers.rules.part.*;
+import weka.classifiers.trees.j48.BinC45ModelSelection;
+import weka.classifiers.trees.j48.C45ModelSelection;
+import weka.classifiers.trees.j48.Distribution;
+import weka.classifiers.trees.j48.ModelSelection;
+import java.util.*;
+import weka.core.*;
+import weka.classifiers.*;
+
+/**
+ * Class for generating a PART decision list. For more information, see<p>
+ *
+ * Eibe Frank and Ian H. Witten (1998).  <a
+ * href="http://www.cs.waikato.ac.nz/~eibe/pubs/ML98-57.ps.gz">Generating
+ * Accurate Rule Sets Without Global Optimization.</a> In Shavlik, J.,
+ * ed., <i>Machine Learning: Proceedings of the Fifteenth
+ * International Conference</i>, Morgan Kaufmann Publishers, San
+ * Francisco, CA. <p>
+ *
+ * Valid options are: <p>
+ *
+ * -C confidence <br>
+ * Set confidence threshold for pruning. (Default: 0.25) <p>
+ *
+ * -M number <br>
+ * Set minimum number of instances per leaf. (Default: 2) <p>
+ *
+ * -R <br>
+ * Use reduced error pruning. <p>
+ *
+ * -N number <br>
+ * Set number of folds for reduced error pruning. One fold is
+ * used as the pruning set. (Default: 3) <p>
+ *
+ * -B <br>
+ * Use binary splits for nominal attributes. <p>
+ *
+ * -U <br>
+ * Generate unpruned decision list. <p>
+ *
+ * -Q <br>
+ * The seed for reduced-error pruning. <p>
+ *
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 1.2.2.1 $
+ */
+public class PART extends Classifier implements OptionHandler,
+  WeightedInstancesHandler, Summarizable, AdditionalMeasureProducer {
+
+  /** The decision list */
+  private MakeDecList m_root;
+
+  /** Confidence level */
+  private float m_CF = 0.25f;
+
+  /** Minimum number of objects */
+  private int m_minNumObj = 2;
+
+  /** Use reduced error pruning? */
+  private boolean m_reducedErrorPruning = false;
+
+  /** Number of folds for reduced error pruning. */
+  private int m_numFolds = 3;
+
+  /** Binary splits on nominal attributes? */
+  private boolean m_binarySplits = false;
+  
+  /** Generate unpruned list? */
+  private boolean m_unpruned = false;
+
+  /** The seed for random number generation. */
+  private int m_Seed = 1;
+    
+  /**
+   * Returns a string describing classifier
+   * @return a description suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String globalInfo() {
+
+    return  "Class for generating a PART decision list. Uses "
+      + "separate-and-conquer. Builds a partial C4.5 decision tree "
+      + "in each iteration and makes the \"best\" leaf into a rule. "
+      + "For more information, see:\n\n"
+      + "Eibe Frank and Ian H. Witten (1998). \"Generating "
+      + "Accurate Rule Sets Without Global Optimization.\""
+      + "In Shavlik, J., ed., Machine Learning: Proceedings of the "
+      + "Fifteenth International Conference, Morgan Kaufmann Publishers.";
+  }
+
+  /**
+   * Generates the classifier.
+   *
+   * @exception Exception if classifier can't be built successfully
+   */
+  public void buildClassifier(Instances instances) 
+       throws Exception {
+
+    ModelSelection modSelection;	 
+
+    if (m_binarySplits)
+      modSelection = new BinC45ModelSelection(m_minNumObj, instances);
+    else
+      modSelection = new C45ModelSelection(m_minNumObj, instances);
+    if (m_unpruned) 
+      m_root = new MakeDecList(modSelection, m_minNumObj);
+    else if (m_reducedErrorPruning) 
+      m_root = new MakeDecList(modSelection, m_numFolds, m_minNumObj, m_Seed);
+    else
+      m_root = new MakeDecList(modSelection, m_CF, m_minNumObj);
+    m_root.buildClassifier(instances);
+    if (m_binarySplits) {
+      ((BinC45ModelSelection)modSelection).cleanup();
+    } else {
+      ((C45ModelSelection)modSelection).cleanup();
+    }
+  }
+
+  /**
+   * Classifies an instance.
+   *
+   * @exception Exception if instance can't be classified successfully
+   */
+  public double classifyInstance(Instance instance) 
+       throws Exception {
+
+    return m_root.classifyInstance(instance);
+  }
+
+  /** 
+   * Returns class probabilities for an instance.
+   *
+   * @exception Exception if the distribution can't be computed successfully
+   */
+  public final double [] distributionForInstance(Instance instance) 
+       throws Exception {
+
+    return m_root.distributionForInstance(instance);
+  }
+
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * Valid options are: <p>
+   *
+   * -C confidence <br>
+   * Set confidence threshold for pruning. (Default: 0.25) <p>
+   *
+   * -M number <br>
+   * Set minimum number of instances per leaf. (Default: 2) <p>
+   *
+   * -R <br>
+   * Use reduced error pruning. <p>
+   *
+   * -N number <br>
+   * Set number of folds for reduced error pruning. One fold is
+   * used as the pruning set. (Default: 3) <p>
+   *
+   * -B <br>
+   * Use binary splits for nominal attributes. <p>
+   *
+   * -U <br>
+   * Generate unpruned decision list. <p>
+   *
+   * -Q <br>
+   * The seed for reduced-error pruning. <p>
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+
+    Vector newVector = new Vector(7);
+
+    newVector.
+	addElement(new Option("\tSet confidence threshold for pruning.\n" +
+			      "\t(default 0.25)",
+			      "C", 1, "-C <pruning confidence>"));
+    newVector.
+	addElement(new Option("\tSet minimum number of objects per leaf.\n" +
+			      "\t(default 2)",
+			      "M", 1, "-M <minimum number of objects>"));
+    newVector.
+	addElement(new Option("\tUse reduced error pruning.",
+			      "R", 0, "-R"));
+    newVector.
+	addElement(new Option("\tSet number of folds for reduced error\n" +
+			      "\tpruning. One fold is used as pruning set.\n" +
+			      "\t(default 3)",
+			      "N", 1, "-N <number of folds>"));
+    newVector.
+	addElement(new Option("\tUse binary splits only.",
+			      "B", 0, "-B"));
+    newVector.
+	addElement(new Option("\tGenerate unpruned decision list.",
+			      "U", 0, "-U"));
+    newVector.
+      addElement(new Option("\tSeed for random data shuffling (default 1).",
+			    "Q", 1, "-Q <seed>"));
+
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options.
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    // Pruning options
+    m_unpruned = Utils.getFlag('U', options);
+    m_reducedErrorPruning = Utils.getFlag('R', options);
+    m_binarySplits = Utils.getFlag('B', options);
+    String confidenceString = Utils.getOption('C', options);
+    if (confidenceString.length() != 0) {
+      if (m_reducedErrorPruning) {
+	throw new Exception("Setting CF doesn't make sense " +
+			    "for reduced error pruning.");
+      } else {
+	m_CF = (new Float(confidenceString)).floatValue();
+	if ((m_CF <= 0) || (m_CF >= 1)) {
+	  throw new Exception("CF has to be greater than zero and smaller than one!");
+	} 
+      }
+    } else {
+      m_CF = 0.25f;
+    }
+    String numFoldsString = Utils.getOption('N', options);
+    if (numFoldsString.length() != 0) {
+      if (!m_reducedErrorPruning) {
+	throw new Exception("Setting the number of folds" +
+			    " does only make sense for" +
+			    " reduced error pruning.");
+      } else {
+	m_numFolds = Integer.parseInt(numFoldsString);
+      }
+    } else {
+      m_numFolds = 3;
+    }
+
+    // Other options
+    String minNumString = Utils.getOption('M', options);
+    if (minNumString.length() != 0) {
+      m_minNumObj = Integer.parseInt(minNumString);
+    } else {
+      m_minNumObj = 2;
+    }
+    String seedString = Utils.getOption('Q', options);
+    if (seedString.length() != 0) {
+      m_Seed = Integer.parseInt(seedString);
+    } else {
+      m_Seed = 1;
+    }
+  }
+
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String [] getOptions() {
+
+    String [] options = new String [11];
+    int current = 0;
+
+    if (m_unpruned) {
+      options[current++] = "-U";
+    }
+    if (m_reducedErrorPruning) {
+      options[current++] = "-R";
+    }
+    if (m_binarySplits) {
+      options[current++] = "-B";
+    }
+    options[current++] = "-M"; options[current++] = "" + m_minNumObj;
+    if (!m_reducedErrorPruning) {
+      options[current++] = "-C"; options[current++] = "" + m_CF;
+    }
+    if (m_reducedErrorPruning) {
+      options[current++] = "-N"; options[current++] = "" + m_numFolds;
+    }
+    options[current++] = "-Q"; options[current++] = "" + m_Seed;
+
+    while (current < options.length) {
+      options[current++] = "";
+    }
+    return options;
+  }
+
+  /**
+   * Returns a description of the classifier
+   */
+  public String toString() {
+
+    if (m_root == null) {
+      return "No classifier built";
+    }
+    return "PART decision list\n------------------\n\n" + m_root.toString();
+  }
+  
+  /**
+   * Returns a superconcise version of the model
+   */
+  public String toSummaryString() {
+
+    return "Number of rules: " + m_root.numRules() + "\n";
+  }
+  
+  /**
+   * Return the number of rules.
+   * @return the number of rules
+   */
+  public double measureNumRules() {
+    return m_root.numRules();
+  }
+  
+  /**
+   * Returns an enumeration of the additional measure names
+   * @return an enumeration of the measure names
+   */
+  public Enumeration enumerateMeasures() {
+    Vector newVector = new Vector(1);
+    newVector.addElement("measureNumRules");
+    return newVector.elements();
+  }
+
+  /**
+   * Returns the value of the named measure
+   * @param measureName the name of the measure to query for its value
+   * @return the value of the named measure
+   * @exception IllegalArgumentException if the named measure is not supported
+   */
+  public double getMeasure(String additionalMeasureName) {
+    if (additionalMeasureName.compareToIgnoreCase("measureNumRules") == 0) {
+      return measureNumRules();
+    } else {
+      throw new IllegalArgumentException(additionalMeasureName 
+			  + " not supported (PART)");
+    }
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String confidenceFactorTipText() {
+    return "The confidence factor used for pruning (smaller values incur "
+      + "more pruning).";
+  }
+
+  /**
+   * Get the value of CF.
+   *
+   * @return Value of CF.
+   */
+  public float getConfidenceFactor() {
+    
+    return m_CF;
+  }
+  
+  /**
+   * Set the value of CF.
+   *
+   * @param v  Value to assign to CF.
+   */
+  public void setConfidenceFactor(float v) {
+    
+    m_CF = v;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String minNumObjTipText() {
+    return "The minimum number of instances per rule.";
+  }
+
+  /**
+   * Get the value of minNumObj.
+   *
+   * @return Value of minNumObj.
+   */
+  public int getMinNumObj() {
+    
+    return m_minNumObj;
+  }
+  
+  /**
+   * Set the value of minNumObj.
+   *
+   * @param v  Value to assign to minNumObj.
+   */
+  public void setMinNumObj(int v) {
+    
+    m_minNumObj = v;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String reducedErrorPruningTipText() {
+    return "Whether reduced-error pruning is used instead of C.4.5 pruning.";
+  }
+
+  /**
+   * Get the value of reducedErrorPruning.
+   *
+   * @return Value of reducedErrorPruning.
+   */
+  public boolean getReducedErrorPruning() {
+    
+    return m_reducedErrorPruning;
+  }
+  
+  /**
+   * Set the value of reducedErrorPruning.
+   *
+   * @param v  Value to assign to reducedErrorPruning.
+   */
+  public void setReducedErrorPruning(boolean v) {
+    
+    m_reducedErrorPruning = v;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String unprunedTipText() {
+    return "Whether pruning is performed.";
+  }
+
+  /**
+   * Get the value of unpruned.
+   *
+   * @return Value of unpruned.
+   */
+  public boolean getUnpruned() {
+    
+    return m_unpruned;
+  }
+  
+  /**
+   * Set the value of unpruned.
+   *
+   * @param newunpruned Value to assign to unpruned.
+   */
+  public void setUnpruned(boolean newunpruned) {
+    
+    m_unpruned = newunpruned;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Determines the amount of data used for reduced-error pruning. "
+      + " One fold is used for pruning, the rest for growing the rules.";
+  }
+
+  /**
+   * Get the value of numFolds.
+   *
+   * @return Value of numFolds.
+   */
+  public int getNumFolds() {
+    
+    return m_numFolds;
+  }
+  
+  /**
+   * Set the value of numFolds.
+   *
+   * @param v  Value to assign to numFolds.
+   */
+  public void setNumFolds(int v) {
+    
+    m_numFolds = v;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The seed used for randomizing the data " +
+      "when reduced-error pruning is used.";
+  }
+
+  /**
+   * Get the value of Seed.
+   *
+   * @return Value of Seed.
+   */
+  public int getSeed() {
+    
+    return m_Seed;
+  }
+  
+  /**
+   * Set the value of Seed.
+   *
+   * @param newSeed Value to assign to Seed.
+   */
+  public void setSeed(int newSeed) {
+    
+    m_Seed = newSeed;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String binarySplitsTipText() {
+    return "Whether to use binary splits on nominal attributes when "
+      + "building the partial trees.";
+  }
+  
+  /**
+   * Get the value of binarySplits.
+   *
+   * @return Value of binarySplits.
+   */
+  public boolean getBinarySplits() {
+    
+    return m_binarySplits;
+  }
+  
+  /**
+   * Set the value of binarySplits.
+   *
+   * @param v  Value to assign to binarySplits.
+   */
+  public void setBinarySplits(boolean v) {
+    
+    m_binarySplits = v;
+  }
+  
+  /**
+   * Main method for testing this class.
+   *
+   * @param String options 
+   */
+  public static void main(String [] argv){
+
+    try {
+      System.out.println(Evaluation.evaluateModel(new PART(), argv));
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+    }
+  }
+}
+
+
+  
+
+
+
+
+
+
