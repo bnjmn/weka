@@ -88,7 +88,7 @@
           depends="init_all" 
           description="Make javadocs into ./doc">
     <mkdir dir="${doc}"/>
-    <javadoc sourcepath="${src}." 
+    <javadoc sourcepath="${src}" 
              destdir="${doc}" 
              packagenames="weka.*"
              Author="yes" 
@@ -229,7 +229,7 @@
       basedir="${build}/classes"
       includes="weka/experiment/*_*.class,weka/experiment/RemoteEngine*.class,weka/experiment/Compute.class,weka/experiment/Task.class,weka/experiment/TaskStatusInfo.class,weka/core/Queue*.class"/>
      <copy todir="${dist}" >
-       <fileset dir="${src}weka/experiment">
+       <fileset dir="${src}/weka/experiment">
           <include name="remote.policy"/>
           <include name="remote.policy.example"/>
        </fileset>
