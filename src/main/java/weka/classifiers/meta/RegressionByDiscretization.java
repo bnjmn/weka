@@ -26,6 +26,8 @@ import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
@@ -100,13 +102,13 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $
+ * @version $Revision$
  */
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer {
   
   /** for serialization */
-  static final long serialVersionUID = 5066426153134050375L;
+  static final long serialVersionUID = 5066426153134050378L;
   
   /** The discretization filter. */
   protected Discretize m_Discretizer = new Discretize();
@@ -116,7 +118,16 @@ public class RegressionByDiscretization
 
   /** The mean values for each Discretized class interval. */
   protected double [] m_ClassMeans;
-    
+
+  /** Whether to delete empty intervals. */
+  protected boolean m_DeleteEmptyBins;
+
+  /** Header of discretized data. */
+  protected Instances m_DiscretizedHeader = null;
+
+  /** Use equal-frequency binning */
+  protected boolean m_UseEqualFrequency = false;
+
   /**
    * Returns a string describing classifier
    * @return a description suitable for
@@ -163,9 +174,6 @@ public class RegressionByDiscretization
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     
-    // other
-    result.setMinimumNumberInstances(getNumBins());  // for the filter, to have at least 1 instance per bin
-    
     return result;
   }
 
@@ -188,8 +196,59 @@ public class RegressionByDiscretization
     m_Discretizer.setIgnoreClass(true);
     m_Discretizer.setAttributeIndices("" + (instances.classIndex() + 1));
     m_Discretizer.setBins(getNumBins());
+    m_Discretizer.setUseEqualFrequency(getUseEqualFrequency());
     m_Discretizer.setInputFormat(instances);
     Instances newTrain = Filter.useFilter(instances, m_Discretizer);
+
+    // Should empty bins be deleted?
+    if (m_DeleteEmptyBins) {
+
+      // Figure out which classes are empty after discretization
+      int numNonEmptyClasses = 0;
+      boolean[] notEmptyClass = new boolean[newTrain.numClasses()];
+      for (int i = 0; i < newTrain.numInstances(); i++) {
+        if (!notEmptyClass[(int)newTrain.instance(i).classValue()]) {
+          numNonEmptyClasses++;
+          notEmptyClass[(int)newTrain.instance(i).classValue()] = true;
+        }
+      }
+      
+      // Compute new list of non-empty classes and mapping of indices
+      FastVector newClassVals = new FastVector(numNonEmptyClasses);
+      int[] oldIndexToNewIndex = new int[newTrain.numClasses()];
+      for (int i = 0; i < newTrain.numClasses(); i++) {
+        if (notEmptyClass[i]) {
+          oldIndexToNewIndex[i] = newClassVals.size();
+          newClassVals.addElement(newTrain.classAttribute().value(i));
+        }
+      }
+      
+      // Compute new header information
+      Attribute newClass = new Attribute(newTrain.classAttribute().name(), 
+                                         newClassVals);
+      FastVector newAttributes = new FastVector(newTrain.numAttributes());
+      for (int i = 0; i < newTrain.numAttributes(); i++) {
+        if (i != newTrain.classIndex()) {
+          newAttributes.addElement(newTrain.attribute(i).copy());
+        } else {
+          newAttributes.addElement(newClass);
+        }
+      }
+      
+      // Create new header and modify instances
+      Instances newTrainTransformed = new Instances(newTrain.relationName(), 
+                                                    newAttributes,
+                                                    newTrain.numInstances());
+      newTrainTransformed.setClassIndex(newTrain.classIndex());
+      for (int i = 0; i < newTrain.numInstances(); i++) {
+        Instance inst = newTrain.instance(i);
+        newTrainTransformed.add(inst);
+        newTrainTransformed.lastInstance().
+          setClassValue(oldIndexToNewIndex[(int)inst.classValue()]);
+      }
+      newTrain = newTrainTransformed;
+    }
+    m_DiscretizedHeader = new Instances(newTrain, 0);
 
     int numClasses = newTrain.numClasses();
 
@@ -233,29 +292,19 @@ public class RegressionByDiscretization
    */
   public double classifyInstance(Instance instance) throws Exception {  
 
-    // Discretize the test instance
-    if (m_Discretizer.numPendingOutput() > 0) {
-      throw new Exception("Discretize output queue not empty");
+    // Make sure structure of class attribute correct
+    Instance newInstance = (Instance)instance.copy();
+    newInstance.setDataset(m_DiscretizedHeader);
+    double [] probs = m_Classifier.distributionForInstance(newInstance);
+
+    // Copmute actual prediction
+    double prediction = 0, probSum = 0;
+    for (int j = 0; j < probs.length; j++) {
+      prediction += probs[j] * m_ClassMeans[j];
+      probSum += probs[j];
     }
-
-    if (m_Discretizer.input(instance)) {
-
-      m_Discretizer.batchFinished();
-      Instance newInstance = m_Discretizer.output();
-      double [] probs = m_Classifier.distributionForInstance(newInstance);
-      
-      double prediction = 0, probSum = 0;
-      for (int j = 0; j < probs.length; j++) {
-	prediction += probs[j] * m_ClassMeans[j];
-	probSum += probs[j];
-      }
-
-      return prediction /  probSum;
-      
-    } else {
-      throw new Exception("Discretize didn't make the test instance"
-			  + " immediately available");
-    }
+    
+    return prediction /  probSum;
   }
 
   /**
@@ -265,12 +314,21 @@ public class RegressionByDiscretization
    */
   public Enumeration listOptions() {
 
-    Vector newVector = new Vector(1);
+    Vector newVector = new Vector(3);
 
     newVector.addElement(new Option(
 	      "\tNumber of bins for equal-width discretization\n"
 	      + "\t(default 10).\n",
 	      "B", 1, "-B <int>"));
+
+    newVector.addElement(new Option(
+	      "\tWhether to delete empty bins after discretization\n"
+	      + "\t(default false).\n",
+	      "E", 0, "-E"));
+    
+    newVector.addElement(new Option(
+	     "\tUse equal-frequency instead of equal-width discretization.",
+	     "F", 0, "-F"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -308,6 +366,9 @@ public class RegressionByDiscretization
       setNumBins(10);
     }
 
+    setDeleteEmptyBins(Utils.getFlag('E', options));
+    setUseEqualFrequency(Utils.getFlag('F', options));
+
     super.setOptions(options);
   }
 
@@ -319,14 +380,27 @@ public class RegressionByDiscretization
   public String [] getOptions() {
 
     String [] superOptions = super.getOptions();
-    String [] options = new String [superOptions.length + 2];
+    String [] options = new String [superOptions.length + 4];
     int current = 0;
 
     options[current++] = "-B";
     options[current++] = "" + getNumBins();
 
+    if (getDeleteEmptyBins()) {
+      options[current++] = "-E";
+    }
+    
+    if (getUseEqualFrequency()) {
+      options[current++] = "-F";
+    }
+
     System.arraycopy(superOptions, 0, options, current, 
 		     superOptions.length);
+
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
 
     return options;
   }
@@ -362,6 +436,71 @@ public class RegressionByDiscretization
     m_NumBins = numBins;
   }
 
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String deleteEmptyBinsTipText() {
+
+    return "Whether to delete empty bins after discretization.";
+  }
+
+
+  /**
+   * Gets the number of bins numeric attributes will be divided into
+   *
+   * @return the number of bins.
+   */
+  public boolean getDeleteEmptyBins() {
+
+    return m_DeleteEmptyBins;
+  }
+
+  /**
+   * Sets the number of bins to divide each selected numeric attribute into
+   *
+   * @param numBins the number of bins
+   */
+  public void setDeleteEmptyBins(boolean b) {
+
+    m_DeleteEmptyBins = b;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String useEqualFrequencyTipText() {
+
+    return "If set to true, equal-frequency binning will be used instead of" +
+      " equal-width binning.";
+  }
+  
+  /**
+   * Get the value of UseEqualFrequency.
+   *
+   * @return Value of UseEqualFrequency.
+   */
+  public boolean getUseEqualFrequency() {
+    
+    return m_UseEqualFrequency;
+  }
+  
+  /**
+   * Set the value of UseEqualFrequency.
+   *
+   * @param newUseEqualFrequency Value to assign to UseEqualFrequency.
+   */
+  public void setUseEqualFrequency(boolean newUseEqualFrequency) {
+    
+    m_UseEqualFrequency = newUseEqualFrequency;
+  }
+
   /**
    * Returns a description of the classifier.
    *
@@ -391,7 +530,7 @@ public class RegressionByDiscretization
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.37 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
   /**
