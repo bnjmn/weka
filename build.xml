@@ -156,7 +156,7 @@
   <!-- Run the test cases via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
   <target name="run_tests" depends="compile_tests" 
-   description="Execute unit tests (fast)" if="junit.present">
+   description="Execute unit tests (fast)">
      <java fork="yes" dir="."
       classname="junit.textui.TestRunner"
       taskname="junit" failonerror="${run_tests_fail}">
@@ -169,8 +169,7 @@
 
 <!-- Run the test cases and produce an html summary (in ${reports}-->
   <target name="junit" depends="compile_tests" 
-   description="Execute unit tests and produce html summary (in ./reports)" 
-   if="junit.present">
+   description="Execute unit tests and produce html summary (in ./reports)">
      <junit fork="yes" dir=".">
        <jvmarg value="-Djava.awt.headless=${headless}"/> 
        <jvmarg value="-Dweka.test.Regression.root=${regression_tests_root}"/>
