@@ -366,6 +366,19 @@
       <arg value="${svn_username}"/>
       <arg value="--password"/>
       <arg value="${svn_password}"/>
+      <arg value="${repository.URL}/${weka_branch}/lib"/>
+      <classpath>
+        <pathelement location="${ant.home}/lib/svnkit.jar" />
+        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+      </classpath>
+    </java>
+    <java classname="org.tmatesoft.svn.cli.SVN"
+       dir="${source-root}/" fork="true">
+      <arg value="co"/>
+      <arg value="--username"/>
+      <arg value="${svn_username}"/>
+      <arg value="--password"/>
+      <arg value="${svn_password}"/>
       <arg value="${repository.URL}/${weka_branch}/wekadocs"/>
       <classpath>
         <pathelement location="${ant.home}/lib/svnkit.jar" />
