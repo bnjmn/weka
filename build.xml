@@ -1,4 +1,4 @@
-<project name="weka" default="compile_inline" basedir=".">
+<project name="weka" default="compile" basedir=".">
 <!-- 
   ===========================================================================
    Ant build file for weka. Tested with ant 1.6.5 and Junit 3.8.2. Requires
