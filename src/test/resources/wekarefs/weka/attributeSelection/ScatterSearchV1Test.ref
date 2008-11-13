@@ -1,0 +1,64 @@
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Scatter Search 
+	Init Population: 1
+	Kind of Combination: Greedy Combination
+	Treshold:    0.816
+	Total number of subsets evaluated: 6
+	Merit of best subset found:    0    
+	Time procesing the search space: 1.226451263372E9 seconds
+
+Attribute Subset Evaluator (supervised, Class (numeric): 3 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2 : 2
+                     Nominal1
+                     Nominal2
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Scatter Search 
+	Init Population: 1
+	Kind of Combination: Greedy Combination
+	Treshold:    0.816
+	Total number of subsets evaluated: 11
+	Merit of best subset found:    0    
+	Time procesing the search space: 1.226451263378E9 seconds
+
+Attribute Subset Evaluator (supervised, Class (nominal): 4 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2,3 : 3
+                     Nominal1
+                     Nominal2
+                     Numeric1
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Scatter Search 
+	Init Population: 1
+	Kind of Combination: Greedy Combination
+	Treshold:    0.816
+	Total number of subsets evaluated: 16
+	Merit of best subset found:    0    
+	Time procesing the search space: 1.226451263379E9 seconds
+
+Attribute Subset Evaluator (supervised, Class (numeric): 3 Class):
+	CFS Subset Evaluator
+	Including locally predictive attributes
+
+Selected attributes: 1,2 : 2
+                     Nominal1
+                     Nominal2
+
