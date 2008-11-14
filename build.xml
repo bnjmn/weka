@@ -352,20 +352,7 @@
       <arg value="${svn_username}"/>
       <arg value="--password"/>
       <arg value="${svn_password}"/>
-      <arg value="${repository.URL}/${weka_branch}/src"/>
-      <classpath>
-        <pathelement location="${ant.home}/lib/svnkit.jar" />
-        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
-      </classpath>
-    </java>
-    <java classname="org.tmatesoft.svn.cli.SVN"
-       dir="${source-root}/" fork="true">
-      <arg value="co"/>
-      <arg value="--username"/>
-      <arg value="${svn_username}"/>
-      <arg value="--password"/>
-      <arg value="${svn_password}"/>
-      <arg value="${repository.URL}/${weka_branch}/lib"/>
+      <arg value="${repository.URL}/${weka_branch}/weka"/>
       <classpath>
         <pathelement location="${ant.home}/lib/svnkit.jar" />
         <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
@@ -435,7 +422,7 @@
        <property name="weka_branch" value="${weka_branch}"/>
      </ant>
 
-     <ant antfile="${ant.file}" target="run_tests" output="${reports}/nightly_build-results.txt">
+     <ant antfile="${ant.file}" dir="weka" target="run_tests" output="../${reports}/nightly_build-results.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
