@@ -414,7 +414,7 @@
        <property name="weka_branch" value="${weka_branch}"/>
      </ant>
 
-     <ant antfile="${ant.file}" target="run_tests" output="${reports}/nightly_build-results.txt">
+     <ant antfile="${ant.file}" dir="weka" target="run_tests" output="../${reports}/nightly_build-results.txt">
        <property name="mail_smtp_host" value="${mail_smtp_host}"/>
        <property name="mail_sender" value="${mail_sender}"/>
        <property name="mail_recipients" value="${mail_recipients}"/>
@@ -436,14 +436,11 @@
 
 <!-- Clean -->
   <target name="clean" depends="init_all"
-   description="Removes the build, dist and reports directories; also any class files in the source tree">
+   description="Removes the build, dist and reports directories.">
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete dir="${reports}"/>
-    <delete>
-       <fileset dir="${path_modifier}." includes="weka/**/*.class"/>
-    </delete>
   </target>
 
   <target name="superclean" depends="clean"
