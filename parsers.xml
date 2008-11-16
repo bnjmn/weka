@@ -22,34 +22,29 @@
   Version: $Revision: 1.2 $
 -->
 
-<project name="weka-parsers" default="compile_inline" basedir=".">
+<project name="weka-parsers" default="compile" basedir=".">
    <property name="build.compiler" value="modern" />
    <property name="debug"          value="on" />
    <property name="deprecation"    value="off" />
    <property name="optimization"   value="off" />
    <property name="build"          value="build"/>
    <property name="parserpkg"      value="" />
+   <property name="src"            value="src/main/java" />
 
-   <target name="init" description="Sets up the environment.">
-      <available file="weka" type="dir" property="path_modifier" value=""/>
-      <available file="../weka" type ="dir" property="path_modifier" value="../"/>
+   <path id="project.class.path">
+     <pathelement location="${build}/classes"/>
+     <pathelement path="${java.class.path}" />
+   </path>
+
+   <target name="init" description="Initializes the build environment.">
+      <!-- initialize Weka -->
+      <ant antfile="build.xml" target="init_compile"/>
    </target>
-   
-   <target name="compile_inline" depends="init" description="Compiles Weka.">
-      <!-- compile Weka -->
-      <ant antfile="build.xml" target="compile_inline"/>
-      <!-- generate parsers -->
-      <property name="classpath" value="${path_modifier}"/>
-      <antcall target="parsers"/>
-      <!-- recompile Weka -->
-      <ant antfile="build.xml" target="compile_inline"/>
-   </target>
-   
-   <target name="compile" depends="init" description="Compiles Weka (inline).">
+
+   <target name="compile" depends="init" description="Compiles Weka.">
       <!-- compile Weka -->
       <ant antfile="build.xml" target="compile"/>
       <!-- generate parsers -->
-      <property name="classpath" value="${path_modifier}${build}/classes"/>
       <antcall target="parsers"/>
       <!-- recompile Weka -->
       <ant antfile="build.xml" target="compile"/>
@@ -71,29 +66,23 @@
    <target name="parser" description="Generates the parser ${parserpkg}.">
       <echo message="Generating lexer (${parserpkg})."/>
       <java classname="weka.core.parser.JFlex.Main">
-      	 <classpath>
-           <pathelement location="${classpath}"/>
-           <pathelement path="${path_modifier}${java.class.path}"/>
-      	 </classpath>
+      	 <classpath refid="project.class.path"/>
          <arg value="--jlex"/>
          <arg value="--quiet"/>
          <arg value="--nobak"/>
          <arg value="--outdir"/>
-         <arg value="${path_modifier}/${parserpkg}"/>
-         <arg value="${path_modifier}/${parserpkg}/Scanner.jflex"/>
+         <arg value="${src}/${parserpkg}"/>
+         <arg value="${src}/${parserpkg}/Scanner.jflex"/>
       </java>
       <echo message="Generating parser (${parserpkg})."/>
       <java classname="weka.core.parser.java_cup.Main">
-      	 <classpath>
-           <pathelement location="${classpath}"/>
-           <pathelement path="${path_modifier}${java.class.path}"/>
-      	 </classpath>
+      	 <classpath refid="project.class.path"/>
          <arg value="-parser"/>
          <arg value="Parser"/>
          <arg value="-interface"/>
          <arg value="-destdir"/>
-         <arg value="${path_modifier}/${parserpkg}"/>
-         <arg value="${path_modifier}/${parserpkg}/Parser.cup"/>
+         <arg value="${src}/${parserpkg}"/>
+         <arg value="${src}/${parserpkg}/Parser.cup"/>
       </java>
    </target>
 </project>
