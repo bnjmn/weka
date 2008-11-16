@@ -220,6 +220,7 @@
     <!-- jar up the source -->
     <jar jarfile="${dist}/weka-src.jar" 
       basedir=".">
+      <include name="*.xml"/>
       <include name="src/**/*.excludes"/>
       <include name="src/**/*.gif"/>
       <include name="src/**/*.java"/>
