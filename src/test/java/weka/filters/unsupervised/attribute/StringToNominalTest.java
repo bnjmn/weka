@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.StringToNominalTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class StringToNominalTest extends AbstractFilterTest {
   
@@ -43,7 +43,7 @@ public class StringToNominalTest extends AbstractFilterTest {
   /** Creates an example StringToNominal */
   public Filter getFilter() {
     StringToNominal f = new StringToNominal();
-    f.setAttributeIndex("1");
+    f.setAttributeRange("1");
     return f;
   }
   
@@ -78,7 +78,7 @@ public class StringToNominalTest extends AbstractFilterTest {
   }
 
   public void testMissing() {
-    ((StringToNominal)m_Filter).setAttributeIndex("4");
+    ((StringToNominal)m_Filter).setAttributeRange("4");
     Instances result = useFilter();
     // Number of attributes and instances shouldn't change
     assertEquals(m_Instances.numAttributes(), result.numAttributes());
@@ -94,6 +94,38 @@ public class StringToNominalTest extends AbstractFilterTest {
     }
   }
   
+  public void testRange() {
+	    ((StringToNominal)m_Filter).setAttributeRange("first-last");
+	    Instances result = useFilter();
+	    // Number of attributes and instances shouldn't change
+	    assertEquals(m_Instances.numAttributes(), result.numAttributes());
+	    assertEquals(m_Instances.numInstances(),  result.numInstances());
+	    
+	    assertEquals("Attribute type should now be NOMINAL",
+                Attribute.NOMINAL, result.attribute(0).type());
+	    assertEquals("Attribute type should still be NOMINAL",
+                Attribute.NOMINAL, result.attribute(1).type());
+	    assertEquals("Attribute type should still be NUMERIC",
+                Attribute.NUMERIC, result.attribute(2).type());
+	    assertEquals("Attribute type should now be NOMINAL",
+	                 Attribute.NOMINAL, result.attribute(3).type());
+	    assertEquals("Attribute type should still be NOMINAL",
+                Attribute.NOMINAL, result.attribute(4).type());
+	    assertEquals("Attribute type should still be NUMERIC",
+                Attribute.NUMERIC, result.attribute(5).type());
+	    assertEquals("Attribute type should still be DATE",
+                Attribute.DATE, result.attribute(6).type());
+
+	    assertEquals(14, result.attribute(0).numValues());
+	    
+	    assertEquals(8, result.attribute(3).numValues());
+	    for (int i = 0; i < result.numInstances(); i++) {
+	      assertTrue("Missing values should be preserved",
+	             m_Instances.instance(i).isMissing(3) ==
+	             result.instance(i).isMissing(3));
+	    }
+	  }
+  
   /**
    * tests the filter in conjunction with the FilteredClassifier
    */
@@ -105,7 +137,7 @@ public class StringToNominalTest extends AbstractFilterTest {
 	if (data.classIndex() == i)
 	  continue;
 	if (data.attribute(i).isString()) {
-	  ((StringToNominal) m_FilteredClassifier.getFilter()).setAttributeIndex(
+	  ((StringToNominal) m_FilteredClassifier.getFilter()).setAttributeRange(
 	      "" + (i + 1));
 	  break;
 	}
