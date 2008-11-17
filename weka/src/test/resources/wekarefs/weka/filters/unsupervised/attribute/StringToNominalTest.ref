@@ -1,4 +1,4 @@
-@relation FilterTest-weka.filters.unsupervised.attribute.StringToNominal-C1
+@relation FilterTest-weka.filters.unsupervised.attribute.StringToNominal-R1
 
 @attribute StringAtt1 {humpty,dumpty,sat,on,a,wall,had,great,fall,all,the,kings,horses,and}
 @attribute NominalAtt1 {r,g,b}
