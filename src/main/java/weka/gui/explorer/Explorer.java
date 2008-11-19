@@ -58,7 +58,7 @@ import javax.swing.event.ChangeEvent;
  * open, save, configure, datasets, and perform ML analysis.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision$
  */
 public class Explorer
   extends JPanel {
@@ -70,7 +70,7 @@ public class Explorer
    * Interface for classes that listen for filter changes.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.42 $
+   * @version $Revision$
    */
   public static interface CapabilitiesFilterChangeListener 
     extends EventListener {
@@ -87,7 +87,7 @@ public class Explorer
    * This event can be fired in case the capabilities filter got changed 
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.42 $
+   * @version $Revision$
    */
   public static class CapabilitiesFilterChangeEvent
     extends ChangeEvent {
@@ -123,7 +123,7 @@ public class Explorer
    * A common interface for panels to be displayed in the Explorer
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.42 $
+   * @version $Revision$
    */
   public static interface ExplorerPanel {
 
@@ -168,7 +168,7 @@ public class Explorer
    * A common interface for panels in the explorer that can handle logs
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.42 $
+   * @version $Revision$
    */
   public static interface LogHandler {
     
@@ -351,6 +351,8 @@ public class Explorer
    */
   public static void main(String [] args) {
 
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    
     LookAndFeel.setLookAndFeel();
     
     try {
