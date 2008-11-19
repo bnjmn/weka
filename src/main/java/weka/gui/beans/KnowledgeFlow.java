@@ -26,7 +26,7 @@ package weka.gui.beans;
  * Startup class for the KnowledgeFlow. Displays a splash screen.
  *
  * @author Mark Hall
- * @version  $Revision: 1.30 $
+ * @version  $Revision$
  */
 public class KnowledgeFlow {
 
@@ -58,6 +58,7 @@ public class KnowledgeFlow {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
       weka.gui.SplashWindow.splash(ClassLoader.
                                    getSystemResource("weka/gui/beans/icons/splash.jpg"));
       weka.gui.SplashWindow.invokeMain("weka.gui.beans.KnowledgeFlowApp", args);
