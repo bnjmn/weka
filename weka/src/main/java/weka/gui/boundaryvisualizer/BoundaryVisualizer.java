@@ -91,7 +91,7 @@ import javax.swing.JTextField;
  * University of Waikato.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.19 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel 
  */
@@ -105,7 +105,7 @@ public class BoundaryVisualizer
    * Inner class to handle rendering the axis
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.19 $
+   * @version $Revision$
    * @since 1.0
    * @see JPanel
    */
@@ -1137,7 +1137,7 @@ public class BoundaryVisualizer
    * @param args a <code>String[]</code> value
    */
   public static void main(String [] args) {
-
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     try {
     	if (args.length < 2) {
 		createNewVisualizerWindow(null, null);
