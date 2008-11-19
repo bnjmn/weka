@@ -41,7 +41,7 @@ import weka.core.pmml.*;
  * raises an Exception).
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class Regression extends PMMLClassifier
   implements Serializable {
@@ -371,7 +371,7 @@ public class Regression extends PMMLClassifier
         for (int i = 0; i < m_indexes.length; i++) {
           result *= input[m_indexes[i]];
         }
-        preds[indx] = result;
+        preds[indx] += result;
       }
     }
     
@@ -415,8 +415,15 @@ public class Regression extends PMMLClassifier
       }
 
       temp.append(" =\n\n");
+      
+      // do the predictors
       for (int i = 0; i < m_predictors.size(); i++) {
         temp.append(m_predictors.get(i).toString() + " +\n");
+      }
+      
+      // do the predictor terms
+      for (int i = 0; i < m_predictorTerms.size(); i++) {
+        temp.append(m_predictorTerms.get(i).toString() + " +\n");
       }
 
       temp.append(Utils.doubleToString(m_intercept, 12, 4));
@@ -826,6 +833,6 @@ public class Regression extends PMMLClassifier
    * @see weka.core.RevisionHandler#getRevision()
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
