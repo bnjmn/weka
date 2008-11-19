@@ -53,7 +53,7 @@ import javax.swing.event.ChangeListener;
  * transient messages.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class LogPanel
   extends JPanel
@@ -301,6 +301,7 @@ public class LogPanel
       m_LogText.append("\n");
     }
     m_LogText.append(LogPanel.getTimestamp() + ' ' + message);
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, message);
   }
 
   /**
