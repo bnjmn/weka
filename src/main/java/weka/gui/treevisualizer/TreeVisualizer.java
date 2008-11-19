@@ -83,7 +83,7 @@ import javax.swing.Timer;
  * Select Auto Scale to set the tree to it's optimal display size.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class TreeVisualizer
   extends PrintablePanel
@@ -2077,6 +2077,7 @@ public class TreeVisualizer
   {
     try
       {
+        weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
 	//put in the random data generator right here
 	// this call with import java.lang gives me between 0 and 1 Math.random
 	TreeBuild builder = new TreeBuild();
