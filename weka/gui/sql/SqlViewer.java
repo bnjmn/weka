@@ -53,7 +53,7 @@ import javax.swing.JPanel;
  * Represents a little tool for querying SQL databases.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.5.2.2 $
+ * @version     $Revision$
  */
 public class SqlViewer 
   extends    JPanel 
@@ -616,6 +616,7 @@ public class SqlViewer
    * @param args	the commandline arguments - ignored
    */
   public static void main(String[] args) {
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     LookAndFeel.setLookAndFeel();
     
     try {
