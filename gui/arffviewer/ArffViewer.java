@@ -38,7 +38,7 @@ import javax.swing.JOptionPane;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 
 public class ArffViewer 
@@ -285,6 +285,7 @@ public class ArffViewer
    * @throws Exception	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     LookAndFeel.setLookAndFeel();
     
     try {
