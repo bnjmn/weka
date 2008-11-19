@@ -137,7 +137,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.113 $
+ * @version $Revision$
  */
 public class ClassifierPanel 
   extends JPanel
@@ -1739,6 +1739,15 @@ public class ClassifierPanel
     
     JMenuItem visErrors = new JMenuItem("Visualize classifier errors");
     if (vp != null) {
+      if ((vp.getXIndex() == 0) && (vp.getYIndex() == 1)) {
+	try {
+	  vp.setXIndex(vp.getInstances().classIndex());  // class
+	  vp.setYIndex(vp.getInstances().classIndex() - 1);  // predicted class
+	}
+	catch (Exception e) {
+	  // ignored
+	}
+      }
       visErrors.addActionListener(new ActionListener() {
 	  public void actionPerformed(ActionEvent e) {
 	    visualizeClassifierErrors(vp);
