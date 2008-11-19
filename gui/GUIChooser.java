@@ -1267,6 +1267,7 @@ public class GUIChooser
    */
   public static void main(String [] args) {
 
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     LookAndFeel.setLookAndFeel();
     
     try {
