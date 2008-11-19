@@ -93,7 +93,7 @@ import javax.swing.table.AbstractTableModel;
  * over nodes.
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class GraphVisualizer
   extends JPanel
@@ -1413,6 +1413,7 @@ public class GraphVisualizer
    * line
    */
   public static void main(String [] args) {
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     JFrame jf = new JFrame("Graph Visualizer");
     GraphVisualizer g = new GraphVisualizer();
     
