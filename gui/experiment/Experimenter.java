@@ -41,7 +41,7 @@ import javax.swing.JTabbedPane;
  * open, save, configure, run experiments, and analyse experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class Experimenter
   extends JPanel {
@@ -112,7 +112,7 @@ public class Experimenter
    * @param args ignored.
    */
   public static void main(String [] args) {
-    
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");    
     LookAndFeel.setLookAndFeel();
     
     try {
