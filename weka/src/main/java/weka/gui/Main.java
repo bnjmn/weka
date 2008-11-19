@@ -1776,6 +1776,8 @@ public class Main
    * @param args	the commandline arguments - ignored
    */
   public static void main(String[] args) {
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+    
     LookAndFeel.setLookAndFeel();
     
     try {
