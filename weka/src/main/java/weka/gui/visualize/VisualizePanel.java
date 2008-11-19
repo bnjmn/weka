@@ -2404,6 +2404,7 @@ public class VisualizePanel
 	System.exit(1);
       }
 
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
       final javax.swing.JFrame jf = 
 	new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500,400);
