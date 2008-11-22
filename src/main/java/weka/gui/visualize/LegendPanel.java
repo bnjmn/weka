@@ -47,7 +47,7 @@ import javax.swing.JScrollPane;
  * be changed.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class LegendPanel
   extends JScrollPane {
@@ -88,6 +88,7 @@ public class LegendPanel
     private JPanel m_pointShape;
 
     public LegendEntry(PlotData2D data, int dataIndex) {
+      javax.swing.ToolTipManager.sharedInstance().setDismissDelay(5000);
       m_plotData = data;
       m_dataIndex = dataIndex;
       //      this.setBackground(Color.black);
@@ -120,6 +121,7 @@ public class LegendPanel
       }
 
       m_legendText = new JLabel(m_plotData.m_plotName);
+      m_legendText.setToolTipText(m_plotData.getPlotNameHTML());
       if (m_plotData.m_useCustomColour) {
 	m_legendText.setForeground(m_plotData.m_customColour);
       }
@@ -222,10 +224,14 @@ public class LegendPanel
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
     constraints.insets = new Insets(2,4,2,4);
-
+    //int numLines = ((PlotData2D)m_plots.elementAt(0)).getPlotName().split("<br>").length;
      for (int i=0;i<m_plots.size();i++) {
        tmp = new LegendEntry((PlotData2D)m_plots.elementAt(i),i);
        constraints.gridy = i;
+/*       constraints.gridheight = 1;
+       if (numLines > 0) {
+         constraints.gridheight = (numLines + 2);
+       } */
        m_span.add(tmp, constraints);
      }
   }
