@@ -49,7 +49,7 @@ import java.beans.beancontext.*;
  * Bean that collects and displays pieces of text
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class TextViewer 
   extends JPanel
@@ -291,6 +291,7 @@ public class TextViewer
       showResults();
     } else if (request.compareTo("Clear results") == 0) {
       m_outText.setText("");
+      m_history.clearResults();
     } else {
       throw new 
 	IllegalArgumentException(request
