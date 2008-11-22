@@ -44,7 +44,7 @@ import javax.swing.JPanel;
  * curves) and scheme error plots
  *
  * @author Mark Hall
- * @version $Revision: 1.7.2.1 $
+ * @version $Revision$
  */
 public class ModelPerformanceChart
   extends JPanel
@@ -208,7 +208,8 @@ public class ModelPerformanceChart
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
     if (m_masterPlot != null) {
-      newVector.addElement("Show plot");
+      newVector.addElement("Show chart");
+      newVector.addElement("Clear all plots");
     }
     return newVector.elements();
   }
@@ -292,7 +293,7 @@ public class ModelPerformanceChart
    * @exception IllegalArgumentException if an error occurs
    */
   public void performRequest(String request) {
-    if (request.compareTo("Show plot") == 0) {
+    if (request.compareTo("Show chart") == 0) {
       try {
 	// popup visualize panel
 	if (!m_framePoppedUp) {
@@ -318,6 +319,11 @@ public class ModelPerformanceChart
 	ex.printStackTrace();
 	m_framePoppedUp = false;
       }
+    } else if (request.equals("Clear all plots")) {
+        m_visPanel.removeAllPlots();
+        m_visPanel.validate(); m_visPanel.repaint();
+        m_visPanel = null;
+        m_masterPlot = null;
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Model Performance Chart)");
