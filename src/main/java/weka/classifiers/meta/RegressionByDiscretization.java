@@ -182,6 +182,8 @@ public class RegressionByDiscretization
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     
+    result.setMinimumNumberInstances(2);
+    
     return result;
   }
 
