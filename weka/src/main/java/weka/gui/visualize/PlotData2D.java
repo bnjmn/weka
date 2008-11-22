@@ -36,7 +36,7 @@ import java.awt.Color;
  * (associated 1 for 1 with the instances) can also be provided.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class PlotData2D {
 
@@ -45,6 +45,12 @@ public class PlotData2D {
 
   /** The name of this plot */
   protected String m_plotName = "new plot";
+  
+  /**
+   * The name of this plot (possibly in html) suitable for using in a 
+   * tool tip text.
+   */
+  protected String m_plotNameHTML = null;
 
   /** Custom colour for this plot */
   public boolean m_useCustomColour = false;
@@ -154,6 +160,31 @@ public class PlotData2D {
    */
   public String getPlotName() {
     return m_plotName;
+  }
+  
+  /**
+   * Set the plot name for use in a tool tip text.
+   * 
+   * @param name the name of the plot for potential use in a tool
+   * tip text (may use html).
+   */
+  public void setPlotNameHTML(String name) {
+    m_plotNameHTML = name;
+  }
+  
+  /**
+   * Get the name of the plot for use in a tool tip text.
+   * Defaults to the standard plot name if it hasn't been set.
+   * 
+   * @return the name of this plot (possibly in html) for use
+   * in a tool tip text.
+   */
+  public String getPlotNameHTML() {
+    if (m_plotNameHTML == null) {
+      return m_plotName;
+    }
+    
+    return m_plotNameHTML;
   }
 
   /**
