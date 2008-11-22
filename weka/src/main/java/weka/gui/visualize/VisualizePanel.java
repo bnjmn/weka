@@ -683,6 +683,7 @@ public class VisualizePanel
      */
     public void removeAllPlots() {
       m_plot2D.removeAllPlots();
+      m_legendPanel.setPlotList(m_plot2D.getPlots());
     }
     
     /**
@@ -1137,6 +1138,39 @@ public class VisualizePanel
       m_plotSurround.add(m_legendPanel, constraints);
       setSindex(0);
       m_ShapeCombo.setEnabled(false);
+    }
+    
+    protected void switchToBars() {
+      if (m_plotSurround.getComponentCount() > 1 && 
+          m_plotSurround.getComponent(1) == m_legendPanel) {
+        m_plotSurround.remove(m_legendPanel);
+      }
+      
+      if (m_plotSurround.getComponentCount() > 1 &&
+          m_plotSurround.getComponent(1) == m_attrib) {
+        return;
+      }
+      
+      if (m_showAttBars) {
+        try {
+          m_attrib.setInstances(m_plot2D.getMasterPlot().m_plotInstances);
+          m_attrib.setCindex(0);m_attrib.setX(0); m_attrib.setY(0);
+          GridBagConstraints constraints = new GridBagConstraints();
+          constraints.fill = GridBagConstraints.BOTH;
+          constraints.insets = new Insets(0, 0, 0, 0);
+          constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
+          constraints.gridwidth=1;constraints.gridheight=1;
+          constraints.weighty=5;
+          m_plotSurround.add(m_attrib, constraints);
+        } catch (Exception ex) {
+          System.err.println("Warning : data contains more attributes "
+                             +"than can be displayed as attribute bars.");
+          if (m_Log != null) {
+            m_Log.logMessage("Warning : data contains more attributes "
+                             +"than can be displayed as attribute bars.");
+          }
+        }
+      }
     }
 
     /**
