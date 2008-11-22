@@ -28,6 +28,8 @@ import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
@@ -38,7 +40,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15.2.4 $
+ * @version $Revision$
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -122,8 +124,8 @@ public class ClassifierPerformanceEvaluator
 	    public void run() {
 	      final String oldText = m_visual.getText();
 	      try {
-		if (ce.getSetNumber() == 1 || 
-		    ce.getClassifier() != m_classifier) {
+		if (ce.getSetNumber() == 1 /*|| 
+		    ce.getClassifier() != m_classifier */) {
 		  m_eval = new Evaluation(ce.getTestSet().getDataSet());
 		  m_classifier = ce.getClassifier();
 		  m_predInstances = 
@@ -157,11 +159,17 @@ public class ClassifierPerformanceEvaluator
 		  // m_resultsString.append(m_eval.toSummaryString());
 		  // m_outText.setText(m_resultsString.toString());
 		  String textTitle = m_classifier.getClass().getName();
+		  String textOptions = "";
+		  if (m_classifier instanceof OptionHandler) {
+	             textOptions = 
+	               Utils.joinOptions(((OptionHandler)m_classifier).getOptions()); 
+		  }
 		  textTitle = 
 		    textTitle.substring(textTitle.lastIndexOf('.')+1,
 					textTitle.length());
 		  String resultT = "=== Evaluation result ===\n\n"
 		    + "Scheme: " + textTitle + "\n"
+		    + ((textOptions.length() > 0) ? "Options: " + textOptions : "")
 		    + "Relation: " + ce.getTestSet().getDataSet().relationName()
 		    + "\n\n" + m_eval.toSummaryString();
                   
@@ -182,7 +190,7 @@ public class ClassifierPerformanceEvaluator
                     PlotData2D errorD = new PlotData2D(m_predInstances);
                     errorD.setShapeSize(m_plotSize);
                     errorD.setShapeType(m_plotShape);
-                    errorD.setPlotName(textTitle+" ("
+                    errorD.setPlotName(textTitle + " " +textOptions + " ("
                                        +ce.getTestSet().getDataSet().relationName()
                                        +")");
                     errorD.addInstanceNumberAttribute();
@@ -199,10 +207,36 @@ public class ClassifierPerformanceEvaluator
 		    result.
 		      setRelationName(ce.getTestSet().getDataSet().relationName());
 		    PlotData2D pd = new PlotData2D(result);
-		    pd.setPlotName(textTitle+" ("
-				   +ce.getTestSet().getDataSet().
-				                   classAttribute().value(0)
-				   +")");
+		    String htmlTitle = "<html><font size=-2>"
+		      + textTitle;
+		    String newOptions = "";
+		    if (m_classifier instanceof OptionHandler) {
+		      String[] options = 
+		        ((OptionHandler) m_classifier).getOptions();
+		      if (options.length > 0) {
+		        for (int ii = 0; ii < options.length; ii++) {
+		          if (options[ii].length() == 0) {
+		            continue;
+		          }
+		          if (options[ii].charAt(0) == '-' && 
+		              !(options[ii].charAt(1) >= '0' &&
+		                  options[ii].charAt(1)<= '9')) {
+		            newOptions += "<br>";
+		          }
+		          newOptions += options[ii];
+		        }
+		      }
+		    }
+		    
+		   htmlTitle += " " + newOptions + "<br>" 
+		      + " (class: "
+                      +ce.getTestSet().getDataSet().
+                        classAttribute().value(0) + ")" 
+                      + "</font></html>";
+		    pd.setPlotName(textTitle + " (class: "
+	                      +ce.getTestSet().getDataSet().
+	                        classAttribute().value(0) + ")");
+		    pd.setPlotNameHTML(htmlTitle);
 		    boolean [] connectPoints = 
 		      new boolean [result.numInstances()];
 		    for (int jj = 1; jj < connectPoints.length; jj++) {
