@@ -62,7 +62,7 @@ import weka.gui.visualize.PrintableComponent;
  * left-click.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18.2.3 $
+ * @version $Revision$
  */
 public class ResultHistoryPanel extends JPanel {
   
@@ -216,6 +216,16 @@ public class ResultHistoryPanel extends JPanel {
       m_Objs.remove(name);
       System.gc();
     } 
+  }
+  /**
+   * Removes all of the result buffers from the history. Any windows currently
+   * displaying the contents of the buffer are not affected.
+   */
+  public void clearResults() {
+    m_Results.clear();
+    m_Model.clear();
+    m_Objs.clear();
+    System.gc();
   }
 
   /**
