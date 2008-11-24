@@ -30,7 +30,7 @@ import java.util.EventObject;
  * Event encapsulating a test set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4.2.1 $
+ * @version $Revision$
  */
 public class TestSetEvent
   extends EventObject {
@@ -43,6 +43,17 @@ public class TestSetEvent
    */
   protected Instances m_testSet;
   private boolean m_structureOnly;
+  
+  /**
+   * What run number is this training set from. 
+   */
+  protected int m_runNumber = 1;
+  
+  
+  /**
+   * Maximum number of runs. 
+   */
+  protected int m_maxRunNumber = 1;
 
   /**
    * what number is this test set (ie fold 2 of 10 folds)
@@ -82,6 +93,24 @@ public class TestSetEvent
     m_setNumber = setNum;
     m_maxSetNumber = maxSetNum;
   }
+  
+  /**
+   * Creates a new <code>TestSetEvent</code>
+   * 
+   * @param source the source of the event
+   * @param testSet the test instances
+   * @param runNum the run number that the test set belongs to
+   * @param maxRunNum the maximum run number
+   * @param setNum the number of the test set
+   * @param maxSetNum the maximum number of sets
+   */
+  public TestSetEvent(Object source, Instances testSet,
+      int runNum, int maxRunNum, int setNum, int maxSetNum) {
+    this(source, testSet, setNum, maxSetNum);
+    
+    m_runNumber = runNum;
+    m_maxRunNumber = maxRunNum;
+  }
 
   /**
    * Get the test set instances
@@ -90,6 +119,24 @@ public class TestSetEvent
    */
   public Instances getTestSet() {
     return m_testSet;
+  }
+  
+  /**
+   * Get the run number that this training set belongs to.
+   * 
+   * @return the run number for this training set.
+   */
+  public int getRunNumber() {
+    return m_runNumber;
+  }
+  
+  /**
+   * Get the maximum number of runs.
+   * 
+   * @return return the maximum number of runs.
+   */
+  public int getMaxRunNumber() {
+    return m_maxRunNumber;
   }
 
   /**
