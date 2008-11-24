@@ -343,9 +343,10 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.Filter.class, "filter");
     m_Properties.addAllowed(weka.gui.beans.Classifier.class, "wrappedAlgorithm");
     m_Properties.addAllowed(weka.gui.beans.Clusterer.class, "wrappedAlgorithm");
+    m_Properties.addAllowed(weka.gui.beans.Classifier.class, "executionSlots");
 
     m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
-    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");    
+    m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
     m_Properties.addAllowed(weka.filters.Filter.class, "options");
     
     m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class, "options");
