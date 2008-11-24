@@ -22,24 +22,36 @@
 
 package weka.gui.beans;
 
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
+
 import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
-import weka.gui.Logger;
+import weka.experiment.Task;
+import weka.experiment.TaskStatusInfo;
 import weka.gui.ExtensionFileFilter;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.*;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-
-import javax.swing.JPanel;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
+import weka.gui.Logger;
 
 /**
  * Bean that wraps around weka.classifiers
@@ -78,7 +90,7 @@ public class Classifier
 
   private int m_state = IDLE;
 
-  private Thread m_buildThread = null;
+  //private Thread m_buildThread = null;
 
   /**
    * Global info for the wrapped classifier (if it exists).
@@ -155,7 +167,34 @@ public class Classifier
    * Event to handle when processing incremental updates
    */
   private InstanceEvent m_incrementalEvent;
-  private Double m_dummy = new Double(0.0);
+  
+  /**
+   * Number of threads to use to train models with
+   */
+  protected int m_executionSlots = 2;
+  
+//  protected int m_queueSize = 5;
+  
+  /**
+   * Pool of threads to train models on incoming data 
+   */
+  protected transient ThreadPoolExecutor m_executorPool;  
+  
+  /**
+   * Stores completed models and associated data sets. Each
+   * run is passed on to listeners when completed. 
+   */
+  protected BatchClassifierEvent[][] m_outputQueues;
+  
+  /**
+   * Holds original icon label text
+   */
+  protected String m_oldText = "";
+  
+  /**
+   * true if we should block any further training data sets.
+   */
+  protected boolean m_block = false;
 
   /**
    * Global info (if it exists) for the wrapped classifier
@@ -175,6 +214,16 @@ public class Classifier
     setClassifier(m_Classifier);
     
     //setupFileChooser();
+  }
+  
+  private void startExecutorPool() {
+    
+    if (m_executorPool != null) {
+      m_executorPool.shutdownNow();
+    }
+    
+    m_executorPool = new ThreadPoolExecutor(m_executionSlots, m_executionSlots,
+        120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
   }
 
   /**
@@ -209,6 +258,26 @@ public class Classifier
       m_fileChooser.addChoosableFileFilter(m_XStreamFilter);
     }
     m_fileChooser.setFileFilter(m_binaryFilter);
+  }
+  
+  /**
+   * Get the number of execution slots (threads) used
+   * to train models.
+   * 
+   * @return the number of execution slots.
+   */
+  public int getExecutionSlots() {
+    return m_executionSlots;
+  }
+  
+  /**
+   * Set the number of execution slots (threads) to use to
+   * train models with.
+   * 
+   * @param slots the number of execution slots to use.
+   */
+  public void setExecutionSlots(int slots) {
+    m_executionSlots = slots;
   }
 
   /**
@@ -317,19 +386,25 @@ public class Classifier
     return getClassifier();
   }
 
+  /**
+   * Get whether an incremental classifier will be updated on the
+   * incoming instance stream.
+   * 
+   * @return true if an incremental classifier is to be updated.
+   */
   public boolean getUpdateIncrementalClassifier() {
     return m_updateIncrementalClassifier;
   }
 
+  /**
+   * Set whether an incremental classifier will be updated on the
+   * incoming instance stream.
+   * 
+   * @param update true if an incremental classifier is to be updated.
+   */
   public void setUpdateIncrementalClassifier(boolean update) {
     m_updateIncrementalClassifier = update;
   }
-
-//    public void acceptDataSet(DataSetEvent e) {
-//      // will wrap up data in a TrainingSetEvent and call acceptTrainingSet
-//      // then will do same for TestSetEvent
-//      acceptTrainingSet(new TrainingSetEvent(e.getSource(), e.getDataSet()));
-//    }
 
   /**
    * Accepts an instance for incremental processing.
@@ -337,33 +412,17 @@ public class Classifier
    * @param e an <code>InstanceEvent</code> value
    */
   public void acceptInstance(InstanceEvent e) {
-    /*    if (m_buildThread == null) {
-	  System.err.println("Starting handler ");
-	  startIncrementalHandler();
-	  } */
-    //    if (m_Classifier instanceof weka.classifiers.UpdateableClassifier) {
-    /*      synchronized(m_dummy) {
-	    m_state = BUILDING_MODEL;
-	    m_incrementalEvent = e;
-	    m_dummy.notifyAll();
-	    }
-	    try {
-	    //	  if (m_state == BUILDING_MODEL && m_buildThread != null) {
-	    block(true);
-	    //	  }
-	    } catch (Exception ex) {
-	    return;
-	    } */
     m_incrementalEvent = e;
     handleIncrementalEvent();
-    //    }
   }
 
   /**
    * Handles initializing and updating an incremental classifier
    */
   private void handleIncrementalEvent() {
-    if (m_buildThread != null) {
+    if (m_executorPool != null && 
+        (m_executorPool.getQueue().size() > 0 || 
+            m_executorPool.getActiveCount() > 0)) {
       String messg = "Classifier is currently batch training!";
       if (m_log != null) {
 	m_log.logMessage(messg);
@@ -494,37 +553,245 @@ public class Classifier
       ex.printStackTrace();
     }
   }
+  
+  protected class TrainingTask implements Runnable, Task {
+    private int m_runNum;
+    private int m_maxRunNum;
+    private int m_setNum;
+    private int m_maxSetNum;
+    private Instances m_train = null;
+    private TaskStatusInfo m_taskInfo = new TaskStatusInfo();
 
-  /**
-   * Unused at present
-   */
-  private void startIncrementalHandler() {
-    if (m_buildThread == null) {
-      m_buildThread = new Thread() {
-	  public void run() {
-	    while (true) {
-	      synchronized(m_dummy) {
-		try {
-		  m_dummy.wait();
-		} catch (InterruptedException ex) {
-		  //		  m_buildThread = null;
-		  //		  System.err.println("Here");
-		  return;
-		}
-	      }
-	      Classifier.this.handleIncrementalEvent();
-	      m_state = IDLE;
-	      block(false);
-	    }
-	  }
-	};
-      m_buildThread.setPriority(Thread.MIN_PRIORITY);
-      m_buildThread.start();
-      // give thread a chance to start
+    public TrainingTask(int runNum, int maxRunNum, 
+        int setNum, int maxSetNum, Instances train) {
+      m_runNum = runNum;
+      m_maxRunNum = maxRunNum;
+      m_setNum = setNum;
+      m_maxSetNum = maxSetNum;
+      m_train = train;
+      m_taskInfo.setExecutionStatus(TaskStatusInfo.TO_BE_RUN);
+    }
+
+    public void run() {
+      execute();
+    }
+
+    public void execute() {
       try {
-	Thread.sleep(500);
-      } catch (InterruptedException ex) {
+        if (m_train != null) {
+          if (m_train.classIndex() < 0) {
+            // assume last column is the class
+            m_train.setClassIndex(m_train.numAttributes()-1);
+            if (m_log != null) {
+              m_log.logMessage("Classifier : assuming last "
+                  +"column is the class");
+            }
+          }
+          if (m_runNum == 1 && m_setNum == 1) {
+            // set this back to idle once the last fold
+            // of the last run has completed
+            m_state = BUILDING_MODEL; // global state
+            
+            // local status of this runnable
+            m_taskInfo.setExecutionStatus(TaskStatusInfo.PROCESSING);
+          }
+          
+          //m_visual.setAnimated();
+          m_visual.setText("Building model...");
+          String msg = "[Classifier] " + m_Classifier.getClass().getName() 
+            + ": building model for run " + m_runNum + " fold " + m_setNum;
+          if (m_log != null) {
+            m_log.statusMessage(msg);
+          } else {
+            System.err.println(msg);
+          }
+          // buildClassifier();
+          
+          // copy the classifier configuration
+          weka.classifiers.Classifier classifierCopy = 
+            weka.classifiers.Classifier.makeCopy(m_Classifier);
+          
+          // build this model
+          classifierCopy.buildClassifier(m_train);
+          if (m_runNum == m_maxRunNum && m_setNum == m_maxSetNum) {
+            // Save the last classifier (might be used later on for
+            // classifying further test sets.
+            m_Classifier = classifierCopy;
+            m_trainingSet = m_train;
+          }
+                              
+          if (m_batchClassifierListeners.size() > 0) {
+            // notify anyone who might be interested in just the model
+            // and training set.
+            BatchClassifierEvent ce = 
+              new BatchClassifierEvent(Classifier.this, classifierCopy, 
+                  new DataSetEvent(this, m_train),
+                  null, // no test set (yet)
+                  m_setNum, m_maxSetNum);
+            notifyBatchClassifierListeners(ce);
+                        
+            // store in the output queue (if we have incoming test set events)
+            classifierTrainingComplete(ce);
+          }
+
+          if (classifierCopy instanceof weka.core.Drawable && 
+              m_graphListeners.size() > 0) {
+            String grphString = 
+              ((weka.core.Drawable)classifierCopy).graph();
+            int grphType = ((weka.core.Drawable)classifierCopy).graphType();
+            String grphTitle = classifierCopy.getClass().getName();
+            grphTitle = grphTitle.substring(grphTitle.
+                lastIndexOf('.')+1, 
+                grphTitle.length());
+            grphTitle = "Set " + m_setNum + " ("
+            + m_train.relationName() + ") "
+            + grphTitle;
+
+            GraphEvent ge = new GraphEvent(Classifier.this, 
+                grphString, 
+                grphTitle,
+                grphType);
+            notifyGraphListeners(ge);
+          }
+
+          if (m_textListeners.size() > 0) {
+            String modelString = classifierCopy.toString();
+            String titleString = classifierCopy.getClass().getName();
+
+            titleString = titleString.
+            substring(titleString.lastIndexOf('.') + 1,
+                titleString.length());
+            modelString = "=== Classifier model ===\n\n" +
+            "Scheme:   " +titleString+"\n" +
+            "Relation: "  + m_train.relationName() + 
+            ((m_maxSetNum > 1) 
+                ? "\nTraining Fold: " + m_setNum
+                    :"")
+                    + "\n\n"
+                    + modelString;
+            titleString = "Model: " + titleString;
+
+            TextEvent nt = new TextEvent(Classifier.this,
+                modelString,
+                titleString);
+            notifyTextListeners(nt);
+          }
+        }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        if (m_log != null) {
+          String titleString = m_Classifier.getClass().getName();
+          titleString = titleString.
+          substring(titleString.lastIndexOf('.') + 1,
+              titleString.length());
+          titleString += " run " + m_runNum + " fold " + m_setNum
+          + " failed to complete.";
+          m_log.logMessage("Build classifier: " + titleString);
+        }
+        m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
+      } finally {
+        m_visual.setStatic();
+//        m_state = IDLE;
+        if (Thread.currentThread().isInterrupted()) {
+          // prevent any classifier events from being fired
+          m_trainingSet = null;
+          if (m_log != null) {
+            String titleString = m_Classifier.getClass().getName();                 
+         
+            m_log.logMessage("Build classifier ("
+                + titleString + 
+                " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
+            m_log.statusMessage("Interrupted");
+          }
+        }
+        if (m_log != null) {
+          m_log.statusMessage("OK");
+        }
+        // if we are the last fold of the last run then unblock
+        if (m_runNum == m_maxRunNum && m_setNum == m_maxSetNum) {
+          System.err.println("[Classifier] last classifier unblocking...");
+          m_visual.setText(m_oldText);
+          m_block = false;
+          block(false);
+        }
       }
+    }
+  
+    public TaskStatusInfo getTaskStatus() {
+      // TODO
+      return null;
+    }     
+  }     
+  
+  /**
+   * Accepts a training set and builds batch classifier
+   *
+   * @param e a <code>TrainingSetEvent</code> value
+   */
+  public void acceptTrainingSet(final TrainingSetEvent e) {
+    if (m_block) {
+      block(true);
+    }
+    
+    if (e.isStructureOnly()) {
+      // no need to build a classifier, instead just generate a dummy
+      // BatchClassifierEvent in order to pass on instance structure to
+      // any listeners - eg. PredictionAppender can use it to determine
+      // the final structure of instances with predictions appended
+      BatchClassifierEvent ce = 
+        new BatchClassifierEvent(this, m_Classifier, 
+                                 new DataSetEvent(this, e.getTrainingSet()),
+                                 new DataSetEvent(this, e.getTrainingSet()),
+                                 e.getSetNumber(), e.getMaxSetNumber());
+
+      notifyBatchClassifierListeners(ce);
+      return;
+    }
+    
+    // Do some initialization if this is the first set of the first run
+    if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
+      m_oldText = m_visual.getText();
+      String msg = "[Classifier] starting executor pool ("
+        + getExecutionSlots() + " slots)...";
+      if (m_log != null) {
+        m_log.logMessage(msg);
+      } else {
+        System.err.println(msg);
+      }
+      // start the execution pool
+      startExecutorPool();
+            
+      // setup output queues
+      msg = "[Classifier] setup output queues.";
+      if (m_log != null) {
+        m_log.logMessage(msg);
+      } else {
+        System.err.println(msg);
+      }
+      
+      m_outputQueues = 
+        new BatchClassifierEvent[e.getMaxRunNumber()][e.getMaxSetNumber()];
+    }
+    
+    // create a new task and schedule for execution
+    TrainingTask newTask = new TrainingTask(e.getRunNumber(), e.getMaxRunNumber(),
+        e.getSetNumber(), e.getMaxSetNumber(), e.getTrainingSet());
+    String msg = "[Classifier] scheduling run " + e.getRunNumber()
+    +" fold " + e.getSetNumber() + " for execution...";
+    if (m_log != null) {
+      m_log.logMessage(msg);
+    } else {
+      System.err.println(msg);
+    }
+    m_executorPool.execute(newTask);
+    
+    if (e.getRunNumber() == e.getMaxRunNumber() && 
+        e.getSetNumber() == e.getMaxSetNumber()) {
+      
+      // block on the last fold of the last run
+      /* System.err.println("[Classifier] blocking on last fold of last run...");
+      block(true); */
+      m_block = true;
     }
   }
 
@@ -533,7 +800,7 @@ public class Classifier
    *
    * @param e a <code>TrainingSetEvent</code> value
    */
-  public void acceptTrainingSet(final TrainingSetEvent e) {
+  /* public void acceptTrainingSet(final TrainingSetEvent e) {
     if (e.isStructureOnly()) {
       // no need to build a classifier, instead just generate a dummy
       // BatchClassifierEvent in order to pass on instance structure to
@@ -671,14 +938,14 @@ public class Classifier
 	ex.printStackTrace();
       }
     }
-  }
+  } */
 
   /**
    * Accepts a test set for a batch trained classifier
    *
    * @param e a <code>TestSetEvent</code> value
    */
-  public void acceptTestSet(TestSetEvent e) {
+  /* public void acceptTestSet(TestSetEvent e) {
 
     if (m_trainingSet != null) {
       try {
@@ -711,11 +978,104 @@ public class Classifier
 	ex.printStackTrace();
       }
     }
+  } */
+    
+  public synchronized void acceptTestSet(TestSetEvent e) {
+  
+    // If we just have a test set connection, then use the
+    // last saved model
+    if (!m_listenees.containsKey("trainingSet")) {
+      Instances testSet = e.getTestSet();
+      if (testSet != null) {
+        if (testSet.classIndex() < 0) {
+          testSet.setClassIndex(testSet.numAttributes() - 1);
+        }
+        
+        if (m_trainingSet.equalHeaders(testSet)) {
+          BatchClassifierEvent ce =
+            new BatchClassifierEvent(this, m_Classifier,                                       
+                new DataSetEvent(this, m_trainingSet),
+                new DataSetEvent(this, e.getTestSet()),
+           e.getRunNumber(), e.getMaxRunNumber(), 
+           e.getSetNumber(), e.getMaxSetNumber());
+          
+          notifyBatchClassifierListeners(ce);
+        }
+      }
+    } else {
+/*      System.err.println("[Classifier] accepting test set: run " 
+          + e.getRunNumber() + " fold " + e.getSetNumber()); */
+      
+      if (m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] == null) {
+        // store an event with a null model and training set (to be filled in later)
+        m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1] =
+          new BatchClassifierEvent(this, null, null, 
+              new DataSetEvent(this, e.getTestSet()),
+              e.getRunNumber(), e.getMaxRunNumber(),
+              e.getSetNumber(), e.getMaxSetNumber());
+      } else {
+        // Otherwise, there is a model here waiting for a test set...
+        m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1].
+          setTestSet(new DataSetEvent(this, e.getTestSet()));
+        checkCompletedRun(e.getRunNumber(), e.getMaxSetNumber());
+      }
+    }
+  }
+  
+  private synchronized void classifierTrainingComplete(BatchClassifierEvent ce) {
+    // check the output queues if we have an incoming test set connection
+    if (m_listenees.containsKey("testSet")) {
+      String msg = "[Classifier] " + m_Classifier.getClass().getName() 
+      + ": storing model for run " + ce.getRunNumber() 
+      + " fold " + ce.getSetNumber();
+      if (m_log != null) {
+        m_log.logMessage(msg);
+      } else {
+        System.err.println(msg);
+      }
+      
+      if (m_outputQueues[ce.getRunNumber() - 1][ce.getSetNumber() - 1] == null) {
+        // store the event - test data filled in later
+        m_outputQueues[ce.getRunNumber() - 1][ce.getSetNumber() - 1] = ce;
+      } else {
+        // there is a test set here waiting for a model and training set
+        m_outputQueues[ce.getRunNumber() - 1][ce.getSetNumber() - 1].
+          setClassifier(ce.getClassifier());
+        m_outputQueues[ce.getRunNumber() - 1][ce.getSetNumber() - 1].
+        setTrainSet(ce.getTrainSet());
+        
+      }
+    }
+    checkCompletedRun(ce.getRunNumber(), ce.getMaxSetNumber());
   }
 
-
-  private void buildClassifier() throws Exception {
-    m_Classifier.buildClassifier(m_trainingSet);
+  private synchronized void checkCompletedRun(int runNum, int  maxSets) {
+    boolean runOK = true;
+    for (int i = 0; i < maxSets; i++) {
+      if (m_outputQueues[runNum - 1][i] == null) {
+        runOK = false;
+        break;
+      } else if (m_outputQueues[runNum - 1][i].getClassifier() == null ||
+          m_outputQueues[runNum - 1][i].getTestSet() == null) {
+        runOK = false;
+        break;       
+      }
+    }
+    
+    if (runOK) {
+      String msg = "[Classifier] dispatching run " + runNum + " to listeners.";
+      if (m_log != null) {
+        m_log.logMessage(msg);
+      } else {
+        System.err.println(msg);
+      }
+      // dispatch this run to listeners
+      for (int i = 0; i < maxSets; i++) {
+        notifyBatchClassifierListeners(m_outputQueues[runNum - 1][i]);
+        // save memory
+        m_outputQueues[runNum - 1][i] = null;
+      }
+    }
   }
 
   /**
@@ -989,7 +1349,7 @@ public class Classifier
     if (tf) {
       try {
 	  // only block if thread is still doing something useful!
-	if (m_buildThread.isAlive() && m_state != IDLE) {
+	if (m_state != IDLE) {
 	  wait();
 	  }
       } catch (InterruptedException ex) {
@@ -1012,14 +1372,20 @@ public class Classifier
 	((BeanCommon)tempO).stop();
       }
     }
+    
+    // shutdown the executor pool and reclaim storage
+    m_executorPool.shutdownNow();
+    m_executorPool.purge();
+    m_executorPool = null;
+    m_visual.setStatic();
 
     // stop the build thread
-    if (m_buildThread != null) {
+    /*if (m_buildThread != null) {
       m_buildThread.interrupt();
       m_buildThread.stop();
       m_buildThread = null;
       m_visual.setStatic();
-    }
+    } */
   }
 
   public void loadModel() {
@@ -1213,16 +1579,22 @@ public class Classifier
    */
   public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
-    if (m_buildThread != null) {
+    if (m_executorPool != null && 
+        (m_executorPool.getQueue().size() > 0 || 
+            m_executorPool.getActiveCount() > 0)) {
       newVector.addElement("Stop");
     }
 
-    if (m_buildThread == null && 
+    if ((m_executorPool == null || 
+        (m_executorPool.getQueue().size() == 0 && 
+            m_executorPool.getActiveCount() == 0)) && 
         m_Classifier != null) {
       newVector.addElement("Save model");
     }
 
-    if (m_buildThread == null) {
+    if (m_executorPool == null || 
+        (m_executorPool.getQueue().size() == 0 && 
+            m_executorPool.getActiveCount() == 0)) {
       newVector.addElement("Load model");
     }
     return newVector.elements();
