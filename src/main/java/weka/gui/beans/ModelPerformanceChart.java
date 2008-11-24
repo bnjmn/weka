@@ -209,7 +209,7 @@ public class ModelPerformanceChart
     Vector newVector = new Vector(0);
     if (m_masterPlot != null) {
       newVector.addElement("Show chart");
-      newVector.addElement("Clear all plots");
+      newVector.addElement("?Clear all plots");
     }
     return newVector.elements();
   }

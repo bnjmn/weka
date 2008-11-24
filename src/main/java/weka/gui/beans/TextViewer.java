@@ -389,7 +389,7 @@ public class TextViewer
 
     newVector.addElement("Show results");
 
-    newVector.addElement("Clear results");
+    newVector.addElement("?Clear results");
     return newVector.elements();
   }
 
