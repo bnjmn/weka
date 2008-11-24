@@ -31,7 +31,7 @@ import java.util.EventObject;
  * test on.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.6 $
+ * @version $Revision$
  * @since 1.0
  * @see EventObject
  */
@@ -57,12 +57,21 @@ public class BatchClassifierEvent
    * Instances that were used to train the classifier (may be null if not available)
    */
   protected DataSetEvent m_trainSet;
+  
+  /**
+   * The run number that this classifier was generated for 
+   */
+  protected int m_runNumber = 1;
+    
+  /**
+   * The maximum number of runs 
+   */
+  protected int m_maxRunNumber = 1;
 
   /**
    * The set number for the test set
    */
   protected int m_setNumber;
-
 
   /**
    * The last set number for this series
@@ -90,6 +99,28 @@ public class BatchClassifierEvent
     m_setNumber = setNum;
     m_maxSetNumber = maxSetNum;
   }
+  
+  /**
+   * Creates a new <code>BatchClassifierEvent</code> instance.
+   *
+   * @param source the source object
+   * @param scheme a Classifier
+   * @param trsI the training instances used to train the classifier
+   * @param tstI the test instances
+   * @param runNum the run number
+   * @param maxRunNum the maximum run number
+   * @param setNum the set number of the test instances
+   * @param maxSetNum the last set number in the series
+   */
+  public BatchClassifierEvent(Object source, Classifier scheme,
+    DataSetEvent trsI, DataSetEvent tstI, int runNum, int maxRunNum,
+    int setNum, int maxSetNum) {
+    
+    this(source, scheme, trsI, tstI, setNum, maxSetNum);
+    
+    m_runNumber = runNum;
+    m_maxRunNumber = maxRunNum;
+  }
 
 //    /**
 //     * Get the training instances
@@ -108,23 +139,68 @@ public class BatchClassifierEvent
   public Classifier getClassifier() {
     return m_classifier;
   }
+  
+  /**
+   * Set the classifier
+   * 
+   * @param classifier the classifier
+   */
+  public void setClassifier(Classifier classifier) {
+    m_classifier = classifier;
+  }
+  
+  /**
+   * Set the test set
+   * 
+   * @param tse the test set
+   */
+  public void setTestSet(DataSetEvent tse) {
+    m_testSet = tse;
+  }
 
   /**
    * Get the test set
    *
-   * @return the testing instances
+   * @return the test set
    */
   public DataSetEvent getTestSet() {
     return m_testSet;
   }
   
   /**
+   * Set the training set
+   * 
+   * @param tse the training set
+   */
+  public void setTrainSet(DataSetEvent tse) {
+    m_trainSet = tse;
+  }
+  
+  /**
    * Get the train set
    *
-   * @return the testing instances
+   * @return the training set
    */
   public DataSetEvent getTrainSet() {
     return m_trainSet;
+  }
+  
+  /**
+   * Get the run number.
+   * 
+   * @return the run number
+   */
+  public int getRunNumber() {
+    return m_runNumber;
+  }
+  
+  /**
+   * Get the maximum run number
+   * 
+   * @return the maximum run number
+   */
+  public int getMaxRunNumber() {
+    return m_maxRunNumber;
   }
 
   /**

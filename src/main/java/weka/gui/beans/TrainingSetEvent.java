@@ -30,7 +30,7 @@ import java.util.EventObject;
  * Event encapsulating a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class TrainingSetEvent
   extends EventObject {
@@ -43,6 +43,17 @@ public class TrainingSetEvent
    */
   protected Instances m_trainingSet;
   private boolean m_structureOnly;
+  
+  /**
+   * What run number is this training set from. 
+   */
+  protected int m_runNumber = 1;
+  
+  
+  /**
+   * Maximum number of runs. 
+   */
+  protected int m_maxRunNumber = 1;
 
   /**
    * what number is this training set (ie fold 2 of 10 folds)
@@ -81,6 +92,24 @@ public class TrainingSetEvent
     m_setNumber = setNum;
     m_maxSetNumber = maxSetNum;
   }
+  
+  /**
+   * Creates a new <code>TrainingSetEvent</code>
+   * 
+   * @param source the source of the event
+   * @param trainSet the training instances
+   * @param runNum the run number that the training set belongs to
+   * @param maxRunNum the maximum run number
+   * @param setNum the number of the training set
+   * @param maxSetNum the maximum number of sets
+   */
+  public TrainingSetEvent(Object source, Instances trainSet, int runNum,
+      int maxRunNum, int setNum, int maxSetNum) {
+    this(source, trainSet, setNum, maxSetNum);
+    
+    m_runNumber = runNum;
+    m_maxRunNumber = maxRunNum; 
+  }
 
   /**
    * Get the training instances
@@ -89,6 +118,24 @@ public class TrainingSetEvent
    */
   public Instances getTrainingSet() {
     return m_trainingSet;
+  }
+  
+  /**
+   * Get the run number that this training set belongs to.
+   * 
+   * @return the run number for this training set.
+   */
+  public int getRunNumber() {
+    return m_runNumber;
+  }
+  
+  /**
+   * Get the maximum number of runs.
+   * 
+   * @return return the maximum number of runs.
+   */
+  public int getMaxRunNumber() {
+    return m_maxRunNumber;
   }
 
   /**
