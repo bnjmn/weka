@@ -123,7 +123,7 @@ import javax.swing.filechooser.FileFilter;
  * with swt provided by Davide Zerbetto (davide dot zerbetto at eng dot it).
  *
  * @author Mark Hall
- * @version  $Revision: 1.18.2.14 $
+ * @version  $Revision$
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -373,7 +373,7 @@ public class KnowledgeFlowApp
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.18.2.14 $
+   * @version $Revision$
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1792,23 +1792,46 @@ public class KnowledgeFlowApp
       while (req.hasMoreElements()) {
         String tempS = (String) req.nextElement();
         boolean disabled = false;
+        boolean confirmRequest = false;
 
         // check to see if this item is currently disabled
         if (tempS.charAt(0) == '$') {
           tempS = tempS.substring(1, tempS.length());
           disabled = true;
         }
+        
+        // check to see if this item requires confirmation
+        if (tempS.charAt(0) == '?') {
+          tempS = tempS.substring(1, tempS.length());
+          confirmRequest = true;
+        }
 
         final String tempS2 = tempS;
 
         //	JMenuItem custItem = new JMenuItem(tempS2);
         MenuItem custItem = new MenuItem(tempS2);
-        custItem.addActionListener(new ActionListener() {
+        if (confirmRequest) {
+          custItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+              // 
+              int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
+                  tempS2,
+                  "Confirm action",
+                  JOptionPane.YES_NO_OPTION);
+              if (result == JOptionPane.YES_OPTION) {
+                ((UserRequestAcceptor) bc).performRequest(tempS2);
+                notifyIsDirty();
+              }
+            }
+          });
+        } else {
+        custItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {              
               ((UserRequestAcceptor) bc).performRequest(tempS2);
               notifyIsDirty();
             }
           });
+        }
 
         if (disabled) {
           custItem.setEnabled(false);
