@@ -33,18 +33,21 @@ import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  * GUI customizer for the classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class ClassifierCustomizer
   extends JPanel
-  implements Customizer {
+  implements Customizer, CustomizerClosingListener {
 
   /** for serialization */
   private static final long serialVersionUID = -6688000820160821429L;
@@ -66,8 +69,15 @@ public class ClassifierCustomizer
   private JCheckBox m_updateIncrementalClassifier 
     = new JCheckBox("Update classifier on incoming instance stream");
   private boolean m_panelVisible = false;
+  
+  private JPanel m_holderPanel = new JPanel();
+  private JTextField m_executionSlotsText = new JTextField();
 
   public ClassifierCustomizer() {
+    
+    m_ClassifierEditor.
+      setBorder(BorderFactory.createTitledBorder("Classifier options"));
+    
     m_updateIncrementalClassifier.
       setToolTipText("Train the classifier on "
 		     +"each individual incoming streamed instance.");
@@ -82,8 +92,32 @@ public class ClassifierCustomizer
 	  }
 	});
     m_incrementalPanel.add(m_updateIncrementalClassifier);
+    
+    m_executionSlotsText.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_dsClassifier != null &&
+            m_executionSlotsText.getText().length() > 0) {
+          int newSlots = Integer.parseInt(m_executionSlotsText.getText());
+          m_dsClassifier.setExecutionSlots(newSlots);
+        }
+      }
+    });
+    
+    JPanel executionSlotsPanel = new JPanel();
+    executionSlotsPanel.
+      setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+    JLabel executionSlotsLabel = new JLabel("Execution slots");
+    executionSlotsPanel.setLayout(new BorderLayout());
+    executionSlotsPanel.add(executionSlotsLabel, BorderLayout.WEST);
+    executionSlotsPanel.add(m_executionSlotsText, BorderLayout.CENTER);
+    m_holderPanel.
+      setBorder(BorderFactory.createTitledBorder("More options"));
+    m_holderPanel.setLayout(new BorderLayout());
+    m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
+    
     setLayout(new BorderLayout());
     add(m_ClassifierEditor, BorderLayout.CENTER);
+    add(m_holderPanel, BorderLayout.SOUTH);
   }
   
   private void checkOnClassifierType() {
@@ -91,12 +125,14 @@ public class ClassifierCustomizer
     if (editedC instanceof weka.classifiers.UpdateableClassifier && 
 	m_dsClassifier.hasIncomingStreamInstances()) {
       if (!m_panelVisible) {
-	add(m_incrementalPanel, BorderLayout.SOUTH);
+	m_holderPanel.add(m_incrementalPanel, BorderLayout.SOUTH);
 	m_panelVisible = true;
+	m_executionSlotsText.setEnabled(false);
       }
     } else {
       if (m_panelVisible) {
-	remove(m_incrementalPanel);
+	m_holderPanel.remove(m_incrementalPanel);
+	m_executionSlotsText.setEnabled(true);
 	m_panelVisible = false;
       }
     }
@@ -113,7 +149,18 @@ public class ClassifierCustomizer
     m_ClassifierEditor.setTarget(m_dsClassifier.getClassifier());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
+    m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
     checkOnClassifierType();
+  }
+  
+  /* (non-Javadoc)
+   * @see weka.gui.beans.CustomizerClosingListener#customizerClosing()
+   */
+  public void customizerClosing() {
+    if (m_executionSlotsText.getText().length() > 0) {
+      int newSlots = Integer.parseInt(m_executionSlotsText.getText());
+      m_dsClassifier.setExecutionSlots(newSlots);
+    }
   }
 
   /**
