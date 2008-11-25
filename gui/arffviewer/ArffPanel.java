@@ -60,7 +60,7 @@ import javax.swing.event.TableModelEvent;
  *
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 
 public class ArffPanel 
@@ -641,11 +641,15 @@ public class ArffPanel
     // undo
     addUndoPoint();
     model.setUndoEnabled(false);
-    
+    String valueCopy = value;
     // set value
     for (i = 0; i < m_TableArff.getRowCount(); i++) {
-      if (o == menuItemSetAllValues)
+      if (o == menuItemSetAllValues) {
+        if (valueCopy.equals("NaN") || valueCopy.equals("?")) {
+          value = null;
+        }
         model.setValueAt(value, i, m_CurrentCol);
+      }
       else
         if ( (o == menuItemSetMissingValues) 
             && model.isMissingAt(i, m_CurrentCol) )
