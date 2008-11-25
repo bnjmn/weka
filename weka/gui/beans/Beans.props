@@ -9,6 +9,7 @@ weka.gui.beans.KnowledgeFlow.Evaluation=weka.gui.beans.TrainingSetMaker,\
  weka.gui.beans.TestSetMaker,\
  weka.gui.beans.CrossValidationFoldMaker,\
  weka.gui.beans.TrainTestSplitMaker,\
+ weka.gui.beans.InstanceStreamToBatchMaker,\
  weka.gui.beans.ClassAssigner,\
  weka.gui.beans.ClassValuePicker,\
  weka.gui.beans.ClassifierPerformanceEvaluator,\
