@@ -1374,10 +1374,16 @@ public class Classifier
     }
     
     // shutdown the executor pool and reclaim storage
-    m_executorPool.shutdownNow();
-    m_executorPool.purge();
-    m_executorPool = null;
+    if (m_executorPool != null) {
+      m_executorPool.shutdownNow();
+      m_executorPool.purge();
+      m_executorPool = null;
+    }
+    m_block = false;
     m_visual.setStatic();
+    if (m_oldText.length() > 0) {
+      m_visual.setText(m_oldText);
+    }
 
     // stop the build thread
     /*if (m_buildThread != null) {
