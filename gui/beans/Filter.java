@@ -272,7 +272,7 @@ public class Filter
 	m_structurePassedOn = false;
 	try {
 	  if (m_Filter.isOutputFormatDefined()) {
-	    System.err.println("Filter - passing on output format...");
+//	    System.err.println("Filter - passing on output format...");
 	    //	    System.err.println(m_Filter.getOutputFormat());
 	    m_ie.setStructure(m_Filter.getOutputFormat());
 	    notifyInstanceListeners(m_ie);
@@ -301,7 +301,15 @@ public class Filter
             }
 
             m_ie.setInstance(filteredInstance);
-            m_ie.setStatus(e.getStatus());
+            
+            // if there are instances pending for output don't want to send
+            // a batch finisehd at this point...
+            //System.err.println("Filter - in batch finisehd...");
+            if (m_Filter.batchFinished() && m_Filter.numPendingOutput() > 0) {
+              m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
+            } else {
+              m_ie.setStatus(e.getStatus());
+            }
             notifyInstanceListeners(m_ie);
           }
         }
@@ -325,12 +333,15 @@ public class Filter
             }
 
             m_ie.setInstance(filteredInstance);
-            m_ie.setStatus(e.getStatus());
+            
+            //TODO here is the problem I think
+            m_ie.setStatus(InstanceEvent.INSTANCE_AVAILABLE);
             notifyInstanceListeners(m_ie);
           }
           while (m_Filter.numPendingOutput() > 0) {
             filteredInstance = m_Filter.output();
             m_ie.setInstance(filteredInstance);
+//            System.err.println("Filter - sending pending...");
             if (m_Filter.numPendingOutput() == 0) {
               m_ie.setStatus(InstanceEvent.BATCH_FINISHED);
             } else {
@@ -349,6 +360,7 @@ public class Filter
       // pass instance through the filter
       try {
         if (!m_Filter.input(e.getInstance())) {
+//          System.err.println("Filter - inputing instance into filter...");
           /* if (m_log != null) {
             m_log.logMessage("ERROR : filter not ready to output instance");
           } */
