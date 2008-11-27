@@ -152,8 +152,7 @@ import java.util.Vector;
  * </pre>
  * 
  * <pre> -M
- *  Treat missing values as a seperate
- *  value.</pre>
+ *  Treat missing values as a seperate value.</pre>
  * 
  * <pre> -L
  *  Don't include locally predictive attributes.</pre>
@@ -164,12 +163,13 @@ import java.util.Vector;
  * 
  * <pre> -P &lt;start set&gt;
  *  Specify a starting set of attributes.
- *  Eg. 1,3,5-7. 
- * Any starting attributes specified are 
- * ignored during the ranking.</pre>
+ *  Eg. 1,3,5-7.
+ *  Any starting attributes specified are
+ *  ignored during the ranking.</pre>
  * 
  * <pre> -T &lt;threshold&gt;
- *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+ *  Specify a theshold by which attributes
+ *  may be discarded from the ranking.</pre>
  * 
  * <pre> -N &lt;num to select&gt;
  *  Specify number of attributes to select</pre>
@@ -178,7 +178,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5.2.1 $
+ * @version $Revision$
  * @see TestInstances
  */
 public class CheckAttributeSelection 
@@ -311,8 +311,7 @@ public class CheckAttributeSelection
    * </pre>
    * 
    * <pre> -M
-   *  Treat missing values as a seperate
-   *  value.</pre>
+   *  Treat missing values as a seperate value.</pre>
    * 
    * <pre> -L
    *  Don't include locally predictive attributes.</pre>
@@ -323,12 +322,13 @@ public class CheckAttributeSelection
    * 
    * <pre> -P &lt;start set&gt;
    *  Specify a starting set of attributes.
-   *  Eg. 1,3,5-7. 
-   * Any starting attributes specified are 
-   * ignored during the ranking.</pre>
+   *  Eg. 1,3,5-7.
+   *  Any starting attributes specified are
+   *  ignored during the ranking.</pre>
    * 
    * <pre> -T &lt;threshold&gt;
-   *  Specify a theshold by which attributes may be discarded from the ranking.</pre>
+   *  Specify a theshold by which attributes
+   *  may be discarded from the ranking.</pre>
    * 
    * <pre> -N &lt;num to select&gt;
    *  Specify number of attributes to select</pre>
@@ -919,7 +919,6 @@ public class CheckAttributeSelection
       int classType) {
 
     boolean[] result = new boolean[2];
-    
     print("correct initialisation during search");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
@@ -986,11 +985,11 @@ public class CheckAttributeSelection
           println(
               "\n=== Full report ===\n"
               + "\nFirst search\n"
-              + evaluation1A.toString()
+              + attsel1A.toResultsString()
               + "\n\n");
           println(
               "\nSecond search\n"
-              + evaluation1B.toString()
+              + attsel1B.toResultsString()
               + "\n\n");
         }
         throw new Exception("Results differ between search calls");
@@ -1627,7 +1626,7 @@ public class CheckAttributeSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -1639,3 +1638,4 @@ public class CheckAttributeSelection
     runCheck(new CheckAttributeSelection(), args);
   }
 }
+
