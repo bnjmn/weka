@@ -178,7 +178,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see TestInstances
  */
 public class CheckAttributeSelection 
@@ -919,7 +919,6 @@ public class CheckAttributeSelection
       int classType) {
 
     boolean[] result = new boolean[2];
-    
     print("correct initialisation during search");
     printAttributeSummary(
         nominalPredictor, numericPredictor, stringPredictor, datePredictor, relationalPredictor, multiInstance, classType);
@@ -986,11 +985,11 @@ public class CheckAttributeSelection
           println(
               "\n=== Full report ===\n"
               + "\nFirst search\n"
-              + evaluation1A.toString()
+              + attsel1A.toResultsString()
               + "\n\n");
           println(
               "\nSecond search\n"
-              + evaluation1B.toString()
+              + attsel1B.toResultsString()
               + "\n\n");
         }
         throw new Exception("Results differ between search calls");
@@ -1627,7 +1626,7 @@ public class CheckAttributeSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
