@@ -149,7 +149,7 @@ import java.util.Vector;
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision$
  * @see RandomizableClusterer
  */
 public class XMeans 
@@ -378,6 +378,11 @@ public class XMeans
 
     // can clusterer handle the data?
     getCapabilities().testWithFail(data);
+    
+    if (m_MinNumClusters > m_MaxNumClusters) {
+      throw new Exception("XMeans: min number of clusters "
+          + "can't be greater than max number of clusters!");
+    }
 
     m_NumSplits = 0;
     m_NumSplitsDone = 0;
@@ -1591,9 +1596,7 @@ public class XMeans
    * @param n the minimum number of clusters to generate
    */
   public void setMinNumClusters(int n) {
-    if (n <= m_MaxNumClusters) {
-      m_MinNumClusters = n;
-    }
+    m_MinNumClusters = n;
   }
 
   /**
@@ -2392,7 +2395,7 @@ public class XMeans
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
