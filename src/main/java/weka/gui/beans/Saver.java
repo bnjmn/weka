@@ -23,6 +23,7 @@
 package weka.gui.beans;
 
 import weka.core.Instances;
+import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.DatabaseConverter;
@@ -99,11 +100,28 @@ public class Saver
       try {
         m_visual.setAnimated();
         m_Saver.setInstances(m_dataSet);
+        if (m_logger != null) {
+          m_logger.statusMessage(statusMessagePrefix() + "Saving "
+              + m_dataSet.relationName() + "...");
+        }
         m_Saver.writeBatch();
+        if (m_logger != null) {
+          m_logger.logMessage("[Saver] " + statusMessagePrefix() 
+              + "Save successful.");
+        }
 	
       } catch (Exception ex) {
 	ex.printStackTrace();
       } finally {
+        if (Thread.currentThread().isInterrupted()) {
+          if (m_logger != null) {
+            m_logger.logMessage("[Saver] " + statusMessagePrefix()
+                + " Saving interrupted!!");
+          }
+        }
+        if (m_logger != null) {
+          m_logger.statusMessage(statusMessagePrefix() + "Done.");
+        }
         block(false);
 	m_visual.setStatic();
       }
@@ -459,6 +477,13 @@ public class Saver
       m_ioThread = null;
       m_visual.setStatic();
     }
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|"
+    + ((m_Saver instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_Saver).getOptions()) + "|"
+            : "");
   }
   
   

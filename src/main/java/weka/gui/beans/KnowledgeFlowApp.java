@@ -34,7 +34,7 @@ import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
-import weka.gui.LogPanel;
+// import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
 import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
@@ -489,7 +489,7 @@ public class KnowledgeFlowApp
   protected JFileChooser m_FileChooser 
     = new JFileChooser(new File(System.getProperty("user.dir")));
 
-  protected LogPanel m_logPanel = new LogPanel(null, true);
+  protected LogPanel m_logPanel = new LogPanel();//new LogPanel(null, true);
 
   protected BeanContextSupport m_bcSupport = new BeanContextSupport();
 
@@ -794,7 +794,30 @@ public class KnowledgeFlowApp
 	 + Copyright.getOwner() + ", " + Copyright.getAddress());
      m_logPanel.logMessage("web: " + Copyright.getURL());
      m_logPanel.logMessage( date);
-     m_logPanel.statusMessage("Welcome to the Weka Knowledge Flow");
+     m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
+     m_logPanel.getStatusTable().addMouseListener(new MouseAdapter() {
+       public void mouseClicked(MouseEvent e) {
+         if (m_logPanel.getStatusTable().rowAtPoint(e.getPoint()) == 0) {
+           if (((e.getModifiers() & InputEvent.BUTTON1_MASK)
+               != InputEvent.BUTTON1_MASK) || e.isAltDown()) {
+             System.gc();
+             Runtime currR = Runtime.getRuntime();
+             long freeM = currR.freeMemory();
+             long totalM = currR.totalMemory();
+             long maxM = currR.maxMemory();
+             m_logPanel.
+             logMessage("[KnowledgeFlow] Memory (free/total/max.) in bytes: " 
+                 + String.format("%,d", freeM) + " / " 
+                 + String.format("%,d", totalM) + " / " 
+                 + String.format("%,d", maxM));
+             m_logPanel.statusMessage("[KnowledgeFlow]|Memory (free/total/max.) in bytes: " 
+                 + String.format("%,d", freeM) + " / " 
+                 + String.format("%,d", totalM) + " / " 
+                 + String.format("%,d", maxM)); 
+           }
+         }
+       }
+     });
     
      JPanel p1 = new JPanel();
      p1.setLayout(new BorderLayout());
@@ -817,6 +840,9 @@ public class KnowledgeFlowApp
      m_beanLayout.setMaximumSize(d);
      m_beanLayout.setPreferredSize(d);
 
+     Dimension d2 = new Dimension(100, 160);
+     m_logPanel.setPreferredSize(d2);
+     m_logPanel.setMinimumSize(d2);
      add(m_logPanel, BorderLayout.SOUTH);
      
      setUpToolBars();
@@ -924,6 +950,7 @@ public class KnowledgeFlowApp
     // end modifications by Zerbetto
     m_stopB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+          m_logPanel.statusMessage("[KnowledgeFlow]|Attempting to stop all components...");
           Vector components = BeanInstance.getBeanInstances();
 
           for (int i = 0; i < components.size(); i++) {
@@ -933,6 +960,7 @@ public class KnowledgeFlowApp
               ((BeanCommon) temp).stop();
             }
           }
+          m_logPanel.statusMessage("[KnowledgeFlow]|OK.");
         }
       });
 
@@ -2338,7 +2366,11 @@ public class KnowledgeFlowApp
         }
 
         integrateFlow(beans, connections);
+        m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
       } catch (Exception ex) {
+        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to load flow (see log).");
+        m_logPanel.logMessage("[KnowledgeFlow] Unable to load flow ("
+            + ex.getMessage() + ").");
 	ex.printStackTrace();
       }
     }
@@ -2549,7 +2581,11 @@ public class KnowledgeFlowApp
           oos.flush();
           oos.close();
         }
+        m_logPanel.statusMessage("[KnowledgeFlow]|Flow saved.");
       } catch (Exception ex) {
+        m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
+        m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
+            + ex.getMessage() + ").");
 	ex.printStackTrace();
       } finally {
 	// restore this panel as a property change listener in the beans
@@ -2940,7 +2976,7 @@ public class KnowledgeFlowApp
       jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-      jf.setSize(900,600);
+      jf.setSize(1000,700);
       jf.setVisible(true);     
 
       
