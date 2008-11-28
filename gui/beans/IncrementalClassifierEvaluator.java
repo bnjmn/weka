@@ -34,7 +34,7 @@ import java.util.Vector;
  * Bean that evaluates incremental classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.11.2.5 $
+ * @version $Revision$
  */
 public class IncrementalClassifierEvaluator
   extends AbstractEvaluator
@@ -120,8 +120,10 @@ public class IncrementalClassifierEvaluator
 	System.err.println("NEW BATCH");
         m_instanceCount = 0;
         if (m_logger != null) {
-          m_logger.statusMessage("IncrementalClassifierEvaluator: started processing...");
-          m_logger.logMessage("IncrementalClassifierEvaluator: started processing...");
+          m_logger.statusMessage(statusMessagePrefix() 
+              + "IncrementalClassifierEvaluator: started processing...");
+          m_logger.logMessage("[IncrementalClassifierEvaluator]" +
+              statusMessagePrefix() + " started processing...");
         }
 	/* if (inst.classIndex() >= 0) {
 	  if (inst.attribute(inst.classIndex()).isNominal()) {
@@ -141,7 +143,7 @@ public class IncrementalClassifierEvaluator
       } else {
         if (m_instanceCount > 0 && m_instanceCount % m_statusFrequency == 0) {
           if (m_logger != null) {
-            m_logger.statusMessage("IncrementalClassifierEvaluator: processed "
+            m_logger.statusMessage(statusMessagePrefix() + "Processed "
                                    + m_instanceCount + " instances.");
           }
         }
@@ -243,8 +245,9 @@ public class IncrementalClassifierEvaluator
 
 	  if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
             if (m_logger != null) {
-              m_logger.logMessage("IncrementalClassifierEvaluator: finished processing.");
-              m_logger.statusMessage("OK.");
+              m_logger.logMessage("[IncrementalClassifierEvaluator]"
+                  + statusMessagePrefix() + " Finished processing.");
+              m_logger.statusMessage(statusMessagePrefix() + "Done.");
             }
 	    if (m_textListeners.size() > 0) {
 	      String textTitle = ce.getClassifier().getClass().getName();
@@ -436,5 +439,9 @@ public class IncrementalClassifierEvaluator
    */
   public synchronized void removeTextListener(TextListener cl) {
     m_textListeners.remove(cl);
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }
