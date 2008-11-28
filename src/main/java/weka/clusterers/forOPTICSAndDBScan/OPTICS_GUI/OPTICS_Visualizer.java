@@ -23,6 +23,7 @@
 
 package weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI;
 
+import weka.core.FastVector;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.gui.LookAndFeel;
@@ -81,6 +82,10 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 
 /**
+ * Start the OPTICS Visualizer from command-line: <br/>
+ * <code>java weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI.OPTICS_Visualizer [file.ser]</code>
+ * <br/>
+ * 
  * <p>
  * OPTICS_Visualizer.java <br/>
  * Authors: Rainer Holzmann, Zhanna Melnikova-Albrecht <br/>
@@ -91,7 +96,7 @@ import javax.swing.table.TableColumn;
  *
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class OPTICS_Visualizer
     implements RevisionHandler {
@@ -382,14 +387,22 @@ public class OPTICS_Visualizer
     private JComponent createTabbedPane() {
         tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Table", new ImageIcon(Toolkit.getDefaultToolkit().
-                getImage(ClassLoader.getSystemResource("weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/Graphics/Table16.gif"))),
-                clusteringResultsTable(),
-                "Show table of DataObjects, Core- and Reachability-Distances");
-        tabbedPane.addTab("Graph - Epsilon: " + serObject.getEpsilon() + ", MinPoints: " + serObject.getMinPoints()
-                , new ImageIcon(Toolkit.getDefaultToolkit().
-                getImage(ClassLoader.getSystemResource("weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/Graphics/Graph16.gif"))),
-                graphPanel(),
-                "Show Plot of Core- and Reachability-Distances");
+            getImage(ClassLoader.getSystemResource("weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/Graphics/Table16.gif"))),
+            clusteringResultsTable(),
+        "Show table of DataObjects, Core- and Reachability-Distances");
+        if (serObject != null)
+          tabbedPane.addTab("Graph - Epsilon: " + serObject.getEpsilon() + ", MinPoints: " + serObject.getMinPoints()
+              , new ImageIcon(Toolkit.getDefaultToolkit().
+        	  getImage(ClassLoader.getSystemResource("weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/Graphics/Graph16.gif"))),
+        	  graphPanel(),
+          "Show Plot of Core- and Reachability-Distances");
+        else
+          tabbedPane.addTab(
+              "Graph - Epsilon: --, MinPoints: --", 
+              new ImageIcon(
+        	  Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/Graphics/Graph16.gif"))),
+        	  graphPanel(),
+          "Show Plot of Core- and Reachability-Distances");
 
         tabbedPane.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -466,7 +479,11 @@ public class OPTICS_Visualizer
             resultVectorTableColumnModel.addColumn(tc);
         }
 
-        ResultVectorTableModel resultVectorTableModel = new ResultVectorTableModel(serObject.getResultVector());
+        ResultVectorTableModel resultVectorTableModel;
+        if (serObject != null)
+          resultVectorTableModel = new ResultVectorTableModel(serObject.getResultVector());
+        else
+          resultVectorTableModel = new ResultVectorTableModel(null);
         resultVectorTable = new JTable(resultVectorTableModel, resultVectorTableColumnModel);
         resultVectorTable.getColumnModel().getColumn(0).setPreferredWidth(70);
         resultVectorTable.getColumnModel().getColumn(1).setPreferredWidth(400);
@@ -487,9 +504,14 @@ public class OPTICS_Visualizer
      */
     private JComponent graphPanel() {
 
-        graphPanel = new GraphPanel(serObject.getResultVector(), verValue, true, true);
-        graphPanel.setPreferredSize(new Dimension((10 * serObject.getDatabaseSize()) +
-                serObject.getDatabaseSize(), graphPanel.getHeight()));
+        if (serObject == null) {
+          graphPanel = new GraphPanel(new FastVector(), verValue, true, true);
+        }
+        else {
+          graphPanel = new GraphPanel(serObject.getResultVector(), verValue, true, true);
+          graphPanel.setPreferredSize(new Dimension((10 * serObject.getDatabaseSize()) +
+              serObject.getDatabaseSize(), graphPanel.getHeight()));
+        }
         graphPanel.setBackground(new Color(255, 255, 179));
         graphPanel.setOpaque(true);
 
@@ -762,7 +784,45 @@ public class OPTICS_Visualizer
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision$");
+    }
+    
+    /**
+     * Displays the GUI. If an optics file is provided as first parameter,
+     * this will be loaded and displayed automatically.
+     * 
+     * @param args		the commandline parameters
+     * @throws Exception	if something goes wrong
+     */
+    public static void main(String[] args) throws Exception {
+      SERObject serObject = null;
+      if (args.length == 1) {
+	System.out.println("Attempting to load: " + args[0]);
+	ObjectInputStream is = null;
+	try {
+	  FileInputStream fs = new FileInputStream(args[0]);
+	  is = new ObjectInputStream(fs);
+	  serObject = (SERObject) is.readObject();
+	}
+	catch (Exception e) {
+	  serObject = null;
+	  JOptionPane.showMessageDialog(
+	      null,
+	      "Error loading file:\n" + e,
+	      "Error", JOptionPane.ERROR_MESSAGE);
+	}
+	finally {
+	  try {
+	    is.close();
+	  }
+	  catch (Exception e) {
+	    // ignored
+	  }
+	}
+      }
+      
+      // open GUI
+      new OPTICS_Visualizer(serObject, "OPTICS Visualizer - Main Window");
     }
 
     // *****************************************************************************************************************
@@ -891,7 +951,7 @@ public class OPTICS_Visualizer
          * @return		the revision
          */
         public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.4 $");
+          return RevisionUtils.extract("$Revision$");
         }
     }
 
@@ -945,7 +1005,7 @@ public class OPTICS_Visualizer
          * @return		the revision
          */
         public String getRevision() {
-          return RevisionUtils.extract("$Revision: 1.4 $");
+          return RevisionUtils.extract("$Revision$");
         }
     }
 }
