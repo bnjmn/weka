@@ -34,7 +34,7 @@ import java.util.Vector;
  * a cross validation
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9.2.5 $
+ * @version $Revision$
  */
 public class CrossValidationFoldMaker 
   extends AbstractTrainAndTestSetProducer
@@ -132,7 +132,7 @@ public class CrossValidationFoldMaker
 		  dataSet.attribute(dataSet.classIndex()).isNominal()) {
 		dataSet.stratify(getFolds());
 		if (m_logger != null) {
-		  m_logger.logMessage("CrossValidationFoldMaker : "
+		  m_logger.logMessage("[" + getCustomName() + "] "
 				      +"stratifying data");
 		}
 	      }
@@ -140,8 +140,7 @@ public class CrossValidationFoldMaker
 	      for (int i = 0; i < getFolds(); i++) {
 		if (m_foldThread == null) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("Cross validation has been canceled!");
-		    m_logger.statusMessage("OK");
+		    m_logger.logMessage("[" + getCustomName() + "] Cross validation has been canceled!");
 		  }
 		  // exit gracefully
 		  break;
@@ -152,6 +151,11 @@ public class CrossValidationFoldMaker
 		// inform all training set listeners
 		TrainingSetEvent tse = new TrainingSetEvent(this, train);
 		tse.m_setNumber = i+1; tse.m_maxSetNumber = getFolds();
+		String msg = getCustomName() + "$" + hashCode() + "|";
+		if (m_logger != null) {
+		  m_logger.statusMessage(msg + "seed: " + getSeed() + " folds: "
+		      + getFolds() + "|Training fold " + (i+1));
+		}
 		if (m_foldThread != null) {
 		  //		  System.err.println("--Just before notify training set");
 		  notifyTrainingSetProduced(tse);
@@ -161,6 +165,11 @@ public class CrossValidationFoldMaker
 		// inform all test set listeners
 		TestSetEvent teste = new TestSetEvent(this, test);
 		teste.m_setNumber = i+1; teste.m_maxSetNumber = getFolds();
+		
+		if (m_logger != null) {
+		  m_logger.statusMessage(msg + "seed: " + getSeed() + " folds: "
+		      + getFolds() + "|Test fold " + (i+1));
+		}
 		if (m_foldThread != null) {
 		  notifyTestSetProduced(teste);
 		}
@@ -169,7 +178,16 @@ public class CrossValidationFoldMaker
 	      ex.printStackTrace();
 	    } finally {
 	      if (isInterrupted()) {
-		System.err.println("Cross validation interrupted");
+	        String msg = "[" + getCustomName() + "] Cross validation interrupted";
+	        if (m_logger != null) {
+	          m_logger.logMessage("[" + getCustomName() + "] Cross validation interrupted");
+	        } else {
+	          System.err.println(msg);
+	        }
+	      }
+	      String msg = getCustomName() + "$" + hashCode() + "|";
+	      if (m_logger != null) {
+	        m_logger.statusMessage(msg + "finished.");
 	      }
 	      block(false);
 	    }

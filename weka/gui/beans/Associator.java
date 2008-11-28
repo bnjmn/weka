@@ -24,6 +24,8 @@ package weka.gui.beans;
 
 import weka.associations.Apriori;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.gui.Logger;
 
 import java.awt.BorderLayout;
@@ -39,7 +41,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.associations
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3.2.6 $
+ * @version $Revision$
  * @since 1.0
  * @see JPanel
  * @see BeanCommon
@@ -220,15 +222,16 @@ public class Associator
 	    m_state = BUILDING_MODEL;
 	  }
 	  final Instances trainingData = e.getDataSet();
-	  final String oldText = m_visual.getText();
+//	  final String oldText = m_visual.getText();
 	  m_buildThread = new Thread() {
 	      public void run() {
 		try {
 		  if (trainingData != null) {
 		    m_visual.setAnimated();
-		    m_visual.setText("Building model...");
+//		    m_visual.setText("Building model...");
 		    if (m_log != null) {
-		      m_log.statusMessage("Associator : building model...");
+		      m_log.statusMessage(statusMessagePrefix() 
+		          + "Building model...");
 		    }
 		    buildAssociations(trainingData);
 
@@ -275,7 +278,7 @@ public class Associator
 		} catch (Exception ex) {
 		  ex.printStackTrace();
 		} finally {
-		  m_visual.setText(oldText);
+//		  m_visual.setText(oldText);
 		  m_visual.setStatic();
 		  m_state = IDLE;
 		  if (isInterrupted()) {
@@ -284,13 +287,13 @@ public class Associator
 		      titleString = titleString.
 			substring(titleString.lastIndexOf('.') + 1,
 				  titleString.length());
-		      m_log.logMessage("Build associator ("
-                                       + titleString + ") interrupted!");
-		      m_log.statusMessage("Interupted");
+		      m_log.logMessage("[Associator] " + statusMessagePrefix() 
+		          + " Build associator interrupted!");
+		      m_log.statusMessage(statusMessagePrefix() + "Interupted");
 		    }
 		  }
 		  if (m_log != null) {
-		    m_log.statusMessage("OK");
+		    m_log.statusMessage(statusMessagePrefix() + "Done.");
 		  }
 		  block(false);
 		}
@@ -595,5 +598,12 @@ public class Associator
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|"
+    + ((m_Associator instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_Associator).getOptions()) + "|"
+            : "");
   }
 }

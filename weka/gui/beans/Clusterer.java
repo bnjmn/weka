@@ -24,6 +24,8 @@ package weka.gui.beans;
 
 import weka.clusterers.EM;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.Logger;
@@ -46,7 +48,7 @@ import javax.swing.JPanel;
  * Bean that wraps around weka.clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5.2.5 $
+ * @version $Revision$
  * @see JPanel
  * @see BeanCommon
  * @see Visible
@@ -264,15 +266,16 @@ public class Clusterer
 	    m_state = BUILDING_MODEL;
 	  }
 	  m_trainingSet = e.getTrainingSet();
-	  final String oldText = m_visual.getText();
+//	  final String oldText = m_visual.getText();
 	  m_buildThread = new Thread() {
 	      public void run() {
 		try {
 		  if (m_trainingSet != null) {  
 		    m_visual.setAnimated();
-		    m_visual.setText("Building clusters...");
+//		    m_visual.setText("Building clusters...");
 		    if (m_log != null) {
-		      m_log.statusMessage("Clusterer : building clusters...");
+		      m_log.statusMessage(statusMessagePrefix() 
+		          + "Building clusters...");
 		    }
 		    buildClusterer();
                     if(m_batchClustererListeners.size() > 0){
@@ -328,22 +331,23 @@ public class Clusterer
 		} catch (Exception ex) {
 		  ex.printStackTrace();
 		} finally {
-		  m_visual.setText(oldText);
+//		  m_visual.setText(oldText);
 		  m_visual.setStatic();
 		  m_state = IDLE;
 		  if (isInterrupted()) {
 		    // prevent any clusterer events from being fired
 		    m_trainingSet = null;
 		    if (m_log != null) {
-		      m_log.logMessage("Build clusterer interrupted!");
-		      m_log.statusMessage("OK");
+		      m_log.logMessage("[Clusterer]" + statusMessagePrefix() 
+		          + " Build clusterer interrupted!");
+		      m_log.statusMessage(statusMessagePrefix() + "Done.");
 		    }
 		  } else {
 		    // save header
 		    m_trainingSet = new Instances(m_trainingSet, 0);
 		  }
 		  if (m_log != null) {
-		    m_log.statusMessage("Interrupted");
+		    m_log.statusMessage(statusMessagePrefix() + "Done.");
 		  }
 		  block(false);
 		}
@@ -687,7 +691,7 @@ public class Clusterer
         }
         os.close();
         if (m_log != null) {
-          m_log.logMessage("Saved clusterer OK.");
+          m_log.logMessage("[Clusterer] Saved clusterer " + getCustomName());
         }
       }
     } catch (Exception ex) {
@@ -696,7 +700,8 @@ public class Clusterer
                                     "Save Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("Problem saving clusterer. " + ex.getMessage());
+        m_log.logMessage("[Clusterer] Problem saving clusterer. " 
+            + getCustomName() + ex.getMessage());
       }
     }
   }
@@ -730,7 +735,7 @@ public class Clusterer
         }
         is.close();
         if (m_log != null) {
-          m_log.logMessage("Loaded clusterer: "
+          m_log.logMessage("[Clusterer] Loaded clusterer: "
                            + m_Clusterer.getClass().toString());
         }
       }
@@ -740,7 +745,8 @@ public class Clusterer
                                     "Load Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("Problem loading classifier. " + ex.getMessage());
+        m_log.logMessage("[Clusterer] Problem loading classifier. " 
+            + ex.getMessage());
       }
     }
   }
@@ -860,5 +866,12 @@ public class Clusterer
         return false;
     
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|"
+    + ((m_Clusterer instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_Clusterer).getOptions()) + "|"
+            : "");
   }
 }

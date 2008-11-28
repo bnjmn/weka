@@ -33,7 +33,7 @@ import java.util.Vector;
  * A bean that evaluates the performance of batch trained clusterers
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.3.2.2 $
+ * @version $Revision$
  */
 public class ClustererPerformanceEvaluator
   extends AbstractEvaluator
@@ -109,8 +109,8 @@ public class ClustererPerformanceEvaluator
               boolean numericClass = false;  
 	      final String oldText = m_visual.getText();
 	      try {
-		if (ce.getSetNumber() == 1 || 
-		    ce.getClusterer() != m_clusterer) {
+		if (ce.getSetNumber() == 1 /*|| 
+		    ce.getClusterer() != m_clusterer */) {
 		  m_eval = new ClusterEvaluation();
 		  m_clusterer = ce.getClusterer();
                   m_eval.setClusterer(m_clusterer);
@@ -119,8 +119,8 @@ public class ClustererPerformanceEvaluator
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
 		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
-		    m_logger.statusMessage("ClustererPerformaceEvaluator : "
-					   +"evaluating ("+ce.getSetNumber()
+		    m_logger.statusMessage(statusMessagePrefix()
+					   +"Evaluating ("+ce.getSetNumber()
 					   +")...");
 		  }
 		  m_visual.setAnimated();
@@ -153,7 +153,7 @@ public class ClustererPerformanceEvaluator
 				  textTitle);
 		  notifyTextListeners(te);
 		  if (m_logger != null) {
-		    m_logger.statusMessage("Done.");
+		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
 		  }
 		}
 	      } catch (Exception ex) {
@@ -164,8 +164,9 @@ public class ClustererPerformanceEvaluator
 		m_evaluateThread = null;
 		if (isInterrupted()) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("Evaluation interrupted!");
-		    m_logger.statusMessage("OK");
+		    m_logger.logMessage("[" + getCustomName() 
+		        + "] Evaluation interrupted!");
+		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
 		  }
 		}
 		block(false);
@@ -314,6 +315,10 @@ public class ClustererPerformanceEvaluator
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }
 

@@ -24,13 +24,17 @@ package weka.gui.beans;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.DatabaseLoader;
 import weka.core.converters.FileSourcedConverter;
+import weka.gui.Logger;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.EventSetDescriptor;
 import java.beans.beancontext.BeanContext;
 import java.io.IOException;
 import java.io.ObjectStreamException;
@@ -43,7 +47,7 @@ import javax.swing.JButton;
  * Loads data sets using weka.core.converter classes
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.16.2.8 $
+ * @version $Revision$
  * @since 1.0
  * @see AbstractDataSource
  * @see UserRequestAcceptor
@@ -51,7 +55,7 @@ import javax.swing.JButton;
 public class Loader
   extends AbstractDataSource 
   implements Startable, UserRequestAcceptor, WekaWrapper,
-	     EventConstraints {
+	     EventConstraints, BeanCommon {
 
   /** for serialization */
   private static final long serialVersionUID = 1993738191961163027L;
@@ -97,6 +101,16 @@ public class Loader
   /** Flag indicating that a database has already been configured*/
   private boolean m_dbSet = false;
   
+  /**
+   * Logging
+   */
+  protected Logger m_log;
+  
+  /**
+   * Asked to stop?
+   */
+  protected boolean m_stopped = false;
+  
   private class LoadThread extends Thread {
     private DataSource m_DP;
 
@@ -107,7 +121,7 @@ public class Loader
     public void run() {
       try {
 	m_visual.setAnimated();
-        m_visual.setText("Loading...");
+//        m_visual.setText("Loading...");
         
 	boolean instanceGeneration = true;
 	// determine if we are going to produce data set or instance events
@@ -120,6 +134,16 @@ public class Loader
 	if (m_dataSetEventTargets > 0) {
 	  instanceGeneration = false;
           m_state = BATCH_LOADING;
+	}
+	
+	String msg = statusMessagePrefix();
+	if (m_Loader instanceof FileSourcedConverter) {
+	  msg += "Loading " + ((FileSourcedConverter)m_Loader).retrieveFile().getName();
+	} else {
+	  msg += "Loading...";
+	}
+	if (m_log != null) {
+	  m_log.statusMessage(msg);
 	}
 
 	if (instanceGeneration) {
@@ -143,6 +167,9 @@ public class Loader
 	  }
 	  int z = 0;
 	  while (nextInstance != null) {
+	    if (m_stopped) {
+	      break;
+	    }
 	    nextInstance.setDataset(structure);
 	    //	    format.add(nextInstance);
 	    /*	    InstanceEvent ie = (start)
@@ -165,26 +192,44 @@ public class Loader
 	    notifyInstanceLoaded(m_ie);
 	    z++;
             if (z % 10000 == 0) {
-              m_visual.setText("" + z + " instances...");
+//              m_visual.setText("" + z + " instances...");
+              if (m_log != null) {
+                m_log.statusMessage(statusMessagePrefix() 
+                    + "Loaded " + z + " instances");
+              }
             }
 	  }
 	  m_visual.setStatic();
-	  m_visual.setText(structure.relationName());
+//	  m_visual.setText(structure.relationName());
 	} else {
           m_Loader.reset();
 	  m_dataSet = m_Loader.getDataSet();
 	  m_visual.setStatic();
-	  m_visual.setText(m_dataSet.relationName());
+	  if (m_log != null) {
+	    m_log.logMessage("[Loader] " + statusMessagePrefix() 
+	        + " loaded " + m_dataSet.relationName());
+	  }
+//	  m_visual.setText(m_dataSet.relationName());
 	  notifyDataSetLoaded(new DataSetEvent(m_DP, m_dataSet));
 	}
       } catch (Exception ex) {
 	ex.printStackTrace();
       } finally {
+        if (Thread.currentThread().isInterrupted()) {
+          if (m_log != null) {
+            m_log.logMessage("[Loader] " + statusMessagePrefix() 
+                + " loading interrupted!");
+          }
+        }
 	m_ioThread = null;
 	//	m_visual.setText("Finished");
 	//	m_visual.setIcon(m_inactive.getVisual());
 	m_visual.setStatic();
         m_state = IDLE;
+        m_stopped = false;
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix() + "Done.");
+        }
         block(false);
       }
     }
@@ -588,6 +633,95 @@ public class Loader
       }
     }
     return this;
+  }
+  
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+  
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
+  }
+  /**
+   * Set a logger
+   *
+   * @param logger a <code>weka.gui.Logger</code> value
+   */
+  public void setLog(Logger logger) {
+    m_log = logger;
+  }
+  
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the supplied
+   * EventSetDescriptor. Always returns false for loader.
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return false;
+  }
+  
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the named event
+   *
+   * @param eventName the name of the event
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(String eventName) {
+    return false;
+  }
+  
+  /**
+   * Notify this object that it has been registered as a listener with
+   * a source for receiving events described by the named event
+   * This object is responsible for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void connectionNotification(String eventName, Object source) {
+    // this should never get called for us.
+  }
+  
+  /**
+   * Notify this object that it has been deregistered as a listener with
+   * a source for named event. This object is responsible
+   * for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void disconnectionNotification(String eventName, Object source) {
+    // this should never get called for us.
+  }
+  
+  /**
+   * Stop any loading action.
+   */
+  public void stop() {
+    m_stopped = true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|"
+    + ((m_Loader instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_Loader).getOptions()) + "|"
+            : "");
   }
 }
 

@@ -40,7 +40,7 @@ import javax.swing.JPanel;
  * predictions appended.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15.2.5 $
+ * @version $Revision$
  */
 public class PredictionAppender
   extends JPanel
@@ -557,7 +557,7 @@ public class PredictionAppender
 	if(m_appendProbabilities && !(clusterer instanceof DensityBasedClusterer)){
           System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
           if (m_logger != null) {
-            m_logger.logMessage("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+            m_logger.logMessage("[PredictionAppender] Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
           }
         }
         try {
