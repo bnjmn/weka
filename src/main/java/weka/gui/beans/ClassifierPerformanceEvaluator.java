@@ -122,7 +122,7 @@ public class ClassifierPerformanceEvaluator
       if (m_evaluateThread == null) {
 	m_evaluateThread = new Thread() {
 	    public void run() {
-	      final String oldText = m_visual.getText();
+//	      final String oldText = m_visual.getText();
 	      try {
 		if (ce.getSetNumber() == 1 /*|| 
 		    ce.getClassifier() != m_classifier */) {
@@ -135,10 +135,10 @@ public class ClassifierPerformanceEvaluator
 		  m_plotSize = new FastVector();
 		}
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
-		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
+//		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
-		    m_logger.statusMessage("ClassifierPerformaceEvaluator : "
-					   +"evaluating ("+ce.getSetNumber()
+		    m_logger.statusMessage(statusMessagePrefix()
+					   +"Evaluating ("+ce.getSetNumber()
 					   +")...");
 		  }
 		  m_visual.setAnimated();
@@ -253,19 +253,19 @@ public class ClassifierPerformanceEvaluator
 				       notifyTextListeners(te); */
 		  }
 		  if (m_logger != null) {
-		    m_logger.statusMessage("Done.");
+		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
 		  }
 		}
 	      } catch (Exception ex) {
 		ex.printStackTrace();
 	      } finally {
-		m_visual.setText(oldText);
+//		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
 		if (isInterrupted()) {
 		  if (m_logger != null) {
-		    m_logger.logMessage("Evaluation interrupted!");
-		    m_logger.statusMessage("OK");
+		    m_logger.logMessage("[" + getCustomName() +"] Evaluation interrupted!");
+		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
 		  }
 		}
 		block(false);
@@ -488,6 +488,10 @@ public class ClassifierPerformanceEvaluator
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }
 
