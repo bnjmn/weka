@@ -46,7 +46,7 @@ import weka.core.Utils;
  * A bean that saves serialized models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class SerializedModelSaver
   extends JPanel
@@ -462,9 +462,9 @@ public class SerializedModelSaver
         break;
       }        
     } catch (Exception ex) {
-      System.err.println("Problem savingmodel (SerializedModelSaver)");
+      System.err.println("[SerializedModelSaver] Problem savingmodel");
       if (m_logger != null) {
-        m_logger.logMessage("Problem saving model (SerializedModelSaver)");
+        m_logger.logMessage("[SerializedModelSaver] Problem saving model");
       }
     }
   }

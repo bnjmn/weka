@@ -46,6 +46,8 @@ import javax.swing.filechooser.FileFilter;
 
 import weka.classifiers.rules.ZeroR;
 import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
 import weka.experiment.Task;
@@ -311,8 +313,8 @@ public class Classifier
     if (!(m_Classifier instanceof weka.classifiers.UpdateableClassifier) &&
 	(m_listenees.containsKey("instance"))) {
       if (m_log != null) {
-	m_log.logMessage("WARNING : "+m_Classifier.getClass().getName()
-			 +" is not an incremental classifier (Classifier)");
+	m_log.logMessage("[Classifier] " + statusMessagePrefix() + " WARNING : "
+	    + getCustomName() +" is not an incremental classifier");
       }
     }
     // get global info
@@ -423,7 +425,9 @@ public class Classifier
     if (m_executorPool != null && 
         (m_executorPool.getQueue().size() > 0 || 
             m_executorPool.getActiveCount() > 0)) {
-      String messg = "Classifier is currently batch training!";
+      
+      String messg = "[Classifier] " + statusMessagePrefix() 
+        + " is currently batch training!";
       if (m_log != null) {
 	m_log.logMessage(messg);
       } else {
@@ -449,12 +453,13 @@ public class Classifier
 		weka.classifiers.UpdateableClassifier)) {
 	    if (m_log != null) {
 	      String msg = (m_trainingSet == null)
-		? "ERROR : "+m_Classifier.getClass().getName()
+		? "[Classifier] ERROR : " + statusMessagePrefix()
 		+" has not been batch "
 		+"trained; can't process instance events."
-		: "ERROR : instance event's structure is different from "
-		+"the data that "
-		+ "was used to batch train this classifier; can't continue.";
+		: "[Classifier] ERROR : " + statusMessagePrefix() 
+		  + " instance event's structure is different from "
+		  +"the data that "
+		  + "was used to batch train this classifier; can't continue.";
 	      m_log.logMessage(msg);
 	    }
 	    return;
@@ -462,7 +467,8 @@ public class Classifier
 	  if (m_trainingSet != null && 
 	      (!dataset.equalHeaders(m_trainingSet))) {
 	    if (m_log != null) {
-	      m_log.logMessage("Warning : structure of instance events differ "
+	      m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+	                       + " WARNING : structure of instance events differ "
 			       +"from data used in batch training this "
 			       +"classifier. Resetting classifier...");
 	    }
@@ -549,8 +555,9 @@ public class Classifier
     } catch (Exception ex) {
       if (m_log != null) {
 	m_log.logMessage(ex.toString());
+      } else {
+        ex.printStackTrace();
       }
-      ex.printStackTrace();
     }
   }
   
@@ -583,7 +590,8 @@ public class Classifier
             // assume last column is the class
             m_train.setClassIndex(m_train.numAttributes()-1);
             if (m_log != null) {
-              m_log.logMessage("Classifier : assuming last "
+              m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+                  + " : assuming last "
                   +"column is the class");
             }
           }
@@ -597,9 +605,9 @@ public class Classifier
           }
           
           //m_visual.setAnimated();
-          m_visual.setText("Building model...");
-          String msg = "[Classifier] " + m_Classifier.getClass().getName() 
-            + ": building model for run " + m_runNum + " fold " + m_setNum;
+          //m_visual.setText("Building model...");
+          String msg = statusMessagePrefix()
+            + "Building model for run " + m_runNum + " fold " + m_setNum;
           if (m_log != null) {
             m_log.statusMessage(msg);
           } else {
@@ -680,13 +688,11 @@ public class Classifier
       } catch (Exception ex) {
         ex.printStackTrace();
         if (m_log != null) {
-          String titleString = m_Classifier.getClass().getName();
-          titleString = titleString.
-          substring(titleString.lastIndexOf('.') + 1,
-              titleString.length());
+          String titleString = "[Classifier] " + statusMessagePrefix();
+
           titleString += " run " + m_runNum + " fold " + m_setNum
           + " failed to complete.";
-          m_log.logMessage("Build classifier: " + titleString);
+          m_log.logMessage(titleString + " (build classifier)");
         }
         m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
       } finally {
@@ -696,21 +702,33 @@ public class Classifier
           // prevent any classifier events from being fired
           m_trainingSet = null;
           if (m_log != null) {
-            String titleString = m_Classifier.getClass().getName();                 
+            String titleString = "[Classifier] " + statusMessagePrefix();                 
          
-            m_log.logMessage("Build classifier ("
-                + titleString + 
-                " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
-            m_log.statusMessage("Interrupted");
+            m_log.logMessage(titleString + " ("
+               + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
+            m_log.statusMessage(statusMessagePrefix() + "Interrupted");
           }
+          /*System.err.println("Queue size: " + m_executorPool.getQueue().size() +
+              " Active count: " + m_executorPool.getActiveCount()); */
         }
-        if (m_log != null) {
-          m_log.statusMessage("OK");
-        }
-        // if we are the last fold of the last run then unblock
-        if (m_runNum == m_maxRunNum && m_setNum == m_maxSetNum) {
-          System.err.println("[Classifier] last classifier unblocking...");
-          m_visual.setText(m_oldText);
+        
+        // check to see if we are the last active thread
+        if (m_executorPool == null || 
+            (/* m_executorPool.getQueue().size() == 0 && */ 
+                m_executorPool.getActiveCount() == 1)) {
+
+          String msg = "[Classifier] " + statusMessagePrefix() 
+          + " last classifier unblocking...";
+          if (m_log != null) {
+            m_log.logMessage(msg);
+          } else {
+            System.err.println(msg);
+          }
+          //m_visual.setText(m_oldText);
+
+          if (m_log != null) {
+            m_log.statusMessage(statusMessagePrefix() + "finished.");
+          }
           m_block = false;
           block(false);
         }
@@ -751,7 +769,8 @@ public class Classifier
     // Do some initialization if this is the first set of the first run
     if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
       m_oldText = m_visual.getText();
-      String msg = "[Classifier] starting executor pool ("
+      String msg = "[Classifier] " + statusMessagePrefix() 
+        + " starting executor pool ("
         + getExecutionSlots() + " slots)...";
       if (m_log != null) {
         m_log.logMessage(msg);
@@ -762,7 +781,7 @@ public class Classifier
       startExecutorPool();
             
       // setup output queues
-      msg = "[Classifier] setup output queues.";
+      msg = "[Classifier] " + statusMessagePrefix() + " setup output queues.";
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -776,8 +795,8 @@ public class Classifier
     // create a new task and schedule for execution
     TrainingTask newTask = new TrainingTask(e.getRunNumber(), e.getMaxRunNumber(),
         e.getSetNumber(), e.getMaxSetNumber(), e.getTrainingSet());
-    String msg = "[Classifier] scheduling run " + e.getRunNumber()
-    +" fold " + e.getSetNumber() + " for execution...";
+    String msg = "[Classifier] " + statusMessagePrefix() + " scheduling run " 
+    + e.getRunNumber() +" fold " + e.getSetNumber() + " for execution...";
     if (m_log != null) {
       m_log.logMessage(msg);
     } else {
@@ -1025,8 +1044,8 @@ public class Classifier
   private synchronized void classifierTrainingComplete(BatchClassifierEvent ce) {
     // check the output queues if we have an incoming test set connection
     if (m_listenees.containsKey("testSet")) {
-      String msg = "[Classifier] " + m_Classifier.getClass().getName() 
-      + ": storing model for run " + ce.getRunNumber() 
+      String msg = "[Classifier] " + statusMessagePrefix() 
+      + " storing model for run " + ce.getRunNumber() 
       + " fold " + ce.getSetNumber();
       if (m_log != null) {
         m_log.logMessage(msg);
@@ -1063,7 +1082,8 @@ public class Classifier
     }
     
     if (runOK) {
-      String msg = "[Classifier] dispatching run " + runNum + " to listeners.";
+      String msg = "[Classifier] " + statusMessagePrefix() 
+        + " dispatching run " + runNum + " to listeners.";
       if (m_log != null) {
         m_log.logMessage(msg);
       } else {
@@ -1305,7 +1325,7 @@ public class Classifier
     if (eventName.compareTo("instance") == 0) {
       if (!(m_Classifier instanceof weka.classifiers.UpdateableClassifier)) {
 	if (m_log != null) {
-	  m_log.logMessage("Warning : " + m_Classifier.getClass().getName()
+	  m_log.logMessage("[Classifier] " + statusMessagePrefix() + " WARNING: "
 			   + " is not an updateable classifier. This "
 			   +"classifier will only be evaluated on incoming "
 			   +"instance events and not trained on them.");
@@ -1377,12 +1397,11 @@ public class Classifier
     if (m_executorPool != null) {
       m_executorPool.shutdownNow();
       m_executorPool.purge();
-      m_executorPool = null;
     }
     m_block = false;
     m_visual.setStatic();
     if (m_oldText.length() > 0) {
-      m_visual.setText(m_oldText);
+      //m_visual.setText(m_oldText);
     }
 
     // stop the build thread
@@ -1470,7 +1489,7 @@ public class Classifier
         m_trainingSet = tempHeader;
 
         if (m_log != null) {
-          m_log.logMessage("Loaded classifier: "
+          m_log.logMessage("[Classifier] Loaded classifier: "
                            + m_Classifier.getClass().toString());
         }
       }
@@ -1480,7 +1499,8 @@ public class Classifier
                                     "Load Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("Problem loading classifier. " + ex.getMessage());
+        m_log.logMessage("[Classifier] Problem loading classifier. " 
+            + ex.getMessage());
       }
     }
   }
@@ -1555,7 +1575,7 @@ public class Classifier
           os.close();
         }
         if (m_log != null) {
-          m_log.logMessage("Saved classifier OK.");
+          m_log.logMessage("[Classifier] Saved classifier " + getCustomName());
         }
       }
     } catch (Exception ex) {
@@ -1564,7 +1584,8 @@ public class Classifier
                                     "Save Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("Problem saving classifier. " + ex.getMessage());
+        m_log.logMessage("[Classifier] Problem saving classifier " + getCustomName() 
+            + ex.getMessage());
       }
     }
   }
@@ -1745,5 +1766,12 @@ public class Classifier
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|"
+    + ((m_Classifier instanceof OptionHandler) 
+        ? Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()) + "|"
+            : "");
   }
 }
