@@ -47,7 +47,10 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
@@ -97,12 +100,22 @@ import java.util.Vector;
  * <pre> -F
  *  write results to OPTICS_#TimeStamp#.TXT - File</pre>
  * 
+ * <pre> -no-gui
+ *  suppress the display of the GUI after building the clusterer</pre>
+ * 
+ * <pre> -db-output &lt;file&gt;
+ *  The file to save the generated database to. If a directory
+ *  is provided, the database doesn't get saved.
+ *  The generated file can be viewed with the OPTICS Visualizer:
+ *    java weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI.OPTICS_Visualizer [file.ser]
+ *  (default: .)</pre>
+ * 
  <!-- options-end -->
  *
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class OPTICS 
     extends AbstractClusterer 
@@ -163,6 +176,12 @@ public class OPTICS
      */
     private FastVector resultVector;
 
+    /** whether to display the GUI after building the clusterer or not. */
+    private boolean showGUI = true;
+    
+    /** the file to save the generated database object to. */
+    private File databaseOutput = new File(".");
+    
     // *****************************************************************************************************************
     // constructors
     // *****************************************************************************************************************
@@ -250,7 +269,26 @@ public class OPTICS
             bufferedOPTICSWriter.close();
         }
 
-        new OPTICS_Visualizer(getSERObject(), "OPTICS Visualizer - Main Window");
+        // explicit file provided to write the generated database to?
+        if (!databaseOutput.isDirectory()) {
+          try {
+            FileOutputStream fos = new FileOutputStream(databaseOutput);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(getSERObject());
+            oos.flush();
+            oos.close();
+            fos.close();
+          }
+          catch (Exception e) {
+            System.err.println(
+        	"Error writing generated database to file '" + getDatabaseOutput() + "': " 
+        	+ e);
+            e.printStackTrace();
+          }
+        }
+        
+        if (showGUI)
+          new OPTICS_Visualizer(getSERObject(), "OPTICS Visualizer - Main Window");
     }
 
     /**
@@ -364,30 +402,43 @@ public class OPTICS
         Vector vector = new Vector();
 
         vector.addElement(
-                new Option("\tepsilon (default = 0.9)",
-                        "E",
-                        1,
-                        "-E <double>"));
+            new Option(
+        	"\tepsilon (default = 0.9)",
+        	"E", 1, "-E <double>"));
+        
         vector.addElement(
-                new Option("\tminPoints (default = 6)",
-                        "M",
-                        1,
-                        "-M <int>"));
+            new Option("\tminPoints (default = 6)",
+        	"M", 1, "-M <int>"));
+        
         vector.addElement(
-                new Option("\tindex (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)",
-                        "I",
-                        1,
-                        "-I <String>"));
+            new Option(
+        	"\tindex (database) used for OPTICS (default = weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase)",
+        	"I", 1, "-I <String>"));
+        
         vector.addElement(
-                new Option("\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)",
-                        "D",
-                        1,
-                        "-D <String>"));
+            new Option(
+        	"\tdistance-type (default = weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject)",
+        	"D", 1, "-D <String>"));
+        
         vector.addElement(
-                new Option("\twrite results to OPTICS_#TimeStamp#.TXT - File",
-                        "F",
-                        0,
-                        "-F"));
+            new Option(
+        	"\twrite results to OPTICS_#TimeStamp#.TXT - File",
+        	"F", 0, "-F"));
+        
+        vector.addElement(
+            new Option(
+        	"\tsuppress the display of the GUI after building the clusterer",
+        	"no-gui", 0, "-no-gui"));
+        
+        vector.addElement(
+            new Option(
+        	"\tThe file to save the generated database to. If a directory\n"
+        	+ "\tis provided, the database doesn't get saved.\n"
+        	+ "\tThe generated file can be viewed with the OPTICS Visualizer:\n"
+        	+ "\t  java " + OPTICS_Visualizer.class.getName() + " [file.ser]\n"
+        	+ "\t(default: .)",
+        	"db-output", 1, "-db-output <file>"));
+        
         return vector.elements();
     }
 
@@ -414,6 +465,16 @@ public class OPTICS
      * <pre> -F
      *  write results to OPTICS_#TimeStamp#.TXT - File</pre>
      * 
+     * <pre> -no-gui
+     *  suppress the display of the GUI after building the clusterer</pre>
+     * 
+     * <pre> -db-output &lt;file&gt;
+     *  The file to save the generated database to. If a directory
+     *  is provided, the database doesn't get saved.
+     *  The generated file can be viewed with the OPTICS Visualizer:
+     *    java weka.clusterers.forOPTICSAndDBScan.OPTICS_GUI.OPTICS_Visualizer [file.ser]
+     *  (default: .)</pre>
+     * 
      <!-- options-end -->
      *
      * @param options The list of options as an array of strings
@@ -421,26 +482,38 @@ public class OPTICS
      */
     public void setOptions(String[] options) throws Exception {
         String optionString = Utils.getOption('E', options);
-        if (optionString.length() != 0) {
+        if (optionString.length() != 0)
             setEpsilon(Double.parseDouble(optionString));
-        }
+        else
+            setEpsilon(0.9);
 
         optionString = Utils.getOption('M', options);
-        if (optionString.length() != 0) {
+        if (optionString.length() != 0)
             setMinPoints(Integer.parseInt(optionString));
-        }
+        else
+            setMinPoints(6);
 
         optionString = Utils.getOption('I', options);
-        if (optionString.length() != 0) {
+        if (optionString.length() != 0)
             setDatabase_Type(optionString);
-        }
+        else
+            setDatabase_Type(weka.clusterers.forOPTICSAndDBScan.Databases.SequentialDatabase.class.getName());
 
         optionString = Utils.getOption('D', options);
-        if (optionString.length() != 0) {
+        if (optionString.length() != 0)
             setDatabase_distanceType(optionString);
-        }
+        else
+            setDatabase_distanceType(weka.clusterers.forOPTICSAndDBScan.DataObjects.EuclidianDataObject.class.getName());
 
         setWriteOPTICSresults(Utils.getFlag('F', options));
+
+        setShowGUI(!Utils.getFlag("no-gui", options));
+
+        optionString = Utils.getOption("db-output", options);
+        if (optionString.length() != 0)
+            setDatabaseOutput(new File(optionString));
+        else
+            setDatabaseOutput(new File("."));
     }
 
     /**
@@ -449,27 +522,32 @@ public class OPTICS
      * @return String[] The list of current option settings as an array of strings
      */
     public String[] getOptions() {
-        String[] options = new String[9];
-        int current = 0;
+        Vector<String>	result;
+        
+        result = new Vector<String>();
+        
+        result.add("-E");
+        result.add("" + getEpsilon());
+        
+        result.add("-M");
+        result.add("" + getMinPoints());
+        
+        result.add("-I");
+        result.add("" + getDatabase_Type());
+        
+        result.add("-D");
+        result.add("" + getDatabase_distanceType());
 
-        options[current++] = "-E";
-        options[current++] = "" + getEpsilon();
-        options[current++] = "-M";
-        options[current++] = "" + getMinPoints();
-        options[current++] = "-I";
-        options[current++] = "" + getDatabase_Type();
-        options[current++] = "-D";
-        options[current++] = "" + getDatabase_distanceType();
+        if (getWriteOPTICSresults())
+          result.add("-F");
 
-        if (writeOPTICSresults) {
-            options[current++] = "-F";
-        }
-
-        while (current < options.length) {
-            options[current++] = "";
-        }
-
-        return options;
+        if (!getShowGUI())
+          result.add("-no-gui");
+        
+        result.add("-db-output");
+        result.add("" + getDatabaseOutput());
+        
+        return result.toArray(new String[result.size()]);
     }
 
     /**
@@ -616,6 +694,47 @@ public class OPTICS
     }
 
     /**
+     * Returns the flag for showing the OPTICS visualizer GUI.
+     * 
+     * @return 		true if the GUI is displayed
+     */
+    public boolean getShowGUI() {
+        return showGUI;
+    }
+
+    /**
+     * Sets the flag for displaying the GUI.
+     * 
+     * @param value 	if true, then the OPTICS visualizer GUI will be 
+     * 			displayed after building the clusterer
+     */
+    public void setShowGUI(boolean value) {
+        showGUI = value;
+    }
+
+    /**
+     * Returns the file to save the database to - if directory, database is not
+     * saved.
+     * 
+     * @return 		the file to save the database to a directory if saving
+     * 			is ignored
+     */
+    public File getDatabaseOutput() {
+        return databaseOutput;
+    }
+
+    /**
+     * Sets the the file to save the generated database to. If a directory
+     * is provided, the datbase doesn't get saved.
+     * 
+     * @param value 	the file to save the database to or a directory if
+     * 			saving is to be ignored
+     */
+    public void setDatabaseOutput(File value) {
+        databaseOutput = value;
+    }
+
+    /**
      * Returns the resultVector
      * @return resultVector
      */
@@ -666,6 +785,29 @@ public class OPTICS
      */
     public String writeOPTICSresultsTipText() {
         return "if the -F option is set, the results are written to OPTICS_#TimeStamp#.TXT";
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * 
+     * @return 		tip text for this property suitable for
+     * 			displaying in the explorer/experimenter gui
+     */
+    public String showGUITipText() {
+        return "Defines whether the OPTICS Visualizer is displayed after the clusterer has been built or not.";
+    }
+
+    /**
+     * Returns the tip text for this property.
+     * 
+     * @return 		tip text for this property suitable for
+     * 			displaying in the explorer/experimenter gui
+     */
+    public String databaseOutputTipText() {
+        return 
+            "The optional output file for the generated database object - can "
+          + "be viewed with the OPTICS Visualizer.\n"
+          + "java " + OPTICS_Visualizer.class.getName() + " [file.ser]";
     }
 
     /**
@@ -747,7 +889,7 @@ public class OPTICS
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.8 $");
+      return RevisionUtils.extract("$Revision$");
     }
 
     /**
@@ -761,4 +903,3 @@ public class OPTICS
         runClusterer(new OPTICS(), args);
     }
 }
-
