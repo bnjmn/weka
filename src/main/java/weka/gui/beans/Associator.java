@@ -602,7 +602,8 @@ public class Associator
   
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Associator instanceof OptionHandler) 
+    + ((m_Associator instanceof OptionHandler && 
+        Utils.joinOptions(((OptionHandler)m_Associator).getOptions()).length() > 0) 
         ? Utils.joinOptions(((OptionHandler)m_Associator).getOptions()) + "|"
             : "");
   }
