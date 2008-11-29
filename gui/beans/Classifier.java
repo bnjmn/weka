@@ -73,7 +73,8 @@ import weka.gui.Logger;
 public class Classifier
   extends JPanel
   implements BeanCommon, Visible, 
-	     WekaWrapper, EventConstraints,
+	     WekaWrapper, EventConstraints, 
+	     ConfigurationConstraints,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     InstanceListener {
@@ -707,30 +708,41 @@ public class Classifier
             m_log.logMessage(titleString + " ("
                + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
             m_log.statusMessage(statusMessagePrefix() + "Interrupted");
+            
+            // are we the last active thread?
+            if (m_executorPool.getActiveCount() == 1) {
+              String msg = "[Classifier] " + statusMessagePrefix() 
+              + " last classifier unblocking...";
+              m_log.logMessage(msg);
+              m_log.statusMessage(statusMessagePrefix() + "finished.");
+              m_block = false;
+//              block(false);
+            }
           }
           /*System.err.println("Queue size: " + m_executorPool.getQueue().size() +
               " Active count: " + m_executorPool.getActiveCount()); */
-        }
-        
-        // check to see if we are the last active thread
-        if (m_executorPool == null || 
-            (/* m_executorPool.getQueue().size() == 0 && */ 
-                m_executorPool.getActiveCount() == 1)) {
+        } else {
+          // check to see if we are the last active thread
+          if (m_executorPool == null || 
+              (m_executorPool.getQueue().size() == 0 && 
+                  m_executorPool.getActiveCount() == 1)) {
 
-          String msg = "[Classifier] " + statusMessagePrefix() 
-          + " last classifier unblocking...";
-          if (m_log != null) {
-            m_log.logMessage(msg);
-          } else {
-            System.err.println(msg);
-          }
-          //m_visual.setText(m_oldText);
+            String msg = "[Classifier] " + statusMessagePrefix() 
+            + " last classifier unblocking...";
+            if (m_log != null) {
+              m_log.logMessage(msg);
+            } else {
+              System.err.println(msg);
+            }
+            //m_visual.setText(m_oldText);
 
-          if (m_log != null) {
-            m_log.statusMessage(statusMessagePrefix() + "finished.");
+            if (m_log != null) {
+              m_log.statusMessage(statusMessagePrefix() + "finished.");
+            }
+            // m_outputQueues = null; // free memory
+            m_block = false;
+  //          block(false);
           }
-          m_block = false;
-          block(false);
         }
       }
     }
@@ -747,9 +759,6 @@ public class Classifier
    * @param e a <code>TrainingSetEvent</code> value
    */
   public void acceptTrainingSet(final TrainingSetEvent e) {
-    if (m_block) {
-      block(true);
-    }
     
     if (e.isStructureOnly()) {
       // no need to build a classifier, instead just generate a dummy
@@ -766,9 +775,18 @@ public class Classifier
       return;
     }
     
+    if (m_block) {
+      //block(true);
+      m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
+          + "at this time.");
+      m_log.logMessage("[Classifier] " + statusMessagePrefix()
+          + " BUSY. Can't accept data at this time.");
+      return;
+    }
+    
     // Do some initialization if this is the first set of the first run
     if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
-      m_oldText = m_visual.getText();
+//      m_oldText = m_visual.getText();
       String msg = "[Classifier] " + statusMessagePrefix() 
         + " starting executor pool ("
         + getExecutionSlots() + " slots)...";
@@ -802,6 +820,11 @@ public class Classifier
     } else {
       System.err.println(msg);
     }
+    
+    // delay just a little bit
+    try {
+      Thread.sleep(10);
+    } catch (Exception ex){}
     m_executorPool.execute(newTask);
     
     if (e.getRunNumber() == e.getMaxRunNumber() && 
@@ -815,190 +838,10 @@ public class Classifier
   }
 
   /**
-   * Accepts a training set and builds batch classifier
-   *
-   * @param e a <code>TrainingSetEvent</code> value
-   */
-  /* public void acceptTrainingSet(final TrainingSetEvent e) {
-    if (e.isStructureOnly()) {
-      // no need to build a classifier, instead just generate a dummy
-      // BatchClassifierEvent in order to pass on instance structure to
-      // any listeners - eg. PredictionAppender can use it to determine
-      // the final structure of instances with predictions appended
-      BatchClassifierEvent ce = 
-	new BatchClassifierEvent(this, m_Classifier, 
-				 new DataSetEvent(this, e.getTrainingSet()),
-				 new DataSetEvent(this, e.getTrainingSet()),
-				 e.getSetNumber(), e.getMaxSetNumber());
-
-      notifyBatchClassifierListeners(ce);
-      return;
-    }
-    if (m_buildThread == null) {
-      try {
-	if (m_state == IDLE) {
-	  synchronized (this) {
-	    m_state = BUILDING_MODEL;
-	  }
-	  m_trainingSet = e.getTrainingSet();
-	  final String oldText = m_visual.getText();
-	  m_buildThread = new Thread() {
-	      public void run() {
-		try {
-		  if (m_trainingSet != null) {
-		    if (m_trainingSet.classIndex() < 0) {
-		      // assume last column is the class
-		      m_trainingSet.setClassIndex(m_trainingSet.numAttributes()-1);
-		      if (m_log != null) {
-			m_log.logMessage("Classifier : assuming last "
-					 +"column is the class");
-		      }
-		    }
-		    m_visual.setAnimated();
-		    m_visual.setText("Building model...");
-		    if (m_log != null) {
-		      m_log.statusMessage("Classifier : building model...");
-		    }
-		    buildClassifier();
-
-                    if (m_batchClassifierListeners.size() > 0) {
-                      // notify anyone who might be interested in just the model
-                      // and training set
-                      BatchClassifierEvent ce = 
-                        new BatchClassifierEvent(this, m_Classifier, 
-                                                 new DataSetEvent(this, e.getTrainingSet()),
-                                                 null, // no test set
-                                                 e.getSetNumber(), e.getMaxSetNumber());
-                      notifyBatchClassifierListeners(ce);
-                    }
-
-		    if (m_Classifier instanceof weka.core.Drawable && 
-			m_graphListeners.size() > 0) {
-		      String grphString = 
-			((weka.core.Drawable)m_Classifier).graph();
-                      int grphType = ((weka.core.Drawable)m_Classifier).graphType();
-		      String grphTitle = m_Classifier.getClass().getName();
-		      grphTitle = grphTitle.substring(grphTitle.
-						      lastIndexOf('.')+1, 
-						      grphTitle.length());
-		      grphTitle = "Set " + e.getSetNumber() + " ("
-			+e.getTrainingSet().relationName() + ") "
-			+grphTitle;
-		      
-		      GraphEvent ge = new GraphEvent(Classifier.this, 
-						     grphString, 
-						     grphTitle,
-                                                     grphType);
-		      notifyGraphListeners(ge);
-		    }
-
-		    if (m_textListeners.size() > 0) {
-		      String modelString = m_Classifier.toString();
-		      String titleString = m_Classifier.getClass().getName();
-		      
-		      titleString = titleString.
-			substring(titleString.lastIndexOf('.') + 1,
-				  titleString.length());
-		      modelString = "=== Classifier model ===\n\n" +
-			"Scheme:   " +titleString+"\n" +
-			"Relation: "  + m_trainingSet.relationName() + 
-			((e.getMaxSetNumber() > 1) 
-			 ? "\nTraining Fold: "+e.getSetNumber()
-			 :"")
-			+ "\n\n"
-			+ modelString;
-		      titleString = "Model: " + titleString;
-
-		      TextEvent nt = new TextEvent(Classifier.this,
-						   modelString,
-						   titleString);
-		      notifyTextListeners(nt);
-		    }
-		  }
-		} catch (Exception ex) {
-		  ex.printStackTrace();
-		} finally {
-		  m_visual.setText(oldText);
-		  m_visual.setStatic();
-		  m_state = IDLE;
-		  if (isInterrupted()) {
-		    // prevent any classifier events from being fired
-		    m_trainingSet = null;
-		    if (m_log != null) {
-                      String titleString = m_Classifier.getClass().getName();		      
-		      titleString = titleString.
-			substring(titleString.lastIndexOf('.') + 1,
-				  titleString.length());
-		      m_log.logMessage("Build classifier ("
-                                       + titleString + ") interrupted!");
-		      m_log.statusMessage("Interrupted");
-		    }
-		  } else {
-		    // save header
-		    //m_trainingSet = new Instances(m_trainingSet, 0);
-		  }
-		  if (m_log != null) {
-		    m_log.statusMessage("OK");
-		  }
-		  block(false);
-		}
-	      }	
-	    };
-	  m_buildThread.setPriority(Thread.MIN_PRIORITY);
-	  m_buildThread.start();
-	  // make sure the thread is still running before we block
-	  //	  if (m_buildThread.isAlive()) {
-	  block(true);
-	    //	  }
-	  m_buildThread = null;
-	  m_state = IDLE;
-	}
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
-    }
-  } */
-
-  /**
    * Accepts a test set for a batch trained classifier
    *
    * @param e a <code>TestSetEvent</code> value
-   */
-  /* public void acceptTestSet(TestSetEvent e) {
-
-    if (m_trainingSet != null) {
-      try {
-	if (m_state == IDLE) {
-	  synchronized(this) {
-	    m_state = CLASSIFYING;
-	  }
-
-	  m_testingSet = e.getTestSet();
-	  if (m_testingSet != null) {
-	    if (m_testingSet.classIndex() < 0) {
-	      m_testingSet.setClassIndex(m_testingSet.numAttributes()-1);
-	    }
-	  }
-	  if (m_trainingSet.equalHeaders(m_testingSet)) {
-
-	    BatchClassifierEvent ce = 
-	      new BatchClassifierEvent(this, m_Classifier, 				       
-				       new DataSetEvent(this, m_trainingSet),
-				       new DataSetEvent(this, e.getTestSet()),
-				  e.getSetNumber(), e.getMaxSetNumber());
-
-	    //	    System.err.println("Just before notify classifier listeners");
-	    notifyBatchClassifierListeners(ce);
-	    //	    System.err.println("Just after notify classifier listeners");
-	  }
-	  m_state = IDLE;
-	}
-      } catch (Exception ex) {
-	ex.printStackTrace();
-      }
-    }
-  } */
-    
+   */    
   public synchronized void acceptTestSet(TestSetEvent e) {
   
     // If we just have a test set connection, then use the
@@ -1768,9 +1611,28 @@ public class Classifier
     return true;
   }
   
+  /**
+   * Returns true if, at this point in time, the
+   * implementing component can be configured (i.e. if
+   * a component is busy doing some work based on
+   * the current configuration it might deny a
+   * request to change its configuration).
+   * 
+   * @return true if configuration can be performed
+   * at this time.
+   */
+  public boolean configurationAllowed() {
+    if (m_executorPool == null || 
+        m_executorPool.getActiveCount() == 0) {
+      return true;
+    }
+    return false;
+  }
+  
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Classifier instanceof OptionHandler) 
+    + ((m_Classifier instanceof OptionHandler &&
+        Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()).length() > 0) 
         ? Utils.joinOptions(((OptionHandler)m_Classifier).getOptions()) + "|"
             : "");
   }
