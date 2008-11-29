@@ -23,6 +23,8 @@
 package weka.gui.beans;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,6 +38,7 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import weka.gui.Logger;
 
@@ -86,7 +89,31 @@ public class LogPanel extends JPanel implements Logger {
     
     String[] columnNames = {"Component", "Parameters", "Time", "Status"};
     m_tableModel = new DefaultTableModel(columnNames, 0);
-    m_table = new JTable();
+    
+    // JTable with error/warning indication for rows.
+    m_table = new JTable() {
+      public Class getColumnClass(int column) {
+        return getValueAt(0, column).getClass();
+      }
+
+      public Component prepareRenderer(TableCellRenderer renderer, 
+          int row, int column) {
+        Component c = super.prepareRenderer(renderer, row, column);
+        if (!c.getBackground().equals(getSelectionBackground()))
+        {
+          String type = (String)getModel().getValueAt(row, 3);
+          Color backgroundIndicator = null;
+          if (type.startsWith("ERROR")) {
+            backgroundIndicator = Color.RED;
+          } else if (type.startsWith("WARNING")) {
+            backgroundIndicator = Color.YELLOW;
+          }
+          c.setBackground(backgroundIndicator);
+        }
+        return c;
+      }
+    };
+    
     m_table.setModel(m_tableModel);
     m_table.getColumnModel().getColumn(0).setPreferredWidth(50);
     m_table.getColumnModel().getColumn(1).setPreferredWidth(100);
@@ -215,11 +242,16 @@ public class LogPanel extends JPanel implements Logger {
           m_tableModel.removeRow(rowNum);
         }
       } else {
+        final String stepNameCopy = stepName;
         final String stepStatusCopy = stepStatus;
+        final String stepParametersCopy = stepParameters;
         if (!SwingUtilities.isEventDispatchThread()) {
           try {
             SwingUtilities.invokeLater(new Runnable() {
               public void run() {
+                m_tableModel.setValueAt(stepNameCopy, rowNum.intValue(), 0);
+                m_tableModel.setValueAt(stepParametersCopy, rowNum.intValue(), 1);
+                m_tableModel.setValueAt("-", rowNum.intValue(), 2);
                 m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
               }
             });
@@ -227,6 +259,9 @@ public class LogPanel extends JPanel implements Logger {
             ex.printStackTrace();
           }
         } else {
+          m_tableModel.setValueAt(stepNameCopy, rowNum.intValue(), 0);
+          m_tableModel.setValueAt(stepParametersCopy, rowNum.intValue(), 1);
+          m_tableModel.setValueAt("-", rowNum.intValue(), 2);
           m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
         }
       //  m_tableModel.fireTableCellUpdated(rowNum.intValue(), 3);
@@ -326,7 +361,11 @@ public class LogPanel extends JPanel implements Logger {
       lp.statusMessage("Step 1|Some options here|finished");
       //lp.statusMessage("Step 1|Some options here|back again!");
       Thread.sleep(3000);
-      lp.statusMessage("Step 2$hashkey|More Funky Chickens!!!");
+      lp.statusMessage("Step 2$hashkey|ERROR! More Funky Chickens!!!");
+      Thread.sleep(3000);
+      lp.statusMessage("Step 2$hashkey|WARNING - now a warning...");
+      Thread.sleep(3000);
+      lp.statusMessage("Step 2$hashkey|Back to normal.");
       
     } catch (Exception ex) {
       ex.printStackTrace();
