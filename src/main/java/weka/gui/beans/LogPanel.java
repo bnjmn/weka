@@ -23,6 +23,7 @@
 package weka.gui.beans;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
@@ -62,7 +64,7 @@ public class LogPanel extends JPanel implements Logger {
   /**
    * The table model for the JTable used in the status area
    */
-  private DefaultTableModel m_tableModel;
+  private final DefaultTableModel m_tableModel;
   
   /**
    * The table for the status area
@@ -173,14 +175,13 @@ public class LogPanel extends JPanel implements Logger {
     // Now see if this step is in the hashmap
     if (m_tableIndexes.containsKey(stepHash)) {
       // Get the row number and update the table model...
-      Integer rowNum = m_tableIndexes.get(stepHash);
+      final Integer rowNum = m_tableIndexes.get(stepHash);
       if (stepStatus.equalsIgnoreCase("finished") ||
           stepStatus.equalsIgnoreCase("finished.") ||
           stepStatus.equalsIgnoreCase("done") ||
           stepStatus.equalsIgnoreCase("done.")) {
-        // Remove the entry...
-        m_tableModel.removeRow(rowNum);
-        m_tableModel.fireTableDataChanged();
+        
+        //m_tableModel.fireTableDataChanged();
         m_tableIndexes.remove(stepHash);
         m_timers.get(stepHash).stop();
         m_timers.remove(stepHash);
@@ -198,9 +199,37 @@ public class LogPanel extends JPanel implements Logger {
 //            System.err.println("new index " + m_rows.get(nextKey).intValue());
           }
         }
+        
+        // Remove the entry...
+        if (!SwingUtilities.isEventDispatchThread()) {
+          try {
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                m_tableModel.removeRow(rowNum);
+              }
+            });
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        } else {
+          m_tableModel.removeRow(rowNum);
+        }
       } else {
-        m_tableModel.setValueAt(stepStatus, rowNum.intValue(), 3);
-        m_tableModel.fireTableCellUpdated(rowNum.intValue(), 3);
+        final String stepStatusCopy = stepStatus;
+        if (!SwingUtilities.isEventDispatchThread()) {
+          try {
+            SwingUtilities.invokeLater(new Runnable() {
+              public void run() {
+                m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
+              }
+            });
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        } else {
+          m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
+        }
+      //  m_tableModel.fireTableCellUpdated(rowNum.intValue(), 3);
       }
     } else {
       // Add this one to the hash map
@@ -208,35 +237,62 @@ public class LogPanel extends JPanel implements Logger {
       m_tableIndexes.put(stepHash, numKeys);
       
       // Now add a row to the table model
-      Object[] newRow = new Object[4];
+      final Object[] newRow = new Object[4];
       newRow[0] = stepName;
       newRow[1] = stepParameters;
       newRow[2] = "-";
       newRow[3] = stepStatus;
-      m_tableModel.addRow(newRow);
-      m_tableModel.fireTableDataChanged();
-      
       final String stepHashCopy = stepHash;
-      final long startTime = System.currentTimeMillis();
-      Timer newTimer = new Timer(1000, new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          synchronized(LogPanel.this) {
-            if (m_tableIndexes.containsKey(stepHashCopy)) {
-              Integer rn = m_tableIndexes.get(stepHashCopy);
-              long elapsed = System.currentTimeMillis() - startTime;
-              long seconds = elapsed / 1000;
-              long minutes = seconds / 60;
-              long hours = minutes / 60;
-              seconds = seconds - (minutes * 60);
-              minutes = minutes - (hours * 60);
-              m_tableModel.
-                setValueAt("" + hours + ":" + minutes + ":" + seconds, rn.intValue(), 2);
+      try {
+        if (!SwingUtilities.isEventDispatchThread()) {
+          SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+              m_tableModel.addRow(newRow);
+              //m_tableModel.fireTableDataChanged();
+            }
+          });
+        } else {
+          m_tableModel.addRow(newRow);
+        }
+        
+        final long startTime = System.currentTimeMillis();
+        Timer newTimer = new Timer(1000, new ActionListener() {
+          public void actionPerformed(ActionEvent e) {
+            synchronized(LogPanel.this) {
+              if (m_tableIndexes.containsKey(stepHashCopy)) {
+                final Integer rn = m_tableIndexes.get(stepHashCopy);
+                long elapsed = System.currentTimeMillis() - startTime;
+                long seconds = elapsed / 1000;
+                long minutes = seconds / 60;
+                final long hours = minutes / 60;
+                seconds = seconds - (minutes * 60);
+                minutes = minutes - (hours * 60);
+                final long seconds2 = seconds;
+                final long minutes2 = minutes;
+                if (!SwingUtilities.isEventDispatchThread()) {
+                  try {
+                  SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                      m_tableModel.
+                        setValueAt("" + hours + ":" + minutes2 + ":" + seconds2, rn.intValue(), 2);
+                    }
+                  });
+                  } catch (Exception ex) {
+                    ex.printStackTrace();
+                  }
+                } else {
+                  m_tableModel.
+                    setValueAt("" + hours + ":" + minutes2 + ":" + seconds2, rn.intValue(), 2);
+                }
+              }
             }
           }
-        }
-      });
-      m_timers.put(stepHash, newTimer);
-      newTimer.start();
+        });
+        m_timers.put(stepHashCopy, newTimer);
+        newTimer.start();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
     }
   }
 
