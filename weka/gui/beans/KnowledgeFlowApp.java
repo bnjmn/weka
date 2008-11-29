@@ -680,7 +680,14 @@ public class KnowledgeFlowApp
                   Class custClass = 
                     Introspector.getBeanInfo(bc.getClass()).getBeanDescriptor().getCustomizerClass();
                   if (custClass != null) {
-                    popupCustomizer(custClass, bc);
+                    if (bc instanceof ConfigurationConstraints) {
+                      if (((ConfigurationConstraints)bc).
+                          configurationAllowed()) {
+                        popupCustomizer(custClass, bc);
+                      }
+                    } else {
+                      popupCustomizer(custClass, bc);
+                    }
                   }
                 } catch (IntrospectionException ex) {
                   ex.printStackTrace();
@@ -1676,10 +1683,15 @@ public class KnowledgeFlowApp
             //	  popupCustomizer(custClass, bc);
             //JMenuItem custItem = null;
             MenuItem custItem = null;
+            boolean customizationEnabled = true;
 
             if (!(bc instanceof MetaBean)) {
               //custItem = new JMenuItem("Configure...");
               custItem = new MenuItem("Configure...");
+              if (bc instanceof ConfigurationConstraints) {
+                customizationEnabled = 
+                  ((ConfigurationConstraints)bc).configurationAllowed();
+              }
             } else {
               String custName = custClass.getName();
               BeanInstance tbi = (BeanInstance) associatedBeans.elementAt(zz);
@@ -1695,6 +1707,10 @@ public class KnowledgeFlowApp
                                             custName.length());
               //custItem = new JMenuItem("Configure: "+ custName);
               custItem = new MenuItem("Configure: " + custName);
+              if (tbi.getBean() instanceof ConfigurationConstraints) {
+                customizationEnabled = 
+                  ((ConfigurationConstraints)tbi.getBean()).configurationAllowed();
+              }
             }
 
             custItem.addActionListener(new ActionListener() {
@@ -1710,6 +1726,7 @@ public class KnowledgeFlowApp
                   notifyIsDirty();
                 }
               });
+            custItem.setEnabled(customizationEnabled);
             beanContextMenu.add(custItem);
             menuItemCount++;
           } else {
