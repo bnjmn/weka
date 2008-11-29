@@ -870,7 +870,8 @@ public class Clusterer
   
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Clusterer instanceof OptionHandler) 
+    + ((m_Clusterer instanceof OptionHandler &&
+        Utils.joinOptions(((OptionHandler)m_Clusterer).getOptions()).length() > 0)
         ? Utils.joinOptions(((OptionHandler)m_Clusterer).getOptions()) + "|"
             : "");
   }

@@ -985,7 +985,8 @@ public class Filter
   
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|"
-    + ((m_Filter instanceof OptionHandler) 
+    + ((m_Filter instanceof OptionHandler &&
+        Utils.joinOptions(((OptionHandler)m_Filter).getOptions()).length() > 0) 
         ? Utils.joinOptions(((OptionHandler)m_Filter).getOptions()) + "|"
             : "");
   }
