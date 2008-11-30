@@ -194,6 +194,16 @@ public class ClustererPerformanceEvaluator
       ex.printStackTrace();
     }
   }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return (m_evaluateThread != null);
+  }
 
   /**
    * Try and stop any action

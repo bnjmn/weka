@@ -29,7 +29,7 @@ import java.util.Vector;
  * Bean that accepts a data sets and produces a training set
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.5.2.4 $
+ * @version $Revision$
  */
 public class TrainingSetMaker 
   extends AbstractTrainingSetProducer 
@@ -124,6 +124,16 @@ public class TrainingSetMaker
       //      System.err.println("Listener is BeanCommon");
       ((BeanCommon)m_listenee).stop();
     }
+  }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return false;
   }
 
   /**

@@ -34,7 +34,7 @@ import java.util.Vector;
  * both a training and test set by randomly spliting the data
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.8.2.7 $
+ * @version $Revision$
  */
 public class TrainTestSplitMaker
   extends AbstractTrainAndTestSetProducer
@@ -301,6 +301,16 @@ public class TrainTestSplitMaker
       temp.interrupt();
       temp.stop();
     }
+  }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return (m_splitThread != null);
   }
 
   /**
