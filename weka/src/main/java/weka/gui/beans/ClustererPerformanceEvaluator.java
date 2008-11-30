@@ -153,10 +153,17 @@ public class ClustererPerformanceEvaluator
 				  textTitle);
 		  notifyTextListeners(te);
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
+		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
 		  }
 		}
 	      } catch (Exception ex) {
+	        // stop all processing
+	        ClustererPerformanceEvaluator.this.stop();
+	        m_logger.statusMessage(statusMessagePrefix()
+	            + "ERROR (see log for details");
+	        m_logger.logMessage("[ClustererPerformanceEvaluator] " 
+	            + statusMessagePrefix()
+	            + " problem while evaluating clusterer. " + ex.getMessage());
 		ex.printStackTrace();
 	      } finally {
 		m_visual.setText(oldText);
@@ -166,7 +173,8 @@ public class ClustererPerformanceEvaluator
 		  if (m_logger != null) {
 		    m_logger.logMessage("[" + getCustomName() 
 		        + "] Evaluation interrupted!");
-		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
+		    m_logger.statusMessage(statusMessagePrefix() 
+		        + "INTERRUPTED");
 		  }
 		}
 		block(false);

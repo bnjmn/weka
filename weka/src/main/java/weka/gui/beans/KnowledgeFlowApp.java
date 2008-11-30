@@ -847,7 +847,7 @@ public class KnowledgeFlowApp
      m_beanLayout.setMaximumSize(d);
      m_beanLayout.setPreferredSize(d);
 
-     Dimension d2 = new Dimension(100, 160);
+     Dimension d2 = new Dimension(100, 170);
      m_logPanel.setPreferredSize(d2);
      m_logPanel.setMinimumSize(d2);
      add(m_logPanel, BorderLayout.SOUTH);
@@ -958,15 +958,7 @@ public class KnowledgeFlowApp
     m_stopB.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           m_logPanel.statusMessage("[KnowledgeFlow]|Attempting to stop all components...");
-          Vector components = BeanInstance.getBeanInstances();
-
-          for (int i = 0; i < components.size(); i++) {
-            Object temp = ((BeanInstance) components.elementAt(i)).getBean();
-
-            if (temp instanceof BeanCommon) {
-              ((BeanCommon) temp).stop();
-            }
-          }
+          stopFlow();
           m_logPanel.statusMessage("[KnowledgeFlow]|OK.");
         }
       });
@@ -1141,6 +1133,18 @@ public class KnowledgeFlowApp
 
     //    add(m_toolBars, BorderLayout.NORTH);
     add(toolBarPanel, BorderLayout.NORTH);
+  }
+  
+  private void stopFlow() {
+    Vector components = BeanInstance.getBeanInstances();
+
+    for (int i = 0; i < components.size(); i++) {
+      Object temp = ((BeanInstance) components.elementAt(i)).getBean();
+
+      if (temp instanceof BeanCommon) {
+        ((BeanCommon) temp).stop();
+      }
+    }
   }
 
 
@@ -1539,10 +1543,13 @@ public class KnowledgeFlowApp
   }
 
   public void clearLayout() {
+    stopFlow(); // try and stop any running components
     BeanInstance.reset(m_beanLayout);
     BeanConnection.reset();
     m_beanLayout.revalidate();
     m_beanLayout.repaint();
+    m_logPanel.clearStatus();
+    m_logPanel.statusMessage("[KnowledgeFlow]|Welcome to the Weka Knowledge Flow");
   }
   
   /**
@@ -1624,10 +1631,20 @@ public class KnowledgeFlowApp
         public void actionPerformed(ActionEvent e) {
           BeanConnection.removeConnections(bi);
           bi.removeBean(m_beanLayout);
+          if (bc instanceof BeanCommon) {            
+            String key = ((BeanCommon)bc).getCustomName()
+              + "$" + bc.hashCode();
+            m_logPanel.statusMessage(key + "|remove");
+          }
           revalidate();
           notifyIsDirty();
         }
       });
+    if (bc instanceof ConfigurationConstraints) {
+      if (!((ConfigurationConstraints)bc).configurationAllowed()) {
+        deleteItem.setEnabled(false);
+      }
+    }
     beanContextMenu.add(deleteItem);
     menuItemCount++;
 
@@ -1644,6 +1661,11 @@ public class KnowledgeFlowApp
             }
           }
         });
+      if (bc instanceof ConfigurationConstraints) {
+        if (!((ConfigurationConstraints)bc).configurationAllowed()) {
+          nameItem.setEnabled(false);
+        }
+      }
       beanContextMenu.add(nameItem);
       menuItemCount++;
     }
@@ -2321,6 +2343,7 @@ public class KnowledgeFlowApp
     m_saveB.setEnabled(false);
     int returnVal = m_FileChooser.showOpenDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
+      stopFlow();
 
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
@@ -2383,6 +2406,7 @@ public class KnowledgeFlowApp
         }
 
         integrateFlow(beans, connections);
+        m_logPanel.clearStatus();
         m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
       } catch (Exception ex) {
         m_logPanel.statusMessage("[KnowledgeFlow]|Unable to load flow (see log).");
@@ -2993,7 +3017,7 @@ public class KnowledgeFlowApp
       jf.getContentPane().add(m_knowledgeFlow, java.awt.BorderLayout.CENTER);
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-      jf.setSize(1000,700);
+      jf.setSize(1000,750);
       jf.setVisible(true);     
 
       
