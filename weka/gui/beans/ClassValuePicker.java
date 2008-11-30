@@ -35,7 +35,7 @@ import javax.swing.JPanel;
 
 /**
  * @author Mark Hall
- * @version $Revision: 1.7.2.2 $
+ * @version $Revision$
  */
 public class ClassValuePicker
   extends JPanel
@@ -310,6 +310,16 @@ public class ClassValuePicker
 
   public void stop() {
     // nothing to do
+  }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return false;
   }
 
   /**

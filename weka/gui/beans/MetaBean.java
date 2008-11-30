@@ -50,7 +50,7 @@ import javax.swing.JWindow;
  *
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.9.2.2 $
+ * @version $Revision$
  */
 public class MetaBean
   extends JPanel 
@@ -389,6 +389,26 @@ public class MetaBean
         ((BeanCommon)temp).stop();
       }
     }
+  }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    boolean result = false;
+    for (int i = 0; i < m_subFlow.size(); i++) {
+      Object temp = m_subFlow.elementAt(i);
+      if (temp instanceof BeanCommon) {
+        if (((BeanCommon)temp).isBusy()) {
+          result = true;
+          break;
+        }
+      }
+    }
+    return result;
   }
 
   /**

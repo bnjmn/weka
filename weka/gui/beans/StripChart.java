@@ -53,7 +53,7 @@ import javax.swing.border.TitledBorder;
  * display multiple plots simultaneously
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.14.2.4 $
+ * @version $Revision$
  */
 public class StripChart
   extends JPanel
@@ -757,6 +757,16 @@ public class StripChart
     if (m_listenee instanceof BeanCommon) {
       ((BeanCommon)m_listenee).stop();
     }
+  }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return (m_updateHandler != null);
   }
 
   /**
