@@ -316,6 +316,16 @@ public class CrossValidationFoldMaker
   public String seedTipText() {
     return "The randomization seed";
   }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return (m_foldThread != null);
+  }
 
   /**
    * Stop any action
