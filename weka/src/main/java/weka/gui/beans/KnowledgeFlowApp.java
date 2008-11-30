@@ -680,9 +680,9 @@ public class KnowledgeFlowApp
                   Class custClass = 
                     Introspector.getBeanInfo(bc.getClass()).getBeanDescriptor().getCustomizerClass();
                   if (custClass != null) {
-                    if (bc instanceof ConfigurationConstraints) {
-                      if (((ConfigurationConstraints)bc).
-                          configurationAllowed()) {
+                    if (bc instanceof BeanCommon) {
+                      if (!((BeanCommon)bc).
+                          isBusy()) {
                         popupCustomizer(custClass, bc);
                       }
                     } else {
@@ -1640,8 +1640,8 @@ public class KnowledgeFlowApp
           notifyIsDirty();
         }
       });
-    if (bc instanceof ConfigurationConstraints) {
-      if (!((ConfigurationConstraints)bc).configurationAllowed()) {
+    if (bc instanceof BeanCommon) {
+      if (((BeanCommon)bc).isBusy()) {
         deleteItem.setEnabled(false);
       }
     }
@@ -1661,8 +1661,8 @@ public class KnowledgeFlowApp
             }
           }
         });
-      if (bc instanceof ConfigurationConstraints) {
-        if (!((ConfigurationConstraints)bc).configurationAllowed()) {
+      if (bc instanceof BeanCommon) {
+        if (((BeanCommon)bc).isBusy()) {
           nameItem.setEnabled(false);
         }
       }
@@ -1710,9 +1710,9 @@ public class KnowledgeFlowApp
             if (!(bc instanceof MetaBean)) {
               //custItem = new JMenuItem("Configure...");
               custItem = new MenuItem("Configure...");
-              if (bc instanceof ConfigurationConstraints) {
+              if (bc instanceof BeanCommon) {
                 customizationEnabled = 
-                  ((ConfigurationConstraints)bc).configurationAllowed();
+                  !((BeanCommon)bc).isBusy();
               }
             } else {
               String custName = custClass.getName();
@@ -1729,9 +1729,9 @@ public class KnowledgeFlowApp
                                             custName.length());
               //custItem = new JMenuItem("Configure: "+ custName);
               custItem = new MenuItem("Configure: " + custName);
-              if (tbi.getBean() instanceof ConfigurationConstraints) {
+              if (tbi.getBean() instanceof BeanCommon) {
                 customizationEnabled = 
-                  ((ConfigurationConstraints)tbi.getBean()).configurationAllowed();
+                  !((BeanCommon)tbi.getBean()).isBusy();
               }
             }
 
