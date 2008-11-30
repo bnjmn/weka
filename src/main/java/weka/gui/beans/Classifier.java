@@ -73,8 +73,7 @@ import weka.gui.Logger;
 public class Classifier
   extends JPanel
   implements BeanCommon, Visible, 
-	     WekaWrapper, EventConstraints, 
-	     ConfigurationConstraints,
+	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
 	     InstanceListener {
@@ -1635,23 +1634,19 @@ public class Classifier
     }
     return true;
   }
-  
+    
   /**
-   * Returns true if, at this point in time, the
-   * implementing component can be configured (i.e. if
-   * a component is busy doing some work based on
-   * the current configuration it might deny a
-   * request to change its configuration).
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
    * 
-   * @return true if configuration can be performed
-   * at this time.
+   * @return true if the bean is busy.
    */
-  public boolean configurationAllowed() {
+  public boolean isBusy() {
     if (m_executorPool == null || 
         m_executorPool.getActiveCount() == 0) {
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
   
   private String statusMessagePrefix() {

@@ -225,6 +225,16 @@ public class InstanceStreamToBatchMaker extends JPanel
   public void setLog(Logger logger) {
     m_log = logger;
   }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return false;
+  }
 
   /**
    * Stop any action (if possible).

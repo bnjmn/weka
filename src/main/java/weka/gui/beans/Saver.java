@@ -148,6 +148,16 @@ public class Saver
       notifyAll();
     }
   }
+  
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return (m_ioThread != null);
+  }
 
   /**
    * Global info (if it exists) for the wrapped loader
