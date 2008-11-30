@@ -276,6 +276,11 @@ public class Associator
 		    }
 		  }
 		} catch (Exception ex) {
+		  Associator.this.stop();
+		  m_log.statusMessage(statusMessagePrefix()
+		      + "ERROR (See log for details)");
+		  m_log.logMessage("[Associator] " + statusMessagePrefix()
+		      + " problem training associator. " + ex.getMessage());
 		  ex.printStackTrace();
 		} finally {
 //		  m_visual.setText(oldText);
@@ -289,11 +294,12 @@ public class Associator
 				  titleString.length());
 		      m_log.logMessage("[Associator] " + statusMessagePrefix() 
 		          + " Build associator interrupted!");
-		      m_log.statusMessage(statusMessagePrefix() + "Interupted");
+		      m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
 		    }
-		  }
-		  if (m_log != null) {
-		    m_log.statusMessage(statusMessagePrefix() + "Done.");
+		  } else {
+		    if (m_log != null) {
+		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		    }
 		  }
 		  block(false);
 		}
