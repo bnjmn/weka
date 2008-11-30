@@ -201,9 +201,12 @@ public class Filter
     if (!(m_Filter instanceof StreamableFilter) &&
 	(m_listenees.containsKey("instance"))) {
       if (m_log != null) {
-	m_log.logMessage("[Filter] " +statusMessagePrefix() + " WARNING : "
+	m_log.logMessage("[Filter] " + 
+	    statusMessagePrefix() + " WARNING : "
 	    + m_Filter.getClass().getName()
 	    + " is not an incremental filter");
+	m_log.statusMessage(statusMessagePrefix()
+	    + "WARNING: Not an incremental filter.");
       }
     }
     
@@ -261,16 +264,21 @@ public class Filter
         + " is currently batch processing!";
       if (m_log != null) {
 	m_log.logMessage(messg);
+	m_log.statusMessage(statusMessagePrefix()
+	    + "WARNING: Filter is currently batch processing.");
       } else {
 	System.err.println(messg);
       }
       return;
     }
     if (!(m_Filter instanceof StreamableFilter)) {
+      stop(); // stop all processing
       if (m_log != null) {
 	m_log.logMessage("[Filter] " + statusMessagePrefix() 
 	    + " ERROR : "+m_Filter.getClass().getName()
 	    +"can't process streamed instances; can't continue");
+	m_log.statusMessage(statusMessagePrefix()
+	    + "ERROR: Can't process streamed instances; can't continue.");
       }
       return;
     }
@@ -301,12 +309,16 @@ public class Filter
 	    m_structurePassedOn = true;
 	  }
 	} catch (Exception ex) {
+	  stop(); // stop all processing
 	  if (m_log != null) {
 	    m_log.logMessage("[Filter] " + statusMessagePrefix() 
-                + " Error in obtaining post-filter structure: Filter.java");
+                + " Error in obtaining post-filter structure. " 
+                + ex.getMessage());
+	    m_log.statusMessage(statusMessagePrefix()
+	        +"ERROR (See log for details).");
 	  } else {
 	    System.err.println("[Filter] " + statusMessagePrefix() 
-	        + " Error in obtaining post-filter structure: Filter.java");
+	        + " Error in obtaining post-filter structure");
 	  }
 	}
       } catch (Exception ex) {
@@ -349,8 +361,12 @@ public class Filter
           m_log.statusMessage(statusMessagePrefix() + "Done.");
         }
       } catch (Exception ex) {
+        stop(); // stop all processing
         if (m_log != null) {
-          m_log.logMessage("[Filter] " + statusMessagePrefix() + ex.toString());
+          m_log.logMessage("[Filter] " 
+              + statusMessagePrefix() + ex.getMessage());
+          m_log.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details).");
         }
         ex.printStackTrace();
       }
@@ -389,12 +405,17 @@ public class Filter
             notifyInstanceListeners(m_ie);
           }
           if (m_log != null) {
-            m_log.statusMessage(statusMessagePrefix() + "Done.");
+            m_log.statusMessage(statusMessagePrefix() + "Finished.");
           }
         }
       } catch (Exception ex) {
+        stop(); // stop all processing
         if (m_log != null) {
-          m_log.logMessage("[Filter] " + statusMessagePrefix() + ex.toString());
+          m_log.logMessage("[Filter] " 
+              + statusMessagePrefix() 
+              + ex.toString());
+          m_log.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details.");
         }
         ex.printStackTrace();
       }
@@ -435,8 +456,12 @@ public class Filter
         }
         notifyInstanceListeners(m_ie);
       } catch (Exception ex) {
+        stop(); // stop all processing
         if (m_log != null) {
-          m_log.logMessage("[Filter] " + statusMessagePrefix() + ex.toString());
+          m_log.logMessage("[Filter] " + statusMessagePrefix() 
+              + ex.toString());
+          m_log.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details).");
         }
         ex.printStackTrace();
       }
@@ -481,7 +506,7 @@ public class Filter
 		    if (m_log != null) {
 		      m_log.statusMessage(statusMessagePrefix() 
 		          + "Filtering training data ("
-					  +m_trainingSet.relationName() + ")");
+		          + m_trainingSet.relationName() + ")");
 		    }
 		    m_Filter.setInputFormat(m_trainingSet);
 		    Instances filteredData = 
@@ -504,10 +529,13 @@ public class Filter
 		    notifyDataOrTrainingListeners(ne);
 		  }
 		} catch (Exception ex) {
+		  Filter.this.stop(); // stop all processing
 		  ex.printStackTrace();
                   if (m_log != null) {
                     m_log.logMessage("[Filter] " + statusMessagePrefix() 
-                        + ex.toString());
+                        + ex.getMessage());
+                    m_log.statusMessage(statusMessagePrefix()
+                        + "ERROR (See log for details).");
 //                    m_log.statusMessage("Problem filtering: see log for details.");
                   }
 		} finally {
@@ -519,10 +547,13 @@ public class Filter
 		    if (m_log != null) {
 		      m_log.logMessage("[Filter] " + statusMessagePrefix()
                                        + " training set interrupted!");
+		      m_log.statusMessage(statusMessagePrefix()
+		          + "INTERRUPTED");
 		    }		    
-		  }
-		  if (m_log != null) {
-		    m_log.statusMessage(statusMessagePrefix() + "Done.");
+		  } else {
+		    if (m_log != null) {
+		      m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		    }
 		  }
 		  block(false);
 		}
@@ -580,10 +611,13 @@ public class Filter
 		  notifyTestListeners(ne);
 		}
 	      } catch (Exception ex) {
+	        Filter.this.stop();
 		ex.printStackTrace();
                 if (m_log != null) {
-                  m_log.logMessage("[Filter] " + statusMessagePrefix() + ex.toString());
-//                  m_log.statusMessage("Problem filtering: see log for details.");
+                  m_log.logMessage("[Filter] " + statusMessagePrefix() 
+                      + ex.getMessage());
+                  m_log.statusMessage(statusMessagePrefix() 
+                      + "ERROR (See log for details).");
                 }
 	      } finally {
 		m_visual.setText(oldText);
@@ -594,11 +628,14 @@ public class Filter
 		  if (m_log != null) {
 		      m_log.logMessage("[Filter] " + statusMessagePrefix()
                                        + " test set interrupted!");
+		      m_log.statusMessage(statusMessagePrefix()
+		          + "INTERRUPTED");
 //		    m_log.statusMessage("OK");
 		  }
-		}
-		if (m_log != null) {
-		  m_log.statusMessage(statusMessagePrefix() + "Done.");
+		} else {
+		  if (m_log != null) {
+		    m_log.statusMessage(statusMessagePrefix() + "Finished.");
+		  }
 		}
 		block(false);
 	      }

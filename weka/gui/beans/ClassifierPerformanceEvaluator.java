@@ -253,10 +253,17 @@ public class ClassifierPerformanceEvaluator
 				       notifyTextListeners(te); */
 		  }
 		  if (m_logger != null) {
-		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
+		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
 		  }
 		}
 	      } catch (Exception ex) {
+	        ClassifierPerformanceEvaluator.this.stop(); // stop all processing
+	        m_logger.logMessage("[ClassifierPerformanceEvaluator] "
+	            + statusMessagePrefix() 
+	            + " problem evaluating classifier. " 
+	            + ex.getMessage());
+	        m_logger.statusMessage(statusMessagePrefix() 
+	            + "ERROR (See log for details)");
 		ex.printStackTrace();
 	      } finally {
 //		m_visual.setText(oldText);
@@ -265,7 +272,8 @@ public class ClassifierPerformanceEvaluator
 		if (isInterrupted()) {
 		  if (m_logger != null) {
 		    m_logger.logMessage("[" + getCustomName() +"] Evaluation interrupted!");
-		    m_logger.statusMessage(statusMessagePrefix() + "Done.");
+		    m_logger.statusMessage(statusMessagePrefix() 
+		        + "INTERRUPTED");
 		  }
 		}
 		block(false);
