@@ -431,6 +431,8 @@ public class Classifier
         + " is currently batch training!";
       if (m_log != null) {
 	m_log.logMessage(messg);
+	m_log.statusMessage(statusMessagePrefix() + "WARNING: "
+	    + "Can't accept instance - batch training in progress.");
       } else {
 	System.err.println(messg);
       }
@@ -452,26 +454,30 @@ public class Classifier
 	if (m_trainingSet == null || (!dataset.equalHeaders(m_trainingSet))) {
 	  if (!(m_Classifier instanceof 
 		weka.classifiers.UpdateableClassifier)) {
+	    stop(); // stop all processing
 	    if (m_log != null) {
 	      String msg = (m_trainingSet == null)
-		? "[Classifier] ERROR : " + statusMessagePrefix()
-		+" has not been batch "
+		? statusMessagePrefix()
+		+ "ERROR: classifier has not been batch "
 		+"trained; can't process instance events."
-		: "[Classifier] ERROR : " + statusMessagePrefix() 
-		  + " instance event's structure is different from "
+		: statusMessagePrefix() 
+		  + "ERROR: instance event's structure is different from "
 		  +"the data that "
 		  + "was used to batch train this classifier; can't continue.";
-	      m_log.logMessage(msg);
+	      m_log.logMessage("[Classifier] " + msg);
+	      m_log.statusMessage(msg);
 	    }
 	    return;
 	  }
 	  if (m_trainingSet != null && 
 	      (!dataset.equalHeaders(m_trainingSet))) {
 	    if (m_log != null) {
-	      m_log.logMessage("[Classifier] " + statusMessagePrefix() 
-	                       + " WARNING : structure of instance events differ "
-			       +"from data used in batch training this "
-			       +"classifier. Resetting classifier...");
+	      String msg = statusMessagePrefix() 
+              + " WARNING : structure of instance events differ "
+              +"from data used in batch training this "
+              +"classifier. Resetting classifier...";
+	      m_log.logMessage("[Classifier] " + msg);
+	      m_log.statusMessage(msg);
 	    }
 	    m_trainingSet = null;
 	  }
@@ -482,6 +488,12 @@ public class Classifier
 	  }
 	}
       } catch (Exception ex) {
+        stop();
+        m_log.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
+        m_log.logMessage("[Classifier] " + statusMessagePrefix()
+            + " problem during incremental processing. " 
+            + ex.getMessage());
 	ex.printStackTrace();
       }
       // Notify incremental classifier listeners of new batch
@@ -554,8 +566,13 @@ public class Classifier
 	}
       }
     } catch (Exception ex) {
+      stop();
       if (m_log != null) {
-	m_log.logMessage(ex.toString());
+	m_log.logMessage("[Classifier] " + statusMessagePrefix()
+	    + ex.getMessage());
+	m_log.statusMessage(statusMessagePrefix()
+	    + "ERROR (see log for details)");
+	ex.printStackTrace();
       } else {
         ex.printStackTrace();
       }
@@ -687,13 +704,19 @@ public class Classifier
           }
         }
       } catch (Exception ex) {
+        // Stop all processing
+        stop();
         ex.printStackTrace();
         if (m_log != null) {
           String titleString = "[Classifier] " + statusMessagePrefix();
 
           titleString += " run " + m_runNum + " fold " + m_setNum
           + " failed to complete.";
-          m_log.logMessage(titleString + " (build classifier)");
+          m_log.logMessage(titleString + " (build classifier). " 
+              + ex.getMessage());
+          m_log.statusMessage(statusMessagePrefix() 
+              + "ERROR (see log for details)");
+          ex.printStackTrace();
         }
         m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
       } finally {
@@ -707,14 +730,14 @@ public class Classifier
          
             m_log.logMessage(titleString + " ("
                + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
-            m_log.statusMessage(statusMessagePrefix() + "Interrupted");
+            m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
             
             // are we the last active thread?
             if (m_executorPool.getActiveCount() == 1) {
               String msg = "[Classifier] " + statusMessagePrefix() 
               + " last classifier unblocking...";
               m_log.logMessage(msg);
-              m_log.statusMessage(statusMessagePrefix() + "finished.");
+//              m_log.statusMessage(statusMessagePrefix() + "finished.");
               m_block = false;
 //              block(false);
             }
@@ -737,7 +760,7 @@ public class Classifier
             //m_visual.setText(m_oldText);
 
             if (m_log != null) {
-              m_log.statusMessage(statusMessagePrefix() + "finished.");
+              m_log.statusMessage(statusMessagePrefix() + "Finished.");
             }
             // m_outputQueues = null; // free memory
             m_block = false;
@@ -1168,10 +1191,12 @@ public class Classifier
     if (eventName.compareTo("instance") == 0) {
       if (!(m_Classifier instanceof weka.classifiers.UpdateableClassifier)) {
 	if (m_log != null) {
-	  m_log.logMessage("[Classifier] " + statusMessagePrefix() + " WARNING: "
-			   + " is not an updateable classifier. This "
-			   +"classifier will only be evaluated on incoming "
-			   +"instance events and not trained on them.");
+	  String msg = statusMessagePrefix() + "WARNING: "
+          + " Is not an updateable classifier. This "
+          +"classifier will only be evaluated on incoming "
+          +"instance events and not trained on them.";
+	  m_log.logMessage("[Classifier] " + msg);
+	  m_log.statusMessage(msg);
 	}
       }
     }
