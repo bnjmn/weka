@@ -186,7 +186,7 @@ public class Classifier
    * Stores completed models and associated data sets. Each
    * run is passed on to listeners when completed. 
    */
-  protected BatchClassifierEvent[][] m_outputQueues;
+  protected transient BatchClassifierEvent[][] m_outputQueues;
   
   /**
    * Holds original icon label text
@@ -844,9 +844,9 @@ public class Classifier
     }
     
     // delay just a little bit
-    try {
+    /*try {
       Thread.sleep(10);
-    } catch (Exception ex){}
+    } catch (Exception ex){} */
     m_executorPool.execute(newTask);
     
     if (e.getRunNumber() == e.getMaxRunNumber() && 
@@ -1643,9 +1643,12 @@ public class Classifier
    */
   public boolean isBusy() {
     if (m_executorPool == null || 
-        m_executorPool.getActiveCount() == 0) {
+        (m_executorPool.getQueue().size() == 0 && 
+            m_executorPool.getActiveCount() == 0)) {
       return false;
     }
+    /* System.err.println("isBusy() Q:" + m_executorPool.getQueue().size()
+        +" A:" + m_executorPool.getActiveCount()); */
     return true;
   }
   
