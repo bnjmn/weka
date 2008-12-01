@@ -557,7 +557,13 @@ public class PredictionAppender
 	if(m_appendProbabilities && !(clusterer instanceof DensityBasedClusterer)){
           System.err.println("Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
           if (m_logger != null) {
-            m_logger.logMessage("[PredictionAppender] Only density based clusterers can append probabilities. Instead cluster will be assigned for each instance.");
+            m_logger.logMessage("[PredictionAppender] "
+                + statusMessagePrefix() + " Only density based clusterers can "
+                +"append probabilities. Instead cluster will be assigned for each "
+                +"instance.");
+            m_logger.statusMessage(statusMessagePrefix()
+                +"WARNING: Only density based clusterers can append probabilities. "
+                +"Instead cluster will be assigned for each instance.");
           }
         }
         try {
@@ -932,5 +938,9 @@ public class PredictionAppender
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }
