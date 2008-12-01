@@ -258,12 +258,14 @@ public class ClassifierPerformanceEvaluator
 		}
 	      } catch (Exception ex) {
 	        ClassifierPerformanceEvaluator.this.stop(); // stop all processing
-	        m_logger.logMessage("[ClassifierPerformanceEvaluator] "
-	            + statusMessagePrefix() 
-	            + " problem evaluating classifier. " 
-	            + ex.getMessage());
-	        m_logger.statusMessage(statusMessagePrefix() 
-	            + "ERROR (See log for details)");
+	        if (m_logger != null) {
+	          m_logger.logMessage("[ClassifierPerformanceEvaluator] "
+	              + statusMessagePrefix() 
+	              + " problem evaluating classifier. " 
+	              + ex.getMessage());
+	          m_logger.statusMessage(statusMessagePrefix() 
+	              + "ERROR (See log for details)");
+	        }
 		ex.printStackTrace();
 	      } finally {
 //		m_visual.setText(oldText);

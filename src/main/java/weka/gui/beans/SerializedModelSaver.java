@@ -295,10 +295,15 @@ public class SerializedModelSaver
     try {
       prefix = Environment.substitute(m_filenamePrefix);
     } catch (Exception ex) {
-      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+      stop(); // stop all processing
+      String message = "[SerializedModelSaver] " 
+        + statusMessagePrefix() 
+        + " Can't save model. Reason: " 
         + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -316,10 +321,14 @@ public class SerializedModelSaver
     try {
       dirName = Environment.substitute(dirName);
     } catch (Exception ex) {
-      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+      stop(); // stop all processing
+      String message = "[SerializedModelSaver] "
+        + statusMessagePrefix() + " Can't save model. Reason: " 
                            + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -351,10 +360,14 @@ public class SerializedModelSaver
       try {
         prefix = Environment.substitute(m_filenamePrefix);
       } catch (Exception ex) {
-        String message = "[SerializedModelSaver] Can't save model. Reason: " 
+        stop(); // stop processing
+        String message = "[SerializedModelSaver] "
+          + statusMessagePrefix() + " Can't save model. Reason: " 
           + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details)");
         } else {
           System.err.println(message);
         }
@@ -368,10 +381,14 @@ public class SerializedModelSaver
       try {
         dirName = Environment.substitute(dirName);
       } catch (Exception ex) {
-        String message = "[SerializedModelSaver] Can't save model. Reason: " 
+        stop(); // stop processing
+        String message = "[SerializedModelSaver] "
+          + statusMessagePrefix() + " Can't save model. Reason: " 
           + ex.getMessage();
         if (m_logger != null) {
           m_logger.logMessage(message);
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details)");
         } else {
           System.err.println(message);
         }
@@ -407,10 +424,14 @@ public class SerializedModelSaver
     try {
       prefix = Environment.substitute(m_filenamePrefix);
     } catch (Exception ex) {
-      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+      stop(); // stop processing
+      String message = "[SerializedModelSaver] "
+        + statusMessagePrefix() + " Can't save model. Reason: " 
         + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -429,10 +450,14 @@ public class SerializedModelSaver
     try {
       dirName = Environment.substitute(dirName);
     } catch (Exception ex) {
-      String message = "[SerializedModelSaver] Can't save model. Reason: " 
+      stop(); // stop processing
+      String message = "[SerializedModelSaver] "
+        + statusMessagePrefix() + " Can't save model. Reason: " 
                            + ex.getMessage();
       if (m_logger != null) {
         m_logger.logMessage(message);
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
       } else {
         System.err.println(message);
       }
@@ -472,9 +497,13 @@ public class SerializedModelSaver
         break;
       }        
     } catch (Exception ex) {
-      System.err.println("[SerializedModelSaver] Problem savingmodel");
+      stop(); // stop all processing
+      System.err.println("[SerializedModelSaver] Problem saving model");
       if (m_logger != null) {
-        m_logger.logMessage("[SerializedModelSaver] Problem saving model");
+        m_logger.logMessage("[SerializedModelSaver] "
+            + statusMessagePrefix() + " Problem saving model");
+        m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
       }
     }
   }
@@ -643,4 +672,8 @@ public class SerializedModelSaver
 
     return r;
   }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
+  }   
 }

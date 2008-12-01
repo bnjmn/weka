@@ -101,7 +101,10 @@ public class TestSetMaker
       for(int i = 0; i < l.size(); i++) {
         if (m_receivedStopNotification) {
           if (m_logger != null) {
-            m_logger.logMessage("TestSetMaker stopping.");
+            m_logger.logMessage("[TestSetMaker] "
+                + statusMessagePrefix() + " stopping.");
+            m_logger.statusMessage(statusMessagePrefix()
+                + "INTERRUPTED");
           }
           m_receivedStopNotification = false;
           break;
@@ -151,5 +154,9 @@ public class TestSetMaker
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }

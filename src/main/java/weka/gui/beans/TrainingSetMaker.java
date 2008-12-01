@@ -102,7 +102,10 @@ public class TrainingSetMaker
       for(int i = 0; i < l.size(); i++) {
         if (m_receivedStopNotification) {
           if (m_logger != null) {
-            m_logger.logMessage("TrainingSetMaker stopping.");
+            m_logger.logMessage("T[rainingSetMaker] "
+                +statusMessagePrefix() + " stopping.");
+            m_logger.statusMessage(statusMessagePrefix()
+                + "INTERRUPTED");
           }
           m_receivedStopNotification = false;
           break;
@@ -156,6 +159,10 @@ public class TrainingSetMaker
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }
 
