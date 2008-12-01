@@ -111,6 +111,13 @@ public class Saver
         }
 	
       } catch (Exception ex) {
+        if (m_logger != null) {
+          m_logger.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details)");
+          m_logger.logMessage("[Saver] " + statusMessagePrefix()
+              + " problem saving. " 
+              + ex.getMessage());
+        }
 	ex.printStackTrace();
       } finally {
         if (Thread.currentThread().isInterrupted()) {
