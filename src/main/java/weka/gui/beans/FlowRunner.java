@@ -116,6 +116,26 @@ public class FlowRunner {
       while (m_runningCount > 0) {
         Thread.sleep(200);
       }
+      
+      // now poll beans to see if there are any that are still busy
+      // (i.e. any multi-threaded ones that queue data instead of blocking)
+      while (true) {
+        boolean busy = false;
+        for (int i = 0; i < m_beans.size(); i++) {
+          BeanInstance temp = (BeanInstance)m_beans.elementAt(i);
+          if (temp.getBean() instanceof BeanCommon) {
+            if (((BeanCommon)temp.getBean()).isBusy()) {
+              busy = true;
+              break; // for
+            }            
+          }
+        }
+        if (busy) {
+          Thread.sleep(3000);
+        } else {
+          break; // while
+        }
+      }
     } catch (Exception ex) {
       if (m_log != null) {
         m_log.logMessage("[FlowRunner] Attempting to stop all flows...");
