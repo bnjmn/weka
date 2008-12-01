@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.clusterers.OPTICSTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class OPTICSTest 
   extends AbstractClustererTest {
@@ -42,7 +42,9 @@ public class OPTICSTest
 
   /** Creates a default OPTICS */
   public Clusterer getClusterer() {
-    return new OPTICS();
+    OPTICS ops = new OPTICS();
+    ops.setShowGUI(false);
+    return ops;
   }
 
   public static Test suite() {
