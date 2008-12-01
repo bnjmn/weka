@@ -488,11 +488,13 @@ public class Classifier
 	}
       } catch (Exception ex) {
         stop();
-        m_log.statusMessage(statusMessagePrefix()
-            + "ERROR (See log for details)");
-        m_log.logMessage("[Classifier] " + statusMessagePrefix()
-            + " problem during incremental processing. " 
-            + ex.getMessage());
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix()
+              + "ERROR (See log for details)");
+          m_log.logMessage("[Classifier] " + statusMessagePrefix()
+              + " problem during incremental processing. " 
+              + ex.getMessage());
+        }
 	ex.printStackTrace();
       }
       // Notify incremental classifier listeners of new batch
@@ -799,10 +801,12 @@ public class Classifier
     
     if (m_block) {
       //block(true);
-      m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
-          + "at this time.");
-      m_log.logMessage("[Classifier] " + statusMessagePrefix()
-          + " BUSY. Can't accept data at this time.");
+      if (m_log != null) {
+        m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
+            + "at this time.");
+        m_log.logMessage("[Classifier] " + statusMessagePrefix()
+            + " BUSY. Can't accept data at this time.");
+      }
       return;
     }
     
