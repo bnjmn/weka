@@ -329,10 +329,13 @@ public class Clusterer
 		    }
 		  }
 		} catch (Exception ex) {
-	            m_log.statusMessage(statusMessagePrefix()
-	                    + "ERROR (see log for details");
-	            m_log.logMessage("[Clusterer] " + statusMessagePrefix()
-	                    + " problem training clusterer. " + ex.getMessage());
+		  Clusterer.this.stop(); // stop processing
+		  if (m_log != null) {
+		    m_log.statusMessage(statusMessagePrefix()
+		        + "ERROR (See log for details");
+		    m_log.logMessage("[Clusterer] " + statusMessagePrefix()
+		        + " problem training clusterer. " + ex.getMessage());
+		  }
 		  ex.printStackTrace();
 		} finally {
 //		  m_visual.setText(oldText);
@@ -399,10 +402,13 @@ public class Clusterer
 	  m_state = IDLE;
 	}
       } catch (Exception ex) {
-        m_log.statusMessage(statusMessagePrefix()
-            + "ERROR (see log for details");
-        m_log.logMessage("[Clusterer] " + statusMessagePrefix()
-            + " problem during testing. " + ex.getMessage());
+        stop(); // stop any processing
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix()
+              + "ERROR (see log for details");
+          m_log.logMessage("[Clusterer] " + statusMessagePrefix()
+              + " problem during testing. " + ex.getMessage());
+        }
 	ex.printStackTrace();
       }
     }

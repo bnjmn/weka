@@ -195,15 +195,31 @@ public class TrainTestSplitMaker
 		notifyTestSetProduced(teste);
 	      } else {
 		if (m_logger != null) {
-		  m_logger.logMessage("Split has been canceled!");
-		  m_logger.statusMessage("OK");
+		  m_logger.logMessage("[TrainTestSplitMaker] "
+		      + statusMessagePrefix() + " Split has been canceled!");
+		  m_logger.statusMessage(statusMessagePrefix()
+		      + "INTERRUPTED");
 		}
 	      }
 	    } catch (Exception ex) {
+	      stop(); // stop all processing
+	      if (m_logger != null) {
+	          m_logger.statusMessage(statusMessagePrefix()
+	              + "ERROR (See log for details)");
+	          m_logger.logMessage("[TrainTestSplitMaker] " 
+	              + statusMessagePrefix()
+	              + " problem during split creation. " 
+	              + ex.getMessage());
+	      }
 	      ex.printStackTrace();
 	    } finally {
 	      if (isInterrupted()) {
-		System.err.println("Split maker interrupted");
+	        if (m_logger != null) {
+	          m_logger.logMessage("[TrainTestSplitMaker] "
+	              + statusMessagePrefix() + " Split has been canceled!");
+	          m_logger.statusMessage(statusMessagePrefix()
+	              + "INTERRUPTED");
+	        }
 	      }
 	      block(false);
 	    }
@@ -365,5 +381,9 @@ public class TrainTestSplitMaker
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }

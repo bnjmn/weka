@@ -277,10 +277,12 @@ public class Associator
 		  }
 		} catch (Exception ex) {
 		  Associator.this.stop();
-		  m_log.statusMessage(statusMessagePrefix()
-		      + "ERROR (See log for details)");
-		  m_log.logMessage("[Associator] " + statusMessagePrefix()
-		      + " problem training associator. " + ex.getMessage());
+		  if (m_log != null) {
+		    m_log.statusMessage(statusMessagePrefix()
+		        + "ERROR (See log for details)");
+		    m_log.logMessage("[Associator] " + statusMessagePrefix()
+		        + " problem training associator. " + ex.getMessage());
+		  }
 		  ex.printStackTrace();
 		} finally {
 //		  m_visual.setText(oldText);
