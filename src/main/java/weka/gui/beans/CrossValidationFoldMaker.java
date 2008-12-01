@@ -178,13 +178,15 @@ public class CrossValidationFoldMaker
 	    } catch (Exception ex) {
 	      // stop all processing
 	      CrossValidationFoldMaker.this.stop();
-	      m_logger.logMessage("[" + getCustomName() 
-	          + "] problem during fold creation. "
-	          + ex.getMessage());
-	      m_logger.statusMessage(getCustomName() 
-	          + "$" + CrossValidationFoldMaker.this.hashCode()
-	          + "|"
-	          + "ERROR (See log for details).");
+	      if (m_logger != null) {
+	        m_logger.logMessage("[" + getCustomName() 
+	            + "] problem during fold creation. "
+	            + ex.getMessage());
+	        m_logger.statusMessage(getCustomName() 
+	            + "$" + CrossValidationFoldMaker.this.hashCode()
+	            + "|"
+	            + "ERROR (See log for details).");
+	      }
 	      ex.printStackTrace();
 	    } finally {
 	      if (isInterrupted()) {

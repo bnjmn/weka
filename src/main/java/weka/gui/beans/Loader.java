@@ -158,11 +158,23 @@ public class Loader
 	    structure = m_Loader.getStructure();
 	    notifyStructureAvailable(structure);
 	  } catch (IOException e) {
+	    if (m_log != null) {
+	      m_log.statusMessage(statusMessagePrefix()
+	          +"ERROR (See log for details");
+	      m_log.logMessage("[Loader] " + statusMessagePrefix()
+	          + " " + e.getMessage());
+	    }
 	    e.printStackTrace();
 	  }
 	  try {
 	    nextInstance = m_Loader.getNextInstance(structure);
 	  } catch (IOException e) {
+	    if (m_log != null) {
+	      m_log.statusMessage(statusMessagePrefix()
+	          +"ERROR (See log for details");
+	      m_log.logMessage("[Loader] " + statusMessagePrefix()
+	          + " " + e.getMessage());
+	    }
 	    e.printStackTrace();
 	  }
 	  int z = 0;
@@ -213,6 +225,12 @@ public class Loader
 	  notifyDataSetLoaded(new DataSetEvent(m_DP, m_dataSet));
 	}
       } catch (Exception ex) {
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix()
+              +"ERROR (See log for details");
+          m_log.logMessage("[Loader] " + statusMessagePrefix()
+              + " " + ex.getMessage());
+        }
 	ex.printStackTrace();
       } finally {
         if (Thread.currentThread().isInterrupted()) {
@@ -228,7 +246,7 @@ public class Loader
         m_state = IDLE;
         m_stopped = false;
         if (m_log != null) {
-          m_log.statusMessage(statusMessagePrefix() + "Done.");
+          m_log.statusMessage(statusMessagePrefix() + "Finished.");
         }
         block(false);
       }

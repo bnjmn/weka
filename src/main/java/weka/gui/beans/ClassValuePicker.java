@@ -150,7 +150,11 @@ public class ClassValuePicker
     if (dataSet.classIndex() < 0) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("No class attribute defined in data set (ClassValuePicker)");
+	  logMessage("[ClassValuePicker] " 
+	      + statusMessagePrefix() 
+	      + " No class attribute defined in data set.");
+	m_logger.statusMessage(statusMessagePrefix()
+	    + "WARNING: No class attribute defined in data set.");
       }
       return dataSet;
     }
@@ -158,7 +162,11 @@ public class ClassValuePicker
     if (dataSet.classAttribute().isNumeric()) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("Class attribute must be nominal (ClassValuePicker)");
+	  logMessage("ClassValuePicker] "
+	      + statusMessagePrefix()
+	      + " Class attribute must be nominal (ClassValuePicker)");
+	m_logger.statusMessage(statusMessagePrefix()
+	    + "WARNING: Class attribute must be nominal.");
       }
       return dataSet;
     }
@@ -177,7 +185,11 @@ public class ClassValuePicker
       } catch (Exception ex) {
 	if (m_logger != null) {
 	  m_logger.
-	    logMessage("Unable to swap class attibute values (ClassValuePicker)");
+	    logMessage("[ClassValuePicker] "
+	        +statusMessagePrefix()
+	        + " Unable to swap class attibute values.");
+	  m_logger.statusMessage(statusMessagePrefix()
+	      + "ERROR (See log for details)");
 	}
       }
     }
@@ -353,5 +365,9 @@ public class ClassValuePicker
       }
     }
     return true;
+  }
+  
+  private String statusMessagePrefix() {
+    return getCustomName() + "$" + hashCode() + "|";
   }
 }

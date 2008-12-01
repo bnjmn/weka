@@ -107,7 +107,7 @@ public class ClustererPerformanceEvaluator
 	m_evaluateThread = new Thread() {
 	    public void run() {
               boolean numericClass = false;  
-	      final String oldText = m_visual.getText();
+//	      final String oldText = m_visual.getText();
 	      try {
 		if (ce.getSetNumber() == 1 /*|| 
 		    ce.getClusterer() != m_clusterer */) {
@@ -117,7 +117,7 @@ public class ClustererPerformanceEvaluator
 		}
 		
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
-		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
+//		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
 		    m_logger.statusMessage(statusMessagePrefix()
 					   +"Evaluating ("+ce.getSetNumber()
@@ -159,14 +159,16 @@ public class ClustererPerformanceEvaluator
 	      } catch (Exception ex) {
 	        // stop all processing
 	        ClustererPerformanceEvaluator.this.stop();
-	        m_logger.statusMessage(statusMessagePrefix()
-	            + "ERROR (see log for details");
-	        m_logger.logMessage("[ClustererPerformanceEvaluator] " 
-	            + statusMessagePrefix()
-	            + " problem while evaluating clusterer. " + ex.getMessage());
+	        if (m_logger != null) {
+	          m_logger.statusMessage(statusMessagePrefix()
+	              + "ERROR (see log for details");
+	          m_logger.logMessage("[ClustererPerformanceEvaluator] " 
+	              + statusMessagePrefix()
+	              + " problem while evaluating clusterer. " + ex.getMessage());
+	        }
 		ex.printStackTrace();
 	      } finally {
-		m_visual.setText(oldText);
+//		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
 		if (isInterrupted()) {
