@@ -115,6 +115,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees.DecisionStump,\
  weka.classifiers.trees.Id3,\
  weka.classifiers.trees.J48,\
+ weka.classifiers.trees.LADTree,\
  weka.classifiers.trees.LMT,\
  weka.classifiers.trees.M5P,\
  weka.classifiers.trees.NBTree,\
