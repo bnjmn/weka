@@ -22,6 +22,8 @@
 
 package weka.gui.beans;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Vector;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +54,19 @@ public class FlowRunner {
   protected int m_runningCount = 0;
 
   protected transient Logger m_log = null;
+  
+  protected static class SimpleLogger implements weka.gui.Logger {
+    SimpleDateFormat m_DateFormat = 
+      new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    
+    public void logMessage(String lm) {
+      System.out.println(m_DateFormat.format(new Date()) + ": " + lm);
+    }
+    
+    public void statusMessage(String lm) {
+      System.out.println(m_DateFormat.format(new Date()) + ": " + lm);  
+    }
+  }
 
   /**
    * Constructor
@@ -233,6 +248,16 @@ public class FlowRunner {
       throw new Exception("Don't seem to have any beans I can execute.");
     }
     
+    // register the log (if set) with the beans
+    if (m_log != null) {
+      for (int i = 0; i < m_beans.size(); i++) {
+        BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
+        if (tempB.getBean() instanceof BeanCommon) {
+          ((BeanCommon)tempB.getBean()).setLog(m_log);
+        }
+      }
+    }
+    
     int numFlows = 1;
 
     // look for a Startable bean...
@@ -260,18 +285,21 @@ public class FlowRunner {
    * @param args command line arguments
    */
   public static void main(String[] args) {
-    
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
     if (args.length != 1) {
       System.err.println("Usage:\n\nFlowRunner <serialized kf file>");
     } else {
       try {
         FlowRunner fr = new FlowRunner();
+        FlowRunner.SimpleLogger sl = new FlowRunner.SimpleLogger();
         String fileName = args[0];
 
+        fr.setLog(sl);
         fr.load(fileName);
         fr.run();
         fr.waitUntilFinished();
         System.out.println("Finished all flows.");
+        System.exit(1);
       } catch (Exception ex) {
         ex.printStackTrace();
         System.err.println(ex.getMessage());
