@@ -1,23 +1,22 @@
 % Version: $Revision$
 
-The new menu-driven GUI in WEKA (class \texttt{weka.gui.Main}) succeeds the old GUI Chooser (class \texttt{weka.gui.GUIChooser}). Its MDI (``multiple document interface'') appearance makes it easier to keep track of all the open windows. If one prefers an SDI (``single document interface'') driven layout, one can invoke this with option \texttt{-gui sdi} on the commandline.
+The Weka GUI Chooser (class \texttt{weka.gui.GUIChooser}) provides a
+starting point for launching Weka's main GUI applications and
+supporting tools. If one prefers a MDI (``multiple document
+interface'') appearance, then this is provided by an alternative
+launcher called ``Main'' (class \texttt{weka.gui.Main}).
+
+%%The new menu-driven GUI in WEKA (class \texttt{weka.gui.Main}) succeeds the old GUI Chooser (class \texttt{weka.gui.GUIChooser}). Its MDI (``multiple document interface'') appearance makes it easier to keep track of all the open windows. If one prefers an SDI (``single document interface'') driven layout, one can invoke this with option \texttt{-gui sdi} on the commandline.
+
+The GUI Chooser consists of four buttons---one for each of the four
+major Weka applications---and four menus. 
 
 \begin{center}
-	\epsfig{file=images/launching/main.eps,height=3cm}
+	\includegraphics[angle=270,width=5cm]{images/launching/GUIChooser.eps}
 \end{center}
 
-The menu consists of six sections:
+The buttons can be used to start the following applications:
 
-\begin{enumerate}
-	\item \textbf{Program} \\
-		\epsfig{file=images/launching/main_program.eps,height=1.2cm}
-		\begin{itemize}
-			\item \textbf{LogWindow} Opens a log window that captures all that is printed to \textit{stdout} or \textit{stderr}. Useful for environments like MS Windows, where WEKA is normally not started from a terminal.
-			\item \textbf{Exit} Closes WEKA.
-		\end{itemize}
-		
-	\item \textbf{Applications} Lists the main applications within WEKA. \\
-		\epsfig{file=images/launching/main_applications.eps,height=1.8cm}
 		\begin{itemize}
 			\item \textbf{Explorer} An environment for exploring data with
 WEKA (the rest of this documentation deals with this application in more detail).
@@ -30,16 +29,30 @@ interface. One advantage is that it supports incremental learning.
 that allows direct execution of WEKA commands for operating systems
 that do not provide their own command line interface.
 		\end{itemize}
-		
+
+
+
+
+The menu consists of four sections:
+
+\begin{enumerate}
+	\item \textbf{Program} \\
+	        \includegraphics[angle=270,width=2cm]{images/launching/guic_program.eps}
+		\begin{itemize}
+			\item \textbf{LogWindow} Opens a log window that captures all that is printed to \textit{stdout} or \textit{stderr}. Useful for environments like MS Windows, where WEKA is normally not started from a terminal.
+			\item \textbf{Exit} Closes WEKA.
+		\end{itemize}
+				
 	\item \textbf{Tools} Other useful applications. \\
-		\epsfig{file=images/launching/main_tools.eps,height=1.2cm}
+                \includegraphics[angle=270,width=2cm]{images/launching/guic_tools.eps}
 		\begin{itemize}
 			\item \textbf{ArffViewer} An MDI application for viewing ARFF files in spreadsheet format.
-			\item \textbf{SqlViewer} represents an SQL worksheet, for querying databases via JDBC.
+			\item \textbf{SqlViewer} Represents an SQL worksheet, for querying databases via JDBC.
+                        \item \textbf{Bayes net editor} An application for editing, visualizing and learning Bayes nets.
 		\end{itemize}
 		
 	\item \textbf{Visualization} Ways of visualizing data with WEKA. \\
-		\epsfig{file=images/launching/main_visualization.eps,height=2.1cm}
+		\includegraphics[angle=270,width=2cm]{images/launching/guic_visualization.eps}
 		\begin{itemize}
 			\item \textbf{Plot} For plotting a 2D plot of a dataset.
 			\item \textbf{ROC} Displays a previously saved ROC curve.
@@ -48,21 +61,14 @@ that do not provide their own command line interface.
 			\item \textbf{BoundaryVisualizer} Allows the visualization of classifier decision boundaries in two dimensions.
 		\end{itemize}
 		
-	\item \textbf{Windows} All open windows are listed here. \\
-		\epsfig{file=images/launching/main_windows.eps,height=2.4cm}
-		\begin{itemize}
-			\item \textbf{Minimize} Minimizes all current windows.
-			\item \textbf{Restore} Restores all minimized windows again.
-		\end{itemize}
 		
 	\item \textbf{Help} Online resources for WEKA can be found here. \\
-		\epsfig{file=images/launching/main_help.eps,height=2.1cm}
+	        \includegraphics[angle=270,width=2cm]{images/launching/guic_help.eps}
 		\begin{itemize}
 			\item \textbf{Weka homepage} Opens a browser window with WEKA's homepage.
 			\item \textbf{HOWTOs, code snippets, etc.} The general WekaWiki \cite{wekawiki}, containing lots of examples and HOWTOs around the development and use of WEKA.
 			\item \textbf{Weka on Sourceforge} WEKA's project homepage on Sourceforge.net.
 			\item \textbf{SystemInfo} Lists some internals about the Java/WEKA environment, e.g., the \texttt{CLASSPATH}.
-			\item \textbf{About} The infamous ``About'' box.
 		\end{itemize}
 \end{enumerate}
 
