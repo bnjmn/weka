@@ -77,7 +77,7 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
- * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC&gt;
+ * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|KAP&gt;
  *  Determines the parameter used for evaluation:
  *  CC = Correlation coefficient
  *  RMSE = Root mean squared error
@@ -86,6 +86,7 @@ import java.util.Vector;
  *  RAE = Root absolute error
  *  COMB = Combined = (1-abs(CC)) + RRSE + RAE
  *  ACC = Accuracy
+ *  KAP = Kappa
  *  (default: CC)</pre>
  * 
  * <pre> -y-property &lt;option&gt;
@@ -291,7 +292,7 @@ import java.util.Vector;
  * @author  Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author  Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  * @see     PLSFilter
  * @see     LinearRegression
  * @see	    NumericCleaner
@@ -352,7 +353,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -393,7 +394,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -862,7 +863,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -900,6 +901,9 @@ public class GridSearch
     /** the Accuracy */
     protected double m_ACC;
     
+    /** the kappa value */
+    protected double m_Kappa;
+    
     /**
      * initializes the performance container
      * 
@@ -929,6 +933,12 @@ public class GridSearch
       }
       catch (Exception e) {
 	m_ACC = Double.NaN;
+      }
+      try {
+	m_Kappa = evaluation.kappa();
+      }
+      catch (Exception e) {
+	m_Kappa = Double.NaN;
       }
     }
     
@@ -964,6 +974,9 @@ public class GridSearch
 	  break;
 	case EVALUATION_ACC:
 	  result = m_ACC;
+	  break;
+	case EVALUATION_KAPPA:
+	  result = m_Kappa;
 	  break;
 	default:
 	  throw new IllegalArgumentException("Evaluation type '" + evaluation + "' not supported!");
@@ -1040,7 +1053,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1105,11 +1118,12 @@ public class GridSearch
       else
 	result = 0;
 	
-      // only correlation coefficient and accuracy obey to this order, for the
+      // only correlation coefficient/accuracy/kappa obey to this order, for the
       // errors (and the combination of all three), the smaller the number the
       // better -> hence invert them
       if (    (getEvaluation() != EVALUATION_CC) 
-           && (getEvaluation() != EVALUATION_ACC) )
+           && (getEvaluation() != EVALUATION_ACC) 
+           && (getEvaluation() != EVALUATION_KAPPA) )
 	result = -result;
 	
       return result;
@@ -1134,7 +1148,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1356,7 +1370,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1430,7 +1444,7 @@ public class GridSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1451,6 +1465,8 @@ public class GridSearch
   public static final int EVALUATION_COMBINED = 5;
   /** evaluation via: Accuracy */
   public static final int EVALUATION_ACC = 6;
+  /** evaluation via: kappa statistic */
+  public static final int EVALUATION_KAPPA = 7;
   /** evaluation */
   public static final Tag[] TAGS_EVALUATION = {
     new Tag(EVALUATION_CC, "CC", "Correlation coefficient"),
@@ -1459,7 +1475,8 @@ public class GridSearch
     new Tag(EVALUATION_MAE, "MAE", "Mean absolute error"),
     new Tag(EVALUATION_RAE, "RAE", "Root absolute error"),
     new Tag(EVALUATION_COMBINED, "COMB", "Combined = (1-abs(CC)) + RRSE + RAE"),
-    new Tag(EVALUATION_ACC, "ACC", "Accuracy")
+    new Tag(EVALUATION_ACC, "ACC", "Accuracy"),
+    new Tag(EVALUATION_KAPPA, "KAP", "Kappa")
   };
   
   /** row-wise grid traversal */
@@ -1901,7 +1918,7 @@ public class GridSearch
    <!-- options-start -->
    * Valid options are: <p/>
    * 
-   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC&gt;
+   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|KAP&gt;
    *  Determines the parameter used for evaluation:
    *  CC = Correlation coefficient
    *  RMSE = Root mean squared error
@@ -1910,6 +1927,7 @@ public class GridSearch
    *  RAE = Root absolute error
    *  COMB = Combined = (1-abs(CC)) + RRSE + RAE
    *  ACC = Accuracy
+   *  KAP = Kappa
    *  (default: CC)</pre>
    * 
    * <pre> -y-property &lt;option&gt;
@@ -2208,7 +2226,7 @@ public class GridSearch
       throw new IllegalArgumentException(
 	  "Classifier needs to handle numeric class for chosen type of evaluation!");
 
-    if ((m_Evaluation == EVALUATION_ACC) && !nominal)
+    if (((m_Evaluation == EVALUATION_ACC) || (m_Evaluation == EVALUATION_KAPPA)) && !nominal)
       throw new IllegalArgumentException(
 	  "Classifier needs to handle nominal class for chosen type of evaluation!");
     
@@ -3473,7 +3491,7 @@ public class GridSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
