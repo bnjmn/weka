@@ -38,7 +38,7 @@ import javax.swing.JComponent;
  * Class that manages a set of beans.
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version  $Revision: 1.8 $
+ * @version  $Revision$
  * @since 1.0
  */
 public class BeanInstance
@@ -151,7 +151,7 @@ public class BeanInstance
    * the labels
    */
   public static void paintLabels(Graphics gx) {
-    gx.setFont(new Font("Monospaced", Font.PLAIN, 10));
+    gx.setFont(new Font(null, Font.PLAIN, 9));
     FontMetrics fm = gx.getFontMetrics();
     int hf = fm.getAscent();
     for (int i = 0; i < COMPONENTS.size(); i++) {
@@ -257,12 +257,12 @@ public class BeanInstance
 
 
 	// adjust bounding box stuff
-	int hf = 0;
+//	int hf = 0;
 	if (gx == null) {
 	  gx = ((JComponent)t.getBean()).getGraphics();
-	  gx.setFont(new Font("Monospaced", Font.PLAIN, 10));
+	  gx.setFont(new Font(null, Font.PLAIN, 9));
 	  fm = gx.getFontMetrics();
-	  hf = fm.getAscent();
+//	  hf = fm.getAscent();
 	}
 	String label = "";
 	if (t.getBean() instanceof Visible) {
