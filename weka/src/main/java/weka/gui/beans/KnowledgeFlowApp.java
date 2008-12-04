@@ -562,7 +562,7 @@ public class KnowledgeFlowApp
     // Grab a fontmetrics object
     JWindow temp = new JWindow();
     temp.setVisible(true);
-    temp.getGraphics().setFont(new Font("Monospaced", Font.PLAIN, 10));
+    temp.getGraphics().setFont(new Font(null, Font.PLAIN, 9));
     m_fontM = temp.getGraphics().getFontMetrics();
     temp.setVisible(false);
 
@@ -1302,7 +1302,7 @@ public class KnowledgeFlowApp
     JToggleButton tempButton;
     final JPanel tempP = new JPanel();
     JLabel tempL = new JLabel();
-    tempL.setFont(new Font("Monospaced", Font.PLAIN, 10));
+    tempL.setFont(new Font(null, Font.PLAIN, 9));
 
     String labelName = (wekawrapper == true) 
       ? algName 
@@ -1458,7 +1458,7 @@ public class KnowledgeFlowApp
     jp.setLayout(new GridLayout(v.size(), 1));
     for (int i = 0; i < v.size(); i++) {
       JLabel temp = new JLabel();
-      temp.setFont(new Font("Monospaced", Font.PLAIN, 10));
+      temp.setFont(new Font(null, Font.PLAIN, 9));
       temp.setText(" "+((String)v.elementAt(i))+" ");
       temp.setHorizontalAlignment(JLabel.CENTER);
       jp.add(temp);
