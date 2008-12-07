@@ -299,7 +299,8 @@ weka.filters.UnsupervisedFilter=\
  weka.filters.unsupervised.instance.RemoveWithValues,\
  weka.filters.unsupervised.instance.Resample,\
  weka.filters.unsupervised.instance.ReservoirSample,\
- weka.filters.unsupervised.instance.SparseToNonSparse
+ weka.filters.unsupervised.instance.SparseToNonSparse,\
+ weka.filters.unsupervised.instance.SubsetByExpression
  
 # Lists the RegOptimizers I want to choose from
 weka.classifiers.functions.supportVector.RegOptimizer=\
