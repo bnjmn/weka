@@ -288,6 +288,7 @@ weka.filters.UnsupervisedFilter=\
  weka.filters.unsupervised.attribute.SwapValues,\
  weka.filters.unsupervised.attribute.TimeSeriesDelta,\
  weka.filters.unsupervised.attribute.TimeSeriesTranslate,\
+ weka.filters.unsupervised.attribute.Wavelet,\
  weka.filters.unsupervised.instance.NonSparseToSparse,\
  weka.filters.unsupervised.instance.Normalize,\
  weka.filters.unsupervised.instance.Randomize,\
