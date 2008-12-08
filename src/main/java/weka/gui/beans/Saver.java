@@ -131,6 +131,7 @@ public class Saver
         }
         block(false);
 	m_visual.setStatic();
+	m_ioThread = null;
       }
     }
   }
