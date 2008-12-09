@@ -48,6 +48,9 @@ import weka.core.xml.XMLSerialization;
 import weka.estimators.Estimator;
 import weka.estimators.KernelEstimator;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -59,6 +62,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Random;
@@ -178,7 +182,7 @@ import java.util.zip.GZIPOutputStream;
  *
  * @author   Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author   Len Trigg (trigg@cs.waikato.ac.nz)
- * @version  $Revision: 1.91 $
+ * @version  $Revision$
  */
 public class Evaluation
   implements Summarizable, RevisionHandler {
@@ -750,7 +754,13 @@ public class Evaluation
 
     // help requested?
     if (Utils.getFlag("h", options) || Utils.getFlag("help", options)) {
-      throw new Exception("\nHelp requested." + makeOptionString(classifier));
+      
+      // global info requested as well?
+      boolean globalInfo = Utils.getFlag("synopsis", options) ||
+        Utils.getFlag("info", options);
+      
+      throw new Exception("\nHelp requested." 
+          + makeOptionString(classifier, globalInfo));
     }
     
     try {
@@ -995,7 +1005,7 @@ public class Evaluation
       Utils.checkForRemainingOptions(options);
     } catch (Exception e) {
       throw new Exception("\nWeka exception: " + e.getMessage()
-	  + makeOptionString(classifier));
+	  + makeOptionString(classifier, false));
     }
 
     // Setup up evaluation objects
@@ -3236,14 +3246,22 @@ public class Evaluation
    * Make up the help string giving all the command line options
    *
    * @param classifier the classifier to include options for
+   * @param globalInfo include the global information string
+   * for the classifier (if available).
    * @return a string detailing the valid command line options
    */
-  protected static String makeOptionString(Classifier classifier) {
+  protected static String makeOptionString(Classifier classifier, 
+                                           boolean globalInfo) {
 
     StringBuffer optionsText = new StringBuffer("");
 
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
+    optionsText.append("-h or -help\n");
+    optionsText.append("\tOutput help information.\n");
+    optionsText.append("-synopsis or -info\n");
+    optionsText.append("\tOutput synopsis for classifier (use in conjunction "
+        + " with -h)\n");
     optionsText.append("-t <name of training file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
@@ -3323,7 +3341,45 @@ public class Evaluation
 	optionsText.append(option.description() + "\n");
       }
     }
+    
+    // Get global information (if available)
+    if (globalInfo) {
+      try {
+        String gi = getGlobalInfo(classifier);
+        optionsText.append(gi);
+      } catch (Exception ex) {
+        // quietly ignore
+      }
+    }
     return optionsText.toString();
+  }
+  
+  /**
+   * Return the global info (if it exists) for the supplied classifier
+   * 
+   * @param classifier the classifier to get the global info for
+   * @return the global info (synopsis) for the classifier
+   * @throws Exception if there is a problem reflecting on the classifier
+   */
+  protected static String getGlobalInfo(Classifier classifier) throws Exception {
+    BeanInfo bi = Introspector.getBeanInfo(classifier.getClass());
+    MethodDescriptor[] methods;
+    methods = bi.getMethodDescriptors();
+    Object[] args = {};
+    String result = "\nSynopsis for " + classifier.getClass().getName()
+      + ":\n\n";
+    
+    for (int i = 0; i < methods.length; i++) {
+      String name = methods[i].getDisplayName();
+      Method meth = methods[i].getMethod();
+      if (name.equals("globalInfo")) {
+        String globalInfo = (String)(meth.invoke(classifier, args));
+        result += globalInfo;
+        break;
+      }
+    }
+    
+    return result;
   }
 
   /**
@@ -3645,6 +3701,6 @@ public class Evaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.91 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
