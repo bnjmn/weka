@@ -35,9 +35,13 @@ import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
@@ -83,7 +87,7 @@ import java.util.Vector;
  * <p/>
  *
  * @author   Mark Hall (mhall@cs.waikato.ac.nz)
- * @version  $Revision: 1.44 $
+ * @version  $Revision$
  * @see	     weka.core.Drawable
  */
 public class ClusterEvaluation 
@@ -528,11 +532,17 @@ public class ClusterEvaluation
     DataSource source = null;
     Instance inst;
 
+    if (Utils.getFlag('h', options) || Utils.getFlag("help", options)) {
+      
+      // global info requested as well?
+      boolean globalInfo = Utils.getFlag("synopsis", options) ||
+        Utils.getFlag("info", options);
+      
+      throw  new Exception("Help requested." 
+          + makeOptionString(clusterer, globalInfo));
+    }
+    
     try {
-      if (Utils.getFlag('h', options)) {
-        throw  new Exception("Help requested.");
-      }
-
       // Get basic options (options the same for all clusterers
       //printClusterAssignments = Utils.getFlag('p', options);
       objectInputFileName = Utils.getOption('l', options);
@@ -589,7 +599,7 @@ public class ClusterEvaluation
     }
     catch (Exception e) {
       throw  new Exception('\n' + e.getMessage() 
-			   + makeOptionString(clusterer));
+			   + makeOptionString(clusterer, false));
     }
 
     try {
@@ -1084,10 +1094,16 @@ public class ClusterEvaluation
    * @param clusterer the clusterer to include options for
    * @return a string detailing the valid command line options
    */
-  private static String makeOptionString (Clusterer clusterer) {
+  private static String makeOptionString (Clusterer clusterer,
+                                          boolean globalInfo) {
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
+    optionsText.append("-h or -help\n");
+    optionsText.append("\tOutput help information.\n");
+    optionsText.append("-synopsis or -info\n");
+    optionsText.append("\tOutput synopsis for clusterer (use in conjunction "
+        + " with -h)\n");
     optionsText.append("-t <name of training file>\n");
     optionsText.append("\tSets training file.\n");
     optionsText.append("-T <name of test file>\n");
@@ -1128,8 +1144,46 @@ public class ClusterEvaluation
 	optionsText.append(option.description() + "\n");
       }
     }
+    
+    // Get global information (if available)
+    if (globalInfo) {
+      try {
+        String gi = getGlobalInfo(clusterer);
+        optionsText.append(gi);
+      } catch (Exception ex) {
+        // quietly ignore
+      }
+    }
 
     return  optionsText.toString();
+  }
+  
+  /**
+   * Return the global info (if it exists) for the supplied clusterer
+   * 
+   * @param clusterer the clusterer to get the global info for
+   * @return the global info (synopsis) for the clusterer
+   * @throws Exception if there is a problem reflecting on the clusterer
+   */
+  protected static String getGlobalInfo(Clusterer clusterer) throws Exception {
+    BeanInfo bi = Introspector.getBeanInfo(clusterer.getClass());
+    MethodDescriptor[] methods;
+    methods = bi.getMethodDescriptors();
+    Object[] args = {};
+    String result = "\nSynopsis for " + clusterer.getClass().getName()
+      + ":\n\n";
+    
+    for (int i = 0; i < methods.length; i++) {
+      String name = methods[i].getDisplayName();
+      Method meth = methods[i].getMethod();
+      if (name.equals("globalInfo")) {
+        String globalInfo = (String)(meth.invoke(clusterer, args));
+        result += globalInfo;
+        break;
+      }
+    }
+    
+    return result;
   }
 
   /**
@@ -1182,7 +1236,7 @@ public class ClusterEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.44 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
