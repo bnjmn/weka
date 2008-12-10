@@ -17,6 +17,7 @@
 /*
  *    ScatterSearchV1.java
  *    Copyright (C) 2008 Adrian Pino
+ *    Copyright (C) 2008 University of Waikato, Hamilton, NZ
  *
  */
 
