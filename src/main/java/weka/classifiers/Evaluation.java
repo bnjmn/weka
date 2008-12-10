@@ -968,6 +968,7 @@ public class Evaluation
       }
       if (attributeRangeString.length() != 0) {
 	printClassifications = true;
+	noOutput = true;
 	if (!attributeRangeString.equals("0")) 
 	  attributesToOutput = new Range(attributeRangeString);
       }
@@ -1191,31 +1192,32 @@ public class Evaluation
       if (printMargins) {
 	return trainingEvaluation.toCumulativeMarginDistributionString();
       } else {
-	text.append("\nTime taken to build model: "
-	    + Utils.doubleToString(trainTimeElapsed / 1000.0,2)
-	    + " seconds");
-	
-	if (splitPercentage > 0)
-	  text.append("\nTime taken to test model on training split: ");
-	else
-	  text.append("\nTime taken to test model on training data: ");
-	text.append(Utils.doubleToString(testTimeElapsed / 1000.0,2) + " seconds");
+        if (!printClassifications) {
+          text.append("\nTime taken to build model: "
+              + Utils.doubleToString(trainTimeElapsed / 1000.0,2)
+              + " seconds");
 
-	if (splitPercentage > 0)
-	  text.append(trainingEvaluation.toSummaryString("\n\n=== Error on training"
-	      + " split ===\n", printComplexityStatistics));
-	else
-	  text.append(trainingEvaluation.toSummaryString("\n\n=== Error on training"
-	      + " data ===\n", printComplexityStatistics));
-	
-	if (template.classAttribute().isNominal()) {
-	  if (classStatistics) {
-	    text.append("\n\n" + trainingEvaluation.toClassDetailsString());
-	  }
-          if (!noCrossValidation)
-            text.append("\n\n" + trainingEvaluation.toMatrixString());
-	}
+          if (splitPercentage > 0)
+            text.append("\nTime taken to test model on training split: ");
+          else
+            text.append("\nTime taken to test model on training data: ");
+          text.append(Utils.doubleToString(testTimeElapsed / 1000.0,2) + " seconds");
 
+          if (splitPercentage > 0)
+            text.append(trainingEvaluation.toSummaryString("\n\n=== Error on training"
+                + " split ===\n", printComplexityStatistics));
+          else
+            text.append(trainingEvaluation.toSummaryString("\n\n=== Error on training"
+                + " data ===\n", printComplexityStatistics));
+
+          if (template.classAttribute().isNominal()) {
+            if (classStatistics) {
+              text.append("\n\n" + trainingEvaluation.toClassDetailsString());
+            }
+            if (!noCrossValidation)
+              text.append("\n\n" + trainingEvaluation.toMatrixString());
+          }
+        }
       }
     }
 
@@ -1231,14 +1233,19 @@ public class Evaluation
             (Classifier)classifier, testInst);
       }
 
-      if (splitPercentage > 0)
-	text.append("\n\n" + testingEvaluation.
-	    toSummaryString("=== Error on test split ===\n",
-		printComplexityStatistics));
-      else
-	text.append("\n\n" + testingEvaluation.
-	    toSummaryString("=== Error on test data ===\n",
-		printComplexityStatistics));
+      if (splitPercentage > 0) {
+        if (!printClassifications) {
+          text.append("\n\n" + testingEvaluation.
+              toSummaryString("=== Error on test split ===\n",
+                  printComplexityStatistics));
+        }
+      } else {
+        if (!printClassifications) {
+          text.append("\n\n" + testingEvaluation.
+              toSummaryString("=== Error on test data ===\n",
+                  printComplexityStatistics));
+        }
+      }
 
     } else if (trainSource != null) {
       if (!noCrossValidation) {
@@ -1267,7 +1274,7 @@ public class Evaluation
                                                trainSource.getDataSet(actualClassIndex),
                                                folds, random, predsBuff, attributesToOutput, 
                                                new Boolean(printDistribution));
-          if (template.classAttribute().isNumeric()) {
+/*          if (template.classAttribute().isNumeric()) {
             text.append("\n\n\n" + testingEvaluation.
                         toSummaryString("=== Cross-validation ===\n",
                                         printComplexityStatistics));
@@ -1276,7 +1283,7 @@ public class Evaluation
                         toSummaryString("=== Stratified " + 
                                         "cross-validation ===\n",
                                         printComplexityStatistics));
-          }
+          } */
         }
       }
     }
@@ -1284,7 +1291,7 @@ public class Evaluation
       if (classStatistics && !noCrossValidation) {
 	text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
-      if (!noCrossValidation)
+      if (!noCrossValidation && !printClassifications)
         text.append("\n\n" + testingEvaluation.toMatrixString());
       
     }
