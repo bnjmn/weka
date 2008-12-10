@@ -280,7 +280,8 @@ weka.attributeSelection.ASSearch=\
  weka.attributeSelection.RaceSearch,\
  weka.attributeSelection.RandomSearch,\
  weka.attributeSelection.Ranker,\
- weka.attributeSelection.RankSearch
+ weka.attributeSelection.RankSearch,\
+ weka.attributeSelection.ScatterSearchV1
  
 # Lists the Associators I want to choose from
 weka.associations.Associator=\
