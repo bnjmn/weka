@@ -209,7 +209,7 @@
     <jar jarfile="${dist}/weka.jar" 
       basedir="${build}/classes">
      <manifest>
-       <attribute name="Main-Class" value="weka.gui.Main"/>
+       <attribute name="Main-Class" value="weka.gui.GUIChooser"/>
      </manifest>
     </jar>
   </target>
@@ -284,15 +284,19 @@
        <fileset dir="${dist}"/>
     </copy>
     <copy todir="weka-${release}/weka-${release}/changelogs">
-       <fileset dir="wekadocs/changelogs"/>
+       <fileset dir="../wekadocs/changelogs"/>
     </copy>
     <copy todir="weka-${release}/weka-${release}/data">
-       <fileset dir="wekadocs/data"/>
+       <fileset dir="../wekadocs/data"/>
     </copy>
     <copy todir="weka-${release}/weka-${release}">
-       <fileset dir="wekadocs">
+      <fileset dir="../wekadocs/manual">
+        <include name="*.pdf"/>
+      </fileset>
+    </copy>
+    <copy todir="weka-${release}/weka-${release}">
+       <fileset dir="../wekadocs">
          <include name="README*"/>
-	 <include name="*.pdf"/>
 	 <include name="COPYING"/>
          <include name="documentation.*"/>
          <include name="weka.gif"/>
@@ -391,7 +395,7 @@
     description="Create a changelog file for a release of Weka. Run with -Dsvn_username=username -Dsvn_password=password -Drelease=&lt;number of release (eg. 3-4-1)&gt;, -Ddate_range=&lt;date range for changes (eg. {2008-07-16}:{2008-09-29})&gt;, -Dweka_branch=&lt;branch name (e.g. trunk, branches/book2ndEd-branch)&gt;.">
     <property name="repository.URL" value="https://svn.scms.waikato.ac.nz/svn/weka"/>
     <java classname="org.tmatesoft.svn.cli.SVN" fork="true"
-          output="wekadocs/changelogs/CHANGELOG-${release}">
+          output="../wekadocs/changelogs/CHANGELOG-${release}">
       <arg value="log"/>
       <arg value="--username"/>
       <arg value="${svn_username}"/>
@@ -400,7 +404,7 @@
       <arg value="-r"/>
       <arg value="${date_range}"/>
       <arg value="-v"/>
-      <arg value="${repository.URL}/${weka_branch}/src/main/java/weka"/>
+      <arg value="${repository.URL}/${weka_branch}/weka/src/main/java/weka"/>
       <classpath>
         <pathelement location="${ant.home}/lib/svnkit.jar" />
         <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
