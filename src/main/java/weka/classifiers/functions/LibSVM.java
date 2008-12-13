@@ -38,6 +38,7 @@ import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -153,7 +154,7 @@ import java.util.Vector;
  *
  * @author  Yasser EL-Manzalawy
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  * @see     weka.core.converters.LibSVMLoader
  * @see     weka.core.converters.LibSVMSaver
  */
@@ -184,9 +185,15 @@ public class LibSVM
   
   /** for normalizing the data */
   protected Filter m_Filter = null;
+    
+  /** The filter used to get rid of missing values. */
+  protected ReplaceMissingValues m_ReplaceMissingValues;
   
   /** normalize input data */
   protected boolean m_Normalize = false;
+  
+  /** If true, the replace missing values filter is not applied */
+  private boolean m_noReplaceMissingValues;
   
   /** SVM type C-SVC (classification) */
   public static final int SVMTYPE_C_SVC = 0;
@@ -393,6 +400,16 @@ public class LibSVM
             "Z", 0, "-Z"));
     
     result.addElement(
+        new Option("\tTurn off nominal to binary conversion."
+            + "\n\tWARNING: use only if your data is all numeric!",
+            "J", 0, "-J"));
+    
+    result.addElement(
+        new Option("\tTurn off missing value replacement."
+            + "\n\tWARNING: use only if your data has no missing "
+            + "values.", "V", 0, "-V"));
+    
+    result.addElement(
         new Option(
             "\tSet the epsilon in loss function of epsilon-SVR (default: 0.1)",
             "P", 1, "-P <double>"));
@@ -562,6 +579,8 @@ public class LibSVM
     
     setNormalize(Utils.getFlag('Z', options));
     
+    setDoNotReplaceMissingValues(Utils.getFlag("V", options));
+    
     tmpStr = Utils.getOption('P', options);
     if (tmpStr.length() != 0)
       setLoss(Double.parseDouble(tmpStr));
@@ -620,6 +639,9 @@ public class LibSVM
     
     if (getNormalize())
       result.add("-Z");
+        
+    if (getDoNotReplaceMissingValues())
+      result.add("-V");
     
     if (getWeights().length() != 0) {
       result.add("-W");
@@ -979,6 +1001,40 @@ public class LibSVM
   public String normalizeTipText() {
     return "Whether to normalize the data.";
   }
+    
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for
+   *         displaying in the explorer/experimenter gui
+   */
+  public String doNotReplaceMissingValuesTipText() {
+    return "Whether to turn off automatic replacement of missing "
+      + "values. WARNING: set to true only if the data does not "
+      + "contain missing values.";
+  }
+  
+  /**
+   * Whether to turn off automatic replacement of missing values.
+   * Set to true only if the data does not contain missing values.
+   * 
+   * @param b true if automatic missing values replacement is
+   * to be disabled.
+   */
+  public void setDoNotReplaceMissingValues(boolean b) {
+    m_noReplaceMissingValues = b;
+  }
+  
+  /**
+   * Gets whether automatic replacement of missing values is
+   * disabled.
+   * 
+   * @return true if automatic replacement of missing values
+   * is disabled.
+   */
+  public boolean getDoNotReplaceMissingValues() {
+    return m_noReplaceMissingValues;
+  }
   
   /**
    * Sets the parameters C of class i to weight[i]*C, for C-SVC (default 1).
@@ -1271,16 +1327,22 @@ public class LibSVM
     Object 	result;
     
     // determine number of non-zero attributes
-    count = 0;
-    for (i = 0; i < instance.numAttributes(); i++) {
+    /*for (i = 0; i < instance.numAttributes(); i++) {
       if (i == instance.classIndex())
 	continue;
       if (instance.value(i) != 0)
 	count++;
+    } */
+    count = 0;
+    for (i = 0; i < instance.numValues(); i++) {
+      if (instance.index(i) == instance.classIndex())
+        continue;
+      if (instance.valueSparse(i) != 0)
+        count++;
     }
 
     // fill array
-    result = Array.newInstance(Class.forName(CLASS_SVMNODE), count);
+    /* result = Array.newInstance(Class.forName(CLASS_SVMNODE), count);
     index  = 0;
     for (i = 0; i < instance.numAttributes(); i++) {
       if (i == instance.classIndex())
@@ -1291,6 +1353,22 @@ public class LibSVM
       Array.set(result, index, Class.forName(CLASS_SVMNODE).newInstance());
       setField(Array.get(result, index), "index", new Integer(i + 1));
       setField(Array.get(result, index), "value", new Double(instance.value(i)));
+      index++;
+    } */
+    
+    result = Array.newInstance(Class.forName(CLASS_SVMNODE), count);
+    index  = 0;
+    for (i = 0; i < instance.numValues(); i++) {
+      
+      int idx = instance.index(i);
+      if (idx == instance.classIndex())
+        continue;
+      if (instance.valueSparse(i) == 0)
+        continue;
+
+      Array.set(result, index, Class.forName(CLASS_SVMNODE).newInstance());
+      setField(Array.get(result, index), "index", new Integer(idx + 1));
+      setField(Array.get(result, index), "value", new Double(instance.valueSparse(i)));
       index++;
     }
     
@@ -1323,7 +1401,13 @@ public class LibSVM
 
       prob_estimates = new double[instance.numClasses()];
     }
-
+    
+    if (!getDoNotReplaceMissingValues()) {
+      m_ReplaceMissingValues.input(instance);
+      m_ReplaceMissingValues.batchFinished();
+      instance = m_ReplaceMissingValues.output();
+    }
+    
     if (m_Filter != null) {
       m_Filter.input(instance);
       m_Filter.batchFinished();
@@ -1433,17 +1517,27 @@ public class LibSVM
    *                    encountered a problem
    */
   public void buildClassifier(Instances insts) throws Exception {
+    m_Filter = null;
     
     if (!isPresent())
       throw new Exception("libsvm classes not in CLASSPATH!");
-
-    // can classifier handle the data?
-    getCapabilities().testWithFail(insts);
 
     // remove instances with missing class
     insts = new Instances(insts);
     insts.deleteWithMissingClass();
     
+    if (!getDoNotReplaceMissingValues()) {
+      m_ReplaceMissingValues = new ReplaceMissingValues();
+      m_ReplaceMissingValues.setInputFormat(insts);
+      insts = Filter.useFilter(insts, m_ReplaceMissingValues);
+    }
+    
+    // can classifier handle the data?
+    // we check this here so that if the user turns off
+    // replace missing values filtering, it will fail
+    // if the data actually does have missing values
+    getCapabilities().testWithFail(insts);
+        
     if (getNormalize()) {
       m_Filter = new Normalize();
       m_Filter.setInputFormat(insts);
@@ -1458,6 +1552,7 @@ public class LibSVM
       Instance inst = insts.instance(d);
       Object x = instanceToArray(inst);
       int m = Array.getLength(x);
+      
       if (m > 0)
         max_index = Math.max(max_index, ((Integer) getField(Array.get(x, m - 1), "index")).intValue());
       vx.addElement(x);
@@ -1495,7 +1590,7 @@ public class LibSVM
           getProblem(vx, vy), 
           getParameters()});
   }
-  
+    
   /**
    * returns a string representation
    * 
@@ -1511,7 +1606,7 @@ public class LibSVM
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
