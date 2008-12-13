@@ -27,6 +27,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,30 +50,30 @@ import java.util.Vector;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  * @see Loader
  */
 public class LibSVMLoader 
   extends AbstractFileLoader 
   implements BatchConverter, URLSourcedLoader {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 4988360125354664417L;
 
-  /** the file extension */
+  /** the file extension. */
   public static String FILE_EXTENSION = ".libsvm";
 
-  /** the url */
+  /** the url. */
   protected String m_URL = "http://";
 
   /** The reader for the source file. */
   protected transient Reader m_sourceReader = null;
 
-  /** the buffer of the rows read so far */
+  /** the buffer of the rows read so far. */
   protected Vector m_Buffer = null;
   
   /**
-   * Returns a string describing this Loader
+   * Returns a string describing this Loader.
    * 
    * @return 		a description of the Loader suitable for
    * 			displaying in the explorer/experimenter gui
@@ -85,7 +86,7 @@ public class LibSVMLoader
   }
 
   /**
-   * Get the file extension used for libsvm files
+   * Get the file extension used for libsvm files.
    *
    * @return 		the file extension
    */
@@ -94,7 +95,7 @@ public class LibSVMLoader
   }
 
   /**
-   * Gets all the file extensions used for this type of file
+   * Gets all the file extensions used for this type of file.
    *
    * @return the file extensions
    */
@@ -112,7 +113,7 @@ public class LibSVMLoader
   }
 
   /**
-   * Resets the Loader ready to read a new data set
+   * Resets the Loader ready to read a new data set.
    * 
    * @throws IOException 	if something goes wrong
    */
@@ -149,7 +150,7 @@ public class LibSVMLoader
   }
 
   /**
-   * Set the url to load from
+   * Set the url to load from.
    *
    * @param url 		the url to load from
    * @throws IOException 		if the url can't be set.
@@ -160,7 +161,7 @@ public class LibSVMLoader
   }
 
   /**
-   * Return the current url
+   * Return the current url.
    *
    * @return the current url
    */
@@ -184,7 +185,7 @@ public class LibSVMLoader
 
   /**
    * turns a libsvm row into a double array with the class as the last
-   * entry
+   * entry.
    * 
    * @param row		the row to turn into a double array
    * @return		the corresponding double array
@@ -229,7 +230,7 @@ public class LibSVMLoader
   /**
    * determines the number of attributes, if the number of attributes in the
    * given row is greater than the current amount then this number will be
-   * returned, otherwise the current number
+   * returned, otherwise the current number.
    * 
    * @param row		row to determine the number of attributes from
    * @param num		the current number of attributes
@@ -309,7 +310,8 @@ public class LibSVMLoader
 	m_structure.setClassIndex(m_structure.numAttributes() - 1);
       }
       catch (Exception ex) {
-	throw new IOException("Unable to determine structure as libsvm.");
+	ex.printStackTrace();
+	throw new IOException("Unable to determine structure as libsvm: " + ex);
       }
     }
 
@@ -358,7 +360,7 @@ public class LibSVMLoader
 	data = sparse;
       }
       
-      result.add(new Instance(1, data));
+      result.add(new SparseInstance(1, data));
     }
 
     try {
@@ -389,7 +391,7 @@ public class LibSVMLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
