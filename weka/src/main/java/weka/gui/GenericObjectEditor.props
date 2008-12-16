@@ -126,6 +126,7 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.GaussianProcesses,\
  weka.classifiers.functions.IsotonicRegression,\
  weka.classifiers.functions.LeastMedSq,\
+ weka.classifiers.functions.LibLINEAR,\
  weka.classifiers.functions.LibSVM,\
  weka.classifiers.functions.LinearRegression,\
  weka.classifiers.functions.Logistic,\
