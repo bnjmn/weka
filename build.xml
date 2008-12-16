@@ -319,7 +319,7 @@
              classname="net.sourceforge.jarbundler.JarBundler" />
     <jarbundler dir="${macdistrib}"
                 name="weka-${release}"
-                mainclass="weka.gui.Main"
+                mainclass="weka.gui.GUIChooser"
                 icon="${src}/weka/gui/weka_icon.icns"
                 version="${release}"
                 verbose="true"
