@@ -944,7 +944,7 @@ public class GUIChooser
                 }
               });
             m_KnowledgeFlowFrame.pack();
-            m_KnowledgeFlowFrame.setSize(900, 600);
+            m_KnowledgeFlowFrame.setSize(1000, 750);
             m_KnowledgeFlowFrame.setVisible(true);
           }
         }
