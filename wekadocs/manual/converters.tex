@@ -1,0 +1,89 @@
+% Version: $Revision$
+
+\section{Introduction}
+Weka offers conversion utilities for several formats, in order to allow import from different sorts of datasources. These utilities, called converters, are all located in the following package:
+
+\begin{verbatim}
+  weka.core.converters
+\end{verbatim}
+
+\noindent For a certain kind of converter you will find two classes
+
+\begin{itemize}
+	\item one for \textbf{loading} (classname ends with \textit{Loader}) and
+	\item one for \textbf{saving} (classname ends with \textit{Saver}).
+\end{itemize}
+
+\noindent Weka contains converters for the following data sources:
+
+\begin{itemize}
+	\item \textbf{ARFF} files (ArffLoader, ArffSaver)
+	\item \textbf{C4.5} files (C45Loader, C45Saver)
+	\item \textbf{CSV} files (CSVLoader, CSVSaver)
+	\item files containing \textbf{serialized instances} (SerializedInstancesLoader, SerializedInstancesSaver)
+	\item JDBC \textbf{databases} (DatabaseLoader, DatabaseSaver)
+	\item \textbf{libsvm} files (LibSVMLoader, LibSVMSaver)
+	\item \textbf{XRFF} files (XRFFLoader, XRFFSaver)
+	\item \textbf{text directories} for text mining (TextDirectoryLoader)
+\end{itemize}
+
+\section{Usage}
+
+\subsection{File converters}
+File converters can be used as follows:
+
+\begin{itemize}
+	\item \textbf{Loader} \\
+		They take one argument, which is the file that should be converted, and print the result to stdout. You can also redirect the output into a file:
+		\begin{verbatim}
+ 		  java <classname> <input-file> > <output-file>
+		\end{verbatim}
+		\noindent Here's an example for loading the CSV file \textit{iris.csv} and saving it as \textit{iris.arff}:
+		\begin{verbatim}
+ 		  java weka.core.converters.CSVLoader iris.csv > iris.arff
+		\end{verbatim}
+
+	\item \textbf{Saver} \\
+		For a Saver you specify the ARFF input file via \textit{-i} and the output file in the specific format with \textit{-o}:
+		\begin{verbatim}
+		  java <classname> -i <input> -o <output>
+		\end{verbatim}
+		\noindent Here's an example for saving an ARFF file to CSV:
+		\begin{verbatim}
+ 		  java weka.core.converters.CSVSaver -i iris.arff -o iris.csv
+		\end{verbatim}
+\end{itemize}
+
+A few notes:
+
+\begin{itemize}
+	\item Using the \textit{ArffSaver} from commandline doesn't make much sense, since this Saver takes an ARFF file as input \textbf{and} output. The \textit{ArffSaver} is normally used from Java for saving an object of \texttt{weka.core.Instances} to a file.
+	\item The \textit{C45Loader} either takes the \textit{.names}-file or the \textit{.data}-file as input, it automatically looks for the other one.
+	\item For the \textit{C45Saver} one specifies as output file a filename without any extension, since two output files will be generated; \textit{.names} and \textit{.data} are automatically appended.
+\end{itemize}
+
+
+\subsection{Database converters}
+The database converters are a bit more complex, since they also rely on additional configuration files, besides the parameters on the commandline. The setup for the database connection is stored in the following props file:
+
+\begin{verbatim}
+  DatabaseUtils.props
+\end{verbatim}
+
+\noindent The default file can be found here:
+\begin{verbatim}
+  weka/experiment/DatabaseUtils.props
+\end{verbatim}
+
+\begin{itemize}
+	\item \textbf{Loader} \\
+		You have to specify at least a SQL query with the \textit{-Q} option (there are additional options for incremental loading)
+		\begin{verbatim}
+		  java weka.core.converters.DatabaseLoader -Q "select * from employee"
+		\end{verbatim}
+	\item \textbf{Saver} \\
+		The Saver takes an ARFF file as input like any other Saver, but then also the table where to save the data to via \textit{-T}:
+		\begin{verbatim}
+ 		  java weka.core.converters.DatabaseSaver -i iris.arff -T iris
+		\end{verbatim}
+\end{itemize}
