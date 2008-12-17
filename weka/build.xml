@@ -290,7 +290,7 @@
        <fileset dir="../wekadocs/data"/>
     </copy>
     <copy todir="weka-${release}/weka-${release}">
-      <fileset dir="../wekadocs/manual">
+      <fileset dir="../wekadocs">
         <include name="*.pdf"/>
       </fileset>
     </copy>
