@@ -245,7 +245,7 @@
 
   <!-- Writes $release version number to weka/core/version.txt -->    
   <target name="set_version">
-    <echo message="${release}" file="${src}weka/core/version.txt"/>
+    <echo message="${release}" file="${src}/weka/core/version.txt"/>
     <echo message="${release}" file="${build}/classes/weka/core/version.txt"/>
   </target>
 
