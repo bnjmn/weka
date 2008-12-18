@@ -1,0 +1,33 @@
+# Database settings for HSQLDB 1.8.x
+#
+# url:     http://hsqldb.sourceforge.net/
+# jdbc:    http://sourceforge.net/projects/hsqldb/
+# howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
+# author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
+# version: $Revision: 1.1.2.1 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=org.hsqldb.jdbcDriver
+
+# database URL
+jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
+
+# specific data types
+#string,getString()= 0;         -->nominal
+#boolean,getBoolean() = 1;  -->nominal
+#double,getDouble() = 2;    -->numeric
+#byte,getByte() = 3;        -->numeric
+#short,getByte()= 4;        -->numeric
+#int,getInteger() = 5;            -->numeric
+#long,getLong() = 6;                -->numeric
+#gloat,getFloat() = 7;            -->numeric
+#date,getDate() = 8;                -->date
+
+# other options
+CREATE_INT=INT
+CREATE_DOUBLE=DOUBLE
+CREATE_STRING=LONGVARCHAR
+checkUpperCaseNames=true
+checkLowerCaseNames=false
+checkForTable=true
+
