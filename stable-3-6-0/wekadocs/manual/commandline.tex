@@ -1,0 +1,649 @@
+% Version: $Revision$
+
+\section{Introduction}
+
+While for initial experiments the included graphical user interface is quite sufficient, for in-depth usage the command line interface is recommended, because it offers some functionality which is not available via the GUI - and uses far less memory. Should you get \textit{Out of Memory} errors, increase the maximum heap size for your java engine, usually via \texttt{-Xmx1024M} or \texttt{-Xmx1024m} for 1GB - the default setting of 16 to 64MB is usually too small. If you get errors that classes are not found, check your \texttt{CLASSPATH}: does it include \texttt{weka.jar}? You can explicitly set \texttt{CLASSPATH} via the \texttt{-cp} command line option as well.
+
+We will begin by describing basic concepts and ideas. Then, we will describe the \texttt{weka.filters} package, which is used to transform input data, e.g. for preprocessing, transformation, feature generation and so on.
+
+Then we will focus on the machine learning algorithms themselves. These are called Classifiers in WEKA. We will restrict ourselves to common settings for all classifiers and shortly note representatives for all main approaches in machine learning.
+
+Afterwards, practical examples are given.
+
+Finally, in the \texttt{doc} directory of WEKA you find a documentation of all java classes within WEKA. Prepare to use it since this overview is not intended to be complete. If you want to know exactly what is going on, take a look at the mostly well-documented source code, which can be found in \texttt{weka-src.jar} and can be extracted via the \texttt{jar} utility from the Java Development Kit (or any archive program that can handle ZIP files).
+
+\newpage
+\section{Basic concepts}
+
+\subsection{Dataset}
+
+A set of data items, the dataset, is a very basic concept of machine learning. A dataset is roughly equivalent to a two-dimensional spreadsheet or database table. In WEKA, it is implemented by the \texttt{weka.core.Instances} class. A dataset is a collection of examples, each one of class \texttt{weka.core.Instance}. Each Instance consists of a number of attributes, any of which can be \textit{nominal} (= one of a predefined list of values), \textit{numeric} (= a real or integer number) or a \textit{string} (= an arbitrary long list of characters, enclosed in "double quotes"). Additional types are \textit{date} and \textit{relational}, which are not covered here but in the ARFF chapter. The external representation of an Instances class is an ARFF file, which consists of a header describing the attribute types and the data as comma-separated list. Here is a short, commented example. A complete description of the ARFF file format can be found here.
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		% This is a toy example, the UCI weather dataset.
+		% Any relation to real weather is purely coincidental.
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	Comment lines at the beginning of the dataset should give an indication of its source, context and meaning.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		@relation golfWeatherMichigan_1988/02/10_14days
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	Here we state the internal name of the dataset. Try to be as comprehensive as possible.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		@attribute outlook {sunny, overcast rainy}
+		@attribute windy {TRUE, FALSE}
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	Here we define two nominal attributes, \textit{outlook} and \textit{windy}. The former has three values: \textit{sunny}, \textit{overcast} and \textit{rainy}; the latter two: \textit{TRUE} and \textit{FALSE}. Nominal values with special characters, commas or spaces are enclosed in 'single quotes'.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		@attribute temperature real
+		@attribute humidity real
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	These lines define two numeric attributes. Instead of real, integer or numeric can also be used. While double floating point values are stored internally, only seven decimal digits are usually processed.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		@attribute play {yes, no}
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	The last attribute is the default target or class variable used for prediction. In our case it is a nominal attribute with two values, making this a binary classification problem.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		@data
+		sunny,FALSE,85,85,no
+		sunny,TRUE,80,90,no
+		overcast,FALSE,83,86,yes
+		rainy,FALSE,70,96,yes
+		rainy,FALSE,68,80,yes
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	The rest of the dataset consists of the token @data, followed by comma-separated values for the attributes -- one line per example. In our case there are five examples.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+
+In our example, we have not mentioned the attribute type string, which defines "double quoted" string attributes for text mining. In recent WEKA versions, date/time attribute types are also supported.
+
+By default, the last attribute is considered the class/target variable, i.e. the attribute which should be predicted as a function of all other attributes. If this is not the case, specify the target variable via \texttt{-c}. The attribute numbers are one-based indices, i.e. \texttt{-c 1} specifies the first attribute.
+
+Some basic statistics and validation of given ARFF files can be obtained via the main() routine of \texttt{weka.core.Instances}:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.core.Instances data/soybean.arff
+\end{verbatim}}
+
+\noindent \texttt{weka.core} offers some other useful routines, e.g. \texttt{converters.C45Loader} and \texttt{converters.CSVLoader}, which can be used to import C45 datasets and comma/tab-separated datasets respectively, e.g.:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.core.converters.CSVLoader data.csv > data.arff
+  java weka.core.converters.C45Loader c45_filestem > data.arff
+\end{verbatim}}
+
+\newpage
+\subsection{Classifier}
+
+Any learning algorithm in WEKA is derived from the abstract \texttt{weka.classifiers.Classifier} class. Surprisingly little is needed for a basic classifier: a routine which generates a classifier model from a training dataset (= \texttt{buildClassifier}) and another routine which evaluates the generated model on an unseen test dataset (= \texttt{classifyInstance}), or generates a probability distribution for all classes (= \texttt{distributionForInstance}).
+
+A classifier model is an arbitrary complex mapping from all-but-one dataset attributes to the class attribute. The specific form and creation of this mapping, or model, differs from classifier to classifier. For example, ZeroR's (= \texttt{weka.classifiers.rules.ZeroR}) model just consists of a single value: the most common class, or the median of all numeric values in case of predicting a numeric value (= regression learning). ZeroR is a trivial classifier, but it gives a lower bound on the performance of a given dataset which should be significantly improved by more complex classifiers. As such it is a reasonable test on how well the class can be predicted without considering the other attributes.
+
+Later, we will explain how to interpret the output from classifiers in detail -- for now just focus on the \textit{Correctly Classified Instances} in the section \textit{Stratified cross-validation} and notice how it improves from ZeroR to J48:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.rules.ZeroR -t weather.arff
+  java weka.classifiers.trees.J48 -t weather.arff
+\end{verbatim}}
+
+\noindent There are various approaches to determine the performance of classifiers. The performance can most simply be measured by counting the proportion of correctly predicted examples in an unseen test dataset. This value is the \textit{accuracy}, which is also \textit{1-ErrorRate}. Both terms are used in literature.
+
+The simplest case is using a training set and a test set which are mutually independent. This is referred to as hold-out estimate. To estimate variance in these performance estimates, hold-out estimates may be computed by repeatedly resampling the same dataset -- i.e. randomly reordering it and then splitting it into training and test sets with a specific proportion of the examples, collecting all estimates on test data and computing average and standard deviation of accuracy.
+
+A more elaborate method is cross-validation. Here, a number of folds \textit{n} is specified. The dataset is randomly reordered and then split into \textit{n} folds of equal size. In each iteration, one fold is used for testing and the other \textit{n-1} folds are used for training the classifier. The test results are collected and averaged over all folds. This gives the cross-validation estimate of the accuracy. The folds can be purely random or slightly modified to create the same class distributions in each fold as in the complete dataset. In the latter case the cross-validation is called \textit{stratified}. Leave-one-out (= loo) cross-validation signifies that \textit{n} is equal to the number of examples. Out of necessity, loo cv has to be non-stratified, i.e. the class distributions in the test set are not related to those in the training data. Therefore loo cv tends to give less reliable results. However it is still quite useful in dealing with small datasets since it utilizes the greatest amount of training data from the dataset.
+
+\newpage
+\subsection{weka.filters}
+
+The \texttt{weka.filters} package is concerned with classes that transforms datasets -- by removing or adding attributes, resampling the dataset, removing examples and so on. This package offers useful support for data preprocessing, which is an important step in machine learning.
+
+All filters offer the options \texttt{-i} for specifying the input dataset, and \texttt{-o} for specifying the output dataset. If any of these parameters is not given, this specifies standard input resp. output for use within pipes. Other parameters are specific to each filter and can be found out via \textit{-h}, as with any other class. The \texttt{weka.filters} package is organized into \texttt{supervised} and \texttt{unsupervised} filtering, both of which are again subdivided into instance and attribute filtering. We will discuss each of the four subsection separately.
+
+\subsubsection*{weka.filters.supervised}
+
+Classes below \texttt{weka.filters.supervised} in the class hierarchy are for supervised filtering, i.e., taking advantage of the class information. A class must be assigned via \texttt{-c}, for WEKA default behaviour use \texttt{-c last}.
+
+\subsubsection*{weka.filters.supervised.attribute}
+
+\texttt{Discretize} is used to discretize numeric attributes into nominal ones, based on the class information, via Fayyad \& Irani's MDL method, or optionally with Kononeko's MDL method. At least some learning schemes or classifiers can only process nominal data, e.g. \texttt{weka.classifiers.rules.Prism}; in some cases discretization may also reduce learning time.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.supervised.attribute.Discretize -i data/iris.arff \
+    -o iris-nom.arff -c last
+  java weka.filters.supervised.attribute.Discretize -i data/cpu.arff \
+    -o cpu-classvendor-nom.arff -c first
+\end{verbatim}}
+
+\noindent \texttt{NominalToBinary} encodes all nominal attributes into binary (two-valued) attributes, which can be used to transform the dataset into a purely numeric representation, e.g. for visualization via multi-dimensional scaling.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.supervised.attribute.NominalToBinary \
+    -i data/contact-lenses.arff -o contact-lenses-bin.arff -c last
+\end{verbatim}}
+
+\noindent Keep in mind that most classifiers in WEKA utilize transformation filters internally, e.g. Logistic and SMO, so you will usually not have to use these filters explicity. However, if you plan to run a lot of experiments, pre-applying the filters yourself may improve runtime performance.
+
+\subsubsection*{weka.filters.supervised.instance}
+
+\texttt{Resample} creates a stratified subsample of the given dataset. This means that overall class distributions are approximately retained within the sample. A bias towards uniform class distribution can be specified via \texttt{-B}.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.supervised.instance.Resample -i data/soybean.arff \
+    -o soybean-5%.arff -c last -Z 5
+  java weka.filters.supervised.instance.Resample -i data/soybean.arff \
+    -o soybean-uniform-5%.arff -c last -Z 5 -B 1
+\end{verbatim}}
+
+\noindent \texttt{StratifiedRemoveFolds} creates stratified cross-validation folds of the given dataset. This means that per default the class distributions are approximately retained within each fold. The following example splits soybean.arff into stratified training and test datasets, the latter consisting of 25\% (= 1/4) of the data.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.supervised.instance.StratifiedRemoveFolds \
+    -i data/soybean.arff -o soybean-train.arff \
+    -c last -N 4 -F 1 -V
+  java weka.filters.supervised.instance.StratifiedRemoveFolds \
+    -i data/soybean.arff -o soybean-test.arff \
+    -c last -N 4 -F 1
+\end{verbatim}}
+
+\subsubsection*{weka.filters.unsupervised}
+
+Classes below \texttt{weka.filters.unsupervised} in the class hierarchy are for unsupervised filtering, e.g. the non-stratified version of Resample. A class should not be assigned here.
+
+\subsubsection*{weka.filters.unsupervised.attribute}
+
+\texttt{StringToWordVector} transforms string attributes into a word vectors, i.e. creating one attribute for each word which either encodes presence or word count (= \texttt{-C}) within the string. \texttt{-W} can be used to set an approximate limit on the number of words. When a class is assigned, the limit applies to each class separately. This filter is useful for text mining.
+
+\noindent \texttt{Obfuscate} renames the dataset name, all attribute names and nominal attribute values. This is intended for exchanging sensitive datasets without giving away restricted information.
+
+\noindent \texttt{Remove} is intended for explicit deletion of attributes from a dataset, e.g. for removing attributes of the iris dataset:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.unsupervised.attribute.Remove -R 1-2 \
+    -i data/iris.arff -o iris-simplified.arff
+  java weka.filters.unsupervised.attribute.Remove -V -R 3-last \
+    -i data/iris.arff -o iris-simplified.arff
+\end{verbatim}}
+
+\subsubsection*{weka.filters.unsupervised.instance}
+
+\texttt{Resample} creates a non-stratified subsample of the given dataset, i.e. random sampling without regard to the class information. Otherwise it is equivalent to its supervised variant.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.unsupervised.instance.Resample -i data/soybean.arff \
+    -o soybean-5%.arff -Z 5
+\end{verbatim}}
+
+\noindent \texttt{RemoveFolds}creates cross-validation folds of the given dataset. The class distributions are not retained. The following example splits soybean.arff into training and test datasets, the latter consisting of 25\% (= 1/4) of the data.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.unsupervised.instance.RemoveFolds -i data/soybean.arff \
+    -o soybean-train.arff -c last -N 4 -F 1 -V
+  java weka.filters.unsupervised.instance.RemoveFolds -i data/soybean.arff \
+    -o soybean-test.arff -c last -N 4 -F 1
+\end{verbatim}}
+
+\noindent \texttt{RemoveWithValues} filters instances according to the value of an attribute.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.filters.unsupervised.instance.RemoveWithValues -i data/soybean.arff \
+    -o soybean-without_herbicide_injury.arff -V -C last -L 19
+\end{verbatim}}
+
+\newpage
+\subsection{weka.classifiers}
+
+Classifiers are at the core of WEKA. There are a lot of common options for classifiers, most of which are related to evaluation purposes. We will focus on the most important ones. All others including classifier-specific parameters can be found via \texttt{-h}, as usual.
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+-t 
+& 
+\begin{minipage}{10cm}
+specifies the training file (ARFF format) 
+\end{minipage}
+\\
+\\
+
+-T 
+& 
+\begin{minipage}{10cm}
+specifies the test file in (ARFF format). If this parameter is missing, a crossvalidation will be performed (default: ten-fold cv) 
+\end{minipage}
+\\
+\\
+
+-x 
+& 
+\begin{minipage}{10cm}
+This parameter determines the number of folds for the cross-validation. A cv will only be performed if -T is missing. 
+\end{minipage}
+\\
+\\
+
+-c 
+& 
+\begin{minipage}{10cm}
+As we already know from the weka.filters section, this parameter sets the class variable with a one-based index. 
+\end{minipage}
+\\
+\\
+
+-d 
+& 
+\begin{minipage}{10cm}
+The model after training can be saved via this parameter. Each classifier has a different binary format for the model, so it can only be read back by the exact same classifier on a compatible dataset. Only the model on the training set is saved, not the multiple models generated via cross-validation. 
+\end{minipage}
+\\
+\\
+
+-l 
+& 
+\begin{minipage}{10cm}
+Loads a previously saved model, usually for testing on new, previously unseen data. In that case, a compatible test file should be specified, i.e. the same attributes in the same order. 
+\end{minipage}
+\\
+\\
+
+-p \# 
+& 
+\begin{minipage}{10cm}
+If a test file is specified, this parameter shows you the predictions and one attribute (0 for none) for all test instances. 
+\end{minipage}
+\\
+\\
+
+-i 
+& 
+\begin{minipage}{10cm}
+A more detailed performance description via precision, recall, true- and false positive rate is additionally output with this parameter. All these values can also be computed from the confusion matrix. 
+\end{minipage}
+\\
+\\
+
+-o 
+& 
+\begin{minipage}{10cm}
+This parameter switches the human-readable output of the model description off. In case of support vector machines or NaiveBayes, this makes some sense unless you want to parse and visualize a lot of information. 
+\end{minipage}
+\\
+\end{tabular}
+\vspace{0.5cm}
+
+\noindent We now give a short list of selected classifiers in WEKA. Other classifiers below weka.classifiers may also be used. This is more easy to see in the Explorer GUI.
+
+\begin{itemize}
+	\item \texttt{trees.J48} A clone of the C4.5 decision tree learner
+	\item \texttt{bayes.NaiveBayes} A Naive Bayesian learner. \texttt{-K} switches on kernel density estimation for numerical attributes which often improves performance.
+	\item \texttt{meta.ClassificationViaRegression} \texttt{-W functions.LinearRegression} Multi-response linear regression.
+	\item \texttt{functions.Logistic} Logistic Regression.
+	\item \texttt{functions.SMO} Support Vector Machine (linear, polynomial and RBF kernel) with Sequential Minimal Optimization Algorithm due to \cite{platt98}. Defaults to SVM with linear kernel, \texttt{-E 5 -C 10} gives an SVM with polynomial kernel of degree \textit{5} and lambda of \textit{10}.
+	\item \texttt{lazy.KStar} Instance-Based learner. \texttt{-E} sets the blend entropy automatically, which is usually preferable.
+	\item \texttt{lazy.IBk} Instance-Based learner with fixed neighborhood. \texttt{-K} sets the number of neighbors to use. \texttt{IB1} is equivalent to \texttt{IBk -K 1}
+	\item \texttt{rules.JRip} A clone of the RIPPER rule learner. 
+\end{itemize}
+
+Based on a simple example, we will now explain the output of a typical classifier, \texttt{weka.classifiers.trees.J48}. Consider the following call from the command line, or start the WEKA explorer and train J48 on \textit{weather.arff}:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.trees.J48 -t data/weather.arff -i
+\end{verbatim}}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		J48 pruned tree
+		------------------
+		
+		outlook = sunny
+		|   humidity <= 75: yes (2.0)
+		|   humidity > 75: no (3.0)
+		outlook = overcast: yes (4.0)
+		outlook = rainy
+		|   windy = TRUE: no (2.0)
+		|   windy = FALSE: yes (3.0)
+		
+		Number of Leaves  :  5
+		
+		Size of the tree :  8
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	The first part, unless you specify \texttt{-o}, is a human-readable form of the training set model. In this case, it is a decision tree. \textit{outlook} is at the root of the tree and determines the first decision. In case it is overcast, we'll always play golf. The numbers in (parentheses) at the end of each leaf tell us the number of examples in this leaf. If one or more leaves were not pure (= all of the same class), the number of misclassified examples would also be given, after a /slash/
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		Time taken to build model: 0.05 seconds
+		Time taken to test model on training data: 0 seconds
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	As you can see, a decision tree learns quite fast and is evaluated even faster. E.g. for a lazy learner, testing would take far longer than training.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		== Error on training data ===
+		
+		Correctly Classified Instance      14      100 %
+		Incorrectly Classified Instances    0      0 %
+		Kappa statistic                     1     
+		Mean absolute error                 0     
+		Root mean squared error             0     
+		Relative absolute error             0      %
+		Root relative squared error         0      %
+		Total Number of Instances          14     
+		
+		=== Detailed Accuracy By Class ===
+		
+		TP Rate  FP Rate  Precision  Recall  F-Measure  Class
+		1        0        1          1       1          yes
+		1        0        1          1       1          no
+		
+		=== Confusion Matrix ===
+		
+		a b   <-- classified as
+		9 0 | a = yes
+		0 5 | b = no
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	This is quite boring: our classifier is perfect, at least on the training data -- all instances were classified correctly and all errors are zero. As is usually the case, the training set accuracy is too optimistic. The detailed accuracy by class, which is output via \texttt{-i}, and the confusion matrix is similarily trivial.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{7cm}
+		{\scriptsize
+		\begin{verbatim}
+		=== Stratified cross-validation ===
+		
+		Correctly Classified Instances      9      64.2857 %
+		Incorrectly Classified Instances    5      35.7143 %
+		Kappa statistic                     0.186 
+		Mean absolute error                 0.2857
+		Root mean squared error             0.4818
+		Relative absolute error            60      %
+		Root relative squared error        97.6586 %
+		Total Number of Instances          14     
+		
+		
+		=== Detailed Accuracy By Class ===
+		
+		TP Rate  FP Rate  Precision  Recall  F-Measure  Class
+		0.778    0.6      0.7        0.778   0.737      yes
+		0.4      0.222    0.5        0.4     0.444      no
+		
+		
+		=== Confusion Matrix ===
+		
+		a b   <-- classified as
+		7 2 | a = yes
+		3 2 | b = no
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	The stratified cv paints a more realistic picture. The accuracy is around 64\%. The kappa statistic measures the agreement of prediction with the true class -- 1.0 signifies complete agreement. The following error values are not very meaningful for classification tasks, however for regression tasks e.g. the root of the mean squared error per example would be a reasonable criterion. We will discuss the relation between confusion matrix and other measures in the text.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+
+The confusion matrix is more commonly named \textit{contingency table}. In our case we have two classes, and therefore a 2x2 confusion matrix, the matrix could be arbitrarily large. The number of correctly classified instances is the sum of diagonals in the matrix; all others are incorrectly classified (class "a" gets misclassified as "b" exactly twice, and class "b" gets misclassified as "a" three times).
+
+The \textit{True Positive (TP)} rate is the proportion of examples which were classified as class x, among all examples which truly have class x, i.e. how much part of the class was captured. It is equivalent to Recall. In the confusion matrix, this is the diagonal element divided by the sum over the relevant row, i.e. 7/(7+2)=0.778 for class yes and 2/(3+2)=0.4 for class no in our example.
+
+The \textit{False Positive (FP)} rate is the proportion of examples which were classified as class x, but belong to a different class, among all examples which are not of class x. In the matrix, this is the column sum of class x minus the diagonal element, divided by the rows sums of all other classes; i.e. 3/5=0.6 for class yes and 2/9=0.222 for class no.
+
+The \textit{Precision} is the proportion of the examples which truly have class x among all those which were classified as class x. In the matrix, this is the diagonal element divided by the sum over the relevant column, i.e. 7/(7+3)=0.7 for class yes and 2/(2+2)=0.5 for class no.
+
+The \textit{F-Measure} is simply 2*Precision*Recall/(Precision+Recall), a combined measure for precision and recall.
+
+These measures are useful for comparing classifiers. However, if more detailed information about the classifier's predictions are necessary, \texttt{-p \#} outputs just the predictions for each test instance, along with a range of one-based attribute ids (0 for none). Let's look at the following example. We shall assume soybean-train.arff and soybean-test.arff have been constructed via weka.filters.supervised.instance.StratifiedRemoveFolds as in a previous example.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.bayes.NaiveBayes -K -t soybean-train.arff \
+    -T soybean-test.arff -p 0
+\end{verbatim}}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{8cm}
+		{\scriptsize
+		\begin{verbatim}
+		0 diaporthe-stem-canker 0.9999672587892333 diaporthe-stem-canker
+		1 diaporthe-stem-canker 0.9999992614503429 diaporthe-stem-canker
+		2 diaporthe-stem-canker 0.999998948559035 diaporthe-stem-canker
+		3 diaporthe-stem-canker 0.9999998441238833 diaporthe-stem-canker
+		4 diaporthe-stem-canker 0.9999989997681132 diaporthe-stem-canker
+		5 rhizoctonia-root-rot 0.9999999395928124 rhizoctonia-root-rot
+		6 rhizoctonia-root-rot 0.999998912860593 rhizoctonia-root-rot
+		7 rhizoctonia-root-rot 0.9999994386283236 rhizoctonia-root-rot
+		...
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	The values in each line are separated by a single space. The fields are the zero-based test instance id, followed by the predicted class value, the confidence for the prediction (estimated probability of predicted class), and the true class. All these are correctly classified, so let's look at a few erroneous ones.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+\noindent
+\begin{tabular}{l l}
+	\begin{minipage}{8cm}
+		{\scriptsize
+		\begin{verbatim}
+		32 phyllosticta-leaf-spot 0.7789710144361445 brown-spot
+		...
+		39 alternarialeaf-spot 0.6403333824349896 brown-spot
+		...
+		44 phyllosticta-leaf-spot 0.893568420641914 brown-spot
+		...
+		46 alternarialeaf-spot 0.5788190397739439 brown-spot
+		...
+		73 brown-spot 0.4943768155314637 alternarialeaf-spot
+		...
+		\end{verbatim}}
+	\end{minipage}
+	&
+	\begin{minipage}{5cm}
+	In each of these cases, a misclassification occurred, mostly between classes \textit{alternarialeaf-spot} and \textit{brown-spot}. The confidences seem to be lower than for correct classification, so for a real-life application it may make sense to output \textit{don't know} below a certain threshold. WEKA also outputs a trailing newline.
+	\end{minipage}
+	\\
+\end{tabular}
+
+\vspace{0.5cm}
+
+If we had chosen a range of attributes via \texttt{-p}, e.g. \texttt{-p first-last}, the mentioned attributes would have been output afterwards as comma-separated values, in (parentheses). However, the zero-based instance id in the first column offers a safer way to determine the test instances.
+
+If we had saved the output of \texttt{-p} in \textit{soybean-test.preds}, the following call would compute the number of correctly classified instances:
+
+{\scriptsize
+\begin{verbatim}
+  cat soybean-test.preds | awk '$2==$4&&$0!=""' | wc -l
+\end{verbatim}}
+
+\noindent Dividing by the number of instances in the test set, i.e. \texttt{wc -l < soybean-test.preds} minus one (= trailing newline), we get the training set accuracy.
+
+\section{Examples}
+
+Usually, if you evaluate a classifier for a longer experiment, you will do something like this (for \texttt{csh}):
+
+{\scriptsize
+\begin{verbatim}
+  java -Xmx1024m weka.classifiers.trees.J48 -t data.arff -i -k \
+    -d J48-data.model >&! J48-data.out &
+\end{verbatim}}
+
+The \texttt{-Xmx1024m} parameter for maximum heap size ensures your task will get enough memory. There is no overhead involved, it just leaves more room for the heap to grow. \texttt{-i} and \texttt{-k} gives you some additional information, which may be useful, e.g. precision and recall for all classes. In case your model performs well, it makes sense to save it via \texttt{-d} - you can always delete it later! The implicit cross-validation gives a more reasonable estimate of the expected accuracy on unseen data than the training set accuracy. The output both of standard error and output should be redirected, so you get both errors and the normal output of your classifier. The last \texttt{\&} starts the task in the background. Keep an eye on your task via top and if you notice the hard disk works hard all the time (for linux), this probably means your task needs too much memory and will not finish in time for the exam. In that case, switch to a faster classifier or use filters, e.g. for \texttt{Resample} to reduce the size of your dataset or \texttt{StratifiedRemoveFolds} to create training and test sets - for most classifiers, training takes more time than testing.
+
+So, now you have run a lot of experiments -- which classifier is best? Try
+
+{\scriptsize
+\begin{verbatim}
+  cat *.out | grep -A 3 "Stratified" | grep "^Correctly"
+\end{verbatim}}
+
+\noindent ...this should give you all cross-validated accuracies. If the cross-validated accuracy is roughly the same as the training set accuracy, this indicates that your classifiers is presumably not overfitting the training set.
+
+Now you have found the best classifier. To apply it on a new dataset, use e.g.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.trees.J48 -l J48-data.model -T new-data.arff
+\end{verbatim}}
+
+\noindent You will have to use the same classifier to load the model, but you need not set any options. Just add the new test file via \texttt{-T}. If you want, \texttt{-p first-last} will output all test instances with classifications and confidence, followed by all attribute values, so you can look at each error separately.
+
+The following more complex csh script creates datasets for learning curves, i.e. creating a 75\% training set and 25\% test set from a given dataset, then successively reducing the test set by factor 1.2 (83\%), until it is also 25\% in size. All this is repeated thirty times, with different random reorderings (-S) and the results are written to different directories. The Experimenter GUI in WEKA can be used to design and run similar experiments.
+
+{\scriptsize
+\input{includes/learning_curves}}
+
+If meta classifiers are used, i.e. classifiers whose options include classifier specifications - for example, \texttt{StackingC} or \texttt{ClassificationViaRegression}, care must be taken not to mix the parameters. E.g.:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.meta.ClassificationViaRegression \
+    -W weka.classifiers.functions.LinearRegression -S 1 \
+    -t data/iris.arff -x 2
+\end{verbatim}}
+
+\noindent gives us an illegal options exception for \texttt{-S 1}. This parameter is meant for \texttt{LinearRegression}, not for \texttt{ClassificationViaRegression}, but WEKA does not know this by itself. One way to clarify this situation is to enclose the classifier specification, including all parameters, in "double" quotes, like this:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.meta.ClassificationViaRegression \
+    -W "weka.classifiers.functions.LinearRegression -S 1" \
+    -t data/iris.arff -x 2
+\end{verbatim}}
+
+\noindent However this does not always work, depending on how the option handling was implemented in the top-level classifier. While for \texttt{Stacking} this approach would work quite well, for \texttt{ClassificationViaRegression} it does not. We get the dubious error message that the class \textit{weka.classifiers.functions.LinearRegression -S 1} cannot be found. Fortunately, there is another approach: All parameters given after \texttt{--} are processed by the first sub-classifier; another \texttt{--} lets us specify parameters for the second sub-classifier and so on.
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.meta.ClassificationViaRegression \
+    -W weka.classifiers.functions.LinearRegression \
+    -t data/iris.arff -x 2 -- -S 1
+\end{verbatim}}
+
+\noindent In some cases, both approaches have to be mixed, for example:
+
+{\scriptsize
+\begin{verbatim}
+  java weka.classifiers.meta.Stacking -B "weka.classifiers.lazy.IBk -K 10" \
+    -M "weka.classifiers.meta.ClassificationViaRegression -W weka.classifiers.functions.LinearRegression -- -S 1" \
+    -t data/iris.arff -x 2
+\end{verbatim}}
+
+\noindent Notice that while \texttt{ClassificationViaRegression} honors the \texttt{--} parameter, \texttt{Stacking} itself does not. Sadly the option handling for sub-classifier specifications is not yet completely unified within WEKA, but hopefully one or the other approach mentioned here will work. 
