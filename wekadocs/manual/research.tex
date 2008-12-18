@@ -1,0 +1,26 @@
+% Version: $Revision$
+
+\section{Citing Weka}
+If you want to refer to Weka in a publication, please cite the data mining book. The full citation is:
+
+\begin{quote}
+Ian H. Witten and Eibe Frank (2005) \textit{"Data Mining: Practical machine learning tools and techniques"}, 2nd Edition, Morgan Kaufmann, San Francisco, 2005.                                                                                          \end{quote}
+
+\section{Paper references}
+Due to the introduction of the \texttt{weka.core.TechnicalInformationHandler} interface it is now easy to extract all the paper references via \texttt{weka.core.ClassDiscovery} and \texttt{weka.core.TechnicalInformation}.
+
+The script listed at the end, extracts all the paper references from Weka based on a given jar file and dumps it to stdout. One can either generate simple plain text output (option \texttt{-p}) or BibTeX compliant one (option \texttt{-b}).
+
+Typical use (after an \texttt{ant exejar}) for BibTeX:
+
+\begin{verbatim}
+  get_wekatechinfo.sh -d ../ -w ../dist/weka.jar -b > ../tech.txt
+\end{verbatim}
+
+\noindent (command is issued from the same directory the Weka \texttt{build.xml} is located in)
+
+\newpage
+\noindent Bash shell script \texttt{get\_wekatechinfo.sh}
+{\scriptsize
+\input{includes/get_wekatechinfo}
+} 
