@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN""http://www.w3.org/TR/html401/strict.dtd">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Weka-3-4-10 Changelog</title>
+<style type="text/css">
+          body, p {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 80%;
+            color: #000000;
+            background-color: #ffffff;
+          }
+          tr, td {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            background: #eeeee0;
+          }
+          td {
+            padding-left: 20px;
+          }
+      .dateAndAuthor {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            text-align: left;
+            background: #a6caf0;
+            padding-left: 3px;
+      }
+          a {
+            color: #000000;
+          }
+          pre {
+            font-weight: bold;
+          }
+        </style>
+</head>
+<body>
+<h1>
+<a name="top">Weka-3-4-10 Changelog</a>
+</h1>
+<p style="text-align: right">Designed for use with <a href="http://ant.apache.org/">Apache Ant</a>.</p>
+<hr>
+<table border="0" width="100%" cellspacing="1">
+<tr>
+<td class="dateAndAuthor">2007-01-26 02:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated version number</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?r1=1.1.2.5&r2=1.1.2.4">core/version.txt (1.1.2.5)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-26 02:11 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added more files to the release (from wekadocs module):
+documentation.html/css, weka.gif, weka.ico</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.13&r2=1.19.2.12">build.xml (1.19.2.13)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-25 23:37 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>updated copyright</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/GUIChooser.html?rev=1.14.2.12&content-type=text/x-cvsweb-markup">gui/GUIChooser.html (1.14.2.12)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-21 04:45 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed typo in error message</pre>
+<ul>
+<li>
+<a href="../doc/weka/gui/treevisualizer/TreeVisualizer.html?rev=1.8.2.3&content-type=text/x-cvsweb-markup">gui/treevisualizer/TreeVisualizer.html (1.8.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-11 07:31 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>simplified Javadoc generation (package "weka" is used recursively now)
+updated Help/Weka homepage links in Javadoc (Help now uses documentation.html from wekadocs module)
+source jar generation uses now nested include tag instead of the hard-to-read includes attribute
+javac targets now fork off and use "javac_max_memory" property</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?r1=1.19.2.12&r2=1.19.2.11">build.xml (1.19.2.12)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-10 05:32 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>fixed manifest generation (now without temporary file)
+Help in Javadoc is now replaced with "documentation.html", no longer with "ExplorerGuide.pdf"</pre>
+<ul>
+<li>
+<a href="../doc/weka/build.xml?rev=1.19.2.11&content-type=text/x-cvsweb-markup">build.xml (1.19.2.11)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-08 23:28 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>added merge functionality to commandline: weka.core.Instances merge &lt;file1&gt; &lt;file2&gt;</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/Instances.html?rev=1.58.2.3&content-type=text/x-cvsweb-markup">core/Instances.html (1.58.2.3)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2007-01-08 23:27 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>the mergeInstance method produced corrupt results or NullPointerException in case the datasets had different number of attributes
+thanks to Scott Davies</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/SparseInstance.html?rev=1.14.2.2&content-type=text/x-cvsweb-markup">core/SparseInstance.html (1.14.2.2)</a>
+</li>
+</ul>
+</td>
+</tr>
+<tr>
+<td class="dateAndAuthor">2006-12-20 05:59 fracpete</td>
+</tr>
+<tr>
+<td>
+<pre>version of new release</pre>
+<ul>
+<li>
+<a href="../doc/weka/core/version.txt?rev=1.1.2.4&content-type=text/x-cvsweb-markup">core/version.txt (1.1.2.4)</a>
+</li>
+</ul>
+</td>
+</tr>
+</table>
+</body>
+</html>
