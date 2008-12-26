@@ -140,7 +140,7 @@ public class Environment implements RevisionHandler {
   /**
    * Main method for testing this class.
    *
-   * @param a list of strings to replace variables in 
+   * @param args a list of strings to replace variables in 
    * (e.g. "\${os.name} "\${java.version}")
    */
   public static void main(String[] args) {

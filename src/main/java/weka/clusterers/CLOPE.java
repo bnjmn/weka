@@ -77,7 +77,7 @@ import java.util.ArrayList;
 <!-- options-end -->
  *
  * @author Alexander Smirnov (austellus@gmail.com)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class CLOPE
   extends AbstractClusterer
@@ -415,7 +415,7 @@ public class CLOPE
 
   /**
    * Generate Clustering via CLOPE
-   * @param instances The instances that need to be clustered
+   * @param data The instances that need to be clustered
    * @throws java.lang.Exception If clustering was not successful
    */
   public void buildClusterer(Instances data) throws Exception {
@@ -617,7 +617,7 @@ public class CLOPE
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

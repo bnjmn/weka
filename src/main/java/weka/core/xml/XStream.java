@@ -40,7 +40,7 @@ import java.io.Writer;
  * XStream does not need to be present, since the class-calls are done generically via Reflection.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class XStream
   implements RevisionHandler {
@@ -177,11 +177,12 @@ public class XStream
   }
 
   /**
-   * writes the XML-serialized object to the given Writer
+   * writes the XML-serialized object to the given Writer.
    *
    * @param writer the Writer
-   * @param o the object to write
+   * @param toSerialize the object to write
    * @return true if everything goes ok
+   * @throws Exception if something goes wrong
    */
   public static boolean write(Writer writer, Object toSerialize) throws Exception {
     Class xstreamClass;
@@ -344,6 +345,6 @@ public class XStream
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -81,7 +81,7 @@ import java.util.Date;
  *
  * This class is "static" (contains only static data and methods).<p> 
  *
- * @see weka.core.parser.java_cup.main
+ * @see weka.core.parser.java_cup.Main
  * @version last update: 11/25/95
  * @author Scott Hudson
  */

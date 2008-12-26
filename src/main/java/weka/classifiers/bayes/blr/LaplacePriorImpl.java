@@ -32,7 +32,7 @@ import weka.core.RevisionUtils;
  * on Laplace Priors.
  *
  * @author Navendu Garg(gargnav@iit.edu)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class LaplacePriorImpl
   extends Prior {
@@ -134,7 +134,6 @@ public class LaplacePriorImpl
    * Computes the log-likelihood values using the implementation in the Prior class.
    * @param betas
    * @param instances
-   * @param hyperparameter
    */
   public void computeLogLikelihood(double[] betas, Instances instances) {
     //Basic implementation done in the prior class.
@@ -166,6 +165,6 @@ public class LaplacePriorImpl
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -116,7 +116,7 @@ import java.util.Vector;
  *
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira  
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class FT 
   extends Classifier 
@@ -533,7 +533,7 @@ public class FT
   /**
    * Set the Functional Tree type.
    *
-   * @param c Value corresponding to tree type.
+   * @param newMethod Value corresponding to tree type.
    */
   public void setModelType(SelectedTag newMethod){
     if (newMethod.getTags() == TAGS_MODEL) {
@@ -784,7 +784,7 @@ public class FT
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

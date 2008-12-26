@@ -439,7 +439,7 @@ public class Evaluation
    * performed 
    * @param numFolds the number of folds for the cross-validation
    * @param random random number generator for randomization 
-   * @param forPredictionsString varargs parameter that, if supplied, is
+   * @param forPredictionsPrinting varargs parameter that, if supplied, is
    * expected to hold a StringBuffer to print predictions to, 
    * a Range of attributes to output and a Boolean (true if the distribution
    * is to be printed)
@@ -1381,7 +1381,7 @@ public class Evaluation
    *
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
-   * @param forPredictionsString varargs parameter that, if supplied, is
+   * @param forPredictionsPrinting varargs parameter that, if supplied, is
    * expected to hold a StringBuffer to print predictions to, 
    * a Range of attributes to output and a Boolean (true if the distribution
    * is to be printed)
@@ -3027,7 +3027,7 @@ public class Evaluation
    * 				override the class index is stored in the data 
    * 				file (by using the last attribute)
    * @param attributesToOutput	the indices of the attributes to output
-   * @return			the generated predictions for the attribute range
+   * @param predsText		the generated predictions for the attribute range
    * @throws Exception 		if test file cannot be opened
    */
   public static void printClassifications(Classifier classifier, 

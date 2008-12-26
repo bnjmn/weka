@@ -27,7 +27,7 @@ package weka.core.parser.JFlex;
  * This base class has no content other than its type. 
  *
  * @author Gerwin Klein
- * @version JFlex 1.4.1, $Revision: 1.1 $, $Date: 2008-05-09 09:14:10 $
+ * @version JFlex 1.4.1, $Revision$, $Date: 2008-05-09 09:14:10 $
  */
 public class RegExp {
   
@@ -43,7 +43,7 @@ public class RegExp {
    *
    * @param type   a value from the cup generated class sym.
    *
-   * @see JFlex.sym
+   * @see weka.core.parser.JFlex.sym
    */
   public RegExp(int type) {
     this.type = type;    

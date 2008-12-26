@@ -30,7 +30,7 @@ import java.util.*;
  * unused macros.
  *
  * @author Gerwin Klein
- * @version JFlex 1.4.1, $Revision: 1.1 $, $Date: 2008-05-09 09:14:11 $
+ * @version JFlex 1.4.1, $Revision$, $Date: 2008-05-09 09:14:11 $
  */
 final public class Macros {
 
@@ -123,7 +123,7 @@ final public class Macros {
    * @return the definition of the macro, <code>null</code> if 
    *         no macro with the specified name has been stored.
    *
-   * @see JFlex.Macros#expand
+   * @see weka.core.parser.JFlex.Macros#expand
    */
   public RegExp getDefinition(String name) {
     return (RegExp) macros.get(name);

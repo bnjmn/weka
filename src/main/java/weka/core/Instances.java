@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.77 $ 
+ * @version $Revision$ 
  */
 public class Instances 
   implements Serializable, RevisionHandler {
@@ -893,8 +893,7 @@ public class Instances
    * @throws Exception if there was no call to randomizeAttribute or if
    * attributes were added or removed since the last call to
    * <code>randomizeAttribute</code>
-   * @see randomizeAttribute
-   * @author Arne Muller (arne.muller@gmail.com)
+   * @see #randomizeAttribute(int, Random, int)
    */
   public void undoRandomizeAttribute() throws Exception {
     
@@ -927,8 +926,7 @@ public class Instances
    * rounds of shuffling the more random your attribute value distribution
    * (e.g. choose 3, but note that the time needed for shuffling is proportional
    * to the number of rounds).
-   * @see undoRandomizeAttribute
-   * @author Arne Muller (arne.muller@gmail.com)
+   * @see #undoRandomizeAttribute()
    */
   public void randomizeAttribute(int attIdx, Random random, int rounds) {
     
@@ -2134,6 +2132,6 @@ public class Instances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.77 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

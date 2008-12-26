@@ -24,7 +24,7 @@ package weka.core.parser.JFlex;
  * An emitter for an array encoded as count/value pairs in a string.
  * 
  * @author Gerwin Klein
- * @version $Revision: 1.1 $, $Date: 2008-05-09 09:14:10 $
+ * @version $Revision$, $Date: 2008-05-09 09:14:10 $
  */
 public class CountEmitter extends PackEmitter {
   /** number of entries in expanded array */
@@ -46,7 +46,7 @@ public class CountEmitter extends PackEmitter {
   /**
    * Emits count/value unpacking code for the generated array. 
    * 
-   * @see JFlex.PackEmitter#emitUnPack()
+   * @see weka.core.parser.JFlex.PackEmitter#emitUnpack()
    */
   public void emitUnpack() {
     // close last string chunk:
