@@ -210,6 +210,7 @@
     <!-- jar up the source -->
     <jar jarfile="${dist}/weka-src.jar" 
       basedir=".">
+      <include name="*.xml"/>
       <include name="src/**/*.gif"/>
       <include name="src/**/*.java"/>
       <include name="src/**/*.jpeg"/>
@@ -217,6 +218,7 @@
       <include name="src/**/*.props"/>
       <include name="src/**/*.txt"/>
       <include name="src/**/*.xml"/>
+      <include name="lib/**/*.jar"/>
       <include name="src/**/DatabaseUtils.props.*"/>
       <include name="src/**/weka/gui/beans/README*"/>
     </jar>
@@ -293,7 +295,7 @@
     <jarbundler dir="${macdistrib}"
                 name="weka-${release}"
                 mainclass="weka.gui.GUIChooser"
-                icon="${path_modifier}weka/gui/weka_icon.icns"
+                icon="${src}/weka/gui/weka_icon.icns"
                 version="${release}"
                 verbose="true"
                 VMOptions="-Xmx256M"
