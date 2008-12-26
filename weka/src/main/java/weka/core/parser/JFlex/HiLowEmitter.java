@@ -24,7 +24,7 @@ package weka.core.parser.JFlex;
  * HiLowEmitter
  * 
  * @author Gerwin Klein
- * @version $Revision: 1.1 $, $Date: 2008-05-09 09:14:10 $
+ * @version $Revision$, $Date: 2008-05-09 09:14:10 $
  */
 public class HiLowEmitter extends PackEmitter {
 
@@ -43,7 +43,7 @@ public class HiLowEmitter extends PackEmitter {
   /**
    * Emits hi/low pair unpacking code for the generated array. 
    * 
-   * @see JFlex.PackEmitter#emitUnPack()
+   * @see weka.core.parser.JFlex.PackEmitter#emitUnpack()
    */
   public void emitUnpack() {
     // close last string chunk:
@@ -74,10 +74,9 @@ public class HiLowEmitter extends PackEmitter {
   }
 
   /**
-   * Emit one value using two characters. 
+   * Emit one value using two characters. Precision: 0 &lt;= val &lt;= 0xFFFFFFFF 
    *
    * @param val  the value to emit
-   * @prec  0 <= val <= 0xFFFFFFFF 
    */
   public void emit(int val) {
     numEntries+= 1;

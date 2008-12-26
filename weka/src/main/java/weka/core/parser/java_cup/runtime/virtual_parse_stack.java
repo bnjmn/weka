@@ -45,7 +45,7 @@ import java.util.Stack;
  *  modified).  Since parse ahead does not execute actions, only parse
  *  state is maintained on the virtual stack, not full Symbol objects.
  *
- * @see     java_cup.runtime.lr_parser
+ * @see     weka.core.parser.java_cup.runtime.lr_parser
  * @version last updated: 7/3/96
  * @author  Frank Flannery
  */

@@ -511,9 +511,9 @@ public class RegressionByDiscretization
 
 
   /**
-   * Gets the number of bins numeric attributes will be divided into
+   * Gets whether empty bins are deleted.
    *
-   * @return the number of bins.
+   * @return true if empty bins get deleted.
    */
   public boolean getDeleteEmptyBins() {
 
@@ -521,9 +521,9 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Sets the number of bins to divide each selected numeric attribute into
+   * Sets whether to delete empty bins.
    *
-   * @param numBins the number of bins
+   * @param b if true, empty bins will be deleted
    */
   public void setDeleteEmptyBins(boolean b) {
 

@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * explicitly.
  *
  * @author Eibe Frank
- * @version $Revision: 1.23 $
+ * @version $Revision$
  */
 public class SparseInstance
   extends Instance {
@@ -460,7 +460,6 @@ public class SparseInstance
    * @param value the new attribute value (If the corresponding
    * attribute is nominal (or a string) then this is the new value's
    * index as a double).  
-   * @author Arne Muller (arne.muller@gmail.com)
    */
   public void modifyValue(int attIndex, double value) {
 
@@ -860,6 +859,6 @@ public class SparseInstance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -31,7 +31,7 @@ import java.text.*;
  * Table compression, String packing etc. is also done here.
  *
  * @author Gerwin Klein
- * @version JFlex 1.4.1, $Revision: 1.1 $, $Date: 2008-05-09 09:14:11 $
+ * @version JFlex 1.4.1, $Revision$, $Date: 2008-05-09 09:14:11 $
  */
 final public class Emitter {
     
@@ -101,7 +101,6 @@ final public class Emitter {
    * another file. Makes a backup if the file already exists.
    *
    * @param name  the name (without path) of the file
-   * @param path  the path where to construct the file
    * @param input fallback location if path = <tt>null</tt>
    *              (expected to be a file in the directory to write to)   
    */
@@ -415,7 +414,7 @@ final public class Emitter {
   /**
    * Try to find out if user code ends with a javadoc comment 
    * 
-   * @param buffer   the user code
+   * @param usercode   the user code
    * @return true    if it ends with a javadoc comment
    */
   public static boolean endsWithJavadoc(StringBuffer usercode) {

@@ -54,7 +54,7 @@ import weka.core.TechnicalInformation.Type;
  * Performs an Scatter Search  through the space of attribute subsets. Start with a population of many significants and diverses subset  stops when the result is higher than a given treshold or there's not more improvement<br/>
  * For more information see:<br/>
  * <br/>
- * Félix García López (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier.
+ * Fï¿½lix Garcï¿½a Lï¿½pez (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -84,8 +84,8 @@ import weka.core.TechnicalInformation.Type;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;book{López2004,
- *    author = {Félix García López},
+ * &#64;book{Lï¿½pez2004,
+ *    author = {Fï¿½lix Garcï¿½a Lï¿½pez},
  *    month = {October},
  *    publisher = {Elsevier},
  *    title = {Solving feature subset selection problem by a Parallel Scatter Search},
@@ -96,7 +96,7 @@ import weka.core.TechnicalInformation.Type;
  * <p/>
  <!-- technical-bibtex-end -->
  *
- * from the Book: Solving feature subset selection problem by a Parallel Scatter Search, Félix García López.
+ * from the Book: Solving feature subset selection problem by a Parallel Scatter Search, Fï¿½lix Garcï¿½a Lï¿½pez.
  * @author Adrian Pino (apinoa@facinf.uho.edu.cu)
  * @version $Revision$
  *
@@ -210,7 +210,7 @@ public class ScatterSearchV1 extends ASSearch
     TechnicalInformation        result;
 
     result = new TechnicalInformation(Type.BOOK);
-    result.setValue(Field.AUTHOR, "Félix García López");
+    result.setValue(Field.AUTHOR, "Fï¿½lix Garcï¿½a Lï¿½pez");
     result.setValue(Field.MONTH, "October");
     result.setValue(Field.YEAR, "2004");
     result.setValue(Field.TITLE, "Solving feature subset selection problem by a Parallel Scatter Search");
@@ -518,7 +518,7 @@ public class ScatterSearchV1 extends ASSearch
   /**
    * Searches the attribute subset space using Scatter Search.
    *
-   * @param ASEvaluator the attribute evaluator to guide the search
+   * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array of selected attribute indexes
    * @exception Exception if the search can't be completed
@@ -670,8 +670,8 @@ public class ScatterSearchV1 extends ASSearch
   /**
    * Update the ReferenceSet putting the new obtained Solutions there
    *
-   * @param bestSolutions the number of the most pure solutions.
-   * @param divSolutions the number of the most diverses solutions acording to the bestSolutions.
+   * @param numBestSolutions the number of the most pure solutions.
+   * @param numDivsSolutions the number of the most diverses solutions acording to the bestSolutions.
   */
   public void UpdateReferenceSet(int numBestSolutions, int numDivsSolutions){
 
@@ -922,7 +922,7 @@ public class ScatterSearchV1 extends ASSearch
     //..........
 
 
-// métodos auxiliares generales
+// mï¿½todos auxiliares generales
 
 
     /**
@@ -1042,7 +1042,7 @@ public class ScatterSearchV1 extends ASSearch
    /**
    * Creating space for introducing the population
    *
-   * @param size the number of subset in the initial population
+   * @param popSize the number of subset in the initial population
    */
   public void InitPopulation(int popSize){
     m_population =new ArrayList<Subset>();

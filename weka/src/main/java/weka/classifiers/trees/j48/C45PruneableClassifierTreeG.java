@@ -37,7 +37,7 @@ import java.util.Collections;
  * be pruned using C4.5 procedures and have nodes grafted on.
  *
  * @author Janice Boughton (based on code by Eibe Frank)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 
 public class C45PruneableClassifierTreeG extends ClassifierTree{
@@ -156,7 +156,7 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
   /**
    * Method for building a pruneable classifier tree.
    *
-   * @param datathe data for building the tree
+   * @param data the data for building the tree
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -1152,7 +1152,9 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
 
   /**
    * Significance test
-   * @param double  x, double  n, double r.
+   * @param x 
+   * @param n
+   * @param r
    * @return returns the probability of obtaining x or MORE out of n
    * if r proportion of n are positive.
    *
@@ -1221,6 +1223,6 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

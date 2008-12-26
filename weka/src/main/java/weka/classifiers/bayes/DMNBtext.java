@@ -76,7 +76,7 @@ import weka.core.OptionHandler;
  <!-- options-end -->
  * 
  * @author Jiang Su (Jiang.Su@unb.ca) 2008
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class DMNBtext extends Classifier
     implements OptionHandler, WeightedInstancesHandler, 
@@ -146,7 +146,7 @@ public class DMNBtext extends Classifier
   /**
    * Generates the classifier.
    *
-   * @param instances set of instances serving as training data
+   * @param data set of instances serving as training data
    * @exception Exception if the classifier has not been generated successfully
    */
   public void buildClassifier(Instances data) throws Exception {
@@ -438,7 +438,7 @@ public class DMNBtext extends Classifier
      * Calculates the class membership probabilities for the given test
      * instance.
      *
-     * @param instance the instance to be classified
+     * @param ins the instance to be classified
      * @return predicted class probability distribution
      * @exception Exception if there is a problem generating the prediction
      */

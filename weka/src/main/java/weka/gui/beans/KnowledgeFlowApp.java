@@ -22,19 +22,18 @@
 
 package weka.gui.beans;
 
+import weka.core.ClassloaderUtil;
 import weka.core.Copyright;
+import weka.core.Environment;
 import weka.core.Memory;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
-import weka.core.ClassloaderUtil;
-import weka.core.Environment;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
-// import weka.gui.LogPanel;
 import weka.gui.LookAndFeel;
 import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
@@ -48,8 +47,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.MenuItem;
+import java.awt.Point;
 import java.awt.PopupMenu;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -60,7 +59,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-
 import java.beans.BeanInfo;
 import java.beans.Beans;
 import java.beans.Customizer;
@@ -72,7 +70,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.beancontext.BeanContextChild;
 import java.beans.beancontext.BeanContextSupport;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -83,10 +80,9 @@ import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -95,7 +91,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -105,17 +100,14 @@ import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.JWindow;
-import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -2478,7 +2470,7 @@ public class KnowledgeFlowApp
    * These two vectors are deep-copied via serialization before being
    * returned.
    *
-   * @returns the current flow being edited
+   * @return the current flow being edited
    */
   public Vector getFlow() throws Exception {
     Vector v = new Vector();
@@ -2656,8 +2648,7 @@ public class KnowledgeFlowApp
    * Save the knowledge flow into the OutputStream passed at input. Only
    * supports saving the layout data (no trained models) to XML.
    *
-   * @param out
-   * @author Zerbetto
+   * @param out		the output stream to save the layout in
    */
   public void saveLayout(OutputStream out) {
     // temporarily remove this panel as a property changle listener from

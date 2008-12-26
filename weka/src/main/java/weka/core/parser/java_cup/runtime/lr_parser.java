@@ -136,9 +136,9 @@ import java.util.Stack;
  *         report_fatal_error("Couldn't repair and continue parse", null);
  *  </dl>
  *
- * @see     java_cup.runtime.Symbol
- * @see     java_cup.runtime.Symbol
- * @see     java_cup.runtime.virtual_parse_stack
+ * @see     weka.core.parser.java_cup.runtime.Symbol
+ * @see     weka.core.parser.java_cup.runtime.Symbol
+ * @see     weka.core.parser.java_cup.runtime.virtual_parse_stack
  * @version last updated: 7/3/96
  * @author  Frank Flannery
  */
@@ -218,7 +218,7 @@ public abstract class lr_parser {
    *  state shifted to).  Reduces are encoded as negative values (one less 
    *  than the production reduced by).  Error entries are denoted by zero. 
    * 
-   * @see java_cup.runtime.lr_parser#get_action
+   * @see weka.core.parser.java_cup.runtime.lr_parser#get_action
    */
   public abstract short[][] action_table();
 
@@ -235,7 +235,7 @@ public abstract class lr_parser {
    *  then indexed by that state and the LHS of the reducing production to 
    *  indicate where to "shift" to. 
    *
-   * @see java_cup.runtime.lr_parser#get_reduce
+   * @see weka.core.parser.java_cup.runtime.lr_parser#get_reduce
    */
   public abstract short[][] reduce_table();
 

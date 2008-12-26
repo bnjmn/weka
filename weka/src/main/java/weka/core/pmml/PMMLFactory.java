@@ -22,37 +22,40 @@
 
 package weka.core.pmml;
 
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
+import weka.classifiers.Classifier;
+import weka.classifiers.pmml.consumer.GeneralRegression;
+import weka.classifiers.pmml.consumer.NeuralNetwork;
+import weka.classifiers.pmml.consumer.PMMLClassifier;
+import weka.classifiers.pmml.consumer.Regression;
+import weka.core.Attribute;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.gui.Logger;
+
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.OutputStream;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.pmml.consumer.*;
-import weka.core.Instances;
-import weka.core.Instance;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Utils;
-import weka.gui.Logger;
-
 /**
  * This class is a factory class for reading/writing PMML models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class PMMLFactory {
 
@@ -146,7 +149,7 @@ public class PMMLFactory {
    *
    * @param stream the <code>InputStream</code> to read from
    * @param log the logging object to use (or null if none is to be used)
-   * @returns a PMML model
+   * @return a PMML model
    * @throws Exception if there is a problem while reading from the stream
    */
   public static PMMLModel getPMMLModel(InputStream stream, Logger log) throws Exception {
@@ -504,7 +507,7 @@ public class PMMLFactory {
     }
     
     public String getRevision() {
-      return weka.core.RevisionUtils.extract("$Revision: 1.2 $");
+      return weka.core.RevisionUtils.extract("$Revision$");
     }
     
     public void evaluatePMMLClassifier(String[] options) {

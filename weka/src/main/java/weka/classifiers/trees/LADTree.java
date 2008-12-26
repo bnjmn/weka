@@ -1316,7 +1316,7 @@ public class LADTree
   /**
    * Returns the value of the named measure.
    *
-   * @param measureName the name of the measure to query for its value
+   * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
    */

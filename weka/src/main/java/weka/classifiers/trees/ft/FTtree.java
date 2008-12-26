@@ -47,7 +47,7 @@ import java.util.Vector;
  * @author Jo\~{a}o Gama
  * @author Carlos Ferreira
  *
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public abstract class FTtree 
   extends LogisticBase {   
@@ -374,7 +374,7 @@ public abstract class FTtree
      
   /**
    *
-   * @param <any> probsConst
+   * @param probsConst
    */
   public int getConstError(double[] probsConst)
   {
@@ -699,6 +699,6 @@ public abstract class FTtree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

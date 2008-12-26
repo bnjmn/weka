@@ -31,7 +31,7 @@ import weka.core.Instances;
  * AbstractClusterer or AbstractDensityBasedClusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @revision $Revision: 1.18 $
+ * @version $Revision$
  */
 public interface Clusterer {
 
