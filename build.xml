@@ -236,6 +236,7 @@
       <include name="src/**/*.jflex"/>
       <include name="src/**/*.properties"/>
       <include name="src/**/*.default"/>
+      <include name="lib/**/*.jar"/>
     </jar>
   </target>
 
