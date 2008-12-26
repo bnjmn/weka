@@ -101,7 +101,7 @@
              packagenames="weka.*"
              Author="yes" 
              Public="yes" 
-             maxmemory="128m"/>
+             maxmemory="256m"/>
     
     <!-- insert the links to our homepage and documentation.html -->
     <replace dir="${doc}" 
