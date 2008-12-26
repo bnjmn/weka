@@ -35,10 +35,10 @@ import java.util.Vector;
  * part to this class. The iterator part is used to emit consecutive skeleton
  * sections to some <code>PrintWriter</code>. 
  *
- * @see JFlex.Emitter
+ * @see weka.core.parser.JFlex.Emitter
  *
  * @author Gerwin Klein
- * @version JFlex 1.4.1, $Revision: 1.1 $, $Date: 2008-05-09 09:14:11 $
+ * @version JFlex 1.4.1, $Revision$, $Date: 2008-05-09 09:14:11 $
  */
 public class Skeleton {
   /** expected number of sections in the skeleton file */

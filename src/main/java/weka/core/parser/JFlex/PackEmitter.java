@@ -33,7 +33,7 @@ package weka.core.parser.JFlex;
  * <code>p.emitUnpack();</code> 
  * 
  * @author Gerwin Klein
- * @version $Revision: 1.1 $, $Date: 2008-05-09 09:14:10 $
+ * @version $Revision$, $Date: 2008-05-09 09:14:10 $
  */
 public abstract class PackEmitter {
 
@@ -105,12 +105,11 @@ public abstract class PackEmitter {
   }
 
   /**
-   * Emit single unicode character. 
+   * Emit single unicode character. Precision: 0 &lt;= i &lt;= 0xFFFF 
    * 
    * Updates length, position, etc.
    *
    * @param i  the character to emit.
-   * @prec  0 <= i <= 0xFFFF 
    */   
   public void emitUC(int i) {     
     if (i < 0 || i > 0xFFFF) 

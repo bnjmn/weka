@@ -77,7 +77,7 @@ import weka.filters.unsupervised.attribute.Reorder;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 
 public class EditableBayesNet extends BayesNet {
@@ -1134,7 +1134,7 @@ public class EditableBayesNet extends BayesNet {
 
 	/** Set position of node. Move set of nodes with the same displacement
 	 * as a specified node.
-	 * @param iNode index of node to set position for
+	 * @param nNode index of node to set position for
 	 * @param nX x position of new position
 	 * @param nY y position of new position
 	 * @param nodes array of indexes of nodes to move
@@ -1438,7 +1438,7 @@ public class EditableBayesNet extends BayesNet {
 	}
 
 	/** return list of children of a node
-	 * @param iNode index of node of interest
+	 * @param nTargetNode index of node of interest
 	 */
 	public FastVector getChildren(int nTargetNode) {
 		FastVector children = new FastVector();
@@ -2658,7 +2658,7 @@ public class EditableBayesNet extends BayesNet {
 	   * @return		the revision
 	   */
 	  public String getRevision() {
-	    return RevisionUtils.extract("$Revision: 1.4 $");
+	    return RevisionUtils.extract("$Revision$");
 	  }
 
 	/**

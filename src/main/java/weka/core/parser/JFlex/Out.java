@@ -38,7 +38,7 @@ import java.awt.TextArea;
  * Counts error and warning messages.
  *
  * @author Gerwin Klein
- * @version JFlex 1.4.1, $Revision: 1.1 $, $Date: 2008-05-09 09:14:10 $
+ * @version JFlex 1.4.1, $Revision$, $Date: 2008-05-09 09:14:10 $
  */
 public final class Out {
 
@@ -160,7 +160,7 @@ public final class Out {
    * All parts of JFlex, that want to provide dump information
    * should use this method for their output.
    *
-   * @message the message to be printed 
+   * @param message the message to be printed 
    */
   public static void dump(String message) {
     if (Options.dump) out.println(message);

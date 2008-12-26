@@ -21,21 +21,19 @@
  */
 package weka.classifiers.functions.supportVector;
 
-import weka.core.Option;
-import weka.core.matrix.Matrix;
-import weka.core.Instances;
-import weka.core.Utils;
 import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
 import weka.core.Instance;
-import weka.core.RevisionHandler;
+import weka.core.Instances;
+import weka.core.Option;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.core.Capabilities.Capability;
+import weka.core.matrix.Matrix;
 
+import java.io.File;
+import java.io.FileReader;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import java.io.FileReader;
-import java.io.File;
 
 /**
  *
@@ -62,7 +60,7 @@ import java.io.File;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class PrecomputedKernelMatrixKernel extends Kernel {
 
@@ -235,7 +233,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
   /**
    * Sets the file holding the kernel matrix
    * 
-   * @param value	the exponent value
+   * @param f	the file holding the matrix
    */
   public void setKernelMatrixFile(File f) {
     m_KernelMatrixFile = f;
@@ -314,7 +312,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

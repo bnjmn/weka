@@ -33,7 +33,7 @@ import java.util.Hashtable;
 
 /**
  * @author Martin Guetlein (martin.guetlein@gmail.com)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class LFSMethods
   implements RevisionHandler {
@@ -593,7 +593,7 @@ public class LFSMethods
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -655,8 +655,8 @@ public class LFSMethods
     /**
      * adds an element (Link) to the list.
      *
-     * @param gr
-     *            the attribute set specification
+     * @param data
+     *            the data to add
      * @param mer
      *            the "merit" of this attribute set
      */
@@ -715,7 +715,7 @@ public class LFSMethods
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.3 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -725,6 +725,6 @@ public class LFSMethods
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
