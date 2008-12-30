@@ -45,11 +45,20 @@ import java.util.Vector;
  <!-- options-start -->
  * Valid options are: <p/>
  * 
+ * <pre> -S &lt;separator&gt;
+ *  The field separator to be used.
+ *  '\t' can be used as well.
+ *  (default: ',')</pre>
+ * 
+ * <pre> -M &lt;str&gt;
+ *  The string representing a missing value.
+ *  (default: ?)</pre>
+ * 
  * <pre> -i &lt;the input file&gt;
- * The input file</pre>
+ *  The input file</pre>
  * 
  * <pre> -o &lt;the output file&gt;
- * The output file</pre>
+ *  The output file</pre>
  * 
  <!-- options-end -->
  *
@@ -117,6 +126,23 @@ public class CSVSaver
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -S &lt;separator&gt;
+   *  The field separator to be used.
+   *  '\t' can be used as well.
+   *  (default: ',')</pre>
+   * 
+   * <pre> -M &lt;str&gt;
+   *  The string representing a missing value.
+   *  (default: ?)</pre>
+   * 
+   * <pre> -i &lt;the input file&gt;
+   *  The input file</pre>
+   * 
+   * <pre> -o &lt;the output file&gt;
+   *  The output file</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
