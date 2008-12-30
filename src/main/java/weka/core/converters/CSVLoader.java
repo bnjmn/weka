@@ -49,6 +49,27 @@ import java.util.Vector;
  * <p/>
  <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;range&gt;
+ *  The range of attributes to force type to be NOMINAL.
+ *  'first' and 'last' are accepted as well.
+ *  Examples: "first-last", "1,4,5-27,50-last"
+ *  (default: -none-)</pre>
+ * 
+ * <pre> -S &lt;range&gt;
+ *  The range of attribute to force type to be STRING.
+ *  'first' and 'last' are accepted as well.
+ *  Examples: "first-last", "1,4,5-27,50-last"
+ *  (default: -none-)</pre>
+ * 
+ * <pre> -M &lt;str&gt;
+ *  The string representing a missing value.
+ *  (default: ?)</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  * @see Loader
@@ -172,6 +193,24 @@ public class CSVLoader
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;range&gt;
+   *  The range of attributes to force type to be NOMINAL.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -S &lt;range&gt;
+   *  The range of attribute to force type to be STRING.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -M &lt;str&gt;
+   *  The string representing a missing value.
+   *  (default: ?)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
