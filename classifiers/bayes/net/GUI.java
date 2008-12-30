@@ -21,13 +21,20 @@
  */
 package weka.classifiers.bayes.net;
 
+import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.ConverterUtils;
+import weka.gui.ConverterFileChooser;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
+import weka.gui.LookAndFeel;
 import weka.gui.PropertyDialog;
 import weka.gui.graphvisualizer.BIFFormatException;
 import weka.gui.graphvisualizer.BIFParser;
@@ -37,11 +44,6 @@ import weka.gui.graphvisualizer.LayoutCompleteEvent;
 import weka.gui.graphvisualizer.LayoutCompleteEventListener;
 import weka.gui.graphvisualizer.LayoutEngine;
 import weka.gui.visualize.PrintablePanel;
-import weka.classifiers.bayes.net.BIFReader;
-import weka.classifiers.bayes.net.BayesNetGenerator;
-import weka.classifiers.bayes.net.EditableBayesNet;
-import weka.classifiers.bayes.net.MarginCalculator;
-import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -71,7 +73,10 @@ import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyEditor;
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 
 import javax.swing.AbstractAction;
@@ -542,6 +547,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 				gbc.gridwidth = GridBagConstraints.REMAINDER;
 				dlg.add(jBtCancel);
 			}
+			dlg.pack();
 			dlg.setLocation(100, 100);
 			dlg.setVisible(true);
 			dlg.setSize(dlg.getPreferredSize());
@@ -617,11 +623,13 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
 							m_sFile = jTfFile.getText();
 							if (m_sFile != null && !m_sFile.equals("")) {
-								FileWriter outfile2 = new FileWriter(m_sFile);
-								StringBuffer text2 = new StringBuffer();
-								text2.append(m_Instances.toString());
-								outfile2.write(text2.toString());
-								outfile2.close();
+								AbstractFileSaver saver = ConverterUtils.getSaverForFile(m_sFile);
+								// no idea what the format is, so let's save it as ARFF file
+								if (saver == null)
+									saver = new ArffSaver();
+								saver.setFile(new File(m_sFile));
+								saver.setInstances(m_Instances);
+								saver.writeBatch();
 							}
 
 						} catch (Exception e) {
@@ -632,12 +640,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 				});
 
 				JButton jBtFile = new JButton("Browse");
-				;
 				jBtFile.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent ae) {
-						JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-						ExtensionFileFilter ef1 = new ExtensionFileFilter(".arff", "Arff files");
-						fc.addChoosableFileFilter(ef1);
+						ConverterFileChooser fc = new ConverterFileChooser(System.getProperty("user.dir"));
 						fc.setDialogTitle("Save Instances As");
 						int rval = fc.showSaveDialog(GUI.this);
 
@@ -854,17 +859,17 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 		} // c'tor
 
 		public void actionPerformed(ActionEvent ae) {
-			JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-			ExtensionFileFilter ef1 = new ExtensionFileFilter(".arff", "ARFF files");
-			fc.addChoosableFileFilter(ef1);
+			ConverterFileChooser fc = new ConverterFileChooser(System.getProperty("user.dir"));
 			fc.setDialogTitle("Set Data File");
 			int rval = fc.showOpenDialog(GUI.this);
 
 			if (rval == JFileChooser.APPROVE_OPTION) {
-				String filename = fc.getSelectedFile().toString();
+				AbstractFileLoader loader = fc.getLoader();
 				try {
-					m_Instances = new Instances(new FileReader(filename));
-					m_Instances.setClassIndex(m_Instances.numAttributes() - 1);
+					if (loader != null)
+					  m_Instances = loader.getDataSet();
+					if (m_Instances.classIndex() == -1)
+					  m_Instances.setClassIndex(m_Instances.numAttributes() - 1);
 					a_learn.setEnabled(true);
 					a_learnCPT.setEnabled(true);
 					repaint();
@@ -3478,6 +3483,11 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 	 * Main method. Builds up menus and reads from file if one is specified.
 	 */
 	public static void main(String[] args) {
+
+		weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+	    
+		LookAndFeel.setLookAndFeel();
+		
 		JFrame jf = new JFrame("Bayes Network Editor");
 		final GUI g = new GUI();
 		JMenuBar menuBar = g.getMenuBar();
