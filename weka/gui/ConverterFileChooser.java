@@ -30,15 +30,22 @@ import weka.core.converters.AbstractSaver;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.FileSourcedConverter;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
 /**
@@ -47,57 +54,69 @@ import javax.swing.filechooser.FileFilter;
  * can set a Capabilities filter.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  * @see	    #setCapabilitiesFilter(Capabilities)
  */
 public class ConverterFileChooser
   extends JFileChooser {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -5373058011025481738L;
   
-  /** unhandled type of dialog */
+  /** unhandled type of dialog. */
   public final static int UNHANDLED_DIALOG = 0;
   
-  /** the loader dialog */
+  /** the loader dialog. */
   public final static int LOADER_DIALOG = 1;
   
-  /** the saver dialog */
+  /** the saver dialog. */
   public final static int SAVER_DIALOG = 2;
   
-  /** the file chooser itself */
+  /** the file chooser itself. */
   protected ConverterFileChooser m_Self;
 
-  /** the file filters for the loaders */
+  /** the file filters for the loaders. */
   protected static Vector<ExtensionFileFilter> m_LoaderFileFilters;
 
-  /** the file filters for the savers */
+  /** the file filters for the savers. */
   protected static Vector<ExtensionFileFilter> m_SaverFileFilters;
   
-  /** the type of dialog to display */
+  /** the type of dialog to display. */
   protected int m_DialogType;
 
-  /** the converter that was chosen by the user */
+  /** the converter that was chosen by the user. */
   protected Object m_CurrentConverter;
   
-  /** the configure button */
+  /** the configure button. */
   protected JButton m_ConfigureButton;
 
-  /** the propertychangelistener */
+  /** the propertychangelistener. */
   protected PropertyChangeListener m_Listener;
   
-  /** the last filter that was used for opening/saving */
+  /** the last filter that was used for opening/saving. */
   protected FileFilter m_LastFilter;
   
-  /** the Capabilities filter for the savers */
+  /** the Capabilities filter for the savers. */
   protected Capabilities m_CapabilitiesFilter;
   
   /** whether to popup a dialog in case the file already exists (only save
-   * dialog) */
+   * dialog). */
   protected boolean m_OverwriteWarning = true;
 
-  /** whether the file to be opened must exist (only open dialog) */
+  /** whether the file to be opened must exist (only open dialog). */
   protected boolean m_FileMustExist = true;
+
+  /** the checkbox for bringing up the GenericObjectEditor. */
+  protected JCheckBox m_CheckBoxOptions;
+  
+  /** the note about the options dialog. */
+  protected JLabel m_LabelOptions;
+
+  /** the GOE for displaying the options of a loader/saver. */
+  protected GenericObjectEditor m_Editor = null;
+  
+  /** whether the GOE was OKed or Canceled. */
+  protected int m_EditorResult;
   
   /** whether to display only core converters (hardcoded in ConverterUtils).
    * Necessary for RMI/Remote Experiments for instance.
@@ -116,7 +135,7 @@ public class ConverterFileChooser
    */
   public ConverterFileChooser() {
     super();
-    m_Self = this;
+    initialize();
   }
 
   /**
@@ -126,7 +145,7 @@ public class ConverterFileChooser
    */
   public ConverterFileChooser(File currentDirectory) {
     super(currentDirectory);
-    m_Self = this;
+    initialize();
   }
   
   /**
@@ -136,11 +155,53 @@ public class ConverterFileChooser
    */
   public ConverterFileChooser(String currentDirectory) {
     super(currentDirectory);
+    initialize();
+  }
+  
+  /**
+   * Further initializations.
+   */
+  protected void initialize() {
+    JPanel	panel;
+    JPanel	panel2;
+    
     m_Self = this;
+    
+    m_CheckBoxOptions = new JCheckBox("Invoke options dialog");
+    m_CheckBoxOptions.setMnemonic('I');
+    m_LabelOptions = new JLabel("<html><br>Note:<br><br>Some file formats offer additional<br>options which can be customized<br>when invoking the options dialog.</html>");
+    panel = new JPanel(new BorderLayout());
+    panel.add(m_CheckBoxOptions, BorderLayout.NORTH);
+    panel2 = new JPanel(new BorderLayout());
+    panel2.add(m_LabelOptions, BorderLayout.NORTH);
+    panel2.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    panel.add(panel2, BorderLayout.CENTER);
+    setAccessory(panel);
+
+    m_Editor = new GenericObjectEditor(false);
+    ((GenericObjectEditor.GOEPanel) m_Editor.getCustomEditor()).addOkListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_EditorResult     = JFileChooser.APPROVE_OPTION;
+	m_CurrentConverter = m_Editor.getValue();
+	// thanks to serialization and transient readers/streams, we have
+	// to set the file again to initialize the converter again
+	try {
+	  ((FileSourcedConverter) m_CurrentConverter).setFile(((FileSourcedConverter) m_CurrentConverter).retrieveFile());
+	}
+	catch (Exception ex) {
+	  // ignored
+	}
+      }
+    });
+    ((GenericObjectEditor.GOEPanel) m_Editor.getCustomEditor()).addCancelListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+	m_EditorResult = JFileChooser.CANCEL_OPTION;
+      }
+    });
   }
 
   /**
-   * filters out all non-core loaders if only those should be displayed
+   * filters out all non-core loaders if only those should be displayed.
    * 
    * @param list	the list of filters to check
    * @return		the filtered list of filters
@@ -169,7 +230,7 @@ public class ConverterFileChooser
   }
 
   /**
-   * filters out all non-core savers if only those should be displayed
+   * filters out all non-core savers if only those should be displayed.
    * 
    * @param list	the list of filters to check
    * @return		the filtered list of filters
@@ -198,7 +259,7 @@ public class ConverterFileChooser
   }
   
   /**
-   * filters the list of file filters according to the currently set
+   * filters the list of file filters according to the currently set.
    * Capabilities
    * 
    * @param list	the filters to check
@@ -228,7 +289,7 @@ public class ConverterFileChooser
   }
   
   /**
-   * initializes the ExtensionFileFilters
+   * initializes the ExtensionFileFilters.
    * 
    * @param loader	if true then the loader filter are initialized
    * @param classnames	the classnames of the converters
@@ -285,7 +346,7 @@ public class ConverterFileChooser
   }
   
   /**
-   * initializes the GUI
+   * initializes the GUI.
    * 
    * @param dialogType		the type of dialog to setup the GUI for
    */
@@ -326,6 +387,16 @@ public class ConverterFileChooser
       }
     };
     addPropertyChangeListener(m_Listener);
+    
+    // initial setup
+    if (dialogType == LOADER_DIALOG) {
+      m_Editor.setClassType(AbstractFileLoader.class);
+      m_Editor.setValue(new weka.core.converters.ArffLoader());
+    }
+    else {
+      m_Editor.setClassType(AbstractFileSaver.class);
+      m_Editor.setValue(new weka.core.converters.ArffSaver());
+    }
     
     updateCurrentConverter();
   }
@@ -477,6 +548,19 @@ public class ConverterFileChooser
     if (result == APPROVE_OPTION) {
       m_LastFilter = getFileFilter();
       configureCurrentConverter(LOADER_DIALOG);
+
+      // bring up options dialog?
+      if (m_CheckBoxOptions.isSelected()) {
+	m_EditorResult = JFileChooser.CANCEL_OPTION;
+	m_Editor.setValue(m_CurrentConverter);
+	PropertyDialog pd;
+	if (PropertyDialog.getParentDialog(this) != null)
+	  pd = new PropertyDialog(PropertyDialog.getParentDialog(this), m_Editor);
+	else
+	  pd = new PropertyDialog(PropertyDialog.getParentFrame(this), m_Editor);
+	pd.setVisible(true);
+	result = m_EditorResult;
+      }
     }
     
     return result;
@@ -551,6 +635,19 @@ public class ConverterFileChooser
     if (result == APPROVE_OPTION) {
       m_LastFilter = getFileFilter();
       configureCurrentConverter(SAVER_DIALOG);
+
+      // bring up options dialog?
+      if (m_CheckBoxOptions.isSelected()) {
+	m_EditorResult = JFileChooser.CANCEL_OPTION;
+	m_Editor.setValue(m_CurrentConverter);
+	PropertyDialog pd;
+	if (PropertyDialog.getParentDialog(this) != null)
+	  pd = new PropertyDialog(PropertyDialog.getParentDialog(this), m_Editor);
+	else
+	  pd = new PropertyDialog(PropertyDialog.getParentFrame(this), m_Editor);
+	pd.setVisible(true);
+	result = m_EditorResult;
+      }
     }
     
     return result;
@@ -558,7 +655,7 @@ public class ConverterFileChooser
   
   /**
    * returns the loader that was chosen by the user, can be null in case the
-   * user aborted the dialog or the save dialog was shown
+   * user aborted the dialog or the save dialog was shown.
    * 
    * @return		the chosen loader, if any
    */
@@ -573,7 +670,7 @@ public class ConverterFileChooser
   
   /**
    * returns the saver that was chosen by the user, can be null in case the
-   * user aborted the dialog or the open dialog was shown
+   * user aborted the dialog or the open dialog was shown.
    * 
    * @return		the chosen saver, if any
    */
@@ -587,7 +684,7 @@ public class ConverterFileChooser
   }
   
   /**
-   * sets the current converter according to the current filefilter
+   * sets the current converter according to the current filefilter.
    */
   protected void updateCurrentConverter() {
     String[]	extensions;
@@ -624,7 +721,7 @@ public class ConverterFileChooser
   }
   
   /**
-   * configures the current converter
+   * configures the current converter.
    * 
    * @param dialogType		the type of dialog to configure for
    */
@@ -661,7 +758,7 @@ public class ConverterFileChooser
   }
   
   /**
-   * For testing the file chooser
+   * For testing the file chooser.
    * 
    * @param args	the commandline options - ignored
    * @throws Exception	if something goes wrong with loading/saving
