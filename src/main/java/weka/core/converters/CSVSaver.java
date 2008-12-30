@@ -50,7 +50,7 @@ import java.io.PrintWriter;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  * @see Saver
  */
 public class CSVSaver 
@@ -264,7 +264,11 @@ public class CSVSaver
    * @param inst the instance to turn into a string
    */
   protected String instanceToString(Instance inst) {
-    Instance outInst;
+    StringBuffer	result;
+    Instance 		outInst;
+    int			i;
+
+    result = new StringBuffer();
 
     if (inst instanceof SparseInstance) {
       outInst = new Instance(inst.weight(), inst.toDoubleArray());
@@ -274,7 +278,16 @@ public class CSVSaver
       outInst = inst;
     }
 
-    return outInst.toString();
+    for (i = 0; i < outInst.numAttributes(); i++) {
+      if (i > 0)
+	result.append(",");
+      if (outInst.isMissing(i))
+	result.append("?");
+      else
+	result.append(outInst.toString(i));
+    }
+
+    return result.toString();
   }
   
   /**
@@ -283,7 +296,7 @@ public class CSVSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
