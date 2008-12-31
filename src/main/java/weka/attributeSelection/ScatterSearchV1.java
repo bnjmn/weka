@@ -54,7 +54,7 @@ import weka.core.TechnicalInformation.Type;
  * Performs an Scatter Search  through the space of attribute subsets. Start with a population of many significants and diverses subset  stops when the result is higher than a given treshold or there's not more improvement<br/>
  * For more information see:<br/>
  * <br/>
- * Félix García López (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier.
+ * Félix Garcia Lopez (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -84,8 +84,8 @@ import weka.core.TechnicalInformation.Type;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;book{López2004,
- *    author = {Félix García López},
+ * &#64;book{Lopez2004,
+ *    author = {Felix Garcia Lopez},
  *    month = {October},
  *    publisher = {Elsevier},
  *    title = {Solving feature subset selection problem by a Parallel Scatter Search},
@@ -96,7 +96,7 @@ import weka.core.TechnicalInformation.Type;
  * <p/>
  <!-- technical-bibtex-end -->
  *
- * from the Book: Solving feature subset selection problem by a Parallel Scatter Search, Félix García López.
+ * from the Book: Solving feature subset selection problem by a Parallel Scatter Search, Félix Garcia Lopez.
  * @author Adrian Pino (apinoa@facinf.uho.edu.cu)
  * @version $Revision$
  *
@@ -210,7 +210,7 @@ public class ScatterSearchV1 extends ASSearch
     TechnicalInformation        result;
 
     result = new TechnicalInformation(Type.BOOK);
-    result.setValue(Field.AUTHOR, "Félix García López");
+    result.setValue(Field.AUTHOR, "Felix Garcia Lopez");
     result.setValue(Field.MONTH, "October");
     result.setValue(Field.YEAR, "2004");
     result.setValue(Field.TITLE, "Solving feature subset selection problem by a Parallel Scatter Search");
