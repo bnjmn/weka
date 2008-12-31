@@ -84,8 +84,8 @@ import weka.core.TechnicalInformation.Type;
  <!-- technical-bibtex-start -->
  * BibTeX:
  * <pre>
- * &#64;book{L�pez2004,
- *    author = {F�lix Garc�a L�pez},
+ * &#64;book{Lopez2004,
+ *    author = {Felix Garcia Lopez},
  *    month = {October},
  *    publisher = {Elsevier},
  *    title = {Solving feature subset selection problem by a Parallel Scatter Search},
@@ -96,7 +96,7 @@ import weka.core.TechnicalInformation.Type;
  * <p/>
  <!-- technical-bibtex-end -->
  *
- * from the Book: Solving feature subset selection problem by a Parallel Scatter Search, F�lix Garc�a L�pez.
+ * from the Book: Solving feature subset selection problem by a Parallel Scatter Search, Felix Garcia Lopez.
  * @author Adrian Pino (apinoa@facinf.uho.edu.cu)
  * @version $Revision$
  *
@@ -210,7 +210,7 @@ public class ScatterSearchV1 extends ASSearch
     TechnicalInformation        result;
 
     result = new TechnicalInformation(Type.BOOK);
-    result.setValue(Field.AUTHOR, "F�lix Garc�a L�pez");
+    result.setValue(Field.AUTHOR, "Felix Garcia Lopez");
     result.setValue(Field.MONTH, "October");
     result.setValue(Field.YEAR, "2004");
     result.setValue(Field.TITLE, "Solving feature subset selection problem by a Parallel Scatter Search");
