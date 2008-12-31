@@ -54,7 +54,7 @@ import weka.core.TechnicalInformation.Type;
  * Performs an Scatter Search  through the space of attribute subsets. Start with a population of many significants and diverses subset  stops when the result is higher than a given treshold or there's not more improvement<br/>
  * For more information see:<br/>
  * <br/>
- * F�lix Garc�a L�pez (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier.
+ * Felix Garcia Lopez (2004). Solving feature subset selection problem by a Parallel Scatter Search. Elsevier.
  * <p/>
  <!-- globalinfo-end -->
  *
