@@ -587,21 +587,21 @@ public class Filter
 	  m_state = FILTERING_TEST;
 	}
 	m_testingSet = e.getTestSet();
-	final String oldText = m_visual.getText();
+        //	final String oldText = m_visual.getText();
 	m_filterThread = new Thread() {
 	    public void run() {
 	      try {
 		if (m_testingSet != null) {
 		  m_visual.setAnimated();
-		  m_visual.setText("Filtering test data...");
+                  //		  m_visual.setText("Filtering test data...");
 		  if (m_log != null) {
 		    m_log.statusMessage(statusMessagePrefix() 
-		        + " filtering test data ("
+		        + "Filtering test data ("
 			+ m_testingSet.relationName() + ")");
 		  }
 		  Instances filteredTest = 
 		    weka.filters.Filter.useFilter(m_testingSet, m_Filter);
-		  m_visual.setText(oldText);
+                  //		  m_visual.setText(oldText);
 		  m_visual.setStatic();
 		  TestSetEvent ne =
 		    new TestSetEvent(weka.gui.beans.Filter.this,
@@ -620,7 +620,7 @@ public class Filter
                       + "ERROR (See log for details).");
                 }
 	      } finally {
-		m_visual.setText(oldText);
+                //		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_state = IDLE;
 		if (isInterrupted()) {
