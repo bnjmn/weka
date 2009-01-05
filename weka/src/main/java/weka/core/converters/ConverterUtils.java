@@ -49,7 +49,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.15 $
+ * @version $Revision$
  * @see Serializable
  */
 public class ConverterUtils
@@ -70,7 +70,7 @@ public class ConverterUtils
    * order to provide a unified interface to files and already loaded datasets.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.15 $
+   * @version $Revision$
    * @see #hasMoreElements(Instances)
    * @see #nextElement(Instances)
    * @see #reset()
@@ -264,7 +264,7 @@ public class ConverterUtils
       reset();
       
       try {
-	if (m_Loader != null)
+	if (m_BatchBuffer == null)
 	  result = m_Loader.getDataSet();
 	else
 	  result = m_BatchBuffer;
@@ -326,7 +326,7 @@ public class ConverterUtils
      * @throws Exception	if something goes wrong
      */
     public Instances getStructure() throws Exception {
-      if (m_Loader != null)
+      if (m_BatchBuffer == null)
 	return m_Loader.getStructure();
       else
 	return new Instances(m_BatchBuffer, 0);
@@ -431,7 +431,6 @@ public class ConverterUtils
      * @param location		the dataset to load
      * @return			the dataset
      * @throws Exception	if loading fails
-     * @see			#DataSource(String)
      */
     public static Instances read(String location) throws Exception {
       DataSource	source;
@@ -449,7 +448,6 @@ public class ConverterUtils
      * @param stream		the stream to load the dataset from
      * @return			the dataset
      * @throws Exception	if loading fails
-     * @see			#DataSource(InputStream)
      */
     public static Instances read(InputStream stream) throws Exception {
       DataSource	source;
@@ -467,7 +465,6 @@ public class ConverterUtils
      * @param loader		the loader to get the dataset from
      * @return			the dataset
      * @throws Exception	if loading fails
-     * @see			#DataSource(Loader)
      */
     public static Instances read(Loader loader) throws Exception {
       DataSource	source;
@@ -515,7 +512,7 @@ public class ConverterUtils
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -525,7 +522,7 @@ public class ConverterUtils
    * It is the logical counterpart to <code>DataSource</code>.
    * 
    * @author FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.15 $
+   * @version $Revision$
    * @see DataSource
    */
   public static class DataSink
@@ -668,7 +665,7 @@ public class ConverterUtils
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.15 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1164,6 +1161,6 @@ public class ConverterUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
