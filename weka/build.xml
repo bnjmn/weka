@@ -153,6 +153,14 @@
      </copy>
   </target>
 
+  <!-- Put everything in ${build}/testcases into the weka-tests.jar file -->
+  <target name="jar_tests" depends="compile_tests, init_dist"
+   description="Creates a jar file with the test cases in ./dist">
+    <jar jarfile="${dist}/weka-tests.jar" 
+      basedir="${build}/testcases">
+    </jar>
+  </target>
+
   <!-- Run the test cases via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
   <target name="run_tests" depends="compile_tests" 
