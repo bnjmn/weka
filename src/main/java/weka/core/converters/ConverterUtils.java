@@ -264,7 +264,7 @@ public class ConverterUtils
       reset();
       
       try {
-	if (m_Loader != null)
+	if (m_BatchBuffer == null)
 	  result = m_Loader.getDataSet();
 	else
 	  result = m_BatchBuffer;
@@ -326,7 +326,7 @@ public class ConverterUtils
      * @throws Exception	if something goes wrong
      */
     public Instances getStructure() throws Exception {
-      if (m_Loader != null)
+      if (m_BatchBuffer == null)
 	return m_Loader.getStructure();
       else
 	return new Instances(m_BatchBuffer, 0);
