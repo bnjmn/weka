@@ -104,7 +104,7 @@ public class Loader
   /**
    * Logging
    */
-  protected Logger m_log;
+  protected transient Logger m_log;
   
   /**
    * Asked to stop?
