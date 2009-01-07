@@ -62,7 +62,7 @@ import java.util.Random;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.77 $ 
+ * @version $Revision$ 
  */
 public class Instances 
   implements Serializable, RevisionHandler {
@@ -2058,6 +2058,11 @@ public class Instances
    *     outputs the results on stdout.
    *   </li>
    *   <li>
+   *     <code>weka.core.Instances</code> headers &lt;filename1&gt; &lt;filename2&gt;<br/>
+   *     Compares the headers of the two datasets and prints whether they match
+   *     or not.
+   *   </li>
+   *   <li>
    *     <code>weka.core.Instances</code> randomize &lt;seed&gt; &lt;filename&gt;<br/>
    *     randomizes the dataset with the given seed and outputs the result on stdout.
    *   </li>
@@ -2102,6 +2107,15 @@ public class Instances
 	while (source2.hasMoreElements(structure))
 	  System.out.println(source2.nextElement(structure));
       }
+      // read two files and compare their headers
+      else if ((args.length == 3) && (args[0].toLowerCase().equals("headers"))) {
+	DataSource source1 = new DataSource(args[1]);
+	DataSource source2 = new DataSource(args[2]);
+	if (source1.getStructure().equalHeaders(source2.getStructure()))
+	  System.out.println("Headers match");
+	else
+	  System.out.println("Headers don't match");
+      }
       // read file and seed value, randomize data and print result to stdout
       else if ((args.length == 3) && (args[0].toLowerCase().equals("randomize"))) {
 	DataSource source = new DataSource(args[2]);
@@ -2117,6 +2131,7 @@ public class Instances
 	    + "\tweka.core.Instances <filename>\n"
 	    + "\tweka.core.Instances merge <filename1> <filename2>\n"
 	    + "\tweka.core.Instances append <filename1> <filename2>\n"
+	    + "\tweka.core.Instances headers <filename1> <filename2>\n"
 	    + "\tweka.core.Instances randomize <seed> <filename>\n"
 	);
 	System.exit(1);
@@ -2134,6 +2149,6 @@ public class Instances
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.77 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
