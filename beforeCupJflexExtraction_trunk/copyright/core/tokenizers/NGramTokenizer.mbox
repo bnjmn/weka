@@ -1,0 +1,94 @@
+From +work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com Mon Jul  2 10:20:06 2007
+Return-Path: <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+Received: from compute2.internal (compute2.internal [10.202.2.42])
+	 by store36m.internal (Cyrus v2.3.8-fmsvn11630) with LMTPA;
+	 Sun, 01 Jul 2007 18:20:06 -0400
+X-Sieve: CMU Sieve 2.3
+X-Spam-score: 0.0
+X-Spam-hits: BAYES_00 -0.7
+X-Spam-source: IP='216.75.35.164', Country='US', FromHeader='com', MailFrom='com'
+X-Resolved-to: mark_andrew_hall@fastmail.fm
+X-Delivered-to: mark_andrew_hall@fastmail.fm
+X-Mail-from: +work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com
+Received: from gourmet.spamgourmet.com (gourmet.spamgourmet.com [216.75.35.164])
+	by mx3.messagingengine.com (Postfix) with ESMTP id 4B05D19419F
+	for <mark_andrew_hall@fastmail.fm>; Sun,  1 Jul 2007 18:20:04 -0400 (EDT)
+Received: from gourmet.spamgourmet.com (localhost.localdomain [127.0.0.1])
+	by gourmet.spamgourmet.com (8.13.8/8.13.7) with ESMTP id l61MK0sD004724
+	for <mark_andrew_hall@fastmail.fm>; Sun, 1 Jul 2007 22:20:00 GMT
+Received: (from jqh1@localhost)
+	by gourmet.spamgourmet.com (8.13.8/8.13.8/Submit) id l61MK0gD004722
+	for mark_andrew_hall@fastmail.fm; Sun, 1 Jul 2007 22:20:00 GMT
+Received: from nz-out-0506.google.com (nz-out-0506.google.com [64.233.162.233])
+	by gourmet.spamgourmet.com (8.13.8/8.13.7) with ESMTP id l61MK0en004698
+	for <work.e.mhall@spamgourmet.com>; Sun, 1 Jul 2007 22:20:00 GMT
+Received: by nz-out-0506.google.com with SMTP id s18so741461nze
+        for <work.e.mhall@spamgourmet.com>; Sun, 01 Jul 2007 15:20:01 -0700 (PDT)
+DKIM-Signature: a=rsa-sha1; c=relaxed/relaxed;
+        d=gmail.com; s=beta;
+        h=domainkey-signature:received:received:message-id:date:from:reply-to:sender:to:subject:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references:x-google-sender-auth;
+        b=inaWPRZkbeatNpllY0Ri13dXz6lYVJk0oKvUffG8EuIzAadfEbdqr5brFz529adiNMIDljxsRduN7UrodsxoExQ1cNxcw9YYs5AcgxE9YxVHZ33lAgGGAfEtob2dbkBMzu/3YItBKPS8fVarHaZPbsoblkwhHS2nxjujv2ywPCs=
+DomainKey-Signature: a=rsa-sha1; c=nofws;
+        d=gmail.com; s=beta;
+        h=received:message-id:date:from:reply-to:sender:to:subject:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references:x-google-sender-auth;
+        b=dUigLYDlQSGdVxre/0hr3TuNywh1aHdxc4Q5R03I6IM0f7YPj2Vy9F4RK9y4vApAhMyoWjCMpijMJayRaXhj9r2/UTIZrW3qcn4rDfQkGRGeRMqgCW7WM7CsNo8ewfIIsyr5IA5r3bWDQCHUTMFjzDxGAOTs4TDzEq8CSBndg5s=
+Received: by 10.143.14.16 with SMTP id r16mr316986wfi.1183328401150;
+        Sun, 01 Jul 2007 15:20:01 -0700 (PDT)
+Received: by 10.142.116.7 with HTTP; Sun, 1 Jul 2007 15:20:01 -0700 (PDT)
+Message-ID: <a96c12e50707011520m2b6307deo6cd0701fc82d71a9@mail.gmail.com>
+Date: Mon, 2 Jul 2007 10:20:01 +1200
+From: "Mark Hall - mhall@cs.waikato.ac.nz" <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+Reply-To: "mhall@cs.waikato.ac.nz" <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+Sender: "Mark Hall - mhall@cs.waikato.ac.nz" <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+To: "Sebastian Germesin" <sebastian.germesin@dfki.de>
+Subject: Re: weka.core.tokenizers.NGramTokenizer copyright
+In-Reply-To: <46879ADE.1060703@dfki.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+References: <20070629032832.GD574@cygnus.resnet.scms.waikato.ac.nz>
+	 <46879ADE.1060703@dfki.de>
+X-Google-Sender-Auth: 377fc736310c284a
+X-Remote-Spamgourmet:  (trusted: cs.waikato.ac.nz)
+Status: RO
+Content-Length: 609
+Lines: 36
+
+Cool! Thanks for that Sebastian.
+
+Cheers,
+Mark.
+
+On 7/2/07, Sebastian Germesin <sebastian.germesin@dfki.de> wrote:
+> Hi Mark,
+>
+> no problem, you can use the code with setting my name as author. I'm
+> happy to contribute the WEKA work.
+>
+> Cheers,
+> Sebastian
+>
+> Mark Hall schrieb:
+> > Hi Sebastian,
+> >
+> > Just a quick question - would you be open to giving copyright for your
+> > code in NGramTokenizer to the University of Waikato?
+> >
+> > Cheers,
+> > Mark.
+> >
+> >
+>
+>
+
+
+-- 
+Mark Hall
+Senior Lecturer
+Department of Computer Science
+University of Waikato
+Hamilton
+New Zealand
+www.cs.waikato.ac.nz/~mhall
+

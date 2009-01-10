@@ -1,0 +1,184 @@
+From +work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com Fri Jun 22 21:42:38 2007
+Return-Path: <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+Received: from compute1.internal (compute1.internal [10.202.2.41])
+	 by store36m.internal (Cyrus v2.3.8-fmsvn11630) with LMTPA;
+	 Fri, 22 Jun 2007 05:42:38 -0400
+X-Sieve: CMU Sieve 2.3
+X-Spam-score: 0.7
+X-Spam-hits: BAYES_00 -0.7, DNS_FROM_RFC_ABUSE 0.2, DNS_FROM_RFC_POST 0.6,
+  DNS_FROM_RFC_WHOIS 0.6
+X-Spam-source: IP='216.75.35.164', Country='US', FromHeader='com', MailFrom='com'
+X-Resolved-to: mark_andrew_hall@fastmail.fm
+X-Delivered-to: mark_andrew_hall@fastmail.fm
+X-Mail-from: +work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com
+Received: from gourmet.spamgourmet.com (gourmet.spamgourmet.com [216.75.35.164])
+	by mx1.messagingengine.com (Postfix) with ESMTP id DB43C272B4E
+	for <mark_andrew_hall@fastmail.fm>; Fri, 22 Jun 2007 05:42:35 -0400 (EDT)
+Received: from gourmet.spamgourmet.com (localhost.localdomain [127.0.0.1])
+	by gourmet.spamgourmet.com (8.13.8/8.13.7) with ESMTP id l5M9gVW0007883
+	for <mark_andrew_hall@fastmail.fm>; Fri, 22 Jun 2007 09:42:31 GMT
+Received: (from jqh1@localhost)
+	by gourmet.spamgourmet.com (8.13.8/8.13.8/Submit) id l5M9gV0d007875
+	for mark_andrew_hall@fastmail.fm; Fri, 22 Jun 2007 09:42:31 GMT
+Received: from wr-out-0506.google.com (wr-out-0506.google.com [64.233.184.232])
+	by gourmet.spamgourmet.com (8.13.8/8.13.7) with ESMTP id l5M9gUUA007845
+	for <work.e.mhall@spamgourmet.com>; Fri, 22 Jun 2007 09:42:30 GMT
+Received: by wr-out-0506.google.com with SMTP id 25so713960wry
+        for <work.e.mhall@spamgourmet.com>; Fri, 22 Jun 2007 02:42:31 -0700 (PDT)
+DKIM-Signature: a=rsa-sha1; c=relaxed/relaxed;
+        d=gmail.com; s=beta;
+        h=domainkey-signature:received:received:message-id:date:from:reply-to:sender:to:subject:cc:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references:x-google-sender-auth;
+        b=XCYWWJhtjeDROWloKWck6ePeOmcoxSv2stdxSWRCpsj7GdqG9Vzkdps/EXQurTQusrvo3cEoUtIv3ZewETmB731jRFk0FIdd3iCjnNj0wSiUYwfYnGQiOcnQXvr/KzI/rqry0WJbpy3kudTKXn+WPpuGGpqsQ0eBrCBfb01p578=
+DomainKey-Signature: a=rsa-sha1; c=nofws;
+        d=gmail.com; s=beta;
+        h=received:message-id:date:from:reply-to:sender:to:subject:cc:in-reply-to:mime-version:content-type:content-transfer-encoding:content-disposition:references:x-google-sender-auth;
+        b=c9ycbuBPgXbJqYzff4V1qvqy4Swd0Ryj376JkVbwUbbaBCcdgOZUT+/n95qJMYLP70PKuAvV8CaDhrObcWXxyoYQrTnHWKNbYFInW9i13Iw66mS8WB0+59JuE8ikyYhmujcrYXcD/n6FlTWyMfbgzjtGFDv4WV+1nIpZoAsEk+A=
+Received: by 10.143.39.16 with SMTP id r16mr14833wfj.1182505351410;
+        Fri, 22 Jun 2007 02:42:31 -0700 (PDT)
+Received: by 10.143.160.10 with HTTP; Fri, 22 Jun 2007 02:42:31 -0700 (PDT)
+Message-ID: <a96c12e50706220242h3e6bffc1h466f3b4ef9159fe9@mail.gmail.com>
+Date: Fri, 22 Jun 2007 21:42:31 +1200
+From: "Mark Hall - mhall@cs.waikato.ac.nz" <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+Reply-To: "mhall@cs.waikato.ac.nz" <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+Sender: "Mark Hall - mhall@cs.waikato.ac.nz" <+work+mhall+78032554d8.mhall#cs.waikato.ac.nz@spamgourmet.com>
+To: "Dr. techn. Alexander K. Seewald" <alex@seewald.at>
+Subject: Re: Copyright again - StringKernel
+Cc: "Peter Reutemann" <fracpete@waikato.ac.nz>
+In-Reply-To: <20070622080532.GA21174@sdg.at>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+References: <a96c12e50706211942g51bbc5c9r83e334c3f1aab2d7@mail.gmail.com>
+	 <20070622080532.GA21174@sdg.at>
+X-Google-Sender-Auth: fa0516e24956dc2c
+X-Remote-Spamgourmet:  (trusted: cs.waikato.ac.nz)
+Status: RO
+Content-Length: 3696
+Lines: 124
+
+Great! Thanks for that Alex.
+
+Cheers,
+Mark.
+
+On 6/22/07, Dr. techn. Alexander K. Seewald <alex@seewald.at> wrote:
+> Yes, no problems again. Although there are other algorithms better
+> suited for text analysis (such as DMCPARM by Gordon V. Cormack & the
+> ROSVM by D. Scully), none of the have yet benn implemented in WEKA.
+> But D. said he'd consider it. :-)
+>
+> Best,
+>   Alex
+>
+> On Fri, Jun 22, 2007 at 02:42:01PM +1200, Mark Hall wrote:
+> > Hi Alex,
+> >
+> > Sorry to bother you with this stuff again. Is it ok with Florian for
+> > UoW to have the copyright for StringKernel?
+> >
+> > Cheers,
+> > Mark.
+> >
+> > On 3/28/07, Dr. techn. Alexander K. Seewald <alex@seewald.at> wrote:
+> > >Yes, no problem - like always. You can also consider the copyright
+> > >for my other contributions (original version of StackingC, Grading
+> > >and Vote) to be given to the University of Waikato as well. It's the
+> > >least I can do.
+> > >
+> > >Best,
+> > >  Alex
+> > >----
+> > >Dr. Alexander K. Seewald
+> > >
+> > >Seewald Solutions                +43(664)1106886
+> > >------------------------------------------------
+> > >         Information wants to be free;
+> > >Information also wants to be expensive (S.Brant)
+> > >--------------- alex.seewald.at ----------------
+> > >
+> > >
+> > >On Wed, Mar 28, 2007 at 03:34:09PM +1200, Mark Hall wrote:
+> > >> Hi Alex,
+> > >>
+> > >> Thanks for the contribution. Are you willing to give copyright fro this
+> > >> change to the University of Waikato?
+> > >>
+> > >> Cheers,
+> > >> Mark.
+> > >>
+> > >> On Tue, 27 Mar 2007 08:10:24 +1200, Eibe Frank wrote:
+> > >> > Sounds useful.
+> > >> >
+> > >> > Cheers,
+> > >> > Eibe
+> > >> >
+> > >> > PS: Not sure whether you guys still want to maintain Waikato
+> > >> > copyright for the Weka classes that were developed here.
+> > >> >
+> > >> > Begin forwarded message:
+> > >> >
+> > >> >> From: "Dr. techn. Alexander K. Seewald" <alex@seewald.at>
+> > >> >> Date: 26 March 2007 20:23:24 GMT+12:00
+> > >> >> To: eibe@cs.waikato.ac.nz
+> > >> >> Subject: Small change to Resample
+> > >> >>
+> > >> >> Hi Eibe,
+> > >> >>
+> > >> >> I hereby contribute a small change to
+> > >> >> weka.filters.supervised.instance.Resample (new version
+> > >> >> attached). It introduces a -V parameter to invert the selection,
+> > >> >> which makes it quite simple to use the rest of a larger datafile for
+> > >> >> testing - which is otherwise quite cumbersome. ;-)
+> > >> >>
+> > >> >> Best & greetings,
+> > >> >>   Alex
+> > >> >> P.S. Is mlcontrib@cs.waikato.ac.nz down? My mail bounced from
+> > >> >> there. Or has the contribution process changed?
+> > >> >> --
+> > >> >> Dr. Alexander K. Seewald
+> > >> >>
+> > >> >> Seewald Solutions                +43(664)1106886
+> > >> >> ------------------------------------------------
+> > >> >>          Information wants to be free;
+> > >> >> Information also wants to be expensive (S.Brant)
+> > >> >> --------------- alex.seewald.at ----------------
+> > >> >
+> > >> --
+> > >> Mark Hall
+> > >> Senior Lecturer
+> > >> Department of Computer Science
+> > >> University of Waikato
+> > >> Hamilton
+> > >> New Zealand
+> > >> www.cs.waikato.ac.nz/~mhall
+> > >
+> >
+> >
+> > --
+> > Mark Hall
+> > Senior Lecturer
+> > Department of Computer Science
+> > University of Waikato
+> > Hamilton
+> > New Zealand
+> > www.cs.waikato.ac.nz/~mhall
+>
+> --
+> Dr. Alexander K. Seewald         +43(664)1106886
+> ------------------------------------------------
+>          Information wants to be free;
+> Information also wants to be expensive (S.Brant)
+> --------------- alex.seewald.at ----------------
+>
+
+
+-- 
+Mark Hall
+Senior Lecturer
+Department of Computer Science
+University of Waikato
+Hamilton
+New Zealand
+www.cs.waikato.ac.nz/~mhall
+
