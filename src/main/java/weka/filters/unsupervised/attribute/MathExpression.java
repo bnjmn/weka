@@ -35,8 +35,8 @@ import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.mathematicalexpression.Parser;
 import weka.core.mathematicalexpression.Scanner;
-import weka.core.parser.java_cup.runtime.DefaultSymbolFactory;
-import weka.core.parser.java_cup.runtime.SymbolFactory;
+import java_cup.runtime.DefaultSymbolFactory;
+import java_cup.runtime.SymbolFactory;
 import weka.filters.UnsupervisedFilter;
 
 import java.io.ByteArrayInputStream;
@@ -75,7 +75,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author Prados Julien (julien.prados@cui.unige.ch) 
- * @version $Revision: 1.10 $
+ * @version $Revision$
  * @see MathematicalExpression
  */
 public class MathExpression 
@@ -551,7 +551,7 @@ public class MathExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

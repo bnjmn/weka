@@ -21,7 +21,7 @@
 
 package weka.filters.unsupervised.instance.subsetbyexpression;
 
-import weka.core.parser.java_cup.runtime.SymbolFactory;
+import java_cup.runtime.SymbolFactory;
 import java.io.*;
 
 /**
@@ -29,7 +29,7 @@ import java.io.*;
  * or not.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 %%
 %unicode
@@ -39,7 +39,7 @@ import java.io.*;
 %class Scanner
 %{
   // Author: FracPete (fracpete at waikato dot ac dot nz)
-  // Version: $Revision: 1.2 $
+  // Version: $Revision$
   protected SymbolFactory m_SymFactory;
 
   protected StringBuffer m_String = new StringBuffer();

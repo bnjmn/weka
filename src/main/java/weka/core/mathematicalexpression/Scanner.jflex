@@ -21,14 +21,14 @@
 
 package weka.core.mathematicalexpression;
 
-import weka.core.parser.java_cup.runtime.SymbolFactory;
+import java_cup.runtime.SymbolFactory;
 import java.io.*;
 
 /**
  * A scanner for mathematical expressions.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 %%
 %cup
@@ -36,7 +36,7 @@ import java.io.*;
 %class Scanner
 %{
   // Author: FracPete (fracpete at waikato dot ac dot nz)
-  // Version: $Revision: 1.2 $
+  // Version: $Revision$
   protected SymbolFactory sf;
 
   public Scanner(InputStream r, SymbolFactory sf){

@@ -28,10 +28,15 @@
    <property name="deprecation"    value="off" />
    <property name="optimization"   value="off" />
    <property name="build"          value="build"/>
+   <property name="lib"            value="lib"/>
    <property name="parserpkg"      value="" />
    <property name="src"            value="src/main/java" />
 
    <path id="project.class.path">
+     <fileset dir="${lib}">
+       <include name="*.jar"/>
+       <include name="*.zip"/>
+     </fileset>
      <pathelement location="${build}/classes"/>
      <pathelement path="${java.class.path}" />
    </path>
@@ -65,7 +70,7 @@
         (using Parser.cup and Scanner.jflex). -->
    <target name="parser" description="Generates the parser ${parserpkg}.">
       <echo message="Generating lexer (${parserpkg})."/>
-      <java classname="weka.core.parser.JFlex.Main">
+      <java classname="JFlex.Main">
       	 <classpath refid="project.class.path"/>
          <arg value="--jlex"/>
          <arg value="--quiet"/>
@@ -75,7 +80,7 @@
          <arg value="${src}/${parserpkg}/Scanner.jflex"/>
       </java>
       <echo message="Generating parser (${parserpkg})."/>
-      <java classname="weka.core.parser.java_cup.Main">
+      <java classname="java_cup.Main">
       	 <classpath refid="project.class.path"/>
          <arg value="-parser"/>
          <arg value="Parser"/>
