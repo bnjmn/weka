@@ -922,9 +922,6 @@ public class ScatterSearchV1 extends ASSearch
     //..........
 
 
-// m�todos auxiliares generales
-
-
     /**
    * Evaluate each gen of a BitSet inserted in a Subset and get the most significant for that Subset
    *
