@@ -2,5 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/JFlex.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/java-cup.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
