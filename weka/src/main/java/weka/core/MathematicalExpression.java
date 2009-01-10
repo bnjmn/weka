@@ -23,8 +23,8 @@ package weka.core;
 
 import weka.core.mathematicalexpression.Parser;
 import weka.core.mathematicalexpression.Scanner;
-import weka.core.parser.java_cup.runtime.DefaultSymbolFactory;
-import weka.core.parser.java_cup.runtime.SymbolFactory;
+import java_cup.runtime.DefaultSymbolFactory;
+import java_cup.runtime.SymbolFactory;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
@@ -104,7 +104,7 @@ import java.util.HashMap;
  * </pre>
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class MathematicalExpression
   implements RevisionHandler {
@@ -139,6 +139,6 @@ public class MathematicalExpression
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

@@ -32,7 +32,7 @@
 
 package weka.core.mathematicalexpression;
 
-import weka.core.parser.java_cup.runtime.*;
+import java_cup.runtime.*;
 
 import java.io.*;
 import java.util.*;
@@ -41,7 +41,7 @@ import java.util.*;
  * A parser for parsing mathematical expressions.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 
 parser code {:
