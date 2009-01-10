@@ -89,6 +89,11 @@
     </copy>
     <rmic base="${build}/classes"
        classname="weka.experiment.RemoteEngine"/>
+    <unzip src="${lib}/java-cup.jar" dest="${build}/classes">
+      <patternset>
+        <include name="java_cup/runtime/**/*"/>
+      </patternset>
+    </unzip>
   </target>
 
   <!-- Make the javadocs -->
@@ -97,6 +102,7 @@
           description="Make javadocs into ./doc">
     <mkdir dir="${doc}"/>
     <javadoc sourcepath="${src}" 
+             classpathref="project.class.path"
              destdir="${doc}" 
              packagenames="weka.*"
              Author="yes" 
