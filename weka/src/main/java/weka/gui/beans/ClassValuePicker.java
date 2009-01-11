@@ -162,11 +162,13 @@ public class ClassValuePicker
     if (dataSet.classAttribute().isNumeric()) {
       if (m_logger != null) {
 	m_logger.
-	  logMessage("ClassValuePicker] "
+	  logMessage("[ClassValuePicker] "
 	      + statusMessagePrefix()
 	      + " Class attribute must be nominal (ClassValuePicker)");
 	m_logger.statusMessage(statusMessagePrefix()
 	    + "WARNING: Class attribute must be nominal.");
+      } else {
+        m_logger.statusMessage(statusMessagePrefix() + "remove");
       }
       return dataSet;
     }
