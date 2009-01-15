@@ -33,7 +33,7 @@ import java.util.Vector;
  * and the corresponding query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision$
  */
 public class ResultSetHelper {
   
@@ -290,7 +290,8 @@ public class ResultSetHelper {
       }
       
       if (proceed) {
-	for (i = 0; i < rowCount; i++) {
+	i = 0;
+	while (true) {
 	  row = new Object[getColumnCount()];
 	  result.add(row);
 
@@ -312,6 +313,8 @@ public class ResultSetHelper {
 	    if (!m_ResultSet.next())
 	      break;
 	  }
+
+	  i++;
 	}
       }
     }
