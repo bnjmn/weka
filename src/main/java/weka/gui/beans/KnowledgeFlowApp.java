@@ -1355,8 +1355,8 @@ public class KnowledgeFlowApp
               } else {
                 SerializedObject so = new SerializedObject(tempBN);
                 MetaBean copy = (MetaBean)so.getObject();
-                ((Visible)copy).getVisual().
-                  addPropertyChangeListener(KnowledgeFlowApp.this);
+                /*((Visible)copy).getVisual().
+                  addPropertyChangeListener(KnowledgeFlowApp.this); */
                 copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
                 m_toolBarBean = copy;
               }
