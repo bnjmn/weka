@@ -125,6 +125,7 @@ public class CrossValidationFoldMaker
       final Instances dataSet = new Instances(e.getDataSet());
       m_foldThread = new Thread() {
 	  public void run() {
+	    boolean errorOccurred = false;
 	    try {
 	      Random random = new Random(getSeed());
 	      dataSet.randomize(random);
@@ -177,19 +178,23 @@ public class CrossValidationFoldMaker
 	      }
 	    } catch (Exception ex) {
 	      // stop all processing
+	      errorOccurred = true;
 	      CrossValidationFoldMaker.this.stop();
 	      if (m_logger != null) {
 	        m_logger.logMessage("[" + getCustomName() 
 	            + "] problem during fold creation. "
 	            + ex.getMessage());
-	        m_logger.statusMessage(getCustomName() 
-	            + "$" + CrossValidationFoldMaker.this.hashCode()
-	            + "|"
-	            + "ERROR (See log for details).");
 	      }
 	      ex.printStackTrace();
 	    } finally {
-	      if (isInterrupted()) {
+	      if (errorOccurred) {
+	        if (m_logger != null) {
+	          m_logger.statusMessage(getCustomName() 
+	              + "$" + CrossValidationFoldMaker.this.hashCode()
+	              + "|"
+	              + "ERROR (See log for details).");
+	        }
+	      } else if (isInterrupted()) {
 	        String msg = "[" + getCustomName() + "] Cross validation interrupted";
 	        if (m_logger != null) {
 	          m_logger.logMessage("[" + getCustomName() + "] Cross validation interrupted");
