@@ -122,6 +122,7 @@ public class ClassifierPerformanceEvaluator
       if (m_evaluateThread == null) {
 	m_evaluateThread = new Thread() {
 	    public void run() {
+	      boolean errorOccurred = false;
 //	      final String oldText = m_visual.getText();
 	      try {
 		if (ce.getSetNumber() == 1 /*|| 
@@ -257,22 +258,24 @@ public class ClassifierPerformanceEvaluator
 		  }
 		}
 	      } catch (Exception ex) {
+	        errorOccurred = true;
 	        ClassifierPerformanceEvaluator.this.stop(); // stop all processing
 	        if (m_logger != null) {
 	          m_logger.logMessage("[ClassifierPerformanceEvaluator] "
 	              + statusMessagePrefix() 
 	              + " problem evaluating classifier. " 
 	              + ex.getMessage());
-	          m_logger.statusMessage(statusMessagePrefix() 
-	              + "ERROR (See log for details)");
 	        }
 		ex.printStackTrace();
 	      } finally {
 //		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
-		if (isInterrupted()) {
-		  if (m_logger != null) {
+		if (m_logger != null) {
+		  if (errorOccurred) {
+		    m_logger.statusMessage(statusMessagePrefix() 
+		        + "ERROR (See log for details)");
+		  } else if (isInterrupted()) {
 		    m_logger.logMessage("[" + getCustomName() +"] Evaluation interrupted!");
 		    m_logger.statusMessage(statusMessagePrefix() 
 		        + "INTERRUPTED");
@@ -305,7 +308,7 @@ public class ClassifierPerformanceEvaluator
   public boolean isBusy() {
     return (m_evaluateThread != null);
   }
-  
+    
   /**
    * Try and stop any action
    */
