@@ -120,7 +120,7 @@ import java.beans.IntrospectionException;
  * Main GUI class for the KnowledgeFlow
  *
  * @author Mark Hall
- * @version  $Revision: 1.1.2.12 $
+ * @version  $Revision$
  * @since 1.0
  * @see JPanel
  * @see PropertyChangeListener
@@ -299,7 +299,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
    * connections
    *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
-   * @version $Revision: 1.1.2.12 $
+   * @version $Revision$
    * @since 1.0
    * @see PrintablePanel
    */
@@ -1135,8 +1135,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
               } else {
                 SerializedObject so = new SerializedObject(tempBN);
                 MetaBean copy = (MetaBean)so.getObject();
-                ((Visible)copy).getVisual().
-                  addPropertyChangeListener(KnowledgeFlowApp.this);
+                /*                ((Visible)copy).getVisual().
+                                  addPropertyChangeListener(KnowledgeFlowApp.this); */
                 copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
                 m_toolBarBean = copy;
               }
