@@ -23,8 +23,10 @@
 package weka.gui.treevisualizer;
 
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.gui.visualize.PrintablePanel;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizeUtils;
 
 import java.awt.Color;
 import java.awt.Container;
@@ -32,6 +34,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -42,6 +45,7 @@ import java.awt.event.MouseMotionListener;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Properties;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -92,6 +96,9 @@ public class TreeVisualizer
   /** for serialization */
   private static final long serialVersionUID = -8668637962504080749L;
 
+  /** the props file. */
+  public final static String PROPERTIES_FILE = "weka/gui/treevisualizer/TreeVisualizer.props";
+  
   /** The placement algorithm for the Node structure. */
   private NodePlace m_placer;  
 
@@ -161,7 +168,7 @@ public class TreeVisualizer
   /** An option on the win_menu */
   private JMenuItem m_autoScale;
 
-  /** A ub group on the win_menu */
+  /** A sub group on the win_menu */
   private JMenu m_selectFont;
 
   /** A grouping for the font choices */
@@ -249,6 +256,27 @@ public class TreeVisualizer
   private JDialog m_searchWin;
   private JRadioButton m_caseSen;
 
+  /** the font color. */
+  protected Color m_FontColor = null;
+
+  /** the background color. */
+  protected Color m_BackgroundColor = null;
+
+  /** the node color. */
+  protected Color m_NodeColor = null;
+
+  /** the line color. */
+  protected Color m_LineColor = null;
+
+  /** the color of the zoombox. */
+  protected Color m_ZoomBoxColor = null;
+
+  /** the XOR color of the zoombox. */
+  protected Color m_ZoomBoxXORColor = null;
+  
+  /** whether to show the border or not. */
+  protected boolean m_ShowBorder = true;
+  
   ///////////////////
 
   //this is the event fireing stuff
@@ -264,9 +292,12 @@ public class TreeVisualizer
    */
   public TreeVisualizer(TreeDisplayListener tdl, String dot, NodePlace p) {
     super();
+
+    initialize();
     
     //generate the node structure in here
-    setBorder(BorderFactory.createTitledBorder("Tree View")); 
+    if (m_ShowBorder)
+      setBorder(BorderFactory.createTitledBorder("Tree View")); 
     m_listener = tdl;
 
     TreeBuild builder = new TreeBuild();
@@ -332,13 +363,13 @@ public class TreeVisualizer
     m_winMenu.addSeparator();
     m_winMenu.add(m_fitToScreen);
     m_winMenu.add(m_autoScale);
-    m_winMenu.addSeparator();
+    //m_winMenu.addSeparator();
     //m_winMenu.add(unhide);
     m_winMenu.addSeparator();
     m_winMenu.add(m_selectFont);
-    m_winMenu.addSeparator();
 
     if (m_listener != null) {
+      m_winMenu.addSeparator();
       m_winMenu.add(m_accept);
     }
     
@@ -490,9 +521,12 @@ public class TreeVisualizer
    */  
   public TreeVisualizer(TreeDisplayListener tdl, Node n, NodePlace p) {
     super();
+
+    initialize();
     
     //if the size needs to be automatically alocated I will do it here
-    setBorder(BorderFactory.createTitledBorder("Tree View")); 
+    if (m_ShowBorder)
+      setBorder(BorderFactory.createTitledBorder("Tree View")); 
     m_listener = tdl;
     m_topNode = n;
     m_placer = p;
@@ -710,6 +744,46 @@ public class TreeVisualizer
     //frame_limiter.setInitialDelay();
     m_frameLimiter.setRepeats(false);
     m_frameLimiter.start();
+  }
+
+  /**
+   * Processes the color string. Returns null if empty.
+   * 
+   * @param colorStr	the string to process
+   * @return		the processed color or null
+   */
+  protected Color getColor(String colorStr) {
+    Color	result;
+    
+    result = null;
+    
+    if ((colorStr != null) && (colorStr.length() > 0))
+      result = VisualizeUtils.processColour(colorStr, result);
+    
+    return result;
+  }
+  
+  /**
+   * Performs some initialization.
+   */
+  protected void initialize() {
+    Properties	props;
+    
+    try {
+      props = Utils.readProperties(PROPERTIES_FILE);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      props = new Properties();
+    }
+    
+    m_FontColor       = getColor(props.getProperty("FontColor", ""));
+    m_BackgroundColor = getColor(props.getProperty("BackgroundColor", ""));
+    m_NodeColor       = getColor(props.getProperty("NodeColor", ""));
+    m_LineColor       = getColor(props.getProperty("LineColor", ""));
+    m_ZoomBoxColor    = getColor(props.getProperty("ZoomBoxColor", ""));
+    m_ZoomBoxXORColor = getColor(props.getProperty("ZoomBoxXORColor", ""));
+    m_ShowBorder      = Boolean.parseBoolean(props.getProperty("ShowBorder", "true"));
   }
 
   /**
@@ -1077,8 +1151,14 @@ public class TreeVisualizer
 	m_mouseState = 3;
 	
 	Graphics g = getGraphics();
-	g.setColor(Color.black);
-	g.setXORMode(Color.white);
+	if (m_ZoomBoxColor == null)
+	  g.setColor(Color.black);
+	else
+	  g.setColor(m_ZoomBoxColor);
+	if (m_ZoomBoxXORColor == null)
+	  g.setXORMode(Color.white);
+	else
+	  g.setXORMode(m_ZoomBoxXORColor);
 	g.drawRect(m_oldMousePos.width, m_oldMousePos.height,
 		   m_newMousePos.width - m_oldMousePos.width, 
 		   m_newMousePos.height - m_oldMousePos.height);
@@ -1152,8 +1232,14 @@ public class TreeVisualizer
       //then zoom in
       m_mouseState = 0;
       Graphics g = getGraphics();
-      g.setColor(Color.black);
-      g.setXORMode(Color.white);
+      if (m_ZoomBoxColor == null)
+	g.setColor(Color.black);
+      else
+	g.setColor(m_ZoomBoxColor);
+      if (m_ZoomBoxXORColor == null)
+	g.setXORMode(Color.white);
+      else
+	g.setXORMode(m_ZoomBoxXORColor);
       g.drawRect(m_oldMousePos.width, m_oldMousePos.height, 
 		 m_newMousePos.width - m_oldMousePos.width, 
 		 m_newMousePos.height - m_oldMousePos.height);
@@ -1267,8 +1353,14 @@ public class TreeVisualizer
       //then zoom box being created
       //redraw the zoom box
       Graphics g = getGraphics();
-      g.setColor(Color.black);
-      g.setXORMode(Color.white);
+      if (m_ZoomBoxColor == null)
+	g.setColor(Color.black);
+      else
+	g.setColor(m_ZoomBoxColor);
+      if (m_ZoomBoxXORColor == null)
+	g.setXORMode(Color.white);
+      else
+	g.setXORMode(m_ZoomBoxXORColor);
       g.drawRect(m_oldMousePos.width, m_oldMousePos.height,
 		 m_newMousePos.width - m_oldMousePos.width, 
 		 m_newMousePos.height - m_oldMousePos.height);
@@ -1334,8 +1426,11 @@ public class TreeVisualizer
    * @param g the drawing surface.
    */
   public void paintComponent(Graphics g) {
-    //System.out.println(nodes[0].top + "this is seriously pissing me off");
+    Color oldBackground = ((Graphics2D) g).getBackground();
+    if (m_BackgroundColor != null)
+      ((Graphics2D) g).setBackground(m_BackgroundColor);
     g.clearRect(0, 0, getSize().width, getSize().height);
+    ((Graphics2D) g).setBackground(oldBackground);
     g.setClip(3, 7, getWidth() - 6, getHeight() - 10);
     painter(g);
     g.setClip(0, 0, getWidth(), getHeight());
@@ -1462,7 +1557,11 @@ public class TreeVisualizer
     if (m_highlightNode >= 0 && m_highlightNode < m_numNodes) {
       //then draw outline
       if (m_nodes[m_highlightNode].m_quad == 18) {
-	Color acol = m_nodes[m_highlightNode].m_node.getColor();
+	Color acol;
+	if (m_NodeColor == null)
+	  acol = m_nodes[m_highlightNode].m_node.getColor();
+	else
+	  acol = m_NodeColor;
 	g.setColor(new Color((acol.getRed() + 125) % 256, 
 			     (acol.getGreen() + 125) % 256, 
 			     (acol.getBlue() + 125) % 256));
@@ -1516,7 +1615,10 @@ public class TreeVisualizer
   private void drawNode(int n, Graphics g) {
     //this will draw a node and then print text on it
     
-    g.setColor(m_nodes[n].m_node.getColor());
+    if (m_NodeColor == null)
+      g.setColor(m_nodes[n].m_node.getColor());
+    else
+      g.setColor(m_NodeColor);
     g.setPaintMode();
     calcScreenCoords(n);
     int x = m_nodes[n].m_center - m_nodes[n].m_side;
@@ -1553,7 +1655,10 @@ public class TreeVisualizer
     calcScreenCoords(c);
     calcScreenCoords(p);
     
-    g.setColor(Color.black);
+    if (m_LineColor == null)
+      g.setColor(Color.black);
+    else
+      g.setColor(m_LineColor);
     g.setPaintMode();
     
     if (m_currentFont.getSize() < 2) {
@@ -1623,9 +1728,15 @@ public class TreeVisualizer
     //this function will take in the rectangle that the text should be 
     //drawn in as well as the subscript
     //for either the edge or node and a boolean variable to tell which
+    
+    // backup color
+    Color oldColor = g.getColor();
 
     g.setPaintMode();
-    g.setColor(Color.black);
+    if (m_FontColor == null)
+      g.setColor(Color.black);
+    else
+      g.setColor(m_FontColor);
     String st;
     if (e_or_n) {
       //then paint for edge
@@ -1645,6 +1756,9 @@ public class TreeVisualizer
 		     y1 + (noa + 1) * m_fontSize.getHeight()); 
       }
     }
+    
+    // restore color
+    g.setColor(oldColor);
   }
   
   /**
@@ -2073,51 +2187,39 @@ public class TreeVisualizer
    * @param args first argument should be the name of a file that contains
    * a tree discription in dot format.
    */
-  public static void main(String[] args)
-  {
-    try
-      {
-        weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-	//put in the random data generator right here
-	// this call with import java.lang gives me between 0 and 1 Math.random
-	TreeBuild builder = new TreeBuild();
-	Node top = null;
-	NodePlace arrange = new PlaceNode2();
-	//top = builder.create(new StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
-	top = builder.create(new FileReader(args[0]));
-    
-	int num = top.getCount(top,0);
-	//System.out.println("counter counted " + num + " nodes");
-	//System.out.println("there are " + num + " nodes");
-	TreeVisualizer a = new TreeVisualizer(null, top, arrange);
-	a.setSize(800 ,600);
-	//a.setTree(top);
-	JFrame f;
-	f = new JFrame();
-	//a.addMouseMotionListener(a);
-	//a.addMouseListener(a);
-	//f.add(a);
-        Container contentPane = f.getContentPane();
-	contentPane.add(a);
-   f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-	f.setSize(800,600);
-	f.setVisible(true);
-	//f.
-	//find_prop(top);
-	//a.setTree(top,arrange);//,(num + 1000), num / 2 + 1000);
-      }
-    catch(IOException e){}
+  public static void main(String[] args) {
+    try {
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
+      //put in the random data generator right here
+      // this call with import java.lang gives me between 0 and 1 Math.random
+      TreeBuild builder = new TreeBuild();
+      Node top = null;
+      NodePlace arrange = new PlaceNode2();
+      //top = builder.create(new StringReader("digraph atree { top [label=\"the top\"] a [label=\"the first node\"] b [label=\"the second nodes\"] c [label=\"comes off of first\"] top->a top->b b->c }"));
+      top = builder.create(new FileReader(args[0]));
+
+      int num = top.getCount(top,0);
+      //System.out.println("counter counted " + num + " nodes");
+      //System.out.println("there are " + num + " nodes");
+      TreeVisualizer a = new TreeVisualizer(null, top, arrange);
+      a.setSize(800 ,600);
+      //a.setTree(top);
+      JFrame f;
+      f = new JFrame();
+      //a.addMouseMotionListener(a);
+      //a.addMouseListener(a);
+      //f.add(a);
+      Container contentPane = f.getContentPane();
+      contentPane.add(a);
+      f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      f.setSize(800,600);
+      f.setVisible(true);
+      //f.
+      //find_prop(top);
+      //a.setTree(top,arrange);//,(num + 1000), num / 2 + 1000);
+    }
+    catch(IOException e) {
+      // ignored
+    }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
