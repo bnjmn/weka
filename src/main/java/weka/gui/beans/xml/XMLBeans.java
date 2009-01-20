@@ -1652,16 +1652,14 @@ public class XMLBeans
     // set file only, if it exists
     if (file != null) {
       String tempFile = file;
-      // try and replace any environment variables before we
-      // test for existence
-      try {
-        tempFile = Environment.substitute(file);
-      } catch (Exception ex) {
-        System.out.println(ex.getMessage());
-      }
-      //      fl = new File(file);
-      fl = new File(tempFile);
-      if (fl.exists()) {
+
+      boolean containsEnv = false;
+      containsEnv = Environment.containsEnvVariables(file);
+      
+      fl = new File(file);      
+      // only test for existence if the path does not contain environment vars
+      // (trust that after they are resolved that everything is hunky dory)
+      if (containsEnv || fl.exists()) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
         System.out.println("WARNING: The file '" + tempFile + "' does not exist!");
