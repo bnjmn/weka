@@ -21,14 +21,19 @@
 
 package weka.core.converters;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.zip.GZIPInputStream;
 
 
@@ -36,11 +41,11 @@ import java.util.zip.GZIPInputStream;
  * Abstract superclass for all file loaders.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader
-  implements FileSourcedConverter {
+  implements FileSourcedConverter, EnvironmentHandler {
 
   /** the file */
   protected String m_File = (new File(System.getProperty("user.dir"))).getAbsolutePath();
@@ -56,7 +61,10 @@ public abstract class AbstractFileLoader
 
   /** use relative file paths */
   protected boolean m_useRelativePath = false;
-
+  
+  /** Environment variables */
+  protected transient Environment m_env;
+  
   /**
    * get the File specified as the source
    *
@@ -78,6 +86,15 @@ public abstract class AbstractFileLoader
 
     //m_File = file.getAbsolutePath();
     setSource(file);
+  }
+  
+  /**
+   * Set the environment variables to use.
+   * 
+   * @param env the environment variables to use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
   }
   
   /**
@@ -108,7 +125,10 @@ public abstract class AbstractFileLoader
     try {
       String fName = file.getPath();
       try {
-        fName = weka.core.Environment.substitute(fName);
+        if (m_env == null) {
+          m_env = Environment.getSystemWide();
+        }
+        fName = m_env.substitute(fName);
       } catch (Exception e) {
         throw new IOException(e.getMessage());
       }
@@ -199,20 +219,33 @@ public abstract class AbstractFileLoader
    * @return		the option string
    */
   protected static String makeOptionStr(AbstractFileLoader loader) {
-    String 	result;
+    StringBuffer 	result;
+    Option 		option;
     
-    result = "\nUsage:\n";
-    result += "\t" + loader.getClass().getName().replaceAll(".*\\.", "");
-    result += " <";
+    result = new StringBuffer("\nUsage:\n");
+    result.append("\t" + loader.getClass().getName().replaceAll(".*\\.", ""));
+    if (loader instanceof OptionHandler)
+      result.append(" [options]");
+    result.append(" <");
     String[] ext = loader.getFileExtensions();
     for (int i = 0; i < ext.length; i++) {
 	if (i > 0)
-	  result += " | ";
-	result += "file" + ext[i];
+	  result.append(" | ");
+	result.append("file" + ext[i]);
     }
-    result += ">\n";
+    result.append(">\n");
+
+    if (loader instanceof OptionHandler) {
+      result.append("\nOptions:\n\n");
+      Enumeration enm = ((OptionHandler) loader).listOptions();
+      while (enm.hasMoreElements()) {
+	option = (Option) enm.nextElement();
+	result.append(option.synopsis() + "\n");
+	result.append(option.description() + "\n");
+      }
+    }
     
-    return result;
+    return result.toString();
   }
   
   /**
@@ -236,6 +269,24 @@ public abstract class AbstractFileLoader
     }
     
     if (options.length > 0) {
+      if (loader instanceof OptionHandler) {
+	// set options
+	try {
+	  ((OptionHandler) loader).setOptions(options);
+	  // find file
+	  for (int i = 0; i < options.length; i++) {
+	    if (options[i].length() > 0) {
+	      options = new String[]{options[i]};
+	      break;
+	    }
+	  }
+	}
+	catch (Exception ex) {
+	  System.err.println(makeOptionStr(loader));
+	  System.exit(1);
+	}
+      }
+      
       try {
 	loader.setFile(new File(options[0]));
 	// incremental
