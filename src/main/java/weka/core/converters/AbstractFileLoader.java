@@ -21,6 +21,8 @@
 
 package weka.core.converters;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -43,7 +45,7 @@ import java.util.zip.GZIPInputStream;
  */
 public abstract class AbstractFileLoader
   extends AbstractLoader
-  implements FileSourcedConverter {
+  implements FileSourcedConverter, EnvironmentHandler {
 
   /** the file */
   protected String m_File = (new File(System.getProperty("user.dir"))).getAbsolutePath();
@@ -59,7 +61,10 @@ public abstract class AbstractFileLoader
 
   /** use relative file paths */
   protected boolean m_useRelativePath = false;
-
+  
+  /** Environment variables */
+  protected transient Environment m_env;
+  
   /**
    * get the File specified as the source
    *
@@ -81,6 +86,15 @@ public abstract class AbstractFileLoader
 
     //m_File = file.getAbsolutePath();
     setSource(file);
+  }
+  
+  /**
+   * Set the environment variables to use.
+   * 
+   * @param env the environment variables to use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
   }
   
   /**
@@ -111,7 +125,10 @@ public abstract class AbstractFileLoader
     try {
       String fName = file.getPath();
       try {
-        fName = weka.core.Environment.substitute(fName);
+        if (m_env == null) {
+          m_env = Environment.getSystemWide();
+        }
+        fName = m_env.substitute(fName);
       } catch (Exception e) {
         throw new IOException(e.getMessage());
       }
