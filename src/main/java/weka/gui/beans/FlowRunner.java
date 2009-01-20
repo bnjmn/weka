@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.gui.Logger;
 import weka.gui.beans.xml.*;
 
@@ -54,6 +55,8 @@ public class FlowRunner {
   protected int m_runningCount = 0;
 
   protected transient Logger m_log = null;
+  
+  protected transient Environment m_env;
   
   protected static class SimpleLogger implements weka.gui.Logger {
     SimpleDateFormat m_DateFormat = 
@@ -199,7 +202,10 @@ public class FlowRunner {
     // don't need the graphical connections
     ois.close();
     
-    Environment.addVariable("Internal.knowledgeflow.directory", (new File(fileName).getParent()));
+    if (m_env != null) {
+      m_env.addVariable("Internal.knowledgeflow.directory", 
+          (new File(fileName).getParent()));
+    }
   }
 
   /**
@@ -216,8 +222,15 @@ public class FlowRunner {
     XMLBeans xml = new XMLBeans(null, null);
     Vector v = (Vector) xml.read(new File(fileName));
     m_beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
+
+    if (m_env != null) {
+      m_env.addVariable("Internal.knowledgeflow.directory", 
+          (new File(fileName).getParent()));
+    }
+  }
+  
+  private void setEnvironmentOnFlow() {
     
-    Environment.addVariable("Internal.knowledgeflow.directory", (new File(fileName).getParent()));
   }
   
   /**
@@ -237,6 +250,27 @@ public class FlowRunner {
   public void setFlows(Vector beans) {
     m_beans = beans;
   }
+  
+  /**
+   * Set the environment variables to use. NOTE: this needs
+   * to be called BEFORE a load method is invoked to ensure
+   * that the ${Internal.knowledgeflow.directory} variable get
+   * set in the supplied Environment object.
+   * 
+   * @param env the environment variables to use.
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+  
+  /**
+   * Get the environment variables that are in use.
+   * 
+   * @return the environment variables that are in ues.
+   */
+  public Environment getEnvironment() {
+    return m_env;
+  }
 
   /**
    * Launch all loaded KnowledgeFlow
@@ -254,6 +288,8 @@ public class FlowRunner {
         BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
         if (tempB.getBean() instanceof BeanCommon) {
           ((BeanCommon)tempB.getBean()).setLog(m_log);
+        } else if (tempB.getBean() instanceof EnvironmentHandler) {
+          ((EnvironmentHandler)tempB.getBean()).setEnvironment(m_env);
         }
       }
     }
@@ -293,8 +329,12 @@ public class FlowRunner {
         FlowRunner fr = new FlowRunner();
         FlowRunner.SimpleLogger sl = new FlowRunner.SimpleLogger();
         String fileName = args[0];
+        // start with the system-wide vars
+        Environment env = Environment.getSystemWide();
 
         fr.setLog(sl);
+        fr.setEnvironment(env);
+        
         fr.load(fileName);
         fr.run();
         fr.waitUntilFinished();

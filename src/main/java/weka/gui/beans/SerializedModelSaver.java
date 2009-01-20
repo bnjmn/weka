@@ -22,6 +22,7 @@
 
 package weka.gui.beans;
 
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.File;
 import java.io.ObjectOutputStream;
@@ -37,6 +38,7 @@ import javax.swing.JPanel;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
 import weka.core.Tag;
@@ -52,7 +54,7 @@ public class SerializedModelSaver
   extends JPanel
   implements BeanCommon, Visible, BatchClassifierListener, 
              IncrementalClassifierListener, BatchClustererListener,
-	     Serializable {
+	     EnvironmentHandler, Serializable {
 
   /** for serialization */
   private static final long serialVersionUID = 3956528599473814287L;
@@ -123,6 +125,11 @@ public class SerializedModelSaver
                                          + XStream.FILE_EXTENSION + FILE_EXTENSION + ")", "", false));
     }
   }
+  
+  /**
+   * The environment variables.
+   */
+  protected transient Environment m_env;
 
   /**
    * Constructor.
@@ -132,6 +139,8 @@ public class SerializedModelSaver
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
     m_fileFormat = s_fileFormatsAvailable.get(0);
+    
+    m_env = Environment.getSystemWide();
   }
 
   /**
@@ -293,7 +302,7 @@ public class SerializedModelSaver
 
     String prefix = "";
     try {
-      prefix = Environment.substitute(m_filenamePrefix);
+      prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop all processing
       String message = "[SerializedModelSaver] " 
@@ -319,7 +328,7 @@ public class SerializedModelSaver
     
     String dirName = m_directory.getPath();
     try {
-      dirName = Environment.substitute(dirName);
+      dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
       stop(); // stop all processing
       String message = "[SerializedModelSaver] "
@@ -358,7 +367,7 @@ public class SerializedModelSaver
 
       String prefix = "";
       try {
-        prefix = Environment.substitute(m_filenamePrefix);
+        prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
         stop(); // stop processing
         String message = "[SerializedModelSaver] "
@@ -379,7 +388,7 @@ public class SerializedModelSaver
 
       String dirName = m_directory.getPath();
       try {
-        dirName = Environment.substitute(dirName);
+        dirName = m_env.substitute(dirName);
       } catch (Exception ex) {
         stop(); // stop processing
         String message = "[SerializedModelSaver] "
@@ -422,7 +431,7 @@ public class SerializedModelSaver
 
     String prefix = "";
     try {
-      prefix = Environment.substitute(m_filenamePrefix);
+      prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
       stop(); // stop processing
       String message = "[SerializedModelSaver] "
@@ -448,7 +457,7 @@ public class SerializedModelSaver
     
     String dirName = m_directory.getPath();
     try {
-      dirName = Environment.substitute(dirName);
+      dirName = m_env.substitute(dirName);
     } catch (Exception ex) {
       stop(); // stop processing
       String message = "[SerializedModelSaver] "
@@ -675,5 +684,25 @@ public class SerializedModelSaver
   
   private String statusMessagePrefix() {
     return getCustomName() + "$" + hashCode() + "|";
-  }   
+  }
+  
+  /**
+   * Set environment variables to use.
+   * 
+   * @param env the environment variables to
+   * use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+  
+  // Custom de-serialization in order to set default
+  // environment variables on de-serialization
+  private void readObject(ObjectInputStream aStream) 
+    throws IOException, ClassNotFoundException {
+    aStream.defaultReadObject();
+    
+    // set a default environment to use
+    m_env = Environment.getSystemWide();
+  }
 }
