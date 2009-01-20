@@ -34,16 +34,17 @@ import java.util.Enumeration;
  * There are methods for adding and removing variables as well as a method for
  * replacing key names (enclosed by ${}) with their associated value in Strings.
  *
- * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
 public class Environment implements RevisionHandler {
   
+  private static Environment m_systemWide = new Environment();
+  
   // Map to hold all the environment variables + java properties
-  private static Map<String,String> ENV_VARS = new HashMap<String,String>();
-
-  // Set up
-  static {
+  private Map<String,String> m_envVars = new HashMap<String,String>();
+  
+  public Environment() {
     // get the env variables first
     Map<String,String> env = System.getenv();
     Set<String> keys = env.keySet();
@@ -51,7 +52,7 @@ public class Environment implements RevisionHandler {
     while (i.hasNext()) {
       String kv = i.next();
       String value = env.get(kv);
-      ENV_VARS.put(kv, value);
+      m_envVars.put(kv, value);
     }
 
     // get the java properties
@@ -60,9 +61,31 @@ public class Environment implements RevisionHandler {
     while (pKeys.hasMoreElements()) {
       String kv = (String)pKeys.nextElement();
       String value = jvmProps.getProperty(kv);
-      ENV_VARS.put(kv, value);
+      m_envVars.put(kv, value);
     }
-    ENV_VARS.put("weka.version", Version.VERSION);
+    m_envVars.put("weka.version", Version.VERSION);
+  }
+  
+  /**
+   * Get the singleton system-wide (visible to every
+   * class in the running VM) set of environment
+   * variables.
+   * 
+   * @return the system-wide set of environment variables.
+   */
+  public static Environment getSystemWide() {
+    return m_systemWide;
+  }
+  
+  /**
+   * Tests for the presence of environment variables.
+   * 
+   * @param source the string to test
+   * @return true if the argument contains one or more environment
+   * variables
+   */
+  public static boolean containsEnvVariables(String source) {
+    return (source.indexOf("${") >= 0);
   }
 
   /**
@@ -72,7 +95,7 @@ public class Environment implements RevisionHandler {
    * @return a String with all variable names replaced with their values
    * @throws Exception if an unknown variable name is encountered
    */
-  public static String substitute(String source) throws Exception {
+  public String substitute(String source) throws Exception {
     // Grab each variable out of the string
     int index = source.indexOf("${");
 
@@ -83,7 +106,7 @@ public class Environment implements RevisionHandler {
         String key = source.substring(index, endIndex);
 
         // look this sucker up
-        String replace = ENV_VARS.get(key);
+        String replace = m_envVars.get(key);
         if (replace != null) {
           String toReplace = "${" + key + "}";
           source = source.replace(toReplace, replace);
@@ -103,8 +126,8 @@ public class Environment implements RevisionHandler {
    * @param key the name of the variable
    * @param value its value
    */
-  public static void addVariable(String key, String value) {
-    ENV_VARS.put(key, value);
+  public void addVariable(String key, String value) {
+    m_envVars.put(key, value);
   }
 
   /**
@@ -112,8 +135,8 @@ public class Environment implements RevisionHandler {
    *
    * @param key the name of the varaible to remove.
    */
-  public static void removeVariable(String key) {
-    ENV_VARS.remove(key);
+  public void removeVariable(String key) {
+    m_envVars.remove(key);
   }
   
   /**
@@ -122,8 +145,8 @@ public class Environment implements RevisionHandler {
    * 
    * @return a Set of variable names (keys)
    */
-  public static Set<String> getVariableNames() {
-    return ENV_VARS.keySet();
+  public Set<String> getVariableNames() {
+    return m_envVars.keySet();
   }
 
   /**
@@ -133,8 +156,8 @@ public class Environment implements RevisionHandler {
    * @return the associated value or null if this variable
    * is not in the internal map
    */
-  public static String getVariableValue(String key) {
-    return ENV_VARS.get(key);
+  public String getVariableValue(String key) {
+    return m_envVars.get(key);
   }
   
   /**
@@ -152,7 +175,7 @@ public class Environment implements RevisionHandler {
     } else {
       try {
         for (int i = 0; i < args.length; i++) {
-          String newS = Environment.substitute(args[i]);
+          String newS = t.substitute(args[i]);
           System.out.println("Original string:\n" + args[i] +"\n\nNew string:\n" + newS);
         }
       } catch (Exception ex) {
