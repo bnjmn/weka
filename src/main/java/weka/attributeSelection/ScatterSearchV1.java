@@ -396,6 +396,7 @@ public class ScatterSearchV1 extends ASSearch
   /**
    * Parses a given list of options.
    *
+   <!-- options-start -->
    * Valid options are: <p>
    *
    * -Z <br>
@@ -414,6 +415,8 @@ public class ScatterSearchV1 extends ASSearch
    * -D <br>
    *  Verbose output for monitoring the search
    *  (default = false)
+   *  
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -451,7 +454,7 @@ public class ScatterSearchV1 extends ASSearch
   }
 
   /**
-   * Gets the current settings of ReliefFAttributeEval.
+   * Gets the current settings of ScatterSearchV1.
    *
    * @return an array of strings suitable for passing to setOptions()
    */
@@ -518,7 +521,7 @@ public class ScatterSearchV1 extends ASSearch
   /**
    * Searches the attribute subset space using Scatter Search.
    *
-   * @param ASEvaluator the attribute evaluator to guide the search
+   * @param ASEval the attribute evaluator to guide the search
    * @param data the training instances.
    * @return an array of selected attribute indexes
    * @exception Exception if the search can't be completed
@@ -670,8 +673,8 @@ public class ScatterSearchV1 extends ASSearch
   /**
    * Update the ReferenceSet putting the new obtained Solutions there
    *
-   * @param bestSolutions the number of the most pure solutions.
-   * @param divSolutions the number of the most diverses solutions acording to the bestSolutions.
+   * @param numBestSolutions the number of the most pure solutions.
+   * @param numDivsSolutions the number of the most diverses solutions acording to the bestSolutions.
   */
   public void UpdateReferenceSet(int numBestSolutions, int numDivsSolutions){
 
@@ -1039,7 +1042,7 @@ public class ScatterSearchV1 extends ASSearch
    /**
    * Creating space for introducing the population
    *
-   * @param size the number of subset in the initial population
+   * @param popSize the number of subset in the initial population
    */
   public void InitPopulation(int popSize){
     m_population =new ArrayList<Subset>();
