@@ -59,7 +59,7 @@ import javax.swing.text.StyledDocument;
  * Frame that shows the output from stdout and stderr.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class LogWindow 
   extends JFrame
@@ -199,7 +199,10 @@ public class LogWindow
         x = line;
       }
 
-      print(x.toString());
+      if (x == null)
+        print("null");
+      else
+        print(x.toString());
     }
 
     /**
