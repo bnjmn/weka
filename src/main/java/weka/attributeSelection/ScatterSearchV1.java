@@ -396,6 +396,7 @@ public class ScatterSearchV1 extends ASSearch
   /**
    * Parses a given list of options.
    *
+   <!-- options-start -->
    * Valid options are: <p>
    *
    * -Z <br>
@@ -414,6 +415,8 @@ public class ScatterSearchV1 extends ASSearch
    * -D <br>
    *  Verbose output for monitoring the search
    *  (default = false)
+   *  
+   <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -451,7 +454,7 @@ public class ScatterSearchV1 extends ASSearch
   }
 
   /**
-   * Gets the current settings of ReliefFAttributeEval.
+   * Gets the current settings of ScatterSearchV1.
    *
    * @return an array of strings suitable for passing to setOptions()
    */
