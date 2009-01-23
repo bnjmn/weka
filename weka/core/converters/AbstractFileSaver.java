@@ -22,6 +22,8 @@
 
 package weka.core.converters;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.FastVector;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -53,7 +55,7 @@ import java.util.Enumeration;
  */
 public abstract class AbstractFileSaver
   extends AbstractSaver
-  implements OptionHandler, FileSourcedConverter{
+  implements OptionHandler, FileSourcedConverter, EnvironmentHandler {
   
   
   /** The destination file. */
@@ -77,6 +79,9 @@ public abstract class AbstractFileSaver
 
   /** use relative file paths */
   protected boolean m_useRelativePath = false;
+  
+  /** Environment variables */
+  protected transient Environment m_env;
   
   
   /**
@@ -194,6 +199,23 @@ public abstract class AbstractFileSaver
   public String retrieveDir(){
    
       return m_dir;
+  }
+  
+  /**
+   * Set the environment variables to use.
+   * 
+   * @param env the environment variables to use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+    if (m_outputFile != null) {
+      try {
+        // try and resolve any new environment variables
+        setFile(m_outputFile);
+      } catch (IOException ex) {
+        // we won't complain about it here...
+      }
+    }
   }
   
   
@@ -319,18 +341,20 @@ public abstract class AbstractFileSaver
     boolean success = false;
     String tempOut = file.getPath();
     try {
-      tempOut = weka.core.Environment.substitute(tempOut);
+      if (m_env == null) {
+        m_env = Environment.getSystemWide();
+      }
+      tempOut = m_env.substitute(tempOut);
     } catch (Exception ex) {
-      throw new IOException("[AbstractFileSaver]: " + ex.getMessage());
+      // don't complain about it here...
+      // throw new IOException("[AbstractFileSaver]: " + ex.getMessage());
     }
     file = new File(tempOut);
     String out = file.getAbsolutePath();
     if(m_outputFile != null){
         try{
             if(file.exists()){
-                if(file.delete())
-                    System.out.println("File exists and will be overridden.");
-                else
+                if(!file.delete())                    
                     throw new IOException("File already exists."); 
             }
             if(out.lastIndexOf(File.separatorChar) == -1){

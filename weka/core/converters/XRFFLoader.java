@@ -45,7 +45,7 @@ import java.util.zip.GZIPInputStream;
  <!-- globalinfo-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision$
  * @see Loader
  */
 public class XRFFLoader 
@@ -121,7 +121,7 @@ public class XRFFLoader
 
     setRetrieval(NONE);
     
-    if ((m_File != null) && (new File(m_File)).isFile()) {
+    if (m_File != null) {
       setFile(new File(m_File));
     }
     else if ((m_URL != null) && !m_URL.equals("http://")) {
@@ -260,6 +260,12 @@ public class XRFFLoader
     if (m_structure == null)
       getStructure();
 
+    try {
+      // close the stream
+      m_sourceReader.close();
+    } catch (Exception ex) {
+    }
+
     return m_XMLInstances.getInstances();
   }
 
@@ -281,7 +287,7 @@ public class XRFFLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
