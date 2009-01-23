@@ -50,7 +50,7 @@ import java.text.ParseException;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.24 $
+ * @version $Revision$
  * @see Loader
  */
 public class ArffLoader 
@@ -99,7 +99,7 @@ public class ArffLoader
    * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
    * @author  Len Trigg (trigg@cs.waikato.ac.nz)
    * @author  fracpete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.24 $
+   * @version $Revision$
    */
   public static class ArffReader
     implements RevisionHandler {
@@ -832,7 +832,7 @@ public class ArffLoader
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.24 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -883,7 +883,7 @@ public class ArffLoader
     m_structure = null;
     setRetrieval(NONE);
     
-    if (m_File != null && (new File(m_File)).isFile()) {
+    if (m_File != null) {
       setFile(new File(m_File));
     } else if (m_URL != null && !m_URL.equals("http://")) {
       setURL(m_URL);
@@ -923,7 +923,7 @@ public class ArffLoader
    * @throws IOException if an error occurs
    */
   public void setFile(File file) throws IOException {
-    m_File = file.getAbsolutePath();
+    m_File = file.getPath();
     setSource(file);
   }
 
@@ -1061,7 +1061,7 @@ public class ArffLoader
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

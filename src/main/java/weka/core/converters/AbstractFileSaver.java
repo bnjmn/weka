@@ -81,7 +81,7 @@ public abstract class AbstractFileSaver
   protected boolean m_useRelativePath = false;
   
   /** Environment variables */
-  protected Environment m_env;
+  protected transient Environment m_env;
   
   
   /**
@@ -208,6 +208,14 @@ public abstract class AbstractFileSaver
    */
   public void setEnvironment(Environment env) {
     m_env = env;
+    if (m_outputFile != null) {
+      try {
+        // try and resolve any new environment variables
+        setFile(m_outputFile);
+      } catch (IOException ex) {
+        // we won't complain about it here...
+      }
+    }
   }
   
   
@@ -338,16 +346,15 @@ public abstract class AbstractFileSaver
       }
       tempOut = m_env.substitute(tempOut);
     } catch (Exception ex) {
-      throw new IOException("[AbstractFileSaver]: " + ex.getMessage());
+      // don't complain about it here...
+      // throw new IOException("[AbstractFileSaver]: " + ex.getMessage());
     }
     file = new File(tempOut);
     String out = file.getAbsolutePath();
     if(m_outputFile != null){
         try{
             if(file.exists()){
-                if(file.delete())
-                    System.out.println("File exists and will be overridden.");
-                else
+                if(!file.delete())                    
                     throw new IOException("File already exists."); 
             }
             if(out.lastIndexOf(File.separatorChar) == -1){
