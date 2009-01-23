@@ -774,7 +774,7 @@ public class CSVLoader
     m_st = null;
     setRetrieval(NONE);
     
-    if (m_File != null && (new File(m_File).isFile())) {
+    if (m_File != null) {
       setFile(new File(m_File));
     }
   }
