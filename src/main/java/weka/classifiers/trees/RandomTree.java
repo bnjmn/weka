@@ -42,45 +42,33 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * <!-- globalinfo-start --> 
- * Class for constructing a tree that considers K
- * randomly chosen attributes at each node. Performs no pruning.
- * <p/>
+ * <!-- globalinfo-start -->
+ * * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning.
+ * * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> 
- * Valid options are:
- * <p/>
- * 
- * <pre>
- * -K &lt;number of attributes&gt;
- *  Number of attributes to randomly investigate
- *  (&lt;1 = int(log(#attributes)+1)).
- * </pre>
- * 
- * <pre>
- * -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- * </pre>
- * 
- * <pre>
- * -S &lt;num&gt;
- *  Seed for random number generator.
- *  (default 1)
- * </pre>
- * 
- * <pre>
- * -depth &lt;num&gt;
- *  The maximum depth of the tree, 0 for unlimited.
- *  (default 0)
- * </pre>
- * 
- * <pre>
- * -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console
- * </pre>
- * 
+ * <!-- options-start -->
+ * * Valid options are: <p/>
+ * * 
+ * * <pre> -K &lt;number of attributes&gt;
+ * *  Number of attributes to randomly investigate
+ * *  (&lt;1 = int(log(#attributes)+1)).</pre>
+ * * 
+ * * <pre> -M &lt;minimum number of instances&gt;
+ * *  Set minimum number of instances per leaf.</pre>
+ * * 
+ * * <pre> -S &lt;num&gt;
+ * *  Seed for random number generator.
+ * *  (default 1)</pre>
+ * * 
+ * * <pre> -depth &lt;num&gt;
+ * *  The maximum depth of the tree, 0 for unlimited.
+ * *  (default 0)</pre>
+ * * 
+ * * <pre> -D
+ * *  If set, classifier is run in debug mode and
+ * *  may output additional info to the console</pre>
+ * * 
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -333,39 +321,28 @@ WeightedInstancesHandler, Randomizable, Drawable {
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> 
-   * Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -K &lt;number of attributes&gt;
-   *  Number of attributes to randomly investigate
-   *  (&lt;1 = int(log(#attributes)+1)).
-   * </pre>
-   * 
-   * <pre>
-   * -M &lt;minimum number of instances&gt;
-   *  Set minimum number of instances per leaf.
-   * </pre>
-   * 
-   * <pre>
-   * -S &lt;num&gt;
-   *  Seed for random number generator.
-   *  (default 1)
-   * </pre>
-   * 
-   * <pre>
-   * -depth &lt;num&gt;
-   *  The maximum depth of the tree, 0 for unlimited.
-   *  (default 0)
-   * </pre>
-   * 
-   * <pre>
-   * -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p/>
+   * * 
+   * * <pre> -K &lt;number of attributes&gt;
+   * *  Number of attributes to randomly investigate
+   * *  (&lt;1 = int(log(#attributes)+1)).</pre>
+   * * 
+   * * <pre> -M &lt;minimum number of instances&gt;
+   * *  Set minimum number of instances per leaf.</pre>
+   * * 
+   * * <pre> -S &lt;num&gt;
+   * *  Seed for random number generator.
+   * *  (default 1)</pre>
+   * * 
+   * * <pre> -depth &lt;num&gt;
+   * *  The maximum depth of the tree, 0 for unlimited.
+   * *  (default 0)</pre>
+   * * 
+   * * <pre> -D
+   * *  If set, classifier is run in debug mode and
+   * *  may output additional info to the console</pre>
+   * * 
    * <!-- options-end -->
    * 
    * @param options
@@ -1261,3 +1238,4 @@ WeightedInstancesHandler, Randomizable, Drawable {
     return num;
   }
 }
+
