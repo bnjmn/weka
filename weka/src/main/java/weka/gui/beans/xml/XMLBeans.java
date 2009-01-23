@@ -25,6 +25,7 @@ import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.gui.beans.BeanConnection;
 import weka.gui.beans.BeanInstance;
 import weka.gui.beans.BeanVisual;
@@ -1583,7 +1584,12 @@ public class XMLBeans
     if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "", VAL_FILE);
     } else {
-      String path = (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath())
+      boolean notAbsolute = 
+        (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
+        (loader instanceof EnvironmentHandler 
+            && Environment.containsEnvVariables(file.getPath())));
+      
+      String path = (notAbsolute)
         ? file.getPath()
         : file.getAbsolutePath();
       // Replace any windows file separators with forward slashes (Java under windows can

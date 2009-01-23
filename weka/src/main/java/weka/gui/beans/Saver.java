@@ -22,6 +22,11 @@
 
 package weka.gui.beans;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -38,7 +43,7 @@ import weka.core.converters.DatabaseSaver;
  */
 public class Saver
   extends AbstractDataSink
-  implements WekaWrapper {
+  implements WekaWrapper, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 5371716690308950755L;
@@ -89,6 +94,11 @@ public class Saver
    */
   private int m_count;
   
+  /**
+   * The environment variables.
+   */
+  protected transient Environment m_env;
+  
   private class SaveBatchThread extends Thread {
     private DataSink m_DS;
 
@@ -99,6 +109,7 @@ public class Saver
     public void run() {
       try {
         m_visual.setAnimated();
+                
         m_Saver.setInstances(m_dataSet);
         if (m_logger != null) {
           m_logger.statusMessage(statusMessagePrefix() + "Saving "
@@ -127,7 +138,7 @@ public class Saver
           }
         }
         if (m_logger != null) {
-          m_logger.statusMessage(statusMessagePrefix() + "Done.");
+          m_logger.statusMessage(statusMessagePrefix() + "Finished.");
         }
         block(false);
 	m_visual.setStatic();
@@ -203,6 +214,26 @@ public class Saver
   public String getCustomName() {
     return m_visual.getText();
   }  
+  
+  /**
+   * Set environment variables to use.
+   * 
+   * @param env the environment variables to
+   * use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+  
+  /**
+   * Pass the environment variables on the the wrapped saver
+   */
+  private void passEnvOnToSaver() {
+    // set environment variables
+    if (m_Saver instanceof EnvironmentHandler && m_env != null) {
+      ((EnvironmentHandler)m_Saver).setEnvironment(m_env);
+    }
+  }
 
   /** Set the loader to use
    * @param saver a Saver
@@ -276,6 +307,7 @@ public class Saver
    */  
   public synchronized void acceptDataSet(DataSetEvent e) {
   
+      passEnvOnToSaver();
       m_fileName = sanitizeFilename(e.getDataSet().relationName());
       m_dataSet = e.getDataSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
@@ -299,6 +331,7 @@ public class Saver
    */  
   public synchronized void acceptTestSet(TestSetEvent e) {
   
+      passEnvOnToSaver();
       m_fileName = sanitizeFilename(e.getTestSet().relationName());
       m_dataSet = e.getTestSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
@@ -328,6 +361,7 @@ public class Saver
    */  
   public synchronized void acceptTrainingSet(TrainingSetEvent e) {
   
+      passEnvOnToSaver();
       m_fileName = sanitizeFilename(e.getTrainingSet().relationName());
       m_dataSet = e.getTrainingSet();
       if(e.isStructureOnly() && m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){
@@ -355,12 +389,12 @@ public class Saver
   public synchronized void saveBatch(){
   
       m_Saver.setRetrieval(m_Saver.BATCH);
-      String visText = this.getName();
+/*      String visText = this.getName();
       try {
         visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
       } catch (Exception ex) {        
       }
-      m_visual.setText(visText);
+      m_visual.setText(visText); */
       m_ioThread = new SaveBatchThread(Saver.this);
       m_ioThread.setPriority(Thread.MIN_PRIORITY);
       m_ioThread.start();
@@ -387,6 +421,7 @@ public class Saver
       if(e.getStatus() == e.INSTANCE_AVAILABLE){
         m_visual.setAnimated();
         if(m_count == 0){
+            passEnvOnToSaver();
             if(!m_isDBSaver){
                 try{
                     m_Saver.setDirAndPrefix(m_fileName,"");
@@ -398,9 +433,9 @@ public class Saver
             m_count ++;
         }
         try{
-          String visText = this.getName();
+/*          String visText = this.getName();
           visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
-            m_visual.setText(m_fileName);
+            m_visual.setText(m_fileName); */
             m_Saver.writeIncremental(e.getInstance());
         } catch (Exception ex) {
             m_visual.setStatic();
@@ -415,9 +450,9 @@ public class Saver
             //m_firstNotice = true;
             m_visual.setStatic();
             System.out.println("...relation "+ m_fileName +" saved.");
-            String visText = this.getName();
+/*            String visText = this.getName();
             visText = (m_fileName.length() > 0) ? m_fileName : m_Saver.filePrefix();
-            m_visual.setText(visText);     
+            m_visual.setText(visText); */     
             m_count = 0;
         } catch (Exception ex) {
             m_visual.setStatic();
@@ -502,6 +537,16 @@ public class Saver
     + ((m_Saver instanceof OptionHandler) 
         ? Utils.joinOptions(((OptionHandler)m_Saver).getOptions()) + "|"
             : "");
+  }
+  
+  // Custom de-serialization in order to set default
+  // environment variables on de-serialization
+  private void readObject(ObjectInputStream aStream) 
+    throws IOException, ClassNotFoundException {
+    aStream.defaultReadObject();
+    
+    // set a default environment to use
+    m_env = Environment.getSystemWide();
   }
   
   
