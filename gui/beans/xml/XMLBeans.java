@@ -25,6 +25,7 @@ import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.gui.beans.BeanConnection;
 import weka.gui.beans.BeanInstance;
 import weka.gui.beans.BeanVisual;
@@ -1583,7 +1584,12 @@ public class XMLBeans
     if ( (file == null) || (file.isDirectory()) ) {
       invokeWriteToXML(node, "", VAL_FILE);
     } else {
-      String path = (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath())
+      boolean notAbsolute = 
+        (((weka.core.converters.AbstractFileLoader) loader).getUseRelativePath() ||
+        (loader instanceof EnvironmentHandler 
+            && Environment.containsEnvVariables(file.getPath())));
+      
+      String path = (notAbsolute)
         ? file.getPath()
         : file.getAbsolutePath();
       // Replace any windows file separators with forward slashes (Java under windows can
@@ -1652,16 +1658,14 @@ public class XMLBeans
     // set file only, if it exists
     if (file != null) {
       String tempFile = file;
-      // try and replace any environment variables before we
-      // test for existence
-      try {
-        tempFile = Environment.substitute(file);
-      } catch (Exception ex) {
-        System.out.println(ex.getMessage());
-      }
-      //      fl = new File(file);
-      fl = new File(tempFile);
-      if (fl.exists()) {
+
+      boolean containsEnv = false;
+      containsEnv = Environment.containsEnvVariables(file);
+      
+      fl = new File(file);      
+      // only test for existence if the path does not contain environment vars
+      // (trust that after they are resolved that everything is hunky dory)
+      if (containsEnv || fl.exists()) {
         ((weka.core.converters.AbstractFileLoader) result).setSource(new File(file));
       } else {
         System.out.println("WARNING: The file '" + tempFile + "' does not exist!");

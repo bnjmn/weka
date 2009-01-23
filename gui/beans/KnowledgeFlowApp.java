@@ -25,6 +25,7 @@ package weka.gui.beans;
 import weka.core.ClassloaderUtil;
 import weka.core.Copyright;
 import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Memory;
 import weka.core.SerializedObject;
 import weka.core.Utils;
@@ -537,6 +538,33 @@ public class KnowledgeFlowApp
   /** whether to store the user components in XML or in binary format */
   protected boolean m_UserComponentsInXML = false;
   
+  /** Environment variables for the current flow */
+  protected Environment m_flowEnvironment;
+  
+  /**
+   * Set the environment variables to use. NOTE: loading a new layout
+   * resets back to the default set of variables
+   * 
+   * @param env
+   */
+  public void setEnvironment(Environment env) {
+    m_flowEnvironment = env;
+    setEnvironment();
+  }
+  
+  private void setEnvironment() {
+    // pass m_flowEnvironment to all components
+    // that implement EnvironmentHandler
+    Vector beans = BeanInstance.getBeanInstances();
+    for (int i = 0; i < beans.size(); i++) {
+      Object temp = ((BeanInstance) beans.elementAt(i)).getBean();
+
+      if (temp instanceof EnvironmentHandler) {
+        ((EnvironmentHandler) temp).setEnvironment(m_flowEnvironment);
+      }
+    }
+  }
+  
   /**
    * Creates a new <code>KnowledgeFlowApp</code> instance.
    */
@@ -897,6 +925,7 @@ public class KnowledgeFlowApp
 
       m_loadB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
+            m_flowEnvironment = new Environment();
             loadLayout();
           }
         });
@@ -2340,7 +2369,7 @@ public class KnowledgeFlowApp
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
       // set internal flow directory environment variable
-      Environment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
+      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
@@ -2398,6 +2427,7 @@ public class KnowledgeFlowApp
         }
 
         integrateFlow(beans, connections);
+        setEnvironment();
         m_logPanel.clearStatus();
         m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
       } catch (Exception ex) {
@@ -2461,6 +2491,9 @@ public class KnowledgeFlowApp
     
     Vector beans = (Vector)copy.elementAt(0);
     Vector connections = (Vector)copy.elementAt(1);
+    
+    // reset environment variables
+    m_flowEnvironment = new Environment();
     integrateFlow(beans, connections);
   }
 
