@@ -22,6 +22,8 @@
 
 package weka.gui.beans;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -36,7 +38,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.EventSetDescriptor;
 import java.beans.beancontext.BeanContext;
+import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectStreamException;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -55,7 +59,7 @@ import javax.swing.JButton;
 public class Loader
   extends AbstractDataSource 
   implements Startable, UserRequestAcceptor, WekaWrapper,
-	     EventConstraints, BeanCommon {
+	     EventConstraints, BeanCommon, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 1993738191961163027L;
@@ -107,6 +111,11 @@ public class Loader
   protected transient Logger m_log;
   
   /**
+   * The environment variables.
+   */
+  protected transient Environment m_env;
+  
+  /**
    * Asked to stop?
    */
   protected boolean m_stopped = false;
@@ -134,6 +143,11 @@ public class Loader
 	if (m_dataSetEventTargets > 0) {
 	  instanceGeneration = false;
           m_state = BATCH_LOADING;
+	}
+	
+	// Set environment variables
+	if (m_Loader instanceof EnvironmentHandler && m_env != null) {
+	  ((EnvironmentHandler)m_Loader).setEnvironment(m_env);
 	}
 	
 	String msg = statusMessagePrefix();
@@ -464,7 +478,13 @@ public class Loader
     boolean ok = true;
     if (m_ioThread == null) {
       if (m_Loader instanceof FileSourcedConverter) {
-	if (! ((FileSourcedConverter) m_Loader).retrieveFile().isFile()) {
+        String temp = ((FileSourcedConverter) m_Loader).retrieveFile().getPath();
+        Environment env = (m_env == null) ? Environment.getSystemWide() : m_env;
+        try {
+          temp = env.substitute(temp);
+        } catch (Exception ex) {}
+        File tempF = new File(temp);
+	if (!tempF.isFile()) {
 	  ok = false;
 	}
       }
@@ -680,6 +700,16 @@ public class Loader
   }
   
   /**
+   * Set environment variables to use.
+   * 
+   * @param env the environment variables to
+   * use
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+  
+  /**
    * Returns true if, at this time, 
    * the object will accept a connection via the supplied
    * EventSetDescriptor. Always returns false for loader.
@@ -750,6 +780,16 @@ public class Loader
     + ((m_Loader instanceof OptionHandler) 
         ? Utils.joinOptions(((OptionHandler)m_Loader).getOptions()) + "|"
             : "");
+  }
+  
+  // Custom de-serialization in order to set default
+  // environment variables on de-serialization
+  private void readObject(ObjectInputStream aStream) 
+    throws IOException, ClassNotFoundException {
+    aStream.defaultReadObject();
+    
+    // set a default environment to use
+    m_env = Environment.getSystemWide();
   }
 }
 

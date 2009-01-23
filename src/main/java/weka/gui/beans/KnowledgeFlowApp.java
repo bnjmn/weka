@@ -549,7 +549,10 @@ public class KnowledgeFlowApp
    */
   public void setEnvironment(Environment env) {
     m_flowEnvironment = env;
-    
+    setEnvironment();
+  }
+  
+  private void setEnvironment() {
     // pass m_flowEnvironment to all components
     // that implement EnvironmentHandler
     Vector beans = BeanInstance.getBeanInstances();
@@ -923,7 +926,7 @@ public class KnowledgeFlowApp
       m_loadB.addActionListener(new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             m_flowEnvironment = new Environment();
-            loadLayout(m_flowEnvironment);
+            loadLayout();
           }
         });
 
@@ -2356,7 +2359,7 @@ public class KnowledgeFlowApp
   /**
    * Load a pre-saved layout
    */
-  private void loadLayout(Environment env) {
+  private void loadLayout() {
     m_loadB.setEnabled(false);
     m_saveB.setEnabled(false);
     int returnVal = m_FileChooser.showOpenDialog(this);
@@ -2366,7 +2369,7 @@ public class KnowledgeFlowApp
       // determine filename
       File oFile = m_FileChooser.getSelectedFile();
       // set internal flow directory environment variable
-      env.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
+      m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", oFile.getParent());
 
       // add extension if necessary
       if (m_FileChooser.getFileFilter() == m_KfFilter) {
@@ -2424,6 +2427,7 @@ public class KnowledgeFlowApp
         }
 
         integrateFlow(beans, connections);
+        setEnvironment();
         m_logPanel.clearStatus();
         m_logPanel.statusMessage("[KnowledgeFlow]|Flow loaded.");
       } catch (Exception ex) {
