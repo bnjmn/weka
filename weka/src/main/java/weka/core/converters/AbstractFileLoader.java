@@ -95,6 +95,15 @@ public abstract class AbstractFileLoader
    */
   public void setEnvironment(Environment env) {
     m_env = env;
+    try {
+      // causes setSource(File) to be called and 
+      // forces the input stream to be reset with a new file
+      // that has environment variables resolved with those
+      // in the new Environment object
+      reset();
+    } catch (IOException ex) {
+      // we won't complain about it here...
+    }
   }
   
   /**
@@ -115,6 +124,7 @@ public abstract class AbstractFileLoader
    * @throws IOException 	if an error occurs
    */
   public void setSource(File file) throws IOException {
+    File original = file;
     m_structure = null;
     
     setRetrieval(NONE);
@@ -122,7 +132,7 @@ public abstract class AbstractFileLoader
     if (file == null)
       throw new IOException("Source file object is null!");
 
-    try {
+  //  try {
       String fName = file.getPath();
       try {
         if (m_env == null) {
@@ -130,31 +140,38 @@ public abstract class AbstractFileLoader
         }
         fName = m_env.substitute(fName);
       } catch (Exception e) {
-        throw new IOException(e.getMessage());
+        // ignore any missing environment variables at this time
+        // as it is possible that these may be set by the time
+        // the actual file is processed
+        
+        //throw new IOException(e.getMessage());
       }
       file = new File(fName);
-      if (file.getName().endsWith(getFileExtension() + FILE_EXTENSION_COMPRESSED)) {
-	setSource(new GZIPInputStream(new FileInputStream(file)));
-      } else {
-	setSource(new FileInputStream(file));
+      // set the source only if the file exists
+      if (file.exists()) {
+        if (file.getName().endsWith(getFileExtension() + FILE_EXTENSION_COMPRESSED)) {
+          setSource(new GZIPInputStream(new FileInputStream(file)));
+        } else {
+          setSource(new FileInputStream(file));
+        }
       }
-    }
-    catch (FileNotFoundException ex) {
+   // }
+  /*  catch (FileNotFoundException ex) {
       throw new IOException("File not found");
-    }
+    } */
 
     if (m_useRelativePath) {
       try {
-        m_sourceFile = Utils.convertToRelativePath(file);
+        m_sourceFile = Utils.convertToRelativePath(original);
         m_File = m_sourceFile.getPath();
       } catch (Exception ex) {
         //        System.err.println("[AbstractFileLoader] can't convert path to relative path.");
-        m_sourceFile = file;
-        m_File       = file.getPath();
+        m_sourceFile = original;
+        m_File       = m_sourceFile.getPath();
       }
     } else {
-      m_sourceFile = file;
-      m_File       = file.getAbsolutePath();
+      m_sourceFile = original;
+      m_File       = m_sourceFile.getPath();
     }
   }
 

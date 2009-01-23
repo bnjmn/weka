@@ -26,7 +26,11 @@ import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
 import weka.core.RevisionUtils;
+import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,6 +41,7 @@ import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
@@ -44,38 +49,71 @@ import java.util.Hashtable;
  * <p/>
  <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -N &lt;range&gt;
+ *  The range of attributes to force type to be NOMINAL.
+ *  'first' and 'last' are accepted as well.
+ *  Examples: "first-last", "1,4,5-27,50-last"
+ *  (default: -none-)</pre>
+ * 
+ * <pre> -S &lt;range&gt;
+ *  The range of attribute to force type to be STRING.
+ *  'first' and 'last' are accepted as well.
+ *  Examples: "first-last", "1,4,5-27,50-last"
+ *  (default: -none-)</pre>
+ * 
+ * <pre> -M &lt;str&gt;
+ *  The string representing a missing value.
+ *  (default: ?)</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  * @see Loader
  */
 public class CSVLoader 
   extends AbstractFileLoader 
-  implements BatchConverter {
+  implements BatchConverter, OptionHandler {
 
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 5607529739745491340L;
   
-  /** the file extension */
+  /** the file extension. */
   public static String FILE_EXTENSION = ".csv";
 
   /**
    * A list of hash tables for accumulating nominal values during parsing.
    */
-  private FastVector m_cumulativeStructure;
+  protected FastVector m_cumulativeStructure;
 
   /**
-   * Holds instances accumulated so far
+   * Holds instances accumulated so far.
    */
-  private FastVector m_cumulativeInstances;
+  protected FastVector m_cumulativeInstances;
   
-  /** The reader for the data */         
-  private BufferedReader m_sourceReader;
+  /** The reader for the data. */         
+  protected transient BufferedReader m_sourceReader;
   
-  /** Tokenizer for the data */
-  private StreamTokenizer m_st;
+  /** Tokenizer for the data. */
+  protected StreamTokenizer m_st;
+  
+  /** The range of attributes to force to type nominal. */
+  protected Range m_NominalAttributes = new Range();
+  
+  /** The range of attributes to force to type string. */
+  protected Range m_StringAttributes = new Range();
+  
+  /** The placeholder for missing values. */
+  protected String m_MissingValue = "?";
+  
+  /** whether the first row has been read. */
+  protected boolean m_FirstCheck;
   
   /**
-   * default constructor
+   * default constructor.
    */
   public CSVLoader() {
     // No instances retrieved yet
@@ -83,7 +121,7 @@ public class CSVLoader
   }
 
   /**
-   * Get the file extension used for arff files
+   * Get the file extension used for arff files.
    *
    * @return the file extension
    */
@@ -101,7 +139,7 @@ public class CSVLoader
   }
 
   /**
-   * Gets all the file extensions used for this type of file
+   * Gets all the file extensions used for this type of file.
    *
    * @return the file extensions
    */
@@ -110,7 +148,8 @@ public class CSVLoader
   }
 
   /**
-   * Returns a string describing this attribute evaluator
+   * Returns a string describing this attribute evaluator.
+   * 
    * @return a description of the evaluator suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -118,6 +157,199 @@ public class CSVLoader
     return "Reads a source that is in comma separated or tab separated format. "
       +"Assumes that the first row in the file determines the number of "
       +"and names of the attributes.";
+  }
+
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector result = new Vector();
+    
+    result.addElement(new Option(
+        "\tThe range of attributes to force type to be NOMINAL.\n"
+        + "\t'first' and 'last' are accepted as well.\n"
+        + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
+        + "\t(default: -none-)",
+        "N", 1, "-N <range>"));
+    
+    result.addElement(new Option(
+        "\tThe range of attribute to force type to be STRING.\n"
+        + "\t'first' and 'last' are accepted as well.\n"
+        + "\tExamples: \"first-last\", \"1,4,5-27,50-last\"\n"
+        + "\t(default: -none-)",
+        "S", 1, "-S <range>"));
+    
+    result.addElement(new Option(
+        "\tThe string representing a missing value.\n"
+        + "\t(default: ?)",
+        "M", 1, "-M <str>"));
+      
+    return result.elements();
+  }
+
+  /**
+   * Parses a given list of options. <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -N &lt;range&gt;
+   *  The range of attributes to force type to be NOMINAL.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -S &lt;range&gt;
+   *  The range of attribute to force type to be STRING.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -M &lt;str&gt;
+   *  The string representing a missing value.
+   *  (default: ?)</pre>
+   * 
+   <!-- options-end -->
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+    String	tmpStr;
+
+    tmpStr = Utils.getOption('N', options);
+    if (tmpStr.length() != 0)
+      setNominalAttributes(tmpStr);
+    else
+      setNominalAttributes("");
+
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0)
+      setStringAttributes(tmpStr);
+    else
+      setStringAttributes("");
+
+    tmpStr = Utils.getOption('M', options);
+    if (tmpStr.length() != 0)
+      setMissingValue(tmpStr);
+    else
+      setMissingValue("?");
+  }
+
+  /**
+   * Gets the current settings of the Classifier.
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector<String>	result;
+    
+    result  = new Vector<String>();
+
+    if (getNominalAttributes().length() > 0) {
+      result.add("-N");
+      result.add(getNominalAttributes());
+    }
+    
+    if (getStringAttributes().length() > 0) {
+      result.add("-S");
+      result.add(getStringAttributes());
+    }
+
+    result.add("-M");
+    result.add(getMissingValue());
+    
+    return result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * Sets the attribute range to be forced to type nominal.
+   * 
+   * @param value	the range
+   */
+  public void setNominalAttributes(String value) {
+    m_NominalAttributes.setRanges(value);
+  }
+  
+  /**
+   * Returns the current attribute range to be forced to type nominal.
+   * 
+   * @return		the range
+   */
+  public String getNominalAttributes() {
+    return m_NominalAttributes.getRanges();
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   *         		displaying in the explorer/experimenter gui
+   */
+  public String nominalAttributesTipText() {
+    return 
+        "The range of attributes to force to be of type NOMINAL, example "
+      + "ranges: 'first-last', '1,4,7-14,50-last'.";
+  }
+  
+  /**
+   * Sets the attribute range to be forced to type string.
+   * 
+   * @param value	the range
+   */
+  public void setStringAttributes(String value) {
+    m_StringAttributes.setRanges(value);
+  }
+  
+  /**
+   * Returns the current attribute range to be forced to type string.
+   * 
+   * @return		the range
+   */
+  public String getStringAttributes() {
+    return m_StringAttributes.getRanges();
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   *         		displaying in the explorer/experimenter gui
+   */
+  public String stringAttributesTipText() {
+    return 
+        "The range of attributes to force to be of type STRING, example "
+      + "ranges: 'first-last', '1,4,7-14,50-last'.";
+  }
+  
+  /**
+   * Sets the placeholder for missing values.
+   * 
+   * @param value	the placeholder
+   */
+  public void setMissingValue(String value) {
+    m_MissingValue = value;
+  }
+  
+  /**
+   * Returns the current placeholder for missing values.
+   * 
+   * @return		the placeholder
+   */
+  public String getMissingValue() {
+    return m_MissingValue;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   *         		displaying in the explorer/experimenter gui
+   */
+  public String missingValueTipText() {
+    return "The placeholder for missing values, default is '?'.";
   }
   
   /**
@@ -132,6 +364,7 @@ public class CSVLoader
     m_structure    = null;
     m_sourceFile   = null;
     m_File         = null;
+    m_FirstCheck     = true;
 
     m_sourceReader = new BufferedReader(new InputStreamReader(input));
   }
@@ -174,7 +407,7 @@ public class CSVLoader
   }
 
   /**
-   * reads the structure
+   * reads the structure.
    * 
    * @param st the stream tokenizer to read from
    * @throws IOException if reading fails
@@ -222,20 +455,28 @@ public class CSVLoader
       if (tempHash.size() == 0) {
 	atts.addElement(new Attribute(attname));
       } else {
-	FastVector values = new FastVector(tempHash.size());
-	// add dummy objects in order to make the FastVector's size == capacity
-	for (int z = 0; z < tempHash.size(); z++) {
-	  values.addElement("dummy");
+	if (m_StringAttributes.isInRange(i)) {
+	  atts.addElement(new Attribute(attname, (FastVector) null));
 	}
-	Enumeration e = tempHash.keys();
-	while (e.hasMoreElements()) {
-	  Object ob = e.nextElement();
-	  //	  if (ob instanceof Double) {
-	  int index = ((Integer)tempHash.get(ob)).intValue();
-	  values.setElementAt(new String(ob.toString()), index);
-	  //	  }
+	else {
+	  FastVector values = new FastVector(tempHash.size());
+	  // add dummy objects in order to make the FastVector's size == capacity
+	  for (int z = 0; z < tempHash.size(); z++) {
+	    values.addElement("dummy");
+	  }
+	  Enumeration e = tempHash.keys();
+	  while (e.hasMoreElements()) {
+	    Object ob = e.nextElement();
+	    //	  if (ob instanceof Double) {
+	    int index = ((Integer)tempHash.get(ob)).intValue();
+	    String s = ob.toString();
+	    if (s.startsWith("'") || s.startsWith("\""))
+	      s = s.substring(1, s.length() - 1);
+	    values.setElementAt(new String(s), index);
+	    //	  }
+	  }
+	  atts.addElement(new Attribute(attname, values));
 	}
-	atts.addElement(new Attribute(attname, values));
       }
     }
 
@@ -255,23 +496,29 @@ public class CSVLoader
       for (int j = 0; j < current.size(); j++) {
 	Object cval = current.elementAt(j);
 	if (cval instanceof String) {
-	  if (((String)cval).compareTo("'?'") == 0) {
+	  if (((String)cval).compareTo(m_MissingValue) == 0) {
 	    vals[j] = Instance.missingValue();
 	  } else {
-	    if (!dataSet.attribute(j).isNominal()) {
-	      System.err.println("Wrong attribute type!!!");
-	      System.exit(1);
+	    if (dataSet.attribute(j).isString()) {
+	      vals[j] = dataSet.attribute(j).addStringValue((String) cval);
 	    }
-	    // find correct index
-	    Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
-	    int index = ((Integer)lookup.get(cval)).intValue();
-	    vals[j] = index;
+	    else if (dataSet.attribute(j).isNominal()) {
+	      // find correct index
+	      Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
+	      int index = ((Integer)lookup.get(cval)).intValue();
+	      vals[j] = index;
+	    }
+	    else {
+	      throw new IllegalStateException("Wrong attribute type at position " + (i+1) + "!!!");
+	    }
 	  }
 	} else if (dataSet.attribute(j).isNominal()) {
 	  // find correct index
 	  Hashtable lookup = (Hashtable)m_cumulativeStructure.elementAt(j);
 	  int index = ((Integer)lookup.get(cval)).intValue();
 	  vals[j] = index;
+	} else if (dataSet.attribute(j).isString()) {
+	  vals[j] = dataSet.attribute(j).addStringValue("" + cval);
 	} else {
 	  vals[j] = ((Double)cval).doubleValue();
 	}
@@ -343,20 +590,22 @@ public class CSVLoader
 
       if (tokenizer.ttype == ',' || tokenizer.ttype == '\t' || 
 	  tokenizer.ttype == StreamTokenizer.TT_EOL) {
-	current.addElement("'?'");
+	current.addElement(m_MissingValue);
 	wasSep = true;
-      } else if (tokenizer.ttype == '?') {
-        wasSep = false;
-        current.addElement(new String("'?'"));
       } else {
 	wasSep = false;
-	// try to parse as a number
-	try {
-	  double val = Double.valueOf(tokenizer.sval).doubleValue();
-	  current.addElement(new Double(val));
-	} catch (NumberFormatException e) {
-	  // otherwise assume its an enumerated value
-	  current.addElement(new String(tokenizer.sval));
+	if (tokenizer.sval.equals(m_MissingValue)) {
+	  current.addElement(new String(m_MissingValue));
+	}
+	else {
+	  // try to parse as a number
+	  try {
+	    double val = Double.valueOf(tokenizer.sval).doubleValue();
+	    current.addElement(new Double(val));
+	  } catch (NumberFormatException e) {
+	    // otherwise assume its an enumerated value
+	    current.addElement(new String(tokenizer.sval));
+	  }
 	}
       }
       
@@ -406,10 +655,19 @@ public class CSVLoader
     if (current == null) {
       throw new Exception("current shouldn't be null in checkStructure");
     }
+
+    // initialize ranges, if necessary
+    if (m_FirstCheck) {
+      m_NominalAttributes.setUpper(current.size() - 1);
+      m_StringAttributes.setUpper(current.size() - 1);
+      m_FirstCheck = false;
+    }
+    
     for (int i = 0; i < current.size(); i++) {
       Object ob = current.elementAt(i);
-      if (ob instanceof String) {
-	if (((String)ob).compareTo("'?'") == 0) {
+      if ((ob instanceof String) || (m_NominalAttributes.isInRange(i)) || (m_StringAttributes.isInRange(i))) {
+	if (ob.toString().compareTo(m_MissingValue) == 0) {
+	  // do nothing
 	} else {
 	  Hashtable tempHash = (Hashtable)m_cumulativeStructure.elementAt(i);
 	  if (!tempHash.containsKey(ob)) {
@@ -490,7 +748,7 @@ public class CSVLoader
   }
 
   /**
-   * Initializes the stream tokenizer
+   * Initializes the stream tokenizer.
    *
    * @param tokenizer the tokenizer to initialize
    */
@@ -501,8 +759,6 @@ public class CSVLoader
     tokenizer.whitespaceChars(',',',');
     tokenizer.whitespaceChars('\t','\t');
     tokenizer.commentChar('%');
-    tokenizer.quoteChar('"');
-    tokenizer.quoteChar('\'');
     tokenizer.eolIsSignificant(true);
   }
   
@@ -518,7 +774,7 @@ public class CSVLoader
     m_st = null;
     setRetrieval(NONE);
     
-    if (m_File != null && (new File(m_File).isFile())) {
+    if (m_File != null) {
       setFile(new File(m_File));
     }
   }
