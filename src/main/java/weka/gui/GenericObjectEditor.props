@@ -89,6 +89,14 @@ weka.attributeSelection.ASEvaluation=\
  
 # Lists the VisualizePlugins I want to choose from
 weka.gui.visualize.plugins.VisualizePlugin=\
+
+
+# Lists the TreeVisualizePlugins I want to choose from
+weka.gui.visualize.plugins.TreeVisualizePlugin=\
+
+
+# Lists the GraphVisualizePlugins I want to choose from
+weka.gui.visualize.plugins.GraphVisualizePlugin=\
  
  
 # Lists the Loaders I want to choose from
