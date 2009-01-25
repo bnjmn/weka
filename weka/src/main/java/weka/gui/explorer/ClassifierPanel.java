@@ -69,6 +69,8 @@ import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.GraphVisualizePlugin;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
 import weka.gui.visualize.plugins.VisualizePlugin;
 
 import java.awt.BorderLayout;
@@ -1887,11 +1889,14 @@ public class ClassifierPanel
     }
     resultListMenu.add(visCost);
     
+    // visualization plugins
     JMenu visPlugins = new JMenu("Plugins");
-    Vector pluginsVector = GenericObjectEditor.getClassnames(VisualizePlugin.class.getName());
     boolean availablePlugins = false;
-    for (int i=0; i<pluginsVector.size(); i++) {
-      String className = (String)(pluginsVector.elementAt(i));
+    
+    // predictions
+    Vector pluginsVector = GenericObjectEditor.getClassnames(VisualizePlugin.class.getName());
+    for (int i = 0; i < pluginsVector.size(); i++) {
+      String className = (String) (pluginsVector.elementAt(i));
       try {
         VisualizePlugin plugin = (VisualizePlugin) Class.forName(className).newInstance();
         if (plugin == null)
@@ -1907,16 +1912,65 @@ public class ClassifierPanel
           visPlugins.add(pluginMenuItem);
         }
       }
-      catch (ClassNotFoundException cnfe) {
-        //System.out.println("Visualize plugin ClassNotFoundException " + cnfe.getMessage());
-      }
-      catch (InstantiationException ie) {
-        //System.out.println("Visualize plugin InstantiationException " + ie.getMessage());
-      }
-      catch (IllegalAccessException iae) {
-        //System.out.println("Visualize plugin IllegalAccessException " + iae.getMessage());
+      catch (Exception e) {
+	  //e.printStackTrace();
       }
     }
+    
+    // graphs+trees
+    if (grph != null) {
+      // trees
+      if (((Drawable) temp_classifier).graphType() == Drawable.TREE) {
+	pluginsVector = GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
+	for (int i = 0; i < pluginsVector.size(); i++) {
+	  String className = (String) (pluginsVector.elementAt(i));
+	  try {
+	    TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
+	    if (plugin == null)
+	      continue;
+	    availablePlugins = true;
+	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
+	    Version version = new Version();
+	    if (pluginMenuItem != null) {
+	      if (version.compareTo(plugin.getMinVersion()) < 0)
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
+	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+	      visPlugins.add(pluginMenuItem);
+	    }
+	  }
+	  catch (Exception e) {
+	    //e.printStackTrace();
+	  }
+	}
+      }
+      // graphs
+      else {
+	pluginsVector = GenericObjectEditor.getClassnames(GraphVisualizePlugin.class.getName());
+	for (int i = 0; i < pluginsVector.size(); i++) {
+	  String className = (String) (pluginsVector.elementAt(i));
+	  try {
+	    GraphVisualizePlugin plugin = (GraphVisualizePlugin) Class.forName(className).newInstance();
+	    if (plugin == null)
+	      continue;
+	    availablePlugins = true;
+	    JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
+	    Version version = new Version();
+	    if (pluginMenuItem != null) {
+	      if (version.compareTo(plugin.getMinVersion()) < 0)
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
+	      if (version.compareTo(plugin.getMaxVersion()) >= 0)
+		pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+	      visPlugins.add(pluginMenuItem);
+	    }
+	  }
+	  catch (Exception e) {
+	    //e.printStackTrace();
+	  }
+	}
+      }
+    }
+
     if (availablePlugins)
       resultListMenu.add(visPlugins);
 
