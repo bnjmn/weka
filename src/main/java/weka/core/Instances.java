@@ -570,6 +570,32 @@ public class Instances
   }
 
   /**
+   * Checks if two headers are equivalent. If not, then returns a message why
+   * they differ.
+   *
+   * @param dataset 	another dataset
+   * @return 		null if the header of the given dataset is equivalent 
+   * 			to this header, otherwise a message with details on
+   * 			why they differ
+   */
+  public String equalHeadersMsg(Instances dataset) {
+    // Check class and all attributes
+    if (m_ClassIndex != dataset.m_ClassIndex)
+      return "Class index differ: " + (m_ClassIndex+1) + " =! " + (dataset.m_ClassIndex+1);
+
+    if (m_Attributes.size() != dataset.m_Attributes.size())
+      return "Different number of attributes: " + m_Attributes.size() + " =! " + dataset.m_Attributes.size();
+    
+    for (int i = 0; i < m_Attributes.size(); i++) {
+      String msg = attribute(i).equalsMsg(dataset.attribute(i));
+      if (msg != null)
+	return "Attributes differ at position " + (i+1) + ":\n" + msg;
+    }
+    
+    return null;
+  }
+
+  /**
    * Checks if two headers are equivalent.
    *
    * @param dataset another dataset
@@ -577,20 +603,7 @@ public class Instances
    * to this header
    */
   public /*@pure@*/ boolean equalHeaders(Instances dataset){
-
-    // Check class and all attributes
-    if (m_ClassIndex != dataset.m_ClassIndex) {
-      return false;
-    }
-    if (m_Attributes.size() != dataset.m_Attributes.size()) {
-      return false;
-    }
-    for (int i = 0; i < m_Attributes.size(); i++) {
-      if (!(attribute(i).equals(dataset.attribute(i)))) {
-	return false;
-      }
-    }
-    return true;
+    return (equalHeadersMsg(dataset) == null);
   }
  
   /**
@@ -2095,8 +2108,9 @@ public class Instances
       else if ((args.length == 3) && (args[0].toLowerCase().equals("append"))) {
 	DataSource source1 = new DataSource(args[1]);
 	DataSource source2 = new DataSource(args[2]);
-	if (!source1.getStructure().equalHeaders(source2.getStructure()))
-	  throw new Exception("The two datasets have different headers!");
+	String msg = source1.getStructure().equalHeadersMsg(source2.getStructure());
+	if (msg != null)
+	  throw new Exception("The two datasets have different headers:\n" + msg);
 	Instances structure = source1.getStructure();
 	System.out.println(source1.getStructure());
 	while (source1.hasMoreElements(structure))
@@ -2109,10 +2123,11 @@ public class Instances
       else if ((args.length == 3) && (args[0].toLowerCase().equals("headers"))) {
 	DataSource source1 = new DataSource(args[1]);
 	DataSource source2 = new DataSource(args[2]);
-	if (source1.getStructure().equalHeaders(source2.getStructure()))
+	String msg = source1.getStructure().equalHeadersMsg(source2.getStructure());
+	if (msg == null)
 	  System.out.println("Headers match");
 	else
-	  System.out.println("Headers don't match");
+	  System.out.println("Headers don't match:\n" + msg);
       }
       // read file and seed value, randomize data and print result to stdout
       else if ((args.length == 3) && (args[0].toLowerCase().equals("randomize"))) {
@@ -2121,16 +2136,31 @@ public class Instances
 	i.randomize(new Random(Integer.parseInt(args[1])));
 	System.out.println(i);
       }
-      // wrong parameters
+      // wrong parameters or help
       else {
 	System.err.println(
 	    "\nUsage:\n"
+	    // help
 	    + "\tweka.core.Instances help\n"
+	    + "\t\tPrints this help\n"
+	    // stats
 	    + "\tweka.core.Instances <filename>\n"
+	    + "\t\tOutputs dataset statistics\n"
+	    // merge
 	    + "\tweka.core.Instances merge <filename1> <filename2>\n"
+	    + "\t\tMerges the datasets (must have same number of rows).\n"
+	    + "\t\tGenerated dataset gets output on stdout.\n"
+	    // append
 	    + "\tweka.core.Instances append <filename1> <filename2>\n"
+	    + "\t\tAppends the second dataset to the first (must have same number of attributes).\n"
+	    + "\t\tGenerated dataset gets output on stdout.\n"
+	    // headers
 	    + "\tweka.core.Instances headers <filename1> <filename2>\n"
+	    + "\t\tCompares the structure of the two datasets and outputs whether they\n"
+	    + "\t\tdiffer or not.\n"
+	    // randomize
 	    + "\tweka.core.Instances randomize <seed> <filename>\n"
+	    + "\t\tRandomizes the dataset and outputs it on stdout.\n"
 	);
 	System.exit(1);
       }
