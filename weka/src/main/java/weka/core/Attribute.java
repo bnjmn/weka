@@ -87,7 +87,7 @@ import java.util.Properties;
  * </code><p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.45 $
+ * @version $Revision$
  */
 public class Attribute
   implements Copyable, Serializable, RevisionHandler {
@@ -449,32 +449,94 @@ public class Attribute
    * @return true if the given attribute is equal to this attribute
    */
   public final /*@ pure @*/ boolean equals(Object other) {
+    return (equalsMsg(other) == null);
+  }
 
-    if ((other == null) || !(other.getClass().equals(this.getClass()))) {
-      return false;
-    }
+  /**
+   * Tests if given attribute is equal to this attribute. If they're not
+   * the same a message detailing why they differ will be returned, otherwise
+   * null.
+   *
+   * @param other 	the Object to be compared to this attribute
+   * @return 		null if the given attribute is equal to this attribute
+   */
+  public final String equalsMsg(Object other) {
+    if (other == null)
+      return "Comparing with null object";
+    
+    if (!(other.getClass().equals(this.getClass())))
+      return "Object has wrong class";
+    
     Attribute att = (Attribute) other;
-    if (!m_Name.equals(att.m_Name)) {
-      return false;
-    }
+    if (!m_Name.equals(att.m_Name))
+      return "Names differ: " + m_Name + " != " + att.m_Name;
+
     if (isNominal() && att.isNominal()) {
-      if (m_Values.size() != att.m_Values.size()) {
-        return false;
-      }
+      if (m_Values.size() != att.m_Values.size())
+        return "Different number of labels: " + m_Values.size() + " != " + att.m_Values.size();
+      
       for (int i = 0; i < m_Values.size(); i++) {
-        if (!m_Values.elementAt(i).equals(att.m_Values.elementAt(i))) {
-          return false;
-        }
+        if (!m_Values.elementAt(i).equals(att.m_Values.elementAt(i)))
+          return "Labels differ at position " + (i+1) + ": " + m_Values.elementAt(i) + " != " + att.m_Values.elementAt(i);
       }
-      return true;
+      
+      return null;
     } 
-    if (isRelationValued() && att.isRelationValued()) {
-      if (!m_Header.equalHeaders(att.m_Header)) {
-        return false;
-      }
-      return true;
-    } 
-    return (type() == att.type());
+    
+    if (isRelationValued() && att.isRelationValued())
+      return m_Header.equalHeadersMsg(att.m_Header);
+    
+    if ((type() != att.type()))
+      return "Types differ: " + typeToString(this) + " != " + typeToString(att);
+    
+    return null;
+  }
+  
+  /**
+   * Returns a string representation of the attribute type.
+   * 
+   * @param att		the attribute to return the type string for
+   * @return		the string representation of the attribute type
+   */
+  public static String typeToString(Attribute att) {
+    return typeToString(att.type());
+  }
+  
+  /**
+   * Returns a string representation of the attribute type.
+   * 
+   * @param type	the type of the attribute
+   * @return		the string representation of the attribute type
+   */
+  public static String typeToString(int type) {
+    String	result;
+    
+    switch(type) {
+      case NUMERIC:
+	result = "numeric";
+	break;
+	
+      case NOMINAL:
+	result = "nominal";
+	break;
+	
+      case STRING:
+	result = "string";
+	break;
+	
+      case DATE:
+	result = "date";
+	break;
+	
+      case RELATIONAL:
+	result = "relational";
+	break;
+	
+      default:
+	result = "unknown(" + type + ")";
+    }
+    
+    return result;
   }
 
   /**
@@ -1485,7 +1547,7 @@ public class Attribute
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.45 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
