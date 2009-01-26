@@ -748,7 +748,7 @@ public class ClusterEvaluation
       DataSource test = new DataSource(testFileName);
       Instances testStructure = test.getStructure();
       if (!trainHeader.equalHeaders(testStructure)) {
-        throw new Exception("Training and testing data are not compatible");
+        throw new Exception("Training and testing data are not compatible\n" + trainHeader.equalHeadersMsg(testStructure));
       }
 
       text.append("\n\n=== Clustering stats for testing data ===\n\n" 

@@ -32,7 +32,7 @@ import java.util.Vector;
  * also used for JUnit tests.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see TestInstances
  */
 public abstract class CheckScheme
@@ -59,7 +59,7 @@ public abstract class CheckScheme
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.4 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -551,7 +551,7 @@ public abstract class CheckScheme
     throws Exception {
     
     if (!data2.equalHeaders(data1)) {
-      throw new Exception("header has been modified");
+      throw new Exception("header has been modified\n" + data2.equalHeadersMsg(data1));
     }
     if (!(data2.numInstances() == data1.numInstances())) {
       throw new Exception("number of instances has changed");

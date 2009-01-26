@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class NNge 
   extends Classifier 
@@ -677,7 +677,7 @@ public class NNge
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.7 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -861,7 +861,7 @@ public class NNge
 
     /* check the instance */
     if (m_Train.equalHeaders(instance.dataset()) == false){
-      throw new Exception("NNge.classifyInstance : Incompatible instance types !");
+      throw new Exception("NNge.classifyInstance : Incompatible instance types !\n" + m_Train.equalHeadersMsg(instance.dataset()));
     }
 	
     Exemplar matched = nearestExemplar(instance); 
@@ -882,7 +882,7 @@ public class NNge
   public void updateClassifier(Instance instance) throws Exception {
 
     if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types");
+      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
     }	
     update(instance);	
   }
@@ -1710,7 +1710,7 @@ public class NNge
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

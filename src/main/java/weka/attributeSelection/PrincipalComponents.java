@@ -785,7 +785,8 @@ public class PrincipalComponents
     Instance tempInst = (Instance)instance.copy();
     if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: header's don't match: "
-                          +"PrincipalComponents");
+                          +"PrincipalComponents\n"
+                          + instance.dataset().equalHeadersMsg(m_trainHeader));
     }
 
     m_replaceMissingFilter.input(tempInst);

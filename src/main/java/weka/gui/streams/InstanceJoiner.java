@@ -32,7 +32,7 @@ import java.util.Vector;
  * A bean that joins two streams of instances into one.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class InstanceJoiner
   implements Serializable, InstanceProducer, SerialInstanceListener {
@@ -273,7 +273,7 @@ public class InstanceJoiner
 	  // Check the formats are compatible
 	  if (!(a.outputFormat()).equalHeaders(outputFormat())) {
 	    throw new Exception(this.getClass().getName()
-	    + "::secondInstanceProduced() - incompatible instance streams");
+	    + "::secondInstanceProduced() - incompatible instance streams\n" + (a.outputFormat()).equalHeadersMsg(outputFormat()));
 	  }
 	  break;
 	case InstanceEvent.INSTANCE_AVAILABLE:
