@@ -673,7 +673,7 @@ implements AttributeTransformer, OptionHandler {
     Instance tempInstance = (Instance)instance.copy();
     if (!instance.dataset().equalHeaders(m_trainHeader)) {
       throw new Exception("Can't convert instance: headers don't match: " +
-      "LatentSemanticAnalysis");
+      "LatentSemanticAnalysis\n" + instance.dataset().equalHeadersMsg(m_trainHeader));
     }
     // replace missing values
     m_replaceMissingFilter.input(tempInstance);

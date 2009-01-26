@@ -945,7 +945,8 @@ public class Attribute
     }
     if (!m_Header.equalHeaders(value)) {
       throw new IllegalArgumentException("Incompatible value for " +
-                                         "relation-valued attribute.");
+                                         "relation-valued attribute.\n" + 
+                                         m_Header.equalHeadersMsg(value));
     }
     Integer index = (Integer)m_Hashtable.get(value);
     if (index != null) {
@@ -1121,7 +1122,8 @@ public class Attribute
     if (isRelationValued()) { 
       if (!data.equalHeaders(m_Header)) {
         throw new IllegalArgumentException("Can't set relational value. " +
-                                           "Headers not compatible.");
+                                           "Headers not compatible.\n" +
+                                           data.equalHeadersMsg(m_Header));
       }
       m_Values = (FastVector)m_Values.copy();
       m_Values.setElementAt(data, index);

@@ -91,7 +91,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz) - Java port
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class KStar 
   extends Classifier
@@ -241,7 +241,7 @@ public class KStar
     String debug = "(KStar.updateClassifier) ";
 
     if (m_Train.equalHeaders(instance.dataset()) == false)
-      throw new Exception("Incompatible instance types");
+      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
     if ( instance.classIsMissing() )
       return;
     m_Train.add(instance);
@@ -710,7 +710,7 @@ public class KStar
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
 } // class end

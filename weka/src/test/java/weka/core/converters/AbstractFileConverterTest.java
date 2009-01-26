@@ -34,7 +34,7 @@ import java.io.FileWriter;
  * Abstract Test class for file converters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public abstract class AbstractFileConverterTest 
   extends AbstractConverterTest {
@@ -130,7 +130,7 @@ public abstract class AbstractFileConverterTest
     throws Exception {
     
     if (!data2.equalHeaders(data1)) {
-      throw new Exception("header has been modified");
+      throw new Exception("header has been modified\n" + data2.equalHeadersMsg(data1));
     }
     if (!(data2.numInstances() == data1.numInstances())) {
       throw new Exception("number of instances has changed");

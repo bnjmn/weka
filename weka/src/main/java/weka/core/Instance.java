@@ -325,6 +325,22 @@ public class Instance
   }
 
   /**
+   * Checks if the headers of two instances are equivalent. 
+   * If not, then returns a message why they differ.
+   *
+   * @param dataset 	another instance
+   * @return 		null if the header of the given instance is equivalent 
+   * 			to this instance's header, otherwise a message with details on
+   * 			why they differ
+   */
+  public String equalHeadersMsg(Instance inst) {
+    if (m_Dataset == null)
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
+
+    return m_Dataset.equalHeadersMsg(inst.m_Dataset);
+  }
+
+  /**
    * Tests whether an instance has a missing value. Skips the class attribute if set.
    * @return true if instance has a missing value.
    * @throws UnassignedDatasetException if instance doesn't have access to any
