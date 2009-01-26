@@ -74,7 +74,7 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision$
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler, RevisionHandler {
@@ -1169,7 +1169,7 @@ public abstract class Filter
       firstData = firstInput.getStructure();
       secondData = secondInput.getStructure();
       if (!secondData.equalHeaders(firstData)) {
-	throw new Exception("Input file formats differ.\n");
+	throw new Exception("Input file formats differ.\n" + secondData.equalHeadersMsg(firstData) + "\n");
       }
       if (classIndex.length() != 0) {
 	if (classIndex.equals("first")) {

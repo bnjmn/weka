@@ -78,7 +78,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class ClassifierSubsetEval 
   extends HoldOutSubsetEvaluator
@@ -388,7 +388,8 @@ public class ClassifierSubsetEval
 	m_holdOutInstances.setClassIndex(m_trainingInstances.classIndex());
 	if (m_trainingInstances.equalHeaders(m_holdOutInstances) == false) {
 	  throw new Exception("Hold out/test set is not compatable with "
-			      +"training data.");
+			      +"training data.\n" 
+			      + m_trainingInstances.equalHeadersMsg(m_holdOutInstances));
 	}
     }
   }
@@ -490,7 +491,8 @@ public class ClassifierSubsetEval
     Instances testCopy=null;
 
     if (m_trainingInstances.equalHeaders(holdOut) == false) {
-      throw new Exception("evaluateSubset : Incompatable instance types.");
+      throw new Exception("evaluateSubset : Incompatable instance types.\n"
+	  + m_trainingInstances.equalHeadersMsg(holdOut));
     }
 
     Remove delTransform = new Remove();
@@ -563,7 +565,8 @@ public class ClassifierSubsetEval
     Instance testCopy=null;
 
     if (m_trainingInstances.equalHeaders(holdOut.dataset()) == false) {
-      throw new Exception("evaluateSubset : Incompatable instance types.");
+      throw new Exception("evaluateSubset : Incompatable instance types.\n"
+	  + m_trainingInstances.equalHeadersMsg(holdOut.dataset()));
     }
 
     Remove delTransform = new Remove();
@@ -685,7 +688,7 @@ public class ClassifierSubsetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

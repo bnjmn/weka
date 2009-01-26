@@ -109,7 +109,7 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision$
  */
 public class IBk 
   extends Classifier 
@@ -521,7 +521,7 @@ public class IBk
   public void updateClassifier(Instance instance) throws Exception {
 
     if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types");
+      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
     }
     if (instance.classIsMissing()) {
       return;
@@ -1040,7 +1040,7 @@ public class IBk
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.42 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

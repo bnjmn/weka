@@ -1146,7 +1146,7 @@ public class ClassifierPanel
 		throw new Exception("No user test set has been specified");
 	      }
 	      if (!inst.equalHeaders(userTestStructure)) {
-		throw new Exception("Train and test set are not compatible");
+		throw new Exception("Train and test set are not compatible\n" + inst.equalHeadersMsg(userTestStructure));
 	      }
               userTestStructure.setClassIndex(classIndex);
 	    } else {
@@ -2289,7 +2289,7 @@ public class ClassifierPanel
                   throw new Exception("Train and test set are not compatible");
                 userTestStructure.setClassIndex(trainHeader.classIndex());
                 if (!trainHeader.equalHeaders(userTestStructure)) {
-                  throw new Exception("Train and test set are not compatible");
+                  throw new Exception("Train and test set are not compatible:\n" + trainHeader.equalHeadersMsg(userTestStructure));
                 }
               } else {
         	if (classifier instanceof PMMLClassifier) {

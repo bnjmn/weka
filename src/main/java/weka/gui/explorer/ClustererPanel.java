@@ -118,7 +118,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $
+ * @version $Revision$
  */
 public class ClustererPanel
   extends JPanel
@@ -744,7 +744,7 @@ public class ClustererPanel
 		throw new Exception("No user test set has been opened");
 	      }
 	      if (!inst.equalHeaders(userTest)) {
-		throw new Exception("Train and test set are not compatible");
+		throw new Exception("Train and test set are not compatible\n" + inst.equalHeadersMsg(userTest));
 	      }
 	    } else if (m_ClassesToClustersBut.isSelected()) {
 	      testMode = 5;
@@ -1475,7 +1475,7 @@ public class ClustererPanel
                 throw new Exception("No user test set has been opened");
               }
               if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
-                throw new Exception("Train and test set are not compatible");
+                throw new Exception("Train and test set are not compatible\n" + trainHeader.equalHeadersMsg(userTest));
               }
 
               m_Log.statusMessage("Evaluating on test data...");

@@ -936,7 +936,7 @@ public class Evaluation
 	}
 	actualClassIndex = train.classIndex();
 	if ((testSetPresent) && !test.equalHeaders(train)) {
-	  throw new IllegalArgumentException("Train and test file not compatible!");
+	  throw new IllegalArgumentException("Train and test file not compatible!\n" + test.equalHeadersMsg(train));
 	}
       }
       if (template == null) {
@@ -1031,7 +1031,7 @@ public class Evaluation
         if (savedStructure != null) {
           // test for compatibility with template
           if (!template.equalHeaders(savedStructure)) {
-            throw new Exception("training and test set are not compatible");
+            throw new Exception("training and test set are not compatible\n" + template.equalHeadersMsg(savedStructure));
           }
         }
 	objectInputStream.close();
