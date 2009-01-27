@@ -81,6 +81,7 @@ public class TrainingSetMaker
    * @param e a <code>DataSetEvent</code> value
    */
   public void acceptDataSet(DataSetEvent e) {
+    m_receivedStopNotification = false;
     System.err.println("In accept data set");
     TrainingSetEvent tse = new TrainingSetEvent(this, e.getDataSet());
     tse.m_setNumber = 1;
@@ -89,7 +90,7 @@ public class TrainingSetMaker
   }
 
   /**
-   * Inform training set listeners that a training set is availabel
+   * Inform training set listeners that a training set is available
    *
    * @param tse a <code>TrainingSetEvent</code> value
    */
