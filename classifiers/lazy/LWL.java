@@ -115,7 +115,7 @@ import java.util.Vector;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
- * @version $Revision: 1.21.2.1 $ 
+ * @version $Revision$ 
  */
 public class LWL 
   extends SingleClassifierEnhancer
@@ -548,11 +548,11 @@ public class LWL
    */
   public void updateClassifier(Instance instance) throws Exception {
 
-    if (m_Train.numInstances() == 0) {
-      throw new Exception("No training instances!");
+    if (m_Train == null) {
+      throw new Exception("No training instance structure set!");
     }
     else if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types");
+      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
     }
     if (!instance.classIsMissing()) {
       m_NNSearch.update(instance);
@@ -738,7 +738,7 @@ public class LWL
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
