@@ -33,6 +33,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.Version;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.ExtensionFileFilter;
@@ -55,6 +56,7 @@ import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -81,6 +83,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
+import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -95,6 +98,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -118,7 +122,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $
+ * @version $Revision$
  */
 public class ClustererPanel
   extends JPanel
@@ -744,7 +748,7 @@ public class ClustererPanel
 		throw new Exception("No user test set has been opened");
 	      }
 	      if (!inst.equalHeaders(userTest)) {
-		throw new Exception("Train and test set are not compatible");
+		throw new Exception("Train and test set are not compatible\n" + inst.equalHeadersMsg(userTest));
 	      }
 	    } else if (m_ClassesToClustersBut.isSelected()) {
 	      testMode = 5;
@@ -1255,6 +1259,41 @@ public class ClustererPanel
     }
     resultListMenu.add(visTree);
 
+    
+    // visualization plugins
+    JMenu visPlugins = new JMenu("Plugins");
+    boolean availablePlugins = false;
+    
+    // trees
+    if (grph != null) {
+      // trees
+      Vector pluginsVector = GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
+      for (int i = 0; i < pluginsVector.size(); i++) {
+	String className = (String) (pluginsVector.elementAt(i));
+	try {
+	  TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(className).newInstance();
+	  if (plugin == null)
+	    continue;
+	  availablePlugins = true;
+	  JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph, selectedName);
+	  Version version = new Version();
+	  if (pluginMenuItem != null) {
+	    if (version.compareTo(plugin.getMinVersion()) < 0)
+	      pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
+	    if (version.compareTo(plugin.getMaxVersion()) >= 0)
+	      pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+	    visPlugins.add(pluginMenuItem);
+	  }
+	}
+	catch (Exception e) {
+	  //e.printStackTrace();
+	}
+      }
+    }
+
+    if (availablePlugins)
+      resultListMenu.add(visPlugins);
+    
     resultListMenu.show(m_History.getList(), x, y);
   }
   
@@ -1475,7 +1514,7 @@ public class ClustererPanel
                 throw new Exception("No user test set has been opened");
               }
               if (trainHeader != null && !trainHeader.equalHeaders(userTest)) {
-                throw new Exception("Train and test set are not compatible");
+                throw new Exception("Train and test set are not compatible\n" + trainHeader.equalHeadersMsg(userTest));
               }
 
               m_Log.statusMessage("Evaluating on test data...");

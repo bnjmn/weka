@@ -442,10 +442,20 @@ weka.core.tokenizers.Tokenizer=\
  
 # Lists the MainMenuExtensions I want to choose from
 weka.gui.MainMenuExtension=\
- 
-# List of VisualizePlugins I want to choose from
-weka.gui.visualize.plugins.VisualizePlugin=
 
+ 
+# Lists the VisualizePlugins I want to choose from
+weka.gui.visualize.plugins.VisualizePlugin=\
+
+
+# Lists the TreeVisualizePlugins I want to choose from
+weka.gui.visualize.plugins.TreeVisualizePlugin=\
+
+
+# Lists the GraphVisualizePlugins I want to choose from
+weka.gui.visualize.plugins.GraphVisualizePlugin=\
+ 
+ 
 # Lists the JComponentWriters I want to choose from
 weka.gui.visualize.JComponentWriter=\
  weka.gui.visualize.BMPWriter,\
