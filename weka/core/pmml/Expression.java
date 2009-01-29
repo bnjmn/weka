@@ -203,7 +203,7 @@ public abstract class Expression  implements Serializable {
       result = new Discretize((Element)expression, opType, fieldDefs);
     } else if (name.equals("MapValues") ||
         name.equals("Aggregate")) {
-      throw new Exception("[Expression] Unhandled Expression tyoe " + name);
+      throw new Exception("[Expression] Unhandled Expression type " + name);
     }
     return result;
   }
