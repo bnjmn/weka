@@ -56,9 +56,7 @@ import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
-import weka.gui.visualize.plugins.GraphVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
-import weka.gui.visualize.plugins.VisualizePlugin;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
