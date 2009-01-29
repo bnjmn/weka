@@ -62,7 +62,7 @@ import java.util.Enumeration;
  * instance values, it may be faster to create a new instance from scratch.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.25.2.4 $ 
+ * @version $Revision$ 
  */
 public class Instance
   implements Copyable, Serializable, RevisionHandler {
@@ -322,6 +322,22 @@ public class Instance
       throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
     }
     return m_Dataset.equalHeaders(inst.m_Dataset);
+  }
+
+  /**
+   * Checks if the headers of two instances are equivalent. 
+   * If not, then returns a message why they differ.
+   *
+   * @param dataset 	another instance
+   * @return 		null if the header of the given instance is equivalent 
+   * 			to this instance's header, otherwise a message with details on
+   * 			why they differ
+   */
+  public String equalHeadersMsg(Instance inst) {
+    if (m_Dataset == null)
+      throw new UnassignedDatasetException("Instance doesn't have access to a dataset!");
+
+    return m_Dataset.equalHeadersMsg(inst.m_Dataset);
   }
 
   /**
@@ -758,7 +774,6 @@ public class Instance
    * @param value the new attribute value (If the corresponding
    * attribute is nominal (or a string) then this is the new value's
    * index as a double).
-   * @author Arne Muller (arne.muller@gmail.com)
    */
   public void modifyValue(int attIndex, double value) {
     
@@ -1225,6 +1240,6 @@ public class Instance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25.2.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
