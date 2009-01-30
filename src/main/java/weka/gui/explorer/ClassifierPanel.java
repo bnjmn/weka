@@ -69,6 +69,7 @@ import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.plugins.ErrorVisualizePlugin;
 import weka.gui.visualize.plugins.GraphVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 import weka.gui.visualize.plugins.VisualizePlugin;
@@ -1903,6 +1904,30 @@ public class ClassifierPanel
           continue;
         availablePlugins = true;
         JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(preds, classAtt);
+        Version version = new Version();
+        if (pluginMenuItem != null) {
+          if (version.compareTo(plugin.getMinVersion()) < 0)
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (weka outdated)");
+          if (version.compareTo(plugin.getMaxVersion()) >= 0)
+            pluginMenuItem.setText(pluginMenuItem.getText() + " (plugin outdated)");
+          visPlugins.add(pluginMenuItem);
+        }
+      }
+      catch (Exception e) {
+	  //e.printStackTrace();
+      }
+    }
+    
+    // errros
+    pluginsVector = GenericObjectEditor.getClassnames(ErrorVisualizePlugin.class.getName());
+    for (int i = 0; i < pluginsVector.size(); i++) {
+      String className = (String) (pluginsVector.elementAt(i));
+      try {
+        ErrorVisualizePlugin plugin = (ErrorVisualizePlugin) Class.forName(className).newInstance();
+        if (plugin == null)
+          continue;
+        availablePlugins = true;
+        JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(vp.getInstances());
         Version version = new Version();
         if (pluginMenuItem != null) {
           if (version.compareTo(plugin.getMinVersion()) < 0)
