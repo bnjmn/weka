@@ -552,7 +552,7 @@ public class LWL
       throw new Exception("No training instance structure set!");
     }
     else if (m_Train.equalHeaders(instance.dataset()) == false) {
-      throw new Exception("Incompatible instance types\n" + m_Train.equalHeadersMsg(instance.dataset()));
+      throw new Exception("Incompatible instance types");
     }
     if (!instance.classIsMissing()) {
       m_NNSearch.update(instance);
