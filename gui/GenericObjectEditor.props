@@ -454,6 +454,10 @@ weka.gui.visualize.plugins.TreeVisualizePlugin=\
 
 # Lists the GraphVisualizePlugins I want to choose from
 weka.gui.visualize.plugins.GraphVisualizePlugin=\
+
+
+# Lists the ErrorVisualizePlugins I want to choose from
+weka.gui.visualize.plugins.ErrorVisualizePlugin=\
  
  
 # Lists the JComponentWriters I want to choose from
