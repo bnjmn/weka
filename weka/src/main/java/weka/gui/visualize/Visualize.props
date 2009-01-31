@@ -11,8 +11,8 @@ weka.gui.visualize.Plot2D.axisColour=green
 # Colour for the background of the 2D plot (can use R,G,B format)
 weka.gui.visualize.Plot2D.backgroundColour=white
 
-# The JFrame (implement the weka.gui.visualize.InstanceInfo) for displaying 
-# Instance information.
+# The JFrame (needs to implement the interface weka.gui.visualize.InstanceInfo) 
+# for displaying Instance information.
 weka.gui.visualize.Plot2D.instanceInfoFrame=weka.gui.visualize.InstanceInfoFrame
 
 # Display the list of one dimensional attribute visualizations
