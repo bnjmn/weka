@@ -46,6 +46,8 @@ public class CrossValidationFoldMaker
 
   private int m_numFolds = 10;
   private int m_randomSeed = 1;
+  
+  private boolean m_preserveOrder = false;
 
   private Thread m_foldThread = null;
 
@@ -106,7 +108,7 @@ public class CrossValidationFoldMaker
     DataSetEvent dse = new DataSetEvent(this, testSet);
     acceptDataSet(dse);
   }
-
+  
   /**
    * Accept a data set
    *
@@ -128,9 +130,12 @@ public class CrossValidationFoldMaker
 	    boolean errorOccurred = false;
 	    try {
 	      Random random = new Random(getSeed());
-	      dataSet.randomize(random);
+	      if (!m_preserveOrder) {
+	        dataSet.randomize(random);
+	      }
 	      if (dataSet.classIndex() >= 0 && 
-		  dataSet.attribute(dataSet.classIndex()).isNominal()) {
+		  dataSet.attribute(dataSet.classIndex()).isNominal() &&
+		  !m_preserveOrder) {
 		dataSet.stratify(getFolds());
 		if (m_logger != null) {
 		  m_logger.logMessage("[" + getCustomName() + "] "
@@ -146,9 +151,11 @@ public class CrossValidationFoldMaker
 		  // exit gracefully
 		  break;
 		}
-		Instances train = dataSet.trainCV(getFolds(), i, random);
+		Instances train = (!m_preserveOrder) 
+		  ? dataSet.trainCV(getFolds(), i, random)
+		  : dataSet.trainCV(getFolds(), i); 
 		Instances test  = dataSet.testCV(getFolds(), i);
-		
+
 		// inform all training set listeners
 		TrainingSetEvent tse = new TrainingSetEvent(this, train);
 		tse.m_setNumber = i+1; tse.m_maxSetNumber = getFolds();
@@ -179,13 +186,13 @@ public class CrossValidationFoldMaker
 	    } catch (Exception ex) {
 	      // stop all processing
 	      errorOccurred = true;
-	      CrossValidationFoldMaker.this.stop();
 	      if (m_logger != null) {
 	        m_logger.logMessage("[" + getCustomName() 
 	            + "] problem during fold creation. "
 	            + ex.getMessage());
 	      }
 	      ex.printStackTrace();
+	      CrossValidationFoldMaker.this.stop();
 	    } finally {
 	      if (errorOccurred) {
 	        if (m_logger != null) {
@@ -322,6 +329,14 @@ public class CrossValidationFoldMaker
    */
   public String seedTipText() {
     return "The randomization seed";
+  }
+  
+  public boolean getPreserveOrder() {
+    return m_preserveOrder;
+  }
+  
+  public void setPreserveOrder(boolean p) {
+    m_preserveOrder = p;
   }
   
   /**
