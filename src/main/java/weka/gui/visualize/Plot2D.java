@@ -23,6 +23,7 @@
 package weka.gui.visualize;
 
 import weka.core.FastVector;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
 
@@ -37,18 +38,17 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Random;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 
 /**
  * This class plots datasets in two dimensions. It can also plot
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision$
  */
 public class Plot2D
   extends JPanel {
@@ -92,9 +92,11 @@ public class Plot2D
       to draw polygons etc. before we draw plot axis and data points */
   protected Plot2DCompanion m_plotCompanion=null;
 
+  /** the class for displaying instance info. */
+  protected Class m_InstanceInfoFrameClass = null;
+  
   /** For popping up text info on data points */
   protected JFrame m_InstanceInfo = null;
-  protected JTextArea m_InstanceInfoText = new JTextArea();
 
   /** The list of the colors used */
   protected FastVector m_colorList;
@@ -172,8 +174,6 @@ public class Plot2D
     super();
     setProperties();
     this.setBackground(m_backgroundColour);
-    m_InstanceInfoText.setFont(new Font("Monospaced", Font.PLAIN,12));
-    m_InstanceInfoText.setEditable(false);
 
     m_drawnPoints = new int[this.getWidth()][this.getHeight()];
 
@@ -223,6 +223,14 @@ public class Plot2D
 	//System.err.println("Setting background colour to: "+backgroundColour);
 	m_backgroundColour = VisualizeUtils.processColour(backgroundColour, 
 							  m_backgroundColour);
+      }
+      
+      try {
+	m_InstanceInfoFrameClass = Class.forName(VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(thisClass + ".instanceInfoFrame", "weka.gui.visualize.InstanceInfoFrame"));
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+	m_InstanceInfoFrameClass = InstanceInfoFrame.class;
       }
     }
   }
@@ -494,8 +502,10 @@ public class Plot2D
       }
 
       StringBuffer insts = new StringBuffer(); 
+      Vector<Instances> data = new Vector<Instances>();
       for (int jj=0;jj<m_plots.size();jj++) {
 	PlotData2D temp_plot = (PlotData2D)(m_plots.elementAt(jj));
+	data.add(new Instances(temp_plot.m_plotInstances, 0));
 	
 	for (int i=0;i<temp_plot.m_plotInstances.numInstances();i++) {
 	  if (temp_plot.m_pointLookup[i][0] != Double.NEGATIVE_INFINITY) {
@@ -508,6 +518,7 @@ public class Plot2D
 	    if ((x >= px-size) && (x <= px+size) &&
 		(y >= py-size) && (y <= py+size)) {
 	      {
+		data.get(jj).add(new Instance(temp_plot.m_plotInstances.instance(i)));
 		insts.append("\nPlot : "+temp_plot.m_plotName
 			     + "\nInstance: " + (i + 1 ) + "\n");
 		for (int j=0;j<temp_plot.m_plotInstances.numAttributes();j++) {
@@ -538,17 +549,24 @@ public class Plot2D
 	  }
 	}
       }
+      // remove datasets that contain no instances
+      int i = 0;
+      while (data.size() > i) {
+	if (data.get(i).numInstances() == 0)
+	  data.remove(i);
+	else
+	  i++;
+      }
 
       if (insts.length() > 0) {
 	// Pop up a new frame
 	if (newFrame || m_InstanceInfo == null) {
-	  JTextArea jt = new JTextArea();
-	  jt.setFont(new Font("Monospaced", Font.PLAIN,12));
-	  jt.setEditable(false);
-	  jt.setText(insts.toString());
-	  final JFrame jf = new JFrame("Weka : Instance info");
-	  final JFrame testf = m_InstanceInfo;
-	  jf.addWindowListener(new WindowAdapter() {
+	  try {
+	    final JFrame jf = (JFrame) m_InstanceInfoFrameClass.newInstance();
+	    ((InstanceInfo) jf).setInfoText(insts.toString());
+	    ((InstanceInfo) jf).setInfoData(data);
+	    final JFrame testf = m_InstanceInfo;
+	    jf.addWindowListener(new WindowAdapter() {
 	      public void windowClosing(WindowEvent e) {
 		if (!newFrame || testf == null) {
 		  m_InstanceInfo = null;
@@ -556,18 +574,18 @@ public class Plot2D
 		jf.dispose();
 	      }
 	    });
-	  jf.getContentPane().setLayout(new BorderLayout());
-	  jf.getContentPane().add(new JScrollPane(jt), BorderLayout.CENTER);
-	  jf.pack();
-	  jf.setSize(320, 400);
-	  jf.setVisible(true);
-	  if (m_InstanceInfo == null) {
-	    m_InstanceInfo = jf;
-	    m_InstanceInfoText = jt;
+	    jf.setVisible(true);
+	    if (m_InstanceInfo == null)
+	      m_InstanceInfo = jf;
 	  }
-	}  else {
+	  catch (Exception e) {
+	    e.printStackTrace();
+	  }
+	}
+	else {
 	  // Overwrite info in existing frame	  
-	  m_InstanceInfoText.setText(insts.toString());
+	  ((InstanceInfo) m_InstanceInfo).setInfoText(insts.toString());
+	  ((InstanceInfo) m_InstanceInfo).setInfoData(data);
 	}
       }
     }
