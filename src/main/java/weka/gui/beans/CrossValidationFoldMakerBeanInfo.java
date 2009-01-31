@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the cross validation fold maker bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class CrossValidationFoldMakerBeanInfo 
   extends AbstractTrainAndTestSetProducerBeanInfo {
@@ -42,9 +42,11 @@ public class CrossValidationFoldMakerBeanInfo
     try {
       PropertyDescriptor p1;
       PropertyDescriptor p2;
+      PropertyDescriptor p3;
       p1 = new PropertyDescriptor("folds", CrossValidationFoldMaker.class);
       p2 = new PropertyDescriptor("seed", CrossValidationFoldMaker.class);
-      PropertyDescriptor [] pds = { p1, p2 };
+      p3 = new PropertyDescriptor("preserveOrder", CrossValidationFoldMaker.class);
+      PropertyDescriptor [] pds = { p1, p2, p3 };
       return pds;
     } catch (Exception ex) {
       ex.printStackTrace();
