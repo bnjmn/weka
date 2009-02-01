@@ -19,7 +19,10 @@
  * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core;
+package weka.core.scripting;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.File;
 import java.io.InputStream;
