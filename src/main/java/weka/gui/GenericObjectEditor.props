@@ -110,6 +110,7 @@ weka.core.tokenizers.Tokenizer=\
  
 # Lists the Classifiers I want to choose from
 weka.classifiers.Classifier=\
+ weka.classifiers.JythonClassifier,\
  weka.classifiers.bayes.AODE,\
  weka.classifiers.bayes.AODEsr,\
  weka.classifiers.bayes.BayesianLogisticRegression,\
