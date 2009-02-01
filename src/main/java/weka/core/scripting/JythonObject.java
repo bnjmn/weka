@@ -19,14 +19,14 @@
  * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core;
+package weka.core.scripting;
 
 
 /**
  * An indicator interface for Jython objects.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public interface JythonObject {
 

@@ -19,7 +19,8 @@
  * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core;
+package weka.core.scripting;
+
 
 import java.io.Serializable;
 
@@ -28,7 +29,7 @@ import java.io.Serializable;
  * An indicator interface for serializable Jython objects.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public interface JythonSerializableObject extends Serializable, JythonObject {
 
