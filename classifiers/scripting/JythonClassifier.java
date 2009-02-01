@@ -20,15 +20,16 @@
  *
  */
 
-package weka.classifiers;
+package weka.classifiers.scripting;
 
+import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Jython;
 import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.scripting.Jython;
 
 import java.io.File;
 import java.util.Enumeration;
@@ -62,7 +63,7 @@ import java.util.Vector;
  * code.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 public class JythonClassifier 
   extends Classifier {
@@ -404,7 +405,7 @@ public class JythonClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

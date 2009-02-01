@@ -19,7 +19,10 @@
  * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
-package weka.core;
+package weka.core.scripting;
+
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -32,7 +35,7 @@ import java.util.HashSet;
  * A helper class for <a href="http://www.jython.org/" target="_blank">Jython</a>.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1.2.3 $
+ * @version $Revision$
  */
 public class Jython
   implements Serializable, RevisionHandler {
@@ -282,7 +285,7 @@ public class Jython
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
