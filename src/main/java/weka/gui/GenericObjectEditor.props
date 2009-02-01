@@ -212,6 +212,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.misc.OSDL,\
  weka.classifiers.misc.SerializedClassifier,\
  weka.classifiers.misc.VFI,\
+ weka.classifiers.scripting.GroovyClassifier,\
+ weka.classifiers.scripting.JythonClassifier,\
  weka.classifiers.trees.ADTree,\
  weka.classifiers.trees.BFTree,\
  weka.classifiers.trees.DecisionStump,\
