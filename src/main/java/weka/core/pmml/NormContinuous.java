@@ -113,7 +113,7 @@ public class NormContinuous extends Expression {
       }
     }
     
-    setUpField();
+//    setUpField();
   }
   
   /**

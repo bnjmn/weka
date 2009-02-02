@@ -127,6 +127,15 @@ public class DefineFunction extends Function {
           + "is not."); 
     }
   }
+  
+  public void pushParameterDefs() throws Exception {
+    if (m_parameterDefs == null) {
+      throw new Exception("[DefineFunction] parameter definitions are null! Can't "
+          + "push them to encapsulated expression.");
+    }
+    
+    m_expression.setFieldDefs(m_parameterDefs);
+  }
 
   /**
    * Get the structure of the result produced by this function.

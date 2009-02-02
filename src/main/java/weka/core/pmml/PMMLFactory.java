@@ -531,10 +531,12 @@ public class PMMLFactory {
       PMMLClassifierRunner pcr = new PMMLClassifierRunner();
       pcr.evaluatePMMLClassifier(args);
 
-/*      System.out.println(model);
+      
+      /*PMMLModel model = getPMMLModel(args[0], null);
+      System.out.println(model);
       if (args.length == 2) {
         // load an arff file
-        Instances testData = new Instances(new BufferedReader(new FileReader(args[1])));
+        Instances testData = new Instances(new java.io.BufferedReader(new java.io.FileReader(args[1])));
         Instances miningSchemaI = model.getMiningSchema().getFieldsAsInstances();
         if (miningSchemaI.classIndex() >= 0) {
           String className = miningSchemaI.classAttribute().name();
@@ -547,7 +549,7 @@ public class PMMLFactory {
           }
         }
         System.out.println(applyClassifier(model, testData));
-      } */
+      }*/
     } catch (Exception ex) {
       ex.printStackTrace();
     }
