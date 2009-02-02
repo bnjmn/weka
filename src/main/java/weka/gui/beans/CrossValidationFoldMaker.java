@@ -331,10 +331,25 @@ public class CrossValidationFoldMaker
     return "The randomization seed";
   }
   
+  /**
+   * Returns true if the order of the incoming instances is to
+   * be preserved under cross-validation (no randomization or 
+   * stratification is done in this case).
+   * 
+   * @return true if the order of the incoming instances is to
+   * be preserved.
+   */
   public boolean getPreserveOrder() {
     return m_preserveOrder;
   }
   
+  /**
+   * Sets whether the order of the incoming instances is to be
+   * preserved under cross-validation (no randomization or 
+   * stratification is done in this case).
+   *  
+   * @param p true if the order is to be preserved.
+   */
   public void setPreserveOrder(boolean p) {
     m_preserveOrder = p;
   }
