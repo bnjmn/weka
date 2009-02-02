@@ -48,7 +48,7 @@ import weka.core.Instances;
  * store them here.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class MiningSchema implements Serializable {
 
@@ -170,13 +170,7 @@ public class MiningSchema implements Serializable {
     m_transformationDictionary = transDict;
     
     // Handle transformation dictionary and any local transformations
-    if (m_transformationDictionary != null) {
-      // first update the field defs for any derived fields in the transformation dictionary
-      // now that we have a fixed ordering for the mining schema attributes (i.e. could
-      // be different from the order of attributes in the data dictionary that was
-      // used when the transformation dictionary was initially constructed
-      m_transformationDictionary.setFieldDefsForDerivedFields(m_miningSchemaInstancesStructure);
-      
+    if (m_transformationDictionary != null) {      
       ArrayList<DerivedFieldMetaInfo> transDerived = transDict.getDerivedFields();
       m_derivedMeta.addAll(transDerived);
     }
@@ -193,6 +187,18 @@ public class MiningSchema implements Serializable {
       newStructure.addElement(d.getFieldAsAttribute());
     }
     m_fieldInstancesStructure = new Instances("FieldStructure", newStructure, 0);
+    
+    if (m_transformationDictionary != null) {
+      // first update the field defs for any derived fields in the transformation dictionary
+      // and our complete list of derived fields, now that we have a fixed 
+      // ordering for the mining schema + derived attributes (i.e. could
+      // be different from the order of attributes in the data dictionary that was
+      // used when the transformation dictionary was initially constructed
+      m_transformationDictionary.setFieldDefsForDerivedFields(m_fieldInstancesStructure);
+      for (DerivedFieldMetaInfo d : m_derivedMeta) {
+        d.setFieldDefs(m_fieldInstancesStructure);
+      }
+    }
     
     if (classIndex != -1) {
       m_fieldInstancesStructure.setClassIndex(classIndex);
