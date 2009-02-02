@@ -100,12 +100,11 @@ class Apply extends Expression {
       }
     }
     
-    updateDefsForArgumentsAndFunction();
+    //updateDefsForArgumentsAndFunction();
   }
   
   public void setFieldDefs(ArrayList<Attribute> fieldDefs) throws Exception {
     super.setFieldDefs(fieldDefs);
-    
     updateDefsForArgumentsAndFunction();
   }
   
@@ -180,6 +179,15 @@ class Apply extends Expression {
    * Attribute.
    */
   public Attribute getOutputDef() {
+    if (m_outputStructure == null) {
+      // return a "default" output def. This will get replaced
+      // by a final one when the final field defs are are set
+      // for all expressions after all derived fields are collected
+      return (m_opType == FieldMetaInfo.Optype.CATEGORICAL ||
+          m_opType == FieldMetaInfo.Optype.ORDINAL)
+      ? new Attribute("Placeholder", new weka.core.FastVector())
+      : new Attribute("Placeholder");
+    }
     return m_outputStructure;//.copy(attName);
   }
   

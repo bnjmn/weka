@@ -30,6 +30,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import weka.core.Attribute;
+import weka.core.Instances;
 
 public class DerivedFieldMetaInfo extends FieldMetaInfo implements Serializable {
   
@@ -76,11 +77,25 @@ public class DerivedFieldMetaInfo extends FieldMetaInfo implements Serializable 
   /**
    * Upadate the field definitions for this derived field
    * 
-   * @param fieldDefs
-   * @throws Exception
+   * @param fieldDefs the fields as an ArrayList of Attributes
+   * @throws Exception if there is a problem setting the field definitions
    */
   public void setFieldDefs(ArrayList<Attribute> fieldDefs) throws Exception {
     m_expression.setFieldDefs(fieldDefs);
+  }
+  
+  /**
+   * Upadate the field definitions for this derived field
+   * 
+   * @param fields the fields as an Instances object
+   * @throws Exception if there is a problem setting the field definitions
+   */
+  public void setFieldDefs(Instances fields) throws Exception {
+    ArrayList<Attribute> tempDefs = new ArrayList<Attribute>();
+    for (int i = 0; i < fields.numAttributes(); i++) {
+      tempDefs.add(fields.attribute(i));
+    }
+    setFieldDefs(tempDefs);
   }
   
   /**
