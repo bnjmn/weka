@@ -97,7 +97,7 @@ public class NormDiscrete extends Expression {
       m_mapMissingDefined = true;
     }
     
-    setUpField();
+    //setUpField();
   }
   
   /**
