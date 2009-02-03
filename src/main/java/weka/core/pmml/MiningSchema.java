@@ -178,6 +178,8 @@ public class MiningSchema implements Serializable {
     // Get any local transformations
     getLocalTransformations(model);
     
+    // Set up the full instances structure: combo of mining schema fields and
+    // all derived fields
     FastVector newStructure = new FastVector();
     for (MiningFieldMetaInfo m : m_miningMeta) {
       newStructure.addElement(m.getFieldAsAttribute());
@@ -195,9 +197,11 @@ public class MiningSchema implements Serializable {
       // be different from the order of attributes in the data dictionary that was
       // used when the transformation dictionary was initially constructed
       m_transformationDictionary.setFieldDefsForDerivedFields(m_fieldInstancesStructure);
-      for (DerivedFieldMetaInfo d : m_derivedMeta) {
-        d.setFieldDefs(m_fieldInstancesStructure);
-      }
+    }
+
+    // update the field defs for all our derived fields.
+    for (DerivedFieldMetaInfo d : m_derivedMeta) {
+      d.setFieldDefs(m_fieldInstancesStructure);
     }
     
     if (classIndex != -1) {
