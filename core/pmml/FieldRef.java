@@ -9,7 +9,7 @@ import weka.core.Attribute;
  * Class encapsulating a FieldRef Expression. Is simply a
  * pass-through to an existing field.
  * 
- * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision 1.0 $
  */
 public class FieldRef extends Expression {
@@ -22,7 +22,6 @@ public class FieldRef extends Expression {
     super(opType, fieldDefs);
     
     m_fieldName = fieldRef.getAttribute("field");
-    validateField();
   }
   
   public void setFieldDefs(ArrayList<Attribute> fieldDefs) throws Exception {
