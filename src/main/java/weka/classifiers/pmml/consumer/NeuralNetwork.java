@@ -87,6 +87,7 @@ public class NeuralNetwork extends PMMLClassifier {
         fieldDefs.add(allFields.attribute(i));
       }
       m_field = new DerivedFieldMetaInfo(dF, fieldDefs, miningSchema.getTransformationDictionary());
+      m_field.setFieldDefs(fieldDefs);
     }
     
     protected double getValue(double[] incoming) throws Exception {
@@ -815,7 +816,7 @@ public class NeuralNetwork extends PMMLClassifier {
    * @see weka.core.RevisionHandler#getRevision()
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**                                                                                                             
