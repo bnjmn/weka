@@ -209,7 +209,9 @@ public class Discretize extends Expression {
       }
     }
    
-    // setUpField();
+    if (fieldDefs != null) {
+      setUpField();
+    }
   }
   
   /**

@@ -61,10 +61,10 @@ class TransformationDictionary implements Serializable {
                                   Instances dataDictionary) throws Exception {
     
     // set up incoming field definitions
-    ArrayList<Attribute> incomingFieldDefs = new ArrayList<Attribute>();
+/*    ArrayList<Attribute> incomingFieldDefs = new ArrayList<Attribute>();
     for (int i = 0; i < dataDictionary.numAttributes(); i++) {
       incomingFieldDefs.add(dataDictionary.attribute(i));
-    }
+    } */
     
     // get any derived fields and DefineFunctions
     NodeList derivedL = dictionary.getChildNodes();
@@ -73,7 +73,7 @@ class TransformationDictionary implements Serializable {
       if (child.getNodeType() == Node.ELEMENT_NODE) {
         String tagName = ((Element)child).getTagName();
         if (tagName.equals("DerivedField")) {
-          DerivedFieldMetaInfo df = new DerivedFieldMetaInfo((Element)child, incomingFieldDefs, null);
+          DerivedFieldMetaInfo df = new DerivedFieldMetaInfo((Element)child, null /*incomingFieldDefs*/, null);
           m_derivedFields.add(df);
         } else if (tagName.equals("DefineFunction")) {
           DefineFunction defF = new DefineFunction((Element)child, null);

@@ -100,7 +100,9 @@ class Apply extends Expression {
       }
     }
     
-    //updateDefsForArgumentsAndFunction();
+    if (fieldDefs != null) {
+      updateDefsForArgumentsAndFunction();
+    }
   }
   
   public void setFieldDefs(ArrayList<Attribute> fieldDefs) throws Exception {
