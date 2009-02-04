@@ -87,17 +87,17 @@ public class MiningSchema implements Serializable {
       Element localT = (Element)temp.item(0);
       
       // Set up some field defs to pass in
-      ArrayList<Attribute> fieldDefs = new ArrayList<Attribute>();
+      /*ArrayList<Attribute> fieldDefs = new ArrayList<Attribute>();
       for (int i = 0; i < m_miningSchemaInstancesStructure.numAttributes(); i++) {
         fieldDefs.add(m_miningSchemaInstancesStructure.attribute(i));
-      }
+      } */
       
       NodeList localDerivedL = localT.getElementsByTagName("DerivedField");
       for (int i = 0; i < localDerivedL.getLength(); i++) {
         Node localDerived = localDerivedL.item(i);
         if (localDerived.getNodeType() == Node.ELEMENT_NODE) {
           DerivedFieldMetaInfo d = 
-            new DerivedFieldMetaInfo((Element)localDerived, fieldDefs, m_transformationDictionary);
+            new DerivedFieldMetaInfo((Element)localDerived, null /*fieldDefs*/, m_transformationDictionary);
           m_derivedMeta.add(d);
         }
       }
