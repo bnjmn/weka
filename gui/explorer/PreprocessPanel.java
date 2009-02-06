@@ -102,7 +102,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.71.2.2 $
+ * @version $Revision$
  */
 public class PreprocessPanel
   extends JPanel 
@@ -158,7 +158,7 @@ public class PreprocessPanel
 
   /** The file chooser for selecting arff files */
   protected ConverterFileChooser m_FileChooser 
-    = new ConverterFileChooser(new File(System.getProperty("user.dir")));
+    = new ConverterFileChooser(new File(ExplorerDefaults.getInitialDirectory()));
 
   /** Stores the last URL that instances were loaded from */
   protected String m_LastURL = "http://";
