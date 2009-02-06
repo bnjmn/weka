@@ -127,6 +127,14 @@ import java.util.Vector;
  * <pre> -Z
  *  Turns on normalization of input data (default: off)</pre>
  * 
+ * <pre> -J
+ *  Turn off nominal to binary conversion.
+ *  WARNING: use only if your data is all numeric!</pre>
+ * 
+ * <pre> -V
+ *  Turn off missing value replacement.
+ *  WARNING: use only if your data has no missing values.</pre>
+ * 
  * <pre> -P &lt;double&gt;
  *  Set the epsilon in loss function of epsilon-SVR (default: 0.1)</pre>
  * 
@@ -140,8 +148,10 @@ import java.util.Vector;
  *  Turns the shrinking heuristics off (default: on)</pre>
  * 
  * <pre> -W &lt;double&gt;
- *  Set the parameters C of class i to weight[i]*C, for C-SVC
- *   (default: 1)</pre>
+ *  Set the parameters C of class i to weight[i]*C, for C-SVC.
+ *  E.g., for a 3-class problem, you could use "1 1 1" for equally
+ *  weighted classes.
+ *  (default: 1 for all classes)</pre>
  * 
  * <pre> -B
  *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
@@ -431,8 +441,10 @@ public class LibSVM
     
     result.addElement(
         new Option(
-            "\tSet the parameters C of class i to weight[i]*C, for C-SVC\n" 
-            + "\t (default: 1)",
+            "\tSet the parameters C of class i to weight[i]*C, for C-SVC.\n" 
+            + "\tE.g., for a 3-class problem, you could use \"1 1 1\" for equally\n"
+            + "\tweighted classes.\n"
+            + "\t(default: 1 for all classes)",
             "W", 1, "-W <double>"));
     
     result.addElement(
@@ -488,6 +500,14 @@ public class LibSVM
    * <pre> -Z
    *  Turns on normalization of input data (default: off)</pre>
    * 
+   * <pre> -J
+   *  Turn off nominal to binary conversion.
+   *  WARNING: use only if your data is all numeric!</pre>
+   * 
+   * <pre> -V
+   *  Turn off missing value replacement.
+   *  WARNING: use only if your data has no missing values.</pre>
+   * 
    * <pre> -P &lt;double&gt;
    *  Set the epsilon in loss function of epsilon-SVR (default: 0.1)</pre>
    * 
@@ -501,8 +521,10 @@ public class LibSVM
    *  Turns the shrinking heuristics off (default: on)</pre>
    * 
    * <pre> -W &lt;double&gt;
-   *  Set the parameters C of class i to weight[i]*C, for C-SVC
-   *   (default: 1)</pre>
+   *  Set the parameters C of class i to weight[i]*C, for C-SVC.
+   *  E.g., for a 3-class problem, you could use "1 1 1" for equally
+   *  weighted classes.
+   *  (default: 1 for all classes)</pre>
    * 
    * <pre> -B
    *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
