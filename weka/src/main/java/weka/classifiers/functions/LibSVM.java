@@ -1087,7 +1087,7 @@ public class LibSVM
    *         displaying in the explorer/experimenter gui
    */
   public String weightsTipText() {
-    return "The weights to use for the classes, if empty 1 is used by default.";
+    return "The weights to use for the classes (blank-separated list, eg, \"1 1 1\" for a 3-class problem), if empty 1 is used by default.";
   }
   
   /**
