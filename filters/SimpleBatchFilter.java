@@ -138,7 +138,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  * @see     SimpleStreamFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -173,9 +173,10 @@ public abstract class SimpleBatchFilter
    * @return            true if the filtered instance may now be
    *                    collected with output().
    * @throws  IllegalStateException if no input structure has been defined
-   * @see     #batchFinished()
+   * @throws Exception	if something goes wrong
+   * @see     		#batchFinished()
    */
-  public boolean input(Instance instance) {
+  public boolean input(Instance instance) throws Exception {
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
     
@@ -187,16 +188,11 @@ public abstract class SimpleBatchFilter
     bufferInput(instance);
     
     if (isFirstBatchDone()) {
-      try {
-	Instances inst = new Instances(getInputFormat());
-	inst = process(inst);
-	for (int i = 0; i < inst.numInstances(); i++)
-	  push(inst.instance(i));
-	flushInput();
-      }
-      catch (Exception e) {
-	e.printStackTrace();
-      }
+      Instances inst = new Instances(getInputFormat());
+      inst = process(inst);
+      for (int i = 0; i < inst.numInstances(); i++)
+	push(inst.instance(i));
+      flushInput();
     }
 
     return m_FirstBatchDone;
@@ -211,43 +207,39 @@ public abstract class SimpleBatchFilter
    * re-assigned or new options have been set). Sets m_FirstBatchDone
    * and m_NewBatch to true.
    *
-   * @return true if there are instances pending output
-   * @throws IllegalStateException if no input format has been set. 
-   * @see    #m_NewBatch
-   * @see    #m_FirstBatchDone 
+   * @return 		true if there are instances pending output
+   * @throws IllegalStateException 	if no input format has been set. 
+   * @throws Exception	if something goes wrong
+   * @see    		#m_NewBatch
+   * @see    		#m_FirstBatchDone 
    */
-  public boolean batchFinished() {
+  public boolean batchFinished() throws Exception {
     int         i;
     Instances   inst;
     
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
 
-    try {
-      // get data
-      inst = new Instances(getInputFormat());
+    // get data
+    inst = new Instances(getInputFormat());
 
-      // if output format hasn't been set yet, do it now
-      if (!hasImmediateOutputFormat() && !isFirstBatchDone())
-        setOutputFormat(determineOutputFormat(new Instances(inst, 0)));
+    // if output format hasn't been set yet, do it now
+    if (!hasImmediateOutputFormat() && !isFirstBatchDone())
+      setOutputFormat(determineOutputFormat(new Instances(inst, 0)));
 
-      // don't do anything in case there are no instances pending.
-      // in case of second batch, they may have already been processed
-      // directly by the input method and added to the output queue
-      if (inst.numInstances() > 0) {
-	// process data
-	inst = process(inst);
+    // don't do anything in case there are no instances pending.
+    // in case of second batch, they may have already been processed
+    // directly by the input method and added to the output queue
+    if (inst.numInstances() > 0) {
+      // process data
+      inst = process(inst);
 
-	// clear input queue
-	flushInput();
+      // clear input queue
+      flushInput();
 
-	// move it to the output
-	for (i = 0; i < inst.numInstances(); i++)
-	  push(inst.instance(i));
-      }
-    }
-    catch (Exception e) {
-      e.printStackTrace();
+      // move it to the output
+      for (i = 0; i < inst.numInstances(); i++)
+	push(inst.instance(i));
     }
     
     m_NewBatch       = true;
