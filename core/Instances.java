@@ -581,10 +581,10 @@ public class Instances
   public String equalHeadersMsg(Instances dataset) {
     // Check class and all attributes
     if (m_ClassIndex != dataset.m_ClassIndex)
-      return "Class index differ: " + (m_ClassIndex+1) + " =! " + (dataset.m_ClassIndex+1);
+      return "Class index differ: " + (m_ClassIndex+1) + " != " + (dataset.m_ClassIndex+1);
 
     if (m_Attributes.size() != dataset.m_Attributes.size())
-      return "Different number of attributes: " + m_Attributes.size() + " =! " + dataset.m_Attributes.size();
+      return "Different number of attributes: " + m_Attributes.size() + " != " + dataset.m_Attributes.size();
     
     for (int i = 0; i < m_Attributes.size(); i++) {
       String msg = attribute(i).equalsMsg(dataset.attribute(i));
