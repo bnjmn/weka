@@ -279,7 +279,15 @@ public class IncrementalClassifierEvaluator
 	}
       }
     } catch (Exception ex) {
+      if (m_logger != null) {
+        m_logger.logMessage("[IncrementalClassifierEvaluator]"
+            + statusMessagePrefix() + " Error processing prediction " 
+            + ex.getMessage());
+        m_logger.statusMessage(statusMessagePrefix() 
+            + "ERROR: problem processing prediction (see log for details)");
+      }
       ex.printStackTrace();
+      stop();
     }
   }
 
