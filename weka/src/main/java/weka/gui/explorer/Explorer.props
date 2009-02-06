@@ -6,7 +6,7 @@
 #   is read).
 #
 # Author  FracPete (fracpete at waikato dot ac dot nz)
-# Version $Revision: 1.6 $
+# Version $Revision$
 
 # if set to true the Capabilities filters in the GOE will be initialized
 # based on the full dataset that has been loaded into the Explorer 
@@ -36,6 +36,14 @@ Tabs=weka.gui.explorer.ClassifierPanel,\
      weka.gui.explorer.AssociationsPanel,\
      weka.gui.explorer.AttributeSelectionPanel,\
      weka.gui.explorer.VisualizePanel
+
+# the initial directory for opening datasets.
+# the following placeholders are recognized
+#   %t - the temp directory
+#   %h - the user's home directory
+#   %c - the current directory
+#   %% - gets replaced by a single percentage sign
+InitialDirectory=%c
 
 # the default filter, including options (can be left empty)
 Filter=
