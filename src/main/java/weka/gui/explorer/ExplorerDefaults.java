@@ -34,19 +34,19 @@ import java.util.Vector;
  * the props file <code>weka/gui/explorer/Explorer.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see #PROPERTY_FILE
  */
 public class ExplorerDefaults
   implements Serializable {
   
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 4954795757927524225L;
 
-  /** The name of the properties file */
+  /** The name of the properties file. */
   public final static String PROPERTY_FILE = "weka/gui/explorer/Explorer.props";
 
-  /** Properties associated with the explorer options */
+  /** Properties associated with the explorer options. */
   protected static Properties PROPERTIES;
   static {
     try {
@@ -72,7 +72,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns the associated properties file
+   * returns the associated properties file.
    * 
    * @return              the props file
    */
@@ -129,7 +129,7 @@ public class ExplorerDefaults
 
   /**
    * returns if the GOEs in the Explorer will be initialized based on the
-   * data that is loaded into the Explorer
+   * data that is loaded into the Explorer.
    * 
    * @return		true if the GOEs get initialized
    */
@@ -139,7 +139,7 @@ public class ExplorerDefaults
   
   /**
    * returns an array with the classnames of all the additional panels to 
-   * display as tabs in the Explorer
+   * display as tabs in the Explorer.
    * 
    * @return		the classnames
    */
@@ -155,7 +155,33 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default filter (fully configured) for the preprocess panel
+   * Returns the initial directory for the file chooser used for opening
+   * datasets. 
+   * <p/>
+   * The following placeholders are recognized:
+   * <pre>
+   *   %t - the temp directory
+   *   %h - the user's home directory
+   *   %c - the current directory
+   *   %% - gets replaced by a single percentage sign
+   * </pre>
+   * 
+   * @return		the default directory
+   */
+  public static String getInitialDirectory() {
+    String	result;
+    
+    result = get("InitialDirectory", "%c");
+    result = result.replaceAll("%t", System.getProperty("java.io.tmpdir"));
+    result = result.replaceAll("%h", System.getProperty("user.home"));
+    result = result.replaceAll("%c", System.getProperty("user.dir"));
+    result = result.replaceAll("%%", System.getProperty("%"));
+    
+    return result;
+  }
+  
+  /**
+   * returns the default filter (fully configured) for the preprocess panel.
    * 
    * @return		the default filter, null if none
    */
@@ -164,7 +190,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default classifier (fully configured) for the classify panel
+   * returns the default classifier (fully configured) for the classify panel.
    * 
    * @return		the default classifier, ZeroR by default
    */
@@ -182,7 +208,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default classifier test mode for the classify panel
+   * returns the default classifier test mode for the classify panel.
    * 
    * @return		the default test mode
    */
@@ -191,7 +217,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default number of folds of the CV in the classify panel
+   * returns the default number of folds of the CV in the classify panel.
    * 
    * @return		the default number of folds
    */
@@ -200,7 +226,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default classifier test mode for the classify panel (0-99)
+   * returns the default classifier test mode for the classify panel (0-99).
    * 
    * @return		the default precentage split
    */
@@ -209,7 +235,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns whether the built model is output
+   * returns whether the built model is output.
    * 
    * @return		true if the built model is output
    */
@@ -218,7 +244,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns whether additional per-class stats of the classifier are output
+   * returns whether additional per-class stats of the classifier are output.
    * 
    * @return		true if stats are output
    */
@@ -228,7 +254,7 @@ public class ExplorerDefaults
 
   /**
    * returns whether entropy-based evaluation meastures of the classifier 
-   * are output
+   * are output.
    * 
    * @return		true if output
    */
@@ -237,7 +263,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns whether the confusion matrix for the classifier is output
+   * returns whether the confusion matrix for the classifier is output.
    * 
    * @return		true if matrix is output
    */
@@ -246,7 +272,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns whether the predictions of the classifier are output as well
+   * returns whether the predictions of the classifier are output as well.
    * 
    * @return		true if predictions are output as well
    */
@@ -266,7 +292,7 @@ public class ExplorerDefaults
 
   /**
    * returns whether the predictions of the classifier are stored for 
-   * visualization
+   * visualization.
    * 
    * @return		true if predictions are stored
    */
@@ -275,7 +301,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns whether the evaluation of the classifier is done cost-sensitively
+   * returns whether the evaluation of the classifier is done cost-sensitively.
    * 
    * @return		true if cost-sensitively done
    */
@@ -285,7 +311,7 @@ public class ExplorerDefaults
   
   /**
    * returns the default random seed value for the classifier for the 
-   * classify panel
+   * classify panel.
    * 
    * @return		the default random seed
    */
@@ -295,7 +321,7 @@ public class ExplorerDefaults
 
   /**
    * returns whether the order is preserved in case of the percentage split 
-   * in the classify tab
+   * in the classify tab.
    * 
    * @return		true if order is preserved
    */
@@ -305,7 +331,7 @@ public class ExplorerDefaults
 
   /**
    * returns whether the source of a sourcable Classifier is output
-   * in the classify tab
+   * in the classify tab.
    * 
    * @return		true if the source code is output
    */
@@ -314,7 +340,7 @@ public class ExplorerDefaults
   }
 
   /**
-   * returns the default classname for a sourcable Classifier in the classify tab
+   * returns the default classname for a sourcable Classifier in the classify tab.
    * 
    * @return		the default classname
    */
@@ -323,7 +349,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default clusterer (fully configured) for the clusterer panel
+   * returns the default clusterer (fully configured) for the clusterer panel.
    * 
    * @return		the default clusterer, EM by default
    */
@@ -341,7 +367,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default cluster test mode for the cluster panel
+   * returns the default cluster test mode for the cluster panel.
    * 
    * @return		the default test mode
    */
@@ -351,7 +377,7 @@ public class ExplorerDefaults
 
   /**
    * returns whether the clusters are storeed for visualization purposes
-   * in the cluster panel
+   * in the cluster panel.
    * 
    * @return		true if clusters are stored
    */
@@ -360,7 +386,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default associator (fully configured) for the associations panel
+   * returns the default associator (fully configured) for the associations panel.
    * 
    * @return		the default associator, Apriori by default
    */
@@ -379,7 +405,7 @@ public class ExplorerDefaults
   
   /**
    * returns the default attribute evalautor (fully configured) for the 
-   * attribute selection panel
+   * attribute selection panel.
    * 
    * @return		the default attribute evaluator, CfsSubsetEval by default
    */
@@ -398,7 +424,7 @@ public class ExplorerDefaults
   
   /**
    * returns the default attribute selection search scheme (fully configured) 
-   * for the attribute selection panel
+   * for the attribute selection panel.
    * 
    * @return		the default search scheme, BestFirst by default
    */
@@ -417,7 +443,7 @@ public class ExplorerDefaults
   
   /**
    * returns the default attribute selection test mode for the attribute
-   * selection panel
+   * selection panel.
    * 
    * @return		the default test mode
    */
@@ -427,7 +453,7 @@ public class ExplorerDefaults
   
   /**
    * returns the default number of folds of the CV in the attribute selection 
-   * panel
+   * panel.
    * 
    * @return		the default number of folds
    */
@@ -436,7 +462,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * returns the default random seed value in the attribute selection panel
+   * returns the default random seed value in the attribute selection panel.
    * 
    * @return		the default random seed
    */
@@ -445,7 +471,7 @@ public class ExplorerDefaults
   }
   
   /**
-   * only for testing - prints the content of the props file
+   * only for testing - prints the content of the props file.
    * 
    * @param args	commandline parameters - ignored
    */
