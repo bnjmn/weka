@@ -135,7 +135,7 @@ import weka.core.Instances;
  * Turns on output of debugging information.<p/>
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  * @see     SimpleBatchFilter 
  * @see     #input(Instance)
  * @see     #batchFinished()
@@ -234,9 +234,10 @@ public abstract class SimpleStreamFilter
    * @param instance    the input instance
    * @return            true if the filtered instance may now be
    *                    collected with output().
-   * @throws IllegalStateException if no input structure has been defined
+   * @throws IllegalStateException 	if no input structure has been defined
+   * @throws Exception	if something goes wrong
    */
-  public boolean input(Instance instance) {
+  public boolean input(Instance instance) throws Exception {
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
 
@@ -268,37 +269,32 @@ public abstract class SimpleStreamFilter
    * obtained from the first batch (unless the setInputFormat has been
    * re-assigned or new options have been set).
    *
-   * @return true if there are instances pending output
-   * @throws IllegalStateException if no input format has been set. 
+   * @return 		true if there are instances pending output
+   * @throws IllegalStateException 	if no input format has been set. 
    */
-  public boolean batchFinished() {
+  public boolean batchFinished() throws Exception {
     int         i;
     Instances   inst;
     
     if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
 
-    try {
-      inst = new Instances(getInputFormat());
-      flushInput();
+    inst = new Instances(getInputFormat());
+    flushInput();
 
-      if (!hasImmediateOutputFormat())
-        preprocess(inst);
+    if (!hasImmediateOutputFormat())
+      preprocess(inst);
 
-      // process data
-      inst = process(inst);
+    // process data
+    inst = process(inst);
 
-      // if output format hasn't been set yet, do it now
-      if (!hasImmediateOutputFormat() && !isFirstBatchDone())
-        setOutputFormat(inst);
+    // if output format hasn't been set yet, do it now
+    if (!hasImmediateOutputFormat() && !isFirstBatchDone())
+      setOutputFormat(inst);
 
-      // move data to the output
-      for (i = 0; i < inst.numInstances(); i++)
-        push(inst.instance(i));
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
+    // move data to the output
+    for (i = 0; i < inst.numInstances(); i++)
+      push(inst.instance(i));
     
     m_NewBatch       = true;
     m_FirstBatchDone = true;
