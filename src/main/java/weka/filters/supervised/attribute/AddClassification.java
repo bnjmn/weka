@@ -32,6 +32,7 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.SimpleBatchFilter;
 
 import java.io.File;
@@ -86,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class AddClassification
   extends SimpleBatchFilter {
@@ -626,6 +627,7 @@ public class AddClassification
     int			n;
     Instance		newInstance;
     Instance		oldInstance;
+    Instances		header;
     double[]		distribution;
     File		file;
     ObjectInputStream 	ois;
@@ -636,7 +638,20 @@ public class AddClassification
       if (!file.isDirectory()) {
 	ois = new ObjectInputStream(new FileInputStream(file));
 	m_ActualClassifier = (Classifier) ois.readObject();
+	header = null;
+	// let's see whether there's an Instances header stored as well
+	try {
+	  header = (Instances) ois.readObject();
+	}
+	catch (Exception e) {
+	  // ignored
+	}
 	ois.close();
+	// same dataset format?
+	if ((header != null) && (!header.equalHeaders(instances)))
+	  throw new WekaException(
+	      "Training header of classifier and filter dataset don't match:\n"
+	      + header.equalHeadersMsg(instances));
       }
       else {
 	m_ActualClassifier = Classifier.makeCopy(m_Classifier);
@@ -710,7 +725,7 @@ public class AddClassification
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
