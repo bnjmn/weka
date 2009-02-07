@@ -21,9 +21,14 @@
 
 package weka.gui;
 
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 
@@ -35,7 +40,7 @@ import javax.swing.JOptionPane;
  * which is placed in the public domain.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class BrowserHelper {
 
@@ -109,4 +114,38 @@ public class BrowserHelper {
 	System.err.println(errMsg);
     }
   } 
+  
+  /**
+   * Generates a label with a clickable link.
+   * 
+   * @param url		the url of the link
+   * @param text	the text to display instead of URL. if null or of 
+   * 			length 0 then the URL is used
+   * @return		the generated label
+   */
+  public static JLabel createLink(String url, String text) {
+    final String urlF = url;
+    final JLabel result = new JLabel();
+    result.setText((text == null) || (text.length() == 0) ? url : text);
+    result.setToolTipText("Click to open link in browser");
+    result.setForeground(Color.BLUE);
+    result.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent e) {
+	if (e.getButton() == MouseEvent.BUTTON1) {
+	  BrowserHelper.openURL(urlF);
+	}
+	else {
+	  super.mouseClicked(e);
+	}
+      }
+      public void mouseEntered(MouseEvent e) {
+	result.setForeground(Color.RED);
+      }
+      public void mouseExited(MouseEvent e) {
+	result.setForeground(Color.BLUE);
+      }
+    });
+    
+    return result;
+  }
 }
