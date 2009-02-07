@@ -22,8 +22,8 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.clusterers.Clusterer;
 import weka.clusterers.AbstractClusterer;
+import weka.clusterers.Clusterer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.FastVector;
@@ -35,15 +35,21 @@ import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.ObjectInputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * A filter that adds a new nominal attribute representing the cluster assigned to each instance by the specified clustering algorithm.
+ * A filter that adds a new nominal attribute representing the cluster assigned to each instance by the specified clustering algorithm.<br/>
+ * Either the clustering algorithm gets built with the first batch of data or one specifies are serialized clusterer model file to use instead.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -56,6 +62,10 @@ import java.util.Vector;
  *   "weka.clusterers.SimpleKMeans -N 3"
  *  (default: weka.clusterers.SimpleKMeans)</pre>
  * 
+ * <pre> -serialized &lt;file&gt;
+ *  Instead of building a clusterer on the data, one can also provide
+ *  a serialized model and use that for adding the clusters.</pre>
+ * 
  * <pre> -I &lt;att1,att2-att4,...&gt;
  *  The range of attributes the clusterer should ignore.
  * </pre>
@@ -63,22 +73,29 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @version $Revision$
  */
 public class AddCluster 
   extends Filter 
   implements UnsupervisedFilter, OptionHandler {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 7414280611943807337L;
 
-  /** The clusterer used to do the cleansing */
+  /** The clusterer used to do the cleansing. */
   protected Clusterer m_Clusterer = new weka.clusterers.SimpleKMeans();
 
-  /** Range of attributes to ignore */
+  /** The file from which to load a serialized clusterer. */
+  protected File m_SerializedClustererFile = new File(System.getProperty("user.dir"));
+  
+  /** The actual clusterer used to do the clustering. */
+  protected Clusterer m_ActualClusterer = null;
+
+  /** Range of attributes to ignore. */
   protected Range m_IgnoreAttributesRange = null;
 
-  /** Filter for removing attributes */
+  /** Filter for removing attributes. */
   protected Filter m_removeAttributes = new Remove();
 
   /** 
@@ -113,7 +130,7 @@ public class AddCluster
   }
   
   /**
-   * tests the data whether the filter can actually handle it
+   * tests the data whether the filter can actually handle it.
    * 
    * @param instanceInfo	the data to test
    * @throws Exception		if the test fails
@@ -132,15 +149,15 @@ public class AddCluster
    * @throws Exception if the inputFormat can't be set successfully 
    */ 
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
-    
     super.setInputFormat(instanceInfo);
+
     m_removeAttributes = null;
 
     return false;
   }
 
   /**
-   * filters all attributes that should be ignored
+   * filters all attributes that should be ignored.
    * 
    * @param data	the data to filter
    * @return		the filtered data
@@ -178,10 +195,8 @@ public class AddCluster
    * @throws IllegalStateException if no input structure has been defined 
    */  
   public boolean batchFinished() throws Exception {
-
-    if (getInputFormat() == null) {
+    if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
-    }
 
     Instances toFilter = getInputFormat();
     
@@ -189,13 +204,35 @@ public class AddCluster
       // filter out attributes if necessary
       Instances toFilterIgnoringAttributes = removeIgnored(toFilter);
 
-      // build the clusterer
-      m_Clusterer.buildClusterer(toFilterIgnoringAttributes);
+      // serialized model or build clusterer from scratch?
+      File file = getSerializedClustererFile();
+      if (!file.isDirectory()) {
+	ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+	m_ActualClusterer = (Clusterer) ois.readObject();
+	Instances header = null;
+	// let's see whether there's an Instances header stored as well
+	try {
+	  header = (Instances) ois.readObject();
+	}
+	catch (Exception e) {
+	  // ignored
+	}
+	ois.close();
+	// same dataset format?
+	if ((header != null) && (!header.equalHeaders(toFilterIgnoringAttributes)))
+	  throw new WekaException(
+	      "Training header of clusterer and filter dataset don't match:\n"
+	      + header.equalHeadersMsg(toFilterIgnoringAttributes));
+      }
+      else {
+	m_ActualClusterer = AbstractClusterer.makeCopy(m_Clusterer);
+	m_ActualClusterer.buildClusterer(toFilterIgnoringAttributes);
+      }
 
       // create output dataset with new attribute
       Instances filtered = new Instances(toFilter, 0); 
-      FastVector nominal_values = new FastVector(m_Clusterer.numberOfClusters());
-      for (int i=0; i<m_Clusterer.numberOfClusters(); i++) {
+      FastVector nominal_values = new FastVector(m_ActualClusterer.numberOfClusters());
+      for (int i = 0; i < m_ActualClusterer.numberOfClusters(); i++) {
 	nominal_values.addElement("cluster" + (i+1)); 
       }
       filtered.insertAttributeAt(new Attribute("cluster", nominal_values),
@@ -227,10 +264,9 @@ public class AddCluster
    * @throws IllegalStateException if no input format has been defined.
    */
   public boolean input(Instance instance) throws Exception {
-
-    if (getInputFormat() == null) {
+    if (getInputFormat() == null)
       throw new IllegalStateException("No input instance format defined");
-    }
+
     if (m_NewBatch) {
       resetQueue();
       m_NewBatch = false;
@@ -271,7 +307,7 @@ public class AddCluster
 
     // add cluster to end
     try {
-      instanceVals[instance.numAttributes()] = m_Clusterer.clusterInstance(filteredI);
+      instanceVals[instance.numAttributes()] = m_ActualClusterer.clusterInstance(filteredI);
     }
     catch (Exception e) {
       // clusterer couldn't cluster instance -> missing
@@ -298,21 +334,25 @@ public class AddCluster
    * @return an enumeration of all the available options.
    */
   public Enumeration listOptions() {
+    Vector result = new Vector();
     
-    Vector newVector = new Vector(2);
-    
-    newVector.addElement(new Option(
-	      "\tFull class name of clusterer to use, followed\n"
-	      + "\tby scheme options. eg:\n"
-	      + "\t\t\"weka.clusterers.SimpleKMeans -N 3\"\n"
-	      + "\t(default: weka.clusterers.SimpleKMeans)",
-	      "W", 1, "-W <clusterer specification>"));
-    
-    newVector.addElement(new Option(
-	      "\tThe range of attributes the clusterer should ignore.\n",
-	      "I", 1,"-I <att1,att2-att4,...>"));
+    result.addElement(new Option(
+	"\tFull class name of clusterer to use, followed\n"
+	+ "\tby scheme options. eg:\n"
+	+ "\t\t\"weka.clusterers.SimpleKMeans -N 3\"\n"
+	+ "\t(default: weka.clusterers.SimpleKMeans)",
+	"W", 1, "-W <clusterer specification>"));
 
-    return newVector.elements();
+    result.addElement(new Option(
+	"\tInstead of building a clusterer on the data, one can also provide\n"
+	+ "\ta serialized model and use that for adding the clusters.",
+	"serialized", 1, "-serialized <file>"));
+    
+    result.addElement(new Option(
+	"\tThe range of attributes the clusterer should ignore.\n",
+	"I", 1,"-I <att1,att2-att4,...>"));
+
+    return result.elements();
   }
 
 
@@ -328,6 +368,10 @@ public class AddCluster
    *   "weka.clusterers.SimpleKMeans -N 3"
    *  (default: weka.clusterers.SimpleKMeans)</pre>
    * 
+   * <pre> -serialized &lt;file&gt;
+   *  Instead of building a clusterer on the data, one can also provide
+   *  a serialized model and use that for adding the clusters.</pre>
+   * 
    * <pre> -I &lt;att1,att2-att4,...&gt;
    *  The range of attributes the clusterer should ignore.
    * </pre>
@@ -338,17 +382,40 @@ public class AddCluster
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-
-    String clustererString = Utils.getOption('W', options);
-    if (clustererString.length() == 0)
-      clustererString = weka.clusterers.SimpleKMeans.class.getName();
-    String[] clustererSpec = Utils.splitOptions(clustererString);
-    if (clustererSpec.length == 0) {
-      throw new Exception("Invalid clusterer specification string");
+    String	tmpStr;
+    String[] 	tmpOptions;
+    File	file;
+    boolean 	serializedModel;
+    
+    serializedModel = false;
+    tmpStr = Utils.getOption("serialized", options);
+    if (tmpStr.length() != 0) {
+      file = new File(tmpStr);
+      if (!file.exists())
+	throw new FileNotFoundException(
+	    "File '" + file.getAbsolutePath() + "' not found!");
+      if (file.isDirectory())
+	throw new FileNotFoundException(
+	    "'" + file.getAbsolutePath() + "' points to a directory not a file!");
+      setSerializedClustererFile(file);
+      serializedModel = true;
     }
-    String clustererName = clustererSpec[0];
-    clustererSpec[0] = "";
-    setClusterer(AbstractClusterer.forName(clustererName, clustererSpec));
+    else {
+      setSerializedClustererFile(null);
+    }
+
+    if (!serializedModel) {
+      tmpStr = Utils.getOption('W', options);
+      if (tmpStr.length() == 0)
+	tmpStr = weka.clusterers.SimpleKMeans.class.getName();
+      tmpOptions = Utils.splitOptions(tmpStr);
+      if (tmpOptions.length == 0) {
+	throw new Exception("Invalid clusterer specification string");
+      }
+      tmpStr = tmpOptions[0];
+      tmpOptions[0] = "";
+      setClusterer(AbstractClusterer.forName(tmpStr, tmpOptions));
+    }
         
     setIgnoredAttributeIndices(Utils.getOption('I', options));
 
@@ -360,43 +427,52 @@ public class AddCluster
    *
    * @return an array of strings suitable for passing to setOptions
    */
-  public String [] getOptions() {
+  public String[] getOptions() {
+    Vector<String>	result;
+    File		file;
 
-    String [] options = new String [5];
-    int current = 0;
+    result = new Vector<String>();
 
-    options[current++] = "-W"; options[current++] = "" + getClustererSpec();
+    file = getSerializedClustererFile();
+    if ((file != null) && (!file.isDirectory())) {
+      result.add("-serialized");
+      result.add(file.getAbsolutePath());
+    }
+    else {
+      result.add("-W");
+      result.add(getClustererSpec());
+    }
     
     if (!getIgnoredAttributeIndices().equals("")) {
-      options[current++] = "-I"; options[current++] = getIgnoredAttributeIndices();
+      result.add("-I");
+      result.add(getIgnoredAttributeIndices());
     }
-
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    
+    return result.toArray(new String[result.size()]);
   }
 
   /**
-   * Returns a string describing this filter
+   * Returns a string describing this filter.
    *
    * @return a description of the filter suitable for
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-
-    return "A filter that adds a new nominal attribute representing the cluster "
-      + "assigned to each instance by the specified clustering algorithm.";
+    return 
+        "A filter that adds a new nominal attribute representing the cluster "
+      + "assigned to each instance by the specified clustering algorithm.\n"
+      + "Either the clustering algorithm gets built with the first batch of "
+      + "data or one specifies are serialized clusterer model file to use "
+      + "instead.";
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String clustererTipText() {
-
     return "The clusterer to assign clusters with.";
   }
 
@@ -406,7 +482,6 @@ public class AddCluster
    * @param clusterer The clusterer to be used (with its options set).
    */
   public void setClusterer(Clusterer clusterer) {
-
     m_Clusterer = clusterer;
   }
   
@@ -416,7 +491,6 @@ public class AddCluster
    * @return The clusterer being used.
    */
   public Clusterer getClusterer() {
-
     return m_Clusterer;
   }
 
@@ -427,7 +501,6 @@ public class AddCluster
    * @return the clusterer string.
    */
   protected String getClustererSpec() {
-    
     Clusterer c = getClusterer();
     if (c instanceof OptionHandler) {
       return c.getClass().getName() + " "
@@ -437,13 +510,12 @@ public class AddCluster
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
   public String ignoredAttributeIndicesTipText() {
-
     return "The range of attributes to be ignored by the clusterer. eg: first-3,5,9-last";
   }
 
@@ -453,12 +525,10 @@ public class AddCluster
    * @return a string containing a comma-separated list of ranges
    */
   public String getIgnoredAttributeIndices() {
-
-    if (m_IgnoreAttributesRange == null) {
+    if (m_IgnoreAttributesRange == null)
       return "";
-    } else {
+    else
       return m_IgnoreAttributesRange.getRanges();
-    }
   }
 
   /**
@@ -470,13 +540,46 @@ public class AddCluster
    * @throws IllegalArgumentException if an invalid range list is supplied 
    */
   public void setIgnoredAttributeIndices(String rangeList) {
-
     if ((rangeList == null) || (rangeList.length() == 0)) {
       m_IgnoreAttributesRange = null;
     } else {
       m_IgnoreAttributesRange = new Range();
       m_IgnoreAttributesRange.setRanges(rangeList);
     }
+  }
+
+  /**
+   * Gets the file pointing to a serialized, built clusterer. If it is
+   * null or pointing to a directory it will not be used.
+   * 
+   * @return		the file the serialized, built clusterer is located in
+   */
+  public File getSerializedClustererFile() {
+    return m_SerializedClustererFile;
+  }
+
+  /**
+   * Sets the file pointing to a serialized, built clusterer. If the
+   * argument is null, doesn't exist or pointing to a directory, then the 
+   * value is ignored.
+   * 
+   * @param value	the file pointing to the serialized, built clusterer
+   */
+  public void setSerializedClustererFile(File value) {
+    if ((value == null) || (!value.exists()))
+      value = new File(System.getProperty("user.dir"));
+
+    m_SerializedClustererFile = value;
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String serializedClustererFileTipText() {
+    return "A file containing the serialized model of a built clusterer.";
   }
   
   /**
@@ -485,7 +588,7 @@ public class AddCluster
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -493,7 +596,7 @@ public class AddCluster
    *
    * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new AddCluster(), argv);
   }
 }
