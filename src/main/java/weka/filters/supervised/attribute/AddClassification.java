@@ -650,8 +650,7 @@ public class AddClassification
 	// same dataset format?
 	if ((header != null) && (!header.equalHeaders(instances)))
 	  throw new WekaException(
-	      "Training header of classifier and filter dataset don't match:\n"
-	      + header.equalHeadersMsg(instances));
+	      "Training header of classifier and filter dataset don't match!");
       }
       else {
 	m_ActualClassifier = Classifier.makeCopy(m_Classifier);
