@@ -48,27 +48,27 @@ import java.util.Vector;
 * </pre>
 *
 * @author   FracPete (fracpete at waikato dot ac dot nz)
-* @version  $Revision: 1.4 $
+* @version  $Revision$
 */
 
 public class Tee
   extends PrintStream
   implements RevisionHandler {
   
-  /** the different PrintStreams */
+  /** the different PrintStreams. */
   protected Vector m_Streams = new Vector();
   
-  /** whether to add timestamps or not */
+  /** whether to add timestamps or not. */
   protected Vector m_Timestamps = new Vector();
   
-  /** whether to add a prefix or not */
+  /** whether to add a prefix or not. */
   protected Vector m_Prefixes = new Vector();
   
-  /** the default printstream */
+  /** the default printstream. */
   protected PrintStream m_Default = null;
 
   /**
-   * initializes the object, with a default printstream
+   * initializes the object, with a default printstream.
    */
   public Tee() {
     this(null);
@@ -89,7 +89,7 @@ public class Tee
 
   /**
    * removes all streams and places the default printstream, if any, again in
-   * the list
+   * the list.
    * 
    * @see #getDefault()
    */
@@ -103,7 +103,7 @@ public class Tee
   }
 
   /**
-   * returns the default printstrean, can be NULL
+   * returns the default printstrean, can be NULL.
    * 
    * @return the default printstream
    * @see #m_Default
@@ -114,7 +114,7 @@ public class Tee
 
   /**
    * adds the given PrintStream to the list of streams, with NO timestamp and
-   * NO prefix
+   * NO prefix.
    * 
    * @param p       the printstream to add
    */
@@ -123,7 +123,7 @@ public class Tee
   }
 
   /**
-   * adds the given PrintStream to the list of streams, with NO prefix
+   * adds the given PrintStream to the list of streams, with NO prefix.
    * 
    * @param p           the printstream to add
    * @param timestamp   whether to use timestamps or not
@@ -133,7 +133,7 @@ public class Tee
   }
 
   /**
-   * adds the given PrintStream to the list of streams
+   * adds the given PrintStream to the list of streams.
    * 
    * @param p           the printstream to add
    * @param timestamp   whether to use timestamps or not
@@ -153,7 +153,7 @@ public class Tee
   }
 
   /**
-   * returns the specified PrintStream from the list
+   * returns the specified PrintStream from the list.
    * 
    * @param index the index of the PrintStream to return
    * @return the specified PrintStream, or null if invalid index
@@ -166,7 +166,7 @@ public class Tee
   }
 
   /**
-   * removes the given PrintStream from the list
+   * removes the given PrintStream from the list.
    * 
    * @param p the PrintStream to remove
    * @return returns the removed PrintStream if it could be removed, null otherwise
@@ -186,7 +186,7 @@ public class Tee
   }
 
   /**
-   * removes the given PrintStream from the list
+   * removes the given PrintStream from the list.
    * 
    * @param index the index of the PrintStream to remove
    * @return returns the removed PrintStream if it could be removed, null otherwise
@@ -203,7 +203,7 @@ public class Tee
   }
 
   /**
-   * checks whether the given PrintStream is already in the list
+   * checks whether the given PrintStream is already in the list.
    * 
    * @param p the PrintStream to look for
    * @return true if the PrintStream is in the list
@@ -213,7 +213,7 @@ public class Tee
   }
 
   /**
-   * returns the number of streams currently in the list
+   * returns the number of streams currently in the list.
    * 
    * @return the number of streams in the list
    */
@@ -223,7 +223,7 @@ public class Tee
 
   /**
    * prints the prefix/timestamp (timestampe only to those streams that want
-   * one)
+   * one).
    */
   private void printHeader() {
     for (int i = 0; i < size(); i++) {
@@ -238,7 +238,7 @@ public class Tee
   }
 
   /**
-   * flushes all the printstreams
+   * flushes all the printstreams.
    */
   public void flush() {
     for (int i = 0; i < size(); i++)
@@ -246,7 +246,7 @@ public class Tee
   }
 
   /**
-   * prints the given int to the streams
+   * prints the given int to the streams.
    * 
    * @param x the object to print
    */
@@ -258,7 +258,43 @@ public class Tee
   }
 
   /**
-   * prints the given boolean to the streams
+   * prints the given long to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void print(long x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).print(x);
+    flush();
+  }
+
+  /**
+   * prints the given float to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void print(float x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).print(x);
+    flush();
+  }
+
+  /**
+   * prints the given double to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void print(double x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).print(x);
+    flush();
+  }
+
+  /**
+   * prints the given boolean to the streams.
    * 
    * @param x the object to print
    */
@@ -270,7 +306,31 @@ public class Tee
   }
 
   /**
-   * prints the given string to the streams
+   * prints the given char to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void print(char x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).print(x);
+    flush();
+  }
+
+  /**
+   * prints the given char array to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void print(char[] x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).print(x);
+    flush();
+  }
+
+  /**
+   * prints the given string to the streams.
    * 
    * @param x the object to print
    */
@@ -282,7 +342,7 @@ public class Tee
   }
 
   /**
-   * prints the given object to the streams
+   * prints the given object to the streams.
    * 
    * @param x the object to print
    */
@@ -294,7 +354,7 @@ public class Tee
   }
 
   /**
-   * prints a new line to the streams
+   * prints a new line to the streams.
    */
   public void println() {
     printHeader();
@@ -304,7 +364,7 @@ public class Tee
   }
 
   /**
-   * prints the given int to the streams
+   * prints the given int to the streams.
    * 
    * @param x the object to print
    */
@@ -316,7 +376,43 @@ public class Tee
   }
 
   /**
-   * prints the given boolean to the streams
+   * prints the given long to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void println(long x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).println(x);
+    flush();
+  }
+
+  /**
+   * prints the given float to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void println(float x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).println(x);
+    flush();
+  }
+
+  /**
+   * prints the given double to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void println(double x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).println(x);
+    flush();
+  }
+
+  /**
+   * prints the given boolean to the streams.
    * 
    * @param x the object to print
    */
@@ -328,7 +424,31 @@ public class Tee
   }
 
   /**
-   * prints the given string to the streams
+   * prints the given char to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void println(char x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).println(x);
+    flush();
+  }
+
+  /**
+   * prints the given char array to the streams.
+   * 
+   * @param x the object to print
+   */
+  public void println(char[] x) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).println(x);
+    flush();
+  }
+
+  /**
+   * prints the given string to the streams.
    * 
    * @param x the object to print
    */
@@ -341,7 +461,7 @@ public class Tee
 
   /**
    * prints the given object to the streams (for Throwables we print the stack
-   * trace)
+   * trace).
    * 
    * @param x the object to print
    */
@@ -367,7 +487,49 @@ public class Tee
   }
 
   /**
-   * returns only the classname and the number of streams
+   * Writes <code>len</code> bytes from the specified byte array starting at
+   * offset <code>off</code> to this stream.  If automatic flushing is
+   * enabled then the <code>flush</code> method will be invoked.
+   *
+   * <p> Note that the bytes will be written as given; to write characters
+   * that will be translated according to the platform's default character
+   * encoding, use the <code>print(char)</code> or <code>println(char)</code>
+   * methods.
+   *
+   * @param  buf   A byte array
+   * @param  off   Offset from which to start taking bytes
+   * @param  len   Number of bytes to write
+   */
+  public void write(byte buf[], int off, int len) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).write(buf, off, len);
+    flush();
+  }
+
+  /**
+   * Writes the specified byte to this stream.  If the byte is a newline and
+   * automatic flushing is enabled then the <code>flush</code> method will be
+   * invoked.
+   *
+   * <p> Note that the byte is written as given; to write a character that
+   * will be translated according to the platform's default character
+   * encoding, use the <code>print(char)</code> or <code>println(char)</code>
+   * methods.
+   *
+   * @param  b  The byte to be written
+   * @see #print(char)
+   * @see #println(char)
+   */
+  public void write(int b) {
+    printHeader();
+    for (int i = 0; i < size(); i++)
+      ((PrintStream) m_Streams.get(i)).write(b);
+    flush();
+  }
+
+  /**
+   * returns only the classname and the number of streams.
    * 
    * @return only the classname and the number of streams
    */
@@ -381,6 +543,6 @@ public class Tee
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
