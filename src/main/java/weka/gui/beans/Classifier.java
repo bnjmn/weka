@@ -439,6 +439,11 @@ public class Classifier
     }
 
     if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
+      // clear any warnings/errors from the log
+      if (m_log != null) {
+        m_log.statusMessage(statusMessagePrefix() + "Finished.");
+      }
+      
       //      Instances dataset = m_incrementalEvent.getInstance().dataset();
       Instances dataset = m_incrementalEvent.getStructure();
       // default to the last column if no class is set
