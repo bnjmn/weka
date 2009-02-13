@@ -450,7 +450,7 @@ public class Classifier
 	// initialize classifier if m_trainingSet is null
 	// otherwise assume that classifier has been pre-trained in batch
 	// mode, *if* headers match
-	if (m_trainingSet == null || (!dataset.equalHeaders(m_trainingSet))) {
+	if (m_trainingSet == null || !m_trainingSet.equalHeaders(dataset)) {
 	  if (!(m_Classifier instanceof 
 		weka.classifiers.UpdateableClassifier)) {
 	    stop(); // stop all processing
@@ -468,6 +468,7 @@ public class Classifier
 	    }
 	    return;
 	  }
+	  
 	  if (m_trainingSet != null && 
 	      (!dataset.equalHeaders(m_trainingSet))) {
 	    if (m_log != null) {
@@ -888,6 +889,38 @@ public class Classifier
            e.getSetNumber(), e.getMaxSetNumber());
           
           notifyBatchClassifierListeners(ce);
+        } else {
+          // if headers do not match check to see if it's
+          // just the class that is different and that
+          // all class values are missing
+          if (testSet.numInstances() > 0) {
+            if (testSet.classIndex() == m_trainingSet.classIndex() && 
+                testSet.attributeStats(testSet.classIndex()).missingCount ==
+                testSet.numInstances()) {
+              // now check the other attributes against the training
+              // structure
+              boolean ok = true;
+              for (int i = 0; i < testSet.numAttributes(); i++) {
+                if (i != testSet.classIndex()) {
+                  ok = testSet.attribute(i).equals(m_trainingSet.attribute(i));
+                  if (!ok) {
+                    break;
+                  }
+                }
+              }
+              
+              if (ok) {
+                BatchClassifierEvent ce =
+                  new BatchClassifierEvent(this, m_Classifier,                                       
+                      new DataSetEvent(this, m_trainingSet),
+                      new DataSetEvent(this, e.getTestSet()),
+                 e.getRunNumber(), e.getMaxRunNumber(), 
+                 e.getSetNumber(), e.getMaxSetNumber());
+                
+                notifyBatchClassifierListeners(ce);
+              }
+            }
+          }
         }
       }
     } else {
