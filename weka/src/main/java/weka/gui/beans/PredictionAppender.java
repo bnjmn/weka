@@ -280,7 +280,6 @@ public class PredictionAppender
   }
 
   protected InstanceEvent m_instanceEvent;
-  protected double [] m_instanceVals;
 
   
   /**
@@ -311,7 +310,6 @@ public class PredictionAppender
 	 try {
 	   m_format = makeDataSetClass(oldStructure, oldStructure, classifier,
 						     relationNameModifier);
-	   m_instanceVals = new double [m_format.numAttributes()];
 	 } catch (Exception ex) {
 	   ex.printStackTrace();
 	   return;
@@ -321,7 +319,7 @@ public class PredictionAppender
 	   m_format = 
 	     makeDataSetProbabilities(oldStructure, oldStructure, classifier,
 				      relationNameModifier);
-	   m_instanceVals = new double [m_format.numAttributes()];
+
 	 } catch (Exception ex) {
 	   ex.printStackTrace();
 	   return;
@@ -333,28 +331,29 @@ public class PredictionAppender
        return;
     }
 
+    double[] instanceVals = new double [m_format.numAttributes()];
     Instance newInst = null;
     try {
       // process the actual instance
       for (int i = 0; i < oldNumAtts; i++) {
-	m_instanceVals[i] = currentI.value(i);
+	instanceVals[i] = currentI.value(i);
       }
       if (!m_appendProbabilities 
 	  || currentI.dataset().classAttribute().isNumeric()) {
 	double predClass = 
 	  classifier.classifyInstance(currentI);
-	m_instanceVals[m_instanceVals.length - 1] = predClass;
+	instanceVals[instanceVals.length - 1] = predClass;
       } else if (m_appendProbabilities) {
 	double [] preds = classifier.distributionForInstance(currentI);
-	for (int i = oldNumAtts; i < m_instanceVals.length; i++) {
-	  m_instanceVals[i] = preds[i-oldNumAtts];
+	for (int i = oldNumAtts; i < instanceVals.length; i++) {
+	  instanceVals[i] = preds[i-oldNumAtts];
 	}      
       }      
     } catch (Exception ex) {
       ex.printStackTrace();
       return;
     } finally {
-      newInst = new Instance(currentI.weight(), m_instanceVals);
+      newInst = new Instance(currentI.weight(), instanceVals);
       newInst.setDataset(m_format);
       m_instanceEvent.setInstance(newInst);
       m_instanceEvent.setStatus(status);
@@ -365,7 +364,6 @@ public class PredictionAppender
     if (status == IncrementalClassifierEvent.BATCH_FINISHED) {
       // clean up
       //      m_incrementalStructure = null;
-      m_instanceVals = null;
       m_instanceEvent = null;
     }
   }
