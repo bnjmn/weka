@@ -1288,7 +1288,7 @@ public class Evaluation
       }
     }
     if (template.classAttribute().isNominal()) {
-      if (classStatistics && !noCrossValidation) {
+      if (classStatistics && !noCrossValidation && !printClassifications) {
 	text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
       if (!noCrossValidation && !printClassifications)
