@@ -441,15 +441,26 @@ public class Classifier
     if (m_incrementalEvent.getStatus() == InstanceEvent.FORMAT_AVAILABLE) {
       // clear any warnings/errors from the log
       if (m_log != null) {
-        m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        m_log.statusMessage(statusMessagePrefix() + "remove");
       }
       
       //      Instances dataset = m_incrementalEvent.getInstance().dataset();
       Instances dataset = m_incrementalEvent.getStructure();
       // default to the last column if no class is set
       if (dataset.classIndex() < 0) {
+        stop();
+        String errorMessage = statusMessagePrefix()
+            + "ERROR: no class attribute set in incoming stream!";
+        if (m_log != null) {
+          m_log.statusMessage(errorMessage);
+          m_log.logMessage("[" + getCustomName() + "] " + errorMessage);
+        } else {
+          System.err.println("[" + getCustomName() + "] " + errorMessage);
+        }
+        return;
+        
 	// System.err.println("Classifier : setting class index...");
-	dataset.setClassIndex(dataset.numAttributes()-1);
+	//dataset.setClassIndex(dataset.numAttributes()-1);
       }
       try {
 	// initialize classifier if m_trainingSet is null
@@ -612,13 +623,25 @@ public class Classifier
       try {
         if (m_train != null) {
           if (m_train.classIndex() < 0) {
+            // stop all processing
+            stop();
+            String errorMessage = statusMessagePrefix()
+                + "ERROR: no class attribute set in test data!";
+            if (m_log != null) {
+              m_log.statusMessage(errorMessage);
+              m_log.logMessage("[Classifier] " + errorMessage);
+            } else {
+              System.err.println("[Classifier] " + errorMessage);
+            }
+            return;
+            
             // assume last column is the class
-            m_train.setClassIndex(m_train.numAttributes()-1);
+/*            m_train.setClassIndex(m_train.numAttributes()-1);
             if (m_log != null) {
               m_log.logMessage("[Classifier] " + statusMessagePrefix() 
                   + " : assuming last "
                   +"column is the class");
-            }
+            } */
           }
           if (m_runNum == 1 && m_setNum == 1) {
             // set this back to idle once the last fold
@@ -876,15 +899,31 @@ public class Classifier
    */    
   public synchronized void acceptTestSet(TestSetEvent e) {
   
-    // If we just have a test set connection, then use the
-    // last saved model
-    if (!m_listenees.containsKey("trainingSet")) {
-      Instances testSet = e.getTestSet();
-      if (testSet != null) {
-        if (testSet.classIndex() < 0) {
-          testSet.setClassIndex(testSet.numAttributes() - 1);
+    Instances testSet = e.getTestSet();
+    if (testSet != null) {
+      if (testSet.classIndex() < 0) {
+//        testSet.setClassIndex(testSet.numAttributes() - 1);
+        // stop all processing
+        stop();
+        String errorMessage = statusMessagePrefix()
+            + "ERROR: no class attribute set in test data!";
+        if (m_log != null) {
+          m_log.statusMessage(errorMessage);
+          m_log.logMessage("[Classifier] " + errorMessage);
+        } else {
+          System.err.println("[Classifier] " + errorMessage);
         }
-        
+        return;
+      }
+    }
+    
+    // If we just have a test set connection or
+    // there is just one run involving one set, then use the
+    // last saved model
+    if (!m_listenees.containsKey("trainingSet") || 
+        (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1)) {
+      testSet = e.getTestSet();
+      if (testSet != null) {        
         if (m_trainingSet.equalHeaders(testSet)) {
           BatchClassifierEvent ce =
             new BatchClassifierEvent(this, m_Classifier,                                       
@@ -893,7 +932,10 @@ public class Classifier
            e.getRunNumber(), e.getMaxRunNumber(), 
            e.getSetNumber(), e.getMaxSetNumber());
           
-          notifyBatchClassifierListeners(ce);
+          if (m_log != null && !e.isStructureOnly()) {
+            m_log.statusMessage(statusMessagePrefix() + "Finished.");
+          }
+          notifyBatchClassifierListeners(ce);          
         } else {
           // if headers do not match check to see if it's
           // just the class that is different and that
@@ -922,6 +964,9 @@ public class Classifier
                  e.getRunNumber(), e.getMaxRunNumber(), 
                  e.getSetNumber(), e.getMaxSetNumber());
                 
+                if (m_log != null && !e.isStructureOnly()) {
+                  m_log.statusMessage(statusMessagePrefix() + "Finished.");
+                }
                 notifyBatchClassifierListeners(ce);
               }
             }
@@ -1398,8 +1443,10 @@ public class Classifier
         m_trainingSet = tempHeader;
 
         if (m_log != null) {
-          m_log.logMessage("[Classifier] Loaded classifier: "
-                           + m_Classifier.getClass().toString());
+          m_log.statusMessage(statusMessagePrefix() + "Loaded model.");
+          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+              + "Loaded classifier: "
+              + m_Classifier.getClass().toString());
         }
       }
     } catch (Exception ex) {
@@ -1408,7 +1455,10 @@ public class Classifier
                                     "Load Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("[Classifier] Problem loading classifier. " 
+        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to load " +
+        		"model (see log).");
+        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+            + "Problem loading classifier. " 
             + ex.getMessage());
       }
     }
@@ -1484,7 +1534,9 @@ public class Classifier
           os.close();
         }
         if (m_log != null) {
-          m_log.logMessage("[Classifier] Saved classifier " + getCustomName());
+          m_log.statusMessage(statusMessagePrefix() + "Model saved.");
+          m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+              + " Saved classifier " + getCustomName());
         }
       }
     } catch (Exception ex) {
@@ -1493,7 +1545,10 @@ public class Classifier
                                     "Save Model",
                                     JOptionPane.ERROR_MESSAGE);
       if (m_log != null) {
-        m_log.logMessage("[Classifier] Problem saving classifier " + getCustomName() 
+        m_log.statusMessage(statusMessagePrefix() + "ERROR: unable to" +
+        		" save model (see log).");
+        m_log.logMessage("[Classifier] " + statusMessagePrefix() 
+            + " Problem saving classifier " + getCustomName() 
             + ex.getMessage());
       }
     }
