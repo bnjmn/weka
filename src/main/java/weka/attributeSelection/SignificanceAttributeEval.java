@@ -78,6 +78,7 @@ import weka.filters.supervised.attribute.Discretize;
  <!-- technical-bibtex-end -->
  *
  * @author Adrian Pino (apinoa@facinf.uho.edu.cu)
+ * @version $Revision$
  */
 public class SignificanceAttributeEval
 extends ASEvaluation
