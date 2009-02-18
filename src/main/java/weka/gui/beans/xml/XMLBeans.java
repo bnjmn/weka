@@ -178,6 +178,9 @@ public class XMLBeans
   
   /** the value of the originalCoords property */
   public final static String VAL_ORIGINALCOORDS = "originalCoords";
+  
+  /** the value of the relationNameForFilename property (Saver) */
+  public final static String VAL_RELATIONNAMEFORFILENAME = "relationNameForFilename";
 
   /** the index in the Vector, where the BeanInstances are stored 
    * (Instances and Connections are stored in a Vector and then serialized) */
@@ -337,6 +340,7 @@ public class XMLBeans
     m_Properties.addAllowed(weka.gui.beans.BeanInstance.class, "bean");
     m_Properties.addAllowed(weka.gui.beans.Saver.class, "saver");
     m_Properties.addAllowed(weka.gui.beans.Loader.class, "loader");
+    m_Properties.addAllowed(weka.gui.beans.Saver.class, "relationNameForFilename");
     if (getDataType() == DATATYPE_LAYOUT)
       m_Properties.addAllowed(weka.gui.beans.Loader.class, "beanContext");
     else
@@ -1531,6 +1535,7 @@ public class XMLBeans
     
     saver = (weka.gui.beans.Saver) o;
     node   = addElement(parent, name, saver.getClass().getName(), false);
+    invokeWriteToXML(node, saver.getRelationNameForFilename(), VAL_RELATIONNAMEFORFILENAME);
 
     invokeWriteToXML(node, saver.getSaver(), VAL_SAVER);
     
