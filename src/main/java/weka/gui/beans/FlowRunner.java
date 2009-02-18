@@ -23,7 +23,10 @@
 package weka.gui.beans;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,6 +61,9 @@ public class FlowRunner {
   
   protected transient Environment m_env;
   
+  /** run each Startable bean sequentially? (default in parallel) */
+  protected boolean m_startSequentially = false;
+  
   protected static class SimpleLogger implements weka.gui.Logger {
     SimpleDateFormat m_DateFormat = 
       new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -81,6 +87,27 @@ public class FlowRunner {
 
   public void setLog(Logger log) {
     m_log = log;
+  }
+  
+  protected void runSequentially(TreeMap<Integer, Startable> startables) {
+    Set<Integer> s = startables.keySet();
+    for (Integer i : s) {
+      try {
+        Startable startPoint = startables.get(i);
+        startPoint.start();
+        waitUntilFinished();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        if (m_log != null) {
+          m_log.logMessage(ex.getMessage());
+          m_log.logMessage("Aborting...");
+        } else {
+          System.err.println(ex.getMessage());
+          System.err.println("Aborting...");
+        }
+        break;
+      }
+    }
   }
 
   protected synchronized void launchThread(final Startable s, final int flowNum) {
@@ -229,10 +256,6 @@ public class FlowRunner {
     }
   }
   
-  private void setEnvironmentOnFlow() {
-    
-  }
-  
   /**
    * Get the vector holding the flow(s)
    *
@@ -271,6 +294,26 @@ public class FlowRunner {
   public Environment getEnvironment() {
     return m_env;
   }
+  
+  /**
+   * Set whether to launch Startable beans one after the other
+   * or all in parallel.
+   * 
+   * @param s true if Startable beans are to be launched sequentially
+   */
+  public void setStartSequentially(boolean s) {
+    m_startSequentially = s;
+  }
+  
+  /**
+   * Gets whether Startable beans will be launched sequentially
+   * or all in parallel.
+   * 
+   * @return true if Startable beans will be launched sequentially
+   */
+  public boolean getStartSequentially() {
+    return m_startSequentially;
+  }
 
   /**
    * Launch all loaded KnowledgeFlow
@@ -296,20 +339,68 @@ public class FlowRunner {
     
     int numFlows = 1;
 
+    if (m_log != null) {
+      if (m_startSequentially) {
+        m_log.logMessage("[FlowRunner] launching flow start points sequentially...");
+      } else {
+        m_log.logMessage("[FlowRunner] launching flow start points in parallel...");
+      }
+    }
+    TreeMap<Integer, Startable> startables = new TreeMap<Integer, Startable>();
     // look for a Startable bean...
     for (int i = 0; i < m_beans.size(); i++) {
       BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
       if (tempB.getBean() instanceof Startable) {
         Startable s = (Startable)tempB.getBean();
         // start that sucker...
-        if (m_log != null) {
-          m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
+        if (!m_startSequentially) {
+          if (m_log != null) {
+            m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
+          } else {
+            System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
+          }
+          launchThread(s, numFlows);
+          numFlows++;
         } else {
-          System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
+          boolean ok = false;
+          Integer position = null;
+          String beanName = s.getClass().getName();
+          if (s instanceof BeanCommon) {
+            String customName = ((BeanCommon)s).getCustomName();
+            beanName = customName;
+            // see if we have a parseable integer at the start of the name
+            if (customName.indexOf(':') > 0) {
+              String startPos = customName.substring(0, customName.indexOf(':'));
+              try {
+                position = new Integer(startPos);
+                ok = true;
+              } catch (NumberFormatException n) {
+              }
+            }            
+          }
+          
+          if (!ok) {
+            if (startables.size() == 0) {
+              position = new Integer(0);
+            } else {
+              int newPos = startables.lastKey().intValue();
+              newPos++;
+              position = new Integer(newPos);
+            }
+          }
+          
+          if (m_log != null) {
+            m_log.logMessage("[FlowRunner] adding start point " + beanName
+                + " to the execution list (position " + position + ")");
+          }
+
+          startables.put(position, s);
         }
-        launchThread(s, numFlows);
-        numFlows++;
       }
+    }
+    
+    if (m_startSequentially) {
+      runSequentially(startables);
     }
   }
 
@@ -322,13 +413,20 @@ public class FlowRunner {
    */
   public static void main(String[] args) {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO, "Logging started");
-    if (args.length != 1) {
-      System.err.println("Usage:\n\nFlowRunner <serialized kf file>");
+    if (args.length < 1) {
+      System.err.println("Usage:\n\nFlowRunner <serialized kf file> [-s]\n\n" 
+          + "\tUse -s to launch start points sequentially (default launches "
+          + "in parallel).");
     } else {
       try {
         FlowRunner fr = new FlowRunner();
         FlowRunner.SimpleLogger sl = new FlowRunner.SimpleLogger();
         String fileName = args[0];
+        
+        if (args.length == 2 && args[1].equals("-s")) {
+          fr.setStartSequentially(true);
+        }
+        
         // start with the system-wide vars
         Environment env = Environment.getSystemWide();
 

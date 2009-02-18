@@ -902,7 +902,7 @@ public class Classifier
     Instances testSet = e.getTestSet();
     if (testSet != null) {
       if (testSet.classIndex() < 0) {
-//        testSet.setClassIndex(testSet.numAttributes() - 1);
+  //        testSet.setClassIndex(testSet.numAttributes() - 1);
         // stop all processing
         stop();
         String errorMessage = statusMessagePrefix()
@@ -922,6 +922,21 @@ public class Classifier
     // last saved model
     if (!m_listenees.containsKey("trainingSet") || 
         (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1)) {
+      // first check that we have a training set/header (if we don't,
+      // then it means that no model has been loaded
+      if (m_trainingSet == null) {
+        stop();
+        String errorMessage = statusMessagePrefix()
+            + "ERROR: no trained/loaded classifier to use for prediction!";
+        if (m_log != null) {
+          m_log.statusMessage(errorMessage);
+          m_log.logMessage("[Classifier] " + errorMessage);
+        } else {
+          System.err.println("[Classifier] " + errorMessage);
+        }
+        return;
+      }
+      
       testSet = e.getTestSet();
       if (testSet != null) {        
         if (m_trainingSet.equalHeaders(testSet)) {
