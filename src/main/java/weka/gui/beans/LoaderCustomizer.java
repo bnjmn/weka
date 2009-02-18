@@ -55,7 +55,7 @@ import javax.swing.JCheckBox;
  * GUI Customizer for the loader bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.15 $
+ * @version $Revision$
  */
 public class LoaderCustomizer
   extends JPanel
@@ -136,7 +136,8 @@ public class LoaderCustomizer
 		setFile(selectedFile);
 	      // tell the loader that a new file has been selected so
 	      // that it can attempt to load the header
-	      m_dsLoader.setLoader(m_dsLoader.getLoader());
+	      //m_dsLoader.setLoader(m_dsLoader.getLoader());
+	      m_dsLoader.newFileSelected();
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }

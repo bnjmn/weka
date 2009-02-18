@@ -348,7 +348,12 @@ public class Loader
     }
     m_visual.setText(loaderName);
     
-    if(! (loader instanceof DatabaseLoader)) {
+    // get global info
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Loader);
+  }
+  
+  protected void newFileSelected() {
+    if(! (m_Loader instanceof DatabaseLoader)) {
       // try to load structure (if possible) and notify any listeners
       try {
         m_dataFormat = m_Loader.getStructure();
@@ -358,9 +363,6 @@ public class Loader
       }catch (Exception ex) {
       }
     }
-    
-    // get global info
-    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Loader);
   }
 
   /**
