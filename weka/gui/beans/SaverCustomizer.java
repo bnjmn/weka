@@ -136,8 +136,7 @@ public class SaverCustomizer
                 m_dsSaver.
                   setRelationNameForFilename(m_relationNameForFilename.isSelected());
                
-	      // tell the saver that a new file has been selected so
-	      m_dsSaver.setSaver(m_dsSaver.getSaver());
+	      // m_dsSaver.setSaver(m_dsSaver.getSaver());
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }
