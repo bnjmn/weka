@@ -68,7 +68,7 @@ import weka.core.Utils;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24.2.1 $
+ * @version $Revision$
  */
 public abstract class Filter implements Serializable {
 
@@ -476,12 +476,13 @@ public abstract class Filter implements Serializable {
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    // Clear out references to old strings occasionally
+
+    /*    // Clear out references to old strings occasionally
     if (m_OutputQueue.empty() && m_NewBatch) {
       if (m_OutputStringAtts.length > 0) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
-    }
+      }*/
     return result;
   }
   
