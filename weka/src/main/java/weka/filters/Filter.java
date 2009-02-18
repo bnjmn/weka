@@ -74,7 +74,7 @@ import java.util.Iterator;
  * </pre> </code>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision$
  */
 public abstract class Filter
   implements Serializable, CapabilitiesHandler, RevisionHandler {
@@ -537,13 +537,13 @@ public abstract class Filter
       return null;
     }
     Instance result = (Instance)m_OutputQueue.pop();
-    // Clear out references to old strings/relationals occasionally
+    /*    // Clear out references to old strings/relationals occasionally
     if (m_OutputQueue.empty() && m_NewBatch) {
       if (    (m_OutputStringAtts.getAttributeIndices().length > 0)
 	   || (m_OutputRelAtts.getAttributeIndices().length > 0) ) {
         m_OutputFormat = m_OutputFormat.stringFreeStructure();
       }
-    }
+      } */
     return result;
   }
   
