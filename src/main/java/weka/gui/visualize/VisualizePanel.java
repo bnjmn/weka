@@ -1657,7 +1657,8 @@ public class VisualizePanel
 
   /** The panel that displays the attributes , using color to represent 
    * another attribute. */
-  protected AttributePanel m_attrib = new AttributePanel();
+  protected AttributePanel m_attrib = 
+    new AttributePanel(m_plot.m_plot2D.getBackground());
 
   /** The panel that displays legend info if there is more than one plot */
   protected LegendPanel m_legendPanel = new LegendPanel();
@@ -1681,7 +1682,8 @@ public class VisualizePanel
   protected String m_plotName = "";
 
   /** The panel that displays the legend for the colouring attribute */
-  protected ClassPanel m_classPanel = new ClassPanel();
+  protected ClassPanel m_classPanel = 
+    new ClassPanel(m_plot.m_plot2D.getBackground());
   
   /** The list of the colors used */
   protected FastVector m_colorList;
@@ -1826,6 +1828,24 @@ public class VisualizePanel
     // colours change
     m_classPanel.addRepaintNotify(this);
     m_legendPanel.addRepaintNotify(this);
+    
+    // Check the default colours against the background colour of the
+    // plot panel. If any are equal to the background colour then
+    // change them (so they are visible :-)
+    for (int i = 0; i < m_DefaultColors.length; i++) {
+      Color c = m_DefaultColors[i];
+      if (c.equals(m_plot.m_plot2D.getBackground())) {
+        int red = c.getRed();
+        int blue = c.getBlue();
+        int green = c.getGreen();
+        red += (red < 128) ? (255 - red) / 2 : -(red / 2);
+        blue += (blue < 128) ? (blue - red) / 2 : -(blue / 2);
+        green += (green< 128) ? (255 - green) / 2 : -(green / 2);
+        m_DefaultColors[i] = new Color(red, green, blue);
+      }
+    }
+    m_classPanel.setDefaultColourList(m_DefaultColors);
+    m_attrib.setDefaultColourList(m_DefaultColors);
 
     m_colorList = new FastVector(10);
     for (int noa = m_colorList.size(); noa < 10; noa++) {
