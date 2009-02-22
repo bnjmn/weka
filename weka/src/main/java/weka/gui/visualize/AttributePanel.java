@@ -46,7 +46,7 @@ import javax.swing.JScrollPane;
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class AttributePanel
   extends JScrollPane {
@@ -78,6 +78,12 @@ public class AttributePanel
 					new Color(255, 0, 0),
 					new Color(0, 255, 0),
 					Color.white};
+    
+  /**
+   *  If set, it allows this panel to avoid setting a color in
+   * the color list that is equal to the background color
+   */
+  protected Color m_backgroundColor = null; 
 
   /** The list of things listening to this panel */
   protected FastVector m_Listeners = new FastVector();
@@ -319,11 +325,17 @@ public class AttributePanel
       }
     }
   }
+  
+  public AttributePanel() {
+    this(null);
+  }
  
   /**
    * This constructs an attributePanel.
    */
-  public AttributePanel() {
+  public AttributePanel(Color background) {
+    m_backgroundColor = background;
+    
     setProperties();
     this.setBackground(Color.blue);
     setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
@@ -433,6 +445,10 @@ public class AttributePanel
 	  pc = pc.brighter();
 	}
 	
+	if (m_backgroundColor != null) {
+	  pc = Plot2D.checkAgainstBackground(pc, m_backgroundColor);
+	}
+
 	m_colorList.addElement(pc);
       }
     }
@@ -444,6 +460,10 @@ public class AttributePanel
    */
   public void setColours(FastVector cols) {
     m_colorList = cols;
+  }
+  
+  protected void setDefaultColourList(Color[] list) {
+    m_DefaultColors = list;
   }
 
   /** 

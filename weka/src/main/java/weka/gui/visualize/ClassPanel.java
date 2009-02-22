@@ -49,7 +49,7 @@ import javax.swing.JPanel;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.16 $
+ * @version $Revision$
  */
 public class ClassPanel
   extends JPanel {
@@ -124,6 +124,12 @@ public class ClassPanel
 					new Color(255, 0, 0),
 					new Color(0, 255, 0),
 					Color.white};
+  
+  /**
+   *  if set, it allows this panel to steer away from setting up
+   * a color in the color list that is equal to the background color
+   */
+  protected Color m_backgroundColor = null;
 
   /** Inner Inner class used to create labels for nominal attributes
    * so that there color can be changed.
@@ -175,8 +181,14 @@ public class ClassPanel
 	});
     }
   }
-
+  
   public ClassPanel() {
+    this(null);
+  }
+
+  public ClassPanel(Color background) {
+    m_backgroundColor = background;
+    
     /** Set up some default colours */
     m_colorList = new FastVector(10);
     for (int noa = m_colorList.size(); noa < 10; noa++) {
@@ -276,10 +288,17 @@ public class ClassPanel
 	for (int j=0;j<ija;j++) {
 	  pc = pc.brighter();
 	}
+        if (m_backgroundColor != null) {
+          pc = Plot2D.checkAgainstBackground(pc, m_backgroundColor);
+        }
 	
 	m_colorList.addElement(pc);
       }
     }
+  }
+    
+  protected void setDefaultColourList(Color[] list) {
+    m_DefaultColors = list;
   }
 
   /**
