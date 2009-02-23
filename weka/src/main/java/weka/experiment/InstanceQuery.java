@@ -75,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.24 $
+ * @version $Revision$
  */
 public class InstanceQuery 
   extends DatabaseUtils 
@@ -302,6 +302,8 @@ public class InstanceQuery
     ResultSetMetaData md = rs.getMetaData();
     if (m_Debug) 
       System.err.println("Completed getting metadata...");
+    
+    
     // Determine structure of the instances
     int numAttributes = md.getColumnCount();
     int [] attributeTypes = new int [numAttributes];
@@ -374,6 +376,14 @@ public class InstanceQuery
 	//System.err.println("Unknown column type");
 	attributeTypes[i - 1] = Attribute.STRING;
       }
+    }
+
+    // For sqlite
+    // cache column names because the last while(rs.next()) { iteration for
+    // the tuples below will close the md object:  
+    Vector<String> columnNames = new Vector<String>(); 
+    for (int i = 0; i < numAttributes; i++) {
+      columnNames.add(md.getColumnName(i + 1));
     }
 
     // Step through the tuples
@@ -526,7 +536,8 @@ public class InstanceQuery
     FastVector attribInfo = new FastVector();
     for (int i = 0; i < numAttributes; i++) {
       /* Fix for databases that uppercase column names */
-      String attribName = attributeCaseFix(md.getColumnName(i + 1));
+      // String attribName = attributeCaseFix(md.getColumnName(i + 1));
+      String attribName = attributeCaseFix(columnNames.get(i));
       switch (attributeTypes[i]) {
       case Attribute.NOMINAL:
 	attribInfo.addElement(new Attribute(attribName, nominalStrings[i]));
@@ -611,6 +622,6 @@ public class InstanceQuery
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.24 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
