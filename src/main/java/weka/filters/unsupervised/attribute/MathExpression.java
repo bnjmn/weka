@@ -264,9 +264,9 @@ public class MathExpression
       int[] newIndices = new int[instance.numAttributes()];
       double[] vals = instance.toDoubleArray();
       int ind = 0;
+      double value;
       for (int j = 0; j < instance.numAttributes(); j++) {
         if (m_SelectCols.isInRange(j)) {          
-	  double value;
 	  if (instance.attribute(j).isNumeric() &&
 	    (!Instance.isMissingValue(vals[j])) &&
 	    (getInputFormat().classIndex() != j)) {
@@ -288,14 +288,15 @@ public class MathExpression
 	        newIndices[ind] = j;
 	        ind++;
 	      }
-	  } else {
-	      value = vals[j];
-	      if (value != 0.0) {
-	        newVals[ind] = value;
-	        newIndices[ind] = j;
-	        ind++;
-	      }
+	      
 	  }
+        } else {
+          value = vals[j];
+          if (value != 0.0) {
+            newVals[ind] = value;
+            newIndices[ind] = j;
+            ind++;
+          }
         }
       }	
       double[] tempVals = new double[ind];
