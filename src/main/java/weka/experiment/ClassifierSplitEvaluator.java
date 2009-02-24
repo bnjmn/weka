@@ -137,6 +137,9 @@ public class ClassifierSplitEvaluator
   /** The number of averaged IR statistics */
   private static final int NUM_WEIGHTED_IR_STATISTICS = 8;
   
+  /** The number of unweighted averaged IR statistics */
+  private static final int NUM_UNWEIGHTED_IR_STATISTICS = 2;
+  
   /** Class index for information retrieval statistics (default 0) */
   private int m_IRclass = 0;
   
@@ -462,6 +465,7 @@ public class ClassifierSplitEvaluator
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
+    overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
     Object [] resultTypes = new Object[overall_length];
@@ -505,6 +509,10 @@ public class ClassifierSplitEvaluator
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    
+    // Unweighted IR stats
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     
@@ -563,6 +571,7 @@ public class ClassifierSplitEvaluator
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
+    overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
 
@@ -623,6 +632,10 @@ public class ClassifierSplitEvaluator
     resultNames[current++] = "Weighted_avg_F_measure";
     resultNames[current++] = "Weighted_avg_area_under_ROC";
     
+    // Unweighted IR stats
+    resultNames[current++] = "Unweighted_macro_avg_F_measure";
+    resultNames[current++] = "Unweighted_micro_avg_F_measure";
+    
     // Timing stats
     resultNames[current++] = "Elapsed_Time_training";
     resultNames[current++] = "Elapsed_Time_testing";
@@ -677,6 +690,7 @@ public class ClassifierSplitEvaluator
     int overall_length = RESULT_SIZE+addm;
     overall_length += NUM_IR_STATISTICS;
     overall_length += NUM_WEIGHTED_IR_STATISTICS;
+    overall_length += NUM_UNWEIGHTED_IR_STATISTICS;
     if (getAttributeID() >= 0) overall_length += 1;
     if (getPredTargetColumn()) overall_length += 2;
     
@@ -766,6 +780,10 @@ public class ClassifierSplitEvaluator
     result[current++] = new Double(eval.weightedRecall());
     result[current++] = new Double(eval.weightedFMeasure());
     result[current++] = new Double(eval.weightedAreaUnderROC());
+    
+    // Unweighted IR stats
+    result[current++] = new Double(eval.unweightedMacroFmeasure());
+    result[current++] = new Double(eval.unweightedMicroFmeasure());
     
     // Timing stats
     result[current++] = new Double(trainTimeElapsed / 1000.0);
