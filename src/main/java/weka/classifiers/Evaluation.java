@@ -2866,7 +2866,8 @@ public class Evaluation
   }
 
   /**
-   * Calculates the weighted (by class size) F-Measure.
+   * Calculates the macro weighted (by class size) average 
+   * F-Measure.
    *
    * @return the weighted F-Measure.
    */
@@ -2888,6 +2889,44 @@ public class Evaluation
     }
 
     return fMeasureTotal / classCountSum;
+  }
+  
+  /** 
+   * Unweighted macro-averaged F-measure. If some classes not present in the
+   * test set, they're just skipped (since recall is undefined there anyway) .
+   *  
+   * @return unweighted macro-averaged F-measure.
+   * */
+  public double unweightedMacroFmeasure() {
+    weka.experiment.Stats rr = new weka.experiment.Stats();
+    for (int c = 0; c < m_NumClasses; c++) {
+      // skip if no testing positive cases of this class
+      if (numTruePositives(c)+numFalseNegatives(c) > 0) {
+        rr.add(fMeasure(c));
+      }
+    }
+    rr.calculateDerived();
+    return rr.mean;
+  }
+
+  /**
+   * Unweighted micro-averaged F-measure. If some classes not present in the 
+   * test set, they have no effect.
+   *  
+   * Note: if the test set is *single-label*, then this is the same as accuracy. 
+   * 
+   * @return unweighted micro-averaged F-measure.
+   */
+  public double unweightedMicroFmeasure() {
+    double tp = 0;
+    double fn = 0;
+    double fp = 0;
+    for (int c = 0; c < m_NumClasses; c++) {
+      tp += numTruePositives(c);
+      fn += numFalseNegatives(c);
+      fp += numFalsePositives(c);
+    }
+    return 2*tp / (2*tp + fn + fp);
   }
 
   /**
