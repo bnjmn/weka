@@ -922,7 +922,12 @@ public class Classifier
     // last saved model
     if (!m_listenees.containsKey("trainingSet") || 
         (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1)) {
-      // first check that we have a training set/header (if we don't,
+      // if this is structure only then just return at this point
+      if (e.getTestSet() != null && e.isStructureOnly()) {
+        return;
+      }
+      
+      // check that we have a training set/header (if we don't,
       // then it means that no model has been loaded
       if (m_trainingSet == null) {
         stop();
@@ -983,6 +988,16 @@ public class Classifier
                   m_log.statusMessage(statusMessagePrefix() + "Finished.");
                 }
                 notifyBatchClassifierListeners(ce);
+              } else {
+                stop();
+                String errorMessage = statusMessagePrefix()
+                + "ERROR: structure of training and test sets is not compatible!";
+                if (m_log != null) {
+                  m_log.statusMessage(errorMessage);
+                  m_log.logMessage("[Classifier] " + errorMessage);
+                } else {
+                  System.err.println("[Classifier] " + errorMessage);
+                }
               }
             }
           }
