@@ -81,6 +81,7 @@ public class TestSetMaker
    * @param e a <code>DataSetEvent</code> value
    */
   public void acceptDataSet(DataSetEvent e) {
+    m_receivedStopNotification = false;
     TestSetEvent tse = new TestSetEvent(this, e.getDataSet());
     tse.m_setNumber = 1;
     tse.m_maxSetNumber = 1;
