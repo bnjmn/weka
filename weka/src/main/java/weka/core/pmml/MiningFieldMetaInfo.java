@@ -35,7 +35,7 @@ import weka.core.Utils;
  * Class encapsulating information about a MiningField.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
   
@@ -309,7 +309,7 @@ public class MiningFieldMetaInfo extends FieldMetaInfo implements Serializable {
       }
     }
     
-    if (outliers.length() > 0) {
+    if (outliers.length() > 0 && m_outlierTreatmentMethod == Outlier.ASEXTREMEVALUES) {
       // low and high values are required for as extreme values handling
       String lowValue = field.getAttribute("lowValue");
       if (lowValue.length() > 0) {
