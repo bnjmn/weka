@@ -827,8 +827,11 @@ public class TreeModel extends PMMLClassifier implements Drawable {
       
       //TODO: Embedded model (once we support model composition)
       
-      // Now get the ScoreDistributions (if any) at this level
-      getScoreDistributions(nodeE, miningSchema);
+      // Now get the ScoreDistributions (if any and mining function 
+      // is classification) at this level
+      if (m_functionType == MiningFunction.CLASSIFICATION) {
+        getScoreDistributions(nodeE, miningSchema);
+      }
       
       // Now get the Predicate
       m_predicate = Predicate.getPredicate(nodeE, miningSchema);
