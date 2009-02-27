@@ -112,7 +112,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class J48 
   extends Classifier 
@@ -124,7 +124,7 @@ public class J48
   static final long serialVersionUID = -217733168393644444L;
 
   /** The decision tree */
-  private ClassifierTree m_root;
+  protected ClassifierTree m_root;
   
   /** Unpruned tree? */
   private boolean m_unpruned = false;
@@ -936,7 +936,7 @@ public class J48
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
   /**
