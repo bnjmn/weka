@@ -35,7 +35,7 @@ import weka.core.FastVector;
  * and submits them to a central database.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class DatabaseResultListener extends DatabaseUtils
   implements ResultListener  {
@@ -143,9 +143,10 @@ public class DatabaseResultListener extends DatabaseUtils
     while (rs.next()) {
       tableExists = true;
       // column four contains the column name
-      if (rs.getString(4).toLowerCase().startsWith("measure")) {
+      String name = rs.getString(4);
+      if (name.toLowerCase().startsWith("measure")) {
 	numColumns++;
-	cNames.addElement(rs.getString(4));
+	cNames.addElement(name);
       }
     }
 
