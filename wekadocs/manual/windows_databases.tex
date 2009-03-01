@@ -1,6 +1,6 @@
 % Version: $Revision$
 
-A common query we get from our users is how to open a Windows database in the Weka Explorer. This page is intended as a guide to help you achieve this. It is a complicated process and we cannot guarantee that it will work for you. The process described makes use of the JDBC-ODBC bridge that is part of Sun's JRE 1.3 (and higher).
+A common query we get from our users is how to open a Windows database in the Weka Explorer. This page is intended as a guide to help you achieve this. It is a complicated process and we cannot guarantee that it will work for you. The process described makes use of the JDBC-ODBC bridge that is part of Sun's JRE/JDK 1.3 (and higher).
 
 The following instructions are for Windows 2000. Under other Windows versions there may be slight differences.
 
@@ -50,11 +50,11 @@ The following instructions are for Windows 2000. Under other Windows versions th
 \end{enumerate}
 
 \section*{Step 2: Set up the DatabaseUtils.props file}
-You will need to create a file called DatabaseUtils.props. This file already exists under the path \texttt{weka/experiment/} in the \texttt{weka.jar} file that is part of the Weka download. In this directory you will also find a sample file for ODBC connectivity, called \texttt{DatabaseUtils.props.odbc}. You can use that as basis, since it already contains default values specific to ODBC access.
+You will need to configure a file called \texttt{DatabaseUtils.props}. This file already exists under the path \texttt{weka/experiment/} in the \texttt{weka.jar} file (which is just a ZIP file) that is part of the Weka download. In this directory you will also find a sample file for ODBC connectivity, called \texttt{DatabaseUtils.props.odbc}, and one specifically for MS Access, called \texttt{DatabaseUtils.props.msaccess}, also using ODBC. You should use one of the sample files as basis for your setup, since they already contain default values specific to ODBC access.
 
-This file needs to be recognized when the Explorer starts. You can achieve this by making sure it is in the working directory, or by replacing the version the already exists in the \texttt{weka/experiment} directory. A way of achieving the second alternative would be to extract the contents of the \texttt{weka.jar}, and setting your CLASSPATH to point to the directory where \texttt{weka} resides rather that the \texttt{.jar} file.
+This file needs to be recognized when the Explorer starts. You can achieve this by making sure it is in the working directory or the home directory (if you are unsure what the terms \textit{working directory} and \textit{home directory} mean, see the \textit{Notes} section). The easiest is probably the second alternative, as the setup will apply to all the Weka instances on your machine.
 
-The file is a text file that needs to contain the following lines:
+Just make sure that the file contains the following lines at least:
 
 \begin{verbatim}
  jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver
@@ -66,14 +66,30 @@ The file is a text file that needs to contain the following lines:
 \newpage
 \section*{Step 3: Open the database}
 \begin{enumerate}
-	\item Start up the Weka Explorer. If you want to be sure that the \texttt{DatabaseUtils.props} file is in the current path, you can open a command prompt window, change to the directory where the \texttt{DatabaseUtils.props} file is located, make sure your CLASSPATH environment variable is set correctly (or set it with the \texttt{-cp} option to java) and launch the Explorer with the following command:
-	\begin{verbatim}
-	  java weka.gui.explorer.Explorer 
-	\end{verbatim}
+	\item Start up the Weka Explorer.
 	\item Choose \textbf{Open DB...}
-	\item Edit the \textbf{query} field to read "select * from \textit{tablename}" where \textit{tablename} is the name of the database table you want to read, or you could put a more complicated SQL query here instead.
-	\item The \textbf{databaseURL} should read "jdbc:odbc:\textit{dbname}" where \textit{dbname} is the name you gave the user DSN.
-	\item Click OK
+	\item The \textbf{URL} should read "jdbc:odbc:\textit{dbname}" where \textit{dbname} is the name you gave the user DSN.
+	\item Click \textbf{Connect}
+	\item Enter a \textbf{Query}, e.g., "\texttt{select * from \textit{tablename}}" where \textit{tablename} is the name of the database table you want to read. Or you could put a more complicated SQL query here instead.
+	\item Click \textbf{Execute}
+	\item When you're satisfied with the returned data, click \textbf{OK} to load the data into the Preprocess panel.
 \end{enumerate}
 
-\noindent At this point the data should be read from the database.
+\section*{Notes}
+\begin{itemize}
+ \item \textbf{Working directory} \\
+  The directory a process is started from. When you start Weka from the Windows Start Menu, then this directory would be Weka's installation directory (the java process is started from that directory).
+ \item \textbf{Home directory} \\
+ The directory that contains all the user's data. The exact location depends on the operating system and the version of the operating system. It is stored in the following environment variable:
+ \begin{itemize}
+  \item Unix/Linux \\
+  \texttt{\$HOME}
+  \item Windows \\
+   \texttt{\%USERPROFILE\%}
+  \item Cygwin \\
+    \texttt{\$USERPROFILE}
+ \end{itemize}
+  You should be able output the value in a command prompt/terminal with the echo command. E.g., for Windows this would be:
+
+  \texttt{echo \%USERPROFILE\%}
+\end{itemize}
