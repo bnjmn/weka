@@ -1,4 +1,4 @@
-# Database settings for ODBC in conjunction with MS SQL Server 2000
+# Database settings for ODBC in conjunction with MS Access 2000
 #
 # url:     http://weka.wiki.sourceforge.net/Windows+Databases
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
@@ -8,7 +8,7 @@
 jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver
 
 # database URL
-jdbcURL=jdbc:odbc:DSN_name
+jdbcURL=jdbc:odbc:DSN_Name
 
 # specific data types
 # string, getString() = 0;    --> nominal
@@ -27,10 +27,11 @@ varchar=0
 float=2
 tinyint=3
 int=5
+text=0
 
 # other options
-CREATE_DOUBLE=DOUBLE PRECISION
-CREATE_STRING=VARCHAR(8000)
+CREATE_DOUBLE=DOUBLE
+CREATE_STRING=TEXT
 CREATE_INT=INT
 checkUpperCaseNames=false
 checkLowerCaseNames=false
