@@ -36,7 +36,7 @@ import java.sql.ResultSet;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class DatabaseResultListener 
   extends DatabaseUtils
@@ -148,9 +148,10 @@ public class DatabaseResultListener
     while (rs.next()) {
       tableExists = true;
       // column four contains the column name
-      if (rs.getString(4).toLowerCase().startsWith("measure")) {
+      String name = rs.getString(4);
+      if (name.toLowerCase().startsWith("measure")) {
 	numColumns++;
-	cNames.addElement(rs.getString(4));
+	cNames.addElement(name);
       }
     }
 
@@ -400,6 +401,6 @@ public class DatabaseResultListener
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
