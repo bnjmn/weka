@@ -41,7 +41,7 @@ import java.util.Hashtable;
  * standard association rule mining.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class ItemSet
   implements Serializable, RevisionHandler {
@@ -94,14 +94,51 @@ public class ItemSet
    * @return true if the given instance contains this item set
    */
   public boolean containedBy(Instance instance) {
-    
-    for (int i = 0; i < instance.numAttributes(); i++) 
-      if (m_items[i] > -1) {
-	if (instance.isMissing(i))
-	  return false;
-	if (m_items[i] != (int)instance.value(i))
-	  return false;
+
+    if (instance instanceof weka.core.SparseInstance) {
+      int numInstVals = instance.numValues();
+      int numItemSetVals = m_items.length;
+
+      for (int p1 = 0, p2 = 0; p1 < numInstVals || p2 < numItemSetVals; ) {
+        int instIndex = Integer.MAX_VALUE;
+        if (p1 < numInstVals) {
+          instIndex = instance.index(p1);
+        }
+        int itemIndex = p2;
+
+        if (m_items[itemIndex] > -1) {
+          if (itemIndex != instIndex) {
+            return false;
+          } else {
+            if (instance.isMissingSparse(p1)) {
+              return false;
+            }
+            if (m_items[itemIndex] != (int)instance.valueSparse(p1)) {
+              return false;
+            }
+          }
+
+          p1++;
+          p2++;
+        } else {
+          if (itemIndex < instIndex) {
+            p2++;
+          } else if (itemIndex == instIndex){
+            p2++;
+            p1++;
+          }
+        }      
       }
+    } else {
+      for (int i = 0; i < instance.numAttributes(); i++) 
+        if (m_items[i] > -1) {
+          if (instance.isMissing(i))
+            return false;
+          if (m_items[i] != (int)instance.value(i))
+            return false;
+        }
+    }
+
     return true;
   }
 
@@ -431,6 +468,6 @@ public class ItemSet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
