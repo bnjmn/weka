@@ -57,6 +57,12 @@ public class ItemSet
 
   /** The total number of transactions */
   protected int m_totalTransactions;
+  
+  /** 
+   * Treat zeros as missing (rather than a value in their
+   * own right)
+   */
+  protected boolean m_treatZeroAsMissing = false;
 
   /**
    * Constructor
@@ -95,7 +101,7 @@ public class ItemSet
    */
   public boolean containedBy(Instance instance) {
 
-    if (instance instanceof weka.core.SparseInstance) {
+    if (instance instanceof weka.core.SparseInstance && m_treatZeroAsMissing) {
       int numInstVals = instance.numValues();
       int numItemSetVals = m_items.length;
 
@@ -132,7 +138,8 @@ public class ItemSet
     } else {
       for (int i = 0; i < instance.numAttributes(); i++) 
         if (m_items[i] > -1) {
-          if (instance.isMissing(i))
+          if (instance.isMissing(i) || 
+              (m_treatZeroAsMissing && (int)instance.value(i) == 0))
             return false;
           if (m_items[i] != (int)instance.value(i))
             return false;
@@ -460,6 +467,26 @@ public class ItemSet
   public void setItemAt(int value, int k){
       
       m_items[k] = value;
+  }
+  
+  /**
+   * Sets whether zeros (i.e. the first value of a nominal attribute)
+   * should be treated as missing values.
+   * 
+   * @param z true if zeros should be treated as missing values.
+   */
+  public void setTreatZeroAsMissing(boolean z) {
+    m_treatZeroAsMissing = z;
+  }
+  
+  /**
+   * Gets whether zeros (i.e. the first value of a nominal attribute)
+   * is to be treated int he same way as missing values.
+   * 
+   * @return true if zeros are to be treated like missing values.
+   */
+  public boolean getTreatZeroAsMissing() {
+    return m_treatZeroAsMissing;
   }
   
   /**

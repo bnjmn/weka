@@ -126,7 +126,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision$
  */
 public class Apriori 
   extends AbstractAssociator 
@@ -208,6 +208,12 @@ public class Apriori
   
   /** Flag indicating whether class association rules are mined. */
   protected boolean m_car;
+  
+  /** 
+   * Treat zeros as missing (rather than a value in their
+   * own right)
+   */
+  protected boolean m_treatZeroAsMissing = false;
 
   /**
    * Returns a string describing this associator
@@ -595,7 +601,9 @@ public class Apriori
       string9 = "\tIf set class association rules are mined. (default = no)",
       string10 = "\tThe class index. (default = last)",
       stringType = "\tThe metric type by which to rank rules. (default = "
-      +"confidence)";
+      +"confidence)",
+      stringZeroAsMissing = "\tTreat zero (i.e. first value of nominal attributes) as " +
+      		"missing";
     
 
     FastVector newVector = new FastVector(11);
@@ -627,6 +635,8 @@ public class Apriori
 				    "-V"));
     newVector.addElement(new Option(string9, "A", 0,
 				    "-A"));
+    newVector.addElement(new Option(stringZeroAsMissing, "Z", 0,
+        "-Z"));
     newVector.addElement(new Option(string10, "c", 1,
 				    "-c <the class index>"));
     
@@ -692,6 +702,7 @@ public class Apriori
       minSupportString = Utils.getOption('M', options),
       significanceLevelString = Utils.getOption('S', options),
       classIndexString = Utils.getOption('c',options);
+    
     String metricTypeString = Utils.getOption('T', options);
     if (metricTypeString.length() != 0) {
       setMetricType(new SelectedTag(Integer.parseInt(metricTypeString),
@@ -728,6 +739,8 @@ public class Apriori
     m_outputItemSets = Utils.getFlag('I', options);
     m_car = Utils.getFlag('A', options);
     m_verbose = Utils.getFlag('V', options);
+    m_treatZeroAsMissing = Utils.getFlag('Z', options);
+    
     setRemoveAllMissingCols(Utils.getFlag('R', options));
   }
 
@@ -738,7 +751,7 @@ public class Apriori
    */
   public String [] getOptions() {
 
-    String [] options = new String [20];
+    String [] options = new String [21];
     int current = 0;
 
     if (m_outputItemSets) {
@@ -760,6 +773,10 @@ public class Apriori
       options[current++] = "-A";
     if (m_verbose)
       options[current++] = "-V";
+    
+    if (m_treatZeroAsMissing) {
+      options[current++] = "-Z";
+    }
     options[current++] = "-c"; options[current++] = "" + m_classIndex;
     
     while (current < options.length) {
@@ -1260,6 +1277,36 @@ public class Apriori
   public String verboseTipText() {
     return "If enabled the algorithm will be run in verbose mode.";
   }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String treatZeroAsMissingTipText() {
+    return "If enabled, zero (that is, the first value of a nominal) is "
+    + "treated in the same way as a missing value.";
+  }
+  
+  /**
+   * Sets whether zeros (i.e. the first value of a nominal attribute)
+   * should be treated as missing values.
+   * 
+   * @param z true if zeros should be treated as missing values.
+   */
+  public void setTreatZeroAsMissing(boolean z) {
+    m_treatZeroAsMissing = z;
+  }
+  
+  /**
+   * Gets whether zeros (i.e. the first value of a nominal attribute)
+   * is to be treated int he same way as missing values.
+   * 
+   * @return true if zeros are to be treated like missing values.
+   */
+  public boolean getTreatZeroAsMissing() {
+    return m_treatZeroAsMissing;
+  }
 
   /** 
    * Method that finds all large itemsets for the given set of instances.
@@ -1280,7 +1327,7 @@ public class Apriori
     necSupport = (int)(m_minSupport * (double)m_instances.numInstances()+0.5);
     necMaxSupport = (int)(m_upperBoundMinSupport * (double)m_instances.numInstances()+0.5);
    
-    kSets = AprioriItemSet.singletons(m_instances);
+    kSets = AprioriItemSet.singletons(m_instances, m_treatZeroAsMissing);
     AprioriItemSet.upDateCounters(kSets,m_instances);
     kSets = AprioriItemSet.deleteItemSets(kSets, necSupport, necMaxSupport);
     if (kSets.size() == 0)
@@ -1449,7 +1496,7 @@ public class Apriori
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
