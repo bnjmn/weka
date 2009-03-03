@@ -1,0 +1,457 @@
+@relation vote-weka.filters.unsupervised.instance.NonSparseToSparse
+
+@attribute handicapped-infants {n,y}
+@attribute water-project-cost-sharing {n,y}
+@attribute adoption-of-the-budget-resolution {n,y}
+@attribute physician-fee-freeze {n,y}
+@attribute el-salvador-aid {n,y}
+@attribute religious-groups-in-schools {n,y}
+@attribute anti-satellite-test-ban {n,y}
+@attribute aid-to-nicaraguan-contras {n,y}
+@attribute mx-missile {n,y}
+@attribute immigration {n,y}
+@attribute synfuels-corporation-cutback {n,y}
+@attribute education-spending {n,y}
+@attribute superfund-right-to-sue {n,y}
+@attribute crime {n,y}
+@attribute duty-free-exports {n,y}
+@attribute export-administration-act-south-africa {n,y}
+@attribute Class {democrat,republican}
+
+@data
+
+{1 y,3 y,4 y,5 y,9 y,10 ?,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 ?,16 republican}
+{0 ?,1 y,2 y,3 ?,4 y,5 y,10 y,12 y,13 y}
+{1 y,2 y,4 ?,5 y,10 y,12 y,15 y}
+{0 y,1 y,2 y,4 y,5 y,10 y,11 ?,12 y,13 y,14 y,15 y}
+{1 y,2 y,4 y,5 y,12 y,13 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,12 ?,13 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,12 y,13 y,14 ?,15 y,16 republican}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 ?,15 ?}
+{1 y,3 y,4 y,10 ?,11 ?,12 y,13 y,16 republican}
+{1 y,3 y,4 y,5 y,10 y,11 ?,12 y,13 y,14 ?,15 ?,16 republican}
+{1 y,2 y,6 y,7 y,8 y,12 y,14 ?,15 ?}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 ?,9 y,10 y,11 ?,14 y,15 ?}
+{1 y,3 y,4 y,5 y,11 y,12 ?,13 ?,15 ?,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 ?,15 ?,16 republican}
+{0 y,2 y,5 y,7 y,8 ?,9 y,10 y,11 y,12 ?,15 y}
+{0 y,1 ?,2 y,6 y,7 y,8 y,12 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 ?,12 y,13 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{0 y,1 y,2 y,5 ?,6 y,7 y,10 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,12 ?,13 ?,14 y,15 y}
+{0 y,1 ?,2 y,6 y,7 y,8 y,11 ?,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{0 y,3 y,4 y,6 y,7 y,8 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,14 y,15 ?}
+{0 y,1 y,2 y,6 y,7 y,8 y,9 y,12 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 ?,3 y,4 y,5 y,9 y,11 y,12 ?,13 y,15 y,16 republican}
+{0 y,1 y,3 y,4 y,5 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,2 y,6 y,7 y,8 y,9 y,10 y,12 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 ?,15 ?}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,15 ?}
+{0 y,1 y,2 y,6 y,7 y,8 ?,10 y,14 y,15 ?}
+{0 y,1 y,2 y,6 y,7 y,8 y,15 y}
+{0 y,2 y,6 y,7 y,8 ?,15 ?}
+{0 y,1 y,2 y,6 y,7 y,13 y,15 y}
+{1 ?,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,7 ?,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 ?,15 ?}
+{0 y,1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,2 y,5 y,6 ?,7 y,10 y,11 y,13 y,15 ?}
+{1 y,3 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 ?,16 republican}
+{0 y,1 y,2 y,5 ?,6 y,7 y,8 y,9 y,14 y,15 ?}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,15 ?}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,11 ?,15 y}
+{0 y,1 y,3 y,4 y,5 y,6 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,6 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,1 ?,2 y,6 y,7 y,8 y,12 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,12 y,14 y,15 ?}
+{0 y,1 y,2 y,3 y,6 y,7 y,8 y,9 y,10 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,14 y,15 ?}
+{0 y,2 y,3 y,4 y,6 y,8 y,9 y,12 y,13 y,15 y,16 republican}
+{0 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,13 y,14 y,15 y}
+{1 y,2 y,3 y,4 y,5 y,9 y,10 y,12 y,13 y}
+{1 y,2 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 ?}
+{1 y,2 y,3 y,4 y,5 y,7 y,8 y,9 y,10 y,11 y,12 y,13 y,15 y}
+{0 y,1 y,2 y,4 y,5 y,9 y,10 y,12 y,13 y,15 y}
+{3 y,4 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,2 y,5 y,6 y,7 y,8 y,9 y,11 y,13 y,15 ?}
+{0 y,2 y,6 y,7 y,8 ?,9 y,10 y,11 y,13 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{1 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{2 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{1 y,2 y,4 y,5 y,6 y,8 y,9 y,10 y,12 y,13 y,15 y}
+{3 y,4 y,5 y,9 y,11 ?,12 y,13 y,15 ?,16 republican}
+{0 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,9 y,10 y,13 ?,14 y,15 y}
+{0 y,2 y,6 y,8 y,9 y,10 y,14 y,15 y}
+{0 y,2 y,4 y,5 y,15 y}
+{0 y,2 y,4 y,5 y,7 ?,8 ?,10 y,11 ?,12 ?,13 ?,14 y,15 y}
+{2 ?,4 y,5 y,10 y,11 y,12 y,13 y,15 y}
+{0 y,4 y,5 y,6 y,9 y,10 y,13 y,15 y}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 y,9 y,15 y}
+{3 y,4 y,5 y,9 y,10 ?,11 y,12 y,13 y,16 republican}
+{0 y,4 y,5 y,10 y,11 y,13 y,15 y}
+{0 y,2 y,4 y,5 y,6 y,10 y,13 y,15 y}
+{0 y,2 y,4 y,5 y,6 y,8 ?,10 y,12 y,13 y,14 y,15 ?}
+{0 y,4 y,5 y,6 ?,8 ?,13 y,14 ?}
+{0 ?,1 ?,2 ?,3 ?,5 y,6 y,7 y,8 y,9 y,10 ?,12 y,13 y,15 ?}
+{0 y,1 y,2 y,7 y,8 y,10 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{1 ?,2 ?,3 ?,4 ?,5 ?,6 ?,7 ?,8 ?,9 ?,10 ?,11 ?,12 ?,13 y,14 ?,15 ?,16 republican}
+{0 y,1 ?,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,1 ?,2 y,6 y,7 y,8 y,14 y,15 ?}
+{2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{1 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 ?,2 y,5 y,6 y,7 y,9 y,14 y,15 ?}
+{1 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,1 ?,2 y,6 y,7 y,8 y,14 y,15 ?}
+{1 ?,2 y,4 ?,5 ?,6 y,7 y,8 y,9 y,10 ?,11 ?,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{0 y,1 y,2 y,3 y,4 y,6 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,2 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{1 ?,2 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,14 ?,15 y,16 republican}
+{1 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,9 y,11 y,13 y,15 y,16 republican}
+{0 y,1 ?,3 y,4 y,5 y,7 y,11 y,12 y,13 y,15 y,16 republican}
+{1 ?,2 y,6 y,7 y,8 y,14 y,15 y}
+{1 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 ?,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{1 ?,2 y,6 y,7 y,8 y,9 y,10 y,13 y,14 y,15 y}
+{1 ?,2 y,5 y,7 y,9 y,10 y,14 y,15 y}
+{0 ?,1 ?,2 y,6 y,7 y,8 ?,10 ?,11 ?,12 ?,13 ?,14 ?,15 ?}
+{0 y,1 ?,2 y,4 ?,5 ?,6 y,7 y,8 y,14 y,15 ?}
+{2 y,5 y,7 y,8 y,9 y,13 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 ?,16 republican}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 ?,16 republican}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,10 y,11 y,12 y,15 y,16 republican}
+{1 ?,2 y,5 y,6 y,7 y,8 y,9 y,13 y,14 y,15 y}
+{2 y,5 y,6 y,7 y,8 y,9 y,13 y,15 y}
+{0 y,2 y,5 y,6 y,7 y,8 y,14 y,15 y}
+{3 y,6 y,7 y,8 y,9 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,6 y,7 y,8 y,9 y,11 y,12 y,13 y,14 ?,15 y,16 republican}
+{3 y,4 y,5 y,6 y,7 y,8 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{0 ?,1 y,6 y,7 y,8 y,9 y,10 y,13 y,14 y,15 y}
+{1 ?,5 y,6 y,7 y,8 y,9 y,13 y,15 ?}
+{2 y,5 y,6 y,7 y,8 y,9 y,13 y,14 ?,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{6 y,7 y,8 y,9 y,11 y,12 y,13 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,9 y,12 y,14 y,15 y}
+{0 y,1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 ?,3 y,4 y,5 y,8 y,10 y,11 ?,12 y,13 y}
+{1 y,2 y,5 y,7 y,8 y,9 y,10 y,12 y,14 y,15 y}
+{2 y,5 y,6 y,7 y,8 y,9 y,10 y,12 y,13 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,3 y,4 y,5 y,7 ?,10 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,3 y,4 y,5 y,6 y,11 y,12 y,13 y,16 republican}
+{1 y,2 y,5 y,7 y,8 y,10 y,12 ?,13 ?,14 ?,15 ?}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{1 y,2 y,4 ?,5 y,6 y,7 y,8 y,9 y,10 y,13 ?,15 ?}
+{1 y,4 y,5 y,11 y,12 y,13 y,14 y,15 y}
+{4 y,5 y,6 y,11 y,12 y,13 y,15 y}
+{1 y,2 y,4 y,5 y,6 y,10 y,11 y,12 y,13 y,15 y}
+{1 y,3 y,4 y,5 y,6 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 ?}
+{1 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,12 y,14 y,15 ?}
+{0 y,2 y,3 y,4 y,5 y,6 y,7 y,9 y,11 y,13 y,14 y,15 y,16 republican}
+{0 y,2 y,3 y,4 y,5 y,6 y,7 y,9 y,10 y,11 y,13 y,14 y,15 y,16 republican}
+{2 y,3 y,4 y,5 y,8 y,12 y,13 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 y,10 y,13 y,15 y}
+{0 y,2 y,6 ?,7 y,8 y,9 ?,14 y,15 ?}
+{1 ?,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,2 y,6 y,7 y,8 y,9 y,12 ?,14 y,15 y}
+{4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 y}
+{0 y,1 ?,2 y,6 y,7 y,8 y,14 y,15 ?}
+{1 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{2 y,3 y,6 y,7 y,8 y,9 y,13 y,14 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,9 y,10 y,11 ?,14 y,15 y}
+{0 ?,2 y,6 y,7 y,8 y,9 y,10 y,11 ?,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{0 ?,1 ?,2 y,6 y,7 y,8 y,9 ?,10 ?,14 ?,15 ?}
+{2 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{0 y,1 ?,2 y,6 y,7 y,8 y,14 y,15 y}
+{0 ?,1 ?,2 ?,3 ?,4 ?,5 ?,6 ?,7 ?,8 y,9 ?,10 ?,11 ?,12 ?,13 ?,14 ?,15 ?}
+{2 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,11 ?,14 y,15 y}
+{1 y,2 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,1 ?,3 y,4 y,5 y,6 y,7 y,11 y,12 ?,13 y,14 ?,15 ?,16 republican}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{1 ?,3 y,4 y,5 y,11 y,12 y,13 y,15 ?,16 republican}
+{1 y,3 y,4 y,5 y,7 ?,9 y,11 y,12 y,13 y,15 ?,16 republican}
+{5 y,6 y,7 y,8 y,10 y,13 y,14 y,15 y}
+{2 y,6 y,7 y,8 y,14 y,15 y}
+{2 y,5 y,6 y,7 ?,8 y,9 y,10 y,14 y,15 y}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 ?,16 republican}
+{2 y,5 y,6 y,7 y,8 y,10 y,11 y,13 y,14 y,15 ?}
+{1 ?,2 y,3 y,4 y,5 y,9 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,9 y,10 y,12 ?,14 y,15 ?}
+{0 y,1 y,6 y,7 y,8 ?,10 y,14 y,15 ?}
+{2 y,6 y,7 y,8 y,13 y,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{0 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{2 y,3 y,4 y,5 y,6 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,5 y,6 y,7 y,8 y,9 y,11 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,13 y,15 y,16 republican}
+{0 y,1 ?,3 y,4 y,5 y,6 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,11 ?,14 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,9 y,10 y,15 y}
+{2 y,5 y,6 y,7 y,8 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{1 y,2 y,5 y,7 y,8 y,10 y,12 y,14 y,15 y}
+{0 y,1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,2 y,3 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,14 y,15 ?}
+{0 y,1 y,2 y,4 y,5 y,8 ?,9 y,13 y,14 y,15 ?}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,1 ?,2 y,6 y,7 y,8 y,10 ?,14 y,15 ?}
+{1 y,2 y,7 y,8 y,10 y,13 y,14 y,15 y}
+{2 y,6 y,7 y,8 y,14 y,15 ?}
+{1 y,2 y,4 y,5 y,10 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,10 y,14 y,15 ?}
+{3 y,4 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 ?,12 y,13 y,16 republican}
+{1 ?,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,5 y,6 y,7 y,8 y,10 y,13 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,14 ?,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 ?,15 y,16 republican}
+{1 y,2 y,3 y,4 y,5 y,6 y,8 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,8 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,2 y,6 y,7 y,10 y,14 y,15 ?}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,5 y,6 y,7 y,8 y,9 y,11 y,13 y,14 y,15 ?}
+{3 y,4 y,5 y,9 y,11 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,14 y,15 y}
+{0 y,2 y,5 y,6 y,7 y,11 y,12 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 ?,9 y,14 y,15 ?}
+{3 y,4 y,5 y,6 y,9 y,13 y,14 y,15 y,16 republican}
+{3 y,5 y,6 y,7 ?,8 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,2 y,6 y,7 y,8 y,9 y,10 y,13 y,14 y,15 y}
+{4 y,5 y,6 y,11 ?,13 y,14 y,15 y,16 republican}
+{1 y,2 y,6 y,7 y,8 ?,9 y,12 y,14 y,15 y}
+{0 y,2 y,7 y,8 y,9 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{2 y,4 y,6 y,7 y,8 y,13 y,14 ?,15 y}
+{1 y,3 y,4 y,5 y,6 ?,11 ?,12 y,13 y,16 republican}
+{0 ?,1 ?,2 ?,3 ?,4 ?,5 ?,6 ?,7 ?,8 ?,9 ?,10 ?,11 ?,12 ?,13 ?,14 ?,15 ?,16 republican}
+{0 y,2 y,6 y,7 y,8 ?,10 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,2 y,6 y,7 y,8 y,9 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,13 y,14 y,15 y}
+{3 y,4 y,11 y,13 y,16 republican}
+{3 y,4 y,11 y,13 y,14 ?,15 y,16 republican}
+{2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,15 y}
+{0 y,2 y,5 ?,6 y,7 y,8 y,10 ?,11 ?,13 ?,14 ?,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 y,12 ?,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,13 y,15 y,16 republican}
+{0 y,6 y,7 y,8 y,9 y,13 y,15 y,16 republican}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{1 y,2 y,5 y,6 y,7 y,8 y,10 ?,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,14 y,15 ?}
+{3 y,4 y,6 y,7 y,9 y,11 y,12 y,13 y,14 ?,15 y,16 republican}
+{0 y,3 y,4 y,6 y,9 y,13 y,14 y,15 y,16 republican}
+{2 y,4 y,5 y,10 ?,12 y,13 y}
+{3 y,4 y,5 y,11 y,12 y,13 y,14 y,16 republican}
+{2 y,3 y,4 y,5 y,6 y,7 y,9 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{2 y,6 y,7 y,8 y,9 y,13 y,15 y}
+{0 y,2 y,3 y,4 y,5 y,6 y,7 y,13 y,15 ?,16 republican}
+{0 y,3 y,4 y,5 y,9 y,11 ?,12 y,13 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,5 y,6 y,7 y,8 y,9 y,10 y,14 ?,15 y}
+{2 y,5 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{2 y,5 y,6 ?,7 y,8 ?,9 y,10 y,11 y,13 y,14 y,15 ?}
+{0 y,1 y,2 y,3 ?,5 y,6 y,7 y,8 y,10 y,12 y,14 ?,15 y}
+{0 y,1 y,2 y,4 y,5 y,7 y,9 y,10 y,12 y,13 y,14 y,15 y}
+{0 y,1 y,2 y,4 y,5 y,7 y,9 y,10 y,12 y,13 y,15 ?}
+{0 y,2 y,4 ?,5 y,6 ?,7 y,8 y,9 y,12 y,13 y,15 y}
+{0 y,2 y,5 y,6 y,7 y,8 y,9 y,11 ?,13 y,15 y}
+{0 y,2 y,5 y,6 y,7 y,9 y,10 y,12 y,13 y,14 y,15 y}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,12 y,13 y,14 y,15 y}
+{1 y,2 y,5 y,6 y,7 y,9 y,10 y,12 y,13 y,15 ?}
+{1 y,3 y,4 y,5 y,6 ?,7 ?,9 y,11 y,12 ?,13 ?,14 ?,15 ?,16 republican}
+{2 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,14 y,15 y,16 republican}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 y,9 y,12 ?,14 y,15 ?}
+{1 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{1 y,2 y,5 y,6 y,7 y,8 y,9 y,12 y,13 y,14 y,15 y}
+{3 y,4 y,6 y,7 y,8 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{2 ?,5 y,6 y,7 y,8 y,14 y,15 y}
+{3 y,4 y,5 y,6 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 ?,16 republican}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,2 y,5 y,6 y,7 y,8 y,13 y,15 ?}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,5 y,6 y,7 y,8 y,9 y,13 y,14 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,14 y,16 republican}
+{2 y,5 y,6 y,7 y,8 y,9 y,12 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{1 y,2 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,6 y,7 y,10 y,11 y,12 y,13 y,14 y,15 y,16 republican}
+{1 y,2 y,3 y,4 y,5 y,6 y,7 ?,12 ?,13 ?,14 y,15 ?,16 republican}
+{5 y,7 y,8 y,10 y,11 y,12 y,13 y,14 y}
+{0 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 ?}
+{1 y,2 y,5 y,7 y,8 y,9 y,12 y,13 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,9 y,12 y,15 y}
+{0 y,1 y,2 y,4 ?,5 y,7 ?,10 y,12 y,13 y,15 ?}
+{0 y,1 y,2 y,4 y,5 y,7 y,8 ?,9 y,12 y,13 y,15 ?}
+{1 y,3 y,4 y,5 y,10 y,11 y,12 y,13 y,16 republican}
+{1 y,4 y,5 y,8 ?,11 y,12 y,13 y,15 y}
+{0 y,1 y,3 y,6 y,7 y,8 y,10 y,13 y,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,10 y,15 y}
+{0 y,1 ?,2 y,5 y,6 y,7 y,8 y,9 y,14 y,15 ?}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,1 ?,2 y,6 y,7 y,8 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,10 y,14 y,15 ?}
+{2 y,6 y,7 y,8 y,14 y,15 y}
+{1 y,2 y,5 y,6 y,7 y,8 ?,10 y,11 y,14 y,15 y}
+{3 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,15 ?,16 republican}
+{2 y,5 y,6 y,7 y,10 y,13 y,14 ?,15 y}
+{0 y,2 y,6 y,7 y,8 y,14 y,15 y}
+{0 y,2 y,6 y,7 y,8 y,9 y,13 y,14 y,15 y}
+{0 y,3 y,4 y,5 y,10 y,11 y,12 y,13 y,16 republican}
+{3 y,4 y,5 y,9 y,10 y,11 y,13 y,15 y,16 republican}
+{1 ?,2 y,3 ?,5 y,6 y,7 y,8 y,9 y,10 y,12 ?,13 ?,14 y,15 y}
+{1 y,2 y,4 y,5 ?,6 y,9 y,10 y,12 y,14 y,15 y}
+{3 y,4 y,6 y,8 y,9 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,9 y,10 y,14 y,15 y}
+{3 y,4 y,5 y,6 y,9 y,11 y,13 y,14 y,15 y,16 republican}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,16 republican}
+{0 y,2 y,6 y,7 y,8 y,9 y,11 y,14 y,15 ?}
+{1 y,2 y,3 y,4 y,5 y,6 y,7 y,8 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,5 y,6 y,8 y,10 y,14 y,15 y}
+{2 y,3 y,4 y,5 y,6 y,7 y,8 y,9 y,11 y,12 y,13 y,14 y,15 y,16 republican}
+{1 y,3 y,5 y,6 y,7 y,8 y,10 y,12 y,14 y,15 ?}
+{2 y,3 y,4 y,5 y,6 y,9 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,2 y,5 y,6 y,7 y,8 y,9 y,11 ?,14 y,15 y}
+{0 y,2 y,3 y,7 y,8 y,9 y,13 y,14 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,11 y,12 y,13 y,15 ?}
+{3 y,4 y,5 y,9 y,10 ?,11 y,12 y,13 y,15 y,16 republican}
+{0 y,2 y,5 y,6 y,7 y,8 y,9 y,12 y,15 y}
+{0 y,2 y,4 y,5 y,6 y,8 y,9 y,12 y,13 y,15 ?}
+{0 y,1 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,11 y,12 y,15 y}
+{0 y,1 y,3 y,4 y,5 y,9 y,10 y,12 y,16 republican}
+{0 y,1 y,3 y,4 y,5 y,10 y,12 y,13 y,15 y,16 republican}
+{1 y,4 y,5 y,9 y,10 y,12 y,13 y}
+{0 y,2 y,6 y,7 y,9 y,10 y,15 ?}
+{0 y,1 y,2 y,4 y,5 y,6 y,7 y,9 y,10 y,14 y,15 ?}
+{1 y,2 y,5 y,6 y,7 y,9 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,4 ?,5 y,6 y,7 y,9 y,10 ?,11 ?,14 y,15 y}
+{0 y,1 y,2 y,4 ?,6 y,7 y,8 y,9 y,14 y,15 ?}
+{1 y,2 y,3 y,4 y,5 y,10 y,11 y,12 ?,13 y}
+{1 y,2 y,3 ?,4 y,5 y,7 y,9 y,10 ?,12 y,13 y,14 ?,15 y}
+{1 y,3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,10 y,11 y,13 y}
+{0 y,1 ?,2 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{1 y,3 y,4 y,5 y,6 ?,7 ?,10 ?,11 ?,12 y,13 ?,14 ?,15 ?,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,5 y,6 ?,7 y,8 y,10 y,12 y,14 y,15 y}
+{0 y,1 y,2 y,4 y,5 y,6 y,7 y,8 y,9 y,10 y,12 y,13 y,15 ?}
+{0 y,1 y,3 y,4 y,5 y,10 y,12 y,13 y,15 ?}
+{0 y,1 y,2 y,4 y,5 y,7 y,8 y,9 y,10 y,15 y}
+{0 y,1 y,2 y,3 y,4 y,5 y,10 y,11 y,12 y,13 y,15 y}
+{0 y,1 y,4 y,5 y,10 y,11 y,12 y,13 y,14 y}
+{1 ?,2 y,4 y,5 y,7 y,10 y,15 ?}
+{0 y,1 y,2 y,4 y,5 y,7 y,8 y,10 y,13 y,15 ?}
+{1 y,2 y,3 y,4 y,5 y,11 y,12 y,13 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 ?,10 y,14 y,15 ?}
+{0 ?,1 ?,4 ?,5 y,6 ?,10 y,11 y,13 y,15 ?}
+{0 y,1 y,7 y,8 y,10 y,14 y}
+{0 y,1 y,3 y,4 y,5 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{0 ?,1 ?,2 ?,3 ?,5 y,7 y,8 y,11 y,12 y,15 ?,16 republican}
+{0 y,1 y,2 ?,3 ?,4 ?,5 y,10 y,12 y,15 y}
+{0 y,1 y,2 y,3 ?,7 y,10 y,11 ?,14 y,15 y}
+{0 y,1 y,2 y,4 y,5 y,7 y,10 y,12 y,14 y,15 y}
+{0 y,1 y,4 y,5 ?,10 y,12 y,13 y,15 y}
+{1 y,2 y,4 y,5 y,7 y,15 y}
+{1 y,3 y,4 ?,5 y,9 y,11 y,12 y,13 y,16 republican}
+{1 y,3 y,4 y,5 y,7 ?,10 ?,11 ?,12 ?,13 y,15 ?,16 republican}
+{1 y,3 y,4 y,5 y,9 y,10 y,11 y,12 y,13 y,16 republican}
+{0 ?,2 y,3 y,5 y,6 y,7 y,8 y,9 y,11 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 ?,13 y,16 republican}
+{0 y,1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,2 y,4 y,5 y,8 y,9 y,12 y,13 y,15 y}
+{3 y,4 y,5 y,10 y,11 y,12 y,13 y}
+{0 y,2 y,5 y,6 y,7 y,8 y,11 y,12 ?,13 y,14 y,15 y}
+{3 y,4 y,5 y,11 y,12 y,13 y,16 republican}
+{3 y,4 y,5 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,2 y,5 y,6 y,7 y,8 y,9 y,10 y,15 y}
+{3 y,4 y,5 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,3 y,4 y,5 y,6 y,7 y,9 y,10 ?,11 ?,12 ?,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,15 y}
+{1 y,2 y,5 y,6 y,7 y,8 ?,9 y,15 y}
+{0 y,1 y,3 y,4 y,5 y,9 y,12 y,13 y,15 y,16 republican}
+{0 y,1 y,2 y,6 y,7 y,8 y,9 y,10 y,12 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,9 y,15 y}
+{0 y,1 y,2 y,6 y,7 y,8 y,15 y}
+{0 y,1 y,2 y,3 y,4 y,5 y,6 y,7 y,9 y,12 y,13 y,15 y,16 republican}
+{1 y,2 y,4 y,5 y,6 y,7 y,10 y,12 y,14 y,15 y}
+{2 y,5 y,6 y,7 y,8 y,10 y,14 y,15 y}
+{1 y,2 y,5 y,6 y,7 y,8 y,10 y,13 y,14 y,15 y}
+{1 y,2 y,5 ?,6 y,7 y,8 y,9 y,10 y,12 ?,13 y,14 y,15 y}
+{2 y,6 y,7 y,9 y,10 y,14 y,15 ?}
+{0 y,2 y,6 y,7 y,8 y,9 y,14 y,15 y}
+{3 y,4 y,5 y,6 y,7 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{0 ?,1 ?,2 ?,6 y,7 y,8 y,9 y,12 y,14 y,15 y}
+{0 y,2 y,4 ?,6 y,7 y,8 y,9 y,11 y,13 ?,14 y,15 y}
+{2 y,3 y,4 y,5 y,8 y,9 y,11 y,12 y,13 y,15 y,16 republican}
+{2 y,6 y,7 y,8 y,9 y,15 y}
+{1 ?,3 y,4 y,5 y,10 y,11 y,12 y,13 y,15 y,16 republican}
+{3 y,4 y,5 y,6 ?,7 ?,8 ?,9 ?,11 y,12 y,13 y,15 y,16 republican}
+{1 y,3 y,4 y,5 y,9 y,11 y,12 y,13 y,14 ?,16 republican}
