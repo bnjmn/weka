@@ -336,7 +336,7 @@ public class MetaBean
     for (int i = 0; i < targets.size(); i++) {
       BeanInstance input = (BeanInstance)targets.elementAt(i);
       if (input.getBean() instanceof BeanCommon) {
-        if (((BeanCommon)input.getBean()).connectionAllowed(esd)) {
+        if (((BeanCommon)input.getBean()).connectionAllowed(esd.getName())) {
           return true;
         }
       } else {

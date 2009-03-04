@@ -77,16 +77,6 @@ public interface BeanCommon {
 
   /**
    * Returns true if, at this time, 
-   * the object will accept a connection via the supplied
-   * EventSetDescriptor
-   *
-   * @param esd the EventSetDescriptor
-   * @return true if the object will accept a connection
-   */
-  boolean connectionAllowed(EventSetDescriptor esd);
-
-  /**
-   * Returns true if, at this time, 
    * the object will accept a connection via the named event
    *
    * @param eventName the name of the event
