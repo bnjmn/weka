@@ -753,7 +753,7 @@ public class KnowledgeFlowApp
 		// Give the target bean a chance to veto the proposed
 		// connection
 		if (((BeanCommon)bi.getBean()).
-		    connectionAllowed(m_sourceEventSetDescriptor)) {
+		    connectionAllowed(m_sourceEventSetDescriptor.getName())) {
 		  doConnection = true;
 		}
 	      }
@@ -2135,7 +2135,7 @@ public class KnowledgeFlowApp
 	  // give this bean a chance to veto any proposed connection via
 	  // the listener interface
 	  if (((BeanCommon)bean).
-	      connectionAllowed(esd)) {
+	      connectionAllowed(esd.getName())) {
 	    connectable = true;
 	  }
 	}
