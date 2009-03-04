@@ -47,10 +47,20 @@ import weka.core.pmml.*;
 public class TreeModel extends PMMLClassifier implements Drawable {
   
   /**
+   * For serialization
+   */
+  private static final long serialVersionUID = -2065158088298753129L;
+
+  /**
    * Inner class representing the ScoreDistribution element
    */
   static class ScoreDistribution implements Serializable {
     
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -123506262094299933L;
+
     /** The class label for this distribution element */
     private String m_classLabel;
     
@@ -141,6 +151,12 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    * Base class for Predicates
    */
   static abstract class Predicate implements Serializable {
+    
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = 1035344165452733887L;
+
     enum Eval {
       TRUE,
       FALSE,
@@ -229,6 +245,11 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    */
   static class True extends Predicate {
     
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = 1817942234610531627L;
+
     public Predicate.Eval evaluate(double[] input) {
       return Predicate.Eval.TRUE;
     }
@@ -242,6 +263,12 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    * Simple False Predicate
    */
   static class False extends Predicate {
+    
+    /**
+     * For serialization 
+     */
+    private static final long serialVersionUID = -3647261386442860365L;
+
     public Predicate.Eval evaluate(double[] input) {
       return Predicate.Eval.FALSE;
     }
@@ -256,6 +283,11 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    */
   static class SimplePredicate extends Predicate {
     
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -6156684285069327400L;
+
     enum Operator {
       EQUAL("equal") {
         Predicate.Eval evaluate(double[] input, double value, int fieldIndex) {
@@ -441,6 +473,11 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    */
   static class CompoundPredicate extends Predicate {
     
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -3332091529764559077L;
+
     enum BooleanOperator {
       OR("or") {
         Predicate.Eval evaluate(ArrayList<Predicate> constituents, double[] input) {
@@ -532,7 +569,7 @@ public class TreeModel extends PMMLClassifier implements Drawable {
         
     public CompoundPredicate(Element compoundP, 
         MiningSchema miningSchema) throws Exception {
-      Instances totalStructure = miningSchema.getFieldsAsInstances();
+//      Instances totalStructure = miningSchema.getFieldsAsInstances();
       
       String booleanOpp = compoundP.getAttribute("booleanOperator");
       for (BooleanOperator b : BooleanOperator.values()) {
@@ -602,6 +639,11 @@ public class TreeModel extends PMMLClassifier implements Drawable {
    */
   static class SimpleSetPredicate extends Predicate {
     
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = -2711995401345708486L;
+
     enum BooleanOperator {
         IS_IN("isIn") {
           Predicate.Eval evaluate(double[] input, int fieldIndex, 
@@ -747,6 +789,11 @@ public class TreeModel extends PMMLClassifier implements Drawable {
   class TreeNode implements Serializable {
     // TODO: perhaps implement a class called Statistics that contains Partitions?
         
+    /**
+     * For serialization
+     */
+    private static final long serialVersionUID = 3011062274167063699L;
+
     /** ID for this node */
     private String m_ID = "" + this.hashCode();
     
