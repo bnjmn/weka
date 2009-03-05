@@ -1,0 +1,38 @@
+# Database settings for Oracle 10g Express Edition
+#
+# url:     http://www.oracle.com/
+# jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.6 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=oracle.jdbc.driver.OracleDriver
+
+# database URL
+jdbcURL=jdbc:oracle:thin:@server_name:1521:XE
+
+# specific data types
+# string, getString() = 0;    --> nominal
+# boolean, getBoolean() = 1;  --> nominal
+# double, getDouble() = 2;    --> numeric
+# byte, getByte() = 3;        --> numeric
+# short, getByte()= 4;        --> numeric
+# int, getInteger() = 5;      --> numeric
+# long, getLong() = 6;        --> numeric
+# float, getFloat() = 7;      --> numeric
+# date, getDate() = 8;        --> date
+# text, getString() = 9;      --> string
+# time, getTime() = 10;       --> date
+
+VARCHAR2=0
+NUMBER=2
+DOUBLE_PRECISION=2
+TIMESTAMP=8
+
+# other options
+CREATE_INT=INTEGER
+CREATE_STRING=VARCHAR2(4000)
+CREATE_DOUBLE=NUMBER
+checkUpperCaseNames=true
+checkForTable=true
+

@@ -1,0 +1,34 @@
+# Database settings for MySQL 3.23.x, 4.x
+#
+# url:     http://www.mysql.com/
+# jdbc:    http://www.mysql.com/products/connector/j/
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.6 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=org.gjt.mm.mysql.Driver
+
+# database URL
+jdbcURL=jdbc:mysql://server_name:3306/database_name
+
+# specific data types
+# string, getString() = 0;    --> nominal
+# boolean, getBoolean() = 1;  --> nominal
+# double, getDouble() = 2;    --> numeric
+# byte, getByte() = 3;        --> numeric
+# short, getByte()= 4;        --> numeric
+# int, getInteger() = 5;      --> numeric
+# long, getLong() = 6;        --> numeric
+# float, getFloat() = 7;      --> numeric
+# date, getDate() = 8;        --> date
+# text, getString() = 9;      --> string
+# time, getTime() = 10;       --> date
+
+# other options
+CREATE_DOUBLE=DOUBLE
+CREATE_STRING=TEXT
+CREATE_INT=INT
+checkUpperCaseNames=false
+checkLowerCaseNames=false
+checkForTable=true
+

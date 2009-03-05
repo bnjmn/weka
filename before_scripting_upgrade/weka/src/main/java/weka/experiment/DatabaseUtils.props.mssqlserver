@@ -1,0 +1,39 @@
+# Database settings for Microsoft SQL Server 2000
+#
+# url:     http://www.microsoft.com/
+# jdbc:    http://www.microsoft.com/downloads/details.aspx?familyid=07287B11-0502-461A-B138-2AA54BFDC03A
+# author:  Fracpete (fracpete at waikato dot ac dot nz)
+# version: $Revision: 1.6 $
+
+# JDBC driver (comma-separated list)
+jdbcDriver=com.microsoft.jdbc.sqlserver.SQLServerDriver
+
+# database URL
+jdbcURL=jdbc:sqlserver://server_name:1433
+
+# specific data types
+# string, getString() = 0;    --> nominal
+# boolean, getBoolean() = 1;  --> nominal
+# double, getDouble() = 2;    --> numeric
+# byte, getByte() = 3;        --> numeric
+# short, getByte()= 4;        --> numeric
+# int, getInteger() = 5;      --> numeric
+# long, getLong() = 6;        --> numeric
+# float, getFloat() = 7;      --> numeric
+# date, getDate() = 8;        --> date
+# text, getString() = 9;      --> string
+# time, getTime() = 10;       --> date
+
+varchar=0
+float=2
+tinyint=3
+int=5
+
+# other options
+CREATE_DOUBLE=DOUBLE PRECISION
+CREATE_STRING=VARCHAR(8000)
+CREATE_INT=INT
+checkUpperCaseNames=false
+checkLowerCaseNames=false
+checkForTable=true
+
