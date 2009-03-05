@@ -32,13 +32,14 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyEditor;
 
 import javax.swing.JDialog;
+import javax.swing.JInternalFrame;
 
 /** 
  * Support for PropertyEditors with custom editors: puts the editor into
  * a separate frame.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class PropertyDialog
   extends JDialog {
@@ -172,6 +173,32 @@ public class PropertyDialog
     while (parent != null) {
       if (parent instanceof Frame) {
 	result = (Frame) parent;
+	break;
+      }
+      else {
+	parent = parent.getParent();
+      }
+    }
+    
+    return result;
+  }
+
+  /**
+   * Tries to determine the internal frame this panel is part of.
+   * 
+   * @param c		the container to start with
+   * @return		the parent internal frame if one exists or null if not
+   */
+  public static JInternalFrame getParentInternalFrame(Container c) {
+    JInternalFrame	result;
+    Container		parent;
+    
+    result = null;
+    
+    parent = c;
+    while (parent != null) {
+      if (parent instanceof JInternalFrame) {
+	result = (JInternalFrame) parent;
 	break;
       }
       else {

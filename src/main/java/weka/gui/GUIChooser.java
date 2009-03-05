@@ -797,11 +797,11 @@ public class GUIChooser
 	    final GroovyPanel groovyPanel = new GroovyPanel();
 	    m_GroovyConsoleFrame = new JFrame(groovyPanel.getPlainTitle());
 	    m_GroovyConsoleFrame.setIconImage(m_Icon);
+	    m_GroovyConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	    m_GroovyConsoleFrame.setJMenuBar(groovyPanel.getMenuBar());
 	    m_GroovyConsoleFrame.getContentPane().add(groovyPanel, BorderLayout.CENTER);
 	    m_GroovyConsoleFrame.addWindowListener(new WindowAdapter() {
-	      public void windowClosing(WindowEvent w) {
-		m_GroovyConsoleFrame.dispose();
+	      public void windowClosed(WindowEvent w) {
 		m_GroovyConsoleFrame = null;
 		jMenuItemGroovyConsole.setEnabled(true);
 		checkExit();
@@ -827,11 +827,11 @@ public class GUIChooser
 	    final JythonPanel jythonPanel = new JythonPanel();
 	    m_JythonConsoleFrame = new JFrame(jythonPanel.getPlainTitle());
 	    m_JythonConsoleFrame.setIconImage(m_Icon);
+	    m_JythonConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 	    m_JythonConsoleFrame.setJMenuBar(jythonPanel.getMenuBar());
 	    m_JythonConsoleFrame.getContentPane().add(jythonPanel, BorderLayout.CENTER);
 	    m_JythonConsoleFrame.addWindowListener(new WindowAdapter() {
-	      public void windowClosing(WindowEvent w) {
-		m_JythonConsoleFrame.dispose();
+	      public void windowClosed(WindowEvent w) {
 		m_JythonConsoleFrame = null;
 		jMenuItemJythonConsole.setEnabled(true);
 		checkExit();
