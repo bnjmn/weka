@@ -15,9 +15,8 @@
  */
 
 /*
- *    SimpleCLIPanel.java
- *    Copyright (C) University of Waikato, Hamilton, New Zealand
- *
+ * SimpleCLIPanel.java
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
@@ -25,6 +24,7 @@ package weka.gui;
 import weka.core.ClassDiscovery;
 import weka.core.Trie;
 import weka.core.Utils;
+import weka.gui.scripting.ScriptingPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -40,12 +40,7 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.PrintStream;
-import java.io.Reader;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
@@ -53,13 +48,14 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
+import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 
 /**
  * Creates a very simple command line for invoking the main method of
@@ -69,15 +65,14 @@ import javax.swing.JTextField;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
  */
 public class SimpleCLIPanel
-  extends JPanel
+  extends ScriptingPanel
   implements ActionListener {
   
   /** for serialization. */
-  private static final long serialVersionUID = -7377739469759943231L;
-  
+  private static final long serialVersionUID = 1089039734615114942L;
+
   /** The filename of the properties file. */
   protected static String FILENAME = "SimpleCLI.props";
   
@@ -113,87 +108,29 @@ public class SimpleCLIPanel
   }
   
   /** The output area canvas added to the frame. */
-  protected JTextArea m_OutputArea = new JTextArea();
+  protected JTextPane m_OutputArea;
 
   /** The command input area. */
-  protected JTextField m_Input = new JTextField();
+  protected JTextField m_Input;
 
   /** The history of commands entered interactively. */
-  protected Vector m_CommandHistory = new Vector();
+  protected Vector m_CommandHistory;
 
   /** The current position in the command history. */
-  protected int m_HistoryPos = 0;
-
-  /** The new output stream for System.out. */
-  protected PipedOutputStream m_POO = new PipedOutputStream();
-
-  /** The new output stream for System.err. */
-  protected PipedOutputStream m_POE = new PipedOutputStream();
-
-  /** The thread that sends output from m_POO to the output box. */
-  protected Thread m_OutRedirector;
-
-  /** The thread that sends output from m_POE to the output box. */
-  protected Thread m_ErrRedirector;
+  protected int m_HistoryPos;
 
   /** The thread currently running a class main method. */
   protected Thread m_RunThread;
 
   /** The commandline completion. */
   protected CommandlineCompletion m_Completion;
-  
-  /**
-   * A class that sends all lines from a reader to a TextArea component.
-   * 
-   * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.6 $
-   */
-  class ReaderToTextArea extends Thread {
-
-    /** The reader being monitored. */
-    protected LineNumberReader m_Input;
-
-    /** The output text component. */
-    protected JTextArea m_Output;
-    
-    /**
-     * Sets up the ReaderToTextArea.
-     *
-     * @param input the Reader to monitor
-     * @param output the TextArea to send output to
-     */
-    public ReaderToTextArea(Reader input, JTextArea output) {
-      setDaemon(true);
-      m_Input = new LineNumberReader(input);
-      m_Output = output;
-    }
-
-    /**
-     * Sit here listening for lines of input and appending them straight
-     * to the text component.
-     */
-    public void run() {
-
-      while (true) {
-	try {
-	  m_Output.append(m_Input.readLine() + '\n');
-	  m_Output.setCaretPosition(m_Output.getDocument().getLength());
-	} catch (Exception ex) {
-	  try {
-	    sleep(100);
-	  } catch (Exception e) {
-	  }
-	}
-      }
-    }
-  }
 
   /**
    * A class that handles running the main method of the class
    * in a separate thread.
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision$
    */
   class ClassRunner extends Thread {
 
@@ -282,7 +219,7 @@ public class SimpleCLIPanel
    * A class for commandline completion of classnames.
    * 
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision$
    */
   public static class CommandlineCompletion {
     
@@ -624,16 +561,30 @@ public class SimpleCLIPanel
   }
   
   /**
-   * Constructor.
-   *
-   * @throws Exception if an error occurs
+   * For initializing member variables.
    */
-  public SimpleCLIPanel() throws Exception {
-    
-    setLayout(new BorderLayout());
-    add(new JScrollPane(m_OutputArea), "Center");
-    add(m_Input, "South");
+  protected void initialize() {
+    super.initialize();
 
+    m_CommandHistory = new Vector();
+    m_HistoryPos     = 0;
+    m_Completion     = new CommandlineCompletion();
+  }
+  
+  /**
+   * Sets up the GUI after initializing the members.
+   */
+  protected void initGUI() {
+    super.initGUI();
+
+    setLayout(new BorderLayout());
+
+    m_OutputArea = new JTextPane();
+    m_OutputArea.setEditable(false);
+    m_OutputArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+    add(new JScrollPane(m_OutputArea), "Center");
+
+    m_Input = new JTextField();
     m_Input.setFont(new Font("Monospaced", Font.PLAIN, 12));
     m_Input.addActionListener(this);
     m_Input.setFocusTraversalKeysEnabled(false);
@@ -643,26 +594,15 @@ public class SimpleCLIPanel
 	doCommandlineCompletion(e);
       }
     });
-    m_OutputArea.setEditable(false);
-    m_OutputArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
-    // Redirect System.out to the text area
-    //    System.out.println("Redirecting System.out");
-    PipedInputStream pio = new PipedInputStream(m_POO);
-    System.setOut(new PrintStream(m_POO));
-    Reader r = new InputStreamReader(pio);
-    m_OutRedirector = new ReaderToTextArea(r, m_OutputArea);
-    m_OutRedirector.start();
+    add(m_Input, "South");
+  }
+  
+  /**
+   * Finishes up after initializing members and setting up the GUI.
+   */
+  protected void initFinish() {
+    super.initFinish();
 
-    // Redirect System.err to the text area
-    //    System.err.println("Redirecting System.err");
-    PipedInputStream pie = new PipedInputStream(m_POE);
-    System.setErr(new PrintStream(m_POE));
-    r = new InputStreamReader(pie);
-    m_ErrRedirector = new ReaderToTextArea(r, m_OutputArea);
-    m_ErrRedirector.start();
-
-    m_Completion = new CommandlineCompletion();
-    
     System.out.println(
 	  "\nWelcome to the WEKA SimpleCLI\n\n"
 	+ "Enter commands in the textfield at the bottom of \n"
@@ -675,9 +615,51 @@ public class SimpleCLIPanel
 	+ "(the latter is a shortcut for the home directory).\n"
 	+ "<Alt+BackSpace> is used for deleting the text\n"
 	+ "in the commandline in chunks.\n");
-    runCommand("help");
+    try {
+      runCommand("help");
+    }
+    catch (Exception e) {
+      // ignored
+    }
     
     loadHistory();
+  }
+
+  /**
+   * Returns an icon to be used in a frame.
+   * 
+   * @return		the icon
+   */
+  public ImageIcon getIcon() {
+    return ComponentHelper.getImageIcon("weka_icon.gif");
+  }
+
+  /**
+   * Returns the current title for the frame/dialog.
+   * 
+   * @return		the title
+   */
+  public String getTitle() {
+    return "SimpleCLI";
+  }
+
+  /**
+   * Returns the text area that is used for displaying output on stdout
+   * and stderr.
+   * 
+   * @return		the JTextArea
+   */
+  public JTextPane getOutput() {
+    return m_OutputArea;
+  }
+
+  /**
+   * Not supported.
+   * 
+   * @return		always null
+   */
+  public JMenuBar getMenuBar() {
+    return null;
   }
 
   /**
@@ -779,7 +761,7 @@ public class SimpleCLIPanel
       boolean help = ((commandArgs.length > 1)
 		      && commandArgs[0].equals("help"));
       if (help && commandArgs[1].equals("java")) {
-	System.err.println(
+	System.out.println(
 	    "java <classname> <args>\n\n"
 	    + "Starts the main method of <classname> with "
 	    + "the supplied command line arguments (if any).\n"
@@ -791,32 +773,32 @@ public class SimpleCLIPanel
 	    + "file to write to, e.g.:\n"
 	    + "  java some.Class > ." + File.separator + "some.txt");
       } else if (help && commandArgs[1].equals("break")) {
-	System.err.println(
+	System.out.println(
 	    "break\n\n"
 	    + "Attempts to nicely interrupt the running job, "
 	    + "if any. If this doesn't respond in an\n"
 	    + "acceptable time, use \"kill\".\n");
       } else if (help && commandArgs[1].equals("kill")) {
-	System.err.println(
+	System.out.println(
 	    "kill\n\n"
 	    + "Kills the running job, if any. You should only "
 	    + "use this if the job doesn't respond to\n"
 	    + "\"break\".\n");
       } else if (help && commandArgs[1].equals("cls")) {
-	System.err.println(
+	System.out.println(
 	    "cls\n\n"
 	    + "Clears the output area.\n");
       } else if (help && commandArgs[1].equals("history")) {
-	System.err.println(
+	System.out.println(
 	    "history\n\n"
 	    + "Prints all issued commands.\n");
       } else if (help && commandArgs[1].equals("exit")) {
-	System.err.println(
+	System.out.println(
 	    "exit\n\n"
 	    + "Exits the SimpleCLI program.\n");
       } else {
 	// Print a help message
-	System.err.println(
+	System.out.println(
 	    "Command must be one of:\n"
 	    + "\tjava <classname> <args> [ > file]\n"
 	    + "\tbreak\n"
@@ -1064,19 +1046,11 @@ public class SimpleCLIPanel
   }
   
   /**
-   * Main method for testing this class.
+   * Displays the panel in a frame.
    * 
-   * @param args 	commandline arguments - ignored
-   * @throws Exception	if initialization fails
+   * @param args	ignored
    */
-  public static void main(String[] args) throws Exception {
-    SimpleCLIPanel panel = new SimpleCLIPanel();
-    JFrame f = new JFrame();
-    f.setTitle("SimpleCLI");
-    f.getContentPane().add(panel);
-    f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    f.pack();
-    f.setSize(600, 500);
-    f.setVisible(true);
+  public static void main(String[] args) {
+    showPanel(new SimpleCLIPanel(), args);
   }
 }
