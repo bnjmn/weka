@@ -38,6 +38,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.HashMap;
 
@@ -47,6 +49,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -323,7 +326,8 @@ public abstract class FileScriptingPanel
   }
 
   /**
-   * The Exit action.
+   * The Exit action. Sends out a WindowEvent/WINDOW_CLOSED to all 
+   * WindowListener objects of a jframe.
    * 
    * @author  fracpete (fracpete at waikato dot ac dot nz)
    * @version $Revision$
@@ -348,9 +352,13 @@ public abstract class FileScriptingPanel
      * @param e		the event
      */
     public void actionPerformed(ActionEvent e) {
-      Dialog	dialog;
-      Frame	frame;
-      JFrame	jframe;
+      Dialog		dialog;
+      Frame		frame;
+      JFrame		jframe;
+      JInternalFrame	jintframe;
+      int		i;
+      WindowListener[] 	listeners;
+      WindowEvent	event;
       
       if (!checkModified())
 	return;
@@ -360,18 +368,30 @@ public abstract class FileScriptingPanel
 	dialog.setVisible(false);
       }
       else if (PropertyDialog.getParentFrame(FileScriptingPanel.this) != null) {
-	frame = PropertyDialog.getParentFrame(FileScriptingPanel.this);
-	if (frame instanceof JFrame) {
-	  jframe = (JFrame) frame;
-	  if (jframe.getDefaultCloseOperation() == JFrame.HIDE_ON_CLOSE)
-	    jframe.setVisible(false);
-	  else if (jframe.getDefaultCloseOperation() == JFrame.DISPOSE_ON_CLOSE)
-	    jframe.dispose();
-	  else if (jframe.getDefaultCloseOperation() == JFrame.EXIT_ON_CLOSE)
-	    System.exit(0);
+	jintframe = PropertyDialog.getParentInternalFrame(FileScriptingPanel.this);
+	if (jintframe != null) {
+	  jintframe.doDefaultCloseAction();
 	}
 	else {
-	  frame.dispose();
+	  frame = PropertyDialog.getParentFrame(FileScriptingPanel.this);
+	  if (frame instanceof JFrame) {
+	    jframe = (JFrame) frame;
+	    if (jframe.getDefaultCloseOperation() == JFrame.HIDE_ON_CLOSE)
+	      jframe.setVisible(false);
+	    else if (jframe.getDefaultCloseOperation() == JFrame.DISPOSE_ON_CLOSE)
+	      jframe.dispose();
+	    else if (jframe.getDefaultCloseOperation() == JFrame.EXIT_ON_CLOSE)
+	      System.exit(0);
+
+	    // notify listeners
+	    listeners = jframe.getWindowListeners();
+	    event     = new WindowEvent(jframe, WindowEvent.WINDOW_CLOSED);
+	    for (i = 0; i < listeners.length; i++)
+	      listeners[i].windowClosed(event);
+	  }
+	  else {
+	    frame.dispose();
+	}
 	}
       }
     }
