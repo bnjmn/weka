@@ -40,6 +40,8 @@ import java.io.OutputStream;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.gui.Logger;
 import weka.gui.beans.xml.*;
 
@@ -47,10 +49,10 @@ import weka.gui.beans.xml.*;
  * Small utility class for executing KnowledgeFlow
  * flows outside of the KnowledgeFlow application
  *
- * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @version $Revision$
  */
-public class FlowRunner {
+public class FlowRunner implements RevisionHandler {
 
   /** The potential flow(s) to execute */
   protected Vector m_beans;
@@ -443,5 +445,9 @@ public class FlowRunner {
         System.err.println(ex.getMessage());
       }
     }                         
+  }
+
+  public String getRevision() {
+    return "$Revision$";
   }
 }
