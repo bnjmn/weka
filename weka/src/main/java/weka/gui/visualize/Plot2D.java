@@ -48,7 +48,7 @@ import javax.swing.JTextArea;
  * classifier errors and clusterer predictions.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision$
  */
 public class Plot2D
   extends JPanel {
@@ -1514,6 +1514,23 @@ public class Plot2D
       }
       paintData(gx);
     }
+  }
+
+  protected static Color checkAgainstBackground(Color c, Color background) {
+    if (background == null) {
+      return c;
+    }
+    
+    if (c.equals(background)) {
+      int red = c.getRed();
+      int blue = c.getBlue();
+      int green = c.getGreen();
+      red += (red < 128) ? (255 - red) / 2 : -(red / 2);
+      blue += (blue < 128) ? (blue - red) / 2 : -(blue / 2);
+      green += (green< 128) ? (255 - green) / 2 : -(green / 2);
+      c = new Color(red, green, blue);
+    }
+    return c;
   }
 
   /**
