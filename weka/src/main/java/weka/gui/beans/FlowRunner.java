@@ -97,6 +97,7 @@ public class FlowRunner implements RevisionHandler {
       try {
         Startable startPoint = startables.get(i);
         startPoint.start();
+        Thread.sleep(200);
         waitUntilFinished();
       } catch (Exception ex) {
         ex.printStackTrace();
