@@ -759,6 +759,8 @@ public class CSVLoader
     tokenizer.whitespaceChars(',',',');
     tokenizer.whitespaceChars('\t','\t');
     tokenizer.commentChar('%');
+    tokenizer.quoteChar('"');
+    tokenizer.quoteChar('\'');
     tokenizer.eolIsSignificant(true);
   }
   
