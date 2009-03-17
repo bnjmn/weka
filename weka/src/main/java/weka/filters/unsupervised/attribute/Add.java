@@ -46,7 +46,7 @@ import weka.core.*;
  * Name of the new attribute. (default = 'Unnamed')<p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class Add extends Filter implements UnsupervisedFilter,
 					   StreamableFilter, OptionHandler {
@@ -122,7 +122,7 @@ public class Add extends Filter implements UnsupervisedFilter,
     
     setAttributeIndex(Utils.getOption('C', options));
     setNominalLabels(Utils.getOption('L', options));
-    setAttributeName(Utils.getOption('N', options));
+    setAttributeName(Utils.unbackQuoteChars(Utils.getOption('N', options)));
 
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
@@ -139,7 +139,7 @@ public class Add extends Filter implements UnsupervisedFilter,
     String [] options = new String [6];
     int current = 0;
 
-    options[current++] = "-N"; options[current++] = getAttributeName();
+    options[current++] = "-N"; options[current++] = Utils.backQuoteChars(getAttributeName());
     if (m_AttributeType == Attribute.NOMINAL) {
       options[current++] = "-L"; options[current++] = getNominalLabels();
     }
@@ -250,19 +250,10 @@ public class Add extends Filter implements UnsupervisedFilter,
    * @param name the new name
    */
   public void setAttributeName(String name) {
-
-    String newName = name.trim();
-    if (newName.indexOf(' ') >= 0) {
-      if (newName.indexOf('\'') != 0) {
-	newName = newName.replace('\'',' ');
-      }
-      newName = '\'' + newName + '\'';
-    }
-    if (newName.equals("")) {
-      newName = "unnamed";
-    }
-    m_Name = newName;
-    
+    if (name.trim().equals(""))
+      m_Name = "unnamed";
+    else
+      m_Name = name;
   }
 
   /**
