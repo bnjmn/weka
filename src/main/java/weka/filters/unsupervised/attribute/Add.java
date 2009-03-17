@@ -81,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class Add 
   extends Filter 
@@ -224,7 +224,7 @@ public class Add
       tmpStr = "last";
     setAttributeIndex(tmpStr);
     
-    setAttributeName(Utils.getOption('N', options));
+    setAttributeName(Utils.unbackQuoteChars(Utils.getOption('N', options)));
     
     if (m_AttributeType == Attribute.NOMINAL) {
       tmpStr = Utils.getOption('L', options);
@@ -258,7 +258,7 @@ public class Add
     }
     
     result.add("-N");
-    result.add(getAttributeName());
+    result.add(Utils.backQuoteChars(getAttributeName()));
     
     if (m_AttributeType == Attribute.NOMINAL) {
       result.add("-L");
@@ -406,19 +406,10 @@ public class Add
    * @param name the new name
    */
   public void setAttributeName(String name) {
-
-    String newName = name.trim();
-    if (newName.indexOf(' ') >= 0) {
-      if (newName.indexOf('\'') != 0) {
-	newName = newName.replace('\'',' ');
-      }
-      newName = '\'' + newName + '\'';
-    }
-    if (newName.equals("")) {
-      newName = "unnamed";
-    }
-    m_Name = newName;
-    
+    if (name.trim().equals(""))
+      m_Name = "unnamed";
+    else
+      m_Name = name;
   }
 
   /**
@@ -589,7 +580,7 @@ public class Add
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
