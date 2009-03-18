@@ -1,18 +1,17 @@
-# Database settings for sqlite 3.x
+# Database settings for ODBC in conjunction with MS Access 2000
 #
 # General information on database access can be found here:
 # http://weka.wiki.sourceforge.net/Databases
 #
-# url:     http://www.sqlite.org/
-# jdbc:    http://www.zentus.com/sqlitejdbc/
+# url:     http://weka.wiki.sourceforge.net/Windows+Databases
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
 # version: $Revision$
 
 # JDBC driver (comma-separated list)
-jdbcDriver=org.sqlite.JDBC
+jdbcDriver=sun.jdbc.odbc.JdbcOdbcDriver
 
 # database URL
-jdbcURL=jdbc:sqlite:/path/to/database.db
+jdbcURL=jdbc:odbc:DSN_Name
 
 # specific data types
 # string, getString() = 0;    --> nominal
@@ -26,6 +25,12 @@ jdbcURL=jdbc:sqlite:/path/to/database.db
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+
+varchar=0
+float=2
+tinyint=3
+int=5
+text=0
 
 # other options
 CREATE_DOUBLE=DOUBLE
