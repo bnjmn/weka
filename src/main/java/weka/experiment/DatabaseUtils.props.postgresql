@@ -1,9 +1,12 @@
 # Database settings for PostgreSQL 7.4
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://www.postgresql.org/
 # jdbc:    http://jdbc.postgresql.org/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.6 $
+# version: $Revision$
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.postgresql.Driver
@@ -37,6 +40,8 @@ date=8
 CREATE_DOUBLE=float8
 CREATE_STRING=text
 CREATE_INT=int
+CREATE_DATE=TIMESTAMP
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=false
 checkLowerCaseNames=true
 checkForTable=true

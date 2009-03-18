@@ -1,9 +1,12 @@
 # Database settings for MySQL 3.23.x, 4.x
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://www.mysql.com/
 # jdbc:    http://www.mysql.com/products/connector/j/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.6 $
+# version: $Revision$
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.gjt.mm.mysql.Driver
@@ -28,6 +31,8 @@ jdbcURL=jdbc:mysql://server_name:3306/database_name
 CREATE_DOUBLE=DOUBLE
 CREATE_STRING=TEXT
 CREATE_INT=INT
+CREATE_DATE=DATETIME
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=false
 checkLowerCaseNames=false
 checkForTable=true

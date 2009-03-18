@@ -54,7 +54,7 @@ import java.util.Vector;
  * </pre></code><p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.36 $
+ * @version $Revision$
  */
 public class DatabaseUtils
   implements Serializable, RevisionHandler {
@@ -167,7 +167,7 @@ public class DatabaseUtils
       String drivers = PROPERTIES.getProperty("jdbcDriver", "jdbc.idbDriver");
 
       if (drivers == null) {
-        throw new Exception("No jdbc drivers specified");
+        throw new Exception("No database drivers (JDBC) specified");
       }
       // The call to newInstance() is necessary on some platforms
       // (with some java VM implementations)
@@ -185,7 +185,7 @@ public class DatabaseUtils
         }
         if (m_Debug || (!result && !DRIVERS_ERRORS.contains(driver))) 
           System.err.println(
-              "Trying to add JDBC driver: " + driver 
+              "Trying to add database driver (JDBC): " + driver 
               + " - " + (result ? "Success!" : "Error, not in CLASSPATH?"));
         if (!result)
           DRIVERS_ERRORS.add(driver);
@@ -1292,6 +1292,6 @@ public class DatabaseUtils
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.36 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
