@@ -36,6 +36,7 @@ import weka.core.Capabilities.Capability;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -76,55 +77,61 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class DatabaseSaver 
   extends AbstractSaver 
   implements BatchConverter, IncrementalConverter, DatabaseConverter, OptionHandler {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 863971733782624956L;
   
-  /** The database connection */
+  /** The database connection. */
   private DatabaseConnection m_DataBaseConnection;
   
-  /** The name of the tablein which the instances should be stored */
+  /** The name of the table in which the instances should be stored. */
   private String m_tableName;
   
-  /** An input arff file (for command line use) */
+  /** An input arff file (for command line use). */
   private String m_inputFile;
   
-  /** The database specific type for a string (read in from the properties file) */
+  /** The database specific type for a string (read in from the properties file). */
   private String m_createText;
   
-  /** The database specific type for a double (read in from the properties file) */
+  /** The database specific type for a double (read in from the properties file). */
   private String m_createDouble;
   
-  /** The database specific type for an int (read in from the properties file) */
+  /** The database specific type for an int (read in from the properties file). */
   private String m_createInt;
+  
+  /** The database specific type for a date (read in from the properties file). */
+  private String m_createDate;
+  
+  /** For converting the date value into a database string. */
+  private SimpleDateFormat m_DateFormat;
   
   /** The name of the primary key column that will be automatically generated (if enabled). The name is read from DatabaseUtils.*/
   private String m_idColumn;
   
-  /** counts the rowsand used as a primary key value */
+  /** counts the rows and used as a primary key value. */
   private int m_count;
   
-  /** Flag indicating if a primary key column should be added */
+  /** Flag indicating if a primary key column should be added. */
   private boolean m_id;
   
   /** Flag indicating whether the default name of the table is the relaion name or not.*/
   private boolean m_tabName;
   
-  /** the user name for the database */
+  /** the user name for the database. */
   private String m_Username;
   
-  /** the password for the database */
+  /** the password for the database. */
   private String m_Password;
   
-  /** The property file for the database connection */
+  /** The property file for the database connection. */
   protected static String PROPERTY_FILE = DatabaseConnection.PROPERTY_FILE;
   
-  /** Properties associated with the database connection */
+  /** Properties associated with the database connection. */
   protected static Properties PROPERTIES;
 
   /** reads the property file */
@@ -140,7 +147,7 @@ public class DatabaseSaver
   }
   
    /** 
-    * Constructor
+    * Constructor.
     * 
     * @throws Exception throws Exception if property file cannot be read
     */
@@ -150,11 +157,13 @@ public class DatabaseSaver
       m_createText = PROPERTIES.getProperty("CREATE_STRING");
       m_createDouble = PROPERTIES.getProperty("CREATE_DOUBLE");
       m_createInt = PROPERTIES.getProperty("CREATE_INT");
+      m_createDate = PROPERTIES.getProperty("CREATE_DATE", "DATETIME");
+      m_DateFormat = new SimpleDateFormat(PROPERTIES.getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
       m_idColumn = PROPERTIES.getProperty("idColumn");
   }
   
   /** 
-   * Resets the Saver ready to save a new data set
+   * Resets the Saver ready to save a new data set.
    */
   public void resetOptions(){
 
@@ -194,7 +203,7 @@ public class DatabaseSaver
   }
    
   /**
-   * Returns a string describing this Saver
+   * Returns a string describing this Saver.
    * 
    * @return a description of the Saver suitable for
    * displaying in the explorer/experimenter gui
@@ -205,7 +214,7 @@ public class DatabaseSaver
 
   
   /** 
-   * Sets the table's name
+   * Sets the table's name.
    * 
    * @param tn the name of the table
    */  
@@ -215,7 +224,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Gets the table's name
+   * Gets the table's name.
    * 
    * @return the table's name
    */  
@@ -225,7 +234,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return the tip text for this property
    */
@@ -235,7 +244,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * En/Dis-ables the automatic generation of a primary key
+   * En/Dis-ables the automatic generation of a primary key.
    * 
    * @param flag flag for automatic key-genereration
    */  
@@ -245,7 +254,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Gets whether or not a primary key will be generated automatically
+   * Gets whether or not a primary key will be generated automatically.
    * 
    * @return true if a primary key column will be generated, false otherwise
    */  
@@ -255,7 +264,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return tip text for this property
    */
@@ -276,7 +285,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Gets whether or not the relation name is used as name of the table
+   * Gets whether or not the relation name is used as name of the table.
    * 
    * @return true if the relation name is used as the name of the table, false otherwise
    */  
@@ -286,7 +295,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Returns the tip text fo this property
+   * Returns the tip text fo this property.
    * 
    * @return the tip text for this property
    */
@@ -296,7 +305,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Sets the database URL
+   * Sets the database URL.
    * 
    * @param url the URL
    */  
@@ -307,7 +316,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Gets the database URL
+   * Gets the database URL.
    * 
    * @return the URL
    */  
@@ -317,7 +326,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return the tip text for this property
    */
@@ -327,7 +336,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Sets the database user
+   * Sets the database user.
    * 
    * @param user the user name
    */  
@@ -337,7 +346,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Gets the database user
+   * Gets the database user.
    * 
    * @return the user name
    */  
@@ -347,7 +356,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return the tip text for this property
    */
@@ -357,7 +366,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Sets the database password
+   * Sets the database password.
    * 
    * @param password the password
    */  
@@ -367,7 +376,7 @@ public class DatabaseSaver
   }
 
   /**
-   * Returns the database password
+   * Returns the database password.
    *
    * @return the database password
    */
@@ -376,7 +385,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    * 
    * @return the tip text for this property
    */
@@ -386,7 +395,7 @@ public class DatabaseSaver
   }
       
   /** 
-   * Sets the database url
+   * Sets the database url.
    * 
    * @param url the database url
    * @param userName the user name
@@ -405,7 +414,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Sets the database url
+   * Sets the database url.
    * 
    * @param url the database url
    */  
@@ -421,7 +430,7 @@ public class DatabaseSaver
        }    
   }
   
-  /** Sets the database url using the DatabaseUtils file */  
+  /** Sets the database url using the DatabaseUtils file. */  
   public void setDestination(){
   
       try{
@@ -459,7 +468,7 @@ public class DatabaseSaver
   }
   
    /**
-   * Opens a connection to the database
+   * Opens a connection to the database.
    *
    */
   public void connectToDatabase() {
@@ -489,6 +498,7 @@ public class DatabaseSaver
         m_createInt = m_createInt.toUpperCase(); 
         m_createDouble = m_createDouble.toUpperCase(); 
         m_createText = m_createText.toUpperCase(); 
+        m_createDate = m_createDate.toUpperCase(); 
       }
       m_tableName = m_tableName.replaceAll("[^\\w]","_");
       query.append(m_tableName);
@@ -512,7 +522,7 @@ public class DatabaseSaver
           else
               query.append(attName);
           if(att.isDate())
-              query.append(" DATE");
+              query.append(" " + m_createDate);
           else{
               if(att.isNumeric())
                   query.append(" "+m_createDouble);
@@ -532,7 +542,7 @@ public class DatabaseSaver
   }
   
   /**
-   * inserts the given instance into the table
+   * inserts the given instance into the table.
    * 
    * @param inst the instance to insert
    * @throws Exception if something goes wrong
@@ -552,7 +562,9 @@ public class DatabaseSaver
         if(inst.isMissing(j))
             insert.append("NULL");
         else{
-            if((inst.attribute(j)).isNumeric())
+            if((inst.attribute(j)).isDate())
+                insert.append("'" + m_DateFormat.format((long) inst.value(j)) + "'");
+            else if((inst.attribute(j)).isNumeric())
                 insert.append(inst.value(j));
             else{
                 String stringInsert = "'"+inst.stringValue(j)+"'";
@@ -633,7 +645,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Writes a Batch of instances
+   * Writes a Batch of instances.
    * 
    * @throws IOException throws IOException
    */
@@ -665,7 +677,7 @@ public class DatabaseSaver
   }
 
   /**
-   * Prints an exception
+   * Prints an exception.
    * 
    * @param ex the exception to print
    */  
@@ -690,7 +702,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Gets the setting
+   * Gets the setting.
    * 
    * @return the current setting
    */  
@@ -729,7 +741,7 @@ public class DatabaseSaver
   }
   
   /** 
-   * Lists the available options
+   * Lists the available options.
    * 
    * @return an enumeration of the available options
    */  
@@ -857,7 +869,7 @@ public class DatabaseSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

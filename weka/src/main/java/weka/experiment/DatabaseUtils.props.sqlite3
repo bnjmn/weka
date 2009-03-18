@@ -1,9 +1,12 @@
 # Database settings for sqlite 3.x
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://www.sqlite.org/
 # jdbc:    http://www.zentus.com/sqlitejdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.5 $
+# version: $Revision$
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.sqlite.JDBC
@@ -28,6 +31,8 @@ jdbcURL=jdbc:sqlite:/path/to/database.db
 CREATE_DOUBLE=DOUBLE
 CREATE_STRING=TEXT
 CREATE_INT=INT
+CREATE_DATE=DATETIME
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=false
 checkLowerCaseNames=false
 checkForTable=true
