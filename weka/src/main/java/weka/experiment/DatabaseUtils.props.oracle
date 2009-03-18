@@ -1,9 +1,12 @@
 # Database settings for Oracle 10g Express Edition
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://www.oracle.com/
 # jdbc:    http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.6 $
+# version: $Revision$
 
 # JDBC driver (comma-separated list)
 jdbcDriver=oracle.jdbc.driver.OracleDriver
@@ -33,6 +36,8 @@ TIMESTAMP=8
 CREATE_INT=INTEGER
 CREATE_STRING=VARCHAR2(4000)
 CREATE_DOUBLE=NUMBER
+CREATE_DATE=TIMESTAMP
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=true
 checkForTable=true
 

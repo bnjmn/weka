@@ -36,6 +36,7 @@ import weka.core.Capabilities.Capability;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -76,7 +77,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class DatabaseSaver 
   extends AbstractSaver 
@@ -102,6 +103,12 @@ public class DatabaseSaver
   
   /** The database specific type for an int (read in from the properties file) */
   private String m_createInt;
+  
+  /** The database specific type for a date (read in from the properties file) */
+  private String m_createDate;
+  
+  /** For converting the date value into a database string. */
+  private SimpleDateFormat m_DateFormat;
   
   /** The name of the primary key column that will be automatically generated (if enabled). The name is read from DatabaseUtils.*/
   private String m_idColumn;
@@ -150,6 +157,8 @@ public class DatabaseSaver
       m_createText = PROPERTIES.getProperty("CREATE_STRING");
       m_createDouble = PROPERTIES.getProperty("CREATE_DOUBLE");
       m_createInt = PROPERTIES.getProperty("CREATE_INT");
+      m_createDate = PROPERTIES.getProperty("CREATE_DATE", "DATETIME");
+      m_DateFormat = new SimpleDateFormat(PROPERTIES.getProperty("DateFormat", "yyyy-MM-dd HH:mm:ss"));
       m_idColumn = PROPERTIES.getProperty("idColumn");
   }
   
@@ -489,6 +498,7 @@ public class DatabaseSaver
         m_createInt = m_createInt.toUpperCase(); 
         m_createDouble = m_createDouble.toUpperCase(); 
         m_createText = m_createText.toUpperCase(); 
+        m_createDate = m_createDate.toUpperCase(); 
       }
       m_tableName = m_tableName.replaceAll("[^\\w]","_");
       query.append(m_tableName);
@@ -512,7 +522,7 @@ public class DatabaseSaver
           else
               query.append(attName);
           if(att.isDate())
-              query.append(" DATE");
+              query.append(" " + m_createDate);
           else{
               if(att.isNumeric())
                   query.append(" "+m_createDouble);
@@ -552,7 +562,9 @@ public class DatabaseSaver
         if(inst.isMissing(j))
             insert.append("NULL");
         else{
-            if((inst.attribute(j)).isNumeric())
+            if((inst.attribute(j)).isDate())
+                insert.append("'" + m_DateFormat.format((long) inst.value(j)) + "'");
+            else if((inst.attribute(j)).isNumeric())
                 insert.append(inst.value(j));
             else{
                 String stringInsert = "'"+inst.stringValue(j)+"'";
@@ -857,7 +869,7 @@ public class DatabaseSaver
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
