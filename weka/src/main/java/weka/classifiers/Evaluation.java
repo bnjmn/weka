@@ -1600,6 +1600,7 @@ public class Evaluation
     result.append("import weka.core.Capabilities.Capability;\n");
     result.append("import weka.core.Instance;\n");
     result.append("import weka.core.Instances;\n");
+    result.append("import weka.core.RevisionUtils;\n");
     result.append("import weka.classifiers.Classifier;\n");
     result.append("\n");
     result.append("public class WekaWrapper\n");
@@ -1665,7 +1666,18 @@ public class Evaluation
     result.append("    \n");
     result.append("    return " + className + ".classify(s);\n");
     result.append("  }\n");
-    
+
+    // getRevision
+    result.append("\n");
+    result.append("  /**\n");
+    result.append("   * Returns the revision string.\n");
+    result.append("   * \n");
+    result.append("   * @return        the revision\n");
+    result.append("   */\n");
+    result.append("  public String getRevision() {\n");
+    result.append("    return RevisionUtils.extract(\"1.0\");\n");
+    result.append("  }\n");
+
     // toString
     result.append("\n");
     result.append("  /**\n");
