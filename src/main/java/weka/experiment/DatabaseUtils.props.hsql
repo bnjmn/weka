@@ -1,10 +1,13 @@
 # Database settings for HSQLDB 1.8.x
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://hsqldb.sourceforge.net/
 # jdbc:    http://sourceforge.net/projects/hsqldb/
 # howto:   http://hsqldb.sourceforge.net/doc/guide/ch01.html
 # author:  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
-# version: $Revision: 1.7 $
+# version: $Revision$
 
 # JDBC driver (comma-separated list)
 jdbcDriver=org.hsqldb.jdbcDriver
@@ -29,6 +32,8 @@ jdbcURL=jdbc:hsqldb:hsql://server_name/database_name
 CREATE_INT=INT
 CREATE_DOUBLE=DOUBLE
 CREATE_STRING=LONGVARCHAR
+CREATE_DATE=DATETIME
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=true
 checkLowerCaseNames=false
 checkForTable=true
