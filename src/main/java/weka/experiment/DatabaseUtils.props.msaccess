@@ -1,5 +1,8 @@
 # Database settings for ODBC in conjunction with MS Access 2000
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://weka.wiki.sourceforge.net/Windows+Databases
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
 # version: $Revision$
@@ -33,6 +36,8 @@ text=0
 CREATE_DOUBLE=DOUBLE
 CREATE_STRING=TEXT
 CREATE_INT=INT
+CREATE_DATE=DATETIME
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=false
 checkLowerCaseNames=false
 checkForTable=true

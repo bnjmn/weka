@@ -1,3 +1,8 @@
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
+# Version: $Revision$
+
 # The comma-separated list of jdbc drivers to use
 #jdbcDriver=RmiJdbc.RJDriver,jdbc.idbDriver
 #jdbcDriver=jdbc.idbDriver
@@ -71,6 +76,8 @@ TIMESTAMP=8
 CREATE_STRING=TEXT
 CREATE_INT=INT
 CREATE_DOUBLE=DOUBLE
+CREATE_DATE=DATETIME
+DateFormat=yyyy-MM-dd HH:mm:ss
 
 #database flags
 checkUpperCaseNames=false

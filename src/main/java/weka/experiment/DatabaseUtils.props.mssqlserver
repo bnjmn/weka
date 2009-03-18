@@ -1,9 +1,12 @@
 # Database settings for Microsoft SQL Server 2000
 #
+# General information on database access can be found here:
+# http://weka.wiki.sourceforge.net/Databases
+#
 # url:     http://www.microsoft.com/
 # jdbc:    http://www.microsoft.com/downloads/details.aspx?familyid=07287B11-0502-461A-B138-2AA54BFDC03A
 # author:  Fracpete (fracpete at waikato dot ac dot nz)
-# version: $Revision: 1.6 $
+# version: $Revision$
 
 # JDBC driver (comma-separated list)
 jdbcDriver=com.microsoft.jdbc.sqlserver.SQLServerDriver
@@ -33,6 +36,8 @@ int=5
 CREATE_DOUBLE=DOUBLE PRECISION
 CREATE_STRING=VARCHAR(8000)
 CREATE_INT=INT
+CREATE_DATE=DATETIME
+DateFormat=yyyy-MM-dd HH:mm:ss
 checkUpperCaseNames=false
 checkLowerCaseNames=false
 checkForTable=true
