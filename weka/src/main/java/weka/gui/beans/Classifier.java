@@ -845,6 +845,7 @@ public class Classifier
 //      m_oldText = m_visual.getText();
       // store the training header
       m_trainingSet = new Instances(e.getTrainingSet(), 0);
+      m_state = BUILDING_MODEL;
       
       String msg = "[Classifier] " + statusMessagePrefix() 
         + " starting executor pool ("
