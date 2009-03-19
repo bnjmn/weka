@@ -32,14 +32,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
 import weka.core.UnsupportedClassTypeException;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 import weka.core.Capabilities.Capability;
-import weka.core.TechnicalInformation.Field;
-import weka.core.TechnicalInformation.Type;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -48,7 +44,7 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * The implementation of a RIpple-DOwn Rule learner.<br/>
+ * An implementation of a RIpple-DOwn Rule learner.<br/>
  * <br/>
  * It generates a default rule first and then the exceptions for the default rule with the least (weighted) error rate.  Then it generates the "best" exceptions for each exception and iterates until pure.  Thus it performs a tree-like expansion of exceptions.The exceptions are a set of rules that predict classes other than the default. IREP is used to generate the exceptions.<br/>
  * <br/>
@@ -119,12 +115,11 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.21 $ 
+ * @version $Revision$ 
  */
 public class Ridor 
   extends Classifier
-  implements AdditionalMeasureProducer, WeightedInstancesHandler,
-             TechnicalInformationHandler {
+  implements AdditionalMeasureProducer, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -7261533075088314436L;
@@ -165,38 +160,14 @@ public class Ridor
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "The implementation of a RIpple-DOwn Rule learner.\n\n" 
+    return "An implementation of a RIpple-DOwn Rule learner.\n\n" 
       + "It generates a default rule first and then the exceptions for the default rule "
       + "with the least (weighted) error rate.  Then it generates the \"best\" exceptions for "
       + "each exception and iterates until pure.  Thus it performs a tree-like expansion of "
       + "exceptions."
       + "The exceptions are a set of rules that predict classes other than the default. "
       + "IREP is used to generate the exceptions.\n\n"
-      + "For more information about Ripple-Down Rules, see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
-   * Returns an instance of a TechnicalInformation object, containing 
-   * detailed information about the technical background of this class,
-   * e.g., paper reference or book this class is based on.
-   * 
-   * @return the technical information about this class
-   */
-  public TechnicalInformation getTechnicalInformation() {
-    TechnicalInformation 	result;
-    
-    result = new TechnicalInformation(Type.ARTICLE);
-    result.setValue(Field.AUTHOR, "Brian R. Gaines and Paul Compton");
-    result.setValue(Field.YEAR, "1995");
-    result.setValue(Field.TITLE, "Induction of Ripple-Down Rules Applied to Modeling Large Databases");
-    result.setValue(Field.JOURNAL, "J. Intell. Inf. Syst.");
-    result.setValue(Field.VOLUME, "5");
-    result.setValue(Field.NUMBER, "3");
-    result.setValue(Field.PAGES, "211-228");
-    result.setValue(Field.PDF, "http://pages.cpsc.ucalgary.ca/~gaines/reports/ML/JIIS95/JIIS95.pdf");
-    
-    return result;
+      + "For more information about Ripple-Down Rules, see:\n\n";
   }
     
   /** 
@@ -556,7 +527,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }    
 
@@ -933,7 +904,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -997,7 +968,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -1183,7 +1154,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
     
@@ -1303,7 +1274,7 @@ public class Ridor
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.21 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1682,7 +1653,7 @@ public class Ridor
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.21 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**
