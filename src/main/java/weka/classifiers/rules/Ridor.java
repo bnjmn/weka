@@ -54,23 +54,6 @@ import java.util.Vector;
  * <p/>
  <!-- globalinfo-end -->
  *
- <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;article{Gaines1995,
- *    author = {Brian R. Gaines and Paul Compton},
- *    journal = {J. Intell. Inf. Syst.},
- *    number = {3},
- *    pages = {211-228},
- *    title = {Induction of Ripple-Down Rules Applied to Modeling Large Databases},
- *    volume = {5},
- *    year = {1995},
- *    PDF = {http://pages.cpsc.ucalgary.ca/\~gaines/reports/ML/JIIS95/JIIS95.pdf}
- * }
- * </pre>
- * <p/>
- <!-- technical-bibtex-end -->
- * 
  * There are five inner classes defined in this class. <br>
  * The first is Ridor_node, which implements one node in the Ridor tree.  It's basically
  * composed of a default class and a set of exception rules to the default class.<br>
