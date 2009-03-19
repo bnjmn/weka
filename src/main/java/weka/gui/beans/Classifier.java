@@ -793,6 +793,7 @@ public class Classifier
             }
             // m_outputQueues = null; // free memory
             m_block = false;
+            m_state = IDLE;
   //          block(false);
           }
         }
@@ -841,6 +842,10 @@ public class Classifier
     // Do some initialization if this is the first set of the first run
     if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
 //      m_oldText = m_visual.getText();
+      // store the training header
+      m_trainingSet = new Instances(e.getTrainingSet(), 0);
+      m_state = BUILDING_MODEL;
+
       String msg = "[Classifier] " + statusMessagePrefix() 
         + " starting executor pool ("
         + getExecutionSlots() + " slots)...";
@@ -917,10 +922,17 @@ public class Classifier
     }
   
     // If we just have a test set connection or
-    // there is just one run involving one set, then use the
+    // there is just one run involving one set (and we are not
+    // currently building a model), then use the
     // last saved model
-    if (!m_listenees.containsKey("trainingSet")  || 
-        (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1)) {
+    if (m_Classifier != null && m_state == IDLE && 
+        (!m_listenees.containsKey("trainingSet") || 
+         (e.getMaxRunNumber() == 1 && e.getMaxSetNumber() == 1))) {
+
+      // if this is structure only then just return at this point
+      if (e.getTestSet() != null && e.isStructureOnly()) {
+        return;
+      }
 
       // first check that we have a training set/header (if we don't,
       // then it means that no model has been loaded
