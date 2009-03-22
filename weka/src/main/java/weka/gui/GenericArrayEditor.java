@@ -68,7 +68,7 @@ import javax.swing.JOptionPane;
  * property editors.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13.2.1 $
+ * @version $Revision$
  */
 public class GenericArrayEditor extends JPanel
   implements PropertyEditor {
@@ -106,7 +106,7 @@ public class GenericArrayEditor extends JPanel
       if (e.getSource() == m_DeleteBut) {
 	int [] selected = m_ElementList.getSelectedIndices();
 	if (selected != null) {
-	  for (int i = 0; i < selected.length; i++) {
+	  for (int i = selected.length - 1; i >= 0; i--) {
 	    int current = selected[i];
 	    m_ListModel.removeElementAt(current);
 	    if (m_ListModel.size() > current) {
