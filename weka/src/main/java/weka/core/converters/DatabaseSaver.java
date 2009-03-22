@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
@@ -423,7 +424,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter, Incr
             insert.append("NULL");
         else{
             if((inst.attribute(j)).isDate())
-                insert.append("'" + m_DateFormat.format((long) inst.value(j)) + "'");
+                insert.append("'" + m_DateFormat.format(new Date((long) inst.value(j))) + "'");
             else if((inst.attribute(j)).isNumeric())
                 insert.append(inst.value(j));
             else{
