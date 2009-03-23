@@ -1303,6 +1303,8 @@ public class Ridor
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();
+
+    m_Random = new Random(m_Seed);
 	
     /* Create a binary attribute */
     FastVector binary_values = new FastVector(2);
