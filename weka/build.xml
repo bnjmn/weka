@@ -226,6 +226,8 @@
       <include name="src/**/*.props"/>
       <include name="src/**/*.txt"/>
       <include name="src/**/*.xml"/>
+      <include name="src/**/*.cost"/>
+      <include name="src/**/*.arff"/>
       <include name="lib/**/*.jar"/>
       <include name="src/**/DatabaseUtils.props.*"/>
       <include name="src/**/weka/gui/beans/README*"/>
