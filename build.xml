@@ -251,6 +251,8 @@
       <include name="src/**/*.properties"/>
       <include name="src/**/*.default"/>
       <include name="src/**/*.cost"/>
+      <include name="src/**/*.arff"/>
+      <include name="src/**/*.matrix"/>
       <include name="lib/**/*.jar"/>
     </jar>
   </target>
