@@ -40,6 +40,8 @@ import java.io.OutputStream;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.gui.Logger;
 import weka.gui.beans.xml.*;
 
@@ -47,10 +49,10 @@ import weka.gui.beans.xml.*;
  * Small utility class for executing KnowledgeFlow
  * flows outside of the KnowledgeFlow application
  *
- * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
  * @version $Revision$
  */
-public class FlowRunner {
+public class FlowRunner implements RevisionHandler {
 
   /** The potential flow(s) to execute */
   protected Vector m_beans;
@@ -64,7 +66,7 @@ public class FlowRunner {
   /** run each Startable bean sequentially? (default in parallel) */
   protected boolean m_startSequentially = false;
   
-  protected static class SimpleLogger implements weka.gui.Logger {
+  public static class SimpleLogger implements weka.gui.Logger {
     SimpleDateFormat m_DateFormat = 
       new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
@@ -95,6 +97,7 @@ public class FlowRunner {
       try {
         Startable startPoint = startables.get(i);
         startPoint.start();
+        Thread.sleep(200);
         waitUntilFinished();
       } catch (Exception ex) {
         ex.printStackTrace();
@@ -124,11 +127,13 @@ public class FlowRunner {
               System.err.println(ex.getMessage());
             }
           } finally {
+            /*
             if (m_log != null) { 
               m_log.logMessage("[FlowRunner] flow " + m_num + " finished.");
             } else {
               System.out.println("[FlowRunner] Flow " + m_num + " finished.");
             }
+            */
             decreaseCount();
           }
         }
@@ -230,8 +235,12 @@ public class FlowRunner {
     ois.close();
     
     if (m_env != null) {
+      String parentDir = (new File(fileName)).getParent();
+      if (parentDir == null) {
+        parentDir = "./";
+      }
       m_env.addVariable("Internal.knowledgeflow.directory", 
-          (new File(fileName).getParent()));
+          parentDir);
     }
   }
 
@@ -251,8 +260,14 @@ public class FlowRunner {
     m_beans = (Vector) v.get(XMLBeans.INDEX_BEANINSTANCES);
 
     if (m_env != null) {
+      String parentDir = (new File(fileName)).getParent();
+      if (parentDir == null) {
+        parentDir = "./";
+      }
       m_env.addVariable("Internal.knowledgeflow.directory", 
-          (new File(fileName).getParent()));
+          parentDir);
+    } else {
+      System.err.println("++++++++++++ Environment variables null!!...");
     }
   }
   
@@ -326,14 +341,16 @@ public class FlowRunner {
     }
     
     // register the log (if set) with the beans
-    if (m_log != null) {
-      for (int i = 0; i < m_beans.size(); i++) {
-        BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
+    for (int i = 0; i < m_beans.size(); i++) {
+      BeanInstance tempB = (BeanInstance)m_beans.elementAt(i);
+      if (m_log != null) {
         if (tempB.getBean() instanceof BeanCommon) {
           ((BeanCommon)tempB.getBean()).setLog(m_log);
-        } else if (tempB.getBean() instanceof EnvironmentHandler) {
-          ((EnvironmentHandler)tempB.getBean()).setEnvironment(m_env);
         }
+      }
+        
+      if (tempB.getBean() instanceof EnvironmentHandler) {
+        ((EnvironmentHandler)tempB.getBean()).setEnvironment(m_env);
       }
     }
     
@@ -443,5 +460,9 @@ public class FlowRunner {
         System.err.println(ex.getMessage());
       }
     }                         
+  }
+
+  public String getRevision() {
+    return "$Revision$";
   }
 }
