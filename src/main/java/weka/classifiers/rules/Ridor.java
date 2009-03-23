@@ -1303,6 +1303,8 @@ public class Ridor
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();
+    
+    m_Random = new Random(m_Seed);
 	
     /* Create a binary attribute */
     FastVector binary_values = new FastVector(2);
@@ -1398,7 +1400,7 @@ public class Ridor
 				    "\t(default 3)","F", 1, "-F <number of folds>"));
     newVector.addElement(new Option("\tSet number of shuffles to randomize\n" +
 				    "\tthe data in order to get better rule.\n" +
-				    "\t(default 10)","S", 1, "-S <number of shuffles>"));
+				    "\t(default 1)","S", 1, "-S <number of shuffles>"));
     newVector.addElement(new Option("\tSet flag of whether use the error rate \n"+
 				    "\tof all the data to select the default class\n"+
 				    "\tin each step. If not set, the learner will only use"+
