@@ -50,7 +50,7 @@ import weka.classifiers.*;
  * 
  *
  * @author: Xin XU (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $ 
+ * @version $Revision$ 
  */
 
 public class Ridor extends Classifier
@@ -1152,6 +1152,8 @@ public class Ridor extends Classifier
 	
     int index = data.classIndex();
     m_Cover = data.sumOfWeights();
+
+    m_Random = new Random(m_Seed);
 	
     /* Create a binary attribute */
     FastVector binary_values = new FastVector(2);
