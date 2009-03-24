@@ -10,7 +10,7 @@
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    alo0ng with this program; if not, write to the Free Software
+ *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
@@ -82,7 +82,7 @@ import weka.core.RevisionUtils;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class HotSpot
   implements Associator, OptionHandler, RevisionHandler, 
@@ -1273,7 +1273,7 @@ public class HotSpot
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

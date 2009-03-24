@@ -10,7 +10,7 @@
  *    GNU General Public License for more details.
  *
  *    You should have received a copy of the GNU General Public License
- *    alo0ng with this program; if not, write to the Free Software
+ *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
@@ -126,7 +126,7 @@ import java.util.Hashtable;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision$
  */
 public class Apriori 
   extends AbstractAssociator 
@@ -1449,7 +1449,7 @@ public class Apriori
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
