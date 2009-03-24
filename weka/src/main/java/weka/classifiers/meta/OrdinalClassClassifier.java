@@ -28,6 +28,7 @@ import weka.classifiers.rules.ZeroR;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.TechnicalInformation;
@@ -48,7 +49,9 @@ import java.util.Vector;
  * <br/>
  * For more information see: <br/>
  * <br/>
- * Eibe Frank, Mark Hall: A Simple Approach to Ordinal Classification. In: 12th European Conference on Machine Learning, 145-156, 2001.
+ * Eibe Frank, Mark Hall: A Simple Approach to Ordinal Classification. In: 12th European Conference on Machine Learning, 145-156, 2001.<br/>
+ * <br/>
+ * Robert E. Schapire, Peter Stone, David A. McAllester, Michael L. Littman, Janos A. Csirik: Modeling Auction Price Uncertainty Using Boosting-based Conditional Density Estimation. In: Machine Learning, Proceedings of the Nineteenth International Conference (ICML 2002), 546-553, 2002.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -63,12 +66,24 @@ import java.util.Vector;
  *    title = {A Simple Approach to Ordinal Classification},
  *    year = {2001}
  * }
+ * 
+ * &#64;inproceedings{Schapire2002,
+ *    author = {Robert E. Schapire and Peter Stone and David A. McAllester and Michael L. Littman and Janos A. Csirik},
+ *    booktitle = {Machine Learning, Proceedings of the Nineteenth International Conference (ICML 2002)},
+ *    pages = {546-553},
+ *    publisher = {Morgan Kaufmann},
+ *    title = {Modeling Auction Price Uncertainty Using Boosting-based Conditional Density Estimation},
+ *    year = {2002}
+ * }
  * </pre>
  * <p/>
  <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
  * Valid options are: <p/>
+ * 
+ * <pre> -S
+ *  Turn off Schapire et al.'s smoothing heuristic (ICML02, pp. 550).</pre>
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -118,8 +133,9 @@ import java.util.Vector;
  * 
  <!-- options-end -->
  *
- * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision 1.0 $
+ * @author Mark Hall
+ * @author Eibe Frank
+ * @version $Revision$
  * @see OptionHandler
  */
 public class OrdinalClassClassifier 
@@ -137,6 +153,9 @@ public class OrdinalClassClassifier
 
   /** ZeroR classifier for when all base classifier return zero probability. */
   private ZeroR m_ZeroR;
+
+  /** Whether to use smoothing to prevent negative "probabilities". */
+  private boolean m_UseSmoothing = true;
 
   /**
    * String describing default classifier.
@@ -176,6 +195,7 @@ public class OrdinalClassClassifier
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation 	result;
+    TechnicalInformation        additional;
     
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR, "Eibe Frank and Mark Hall");
@@ -184,6 +204,17 @@ public class OrdinalClassClassifier
     result.setValue(Field.YEAR, "2001");
     result.setValue(Field.PAGES, "145-156");
     result.setValue(Field.PUBLISHER, "Springer");
+    
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(Field.AUTHOR, "Robert E. Schapire and Peter Stone and David A. McAllester " +
+    		"and Michael L. Littman and Janos A. Csirik");
+    additional.setValue(Field.TITLE, "Modeling Auction Price Uncertainty Using Boosting-based " +
+    		"Conditional Density Estimation");
+    additional.setValue(Field.BOOKTITLE, "Machine Learning, Proceedings of the Nineteenth " +
+    		"International Conference (ICML 2002)");
+    additional.setValue(Field.YEAR, "2002");
+    additional.setValue(Field.PAGES, "546-553");
+    additional.setValue(Field.PUBLISHER, "Morgan Kaufmann");
     
     return result;
   }
@@ -275,21 +306,74 @@ public class OrdinalClassClassifier
       
     }
 
-    for (int i = 0; i < inst.numClasses(); i++) {
-      if (i == 0) {
-	probs[i] = distributions[0][0];
-      } else if (i == inst.numClasses() - 1) {
-	probs[i] = distributions[i - 1][1];
-      } else {
-	probs[i] = distributions[i - 1][1] - distributions[i][1];
-	if (!(probs[i] > 0)) {
-	  System.err.println("Warning: estimated probability " + probs[i] +
-	  		     ". Rounding to 0.");
-	  probs[i] = 0;
-	}
+    // Use Schapire et al.'s smoothing heuristic?
+    if (getUseSmoothing()) {
+      
+      double[] fScores = new double[distributions.length + 2];
+      fScores[0] = 1;
+      fScores[distributions.length + 1] = 0;
+      for (int i = 0; i < distributions.length; i++) {
+        fScores[i + 1] = distributions[i][1];
+      }
+      
+      // Sort scores in ascending order
+      int[] sortOrder = Utils.sort(fScores);
+      
+      // Compute pointwise maximum of lower bound
+      int minSoFar = sortOrder[0];
+      int index = 0;
+      double[] pointwiseMaxLowerBound = new double[fScores.length];
+      for (int i = 0; i < sortOrder.length; i++) {
+
+        // Progress to next higher value if possible
+        while (minSoFar > sortOrder.length - i - 1) {
+          minSoFar = sortOrder[++index];
+        }
+        pointwiseMaxLowerBound[sortOrder.length - i - 1] = fScores[minSoFar];
+      }
+      
+      // Get scores in descending order
+      int[] newSortOrder = new int[sortOrder.length];
+      for (int i = sortOrder.length - 1; i >= 0; i--) {
+        newSortOrder[sortOrder.length - i - 1] = sortOrder[i];
+      }
+      sortOrder = newSortOrder;
+      
+      // Compute pointwise minimum of upper bound
+      int maxSoFar = sortOrder[0];
+      index = 0;
+      double[] pointwiseMinUpperBound = new double[fScores.length];
+      for (int i = 0; i < sortOrder.length; i++) {
+        
+        // Progress to next lower value if possible
+        while (maxSoFar < i) {
+          maxSoFar = sortOrder[++index];
+        }
+        pointwiseMinUpperBound[i] = fScores[maxSoFar];
+      }
+
+      // Compute average
+      for (int i = 0; i < distributions.length; i++) {
+        distributions[i][1] = (pointwiseMinUpperBound[i + 1] +
+                               pointwiseMaxLowerBound[i + 1]) / 2.0;
       }
     }
 
+    for (int i = 0; i < inst.numClasses(); i++) {
+      if (i == 0) {
+        probs[i] = 1.0 - distributions[0][1];
+      } else if (i == inst.numClasses() - 1) {
+        probs[i] = distributions[i - 1][1];
+      } else {
+        probs[i] = distributions[i - 1][1] - distributions[i][1];
+        if (!(probs[i] >= 0)) {
+          System.err.println("Warning: estimated probability " + probs[i] +
+                             ". Rounding to 0.");
+          probs[i] = 0;
+        }
+      }
+    }
+    
     if (Utils.gr(Utils.sum(probs), 0)) {
       Utils.normalize(probs);
       return probs;
@@ -306,6 +390,10 @@ public class OrdinalClassClassifier
   public Enumeration listOptions()  {
 
     Vector vec = new Vector();
+    vec.addElement(new Option(
+	      "\tTurn off Schapire et al.'s smoothing " + 
+              "heuristic (ICML02, pp. 550).",
+	      "S", 0, "-S"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -313,12 +401,14 @@ public class OrdinalClassClassifier
     }
     return vec.elements();
   }
-
   /**
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
    * Valid options are: <p/>
+   * 
+   * <pre> -S
+   *  Turn off Schapire et al.'s smoothing heuristic (ICML02, pp. 550).</pre>
    * 
    * <pre> -D
    *  If set, classifier is run in debug mode and
@@ -372,7 +462,8 @@ public class OrdinalClassClassifier
    * @throws Exception if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
-  
+
+    setUseSmoothing(!Utils.getFlag('S', options));
     super.setOptions(options);
   }
 
@@ -382,9 +473,54 @@ public class OrdinalClassClassifier
    * @return an array of strings suitable for passing to setOptions
    */
   public String [] getOptions() {
-    
-    return super.getOptions();
+
+    String [] superOptions = super.getOptions();
+    String [] options = new String [superOptions.length + 1];
+
+    int current = 0;
+    if (!getUseSmoothing()) {
+      options[current++] = "-S";
+    }
+    System.arraycopy(superOptions, 0, options, current, 
+		     superOptions.length);
+
+    current += superOptions.length;
+    while (current < options.length) {
+      options[current++] = "";
+    }
+
+    return options;
   }
+
+  /**
+   * Tip text method.
+   * 
+   * @return a tip text string suitable for displaying as a popup in the GUI.
+   */
+  public String useSmoothingTipText() {
+    return "If true, use Schapire et al.'s heuristic (ICML02, pp. 550).";
+  }
+
+  /**
+   * Determines whether Schapire et al.'s smoothing method is used.
+   * 
+   * @param b true if the smoothing heuristic is to be used.
+   */
+  public void setUseSmoothing(boolean b) {
+    
+    m_UseSmoothing = b;
+  }
+
+  /**
+   * Checks whether Schapire et al.'s smoothing method is used.
+   * 
+   * @return true if the smoothing heuristic is to be used.
+   */
+  public boolean getUseSmoothing() {
+    
+    return m_UseSmoothing;
+  }
+
   
   /**
    * Prints the classifiers.
@@ -421,7 +557,7 @@ public class OrdinalClassClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -433,3 +569,4 @@ public class OrdinalClassClassifier
     runClassifier(new OrdinalClassClassifier(), argv);
   }
 }
+
