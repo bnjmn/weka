@@ -58,7 +58,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  * 
  * @author Remco Bouckaert
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class LocalScoreSearchAlgorithm 
 	extends SearchAlgorithm {
@@ -408,9 +408,9 @@ public class LocalScoreSearchAlgorithm
 					double nSumOfCounts = 0;
 
 					for (int iSymbol = 0; iSymbol < numValues; iSymbol++) {
-						if (m_fAlpha + nCounts[iParent * numValues][iSymbol] != 0) {
-							fLogScore += Statistics.lnGamma(1.0/(numValues * nCardinality) + nCounts[iParent * numValues][iSymbol]);
-							nSumOfCounts += 1.0/(numValues * nCardinality) + nCounts[iParent * numValues][iSymbol];
+						if (m_fAlpha + nCounts[iParent][iSymbol] != 0) {
+							fLogScore += Statistics.lnGamma(1.0/(numValues * nCardinality) + nCounts[iParent][iSymbol]);
+							nSumOfCounts += 1.0/(numValues * nCardinality) + nCounts[iParent][iSymbol];
 						}
 					}
 					fLogScore -= Statistics.lnGamma(nSumOfCounts);
@@ -715,6 +715,6 @@ public class LocalScoreSearchAlgorithm
 	 * @return		the revision
 	 */
 	public String getRevision() {
-	  return RevisionUtils.extract("$Revision: 1.8 $");
+	  return RevisionUtils.extract("$Revision$");
 	}
 }
