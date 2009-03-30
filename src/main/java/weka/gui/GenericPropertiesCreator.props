@@ -32,6 +32,10 @@ weka.classifiers.Classifier=\
  weka.classifiers.trees,\
  weka.classifiers.rules
 
+# Lists the AbstractClassificationOutput-packages I want to choose from
+weka.classifiers.evaluation.output.prediction.AbstractOutput=\
+  weka.classifiers.evaluation.output.prediction
+
 # Lists the Filters-Packages I want to choose from
 weka.filters.Filter= \
  weka.filters, \
