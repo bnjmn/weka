@@ -24,6 +24,8 @@ package weka.classifiers;
 
 import weka.classifiers.evaluation.NominalPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
+import weka.classifiers.evaluation.output.prediction.AbstractOutput;
+import weka.classifiers.evaluation.output.prediction.PlainText;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.xml.XMLClassifier;
 import weka.core.Drawable;
@@ -32,7 +34,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.Range;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Summarizable;
@@ -127,14 +128,21 @@ import java.util.zip.GZIPOutputStream;
  * -k <br/>
  * Outputs information-theoretic statistics. <p/>
  *
+ * -classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
+ * Uses the specified class for generating the classification output.
+ * E.g.: weka.classifiers.evaluation.output.prediction.PlainText
+ * or  : weka.classifiers.evaluation.output.prediction.CSV
+ *
  * -p range <br/>
  * Outputs predictions for test instances (or the train instances if no test
  * instances provided and -no-cv is used), along with the attributes in the specified range 
  * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
+ * Deprecated: use "-classifications ..." instead. <p/>
  * 
  * -distribution <br/>
  * Outputs the distribution instead of only the prediction
  * in conjunction with the '-p' option (only nominal classes). <p/>
+ * Deprecated: use "-classifications ..." instead. <p/>
  *
  * -r <br/>
  * Outputs cumulative margin distribution (and nothing else). <p/>
@@ -440,9 +448,8 @@ public class Evaluation
    * @param numFolds the number of folds for the cross-validation
    * @param random random number generator for randomization 
    * @param forPredictionsPrinting varargs parameter that, if supplied, is
-   * expected to hold a StringBuffer to print predictions to, 
-   * a Range of attributes to output and a Boolean (true if the distribution
-   * is to be printed)
+   * expected to hold a weka.classifiers.evaluation.output.prediction.AbstractOutput 
+   * object
    * @throws Exception if a classifier could not be generated 
    * successfully or the class is not defined
    */
@@ -458,15 +465,14 @@ public class Evaluation
       data.stratify(numFolds);
     }
 
-    // We assume that the first element is a StringBuffer, the second a Range (attributes
-    // to output) and the third a Boolean (whether or not to output a distribution instead
-    // of just a classification)
+    // We assume that the first element is a 
+    // weka.classifiers.evaluation.output.prediction.AbstractOutput object
+    AbstractOutput classificationOutput = null;
     if (forPredictionsPrinting.length > 0) {
       // print the header first
-      StringBuffer buff = (StringBuffer)forPredictionsPrinting[0];
-      Range attsToOutput = (Range)forPredictionsPrinting[1];
-      boolean printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
-      printClassificationsHeader(data, attsToOutput, printDist, buff);
+      classificationOutput = (AbstractOutput) forPredictionsPrinting[0];
+      classificationOutput.setHeader(data);
+      classificationOutput.printHeader();
     }
 
     // Do the folds
@@ -479,6 +485,9 @@ public class Evaluation
       evaluateModel(copiedClassifier, test, forPredictionsPrinting);
     }
     m_NumFolds = numFolds;
+
+    if (classificationOutput != null)
+      classificationOutput.printFooter();
   }
 
   /**
@@ -561,14 +570,21 @@ public class Evaluation
    * -k <br/>
    * Outputs information-theoretic statistics. <p/>
    *
+   * -classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
+   * Uses the specified class for generating the classification output.
+   * E.g.: weka.classifiers.evaluation.output.prediction.PlainText
+   * or  : weka.classifiers.evaluation.output.prediction.CSV
+   *
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
-   * instances provided  and -no-cv is used), along with the attributes in the specified range (and 
-   *  nothing else). Use '-p 0' if no attributes are desired. <p/>
-   *
+   * instances provided and -no-cv is used), along with the attributes in the specified range 
+   * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
+   * Deprecated: use "-classifications ..." instead. <p/>
+   * 
    * -distribution <br/>
    * Outputs the distribution instead of only the prediction
    * in conjunction with the '-p' option (only nominal classes). <p/>
+   * Deprecated: use "-classifications ..." instead. <p/>
    *
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else). <p/>
@@ -690,14 +706,21 @@ public class Evaluation
    * -k <br/>
    * Outputs information-theoretic statistics. <p/>
    *
+   * -classifications "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
+   * Uses the specified class for generating the classification output.
+   * E.g.: weka.classifiers.evaluation.output.prediction.PlainText
+   * or  : weka.classifiers.evaluation.output.prediction.CSV
+   *
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
    * instances provided and -no-cv is used), along with the attributes in the specified range 
    * (and nothing else). Use '-p 0' if no attributes are desired. <p/>
-   *
+   * Deprecated: use "-classifications ..." instead. <p/>
+   * 
    * -distribution <br/>
    * Outputs the distribution instead of only the prediction
    * in conjunction with the '-p' option (only nominal classes). <p/>
+   * Deprecated: use "-classifications ..." instead. <p/>
    *
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else). <p/>
@@ -723,9 +746,9 @@ public class Evaluation
     boolean noCrossValidation = false;
     String trainFileName, testFileName, sourceClass, 
     classIndexString, seedString, foldsString, objectInputFileName, 
-    objectOutputFileName, attributeRangeString;
+    objectOutputFileName;
     boolean noOutput = false,
-    printClassifications = false, trainStatistics = true,
+    trainStatistics = true,
     printMargins = false, printComplexityStatistics = false,
     printGraph = false, classStatistics = false, printSource = false;
     StringBuffer text = new StringBuffer();
@@ -734,14 +757,12 @@ public class Evaluation
     BufferedInputStream xmlInputStream = null;
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
-    Range attributesToOutput = null;
     long trainTimeStart = 0, trainTimeElapsed = 0,
     testTimeStart = 0, testTimeElapsed = 0;
     String xml = "";
     String[] optionsTmp = null;
     Classifier classifierBackup;
     Classifier classifierClassifications = null;
-    boolean printDistribution = false;
     int actualClassIndex = -1;  // 0-based class index
     String splitPercentageString = "";
     int splitPercentage = -1;
@@ -751,6 +772,7 @@ public class Evaluation
     String thresholdFile;
     String thresholdLabel;
     StringBuffer predsBuff = null; // predictions from cross-validation
+    AbstractOutput classificationOutput = null;
 
     // help requested?
     if (Utils.getFlag("h", options) || Utils.getFlag("help", options)) {
@@ -953,28 +975,30 @@ public class Evaluation
       printGraph = Utils.getFlag('g', options);
       sourceClass = Utils.getOption('z', options);
       printSource = (sourceClass.length() != 0);
-      printDistribution = Utils.getFlag("distribution", options);
       thresholdFile = Utils.getOption("threshold-file", options);
       thresholdLabel = Utils.getOption("threshold-label", options);
 
-      // Check -p option
-      try {
-	attributeRangeString = Utils.getOption('p', options);
+      String classifications = Utils.getOption("classifications", options);
+      String classificationsOld = Utils.getOption("p", options);
+      if (classifications.length() > 0) {
+	noOutput             = true;
+	classificationOutput = AbstractOutput.fromCommandline(classifications);
+	classificationOutput.setHeader(template);
       }
-      catch (Exception e) {
-	throw new Exception(e.getMessage() + "\nNOTE: the -p option has changed. " +
-	    "It now expects a parameter specifying a range of attributes " +
-	"to list with the predictions. Use '-p 0' for none.");
+      // backwards compatible with old "-p range" and "-distribution" options
+      else if (classificationsOld.length() > 0) {
+	noOutput             = true;
+	classificationOutput = new PlainText();
+	classificationOutput.setHeader(template);
+	if (!classificationsOld.equals("0"))
+	  classificationOutput.setAttributes(classificationsOld);
+	classificationOutput.setOutputDistribution(Utils.getFlag("distribution", options));
       }
-      if (attributeRangeString.length() != 0) {
-	printClassifications = true;
-	noOutput = true;
-	if (!attributeRangeString.equals("0")) 
-	  attributesToOutput = new Range(attributeRangeString);
+      // -distribution flag needs -p option
+      else {
+	if (Utils.getFlag("distribution", options))
+	  throw new Exception("Cannot print distribution without '-p' option!");
       }
-
-      if (!printClassifications && printDistribution)
-	throw new Exception("Cannot print distribution without '-p' option!");
 
       // if no training file given, we don't have any priors
       if ( (!trainSetPresent) && (printComplexityStatistics) )
@@ -1077,7 +1101,7 @@ public class Evaluation
     } 
 
     // backup of fully trained classifier for printing the classifications
-    if (printClassifications)
+    if (classificationOutput != null)
       classifierClassifications = Classifier.makeCopy(classifier);
 
     // Save the classifier if an object output file is provided
@@ -1140,9 +1164,10 @@ public class Evaluation
     }
 
     // Output test instance predictions only
-    if (printClassifications) {
+    if (classificationOutput != null) {
       DataSource source = testSource;
       predsBuff = new StringBuffer();
+      classificationOutput.setBuffer(predsBuff);
       // no test set -> use train set
       if (source == null && noCrossValidation) {
 	source = trainSource;
@@ -1150,15 +1175,8 @@ public class Evaluation
       } else {
         predsBuff.append("\n=== Predictions on test data ===\n\n");
       }
-      if (source != null) {
-        /*      return printClassifications(classifierClassifications, new Instances(template, 0),
-                source, actualClassIndex + 1, attributesToOutput,
-                printDistribution); */
-        printClassifications(classifierClassifications, new Instances(template, 0),
-                             source, actualClassIndex + 1, attributesToOutput,
-                             printDistribution, predsBuff);
-        //        return predsText.toString();
-      }
+      if (source != null)
+	classificationOutput.print(classifierClassifications, source);
     }
 
     // Compute error estimate from training data
@@ -1192,7 +1210,7 @@ public class Evaluation
       if (printMargins) {
 	return trainingEvaluation.toCumulativeMarginDistributionString();
       } else {
-        if (!printClassifications) {
+        if (classificationOutput == null) {
           text.append("\nTime taken to build model: "
               + Utils.doubleToString(trainTimeElapsed / 1000.0,2)
               + " seconds");
@@ -1234,13 +1252,13 @@ public class Evaluation
       }
 
       if (splitPercentage > 0) {
-        if (!printClassifications) {
+        if (classificationOutput == null) {
           text.append("\n\n" + testingEvaluation.
               toSummaryString("=== Error on test split ===\n",
                   printComplexityStatistics));
         }
       } else {
-        if (!printClassifications) {
+        if (classificationOutput == null) {
           text.append("\n\n" + testingEvaluation.
               toSummaryString("=== Error on test data ===\n",
                   printComplexityStatistics));
@@ -1253,7 +1271,7 @@ public class Evaluation
 	Random random = new Random(seed);
 	// use untrained (!) classifier for cross-validation
 	classifier = Classifier.makeCopy(classifierBackup);
-        if (!printClassifications) {
+        if (classificationOutput == null) {
           testingEvaluation.crossValidateModel(classifier, 
                                                trainSource.getDataSet(actualClassIndex), 
                                                folds, random);
@@ -1269,29 +1287,19 @@ public class Evaluation
           }
         } else {
           predsBuff = new StringBuffer();
+          classificationOutput.setBuffer(predsBuff);
           predsBuff.append("\n=== Predictions under cross-validation ===\n\n");
           testingEvaluation.crossValidateModel(classifier,
                                                trainSource.getDataSet(actualClassIndex),
-                                               folds, random, predsBuff, attributesToOutput, 
-                                               new Boolean(printDistribution));
-/*          if (template.classAttribute().isNumeric()) {
-            text.append("\n\n\n" + testingEvaluation.
-                        toSummaryString("=== Cross-validation ===\n",
-                                        printComplexityStatistics));
-          } else {
-            text.append("\n\n\n" + testingEvaluation.
-                        toSummaryString("=== Stratified " + 
-                                        "cross-validation ===\n",
-                                        printComplexityStatistics));
-          } */
+                                               folds, random, classificationOutput);
         }
       }
     }
     if (template.classAttribute().isNominal()) {
-      if (classStatistics && !noCrossValidation && !printClassifications) {
+      if (classStatistics && !noCrossValidation && (classificationOutput == null)) {
 	text.append("\n\n" + testingEvaluation.toClassDetailsString());
       }
-      if (!noCrossValidation && !printClassifications)
+      if (!noCrossValidation && (classificationOutput == null))
         text.append("\n\n" + testingEvaluation.toMatrixString());
       
     }
@@ -1382,9 +1390,8 @@ public class Evaluation
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
    * @param forPredictionsPrinting varargs parameter that, if supplied, is
-   * expected to hold a StringBuffer to print predictions to, 
-   * a Range of attributes to output and a Boolean (true if the distribution
-   * is to be printed)
+   * expected to hold a weka.classifiers.evaluation.output.prediction.AbstractOutput
+   * object
    * @return the predictions
    * @throws Exception if model could not be evaluated 
    * successfully 
@@ -1393,16 +1400,12 @@ public class Evaluation
                                 Instances data, 
                                 Object... forPredictionsPrinting) throws Exception {
     // for predictions printing
-    StringBuffer buff = null;
-    Range attsToOutput = null;
-    boolean printDist = false;
+    AbstractOutput classificationOutput = null;
 
     double predictions[] = new double[data.numInstances()];
 
     if (forPredictionsPrinting.length > 0) {
-      buff = (StringBuffer)forPredictionsPrinting[0];
-      attsToOutput = (Range)forPredictionsPrinting[1];
-      printDist = ((Boolean)forPredictionsPrinting[2]).booleanValue();
+      classificationOutput = (AbstractOutput) forPredictionsPrinting[0];
     }
 
     // Need to be able to collect predictions if appropriate (for AUC)
@@ -1410,10 +1413,8 @@ public class Evaluation
     for (int i = 0; i < data.numInstances(); i++) {
       predictions[i] = evaluateModelOnceAndRecordPrediction((Classifier)classifier, 
 	  data.instance(i));
-      if (buff != null) {
-        buff.append(predictionText(classifier, data.instance(i), i, 
-                                   attsToOutput, printDist));
-      }
+      if (classificationOutput != null)
+	classificationOutput.printClassification(classifier, data.instance(i), i);
     }
 
     return predictions;
@@ -3069,238 +3070,6 @@ public class Evaluation
   }
 
   /**
-   * Prints the predictions for the given dataset into a String variable.
-   * 
-   * @param classifier		the classifier to use
-   * @param train		the training data
-   * @param testSource		the test set
-   * @param classIndex		the class index (1-based), if -1 ot does not 
-   * 				override the class index is stored in the data 
-   * 				file (by using the last attribute)
-   * @param attributesToOutput	the indices of the attributes to output
-   * @param predsText		the generated predictions for the attribute range
-   * @throws Exception 		if test file cannot be opened
-   */
-  public static void printClassifications(Classifier classifier, 
-                                            Instances train,
-                                            DataSource testSource,
-                                            int classIndex,
-                                            Range attributesToOutput,
-                                            StringBuffer predsText) throws Exception {
-    
-    printClassifications(classifier, train, 
-                         testSource, classIndex, 
-                         attributesToOutput, false, predsText);
-  }
-
-  /**
-   * Prints the header for the predictions output into a supplied StringBuffer
-   *
-   * @param test structure of the test set to print predictions for
-   * @param attributesToOutput indices of the attributes to output
-   * @param printDistribution prints the complete distribution for nominal
-   * attributes, not just the predicted value
-   * @param text the StringBuffer to print to
-   */
-  protected static void printClassificationsHeader(Instances test, 
-                                                   Range attributesToOutput, 
-                                                   boolean printDistribution,
-                                                   StringBuffer text) {
-    // print header
-    if (test.classAttribute().isNominal())
-      if (printDistribution)
-        text.append(" inst#     actual  predicted error distribution");
-      else
-        text.append(" inst#     actual  predicted error prediction");
-    else
-      text.append(" inst#     actual  predicted      error");
-    if (attributesToOutput != null) {
-      attributesToOutput.setUpper(test.numAttributes() - 1);
-      text.append(" (");
-      boolean first = true;
-      for (int i = 0; i < test.numAttributes(); i++) {
-        if (i == test.classIndex())
-          continue;
-
-        if (attributesToOutput.isInRange(i)) {
-          if (!first)
-            text.append(",");
-          text.append(test.attribute(i).name());
-          first = false;
-        }
-      }
-      text.append(")");
-    }
-    text.append("\n");
-  }
-
-  /**
-   * Prints the predictions for the given dataset into a supplied StringBuffer
-   * 
-   * @param classifier		the classifier to use
-   * @param train		the training data
-   * @param testSource		the test set
-   * @param classIndex		the class index (1-based), if -1 ot does not 
-   * 				override the class index is stored in the data 
-   * 				file (by using the last attribute)
-   * @param attributesToOutput	the indices of the attributes to output
-   * @param printDistribution	prints the complete distribution for nominal 
-   * 				classes, not just the predicted value
-   * @param text                StringBuffer to hold the printed predictions
-   * @throws Exception 		if test file cannot be opened
-   */
-  public static void printClassifications(Classifier classifier, 
-                                          Instances train,
-                                          DataSource testSource,
-                                          int classIndex,
-                                          Range attributesToOutput,
-                                          boolean printDistribution,
-                                          StringBuffer text) throws Exception {
-
-    if (testSource != null) {
-      Instances test = testSource.getStructure();
-      if (classIndex != -1) {
-	test.setClassIndex(classIndex - 1);
-      } else {
-	if (test.classIndex() == -1)
-	  test.setClassIndex(test.numAttributes() - 1);
-      }
-
-      // print the header
-      printClassificationsHeader(test, attributesToOutput, printDistribution, text);
-
-      // print predictions
-      int i = 0;
-      testSource.reset();
-      test = testSource.getStructure(test.classIndex());
-      while (testSource.hasMoreElements(test)) {
-	Instance inst = testSource.nextElement(test);
-        text.append(predictionText(classifier, inst, i, 
-                                   attributesToOutput, printDistribution));
-	i++;
-      }
-    }
-    //    return text.toString();
-  }
-
-  /**
-   * store the prediction made by the classifier as a string
-   * 
-   * @param classifier		the classifier to use
-   * @param inst		the instance to generate text from
-   * @param instNum		the index in the dataset
-   * @param attributesToOutput	the indices of the attributes to output
-   * @param printDistribution	prints the complete distribution for nominal 
-   * 				classes, not just the predicted value
-   * @return                    the prediction as a String
-   * @throws Exception		if something goes wrong
-   * @see			#printClassifications(Classifier, Instances, String, int, Range, boolean)
-   */
-  protected static String predictionText(Classifier classifier, 
-                                         Instance inst, 
-                                         int instNum,
-                                         Range attributesToOutput,
-                                         boolean printDistribution)
-    
-    throws Exception {
-
-    StringBuffer result = new StringBuffer();
-    int width = 10;
-    int prec = 3;
-
-    Instance withMissing = (Instance)inst.copy();
-    withMissing.setDataset(inst.dataset());
-    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
-
-    // index
-    result.append(Utils.padLeft("" + (instNum+1), 6));
-
-    if (inst.dataset().classAttribute().isNumeric()) {
-      // actual
-      if (inst.classIsMissing())
-	result.append(" " + Utils.padLeft("?", width));
-      else
-	result.append(" " + Utils.doubleToString(inst.classValue(), width, prec));
-      // predicted
-      if (Instance.isMissingValue(predValue))
-	result.append(" " + Utils.padLeft("?", width));
-      else
-	result.append(" " + Utils.doubleToString(predValue, width, prec));
-      // error
-      if (Instance.isMissingValue(predValue) || inst.classIsMissing())
-	result.append(" " + Utils.padLeft("?", width));
-      else
-	result.append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
-    } else {
-      // actual
-      result.append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
-      // predicted
-      if (Instance.isMissingValue(predValue))
-	result.append(" " + Utils.padLeft("?", width));
-      else
-	result.append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
-      // error?
-      if ((int) predValue+1 != (int) inst.classValue()+1)
-	result.append(" " + "  +  ");
-      else
-	result.append(" " + "     ");
-      // prediction/distribution
-      if (printDistribution) {
-	if (Instance.isMissingValue(predValue)) {
-	  result.append(" " + "?");
-	}
-	else {
-	  result.append(" ");
-	  double[] dist = classifier.distributionForInstance(withMissing);
-	  for (int n = 0; n < dist.length; n++) {
-	    if (n > 0)
-	      result.append(",");
-	    if (n == (int) predValue)
-	      result.append("*");
-            result.append(Utils.doubleToString(dist[n], prec));
-	  }
-	}
-      }
-      else {
-	if (Instance.isMissingValue(predValue))
-	  result.append(" " + "?");
-	else
-	  result.append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
-      }
-    }
-
-    // attributes
-    result.append(" " + attributeValuesString(withMissing, attributesToOutput) + "\n");
-
-    return result.toString();
-  }
-
-  /**
-   * Builds a string listing the attribute values in a specified range of indices,
-   * separated by commas and enclosed in brackets.
-   *
-   * @param instance the instance to print the values from
-   * @param attRange the range of the attributes to list
-   * @return a string listing values of the attributes in the range
-   */
-  protected static String attributeValuesString(Instance instance, Range attRange) {
-    StringBuffer text = new StringBuffer();
-    if (attRange != null) {
-      boolean firstOutput = true;
-      attRange.setUpper(instance.numAttributes() - 1);
-      for (int i=0; i<instance.numAttributes(); i++)
-	if (attRange.isInRange(i) && i != instance.classIndex()) {
-	  if (firstOutput) text.append("(");
-	  else text.append(",");
-	  text.append(instance.toString(i));
-	  firstOutput = false;
-	}
-      if (!firstOutput) text.append(")");
-    }
-    return text.toString();
-  }
-
-  /**
    * Make up the help string giving all the command line options
    *
    * @param classifier the classifier to include options for
@@ -3356,13 +3125,19 @@ public class Evaluation
     optionsText.append(" statistics for each class.\n");
     optionsText.append("-k\n");
     optionsText.append("\tOutputs information-theoretic statistics.\n");
-    optionsText.append("-p <attribute range>\n");
-    optionsText.append("\tOnly outputs predictions for test instances (or the train\n"
-	+ "\tinstances if no test instances provided and -no-cv is used),\n"
-	+ "\talong with attributes (0 for none).\n");
+    optionsText.append("-classifications \"weka.classifiers.evaluation.output.prediction.AbstractOutput + options\"\n");
+    optionsText.append("\tUses the specified class for generating the classification output.\n");
+    optionsText.append("\tE.g.: " + PlainText.class.getName() + "\n");
+    optionsText.append("-p range\n");
+    optionsText.append("\tOutputs predictions for test instances (or the train instances if\n");
+    optionsText.append("\tno test instances provided and -no-cv is used), along with the \n");
+    optionsText.append("\tattributes in the specified range (and nothing else). \n");
+    optionsText.append("\tUse '-p 0' if no attributes are desired.\n");
+    optionsText.append("\tDeprecated: use \"-classifications ...\" instead.\n");
     optionsText.append("-distribution\n");
     optionsText.append("\tOutputs the distribution instead of only the prediction\n");
     optionsText.append("\tin conjunction with the '-p' option (only nominal classes).\n");
+    optionsText.append("\tDeprecated: use \"-classifications ...\" instead.\n");
     optionsText.append("-r\n");
     optionsText.append("\tOnly outputs cumulative margin distribution.\n");
     if (classifier instanceof Sourcable) {

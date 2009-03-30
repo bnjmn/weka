@@ -242,6 +242,13 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules.Prism,\
  weka.classifiers.rules.Ridor,\
  weka.classifiers.rules.ZeroR
+
+# Lists the AbstractOutput classes I want to choose from
+weka.classifiers.evaluation.output.prediction.AbstractOutput=\
+  weka.classifiers.evaluation.output.prediction.CSV,\
+  weka.classifiers.evaluation.output.prediction.HTML,\
+  weka.classifiers.evaluation.output.prediction.Null,\
+  weka.classifiers.evaluation.output.prediction.PlainText
  
 # Lists the DistanceFunctions I want to choose from
 weka.core.DistanceFunction=\
