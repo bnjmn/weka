@@ -38,7 +38,7 @@ import javax.swing.SwingConstants;
  * simple bird animation while their are active tasks
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class WekaTaskMonitor
   extends JPanel
@@ -66,13 +66,23 @@ public class WekaTaskMonitor
    * Constructor
    */
   public WekaTaskMonitor() {
-    Image pic = Toolkit.getDefaultToolkit().
-      getImage(ClassLoader.getSystemResource("weka/gui/weka_stationary.gif"));
-    Image pic2 = Toolkit.getDefaultToolkit().
-      getImage(ClassLoader.getSystemResource("weka/gui/weka_animated.gif"));
+    java.net.URL imageURL = 
+      this.getClass().getClassLoader().getResource("weka/gui/weka_stationary.gif");
 
-    m_iconStationary = new ImageIcon(pic); 
-    m_iconAnimated = new ImageIcon(pic2);
+    if (imageURL != null) {
+      Image pic = Toolkit.getDefaultToolkit().getImage(imageURL);
+      imageURL = 
+        this.getClass().getClassLoader().getResource("weka/gui/weka_animated.gif");
+      Image pic2 = Toolkit.getDefaultToolkit().getImage(imageURL); 
+    
+      /*    Image pic = Toolkit.getDefaultToolkit().
+            getImage(ClassLoader.getSystemResource("weka/gui/weka_stationary.gif"));
+            Image pic2 = Toolkit.getDefaultToolkit().
+            getImage(ClassLoader.getSystemResource("weka/gui/weka_animated.gif")); */
+
+      m_iconStationary = new ImageIcon(pic); 
+      m_iconAnimated = new ImageIcon(pic2);
+    }
     
     m_MonitorLabel = new JLabel(" x "+m_ActiveTasks,m_iconStationary,SwingConstants.CENTER);
     /*
