@@ -81,6 +81,7 @@ BlockEndd=}
 # the keywords
 Keywords=\
 	abstract,\
+	assert,\
 	boolean,\
 	break,\
 	byte,\
