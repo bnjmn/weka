@@ -23,12 +23,14 @@
 
 package weka.gui;
 
+import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.FontMetrics;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyEditor;
+import java.awt.event.ActionListener;
 import java.beans.PropertyEditorSupport;
 import java.io.File;
+
 import javax.swing.JFileChooser;
 
 
@@ -36,11 +38,11 @@ import javax.swing.JFileChooser;
  * A PropertyEditor for File objects that lets the user select a file.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class FileEditor extends PropertyEditorSupport {
 
-  /** The file chooser used for selecting files */
+  /** The file chooser used for selecting files. */
   protected JFileChooser m_FileChooser;
   
   /**
@@ -93,6 +95,7 @@ public class FileEditor extends PropertyEditorSupport {
 	    File newVal = m_FileChooser.getSelectedFile();
 	    setValue(newVal);
 	  }
+	  closeDialog();
 	}
       });
     }
@@ -125,5 +128,16 @@ public class FileEditor extends PropertyEditorSupport {
     }
     gfx.drawString(val, 2, fm.getHeight() + vpad);
   }  
+  
+  /**
+   * Closes the dialog.
+   */
+  protected void closeDialog() {
+    if (m_FileChooser instanceof Container) {
+      Dialog dlg = PropertyDialog.getParentDialog((Container) m_FileChooser);
+      if (dlg != null)
+	dlg.setVisible(false);
+    }
+  }
 }
 
