@@ -40,6 +40,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -156,6 +157,10 @@ import java.util.Vector;
  * <pre> -B
  *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
  * 
+ * <pre> -model &lt;file&gt;
+ *  Specifies the filename to save the libsvm-internal model to.
+ *  Gets ignored if a directory is provided.</pre>
+ * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
@@ -172,50 +177,50 @@ public class LibSVM
   extends Classifier
   implements TechnicalInformationHandler {
   
-  /** the svm classname */
+  /** the svm classname. */
   protected final static String CLASS_SVM = "libsvm.svm";
   
-  /** the svm_model classname */
+  /** the svm_model classname. */
   protected final static String CLASS_SVMMODEL = "libsvm.svm_model";
   
-  /** the svm_problem classname */
+  /** the svm_problem classname. */
   protected final static String CLASS_SVMPROBLEM = "libsvm.svm_problem";
   
-  /** the svm_parameter classname */
+  /** the svm_parameter classname. */
   protected final static String CLASS_SVMPARAMETER = "libsvm.svm_parameter";
   
-  /** the svm_node classname */
+  /** the svm_node classname. */
   protected final static String CLASS_SVMNODE = "libsvm.svm_node";
   
-  /** serial UID */
+  /** serial UID. */
   protected static final long serialVersionUID = 14172;
   
-  /** LibSVM Model */
+  /** LibSVM Model. */
   protected Object m_Model;
   
-  /** for normalizing the data */
+  /** for normalizing the data. */
   protected Filter m_Filter = null;
     
   /** The filter used to get rid of missing values. */
   protected ReplaceMissingValues m_ReplaceMissingValues;
   
-  /** normalize input data */
+  /** normalize input data. */
   protected boolean m_Normalize = false;
   
-  /** If true, the replace missing values filter is not applied */
+  /** If true, the replace missing values filter is not applied. */
   private boolean m_noReplaceMissingValues;
   
-  /** SVM type C-SVC (classification) */
+  /** SVM type C-SVC (classification). */
   public static final int SVMTYPE_C_SVC = 0;
-  /** SVM type nu-SVC (classification) */
+  /** SVM type nu-SVC (classification). */
   public static final int SVMTYPE_NU_SVC = 1;
-  /** SVM type one-class SVM (classification) */
+  /** SVM type one-class SVM (classification). */
   public static final int SVMTYPE_ONE_CLASS_SVM = 2;
-  /** SVM type epsilon-SVR (regression) */
+  /** SVM type epsilon-SVR (regression). */
   public static final int SVMTYPE_EPSILON_SVR = 3;
-  /** SVM type nu-SVR (regression) */
+  /** SVM type nu-SVR (regression). */
   public static final int SVMTYPE_NU_SVR = 4;
-  /** SVM types */
+  /** SVM types. */
   public static final Tag[] TAGS_SVMTYPE = {
     new Tag(SVMTYPE_C_SVC, "C-SVC (classification)"),
     new Tag(SVMTYPE_NU_SVC, "nu-SVC (classification)"),
@@ -224,18 +229,18 @@ public class LibSVM
     new Tag(SVMTYPE_NU_SVR, "nu-SVR (regression)")
   };
   
-  /** the SVM type */
+  /** the SVM type. */
   protected int m_SVMType = SVMTYPE_C_SVC;
   
-  /** kernel type linear: u'*v */
+  /** kernel type linear: u'*v. */
   public static final int KERNELTYPE_LINEAR = 0;
-  /** kernel type polynomial: (gamma*u'*v + coef0)^degree */
+  /** kernel type polynomial: (gamma*u'*v + coef0)^degree. */
   public static final int KERNELTYPE_POLYNOMIAL = 1;
-  /** kernel type radial basis function: exp(-gamma*|u-v|^2) */
+  /** kernel type radial basis function: exp(-gamma*|u-v|^2). */
   public static final int KERNELTYPE_RBF = 2;
-  /** kernel type sigmoid: tanh(gamma*u'*v + coef0) */
+  /** kernel type sigmoid: tanh(gamma*u'*v + coef0). */
   public static final int KERNELTYPE_SIGMOID = 3;
-  /** the different kernel types */
+  /** the different kernel types. */
   public static final Tag[] TAGS_KERNELTYPE = {
     new Tag(KERNELTYPE_LINEAR, "linear: u'*v"),
     new Tag(KERNELTYPE_POLYNOMIAL, "polynomial: (gamma*u'*v + coef0)^degree"),
@@ -243,51 +248,54 @@ public class LibSVM
     new Tag(KERNELTYPE_SIGMOID, "sigmoid: tanh(gamma*u'*v + coef0)")
   };
   
-  /** the kernel type */
+  /** the kernel type. */
   protected int m_KernelType = KERNELTYPE_RBF;
   
   /** for poly - in older versions of libsvm declared as a double.
    * At least since 2.82 it is an int. */
   protected int m_Degree = 3;
   
-  /** for poly/rbf/sigmoid */
+  /** for poly/rbf/sigmoid. */
   protected double m_Gamma = 0;
   
-  /** for poly/rbf/sigmoid (the actual gamma) */
+  /** for poly/rbf/sigmoid (the actual gamma). */
   protected double m_GammaActual = 0;
   
-  /** for poly/sigmoid */
+  /** for poly/sigmoid. */
   protected double m_Coef0 = 0;
   
-  /** in MB */
+  /** in MB. */
   protected double m_CacheSize = 40;
   
-  /** stopping criteria */
+  /** stopping criteria. */
   protected double m_eps = 1e-3;
   
-  /** cost, for C_SVC, EPSILON_SVR and NU_SVR */
+  /** cost, for C_SVC, EPSILON_SVR and NU_SVR. */
   protected double m_Cost = 1;
   
-  /** for C_SVC */
+  /** for C_SVC. */
   protected int[] m_WeightLabel = new int[0];
   
-  /** for C_SVC */
+  /** for C_SVC. */
   protected double[] m_Weight = new double[0];
   
-  /** for NU_SVC, ONE_CLASS, and NU_SVR */
+  /** for NU_SVC, ONE_CLASS, and NU_SVR. */
   protected double m_nu = 0.5;
   
-  /** loss, for EPSILON_SVR */
+  /** loss, for EPSILON_SVR. */
   protected double m_Loss = 0.1;
   
-  /** use the shrinking heuristics */
+  /** use the shrinking heuristics. */
   protected boolean m_Shrinking = true;	
   
   /** whether to generate probability estimates instead of +1/-1 in case of 
-   * classification problems */
+   * classification problems. */
   protected boolean m_ProbabilityEstimates = false;
+  
+  /** the file to save the libsvm-internal model to. */
+  protected File m_ModelFile = new File(System.getProperty("user.dir"));
     
-  /** whether the libsvm classes are in the Classpath */
+  /** whether the libsvm classes are in the Classpath. */
   protected static boolean m_Present = false;
   static {
     try {
@@ -300,7 +308,7 @@ public class LibSVM
   }
   
   /**
-   * Returns a string describing classifier
+   * Returns a string describing classifier.
    * 
    * @return a description suitable for displaying in the
    *         explorer/experimenter gui
@@ -451,6 +459,12 @@ public class LibSVM
         new Option(
             "\tTrains a SVC model instead of a SVR one (default: SVR)",
             "B", 0, "-B"));
+    
+    result.addElement(
+        new Option(
+            "\tSpecifies the filename to save the libsvm-internal model to.\n"
+            + "\tGets ignored if a directory is provided.",
+            "model", 1, "-model <file>"));
 
     Enumeration en = super.listOptions();
     while (en.hasMoreElements())
@@ -528,6 +542,10 @@ public class LibSVM
    * 
    * <pre> -B
    *  Trains a SVC model instead of a SVR one (default: SVR)</pre>
+   * 
+   * <pre> -model &lt;file&gt;
+   *  Specifies the filename to save the libsvm-internal model to.
+   *  Gets ignored if a directory is provided.</pre>
    * 
    * <pre> -D
    *  If set, classifier is run in debug mode and
@@ -614,10 +632,16 @@ public class LibSVM
     setWeights(Utils.getOption('W', options));
     
     setProbabilityEstimates(Utils.getFlag('B', options));
+    
+    tmpStr = Utils.getOption("model", options);
+    if (tmpStr.length() == 0)
+      m_ModelFile = new File(System.getProperty("user.dir"));
+    else
+      m_ModelFile = new File(tmpStr);
   }
   
   /**
-   * Returns the current options
+   * Returns the current options.
    * 
    * @return            the current setup
    */
@@ -673,6 +697,9 @@ public class LibSVM
     if (getProbabilityEstimates())
       result.add("-B");
     
+    result.add("-model");
+    result.add(m_ModelFile.getAbsolutePath());
+    
     return (String[]) result.toArray(new String[result.size()]);
   }
   
@@ -687,7 +714,7 @@ public class LibSVM
   }
   
   /**
-   * Sets type of SVM (default SVMTYPE_C_SVC)
+   * Sets type of SVM (default SVMTYPE_C_SVC).
    * 
    * @param value       the type of the SVM
    */
@@ -697,7 +724,7 @@ public class LibSVM
   }
   
   /**
-   * Gets type of SVM
+   * Gets type of SVM.
    * 
    * @return            the type of the SVM
    */
@@ -706,7 +733,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -716,7 +743,7 @@ public class LibSVM
   }
   
   /**
-   * Sets type of kernel function (default KERNELTYPE_RBF)
+   * Sets type of kernel function (default KERNELTYPE_RBF).
    * 
    * @param value       the kernel type
    */
@@ -726,7 +753,7 @@ public class LibSVM
   }
   
   /**
-   * Gets type of kernel function
+   * Gets type of kernel function.
    * 
    * @return            the kernel type
    */
@@ -735,7 +762,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -745,7 +772,7 @@ public class LibSVM
   }
   
   /**
-   * Sets the degree of the kernel
+   * Sets the degree of the kernel.
    * 
    * @param value       the degree of the kernel
    */
@@ -754,7 +781,7 @@ public class LibSVM
   }
   
   /**
-   * Gets the degree of the kernel
+   * Gets the degree of the kernel.
    * 
    * @return            the degree of the kernel
    */
@@ -763,7 +790,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -773,7 +800,7 @@ public class LibSVM
   }
   
   /**
-   * Sets gamma (default = 1/no of attributes)
+   * Sets gamma (default = 1/no of attributes).
    * 
    * @param value       the gamma value
    */
@@ -782,7 +809,7 @@ public class LibSVM
   }
   
   /**
-   * Gets gamma
+   * Gets gamma.
    * 
    * @return            the current gamma
    */
@@ -791,7 +818,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -801,7 +828,7 @@ public class LibSVM
   }
   
   /**
-   * Sets coef (default 0)
+   * Sets coef (default 0).
    * 
    * @param value       the coef
    */
@@ -810,7 +837,7 @@ public class LibSVM
   }
   
   /**
-   * Gets coef
+   * Gets coef.
    * 
    * @return            the coef
    */
@@ -819,7 +846,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -829,7 +856,7 @@ public class LibSVM
   }
   
   /**
-   * Sets nu of nu-SVC, one-class SVM, and nu-SVR (default 0.5)
+   * Sets nu of nu-SVC, one-class SVM, and nu-SVR (default 0.5).
    * 
    * @param value       the new nu value
    */
@@ -838,7 +865,7 @@ public class LibSVM
   }
   
   /**
-   * Gets nu of nu-SVC, one-class SVM, and nu-SVR (default 0.5)
+   * Gets nu of nu-SVC, one-class SVM, and nu-SVR (default 0.5).
    * 
    * @return            the current nu value
    */
@@ -847,7 +874,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -857,7 +884,7 @@ public class LibSVM
   }
   
   /**
-   * Sets cache memory size in MB (default 40)
+   * Sets cache memory size in MB (default 40).
    * 
    * @param value       the memory size in MB
    */
@@ -866,7 +893,7 @@ public class LibSVM
   }
   
   /**
-   * Gets cache memory size in MB
+   * Gets cache memory size in MB.
    * 
    * @return            the memory size in MB
    */
@@ -875,7 +902,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -885,7 +912,7 @@ public class LibSVM
   }
   
   /**
-   * Sets the parameter C of C-SVC, epsilon-SVR, and nu-SVR (default 1)
+   * Sets the parameter C of C-SVC, epsilon-SVR, and nu-SVR (default 1).
    * 
    * @param value       the cost value
    */
@@ -894,7 +921,7 @@ public class LibSVM
   }
   
   /**
-   * Sets the parameter C of C-SVC, epsilon-SVR, and nu-SVR
+   * Sets the parameter C of C-SVC, epsilon-SVR, and nu-SVR.
    * 
    * @return            the cost value
    */
@@ -903,7 +930,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -913,7 +940,7 @@ public class LibSVM
   }
   
   /**
-   * Sets tolerance of termination criterion (default 0.001)
+   * Sets tolerance of termination criterion (default 0.001).
    * 
    * @param value       the tolerance
    */
@@ -922,7 +949,7 @@ public class LibSVM
   }
   
   /**
-   * Gets tolerance of termination criterion
+   * Gets tolerance of termination criterion.
    * 
    * @return            the current tolerance
    */
@@ -931,7 +958,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -941,7 +968,7 @@ public class LibSVM
   }
   
   /**
-   * Sets the epsilon in loss function of epsilon-SVR (default 0.1)
+   * Sets the epsilon in loss function of epsilon-SVR (default 0.1).
    * 
    * @param value       the loss epsilon
    */
@@ -950,7 +977,7 @@ public class LibSVM
   }
   
   /**
-   * Gets the epsilon in loss function of epsilon-SVR
+   * Gets the epsilon in loss function of epsilon-SVR.
    * 
    * @return            the loss epsilon
    */
@@ -959,7 +986,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -969,7 +996,7 @@ public class LibSVM
   }
   
   /**
-   * whether to use the shrinking heuristics
+   * whether to use the shrinking heuristics.
    * 
    * @param value       true uses shrinking
    */
@@ -978,7 +1005,7 @@ public class LibSVM
   }
   
   /**
-   * whether to use the shrinking heuristics
+   * whether to use the shrinking heuristics.
    * 
    * @return            true, if shrinking is used
    */
@@ -987,7 +1014,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -997,7 +1024,7 @@ public class LibSVM
   }
   
   /**
-   * whether to normalize input data
+   * whether to normalize input data.
    * 
    * @param value       whether to normalize the data
    */
@@ -1006,7 +1033,7 @@ public class LibSVM
   }
   
   /**
-   * whether to normalize input data
+   * whether to normalize input data.
    * 
    * @return            true, if the data is normalized
    */
@@ -1015,7 +1042,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -1025,7 +1052,7 @@ public class LibSVM
   }
     
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -1103,7 +1130,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -1113,7 +1140,7 @@ public class LibSVM
   }
   
   /**
-   * Returns whether probability estimates are generated instead of -1/+1 for 
+   * Sets whether probability estimates are generated instead of -1/+1 for 
    * classification problems.
    * 
    * @param value       whether to predict probabilities
@@ -1123,7 +1150,7 @@ public class LibSVM
   }
   
   /**
-   * Sets whether to generate probability estimates instead of -1/+1 for 
+   * Returns whether to generate probability estimates instead of -1/+1 for 
    * classification problems.
    * 
    * @return            true, if probability estimates should be returned
@@ -1133,7 +1160,7 @@ public class LibSVM
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    *         displaying in the explorer/experimenter gui
@@ -1143,7 +1170,40 @@ public class LibSVM
   }
   
   /**
-   * sets the specified field
+   * Sets the file to save the libsvm-internal model to. No model is saved if
+   * pointing to a directory.
+   * 
+   * @param value       the filename/directory
+   */
+  public void setModelFile(File value) {
+    if (value == null)
+      m_ModelFile = new File(System.getProperty("user.dir"));
+    else
+      m_ModelFile = value;
+  }
+  
+  /**
+   * Returns the file to save the libsvm-internal model to. No model is saved
+   * if pointing to a directory.
+   * 
+   * @return            the file object
+   */
+  public File getModelFile() {
+    return m_ModelFile;
+  }
+  
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return 		tip text for this property suitable for
+   *         		displaying in the explorer/experimenter gui
+   */
+  public String modelFileTipText() {
+    return "The file to save the libsvm-internal model to; no model is saved if pointing to a directory.";
+  }
+  
+  /**
+   * sets the specified field.
    * 
    * @param o           the object to set the field for
    * @param name        the name of the field
@@ -1162,7 +1222,7 @@ public class LibSVM
   }
   
   /**
-   * sets the specified field in an array
+   * sets the specified field in an array.
    * 
    * @param o           the object to set the field for
    * @param name        the name of the field
@@ -1182,7 +1242,7 @@ public class LibSVM
   }
   
   /**
-   * returns the current value of the specified field
+   * returns the current value of the specified field.
    * 
    * @param o           the object the field is member of
    * @param name        the name of the field
@@ -1205,7 +1265,7 @@ public class LibSVM
   }
   
   /**
-   * sets a new array for the field
+   * sets a new array for the field.
    * 
    * @param o           the object to set the array for
    * @param name        the name of the field
@@ -1217,7 +1277,7 @@ public class LibSVM
   }
   
   /**
-   * sets a new array for the field
+   * sets a new array for the field.
    * 
    * @param o           the object to set the array for
    * @param name        the name of the field
@@ -1237,7 +1297,7 @@ public class LibSVM
   }
   
   /**
-   * executes the specified method and returns the result, if any
+   * executes the specified method and returns the result, if any.
    * 
    * @param o                   the object the method should be called from
    * @param name                the name of the method
@@ -1264,7 +1324,7 @@ public class LibSVM
   }
   
   /**
-   * transfers the local variables into a svm_parameter object
+   * transfers the local variables into a svm_parameter object.
    * 
    * @return the configured svm_parameter object
    */
@@ -1305,7 +1365,7 @@ public class LibSVM
   }
   
   /**
-   * returns the svm_problem
+   * returns the svm_problem.
    * 
    * @param vx the x values
    * @param vy the y values
@@ -1336,7 +1396,7 @@ public class LibSVM
   }
   
   /**
-   * returns an instance into a sparse libsvm array
+   * returns an instance into a sparse libsvm array.
    * 
    * @param instance	the instance to work on
    * @return		the libsvm array
@@ -1532,7 +1592,7 @@ public class LibSVM
   }
   
   /**
-   * builds the classifier
+   * builds the classifier.
    * 
    * @param insts       the training instances
    * @throws Exception  if libsvm classes not in classpath or libsvm
@@ -1611,10 +1671,23 @@ public class LibSVM
         new Object[]{
           getProblem(vx, vy), 
           getParameters()});
+    
+    // save internal model?
+    if (!m_ModelFile.isDirectory()) {
+      invokeMethod(
+	  Class.forName(CLASS_SVM).newInstance(), 
+	  "svm_save_model", 
+	  new Class[]{
+	    String.class, 
+	    Class.forName(CLASS_SVMMODEL)},
+	    new Object[]{
+	    m_ModelFile.getAbsolutePath(), 
+	    m_Model});
+    }
   }
     
   /**
-   * returns a string representation
+   * returns a string representation.
    * 
    * @return            a string representation
    */
