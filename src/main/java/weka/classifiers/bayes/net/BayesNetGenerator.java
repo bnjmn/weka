@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class BayesNetGenerator extends EditableBayesNet {
     /** the seed value */
@@ -374,7 +374,7 @@ public class BayesNetGenerator extends EditableBayesNet {
 		    allParentsDone = true;
 		    int iParent = 0;
 		    while (allParentsDone && iParent < m_ParentSets[iAtt2].getNrOfParents()) {
-			allParentsDone = bDone[m_ParentSets[iAtt].getParent(iParent++)];
+			allParentsDone = bDone[m_ParentSets[iAtt2].getParent(iParent++)];
 		    }
 		    if (allParentsDone && iParent == m_ParentSets[iAtt2].getNrOfParents()) {
 			order[iAtt] = iAtt2;
@@ -582,7 +582,7 @@ public class BayesNetGenerator extends EditableBayesNet {
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.14 $");
+      return RevisionUtils.extract("$Revision$");
     }
 
     /**
