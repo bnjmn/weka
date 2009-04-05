@@ -23,6 +23,7 @@
 package weka.gui.explorer;
 
 import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -67,6 +68,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.BufferedOutputStream;
@@ -210,6 +212,24 @@ public class PreprocessPanel
     m_FilterEditor.setClassType(weka.filters.Filter.class);
     if (ExplorerDefaults.getFilter() != null)
       m_FilterEditor.setValue(ExplorerDefaults.getFilter());
+    
+    m_FilterEditor.addPropertyChangeListener(new PropertyChangeListener() {
+      public void propertyChange(PropertyChangeEvent e) {
+        m_ApplyFilterBut.setEnabled(true);
+        Capabilities currentCapabilitiesFilter = m_FilterEditor.getCapabilitiesFilter();
+        Filter filter = (Filter) m_FilterEditor.getValue();
+        Capabilities currentFilterCapabilities = null;
+        if (filter != null && currentCapabilitiesFilter != null &&
+            (filter instanceof CapabilitiesHandler)) {
+          currentFilterCapabilities = ((CapabilitiesHandler)filter).getCapabilities();
+          
+          if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
+              !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
+            m_ApplyFilterBut.setEnabled(false);
+          }
+        }
+      }
+    });
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_OpenDBBut.setToolTipText("Open a set of instances from a database");
