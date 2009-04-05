@@ -25,6 +25,7 @@ package weka.gui.explorer;
 import weka.associations.Associator;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
@@ -72,7 +73,7 @@ import javax.swing.event.ChangeListener;
  * that learns associations.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.26 $
+ * @version $Revision$
  */
 public class AssociationsPanel 
   extends JPanel
@@ -162,6 +163,20 @@ public class AssociationsPanel
     m_AssociatorEditor.setValue(ExplorerDefaults.getAssociator());
     m_AssociatorEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
+        m_StartBut.setEnabled(true);
+        // Check capabilities
+        Capabilities currentFilter = m_AssociatorEditor.getCapabilitiesFilter();
+        Associator associator = (Associator) m_AssociatorEditor.getValue();
+        Capabilities currentSchemeCapabilities =  null;
+        if (associator != null && currentFilter != null && 
+            (associator instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities = ((CapabilitiesHandler)associator).getCapabilities();
+          
+          if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+              !currentSchemeCapabilities.supports(currentFilter)) {
+            m_StartBut.setEnabled(false);
+          }
+        }
 	repaint();
       }
     });
