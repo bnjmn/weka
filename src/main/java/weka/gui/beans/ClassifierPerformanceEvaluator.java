@@ -104,10 +104,10 @@ public class ClassifierPerformanceEvaluator
   // ----- Stuff for ROC curves
   private boolean m_rocListenersConnected = false;
   // Plottable Instances with predictions appended
-  private Instances m_predInstances = null;
+  private transient Instances m_predInstances = null;
   // Actual predictions
-  private FastVector m_plotShape = null;
-  private FastVector m_plotSize = null;
+  private transient FastVector m_plotShape = null;
+  private transient FastVector m_plotSize = null;
 
   /**
    * Accept a classifier to be evaluated
@@ -129,11 +129,13 @@ public class ClassifierPerformanceEvaluator
 		    ce.getClassifier() != m_classifier */) {
 		  m_eval = new Evaluation(ce.getTestSet().getDataSet());
 		  m_classifier = ce.getClassifier();
-		  m_predInstances = 
-		    weka.gui.explorer.ClassifierPanel.
-		    setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
-		  m_plotShape = new FastVector();
-		  m_plotSize = new FastVector();
+		  if (m_visualizableErrorListeners.size() > 0) {
+		    m_predInstances = 
+		      weka.gui.explorer.ClassifierPanel.
+		      setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
+		    m_plotShape = new FastVector();
+		    m_plotSize = new FastVector();
+		  }
 		}
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
@@ -170,7 +172,7 @@ public class ClassifierPerformanceEvaluator
 					textTitle.length());
 		  String resultT = "=== Evaluation result ===\n\n"
 		    + "Scheme: " + textTitle + "\n"
-		    + ((textOptions.length() > 0) ? "Options: " + textOptions : "")
+		    + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n": "")
 		    + "Relation: " + ce.getTestSet().getDataSet().relationName()
 		    + "\n\n" + m_eval.toSummaryString();
                   
@@ -202,7 +204,8 @@ public class ClassifierPerformanceEvaluator
                   }
                   
 
-		  if (ce.getTestSet().getDataSet().classAttribute().isNominal()) {
+		  if (ce.getTestSet().getDataSet().classAttribute().isNominal() &&
+		      m_thresholdListeners.size() > 0) {
 		    ThresholdCurve tc = new ThresholdCurve();
 		    Instances result = tc.getCurve(m_eval.predictions(), 0);
 		    result.
@@ -256,6 +259,11 @@ public class ClassifierPerformanceEvaluator
 		  if (m_logger != null) {
 		    m_logger.statusMessage(statusMessagePrefix() + "Finished.");
 		  }
+
+		  // save memory
+		  m_predInstances = null;
+		  m_plotShape = null;
+		  m_plotSize = null;
 		}
 	      } catch (Exception ex) {
 	        errorOccurred = true;
@@ -271,6 +279,7 @@ public class ClassifierPerformanceEvaluator
 //		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
+				
 		if (m_logger != null) {
 		  if (errorOccurred) {
 		    m_logger.statusMessage(statusMessagePrefix() 
