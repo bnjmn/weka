@@ -554,6 +554,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	      dialog.setCapabilities(m_CapabilitiesFilter);
 	      dialog.setPopup(m_Self);
 	      dialog.setVisible(true);
+	      m_Support.firePropertyChange("", null, null);
 	      repaint();
 	    }
 	  }
@@ -566,6 +567,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	  public void actionPerformed(ActionEvent e) {
 	    if (e.getSource() == m_RemoveFilterButton) {
 	      m_CapabilitiesFilter = null;
+	      m_Support.firePropertyChange("", null, null);
 	      repaint();
 	    }
 	  }
@@ -1554,12 +1556,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    return;
 	  
 	  if (node.isLeaf()) {
-	    if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
+	    /*if (node.m_Capabilities != null && m_CapabilitiesFilter != null) {
 	      if (!node.m_Capabilities.supportsMaybe(m_CapabilitiesFilter) && 
 	          !node.m_Capabilities.supports(m_CapabilitiesFilter)) {
 	        return;
 	      }
-	    }
+	    } */
 	    classSelected(getClassnameFromPath(tree.getSelectionPath()));
 	    popup.setVisible(false);
 	  }
