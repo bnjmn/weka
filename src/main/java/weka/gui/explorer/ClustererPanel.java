@@ -26,6 +26,7 @@ import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -118,7 +119,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.60 $
+ * @version $Revision$
  */
 public class ClustererPanel
   extends JPanel
@@ -266,6 +267,19 @@ public class ClustererPanel
     m_ClustererEditor.setValue(ExplorerDefaults.getClusterer());
     m_ClustererEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
+        m_StartBut.setEnabled(true);
+        Capabilities currentFilter = m_ClustererEditor.getCapabilitiesFilter();
+        Clusterer clusterer = (Clusterer) m_ClustererEditor.getValue();
+        Capabilities currentSchemeCapabilities =  null;
+        if (clusterer != null && currentFilter != null && 
+            (clusterer instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities = ((CapabilitiesHandler)clusterer).getCapabilities();
+          
+          if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+              !currentSchemeCapabilities.supports(currentFilter)) {
+            m_StartBut.setEnabled(false);
+          }
+        }
 	repaint();
       }
     });
