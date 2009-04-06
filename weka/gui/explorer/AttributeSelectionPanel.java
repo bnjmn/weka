@@ -30,6 +30,7 @@ import weka.attributeSelection.AttributeTransformer;
 import weka.attributeSelection.Ranker;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.FastVector;
 import weka.core.Instances;
 import weka.core.OptionHandler;
@@ -257,6 +258,21 @@ public class AttributeSelectionPanel
           }
         }
 	updateRadioLinks();
+	
+	m_StartBut.setEnabled(true);
+	// check capabilities...
+        Capabilities currentFilter = m_AttributeEvaluatorEditor.getCapabilitiesFilter();
+        ASEvaluation evaluator = (ASEvaluation) m_AttributeEvaluatorEditor.getValue();
+        Capabilities currentSchemeCapabilities =  null;
+        if (evaluator != null && currentFilter != null && 
+            (evaluator instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities = ((CapabilitiesHandler)evaluator).getCapabilities();
+          
+          if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+              !currentSchemeCapabilities.supports(currentFilter)) {
+            m_StartBut.setEnabled(false);
+          }
+        }
 	repaint();
       }
     });
