@@ -32,6 +32,7 @@ import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -345,6 +346,20 @@ public class ClassifierPanel
     m_ClassifierEditor.setValue(ExplorerDefaults.getClassifier());
     m_ClassifierEditor.addPropertyChangeListener(new PropertyChangeListener() {
       public void propertyChange(PropertyChangeEvent e) {
+        m_StartBut.setEnabled(true);
+        // Check capabilities
+        Capabilities currentFilter = m_ClassifierEditor.getCapabilitiesFilter();
+        Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
+        Capabilities currentSchemeCapabilities =  null;
+        if (classifier != null && currentFilter != null && 
+            (classifier instanceof CapabilitiesHandler)) {
+          currentSchemeCapabilities = ((CapabilitiesHandler)classifier).getCapabilities();
+          
+          if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+              !currentSchemeCapabilities.supports(currentFilter)) {
+            m_StartBut.setEnabled(false);
+          }
+        }
 	repaint();
       }
     });
