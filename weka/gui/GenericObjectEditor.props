@@ -267,6 +267,7 @@ weka.attributeSelection.ASEvaluation=\
  weka.attributeSelection.OneRAttributeEval,\
  weka.attributeSelection.PrincipalComponents,\
  weka.attributeSelection.ReliefFAttributeEval,\
+ weka.attributeSelection.SignificanceAttributeEval,\
  weka.attributeSelection.SVMAttributeEval,\
  weka.attributeSelection.SymmetricalUncertAttributeEval,\
  weka.attributeSelection.SymmetricalUncertAttributeSetEval,\
