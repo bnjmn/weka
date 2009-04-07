@@ -54,7 +54,7 @@ public class FileLogger
     m_LogFile = getLogFile();
     // try to remove file
     try {
-      if (m_LogFile.exists())
+      if ((m_LogFile != null) && m_LogFile.exists())
 	m_LogFile.delete();
     }
     catch (Exception e) {
@@ -92,6 +92,9 @@ public class FileLogger
    */
   protected void append(String s) {
     BufferedWriter	writer;
+   
+    if (m_LogFile == null)
+      return;
     
     // append output to file
     try {
