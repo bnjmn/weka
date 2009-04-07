@@ -886,15 +886,6 @@ public class Classifier
       Thread.sleep(10);
     } catch (Exception ex){} */
     m_executorPool.execute(newTask);
-    
-    if (e.getRunNumber() == e.getMaxRunNumber() && 
-        e.getSetNumber() == e.getMaxSetNumber()) {
-      
-      // block on the last fold of the last run
-      /* System.err.println("[Classifier] blocking on last fold of last run...");
-      block(true); */
-      m_block = true;
-    }
   }
 
   /**
@@ -903,6 +894,17 @@ public class Classifier
    * @param e a <code>TestSetEvent</code> value
    */    
   public synchronized void acceptTestSet(TestSetEvent e) {
+    if (m_block) {
+      //block(true);
+      if (m_log != null) {
+        m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
+            + "at this time.");
+        m_log.logMessage("[Classifier] " + statusMessagePrefix()
+            + " BUSY. Can't accept data at this time.");
+      }
+      return;
+    }
+    
     Instances testSet = e.getTestSet();
     if (testSet != null) {
       if (testSet.classIndex() < 0) {
@@ -1020,6 +1022,14 @@ public class Classifier
               new DataSetEvent(this, e.getTestSet()),
               e.getRunNumber(), e.getMaxRunNumber(),
               e.getSetNumber(), e.getMaxSetNumber());
+        if (e.getRunNumber() == e.getMaxRunNumber() && 
+            e.getSetNumber() == e.getMaxSetNumber()) {
+          
+          // block on the last fold of the last run
+          /* System.err.println("[Classifier] blocking on last fold of last run...");
+          block(true); */
+          m_block = true;
+        }
       } else {
         // Otherwise, there is a model here waiting for a test set...
         m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1].
