@@ -394,7 +394,7 @@ public class CrossValidationFoldMaker
     if (tf) {
       try {
 	// make sure the thread is still running before we block
-	if (m_foldThread.isAlive()) {
+	if (m_foldThread != null && m_foldThread.isAlive()) {
 	  wait();
 	}
       } catch (InterruptedException ex) {
