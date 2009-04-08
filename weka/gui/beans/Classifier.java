@@ -194,7 +194,16 @@ public class Classifier
   protected String m_oldText = "";
   
   /**
-   * true if we should block any further training data sets.
+   * true if we should reject any further training 
+   * data sets, until all processing has been finished,
+   *  once we've received the last fold of
+   * the last run.
+   */
+  protected boolean m_reject = false;
+  
+  /** 
+   * True if we should block rather reject until
+   * all processing has been completed.
    */
   protected boolean m_block = false;
 
@@ -280,6 +289,30 @@ public class Classifier
    */
   public void setExecutionSlots(int slots) {
     m_executionSlots = slots;
+  }
+  
+  /**
+   * Set whether to block on receiving the last fold
+   * of the last run rather than rejecting any further
+   * data until all processing is complete.
+   * 
+   * @param block true if we should block on the
+   * last fold of the last run.
+   */
+  public void setBlockOnLastFold(boolean block) {
+    m_block = block;
+  }
+  
+  /**
+   * Gets whether we are blocking on the last fold of the
+   * last run rather than rejecting any further data until
+   * all processing has been completed.
+   * 
+   * @return true if we are blocking on the last fold
+   * of the last run
+   */
+  public boolean getBlockOnLastFold() {
+    return m_block;
   }
 
   /**
@@ -687,6 +720,11 @@ public class Classifier
             notifyBatchClassifierListeners(ce);
                         
             // store in the output queue (if we have incoming test set events)
+            ce = 
+              new BatchClassifierEvent(Classifier.this, classifierCopy, 
+                  new DataSetEvent(this, m_train),
+                  null, // no test set (yet)
+                  m_setNum, m_maxSetNum);
             classifierTrainingComplete(ce);
           }
 
@@ -734,8 +772,6 @@ public class Classifier
           }
         }
       } catch (Exception ex) {
-        // Stop all processing
-        stop();
         ex.printStackTrace();
         if (m_log != null) {
           String titleString = "[Classifier] " + statusMessagePrefix();
@@ -749,9 +785,14 @@ public class Classifier
           ex.printStackTrace();
         }
         m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
+        // Stop all processing
+        stop();
       } finally {
         m_visual.setStatic();
-//        m_state = IDLE;
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        }
+        m_state = IDLE;
         if (Thread.currentThread().isInterrupted()) {
           // prevent any classifier events from being fired
           m_trainingSet = null;
@@ -762,20 +803,21 @@ public class Classifier
                + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
             m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
             
-            // are we the last active thread?
+            /* // are we the last active thread?
             if (m_executorPool.getActiveCount() == 1) {
               String msg = "[Classifier] " + statusMessagePrefix() 
               + " last classifier unblocking...";
-              m_log.logMessage(msg);
+              System.err.println(msg + " (interrupted)");
+              m_log.logMessage(msg + " (interrupted)");
 //              m_log.statusMessage(statusMessagePrefix() + "finished.");
               m_block = false;
               m_state = IDLE;
-//              block(false);
-            }
+              block(false);
+            } */
           }
           /*System.err.println("Queue size: " + m_executorPool.getQueue().size() +
               " Active count: " + m_executorPool.getActiveCount()); */
-        } else {
+        } /* else {
           // check to see if we are the last active thread
           if (m_executorPool == null || 
               (m_executorPool.getQueue().size() == 0 && 
@@ -783,6 +825,7 @@ public class Classifier
 
             String msg = "[Classifier] " + statusMessagePrefix() 
             + " last classifier unblocking...";
+            System.err.println(msg);
             if (m_log != null) {
               m_log.logMessage(msg);
             } else {
@@ -795,9 +838,9 @@ public class Classifier
             }
             // m_outputQueues = null; // free memory
             m_block = false;
-  //          block(false);
+            block(false);
           }
-        }
+        } */
       }
     }
   
@@ -829,7 +872,7 @@ public class Classifier
       return;
     }
     
-    if (m_block) {
+    if (m_reject) {
       //block(true);
       if (m_log != null) {
         m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
@@ -894,8 +937,7 @@ public class Classifier
    * @param e a <code>TestSetEvent</code> value
    */    
   public synchronized void acceptTestSet(TestSetEvent e) {
-    if (m_block) {
-      //block(true);
+    if (m_reject) {
       if (m_log != null) {
         m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
             + "at this time.");
@@ -1028,13 +1070,16 @@ public class Classifier
           // block on the last fold of the last run
           /* System.err.println("[Classifier] blocking on last fold of last run...");
           block(true); */
-          m_block = true;
+          m_reject = true;
+          if (m_block) {
+            block(true);
+          }
         }
       } else {
         // Otherwise, there is a model here waiting for a test set...
         m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1].
           setTestSet(new DataSetEvent(this, e.getTestSet()));
-        checkCompletedRun(e.getRunNumber(), e.getMaxSetNumber());
+        checkCompletedRun(e.getRunNumber(), e.getMaxRunNumber(), e.getMaxSetNumber());
       }
     }
   }
@@ -1063,10 +1108,10 @@ public class Classifier
         
       }
     }
-    checkCompletedRun(ce.getRunNumber(), ce.getMaxSetNumber());
+    checkCompletedRun(ce.getRunNumber(), ce.getMaxRunNumber(), ce.getMaxSetNumber());
   }
 
-  private synchronized void checkCompletedRun(int runNum, int  maxSets) {
+  private synchronized void checkCompletedRun(int runNum, int maxRunNum, int  maxSets) {
     boolean runOK = true;
     for (int i = 0; i < maxSets; i++) {
       if (m_outputQueues[runNum - 1][i] == null) {
@@ -1092,6 +1137,27 @@ public class Classifier
         notifyBatchClassifierListeners(m_outputQueues[runNum - 1][i]);
         // save memory
         m_outputQueues[runNum - 1][i] = null;
+      }
+      
+      if (runNum == maxRunNum) {
+        // unblock
+        msg = "[Classifier] " + statusMessagePrefix() 
+        + " last classifier unblocking...";
+        System.err.println(msg);
+        if (m_log != null) {
+          m_log.logMessage(msg);
+        } else {
+          System.err.println(msg);
+        }
+        //m_visual.setText(m_oldText);
+
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        }
+        // m_outputQueues = null; // free memory
+        m_reject = false;
+        block(false);
+        m_state = IDLE;
       }
     }
   }
@@ -1158,7 +1224,7 @@ public class Classifier
    *
    * @param ce a <code>BatchClassifierEvent</code> value
    */
-  private void notifyBatchClassifierListeners(BatchClassifierEvent ce) {
+  private synchronized void notifyBatchClassifierListeners(BatchClassifierEvent ce) {
     Vector l;
     synchronized (this) {
       l = (Vector)m_batchClassifierListeners.clone();
@@ -1369,9 +1435,9 @@ public class Classifier
     if (tf) {
       try {
 	  // only block if thread is still doing something useful!
-	if (m_state != IDLE) {
+//	if (m_state != IDLE) {
 	  wait();
-	  }
+	  //}
       } catch (InterruptedException ex) {
       }
     } else {
@@ -1398,7 +1464,8 @@ public class Classifier
       m_executorPool.shutdownNow();
       m_executorPool.purge();
     }
-    m_block = false;
+    m_reject = false;
+    block(false);
     m_visual.setStatic();
     if (m_oldText.length() > 0) {
       //m_visual.setText(m_oldText);
