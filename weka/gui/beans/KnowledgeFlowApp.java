@@ -1864,10 +1864,14 @@ public class KnowledgeFlowApp
 
     //    System.err.println("Just before look for other options");
     // now look for other options for this bean
-    if (bc instanceof UserRequestAcceptor) {
-      Enumeration req = ((UserRequestAcceptor) bc).enumerateRequests();
+    if (bc instanceof UserRequestAcceptor || bc instanceof Startable) {
+      Enumeration req = null;
+      
+      if (bc instanceof UserRequestAcceptor) {
+        req = ((UserRequestAcceptor) bc).enumerateRequests();
+      }
 
-      if (req.hasMoreElements()) {
+      if ((bc instanceof Startable) || (req !=null && req.hasMoreElements())) {
         //	beanContextMenu.insert(new JLabel("Actions", 
         //					  SwingConstants.CENTER), 
         //			       menuItemCount);
@@ -1877,55 +1881,14 @@ public class KnowledgeFlowApp
         menuItemCount++;
       }
 
-      while (req.hasMoreElements()) {
+      if (bc instanceof Startable) {
+        String tempS = ((Startable)bc).getStartMessage();
+        insertUserOrStartableMenuItem(bc, true, tempS, beanContextMenu);
+      }
+      
+      while (req != null && req.hasMoreElements()) {
         String tempS = (String) req.nextElement();
-        boolean disabled = false;
-        boolean confirmRequest = false;
-
-        // check to see if this item is currently disabled
-        if (tempS.charAt(0) == '$') {
-          tempS = tempS.substring(1, tempS.length());
-          disabled = true;
-        }
-        
-        // check to see if this item requires confirmation
-        if (tempS.charAt(0) == '?') {
-          tempS = tempS.substring(1, tempS.length());
-          confirmRequest = true;
-        }
-
-        final String tempS2 = tempS;
-
-        //	JMenuItem custItem = new JMenuItem(tempS2);
-        MenuItem custItem = new MenuItem(tempS2);
-        if (confirmRequest) {
-          custItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              // 
-              int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
-                  tempS2,
-                  "Confirm action",
-                  JOptionPane.YES_NO_OPTION);
-              if (result == JOptionPane.YES_OPTION) {
-                ((UserRequestAcceptor) bc).performRequest(tempS2);
-                notifyIsDirty();
-              }
-            }
-          });
-        } else {
-        custItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {              
-              ((UserRequestAcceptor) bc).performRequest(tempS2);
-              notifyIsDirty();
-            }
-          });
-        }
-
-        if (disabled) {
-          custItem.setEnabled(false);
-        }
-
-        beanContextMenu.add(custItem);
+        insertUserOrStartableMenuItem(bc, false, tempS, beanContextMenu);
         menuItemCount++;
       }
     }
@@ -1937,6 +1900,86 @@ public class KnowledgeFlowApp
       m_beanLayout.add(beanContextMenu);
       beanContextMenu.show(m_beanLayout, x, y);
     }
+  }
+  
+  private void insertUserOrStartableMenuItem(final JComponent bc, 
+      boolean startable, String tempS, PopupMenu beanContextMenu) {
+
+    boolean disabled = false;
+    boolean confirmRequest = false;
+
+    // check to see if this item is currently disabled
+    if (tempS.charAt(0) == '$') {
+      tempS = tempS.substring(1, tempS.length());
+      disabled = true;
+    }
+    
+    // check to see if this item requires confirmation
+    if (tempS.charAt(0) == '?') {
+      tempS = tempS.substring(1, tempS.length());
+      confirmRequest = true;
+    }
+
+    final String tempS2 = tempS;
+
+    //      JMenuItem custItem = new JMenuItem(tempS2);
+    MenuItem custItem = new MenuItem(tempS2);
+    if (confirmRequest) {
+      custItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          // 
+          int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
+              tempS2,
+              "Confirm action",
+              JOptionPane.YES_NO_OPTION);
+          if (result == JOptionPane.YES_OPTION) {
+            Thread startPointThread = new Thread() {
+              public void run() {
+                try {
+                  if (bc instanceof UserRequestAcceptor) {
+                    ((UserRequestAcceptor) bc).performRequest(tempS2);
+                  } else {
+                    ((Startable)bc).start();
+                  }
+                  notifyIsDirty();
+                } catch (Exception ex) {
+                  ex.printStackTrace();
+                }
+              }
+            };
+            startPointThread.setPriority(Thread.MIN_PRIORITY);
+            startPointThread.start();
+          }
+        }
+      });
+    } else {
+      custItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          Thread startPointThread = new Thread() {
+            public void run() {
+              try {
+                if (bc instanceof UserRequestAcceptor) {
+                  ((UserRequestAcceptor) bc).performRequest(tempS2);
+                } else {
+                  ((Startable)bc).start();
+                }
+                notifyIsDirty();
+              } catch (Exception ex) {
+                ex.printStackTrace();
+              }
+            }
+          };
+          startPointThread.setPriority(Thread.MIN_PRIORITY);
+          startPointThread.start();
+        }
+      });
+    }
+
+    if (disabled) {
+      custItem.setEnabled(false);
+    }
+
+    beanContextMenu.add(custItem); 
   }
 
   /**
