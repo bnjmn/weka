@@ -38,6 +38,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 /**
  * GUI customizer for the classifier wrapper bean
@@ -72,6 +73,8 @@ public class ClassifierCustomizer
   
   private JPanel m_holderPanel = new JPanel();
   private JTextField m_executionSlotsText = new JTextField();
+  
+  private JCheckBox m_blockOnLastFold = new JCheckBox("Block on last fold of last run");
 
   public ClassifierCustomizer() {
     
@@ -103,6 +106,14 @@ public class ClassifierCustomizer
       }
     });
     
+    m_blockOnLastFold.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_dsClassifier != null) {
+          m_dsClassifier.setBlockOnLastFold(m_blockOnLastFold.isSelected());
+        }
+      }
+    });
+    
     JPanel executionSlotsPanel = new JPanel();
     executionSlotsPanel.
       setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
@@ -114,6 +125,8 @@ public class ClassifierCustomizer
       setBorder(BorderFactory.createTitledBorder("More options"));
     m_holderPanel.setLayout(new BorderLayout());
     m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
+//    m_blockOnLastFold.setHorizontalTextPosition(SwingConstants.RIGHT);
+    m_holderPanel.add(m_blockOnLastFold, BorderLayout.SOUTH);
     
     setLayout(new BorderLayout());
     add(m_ClassifierEditor, BorderLayout.CENTER);
@@ -150,6 +163,7 @@ public class ClassifierCustomizer
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
     m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
+    m_blockOnLastFold.setSelected(m_dsClassifier.getBlockOnLastFold());
     checkOnClassifierType();
   }
   
