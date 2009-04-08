@@ -194,7 +194,16 @@ public class Classifier
   protected String m_oldText = "";
   
   /**
-   * true if we should block any further training data sets.
+   * true if we should reject any further training 
+   * data sets, until all processing has been finished,
+   *  once we've received the last fold of
+   * the last run.
+   */
+  protected boolean m_reject = false;
+  
+  /** 
+   * True if we should block rather reject until
+   * all processing has been completed.
    */
   protected boolean m_block = false;
 
@@ -280,6 +289,30 @@ public class Classifier
    */
   public void setExecutionSlots(int slots) {
     m_executionSlots = slots;
+  }
+  
+  /**
+   * Set whether to block on receiving the last fold
+   * of the last run rather than rejecting any further
+   * data until all processing is complete.
+   * 
+   * @param block true if we should block on the
+   * last fold of the last run.
+   */
+  public void setBlockOnLastFold(boolean block) {
+    m_block = block;
+  }
+  
+  /**
+   * Gets whether we are blocking on the last fold of the
+   * last run rather than rejecting any further data until
+   * all processing has been completed.
+   * 
+   * @return true if we are blocking on the last fold
+   * of the last run
+   */
+  public boolean getBlockOnLastFold() {
+    return m_block;
   }
 
   /**
@@ -839,7 +872,7 @@ public class Classifier
       return;
     }
     
-    if (m_block) {
+    if (m_reject) {
       //block(true);
       if (m_log != null) {
         m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
@@ -904,7 +937,7 @@ public class Classifier
    * @param e a <code>TestSetEvent</code> value
    */    
   public synchronized void acceptTestSet(TestSetEvent e) {
-    if (m_block) {
+    if (m_reject) {
       if (m_log != null) {
         m_log.statusMessage(statusMessagePrefix() + "BUSY. Can't accept data "
             + "at this time.");
@@ -1037,8 +1070,10 @@ public class Classifier
           // block on the last fold of the last run
           /* System.err.println("[Classifier] blocking on last fold of last run...");
           block(true); */
-          m_block = true;
-          block(true);
+          m_reject = true;
+          if (m_block) {
+            block(true);
+          }
         }
       } else {
         // Otherwise, there is a model here waiting for a test set...
@@ -1120,7 +1155,7 @@ public class Classifier
           m_log.statusMessage(statusMessagePrefix() + "Finished.");
         }
         // m_outputQueues = null; // free memory
-        m_block = false;
+        m_reject = false;
         block(false);
         m_state = IDLE;
       }
@@ -1429,7 +1464,7 @@ public class Classifier
       m_executorPool.shutdownNow();
       m_executorPool.purge();
     }
-    m_block = false;
+    m_reject = false;
     block(false);
     m_visual.setStatic();
     if (m_oldText.length() > 0) {
