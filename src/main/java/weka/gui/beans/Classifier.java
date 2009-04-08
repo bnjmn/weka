@@ -750,7 +750,11 @@ public class Classifier
         m_taskInfo.setExecutionStatus(TaskStatusInfo.FAILED);
       } finally {
         m_visual.setStatic();
-//        m_state = IDLE;
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        }
+        m_state = IDLE;
+
         if (Thread.currentThread().isInterrupted()) {
           // prevent any classifier events from being fired
           m_trainingSet = null;
@@ -761,6 +765,7 @@ public class Classifier
                + " run " + m_runNum + " fold " + m_setNum + ") interrupted!");
             m_log.statusMessage(statusMessagePrefix() + "INTERRUPTED");
             
+            /*
             // are we the last active thread?
             if (m_executorPool.getActiveCount() == 1) {
               String msg = "[Classifier] " + statusMessagePrefix() 
@@ -769,13 +774,13 @@ public class Classifier
 //              m_log.statusMessage(statusMessagePrefix() + "finished.");
               m_block = false;
 //              block(false);
-            }
+            } */
           }
           /*System.err.println("Queue size: " + m_executorPool.getQueue().size() +
               " Active count: " + m_executorPool.getActiveCount()); */
-        } else {
+        } /* else {
           // check to see if we are the last active thread
-          if (m_executorPool == null || 
+           if (m_executorPool == null || 
               (m_executorPool.getQueue().size() == 0 && 
                   m_executorPool.getActiveCount() == 1)) {
 
@@ -796,7 +801,7 @@ public class Classifier
             m_state = IDLE;
   //          block(false);
           }
-        }
+          } */
       }
     }
   
@@ -995,7 +1000,7 @@ public class Classifier
         // Otherwise, there is a model here waiting for a test set...
         m_outputQueues[e.getRunNumber() - 1][e.getSetNumber() - 1].
           setTestSet(new DataSetEvent(this, e.getTestSet()));
-        checkCompletedRun(e.getRunNumber(), e.getMaxSetNumber());
+        checkCompletedRun(e.getRunNumber(), e.getMaxRunNumber(), e.getMaxSetNumber());
       }
     }
   }
@@ -1024,10 +1029,10 @@ public class Classifier
         
       }
     }
-    checkCompletedRun(ce.getRunNumber(), ce.getMaxSetNumber());
+    checkCompletedRun(ce.getRunNumber(), ce.getMaxRunNumber(), ce.getMaxSetNumber());
   }
 
-  private synchronized void checkCompletedRun(int runNum, int  maxSets) {
+  private synchronized void checkCompletedRun(int runNum, int maxRunNum, int  maxSets) {
     boolean runOK = true;
     for (int i = 0; i < maxSets; i++) {
       if (m_outputQueues[runNum - 1][i] == null) {
@@ -1053,6 +1058,27 @@ public class Classifier
         notifyBatchClassifierListeners(m_outputQueues[runNum - 1][i]);
         // save memory
         m_outputQueues[runNum - 1][i] = null;
+      }
+
+      if (runNum == maxRunNum) {
+        // unblock
+        msg = "[Classifier] " + statusMessagePrefix() 
+          + " last classifier unblocking...";
+        System.err.println(msg);
+        if (m_log != null) {
+          m_log.logMessage(msg);
+        } else {
+          System.err.println(msg);
+        }
+        //m_visual.setText(m_oldText);
+
+        if (m_log != null) {
+          m_log.statusMessage(statusMessagePrefix() + "Finished.");
+        }
+        // m_outputQueues = null; // free memory
+        m_block = false;
+        //        block(false);
+        m_state = IDLE;
       }
     }
   }
