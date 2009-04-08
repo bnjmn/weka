@@ -58,7 +58,7 @@ import javax.swing.JButton;
  */
 public class Loader
   extends AbstractDataSource 
-  implements Startable, UserRequestAcceptor, WekaWrapper,
+  implements Startable, /*UserRequestAcceptor,*/ WekaWrapper,
 	     EventConstraints, BeanCommon, EnvironmentHandler {
 
   /** for serialization */
@@ -475,7 +475,7 @@ public class Loader
    *
    * @return an <code>Enumeration</code> value
    */
-  public Enumeration enumerateRequests() {
+  /*public Enumeration enumerateRequests() {
     Vector newVector = new Vector(0);
     boolean ok = true;
     if (m_ioThread == null) {
@@ -497,7 +497,7 @@ public class Loader
       newVector.addElement(entry);
     }
     return newVector.elements();
-  }
+  } */
 
   /**
    * Perform the named request
@@ -505,14 +505,14 @@ public class Loader
    * @param request a <code>String</code> value
    * @exception IllegalArgumentException if an error occurs
    */
-  public void performRequest(String request) {
+  /*public void performRequest(String request) {
     if (request.compareTo("Start loading") == 0) {
       startLoading();
     } else {
       throw new IllegalArgumentException(request
 					 + " not supported (Loader)");
     }
-  }
+  } */
 
   /**
    * Start loading
@@ -522,6 +522,38 @@ public class Loader
   public void start() throws Exception {
     startLoading();
     block(true);
+  }
+  
+  /**
+   * Gets a string that describes the start action. The
+   * KnowledgeFlow uses this in the popup contextual menu
+   * for the component. The string can be proceeded by
+   * a '$' character to indicate that the component can't
+   * be started at present.
+   * 
+   * @return a string describing the start action.
+   */
+  public String getStartMessage() {
+    boolean ok = true;
+    String entry = "Start loading";
+    if (m_ioThread == null) {
+      if (m_Loader instanceof FileSourcedConverter) {
+        String temp = ((FileSourcedConverter) m_Loader).retrieveFile().getPath();
+        Environment env = (m_env == null) ? Environment.getSystemWide() : m_env;
+        try {
+          temp = env.substitute(temp);
+        } catch (Exception ex) {}
+        File tempF = new File(temp);
+        if (!tempF.isFile()) {
+          ok = false;
+        }
+      }
+      if (!ok) {
+        entry = "$"+entry;
+      }
+    }
+    
+    return entry;
   }
   
   /**
