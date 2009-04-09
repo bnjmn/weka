@@ -1143,7 +1143,7 @@ public class Classifier
         // unblock
         msg = "[Classifier] " + statusMessagePrefix() 
         + " last classifier unblocking...";
-        System.err.println(msg);
+
         if (m_log != null) {
           m_log.logMessage(msg);
         } else {
