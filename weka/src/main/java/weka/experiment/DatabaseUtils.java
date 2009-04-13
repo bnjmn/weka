@@ -36,6 +36,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -151,6 +153,12 @@ public class DatabaseUtils
   /** create index on the database? */
   protected boolean m_createIndex = false;
 
+  /** the keywords for the current database type. */
+  protected HashSet<String> m_Keywords = new HashSet<String>();
+
+  /** the character to mask SQL keywords (by appending this character). */
+  protected String m_KeywordsMaskChar = "_";
+  
   /**
    * Reads properties and sets up the database drivers.
    *
@@ -207,6 +215,9 @@ public class DatabaseUtils
 			"setAutoCommit", "false").equals("true");
     m_createIndex   = PROPERTIES.getProperty(
 			"createIndex", "false").equals("true");
+    setKeywords(PROPERTIES.getProperty(
+			"Keywords", "AND,ASC,BY,DESC,FROM,GROUP,INSERT,ORDER,SELECT,UPDATE,WHERE"));
+    setKeywordsMaskChar(PROPERTIES.getProperty("KeywordsMaskChar", "_"));
   }
   
   /** 
@@ -1284,6 +1295,92 @@ public class DatabaseUtils
       update(query);
     }
     return tableName;
+  }
+  
+  /**
+   * Sets the keywords (comma-separated list) to use.
+   * 
+   * @param value	the list of keywords
+   */
+  public void setKeywords(String value) {
+    String[] 	keywords;
+    int		i;
+    
+    m_Keywords.clear();
+    
+    keywords = value.replaceAll(" ", "").split(",");
+    for (i = 0; i < keywords.length; i++)
+      m_Keywords.add(keywords[i].toUpperCase());
+  }
+  
+  /**
+   * Returns the currently stored keywords (as comma-separated list).
+   * 
+   * @return		the list of keywords
+   */
+  public String getKeywords() {
+    String		result;
+    Vector<String>	list;
+    int			i;
+    
+    list = new Vector<String>(m_Keywords);
+    Collections.sort(list);
+    
+    result = "";
+    for (i = 0; i < list.size(); i++) {
+      if (i > 0)
+	result += ",";
+      result += list.get(i);
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Sets the mask character to append to table or attribute names that
+   * are a reserved keyword.
+   * 
+   * @param value	the new character
+   */
+  public void setKeywordsMaskChar(String value) {
+    m_KeywordsMaskChar = value;
+  }
+  
+  /**
+   * Returns the currently set mask character.
+   * 
+   * @return		the character
+   */
+  public String getKeywordsMaskChar() {
+    return m_KeywordsMaskChar;
+  }
+  
+  /**
+   * Checks whether the given string is a reserved keyword.
+   * 
+   * @param s		the string to check
+   * @return		true if the string is a keyword
+   * @see		#m_Keywords
+   */
+  public boolean isKeyword(String s) {
+    return m_Keywords.contains(s.toUpperCase());
+  }
+  
+  /**
+   * If the given string is a keyword, then the mask character will be 
+   * appended and returned. Otherwise, the same string will be returned
+   * unchanged.
+   * 
+   * @param s		the string to check
+   * @return		the potentially masked string
+   * @see		#m_KeywordsMaskChar
+   * @see		#isKeyword(String)
+   */
+  public String maskKeyword(String s) {
+    if (isKeyword(s))
+      return s + m_KeywordsMaskChar;
+    else
+      return s;
   }
   
   /**
