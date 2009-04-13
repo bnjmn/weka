@@ -86,6 +86,24 @@ checkForTable=true
 setAutoCommit=true
 createIndex=false
 
+# All the reserved keywords for this database
+Keywords=\
+  AND,\
+  ASC,\
+  BY,\
+  DESC,\
+  FROM,\
+  GROUP,\
+  INSERT,\
+  ORDER,\
+  SELECT,\
+  UPDATE,\
+  WHERE
+
+# The character to append to attribute names to avoid exceptions due to
+# clashes between keywords and attribute names
+KeywordsMaskChar=_
+
 #flags for loading and saving instances using DatabaseLoader/Saver
 nominalToStringLimit=50
 idColumn=auto_generated_id
