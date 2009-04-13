@@ -492,7 +492,7 @@ public class DatabaseSaver
       Instances structure = getInstances();
       query.append("CREATE TABLE ");
       if(m_tabName || m_tableName.equals(""))
-        m_tableName = structure.relationName();
+        m_tableName = m_DataBaseConnection.maskKeyword(structure.relationName());
       if(m_DataBaseConnection.getUpperCase()){
         m_tableName = m_tableName.toUpperCase();
         m_createInt = m_createInt.toUpperCase(); 
@@ -501,6 +501,7 @@ public class DatabaseSaver
         m_createDate = m_createDate.toUpperCase(); 
       }
       m_tableName = m_tableName.replaceAll("[^\\w]","_");
+      m_tableName = m_DataBaseConnection.maskKeyword(m_tableName);
       query.append(m_tableName);
       if(structure.numAttributes() == 0)
           throw new Exception("Instances have no attribute.");
@@ -508,7 +509,7 @@ public class DatabaseSaver
       if(m_id){
         if(m_DataBaseConnection.getUpperCase())
               m_idColumn = m_idColumn.toUpperCase();
-        query.append(m_idColumn);
+        query.append(m_DataBaseConnection.maskKeyword(m_idColumn));
         query.append(" ");
         query.append(m_createInt);
         query.append(" PRIMARY KEY,");
@@ -517,6 +518,7 @@ public class DatabaseSaver
           Attribute att = structure.attribute(i);
           String attName = att.name();
           attName = attName.replaceAll("[^\\w]","_");
+          attName = m_DataBaseConnection.maskKeyword(attName);
           if(m_DataBaseConnection.getUpperCase())
               query.append(attName.toUpperCase());
           else
