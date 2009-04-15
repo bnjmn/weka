@@ -1903,7 +1903,7 @@ public class KnowledgeFlowApp
   }
   
   private void insertUserOrStartableMenuItem(final JComponent bc, 
-      boolean startable, String tempS, PopupMenu beanContextMenu) {
+      final boolean startable, String tempS, PopupMenu beanContextMenu) {
 
     boolean disabled = false;
     boolean confirmRequest = false;
@@ -1936,10 +1936,10 @@ public class KnowledgeFlowApp
             Thread startPointThread = new Thread() {
               public void run() {
                 try {
-                  if (bc instanceof UserRequestAcceptor) {
+                  if (startable) {
+                    ((Startable)bc).start();                    
+                  } else if (bc instanceof UserRequestAcceptor) {
                     ((UserRequestAcceptor) bc).performRequest(tempS2);
-                  } else {
-                    ((Startable)bc).start();
                   }
                   notifyIsDirty();
                 } catch (Exception ex) {
@@ -1958,10 +1958,10 @@ public class KnowledgeFlowApp
           Thread startPointThread = new Thread() {
             public void run() {
               try {
-                if (bc instanceof UserRequestAcceptor) {
+                if (startable) {
+                  ((Startable)bc).start();                  
+                } else if (bc instanceof UserRequestAcceptor) {
                   ((UserRequestAcceptor) bc).performRequest(tempS2);
-                } else {
-                  ((Startable)bc).start();
                 }
                 notifyIsDirty();
               } catch (Exception ex) {
