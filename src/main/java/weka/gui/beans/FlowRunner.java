@@ -371,26 +371,13 @@ public class FlowRunner implements RevisionHandler {
         Startable s = (Startable)tempB.getBean();
         // start that sucker (if it's happy to be started)...
         if (!m_startSequentially) {
-          if (s.getStartMessage().charAt(0) != '$') {
-            if (m_log != null) {
-              m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
-            } else {
-              System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
-            }
-            launchThread(s, numFlows);
-            numFlows++;
+          if (m_log != null) {
+            m_log.logMessage("[FlowRunner] Launching flow "+numFlows+"...");
           } else {
-            String beanName = s.getClass().getName();
-            if (s instanceof BeanCommon) {
-              String customName = ((BeanCommon)s).getCustomName();
-              beanName = customName;
-            }
-            if (m_log != null) {
-              m_log.logMessage("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
-            } else {
-              System.out.println("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
-            }
+            System.out.println("[FlowRunner] Launching flow "+numFlows+"...");
           }
+          launchThread(s, numFlows);
+          numFlows++;
         } else {
           boolean ok = false;
           Integer position = null;
@@ -419,22 +406,14 @@ public class FlowRunner implements RevisionHandler {
             }
           }
           
-          if (s.getStartMessage().charAt(0) != '$') {
-            if (m_log != null) {
-              m_log.logMessage("[FlowRunner] adding start point " + beanName
-                  + " to the execution list (position " + position + ")");
-            } else {
-              System.out.println("[FlowRunner] adding start point " + beanName
-                  + " to the execution list (position " + position + ")");
-            }
-            startables.put(position, s);
+          if (m_log != null) {
+            m_log.logMessage("[FlowRunner] adding start point " + beanName
+                             + " to the execution list (position " + position + ")");
           } else {
-            if (m_log != null) {
-              m_log.logMessage("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
-            } else {
-              System.out.println("[FlowRunner] WARNING: Can't start " + beanName + " at this time.");
-            }
+            System.out.println("[FlowRunner] adding start point " + beanName
+                               + " to the execution list (position " + position + ")");
           }
+          startables.put(position, s);
         }
       }
     }
