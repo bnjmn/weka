@@ -58,7 +58,7 @@ public class Associator
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
              DataSourceListener,
-	     TrainingSetListener {
+	     TrainingSetListener, ConfigurationProducer {
 
   /** for serialization */
   private static final long serialVersionUID = -7843500322130210057L;
@@ -386,6 +386,26 @@ public class Associator
    */
   public synchronized void removeGraphListener(GraphListener cl) {
     m_graphListeners.remove(cl);
+  }
+  
+  /**
+   * We don't have to keep track of configuration listeners (see the
+   * documentation for ConfigurationListener/ConfigurationEvent).
+   * 
+   * @param cl a ConfigurationListener.
+   */
+  public synchronized void addConfigurationListener(ConfigurationListener cl) {
+    
+  }
+  
+  /**
+   * We don't have to keep track of configuration listeners (see the
+   * documentation for ConfigurationListener/ConfigurationEvent).
+   * 
+   * @param cl a ConfigurationListener.
+   */
+  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
+    
   }
 
   /**

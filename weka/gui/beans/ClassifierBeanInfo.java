@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the Classifier wrapper bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class ClassifierBeanInfo extends SimpleBeanInfo {
  
@@ -50,7 +50,12 @@ public class ClassifierBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(Classifier.class,
 			       "incrementalClassifier",
 			       IncrementalClassifierListener.class,
-			       "acceptClassifier")
+			       "acceptClassifier"),
+	new EventSetDescriptor(Classifier.class,
+	                       "configuration",
+	                        ConfigurationListener.class,
+	                        "acceptConfiguration")
+			       
 	};
       return esds;
     } catch (Exception ex) {

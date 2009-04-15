@@ -76,7 +76,7 @@ public class Classifier
 	     WekaWrapper, EventConstraints,
 	     Serializable, UserRequestAcceptor,
 	     TrainingSetListener, TestSetListener,
-	     InstanceListener {
+	     InstanceListener, ConfigurationProducer {
 
   /** for serialization */
   private static final long serialVersionUID = 659603893917736008L;
@@ -1288,6 +1288,26 @@ public class Classifier
   public synchronized void removeTextListener(TextListener cl) {
     m_textListeners.remove(cl);
   }
+  
+  /**
+   * We don't have to keep track of configuration listeners (see the
+   * documentation for ConfigurationListener/ConfigurationEvent).
+   * 
+   * @param cl a ConfigurationListener.
+   */
+  public synchronized void addConfigurationListener(ConfigurationListener cl) {
+    
+  }
+  
+  /**
+   * We don't have to keep track of configuration listeners (see the
+   * documentation for ConfigurationListener/ConfigurationEvent).
+   * 
+   * @param cl a ConfigurationListener.
+   */
+  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
+    
+  }
 
   /**
    * Notify all text listeners of a text event
@@ -1744,7 +1764,8 @@ public class Classifier
     if (eventName.compareTo("graph") == 0
 	|| eventName.compareTo("text") == 0
 	|| eventName.compareTo("batchClassifier") == 0
-	|| eventName.compareTo("incrementalClassifier") == 0) {
+	|| eventName.compareTo("incrementalClassifier") == 0
+	|| eventName.compareTo("configuration") == 0) {
       return true;
     }
     return false;
@@ -1842,6 +1863,11 @@ public class Classifier
 	}
       }
     }
+    
+    if (eventName.equals("configuration") && m_Classifier == null) {
+      return false;
+    }
+    
     return true;
   }
     
