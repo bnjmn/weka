@@ -28,7 +28,7 @@ import java.beans.*;
  * BeanInfo class for the Associator wrapper bean
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class AssociatorBeanInfo extends SimpleBeanInfo {
  
@@ -42,7 +42,11 @@ public class AssociatorBeanInfo extends SimpleBeanInfo {
         new EventSetDescriptor(Associator.class,
 			       "graph",
 			       GraphListener.class,
-			       "acceptGraph")
+			       "acceptGraph"),
+	new EventSetDescriptor(Associator.class,
+	                       "configuration",
+	                       ConfigurationListener.class,
+	                       "acceptConfiguration")
       };
       return esds;
     } catch (Exception ex) {
