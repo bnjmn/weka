@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the Filter bean
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class FilterBeanInfo extends SimpleBeanInfo {
    
@@ -55,7 +55,11 @@ public class FilterBeanInfo extends SimpleBeanInfo {
 	new EventSetDescriptor(DataSource.class, 
 			       "instance", 
 			       InstanceListener.class, 
-			       "acceptInstance")
+			       "acceptInstance"),
+	new EventSetDescriptor(Filter.class,
+	                       "configuration",
+	                       ConfigurationListener.class,
+	                       "acceptConfiguration")
 	  };
       return esds;
     } catch (Exception ex) {
