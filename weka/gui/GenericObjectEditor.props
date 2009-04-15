@@ -136,6 +136,13 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules.Prism,\
  weka.classifiers.rules.Ridor,\
  weka.classifiers.rules.ZeroR
+
+# Lists the AbstractOutput classes I want to choose from
+weka.classifiers.evaluation.output.prediction.AbstractOutput=\
+  weka.classifiers.evaluation.output.prediction.CSV,\
+  weka.classifiers.evaluation.output.prediction.HTML,\
+  weka.classifiers.evaluation.output.prediction.Null,\
+  weka.classifiers.evaluation.output.prediction.PlainText
  
 # Lists the Filters I want to choose from
 weka.filters.Filter=\
@@ -401,7 +408,10 @@ weka.classifiers.functions.supportVector.Kernel=\
  
 # Lists the DistanceFunctions I want to choose from
 weka.core.DistanceFunction=\
- weka.core.EuclideanDistance
+ weka.core.ChebyshevDistance,\
+ weka.core.EditDistance,\
+ weka.core.EuclideanDistance,\
+ weka.core.ManhattanDistance
  
 # Lists the NearestNeighbourSearchs I want to choose from
 weka.core.neighboursearch.NearestNeighbourSearch=\
