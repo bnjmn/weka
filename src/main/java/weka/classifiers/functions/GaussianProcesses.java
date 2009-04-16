@@ -116,7 +116,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -436,7 +436,7 @@ public class GaussianProcesses
    * @throws Exception if interval could not be estimated
    * successfully
    */
-  public double[][] predictInterval(Instance inst, double confidenceLevel) throws Exception {
+  public double[][] predictIntervals(Instance inst, double confidenceLevel) throws Exception {
 
     // Filter instance
     if (!m_checksTurnedOff) {
@@ -810,7 +810,7 @@ public class GaussianProcesses
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
   /**
