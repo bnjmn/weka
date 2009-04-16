@@ -899,7 +899,9 @@ public class Classifier
         System.err.println(msg);
       }
       // start the execution pool
-      startExecutorPool();
+      if (m_executorPool == null) {
+        startExecutorPool();
+      }
             
       // setup output queues
       msg = "[Classifier] " + statusMessagePrefix() + " setup output queues.";
@@ -1107,8 +1109,8 @@ public class Classifier
         setTrainSet(ce.getTrainSet());
         
       }
+      checkCompletedRun(ce.getRunNumber(), ce.getMaxRunNumber(), ce.getMaxSetNumber());
     }
-    checkCompletedRun(ce.getRunNumber(), ce.getMaxRunNumber(), ce.getMaxSetNumber());
   }
 
   private synchronized void checkCompletedRun(int runNum, int maxRunNum, int  maxSets) {
