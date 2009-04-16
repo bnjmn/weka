@@ -33,6 +33,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -43,50 +44,55 @@ import javax.swing.JPanel;
  * A little dialog containing the SqlViewer.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.3 $
+ * @version     $Revision$
  */
 public class SqlViewerDialog 
   extends JDialog 
   implements ResultChangedListener {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -31619864037233099L;
   
-  /** the parent frame */
+  /** the parent frame. */
   protected JFrame m_Parent;
   
-  /** the SQL panel */
+  /** the SQL panel. */
   protected SqlViewer m_Viewer;
 
-  /** the panel for the buttons */
+  /** the panel for the buttons. */
   protected JPanel m_PanelButtons;
 
-  /** the OK button */
+  /** the OK button. */
   protected JButton m_ButtonOK = new JButton("OK");
 
-  /** the Cancel button */
+  /** the Cancel button. */
   protected JButton m_ButtonCancel = new JButton("Cancel");
 
-  /** displays the current query */
+  /** displays the current query. */
   protected JLabel m_LabelQuery = new JLabel("");
+  
+  /** whether to return sparse instances or not. */
+  protected JCheckBox m_CheckBoxSparseData = new JCheckBox("Generate sparse data");
 
-  /** the return value */
+  /** the return value. */
   protected int m_ReturnValue = JOptionPane.CANCEL_OPTION;
 
-  /** the connect string with which the query was run */
+  /** the connect string with which the query was run. */
   protected String m_URL;
 
-  /** the user that was used to connect to the DB */
+  /** the user that was used to connect to the DB. */
   protected String m_User;
 
-  /** the password that was used to connect to the DB */
+  /** the password that was used to connect to the DB. */
   protected String m_Password;
 
-  /** the currently selected query */
+  /** the currently selected query. */
   protected String m_Query;
   
   /**
-   * initializes the dialog
+   * initializes the dialog.
+   * 
+   * @param parent	the parent frame
    */
   public SqlViewerDialog(JFrame parent) {
     super(parent, "SQL-Viewer", true);
@@ -101,7 +107,7 @@ public class SqlViewerDialog
   }
 
   /**
-   * builds the dialog and all its components
+   * builds the dialog and all its components.
    */
   protected void createDialog() {
     JPanel                    panel;
@@ -119,8 +125,7 @@ public class SqlViewerDialog
     add(panel2, BorderLayout.SOUTH);
     
     // Buttons
-    panel = new JPanel();
-    panel.setLayout(new FlowLayout());
+    panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     panel2.add(panel, BorderLayout.EAST);
     m_ButtonOK.setMnemonic('O');
     panel.add(m_ButtonOK);
@@ -147,6 +152,12 @@ public class SqlViewerDialog
       }
     });
     
+    // the checkbox for sparse data
+    panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(panel, BorderLayout.WEST);
+    panel.add(m_CheckBoxSparseData);
+    m_CheckBoxSparseData.setMnemonic('s');
+    
     addWindowListener(new WindowAdapter() {
       /**
        * Invoked when a window is in the process of being closed.
@@ -157,7 +168,7 @@ public class SqlViewerDialog
     });
    
     // current Query
-    panel = new JPanel(new FlowLayout());
+    panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
     panel2.add(panel, BorderLayout.CENTER);
     panel.add(m_LabelQuery);
     
@@ -170,7 +181,9 @@ public class SqlViewerDialog
   }
 
   /**
-   * displays the dialog if TRUE
+   * displays the dialog if TRUE.
+   * 
+   * @param b		if true displaying the dialog, hiding otherwise
    */
   public void setVisible(boolean b) {
     if (b)
@@ -185,44 +198,63 @@ public class SqlViewerDialog
 
   /**
    * returns whether the user clicked OK (JOptionPane.OK_OPTION) or whether he
-   * cancelled the dialog (JOptionPane.CANCEL_OPTION)
-   * @return      the return value
-   * @see         JOptionPane
+   * cancelled the dialog (JOptionPane.CANCEL_OPTION).
+   * @return		the return value
+   * @see		JOptionPane
    */
   public int getReturnValue() {
     return m_ReturnValue;
   }
 
   /**
-   * returns the chosen URL, if any
+   * returns the chosen URL, if any.
+   * 
+   * @return		the URL
    */
   public String getURL() {
     return m_URL;
   }
 
   /**
-   * returns the chosen user, if any
+   * returns the chosen user, if any.
+   * 
+   * @return		the user
    */
   public String getUser() {
     return m_User;
   }
 
   /**
-   * returns the chosen password, if any
+   * returns the chosen password, if any.
+   * 
+   * @return		the password
    */
   public String getPassword() {
     return m_Password;
   }
 
   /**
-   * returns the chosen query, if any
+   * returns the chosen query, if any.
+   * 
+   * @return		the query
    */
   public String getQuery() {
     return m_Query;
   }
+  
+  /**
+   * Returns whether sparse data is generated.
+   * 
+   * @return		true if sparse data is to be generated
+   */
+  public boolean getGenerateSparseData() {
+    return m_CheckBoxSparseData.isSelected();
+  }
 
   /**
    * This method gets called when a query has been executed.
+   * 
+   * @param evt		the event
    */
   public void resultChanged(ResultChangedEvent evt) {
     m_URL      = evt.getURL();
@@ -233,7 +265,9 @@ public class SqlViewerDialog
   }
 
   /**
-   * for testing only
+   * for testing only.
+   * 
+   * @param args	ignored
    */
   public static void main(String[] args) {
     SqlViewerDialog       dialog;
