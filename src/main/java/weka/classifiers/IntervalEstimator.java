@@ -25,25 +25,25 @@ package weka.classifiers;
 import weka.core.Instance;
 
 /** 
- * Interface for classifiers that can output confidence intervals
+ * Interface for numeric prediction schemes that can output prediction
+ * intervals.
  *
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public interface IntervalEstimator {
 
   /**
-   * Returns an N*2 array, where N is the number of possible classes, that estimate 
-   * the boundaries for the confidence interval with a confidence level specified by
-   * the second parameter. Every row of the returned array gives the probability estimates 
-   * for a single class.  In the case of numeric predictions, a single confidance interval 
-   * will be returned.
+   * Returns an N * 2 array, where N is the number of prediction
+   * intervals. In each row, the first element contains the lower
+   * boundary of the corresponding prediction interval and the second
+   * element the upper boundary.
    *
    * @param inst the instance to make the prediction for.
    * @param confidenceLevel the percentage of cases that the interval should cover.
-   * @return an array of confidance intervals (one for each class)
+   * @return an array of prediction intervals
    * @exception Exception if the intervals can't be computed
    */
-  double[][] predictInterval(Instance inst, double confidenceLevel) throws Exception;
+  double[][] predictIntervals(Instance inst, double confidenceLevel) throws Exception;
 }
 
