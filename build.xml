@@ -58,28 +58,28 @@
     <mkdir dir="public_domain/weka/gui"/>
 
     <!-- Move the public domain classes out of weka -->
-    <move file="weka/core/matrix/CholeskyDecomposition.java" 
+    <move file="${src}/weka/core/matrix/CholeskyDecomposition.java" 
           todir="public_domain/weka/core/matrix" failonerror="false"/>
-    <move file="weka/core/matrix/EigenvalueDecomposition.java" 
+    <move file="${src}/weka/core/matrix/EigenvalueDecomposition.java" 
           todir="public_domain/weka/core/matrix" failonerror="false"/>
-    <move file="weka/core/matrix/LUDecomposition.java" 
+    <move file="${src}/weka/core/matrix/LUDecomposition.java" 
           todir="public_domain/weka/core/matrix" failonerror="false"/>
-    <move file="weka/core/matrix/Maths.java" 
+    <move file="${src}/weka/core/matrix/Maths.java" 
           todir="public_domain/weka/core/matrix" failonerror="false"/>
-    <move file="weka/core/matrix/QRDecomposition.java" 
+    <move file="${src}/weka/core/matrix/QRDecomposition.java" 
           todir="public_domain/weka/core/matrix" failonerror="false"/>
-    <move file="weka/core/matrix/SingularValueDecomposition.java" 
+    <move file="${src}/weka/core/matrix/SingularValueDecomposition.java" 
           todir="public_domain/weka/core/matrix" failonerror="false"/>
-    <move file="weka/core/Statistics.java" 
+    <move file="${src}/weka/core/Statistics.java" 
           todir="public_domain/weka/core/" failonerror="false"/>
-    <move file="weka/gui/SplashWindow.java" 
+    <move file="${src}/weka/gui/SplashWindow.java" 
           todir="public_domain/weka/gui/" failonerror="false"/>
   </target>
 
   <!-- Compile the java code from ${src}/weka into ${build}/classes -->
   <target name="compile" depends="init_compile" 
    description="Compile weka and deposit class files in build/classes">
-    <javac srcdir="${src}" 
+    <javac srcdir="${src}:public_domain/" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${build}/classes"
       optimize="${optimization}"
@@ -254,6 +254,7 @@
       <include name="src/**/*.excludes"/>
       <include name="src/**/*.gif"/>
       <include name="src/**/*.java"/>
+      <include name="public_domain/**/*.java"/>
       <include name="src/**/*.jpeg"/>
       <include name="src/**/*.jpg"/>
       <include name="src/**/*.props"/>
