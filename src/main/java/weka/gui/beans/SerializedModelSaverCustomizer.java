@@ -40,6 +40,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -57,7 +58,7 @@ import javax.swing.filechooser.FileFilter;
  * GUI Customizer for the SerializedModelSaver bean
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
@@ -89,6 +90,8 @@ public class SerializedModelSaverCustomizer
   private JComboBox m_fileFormatBox;
 
   private JCheckBox m_relativeFilePath;
+  
+  private JCheckBox m_includeRelationName;
   
 
   /** Constructor */  
@@ -205,10 +208,22 @@ public class SerializedModelSaverCustomizer
           m_smSaver.setUseRelativePath(m_relativeFilePath.isSelected());
         }
       });
+    
+    m_includeRelationName = new JCheckBox("Include relation name in file name");
+    m_includeRelationName.setToolTipText("Include the relation name of the training data used "
+        + "to create the model in the file name.");
+    m_includeRelationName.setSelected(m_smSaver.getIncludeRelationName());
+    
+    m_includeRelationName.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_smSaver.setIncludeRelationName(m_includeRelationName.isSelected());
+      }
+    });
 
     JPanel holderPanel = new JPanel();
-    holderPanel.setLayout(new FlowLayout());
+    holderPanel.setLayout(new BoxLayout(holderPanel, BoxLayout.Y_AXIS));
     holderPanel.add(m_relativeFilePath);
+    holderPanel.add(m_includeRelationName);
     add(holderPanel, BorderLayout.SOUTH);
   }
 
