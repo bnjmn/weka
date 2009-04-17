@@ -103,6 +103,9 @@ public class SerializedModelSaver
 
   /** relative path for the directory (relative to the user.dir (startup directory))? */
   private boolean m_useRelativePath = false;
+  
+  /** include relation name in filename */
+  private boolean m_includeRelationName = false;
 
   /**
    * Available file formats. Reflection is used to check if classes
@@ -301,6 +304,9 @@ public class SerializedModelSaver
                 titleString.length());
 
     String prefix = "";
+    String relationName = (m_includeRelationName)
+    ? trainHeader.relationName()
+    : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
@@ -320,6 +326,7 @@ public class SerializedModelSaver
     }
     String fileName = "" 
       + prefix
+      + relationName
       + titleString
       + "_"
       + ce.getSetNumber() 
@@ -366,6 +373,10 @@ public class SerializedModelSaver
                   titleString.length());
 
       String prefix = "";
+      String relationName = (m_includeRelationName)
+        ? header.relationName()
+        : "";
+        
       try {
         prefix = m_env.substitute(m_filenamePrefix);
       } catch (Exception ex) {
@@ -383,7 +394,7 @@ public class SerializedModelSaver
         return;
       }
       
-      String fileName = "" + prefix + titleString;
+      String fileName = "" + prefix + relationName + titleString;
       fileName = sanitizeFilename(fileName);
 
       String dirName = m_directory.getPath();
@@ -430,6 +441,9 @@ public class SerializedModelSaver
                 titleString.length());
 
     String prefix = "";
+    String relationName = (m_includeRelationName)
+    ? trainHeader.relationName()
+    : "";
     try {
       prefix = m_env.substitute(m_filenamePrefix);
     } catch (Exception ex) {
@@ -449,6 +463,7 @@ public class SerializedModelSaver
 
     String fileName = "" 
       + prefix
+      + relationName
       + titleString
       + "_"
       + ce.getSetNumber() 
@@ -612,6 +627,30 @@ public class SerializedModelSaver
    */
   public boolean getUseRelativePath() {
     return m_useRelativePath;
+  }
+  
+  /**
+   * Set whether the relation name of the training data
+   * used to create the model should be included as part
+   * of the filename for the serialized model.
+   * 
+   * @param rn true if the relation name should be included
+   * in the file name
+   */
+  public void setIncludeRelationName(boolean rn) {
+    m_includeRelationName = rn;
+  }
+  
+  /**
+   * Get whether the relation name of the training
+   * data used to create the model is to be included
+   * in the filename of the serialized model.
+   * 
+   * @return true if the relation name is to be included
+   * in the file name
+   */
+  public boolean getIncludeRelationName() {
+    return m_includeRelationName;
   }
 
   /**
