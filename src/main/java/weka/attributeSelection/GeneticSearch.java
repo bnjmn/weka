@@ -77,8 +77,8 @@ import java.util.Vector;
  *  population.</pre>
  * 
  * <pre> -Z &lt;population size&gt;
- *  Set the size of the population.
- *  (default = 10).</pre>
+ *  Set the size of the population (even number).
+ *  (default = 20).</pre>
  * 
  * <pre> -G &lt;number of generations&gt;
  *  Set the number of generations.
@@ -105,7 +105,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.19 $
+ * @version $Revision$
  */
 public class GeneticSearch 
   extends ASSearch 
@@ -298,7 +298,7 @@ public class GeneticSearch
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.19 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -316,8 +316,8 @@ public class GeneticSearch
                                     +"\n\tpopulation."
                                     ,"P",1
                                     , "-P <start set>"));
-    newVector.addElement(new Option("\tSet the size of the population."
-                                    +"\n\t(default = 10)."
+    newVector.addElement(new Option("\tSet the size of the population (even number)."
+                                    +"\n\t(default = 20)."
                                     , "Z", 1
                                     , "-Z <population size>"));
     newVector.addElement(new Option("\tSet the number of generations."
@@ -355,8 +355,8 @@ public class GeneticSearch
    *  population.</pre>
    * 
    * <pre> -Z &lt;population size&gt;
-   *  Set the size of the population.
-   *  (default = 10).</pre>
+   *  Set the size of the population (even number).
+   *  (default = 20).</pre>
    * 
    * <pre> -G &lt;number of generations&gt;
    *  Set the number of generations.
@@ -628,7 +628,7 @@ public class GeneticSearch
    * displaying in the explorer/experimenter gui
    */
   public String populationSizeTipText() {
-    return "Set the population size. This is the number of individuals "
+    return "Set the population size (even number), this is the number of individuals "
       +"(attribute sets) in the population.";
   }
 
@@ -637,7 +637,10 @@ public class GeneticSearch
    * @param p the size of the population
    */
   public void setPopulationSize(int p) {
-    m_popSize = p;
+    if (p % 2 == 0)
+      m_popSize = p;
+    else
+      System.err.println("Population size needs to be an even number!");
   }
 
   /**
@@ -1298,6 +1301,6 @@ public class GeneticSearch
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.19 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
