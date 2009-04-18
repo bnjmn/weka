@@ -36,7 +36,8 @@ import  weka.core.*;
  * Valid options are: <p>
  *
  * -Z <size of the population> <br>
- * Sets the size of the population. (default = 20). <p>
+ * Sets the size of the population (even number). 
+ * (default = 20). <p>
  *
  * -G <number of generations> <br>
  * Sets the number of generations to perform.
@@ -58,7 +59,7 @@ import  weka.core.*;
  * Sets the seed for random number generation. <p>
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class GeneticSearch extends ASSearch implements 
   StartSetHandler, OptionHandler {
@@ -246,8 +247,8 @@ public class GeneticSearch extends ASSearch implements
 				    +"\n\tpopulation."
 				    ,"P",1
 				    , "-P <start set>"));
-    newVector.addElement(new Option("\tSet the size of the population."
-				    +"\n\t(default = 10)."
+    newVector.addElement(new Option("\tSet the size of the population (even number)."
+				    +"\n\t(default = 20)."
 				    , "Z", 1
 				    , "-Z <population size>"));
     newVector.addElement(new Option("\tSet the number of generations."
@@ -278,7 +279,8 @@ public class GeneticSearch extends ASSearch implements
    * Valid options are: <p>
    *
    * -Z <size of the population> <br>
-   * Sets the size of the population. (default = 20). <p>
+   * Sets the size of the population (even number). 
+   * (default = 20). <p>
    *
    * -G <number of generations> <br>
    * Sets the number of generations to perform.
@@ -545,7 +547,7 @@ public class GeneticSearch extends ASSearch implements
    * displaying in the explorer/experimenter gui
    */
   public String populationSizeTipText() {
-    return "Set the population size. This is the number of individuals "
+    return "Set the population size (even number), this is the number of individuals "
       +"(attribute sets) in the population.";
   }
 
@@ -554,7 +556,10 @@ public class GeneticSearch extends ASSearch implements
    * @param p the size of the population
    */
   public void setPopulationSize(int p) {
-    m_popSize = p;
+    if (p % 2 == 0)
+      m_popSize = p;
+    else
+      System.err.println("Population size needs to be an even number!");
   }
 
   /**
