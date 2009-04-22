@@ -43,32 +43,38 @@ import java.util.Vector;
 
 /**
  * <!-- globalinfo-start -->
- * * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning.
- * * <p/>
+ * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning. Also has an option to allow estimation of class probabilities based on a hold-out set (backfitting).
+ * <p/>
  * <!-- globalinfo-end -->
  * 
  * <!-- options-start -->
- * * Valid options are: <p/>
- * * 
- * * <pre> -K &lt;number of attributes&gt;
- * *  Number of attributes to randomly investigate
- * *  (&lt;1 = int(log(#attributes)+1)).</pre>
- * * 
- * * <pre> -M &lt;minimum number of instances&gt;
- * *  Set minimum number of instances per leaf.</pre>
- * * 
- * * <pre> -S &lt;num&gt;
- * *  Seed for random number generator.
- * *  (default 1)</pre>
- * * 
- * * <pre> -depth &lt;num&gt;
- * *  The maximum depth of the tree, 0 for unlimited.
- * *  (default 0)</pre>
- * * 
- * * <pre> -D
- * *  If set, classifier is run in debug mode and
- * *  may output additional info to the console</pre>
- * * 
+ * Valid options are: <p/>
+ * 
+ * <pre> -K &lt;number of attributes&gt;
+ *  Number of attributes to randomly investigate
+ *  (&lt;0 = int(log_2(#attributes)+1)).</pre>
+ * 
+ * <pre> -M &lt;minimum number of instances&gt;
+ *  Set minimum number of instances per leaf.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Seed for random number generator.
+ *  (default 1)</pre>
+ * 
+ * <pre> -depth &lt;num&gt;
+ *  The maximum depth of the tree, 0 for unlimited.
+ *  (default 0)</pre>
+ * 
+ * <pre> -N &lt;num&gt;
+ *  Number of folds for backfitting (default 0, no backfitting).</pre>
+ * 
+ * <pre> -U
+ *  Allow unclassified instances.</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -90,9 +96,6 @@ WeightedInstancesHandler, Randomizable, Drawable {
   /** The split point. */
   protected double m_SplitPoint = Double.NaN;
 
-  /** The class distribution from the training data. */
-  protected double[][] m_Distribution = null;
-
   /** The header information. */
   protected Instances m_Info = null;
 
@@ -100,19 +103,25 @@ WeightedInstancesHandler, Randomizable, Drawable {
   protected double[] m_Prop = null;
 
   /** Class probabilities from the training data. */
-  protected double[] m_ClassProbs = null;
+  protected double[] m_ClassDistribution = null;
 
   /** Minimum number of instances for leaf. */
   protected double m_MinNum = 1.0;
 
   /** The number of attributes considered for a split. */
-  protected int m_KValue = 1;
+  protected int m_KValue = 0;
 
   /** The random seed to use. */
   protected int m_randomSeed = 1;
 
   /** The maximum depth of the tree (0 = unlimited) */
   protected int m_MaxDepth = 0;
+
+  /** Determines how much data is used for backfitting */
+  protected int m_NumFolds = 0;
+
+  /** Whether unclassified instances are allowed */
+  protected boolean m_AllowUnclassifiedInstances = false;
 
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
@@ -126,7 +135,9 @@ WeightedInstancesHandler, Randomizable, Drawable {
   public String globalInfo() {
 
     return "Class for constructing a tree that considers K randomly "
-    + " chosen attributes at each node. Performs no pruning.";
+    + " chosen attributes at each node. Performs no pruning. Also has"
+    + " an option to allow estimation of class probabilities based on"
+    + " a hold-out set (backfitting).";
   }
 
   /**
@@ -167,7 +178,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
    *         explorer/experimenter gui
    */
   public String KValueTipText() {
-    return "Sets the number of randomly chosen attributes.";
+    return "Sets the number of randomly chosen attributes. If 0, log_2(number_of_attributes) + 1 is used.";
   }
 
   /**
@@ -242,6 +253,65 @@ WeightedInstancesHandler, Randomizable, Drawable {
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String numFoldsTipText() {
+    return "Determines the amount of data used for backfitting. One fold is used for "
+      + "backfitting, the rest for growing the tree. (Default: 0, no backfitting)";
+  }
+  
+  /**
+   * Get the value of NumFolds.
+   *
+   * @return Value of NumFolds.
+   */
+  public int getNumFolds() {
+    
+    return m_NumFolds;
+  }
+  
+  /**
+   * Set the value of NumFolds.
+   *
+   * @param newNumFolds Value to assign to NumFolds.
+   */
+  public void setNumFolds(int newNumFolds) {
+    
+    m_NumFolds = newNumFolds;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String allowUnclassifiedInstancesTipText() {
+    return "Whether to allow unclassified instances.";
+  }
+  
+  /**
+   * Get the value of NumFolds.
+   *
+   * @return Value of NumFolds.
+   */
+  public boolean getAllowUnclassifiedInstances() {
+    
+    return m_AllowUnclassifiedInstances;
+  }
+  
+  /**
+   * Set the value of AllowUnclassifiedInstances.
+   *
+   * @param newAllowUnclassifiedInstances Value to assign to AllowUnclassifiedInstances.
+   */
+  public void setAllowUnclassifiedInstances(boolean newAllowUnclassifiedInstances) {
+    
+    m_AllowUnclassifiedInstances = newAllowUnclassifiedInstances;
+  }
+
+  /**
    * Set the maximum depth of the tree, 0 for unlimited.
    * 
    * @param value
@@ -262,7 +332,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
 
     newVector.addElement(new Option(
         "\tNumber of attributes to randomly investigate\n"
-        + "\t(<1 = int(log(#attributes)+1)).", "K", 1,
+        + "\t(<0 = int(log_2(#attributes)+1)).", "K", 1,
     "-K <number of attributes>"));
 
     newVector.addElement(new Option(
@@ -275,6 +345,14 @@ WeightedInstancesHandler, Randomizable, Drawable {
     newVector.addElement(new Option(
         "\tThe maximum depth of the tree, 0 for unlimited.\n"
         + "\t(default 0)", "depth", 1, "-depth <num>"));
+
+    newVector.
+      addElement(new Option("\tNumber of folds for backfitting " +
+			    "(default 0, no backfitting).",
+                            "N", 1, "-N <num>"));
+    newVector.
+      addElement(new Option("\tAllow unclassified instances.",
+			    "U", 0, "-U"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -310,6 +388,15 @@ WeightedInstancesHandler, Randomizable, Drawable {
       result.add("" + getMaxDepth());
     }
 
+    if (getNumFolds() > 0) {
+      result.add("-N"); 
+      result.add("" + getNumFolds());
+    }
+
+    if (getAllowUnclassifiedInstances()) {
+      result.add("-U");
+    }
+
     options = super.getOptions();
     for (i = 0; i < options.length; i++)
       result.add(options[i]);
@@ -322,27 +409,33 @@ WeightedInstancesHandler, Randomizable, Drawable {
    * <p/>
    * 
    * <!-- options-start -->
-   * * Valid options are: <p/>
-   * * 
-   * * <pre> -K &lt;number of attributes&gt;
-   * *  Number of attributes to randomly investigate
-   * *  (&lt;1 = int(log(#attributes)+1)).</pre>
-   * * 
-   * * <pre> -M &lt;minimum number of instances&gt;
-   * *  Set minimum number of instances per leaf.</pre>
-   * * 
-   * * <pre> -S &lt;num&gt;
-   * *  Seed for random number generator.
-   * *  (default 1)</pre>
-   * * 
-   * * <pre> -depth &lt;num&gt;
-   * *  The maximum depth of the tree, 0 for unlimited.
-   * *  (default 0)</pre>
-   * * 
-   * * <pre> -D
-   * *  If set, classifier is run in debug mode and
-   * *  may output additional info to the console</pre>
-   * * 
+   * Valid options are: <p/>
+   * 
+   * <pre> -K &lt;number of attributes&gt;
+   *  Number of attributes to randomly investigate
+   *  (&lt;0 = int(log_2(#attributes)+1)).</pre>
+   * 
+   * <pre> -M &lt;minimum number of instances&gt;
+   *  Set minimum number of instances per leaf.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Seed for random number generator.
+   *  (default 1)</pre>
+   * 
+   * <pre> -depth &lt;num&gt;
+   *  The maximum depth of the tree, 0 for unlimited.
+   *  (default 0)</pre>
+   * 
+   * <pre> -N &lt;num&gt;
+   *  Number of folds for backfitting (default 0, no backfitting).</pre>
+   * 
+   * <pre> -U
+   *  Allow unclassified instances.</pre>
+   * 
+   * <pre> -D
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
    * <!-- options-end -->
    * 
    * @param options
@@ -357,7 +450,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
     if (tmpStr.length() != 0) {
       m_KValue = Integer.parseInt(tmpStr);
     } else {
-      m_KValue = 1;
+      m_KValue = 0;
     }
 
     tmpStr = Utils.getOption('M', options);
@@ -380,6 +473,14 @@ WeightedInstancesHandler, Randomizable, Drawable {
     } else {
       setMaxDepth(0);
     }
+    String numFoldsString = Utils.getOption('N', options);
+    if (numFoldsString.length() != 0) {
+      m_NumFolds = Integer.parseInt(numFoldsString);
+    } else {
+      m_NumFolds = 0;
+    }
+
+    setAllowUnclassifiedInstances(Utils.getFlag('U', options));
 
     super.setOptions(options);
 
@@ -442,58 +543,17 @@ WeightedInstancesHandler, Randomizable, Drawable {
       m_ZeroR = null;
     }
 
-    Instances train = data;
-
-    // Create array of sorted indices and weights
-    int[][] sortedIndices = new int[train.numAttributes()][0];
-    double[][] weights = new double[train.numAttributes()][0];
-    double[] vals = new double[train.numInstances()];
-    for (int j = 0; j < train.numAttributes(); j++) {
-      if (j != train.classIndex()) {
-        weights[j] = new double[train.numInstances()];
-        if (train.attribute(j).isNominal()) {
-
-          // Handling nominal attributes. Putting indices of
-          // instances with missing values at the end.
-          sortedIndices[j] = new int[train.numInstances()];
-          int count = 0;
-          for (int i = 0; i < train.numInstances(); i++) {
-            Instance inst = train.instance(i);
-            if (!inst.isMissing(j)) {
-              sortedIndices[j][count] = i;
-              weights[j][count] = inst.weight();
-              count++;
-            }
-          }
-          for (int i = 0; i < train.numInstances(); i++) {
-            Instance inst = train.instance(i);
-            if (inst.isMissing(j)) {
-              sortedIndices[j][count] = i;
-              weights[j][count] = inst.weight();
-              count++;
-            }
-          }
-        } else {
-
-          // Sorted indices are computed for numeric attributes
-          for (int i = 0; i < train.numInstances(); i++) {
-            Instance inst = train.instance(i);
-            vals[i] = inst.value(j);
-          }
-          sortedIndices[j] = Utils.sort(vals);
-          for (int i = 0; i < train.numInstances(); i++) {
-            weights[j][i] = train.instance(sortedIndices[j][i])
-            .weight();
-          }
-        }
-      }
-    }
-
-    // Compute initial class counts
-    double[] classProbs = new double[train.numClasses()];
-    for (int i = 0; i < train.numInstances(); i++) {
-      Instance inst = train.instance(i);
-      classProbs[(int) inst.classValue()] += inst.weight();
+    // Figure out appropriate datasets
+    Instances train = null;
+    Instances backfit = null;
+    Random rand = data.getRandomNumberGenerator(m_randomSeed);
+    if (m_NumFolds <= 0) {
+      train = data;
+    } else {
+      data.randomize(rand);
+      data.stratify(m_NumFolds);
+      train = data.trainCV(m_NumFolds, 1, rand);
+      backfit = data.testCV(m_NumFolds, 1);
     }
 
     // Create the attribute indices window
@@ -505,11 +565,37 @@ WeightedInstancesHandler, Randomizable, Drawable {
       attIndicesWindow[i] = j++;
     }
 
-    // Build tree
-    buildTree(sortedIndices, weights, train, classProbs, new Instances(
-        train, 0), m_MinNum, m_Debug, attIndicesWindow, data
-        .getRandomNumberGenerator(m_randomSeed), 0);
+    // Compute initial class counts
+    double[] classProbs = new double[train.numClasses()];
+    for (int i = 0; i < train.numInstances(); i++) {
+      Instance inst = train.instance(i);
+      classProbs[(int) inst.classValue()] += inst.weight();
+    }
 
+    // Build tree 
+    buildTree(train, classProbs, new Instances(data, 0), m_MinNum, m_Debug, attIndicesWindow, 
+              rand, 0, getAllowUnclassifiedInstances());
+      
+    // Backfit if required
+    if (backfit != null) {
+      backfitData(backfit);
+    }
+  }
+
+  /**
+   * Backfits the given data into the tree.
+   */
+  public void backfitData(Instances data) throws Exception {
+
+    // Compute initial class counts
+    double[] classProbs = new double[data.numClasses()];
+    for (int i = 0; i < data.numInstances(); i++) {
+      Instance inst = data.instance(i);
+      classProbs[(int) inst.classValue()] += inst.weight();
+    }
+
+    // Fit data into tree
+    backfitData(data, classProbs);
   }
 
   /**
@@ -537,6 +623,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
 
         // Value is missing
         returnedDist = new double[m_Info.numClasses()];
+
         // Split instance up
         for (int i = 0; i < m_Successors.length; i++) {
           double[] help = m_Successors[i]
@@ -564,10 +651,24 @@ WeightedInstancesHandler, Randomizable, Drawable {
         }
       }
     }
-    if ((m_Attribute == -1) || (returnedDist == null)) {
 
-      // Node is a leaf or successor is empty
-      return m_ClassProbs;
+
+    // Node is a leaf or successor is empty?
+    if ((m_Attribute == -1) || (returnedDist == null)) {
+ 
+      // Is node empty?
+      if (m_ClassDistribution == null) {
+        if (getAllowUnclassifiedInstances()) {
+          return new double[m_Info.numClasses()];
+        } else {
+          return null;
+        }
+      }
+
+      // Else return normalized distribution
+      double[] normalizedDistribution = (double[]) m_ClassDistribution.clone();
+      Utils.normalize(normalizedDistribution);
+      return normalizedDistribution;
     } else {
       return returnedDist;
     }
@@ -604,7 +705,7 @@ WeightedInstancesHandler, Randomizable, Drawable {
    */
   public int toGraph(StringBuffer text, int num) throws Exception {
 
-    int maxIndex = Utils.maxIndex(m_ClassProbs);
+    int maxIndex = Utils.maxIndex(m_ClassDistribution);
     String classValue = m_Info.classAttribute().value(maxIndex);
 
     num++;
@@ -681,17 +782,19 @@ WeightedInstancesHandler, Randomizable, Drawable {
    */
   protected String leafString() throws Exception {
 
-    int maxIndex = Utils.maxIndex(m_Distribution[0]);
-
+    double sum = 0, maxCount = 0;
+    int maxIndex = 0;
+    if (m_ClassDistribution != null) {
+      sum = Utils.sum(m_ClassDistribution);
+      maxIndex = Utils.maxIndex(m_ClassDistribution);
+      maxCount = m_ClassDistribution[maxIndex];
+    } 
     return " : "
     + m_Info.classAttribute().value(maxIndex)
     + " ("
-    + Utils.doubleToString(Utils.sum(m_Distribution[0]), 2)
+    + Utils.doubleToString(sum, 2)
     + "/"
-    + Utils
-    .doubleToString(
-        (Utils.sum(m_Distribution[0]) - m_Distribution[0][maxIndex]),
-        2) + ")";
+    + Utils.doubleToString(sum - maxCount, 2) + ")";
   }
 
   /**
@@ -749,12 +852,119 @@ WeightedInstancesHandler, Randomizable, Drawable {
   }
 
   /**
+   * Recursively backfits data into the tree.
+   * 
+   * @param data
+   *            the data to work with
+   * @param classProbs
+   *            the class distribution
+   * @throws Exception
+   *             if generation fails
+   */
+  protected void backfitData(Instances data, double[] classProbs) throws Exception {
+
+    // Make leaf if there are no training instances
+    if (data.numInstances() == 0) {
+      m_Attribute = -1;
+      m_ClassDistribution = null;
+      m_Prop = null;
+      return;
+    }
+
+    // Check if node doesn't contain enough instances or is pure
+    // or maximum depth reached
+    m_ClassDistribution = (double[]) classProbs.clone();
+
+    /*    if (Utils.sum(m_ClassDistribution) < 2 * m_MinNum
+        || Utils.eq(m_ClassDistribution[Utils.maxIndex(m_ClassDistribution)], Utils
+                    .sum(m_ClassDistribution))) {
+      
+      // Make leaf
+      m_Attribute = -1;
+      m_Prop = null;
+      return;
+      }*/
+
+    // Are we at an inner node
+    if (m_Attribute > -1) {
+      
+      // Compute new weights for subsets based on backfit data
+      m_Prop = new double[m_Successors.length];
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if (!inst.isMissing(m_Attribute)) {
+          if (data.attribute(m_Attribute).isNominal()) {
+            m_Prop[(int)inst.value(m_Attribute)] += inst.weight();
+          } else {
+            m_Prop[(inst.value(m_Attribute) < m_SplitPoint) ? 0 : 1] += inst.weight();
+          }
+        }
+      }
+
+      // If we only have missing values we can make this node into a leaf
+      if (Utils.sum(m_Prop) <= 0) {
+        m_Attribute = -1;
+        m_Prop = null;
+        return;
+      }
+
+      // Otherwise normalize the proportions
+      Utils.normalize(m_Prop);
+
+      // Split data
+      Instances[] subsets = splitData(data);
+      
+      // Go through subsets
+      for (int i = 0; i < subsets.length; i++) {
+        
+        // Compute distribution for current subset
+        double[] dist = new double[data.numClasses()];
+        for (int j = 0; j < subsets[i].numInstances(); j++) {
+          dist[(int)subsets[i].instance(j).classValue()] += subsets[i].instance(j).weight();
+        }
+        
+        // Backfit subset
+        m_Successors[i].backfitData(subsets[i], dist);
+      }
+
+      // If unclassified instances are allowed, we don't need to store the class distribution
+      if (getAllowUnclassifiedInstances()) {
+        m_ClassDistribution = null;
+        return;
+      }
+
+      // Otherwise, if all successors are non-empty, we don't need to store the class distribution
+      boolean emptySuccessor = false;
+      for (int i = 0; i < subsets.length; i++) {
+        if (m_Successors[i].m_ClassDistribution == null) {
+          emptySuccessor = true;
+          return;
+        }
+      }
+      m_ClassDistribution = null;
+      
+      // If we have a least two non-empty successors, we should keep this tree
+      /*      int nonEmptySuccessors = 0;
+      for (int i = 0; i < subsets.length; i++) {
+        if (m_Successors[i].m_ClassDistribution != null) {
+          nonEmptySuccessors++;
+          if (nonEmptySuccessors > 1) {
+            return;
+          }
+        }
+      }
+      
+      // Otherwise, this node is a leaf or should become a leaf
+      m_Successors = null;
+      m_Attribute = -1;
+      m_Prop = null;
+      return;*/
+    }
+  }
+
+  /**
    * Recursively generates a tree.
    * 
-   * @param sortedIndices
-   *            the indices of the instances
-   * @param weights
-   *            the weights of the instances
    * @param data
    *            the data to work with
    * @param classProbs
@@ -771,44 +981,40 @@ WeightedInstancesHandler, Randomizable, Drawable {
    *            random number generator for choosing random attributes
    * @param depth
    *            the current depth
+   * @param determineStructure
+   *            whether to determine structure
    * @throws Exception
    *             if generation fails
    */
-  protected void buildTree(int[][] sortedIndices, double[][] weights,
-      Instances data, double[] classProbs, Instances header,
-      double minNum, boolean debug, int[] attIndicesWindow,
-      Random random, int depth) throws Exception {
+  protected void buildTree(Instances data, double[] classProbs, Instances header,
+                           double minNum, boolean debug, int[] attIndicesWindow,
+                           Random random, int depth, boolean allow) throws Exception {
 
     // Store structure of dataset, set minimum number of instances
     m_Info = header;
     m_Debug = debug;
     m_MinNum = minNum;
+    m_AllowUnclassifiedInstances = allow;
 
     // Make leaf if there are no training instances
-    if (((data.classIndex() > 0) && (sortedIndices[0].length == 0))
-        || ((data.classIndex() == 0) && sortedIndices[1].length == 0)) {
-      m_Distribution = new double[1][data.numClasses()];
-      m_ClassProbs = null;
+    if (data.numInstances() == 0) {
+      m_Attribute = -1;
+      m_ClassDistribution = null;
+      m_Prop = null;
       return;
     }
 
     // Check if node doesn't contain enough instances or is pure
     // or maximum depth reached
-    m_ClassProbs = new double[classProbs.length];
+    m_ClassDistribution = (double[]) classProbs.clone();
 
-    System.arraycopy(classProbs, 0, m_ClassProbs, 0, classProbs.length);
-
-    if (Utils.sum(m_ClassProbs) < 2 * m_MinNum
-        || Utils.eq(m_ClassProbs[Utils.maxIndex(m_ClassProbs)], Utils
-            .sum(m_ClassProbs))
+    if (Utils.sum(m_ClassDistribution) < 2 * m_MinNum
+        || Utils.eq(m_ClassDistribution[Utils.maxIndex(m_ClassDistribution)], Utils
+            .sum(m_ClassDistribution))
             || ((getMaxDepth() > 0) && (depth >= getMaxDepth()))) {
       // Make leaf
       m_Attribute = -1;
-      m_Distribution = new double[1][m_ClassProbs.length];
-      for (int i = 0; i < m_ClassProbs.length; i++) {
-        m_Distribution[0][i] = m_ClassProbs[i];
-      }
-      Utils.normalize(m_ClassProbs);
+      m_Prop = null;
       return;
     }
 
@@ -818,66 +1024,65 @@ WeightedInstancesHandler, Randomizable, Drawable {
     double[][][] dists = new double[data.numAttributes()][0][0];
     double[][] props = new double[data.numAttributes()][0];
     double[] splits = new double[data.numAttributes()];
-
+    
     // Investigate K random attributes
     int attIndex = 0;
     int windowSize = attIndicesWindow.length;
     int k = m_KValue;
     boolean gainFound = false;
     while ((windowSize > 0) && (k-- > 0 || !gainFound)) {
-
+      
       int chosenIndex = random.nextInt(windowSize);
       attIndex = attIndicesWindow[chosenIndex];
-
+      
       // shift chosen attIndex out of window
       attIndicesWindow[chosenIndex] = attIndicesWindow[windowSize - 1];
       attIndicesWindow[windowSize - 1] = attIndex;
       windowSize--;
-
-      splits[attIndex] = distribution(props, dists, attIndex,
-          sortedIndices[attIndex], weights[attIndex], data);
+      
+      splits[attIndex] = distribution(props, dists, attIndex, data);
       vals[attIndex] = gain(dists[attIndex], priorVal(dists[attIndex]));
-
-      if (vals[attIndex] > 0)
+      
+      if (Utils.gr(vals[attIndex], 0))
         gainFound = true;
     }
-
+      
     // Find best attribute
     m_Attribute = Utils.maxIndex(vals);
-    m_Distribution = dists[m_Attribute];
+    double[][] distribution = dists[m_Attribute];
 
-    // Any useful split found?
-    if (vals[m_Attribute] > 0) {
+    // Any useful split found? 
+    if (Utils.gr(vals[m_Attribute], 0)) {
+
       // Build subtrees
       m_SplitPoint = splits[m_Attribute];
       m_Prop = props[m_Attribute];
-      int[][][] subsetIndices = new int[m_Distribution.length][data
-                                                               .numAttributes()][0];
-      double[][][] subsetWeights = new double[m_Distribution.length][data
-                                                                     .numAttributes()][0];
-      splitData(subsetIndices, subsetWeights, m_Attribute, m_SplitPoint,
-          sortedIndices, weights, m_Distribution, data);
-      m_Successors = new RandomTree[m_Distribution.length];
-      for (int i = 0; i < m_Distribution.length; i++) {
+      Instances[] subsets = splitData(data);
+      m_Successors = new RandomTree[distribution.length];
+      for (int i = 0; i < distribution.length; i++) {
         m_Successors[i] = new RandomTree();
         m_Successors[i].setKValue(m_KValue);
         m_Successors[i].setMaxDepth(getMaxDepth());
-        m_Successors[i].buildTree(subsetIndices[i], subsetWeights[i],
-            data, m_Distribution[i], header, m_MinNum, m_Debug,
-            attIndicesWindow, random, depth + 1);
+        m_Successors[i].buildTree(subsets[i], distribution[i], header, m_MinNum, m_Debug,
+                                  attIndicesWindow, random, depth + 1, allow);
+      }
+
+      // If all successors are non-empty, we don't need to store the class distribution
+      boolean emptySuccessor = false;
+      for (int i = 0; i < subsets.length; i++) {
+        if (m_Successors[i].m_ClassDistribution == null) {
+          emptySuccessor = true;
+          break;
+        }
+      }
+      if (!emptySuccessor) {
+        m_ClassDistribution = null;
       }
     } else {
 
       // Make leaf
       m_Attribute = -1;
-      m_Distribution = new double[1][m_ClassProbs.length];
-      for (int i = 0; i < m_ClassProbs.length; i++) {
-        m_Distribution[0][i] = m_ClassProbs[i];
-      }
     }
-
-    // Normalize class counts
-    Utils.normalize(m_ClassProbs);
   }
 
   /**
@@ -899,108 +1104,71 @@ WeightedInstancesHandler, Randomizable, Drawable {
   }
 
   /**
-   * Splits instances into subsets.
+   * Splits instances into subsets based on the given split.
    * 
-   * @param subsetIndices
-   *            the sorted indices of the subset
-   * @param subsetWeights
-   *            the weights of the subset
-   * @param att
-   *            the attribute index
-   * @param splitPoint
-   *            the splitpoint for numeric attributes
-   * @param sortedIndices
-   *            the sorted indices of the whole set
-   * @param weights
-   *            the weights of the whole set
-   * @param dist
-   *            the distribution
    * @param data
    *            the data to work with
+   * @return  the subsets of instances
    * @throws Exception
    *             if something goes wrong
    */
-  protected void splitData(int[][][] subsetIndices,
-      double[][][] subsetWeights, int att, double splitPoint,
-      int[][] sortedIndices, double[][] weights, double[][] dist,
-      Instances data) throws Exception {
+  protected Instances[] splitData(Instances data) throws Exception {
 
-    int j;
-    int[] num;
-
-    // For each attribute
-    for (int i = 0; i < data.numAttributes(); i++) {
-      if (i != data.classIndex()) {
-        if (data.attribute(att).isNominal()) {
-
-          // For nominal attributes
-          num = new int[data.attribute(att).numValues()];
-          for (int k = 0; k < num.length; k++) {
-            subsetIndices[k][i] = new int[sortedIndices[i].length];
-            subsetWeights[k][i] = new double[sortedIndices[i].length];
-          }
-          for (j = 0; j < sortedIndices[i].length; j++) {
-            Instance inst = data.instance(sortedIndices[i][j]);
-            if (inst.isMissing(att)) {
-
-              // Split instance up
-              for (int k = 0; k < num.length; k++) {
-                if (m_Prop[k] > 0) {
-                  subsetIndices[k][i][num[k]] = sortedIndices[i][j];
-                  subsetWeights[k][i][num[k]] = m_Prop[k]
-                                                       * weights[i][j];
-                  num[k]++;
-                }
-              }
-            } else {
-              int subset = (int) inst.value(att);
-              subsetIndices[subset][i][num[subset]] = sortedIndices[i][j];
-              subsetWeights[subset][i][num[subset]] = weights[i][j];
-              num[subset]++;
-            }
-          }
-        } else {
-
-          // For numeric attributes
-          num = new int[2];
-          for (int k = 0; k < 2; k++) {
-            subsetIndices[k][i] = new int[sortedIndices[i].length];
-            subsetWeights[k][i] = new double[weights[i].length];
-          }
-          for (j = 0; j < sortedIndices[i].length; j++) {
-            Instance inst = data.instance(sortedIndices[i][j]);
-            if (inst.isMissing(att)) {
-
-              // Split instance up
-              for (int k = 0; k < num.length; k++) {
-                if (m_Prop[k] > 0) {
-                  subsetIndices[k][i][num[k]] = sortedIndices[i][j];
-                  subsetWeights[k][i][num[k]] = m_Prop[k]
-                                                       * weights[i][j];
-                  num[k]++;
-                }
-              }
-            } else {
-              int subset = (inst.value(att) < splitPoint) ? 0 : 1;
-              subsetIndices[subset][i][num[subset]] = sortedIndices[i][j];
-              subsetWeights[subset][i][num[subset]] = weights[i][j];
-              num[subset]++;
-            }
-          }
-        }
-
-        // Trim arrays
-        for (int k = 0; k < num.length; k++) {
-          int[] copy = new int[num[k]];
-          System.arraycopy(subsetIndices[k][i], 0, copy, 0, num[k]);
-          subsetIndices[k][i] = copy;
-          double[] copyWeights = new double[num[k]];
-          System.arraycopy(subsetWeights[k][i], 0, copyWeights, 0,
-              num[k]);
-          subsetWeights[k][i] = copyWeights;
-        }
-      }
+    // Allocate array of Instances objects
+    Instances[] subsets = new Instances[m_Prop.length];
+    for (int i = 0; i < m_Prop.length; i++) {
+      subsets[i] = new Instances(data, data.numInstances());
     }
+
+    // Go through the data
+    for (int i = 0; i < data.numInstances(); i++) {
+
+      // Get instance
+      Instance inst = data.instance(i);
+
+      // Does the instance have a missing value?
+      if (inst.isMissing(m_Attribute)) {
+        
+        // Split instance up
+        for (int k = 0; k < m_Prop.length; k++) {
+          if (m_Prop[k] > 0) {
+            Instance copy = (Instance)inst.copy();
+            copy.setWeight(m_Prop[k] * inst.weight());
+            subsets[k].add(copy);
+          }
+        }
+
+        // Proceed to next instance
+        continue;
+      }
+
+      // Do we have a nominal attribute?
+      if (data.attribute(m_Attribute).isNominal()) {
+        subsets[(int)inst.value(m_Attribute)].add(inst);
+
+        // Proceed to next instance
+        continue;
+      }
+
+      // Do we have a numeric attribute?
+      if (data.attribute(m_Attribute).isNumeric()) {
+        subsets[(inst.value(m_Attribute) < m_SplitPoint) ? 0 : 1].add(inst);
+
+        // Proceed to next instance
+        continue;
+      }
+      
+      // Else throw an exception
+      throw new IllegalArgumentException("Unknown attribute type");
+    }
+
+    // Save memory
+    for (int i = 0; i < m_Prop.length; i++) {
+      subsets[i].compactify();
+    }
+
+    // Return the subsets
+    return subsets;
   }
 
   /**
@@ -1010,33 +1178,34 @@ WeightedInstancesHandler, Randomizable, Drawable {
    * @param dists
    * @param att
    *            the attribute index
-   * @param sortedIndices
-   *            the sorted indices of the data
-   * @param weights
    * @param data
    *            the data to work with
    * @throws Exception
    *             if something goes wrong
    */
-  protected double distribution(double[][] props, double[][][] dists,
-      int att, int[] sortedIndices, double[] weights, Instances data)
+  protected double distribution(double[][] props, double[][][] dists, int att, Instances data)
   throws Exception {
 
     double splitPoint = Double.NaN;
     Attribute attribute = data.attribute(att);
     double[][] dist = null;
-    int i;
+    int indexOfFirstMissingValue = -1;
 
     if (attribute.isNominal()) {
 
       // For nominal attributes
       dist = new double[attribute.numValues()][data.numClasses()];
-      for (i = 0; i < sortedIndices.length; i++) {
-        Instance inst = data.instance(sortedIndices[i]);
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
         if (inst.isMissing(att)) {
-          break;
+
+          // Skip missing values at this stage
+          if (indexOfFirstMissingValue < 0) {
+            indexOfFirstMissingValue = i;
+          }
+          continue;
         }
-        dist[(int) inst.value(att)][(int) inst.classValue()] += weights[i];
+        dist[(int) inst.value(att)][(int) inst.classValue()] += inst.weight();
       }
     } else {
 
@@ -1044,45 +1213,70 @@ WeightedInstancesHandler, Randomizable, Drawable {
       double[][] currDist = new double[2][data.numClasses()];
       dist = new double[2][data.numClasses()];
 
+      // Sort data
+      data.sort(att);
+
       // Move all instances into second subset
-      for (int j = 0; j < sortedIndices.length; j++) {
-        Instance inst = data.instance(sortedIndices[j]);
+      for (int j = 0; j < data.numInstances(); j++) {
+        Instance inst = data.instance(j);
         if (inst.isMissing(att)) {
+
+          // Can stop as soon as we hit a missing value
+          indexOfFirstMissingValue = j;
           break;
         }
-        currDist[1][(int) inst.classValue()] += weights[j];
+        currDist[1][(int) inst.classValue()] += inst.weight();
       }
+
+      // Value before splitting
       double priorVal = priorVal(currDist);
+
+      // Save initial distribution
       for (int j = 0; j < currDist.length; j++) {
         System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
       }
 
       // Try all possible split points
-      double currSplit = data.instance(sortedIndices[0]).value(att);
+      double currSplit = data.instance(0).value(att);
       double currVal, bestVal = -Double.MAX_VALUE;
-      for (i = 0; i < sortedIndices.length; i++) {
-        Instance inst = data.instance(sortedIndices[i]);
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
         if (inst.isMissing(att)) {
+
+          // Can stop as soon as we hit a missing value
           break;
         }
+
+        // Can we place a sensible split point here?
         if (inst.value(att) > currSplit) {
+
+          // Compute gain for split point
           currVal = gain(currDist, priorVal);
+
+          // Is the current split point the best point so far?
           if (currVal > bestVal) {
+
+            // Store value of current point
             bestVal = currVal;
+
+            // Save split point
             splitPoint = (inst.value(att) + currSplit) / 2.0;
+
+            // Save distribution
             for (int j = 0; j < currDist.length; j++) {
-              System.arraycopy(currDist[j], 0, dist[j], 0,
-                  dist[j].length);
+              System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
             }
           }
         }
         currSplit = inst.value(att);
-        currDist[0][(int) inst.classValue()] += weights[i];
-        currDist[1][(int) inst.classValue()] -= weights[i];
+
+        // Shift over the weight
+        currDist[0][(int) inst.classValue()] += inst.weight();
+        currDist[1][(int) inst.classValue()] -= inst.weight();
       }
     }
 
-    // Compute weights
+    // Compute weights for subsets
     props[att] = new double[dist.length];
     for (int k = 0; k < props[att].length; k++) {
       props[att][k] = Utils.sum(dist[k]);
@@ -1096,16 +1290,26 @@ WeightedInstancesHandler, Randomizable, Drawable {
     }
 
     // Any instances with missing values ?
-    if (i < sortedIndices.length) {
+    if (indexOfFirstMissingValue > -1) {
 
-      // Distribute counts
-      while (i < sortedIndices.length) {
-        Instance inst = data.instance(sortedIndices[i]);
-        for (int j = 0; j < dist.length; j++) {
-          dist[j][(int) inst.classValue()] += props[att][j]
-                                                         * weights[i];
+      // Distribute weights for instances with missing values
+      for (int i = indexOfFirstMissingValue; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if (attribute.isNominal()) {
+
+          // Need to check if attribute value is missing
+          if (inst.isMissing(att)) {
+            for (int j = 0; j < dist.length; j++) {
+              dist[j][(int) inst.classValue()] += props[att][j] * inst.weight();
+            }
+          }
+        } else {
+
+          // Can be sure that value is missing, so no test required
+          for (int j = 0; j < dist.length; j++) {
+            dist[j][(int) inst.classValue()] += props[att][j] * inst.weight();
+          }
         }
-        i++;
       }
     }
 
