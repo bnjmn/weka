@@ -32,7 +32,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.3 $
+ * @version $Revision$
  */
 public class RandomTree extends Classifier 
   implements OptionHandler, WeightedInstancesHandler, Randomizable {
@@ -47,16 +47,13 @@ public class RandomTree extends Classifier
   protected double m_SplitPoint = Double.NaN;
     
   /** The class distribution from the training data. */
-  protected double[][] m_Distribution = null;
+  protected double[] m_ClassDistribution = null;
     
   /** The header information. */
   protected Instances m_Info = null;
     
   /** The proportions of training instances going down each branch. */
   protected double[] m_Prop = null;
-    
-  /** Class probabilities from the training data. */
-  protected double[] m_ClassProbs = null;
     
   /** Minimum number of instances for leaf. */
   protected double m_MinNum = 1.0;
@@ -310,70 +307,26 @@ public class RandomTree extends Classifier
 
     Instances train = data;
 
-    // Create array of sorted indices and weights
-    int[][] sortedIndices = new int[train.numAttributes()][0];
-    double[][] weights = new double[train.numAttributes()][0];
-    double[] vals = new double[train.numInstances()];
-    for (int j = 0; j < train.numAttributes(); j++) {
-      if (j != train.classIndex()) {
-	weights[j] = new double[train.numInstances()];
-	if (train.attribute(j).isNominal()) {
-
-	  // Handling nominal attributes. Putting indices of
-	  // instances with missing values at the end.
-	  sortedIndices[j] = new int[train.numInstances()];
-	  int count = 0;
-	  for (int i = 0; i < train.numInstances(); i++) {
-	    Instance inst = train.instance(i);
-	    if (!inst.isMissing(j)) {
-	      sortedIndices[j][count] = i;
-	      weights[j][count] = inst.weight();
-	      count++;
-	    }
-	  }
-	  for (int i = 0; i < train.numInstances(); i++) {
-	    Instance inst = train.instance(i);
-	    if (inst.isMissing(j)) {
-	      sortedIndices[j][count] = i;
-	      weights[j][count] = inst.weight();
-	      count++;
-	    }
-	  }
-	} else {
-	  
-	  // Sorted indices are computed for numeric attributes
-	  for (int i = 0; i < train.numInstances(); i++) {
-	    Instance inst = train.instance(i);
-	    vals[i] = inst.value(j);
-	  }
-	  sortedIndices[j] = Utils.sort(vals);
-	  for (int i = 0; i < train.numInstances(); i++) {
-	    weights[j][i] = train.instance(sortedIndices[j][i]).weight();
-	  }
-	}
-      }
+    // Create the attribute indices window
+    int[] attIndicesWindow = new int[data.numAttributes() - 1];
+    int j = 0;
+    for (int i = 0; i < attIndicesWindow.length; i++) {
+      if (j == data.classIndex())
+        j++; // do not include the class
+      attIndicesWindow[i] = j++;
     }
 
     // Compute initial class counts
     double[] classProbs = new double[train.numClasses()];
     for (int i = 0; i < train.numInstances(); i++) {
       Instance inst = train.instance(i);
-      classProbs[(int)inst.classValue()] += inst.weight();
+      classProbs[(int) inst.classValue()] += inst.weight();
     }
 
-    // Create the attribute indices window
-    int[] attIndicesWindow = new int[data.numAttributes()-1];
-    int j=0;
-    for (int i=0; i<attIndicesWindow.length; i++) {
-      if (j == data.classIndex()) j++; // do not include the class
-      attIndicesWindow[i] = j++;
-    }
-
-    // Build tree
-    buildTree(sortedIndices, weights, train, classProbs,
-	      new Instances(train, 0), m_MinNum, m_Debug,
-	      attIndicesWindow, data.getRandomNumberGenerator(m_randomSeed));
-
+    // Build tree 
+    Random rand = data.getRandomNumberGenerator(m_randomSeed);
+    buildTree(train, classProbs, new Instances(data, 0), m_MinNum, m_Debug, 
+              attIndicesWindow, rand);
   }
   
   /**
@@ -387,37 +340,50 @@ public class RandomTree extends Classifier
       
       // Node is not a leaf
       if (instance.isMissing(m_Attribute)) {
+        
+        // Value is missing
+        returnedDist = new double[m_Info.numClasses()];
 
-	// Value is missing
-	returnedDist = new double[m_Info.numClasses()];
-	// Split instance up
-	for (int i = 0; i < m_Successors.length; i++) {
-	  double[] help = m_Successors[i].distributionForInstance(instance);
-	  if (help != null) {
-	    for (int j = 0; j < help.length; j++) {
-	      returnedDist[j] += m_Prop[i] * help[j];
-	    }
-	  }
-	}
+        // Split instance up
+        for (int i = 0; i < m_Successors.length; i++) {
+          double[] help = m_Successors[i]
+                                       .distributionForInstance(instance);
+          if (help != null) {
+            for (int j = 0; j < help.length; j++) {
+              returnedDist[j] += m_Prop[i] * help[j];
+            }
+          }
+        }
       } else if (m_Info.attribute(m_Attribute).isNominal()) {
-	  
-	// For nominal attributes
-	returnedDist =  m_Successors[(int)instance.value(m_Attribute)].
-	  distributionForInstance(instance);
+
+        // For nominal attributes
+        returnedDist = m_Successors[(int) instance.value(m_Attribute)]
+                                    .distributionForInstance(instance);
       } else {
-	
-	// For numeric attributes
-	if (instance.value(m_Attribute) < m_SplitPoint) {
-	  returnedDist = m_Successors[0].distributionForInstance(instance);
-	} else {
-	  returnedDist = m_Successors[1].distributionForInstance(instance);
-	}
+
+        // For numeric attributes
+        if (instance.value(m_Attribute) < m_SplitPoint) {
+          returnedDist = m_Successors[0]
+                                      .distributionForInstance(instance);
+        } else {
+          returnedDist = m_Successors[1]
+                                      .distributionForInstance(instance);
+        }
       }
     }
-    if ((m_Attribute == -1) || (returnedDist == null)) {
 
-      // Node is a leaf or successor is empty
-      return m_ClassProbs;
+    // Node is a leaf or successor is empty?
+    if ((m_Attribute == -1) || (returnedDist == null)) {
+ 
+      // Is node empty?
+      if (m_ClassDistribution == null) {
+        return null;
+      }
+
+      // Else return normalized distribution
+      double[] normalizedDistribution = (double[]) m_ClassDistribution.clone();
+      Utils.normalize(normalizedDistribution);
+      return normalizedDistribution;
     } else {
       return returnedDist;
     }
@@ -444,7 +410,7 @@ public class RandomTree extends Classifier
    */
   public int toGraph(StringBuffer text, int num) throws Exception {
     
-    int maxIndex = Utils.maxIndex(m_ClassProbs);
+    int maxIndex = Utils.maxIndex(m_ClassDistribution);
     String classValue = m_Info.classAttribute().value(maxIndex);
     
     num++;
@@ -497,13 +463,20 @@ public class RandomTree extends Classifier
    * Outputs a leaf.
    */
   protected String leafString() throws Exception {
-    
-    int maxIndex = Utils.maxIndex(m_Distribution[0]);
 
-    return " : " + m_Info.classAttribute().value(maxIndex) + 
-      " (" + Utils.doubleToString(Utils.sum(m_Distribution[0]), 2) + "/" + 
-      Utils.doubleToString((Utils.sum(m_Distribution[0]) - 
-			    m_Distribution[0][maxIndex]), 2) + ")";
+    double sum = 0, maxCount = 0;
+    int maxIndex = 0;
+    if (m_ClassDistribution != null) {
+      sum = Utils.sum(m_ClassDistribution);
+      maxIndex = Utils.maxIndex(m_ClassDistribution);
+      maxCount = m_ClassDistribution[maxIndex];
+    } 
+    return " : "
+    + m_Info.classAttribute().value(maxIndex)
+    + " ("
+    + Utils.doubleToString(sum, 2)
+    + "/"
+    + Utils.doubleToString(sum - maxCount, 2) + ")";
   }
   
   /**
@@ -559,11 +532,9 @@ public class RandomTree extends Classifier
   /**
    * Recursively generates a tree.
    */
-  protected void buildTree(int[][] sortedIndices, double[][] weights,
-			 Instances data, double[] classProbs, 
-			 Instances header, double minNum, boolean debug,
-			 int[] attIndicesWindow, Random random) 
-    throws Exception {
+  protected void buildTree(Instances data, double[] classProbs, Instances header,
+                           double minNum, boolean debug, int[] attIndicesWindow,
+                           Random random) throws Exception {
 
     // Store structure of dataset, set minimum number of instances
     m_Info = header;
@@ -571,27 +542,23 @@ public class RandomTree extends Classifier
     m_MinNum = minNum;
 
     // Make leaf if there are no training instances
-    if (((data.classIndex() > 0) && (sortedIndices[0].length == 0)) ||
-	((data.classIndex() == 0) && sortedIndices[1].length == 0)) {
-      m_Distribution = new double[1][data.numClasses()];
-      m_ClassProbs = null;
+    if (data.numInstances() == 0) {
+      m_Attribute = -1;
+      m_ClassDistribution = null;
+      m_Prop = null;
       return;
     }
 
     // Check if node doesn't contain enough instances or is pure
-    m_ClassProbs = new double[classProbs.length];
-    System.arraycopy(classProbs, 0, m_ClassProbs, 0, classProbs.length);
-    if (Utils.sum(m_ClassProbs) < 2 * m_MinNum ||
-	Utils.eq(m_ClassProbs[Utils.maxIndex(m_ClassProbs)],
-		 Utils.sum(m_ClassProbs))) {
+    m_ClassDistribution = (double[]) classProbs.clone();
+
+    if (Utils.sum(m_ClassDistribution) < 2 * m_MinNum
+        || Utils.eq(m_ClassDistribution[Utils.maxIndex(m_ClassDistribution)], Utils
+                    .sum(m_ClassDistribution))) {
 
       // Make leaf
       m_Attribute = -1;
-      m_Distribution = new double[1][m_ClassProbs.length];
-      for (int i = 0; i < m_ClassProbs.length; i++) {
-	m_Distribution[0][i] = m_ClassProbs[i];
-      }
-      Utils.normalize(m_ClassProbs);
+      m_Prop = null;
       return;
     }
 
@@ -601,66 +568,64 @@ public class RandomTree extends Classifier
     double[][][] dists = new double[data.numAttributes()][0][0];
     double[][] props = new double[data.numAttributes()][0];
     double[] splits = new double[data.numAttributes()];
-
+    
     // Investigate K random attributes
     int attIndex = 0;
     int windowSize = attIndicesWindow.length;
     int k = m_KValue;
     boolean gainFound = false;
     while ((windowSize > 0) && (k-- > 0 || !gainFound)) {
-
+      
       int chosenIndex = random.nextInt(windowSize);
       attIndex = attIndicesWindow[chosenIndex];
       
       // shift chosen attIndex out of window
-      attIndicesWindow[chosenIndex] = attIndicesWindow[windowSize-1];
-      attIndicesWindow[windowSize-1] = attIndex;
+      attIndicesWindow[chosenIndex] = attIndicesWindow[windowSize - 1];
+      attIndicesWindow[windowSize - 1] = attIndex;
       windowSize--;
-
-      splits[attIndex] = distribution(props, dists, attIndex,
-				      sortedIndices[attIndex], 
-				      weights[attIndex], data);
+      
+      splits[attIndex] = distribution(props, dists, attIndex, data);
       vals[attIndex] = gain(dists[attIndex], priorVal(dists[attIndex]));
-
-      if (vals[attIndex] > 0) gainFound = true;
+      
+      if (Utils.gr(vals[attIndex], 0))
+        gainFound = true;
     }
-
+      
     // Find best attribute
     m_Attribute = Utils.maxIndex(vals);
-    m_Distribution = dists[m_Attribute];
+    double[][] distribution = dists[m_Attribute];
 
-    // Any useful split found?
-    if (vals[m_Attribute] > 0) {
+    // Any useful split found? 
+    if (Utils.gr(vals[m_Attribute], 0)) {
 
       // Build subtrees
       m_SplitPoint = splits[m_Attribute];
       m_Prop = props[m_Attribute];
-      int[][][] subsetIndices = 
-	new int[m_Distribution.length][data.numAttributes()][0];
-      double[][][] subsetWeights = 
-	new double[m_Distribution.length][data.numAttributes()][0];
-      splitData(subsetIndices, subsetWeights, m_Attribute, m_SplitPoint, 
-		sortedIndices, weights, m_Distribution, data);
-      m_Successors = new RandomTree[m_Distribution.length];
-      for (int i = 0; i < m_Distribution.length; i++) {
-	m_Successors[i] = new RandomTree();
-	m_Successors[i].setKValue(m_KValue);
-	m_Successors[i].buildTree(subsetIndices[i], subsetWeights[i], data, 
-				  m_Distribution[i], header, m_MinNum, m_Debug,
-				  attIndicesWindow, random);
+      Instances[] subsets = splitData(data);
+      m_Successors = new RandomTree[distribution.length];
+      for (int i = 0; i < distribution.length; i++) {
+        m_Successors[i] = new RandomTree();
+        m_Successors[i].setKValue(m_KValue);
+        m_Successors[i].buildTree(subsets[i], distribution[i], header, m_MinNum, m_Debug,
+                                  attIndicesWindow, random);
+      }
+
+      // If all successors are non-empty, we don't need to store the class distribution
+      boolean emptySuccessor = false;
+      for (int i = 0; i < subsets.length; i++) {
+        if (m_Successors[i].m_ClassDistribution == null) {
+          emptySuccessor = true;
+          break;
+        }
+      }
+      if (!emptySuccessor) {
+        m_ClassDistribution = null;
       }
     } else {
-      
+
       // Make leaf
       m_Attribute = -1;
-      m_Distribution = new double[1][m_ClassProbs.length];
-      for (int i = 0; i < m_ClassProbs.length; i++) {
-	m_Distribution[0][i] = m_ClassProbs[i];
-      }
     }
-
-    // Normalize class counts
-    Utils.normalize(m_ClassProbs);
   }
 
   /**
@@ -682,109 +647,91 @@ public class RandomTree extends Classifier
   /**
    * Splits instances into subsets.
    */
-  protected void splitData(int[][][] subsetIndices, double[][][] subsetWeights,
-			 int att, double splitPoint, 
-			 int[][] sortedIndices, double[][] weights,
-			 double[][] dist, Instances data) throws Exception {
-    
-    int j;
-    int[] num;
-   
-    // For each attribute
-    for (int i = 0; i < data.numAttributes(); i++) {
-      if (i != data.classIndex()) {
-	if (data.attribute(att).isNominal()) {
+  protected Instances[] splitData(Instances data) throws Exception {
 
-	  // For nominal attributes
-	  num = new int[data.attribute(att).numValues()];
-	  for (int k = 0; k < num.length; k++) {
-	    subsetIndices[k][i] = new int[sortedIndices[i].length];
-	    subsetWeights[k][i] = new double[sortedIndices[i].length];
-	  }
-	  for (j = 0; j < sortedIndices[i].length; j++) {
-	    Instance inst = data.instance(sortedIndices[i][j]);
-	    if (inst.isMissing(att)) {
-
-	      // Split instance up
-	      for (int k = 0; k < num.length; k++) {
-		if (m_Prop[k] > 0) {
-		  subsetIndices[k][i][num[k]] = sortedIndices[i][j];
-		  subsetWeights[k][i][num[k]] = m_Prop[k] * weights[i][j];
-		  num[k]++;
-		}
-	      }
-	    } else {
-	      int subset = (int)inst.value(att);
-	      subsetIndices[subset][i][num[subset]] = sortedIndices[i][j];
-	      subsetWeights[subset][i][num[subset]] = weights[i][j];
-	      num[subset]++;
-	    }
-	  }
-	} else {
-
-	  // For numeric attributes
-	  num = new int[2];
-	  for (int k = 0; k < 2; k++) {
-	    subsetIndices[k][i] = new int[sortedIndices[i].length];
-	    subsetWeights[k][i] = new double[weights[i].length];
-	  }
-	  for (j = 0; j < sortedIndices[i].length; j++) {
-	    Instance inst = data.instance(sortedIndices[i][j]);
-	    if (inst.isMissing(att)) {
-
-	      // Split instance up
-	      for (int k = 0; k < num.length; k++) {
-		if (m_Prop[k] > 0) {
-		  subsetIndices[k][i][num[k]] = sortedIndices[i][j];
-		  subsetWeights[k][i][num[k]] = m_Prop[k] * weights[i][j];
-		  num[k]++;
-		}
-	      }
-	    } else {
-	      int subset = (inst.value(att) < splitPoint) ? 0 : 1;
-	      subsetIndices[subset][i][num[subset]] = sortedIndices[i][j];
-	      subsetWeights[subset][i][num[subset]] = weights[i][j];
-	      num[subset]++;
-	    } 
-	  }
-	}
-	
-	// Trim arrays
-	for (int k = 0; k < num.length; k++) {
-	  int[] copy = new int[num[k]];
-	  System.arraycopy(subsetIndices[k][i], 0, copy, 0, num[k]);
-	  subsetIndices[k][i] = copy;
-	  double[] copyWeights = new double[num[k]];
-	  System.arraycopy(subsetWeights[k][i], 0, copyWeights, 0, num[k]);
-	  subsetWeights[k][i] = copyWeights;
-	}
-      }
+    // Allocate array of Instances objects
+    Instances[] subsets = new Instances[m_Prop.length];
+    for (int i = 0; i < m_Prop.length; i++) {
+      subsets[i] = new Instances(data, data.numInstances());
     }
+
+    // Go through the data
+    for (int i = 0; i < data.numInstances(); i++) {
+
+      // Get instance
+      Instance inst = data.instance(i);
+
+      // Does the instance have a missing value?
+      if (inst.isMissing(m_Attribute)) {
+        
+        // Split instance up
+        for (int k = 0; k < m_Prop.length; k++) {
+          if (m_Prop[k] > 0) {
+            Instance copy = (Instance)inst.copy();
+            copy.setWeight(m_Prop[k] * inst.weight());
+            subsets[k].add(copy);
+          }
+        }
+
+        // Proceed to next instance
+        continue;
+      }
+
+      // Do we have a nominal attribute?
+      if (data.attribute(m_Attribute).isNominal()) {
+        subsets[(int)inst.value(m_Attribute)].add(inst);
+
+        // Proceed to next instance
+        continue;
+      }
+
+      // Do we have a numeric attribute?
+      if (data.attribute(m_Attribute).isNumeric()) {
+        subsets[(inst.value(m_Attribute) < m_SplitPoint) ? 0 : 1].add(inst);
+
+        // Proceed to next instance
+        continue;
+      }
+      
+      // Else throw an exception
+      throw new IllegalArgumentException("Unknown attribute type");
+    }
+
+    // Save memory
+    for (int i = 0; i < m_Prop.length; i++) {
+      subsets[i].compactify();
+    }
+
+    // Return the subsets
+    return subsets;
   }
 
   /**
    * Computes class distribution for an attribute.
    */
-  protected double distribution(double[][] props, double[][][] dists, int att, 
-			      int[] sortedIndices,
-			      double[] weights, Instances data) 
-    throws Exception {
+  protected double distribution(double[][] props, double[][][] dists, int att, Instances data)
+  throws Exception {
 
     double splitPoint = Double.NaN;
     Attribute attribute = data.attribute(att);
     double[][] dist = null;
-    int i;
+    int indexOfFirstMissingValue = -1;
 
     if (attribute.isNominal()) {
 
       // For nominal attributes
       dist = new double[attribute.numValues()][data.numClasses()];
-      for (i = 0; i < sortedIndices.length; i++) {
-	Instance inst = data.instance(sortedIndices[i]);
-	if (inst.isMissing(att)) {
-	  break;
-	}
-	dist[(int)inst.value(att)][(int)inst.classValue()] += weights[i];
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if (inst.isMissing(att)) {
+
+          // Skip missing values at this stage
+          if (indexOfFirstMissingValue < 0) {
+            indexOfFirstMissingValue = i;
+          }
+          continue;
+        }
+        dist[(int) inst.value(att)][(int) inst.classValue()] += inst.weight();
       }
     } else {
 
@@ -792,73 +739,110 @@ public class RandomTree extends Classifier
       double[][] currDist = new double[2][data.numClasses()];
       dist = new double[2][data.numClasses()];
 
+      // Sort data
+      data.sort(att);
+
       // Move all instances into second subset
-      for (int j = 0; j < sortedIndices.length; j++) {
-	Instance inst = data.instance(sortedIndices[j]);
-	if (inst.isMissing(att)) {
-	  break;
-	}
-	currDist[1][(int)inst.classValue()] += weights[j];
+      for (int j = 0; j < data.numInstances(); j++) {
+        Instance inst = data.instance(j);
+        if (inst.isMissing(att)) {
+
+          // Can stop as soon as we hit a missing value
+          indexOfFirstMissingValue = j;
+          break;
+        }
+        currDist[1][(int) inst.classValue()] += inst.weight();
       }
+
+      // Value before splitting
       double priorVal = priorVal(currDist);
+
+      // Save initial distribution
       for (int j = 0; j < currDist.length; j++) {
-	System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
+        System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
       }
 
       // Try all possible split points
-      double currSplit = data.instance(sortedIndices[0]).value(att);
+      double currSplit = data.instance(0).value(att);
       double currVal, bestVal = -Double.MAX_VALUE;
-      for (i = 0; i < sortedIndices.length; i++) {
-	Instance inst = data.instance(sortedIndices[i]);
-	if (inst.isMissing(att)) {
-	  break;
-	}
-	if (inst.value(att) > currSplit) {
-	  currVal = gain(currDist, priorVal);
-	  if (currVal > bestVal) {
-	    bestVal = currVal;
-	    splitPoint = (inst.value(att) + currSplit) / 2.0;
-	    for (int j = 0; j < currDist.length; j++) {
-	      System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
-	    }
-	  } 
-	} 
-	currSplit = inst.value(att);
-	currDist[0][(int)inst.classValue()] += weights[i];
-	currDist[1][(int)inst.classValue()] -= weights[i];
+      for (int i = 0; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if (inst.isMissing(att)) {
+
+          // Can stop as soon as we hit a missing value
+          break;
+        }
+
+        // Can we place a sensible split point here?
+        if (inst.value(att) > currSplit) {
+
+          // Compute gain for split point
+          currVal = gain(currDist, priorVal);
+
+          // Is the current split point the best point so far?
+          if (currVal > bestVal) {
+
+            // Store value of current point
+            bestVal = currVal;
+
+            // Save split point
+            splitPoint = (inst.value(att) + currSplit) / 2.0;
+
+            // Save distribution
+            for (int j = 0; j < currDist.length; j++) {
+              System.arraycopy(currDist[j], 0, dist[j], 0, dist[j].length);
+            }
+          }
+        }
+        currSplit = inst.value(att);
+
+        // Shift over the weight
+        currDist[0][(int) inst.classValue()] += inst.weight();
+        currDist[1][(int) inst.classValue()] -= inst.weight();
       }
     }
 
-    // Compute weights
+    // Compute weights for subsets
     props[att] = new double[dist.length];
     for (int k = 0; k < props[att].length; k++) {
       props[att][k] = Utils.sum(dist[k]);
     }
     if (Utils.eq(Utils.sum(props[att]), 0)) {
       for (int k = 0; k < props[att].length; k++) {
-	props[att][k] = 1.0 / (double)props[att].length;
+        props[att][k] = 1.0 / (double) props[att].length;
       }
     } else {
       Utils.normalize(props[att]);
     }
-    
+
     // Any instances with missing values ?
-    if (i < sortedIndices.length) {
-	
-      // Distribute counts
-      while (i < sortedIndices.length) {
-	Instance inst = data.instance(sortedIndices[i]);
-	for (int j = 0; j < dist.length; j++) {
-	  dist[j][(int)inst.classValue()] += props[att][j] * weights[i];
-	}
-	i++;
+    if (indexOfFirstMissingValue > -1) {
+
+      // Distribute weights for instances with missing values
+      for (int i = indexOfFirstMissingValue; i < data.numInstances(); i++) {
+        Instance inst = data.instance(i);
+        if (attribute.isNominal()) {
+
+          // Need to check if attribute value is missing
+          if (inst.isMissing(att)) {
+            for (int j = 0; j < dist.length; j++) {
+              dist[j][(int) inst.classValue()] += props[att][j] * inst.weight();
+            }
+          }
+        } else {
+
+          // Can be sure that value is missing, so no test required
+          for (int j = 0; j < dist.length; j++) {
+            dist[j][(int) inst.classValue()] += props[att][j] * inst.weight();
+          }
+        }
       }
     }
 
     // Return distribution and split point
     dists[att] = dist;
     return splitPoint;
-  }      
+  }
 
   /**
    * Computes value of splitting criterion before split.
