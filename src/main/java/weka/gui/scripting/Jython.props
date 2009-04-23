@@ -76,7 +76,10 @@ AddMatchingBlockEnd=false
 BlockStart=
 
 # the end of a block (e.g., "closing bracket")
-BlockEndd=
+BlockEnd=
+
+# whether the keywords are case-sensitive (true|false)
+CaseSensitive=true
 
 # the keywords
 Keywords=\

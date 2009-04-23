@@ -158,6 +158,9 @@ public class SyntaxDocument
   /** whether multi-line comments are enabled. */
   protected boolean m_MultiLineComment;
   
+  /** whether keywords are case-sensitive. */
+  protected boolean m_CaseSensitive;
+  
   /**
    * Initializes the document.
    * 
@@ -191,6 +194,7 @@ public class SyntaxDocument
     setBlockEnd(props.getProperty("BlockEnd", "}"));
     setAddMatchingEndBlocks(props.getProperty("AddMatchingBlockEnd", "false").equals("true"));
     setUseBlanks(props.getProperty("UseBlanks", "false").equals("true"));
+    setCaseSensitive(props.getProperty("CaseSensitive", "true").equals("true"));
     addKeywords(props.getProperty("Keywords", "").trim().replaceAll(" ", "").split(","), DEFAULT_KEYWORD);
     setTabs(Integer.parseInt(props.getProperty("Tabs", "2")));
     setAttributeColor(DEFAULT_NORMAL, VisualizeUtils.processColour(props.getProperty("ForegroundColor", "black"), Color.BLACK));
@@ -290,7 +294,10 @@ public class SyntaxDocument
    *          how to format keyword
    */
   public void addKeyword(String keyword, MutableAttributeSet attr) {
-    m_Keywords.put(keyword, attr);
+    if (m_CaseSensitive)
+      m_Keywords.put(keyword, attr);
+    else
+      m_Keywords.put(keyword.toLowerCase(), attr);
   }
 
   /**
@@ -302,7 +309,10 @@ public class SyntaxDocument
    * @return how keyword is formatted, or null if no formatting is applied to it
    */
   public MutableAttributeSet getKeywordFormatting(String keyword) {
-    return m_Keywords.get(keyword);
+    if (m_CaseSensitive)
+      return m_Keywords.get(keyword);
+    else
+      return m_Keywords.get(keyword.toLowerCase());
   }
 
   /**
@@ -312,7 +322,10 @@ public class SyntaxDocument
    *          the token or word to stop formatting
    */
   public void removeKeyword(String keyword) {
-    m_Keywords.remove(keyword);
+    if (m_CaseSensitive)
+      m_Keywords.remove(keyword);
+    else
+      m_Keywords.remove(keyword.toLowerCase());
   }
 
   /** 
@@ -761,7 +774,7 @@ public class SyntaxDocument
     String token = content.substring(startOffset, endOfToken);
 
     // see if this token has a highlighting format associated with it
-    MutableAttributeSet attr = m_Keywords.get(token);
+    MutableAttributeSet attr = getKeywordFormatting(token);
     if (attr != null)
       m_Self.setCharacterAttributes(startOffset, endOfToken - startOffset, attr, false);
 
@@ -1227,5 +1240,25 @@ public class SyntaxDocument
    */
   public boolean getMultiLineComment() {
     return m_MultiLineComment;
+  }
+  
+  /**
+   * Sets whether the keywords are case-sensitive or not.
+   * 
+   * @param value	
+   * 		if true then keywords are treated case-sensitive
+   */
+  public void setCaseSensitive(boolean value) {
+    m_CaseSensitive = value;
+  }
+
+  /**
+   * Returns whether blanks are used instead of tabs.
+   * 
+   * @return
+   * 		true if keywords are case-sensitive
+   */
+  public boolean getCaseSensitive() {
+    return m_CaseSensitive;
   }
 }
