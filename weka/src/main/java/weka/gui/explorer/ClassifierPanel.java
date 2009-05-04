@@ -840,12 +840,13 @@ public class ClassifierPanel
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
-      final SetInstancesPanel sp = new SetInstancesPanel();
+      final SetInstancesPanel sp = new SetInstancesPanel(true);
 
       if (m_TestLoader != null) {
         try {
-          if (m_TestLoader.getStructure() != null)
+          if (m_TestLoader.getStructure() != null) {
             sp.setInstances(m_TestLoader.getStructure());
+          }
         } catch (Exception ex) {
           ex.printStackTrace();
         }
