@@ -61,7 +61,7 @@ import javax.swing.JFrame;
  *   intervals = max(1, Math.round(Range/intervalWidth);
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision$
  */
 public class AttributeVisualizationPanel
   extends PrintablePanel {
@@ -87,12 +87,12 @@ public class AttributeVisualizationPanel
   /**
    * This holds the max value of the current attribute. In case of nominal
    * attribute it is the highest count that a nominal value has in the
-   * attribute (given by m_as.nominalCounts[i]), otherwise in case of numeric
+   * attribute (given by m_as.nominalWeights[i]), otherwise in case of numeric
    * attribute it is simply the maximum value present in the attribute (given by
    * m_as.numericStats.max). It is used to calculate the ratio of the height of
    * the bars with respect to the height of the display area.
    */
-  protected int m_maxValue;
+  protected double m_maxValue;
   
   /**
    * This array holds the count (or height) for the each of the bars in a
@@ -100,7 +100,7 @@ public class AttributeVisualizationPanel
    * nominal) its length (and the number of bars) is equal to the number of
    * nominal values in the current attribute, with each field of the array being
    * equal to the count of each nominal that it represents (the count of ith
-   * nominal value of an attribute is given by m_as.nominalCounts[i]). Whereas,
+   * nominal value of an attribute is given by m_as.nominalWeights[i]). Whereas,
    * in case of histograms (and current attribute being numeric) the width of
    * its intervals is calculated by Scott's(1979) method: <br>
    *    intervalWidth = Max(1, 3.49*Std.Dev*numInstances^(1/3))
@@ -111,7 +111,7 @@ public class AttributeVisualizationPanel
    * NOTE: The values of this array are only calculated if the class attribute
    * is not set or if it is numeric.
    */
-  protected int m_histBarCounts[];
+  protected double[] m_histBarCounts;
   
   /**
    * This array holds the per class count (or per class height) of the each of
@@ -129,7 +129,7 @@ public class AttributeVisualizationPanel
    * NOTE: The values of this array are only calculated if the class attribute
    * is set and it is nominal.
    */
-  int m_histBarClassCounts[][];
+  double m_histBarClassCounts[][];
   
   /**
    * Contains the range of each bar in a histogram. It is used to work out the
@@ -346,7 +346,7 @@ public class AttributeVisualizationPanel
     
     synchronized (m_locker) {
       m_threadRun = true;
-      if(m_as.nominalCounts!=null) {
+      if(m_as.nominalWeights!=null) {
         m_hc = new BarCalc();
         m_hc.setPriority(m_hc.MIN_PRIORITY);
         m_hc.start();
@@ -376,15 +376,15 @@ public class AttributeVisualizationPanel
       synchronized (m_locker) {
         if((m_classIndex >= 0) &&
         (m_data.attribute(m_classIndex).isNominal())) {
-          int histClassCounts[][];
-          histClassCounts=new int[m_data.attribute(m_attribIndex).numValues()]
+          double histClassCounts[][];
+          histClassCounts=new double[m_data.attribute(m_attribIndex).numValues()]
                                  [m_data.attribute(m_classIndex).numValues()+1];
           
-          if (m_as.nominalCounts.length > 0) {
-            m_maxValue = m_as.nominalCounts[0];
+          if (m_as.nominalWeights.length > 0) {
+            m_maxValue = m_as.nominalWeights[0];
             for(int i=0; i<m_data.attribute(m_attribIndex).numValues(); i++) {
-              if(m_as.nominalCounts[i]>m_maxValue)
-        	m_maxValue = m_as.nominalCounts[i];
+              if(m_as.nominalWeights[i]>m_maxValue)
+        	m_maxValue = m_as.nominalWeights[i];
             }
           }
           else {
@@ -414,10 +414,10 @@ public class AttributeVisualizationPanel
             if(!m_data.instance(k).isMissing(m_attribIndex))
               if(m_data.instance(k).isMissing(m_classIndex))
                 histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
-                               [0]++;
+                               [0] += m_data.instance(k).weight();
               else
                 histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
-                              [(int)m_data.instance(k).value(m_classIndex)+1]++;
+                              [(int)m_data.instance(k).value(m_classIndex)+1] += m_data.instance(k).weight();
           }
           
           //for(int i=0; i<histClassCounts.length; i++) {
@@ -426,7 +426,7 @@ public class AttributeVisualizationPanel
           //    sum = sum+histClassCounts[i][j];
           //}
           //System.out.println("histCount: "+sum+" Actual: "+
-          //                   m_as.nominalCounts[i]);
+          //                   m_as.nominalWeights[i]);
           //}
           
           m_threadRun=false;
@@ -438,14 +438,14 @@ public class AttributeVisualizationPanel
           AttributeVisualizationPanel.this.repaint();
         }
         else {
-          int histCounts[];
-          histCounts  = new int[m_data.attribute(m_attribIndex).numValues()];
+          double histCounts[];
+          histCounts  = new double[m_data.attribute(m_attribIndex).numValues()];
           
-          if (m_as.nominalCounts.length > 0) {
-            m_maxValue = m_as.nominalCounts[0];
+          if (m_as.nominalWeights.length > 0) {
+            m_maxValue = m_as.nominalWeights[0];
             for(int i=0; i<m_data.attribute(m_attribIndex).numValues(); i++) {
-              if(m_as.nominalCounts[i]>m_maxValue)
-        	m_maxValue = m_as.nominalCounts[i];
+              if(m_as.nominalWeights[i]>m_maxValue)
+        	m_maxValue = m_as.nominalWeights[i];
             }
           }
           else {
@@ -454,7 +454,8 @@ public class AttributeVisualizationPanel
           
           for(int k=0; k<m_data.numInstances(); k++) {
             if(!m_data.instance(k).isMissing(m_attribIndex))
-              histCounts[(int)m_data.instance(k).value(m_attribIndex)]++;
+              histCounts[(int)m_data.instance(k).value(m_attribIndex)] += 
+                m_data.instance(k).weight();
           }
           m_threadRun=false;
           m_histBarCounts = histCounts;
@@ -514,8 +515,8 @@ public class AttributeVisualizationPanel
             if(intervals<1)//if width is too small then use 1 and forget padding
               intervals = 1;
           }
-          int histClassCounts[][]  =
-                          new int[intervals]
+          double histClassCounts[][]  =
+                          new double[intervals]
                                  [m_data.attribute(m_classIndex).numValues()+1];
           
           double barRange   = (m_as.numericStats.max - m_as.numericStats.min) /
@@ -547,17 +548,19 @@ public class AttributeVisualizationPanel
                 / barRange) );
                 if(t==0) {
                   if(m_data.instance(k).isMissing(m_classIndex))
-                    histClassCounts[t][0]++;
+                    histClassCounts[t][0] += m_data.instance(k).weight();
                   else
-                    histClassCounts[t][(int)m_data.instance(k).value(m_classIndex)+1]++;
+                    histClassCounts[t][(int)m_data.instance(k).value(m_classIndex)+1] +=
+                      m_data.instance(k).weight();
                   //if(histCounts[t]>m_maxValue)
                   //  m_maxValue = histCounts[t];
                 }
                 else {
                   if(m_data.instance(k).isMissing(m_classIndex))
-                    histClassCounts[t-1][0]++;
+                    histClassCounts[t-1][0] += m_data.instance(k).weight();
                   else
-                    histClassCounts[t-1][(int)m_data.instance(k).value(m_classIndex)+1]++;
+                    histClassCounts[t-1][(int)m_data.instance(k).value(m_classIndex)+1] +=
+                      m_data.instance(k).weight();
                   //if(histCounts[t-1]>m_maxValue)
                   //  m_maxValue = histCounts[t-1];
                 }
@@ -581,7 +584,7 @@ public class AttributeVisualizationPanel
             }
           }
           for(int i=0; i<histClassCounts.length; i++) {
-            int sum=0;
+            double sum=0;
             for(int j=0; j<histClassCounts[i].length; j++)
               sum = sum+histClassCounts[i][j];
             if(m_maxValue<sum)
@@ -630,7 +633,7 @@ public class AttributeVisualizationPanel
               intervals = 1;
           }
           
-          int histCounts[]  = new int[intervals];
+          double[] histCounts  = new double[intervals];
           double barRange   = (m_as.numericStats.max - m_as.numericStats.min) /
                               (double)histCounts.length;
           
@@ -645,16 +648,16 @@ public class AttributeVisualizationPanel
             
             try {
               //1. see footnote at the end of this file
-              t =(int) Math.ceil((float)(
+              t =(int) Math.ceil((
               (m_data.instance(k).value(m_attribIndex)-m_as.numericStats.min)
               / barRange));
               if(t==0) {
-                histCounts[t]++;
+                histCounts[t] += m_data.instance(k).weight();
                 if(histCounts[t]>m_maxValue)
                   m_maxValue = histCounts[t];
               }
               else {
-                histCounts[t-1]++;
+                histCounts[t-1] += m_data.instance(k).weight();
                 if(histCounts[t-1]>m_maxValue)
                   m_maxValue = histCounts[t-1];
               }
@@ -779,10 +782,10 @@ public class AttributeVisualizationPanel
    */
   public String getToolTipText(MouseEvent ev) {
     
-    if(m_as!=null && m_as.nominalCounts!=null) { //if current attrib is nominal
+    if(m_as!=null && m_as.nominalWeights!=null) { //if current attrib is nominal
       
-      float intervalWidth = this.getWidth() / (float)m_as.nominalCounts.length;
-      float heightRatio;      
+      float intervalWidth = this.getWidth() / (float)m_as.nominalWeights.length;
+      double heightRatio;      
       int barWidth, x=0, y=0;
       
       //if intervalWidth is at least six then bar width is 80% of intervalwidth
@@ -800,33 +803,33 @@ public class AttributeVisualizationPanel
       //Adding to x the appropriate value so that it points to the 1st bar of 
       //our "centered" barplot. If subtracting barplots width from panel width 
       //gives <=2 then the barplot is not centered.
-      if(this.getWidth() - (m_as.nominalCounts.length*barWidth+
+      if(this.getWidth() - (m_as.nominalWeights.length*barWidth+
                            (int)( (Math.floor(intervalWidth*0.2F))<1 ? 
                                    1:(Math.floor(intervalWidth*0.2F)) ) * 
-                           m_as.nominalCounts.length) > 2 ) {
+                           m_as.nominalWeights.length) > 2 ) {
         
         //The following amounts to adding to x the half of the area left after
         //subtracting from the components width the width of the whole barplot
         //(i.e. width of all the bars plus the width of all the bar paddings, 
         //thereby equaling to the whole barplot), since our barplot is centered.
-        x += ( this.getWidth() - (m_as.nominalCounts.length*barWidth + 
+        x += ( this.getWidth() - (m_as.nominalWeights.length*barWidth + 
                                  (int)( (Math.floor(intervalWidth*0.2F))<1 ? 
                                         1:(Math.floor(intervalWidth*0.2F)) ) * 
-                                 m_as.nominalCounts.length) ) / 2;
+                                 m_as.nominalWeights.length) ) / 2;
       }
         
-      for(int i=0; i<m_as.nominalCounts.length; i++) {        
-        heightRatio = (this.getHeight()-(float)m_fm.getHeight())/m_maxValue;
+      for(int i=0; i<m_as.nominalWeights.length; i++) {        
+        heightRatio = (this.getHeight()-(double)m_fm.getHeight())/m_maxValue;
         //initializing y to point to (from top) the start of the bar
-        y = this.getHeight()-Math.round(m_as.nominalCounts[i]*heightRatio);
+        y = (int) (this.getHeight()-Math.round(m_as.nominalWeights[i]*heightRatio));
         
         //if our mouse is on a bar then return the count of this bar in our
         //barplot 
         if(ev.getX() >= x && ev.getX()<=x+barWidth && 
            ev.getY() >= this.getHeight() - 
-                        Math.round(m_as.nominalCounts[i]*heightRatio) )
+                        Math.round(m_as.nominalWeights[i]*heightRatio) )
           return(m_data.attribute(m_attribIndex).value(i)+
-                 " ["+m_as.nominalCounts[i]+"]");
+                 " ["+Utils.doubleToString(m_as.nominalWeights[i], 3)+"]");
         //otherwise advance x to next bar and check that. Add barwidth to x 
         //and padding which is max(1, 20% of interval width)
         x = x+barWidth+(int)( (Math.floor(intervalWidth*0.2F))<1 ? 
@@ -836,7 +839,7 @@ public class AttributeVisualizationPanel
     else if(m_threadRun==false &&     //if attrib is numeric
             (m_histBarCounts!=null || m_histBarClassCounts!=null)) {
 
-      float heightRatio, intervalWidth;
+      double heightRatio, intervalWidth;
       int x=0, y=0,  barWidth;
       double bar = m_as.numericStats.min;
       
@@ -854,30 +857,32 @@ public class AttributeVisualizationPanel
         if( (this.getWidth() - (x + m_histBarClassCounts.length*barWidth)) > 5 )
           x += (this.getWidth() - (x + m_histBarClassCounts.length*barWidth))/2;
         
-        heightRatio = (this.getHeight()-(float)m_fm.getHeight())/m_maxValue;
+        heightRatio = (this.getHeight()-(double)m_fm.getHeight())/m_maxValue;
         
         if( ev.getX()-x >= 0) {
           //The temp holds the index of the current interval that we are looking
           //at
           int temp = (int)((ev.getX()-x)/(barWidth+0.0000000001));
           if(temp == 0){  //handle the special case temp==0. see footnote 1
-            int sum=0;
+            double sum=0;
             for(int k=0; k<m_histBarClassCounts[0].length; k++)
               sum += m_histBarClassCounts[0][k];
             //return the count of the interval mouse is pointing to plus 
             //the range of values that fall into this interval
-            return ("<html><center><font face=Dialog size=-1>"+sum+"<br>"+
+            return ("<html><center><font face=Dialog size=-1>" + 
+                Utils.doubleToString(sum, 3) + "<br>"+
                     "["+Utils.doubleToString(bar+m_barRange*temp,3)+
                     ", "+Utils.doubleToString((bar+m_barRange*(temp+1)),3)+
                     "]"+"</font></center></html>");
           }
           else if( temp < m_histBarClassCounts.length ) { //handle case temp!=0
-            int sum=0;
+            double sum=0;
             for(int k=0; k<m_histBarClassCounts[temp].length; k++)
               sum+=m_histBarClassCounts[temp][k];
             //return the count of the interval mouse is pointing to plus 
             //the range of values that fall into this interval
-            return ("<html><center><font face=Dialog size=-1>"+sum+"<br>("+
+            return ("<html><center><font face=Dialog size=-1>" + 
+                Utils.doubleToString(sum, 3) + "<br>("+
                     Utils.doubleToString(bar+m_barRange*temp,3)+", "+
                     Utils.doubleToString((bar+m_barRange*(temp+1)),3)+
                     "]</font></center></html>");
@@ -938,9 +943,9 @@ public class AttributeVisualizationPanel
           buttonHeight =m_colorAttrib.getHeight()+m_colorAttrib.getLocation().y;
         
         //if current attribute is nominal then draw barplot.
-        if(m_as.nominalCounts != null && 
+        if(m_as.nominalWeights != null && 
            (m_histBarClassCounts!=null || m_histBarCounts!=null) ) {
-          float heightRatio, intervalWidth;
+          double heightRatio, intervalWidth;
           int x=0, y=0, barHeight, barWidth;
           
           //if the class attribute is set and is nominal then draw coloured 
@@ -985,28 +990,28 @@ public class AttributeVisualizationPanel
             //this holds the count of the bar and will be calculated by adding
             //up the counts of individual subbars. It is displayed at the top
             //of each bar.
-            int sum=0;
+            double sum=0;
             for(int i=0; i<m_histBarClassCounts.length; i++) {
               //calculating the proportion of the components height compared to 
               //the maxvalue in our attribute, also taking into account the 
               //height of font to display bars count and the height of the class 
               //ComboBox.
-              heightRatio = ( this.getHeight()-(float)m_fm.getHeight() - 
+              heightRatio = ( this.getHeight()-(double)m_fm.getHeight() - 
                               buttonHeight ) / m_maxValue;              
               y=this.getHeight();
               for(int j=0; j<m_histBarClassCounts[i].length; j++) {
                 sum = sum + m_histBarClassCounts[i][j];
-                y = y-Math.round(m_histBarClassCounts[i][j]*heightRatio);
+                y = (int) (y-Math.round(m_histBarClassCounts[i][j]*heightRatio));
                 //selecting the colour corresponding to the current class.
                 g.setColor( (Color)m_colorList.elementAt(j) );
                 g.fillRect(x, y, barWidth, 
-                           Math.round(m_histBarClassCounts[i][j]*heightRatio));
+                           (int) Math.round(m_histBarClassCounts[i][j]*heightRatio));
                 g.setColor(Color.black);
               }
               //drawing the bar count at the top of the bar if it is less than
               //interval width. draw it 1px up to avoid touching the bar.
-              if(m_fm.stringWidth(Integer.toString(sum))<intervalWidth)
-                g.drawString(Integer.toString(sum), x, y-1);
+              if(m_fm.stringWidth(Utils.doubleToString(sum, 1))<intervalWidth)
+                g.drawString(Utils.doubleToString(sum, 1), x, y-1);
               //advancing x to the next bar by adding bar width and padding
               //of both the bars (i.e. RHS padding of the bar just drawn and LHS
               //padding of the new bar).
@@ -1049,14 +1054,14 @@ public class AttributeVisualizationPanel
               //compared to the maxValue in our attribute.
               heightRatio = (this.getHeight()-(float)m_fm.getHeight() - 
                              buttonHeight) / m_maxValue;
-              y = this.getHeight()-Math.round(m_histBarCounts[i]*heightRatio);
+              y = (int) (this.getHeight()-Math.round(m_histBarCounts[i]*heightRatio));
               g.fillRect(x, y, barWidth, 
-                         Math.round(m_histBarCounts[i]*heightRatio));
+                         (int) Math.round(m_histBarCounts[i]*heightRatio));
               //draw the bar count if it's width is smaller than intervalWidth.
               //draw it 1px above to avoid touching the bar.
-              if(m_fm.stringWidth(Integer.toString(m_histBarCounts[i])) < 
+              if(m_fm.stringWidth(Utils.doubleToString(m_histBarCounts[i], 1)) < 
                                     intervalWidth)
-                g.drawString(Integer.toString(m_histBarCounts[i]), x, y-1);
+                g.drawString(Utils.doubleToString(m_histBarCounts[i], 1), x, y-1);
               //Advance x to the next bar by adding bar-width and padding
               //of the bars (RHS padding of current bar & LHS padding of next 
               //bar).
@@ -1070,7 +1075,8 @@ public class AttributeVisualizationPanel
         else if(m_as.numericStats != null && 
                 (m_histBarClassCounts!=null || m_histBarCounts!=null)) {
 
-          float heightRatio, intervalWidth;
+          double heightRatio;
+          float intervalWidth;
           int x=0, y=0,  barWidth;
           
           //If the class attribute is set and is not numeric then draw coloured 
@@ -1106,9 +1112,9 @@ public class AttributeVisualizationPanel
                              buttonHeight-19) / m_maxValue;
               y = this.getHeight()-19;
               //This would hold the count of the bar (sum of sub-bars).
-              int sum = 0;
+              double sum = 0;
               for(int j=0; j<m_histBarClassCounts[i].length; j++) {
-                y = y-Math.round(m_histBarClassCounts[i][j]*heightRatio);
+                y = (int) (y-Math.round(m_histBarClassCounts[i][j]*heightRatio));
                 //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+
                 //                   " height:"+
                 //                   (m_histBarClassCounts[i][j]*heightRatio));
@@ -1118,17 +1124,17 @@ public class AttributeVisualizationPanel
                 if(barWidth>1)
                   g.fillRect(x, y, 
                              barWidth, 
-                             Math.round(m_histBarClassCounts[i][j]*heightRatio));
+                             (int) Math.round(m_histBarClassCounts[i][j]*heightRatio));
                 //otherwise drawing a line
                 else if((m_histBarClassCounts[i][j]*heightRatio)>0)
                   g.drawLine(x, y, x, 
-                          y+Math.round(m_histBarClassCounts[i][j]*heightRatio));
+                          (int) (y+Math.round(m_histBarClassCounts[i][j]*heightRatio)));
                 g.setColor(Color.black);
                 sum = sum + m_histBarClassCounts[i][j];
               }
               //Drawing bar count on the top of the bar if it is < barWidth
-              if(m_fm.stringWidth(" "+Integer.toString(sum))<barWidth)
-                g.drawString(" "+Integer.toString(sum), x, y-1);
+              if(m_fm.stringWidth(" "+Utils.doubleToString(sum, 1))<barWidth)
+                g.drawString(" "+Utils.doubleToString(sum, 1), x, y-1);
               //Moving x to the next bar
               x = x+barWidth;
             }
@@ -1190,20 +1196,20 @@ public class AttributeVisualizationPanel
               //draw the axis at the bottom of the histogram.
               heightRatio = (this.getHeight()-(float)m_fm.getHeight() - 
                              buttonHeight-19) / m_maxValue;
-              y = this.getHeight() - 
-                  Math.round(m_histBarCounts[i]*heightRatio)-19;
+              y = (int) (this.getHeight() - 
+                  Math.round(m_histBarCounts[i]*heightRatio)-19);
               //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+
               //                   " height:"+(m_histBarCounts[i]*heightRatio));
               //same as in the if stmt above
               if(barWidth>1)
                 g.drawRect(x, y, barWidth, 
-                           Math.round(m_histBarCounts[i]*heightRatio));
+                           (int) Math.round(m_histBarCounts[i]*heightRatio));
               else if((m_histBarCounts[i]*heightRatio)>0)
                 g.drawLine(x, y, 
-                           x, y+Math.round(m_histBarCounts[i]*heightRatio));
-              if(m_fm.stringWidth(" "+Integer.toString(m_histBarCounts[i])) < 
+                           x, (int) (y+Math.round(m_histBarCounts[i]*heightRatio)));
+              if(m_fm.stringWidth(" "+Utils.doubleToString(m_histBarCounts[i], 1)) < 
                     barWidth)
-                g.drawString(" "+Integer.toString(m_histBarCounts[i]), x, y-1);
+                g.drawString(" "+Utils.doubleToString(m_histBarCounts[i], 1), x, y-1);
               
               x = x+barWidth;
             }

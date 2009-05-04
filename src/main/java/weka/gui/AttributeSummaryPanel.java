@@ -50,7 +50,7 @@ import javax.swing.table.DefaultTableModel;
  * attributes gives counts for each attribute value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class AttributeSummaryPanel 
   extends JPanel {
@@ -98,6 +98,9 @@ public class AttributeSummaryPanel
 
   /** Cached stats on the attributes we've summarized so far */
   protected AttributeStats [] m_AttributeStats;
+  
+  /** Do all instances have the same weight */
+  protected boolean m_allEqualWeights = true;
   
   /**
    * Creates the instances panel with no initial instances.
@@ -214,6 +217,15 @@ public class AttributeSummaryPanel
     m_UniqueLab.setText(NO_SOURCE);
     m_DistinctLab.setText(NO_SOURCE);
     m_StatsTable.setModel(new DefaultTableModel());
+    
+    m_allEqualWeights = true;
+    double w = m_Instances.instance(0).weight();
+    for (int i = 1; i < m_Instances.numInstances(); i++) {
+      if (m_Instances.instance(i).weight() != w) {
+        m_allEqualWeights = false;
+        break;
+      }
+    }
   }
 
   /**
@@ -273,12 +285,13 @@ public class AttributeSummaryPanel
 
     if (as.nominalCounts != null) {
       Attribute att = m_Instances.attribute(index);
-      Object [] colNames = {"No.", "Label", "Count"};
-      Object [][] data = new Object [as.nominalCounts.length][3];
+      Object [] colNames = {"No.", "Label", "Count", "Weight"};
+      Object [][] data = new Object [as.nominalCounts.length][4];
       for (int i = 0; i < as.nominalCounts.length; i++) {
 	data[i][0] = new Integer(i + 1);
 	data[i][1] = att.value(i);
 	data[i][2] = new Integer(as.nominalCounts[i]);
+	data[i][3] = new Double(Utils.doubleToString(as.nominalWeights[i], 3));
       }
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
       m_StatsTable.getColumnModel().getColumn(0).setMaxWidth(60);
@@ -290,8 +303,10 @@ public class AttributeSummaryPanel
       Object [][] data = new Object [4][2];
       data[0][0] = "Minimum"; data[0][1] = Utils.doubleToString(as.numericStats.min, 3);
       data[1][0] = "Maximum"; data[1][1] = Utils.doubleToString(as.numericStats.max, 3);
-      data[2][0] = "Mean";    data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
-      data[3][0] = "StdDev";  data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
+      data[2][0] = "Mean" + ((!m_allEqualWeights) ? " (weighted)" : "");    
+      data[2][1] = Utils.doubleToString(as.numericStats.mean, 3);
+      data[3][0] = "StdDev" + ((!m_allEqualWeights) ? " (weighted)" : "");  
+      data[3][1] = Utils.doubleToString(as.numericStats.stdDev, 3);
       m_StatsTable.setModel(new DefaultTableModel(data, colNames));
     } else {
       m_StatsTable.setModel(new DefaultTableModel());
