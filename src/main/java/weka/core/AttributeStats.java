@@ -29,7 +29,7 @@ import java.io.Serializable;
  * the values that appear in a dataset for a particular attribute.
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class AttributeStats
   implements Serializable, RevisionHandler {
@@ -61,14 +61,18 @@ public class AttributeStats
   
   /** Counts of each nominal value */
   public int [] nominalCounts;
+  
+  /** Weight mass for each nominal value */
+  public double[] nominalWeights;
     
   /**
    * Updates the counters for one more observed distinct value.
    *
    * @param value the value that has just been seen
    * @param count the number of times the value appeared
+   * @param weight the weight mass of the value
    */
-  protected void addDistinct(double value, int count) {
+  protected void addDistinct(double value, int count, double weight) {
     
     if (count > 0) {
       if (count == 1) {
@@ -81,9 +85,11 @@ public class AttributeStats
       }
       if (nominalCounts != null) {
 	nominalCounts[(int)value] = count;
+	nominalWeights[(int)value] = weight;
       }
       if (numericStats != null) {
-	  numericStats.add(value, count);
+	  //numericStats.add(value, count);
+          numericStats.add(value, weight);
 	  numericStats.calculateDerived();
       }
     }
@@ -146,6 +152,6 @@ public class AttributeStats
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
