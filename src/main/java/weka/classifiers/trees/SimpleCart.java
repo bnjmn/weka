@@ -107,7 +107,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Haijian Shi (hs69@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class SimpleCart
   extends RandomizableClassifier
@@ -428,7 +428,7 @@ public class SimpleCart
 	props[attIndex][0]==0 || props[attIndex][1]==0) {
       makeLeaf(data);
     }
-
+    
     else {            
       m_Props = props[attIndex];
       int[][][] subsetIndices = new int[2][data.numAttributes()][0];
@@ -442,7 +442,7 @@ public class SimpleCart
 
       splitData(subsetIndices, subsetWeights, m_Attribute, m_SplitValue,
 	  m_SplitString, sortedIndices, weights, data);
-
+      
       // If split of the node results in a node with less than minimal number of isntances, 
       // make the node leaf node.
       if (subsetIndices[0][attIndex].length<minNumObj ||
@@ -696,7 +696,8 @@ public class SimpleCart
 	  bestGiniGain = currGiniGain;
 
 	  // clean split point
-	  splitPoint = Math.rint((inst.value(att) + currSplit)/2.0*100000)/100000.0; 
+//	  splitPoint = Math.rint((inst.value(att) + currSplit)/2.0*100000)/100000.0;
+	  splitPoint = (inst.value(att) + currSplit) / 2.0;
 
 	  for (int j = 0; j < currDist.length; j++) {
 	    System.arraycopy(tempDist[j], 0, dist[j], 0,
@@ -724,7 +725,8 @@ public class SimpleCart
     }
 
     // clean Gini gain
-    giniGains[attIndex] = Math.rint(bestGiniGain*10000000)/10000000.0;
+    //giniGains[attIndex] = Math.rint(bestGiniGain*10000000)/10000000.0;
+    giniGains[attIndex] = bestGiniGain;
     dists[attIndex] = dist;
 
     return splitPoint;
@@ -1156,7 +1158,8 @@ public class SimpleCart
     }
 
     // clean Gini gain for the attribute
-    giniGains[attIndex] = Math.rint(bestGiniGain*10000000)/10000000.0;
+    //giniGains[attIndex] = Math.rint(bestGiniGain*10000000)/10000000.0;
+    giniGains[attIndex] = bestGiniGain;
 
     dists[attIndex] = dist;
     return bestSplitString;
@@ -2005,7 +2008,7 @@ public class SimpleCart
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
