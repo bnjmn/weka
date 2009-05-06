@@ -1882,7 +1882,7 @@ public class Classifier
   public boolean isBusy() {
     if (m_executorPool == null || 
         (m_executorPool.getQueue().size() == 0 && 
-            m_executorPool.getActiveCount() == 0)) {
+            m_executorPool.getActiveCount() == 0) && m_state == IDLE) {
       return false;
     }
     /* System.err.println("isBusy() Q:" + m_executorPool.getQueue().size()
