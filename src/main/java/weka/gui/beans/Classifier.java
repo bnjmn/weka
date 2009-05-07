@@ -1386,6 +1386,7 @@ public class Classifier
     if (m_executorPool != null) {
       m_executorPool.shutdownNow();
       m_executorPool.purge();
+      m_executorPool = null;
     }
     m_block = false;
     m_visual.setStatic();
