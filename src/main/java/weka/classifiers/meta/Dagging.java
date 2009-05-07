@@ -163,7 +163,7 @@ import java.util.Vector;
  *
  * @author Bernhard Pfahringer (bernhard at cs dot waikato dot ac dot nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see       Vote
  */
 public class Dagging
@@ -191,7 +191,7 @@ public class Dagging
     return 
      "This meta classifier creates a number of disjoint, stratified folds out "
      + "of the data and feeds each chunk of data to a copy of the supplied "
-     + "base classifier. Predictions are made via majority vote, since all the "
+     + "base classifier. Predictions are made via averaging, since all the "
      + "generated base classifiers are put into the Vote meta classifier. \n"
      + "Useful for base classifiers that are quadratic or worse in time "
      + "behavior, regarding number of instances in the training data. \n"
@@ -496,8 +496,10 @@ public class Dagging
     chunkSize = (double) data.numInstances() / (double) getNumFolds();
     
     // stratify data
-    if (getNumFolds() > 1)
+    if (getNumFolds() > 1) {
+      data.randomize(data.getRandomNumberGenerator(getSeed()));
       data.stratify(getNumFolds());
+    }
 
     // generate <folds> classifiers
     for (i = 0; i < getNumFolds(); i++) {
@@ -509,13 +511,7 @@ public class Dagging
         if (getVerbose())
           System.out.print(".");
         
-        train     = new Instances(data, 0);
-        fromIndex = (int) ((double) i * chunkSize);
-        toIndex   = (int) (((double) i + 1) * chunkSize) - 1;
-        if (i == getNumFolds() - 1)
-          toIndex = data.numInstances() - 1;
-        for (n = fromIndex; n < toIndex; n++)
-          train.add(data.instance(n));
+        train     = data.testCV(getNumFolds(), i);
       }
       else {
         train = data;
@@ -563,7 +559,7 @@ public class Dagging
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
