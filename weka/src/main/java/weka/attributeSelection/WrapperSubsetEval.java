@@ -30,6 +30,8 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SelectedTag;
+import weka.core.Tag;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
@@ -97,6 +99,10 @@ import java.util.Vector;
  *  (standard deviation---expressed as a percentage of the mean).
  *  (default: 0.01 (1%))</pre>
  * 
+ * <pre> -E &lt;acc | rmse | mae | f-meas | auc&gt;
+ *  Performance evaluation measure to use for selecting attributes.
+ *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
+ * 
  * <pre> 
  * Options specific to scheme weka.classifiers.rules.ZeroR:
  * </pre>
@@ -108,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision$
  */
 public class WrapperSubsetEval
   extends ASEvaluation
@@ -140,6 +146,25 @@ public class WrapperSubsetEval
    * estimating the accuracy of a subset
    */
   private double m_threshold;
+  
+  public static final int EVAL_DEFAULT = 1;
+  public static final int EVAL_ACCURACY = 2;
+  public static final int EVAL_RMSE = 3;
+  public static final int EVAL_MAE = 4;
+  public static final int EVAL_FMEASURE = 5;
+  public static final int EVAL_AUC = 6;
+  
+  public static final Tag[] TAGS_EVALUATION = {
+    new Tag(EVAL_DEFAULT, "Default: accuracy (discrete class); RMSE (numeric class)"),
+    new Tag(EVAL_ACCURACY, "Accuracy (discrete class only)"),
+    new Tag(EVAL_RMSE, "RMSE (of the class probabilities for discrete class)"),
+    new Tag(EVAL_MAE, "MAE (of the class probabilities for discrete class)"),
+    new Tag(EVAL_FMEASURE, "F-measure (discrete class only)"),
+    new Tag(EVAL_AUC, "AUC (area under the ROC curve - discrete class only)")
+  };
+  
+  /** The evaluation measure to use */
+  protected int m_evaluationMeasure = EVAL_DEFAULT;
 
   /**
    * Returns a string describing this attribute evaluator
@@ -216,6 +241,11 @@ public class WrapperSubsetEval
 	+ "\t(standard deviation---expressed as a percentage of the mean).\n"
 	+ "\t(default: 0.01 (1%))", 
 	"T", 1, "-T <num>"));
+    
+    newVector.addElement(new Option(
+        "\tPerformance evaluation measure to use for selecting attributes.\n" +
+        "\t(Default = accuracy for discrete class and rmse for numeric class)",
+        "E", 1, "-E <acc | rmse | mae | f-meas | auc>"));
 
     if ((m_BaseClassifier != null) && 
 	(m_BaseClassifier instanceof OptionHandler)) {
@@ -258,6 +288,10 @@ public class WrapperSubsetEval
    *  threshold by which to execute another cross validation
    *  (standard deviation---expressed as a percentage of the mean).
    *  (default: 0.01 (1%))</pre>
+   * 
+   * <pre> -E &lt;acc | rmse | mae | f-meas | auc&gt;
+   *  Performance evaluation measure to use for selecting attributes.
+   *  (Default = accuracy for discrete class and rmse for numeric class)</pre>
    * 
    * <pre> 
    * Options specific to scheme weka.classifiers.rules.ZeroR:
@@ -304,6 +338,54 @@ public class WrapperSubsetEval
       Double temp;
       temp = Double.valueOf(optionString);
       setThreshold(temp.doubleValue());
+    }
+    
+    optionString = Utils.getOption('E', options);
+    if (optionString.length() != 0) {
+      if (optionString.equals("acc")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_ACCURACY, TAGS_EVALUATION));
+      } else if (optionString.equals("rmse")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_RMSE, TAGS_EVALUATION));
+      } else if (optionString.equals("mae")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_MAE, TAGS_EVALUATION));
+      } else if (optionString.equals("f-meas")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_FMEASURE, TAGS_EVALUATION));
+      } else if (optionString.equals("auc")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_AUC, TAGS_EVALUATION));
+      } else {
+        throw new IllegalArgumentException("Invalid evaluation measure");
+      }
+    }
+  }
+  
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String evaluationMeasureTipText() {
+    return "The measure used to evaluate the performance of attribute combinations "
+    + "used in the decision table.";
+  }
+  /**
+   * Gets the currently set performance evaluation measure used for selecting
+   * attributes for the decision table
+   * 
+   * @return the performance evaluation measure
+   */
+  public SelectedTag getEvaluationMeasure() {
+    return new SelectedTag(m_evaluationMeasure, TAGS_EVALUATION);
+  }
+
+  /**
+   * Sets the performance evaluation measure to use for selecting attributes
+   * for the decision table
+   * 
+   * @param newMethod the new performance evaluation metric to use
+   */
+  public void setEvaluationMeasure(SelectedTag newMethod) {
+    if (newMethod.getTags() == TAGS_EVALUATION) {
+      m_evaluationMeasure = newMethod.getSelectedTag().getID();
     }
   }
   
@@ -487,6 +569,15 @@ public class WrapperSubsetEval
     for (Capability cap: Capability.values())
       result.enableDependency(cap);
     
+    // adjustment for class based on selected evaluation metric
+    result.disable(Capability.NUMERIC_CLASS);
+    result.disable(Capability.DATE_CLASS);
+    if (m_evaluationMeasure != EVAL_ACCURACY && m_evaluationMeasure != EVAL_FMEASURE &&
+        m_evaluationMeasure != EVAL_AUC) {
+      result.enable(Capability.NUMERIC_CLASS);
+      result.enable(Capability.DATE_CLASS);
+    }
+    
     result.setMinimumNumberInstances(getFolds());
     
     return result;
@@ -523,7 +614,7 @@ public class WrapperSubsetEval
    */
   public double evaluateSubset (BitSet subset)
     throws Exception {
-    double errorRate = 0;
+    double evalMetric = 0;
     double[] repError = new double[5];
     int numAttributes = 0;
     int i, j;
@@ -554,11 +645,31 @@ public class WrapperSubsetEval
     delTransform.setInputFormat(trainCopy);
     trainCopy = Filter.useFilter(trainCopy, delTransform);
 
-    // max of 5 repititions ofcross validation
+    // max of 5 repetitions of cross validation
     for (i = 0; i < 5; i++) {
       m_Evaluation = new Evaluation(trainCopy);
       m_Evaluation.crossValidateModel(m_BaseClassifier, trainCopy, m_folds, Rnd);
-      repError[i] = m_Evaluation.errorRate();
+      
+      switch (m_evaluationMeasure) {
+      case EVAL_DEFAULT:
+        repError[i] = m_Evaluation.errorRate();
+        break;
+      case EVAL_ACCURACY:
+        repError[i] = m_Evaluation.errorRate();
+        break;
+      case EVAL_RMSE:
+        repError[i] = m_Evaluation.rootMeanSquaredError();
+        break;
+      case EVAL_MAE:
+        repError[i] = m_Evaluation.meanAbsoluteError();
+        break;
+      case EVAL_FMEASURE:
+        repError[i] = m_Evaluation.weightedFMeasure();
+        break;
+      case EVAL_AUC:
+        repError[i] = m_Evaluation.weightedAreaUnderROC();
+        break;
+      }
 
       // check on the standard deviation
       if (!repeat(repError, i + 1)) {
@@ -568,12 +679,22 @@ public class WrapperSubsetEval
     }
 
     for (j = 0; j < i; j++) {
-      errorRate += repError[j];
+      evalMetric += repError[j];
     }
 
-    errorRate /= (double)i;
+    evalMetric /= (double)i;
     m_Evaluation = null;
-    return  -errorRate;
+    
+    switch (m_evaluationMeasure) {
+    case EVAL_DEFAULT:
+    case EVAL_ACCURACY:
+    case EVAL_RMSE:
+    case EVAL_MAE:
+      evalMetric = -evalMetric; // maximize
+      break;
+    }
+    
+    return evalMetric;
   }
 
 
@@ -604,15 +725,40 @@ public class WrapperSubsetEval
       }
 
       text.append("\n");
-      if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
-	text.append("\tAccuracy estimation: RMSE\n");
-      } else {
-	text.append("\tAccuracy estimation: classification error\n");
+      switch (m_evaluationMeasure) {
+      case EVAL_DEFAULT:
+      case EVAL_ACCURACY:
+        if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+          text.append("\tSubset evaluation: RMSE\n");
+        } else {
+          text.append("\tSubset evaluation: classification error\n");
+        }
+        break;
+      case EVAL_RMSE:
+        if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+          text.append("\tSubset evaluation: RMSE\n");
+        } else {
+          text.append("\tSubset evaluation: RMSE (probability estimates)\n");
+        }
+        break;
+      case EVAL_MAE:
+        if (m_trainInstances.attribute(m_classIndex).isNumeric()) {
+          text.append("\tSubset evaluation: MAE\n");
+        } else {
+          text.append("\tSubset evaluation: MAE (probability estimates)\n");
+        }
+        break;
+      case EVAL_FMEASURE:
+        text.append("\tSubset evaluation: F-measure\n");
+        break;
+      case EVAL_AUC:
+        text.append("\tSubset evaluation: area under the ROC curve\n");
+        break;
       }
       
       text.append("\tNumber of folds for accuracy estimation: " 
-		  + m_folds 
-		  + "\n");
+          + m_folds 
+          + "\n");
     }
 
     return  text.toString();
@@ -667,7 +813,7 @@ public class WrapperSubsetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -679,3 +825,4 @@ public class WrapperSubsetEval
     runEvaluator(new WrapperSubsetEval(), args);
   }
 }
+
