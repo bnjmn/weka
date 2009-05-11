@@ -113,6 +113,8 @@ public class IncrementalClassifierEvaluator
       if (ce.getStatus() == IncrementalClassifierEvent.NEW_BATCH) {
 	//	m_eval = new Evaluation(ce.getCurrentInstance().dataset());
 	m_eval = new Evaluation(ce.getStructure());
+	m_eval.useNoPriors();
+	
 	m_dataLegend = new Vector();
 	m_reset = true;
 	m_dataPoint = new double[0];
