@@ -33,7 +33,7 @@ import java.util.Vector;
  * and the corresponding query.
  *
  * @author      FracPete (fracpete at waikato dot ac dot nz)
- * @version     $Revision: 1.2.2.1 $
+ * @version     $Revision$
  */
 public class ResultSetHelper {
   
@@ -110,19 +110,12 @@ public class ResultSetHelper {
       // column classes
       m_ColumnClasses = new Class[meta.getColumnCount()];
       for (i = 1; i <= meta.getColumnCount(); i++) {
-        try {
-          m_ColumnClasses[i - 1] = Class.forName(meta.getColumnClassName(i));
-        }
-        catch (Exception e) {
-          //e.printStackTrace();
-          // JDBC does not support this function -> do it manually
-          try {
-            m_ColumnClasses[i - 1] = typeToClass(meta.getColumnType(i));
-          }
-          catch (Exception ex) {
-            m_ColumnClasses[i - 1] = String.class;
-          }
-        }
+	try {
+	  m_ColumnClasses[i - 1] = typeToClass(meta.getColumnType(i));
+	}
+	catch (Exception ex) {
+	  m_ColumnClasses[i - 1] = String.class;
+	}
       }
 
       // dimensions
@@ -290,13 +283,18 @@ public class ResultSetHelper {
       }
       
       if (proceed) {
-	for (i = 0; i < rowCount; i++) {
+	i = 0;
+	while (true) {
 	  row = new Object[getColumnCount()];
 	  result.add(row);
 
 	  for (n = 0; n < getColumnCount(); n++) {
 	    try {
-	      row[n] = m_ResultSet.getObject(n + 1);
+	      // to get around byte arrays when using getObject(int)
+	      if (getColumnClasses()[n] == String.class)
+		row[n] = m_ResultSet.getString(n + 1);
+	      else
+		row[n] = m_ResultSet.getObject(n + 1);
 	    }
 	    catch (Exception e) {
 	      row[n] = null;
@@ -312,6 +310,8 @@ public class ResultSetHelper {
 	    if (!m_ResultSet.next())
 	      break;
 	  }
+
+	  i++;
 	}
       }
     }
