@@ -113,6 +113,8 @@ public class IncrementalClassifierEvaluator
       if (ce.getStatus() == IncrementalClassifierEvent.NEW_BATCH) {
 	//	m_eval = new Evaluation(ce.getCurrentInstance().dataset());
 	m_eval = new Evaluation(ce.getStructure());
+	m_eval.useNoPriors();
+	
 	m_dataLegend = new Vector();
 	m_reset = true;
 	m_dataPoint = new double[0];
@@ -279,7 +281,15 @@ public class IncrementalClassifierEvaluator
 	}
       }
     } catch (Exception ex) {
+      if (m_logger != null) {
+        m_logger.logMessage("[IncrementalClassifierEvaluator]"
+            + statusMessagePrefix() + " Error processing prediction " 
+            + ex.getMessage());
+        m_logger.statusMessage(statusMessagePrefix() 
+            + "ERROR: problem processing prediction (see log for details)");
+      }
       ex.printStackTrace();
+      stop();
     }
   }
 
