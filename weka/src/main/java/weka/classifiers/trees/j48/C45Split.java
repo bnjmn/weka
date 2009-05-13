@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class implementing a C4.5-type split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class C45Split
   extends ClassifierSplitModel{
@@ -121,6 +121,15 @@ public class C45Split
   public final int attIndex() {
 
     return m_attIndex;
+  }
+  
+  /**
+   * Returns the split point (numeric attribute only).
+   * 
+   * @return the split point used for a test on a numeric attribute
+   */
+  public double splitPoint() {
+    return m_splitPoint;
   }
 
   /**
@@ -493,6 +502,6 @@ public class C45Split
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
