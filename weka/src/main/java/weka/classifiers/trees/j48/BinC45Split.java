@@ -33,7 +33,7 @@ import java.util.Enumeration;
  * Class implementing a binary C4.5-like split on an attribute.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class BinC45Split
   extends ClassifierSplitModel {
@@ -110,6 +110,15 @@ public class BinC45Split
   public final int attIndex(){
 
     return m_attIndex;
+  }
+  
+  /**
+   * Returns the split point (numeric attribute only).
+   * 
+   * @return the split point used for a test on a numeric attribute
+   */
+  public double splitPoint() {
+    return m_splitPoint;
   }
   
   /**
@@ -484,6 +493,6 @@ public class BinC45Split
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.14 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
