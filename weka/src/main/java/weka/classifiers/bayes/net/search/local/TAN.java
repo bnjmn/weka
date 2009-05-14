@@ -33,7 +33,7 @@ import weka.core.Instances;
  *      Machine Learning, 29: 131--163, 1997
  *
  * @author Remco Bouckaert
- * @version $Revision: 1.1.2.1 $
+ * @version $Revision$
  */
 
 public class TAN extends LocalScoreSearchAlgorithm {
@@ -49,6 +49,10 @@ public class TAN extends LocalScoreSearchAlgorithm {
 		m_nMaxNrOfParents = 2;
 		super.buildStructure(bayesNet, instances);
 		int      nNrOfAtts = instances.numAttributes();
+
+                if (nNrOfAtts <= 1) {
+                  return;
+                }
 
 		// initialize as naive Bayes network
 		for (int iAttribute = 0; iAttribute < nNrOfAtts; iAttribute++) {
