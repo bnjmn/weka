@@ -335,6 +335,11 @@ public class BoundaryVisualizer
   protected ButtonGroup m_addRemovePointsButtonGroup = new ButtonGroup();
   protected JButton removeAllButton = new JButton ("Remove all"); //button to remove all points
   protected JButton chooseButton = new JButton("Open File"); //button to choose a data file
+  
+  /* Register the property editors we need */
+  static {
+    GenericObjectEditor.registerEditors();
+  }
 
 
   /**
