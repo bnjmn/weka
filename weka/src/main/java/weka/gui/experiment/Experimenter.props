@@ -2,7 +2,7 @@
 # "simple" indicates that this property is only available for simple
 # experiments.
 #
-# $Revision: 1.3 $
+# $Revision$
 
 # the default extension in the file-dialog
 # possible values: 
@@ -82,6 +82,8 @@ MeanPrecision=2
 StdDevPrecision=2
 
 # the classname of the ResultMatrix, reponsible for the default output format
+# NB: The other defaults listed in this props file override the "advanced" 
+#     options specified in this property.
 OutputFormat=weka.experiment.ResultMatrixPlainText
 
 # whether filter classnames are removed by default
