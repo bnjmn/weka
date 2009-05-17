@@ -74,7 +74,7 @@ import java.util.Vector;
  *  (default: current directory)</pre>
  * 
  * <pre> -prefix &lt;string&gt;
- *  An optional prefix for the test sets (before the relation na,e).
+ *  An optional prefix for the test sets (before the relation name).
  * (default: empty string)</pre>
  * 
  * <pre> -suffix &lt;string&gt;
@@ -247,7 +247,7 @@ public class ExplicitTestsetResultProducer
 	"dir", 1, "-dir <directory>"));
 
     result.addElement(new Option(
-	"\tAn optional prefix for the test sets (before the relation na,e).\n"
+	"\tAn optional prefix for the test sets (before the relation name).\n"
 	+ "(default: empty string)", 
 	"prefix", 1, "-prefix <string>"));
 
@@ -308,7 +308,7 @@ public class ExplicitTestsetResultProducer
    *  (default: current directory)</pre>
    * 
    * <pre> -prefix &lt;string&gt;
-   *  An optional prefix for the test sets (before the relation na,e).
+   *  An optional prefix for the test sets (before the relation name).
    * (default: empty string)</pre>
    * 
    * <pre> -suffix &lt;string&gt;
