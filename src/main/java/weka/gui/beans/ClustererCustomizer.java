@@ -26,21 +26,26 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
  * GUI customizer for the Clusterer wrapper bean
  *
  * @author <a href="mailto:mutter@cs.waikato.ac.nz">Stefan Mutter</a>
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class ClustererCustomizer
   extends JPanel
-  implements Customizer {
+  implements Customizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = -2035688458149534161L;
@@ -56,16 +61,44 @@ public class ClustererCustomizer
   
   private PropertySheetPanel m_ClustererEditor = 
     new PropertySheetPanel();
+  
+  private JFrame m_parentFrame;
+  
+  /** Backup if the user presses cancel */
+  private weka.clusterers.Clusterer m_backup;
 
   
   public ClustererCustomizer() {
     
     setLayout(new BorderLayout());
     add(m_ClustererEditor, BorderLayout.CENTER);
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new GridLayout(1,2));
+    JButton OKBut = new JButton("OK");
+    OKBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_parentFrame.dispose();
+      }
+    });
+
+    JButton CancelBut = new JButton("Cancel");
+    CancelBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // cancel requested, so revert to backup and then
+        // close the dialog
+        if (m_backup != null) {
+          m_dsClusterer.setClusterer(m_backup);
+        }
+        m_parentFrame.dispose();
+      }
+    });
+    
+    butHolder.add(OKBut);
+    butHolder.add(CancelBut);
+    add(butHolder, BorderLayout.SOUTH);
   }
   
-  
-
   /**
    * Set the Clusterer object to be edited
    *
@@ -73,6 +106,13 @@ public class ClustererCustomizer
    */
   public void setObject(Object object) {
     m_dsClusterer = (weka.gui.beans.Clusterer)object;
+    try {
+      m_backup = 
+        (weka.clusterers.Clusterer)GenericObjectEditor.makeCopy(m_dsClusterer.getClusterer());
+    } catch (Exception ex) {
+      // ignore
+    }
+    
     m_ClustererEditor.setTarget(m_dsClusterer.getClusterer());
     
   }
@@ -93,5 +133,9 @@ public class ClustererCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
 }
