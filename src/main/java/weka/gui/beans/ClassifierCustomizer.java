@@ -32,12 +32,17 @@ import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
 /**
  * GUI customizer for the classifier wrapper bean
@@ -47,7 +52,8 @@ import javax.swing.JTextField;
  */
 public class ClassifierCustomizer
   extends JPanel
-  implements Customizer, CustomizerClosingListener {
+  implements Customizer, CustomizerClosingListener,
+             CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = -6688000820160821429L;
@@ -72,6 +78,11 @@ public class ClassifierCustomizer
   
   private JPanel m_holderPanel = new JPanel();
   private JTextField m_executionSlotsText = new JTextField();
+
+  private JFrame m_parentFrame;
+
+  /** Copy of the current classifier in case cancel is selected */
+  protected weka.classifiers.Classifier m_backup;
 
   public ClassifierCustomizer() {
     
@@ -114,10 +125,38 @@ public class ClassifierCustomizer
       setBorder(BorderFactory.createTitledBorder("More options"));
     m_holderPanel.setLayout(new BorderLayout());
     m_holderPanel.add(executionSlotsPanel, BorderLayout.NORTH);
+
+    JPanel holder2 = new JPanel();
+    holder2.setLayout(new BorderLayout());
+    holder2.add(m_holderPanel, BorderLayout.NORTH);
+    JButton OKBut = new JButton("OK");
+    JButton CancelBut = new JButton("Cancel");
+    OKBut.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          m_parentFrame.dispose();
+        }
+      });
+    
+    CancelBut.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          // cancel requested, so revert to backup and then
+          // close the dialog
+          if (m_backup != null) {
+            m_dsClassifier.setClassifier(m_backup);
+          }
+          m_parentFrame.dispose();
+        }
+      });
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new GridLayout(1,2));
+    butHolder.add(OKBut);
+    butHolder.add(CancelBut);
+    holder2.add(butHolder, BorderLayout.SOUTH);
     
     setLayout(new BorderLayout());
     add(m_ClassifierEditor, BorderLayout.CENTER);
-    add(m_holderPanel, BorderLayout.SOUTH);
+    add(holder2, BorderLayout.SOUTH);
   }
   
   private void checkOnClassifierType() {
@@ -146,6 +185,13 @@ public class ClassifierCustomizer
   public void setObject(Object object) {
     m_dsClassifier = (weka.gui.beans.Classifier)object;
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
+    try {
+      m_backup = 
+        (weka.classifiers.Classifier)GenericObjectEditor.makeCopy(m_dsClassifier.getClassifier());
+    } catch (Exception ex) {
+      // ignore
+    }
+
     m_ClassifierEditor.setTarget(m_dsClassifier.getClassifier());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
@@ -179,5 +225,9 @@ public class ClassifierCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;    
   }
 }
