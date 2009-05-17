@@ -15,7 +15,7 @@
  */
 
 /*
- * ResultMatrixCSV.java
+ * ResultMatrixGnuPlot.java
  * Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
  *
  */
@@ -27,72 +27,193 @@ import weka.core.Utils;
 import weka.core.Version;
 
 /**
- * This matrix is a container for the datasets and classifier setups and 
- * their statistics. It outputs the data in CSV format.
+ <!-- globalinfo-start -->
+ * Generates output for a data and script file for GnuPlot.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -mean-prec &lt;int&gt;
+ *  The number of decimals after the decimal point for the mean.
+ *  (default: 2)</pre>
+ * 
+ * <pre> -stddev-prec &lt;int&gt;
+ *  The number of decimals after the decimal point for the mean.
+ *  (default: 2)</pre>
+ * 
+ * <pre> -col-name-width &lt;int&gt;
+ *  The maximum width for the column names (0 = optimal).
+ *  (default: 50)</pre>
+ * 
+ * <pre> -row-name-width &lt;int&gt;
+ *  The maximum width for the row names (0 = optimal).
+ *  (default: 50)</pre>
+ * 
+ * <pre> -mean-width &lt;int&gt;
+ *  The width of the mean (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -stddev-width &lt;int&gt;
+ *  The width of the standard deviation (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -sig-width &lt;int&gt;
+ *  The width of the significance indicator (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -count-width &lt;int&gt;
+ *  The width of the counts (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -show-stddev
+ *  Whether to display the standard deviation column.
+ *  (default: no)</pre>
+ * 
+ * <pre> -show-avg
+ *  Whether to show the row with averages.
+ *  (default: no)</pre>
+ * 
+ * <pre> -remove-filter
+ *  Whether to remove the classname package prefixes from the
+ *  filter names in datasets.
+ *  (default: no)</pre>
+ * 
+ * <pre> -print-col-names
+ *  Whether to output column names or just numbers representing them.
+ *  (default: no)</pre>
+ * 
+ * <pre> -print-row-names
+ *  Whether to output row names or just numbers representing them.
+ *  (default: no)</pre>
+ * 
+ * <pre> -enum-col-names
+ *  Whether to enumerate the column names (prefixing them with 
+ *  '(x)', with 'x' being the index).
+ *  (default: no)</pre>
+ * 
+ * <pre> -enum-row-names
+ *  Whether to enumerate the row names (prefixing them with 
+ *  '(x)', with 'x' being the index).
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class ResultMatrixGnuPlot
   extends ResultMatrix {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -234648254944790097L;
   
   /**
-   * initializes the matrix as 1x1 matrix
+   * initializes the matrix as 1x1 matrix.
    */
   public ResultMatrixGnuPlot() {
     this(1, 1);
   }
 
   /**
-   * initializes the matrix with the given dimensions
+   * initializes the matrix with the given dimensions.
+   * 
+   * @param cols	the number of columns
+   * @param rows	the number of rows
    */
   public ResultMatrixGnuPlot(int cols, int rows) {
     super(cols, rows);
   }
 
   /**
-   * initializes the matrix with the values from the given matrix
+   * initializes the matrix with the values from the given matrix.
+   * 
    * @param matrix      the matrix to get the values from
    */
   public ResultMatrixGnuPlot(ResultMatrix matrix) {
     super(matrix);
   }
+  
+  /**
+   * Returns a string describing the matrix.
+   * 
+   * @return 		a description suitable for
+   * 			displaying in the experimenter gui
+   */
+  public String globalInfo() {
+    return "Generates output for a data and script file for GnuPlot.";
+  }
 
   /**
-   * returns the name of the output format
+   * returns the name of the output format.
+   * 
+   * @return		the display name
    */
   public String getDisplayName() {
     return "GNUPlot";
   }
 
   /**
-   * removes the stored data but retains the dimensions of the matrix
+   * removes the stored data but retains the dimensions of the matrix.
    */
   public void clear() {
     super.clear();
-    setRowNameWidth(50);
-    setColNameWidth(50);
-    setEnumerateRowNames(false);
-    setEnumerateColNames(false);
     LEFT_PARENTHESES = "";
     RIGHT_PARENTHESES = "";
   }
+
+  /**
+   * returns the default width for the row names.
+   * 
+   * @return		the width
+   */
+  public int getDefaultRowNameWidth() {
+    return 50;
+  }
+
+  /**
+   * returns the default width for the column names.
+   * 
+   * @return		the width
+   */
+  public int getDefaultColNameWidth() {
+    return 50;
+  }
+
+  /**
+   * returns the default of whether column names are prefixed with the index.
+   * 
+   * @return		true if the names are prefixed
+   */
+  public boolean getDefaultEnumerateColNames() {
+    return false;
+  }
+
+  /**
+   * returns the default of whether row names are prefixed with the index.
+   * 
+   * @return		true if the names are prefixed
+   */
+  public boolean getDefaultEnumerateRowNames() {
+    return false;
+  }
   
   /**
-   * returns the header of the matrix as a string
-   * @see #m_HeaderKeys
-   * @see #m_HeaderValues
+   * returns the header of the matrix as a string.
+   * 
+   * @return		the header
+   * @see 		#m_HeaderKeys
+   * @see 		#m_HeaderValues
    */
   public String toStringHeader() {
     return new ResultMatrixPlainText(this).toStringHeader();
   }
 
   /**
-   * returns the matrix in CSV format
+   * returns the matrix in CSV format.
+   * 
+   * @return		the matrix
    */
   public String toStringMatrix() {
     StringBuffer        result;
@@ -219,21 +340,27 @@ public class ResultMatrixGnuPlot
 
   /**
    * returns returns a key for all the col names, for better readability if
-   * the names got cut off
+   * the names got cut off.
+   * 
+   * @return		the key
    */
   public String toStringKey() {
     return new ResultMatrixPlainText(this).toStringKey();
   }
 
   /**
-   * returns the summary as string
+   * returns the summary as string.
+   * 
+   * @return		the summary
    */
   public String toStringSummary() {
     return new ResultMatrixPlainText(this).toStringSummary();
   }
 
   /**
-   * returns the ranking in a string representation
+   * returns the ranking in a string representation.
+   * 
+   * @return		the ranking
    */
   public String toStringRanking() {
     return new ResultMatrixPlainText(this).toStringRanking();
@@ -245,11 +372,13 @@ public class ResultMatrixGnuPlot
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
-   * for testing only
+   * for testing only.
+   * 
+   * @param args	ignored
    */
   public static void main(String[] args) {
     ResultMatrix        matrix;

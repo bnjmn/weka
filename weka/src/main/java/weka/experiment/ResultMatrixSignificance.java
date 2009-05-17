@@ -25,68 +25,173 @@ package weka.experiment;
 import weka.core.RevisionUtils;
 
 /**
- * This matrix is a container for the datasets and classifier setups and 
- * their statistics. It outputs only the significance indicators - sometimes
- * good for recognizing patterns.
+ <!-- globalinfo-start -->
+ * Only outputs the significance indicators. Can be used for spotting patterns.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -mean-prec &lt;int&gt;
+ *  The number of decimals after the decimal point for the mean.
+ *  (default: 2)</pre>
+ * 
+ * <pre> -stddev-prec &lt;int&gt;
+ *  The number of decimals after the decimal point for the mean.
+ *  (default: 2)</pre>
+ * 
+ * <pre> -col-name-width &lt;int&gt;
+ *  The maximum width for the column names (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -row-name-width &lt;int&gt;
+ *  The maximum width for the row names (0 = optimal).
+ *  (default: 40)</pre>
+ * 
+ * <pre> -mean-width &lt;int&gt;
+ *  The width of the mean (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -stddev-width &lt;int&gt;
+ *  The width of the standard deviation (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -sig-width &lt;int&gt;
+ *  The width of the significance indicator (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -count-width &lt;int&gt;
+ *  The width of the counts (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -show-stddev
+ *  Whether to display the standard deviation column.
+ *  (default: no)</pre>
+ * 
+ * <pre> -show-avg
+ *  Whether to show the row with averages.
+ *  (default: no)</pre>
+ * 
+ * <pre> -remove-filter
+ *  Whether to remove the classname package prefixes from the
+ *  filter names in datasets.
+ *  (default: no)</pre>
+ * 
+ * <pre> -print-col-names
+ *  Whether to output column names or just numbers representing them.
+ *  (default: no)</pre>
+ * 
+ * <pre> -print-row-names
+ *  Whether to output row names or just numbers representing them.
+ *  (default: no)</pre>
+ * 
+ * <pre> -enum-col-names
+ *  Whether to enumerate the column names (prefixing them with 
+ *  '(x)', with 'x' being the index).
+ *  (default: no)</pre>
+ * 
+ * <pre> -enum-row-names
+ *  Whether to enumerate the row names (prefixing them with 
+ *  '(x)', with 'x' being the index).
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class ResultMatrixSignificance
   extends ResultMatrix {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -1280545644109764206L;
   
   /**
-   * initializes the matrix as 1x1 matrix
+   * initializes the matrix as 1x1 matrix.
    */
   public ResultMatrixSignificance() {
     this(1, 1);
   }
 
   /**
-   * initializes the matrix with the given dimensions
+   * initializes the matrix with the given dimensions.
+   * 
+   * @param cols	the number of columns
+   * @param rows	the number of rows
    */
   public ResultMatrixSignificance(int cols, int rows) {
     super(cols, rows);
   }
 
   /**
-   * initializes the matrix with the values from the given matrix
+   * initializes the matrix with the values from the given matrix.
+   * 
    * @param matrix      the matrix to get the values from
    */
   public ResultMatrixSignificance(ResultMatrix matrix) {
     super(matrix);
   }
+  
+  /**
+   * Returns a string describing the matrix.
+   * 
+   * @return 		a description suitable for
+   * 			displaying in the experimenter gui
+   */
+  public String globalInfo() {
+    return "Only outputs the significance indicators. Can be used for spotting patterns.";
+  }
 
   /**
-   * returns the name of the output format
+   * returns the name of the output format.
+   * 
+   * @return		the display name
    */
   public String getDisplayName() {
     return "Significance only";
   }
 
   /**
-   * removes the stored data but retains the dimensions of the matrix
+   * returns the default of whether column names or numbers instead are printed.
+   * 
+   * @return		true if names instead of numbers are printed
    */
-  public void clear() {
-    super.clear();
-    setPrintColNames(false);
-    setRowNameWidth(40);
-    super.setShowStdDev(false);
+  public boolean getDefaultPrintColNames() {
+    return false;
+  }
+
+  /**
+   * returns the default width for the row names.
+   * 
+   * @return		the width
+   */
+  public int getDefaultRowNameWidth() {
+    return 40;
+  }
+
+  /**
+   * returns the default of whether std deviations are displayed or not.
+   * 
+   * @return		true if the std deviations are displayed
+   */
+  public boolean getDefaultShowStdDev() {
+    return false;
   }
 
   /**
    * sets whether to display the std deviations or not - always false!
+   * 
+   * @param show	ignored
    */
   public void setShowStdDev(boolean show) {
     // ignore
   }
 
   /**
-   * returns the matrix as plain text
+   * returns the matrix as plain text.
+   * 
+   * @return		the matrix
    */
   public String toStringMatrix() {
     StringBuffer        result;
@@ -158,9 +263,11 @@ public class ResultMatrixSignificance
   }
   
   /**
-   * returns the header of the matrix as a string
-   * @see #m_HeaderKeys
-   * @see #m_HeaderValues
+   * returns the header of the matrix as a string.
+   * 
+   * @return		the header
+   * @see 		#m_HeaderKeys
+   * @see 		#m_HeaderValues
    */
   public String toStringHeader() {
     return new ResultMatrixPlainText(this).toStringHeader();
@@ -168,21 +275,27 @@ public class ResultMatrixSignificance
 
   /**
    * returns returns a key for all the col names, for better readability if
-   * the names got cut off
+   * the names got cut off.
+   * 
+   * @return		the key
    */
   public String toStringKey() {
     return new ResultMatrixPlainText(this).toStringKey();
   }
 
   /**
-   * returns the summary as string
+   * returns the summary as string.
+   * 
+   * @return		the summary
    */
   public String toStringSummary() {
     return new ResultMatrixPlainText(this).toStringSummary();
   }
 
   /**
-   * returns the ranking in a string representation
+   * returns the ranking in a string representation.
+   * 
+   * @return		the ranking
    */
   public String toStringRanking() {
     return new ResultMatrixPlainText(this).toStringRanking();
@@ -194,11 +307,13 @@ public class ResultMatrixSignificance
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
-   * for testing only
+   * for testing only.
+   * 
+   * @param args	ignored
    */
   public static void main(String[] args) {
     ResultMatrix        matrix;
