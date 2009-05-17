@@ -26,21 +26,26 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.Customizer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
  * GUI customizer for the associator wrapper bean
  *
  * @author Mark Hall (mhall at cs dot waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class AssociatorCustomizer
   extends JPanel
-  implements Customizer {
+  implements Customizer, CustomizerCloseRequester {
 
   /** for serialization */
   private static final long serialVersionUID = 5767664969353495974L;
@@ -57,10 +62,40 @@ public class AssociatorCustomizer
       new GenericObjectEditor(true); */
   private PropertySheetPanel m_AssociatorEditor = 
     new PropertySheetPanel();
+  
+  protected JFrame m_parentFrame;
+  
+  /** Backup is user presses cancel */
+  private weka.associations.Associator m_backup;
 
   public AssociatorCustomizer() {
     setLayout(new BorderLayout());
     add(m_AssociatorEditor, BorderLayout.CENTER);
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new GridLayout(1,2));
+    JButton OKBut = new JButton("OK");
+    OKBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_parentFrame.dispose();
+      }
+    });
+
+    JButton CancelBut = new JButton("Cancel");
+    CancelBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        // cancel requested, so revert to backup and then
+        // close the dialog
+        if (m_backup != null) {
+          m_dsAssociator.setAssociator(m_backup);
+        }
+        m_parentFrame.dispose();
+      }
+    });
+    
+    butHolder.add(OKBut);
+    butHolder.add(CancelBut);
+    add(butHolder, BorderLayout.SOUTH);
   }
 
   /**
@@ -71,6 +106,13 @@ public class AssociatorCustomizer
   public void setObject(Object object) {
     m_dsAssociator = (weka.gui.beans.Associator)object;
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
+    try {
+      m_backup = 
+        (weka.associations.Associator)GenericObjectEditor.makeCopy(m_dsAssociator.getAssociator());
+    } catch (Exception ex) {
+      // ignore
+    }
+    
     m_AssociatorEditor.setTarget(m_dsAssociator.getAssociator());
   }
 
@@ -90,5 +132,9 @@ public class AssociatorCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  public void setParentFrame(JFrame parent) {
+    m_parentFrame = parent;
   }
 }
