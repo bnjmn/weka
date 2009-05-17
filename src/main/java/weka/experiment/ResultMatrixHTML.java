@@ -26,69 +26,175 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- * This matrix is a container for the datasets and classifier setups and 
- * their statistics. It outputs the matrix in HTML.
+ <!-- globalinfo-start -->
+ * Generates the matrix output as HTML.
+ * <p/>
+ <!-- globalinfo-end -->
  *
+ <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -mean-prec &lt;int&gt;
+ *  The number of decimals after the decimal point for the mean.
+ *  (default: 2)</pre>
+ * 
+ * <pre> -stddev-prec &lt;int&gt;
+ *  The number of decimals after the decimal point for the mean.
+ *  (default: 2)</pre>
+ * 
+ * <pre> -col-name-width &lt;int&gt;
+ *  The maximum width for the column names (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -row-name-width &lt;int&gt;
+ *  The maximum width for the row names (0 = optimal).
+ *  (default: 25)</pre>
+ * 
+ * <pre> -mean-width &lt;int&gt;
+ *  The width of the mean (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -stddev-width &lt;int&gt;
+ *  The width of the standard deviation (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -sig-width &lt;int&gt;
+ *  The width of the significance indicator (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -count-width &lt;int&gt;
+ *  The width of the counts (0 = optimal).
+ *  (default: 0)</pre>
+ * 
+ * <pre> -show-stddev
+ *  Whether to display the standard deviation column.
+ *  (default: no)</pre>
+ * 
+ * <pre> -show-avg
+ *  Whether to show the row with averages.
+ *  (default: no)</pre>
+ * 
+ * <pre> -remove-filter
+ *  Whether to remove the classname package prefixes from the
+ *  filter names in datasets.
+ *  (default: no)</pre>
+ * 
+ * <pre> -print-col-names
+ *  Whether to output column names or just numbers representing them.
+ *  (default: no)</pre>
+ * 
+ * <pre> -print-row-names
+ *  Whether to output row names or just numbers representing them.
+ *  (default: no)</pre>
+ * 
+ * <pre> -enum-col-names
+ *  Whether to enumerate the column names (prefixing them with 
+ *  '(x)', with 'x' being the index).
+ *  (default: no)</pre>
+ * 
+ * <pre> -enum-row-names
+ *  Whether to enumerate the row names (prefixing them with 
+ *  '(x)', with 'x' being the index).
+ *  (default: no)</pre>
+ * 
+ <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class ResultMatrixHTML
   extends ResultMatrix {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = 6672380422544799990L;
 
   /**
-   * initializes the matrix as 1x1 matrix
+   * initializes the matrix as 1x1 matrix.
    */
   public ResultMatrixHTML() {
     this(1, 1);
   }
 
   /**
-   * initializes the matrix with the given dimensions
+   * initializes the matrix with the given dimensions.
+   * 
+   * @param cols	the number of columns
+   * @param rows	the number of rows
    */
   public ResultMatrixHTML(int cols, int rows) {
     super(cols, rows);
   }
 
   /**
-   * initializes the matrix with the values from the given matrix
+   * initializes the matrix with the values from the given matrix.
+   * 
    * @param matrix      the matrix to get the values from
    */
   public ResultMatrixHTML(ResultMatrix matrix) {
     super(matrix);
   }
+  
+  /**
+   * Returns a string describing the matrix.
+   * 
+   * @return 		a description suitable for
+   * 			displaying in the experimenter gui
+   */
+  public String globalInfo() {
+    return "Generates the matrix output as HTML.";
+  }
 
   /**
-   * returns the name of the output format
+   * returns the name of the output format.
+   * 
+   * @return		the display name
    */
   public String getDisplayName() {
     return "HTML";
   }
 
   /**
-   * removes the stored data but retains the dimensions of the matrix
+   * returns the default width for the row names.
+   * 
+   * @return		the width
    */
-  public void clear() {
-    super.clear();
-    setRowNameWidth(25);
-    setPrintColNames(false);
-    setEnumerateColNames(true);
+  public int getDefaultRowNameWidth() {
+    return 25;
+  }
+
+  /**
+   * returns the default of whether column names or numbers instead are printed.
+   * 
+   * @return		true if names instead of numbers are printed
+   */
+  public boolean getDefaultPrintColNames() {
+    return false;
+  }
+
+  /**
+   * returns the default of whether column names are prefixed with the index.
+   * 
+   * @return		true if the names are prefixed
+   */
+  public boolean getDefaultEnumerateColNames() {
+    return true;
   }
   
   /**
-   * returns the header of the matrix as a string
-   * @see #m_HeaderKeys
-   * @see #m_HeaderValues
+   * returns the header of the matrix as a string.
+   * 
+   * @return		the header
+   * @see 		#m_HeaderKeys
+   * @see 		#m_HeaderValues
    */
   public String toStringHeader() {
     return new ResultMatrixPlainText(this).toStringHeader();
   }
 
   /**
-   * returns the matrix in an HTML table
+   * returns the matrix in an HTML table.
+   * 
+   * @return		the matrix
    */
   public String toStringMatrix() {
     StringBuffer        result;
@@ -154,7 +260,9 @@ public class ResultMatrixHTML
 
   /**
    * returns returns a key for all the col names, for better readability if
-   * the names got cut off
+   * the names got cut off.
+   * 
+   * @return		the key
    */
   public String toStringKey() {
     String          result;
@@ -178,7 +286,9 @@ public class ResultMatrixHTML
   }
 
   /**
-   * returns the summary as string
+   * returns the summary as string.
+   * 
+   * @return		the summary
    */
   public String toStringSummary() {
     String      result;
@@ -232,11 +342,11 @@ public class ResultMatrixHTML
   }
 
   /**
-   * returns the ranking in a string representation
+   * returns the ranking in a string representation.
+   * 
+   * @return		the ranking
    */
   public String toStringRanking() {
-    int           biggest;
-    int           width;
     String        result;
     int[]         ranking;
     int           i;
@@ -245,10 +355,6 @@ public class ResultMatrixHTML
     if (m_RankingWins == null)
       return "-ranking data not set-";
 
-    biggest = Math.max(m_RankingWins[Utils.maxIndex(m_RankingWins)],
-                       m_RankingLosses[Utils.maxIndex(m_RankingLosses)]);
-    width = Math.max(2 + (int)(Math.log(biggest) / Math.log(10)),
-			 ">-<".length());
     result = "<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n";
     result +=  "   <tr>" 
              + "<td align=\"center\"><b>&gt;-&lt;</b></td>"
@@ -284,11 +390,13 @@ public class ResultMatrixHTML
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
-   * for testing only
+   * for testing only.
+   * 
+   * @param args	ignored
    */
   public static void main(String[] args) {
     ResultMatrix        matrix;

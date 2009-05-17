@@ -25,15 +25,20 @@ package weka.gui.experiment;
 import weka.experiment.ResultMatrix;
 import weka.experiment.ResultMatrixPlainText;
 import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -42,12 +47,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /** 
  * A dialog for setting various output format parameters.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class OutputFormatDialog
   extends JDialog {
@@ -62,74 +69,65 @@ public class OutputFormatDialog
   public static final int CANCEL_OPTION = 1;
 
   /** the result of the user's action, either OK or CANCEL. */
-  protected int m_Result = CANCEL_OPTION;
+  protected int m_Result;
   
   /** the different classes for outputting the comparison tables. */
-  protected static Vector m_OutputFormatClasses = null;
+  protected static Vector<Class> m_OutputFormatClasses;
   
   /** the different names of matrices for outputting the comparison tables. */
-  protected static Vector m_OutputFormatNames = null;
+  protected static Vector<String> m_OutputFormatNames;
   
-  /** determine all classes inheriting from the ResultMatrix (in the same
-   * package!)
-   * @see ResultMatrix
-   * @see ClassDiscovery */
-  static {
-    Vector classes = GenericObjectEditor.getClassnames(ResultMatrix.class.getName());
+  /** Lets the user configure the result matrix. */
+  protected GenericObjectEditor m_ResultMatrixEditor;
 
-    // set names and classes
-    m_OutputFormatClasses = new Vector();
-    m_OutputFormatNames   = new Vector();
-    for (int i = 0; i < classes.size(); i++) {
-      try {
-        Class cls = Class.forName(classes.get(i).toString());
-        ResultMatrix matrix = (ResultMatrix) cls.newInstance();
-        m_OutputFormatClasses.add(cls);
-        m_OutputFormatNames.add(matrix.getDisplayName());
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
+  /** the panel for the GOE. */
+  protected PropertyPanel m_ResultMatrixPanel;
 
-  /** the output format specific matrix. */
-  protected Class m_ResultMatrix = ResultMatrixPlainText.class;
+  /** the label for the GOE. */
+  protected JLabel m_ResultMatrixLabel;
+  
+  /** the current result matrix. */
+  protected ResultMatrix m_ResultMatrix;
 
   /** lets the user choose the format for the output. */
-  protected JComboBox m_OutputFormatComboBox = new JComboBox(m_OutputFormatNames);
+  protected JComboBox m_OutputFormatComboBox;
+
+  /** the label for the format. */
+  protected JLabel m_OutputFormatLabel;
 
   /** the spinner to choose the precision for the mean from. */
-  protected JSpinner m_MeanPrecSpinner = new JSpinner();
+  protected JSpinner m_MeanPrecSpinner;
+
+  /** the label for the mean precision. */
+  protected JLabel m_MeanPrecLabel;
 
   /** the spinner to choose the precision for the std. deviation from */
-  protected JSpinner m_StdDevPrecSpinner = new JSpinner();
+  protected JSpinner m_StdDevPrecSpinner;
+
+  /** the label for the std dev precision. */
+  protected JLabel m_StdDevPrecLabel;
 
   /** the checkbox for outputting the average. */
-  protected JCheckBox m_ShowAverageCheckBox = new JCheckBox("");
+  protected JCheckBox m_ShowAverageCheckBox;
+
+  /** the label for showing the average. */
+  protected JLabel m_ShowAverageLabel;
 
   /** the checkbox for the removing of filter classnames. */
-  protected JCheckBox m_RemoveFilterNameCheckBox = new JCheckBox("");
+  protected JCheckBox m_RemoveFilterNameCheckBox;
+
+  /** the label for the removing the filter classnames. */
+  protected JLabel m_RemoveFilterNameLabel;
   
   /** Click to activate the current set parameters. */
-  protected JButton m_OkButton = new JButton("OK");
+  protected JButton m_OkButton;
 
   /** Click to cancel the dialog. */
-  protected JButton m_CancelButton = new JButton("Cancel");
+  protected JButton m_CancelButton;
+
+  /** whether to ignore updates in the GUI momentarily. */
+  protected boolean m_IgnoreChanges;
   
-  /** the number of digits after the period (= precision) for printing the mean. */
-  protected int m_MeanPrec = 2;
-  
-  /** the number of digits after the period (= precision) for printing the std.
-   * deviation */
-  protected int m_StdDevPrec = 2;
-
-  /** whether to remove the filter names from the names. */
-  protected boolean m_RemoveFilterName = false;
-
-  /** whether to show the average too. */
-  protected boolean m_ShowAverage = false;
-
   /**
    * initializes the dialog with the given parent frame.
    * 
@@ -137,69 +135,180 @@ public class OutputFormatDialog
    */
   public OutputFormatDialog(Frame parent) {
     super(parent, "Output Format...", true);
-    createDialog();
+
+    m_IgnoreChanges = true;
+    
+    initialize();
+    initGUI();
+
+    m_IgnoreChanges = false;
+  }
+  
+  /**
+   * initializes the member variables.
+   */
+  protected void initialize() {
+    Vector 		classes;
+    int			i;
+    Class 		cls;
+    ResultMatrix 	matrix;
+    
+    m_Result = CANCEL_OPTION;
+
+    if (m_OutputFormatClasses == null) {
+      classes = GenericObjectEditor.getClassnames(ResultMatrix.class.getName());
+
+      // set names and classes
+      m_OutputFormatClasses = new Vector<Class>();
+      m_OutputFormatNames   = new Vector<String>();
+      for (i = 0; i < classes.size(); i++) {
+        try {
+          cls    = Class.forName(classes.get(i).toString());
+          matrix = (ResultMatrix) cls.newInstance();
+          m_OutputFormatClasses.add(cls);
+          m_OutputFormatNames.add(matrix.getDisplayName());
+        }
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
   }
   
   /**
    * performs the creation of the dialog and all its components.
    */
-  protected void createDialog() {
+  protected void initGUI() {
     JPanel              panel;
     SpinnerNumberModel  model;
-    JLabel              label;
+    JPanel		panel2;
     
     getContentPane().setLayout(new BorderLayout());
     
-    panel = new JPanel(new GridLayout(5, 2));
+    panel = new JPanel(new GridLayout(6, 1));
+    panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     getContentPane().add(panel, BorderLayout.CENTER);
     
-    // Precision
+    // mean precision
+    m_MeanPrecSpinner = new JSpinner();
+    m_MeanPrecSpinner.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        getData();
+      }
+    });
     model = (SpinnerNumberModel) m_MeanPrecSpinner.getModel();
     model.setMaximum(new Integer(20));
     model.setMinimum(new Integer(0));
+    m_MeanPrecLabel = new JLabel("Mean Precision");
+    m_MeanPrecLabel.setDisplayedMnemonic('M');
+    m_MeanPrecLabel.setLabelFor(m_MeanPrecSpinner);
+    panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(m_MeanPrecLabel);
+    panel2.add(m_MeanPrecSpinner);
+    panel.add(panel2);
+    
+    // stddev precision
+    m_StdDevPrecSpinner = new JSpinner();
+    m_StdDevPrecSpinner.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+        getData();
+      }
+    });
     model = (SpinnerNumberModel) m_StdDevPrecSpinner.getModel();
     model.setMaximum(new Integer(20));
     model.setMinimum(new Integer(0));
-    label = new JLabel("Mean Precision");
-    label.setDisplayedMnemonic('M');
-    label.setLabelFor(m_MeanPrecSpinner);
-    panel.add(label);
-    panel.add(m_MeanPrecSpinner);
-    label = new JLabel("StdDev. Precision");
-    label.setDisplayedMnemonic('S');
-    label.setLabelFor(m_StdDevPrecSpinner);
-    panel.add(label);
-    panel.add(m_StdDevPrecSpinner);
+    m_StdDevPrecLabel = new JLabel("StdDev. Precision");
+    m_StdDevPrecLabel.setDisplayedMnemonic('S');
+    m_StdDevPrecLabel.setLabelFor(m_StdDevPrecSpinner);
+    panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(m_StdDevPrecLabel);
+    panel2.add(m_StdDevPrecSpinner);
+    panel.add(panel2);
     
     // Format
-    label = new JLabel("Output Format");
-    label.setDisplayedMnemonic('F');
-    label.setLabelFor(m_OutputFormatComboBox);
-    panel.add(label);
-    panel.add(m_OutputFormatComboBox);
+    m_OutputFormatComboBox = new JComboBox(m_OutputFormatNames);
     m_OutputFormatComboBox.addActionListener(new ActionListener() {
-	public void actionPerformed(ActionEvent e) {
-	  getData();
-	}
-      });
+      public void actionPerformed(ActionEvent e) {
+	getData();
+      }
+    });
+    m_OutputFormatLabel = new JLabel("Output Format");
+    m_OutputFormatLabel.setDisplayedMnemonic('F');
+    m_OutputFormatLabel.setLabelFor(m_OutputFormatComboBox);
+    panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(m_OutputFormatLabel);
+    panel2.add(m_OutputFormatComboBox);
+    panel.add(panel2);
 
     // Average
-    label = new JLabel("Show Average");
-    label.setDisplayedMnemonic('A');
-    label.setLabelFor(m_ShowAverageCheckBox);
-    panel.add(label);
-    panel.add(m_ShowAverageCheckBox);
+    m_ShowAverageCheckBox = new JCheckBox("");
+    m_ShowAverageCheckBox.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+	getData();
+      }
+    });
+    m_ShowAverageLabel = new JLabel("Show Average");
+    m_ShowAverageLabel.setDisplayedMnemonic('A');
+    m_ShowAverageLabel.setLabelFor(m_ShowAverageCheckBox);
+    panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(m_ShowAverageLabel);
+    panel2.add(m_ShowAverageCheckBox);
+    panel.add(panel2);
 
     // Remove filter classname
-    label = new JLabel("Remove filter classnames");
-    label.setDisplayedMnemonic('R');
-    label.setLabelFor(m_RemoveFilterNameCheckBox);
-    panel.add(label);
-    panel.add(m_RemoveFilterNameCheckBox);
+    m_RemoveFilterNameCheckBox = new JCheckBox("");
+    m_RemoveFilterNameCheckBox.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+	getData();
+      }
+    });
+    m_RemoveFilterNameLabel = new JLabel("Remove filter classnames");
+    m_RemoveFilterNameLabel.setDisplayedMnemonic('R');
+    m_RemoveFilterNameLabel.setLabelFor(m_RemoveFilterNameCheckBox);
+    panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(m_RemoveFilterNameLabel);
+    panel2.add(m_RemoveFilterNameCheckBox);
+    panel.add(panel2);
+
+    // Advanced setup
+    m_ResultMatrix       = ExperimenterDefaults.getOutputFormat();
+    m_ResultMatrixEditor = new GenericObjectEditor(true);
+    m_ResultMatrixEditor.setClassType(ResultMatrix.class);
+    m_ResultMatrixEditor.setValue(m_ResultMatrix);
+    m_ResultMatrixEditor.addPropertyChangeListener(new PropertyChangeListener() {
+	public void propertyChange(PropertyChangeEvent e) {
+	  // user selected different class?
+	  if (!m_ResultMatrix.getClass().equals(m_ResultMatrixEditor.getValue().getClass())) {
+	    // if it's the preferred class, then automaticallly use the Experimenter defaults
+	    if (m_ResultMatrixEditor.getValue().getClass().equals(ExperimenterDefaults.getOutputFormat().getClass())) {
+	      m_ResultMatrix = ExperimenterDefaults.getOutputFormat();
+	      m_ResultMatrixEditor.setValue(ExperimenterDefaults.getOutputFormat());
+	    }
+	    else {
+	      m_ResultMatrix = (ResultMatrix) m_ResultMatrixEditor.getValue();
+	    }
+	    setData();
+	  }
+	  repaint();
+	}
+      });
+    ((GenericObjectEditor.GOEPanel) m_ResultMatrixEditor.getCustomEditor()).addOkListener(new ActionListener() {
+	public void actionPerformed(ActionEvent e) {
+          m_ResultMatrix = (ResultMatrix) m_ResultMatrixEditor.getValue();
+          setData();
+	}
+      });
+    m_ResultMatrixPanel = new PropertyPanel(m_ResultMatrixEditor, false);
+    m_ResultMatrixLabel = new JLabel("Advanced setup");
+    panel2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    panel2.add(m_ResultMatrixLabel);
+    panel2.add(m_ResultMatrixPanel);
+    panel.add(panel2);
     
     // Buttons
     panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
     getContentPane().add(panel, BorderLayout.SOUTH);
+    m_CancelButton = new JButton("Cancel");
     m_CancelButton.setMnemonic('C');
     m_CancelButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -207,6 +316,7 @@ public class OutputFormatDialog
         setVisible(false);
       }
     });
+    m_OkButton = new JButton("OK");
     m_OkButton.setMnemonic('O');
     m_OkButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -220,7 +330,21 @@ public class OutputFormatDialog
 
     // default button
     getRootPane().setDefaultButton(m_OkButton);
-
+    
+    // initial layout (to get widths and heights)
+    pack();
+    
+    // adjust dimensions
+    m_MeanPrecLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_MeanPrecLabel.getHeight()));
+    m_MeanPrecSpinner.setPreferredSize(new Dimension(m_MeanPrecSpinner.getWidth() * 3, m_MeanPrecSpinner.getHeight()));
+    m_StdDevPrecLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_StdDevPrecLabel.getHeight()));
+    m_StdDevPrecSpinner.setPreferredSize(new Dimension(m_StdDevPrecSpinner.getWidth() * 3, m_StdDevPrecSpinner.getHeight()));
+    m_OutputFormatLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_OutputFormatLabel.getHeight()));
+    m_ShowAverageLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_ShowAverageLabel.getHeight()));
+    m_ResultMatrixLabel.setPreferredSize(new Dimension(m_RemoveFilterNameLabel.getWidth(), m_ResultMatrixLabel.getHeight()));
+    m_ResultMatrixPanel.setPreferredSize(new Dimension((int) (m_ResultMatrixPanel.getWidth() * 1.5), m_ResultMatrixPanel.getHeight()));
+    
+    // final layout
     pack();
   }
   
@@ -228,77 +352,65 @@ public class OutputFormatDialog
    * initializes the GUI components with the data.
    */
   private void setData() {
-    // Precision
-    m_MeanPrecSpinner.setValue(new Integer(m_MeanPrec));
-    m_StdDevPrecSpinner.setValue(new Integer(m_StdDevPrec));
-
-    // average
-    m_ShowAverageCheckBox.setSelected(m_ShowAverage);
-
-    // filter names
-    m_RemoveFilterNameCheckBox.setSelected(m_RemoveFilterName);
+    m_IgnoreChanges = true;
     
-    // format (must be last, since getData() will be called!)
+    // Precision
+    m_MeanPrecSpinner.setValue(m_ResultMatrix.getMeanPrec());
+    m_StdDevPrecSpinner.setValue(m_ResultMatrix.getStdDevPrec());
+    
+    // format
     for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
-      if (m_OutputFormatClasses.get(i).equals(m_ResultMatrix)) {
-        m_OutputFormatComboBox.setSelectedItem(m_OutputFormatNames.get(i));
+      if (m_OutputFormatClasses.get(i).equals(m_ResultMatrix.getClass())) {
+	m_OutputFormatComboBox.setSelectedItem(m_OutputFormatNames.get(i));
         break;
       }
     }
+
+    // average
+    m_ShowAverageCheckBox.setSelected(m_ResultMatrix.getShowAverage());
+
+    // filter names
+    m_RemoveFilterNameCheckBox.setSelected(m_ResultMatrix.getRemoveFilterName());
+
+    // GOE
+    m_ResultMatrixEditor.setValue(m_ResultMatrix);
+    
+    m_IgnoreChanges = false;
   }    
   
   /**
    *  gets the data from GUI components.
    */
   private void getData() {
-    // Precision
-    m_MeanPrec   = Integer.parseInt(m_MeanPrecSpinner.getValue().toString());
-    m_StdDevPrec = Integer.parseInt(m_StdDevPrecSpinner.getValue().toString());
-
-    // average
-    m_ShowAverage = m_ShowAverageCheckBox.isSelected();
-
-    // filter names
-    m_RemoveFilterName = m_RemoveFilterNameCheckBox.isSelected();
+    if (m_IgnoreChanges)
+      return;
     
     // format
-    m_ResultMatrix = (Class) m_OutputFormatClasses.get(
-                        m_OutputFormatComboBox.getSelectedIndex());
-  }
-  
-  /**
-   * Sets the precision of the mean output.
-   * 
-   * @param precision the number of digits used in printing the mean
-   */
-  public void setMeanPrec(int precision) {
-    m_MeanPrec = precision;
-  }
+    try {
+      if (!m_ResultMatrix.getClass().equals(m_OutputFormatClasses.get(m_OutputFormatComboBox.getSelectedIndex()))) {
+	if (m_OutputFormatClasses.get(m_OutputFormatComboBox.getSelectedIndex()).equals(ExperimenterDefaults.getOutputFormat().getClass()))
+	  m_ResultMatrix = ExperimenterDefaults.getOutputFormat();
+	else
+	  m_ResultMatrix = (ResultMatrix) ((Class) m_OutputFormatClasses.get(m_OutputFormatComboBox.getSelectedIndex())).newInstance();
+      }
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      m_ResultMatrix = new ResultMatrixPlainText();
+    }
+    
+    // Precision
+    m_ResultMatrix.setMeanPrec(Integer.parseInt(m_MeanPrecSpinner.getValue().toString()));
+    m_ResultMatrix.setStdDevPrec(Integer.parseInt(m_StdDevPrecSpinner.getValue().toString()));
 
-  /**
-   * Gets the precision used for printing the mean.
-   * 
-   * @return the number of digits used in printing the mean
-   */
-  public int getMeanPrec() {
-    return m_MeanPrec;
-  }
+    // average
+    m_ResultMatrix.setShowAverage(m_ShowAverageCheckBox.isSelected());
 
-  /**
-   * Sets the precision of the std. deviation output.
-   * 
-   * @param precision the number of digits used in printing the std. deviation
-   */
-  public void setStdDevPrec(int precision) {
-    m_StdDevPrec = precision;
-  }
-
-  /**
-   * Gets the precision used for printing the std. deviation
-   * @return the number of digits used in printing the std. deviation
-   */
-  public int getStdDevPrec() {
-    return m_StdDevPrec;
+    // filter names
+    m_ResultMatrix.setRemoveFilterName(m_RemoveFilterNameCheckBox.isSelected());
+    
+    // update GOE
+    m_ResultMatrixEditor.setValue(m_ResultMatrix);
   }
 
   /**
@@ -306,8 +418,9 @@ public class OutputFormatDialog
    * 
    * @param matrix the matrix to use as initial selected output format
    */
-  public void setResultMatrix(Class matrix) {
+  public void setResultMatrix(ResultMatrix matrix) {
     m_ResultMatrix = matrix;
+    setData();
   }
 
   /**
@@ -315,44 +428,8 @@ public class OutputFormatDialog
    * 
    * @return the currently selected matrix to use as output
    */
-  public Class getResultMatrix() {
+  public ResultMatrix getResultMatrix() {
     return m_ResultMatrix;
-  }
-
-  /**
-   * sets whether to remove the filter classname from the dataset name.
-   * 
-   * @param remove if true then the filter classname is removed
-   */
-  public void setRemoveFilterName(boolean remove) {
-    m_RemoveFilterName = remove;
-  }
-
-  /**
-   * returns whether the filter classname is removed from the dataset name.
-   * 
-   * @return true if the filter classname is removed
-   */
-  public boolean getRemoveFilterName() {
-    return m_RemoveFilterName;
-  }
-
-  /**
-   * sets whether the average for each column is displayed.
-   * 
-   * @param show if true then an additional row with the average is printed.
-   */
-  public void setShowAverage(boolean show) {
-    m_ShowAverage = show;
-  }
-
-  /**
-   * returns whether the average for each column is displayed.
-   * 
-   * @return true if an additional row with the average is displayed
-   */
-  public boolean getShowAverage() {
-    return m_ShowAverage;
   }
 
   /**
@@ -360,7 +437,7 @@ public class OutputFormatDialog
    */
   protected void setFormat() {
     for (int i = 0; i < m_OutputFormatClasses.size(); i++) {
-      if (m_OutputFormatNames.get(i).toString().equals(
+      if (m_OutputFormatNames.get(i).equals(
             m_OutputFormatComboBox.getItemAt(i).toString())) {
         m_OutputFormatComboBox.setSelectedIndex(i);
         break;

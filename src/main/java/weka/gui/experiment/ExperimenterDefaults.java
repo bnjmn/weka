@@ -40,19 +40,19 @@ import java.util.Vector;
  * the props file <code>weka/gui/experiment/Experimenter.props</code>.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see #PROPERTY_FILE
  */
 public class ExperimenterDefaults
   implements Serializable {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = -2835933184632147981L;
   
-  /** The name of the properties file */
+  /** The name of the properties file. */
   public final static String PROPERTY_FILE = "weka/gui/experiment/Experimenter.props";
 
-  /** Properties associated with the experimenter options */
+  /** Properties associated with the experimenter options. */
   protected static Properties PROPERTIES;
   static {
     try {
@@ -78,7 +78,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the associated properties file
+   * returns the associated properties file.
    * 
    * @return              the props file
    */
@@ -87,7 +87,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default experiment extension
+   * returns the default experiment extension.
    * 
    * @return              the extension (incl. dot)
    */
@@ -96,7 +96,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default destination
+   * returns the default destination.
    * 
    * @return              the destination
    */
@@ -105,7 +105,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default experiment type
+   * returns the default experiment type.
    * 
    * @return              the type
    */
@@ -114,7 +114,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * whether classification or regression is used
+   * whether classification or regression is used.
    * 
    * @return              true if classification
    */
@@ -123,7 +123,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the number of folds used for cross-validation
+   * returns the number of folds used for cross-validation.
    * 
    * @return              the number of folds
    */
@@ -132,7 +132,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the training percentage in case of splits
+   * returns the training percentage in case of splits.
    * 
    * @return              the percentage (0-100)
    */
@@ -141,7 +141,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the number of repetitions to use
+   * returns the number of repetitions to use.
    * 
    * @return              the repetitions/runs
    */
@@ -150,7 +150,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * whether datasets or algorithms are iterated first
+   * whether datasets or algorithms are iterated first.
    * 
    * @return              true if datasets are iterated first
    */
@@ -160,7 +160,7 @@ public class ExperimenterDefaults
 
   /**
    * returns the initial directory for the datasets (if empty, it returns
-   * the user's home directory)
+   * the user's home directory).
    * 
    * @return              the directory
    */
@@ -175,7 +175,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * whether relative paths are used by default
+   * whether relative paths are used by default.
    * 
    * @return              true if relative paths are used
    */
@@ -184,7 +184,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the display name of the preferred Tester algorithm
+   * returns the display name of the preferred Tester algorithm.
    * 
    * @return              the display name
    * @see Tester
@@ -195,7 +195,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * the comma-separated list of attribute names that identify a row
+   * the comma-separated list of attribute names that identify a row.
    * 
    * @return              the attribute list
    */
@@ -204,7 +204,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * the comma-separated list of attribute names that identify a column
+   * the comma-separated list of attribute names that identify a column.
    * 
    * @return              the attribute list
    */
@@ -213,7 +213,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the name of the field used for comparison
+   * returns the name of the field used for comparison.
    * 
    * @return              the comparison field
    */
@@ -222,7 +222,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default significance
+   * returns the default significance.
    * 
    * @return              the significance (0.0-1.0)
    */
@@ -231,7 +231,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default sorting (empty string means none)
+   * returns the default sorting (empty string means none).
    * 
    * @return              the sorting field
    */
@@ -240,7 +240,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns whether StdDevs are shown by default
+   * returns whether StdDevs are shown by default.
    * 
    * @return              true if stddevs are shown
    */
@@ -249,7 +249,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns whether the Average is shown by default
+   * returns whether the Average is shown by default.
    * 
    * @return              true if the average is shown
    */
@@ -258,7 +258,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default precision for the mean
+   * returns the default precision for the mean.
    * 
    * @return              the decimals of the mean
    */
@@ -267,7 +267,7 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the default precision for the stddevs
+   * returns the default precision for the stddevs.
    * 
    * @return              the decimals of the stddevs
    */
@@ -276,19 +276,39 @@ public class ExperimenterDefaults
   }
 
   /**
-   * returns the classname of the ResultMatrix class, responsible for the
-   * output format
+   * returns the classname (and optional options) of the ResultMatrix class, 
+   * responsible for the output format.
    * 
-   * @return              the classname
+   * @return              the classname and options
    * @see ResultMatrix
    * @see ResultMatrixPlainText
    */
-  public final static String getOutputFormat() {
-    return get("OutputFormat", ResultMatrixPlainText.class.getName());
+  public final static ResultMatrix getOutputFormat() {
+    ResultMatrix	result;
+    
+    try {
+      String[] options = Utils.splitOptions(get("OutputFormat", ResultMatrixPlainText.class.getName()));
+      String classname = options[0];
+      options[0]       = "";
+      result           = (ResultMatrix) Utils.forName(ResultMatrix.class, classname, options);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      result = new ResultMatrixPlainText();
+    }
+    
+    // override with other default properties
+    result.setMeanPrec(getMeanPrecision());
+    result.setStdDevPrec(getStdDevPrecision());
+    result.setShowAverage(getShowAverage());
+    result.setShowStdDev(getShowStdDevs());
+    result.setRemoveFilterName(getRemoveFilterClassnames());
+
+    return result;
   }
 
   /**
-   * whether the filter classnames in the dataset names are removed by default
+   * whether the filter classnames in the dataset names are removed by default.
    * 
    * @return              true if filter names are removed
    */
@@ -297,7 +317,7 @@ public class ExperimenterDefaults
   }
   
   /**
-   * only for testing - prints the content of the props file
+   * only for testing - prints the content of the props file.
    * 
    * @param args	commandline parameters - ignored
    */
