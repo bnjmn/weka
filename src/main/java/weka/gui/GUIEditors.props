@@ -52,6 +52,7 @@ weka.classifiers.meta.ensembleSelection.EnsembleSelectionLibrary=weka.gui.Ensemb
 weka.experiment.ResultListener=weka.gui.GenericObjectEditor
 weka.experiment.ResultProducer=weka.gui.GenericObjectEditor
 weka.experiment.SplitEvaluator=weka.gui.GenericObjectEditor
+weka.experiment.ResultMatrix=weka.gui.GenericObjectEditor
 
 # datagenerators
 weka.datagenerators.DataGenerator=weka.gui.GenericObjectEditor

@@ -23,6 +23,7 @@
 package weka.gui.experiment;
 
 import weka.core.Attribute;
+import weka.core.ClassDiscovery;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Range;
@@ -39,6 +40,7 @@ import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.ListSelectorDialog;
+import weka.gui.PropertyDialog;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
 
@@ -86,7 +88,7 @@ import javax.swing.SwingUtilities;
  * This panel controls simple analysis of experimental results.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.44 $
+ * @version $Revision$
  */
 public class ResultsPanel
   extends JPanel {
@@ -289,13 +291,7 @@ public class ResultsPanel
     // defaults
     m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
     m_TTester.setShowStdDevs(ExperimenterDefaults.getShowStdDevs());
-    try {
-      m_ResultMatrix = (ResultMatrix) Class.forName(
-          ExperimenterDefaults.getOutputFormat()).newInstance();
-    }
-    catch (Exception e) {
-      m_ResultMatrix = new ResultMatrixPlainText();
-    }
+    m_ResultMatrix = ExperimenterDefaults.getOutputFormat();
     m_ResultMatrix.setShowStdDev(ExperimenterDefaults.getShowStdDevs());
     m_ResultMatrix.setMeanPrec(ExperimenterDefaults.getMeanPrecision());
     m_ResultMatrix.setStdDevPrec(ExperimenterDefaults.getStdDevPrecision());
@@ -1246,26 +1242,15 @@ public class ResultsPanel
    * if the user approves.
    */
   public void setOutputFormatFromDialog() {
-    OutputFormatDialog dialog = new OutputFormatDialog(null);
-    
-    dialog.setResultMatrix(m_ResultMatrix.getClass());
-    dialog.setMeanPrec(m_ResultMatrix.getMeanPrec());
-    dialog.setStdDevPrec(m_ResultMatrix.getStdDevPrec());
-    dialog.setRemoveFilterName(m_ResultMatrix.getRemoveFilterName());
-    dialog.setShowAverage(m_ResultMatrix.getShowAverage());
+    OutputFormatDialog dialog = new OutputFormatDialog(PropertyDialog.getParentFrame(this));
+
+    m_ResultMatrix.setShowStdDev(m_ShowStdDevs.isSelected());
+    dialog.setResultMatrix(m_ResultMatrix);
+    dialog.setLocationRelativeTo(this);
     
     if (dialog.showDialog() == OutputFormatDialog.APPROVE_OPTION) {
-      try {
-        m_ResultMatrix = (ResultMatrix) dialog.getResultMatrix().newInstance();
-      }
-      catch (Exception e) {
-        e.printStackTrace();
-        m_ResultMatrix = new ResultMatrixPlainText();
-      }
-      m_ResultMatrix.setMeanPrec(dialog.getMeanPrec());
-      m_ResultMatrix.setStdDevPrec(dialog.getStdDevPrec());
-      m_ResultMatrix.setRemoveFilterName(dialog.getRemoveFilterName());
-      m_ResultMatrix.setShowAverage(dialog.getShowAverage());
+      m_ResultMatrix = dialog.getResultMatrix();
+      m_ShowStdDevs.setSelected(m_ResultMatrix.getShowStdDev());
     }
   }
 
