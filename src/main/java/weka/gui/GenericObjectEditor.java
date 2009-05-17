@@ -1703,7 +1703,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return a copy of the source object
    * @exception Exception if the copy fails
    */
-  public Object makeCopy(Object source) throws Exception {
+  public static Object makeCopy(Object source) throws Exception {
     SerializedObject so = new SerializedObject(source);
     Object result = so.getObject();
     return result;
