@@ -2166,7 +2166,6 @@ public class Instances
 	    + "\tweka.core.Instances randomize <seed> <filename>\n"
 	    + "\t\tRandomizes the dataset and outputs it on stdout.\n"
 	);
-	System.exit(1);
       }
     }
     catch (Exception ex) {
