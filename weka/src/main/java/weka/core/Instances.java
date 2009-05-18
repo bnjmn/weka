@@ -2134,7 +2134,6 @@ public class Instances
 	    + "\tweka.core.Instances headers <filename1> <filename2>\n"
 	    + "\tweka.core.Instances randomize <seed> <filename>\n"
 	);
-	System.exit(1);
       }
     }
     catch (Exception ex) {
