@@ -69,7 +69,7 @@ import javax.swing.JTextField;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class SimpleCLIPanel
   extends JPanel
@@ -146,7 +146,7 @@ public class SimpleCLIPanel
    * A class that sends all lines from a reader to a TextArea component.
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision$
    */
   class ReaderToTextArea extends Thread {
 
@@ -193,7 +193,7 @@ public class SimpleCLIPanel
    * in a separate thread.
    * 
    * @author Len Trigg (trigg@cs.waikato.ac.nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision$
    */
   class ClassRunner extends Thread {
 
@@ -240,10 +240,19 @@ public class SimpleCLIPanel
 	  outOld = System.out;
 	  try {
 	    outFilename = m_CommandArgs[m_CommandArgs.length - 1];
+	    // since file may not yet exist, command-line completion doesn't
+	    // work, hence replace "~" manually with home directory
+	    if (outFilename.startsWith("~"))
+	      outFilename = outFilename.replaceFirst("~", System.getProperty("user.home"));
 	    outNew = new PrintStream(new File(outFilename));
 	    System.setOut(outNew);
 	    m_CommandArgs[m_CommandArgs.length - 2] = "";
 	    m_CommandArgs[m_CommandArgs.length - 1] = "";
+	    // some main methods check the length of the "args" array
+	    // -> removed the two empty elements at the end
+	    String[] newArgs = new String[m_CommandArgs.length - 2];
+	    System.arraycopy(m_CommandArgs, 0, newArgs, 0, m_CommandArgs.length - 2);
+	    m_CommandArgs = newArgs;
 	  }
 	  catch (Exception e) {
 	    System.setOut(outOld);
@@ -282,7 +291,7 @@ public class SimpleCLIPanel
    * A class for commandline completion of classnames.
    * 
    * @author  FracPete (fracpete at waikato dot ac dot nz)
-   * @version $Revision: 1.6 $
+   * @version $Revision$
    */
   public static class CommandlineCompletion {
     
