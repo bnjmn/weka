@@ -1,9 +1,10 @@
 % Version: $Revision$
 
 Using the graphical tools, like the Explorer, or the command-line is in most
-cases sufficient for the normal user. But WEKA's clearly defined API makes is
-very easy to ``embed'' it in another projects. This chapter covers some basics
-of how to achieve the following common tasks from source code:
+cases sufficient for the normal user. But WEKA's clearly defined API
+(``application programming interface'') makes is very easy to ``embed'' it in
+another projects. This chapter covers some basics of how to achieve the
+following common tasks from source code:
 \begin{itemize}
 	\item Option handling
 	\item Loading data
@@ -137,17 +138,28 @@ example loads a CSV file (``comma-separated values'') file:
    Instances data = loader.getDataSet();
 \end{verbatim}
 \textbf{NB:} Not all file formats allow to store information about the class
-attribute (ARFF: no, XRFF: yes). If a class attribute is required further down
-the road, e.g., when using a classifier, it can be set with the
-\texttt{setClassIndex(int)} method:
+attribute (e.g., ARFF stores no information about class attribute, but XRFF
+does). If a class attribute is required further down the road, e.g., when using
+a classifier, it can be set with the \texttt{setClassIndex(int)} method:
 \begin{verbatim}
    // uses the first attribute as class attribute
-   data.setClassIndex(0);
+   if (data.classIndex() == -1)
+      data.setClassIndex(0);
+   ...
    // uses the last attribute as class attribute
-   data.setClassIndex(data.numAttributes() - 1);
+   if (data.classIndex() == -1)
+      data.setClassIndex(data.numAttributes() - 1);
 \end{verbatim}
 
 \subsection{Loading data from databases}
+For loading data from databases, you have two classes that allow you to do that:
+\begin{itemize}
+	\item \texttt{weka.experiment.InstanceQuery}
+	\item \texttt{weka.core.converters.DatabaseLoader}
+\end{itemize}
+The differences between them are, that the \texttt{InstanceQuery} class allows
+you to retrieve sparse data and the \texttt{DatabaseLoader} can retrieve the
+data incrementally.
 
 \newpage
 
