@@ -24,6 +24,9 @@ available under the GLPv2 as well, alongside the binaries.
 
 \newpage
 
+%%%%%%%%%%%%%%%%%%%
+% Option handling %
+%%%%%%%%%%%%%%%%%%%
 \section{Option handling}
 Configuring an object, e.g., a classifier, can either be done using the
 appropriate get/set-methods for the property that you wish to change, like the
@@ -75,15 +78,104 @@ into appropriate Java source code.
 
 \newpage
 
+%%%%%%%%%%%%%%%%
+% Loading data %
+%%%%%%%%%%%%%%%%
 \section{Loading data}
+Before any filter, classifier or clusterer can be applied, data needs to be
+present. WEKA enables one to load data from files (in various file formats) and
+also from databases. In the latter case, it is assumed in that the database
+connection is set up and working. See chapter \ref{databases} for more details.
+
+The following classes are used to store data in memory:
+\begin{itemize}
+	\item \texttt{weka.core.Instances} -- holds a complete dataset. This data
+structure is row-based, single rows can be accessed via the
+\texttt{instance(int)} method using a 0-based index. Information about the
+columns can be accessed via the \texttt{attribute(int)} method. This method
+returns \texttt{weka.core.Attribute} objects (see below).
+	\item \texttt{weka.core.Instance} -- encapsulates a single row. It is
+basically a wrapper around an array of double primitives. Since this class
+contains no information about the type of the columns, it always needs access
+to a \texttt{weka.core.Instances} object (see methods \texttt{dataset} and
+\texttt{setDataset}). The class \texttt{weka.core.SparseInstance} is used in
+case of sparse data.
+	\item \texttt{weka.core.Attribute} -- holds the information about a single
+column in the dataset. It stores the type of the attribute, as well as the
+labels for \textit{nominal} attributes, the possible values for \textit{string}
+attributes or the datasets for \textit{relational} attributes (these are just
+\texttt{weka.core.Instances} objects again).
+\end{itemize}
+
 \subsection{Loading data from files}
+When loading data from files, one can either let WEKA choose the appropriate
+loader (the available loaders can be found in the \texttt{weka.core.converters}
+package) based on the file's extension or one can use the correct loader
+explicitly. The latter case is necessary if the files don't have the correct
+extension.
+
+The \texttt{DataSource} class (inner class of the
+\texttt{weka.core.converters.ConverterUtils} class) can be used to read data
+from files that have the appropriate file extension. Here are a some examples:
+\begin{verbatim}
+   import weka.core.converters.ConverterUtils.DataSource;
+   import weka.core.Instances;
+   ...
+   Instances data1 = DataSource.read("/some/where/dataset.arff");
+   Instances data2 = DataSource.read("/other/place/dataset.csv");
+   Instances data3 = DataSource.read("/other/place/dataset.xrff");
+\end{verbatim}
+In case the file does have a different file extension than is normally
+associated with the loader, one has to use a loader directly. The following
+example loads a CSV file (``comma-separated values'') file:
+\begin{verbatim}
+   import weka.core.converters.CSVLoader;
+   import weka.core.Instances;
+   ...
+   CSVLoader loader = new CSVLoader();
+   loader.setSource(new File("/some/where/some.data"));
+   Instances data = loader.getDataSet();
+\end{verbatim}
+\textbf{NB:} Not all file formats allow to store information about the class
+attribute (ARFF: no, XRFF: yes). If a class attribute is required further down
+the road, e.g., when using a classifier, it can be set with the
+\texttt{setClassIndex(int)} method:
+\begin{verbatim}
+   // uses the first attribute as class attribute
+   data.setClassIndex(0);
+   // uses the last attribute as class attribute
+   data.setClassIndex(data.numAttributes() - 1);
+\end{verbatim}
+
 \subsection{Loading data from databases}
 
+\newpage
+
+%%%%%%%%%%%%%
+% Filtering %
+%%%%%%%%%%%%%
 \section{Filtering}
 
+%%%%%%%%%%%%%%%
+% Classifying %
+%%%%%%%%%%%%%%%
 \section{Classifying}
 
+%%%%%%%%%%%%%%
+% Clustering %
+%%%%%%%%%%%%%%
 \section{Clustering}
 
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Selecting attributes %
+%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Selecting attributes}
 
+%%%%%%%%%%%%%%%
+% Saving data %
+%%%%%%%%%%%%%%%
+\section{Saving data}
+
+\subsection{Saving data to files}
+
+\subsection{Saving data to databases}
