@@ -81,10 +81,11 @@ MeanPrecision=2
 # the default precision for the stdev
 StdDevPrecision=2
 
-# the classname of the ResultMatrix, reponsible for the default output format
+# the classname and options of the ResultMatrix, reponsible for the default 
+# output format.
 # NB: The other defaults listed in this props file override the "advanced" 
 #     options specified in this property.
-OutputFormat=weka.experiment.ResultMatrixPlainText
+OutputFormat=weka.experiment.ResultMatrixPlainText -col-name-width 0 -row-name-width 25 -mean-width 0 -stddev-width 0 -sig-width 0 -count-width 5 -print-col-names -print-row-names -enum-col-names
 
 # whether filter classnames are removed by default
 RemoveFilterClassnames=false
