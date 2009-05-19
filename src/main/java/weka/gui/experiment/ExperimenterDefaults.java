@@ -287,7 +287,7 @@ public class ExperimenterDefaults
     ResultMatrix	result;
     
     try {
-      String[] options = Utils.splitOptions(get("OutputFormat", ResultMatrixPlainText.class.getName()));
+      String[] options = Utils.splitOptions(get("OutputFormat", ResultMatrix.class.getName() + " -col-name-width 0 -row-name-width 25 -mean-width 0 -stddev-width 0 -sig-width 0 -count-width 5 -print-col-names -print-row-names -enum-col-names"));
       String classname = options[0];
       options[0]       = "";
       result           = (ResultMatrix) Utils.forName(ResultMatrix.class, classname, options);
