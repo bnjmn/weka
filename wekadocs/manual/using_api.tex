@@ -1,0 +1,89 @@
+% Version: $Revision$
+
+Using the graphical tools, like the Explorer, or the command-line is in most
+cases sufficient for the normal user. But WEKA's clearly defined API makes is
+very easy to ``embed'' it in another projects. This chapter covers some basics
+of how to achieve the following common tasks from source code:
+\begin{itemize}
+	\item Option handling
+	\item Loading data
+	\item Filtering
+	\item Classifying
+	\item Clustering
+	\item Selecting attributes
+\end{itemize}
+
+\noindent \textbf{Note} \\
+\noindent WEKA is released under the GNU General Public License version
+2\footnote{http://www.gnu.org/licenses/gpl-2.0.html} (GPLv2), i.e., that derived
+code or code that uses WEKA needs to be released under the GPLv2 as well. If
+you are just using WEKA for a personal project that does not get released
+publicly then you are not affected. But as soon as you make your project
+publicly available (e.g., for download), then you need to make your source code
+available under the GLPv2 as well, alongside the binaries.
+
+\newpage
+
+\section{Option handling}
+Configuring an object, e.g., a classifier, can either be done using the
+appropriate get/set-methods for the property that you wish to change, like the
+Explorer does. Or, if the class implements the \texttt{weka.core.OptionHandler}
+interface, you can just use the object's ability to parse command-line options
+via the \texttt{setOptions(String[])} method (the counterpart of this method is
+\texttt{getOptions()}, which returns a \texttt{String[]} array). The
+difference between the two approaches is, that the \texttt{setOptions(String[])}
+method cannot be used to set the options incrementally. Default values are used
+for all options that haven't been explicitly specified in the options array.
+
+The most basic approach is to assemble the String array by hand. The following
+example creates an array with a single option (``\texttt{-R}'') that takes an
+argument (``\texttt{1}''):
+\begin{verbatim}
+  String[] options = new String[2];
+  options[0] = "-R";
+  options[1] = "1";
+\end{verbatim}
+Since the \texttt{setOptions(String[])} method expects a fully parsed and
+correctly split up array (which is done by the command-line), some common
+pitfalls with this approach are:
+\begin{itemize}
+	\item Combination of option and argument -- Using ``\texttt{-R 1}'' as an
+element of the String array will fail, prompting WEKA to output an error message
+stating that the option ``R 1'' is unknown.
+	\item Trailing blanks -- Using ``\texttt{-R }'' will fail as well, since no
+removal of trailing blanks happens and therefore option ``R '' is unknown.
+\end{itemize}
+The easiest way to avoid these problems, is to provide a String array that has
+been generated automatically from a single command-line string using the
+\texttt{splitOptions(String)} method of the \texttt{weka.core.Utils} class.
+Here is an example:
+\begin{verbatim}
+  import weka.core.Utils;
+  ...
+  String[] options = Utils.splitOptions("-R 1");
+\end{verbatim}
+As this method ignores whitespaces, using ``\texttt{  -R    1}'' or
+``\texttt{-R 1 }'' will return the same result as ``\texttt{-R 1}''.
+
+Complicated command-lines with lots of nested options, e.g., options for the
+support-vector machine classifier \textit{SMO} (package
+\texttt{weka.classifiers.functions}) including a kernel setup, are a bit tricky,
+since Java requires one to escape double quotes and backslashes inside a
+String. The Wiki\cite{wekawiki} article ``Use Weka in your Java code''
+references the Java class \texttt{OptionsToCode}, which turns any command-line
+into appropriate Java source code.
+
+\newpage
+
+\section{Loading data}
+\subsection{Loading data from files}
+\subsection{Loading data from databases}
+
+\section{Filtering}
+
+\section{Classifying}
+
+\section{Clustering}
+
+\section{Selecting attributes}
+
