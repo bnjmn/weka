@@ -22,12 +22,12 @@
 
 package weka.core;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Properties;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * This class encapsulates a map of all environment and java system properties.
@@ -41,8 +41,8 @@ public class Environment implements RevisionHandler {
   
   private static Environment m_systemWide = new Environment();
   
-  // Map to hold all the environment variables + java properties
-  private Map<String,String> m_envVars = new HashMap<String,String>();
+  // Map to hold all the system environment variables + java properties
+  private Map<String,String> m_envVars = new TreeMap<String,String>();
   
   public Environment() {
     // get the env variables first
@@ -114,6 +114,8 @@ public class Environment implements RevisionHandler {
           throw new Exception("[Environment] Variable " 
                               + key + " doesn't seem to be set.");
         }
+      } else {
+        break;
       }
       index = source.indexOf("${");
     }
