@@ -70,6 +70,23 @@ public class EnvironmentField extends JPanel {
   protected int m_currentCaretPos = 0;
   
   /**
+   * Construct an EnvironmentField with no label.
+   */
+  public EnvironmentField() {
+    this("");
+  }
+  
+  /**
+   * Construct an EnvironmentField with no label.
+   * @param env the environment variables to display in
+   * the drop-down box
+   */
+  public EnvironmentField(Environment env) {
+    this("");
+    setEnvironment(env);    
+  }
+  
+  /**
    * Constructor.
    * 
    * @param label the label to use
@@ -77,12 +94,14 @@ public class EnvironmentField extends JPanel {
   public EnvironmentField(String label) {
     setLayout(new BorderLayout());
     m_label = new JLabel(label);
-    m_label.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+    if (label.length() > 0) {
+      m_label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    }
     add(m_label, BorderLayout.WEST);
     
     m_combo = new JComboBox();
     m_combo.setEditable(true);
-    m_combo.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+    m_combo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     
     java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
     if (theEditor instanceof JTextField) {
