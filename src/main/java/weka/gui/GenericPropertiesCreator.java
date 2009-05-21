@@ -21,17 +21,20 @@
  */
 package weka.gui;
 
+import weka.core.ClassDiscovery;
+import weka.core.Utils;
+import weka.core.ClassDiscovery.StringCompare;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.ClassDiscovery;
-import weka.core.Utils;
 
 /**
  * This class can generate the properties object that is normally loaded from
@@ -75,7 +78,7 @@ import weka.core.Utils;
  * @see GenericObjectEditor
  * @see weka.core.ClassDiscovery
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class GenericPropertiesCreator {
   
@@ -422,6 +425,7 @@ public class GenericPropertiesCreator {
     String            pkg;
     StringTokenizer   tok;
     Vector            classes;
+    HashSet           names;
     int               i;
     
     m_OutputProperties = new Properties();
@@ -431,7 +435,8 @@ public class GenericPropertiesCreator {
       if (key.equals(USE_DYNAMIC))
 	continue;
       tok   = new StringTokenizer(m_InputProperties.getProperty(key), ",");
-      value = "";
+      names = new HashSet();
+      
       // get classes for all packages
       while (tok.hasMoreTokens()) {
         pkg = tok.nextToken().trim();
@@ -451,13 +456,24 @@ public class GenericPropertiesCreator {
           // some classes should not be listed for some keys
           if (!isValidClassname(key, classes.get(i).toString()))
             continue;
-          if (!value.equals(""))
-            value += ",";
-          value += classes.get(i).toString();
+          names.add(classes.get(i));
         }
-        if (VERBOSE)
-          System.out.println(pkg + " -> " + value);
       }
+      
+      // generate list
+      value   = "";
+      classes = new Vector();
+      classes.addAll(names);
+      Collections.sort(classes, new StringCompare());
+      for (i = 0; i < classes.size(); i++) {
+        if (!value.equals(""))
+          value += ",";
+        value += classes.get(i).toString();
+      }
+      if (VERBOSE)
+        System.out.println(pkg + " -> " + value);
+      
+      // set value
       m_OutputProperties.setProperty(key, value);
     }
   }
