@@ -40,7 +40,7 @@ import java.util.jar.JarFile;
  * interface or a derived from a certain class.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  * @see StringCompare
  */
 public class ClassDiscovery
@@ -281,15 +281,18 @@ public class ClassDiscovery
    * @return                a list with all the found classnames
    */
   public static Vector find(Class cls, String[] pkgnames) {
-    Vector        result;
-    int           i;
+    Vector	result;
+    int		i;
+    HashSet	names;
 
     result = new Vector();
 
+    names = new HashSet();
     for (i = 0; i < pkgnames.length; i++)
-      result.addAll(find(cls, pkgnames[i]));
+      names.addAll(find(cls, pkgnames[i]));
 
     // sort result
+    result.addAll(names);
     Collections.sort(result, new StringCompare());
 
     return result;
@@ -584,7 +587,7 @@ public class ClassDiscovery
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -761,7 +764,7 @@ public class ClassDiscovery
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 }
