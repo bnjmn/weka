@@ -1649,6 +1649,21 @@ public class ClustererPanel
     }
     
     m_ClustererEditor.setCapabilitiesFilter(filterClass);
+    
+    // check capabilities
+    m_StartBut.setEnabled(true);
+    Capabilities currentFilter = m_ClustererEditor.getCapabilitiesFilter();
+    Clusterer clusterer = (Clusterer) m_ClustererEditor.getValue();
+    Capabilities currentSchemeCapabilities =  null;
+    if (clusterer != null && currentFilter != null && 
+        (clusterer instanceof CapabilitiesHandler)) {
+      currentSchemeCapabilities = ((CapabilitiesHandler)clusterer).getCapabilities();
+      
+      if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+          !currentSchemeCapabilities.supports(currentFilter)) {
+        m_StartBut.setEnabled(false);
+      }
+    }
   }
   
   /**
