@@ -2452,6 +2452,21 @@ public class ClassifierPanel
     
     // set new filter
     m_ClassifierEditor.setCapabilitiesFilter(filterClass);
+    
+    // Check capabilities
+    m_StartBut.setEnabled(true);
+    Capabilities currentFilter = m_ClassifierEditor.getCapabilitiesFilter();
+    Classifier classifier = (Classifier) m_ClassifierEditor.getValue();
+    Capabilities currentSchemeCapabilities =  null;
+    if (classifier != null && currentFilter != null && 
+        (classifier instanceof CapabilitiesHandler)) {
+      currentSchemeCapabilities = ((CapabilitiesHandler)classifier).getCapabilities();
+      
+      if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+          !currentSchemeCapabilities.supports(currentFilter)) {
+        m_StartBut.setEnabled(false);
+      }
+    }
   }
   
   /**
