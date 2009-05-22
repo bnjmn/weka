@@ -59,7 +59,7 @@ import javax.swing.JPanel;
  * then retrieve the instances by calling getInstances().
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class SetInstancesPanel
   extends JPanel {
@@ -109,11 +109,18 @@ public class SetInstancesPanel
 
   protected boolean m_readIncrementally = true;
   
+  protected boolean m_showZeroInstancesAsUnknown = false;
+  
+  public SetInstancesPanel() {
+    this(false);
+  }
+  
   /**
    * Create the panel.
    */
-  public SetInstancesPanel() {
-
+  public SetInstancesPanel(boolean showZeroInstancesAsUnknown) {
+    m_showZeroInstancesAsUnknown = showZeroInstancesAsUnknown;
+    
     m_OpenFileBut.setToolTipText("Open a set of instances from a file");
     m_OpenURLBut.setToolTipText("Open a set of instances from a URL");
     m_CloseBut.setToolTipText("Closes the dialog");
@@ -277,8 +284,12 @@ public class SetInstancesPanel
       // load
       ((FileSourcedConverter) m_Loader).setFile(f);
       if (incremental) {
+        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
 	setInstances(m_Loader.getStructure());
       } else {
+        // If we are batch loading then we will know for sure that
+        // the data has no instances
+        m_Summary.setShowZeroInstancesAsUnknown(false);
 	setInstances(m_Loader.getDataSet());
       }
     } catch (Exception ex) {
@@ -310,8 +321,10 @@ public class SetInstancesPanel
       // load
       ((URLSourcedLoader) m_Loader).setURL(u.toString());
       if (incremental) {
+        m_Summary.setShowZeroInstancesAsUnknown(m_showZeroInstancesAsUnknown);
 	setInstances(m_Loader.getStructure());
       } else {
+        m_Summary.setShowZeroInstancesAsUnknown(false);
 	setInstances(m_Loader.getDataSet());
       }
     } catch (Exception ex) {

@@ -1496,6 +1496,7 @@ public class Instances
     AttributeStats result = new AttributeStats();
     if (attribute(index).isNominal()) {
       result.nominalCounts = new int [attribute(index).numValues()];
+      result.nominalWeights = new double[attribute(index).numValues()];
     }
     if (attribute(index).isNumeric()) {
       result.numericStats = new weka.experiment.Stats();
@@ -1505,6 +1506,7 @@ public class Instances
     double [] attVals = attributeToDoubleArray(index);
     int [] sorted = Utils.sort(attVals);
     int currentCount = 0;
+    double currentWeight = 0;
     double prev = Instance.missingValue();
     for (int j = 0; j < numInstances(); j++) {
       Instance current = instance(sorted[j]);
@@ -1514,13 +1516,15 @@ public class Instances
       }
       if (current.value(index) == prev) {
 	currentCount++;
+	currentWeight += current.weight();
       } else {
-	result.addDistinct(prev, currentCount);
+	result.addDistinct(prev, currentCount, currentWeight);
 	currentCount = 1;
+	currentWeight = current.weight();
 	prev = current.value(index);
       }
     }
-    result.addDistinct(prev, currentCount);
+    result.addDistinct(prev, currentCount, currentWeight);
     result.distinctCount--; // So we don't count "missing" as a value 
     return result;
   }
