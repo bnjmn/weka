@@ -497,6 +497,21 @@ public class AssociationsPanel
     }
     
     m_AssociatorEditor.setCapabilitiesFilter(filter);
+    
+    m_StartBut.setEnabled(true);
+    // Check capabilities
+    Capabilities currentFilter = m_AssociatorEditor.getCapabilitiesFilter();
+    Associator associator = (Associator) m_AssociatorEditor.getValue();
+    Capabilities currentSchemeCapabilities =  null;
+    if (associator != null && currentFilter != null && 
+        (associator instanceof CapabilitiesHandler)) {
+      currentSchemeCapabilities = ((CapabilitiesHandler)associator).getCapabilities();
+      
+      if (!currentSchemeCapabilities.supportsMaybe(currentFilter) &&
+          !currentSchemeCapabilities.supports(currentFilter)) {
+        m_StartBut.setEnabled(false);
+      }
+    }
   }
   
   /**
