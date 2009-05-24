@@ -16,7 +16,8 @@ following common tasks from source code:
 
 \noindent \textbf{Note} \\
 \noindent WEKA is released under the GNU General Public License version
-2\footnote{http://www.gnu.org/licenses/gpl-2.0.html} (GPLv2), i.e., that derived
+2\footnote{\url{http://www.gnu.org/licenses/gpl-2.0.html}{}} (GPLv2), i.e., that
+derived
 code or code that uses WEKA needs to be released under the GPLv2 as well. If
 you are just using WEKA for a personal project that does not get released
 publicly then you are not affected. But as soon as you make your project
@@ -86,7 +87,9 @@ into appropriate Java source code.
 Before any filter, classifier or clusterer can be applied, data needs to be
 present. WEKA enables one to load data from files (in various file formats) and
 also from databases. In the latter case, it is assumed in that the database
-connection is set up and working. See chapter \ref{databases} for more details.
+connection is set up and working. See chapter \ref{databases} for more details
+on how to configure WEKA correctly and also more information on JDBC (Java
+Database Connectivity) URLs.
 
 The following classes are used to store data in memory:
 \begin{itemize}
@@ -161,7 +164,58 @@ The differences between them are, that the \texttt{InstanceQuery} class allows
 you to retrieve sparse data and the \texttt{DatabaseLoader} can retrieve the
 data incrementally.
 
-\newpage
+Here is an exaample of using the \texttt{InstanceQuery} class:
+\begin{verbatim}
+  import weka.core.Instances;
+  import weka.experiment.InstanceQuery;
+  ...
+  InstanceQuery query = new InstanceQuery();
+  query.setDatabaseURL("jdbc_url");
+  query.setUsername("the_user");
+  query.setPassword("the_password");
+  query.setQuery("select * from whatsoever");
+  // if your data is sparse, then you can say so too
+  // query.setSparseData(true);
+  Instances data = query.retrieveInstances();
+\end{verbatim}
+
+And an example using the \texttt{DatabaseLoader} class in ``batch retrieval'':
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.core.converters.DatabaseLoader;
+   ...
+   DatabaseLoader loader = new DatabaseLoader();
+   loader.setSource("jdbc_url", "the_user", "the_password");
+   loader.setQuery("select * from whatsoever");
+   Instances data = loader.getDataSet();
+\end{verbatim}
+
+\samepage
+And in ``incremental mode'':
+\begin{verbatim}
+   import weka.core.Instance;
+   import weka.core.Instances;
+   import weka.core.converters.DatabaseLoader;
+   ...
+   DatabaseLoader loader = new DatabaseLoader();
+   loader.setSource("jdbc_url", "the_user", "the_password");
+   loader.setQuery("select * from whatsoever");
+   Instances structure = loader.getStructure();
+   Instances data = new Instances(structure);
+   Instance inst;
+   while ((inst = loader.getNextInstance(structure)) != null)
+      data.add(inst);
+\end{verbatim}
+\textbf{Notes:}
+\begin{itemize}
+	\item Not all database systems allow incremental retrieval.
+	\item Not all queries have a unique key to retrieve rows incrementally. In
+that case, you can supply the necessary columns with the
+\textit{setKeys(String)} method (comma-separated list of columns).
+	\item If the data cannot be retrieved in an incremental fashion, it is first
+loaded fully into memory and then provided row-by-row (``pseudo-incremental'').
+\end{itemize}
+
 
 %%%%%%%%%%%%%
 % Filtering %
