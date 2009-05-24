@@ -10,7 +10,7 @@ Weka now supports stemming algorithms. The stemming algorithms are located in th
 \noindent Currently, the Lovins Stemmer (+ iterated version) and support for the Snowball stemmers are included.
 
 \section{Snowball stemmers}
-Weka contains a wrapper class for the Snowball (homepage: \texttt{http://snowball.tartarus.org/}) stemmers (containing the Porter stemmer and several other stemmers for different languages). The relevant class is \texttt{weka.core.stemmers.Snowball}.
+Weka contains a wrapper class for the Snowball (homepage: \url{http://snowball.tartarus.org/}{}) stemmers (containing the Porter stemmer and several other stemmers for different languages). The relevant class is \texttt{weka.core.stemmers.Snowball}.
 
 The Snowball classes are not included, they only have to be present in the classpath. The reason for this is, that the Weka team doesn't have to watch out for new versions of the stemmers and update them.
 
@@ -18,9 +18,9 @@ There are two ways of getting hold of the Snowball stemmers:
 
 \begin{enumerate}
 	\item You can add the following pre-compiled jar archive to your classpath and you're set (based on source code from 2005-10-19, compiled 2005-10-22). \\
-	\texttt{http://www.cs.waikato.ac.nz/~ml/weka/stemmers/snowball.jar}
-	\item You can compile the stemmers yourself with the newest sources. Just download the following ZIP file, unpack it and follow the instructions in the README file (the zip contains an ANT (http://ant.apache.org/) build script for generating the jar archive). \\
-	\texttt{http://www.cs.waikato.ac.nz/~ml/weka/stemmers/snowball.zip} \\
+	\url{http://www.cs.waikato.ac.nz/~ml/weka/stemmers/snowball.jar}{}
+	\item You can compile the stemmers yourself with the newest sources. Just download the following ZIP file, unpack it and follow the instructions in the README file (the zip contains an ANT (\url{http://ant.apache.org/}{}) build script for generating the jar archive). \\
+	\url{http://www.cs.waikato.ac.nz/~ml/weka/stemmers/snowball.zip}{} \\
       \textbf{Note:} the patch target is specific to the source code from 2005-10-19.
 \end{enumerate}
 
