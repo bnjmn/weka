@@ -41,7 +41,7 @@ public class LoadDataFromCsvFile {
    */
   public static void main(String[] args) throws Exception {
     // output usage
-    if (args.length == 0) {
+    if (args.length != 1) {
       System.err.println("\nUsage: java LoadDataFromCsvFile <file>\n");
       System.exit(1);
     }

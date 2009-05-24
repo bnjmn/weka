@@ -42,7 +42,7 @@ public class LoadDataFromArffFile {
    */
   public static void main(String[] args) throws Exception {
     // output usage
-    if (args.length == 0) {
+    if (args.length != 1) {
       System.err.println("\nUsage: java LoadDataFromArffFile <file|URL>\n");
       System.exit(1);
     }

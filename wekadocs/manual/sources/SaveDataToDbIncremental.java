@@ -15,7 +15,7 @@
  */
 
 /*
- *    LoadDataFromDbLoaderIncremental.java
+ *    SaveDataToDbIncremental.java
  *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
@@ -23,15 +23,18 @@
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.DatabaseLoader;
+import weka.core.converters.DatabaseSaver;
 
 /**
- * Loads data from a JDBC database using the weka.core.converters.DatabaseLoader
- * class. The data is loaded incrementally (if that is possible).
+ * Loads data from a JDBC database using the
+ * weka.core.converters.DatabaseLoader class and saves it to another JDBC
+ * database using the weka.core.converters.DatabaseSaver class. The data is
+ * loaded/saved incrementally.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class LoadDataFromDbLoaderIncremental {
+public class SaveDataToDbIncremental {
 
   /**
    * Expects no parameters.
@@ -42,7 +45,7 @@ public class LoadDataFromDbLoaderIncremental {
   public static void main(String[] args) throws Exception {
     // output usage
     if (args.length != 0) {
-      System.err.println("\nUsage: java LoadDataFromDbLoaderIncremental\n");
+      System.err.println("\nUsage: java SaveDataToDbBatch\n");
       System.exit(1);
     }
 
@@ -64,7 +67,24 @@ public class LoadDataFromDbLoaderIncremental {
         System.out.println(count + " rows read so far.");
     }
 
-    System.out.println("\nHeader of dataset:\n");
-    System.out.println(new Instances(data, 0));
+    System.out.println("\nSaving data...");
+    DatabaseSaver saver = new DatabaseSaver();
+    saver.setDestination("jdbc_url", "the_user", "the_password");
+    // we explicitly specify the table name here:
+    saver.setTableName("whatsoever2");
+    saver.setRelationForTableName(false);
+    // or we could just update the name of the dataset:
+    // saver.setRelationForTableName(true);
+    // data.setRelationName("whatsoever2");
+    saver.setRetrieval(DatabaseSaver.INCREMENTAL);
+    saver.setStructure(data);
+    count = 0;
+    for (int i = 0; i < data.numInstances(); i++) {
+      saver.writeIncremental(data.instance(i));
+      count++;
+      if ((count % 100) == 0)
+        System.out.println(count + " rows written so far.");
+    }
+    saver.writeIncremental(null);
   }
 }
