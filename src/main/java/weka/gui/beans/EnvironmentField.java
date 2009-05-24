@@ -242,6 +242,24 @@ public class EnvironmentField extends JPanel {
   }
   
   /**
+   * Set the enabled status of the combo box.
+   * 
+   * @param enabled true if the combo box is enabled
+   */
+  public void setEnabled(boolean enabled) {
+    m_combo.setEnabled(enabled);
+  }
+  
+  /**
+   * Set the editable status of the combo box.
+   * 
+   * @param editable true if the combo box is editable
+   */
+  public void setEditable(boolean editable) {
+    m_combo.setEditable(editable);
+  }
+  
+  /**
    * Main method for testing this class
    * 
    * @param args command line args (ignored)
