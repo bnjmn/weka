@@ -24,11 +24,16 @@ package weka.gui.beans;
 
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertySheetPanel;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
 import weka.core.Tag;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -62,7 +67,7 @@ import javax.swing.filechooser.FileFilter;
  */
 public class SerializedModelSaverCustomizer
   extends JPanel
-  implements Customizer, CustomizerCloseRequester {
+  implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -4874208115942078471L;
@@ -85,13 +90,20 @@ public class SerializedModelSaverCustomizer
 
   private JFrame m_parentFrame;
   
-  private JTextField m_prefixText;
+  private JFrame m_fileChooserFrame;
+  
+  //private JTextField m_prefixText;
+  private EnvironmentField m_prefixText;
 
   private JComboBox m_fileFormatBox;
 
   private JCheckBox m_relativeFilePath;
   
   private JCheckBox m_includeRelationName;
+  
+  private Environment m_env = Environment.getSystemWide();
+  
+  private EnvironmentField m_directoryText;
   
 
   /** Constructor */  
@@ -123,14 +135,18 @@ public class SerializedModelSaverCustomizer
 	  if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
 	    try {
               m_smSaver.setPrefix(m_prefixText.getText());
-              m_smSaver.setDirectory(m_fileChooser.getSelectedFile());               
+//              m_smSaver.setDirectory(m_fileChooser.getSelectedFile());
+              
+              File selectedFile = m_fileChooser.getSelectedFile();
+              m_directoryText.setText(selectedFile.toString());
+              
 	    } catch (Exception ex) {
 	      ex.printStackTrace();
 	    }
 	  }
 	  // closing
 	  if (m_parentFrame != null) {
-	    m_parentFrame.dispose();
+	    m_fileChooserFrame.dispose();
 	  }
 	}
       });   
@@ -150,19 +166,30 @@ public class SerializedModelSaverCustomizer
   /** Sets up dialog for saving models to a file */  
   public void setUpFile() {
     removeAll();
-    m_fileChooser.setFileFilter(new FileFilter()
-        { public boolean accept(File f)
-            { return f.isDirectory();}
-          public String getDescription()
-            { return "Directory";}
-         });
+    m_fileChooser.setFileFilter(new FileFilter() { 
+      public boolean accept(File f) { 
+        return f.isDirectory();
+      }
+      public String getDescription() {
+        return "Directory";
+      }
+    });
 
     m_fileChooser.setAcceptAllFileFilterUsed(false);
 
     try{
       if (!m_smSaver.getDirectory().getPath().equals("")) {
-        File tmp = m_smSaver.getDirectory();
-        tmp = new File(tmp.getAbsolutePath());
+       // File tmp = m_smSaver.getDirectory();
+        String dirStr = m_smSaver.getDirectory().toString();
+        if (Environment.containsEnvVariables(dirStr)) {
+          try {
+            dirStr = m_env.substitute(dirStr);
+          } catch (Exception ex) {
+            // ignore
+          }
+        }
+        File tmp = new File(dirStr);;
+        tmp = new File (tmp.getAbsolutePath());
         m_fileChooser.setCurrentDirectory(tmp);
       }
     } catch(Exception ex) {
@@ -171,35 +198,115 @@ public class SerializedModelSaverCustomizer
 
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
-    try {
-      m_prefixText = new JTextField(m_smSaver.getPrefix(), 25); 
-      JLabel prefixLab = new JLabel("Prefix for file name:", SwingConstants.LEFT);
-      JPanel prefixP = new JPanel();   
-      prefixP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      //      prefixP.setLayout(new FlowLayout(FlowLayout.LEFT));
-      prefixP.setLayout(new BorderLayout());
-      prefixP.add(prefixLab, BorderLayout.WEST);
-      prefixP.add(m_prefixText, BorderLayout.CENTER);
-      innerPanel.add(prefixP, BorderLayout.SOUTH);
+    
+    JPanel alignedP = new JPanel();
+    GridBagLayout gbLayout = new GridBagLayout();
+    alignedP.setLayout(gbLayout);
+    
+    JLabel prefixLab = new JLabel("Prefix for file name", SwingConstants.RIGHT);
+    prefixLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    GridBagConstraints gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 0; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(prefixLab, gbConstraints);
+    alignedP.add(prefixLab);
+    
+//    m_prefixText = new JTextField(m_smSaver.getPrefix(), 25);
+    m_prefixText = new EnvironmentField();
+    m_prefixText.setEnvironment(m_env);
+    int width = m_prefixText.getPreferredSize().width;
+    int height = m_prefixText.getPreferredSize().height;
+    m_prefixText.setMinimumSize(new Dimension(width * 2, height));
+    m_prefixText.setPreferredSize(new Dimension(width * 2, height));
+    m_prefixText.setText(m_smSaver.getPrefix());
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 0; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_prefixText, gbConstraints);
+    alignedP.add(m_prefixText);
+    
+    JLabel ffLab = new JLabel("File format", SwingConstants.RIGHT);
+    ffLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 1; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(ffLab, gbConstraints);
+    alignedP.add(ffLab);
+    
+    setUpFileFormatComboBox();
+    m_fileFormatBox.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 1; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_fileFormatBox, gbConstraints);
+    alignedP.add(m_fileFormatBox);
 
-      JPanel ffP = new JPanel();
-      ffP.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-      ffP.setLayout(new BorderLayout());
-      ffP.add(new JLabel(" File format:"), BorderLayout.WEST);
-      setUpFileFormatComboBox();
-      ffP.add(m_fileFormatBox, BorderLayout.CENTER);
-      innerPanel.add(ffP, BorderLayout.CENTER);
-    } catch(Exception ex){
-    }
-    //innerPanel.add(m_SaverEditor, BorderLayout.SOUTH);
     JPanel about = m_SaverEditor.getAboutPanel();
     if (about != null) {
       innerPanel.add(about, BorderLayout.NORTH);
     }
     add(innerPanel, BorderLayout.NORTH);
-    add(m_fileChooser, BorderLayout.CENTER);
+    
+    JLabel directoryLab = new JLabel("Directory", SwingConstants.RIGHT);
+    directoryLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 2; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(directoryLab, gbConstraints);
+    alignedP.add(directoryLab);
+    
+    m_directoryText = new EnvironmentField();
+    m_directoryText.setEnvironment(m_env);  
+    width = m_directoryText.getPreferredSize().width;
+    height = m_directoryText.getPreferredSize().height;
+    m_directoryText.setMinimumSize(new Dimension(width * 2, height));
+    m_directoryText.setPreferredSize(new Dimension(width * 2, height));
+    
+    m_directoryText.setText(m_smSaver.getDirectory().toString());
+    
+    JButton browseBut = new JButton("Browse...");
+    browseBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        try {
+          final JFrame jf = new JFrame("Choose directory");
+          jf.getContentPane().setLayout(new BorderLayout());
+          jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
+          jf.pack();
+          jf.setVisible(true);
+          m_fileChooserFrame = jf;
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    });
+    
+    JPanel efHolder = new JPanel();
+    efHolder.setLayout(new BorderLayout());
+    efHolder.add(browseBut, BorderLayout.EAST);
+    efHolder.add(m_directoryText, BorderLayout.CENTER);
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 2; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(efHolder, gbConstraints);
+    alignedP.add(efHolder);
 
-    m_relativeFilePath = new JCheckBox("Use relative file paths");
+    
+    JLabel relativeLab = new JLabel("Use relative file paths", SwingConstants.RIGHT);
+    relativeLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 3; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(relativeLab, gbConstraints);
+    alignedP.add(relativeLab);
+    
+    m_relativeFilePath = new JCheckBox();
     m_relativeFilePath.
       setSelected(m_smSaver.getUseRelativePath());
 
@@ -208,22 +315,67 @@ public class SerializedModelSaverCustomizer
           m_smSaver.setUseRelativePath(m_relativeFilePath.isSelected());
         }
       });
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 3; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_relativeFilePath, gbConstraints);
+    alignedP.add(m_relativeFilePath);
     
-    m_includeRelationName = new JCheckBox("Include relation name in file name");
+    
+    JLabel relationLab = new JLabel("Include relation name in file name", SwingConstants.RIGHT);
+    relationLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 4; gbConstraints.gridx = 0;
+    gbLayout.setConstraints(relationLab, gbConstraints);
+    alignedP.add(relationLab);
+    
+    m_includeRelationName = new JCheckBox();
     m_includeRelationName.setToolTipText("Include the relation name of the training data used "
         + "to create the model in the file name.");
     m_includeRelationName.setSelected(m_smSaver.getIncludeRelationName());
+        
+    gbConstraints = new GridBagConstraints();
+    gbConstraints.anchor = GridBagConstraints.EAST;
+    gbConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gbConstraints.gridy = 4; gbConstraints.gridx = 1;
+    gbLayout.setConstraints(m_includeRelationName, gbConstraints);
+    alignedP.add(m_includeRelationName);
     
-    m_includeRelationName.addActionListener(new ActionListener() {
+    JButton OKBut = new JButton("OK");
+    OKBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        m_smSaver.setIncludeRelationName(m_includeRelationName.isSelected());
+        try {          
+          m_smSaver.setPrefix(m_prefixText.getText());
+          m_smSaver.setDirectory(new File(m_directoryText.getText()));
+          m_smSaver.
+            setIncludeRelationName(m_includeRelationName.isSelected());
+        } catch (Exception ex) {
+          ex.printStackTrace();
+        }
+        
+        m_parentFrame.dispose();
       }
     });
 
+    JButton CancelBut = new JButton("Cancel");
+    CancelBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        m_parentFrame.dispose();
+      }
+    });
+    
+    JPanel butHolder = new JPanel();
+    butHolder.setLayout(new FlowLayout());
+    butHolder.add(OKBut);
+    butHolder.add(CancelBut);
+  
     JPanel holderPanel = new JPanel();
-    holderPanel.setLayout(new BoxLayout(holderPanel, BoxLayout.Y_AXIS));
-    holderPanel.add(m_relativeFilePath);
-    holderPanel.add(m_includeRelationName);
+    holderPanel.setLayout(new BorderLayout());
+    holderPanel.add(alignedP, BorderLayout.NORTH);
+    holderPanel.add(butHolder, BorderLayout.SOUTH);
     add(holderPanel, BorderLayout.SOUTH);
   }
 
@@ -279,5 +431,12 @@ public class SerializedModelSaverCustomizer
    */
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
     m_pcSupport.removePropertyChangeListener(pcl);
+  }
+
+  /* (non-Javadoc)
+   * @see weka.core.EnvironmentHandler#setEnvironment(weka.core.Environment)
+   */
+  public void setEnvironment(Environment env) {
+    m_env = env;
   }
 }
