@@ -539,7 +539,7 @@ public class KnowledgeFlowApp
   protected boolean m_UserComponentsInXML = false;
   
   /** Environment variables for the current flow */
-  protected Environment m_flowEnvironment;
+  protected Environment m_flowEnvironment = new Environment();
   
   /**
    * Set the environment variables to use. NOTE: loading a new layout
@@ -1992,6 +1992,10 @@ public class KnowledgeFlowApp
     try {
       // instantiate
       final Object customizer = custClass.newInstance();
+      // set environment **before** setting object!!
+      if (customizer instanceof EnvironmentHandler) {
+        ((EnvironmentHandler)customizer).setEnvironment(m_flowEnvironment);
+      }
       ((Customizer)customizer).setObject(bc);
       final javax.swing.JFrame jf = new javax.swing.JFrame();
       jf.getContentPane().setLayout(new BorderLayout());
@@ -2691,6 +2695,10 @@ public class KnowledgeFlowApp
           oos.close();
         }
         m_logPanel.statusMessage("[KnowledgeFlow]|Flow saved.");
+        
+        // set the internal knowledgeflow directory environment var for this flow
+        m_flowEnvironment.addVariable("Internal.knowledgeflow.directory", sFile.getParent());
+        setEnvironment();
       } catch (Exception ex) {
         m_logPanel.statusMessage("[KnowledgeFlow]|Unable to save flow (see log).");
         m_logPanel.logMessage("[KnowledgeFlow] Unable to save flow ("
