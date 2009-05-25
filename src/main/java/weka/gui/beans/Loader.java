@@ -356,6 +356,10 @@ public class Loader
     if(! (m_Loader instanceof DatabaseLoader)) {
       // try to load structure (if possible) and notify any listeners
       try {
+        // Set environment variables
+        if (m_Loader instanceof EnvironmentHandler && m_env != null) {
+          ((EnvironmentHandler)m_Loader).setEnvironment(m_env);
+        }
         m_dataFormat = m_Loader.getStructure();
         //      System.err.println(m_dataFormat);
         System.out.println("[Loader] Notifying listeners of instance structure avail.");
