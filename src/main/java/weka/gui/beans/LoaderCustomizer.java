@@ -200,15 +200,16 @@ public class LoaderCustomizer
 
     m_dbaseURLText = new EnvironmentField();
     m_dbaseURLText.setEnvironment(m_env);
-    int width = m_dbaseURLText.getPreferredSize().width;
+/*    int width = m_dbaseURLText.getPreferredSize().width;
     int height = m_dbaseURLText.getPreferredSize().height;
     m_dbaseURLText.setMinimumSize(new Dimension(width * 2, height));
-    m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height));
+    m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height)); */
     m_dbaseURLText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUrl());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 0; gbConstraints.gridx = 1;
+    gbConstraints.weightx = 5;
     gbLayout.setConstraints(m_dbaseURLText, gbConstraints);
     db.add(m_dbaseURLText);
     
@@ -223,9 +224,9 @@ public class LoaderCustomizer
     
     m_userNameText = new EnvironmentField();
     m_userNameText.setEnvironment(m_env);
-    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
-    m_userNameText.setPreferredSize(new Dimension(width * 2, height));
-    m_userNameText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUser());
+/*    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
+    m_userNameText.setPreferredSize(new Dimension(width * 2, height)); */
+    m_userNameText.setText(((DatabaseConverter)m_dsLoader.getLoader()).getUser()); 
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -248,8 +249,8 @@ public class LoaderCustomizer
     passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 //    passwordHolder.add(passwordLab, BorderLayout.WEST);
     passwordHolder.add(m_passwordText, BorderLayout.CENTER);
-    passwordHolder.setMinimumSize(new Dimension(width * 2, height));
-    passwordHolder.setPreferredSize(new Dimension(width * 2, height));
+/*    passwordHolder.setMinimumSize(new Dimension(width * 2, height));
+    passwordHolder.setPreferredSize(new Dimension(width * 2, height)); */
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -268,8 +269,8 @@ public class LoaderCustomizer
     
     m_queryText = new EnvironmentField();
     m_queryText.setEnvironment(m_env);
-    m_queryText.setMinimumSize(new Dimension(width * 2, height));
-    m_queryText.setPreferredSize(new Dimension(width * 2, height));
+/*    m_queryText.setMinimumSize(new Dimension(width * 2, height));
+    m_queryText.setPreferredSize(new Dimension(width * 2, height)); */
     m_queryText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getQuery());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -289,8 +290,8 @@ public class LoaderCustomizer
     
     m_keyText = new EnvironmentField();
     m_keyText.setEnvironment(m_env);
-    m_keyText.setMinimumSize(new Dimension(width * 2, height));
-    m_keyText.setPreferredSize(new Dimension(width * 2, height));
+    /*m_keyText.setMinimumSize(new Dimension(width * 2, height));
+    m_keyText.setPreferredSize(new Dimension(width * 2, height)); */
     m_keyText.setText(((DatabaseLoader)m_dsLoader.getLoader()).getKeys());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -391,10 +392,10 @@ public class LoaderCustomizer
     efHolder.setLayout(new BorderLayout());
 
     ef.setEnvironment(m_env);
-    int width = ef.getPreferredSize().width;
+    /*int width = ef.getPreferredSize().width;
     int height = ef.getPreferredSize().height;
 //    ef.setMinimumSize(new Dimension(width * 2, height));
-    ef.setPreferredSize(new Dimension(width * 2, height));
+    ef.setPreferredSize(new Dimension(width * 2, height)); */
     m_fileText = ef;
     
     // only set the text on the EnvironmentField if the current file is not a directory
@@ -419,7 +420,10 @@ public class LoaderCustomizer
       }
     });
     
-    efHolder.add(browseBut, BorderLayout.EAST);
+    JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
+    bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
+    bP.add(browseBut, BorderLayout.CENTER);
+    efHolder.add(bP, BorderLayout.EAST);
     JPanel alignedP = new JPanel();
     GridBagLayout gbLayout = new GridBagLayout();
     alignedP.setLayout(gbLayout);
@@ -436,6 +440,7 @@ public class LoaderCustomizer
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 0; gbConstraints.gridx = 1;
+    gbConstraints.weightx = 5;
     gbLayout.setConstraints(efHolder, gbConstraints);
     alignedP.add(efHolder);
     
