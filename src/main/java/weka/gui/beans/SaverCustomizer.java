@@ -190,15 +190,16 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     
     m_dbaseURLText = new EnvironmentField();
     m_dbaseURLText.setEnvironment(m_env);
-    int width = m_dbaseURLText.getPreferredSize().width;
+/*    int width = m_dbaseURLText.getPreferredSize().width;
     int height = m_dbaseURLText.getPreferredSize().height;
     m_dbaseURLText.setMinimumSize(new Dimension(width * 2, height));
-    m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height));
+    m_dbaseURLText.setPreferredSize(new Dimension(width * 2, height)); */
     m_dbaseURLText.setText(((DatabaseConverter)m_dsSaver.getSaver()).getUrl());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 0; gbConstraints.gridx = 1;
+    gbConstraints.weightx = 5;
     gbLayout.setConstraints(m_dbaseURLText, gbConstraints);
     db.add(m_dbaseURLText);    
     
@@ -213,8 +214,8 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
 
     m_userNameText = new EnvironmentField();
     m_userNameText.setEnvironment(m_env);
-    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
-    m_userNameText.setPreferredSize(new Dimension(width * 2, height));
+/*    m_userNameText.setMinimumSize(new Dimension(width * 2, height));
+    m_userNameText.setPreferredSize(new Dimension(width * 2, height)); */
     m_userNameText.setText(((DatabaseConverter)m_dsSaver.getSaver()).getUser());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -237,8 +238,8 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     passwordHolder.setLayout(new BorderLayout());
     passwordHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     passwordHolder.add(m_passwordText, BorderLayout.CENTER);
-    passwordHolder.setMinimumSize(new Dimension(width * 2, height));
-    passwordHolder.setPreferredSize(new Dimension(width * 2, height));
+    /*passwordHolder.setMinimumSize(new Dimension(width * 2, height));
+    passwordHolder.setPreferredSize(new Dimension(width * 2, height)); */
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -257,8 +258,8 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     
     m_tableText = new EnvironmentField();
     m_tableText.setEnvironment(m_env);
-    m_tableText.setMinimumSize(new Dimension(width * 2, height));
-    m_tableText.setPreferredSize(new Dimension(width * 2, height));
+/*    m_tableText.setMinimumSize(new Dimension(width * 2, height));
+    m_tableText.setPreferredSize(new Dimension(width * 2, height)); */
     m_tableText.setEnabled(!((DatabaseSaver)m_dsSaver.getSaver()).getRelationForTableName());
     m_tableText.setText(((DatabaseSaver)m_dsSaver.getSaver()).getTableName());
     gbConstraints = new GridBagConstraints();
@@ -429,6 +430,7 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
       gbConstraints.anchor = GridBagConstraints.EAST;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = 1; gbConstraints.gridx = 0;
+      gbConstraints.weightx = 5;
       gbLayout.setConstraints(relationLab, gbConstraints);
       alignedP.add(relationLab);
       
@@ -503,7 +505,10 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     
     JPanel efHolder = new JPanel();
     efHolder.setLayout(new BorderLayout());
-    efHolder.add(browseBut, BorderLayout.EAST);
+    JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
+    bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
+    bP.add(browseBut, BorderLayout.CENTER);
+    efHolder.add(bP, BorderLayout.EAST);
     efHolder.add(m_directoryText, BorderLayout.CENTER);
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
