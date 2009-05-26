@@ -29,7 +29,7 @@ import java.util.Random;
  * This class is used to represent a node in the neuralnet.
  * 
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class NeuralNode
   extends NeuralConnection {
@@ -39,6 +39,9 @@ public class NeuralNode
     
   /** The weights for each of the input connections, and the threshold. */
   private double[] m_weights;
+  
+  /** The best (lowest error) weights. Only used when validation set is used */
+  private double[] m_bestWeights;
   
   /** The change in the weights. */
   private double[] m_changeInWeights;
@@ -57,6 +60,7 @@ public class NeuralNode
   public NeuralNode(String id, Random r, NeuralMethod m) {
     super(id);
     m_weights = new double[1];
+    m_bestWeights = new double[1];
     m_changeInWeights = new double[1];
     
     m_random = r;
@@ -127,6 +131,34 @@ public class NeuralNode
       for (int noa = 0; noa < m_numInputs; noa++) {
 	m_inputList[noa].reset();
       }
+    }
+  }
+  
+  /**
+   * Call this to have the connection save the current
+   * weights.
+   */
+  public void saveWeights() {
+    // copy the current weights
+    System.arraycopy(m_weights, 0, m_bestWeights, 0, m_weights.length);
+    
+    // tell inputs to save weights
+    for (int i = 0; i < m_numInputs; i++) {
+      m_inputList[i].saveWeights();
+    }
+  }
+  
+  /**
+   * Call this to have the connection restore from the saved
+   * weights.
+   */
+  public void restoreWeights() {
+    // copy the saved best weights back into the weights
+    System.arraycopy(m_bestWeights, 0, m_weights, 0, m_weights.length);
+    
+    // tell inputs to restore weights
+    for (int i = 0; i < m_numInputs; i++) {
+      m_inputList[i].restoreWeights();
     }
   }
 
@@ -216,20 +248,24 @@ public class NeuralNode
     int[] temp2 = new int[m_inputNums.length + 15];
     double[] temp4 = new double[m_weights.length + 15];
     double[] temp5 = new double[m_changeInWeights.length + 15];
+    double[] temp6 = new double[m_bestWeights.length + 15];
 
     temp4[0] = m_weights[0];
     temp5[0] = m_changeInWeights[0];
+    temp6[0] = m_bestWeights[0];
     for (int noa = 0; noa < m_numInputs; noa++) {
       temp1[noa] = m_inputList[noa];
       temp2[noa] = m_inputNums[noa];
       temp4[noa+1] = m_weights[noa+1];
       temp5[noa+1] = m_changeInWeights[noa+1];
+      temp6[noa+1] = m_bestWeights[noa+1];
     }
     
     m_inputList = temp1;
     m_inputNums = temp2;
     m_weights = temp4;
     m_changeInWeights = temp5;
+    m_bestWeights = temp6;
   }
 
   
@@ -298,6 +334,6 @@ public class NeuralNode
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
