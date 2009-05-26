@@ -146,7 +146,7 @@ import javax.swing.DefaultListModel;
  * All options after -- will be passed to the result producer. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27 $
+ * @version $Revision$
  */
 public class Experiment 
   implements Serializable, OptionHandler, RevisionHandler {
@@ -1059,6 +1059,64 @@ public class Experiment
   }
 
   /**
+   * Loads an experiment from a file.
+   * 
+   * @param filename	the file to load the experiment from
+   * @return		the experiment
+   * @throws Exception	if loading fails
+   */
+  public static Experiment read(String filename) throws Exception {
+    Experiment	result;
+    
+    // KOML?
+    if ( (KOML.isPresent()) && (filename.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+      result = (Experiment) KOML.read(filename);
+    }
+    // XML?
+    else if (filename.toLowerCase().endsWith(".xml")) {
+      XMLExperiment xml = new XMLExperiment(); 
+      result = (Experiment) xml.read(filename);
+    }
+    // binary
+    else {
+      FileInputStream fi = new FileInputStream(filename);
+      ObjectInputStream oi = new ObjectInputStream(
+	  new BufferedInputStream(fi));
+      result = (Experiment)oi.readObject();
+      oi.close();
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Writes the experiment to disk.
+   * 
+   * @param filename	the file to write to
+   * @param exp		the experiment to save
+   * @throws Exception	if writing fails
+   */
+  public static void write(String filename, Experiment exp) throws Exception {
+    // KOML?
+    if ( (KOML.isPresent()) && (filename.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
+      KOML.write(filename, exp);
+    }
+    // XML?
+    else if (filename.toLowerCase().endsWith(".xml")) {
+      XMLExperiment xml = new XMLExperiment(); 
+      xml.write(filename, exp);
+    }
+    // binary
+    else {
+      FileOutputStream fo = new FileOutputStream(filename);
+      ObjectOutputStream oo = new ObjectOutputStream(
+	  new BufferedOutputStream(fo));
+      oo.writeObject(exp);
+      oo.close();
+    }
+  }
+  
+  /**
    * Configures/Runs the Experiment from the command line.
    *
    * @param args command line arguments to the Experiment.
@@ -1106,24 +1164,7 @@ public class Experiment
 	  throw new Exception(result + "\n" + ex.getMessage());
 	}
       } else {
-         // KOML?
-         if ( (KOML.isPresent()) && (expFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-            exp = (Experiment) KOML.read(expFile);
-         }
-         else
-         // XML?
-         if (expFile.toLowerCase().endsWith(".xml")) {
-            XMLExperiment xml = new XMLExperiment(); 
-            exp = (Experiment) xml.read(expFile);
-         }
-         // binary
-         else {
-            FileInputStream fi = new FileInputStream(expFile);
-            ObjectInputStream oi = new ObjectInputStream(
-                                   new BufferedInputStream(fi));
-            exp = (Experiment)oi.readObject();
-            oi.close();
-         }
+	exp = read(expFile);
 
 	// allow extra datasets to be added to pre-loaded experiment from command line
 	String dataName;
@@ -1138,26 +1179,8 @@ public class Experiment
       }
       System.err.println("Experiment:\n" + exp.toString());
 
-      if (saveFile.length() != 0) {
-         // KOML?
-         if ( (KOML.isPresent()) && (saveFile.toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-            KOML.write(saveFile, exp);
-         }
-         else
-         // XML?
-         if (saveFile.toLowerCase().endsWith(".xml")) {
-            XMLExperiment xml = new XMLExperiment(); 
-            xml.write(saveFile, exp);
-         }
-         // binary
-         else {
-            FileOutputStream fo = new FileOutputStream(saveFile);
-            ObjectOutputStream oo = new ObjectOutputStream(
-                                    new BufferedOutputStream(fo));
-            oo.writeObject(exp);
-            oo.close();
-         }
-      }
+      if (saveFile.length() != 0)
+	write(saveFile, exp);
       
       if (runExp) {
 	System.err.println("Initializing...");
@@ -1179,6 +1202,6 @@ public class Experiment
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // Experiment
