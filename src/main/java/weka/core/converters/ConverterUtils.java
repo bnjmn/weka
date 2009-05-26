@@ -677,6 +677,8 @@ public class ConverterUtils
     + weka.core.converters.CSVLoader.class.getName() + ","
     + weka.core.converters.DatabaseConverter.class.getName() + ","
     + weka.core.converters.LibSVMLoader.class.getName() + ","
+    + weka.core.converters.MatlabLoader.class.getName() + ","
+    + weka.core.converters.SVMLightLoader.class.getName() + ","
     + weka.core.converters.SerializedInstancesLoader.class.getName() + ","
     + weka.core.converters.TextDirectoryLoader.class.getName() + ","
     + weka.core.converters.XRFFLoader.class.getName();
@@ -689,6 +691,8 @@ public class ConverterUtils
     + weka.core.converters.CSVSaver.class.getName() + ","
     + weka.core.converters.DatabaseConverter.class.getName() + ","
     + weka.core.converters.LibSVMSaver.class.getName() + ","
+    + weka.core.converters.MatlabSaver.class.getName() + ","
+    + weka.core.converters.SVMLightSaver.class.getName() + ","
     + weka.core.converters.SerializedInstancesSaver.class.getName() + ","
     + weka.core.converters.XRFFSaver.class.getName();
   
