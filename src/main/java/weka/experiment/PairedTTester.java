@@ -36,6 +36,7 @@ import weka.core.Utils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
@@ -87,7 +88,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.35 $
+ * @version $Revision$
  */
 public class PairedTTester 
   implements OptionHandler, Tester, RevisionHandler {
@@ -158,8 +159,11 @@ public class PairedTTester
   
   /** A list of unique "dataset" specifiers that have been observed */
   protected class DatasetSpecifiers
-    implements RevisionHandler {
+    implements RevisionHandler, Serializable {
 
+    /** for serialization. */
+    private static final long serialVersionUID = -9020938059902723401L;
+    
     /** the specifiers that have been observed */
     FastVector m_Specifiers = new FastVector();
 
@@ -221,13 +225,16 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
   /** Utility class to store the instances pertaining to a dataset */
   protected class Dataset
-    implements RevisionHandler {
+    implements RevisionHandler, Serializable {
+
+    /** for serialization. */
+    private static final long serialVersionUID = -2801397601839433282L;
 
     /** the template */
     Instance m_Template;
@@ -310,13 +317,16 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
  
   /** Utility class to store the instances in a resultset */
   protected class Resultset
-    implements RevisionHandler {
+    implements RevisionHandler, Serializable {
+
+    /** for serialization. */
+    private static final long serialVersionUID = 1543786683821339978L;
 
     /** the template */
     Instance m_Template;
@@ -427,7 +437,7 @@ public class PairedTTester
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.35 $");
+      return RevisionUtils.extract("$Revision$");
     }
   } // Resultset
 
@@ -1445,7 +1455,7 @@ public class PairedTTester
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.35 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
