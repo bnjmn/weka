@@ -215,10 +215,10 @@ public class SerializedModelSaverCustomizer
 //    m_prefixText = new JTextField(m_smSaver.getPrefix(), 25);
     m_prefixText = new EnvironmentField();
     m_prefixText.setEnvironment(m_env);
-    int width = m_prefixText.getPreferredSize().width;
+/*    int width = m_prefixText.getPreferredSize().width;
     int height = m_prefixText.getPreferredSize().height;
     m_prefixText.setMinimumSize(new Dimension(width * 2, height));
-    m_prefixText.setPreferredSize(new Dimension(width * 2, height));
+    m_prefixText.setPreferredSize(new Dimension(width * 2, height)); */
     m_prefixText.setText(m_smSaver.getPrefix());
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
@@ -262,10 +262,10 @@ public class SerializedModelSaverCustomizer
     
     m_directoryText = new EnvironmentField();
     m_directoryText.setEnvironment(m_env);  
-    width = m_directoryText.getPreferredSize().width;
+/*    width = m_directoryText.getPreferredSize().width;
     height = m_directoryText.getPreferredSize().height;
     m_directoryText.setMinimumSize(new Dimension(width * 2, height));
-    m_directoryText.setPreferredSize(new Dimension(width * 2, height));
+    m_directoryText.setPreferredSize(new Dimension(width * 2, height)); */
     
     m_directoryText.setText(m_smSaver.getDirectory().toString());
     
@@ -287,12 +287,16 @@ public class SerializedModelSaverCustomizer
     
     JPanel efHolder = new JPanel();
     efHolder.setLayout(new BorderLayout());
-    efHolder.add(browseBut, BorderLayout.EAST);
+    JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
+    bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
+    bP.add(browseBut, BorderLayout.CENTER);
+    efHolder.add(bP, BorderLayout.EAST);
     efHolder.add(m_directoryText, BorderLayout.CENTER);
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
     gbConstraints.gridy = 2; gbConstraints.gridx = 1;
+    gbConstraints.weightx = 5; // make sure that extra horizontal space gets allocated to this column
     gbLayout.setConstraints(efHolder, gbConstraints);
     alignedP.add(efHolder);
 
