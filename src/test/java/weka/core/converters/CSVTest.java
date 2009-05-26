@@ -20,9 +20,6 @@
 
 package weka.core.converters;
 
-import weka.core.Instance;
-import weka.core.Instances;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -31,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.core.converters.CSVTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class CSVTest 
   extends AbstractFileConverterTest {
@@ -46,7 +43,7 @@ public class CSVTest
   }
 
   /**
-   * returns the loader used in the tests
+   * returns the loader used in the tests.
    * 
    * @return the configured loader
    */
@@ -55,7 +52,7 @@ public class CSVTest
   }
 
   /**
-   * returns the saver used in the tests
+   * returns the saver used in the tests.
    * 
    * @return the configured saver
    */
@@ -64,43 +61,20 @@ public class CSVTest
   }
   
   /**
-   * Compare two datasets to see if they differ.
+   * Called by JUnit before each test method. This implementation creates
+   * the default loader/saver to test and generates a test set of Instances.
    *
-   * @param data1 one set of instances
-   * @param data2 the other set of instances
-   * @throws Exception if the datasets differ
+   * @throws Exception if an error occurs reading the example instances.
    */
-  protected void compareDatasets(Instances data1, Instances data2)
-    throws Exception {
-
-    // header (order of values of nominal attributes can differ!)
-    if (data1.numAttributes() != data2.numAttributes()) {
-      throw new Exception("header has been modified");
-    }
+  protected void setUp() throws Exception {
+    super.setUp();
     
-    if (!(data2.numInstances() == data1.numInstances())) {
-      throw new Exception("number of instances has changed");
-    }
-    for (int i = 0; i < data2.numInstances(); i++) {
-      Instance orig = data1.instance(i);
-      Instance copy = data2.instance(i);
-      for (int j = 0; j < orig.numAttributes(); j++) {
-        if (orig.isMissing(j)) {
-          if (!copy.isMissing(j)) {
-            throw new Exception("instances have changed");
-          }
-        } else if (!orig.toString(j).equals(copy.toString(j))) {
-          throw new Exception("instances have changed");
-        }
-        if (orig.weight() != copy.weight()) {
-          throw new Exception("instance weights have changed");
-        }	  
-      }
-    }
+    m_CheckHeader           = false;
+    m_CompareValuesAsString = true;
   }
 
   /**
-   * returns a test suite
+   * returns a test suite.
    * 
    * @return the test suite
    */
@@ -109,7 +83,7 @@ public class CSVTest
   }
 
   /**
-   * for running the test from commandline
+   * for running the test from commandline.
    * 
    * @param args the commandline arguments - ignored
    */

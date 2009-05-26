@@ -15,30 +15,32 @@
  */
 
 /*
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core.converters;
+
+import weka.core.TestInstances;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Tests LibSVMLoader/LibSVMSaver. Run from the command line with:<p/>
- * java weka.core.converters.LibSVMTest
+ * Tests MatlabLoader/MatlabSaver. Run from the command line with:<p/>
+ * java weka.core.converters.MatlabTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class LibSVMTest 
+public class MatlabTest 
   extends AbstractFileConverterTest {
 
   /**
-   * Constructs the <code>LibSVMTest</code>.
+   * Constructs the <code>MatlabTest</code>.
    *
    * @param name the name of the test class
    */
-  public LibSVMTest(String name) { 
+  public MatlabTest(String name) { 
     super(name);  
   }
 
@@ -48,7 +50,7 @@ public class LibSVMTest
    * @return the configured loader
    */
   public AbstractLoader getLoader() {
-    return new LibSVMLoader();
+    return new MatlabLoader();
   }
 
   /**
@@ -57,7 +59,16 @@ public class LibSVMTest
    * @return the configured saver
    */
   public AbstractSaver getSaver() {
-    return new LibSVMSaver();
+    return new MatlabSaver();
+  }
+
+  /**
+   * returns the test data generator.
+   * 
+   * @return 	the configured test data generator
+   */
+  protected TestInstances getTestInstances() {
+    return TestInstances.forCapabilities(new MatlabSaver().getCapabilities());
   }
   
   /**
@@ -69,7 +80,9 @@ public class LibSVMTest
   protected void setUp() throws Exception {
     super.setUp();
     
-    m_CheckHeader = false;
+    m_MaxDiffValues  = 1E-6;
+    m_MaxDiffWeights = 0.0;
+    m_CheckHeader    = false;
   }
 
   /**
@@ -78,7 +91,7 @@ public class LibSVMTest
    * @return the test suite
    */
   public static Test suite() {
-    return new TestSuite(LibSVMTest.class);
+    return new TestSuite(MatlabTest.class);
   }
 
   /**
@@ -90,4 +103,3 @@ public class LibSVMTest
     junit.textui.TestRunner.run(suite());
   }
 }
-
