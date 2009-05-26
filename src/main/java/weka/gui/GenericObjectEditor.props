@@ -281,6 +281,7 @@ weka.filters.UnsupervisedFilter=\
  weka.filters.unsupervised.attribute.ClusterMembership,\
  weka.filters.unsupervised.attribute.Copy,\
  weka.filters.unsupervised.attribute.Discretize,\
+ weka.filters.unsupervised.attribute.EMImputation,\
  weka.filters.unsupervised.attribute.FirstOrder,\
  weka.filters.unsupervised.attribute.KernelFilter,\
  weka.filters.unsupervised.attribute.MakeIndicator,\
@@ -476,6 +477,7 @@ weka.filters.Filter=\
  weka.filters.unsupervised.attribute.ClusterMembership,\
  weka.filters.unsupervised.attribute.Copy,\
  weka.filters.unsupervised.attribute.Discretize,\
+ weka.filters.unsupervised.attribute.EMImputation,\
  weka.filters.unsupervised.attribute.FirstOrder,\
  weka.filters.unsupervised.attribute.InterquartileRange,\
  weka.filters.unsupervised.attribute.KernelFilter,\
