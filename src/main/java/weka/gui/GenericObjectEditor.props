@@ -37,6 +37,7 @@ weka.core.converters.Saver=\
  weka.core.converters.CSVSaver,\
  weka.core.converters.DatabaseSaver,\
  weka.core.converters.LibSVMSaver,\
+ weka.core.converters.MatlabSaver,\
  weka.core.converters.SerializedInstancesSaver,\
  weka.core.converters.XRFFSaver
  
@@ -111,6 +112,7 @@ weka.core.converters.Loader=\
  weka.core.converters.CSVLoader,\
  weka.core.converters.DatabaseLoader,\
  weka.core.converters.LibSVMLoader,\
+ weka.core.converters.MatlabLoader,\
  weka.core.converters.SerializedInstancesLoader,\
  weka.core.converters.TextDirectoryLoader,\
  weka.core.converters.XRFFLoader
@@ -399,6 +401,7 @@ weka.core.converters.AbstractFileLoader=\
  weka.core.converters.C45Loader,\
  weka.core.converters.CSVLoader,\
  weka.core.converters.LibSVMLoader,\
+ weka.core.converters.MatlabLoader,\
  weka.core.converters.SerializedInstancesLoader,\
  weka.core.converters.XRFFLoader
  
@@ -408,6 +411,7 @@ weka.core.converters.AbstractFileSaver=\
  weka.core.converters.C45Saver,\
  weka.core.converters.CSVSaver,\
  weka.core.converters.LibSVMSaver,\
+ weka.core.converters.MatlabSaver,\
  weka.core.converters.SerializedInstancesSaver,\
  weka.core.converters.XRFFSaver
  
