@@ -29,7 +29,7 @@ import java.io.*;
  * Abstract unit in a NeuralNetwork.
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 
 public abstract class NeuralConnection implements Serializable {
@@ -176,6 +176,18 @@ public abstract class NeuralConnection implements Serializable {
    * @return The error value, or NaN, if the value has not been calculated.
    */
   public abstract double errorValue(boolean calculate);
+
+  /**
+   * Call this to have the connection save the current
+   * weights.
+   */
+  public abstract void saveWeights();
+  
+  /**
+   * Call this to have the connection restore from the saved
+   * weights.
+   */
+  public abstract void restoreWeights();
 
   /**
    * Call this to get the weight value on a particular connection.
