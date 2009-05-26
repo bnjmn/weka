@@ -142,7 +142,7 @@ import javax.swing.JTextField;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class MultilayerPerceptron 
   extends Classifier 
@@ -373,6 +373,26 @@ public class MultilayerPerceptron
       }
     }
     
+    /**
+     * Call this to have the connection save the current
+     * weights.
+     */
+    public void saveWeights() {
+      for (int i = 0; i < m_numInputs; i++) {
+        m_inputList[i].saveWeights();
+      }
+    }
+    
+    /**
+     * Call this to have the connection restore from the saved
+     * weights.
+     */
+    public void restoreWeights() {
+      for (int i = 0; i < m_numInputs; i++) {
+        m_inputList[i].restoreWeights();
+      }
+    }
+    
     
     /** 
      * Call this function to set What this end unit represents.
@@ -413,7 +433,7 @@ public class MultilayerPerceptron
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -664,14 +684,14 @@ public class MultilayerPerceptron
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
   /** 
    * This provides the basic controls for working with the neuralnetwork
    * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
-   * @version $Revision: 1.12 $
+   * @version $Revision$
    */
   class ControlPanel 
     extends JPanel
@@ -867,7 +887,7 @@ public class MultilayerPerceptron
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1884,6 +1904,7 @@ public class MultilayerPerceptron
     double right = 0;
     double driftOff = 0;
     double lastRight = Double.POSITIVE_INFINITY;
+    double bestError = Double.POSITIVE_INFINITY;
     double tempRate;
     double totalWeight = 0;
     double totalValWeight = 0;
@@ -1975,12 +1996,23 @@ public class MultilayerPerceptron
 	
 	if (right < lastRight) {
 	  driftOff = 0;
+	  
+	  if (right < bestError) {
+	    bestError = right;
+	    // save the network weights at this point
+	    for (int noc = 0; noc < m_numClasses; noc++) {
+	      m_outputs[noc].saveWeights();
+	    }
+	  }
 	}
 	else {
 	  driftOff++;
 	}
 	lastRight = right;
 	if (driftOff > m_driftThreshold || noa + 1 >= m_numEpochs) {
+	  for (int noc = 0; noc < m_numClasses; noc++) {
+            m_outputs[noc].restoreWeights();
+          }
 	  m_accepted = true;
 	}
 	right /= totalValWeight;
@@ -2650,6 +2682,6 @@ public class MultilayerPerceptron
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
