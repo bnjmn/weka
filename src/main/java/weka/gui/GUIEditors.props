@@ -53,6 +53,7 @@ weka.experiment.ResultListener=weka.gui.GenericObjectEditor
 weka.experiment.ResultProducer=weka.gui.GenericObjectEditor
 weka.experiment.SplitEvaluator=weka.gui.GenericObjectEditor
 weka.experiment.ResultMatrix=weka.gui.GenericObjectEditor
+weka.experiment.Tester=weka.gui.GenericObjectEditor
 
 # datagenerators
 weka.datagenerators.DataGenerator=weka.gui.GenericObjectEditor
