@@ -405,10 +405,10 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     m_prefixText.setEnvironment(m_env);
     m_prefixText.setToolTipText("Prefix for file name "
         + "(or filename itself if relation name is not used)");
-    int width = m_prefixText.getPreferredSize().width;
+/*    int width = m_prefixText.getPreferredSize().width;
     int height = m_prefixText.getPreferredSize().height;
     m_prefixText.setMinimumSize(new Dimension(width * 2, height));
-    m_prefixText.setPreferredSize(new Dimension(width * 2, height));
+    m_prefixText.setPreferredSize(new Dimension(width * 2, height)); */
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -430,7 +430,6 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
       gbConstraints.anchor = GridBagConstraints.EAST;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = 1; gbConstraints.gridx = 0;
-      gbConstraints.weightx = 5;
       gbLayout.setConstraints(relationLab, gbConstraints);
       alignedP.add(relationLab);
       
@@ -452,6 +451,7 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
       gbConstraints.anchor = GridBagConstraints.EAST;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = 1; gbConstraints.gridx = 1;
+      gbConstraints.weightx = 5;
       gbLayout.setConstraints(m_relationNameForFilename, gbConstraints);
       alignedP.add(m_relationNameForFilename);
     } catch(Exception ex){
@@ -476,10 +476,10 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     m_directoryText = new EnvironmentField();
 //    m_directoryText.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     m_directoryText.setEnvironment(m_env);  
-    width = m_directoryText.getPreferredSize().width;
+/*    width = m_directoryText.getPreferredSize().width;
     height = m_directoryText.getPreferredSize().height;
     m_directoryText.setMinimumSize(new Dimension(width * 2, height));
-    m_directoryText.setPreferredSize(new Dimension(width * 2, height));
+    m_directoryText.setPreferredSize(new Dimension(width * 2, height)); */
     
     try {
       m_directoryText.setText(m_dsSaver.getSaver().retrieveDir());
