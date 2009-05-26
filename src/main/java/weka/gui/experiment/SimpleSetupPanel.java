@@ -34,7 +34,6 @@ import weka.experiment.PropertyNode;
 import weka.experiment.RandomSplitResultProducer;
 import weka.experiment.RegressionSplitEvaluator;
 import weka.experiment.SplitEvaluator;
-import weka.experiment.xml.XMLExperiment;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
 
@@ -55,13 +54,7 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyDescriptor;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -89,7 +82,7 @@ import javax.swing.filechooser.FileFilter;
 *
  * @author Richard kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.14 $
+ * @version $Revision$
  */
 public class SimpleSetupPanel
   extends JPanel {
@@ -834,27 +827,7 @@ public class SimpleSetupPanel
     }
     
     try {
-      Experiment exp; 
-      
-      // KOML?
-      if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-         exp = (Experiment) KOML.read(expFile.getAbsolutePath());
-      }
-      else
-      // XML?
-      if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
-         XMLExperiment xml = new XMLExperiment(); 
-         exp = (Experiment) xml.read(expFile);
-      }
-      // binary
-      else {
-         FileInputStream fi = new FileInputStream(expFile);
-         ObjectInputStream oi = new ObjectInputStream(
-                                new BufferedInputStream(fi));
-         exp = (Experiment)oi.readObject();
-         oi.close();
-      }
-      
+      Experiment exp = Experiment.read(expFile.getAbsolutePath());
       if (!setExperiment(exp)) {
 	if (m_modePanel != null) m_modePanel.switchToAdvanced(exp);
       }
@@ -897,25 +870,7 @@ public class SimpleSetupPanel
     }
     
     try {
-       // KOML?
-       if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-          KOML.write(expFile.getAbsolutePath(), m_Exp);
-       }
-       else
-       // XML?
-       if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
-          XMLExperiment xml = new XMLExperiment(); 
-          xml.write(expFile, m_Exp);
-       }
-       // binary
-       else {
-          FileOutputStream fo = new FileOutputStream(expFile);
-          ObjectOutputStream oo = new ObjectOutputStream(
-                                  new BufferedOutputStream(fo));
-          oo.writeObject(m_Exp);
-          oo.close();
-       }
-      
+      Experiment.write(expFile.getAbsolutePath(), m_Exp);
       System.err.println("Saved experiment:\n" + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
