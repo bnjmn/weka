@@ -29,7 +29,6 @@ import weka.experiment.PropertyNode;
 import weka.experiment.RemoteExperiment;
 import weka.experiment.ResultListener;
 import weka.experiment.ResultProducer;
-import weka.experiment.xml.XMLExperiment;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
@@ -80,7 +79,7 @@ import javax.swing.filechooser.FileFilter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.31 $
+ * @version $Revision$
  */
 public class SetupPanel
   extends JPanel {
@@ -500,26 +499,7 @@ public class SetupPanel
     }
     
     try {
-      Experiment exp; 
-      
-      // KOML?
-      if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-         exp = (Experiment) KOML.read(expFile.getAbsolutePath());
-      }
-      else
-      // XML?
-      if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
-         XMLExperiment xml = new XMLExperiment(); 
-         exp = (Experiment) xml.read(expFile);
-      }
-      // binary
-      else {
-         FileInputStream fi = new FileInputStream(expFile);
-         ObjectInputStream oi = new ObjectInputStream(
-                                new BufferedInputStream(fi));
-         exp = (Experiment)oi.readObject();
-         oi.close();
-      }
+      Experiment exp = Experiment.read(expFile.getAbsolutePath());
       setExperiment(exp);
       System.err.println("Opened experiment:\n" + m_Exp);
     } catch (Exception ex) {
@@ -560,24 +540,7 @@ public class SetupPanel
     }
     
     try {
-      // KOML?
-      if ( (KOML.isPresent()) && (expFile.getAbsolutePath().toLowerCase().endsWith(KOML.FILE_EXTENSION)) ) {
-         KOML.write(expFile.getAbsolutePath(), m_Exp);
-      }
-      else
-      // XML?
-      if (expFile.getAbsolutePath().toLowerCase().endsWith(".xml")) {
-         XMLExperiment xml = new XMLExperiment(); 
-         xml.write(expFile, m_Exp);
-      }
-      // binary
-      else {
-         FileOutputStream fo = new FileOutputStream(expFile);
-         ObjectOutputStream oo = new ObjectOutputStream(
-                                 new BufferedOutputStream(fo));
-         oo.writeObject(m_Exp);
-         oo.close();
-      }
+      Experiment.write(expFile.getAbsolutePath(), m_Exp);
       System.err.println("Saved experiment:\n" + m_Exp);
     } catch (Exception ex) {
       ex.printStackTrace();
