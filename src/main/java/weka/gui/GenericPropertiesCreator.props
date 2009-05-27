@@ -5,7 +5,7 @@
 
 # Whether to use the dynamic approach or not (true|false). In case of
 # "false" the old GenericObjectEditor.props file is used:
-UseDynamic=false
+UseDynamic=true
 
 # Lists the ResultProducers-Packages I want to choose from
 weka.experiment.ResultProducer=\
