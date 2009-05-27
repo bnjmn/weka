@@ -508,8 +508,9 @@ implements Customizer, CustomizerCloseRequester, EnvironmentHandler {
     JPanel bP = new JPanel(); bP.setLayout(new BorderLayout());
     bP.setBorder(BorderFactory.createEmptyBorder(5,0,5,5));
     bP.add(browseBut, BorderLayout.CENTER);
-    efHolder.add(bP, BorderLayout.EAST);
     efHolder.add(m_directoryText, BorderLayout.CENTER);
+    efHolder.add(bP, BorderLayout.EAST);
+    //efHolder.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     gbConstraints = new GridBagConstraints();
     gbConstraints.anchor = GridBagConstraints.EAST;
     gbConstraints.fill = GridBagConstraints.HORIZONTAL;
