@@ -21,6 +21,10 @@
  */
 package weka.gui;
 
+import weka.core.ClassDiscovery;
+import weka.core.Utils;
+import weka.core.ClassDiscovery.StringCompare;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,10 +35,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.ClassDiscovery;
-import weka.core.Utils;
-import weka.core.ClassDiscovery.StringCompare;
 
 /**
  * This class can generate the properties object that is normally loaded from
@@ -315,6 +315,13 @@ public class GenericPropertiesCreator {
   public boolean useDynamic() {
     if (getInputProperties() == null)
       loadInputProperties();
+    
+    // check our classloader against the system one - if different then
+    // return false (as dynamic classloading only works for classes discoverable
+    // in the system classpath
+    if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
+      return false;
+    }
     
     return Boolean.parseBoolean(
 	getInputProperties().getProperty(USE_DYNAMIC, "true"));
