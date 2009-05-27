@@ -22,7 +22,7 @@
 
 package weka.classifiers.functions.supportVector;
 
-import weka.classifiers.functions.SVMreg;
+import weka.classifiers.functions.SMOreg;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -37,7 +37,7 @@ import java.util.Random;
 import java.util.Vector;
 
 /**
- * Base class implementation for learning algorithm of SVMreg
+ * Base class implementation for learning algorithm of SMOreg
  * 
  <!-- options-start -->
  * Valid options are: <p/>
@@ -53,7 +53,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Remco Bouckaert (remco@cs.waikato.ac.nz,rrb@xm.co.nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class RegOptimizer 
   implements OptionHandler, Serializable, RevisionHandler {
@@ -89,7 +89,7 @@ public class RegOptimizer
   /** epsilon of epsilon-insensitive cost function **/
   protected double m_epsilon = 1e-3;
   
-  /** capacity parameter, copied from SVMreg **/
+  /** capacity parameter, copied from SMOreg **/
   protected double m_C = 1.0;
   
   /** class values/desired output vector **/
@@ -133,8 +133,8 @@ public class RegOptimizer
   /** flag to indicate whether the model is built yet **/
   protected boolean m_bModelBuilt = false;
 
-  /** parent SVMreg class **/
-  protected SVMreg m_SVM = null;
+  /** parent SMOreg class **/
+  protected SMOreg m_SVM = null;
   
   /**
    * the default constructor
@@ -250,7 +250,7 @@ public class RegOptimizer
    * 
    * @param value	the parent SVM
    */
-  public void setSVMReg(SVMreg value) {
+  public void setSMOReg(SMOreg value) {
     m_SVM = value;
   }
 
@@ -513,16 +513,16 @@ public class RegOptimizer
    */
   public String toString() {
     StringBuffer text = new StringBuffer();
-    text.append("SVMreg\n\n");
+    text.append("SMOreg\n\n");
     if (m_weights != null) {
       text.append("weights (not support vectors):\n");
       // it's a linear machine
       for (int i = 0; i < m_data.numAttributes(); i++) {
 	if (i != m_classIndex) {
 	  text.append((m_weights[i] >= 0 ? " + " : " - ") + Utils.doubleToString(Math.abs(m_weights[i]), 12, 4) + " * ");
-	  if (m_SVM.getFilterType().getSelectedTag().getID() == SVMreg.FILTER_STANDARDIZE) {
+	  if (m_SVM.getFilterType().getSelectedTag().getID() == SMOreg.FILTER_STANDARDIZE) {
 	    text.append("(standardized) ");
-	  } else if (m_SVM.getFilterType().getSelectedTag().getID() == SVMreg.FILTER_NORMALIZE) {
+	  } else if (m_SVM.getFilterType().getSelectedTag().getID() == SMOreg.FILTER_NORMALIZE) {
 	    text.append("(normalized) ");
 	  }
 	  text.append(m_data.attribute(i).name() + "\n");
@@ -558,6 +558,6 @@ public class RegOptimizer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
