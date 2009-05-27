@@ -316,6 +316,13 @@ public class GenericPropertiesCreator {
     if (getInputProperties() == null)
       loadInputProperties();
     
+    // check our classloader against the system one - if different then
+    // return false (as dynamic classloading only works for classes discoverable
+    // in the system classpath
+    if (!ClassLoader.getSystemClassLoader().equals(this.getClass().getClassLoader())) {
+      return false;
+    }
+    
     return Boolean.parseBoolean(
 	getInputProperties().getProperty(USE_DYNAMIC, "true"));
   }
