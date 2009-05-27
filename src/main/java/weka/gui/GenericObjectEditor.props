@@ -153,7 +153,6 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.SimpleLogistic,\
  weka.classifiers.functions.SMO,\
  weka.classifiers.functions.SMOreg,\
- weka.classifiers.functions.SVMreg,\
  weka.classifiers.functions.VotedPerceptron,\
  weka.classifiers.functions.Winnow,\
  weka.classifiers.lazy.IB1,\
