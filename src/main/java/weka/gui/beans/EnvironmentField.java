@@ -115,6 +115,7 @@ public class EnvironmentField extends JPanel {
       });
     }
     add(m_combo, BorderLayout.CENTER);
+    setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
   }
   
   /**
@@ -240,7 +241,7 @@ public class EnvironmentField extends JPanel {
       }
     });
   }
-
+  
   /**
    * Set the enabled status of the combo box.
    * 
