@@ -173,6 +173,7 @@ public class HotSpot
    */
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
