@@ -26,6 +26,7 @@ import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -36,7 +37,7 @@ import java.io.Serializable;
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $ 
+ * @version $Revision$ 
  */
 public abstract class AbstractAssociator 
   implements Cloneable, Associator, Serializable, CapabilitiesHandler, RevisionHandler {
@@ -109,7 +110,19 @@ public abstract class AbstractAssociator
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    return new Capabilities(this);
+    Capabilities defaultC = new Capabilities(this);
+    defaultC.enableAll();
+    
+    return defaultC;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
