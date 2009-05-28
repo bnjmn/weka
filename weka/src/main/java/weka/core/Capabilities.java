@@ -62,7 +62,7 @@ import java.util.Vector;
  * </pre>
  * 
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.27 $
+ * @version $Revision$
  */
 public class Capabilities 
   implements Cloneable, Serializable, RevisionHandler {
@@ -572,6 +572,16 @@ public class Capabilities
 	enableDependency(cap);
     }
   }
+  
+  /**
+   * enables all attribute and class types (including dependencies)
+   */
+  public void enableAll() {
+    enableAllAttributes();
+    enableAllAttributeDependencies();
+    enableAllClasses();
+    enableAllClassDependencies();
+  }
 
   /**
    * disables the given capability
@@ -695,6 +705,16 @@ public class Capabilities
       if (cap.isAttribute())
 	disableDependency(cap);
     }
+  }
+  
+  /**
+   * disables all attribute and class types (including dependencies)
+   */
+  public void disableAll() {
+    disableAllAttributes();
+    disableAllAttributeDependencies();
+    disableAllClasses();
+    disableAllClassDependencies();
   }
   
   /**
@@ -1611,6 +1631,6 @@ public class Capabilities
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.27 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
