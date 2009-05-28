@@ -105,7 +105,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class FilteredAssociator 
   extends SingleAssociatorEnhancer {
@@ -389,10 +389,12 @@ public class FilteredAssociator
   public Capabilities getCapabilities() {
     Capabilities	result;
     
-    if (getFilter() == null)
+    if (getFilter() == null) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+    } else {
       result = getFilter().getCapabilities();
+    }
     
     result.enable(Capability.NO_CLASS);
     
@@ -467,7 +469,7 @@ public class FilteredAssociator
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
