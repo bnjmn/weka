@@ -82,7 +82,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.28 $
+ * @version $Revision$
  * @see Discretize
  */
 public class CfsSubsetEval
@@ -296,6 +296,7 @@ public class CfsSubsetEval
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1125,7 +1126,7 @@ public class CfsSubsetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.28 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

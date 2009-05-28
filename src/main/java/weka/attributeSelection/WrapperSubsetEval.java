@@ -560,10 +560,12 @@ public class WrapperSubsetEval
   public Capabilities getCapabilities() {
     Capabilities	result;
     
-    if (getClassifier() == null)
+    if (getClassifier() == null) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+    } else {
       result = getClassifier().getCapabilities();
+    }
     
     // set dependencies
     for (Capability cap: Capability.values())
