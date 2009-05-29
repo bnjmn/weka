@@ -48,7 +48,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class SimpleLinearRegression extends Classifier 
   implements WeightedInstancesHandler {
@@ -108,6 +108,7 @@ public class SimpleLinearRegression extends Classifier
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -278,7 +279,7 @@ public class SimpleLinearRegression extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
