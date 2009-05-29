@@ -94,7 +94,7 @@ import java.util.Vector;
  *
  * @author Fei Zheng
  * @author Janice Boughton
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class AODEsr extends Classifier
     implements OptionHandler, WeightedInstancesHandler, UpdateableClassifier,
@@ -224,6 +224,7 @@ public class AODEsr extends Classifier
   */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -887,7 +888,7 @@ public class AODEsr extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
     
   /**
