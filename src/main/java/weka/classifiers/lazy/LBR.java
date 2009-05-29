@@ -98,7 +98,7 @@ import java.util.ArrayList;
  *
  * @author Zhihai Wang (zhw@deakin.edu.au) : July 2001 implemented the algorithm
  * @author Jason Wells (wells@deakin.edu.au) : November 2001 added instance referencing via indexes
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class LBR 
   extends Classifier
@@ -606,7 +606,7 @@ public class LBR
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.12 $");
+      return RevisionUtils.extract("$Revision$");
     }
   } /* end of Indexes inner-class */
   
@@ -723,6 +723,7 @@ public class LBR
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1223,7 +1224,7 @@ public class LBR
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

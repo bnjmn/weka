@@ -487,10 +487,12 @@ public class LWL
   public Capabilities getCapabilities() {
     Capabilities      result;
     
-    if (m_Classifier != null)
+    if (m_Classifier != null) {
       result = m_Classifier.getCapabilities();
-    else
+    } else {
       result = super.getCapabilities();
+      result.disableAll();
+    }
     
     result.setMinimumNumberInstances(0);
     
