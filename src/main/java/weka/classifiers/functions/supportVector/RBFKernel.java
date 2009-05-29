@@ -66,7 +66,7 @@ import java.util.Vector;
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
  * @author J. Lindgren (jtlindgr{at}cs.helsinki.fi) (RBF kernel)
- * @version $Revision: 1.11 $
+ * @version $Revision$
  */
 public class RBFKernel 
   extends CachedKernel {
@@ -275,6 +275,7 @@ public class RBFKernel
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enableAllClasses();
@@ -316,7 +317,7 @@ public class RBFKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

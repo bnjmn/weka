@@ -222,6 +222,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 	    
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enableAllClasses();
