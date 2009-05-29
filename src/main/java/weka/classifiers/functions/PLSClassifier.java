@@ -83,7 +83,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class PLSClassifier
   extends Classifier {
@@ -273,6 +273,7 @@ public class PLSClassifier
    */
   public Capabilities getCapabilities() {
     Capabilities result = getFilter().getCapabilities();
+    result.disableAll();
 
     // class
     result.enable(Capability.MISSING_CLASS_VALUES);
@@ -350,7 +351,7 @@ public class PLSClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
