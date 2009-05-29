@@ -78,7 +78,7 @@ import java.util.Vector;
  *
  * @author  Liangxiao Jiang (ljiang@cug.edu.cn)
  * @author  H. Zhang (hzhang@unb.ca)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class WAODE 
   extends Classifier
@@ -272,6 +272,7 @@ public class WAODE
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -527,7 +528,7 @@ public class WAODE
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
