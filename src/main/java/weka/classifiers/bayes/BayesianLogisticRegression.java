@@ -76,7 +76,7 @@ import java.util.Vector;
  *
  *
  *  @author Navendu Garg (gargnav at iit dot edu)
- *  @version $Revision: 1.3 $
+ *  @version $Revision$
  */
 public class BayesianLogisticRegression extends Classifier
   implements OptionHandler, TechnicalInformationHandler {
@@ -297,6 +297,7 @@ public class BayesianLogisticRegression extends Classifier
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -1252,7 +1253,7 @@ public class BayesianLogisticRegression extends Classifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

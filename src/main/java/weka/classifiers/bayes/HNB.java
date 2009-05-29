@@ -69,7 +69,7 @@ import weka.core.TechnicalInformation.Type;
  *
  * @author H. Zhang (hzhang@unb.ca)
  * @author Liangxiao Jiang (ljiang@cug.edu.cn)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class HNB  
   extends Classifier
@@ -151,6 +151,7 @@ public class HNB
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -374,7 +375,7 @@ public class HNB
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
