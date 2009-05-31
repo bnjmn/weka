@@ -170,7 +170,7 @@ public class HTML
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    int prec = 3;
+    int prec = m_NumDecimals;
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
