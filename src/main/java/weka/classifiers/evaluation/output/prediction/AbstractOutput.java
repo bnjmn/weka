@@ -100,6 +100,9 @@ public abstract class AbstractOutput
   /** the range of attributes to output. */
   protected Range m_Attributes;
   
+  /** the number of decimals after the decimal point. */
+  protected int m_NumDecimals;
+  
   /**
    * Initializes the output class. 
    */
@@ -108,6 +111,7 @@ public abstract class AbstractOutput
     m_OutputDistribution = false;
     m_Attributes         = null;
     m_Buffer             = null;
+    m_NumDecimals        = 3;
   }
   
   /**
@@ -146,6 +150,11 @@ public abstract class AbstractOutput
 	+ "\t(default: off)",
         "distribution", 0, "-distribution"));
     
+    result.addElement(new Option(
+        "\tThe number of digits after the decimal point.\n"
+	+ "\t(default: " + getDefaultNumDecimals() + ")",
+        "decimals", 1, "-decimals <num>"));
+    
     return result.elements();
   }
 
@@ -158,8 +167,16 @@ public abstract class AbstractOutput
    * @throws Exception 	if an option is not supported
    */
   public void setOptions(String[] options) throws Exception {
+    String	tmpStr;
+    
     setAttributes(Utils.getOption("p", options));
     setOutputDistribution(Utils.getFlag("distribution", options));
+    
+    tmpStr = Utils.getOption("decimals", options);
+    if (tmpStr.length() > 0)
+      setNumDecimals(Integer.parseInt(tmpStr));
+    else
+      setNumDecimals(getDefaultNumDecimals());
   }
 
   /**
@@ -179,6 +196,11 @@ public abstract class AbstractOutput
     
     if (getOutputDistribution())
       result.add("-distribution");
+
+    if (getNumDecimals() != getDefaultNumDecimals()) {
+      result.add("-decimals");
+      result.add("" + getNumDecimals());
+    }
     
     return result.toArray(new String[result.size()]);
   }
@@ -279,6 +301,47 @@ public abstract class AbstractOutput
    */
   public String outputDistributionTipText() {
     return "Whether to ouput the class distribution as well (only nominal class attributes).";
+  }
+  
+  /**
+   * Returns the default number of digits to output after the decimal point.
+   * 
+   * @return		the default number of digits
+   */
+  public int getDefaultNumDecimals() {
+    return 3;
+  }
+  
+  /**
+   * Sets the number of digits to output after the decimal point.
+   * 
+   * @param value	the number of digits
+   */
+  public void setNumDecimals(int value) {
+    if (value >= 0)
+      m_NumDecimals = value;
+    else
+      System.err.println(
+	  "Number of decimals cannot be negative (provided: " + value + ")!");
+  }
+  
+  /**
+   * Returns the number of digits to output after the decimal point.
+   * 
+   * @return		the number of digits
+   */
+  public int getNumDecimals() {
+    return m_NumDecimals;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the GUI
+   */
+  public String numDecimalsTipText() {
+    return "The number of digits to output after the decimal point.";
   }
   
   /**
