@@ -184,7 +184,7 @@ public class CSV
 	  m_Buffer.append(m_Delimiter);
       }
       else {
-	m_Buffer.append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted error" + m_Delimiter + "prediction");
+	m_Buffer.append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error" + m_Delimiter + "prediction");
       }
     }
     else {
@@ -242,7 +242,7 @@ public class CSV
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    int prec = 3;
+    int prec = m_NumDecimals;
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
@@ -306,7 +306,9 @@ public class CSV
     }
 
     // attributes
-    m_Buffer.append(m_Delimiter + attributeValuesString(withMissing) + "\n");
+    if (m_Attributes != null)
+      m_Buffer.append(m_Delimiter + attributeValuesString(withMissing));
+    m_Buffer.append("\n");
   }
   
   /**
