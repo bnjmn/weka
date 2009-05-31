@@ -273,7 +273,6 @@ public class PLSClassifier
    */
   public Capabilities getCapabilities() {
     Capabilities result = getFilter().getCapabilities();
-    result.disableAll();
 
     // class
     result.enable(Capability.MISSING_CLASS_VALUES);
