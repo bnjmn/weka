@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="groovy/**|jython/**" kind="src" path="src/main"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/weka.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/groovy.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jython.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+</classpath>

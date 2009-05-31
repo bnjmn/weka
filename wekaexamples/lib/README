@@ -1,0 +1,18 @@
+README
+======
+
+Information about the libraries:
+
+- Jython
+  Version: 2.2.1
+  Homepage: http://www.jython.org/
+  Download: http://downloads.sourceforge.net/jython/jython_installer-2.2.1.jar
+            (this is the installer)
+
+- Groovy
+  Version: 1.5.7 (all)
+  Homepage: http://groovy.codehaus.org/
+  Download: http://dist.groovy.codehaus.org/distributions/groovy-binary-1.5.7.zip
+
+
+$Revision$
