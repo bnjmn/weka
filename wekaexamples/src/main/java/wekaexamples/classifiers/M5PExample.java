@@ -39,13 +39,13 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class M5PExample {
-  public final static String FILENAME = "/tmp/m5pexample.save";
+  public final static String FILENAME = "/some/where/m5pexample.save";
 
-  public final static String URL = "jdbc:mysql://localhost:3306/weka_old";
+  public final static String URL = "jdbc_url";
 
-  public final static String USER = "someuser";
+  public final static String USER = "the_user";
 
-  public final static String PASSWORD = "somepassword";
+  public final static String PASSWORD = "the_password";
   
   public void train() throws Exception {
     System.out.println("Training...");
@@ -55,7 +55,7 @@ public class M5PExample {
     query.setDatabaseURL(URL);
     query.setUsername(USER);
     query.setPassword(PASSWORD);
-    query.setQuery("select * from Results0");
+    query.setQuery("select * from some_table");
     Instances data = query.retrieveInstances();
     data.setClassIndex(13);
 
@@ -81,7 +81,7 @@ public class M5PExample {
     query.setDatabaseURL(URL);
     query.setUsername(USER);
     query.setPassword(PASSWORD);
-    query.setQuery("select * from Results0");  // retrieves the same table only for simplicty reasons.
+    query.setQuery("select * from some_table");  // retrieves the same table only for simplicty reasons.
     Instances data = query.retrieveInstances();
     data.setClassIndex(14);
 
