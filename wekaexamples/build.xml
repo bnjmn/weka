@@ -209,7 +209,7 @@
    <!-- archive -->
    <target name="archive" depends="cleanTmp, dist" description="Generates are gzipped tar from the source code.">
      <tstamp/>
-     <zip destfile="${dist}/${ant.project.name}-src-${DSTAMP}.zip"
+     <zip destfile="${dist}/${ant.project.name}-src.zip"
           basedir="."
           includes="${src}/**/* ${documentation}/**/* build.xml .*-default"/>
    </target>
