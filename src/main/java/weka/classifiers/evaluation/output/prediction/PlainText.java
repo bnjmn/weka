@@ -138,8 +138,8 @@ public class PlainText
    * @throws Exception	if something goes wrong
    */
   protected void doPrintClassification(Classifier classifier, Instance inst, int index) throws Exception {
-    int width = 10;
-    int prec = 3;
+    int width = 7 + m_NumDecimals;
+    int prec = m_NumDecimals;
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
