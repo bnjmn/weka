@@ -5,14 +5,19 @@ cases sufficient for the normal user. But WEKA's clearly defined API
 (``application programming interface'') makes is very easy to ``embed'' it in
 another projects. This chapter covers some basics of how to achieve the
 following common tasks from source code:
-\begin{itemize}
+\begin{tight_itemize}
 	\item Option handling
 	\item Loading data
 	\item Filtering
 	\item Classifying
 	\item Clustering
 	\item Selecting attributes
-\end{itemize}
+\end{tight_itemize}
+Even though most of the examples are for the Linux platform, using forward
+slashes in the paths and file names, they do work on the MS Windows platform as
+well. To make the examples work under MS Windows, one only needs to adapt the
+paths, changing the forward slashes to backslashes and adding a drive letter
+where appropriate. \\
 
 \noindent \textbf{Note} \\
 \noindent WEKA is released under the GNU General Public License version
@@ -51,13 +56,13 @@ argument (``\texttt{1}''):
 Since the \texttt{setOptions(String[])} method expects a fully parsed and
 correctly split up array (which is done by the command-line), some common
 pitfalls with this approach are:
-\begin{itemize}
+\begin{tight_itemize}
 	\item Combination of option and argument -- Using ``\texttt{-R 1}'' as an
 element of the String array will fail, prompting WEKA to output an error message
 stating that the option ``R 1'' is unknown.
 	\item Trailing blanks -- Using ``\texttt{-R }'' will fail as well, since no
 removal of trailing blanks happens and therefore option ``R '' is unknown.
-\end{itemize}
+\end{tight_itemize}
 The easiest way to avoid these problems, is to provide a String array that has
 been generated automatically from a single command-line string using the
 \texttt{splitOptions(String)} method of the \texttt{weka.core.Utils} class.
@@ -92,7 +97,7 @@ on how to configure WEKA correctly and also more information on JDBC (Java
 Database Connectivity) URLs.
 
 The following classes are used to store data in memory:
-\begin{itemize}
+\begin{tight_itemize}
 	\item \texttt{weka.core.Instances} -- holds a complete dataset. This data
 structure is row-based, single rows can be accessed via the
 \texttt{instance(int)} method using a 0-based index. Information about the
@@ -109,7 +114,7 @@ column in the dataset. It stores the type of the attribute, as well as the
 labels for \textit{nominal} attributes, the possible values for \textit{string}
 attributes or the datasets for \textit{relational} attributes (these are just
 \texttt{weka.core.Instances} objects again).
-\end{itemize}
+\end{tight_itemize}
 
 \subsection{Loading data from files}
 When loading data from files, one can either let WEKA choose the appropriate
@@ -156,15 +161,15 @@ a classifier, it can be set with the \texttt{setClassIndex(int)} method:
 
 \subsection{Loading data from databases}
 For loading data from databases, you have two classes that allow you to do that:
-\begin{itemize}
+\begin{tight_itemize}
 	\item \texttt{weka.experiment.InstanceQuery}
 	\item \texttt{weka.core.converters.DatabaseLoader}
-\end{itemize}
+\end{tight_itemize}
 The differences between them are, that the \texttt{InstanceQuery} class allows
 you to retrieve sparse data and the \texttt{DatabaseLoader} can retrieve the
-data incrementally.
+data incrementally. \\
 
-Here is an exaample of using the \texttt{InstanceQuery} class:
+\noindent Here is an example of using the \texttt{InstanceQuery} class:
 \begin{verbatim}
   import weka.core.Instances;
   import weka.experiment.InstanceQuery;
@@ -178,7 +183,6 @@ Here is an exaample of using the \texttt{InstanceQuery} class:
   // query.setSparseData(true);
   Instances data = query.retrieveInstances();
 \end{verbatim}
-
 And an example using the \texttt{DatabaseLoader} class in ``batch retrieval'':
 \begin{verbatim}
    import weka.core.Instances;
@@ -191,7 +195,7 @@ And an example using the \texttt{DatabaseLoader} class in ``batch retrieval'':
 \end{verbatim}
 
 \samepage
-And in ``incremental mode'':
+\noindent And in ``incremental mode'':
 \begin{verbatim}
    import weka.core.Instance;
    import weka.core.Instances;
@@ -207,41 +211,280 @@ And in ``incremental mode'':
       data.add(inst);
 \end{verbatim}
 \textbf{Notes:}
-\begin{itemize}
+\begin{tight_itemize}
 	\item Not all database systems allow incremental retrieval.
 	\item Not all queries have a unique key to retrieve rows incrementally. In
 that case, you can supply the necessary columns with the
 \textit{setKeys(String)} method (comma-separated list of columns).
 	\item If the data cannot be retrieved in an incremental fashion, it is first
 loaded fully into memory and then provided row-by-row (``pseudo-incremental'').
-\end{itemize}
+\end{tight_itemize}
 
+\newpage
 
 %%%%%%%%%%%%%
 % Filtering %
 %%%%%%%%%%%%%
 \section{Filtering}
+In WEKA, filters are used to preprocess the data. Each filter falls into one
+of the following two categories:
+\begin{tight_itemize}
+	\item \textit{supervised} -- The filters require a class attribute to be
+set.
+	\item \textit{unsupervised} -- A class attribute is not required to be
+present.
+\end{tight_itemize}
+And into one of the two sub-categories:
+\begin{tight_itemize}
+	\item \textit{attribute-based} -- Columns are processed, e.g., added or
+removed .
+	\item \textit{instance-based} -- Rows are processed, e.g., added or deleted.
+\end{tight_itemize}
+These categories should make it clear, what the difference between the two
+\texttt{Discretize} filters in WEKA is. The \textit{supervised} one takes the
+class attribute and its distribution over the dataset into account, in order to
+determine the optimal number and size of bins, whereas the
+\textit{unsupervised} one relies on a user-specified number of bins.
+
+Apart from this classification, filters are either \textit{stream-} or
+\textit{batch-based}. \textit{Stream} filters can process the data straight away
+and make it immediately available for collection again. \textit{Batch} filters,
+on the other hand, need a batch of data to setup their internal
+data structures. The \texttt{Add} filter (the can be found in the
+\texttt{weka.filters.unsupervised.attribute} package) is an example of a stream
+filter. Adding a new attribute with only missing values does not require any
+sophisticated setup. However, the \texttt{ReplaceMissingValues} filter (same
+package as the \texttt{Add} filter) needs a batch of data in order to determine
+the means and modes for each of the attributes. Otherwise the filter will not
+be able to replace the missing values with meaningful values. But as soon as a
+batch filter has been initialized with the first batch of data, it can also
+process data on a row-by-row basis, just like a stream filter.
+
+\textit{Instance-based} filters are a bit special in the way they handle data.
+As mentioned earlier, \textit{all} filters can process data on a row-by-row
+basis after the first batch of data has been passed through. Of course, if a
+filter adds or removes rows from a batch of data, this no longer works when
+working in single-row processing mode. It makes sense, if one thinks of a
+scenario involving the \texttt{FilteredClassifier} meta-classifier: after
+the training phase (=\ first batch of data), the classifier will get
+evaluated against a test set, one instance at a time. If the filter now
+removes the only instance or adds instances, it can no longer be evaluated
+correctly, as the evaluation expects to get only a single result back. This is
+the reason why \textit{instance-based} filters only pass through any subsequent
+batch of data without processing it. The \texttt{Resample} filters, for
+instance, act like this.
+
+\newpage
+
+The following example uses the \texttt{Remove} filter (filter can be
+found in package \texttt{weka.filters.unsupervised.attribute}) to remove the
+first attribute from a dataset. For setting the options, the
+\texttt{setOptions(String[])} method is used.
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.filters.Filter;
+   import weka.filters.unsupervised.attribute.Remove;
+   ...
+   String[] options = new String[2];
+   options[0] = "-R";                   // "range"
+   options[1] = "1";                    // first attribute
+   Remove remove = new Remove();        // new instance of filter
+   remove.setOptions(options);          // set options
+   remove.setInputFormat(data);         // inform filter about dataset
+                                        // **AFTER** setting options
+   Instances newData = Filter.useFilter(data, remove); // apply filter
+\end{verbatim}
+A common trap to fall into is setting options after the
+\texttt{setInputFormat(Instances)} has been called already. Since this method
+is used to determine the output format of the data, \textbf{all} the options
+have to be set before calling it. Otherwise, all options set afterwards will be
+ignored.
+
+Batch filtering is necessary if two or more datasets need to processed
+according to the same filter initialization. For instance, standardizing a
+training and a test set with the \texttt{Standardize} filter (package
+\texttt{weka.filters.unsupervised.attribute}). The example below shows how to
+do this:
+\begin{verbatim}
+   Instances train = ...   // from somewhere
+   Instances test = ...    // from somewhere
+   Standardize filter = new Standardize();
+   // initializing the filter once with training set
+   filter.setInputFormat(train);
+   // configures the Filter based on train instances and returns
+   // filtered instances
+   Instances newTrain = Filter.useFilter(train, filter);
+   // create new test set
+   Instances newTest = Filter.useFilter(test, filter);
+\end{verbatim}
+Even though using the API gives one full control over the data and makes it
+easier to juggle several datasets at the same time, filtering data
+\textbf{on-the-fly} makes life even easier. This handy feature is available
+through meta schemes in WEKA, like \texttt{FilteredClassifier} (package
+\texttt{weka.classifiers.meta}), \texttt{FilteredClusterer} (package
+\texttt{weka.clusterers}), \texttt{FilteredAssociator} (package
+\texttt{weka.associations}) and
+\texttt{FilteredAttributeEval}/\texttt{FilteredSubsetEval} (package
+\texttt{weka.attributeSelection}). Instead of filtering the data
+\textit{beforehand}, one just sets up a meta-scheme and lets the meta-scheme
+do the filtering for one.
+
+\newpage
+
+The following example uses the
+\texttt{FilteredClassifier} in conjunction with the \texttt{Remove} filter to
+remove the first attribute from the dataset and \texttt{J48} (package
+\texttt{weka.classifiers.trees}) as base-classifier. First the classifier is
+built with a training set and the evaluated with a separate test set. The
+actual and predicted class values are printed in the console.
+\begin{verbatim}
+   import weka.classifiers.meta.FilteredClassifier;
+   import weka.classifiers.trees.J48;
+   import weka.filters.unsupervised.attribute.Remove;
+   ...
+   Instances train = ...         // from somewhere
+   Instances test = ...          // from somewhere
+   // filter
+   Remove rm = new Remove();
+   rm.setAttributeIndices("1");  // remove 1st attribute
+   // classifier
+   J48 j48 = new J48();
+   j48.setUnpruned(true);        // using an unpruned J48
+   // meta-classifier
+   FilteredClassifier fc = new FilteredClassifier();
+   fc.setFilter(rm);
+   fc.setClassifier(j48);
+   // train and make predictions
+   fc.buildClassifier(train);
+   for (int i = 0; i < test.numInstances(); i++) {
+     double pred = fc.classifyInstance(test.instance(i));
+     double actual = test.instance(i).classValue();
+     System.out.print("ID: "
+       + test.instance(i).value(0));
+     System.out.print(", actual: "
+       + test.classAttribute().value((int) actual));
+     System.out.println(", predicted: "
+       + test.classAttribute().value((int) pred));
+   }
+\end{verbatim}
+
+\newpage
 
 %%%%%%%%%%%%%%%
 % Classifying %
 %%%%%%%%%%%%%%%
 \section{Classifying}
 
+\newpage
+
 %%%%%%%%%%%%%%
 % Clustering %
 %%%%%%%%%%%%%%
 \section{Clustering}
+
+\newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 % Selecting attributes %
 %%%%%%%%%%%%%%%%%%%%%%%%
 \section{Selecting attributes}
 
+\newpage
+
 %%%%%%%%%%%%%%%
 % Saving data %
 %%%%%%%%%%%%%%%
 \section{Saving data}
+Saving \texttt{weka.core.Instances} objects is as easy as reading the data in
+the first place, though the process of storing the data again is far less common
+than of reading the data into memory. The following two sections cover how to
+save the data in files and in databases.
 
 \subsection{Saving data to files}
+Once again, one can either let WEKA choose the appropriate converter for saving
+the data or use an explicit converter (all savers are located in the
+\texttt{weka.core.converters} package). The latter approach is necessary, if the
+file name under which the data will be stored does not have an extension that
+WEKA recognizes.
+
+Use the \texttt{DataSink} class (inner class of
+\texttt{weka.core.converters.ConverterUtils}), if the extensions are not a
+problem. Here are a few examples:
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.core.converters.ConverterUtils.DataSink;
+   ...
+   // data structure to save
+   Instances data = ...
+   // save as ARFF
+   DataSink.write("/some/where/data.arff");
+   // save as CSV
+   DataSink.write("/some/where/data.csv");
+\end{verbatim}
+And here is an example of using the \texttt{CSVSaver} converter explicitly:
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.core.converters.CSVSaver;
+   ...
+   // data structure to save
+   Instances data = ...
+   // save as CSV
+   CSVSaver saver = new CSVSaver();
+   saver.setInstances(data);
+   saver.setFile(new File("/some/where/data.csv"));
+   saver.writeBatch();
+\end{verbatim}
 
 \subsection{Saving data to databases}
+Apart from the KnowledgeFlow, saving to databases is not very obvious in WEKA,
+unless you know about the \texttt{DatabaseSaver} converter. Just like the
+\texttt{DatabaseLoader}, the saver counterpart can store the data either in
+batch mode or incrementally as well.
+
+The first example shows how to save the data in batch mode, which is the easier
+way of doing it:
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.core.converters.DatabaseSaver;
+   ...
+   // data structure to save
+   Instances data = ...
+   // store data in database
+   DatabaseSaver saver = new DatabaseSaver();
+   saver.setDestination("jdbc_url", "the_user", "the_password");
+   // we explicitly specify the table name here:
+   saver.setTableName("whatsoever2");
+   saver.setRelationForTableName(false);
+   // or we could just update the name of the dataset:
+   // saver.setRelationForTableName(true);
+   // data.setRelationName("whatsoever2");
+   saver.setInstances(data);
+   saver.writeBatch();
+\end{verbatim}
+Saving the data incrementally, requires a bit more work, as one has to specify
+that writing the data is done incrementally (using the \texttt{setRetrieve}
+method), as well as notifying the saver when all the data has been saved:
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.core.converters.DatabaseSaver;
+   ...
+   // data structure to save
+   Instances data = ...
+   // store data in database
+   DatabaseSaver saver = new DatabaseSaver();
+   saver.setDestination("jdbc_url", "the_user", "the_password");
+   // we explicitly specify the table name here:
+   saver.setTableName("whatsoever2");
+   saver.setRelationForTableName(false);
+   // or we could just update the name of the dataset:
+   // saver.setRelationForTableName(true);
+   // data.setRelationName("whatsoever2");
+   saver.setRetrieval(DatabaseSaver.INCREMENTAL);
+   saver.setStructure(data);
+   count = 0;
+   for (int i = 0; i < data.numInstances(); i++) {
+     saver.writeIncremental(data.instance(i));
+   }
+   // notify saver that we're finished
+   saver.writeIncremental(null);
+\end{verbatim}
