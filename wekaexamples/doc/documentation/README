@@ -41,11 +41,21 @@ Also, a lot of the examples require command-line parameters as they load and/or
 process data. Check out the documentation of the specific source code that you 
 are interested in.
 
-Eclipse users can just rename the .classpath-default and .project-default files
-(by removing the "-default") and then import the project directly in Eclipse.
+
+3. Eclipse
+==========
+Since there are quite a Groovy and Jython scripts available, you should consider
+installing the appropriate Eclipse plugins:
+- Groovy
+  http://dist.codehaus.org/groovy/distributions/update/
+- Python
+  http://pydev.sourceforge.net/updates/
+
+Eclipse users can then just rename the .classpath-default and .project-default 
+files (by removing the "-default") and then import the project directly in Eclipse.
 
 
-3. Further information
+4. Further information
 ======================
 Always check out the documentation of the source code file that you are 
 interested in. In addition to that, also check out the other README files 
