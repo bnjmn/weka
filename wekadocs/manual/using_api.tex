@@ -89,6 +89,7 @@ into appropriate Java source code.
 % Loading data %
 %%%%%%%%%%%%%%%%
 \section{Loading data}
+\label{api_loading_data}
 Before any filter, classifier or clusterer can be applied, data needs to be
 present. WEKA enables one to load data from files (in various file formats) and
 also from databases. In the latter case, it is assumed in that the database
@@ -140,6 +141,7 @@ example loads a CSV file (``comma-separated values'') file:
 \begin{verbatim}
    import weka.core.converters.CSVLoader;
    import weka.core.Instances;
+   import java.io.File;
    ...
    CSVLoader loader = new CSVLoader();
    loader.setSource(new File("/some/where/some.data"));
@@ -226,7 +228,8 @@ loaded fully into memory and then provided row-by-row (``pseudo-incremental'').
 % Filtering %
 %%%%%%%%%%%%%
 \section{Filtering}
-In WEKA, filters are used to preprocess the data. Each filter falls into one
+In WEKA, filters are used to preprocess the data. They can be found in
+package \texttt{weka.filters}. Each filter falls into one
 of the following two categories:
 \begin{tight_itemize}
 	\item \textit{supervised} -- The filters require a class attribute to be
@@ -300,6 +303,7 @@ is used to determine the output format of the data, \textbf{all} the options
 have to be set before calling it. Otherwise, all options set afterwards will be
 ignored.
 
+\subsection{Batch filtering}
 Batch filtering is necessary if two or more datasets need to processed
 according to the same filter initialization. For instance, standardizing a
 training and a test set with the \texttt{Standardize} filter (package
@@ -317,6 +321,8 @@ do this:
    // create new test set
    Instances newTest = Filter.useFilter(test, filter);
 \end{verbatim}
+
+\subsection{Filtering on-the-fly}
 Even though using the API gives one full control over the data and makes it
 easier to juggle several datasets at the same time, filtering data
 \textbf{on-the-fly} makes life even easier. This handy feature is available
@@ -336,7 +342,8 @@ The following example uses the
 remove the first attribute from the dataset and \texttt{J48} (package
 \texttt{weka.classifiers.trees}) as base-classifier. First the classifier is
 built with a training set and the evaluated with a separate test set. The
-actual and predicted class values are printed in the console.
+actual and predicted class values are printed in the console. For more
+information on classification, see chapter \ref{api_classiyfing}.
 \begin{verbatim}
    import weka.classifiers.meta.FilteredClassifier;
    import weka.classifiers.trees.J48;
@@ -374,6 +381,282 @@ actual and predicted class values are printed in the console.
 % Classifying %
 %%%%%%%%%%%%%%%
 \section{Classifying}
+\label{api_classiyfing}
+Classification and regression algorithms in WEKA are called ``classifiers'' and
+are located in the \texttt{weka.classifiers} package. This section covers the
+following topics:
+\begin{tight_itemize}
+	\item \textit{Building a classifier} -- batch and incremental learning.
+	\item \textit{Evaluating a classifier} -- various evaluation techniques and
+how to obtain the generated statistics.
+	\item \textit{Classifying instances} -- obtaining classifications for
+unknown data.
+\end{tight_itemize}
+
+\subsection{Building a classifier}
+By default, all classifiers in WEKA are \textit{batch-trainable}, i.e., the
+train on the whole dataset at once. This is fine, if the training data fits
+into memory. But there are also algorithms available, that can update their
+internal model \textit{on-the-go}. These classifiers are called
+\textit{incremental}. The following two sections cover the batch and the
+incremental classifiers.
+
+\subsubsection*{Batch classifiers}
+A batch classifier is really simple to build:
+\begin{tight_itemize}
+	\item set options -- either using the \texttt{setOptions(String[])} method
+or the actual set-methods.
+	\item train it -- calling the \texttt{buildClassifier(Instances)} method
+with the training set. By definition, the \texttt{buildClassifier(Instances)}
+method resets the internal model completely, in order to ensure that subsequent
+calls of this method with the same data result in the same model.
+\end{tight_itemize}
+The following code snippet builds an unpruned J48 (J48 is WEKA's C4.5
+implementation) on a dataset:
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.classifiers.trees.J48;
+   ...
+   Instances data = ...              // from somewhere
+   String[] options = new String[1];
+   options[0] = "-U";                // unpruned tree
+   J48 tree = new J48();             // new instance of tree
+   tree.setOptions(options);         // set the options
+   tree.buildClassifier(data);       // build classifier
+\end{verbatim}
+
+\subsubsection*{Incremental classifiers}
+All incremental classifiers in WEKA implement the interface
+\texttt{UpdateableClassifier} (found in package \texttt{weka.classifiers}).
+Bringing up the Javadoc for this particular interface tells one what classifiers
+implement this interface. Those classifiers can be used to process large amounts
+of data with a small memory-footprint, as the training data does not have to fit
+in memory. ARFF files, for instance, can be read incrementally (see chapter
+\ref{api_loading_data}).
+
+Training an incremental classifier happens in \textit{two} stages:
+\begin{tight_enumerate}
+	\item \textit{initialize} the model by calling the
+\texttt{buildClassifier(Instances)} method. One can either use an
+\texttt{weka.core.Instances} object with no actual data or one with an initial
+set of data.
+	\item \textit{update} the model row-by-row by calling the
+\texttt{updateClassifier(Instance)} method.
+\end{tight_enumerate}
+The following example shows how load an ARFF file incrementally using the
+\texttt{ArffLoader} class, training the
+\texttt{NaiveBayesUpdateable} classifier.
+\begin{verbatim}
+   import weka.core.converters.ArffLoader;
+   import weka.classifiers.bayes.NaiveBayesUpdateable;
+   import java.io.File;
+   ...
+   // load data
+   ArffLoader loader = new ArffLoader();
+   loader.setFile(new File("/some/where/data.arff"));
+   Instances structure = loader.getStructure();
+   structure.setClassIndex(structure.numAttributes() - 1);
+
+   // train NaiveBayes
+   NaiveBayesUpdateable nb = new NaiveBayesUpdateable();
+   nb.buildClassifier(structure);
+   Instance current;
+   while ((current = loader.getNextInstance(structure)) != null)
+     nb.updateClassifier(current);
+\end{verbatim}
+
+\newpage
+
+\subsection{Evaluating a classifier}
+Building a classifier is only one part of the equation, evaluating how
+\textit{well} it performs is another important part. WEKA supports two types of
+evaluation:
+\begin{tight_itemize}
+	\item \textit{Cross-validation} -- If you only have a single dataset and
+want to get a reasonable realistic evaluation. Setting the number of folds equal
+to the number of rows in the dataset will give you leave-one-out
+cross-validation (LOOCV).
+	\item \textit{Dedicated test set} -- The test set is solely used to evaluate
+the built classifier. It is important to have a test set that incorporates the
+same (or similar) concepts as the training set, otherwise you will always end
+up with poor performance.
+\end{tight_itemize}
+The evaluation step, and collection of statistics, is performed by the
+\texttt{Evaluation} class (package \texttt{weka.classifiers}).
+
+\subsubsection*{Cross-validation}
+The \texttt{crossValidateModel} method of the \texttt{Evaluation} class is used
+to perform cross-validation with an \textbf{untrained} classifier and a single
+dataset. Supplying an untrained classifier ensures that no information leaks
+into the actual evaluation. Even though it is an implementation requirement,
+that the \texttt{buildClassifier} method resets the classifier, it cannot be
+guaranteed that this is indeed the case (``leaky'' implementation). Using an
+untrained classifier avoids unwanted side-effects, as for each train/test set
+pair, a copy of the originally supplied classifier is used.
+
+Before cross-validation is performed, the data gets randomized using the
+supplied random number generator (\texttt{java.util.Random}). It is
+recommended that this number generator is ``seeded'' with a specified seed
+value. Otherwise, subsequent runs of cross-validation on the same dataset will
+not yield the same results, due to different randomization of the data.
+
+The code snippet below performs 10-fold cross-validation with a J48 decision
+tree algorithm on a dataset \texttt{newData}, with random number generator that
+is seeded with ``1''. The summary of the collected statistics is output to
+\texttt{stdout}.
+\begin{verbatim}
+   import weka.classifiers.Evaluation;
+   import weka.classifiers.trees.J48;
+   import java.util.Random;
+   ...
+   Instances newData = ... // from somewhere
+   Evaluation eval = new Evaluation(newData);
+   J48 tree = new J48();
+   eval.crossValidateModel(tree, newData, 10, new Random(1));
+   System.out.println(eval.toSummaryString("\nResults\n\n", false));
+\end{verbatim}
+The \texttt{Evaluation} object in this example is initialized with the dataset
+used in the evaluation process. This is done in order to inform the evaluation
+about the type of data that is being evaluated, ensuring that all internal data
+structures are setup correctly.
+
+In order to get a more dataset-dependent initial randomization of the data, the
+\texttt{getRandomNumberGenerator(int)} method of the
+\texttt{weka.core.Instances} class can be used for this purpose. This method
+returns a \texttt{java.util.Random} object that was seeded with the sum
+of the supplied seed and the hashcode of the string representation of
+a randomly chosen \texttt{weka.core.Instance} of the \texttt{Instances} object
+(using a random number generator seeded with the seed supplied to this method).
+
+\subsubsection*{Train/test set}
+Using a dedicated test set to evaluate a classifier is just as easy as
+cross-validation. But instead of providing an untrained classifier, a trained
+classifier has to be provided now. Once again, the
+\texttt{weka.classifiers.Evaluation} class is used to perform the evaluation,
+using the \texttt{evaluateModel} method.
+
+The code snippet below trains a J48 with default options on a training set and
+evaluates on a test set before outputting the summary of the
+collected statistics:
+\begin{verbatim}
+   import weka.core.Instances;
+   import weka.classifiers.Evaluation;
+   import weka.classifiers.trees.J48;
+   ...
+   Instances train = ...   // from somewhere
+   Instances test = ...    // from somewhere
+   // train classifier
+   Classifier cls = new J48();
+   cls.buildClassifier(train);
+   // evaluate classifier and print some statistics
+   Evaluation eval = new Evaluation(train);
+   eval.evaluateModel(cls, test);
+   System.out.println(eval.toSummaryString("\nResults\n\n", false));
+\end{verbatim}
+
+\newpage
+
+\subsubsection*{Statistics}
+In the previous sections, the \texttt{toSummaryString} of the
+\texttt{Evaluation} class was already used in the code examples. But there are
+other summary methods for nominal class attributes available as well:
+\begin{tight_itemize}
+	\item \texttt{toMatrixString}
+	\item \texttt{toClassDetailsString}
+	\item \texttt{toCumulativeMarginDistributionString}
+\end{tight_itemize}
+If one does not want to use these summary methods, it is possible to access the
+individual statistical measures directly. Below, a few common measures
+are listed:
+\begin{tight_itemize}
+	\item nominal class attribute
+	\begin{tight_itemize}
+		\item \texttt{correct()} -- The number of correctly classified
+instances. The incorrectly classified ones are available through
+\texttt{incorrect()}.
+		\item \texttt{pctCorrect()} -- The percentage of correctly classified
+instances (accuracy). \texttt{pctIncorrect()} returns the number of
+misclassified ones.
+		\item \texttt{areaUnderROC(int)} -- The AUC for the specified class
+label index (0-based index).
+	\end{tight_itemize}
+
+	\item numeric class attribute
+	\begin{tight_itemize}
+		\item \texttt{correlationCoefficient()} -- The correlation coefficient.
+	\end{tight_itemize}
+
+	\item general
+	\begin{tight_itemize}
+		\item \texttt{meanAbsoluteError()} -- The mean absolute error.
+		\item \texttt{rootMeanSquaredError()} -- The root mean squared error.
+		\item \texttt{numInstances()} -- The number of instances with a class
+value.
+		\item unclassified() - The number of unclassified instances.
+		\item pctUnclassified() - The percentage of unclassified instances.
+	\end{tight_itemize}
+\end{tight_itemize}
+For a complete overview, see the Javadoc page of the \texttt{Evaluation} class.
+By looking up the source code of the summary methods mentioned above, you can
+easily determine what methods are used for which particular output.
+
+\newpage
+
+\subsubsection*{ROC curves}
+WEKA can generate Receiver operating characteristic (ROC) curves, based on the
+collected predictions during an evaluation. The class used for generating the
+necessary data to plot is \texttt{ThresholdCurve} (package
+\texttt{weka.classifiers.evaluation}). The \texttt{getCurve} method of
+this class generates a \texttt{weka.core.Instances} object for a particular
+class label (specified with a 0-based index), based on the collected predictions
+returned from an \texttt{Evaluation} object's \texttt{predictions()} method.
+
+\noindent The following code snippet generates the plottable data
+(\texttt{result}) for the first class label:
+\begin{verbatim}
+   import weka.classifiers.Evaluation;
+   import weka.classifiers.evaluation.ThresholdCurve;
+   ...
+   Evaluation eval = ... // from somewhere
+   ThresholdCurve tc = new ThresholdCurve();
+   int classIndex = 0;
+   Instances result = tc.getCurve(eval.predictions(), classIndex);
+\end{verbatim}
+Using the \texttt{ThresholdVisualizePanel} class (package
+\texttt{weka.gui.visualize}), the plottable data stored in \texttt{result} can
+then be displayed in a frame. The \texttt{ThresholdCurve} can be used to
+determine the AUC, using the \texttt{getROCArea(Instances)} method.
+\begin{verbatim}
+   import weka.classifiers.evaluation.ThresholdCurve;
+   import weka.core.Utils;
+   import weka.gui.visualize.PlotData2D;
+   import weka.gui.visualize.ThresholdVisualizePanel;
+   ...
+   ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
+   vmc.setROCString("(Area under ROC = " +
+       Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
+   vmc.setName(result.relationName());
+   PlotData2D tempd = new PlotData2D(result);
+   tempd.setPlotName(result.relationName());
+   tempd.addInstanceNumberAttribute();
+   vmc.addPlot(tempd);
+   String plotName = vmc.getName();
+   final javax.swing.JFrame jf =
+     new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
+   jf.setSize(500,400);
+   jf.getContentPane().setLayout(new BorderLayout());
+   jf.getContentPane().add(vmc, BorderLayout.CENTER);
+   jf.addWindowListener(new java.awt.event.WindowAdapter() {
+     public void windowClosing(java.awt.event.WindowEvent e) {
+       jf.dispose();
+     }
+   });
+   jf.setVisible(true);
+\end{verbatim}
+
+\newpage
+
+\subsection{Classifying instances}
 
 \newpage
 
@@ -425,6 +708,7 @@ And here is an example of using the \texttt{CSVSaver} converter explicitly:
 \begin{verbatim}
    import weka.core.Instances;
    import weka.core.converters.CSVSaver;
+   import java.io.File;
    ...
    // data structure to save
    Instances data = ...
