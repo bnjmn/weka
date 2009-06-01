@@ -127,7 +127,16 @@ public class ClassifierPerformanceEvaluator
 	      try {
 		if (ce.getSetNumber() == 1 /*|| 
 		    ce.getClassifier() != m_classifier */) {
-		  m_eval = new Evaluation(ce.getTestSet().getDataSet());
+		  
+		  if (ce.getTrainSet().getDataSet() == null ||
+		      ce.getTrainSet().getDataSet().numInstances() == 0) {
+		    // we have no training set to estimate majority class
+		    // or mean of target from
+		    m_eval = new Evaluation(ce.getTestSet().getDataSet());
+		    m_eval.useNoPriors();
+		  } else {
+		    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
+		  }
 		  m_classifier = ce.getClassifier();
 		  if (m_visualizableErrorListeners.size() > 0) {
 		    m_predInstances = 
