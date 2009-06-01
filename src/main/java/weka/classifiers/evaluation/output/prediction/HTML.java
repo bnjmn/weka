@@ -43,6 +43,20 @@ import weka.core.Utils;
  *  Only for nominal class attributes.
  *  (default: off)</pre>
  * 
+ * <pre> -decimals &lt;num&gt;
+ *  The number of digits after the decimal point.
+ *  (default: 3)</pre>
+ * 
+ * <pre> -file &lt;path&gt;
+ *  The file to store the output in, instead of outputting it on stdout.
+ *  Gets ignored if the supplied path is a directory.
+ *  (default: .)</pre>
+ * 
+ * <pre> -suppress
+ *  In case the data gets stored in a file, then this flag can be used
+ *  to suppress the regular output.
+ *  (default: not suppressed)</pre>
+ * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
@@ -95,25 +109,25 @@ public class HTML
    * Performs the actual printing of the header.
    */
   protected void doPrintHeader() {
-    m_Buffer.append("<html>\n");
-    m_Buffer.append("<head>\n");
-    m_Buffer.append("<title>Predictions for dataset " + sanitize(m_Header.relationName()) + "</title>\n");
-    m_Buffer.append("</head>\n");
-    m_Buffer.append("<body>\n");
-    m_Buffer.append("<div align=\"center\">\n");
-    m_Buffer.append("<h3>Predictions for dataset " + sanitize(m_Header.relationName()) + "</h3>\n");
-    m_Buffer.append("<table border=\"1\">\n");
-    m_Buffer.append("<tr>\n");
+    append("<html>\n");
+    append("<head>\n");
+    append("<title>Predictions for dataset " + sanitize(m_Header.relationName()) + "</title>\n");
+    append("</head>\n");
+    append("<body>\n");
+    append("<div align=\"center\">\n");
+    append("<h3>Predictions for dataset " + sanitize(m_Header.relationName()) + "</h3>\n");
+    append("<table border=\"1\">\n");
+    append("<tr>\n");
     if (m_Header.classAttribute().isNominal())
       if (m_OutputDistribution)
-	m_Buffer.append("<td>inst#</td><td>actual</td><td>predicted</td><td>error</td><td colspan=\"" + m_Header.classAttribute().numValues() + "\">distribution</td>");
+	append("<td>inst#</td><td>actual</td><td>predicted</td><td>error</td><td colspan=\"" + m_Header.classAttribute().numValues() + "\">distribution</td>");
       else
-	m_Buffer.append("<td>inst#</td><td>actual</td><td>predicted</td><td>error</td><td>prediction</td>");
+	append("<td>inst#</td><td>actual</td><td>predicted</td><td>error</td><td>prediction</td>");
     else
-      m_Buffer.append("<td>inst#</td><td>actual</td><td>predicted</td><td>error</td>");
+      append("<td>inst#</td><td>actual</td><td>predicted</td><td>error</td>");
     
     if (m_Attributes != null) {
-      m_Buffer.append("<td>");
+      append("<td>");
       boolean first = true;
       for (int i = 0; i < m_Header.numAttributes(); i++) {
         if (i == m_Header.classIndex())
@@ -121,15 +135,15 @@ public class HTML
 
         if (m_Attributes.isInRange(i)) {
           if (!first)
-            m_Buffer.append("</td><td>");
-          m_Buffer.append(sanitize(m_Header.attribute(i).name()));
+            append("</td><td>");
+          append(sanitize(m_Header.attribute(i).name()));
           first = false;
         }
       }
-      m_Buffer.append("</td>");
+      append("</td>");
     }
     
-    m_Buffer.append("</tr>\n");
+    append("</tr>\n");
   }
 
   /**
@@ -177,75 +191,75 @@ public class HTML
     double predValue = ((Classifier)classifier).classifyInstance(withMissing);
 
     // index
-    m_Buffer.append("<tr>");
-    m_Buffer.append("<td>" + (index+1) + "</td>");
+    append("<tr>");
+    append("<td>" + (index+1) + "</td>");
 
     if (inst.dataset().classAttribute().isNumeric()) {
       // actual
       if (inst.classIsMissing())
-	m_Buffer.append("<td align=\"right\">" + "?" + "</td>");
+	append("<td align=\"right\">" + "?" + "</td>");
       else
-	m_Buffer.append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
+	append("<td align=\"right\">" + Utils.doubleToString(inst.classValue(), prec) + "</td>");
       // predicted
       if (Instance.isMissingValue(predValue))
-	m_Buffer.append("<td align=\"right\">" + "?" + "</td>");
+	append("<td align=\"right\">" + "?" + "</td>");
       else
-	m_Buffer.append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
+	append("<td align=\"right\">" + Utils.doubleToString(predValue, prec) + "</td>");
       // error
       if (Instance.isMissingValue(predValue) || inst.classIsMissing())
-	m_Buffer.append("<td align=\"right\">" + "?" + "</td>");
+	append("<td align=\"right\">" + "?" + "</td>");
       else
-	m_Buffer.append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
+	append("<td align=\"right\">" + Utils.doubleToString(predValue - inst.classValue(), prec) + "</td>");
     } else {
       // actual
-      m_Buffer.append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
+      append("<td>" + ((int) inst.classValue()+1) + ":" + sanitize(inst.toString(inst.classIndex())) + "</td>");
       // predicted
       if (Instance.isMissingValue(predValue))
-	m_Buffer.append("<td>" + "?" + "</td>");
+	append("<td>" + "?" + "</td>");
       else
-	m_Buffer.append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
+	append("<td>" + ((int) predValue+1) + ":" + sanitize(inst.dataset().classAttribute().value((int)predValue)) + "</td>");
       // error?
       if ((int) predValue+1 != (int) inst.classValue()+1)
-	m_Buffer.append("<td>" + "+" + "</td>");
+	append("<td>" + "+" + "</td>");
       else
-	m_Buffer.append("<td>" + "&nbsp;" + "</td>");
+	append("<td>" + "&nbsp;" + "</td>");
       // prediction/distribution
       if (m_OutputDistribution) {
 	if (Instance.isMissingValue(predValue)) {
-	  m_Buffer.append("<td>" + "?" + "</td>");
+	  append("<td>" + "?" + "</td>");
 	}
 	else {
-	  m_Buffer.append("<td align=\"right\">");
+	  append("<td align=\"right\">");
 	  double[] dist = classifier.distributionForInstance(withMissing);
 	  for (int n = 0; n < dist.length; n++) {
 	    if (n > 0)
-	      m_Buffer.append("</td><td align=\"right\">");
+	      append("</td><td align=\"right\">");
 	    if (n == (int) predValue)
-	      m_Buffer.append("*");
-            m_Buffer.append(Utils.doubleToString(dist[n], prec));
+	      append("*");
+            append(Utils.doubleToString(dist[n], prec));
 	  }
-	  m_Buffer.append("</td>");
+	  append("</td>");
 	}
       }
       else {
 	if (Instance.isMissingValue(predValue))
-	  m_Buffer.append("<td align=\"right\">" + "?" + "</td>");
+	  append("<td align=\"right\">" + "?" + "</td>");
 	else
-	  m_Buffer.append("<td align=\"right\">" + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec) + "</td>");
+	  append("<td align=\"right\">" + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec) + "</td>");
       }
     }
 
     // attributes
-    m_Buffer.append(attributeValuesString(withMissing) + "</tr>\n");
+    append(attributeValuesString(withMissing) + "</tr>\n");
   }
   
   /**
    * Does nothing.
    */
   protected void doPrintFooter() {
-    m_Buffer.append("</table>\n");
-    m_Buffer.append("</div>\n");
-    m_Buffer.append("</body>\n");
-    m_Buffer.append("</html>\n");
+    append("</table>\n");
+    append("</div>\n");
+    append("</body>\n");
+    append("</html>\n");
   }
 }
