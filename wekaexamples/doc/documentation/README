@@ -41,6 +41,9 @@ Also, a lot of the examples require command-line parameters as they load and/or
 process data. Check out the documentation of the specific source code that you 
 are interested in.
 
+Eclipse users can just rename the .classpath-default and .project-default files
+(by removing the "-default") and then import the project directly in Eclipse.
+
 
 3. Further information
 ======================
