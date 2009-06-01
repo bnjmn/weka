@@ -48,7 +48,7 @@ import javax.swing.JScrollPane;
  * A bean that evaluates the performance of batch trained classifiers
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.9.2.3 $
+ * @version $Revision$
  */
 public class ClassifierPerformanceEvaluator 
   extends AbstractEvaluator
@@ -114,7 +114,16 @@ public class ClassifierPerformanceEvaluator
 	      try {
 		if (ce.getSetNumber() == 1 || 
 		    ce.getClassifier() != m_classifier) {
-		  m_eval = new Evaluation(ce.getTestSet().getDataSet());
+                  if (ce.getTrainSet().getDataSet() == null ||
+                      ce.getTrainSet().getDataSet().numInstances() == 0) {
+                    // we have no training set to estimate majority class
+                    // or mean of target from
+                    m_eval = new Evaluation(ce.getTestSet().getDataSet());
+                    m_eval.useNoPriors();
+                  } else {
+                    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
+                  }
+
 		  m_classifier = ce.getClassifier();
 		  m_predInstances = 
 		    weka.gui.explorer.ClassifierPanel.
