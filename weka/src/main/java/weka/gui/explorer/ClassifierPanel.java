@@ -1026,7 +1026,8 @@ public class ClassifierPanel
    * @param title			the title to print
    */
   protected void printPredictionsHeader(StringBuffer outBuff, AbstractOutput classificationOutput, String title) {
-    outBuff.append("=== Predictions on " + title + " ===\n\n");
+    if (classificationOutput.generatesOutput())
+      outBuff.append("=== Predictions on " + title + " ===\n\n");
     classificationOutput.printHeader();
   }
   
@@ -1258,7 +1259,7 @@ public class ClassifierPanel
 	      }
 	      if (outputPredictionsText)
 		classificationOutput.printFooter();
-	      if (outputPredictionsText) {
+	      if (outputPredictionsText && classificationOutput.generatesOutput()) {
 		outBuff.append("\n");
 	      } 
 	      outBuff.append("=== Evaluation on training set ===\n");
@@ -2306,7 +2307,7 @@ public class ClassifierPanel
 
 	      if (outputPredictionsText)
 		classificationOutput.printFooter();
-              if (outputPredictionsText) {
+              if (outputPredictionsText && classificationOutput.generatesOutput()) {
                 outBuff.append("\n");
               } 
       
