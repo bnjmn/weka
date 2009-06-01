@@ -31,6 +31,9 @@ import weka.core.Utils;
 import weka.core.WekaException;
 import weka.core.converters.ConverterUtils.DataSource;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -94,6 +97,9 @@ public abstract class AbstractOutput
   /** the buffer to write to. */
   protected StringBuffer m_Buffer;
   
+  /** the file buffer to write to. */
+  protected StringBuffer m_FileBuffer;
+  
   /** whether to output the class distribution. */
   protected boolean m_OutputDistribution;
   
@@ -102,6 +108,12 @@ public abstract class AbstractOutput
   
   /** the number of decimals after the decimal point. */
   protected int m_NumDecimals;
+
+  /** the file to store the output in. */
+  protected File m_OutputFile;
+  
+  /** whether to suppress the regular output and only store in file. */
+  protected boolean m_SuppressOutput;
   
   /**
    * Initializes the output class. 
@@ -112,6 +124,9 @@ public abstract class AbstractOutput
     m_Attributes         = null;
     m_Buffer             = null;
     m_NumDecimals        = 3;
+    m_OutputFile         = new File(".");
+    m_FileBuffer         = new StringBuffer();
+    m_SuppressOutput     = false;
   }
   
   /**
@@ -155,6 +170,18 @@ public abstract class AbstractOutput
 	+ "\t(default: " + getDefaultNumDecimals() + ")",
         "decimals", 1, "-decimals <num>"));
     
+    result.addElement(new Option(
+        "\tThe file to store the output in, instead of outputting it on stdout.\n"
+	+ "\tGets ignored if the supplied path is a directory.\n"
+	+ "\t(default: .)",
+        "file", 1, "-file <path>"));
+    
+    result.addElement(new Option(
+        "\tIn case the data gets stored in a file, then this flag can be used\n"
+	+ "\tto suppress the regular output.\n"
+	+ "\t(default: not suppressed)",
+        "suppress", 0, "-suppress"));
+    
     return result.elements();
   }
 
@@ -177,6 +204,14 @@ public abstract class AbstractOutput
       setNumDecimals(Integer.parseInt(tmpStr));
     else
       setNumDecimals(getDefaultNumDecimals());
+    
+    tmpStr = Utils.getOption("file", options);
+    if (tmpStr.length() > 0)
+      setOutputFile(new File(tmpStr));
+    else
+      setOutputFile(new File("."));
+    
+    setSuppressOutput(Utils.getFlag("suppress", options));
   }
 
   /**
@@ -200,6 +235,13 @@ public abstract class AbstractOutput
     if (getNumDecimals() != getDefaultNumDecimals()) {
       result.add("-decimals");
       result.add("" + getNumDecimals());
+    }
+    
+    if (!getOutputFile().isDirectory()) {
+      result.add("-file");
+      result.add(getOutputFile().getAbsolutePath());
+      if (getSuppressOutput())
+	result.add("-suppress");
     }
     
     return result.toArray(new String[result.size()]);
@@ -345,6 +387,64 @@ public abstract class AbstractOutput
   }
   
   /**
+   * Sets the output file to write to. A directory disables this feature.
+   * 
+   * @param value	the file to write to or a directory
+   */
+  public void setOutputFile(File value) {
+    m_OutputFile = value;
+  }
+  
+  /**
+   * Returns the output file to write to. A directory if turned off.
+   * 
+   * @return		the file to write to or a directory
+   */
+  public File getOutputFile() {
+    return m_OutputFile;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the GUI
+   */
+  public String outputFileTipText() {
+    return "The file to write the generated output to (disabled if path is a directory).";
+  }
+  
+  /**
+   * Sets whether to the regular output is suppressed in case the output is 
+   * stored in a file.
+   * 
+   * @param value	true if the regular output is to be suppressed
+   */
+  public void setSuppressOutput(boolean value) {
+    m_SuppressOutput = value;
+  }
+  
+  /**
+   * Returns whether to the regular output is suppressed in case the output
+   * is stored in a file.
+   * 
+   * @return		true if the regular output is to be suppressed
+   */
+  public boolean getSuppressOutput() {
+    return m_SuppressOutput;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return 		tip text for this property suitable for
+   * 			displaying in the GUI
+   */
+  public String suppressOutputTipText() {
+    return "Whether to suppress the regular output when storing the output in a file.";
+  }
+  
+  /**
    * Performs basic checks.
    * 
    * @return		null if everything is in order, otherwise the error message
@@ -360,6 +460,31 @@ public abstract class AbstractOutput
       m_Attributes.setUpper(m_Header.numAttributes() - 1);
     
     return null;
+  }
+
+  /**
+   * Returns whether regular output is generated or not.
+   * 
+   * @return		true if regular output is generated
+   */
+  public boolean generatesOutput() {
+    return    m_OutputFile.isDirectory() 
+           || (!m_OutputFile.isDirectory() && !m_SuppressOutput);
+  }
+  
+  /**
+   * If an output file was defined, then the string gets added to the file 
+   * buffer, otherwise to the actual buffer.
+   * 
+   * @param s		the string to append
+   * @see		#m_Buffer
+   * @see		#m_FileBuffer
+   */
+  protected void append(String s) {
+    if (generatesOutput())
+      m_Buffer.append(s);
+    if (!m_OutputFile.isDirectory())
+      m_FileBuffer.append(s);
   }
   
   /**
@@ -457,17 +582,33 @@ public abstract class AbstractOutput
   protected abstract void doPrintFooter();
   
   /**
-   * Prints the footer to the buffer.
+   * Prints the footer to the buffer. This will also store the generated 
+   * output in a file if an output file was specified.
    * 
    * @throws Exception	if check fails
    */
   public void printFooter() throws Exception {
-    String	error;
+    String		error;
+    BufferedWriter	writer;
     
     if ((error = checkBasic()) != null)
       throw new WekaException(error);
     
     doPrintFooter();
+    
+    // write output to file
+    if (!m_OutputFile.isDirectory()) {
+      try {
+	writer = new BufferedWriter(new FileWriter(m_OutputFile));
+	writer.write(m_FileBuffer.toString());
+	writer.newLine();
+	writer.flush();
+	writer.close();
+      }
+      catch (Exception e) {
+	e.printStackTrace();
+      }
+    }
   }
   
   /**

@@ -43,6 +43,20 @@ import weka.core.Utils;
  *  Only for nominal class attributes.
  *  (default: off)</pre>
  * 
+ * <pre> -decimals &lt;num&gt;
+ *  The number of digits after the decimal point.
+ *  (default: 3)</pre>
+ * 
+ * <pre> -file &lt;path&gt;
+ *  The file to store the output in, instead of outputting it on stdout.
+ *  Gets ignored if the supplied path is a directory.
+ *  (default: .)</pre>
+ * 
+ * <pre> -suppress
+ *  In case the data gets stored in a file, then this flag can be used
+ *  to suppress the regular output.
+ *  (default: not suppressed)</pre>
+ * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
@@ -79,14 +93,14 @@ public class PlainText
   protected void doPrintHeader() {
     if (m_Header.classAttribute().isNominal())
       if (m_OutputDistribution)
-	m_Buffer.append(" inst#     actual  predicted error distribution");
+	append(" inst#     actual  predicted error distribution");
       else
-	m_Buffer.append(" inst#     actual  predicted error prediction");
+	append(" inst#     actual  predicted error prediction");
     else
-      m_Buffer.append(" inst#     actual  predicted      error");
+      append(" inst#     actual  predicted      error");
     
     if (m_Attributes != null) {
-      m_Buffer.append(" (");
+      append(" (");
       boolean first = true;
       for (int i = 0; i < m_Header.numAttributes(); i++) {
         if (i == m_Header.classIndex())
@@ -94,15 +108,15 @@ public class PlainText
 
         if (m_Attributes.isInRange(i)) {
           if (!first)
-            m_Buffer.append(",");
-          m_Buffer.append(m_Header.attribute(i).name());
+            append(",");
+          append(m_Header.attribute(i).name());
           first = false;
         }
       }
-      m_Buffer.append(")");
+      append(")");
     }
     
-    m_Buffer.append("\n");
+    append("\n");
   }
 
   /**
@@ -146,64 +160,64 @@ public class PlainText
     double predValue = ((Classifier)classifier).classifyInstance(withMissing);
 
     // index
-    m_Buffer.append(Utils.padLeft("" + (index+1), 6));
+    append(Utils.padLeft("" + (index+1), 6));
 
     if (inst.dataset().classAttribute().isNumeric()) {
       // actual
       if (inst.classIsMissing())
-	m_Buffer.append(" " + Utils.padLeft("?", width));
+	append(" " + Utils.padLeft("?", width));
       else
-	m_Buffer.append(" " + Utils.doubleToString(inst.classValue(), width, prec));
+	append(" " + Utils.doubleToString(inst.classValue(), width, prec));
       // predicted
       if (Instance.isMissingValue(predValue))
-	m_Buffer.append(" " + Utils.padLeft("?", width));
+	append(" " + Utils.padLeft("?", width));
       else
-	m_Buffer.append(" " + Utils.doubleToString(predValue, width, prec));
+	append(" " + Utils.doubleToString(predValue, width, prec));
       // error
       if (Instance.isMissingValue(predValue) || inst.classIsMissing())
-	m_Buffer.append(" " + Utils.padLeft("?", width));
+	append(" " + Utils.padLeft("?", width));
       else
-	m_Buffer.append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
+	append(" " + Utils.doubleToString(predValue - inst.classValue(), width, prec));
     } else {
       // actual
-      m_Buffer.append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
+      append(" " + Utils.padLeft(((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()), width));
       // predicted
       if (Instance.isMissingValue(predValue))
-	m_Buffer.append(" " + Utils.padLeft("?", width));
+	append(" " + Utils.padLeft("?", width));
       else
-	m_Buffer.append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
+	append(" " + Utils.padLeft(((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue), width));
       // error?
       if ((int) predValue+1 != (int) inst.classValue()+1)
-	m_Buffer.append(" " + "  +  ");
+	append(" " + "  +  ");
       else
-	m_Buffer.append(" " + "     ");
+	append(" " + "     ");
       // prediction/distribution
       if (m_OutputDistribution) {
 	if (Instance.isMissingValue(predValue)) {
-	  m_Buffer.append(" " + "?");
+	  append(" " + "?");
 	}
 	else {
-	  m_Buffer.append(" ");
+	  append(" ");
 	  double[] dist = classifier.distributionForInstance(withMissing);
 	  for (int n = 0; n < dist.length; n++) {
 	    if (n > 0)
-	      m_Buffer.append(",");
+	      append(",");
 	    if (n == (int) predValue)
-	      m_Buffer.append("*");
-            m_Buffer.append(Utils.doubleToString(dist[n], prec));
+	      append("*");
+            append(Utils.doubleToString(dist[n], prec));
 	  }
 	}
       }
       else {
 	if (Instance.isMissingValue(predValue))
-	  m_Buffer.append(" " + "?");
+	  append(" " + "?");
 	else
-	  m_Buffer.append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
+	  append(" " + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
       }
     }
 
     // attributes
-    m_Buffer.append(" " + attributeValuesString(withMissing) + "\n");
+    append(" " + attributeValuesString(withMissing) + "\n");
   }
   
   /**
