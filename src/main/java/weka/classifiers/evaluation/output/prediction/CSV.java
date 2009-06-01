@@ -47,6 +47,20 @@ import java.util.Vector;
  *  Only for nominal class attributes.
  *  (default: off)</pre>
  * 
+ * <pre> -decimals &lt;num&gt;
+ *  The number of digits after the decimal point.
+ *  (default: 3)</pre>
+ * 
+ * <pre> -file &lt;path&gt;
+ *  The file to store the output in, instead of outputting it on stdout.
+ *  Gets ignored if the supplied path is a directory.
+ *  (default: .)</pre>
+ * 
+ * <pre> -suppress
+ *  In case the data gets stored in a file, then this flag can be used
+ *  to suppress the regular output.
+ *  (default: not suppressed)</pre>
+ * 
  * <pre> -use-tab
  *  Whether to use TAB as separator instead of comma.
  *  (default: comma)</pre>
@@ -179,20 +193,20 @@ public class CSV
   protected void doPrintHeader() {
     if (m_Header.classAttribute().isNominal()) {
       if (m_OutputDistribution) {
-	m_Buffer.append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error" + m_Delimiter + "distribution");
+	append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error" + m_Delimiter + "distribution");
 	for (int i = 1; i < m_Header.classAttribute().numValues(); i++)
-	  m_Buffer.append(m_Delimiter);
+	  append(m_Delimiter);
       }
       else {
-	m_Buffer.append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error" + m_Delimiter + "prediction");
+	append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error" + m_Delimiter + "prediction");
       }
     }
     else {
-      m_Buffer.append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error");
+      append("inst#" + m_Delimiter + "actual" + m_Delimiter + "predicted" + m_Delimiter + "error");
     }
     
     if (m_Attributes != null) {
-      m_Buffer.append(m_Delimiter);
+      append(m_Delimiter);
       boolean first = true;
       for (int i = 0; i < m_Header.numAttributes(); i++) {
         if (i == m_Header.classIndex())
@@ -200,14 +214,14 @@ public class CSV
 
         if (m_Attributes.isInRange(i)) {
           if (!first)
-            m_Buffer.append(m_Delimiter);
-          m_Buffer.append(m_Header.attribute(i).name());
+            append(m_Delimiter);
+          append(m_Header.attribute(i).name());
           first = false;
         }
       }
     }
     
-    m_Buffer.append("\n");
+    append("\n");
   }
 
   /**
@@ -249,66 +263,66 @@ public class CSV
     double predValue = ((Classifier)classifier).classifyInstance(withMissing);
 
     // index
-    m_Buffer.append("" + (index+1));
+    append("" + (index+1));
 
     if (inst.dataset().classAttribute().isNumeric()) {
       // actual
       if (inst.classIsMissing())
-	m_Buffer.append(m_Delimiter + "?");
+	append(m_Delimiter + "?");
       else
-	m_Buffer.append(m_Delimiter + Utils.doubleToString(inst.classValue(), prec));
+	append(m_Delimiter + Utils.doubleToString(inst.classValue(), prec));
       // predicted
       if (Instance.isMissingValue(predValue))
-	m_Buffer.append(m_Delimiter + "?");
+	append(m_Delimiter + "?");
       else
-	m_Buffer.append(m_Delimiter + Utils.doubleToString(predValue, prec));
+	append(m_Delimiter + Utils.doubleToString(predValue, prec));
       // error
       if (Instance.isMissingValue(predValue) || inst.classIsMissing())
-	m_Buffer.append(m_Delimiter + "?");
+	append(m_Delimiter + "?");
       else
-	m_Buffer.append(m_Delimiter + Utils.doubleToString(predValue - inst.classValue(), prec));
+	append(m_Delimiter + Utils.doubleToString(predValue - inst.classValue(), prec));
     } else {
       // actual
-      m_Buffer.append(m_Delimiter + ((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()));
+      append(m_Delimiter + ((int) inst.classValue()+1) + ":" + inst.toString(inst.classIndex()));
       // predicted
       if (Instance.isMissingValue(predValue))
-	m_Buffer.append(m_Delimiter + "?");
+	append(m_Delimiter + "?");
       else
-	m_Buffer.append(m_Delimiter + ((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue));
+	append(m_Delimiter + ((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue));
       // error?
       if ((int) predValue+1 != (int) inst.classValue()+1)
-	m_Buffer.append(m_Delimiter + "+");
+	append(m_Delimiter + "+");
       else
-	m_Buffer.append(m_Delimiter + "");
+	append(m_Delimiter + "");
       // prediction/distribution
       if (m_OutputDistribution) {
 	if (Instance.isMissingValue(predValue)) {
-	  m_Buffer.append(m_Delimiter + "?");
+	  append(m_Delimiter + "?");
 	}
 	else {
-	  m_Buffer.append(m_Delimiter);
+	  append(m_Delimiter);
 	  double[] dist = classifier.distributionForInstance(withMissing);
 	  for (int n = 0; n < dist.length; n++) {
 	    if (n > 0)
-	      m_Buffer.append(m_Delimiter);
+	      append(m_Delimiter);
 	    if (n == (int) predValue)
-	      m_Buffer.append("*");
-            m_Buffer.append(Utils.doubleToString(dist[n], prec));
+	      append("*");
+            append(Utils.doubleToString(dist[n], prec));
 	  }
 	}
       }
       else {
 	if (Instance.isMissingValue(predValue))
-	  m_Buffer.append(m_Delimiter + "?");
+	  append(m_Delimiter + "?");
 	else
-	  m_Buffer.append(m_Delimiter + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
+	  append(m_Delimiter + Utils.doubleToString(classifier.distributionForInstance(withMissing) [(int)predValue], prec));
       }
     }
 
     // attributes
     if (m_Attributes != null)
-      m_Buffer.append(m_Delimiter + attributeValuesString(withMissing));
-    m_Buffer.append("\n");
+      append(m_Delimiter + attributeValuesString(withMissing));
+    append("\n");
   }
   
   /**
