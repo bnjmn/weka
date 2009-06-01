@@ -95,13 +95,13 @@ public class EnvironmentField extends JPanel {
     setLayout(new BorderLayout());
     m_label = new JLabel(label);
     if (label.length() > 0) {
-      m_label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+      m_label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
     }
     add(m_label, BorderLayout.WEST);
     
     m_combo = new JComboBox();
     m_combo.setEditable(true);
-    m_combo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    //m_combo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     
     java.awt.Component theEditor = m_combo.getEditor().getEditorComponent();
     if (theEditor instanceof JTextField) {
