@@ -42,6 +42,20 @@ import weka.core.Instance;
  *  Only for nominal class attributes.
  *  (default: off)</pre>
  * 
+ * <pre> -decimals &lt;num&gt;
+ *  The number of digits after the decimal point.
+ *  (default: 3)</pre>
+ * 
+ * <pre> -file &lt;path&gt;
+ *  The file to store the output in, instead of outputting it on stdout.
+ *  Gets ignored if the supplied path is a directory.
+ *  (default: .)</pre>
+ * 
+ * <pre> -suppress
+ *  In case the data gets stored in a file, then this flag can be used
+ *  to suppress the regular output.
+ *  (default: not suppressed)</pre>
+ * 
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
@@ -70,6 +84,15 @@ public class Null
    */
   public String getDisplay() {
     return "No output";
+  }
+
+  /**
+   * Returns always false.
+   * 
+   * @return		always false
+   */
+  public boolean generatesOutput() {
+    return false;
   }
 
   /**
