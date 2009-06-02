@@ -51,31 +51,29 @@ public class VisualizeROC {
    * @throws Exception	if something goes wrong
    */
   public static void main(String[] args) throws Exception {
-    Instances result = DataSource.read(args[0]);
-    result.setClassIndex(result.numAttributes() - 1);
+    Instances curve = DataSource.read(args[0]);
+    curve.setClassIndex(curve.numAttributes() - 1);
+    
     // method visualize
-    ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-    vmc.setROCString("(Area under ROC = " + 
-        Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
-    vmc.setName(result.relationName());
-    PlotData2D tempd = new PlotData2D(result);
-    tempd.setPlotName(result.relationName());
-    tempd.addInstanceNumberAttribute();
-    vmc.addPlot(tempd);
+    ThresholdVisualizePanel tvp = new ThresholdVisualizePanel();
+    tvp.setROCString("(Area under ROC = " + 
+        Utils.doubleToString(ThresholdCurve.getROCArea(curve), 4) + ")");
+    tvp.setName(curve.relationName());
+    PlotData2D plotdata = new PlotData2D(curve);
+    plotdata.setPlotName(curve.relationName());
+    plotdata.addInstanceNumberAttribute();
+    tvp.addPlot(plotdata);
+    
     // method visualizeClassifierErrors
-    String plotName = vmc.getName(); 
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
+    final javax.swing.JFrame jf = new javax.swing.JFrame("WEKA ROC: " + tvp.getName());
     jf.setSize(500,400);
     jf.getContentPane().setLayout(new BorderLayout());
-
-    jf.getContentPane().add(vmc, BorderLayout.CENTER);
+    jf.getContentPane().add(tvp, BorderLayout.CENTER);
     jf.addWindowListener(new java.awt.event.WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) {
-      jf.dispose();
+	jf.dispose();
       }
     });
-
     jf.setVisible(true);
   }
 }

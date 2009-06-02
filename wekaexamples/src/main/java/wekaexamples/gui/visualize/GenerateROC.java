@@ -63,25 +63,23 @@ public class GenerateROC {
     // generate curve
     ThresholdCurve tc = new ThresholdCurve();
     int classIndex = 0;
-    Instances result = tc.getCurve(eval.predictions(), classIndex);
+    Instances curve = tc.getCurve(eval.predictions(), classIndex);
 
     // plot curve
-    ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-    vmc.setROCString("(Area under ROC = " + 
-	Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
-    vmc.setName(result.relationName());
-    PlotData2D tempd = new PlotData2D(result);
-    tempd.setPlotName(result.relationName());
-    tempd.addInstanceNumberAttribute();
-    vmc.addPlot(tempd);
+    ThresholdVisualizePanel tvp = new ThresholdVisualizePanel();
+    tvp.setROCString("(Area under ROC = " + 
+	Utils.doubleToString(ThresholdCurve.getROCArea(curve), 4) + ")");
+    tvp.setName(curve.relationName());
+    PlotData2D plotdata = new PlotData2D(curve);
+    plotdata.setPlotName(curve.relationName());
+    plotdata.addInstanceNumberAttribute();
+    tvp.addPlot(plotdata);
 
     // display curve
-    String plotName = vmc.getName(); 
-    final javax.swing.JFrame jf = 
-      new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
+    final javax.swing.JFrame jf = new javax.swing.JFrame("WEKA ROC: " + tvp.getName());
     jf.setSize(500,400);
     jf.getContentPane().setLayout(new BorderLayout());
-    jf.getContentPane().add(vmc, BorderLayout.CENTER);
+    jf.getContentPane().add(tvp, BorderLayout.CENTER);
     jf.addWindowListener(new java.awt.event.WindowAdapter() {
       public void windowClosing(java.awt.event.WindowEvent e) {
 	jf.dispose();
