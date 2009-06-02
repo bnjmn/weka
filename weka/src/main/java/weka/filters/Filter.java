@@ -31,6 +31,7 @@ import weka.core.OptionHandler;
 import weka.core.Queue;
 import weka.core.RelationalLocator;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.StringLocator;
 import weka.core.UnsupportedAttributeTypeException;
@@ -145,9 +146,20 @@ public abstract class Filter
     Capabilities 	result;
 
     result = new Capabilities(this);
+    result.enableAll();
+    
     result.setMinimumNumberInstances(0);
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
 
   /** 
