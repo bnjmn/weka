@@ -34,6 +34,8 @@ import weka.gui.visualize.ThresholdVisualizePanel;
 import java.awt.BorderLayout;
 import java.util.Random;
 
+import javax.swing.JFrame;
+
 /**
  * Generates and displays a ROC curve from a dataset. Uses a default 
  * NaiveBayes to generate the ROC data.
@@ -76,15 +78,11 @@ public class GenerateROC {
     tvp.addPlot(plotdata);
 
     // display curve
-    final javax.swing.JFrame jf = new javax.swing.JFrame("WEKA ROC: " + tvp.getName());
+    final JFrame jf = new JFrame("WEKA ROC: " + tvp.getName());
     jf.setSize(500,400);
     jf.getContentPane().setLayout(new BorderLayout());
     jf.getContentPane().add(tvp, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-	jf.dispose();
-      }
-    });
+    jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     jf.setVisible(true);
   }
 }

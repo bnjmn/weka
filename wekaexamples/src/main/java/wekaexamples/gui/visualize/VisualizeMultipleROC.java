@@ -28,6 +28,8 @@ import weka.gui.visualize.ThresholdVisualizePanel;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JFrame;
+
 /**
  * Visualizes previously saved ROC curves.
  *
@@ -61,15 +63,11 @@ public class VisualizeMultipleROC {
       first = false;
     }
     // method visualizeClassifierErrors
-    final javax.swing.JFrame jf = new javax.swing.JFrame("WEKA ROC");
+    final JFrame jf = new JFrame("WEKA ROC");
     jf.setSize(500,400);
     jf.getContentPane().setLayout(new BorderLayout());
     jf.getContentPane().add(tvp, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-	jf.dispose();
-      }
-    });
+    jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     jf.setVisible(true);
   }
 }

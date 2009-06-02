@@ -29,6 +29,10 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 
 import java.awt.BorderLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
 
 /**
  * Visualizes a previously saved ROC curve. Code taken from the 
@@ -65,15 +69,11 @@ public class VisualizeROC {
     tvp.addPlot(plotdata);
     
     // method visualizeClassifierErrors
-    final javax.swing.JFrame jf = new javax.swing.JFrame("WEKA ROC: " + tvp.getName());
+    final JFrame jf = new JFrame("WEKA ROC: " + tvp.getName());
     jf.setSize(500,400);
     jf.getContentPane().setLayout(new BorderLayout());
     jf.getContentPane().add(tvp, BorderLayout.CENTER);
-    jf.addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent e) {
-	jf.dispose();
-      }
-    });
+    jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     jf.setVisible(true);
   }
 }
