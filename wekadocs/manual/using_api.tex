@@ -323,6 +323,7 @@ do this:
 \end{verbatim}
 
 \subsection{Filtering on-the-fly}
+\label{api_filtering_onthefly}
 Even though using the API gives one full control over the data and makes it
 easier to juggle several datasets at the same time, filtering data
 \textbf{on-the-fly} makes life even easier. This handy feature is available
@@ -337,13 +338,13 @@ do the filtering for one.
 
 \newpage
 
-The following example uses the
-\texttt{FilteredClassifier} in conjunction with the \texttt{Remove} filter to
-remove the first attribute from the dataset and \texttt{J48} (package
+The following example uses the \texttt{FilteredClassifier} in conjunction with
+the \texttt{Remove} filter to remove the first attribute (which happens to be
+an ID attribute) from the dataset and \texttt{J48} (package
 \texttt{weka.classifiers.trees}) as base-classifier. First the classifier is
-built with a training set and the evaluated with a separate test set. The
-actual and predicted class values are printed in the console. For more
-information on classification, see chapter \ref{api_classiyfing}.
+built with a training set and the evaluated with a separate test set. The actual
+and predicted class values are printed in the console. For more information on
+classification, see chapter \ref{api_classification}.
 \begin{verbatim}
    import weka.classifiers.meta.FilteredClassifier;
    import weka.classifiers.trees.J48;
@@ -361,8 +362,9 @@ information on classification, see chapter \ref{api_classiyfing}.
    FilteredClassifier fc = new FilteredClassifier();
    fc.setFilter(rm);
    fc.setClassifier(j48);
-   // train and make predictions
+   // train and output model
    fc.buildClassifier(train);
+   System.out.println(fc);
    for (int i = 0; i < test.numInstances(); i++) {
      double pred = fc.classifyInstance(test.instance(i));
      double actual = test.instance(i).classValue();
@@ -377,11 +379,11 @@ information on classification, see chapter \ref{api_classiyfing}.
 
 \newpage
 
-%%%%%%%%%%%%%%%
-% Classifying %
-%%%%%%%%%%%%%%%
-\section{Classifying}
-\label{api_classiyfing}
+%%%%%%%%%%%%%%%%%%
+% Classification %
+%%%%%%%%%%%%%%%%%%
+\section{Classification}
+\label{api_classification}
 Classification and regression algorithms in WEKA are called ``classifiers'' and
 are located in the \texttt{weka.classifiers} package. This section covers the
 following topics:
@@ -561,9 +563,11 @@ In the previous sections, the \texttt{toSummaryString} of the
 \texttt{Evaluation} class was already used in the code examples. But there are
 other summary methods for nominal class attributes available as well:
 \begin{tight_itemize}
-	\item \texttt{toMatrixString}
-	\item \texttt{toClassDetailsString}
-	\item \texttt{toCumulativeMarginDistributionString}
+	\item \texttt{toMatrixString} -- outputs the confusion matrix
+	\item \texttt{toClassDetailsString} -- outputs TP/FP rates, precision,
+recall, F-measure, AUC (per class)
+	\item \texttt{toCumulativeMarginDistributionString} -- outputs the
+cumulative margins distribution
 \end{tight_itemize}
 If one does not want to use these summary methods, it is possible to access the
 individual statistical measures directly. Below, a few common measures
@@ -658,6 +662,61 @@ And now, the four steps translated into actual code:
 \newpage
 
 \subsection{Classifying instances}
+After a classifier setup has been evaluated and proven to be useful, a built
+classifier can be used to make predictions and label previously unlabeled data.
+Section \ref{api_filtering_onthefly} already provided a glimpse of how to use a
+classifier's \texttt{classifyInstance(Instance)} method. This section here will
+elaborate a bit more on this.
+
+The following example uses a trained classifier \texttt{tree} to label all the
+instances in an unlabeled dataset that gets loaded from disk. After all the
+instances have been labeled, the labeled dataset gets written back to a new
+file.
+\begin{verbatim}
+   // load unlabeled data
+   Instances unlabeled = DataSource.read("/some/where/unlabeled.arff"); 
+   // set class attribute
+   unlabeled.setClassIndex(unlabeled.numAttributes() - 1);
+   // create copy
+   Instances labeled = new Instances(unlabeled);
+   // label instances
+   for (int i = 0; i < unlabeled.numInstances(); i++) {
+     double clsLabel = tree.classifyInstance(unlabeled.instance(i));
+     labeled.instance(i).setClassValue(clsLabel);
+   }
+   // save labeled data
+   DataSink.write("/some/where/labeled.arff", labeled);
+\end{verbatim}
+The above example basically works for classification and regression problems
+alike. Why is that? The \texttt{classifyInstance(Instance)} method returns the
+numeric classes the regression value and for nominal classes the 0-based index
+in the list of available class labels.
+
+If one is interested in the class distribution instead, then one can use the
+\texttt{distributionForInstance(Instance)} method. Of course, using this method
+makes only sense for classification problems. The code snippet below outputs
+the class distribution, the actual and chosen label side-by-side in the
+console:
+\begin{verbatim}
+   // load data
+   Instances train = DataSource.read(args[0]);
+   train.setClassIndex(train.numAttributes() - 1);
+   Instances test = DataSource.read(args[1]);
+   test.setClassIndex(test.numAttributes() - 1);
+   // train classifier
+   J48 cls = new J48();
+   cls.buildClassifier(train);
+   // output predictions
+   System.out.println("# - actual - predicted - distribution");
+   for (int i = 0; i < test.numInstances(); i++) {
+     double pred = cls.classifyInstance(test.instance(i));
+     double[] dist = cls.distributionForInstance(test.instance(i));
+     System.out.print((i+1) + " - ");
+     System.out.print(test.instance(i).toString(test.classIndex()) + " - ");
+     System.out.print(test.classAttribute().value((int) pred) + " - ");
+     System.out.println(Utils.arrayToString(dist));
+   }
+\end{verbatim}
 
 \newpage
 
