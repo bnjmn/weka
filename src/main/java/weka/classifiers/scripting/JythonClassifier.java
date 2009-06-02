@@ -309,10 +309,12 @@ public class JythonClassifier
   public Capabilities getCapabilities() {
     Capabilities	result;
 
-    if (m_JythonObject == null)
+    if (m_JythonObject == null) {
       result = new Capabilities(this);
-    else
+      result.disableAll();
+    } else {
       result = m_JythonObject.getCapabilities();
+    }
 
     result.enableAllAttributeDependencies();
     result.enableAllClassDependencies();
