@@ -247,10 +247,12 @@ public class GroovyClassifier
   public Capabilities getCapabilities() {
     Capabilities	result;
 
-    if (m_GroovyObject == null)
+    if (m_GroovyObject == null) {
       result = new Capabilities(this);
-    else
+      result.disableAll();
+    } else {
       result = m_GroovyObject.getCapabilities();
+    }
 
     result.enableAllAttributeDependencies();
     result.enableAllClassDependencies();
