@@ -104,7 +104,7 @@ import java.util.Vector;
  *
  * @author Janice Boughton (jrbought@csse.monash.edu.au)
  *  (based on J48.java written by Eibe Frank)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class J48graft 
   extends Classifier
@@ -190,6 +190,7 @@ public class J48graft
     }
     catch (Exception e) {
       result = new Capabilities(this);
+      result.disableAll();
     }
 
     result.setOwner(this);
@@ -801,7 +802,7 @@ public class J48graft
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
   /**

@@ -38,7 +38,7 @@ import java.io.Serializable;
  * classification.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.22 $
+ * @version $Revision$
  */
 public class ClassifierTree 
   implements Drawable, Serializable, CapabilitiesHandler, RevisionHandler {
@@ -109,7 +109,10 @@ public class ClassifierTree
    * @return      the capabilities of this classifier tree
    */
   public Capabilities getCapabilities() {
-    return new Capabilities(this);
+    Capabilities result = new Capabilities(this);
+    result.disableAll();
+    
+    return result;
   }
 
   /**
@@ -705,6 +708,6 @@ public class ClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.22 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
