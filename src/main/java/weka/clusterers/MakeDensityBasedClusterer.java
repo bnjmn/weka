@@ -30,6 +30,7 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.core.Capabilities.Capability;
 import weka.estimators.DiscreteEstimator;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
@@ -80,7 +81,7 @@ import java.util.Vector;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public class MakeDensityBasedClusterer 
   extends AbstractDensityBasedClusterer
@@ -174,10 +175,14 @@ public class MakeDensityBasedClusterer
    * @return      the capabilities of this clusterer
    */
   public Capabilities getCapabilities() {
-    if (m_wrappedClusterer != null)
+    if (m_wrappedClusterer != null) {
       return m_wrappedClusterer.getCapabilities();
-    else
-      return super.getCapabilities();
+    }
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
+    
+    return result;
   }
   
   /**
@@ -581,7 +586,7 @@ public class MakeDensityBasedClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.18 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
