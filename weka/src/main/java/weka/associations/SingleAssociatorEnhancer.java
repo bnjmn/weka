@@ -37,7 +37,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public abstract class SingleAssociatorEnhancer
   extends AbstractAssociator
@@ -187,10 +187,12 @@ public abstract class SingleAssociatorEnhancer
   public Capabilities getCapabilities() {
     Capabilities        result;
 
-    if (getAssociator() != null)
+    if (getAssociator() != null) {
       result = getAssociator().getCapabilities();
-    else
+    } else {
       result = new Capabilities(this);
+      result.disableAll();
+    }
     
     // set dependencies
     for (Capability cap: Capability.values())

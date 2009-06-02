@@ -90,7 +90,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  Sebastian Beer
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class GeneralizedSequentialPatterns
   extends AbstractAssociator
@@ -294,6 +294,7 @@ public class GeneralizedSequentialPatterns
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capability.NO_CLASS);
@@ -616,7 +617,7 @@ public class GeneralizedSequentialPatterns
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
