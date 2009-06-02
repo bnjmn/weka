@@ -197,6 +197,8 @@ public class OPTICS
      */
     public Capabilities getCapabilities() {
       Capabilities result = super.getCapabilities();
+      result.disableAll();
+      result.enable(Capability.NO_CLASS);
 
       // attributes
       result.enable(Capability.NOMINAL_ATTRIBUTES);

@@ -358,6 +358,8 @@ public class XMeans
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
 
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
