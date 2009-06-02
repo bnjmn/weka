@@ -205,6 +205,7 @@ public class J48
     }
     catch (Exception e) {
       result = new Capabilities(this);
+      result.disableAll();
     }
     
     result.setOwner(this);
