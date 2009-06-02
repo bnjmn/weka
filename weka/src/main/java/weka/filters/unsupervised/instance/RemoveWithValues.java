@@ -81,7 +81,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class RemoveWithValues 
   extends Filter
@@ -272,6 +272,7 @@ public class RemoveWithValues
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -627,7 +628,7 @@ public class RemoveWithValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

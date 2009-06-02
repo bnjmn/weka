@@ -75,7 +75,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class RemoveFrequentValues 
    extends Filter 
@@ -495,6 +495,7 @@ public class RemoveFrequentValues
     */
    public Capabilities getCapabilities() {
      Capabilities result = super.getCapabilities();
+     result.disableAll();
 
      // attributes
      result.enableAllAttributes();
@@ -630,7 +631,7 @@ public class RemoveFrequentValues
     * @return		the revision
     */
    public String getRevision() {
-     return RevisionUtils.extract("$Revision: 1.6 $");
+     return RevisionUtils.extract("$Revision$");
    }
    
    /**
