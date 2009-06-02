@@ -62,7 +62,7 @@ import java.io.Serializable;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class FilteredSubsetEval
   extends ASEvaluation
@@ -94,6 +94,7 @@ public class FilteredSubsetEval
 
     if (getFilter() == null) {
       result = super.getCapabilities();
+      result.disableAll();
     } else {
       result = getFilter().getCapabilities();
     }
@@ -301,7 +302,7 @@ public class FilteredSubsetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
