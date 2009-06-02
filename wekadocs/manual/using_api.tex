@@ -604,55 +604,56 @@ easily determine what methods are used for which particular output.
 
 \subsubsection*{ROC curves}
 WEKA can generate Receiver operating characteristic (ROC) curves, based on the
-collected predictions during an evaluation. The class used for generating the
-necessary data to plot is \texttt{ThresholdCurve} (package
-\texttt{weka.classifiers.evaluation}). The \texttt{getCurve} method of
-this class generates a \texttt{weka.core.Instances} object for a particular
-class label (specified with a 0-based index), based on the collected predictions
-returned from an \texttt{Evaluation} object's \texttt{predictions()} method.
+collected predictions during an evaluation. In order to display a ROC curve, we
+need to perform the following steps:
+\begin{tight_enumerate}
+	\item Generate the plotable data based on the \texttt{Evaluation}'s
+collected predictions, using the \texttt{ThresholdCurve} class (package
+\texttt{weka.classifiers.evaluation}).
+	\item Put the plotable data into a plot container, an instance of the
+\texttt{PlotData2D} class (package \texttt{weka.gui.visualize}).
+	\item Add the plot container to a visualization panel for displaying the
+data, an instance of the \texttt{ThresholdVisualizePanel} class (package
+\texttt{weka.gui.visualize}).
+	\item Add the visualization panel to a \texttt{JFrame} (package
+\texttt{javax.swing}) and display it.
+\end{tight_enumerate}
+And now, the four steps translated into actual code:
+\begin{tight_enumerate}
+	\item Generate the plotable data
+	\begin{verbatim}
+		Evaluation eval = ... // from somewhere
+		ThresholdCurve tc = new ThresholdCurve();
+		int classIndex = 0;  // ROC for the 1st class label
+		Instances curve = tc.getCurve(eval.predictions(), classIndex);
+	\end{verbatim}
 
-\noindent The following code snippet generates the plottable data
-(\texttt{result}) for the first class label:
-\begin{verbatim}
-   import weka.classifiers.Evaluation;
-   import weka.classifiers.evaluation.ThresholdCurve;
-   ...
-   Evaluation eval = ... // from somewhere
-   ThresholdCurve tc = new ThresholdCurve();
-   int classIndex = 0;
-   Instances result = tc.getCurve(eval.predictions(), classIndex);
-\end{verbatim}
-Using the \texttt{ThresholdVisualizePanel} class (package
-\texttt{weka.gui.visualize}), the plottable data stored in \texttt{result} can
-then be displayed in a frame. The \texttt{ThresholdCurve} can be used to
-determine the AUC, using the \texttt{getROCArea(Instances)} method.
-\begin{verbatim}
-   import weka.classifiers.evaluation.ThresholdCurve;
-   import weka.core.Utils;
-   import weka.gui.visualize.PlotData2D;
-   import weka.gui.visualize.ThresholdVisualizePanel;
-   ...
-   ThresholdVisualizePanel vmc = new ThresholdVisualizePanel();
-   vmc.setROCString("(Area under ROC = " +
-       Utils.doubleToString(ThresholdCurve.getROCArea(result), 4) + ")");
-   vmc.setName(result.relationName());
-   PlotData2D tempd = new PlotData2D(result);
-   tempd.setPlotName(result.relationName());
-   tempd.addInstanceNumberAttribute();
-   vmc.addPlot(tempd);
-   String plotName = vmc.getName();
-   final javax.swing.JFrame jf =
-     new javax.swing.JFrame("Weka Classifier Visualize: "+plotName);
-   jf.setSize(500,400);
-   jf.getContentPane().setLayout(new BorderLayout());
-   jf.getContentPane().add(vmc, BorderLayout.CENTER);
-   jf.addWindowListener(new java.awt.event.WindowAdapter() {
-     public void windowClosing(java.awt.event.WindowEvent e) {
-       jf.dispose();
-     }
-   });
-   jf.setVisible(true);
-\end{verbatim}
+	\item Put the plotable into a plot container
+	\begin{verbatim}
+		PlotData2D plotdata = new PlotData2D(curve);
+		plotdata.setPlotName(curve.relationName());
+		plotdata.addInstanceNumberAttribute();
+	\end{verbatim}
+
+	\item Add the plot container to a visualization panel
+	\begin{verbatim}
+		ThresholdVisualizePanel tvp = new ThresholdVisualizePanel();
+		tvp.setROCString("(Area under ROC = " +
+			Utils.doubleToString(ThresholdCurve.getROCArea(curve), 4) + ")");
+		tvp.setName(curve.relationName());
+		tvp.addPlot(plotdata);
+	\end{verbatim}
+
+	\item Add the visualization panel to a \texttt{JFrame}
+	\begin{verbatim}
+		final JFrame jf = new JFrame("WEKA ROC: " + tvp.getName());
+		jf.setSize(500,400);
+		jf.getContentPane().setLayout(new BorderLayout());
+		jf.getContentPane().add(tvp, BorderLayout.CENTER);
+		jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		jf.setVisible(true);
+	\end{verbatim}
+\end{tight_enumerate}
 
 \newpage
 
