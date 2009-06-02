@@ -81,7 +81,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  * @see weka.classifiers.meta.FilteredClassifier
  */
 public class FilteredClusterer
@@ -292,10 +292,13 @@ public class FilteredClusterer
   public Capabilities getCapabilities() {
     Capabilities	result;
     
-    if (getFilter() == null)
+    if (getFilter() == null) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+      result.enable(Capability.NO_CLASS);
+    } else {
       result = getFilter().getCapabilities();
+    }
     
     // set dependencies
     for (Capability cap: Capability.values())
@@ -383,7 +386,7 @@ public class FilteredClusterer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

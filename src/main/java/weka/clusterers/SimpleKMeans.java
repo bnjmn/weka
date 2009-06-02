@@ -82,7 +82,7 @@ import java.util.Vector;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.40 $
+ * @version $Revision$
  * @see RandomizableClusterer
  */
 public class SimpleKMeans 
@@ -203,6 +203,8 @@ public class SimpleKMeans
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1248,7 +1250,7 @@ public class SimpleKMeans
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.40 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

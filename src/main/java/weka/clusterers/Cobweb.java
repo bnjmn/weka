@@ -103,7 +103,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.25 $
+ * @version $Revision$
  * @see RandomizableClusterer
  * @see Drawable
  */
@@ -762,7 +762,7 @@ public class Cobweb
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.25 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -877,6 +877,8 @@ public class Cobweb
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1242,7 +1244,7 @@ public class Cobweb
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /** 
