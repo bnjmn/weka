@@ -61,7 +61,7 @@ import java.io.Serializable;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class FilteredAttributeEval
   extends ASEvaluation
@@ -93,6 +93,7 @@ public class FilteredAttributeEval
 
     if (getFilter() == null) {
       result = super.getCapabilities();
+      result.disableAll();
     } else {
       result = getFilter().getCapabilities();
     }
@@ -300,7 +301,7 @@ public class FilteredAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

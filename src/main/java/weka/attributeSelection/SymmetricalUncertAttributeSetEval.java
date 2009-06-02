@@ -114,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Zheng Zhao: zhaozheng at asu.edu
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see Discretize
  */
 public class SymmetricalUncertAttributeSetEval
@@ -275,6 +275,7 @@ public class SymmetricalUncertAttributeSetEval
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -724,7 +725,7 @@ public class SymmetricalUncertAttributeSetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   // ============
