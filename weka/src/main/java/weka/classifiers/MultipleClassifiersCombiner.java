@@ -36,7 +36,7 @@ import java.util.Vector;
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
 
@@ -199,6 +199,7 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
     
     if (getClassifiers().length == 0) {
       result = new Capabilities(this);
+      result.disableAll();
     }
     else {
       result = (Capabilities) getClassifier(0).getCapabilities().clone();

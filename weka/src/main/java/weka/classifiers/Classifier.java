@@ -30,6 +30,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -44,7 +45,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler,
@@ -283,7 +284,19 @@ public abstract class Classifier
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    return new Capabilities(this);
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
+    
+    return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
