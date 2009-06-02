@@ -101,7 +101,7 @@ import java.util.Vector;
  *
  * @author  Dale Fletcher (dale at cs dot waikato dot ac dot nz)
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class InterquartileRange
   extends SimpleBatchFilter {
@@ -576,6 +576,7 @@ public class InterquartileRange
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -944,7 +945,7 @@ public class InterquartileRange
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

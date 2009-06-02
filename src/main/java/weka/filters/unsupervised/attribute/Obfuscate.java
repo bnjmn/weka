@@ -41,7 +41,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class Obfuscate 
   extends Filter 
@@ -71,6 +71,7 @@ public class Obfuscate
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -158,7 +159,7 @@ public class Obfuscate
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

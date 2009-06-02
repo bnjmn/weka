@@ -67,7 +67,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz) 
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see PropositionalToMultiInstance
  */
 public class MultiInstanceToPropositional 
@@ -240,6 +240,7 @@ public class MultiInstanceToPropositional
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.disableAllAttributes();
@@ -436,7 +437,7 @@ public class MultiInstanceToPropositional
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

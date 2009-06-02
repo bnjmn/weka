@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class NumericTransform 
   extends Filter
@@ -115,6 +115,7 @@ public class NumericTransform
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -462,7 +463,7 @@ public class NumericTransform
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
