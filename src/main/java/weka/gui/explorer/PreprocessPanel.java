@@ -1362,7 +1362,7 @@ public class PreprocessPanel
     Capabilities currentFilterCapabilities = null;
     if (currentFilter != null && currentCapabilitiesFilter != null &&
         (currentFilter instanceof CapabilitiesHandler)) {
-      currentFilterCapabilities = ((CapabilitiesHandler)filter).getCapabilities();
+      currentFilterCapabilities = ((CapabilitiesHandler)currentFilter).getCapabilities();
       
       if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
           !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
