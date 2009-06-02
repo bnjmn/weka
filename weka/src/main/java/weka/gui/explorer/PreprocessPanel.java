@@ -1354,6 +1354,21 @@ public class PreprocessPanel
     
     // set new filter
     m_FilterEditor.setCapabilitiesFilter(filterClass);
+    
+    // check capabilities
+    m_ApplyFilterBut.setEnabled(true);
+    Capabilities currentCapabilitiesFilter = m_FilterEditor.getCapabilitiesFilter();
+    Filter currentFilter = (Filter) m_FilterEditor.getValue();
+    Capabilities currentFilterCapabilities = null;
+    if (currentFilter != null && currentCapabilitiesFilter != null &&
+        (currentFilter instanceof CapabilitiesHandler)) {
+      currentFilterCapabilities = ((CapabilitiesHandler)filter).getCapabilities();
+      
+      if (!currentFilterCapabilities.supportsMaybe(currentCapabilitiesFilter) &&
+          !currentFilterCapabilities.supports(currentCapabilitiesFilter)) {
+        m_ApplyFilterBut.setEnabled(false);
+      }
+    }
   }
   
   /**
