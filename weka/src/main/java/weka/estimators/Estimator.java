@@ -91,7 +91,7 @@ import java.util.Vector;
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public abstract class Estimator 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler, 
@@ -107,7 +107,7 @@ public abstract class Estimator
   protected double m_classValueIndex = -1.0;
   
   /** set if class is not important */
-  private boolean m_noClass = true;
+  protected boolean m_noClass = true;
   
   /**
    * Class to support a building process of an estimator.
@@ -136,7 +136,7 @@ public abstract class Estimator
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.10 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -677,16 +677,26 @@ public abstract class Estimator
    */
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
+    result.enableAll();
     
-    // class
+/*    // class
     if (!m_noClass) {
       result.enable(Capability.NOMINAL_CLASS);
       result.enable(Capability.MISSING_CLASS_VALUES);
     } else {
       result.enable(Capability.NO_CLASS);
-    }
+    } */
        
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
   
   /** 
