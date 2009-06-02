@@ -127,7 +127,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  * @see weka.classifiers.functions.SMO
  */
 public class MISVM 
@@ -535,7 +535,7 @@ public class MISVM
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -546,6 +546,7 @@ public class MISVM
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -797,7 +798,7 @@ public class MISVM
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

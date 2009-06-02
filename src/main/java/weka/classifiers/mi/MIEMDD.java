@@ -94,7 +94,7 @@ import java.util.Vector;
  *     
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class MIEMDD 
   extends RandomizableClassifier 
@@ -368,7 +368,7 @@ public class MIEMDD
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.6 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -379,6 +379,7 @@ public class MIEMDD
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -404,6 +405,7 @@ public class MIEMDD
    */
   public Capabilities getMultiInstanceCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -747,7 +749,7 @@ public class MIEMDD
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
