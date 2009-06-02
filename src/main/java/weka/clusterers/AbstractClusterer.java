@@ -27,6 +27,7 @@ import weka.core.CapabilitiesHandler;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
@@ -37,7 +38,7 @@ import java.io.Serializable;
  * Abstract clusterer.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public abstract class AbstractClusterer
   implements Clusterer, Cloneable, Serializable, CapabilitiesHandler, RevisionHandler {
@@ -178,9 +179,19 @@ public abstract class AbstractClusterer
     Capabilities 	result;
     
     result = new Capabilities(this);
-    result.enable(Capability.NO_CLASS);
+    result.enableAll();
+//    result.enable(Capability.NO_CLASS);
     
     return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
