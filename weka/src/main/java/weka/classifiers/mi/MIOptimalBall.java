@@ -85,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Lin Dong (ld21@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision$ 
  */
 public class MIOptimalBall 
   extends Classifier 
@@ -176,6 +176,7 @@ public class MIOptimalBall
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -201,6 +202,7 @@ public class MIOptimalBall
    */
   public Capabilities getMultiInstanceCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -537,7 +539,7 @@ public class MIOptimalBall
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

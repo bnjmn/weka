@@ -80,7 +80,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Miguel Garcia Torres (mgarciat@ull.es)
- * @version $Revision: 1.9 $ 
+ * @version $Revision$ 
  */
 public class CitationKNN 
   extends Classifier 
@@ -308,6 +308,7 @@ public class CitationKNN
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -335,6 +336,7 @@ public class CitationKNN
    */
   public Capabilities getMultiInstanceCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -913,7 +915,7 @@ public class CitationKNN
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -985,7 +987,7 @@ public class CitationKNN
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1156,7 +1158,7 @@ public class CitationKNN
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 }
