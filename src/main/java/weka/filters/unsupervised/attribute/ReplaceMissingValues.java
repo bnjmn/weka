@@ -50,7 +50,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 public class ReplaceMissingValues 
   extends PotentialClassIgnorer
@@ -82,6 +82,7 @@ public class ReplaceMissingValues
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -406,7 +407,7 @@ public class ReplaceMissingValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.12 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

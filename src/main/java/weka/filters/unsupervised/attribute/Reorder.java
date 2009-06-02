@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class Reorder 
   extends Filter 
@@ -236,6 +236,7 @@ public class Reorder
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attribute
     result.enableAllAttributes();
@@ -409,7 +410,7 @@ public class Reorder
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

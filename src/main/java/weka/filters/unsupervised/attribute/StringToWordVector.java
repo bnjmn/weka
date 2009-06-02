@@ -136,7 +136,7 @@ import java.util.Vector;
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
  * @author Asrhaf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.25 $ 
+ * @version $Revision$ 
  * @see Stopwords
  */
 public class StringToWordVector 
@@ -620,7 +620,7 @@ public class StringToWordVector
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.25 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -632,6 +632,7 @@ public class StringToWordVector
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -1732,7 +1733,7 @@ public class StringToWordVector
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.25 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

@@ -50,7 +50,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.8 $ 
+ * @version $Revision$ 
  */
 public class NumericToBinary 
   extends PotentialClassIgnorer
@@ -83,6 +83,7 @@ public class NumericToBinary
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -217,7 +218,7 @@ public class NumericToBinary
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

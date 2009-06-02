@@ -67,7 +67,7 @@ import java.util.Vector;
  * Based on code from AddValues.
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.3 $
+ * @version $Revision$
  * @see     AddValues
  */
 public class AddValues 
@@ -203,6 +203,7 @@ public class AddValues
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -459,7 +460,7 @@ public class AddValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
