@@ -60,7 +60,7 @@ import weka.core.Capabilities.Capability;
  <!-- options-end -->
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class TimeSeriesTranslate 
   extends AbstractTimeSeries {
@@ -90,6 +90,7 @@ public class TimeSeriesTranslate
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -182,7 +183,7 @@ public class TimeSeriesTranslate
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
