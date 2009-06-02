@@ -55,7 +55,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Julien Prados
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class Normalize 
   extends Filter 
@@ -221,6 +221,7 @@ public class Normalize
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -307,7 +308,7 @@ public class Normalize
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
