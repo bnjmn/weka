@@ -388,8 +388,8 @@ public class AttributeSelection
     
     if (m_ASEvaluator == null) {
       result = super.getCapabilities();
-    }
-    else {
+      result.disableAll();
+    } else {
       result = m_ASEvaluator.getCapabilities();
       // class index will be set if necessary, so we always allow the dataset
       // to have no class attribute set. see the following method:
