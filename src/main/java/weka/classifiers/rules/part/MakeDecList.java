@@ -41,7 +41,7 @@ import java.util.Vector;
  * Class for handling a decision list.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.17 $
+ * @version $Revision$
  */
 public class MakeDecList
   implements Serializable, CapabilitiesHandler, RevisionHandler {
@@ -119,6 +119,7 @@ public class MakeDecList
    */
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -302,6 +303,6 @@ public class MakeDecList
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.17 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
