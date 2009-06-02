@@ -99,7 +99,7 @@ import javax.swing.JTabbedPane;
  <!-- options-end -->
  *
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.31 $
+ * @version $Revision$
  */
 public class UserClassifier 
   extends Classifier 
@@ -504,6 +504,7 @@ public class UserClassifier
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1492,7 +1493,7 @@ public class UserClassifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.31 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -1502,6 +1503,6 @@ public class UserClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.31 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
