@@ -491,7 +491,6 @@ public class LWL
       result = m_Classifier.getCapabilities();
     } else {
       result = super.getCapabilities();
-      result.disableAll();
     }
     
     result.setMinimumNumberInstances(0);
