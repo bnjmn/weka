@@ -115,7 +115,7 @@ import java.util.Vector;
  *
  * @author Ioannis N. Athanasiadis (email: ionathan@iti.gr, alias: ionathan@ieee.org)
  * @version 5.0
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class FLR
     extends Classifier
@@ -150,6 +150,7 @@ public class FLR
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -728,7 +729,7 @@ public class FLR
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -950,7 +951,7 @@ public class FLR
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.10 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 }
