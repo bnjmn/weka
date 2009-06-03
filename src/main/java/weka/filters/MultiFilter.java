@@ -52,7 +52,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  * @see     weka.filters.StreamableFilter
  */
 public class MultiFilter
@@ -170,10 +170,14 @@ public class MultiFilter
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    if (getFilters().length == 0)
-      return super.getCapabilities();
-    else
+    if (getFilters().length == 0) {
+      Capabilities result = super.getCapabilities();
+      result.disableAll();
+      
+      return result;
+    } else {
       return getFilters()[0].getCapabilities();
+    }
   }
 
   /**
@@ -383,7 +387,7 @@ public class MultiFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
