@@ -89,7 +89,7 @@ import java.util.Vector;
  *
  * @author Brent Martin (bim20@cosc.canterbury.ac.nz)
  * @author Sylvain Roy (sro33@student.canterbury.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class NNge 
   extends Classifier 
@@ -677,7 +677,7 @@ public class NNge
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.7 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -733,6 +733,7 @@ public class NNge
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1710,7 +1711,7 @@ public class NNge
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
