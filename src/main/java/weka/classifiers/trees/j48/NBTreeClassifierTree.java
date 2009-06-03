@@ -34,7 +34,7 @@ import weka.core.Capabilities.Capability;
  * classification.
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class NBTreeClassifierTree
   extends ClassifierTree {
@@ -53,6 +53,7 @@ public class NBTreeClassifierTree
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -274,6 +275,6 @@ public class NBTreeClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
