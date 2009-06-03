@@ -62,7 +62,7 @@ import java.io.File;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class PrecomputedKernelMatrixKernel extends Kernel {
 
@@ -224,6 +224,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 	    
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enableAllClasses();
@@ -314,7 +315,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 
