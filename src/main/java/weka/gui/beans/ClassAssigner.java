@@ -440,7 +440,22 @@ public class ClassAssigner
   }
 
   public void stop() {
-    // nothing to do
+    // Pass on to upstream beans
+    if (m_trainingProvider != null && m_trainingProvider instanceof BeanCommon) {
+      ((BeanCommon)m_trainingProvider).stop();
+    }
+    
+    if (m_testProvider != null && m_testProvider instanceof BeanCommon) {
+      ((BeanCommon)m_testProvider).stop();
+    }
+    
+    if (m_dataProvider != null && m_dataProvider instanceof BeanCommon) {
+      ((BeanCommon)m_dataProvider).stop();
+    }
+    
+    if (m_instanceProvider != null && m_instanceProvider instanceof BeanCommon) {
+      ((BeanCommon)m_instanceProvider).stop();
+    }
   }
   
   /**
