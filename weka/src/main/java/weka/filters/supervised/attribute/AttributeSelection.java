@@ -388,6 +388,7 @@ public class AttributeSelection
     
     if (m_ASEvaluator == null) {
       result = super.getCapabilities();
+      result.disableAll();
     }
     else {
       result = m_ASEvaluator.getCapabilities();
