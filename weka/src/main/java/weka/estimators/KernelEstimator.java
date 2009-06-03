@@ -33,7 +33,7 @@ import weka.core.Statistics;
  * data value.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class KernelEstimator extends Estimator implements IncrementalEstimator {
 
@@ -309,6 +309,14 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    // class
+    if (!m_noClass) {
+      result.enable(Capability.NOMINAL_CLASS);
+      result.enable(Capability.MISSING_CLASS_VALUES);
+    } else {
+      result.enable(Capability.NO_CLASS);
+    }
     
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -321,7 +329,7 @@ public class KernelEstimator extends Estimator implements IncrementalEstimator {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
