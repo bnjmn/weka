@@ -186,7 +186,7 @@ import java.util.zip.GZIPOutputStream;
  * 
  * @author Robert Jung
  * @author David Michael
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class EnsembleSelection 
   extends RandomizableClassifier 
@@ -454,6 +454,7 @@ public class EnsembleSelection
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities(); // returns the object
+    result.disableAll();
     // from
     // weka.classifiers.Classifier
     
@@ -1657,7 +1658,7 @@ public class EnsembleSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
