@@ -104,7 +104,7 @@ import java.util.Vector;
  *
  * @author Noam Slonim
  * @author <a href="mailto:lh92@cs.waikato.ac.nz">Anna Huang</a> 
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class sIB
   extends RandomizableClusterer
@@ -154,7 +154,7 @@ public class sIB
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
@@ -270,7 +270,7 @@ public class sIB
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.2 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -1202,6 +1202,9 @@ public class sIB
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
+    
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     return result;
@@ -1231,7 +1234,7 @@ public class sIB
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   public static void main(String[] argv) {

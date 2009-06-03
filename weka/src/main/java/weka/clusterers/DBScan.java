@@ -90,7 +90,7 @@ import java.util.Vector;
  * @author Matthias Schubert (schubert@dbs.ifi.lmu.de)
  * @author Zhanna Melnikova-Albrecht (melnikov@cip.ifi.lmu.de)
  * @author Rainer Holzmann (holzmann@cip.ifi.lmu.de)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class DBScan 
     extends AbstractClusterer 
@@ -158,6 +158,8 @@ public class DBScan
      */
     public Capabilities getCapabilities() {
       Capabilities result = super.getCapabilities();
+      result.disableAll();
+      result.enable(Capability.NO_CLASS);
 
       // attributes
       result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -623,7 +625,7 @@ public class DBScan
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
 
     /**
