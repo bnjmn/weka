@@ -110,7 +110,7 @@ public class ClassifierTree
    */
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
-    result.disableAll();
+    result.enableAll();
     
     return result;
   }
