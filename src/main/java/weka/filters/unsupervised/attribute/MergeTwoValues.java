@@ -63,7 +63,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.10 $
+ * @version $Revision$
  */
 public class MergeTwoValues 
   extends Filter
@@ -100,6 +100,7 @@ public class MergeTwoValues
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -443,7 +444,7 @@ public class MergeTwoValues
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.10 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

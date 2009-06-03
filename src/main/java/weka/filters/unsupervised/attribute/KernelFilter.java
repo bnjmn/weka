@@ -159,7 +159,7 @@ import java.util.Vector;
  *
  * @author Jonathan Miles (jdm18@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class KernelFilter
   extends SimpleBatchFilter 
@@ -788,10 +788,12 @@ public class KernelFilter
   public Capabilities getCapabilities() {
     Capabilities 	result;
     
-    if (getKernel() == null)
+    if (getKernel() == null) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+    } else {
       result = getKernel().getCapabilities();
+    }
 
     result.setMinimumNumberInstances(0);
     
@@ -872,7 +874,7 @@ public class KernelFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
