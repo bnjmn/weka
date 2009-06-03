@@ -324,10 +324,12 @@ public class AddClassification
   public Capabilities getCapabilities() {
     Capabilities 	result;
     
-    if (getClassifier() == null)
+    if (getClassifier() == null) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+    } else {
       result = getClassifier().getCapabilities();
+    }
     
     result.setMinimumNumberInstances(0);
     
