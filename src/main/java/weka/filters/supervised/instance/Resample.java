@@ -71,7 +71,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.13 $ 
+ * @version $Revision$ 
  */
 public class Resample
   extends Filter 
@@ -398,6 +398,7 @@ public class Resample
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -666,7 +667,7 @@ public class Resample
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
