@@ -44,7 +44,7 @@ import weka.filters.Filter;
  * @version $Revision$
  */
 public class MultilayerPerceptron extends Classifier 
-  implements OptionHandler, WeightedInstancesHandler {
+  implements OptionHandler, WeightedInstancesHandler, Randomizable {
   
   /**
    * Main method for testing this class.
@@ -831,7 +831,7 @@ public class MultilayerPerceptron extends Classifier
   private int m_driftThreshold;
 
   /** The number used to seed the random number generator. */
-  private long m_randomSeed;
+  private int m_randomSeed;
 
   /** The actual random number generator. */
   private Random m_random;
@@ -1026,7 +1026,7 @@ public class MultilayerPerceptron extends Classifier
    * number is needed for the network.
    * @param l The seed.
    */
-  public void setRandomSeed(long l) {
+  public void setSeed(int l) {
     if (l >= 0) {
       m_randomSeed = l;
     }
@@ -1035,7 +1035,7 @@ public class MultilayerPerceptron extends Classifier
   /**
    * @return The seed for the random number generator.
    */
-  public long getRandomSeed() {
+  public int getSeed() {
     return m_randomSeed;
   }
 
@@ -2147,9 +2147,9 @@ public class MultilayerPerceptron extends Classifier
     }
     String seedString = Utils.getOption('S', options);
     if (seedString.length() != 0) {
-      setRandomSeed(Long.parseLong(seedString));
+      setSeed(Integer.parseInt(seedString));
     } else {
-      setRandomSeed(0);
+      setSeed(0);
     }
     String thresholdString = Utils.getOption('E', options);
     if (thresholdString.length() != 0) {
@@ -2217,7 +2217,7 @@ public class MultilayerPerceptron extends Classifier
     options[current++] = "-M"; options[current++] = "" + getMomentum();
     options[current++] = "-N"; options[current++] = "" + getTrainingTime(); 
     options[current++] = "-V"; options[current++] = "" +getValidationSetSize();
-    options[current++] = "-S"; options[current++] = "" + getRandomSeed();
+    options[current++] = "-S"; options[current++] = "" + getSeed();
     options[current++] = "-E"; options[current++] =""+getValidationThreshold();
     options[current++] = "-H"; options[current++] = getHiddenLayers();
     if (getGUI()) {
@@ -2351,7 +2351,7 @@ public class MultilayerPerceptron extends Classifier
   /**
    * @return a string to describe the random seed option.
    */
-  public String randomSeedTipText() {
+  public String seedTipText() {
     return "Seed used to initialise the random number generator." +
       "Random numbers are used for setting the initial weights of the" +
       " connections betweem nodes, and also for shuffling the training data.";
