@@ -2523,7 +2523,7 @@ public class MultilayerPerceptron
   /**
    * @return a string to describe the random seed option.
    */
-  public String randomSeedTipText() {
+  public String seedTipText() {
     return "Seed used to initialise the random number generator." +
       "Random numbers are used for setting the initial weights of the" +
       " connections betweem nodes, and also for shuffling the training data.";
