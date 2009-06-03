@@ -87,7 +87,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision$ 
  */
 public class MINND 
   extends Classifier 
@@ -206,6 +206,7 @@ public class MINND
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -231,6 +232,7 @@ public class MINND
    */
   public Capabilities getMultiInstanceCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -1015,7 +1017,7 @@ search:
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

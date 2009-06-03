@@ -90,7 +90,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class TLDSimple 
   extends RandomizableClassifier 
@@ -188,6 +188,7 @@ public class TLDSimple
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -213,6 +214,7 @@ public class TLDSimple
    */
   public Capabilities getMultiInstanceCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -896,7 +898,7 @@ public class TLDSimple
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -1033,6 +1035,6 @@ class TLDSimple_Optm extends Optimization {
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
