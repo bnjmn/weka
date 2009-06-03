@@ -71,7 +71,7 @@ import java.util.Enumeration;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.20 $ 
+ * @version $Revision$ 
 */
 public class NaiveBayesSimple 
   extends Classifier
@@ -138,6 +138,7 @@ public class NaiveBayesSimple
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -415,7 +416,7 @@ public class NaiveBayesSimple
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.20 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

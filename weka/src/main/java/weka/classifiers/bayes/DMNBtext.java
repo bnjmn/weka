@@ -76,7 +76,7 @@ import weka.core.OptionHandler;
  <!-- options-end -->
  * 
  * @author Jiang Su (Jiang.Su@unb.ca) 2008
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class DMNBtext extends Classifier
     implements OptionHandler, WeightedInstancesHandler, 
@@ -132,6 +132,7 @@ public class DMNBtext extends Classifier
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);

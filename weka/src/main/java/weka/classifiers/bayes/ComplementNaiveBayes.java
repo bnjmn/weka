@@ -79,7 +79,7 @@ import weka.core.TechnicalInformation.Type;
  <!-- options-end -->
  *
  * @author Ashraf M. Kibriya (amk14@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $ 
+ * @version $Revision$ 
  */
 public class ComplementNaiveBayes extends Classifier
     implements OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
@@ -280,6 +280,7 @@ public class ComplementNaiveBayes extends Classifier
      */
     public Capabilities getCapabilities() {
       Capabilities result = super.getCapabilities();
+      result.disableAll();
 
       // attributes
       result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -481,7 +482,7 @@ public class ComplementNaiveBayes extends Classifier
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.9 $");
+      return RevisionUtils.extract("$Revision$");
     }
     
     /**
