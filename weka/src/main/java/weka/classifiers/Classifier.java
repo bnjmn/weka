@@ -30,6 +30,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
@@ -44,7 +45,7 @@ import java.util.Vector;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.18 $
+ * @version $Revision$
  */
 public abstract class Classifier 
   implements Cloneable, Serializable, OptionHandler, CapabilitiesHandler,
@@ -276,14 +277,28 @@ public abstract class Classifier
   }
 
   /** 
-   * Returns the Capabilities of this classifier. Derived classifiers have to
-   * override this method to enable capabilities.
+   * Returns the Capabilities of this classifier. Maximally permissive
+   * capabilities are allowed by default. Derived classifiers should
+   * override this method and first disable all capabilities and then
+   * enable just those capabilities that make sense for the scheme.
    *
    * @return            the capabilities of this object
    * @see               Capabilities
    */
   public Capabilities getCapabilities() {
-    return new Capabilities(this);
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
+    
+    return result;
+  }
+  
+  /**
+   * Returns the revision string.
+   * 
+   * @return            the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

@@ -37,7 +37,7 @@ import java.util.Vector;
  * classifiers that use a single base learner.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public abstract class SingleClassifierEnhancer extends Classifier {
 
@@ -171,10 +171,12 @@ public abstract class SingleClassifierEnhancer extends Classifier {
   public Capabilities getCapabilities() {
     Capabilities        result;
 
-    if (getClassifier() != null)
+    if (getClassifier() != null) {
       result = getClassifier().getCapabilities();
-    else
+    } else {
       result = new Capabilities(this);
+      result.disableAll();
+    }
     
     // set dependencies
     for (Capability cap: Capability.values())
