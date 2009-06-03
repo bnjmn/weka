@@ -62,7 +62,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class ChangeDateFormat 
   extends Filter 
@@ -106,6 +106,7 @@ public class ChangeDateFormat
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -357,7 +358,7 @@ public class ChangeDateFormat
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**

@@ -68,7 +68,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  * @see     weka.filters.StreamableFilter
  */
 public class PartitionedMultiFilter
@@ -249,10 +249,12 @@ public class PartitionedMultiFilter
   public Capabilities getCapabilities() {
     Capabilities	result;
     
-    if (getFilters().length == 0)
+    if (getFilters().length == 0) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+    } else {
       result = getFilters()[0].getCapabilities();
+    }
     
     // disable attributes
     result.disable(Capability.STRING_ATTRIBUTES);
@@ -692,7 +694,7 @@ public class PartitionedMultiFilter
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

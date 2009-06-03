@@ -50,7 +50,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class Center 
   extends PotentialClassIgnorer 
@@ -82,6 +82,7 @@ public class Center
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -322,7 +323,7 @@ public class Center
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
