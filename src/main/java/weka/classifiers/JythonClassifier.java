@@ -62,7 +62,7 @@ import java.util.Vector;
  * code.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class JythonClassifier 
   extends Classifier {
@@ -308,10 +308,12 @@ public class JythonClassifier
   public Capabilities getCapabilities() {
     Capabilities	result;
 
-    if (m_JythonObject == null)
+    if (m_JythonObject == null) {
       result = new Capabilities(this);
-    else
+      result.disableAll();
+    } else {
       result = m_JythonObject.getCapabilities();
+    }
 
     result.enableAllAttributeDependencies();
     result.enableAllClassDependencies();
@@ -404,7 +406,7 @@ public class JythonClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
