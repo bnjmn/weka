@@ -91,7 +91,7 @@ import java.util.Vector;
  *
  * @author Len Trigg (len@reeltwo.com)
  * @author Abdelaziz Mahoui (am14@cs.waikato.ac.nz) - Java port
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class KStar 
   extends Classifier
@@ -190,6 +190,7 @@ public class KStar
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -710,7 +711,7 @@ public class KStar
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
 } // class end

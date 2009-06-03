@@ -109,7 +109,7 @@ import java.util.Vector;
  * @author Stuart Inglis (singlis@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.42 $
+ * @version $Revision$
  */
 public class IBk 
   extends Classifier 
@@ -451,6 +451,7 @@ public class IBk
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1040,7 +1041,7 @@ public class IBk
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.42 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
