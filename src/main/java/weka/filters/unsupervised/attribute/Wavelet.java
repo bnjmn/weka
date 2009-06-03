@@ -110,7 +110,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class Wavelet
   extends SimpleBatchFilter 
@@ -652,6 +652,7 @@ public class Wavelet
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attribute
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -696,7 +697,7 @@ public class Wavelet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
