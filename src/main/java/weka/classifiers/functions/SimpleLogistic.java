@@ -116,7 +116,7 @@ import java.util.Vector;
  *
  * @author Niels Landwehr 
  * @author Marc Sumner 
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 public class SimpleLogistic 
   extends Classifier 
@@ -191,6 +191,7 @@ public class SimpleLogistic
      */
     public Capabilities getCapabilities() {
       Capabilities result = super.getCapabilities();
+      result.disableAll();
 
       // attributes
       result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -729,7 +730,7 @@ public class SimpleLogistic
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.13 $");
+      return RevisionUtils.extract("$Revision$");
     }
 
     /**

@@ -51,7 +51,7 @@ import java.util.Arrays;
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.7 $
+ * @version $Revision$
  */
 public class IsotonicRegression extends Classifier implements WeightedInstancesHandler {
 
@@ -118,6 +118,7 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -306,7 +307,7 @@ public class IsotonicRegression extends Classifier implements WeightedInstancesH
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

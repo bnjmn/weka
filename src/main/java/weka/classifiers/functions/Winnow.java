@@ -114,7 +114,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author J. Lindgren (jtlindgr at cs.helsinki.fi)
- * @version $Revision: 1.13 $ 
+ * @version $Revision$ 
 */
 public class Winnow 
   extends Classifier 
@@ -347,6 +347,7 @@ public class Winnow
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -853,7 +854,7 @@ public class Winnow
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.13 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
