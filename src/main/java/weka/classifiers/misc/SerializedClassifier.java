@@ -57,7 +57,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class SerializedClassifier
   extends Classifier {
@@ -249,10 +249,12 @@ public class SerializedClassifier
       System.err.println(e);
     }
 
-    if (m_Model != null)
+    if (m_Model != null) {
       result = m_Model.getCapabilities();
-    else
+    } else {
       result = new Capabilities(this);
+      result.disableAll();
+    }
     
     // set dependencies
     for (Capability cap: Capability.values())
@@ -324,7 +326,7 @@ public class SerializedClassifier
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
