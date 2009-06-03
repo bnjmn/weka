@@ -21,30 +21,24 @@
 package weka.clusterers;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Vector;
+
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SparseInstance;
 import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-import java.util.HashMap;
-import java.util.ArrayList;
 
 /**
 <!-- globalinfo-start -->
@@ -77,7 +71,7 @@ import java.util.ArrayList;
 <!-- options-end -->
  *
  * @author Alexander Smirnov (austellus@gmail.com)
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 public class CLOPE
   extends AbstractClusterer
@@ -404,6 +398,8 @@ public class CLOPE
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -617,7 +613,7 @@ public class CLOPE
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

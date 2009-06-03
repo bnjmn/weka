@@ -94,7 +94,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  * @see RandomizableClusterer
  */
 public class FarthestFirst 
@@ -190,6 +190,8 @@ public class FarthestFirst
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
+    result.enable(Capability.NO_CLASS);
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -604,7 +606,7 @@ public class FarthestFirst
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
