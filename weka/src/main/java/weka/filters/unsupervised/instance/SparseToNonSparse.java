@@ -40,7 +40,7 @@ import weka.filters.UnsupervisedFilter;
  <!-- globalinfo-end -->
  * 
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.6 $ 
+ * @version $Revision$ 
  */
 public class SparseToNonSparse 
   extends Filter 
@@ -68,6 +68,7 @@ public class SparseToNonSparse
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enableAllAttributes();
@@ -134,7 +135,7 @@ public class SparseToNonSparse
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

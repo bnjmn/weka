@@ -75,7 +75,7 @@ import java.util.Vector;
  *
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author Malcolm Ware (mfw4@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class RemoveMisclassified 
   extends Filter 
@@ -114,10 +114,12 @@ public class RemoveMisclassified
   public Capabilities getCapabilities() {
     Capabilities 	result;
     
-    if (getClassifier() == null)
+    if (getClassifier() == null) {
       result = super.getCapabilities();
-    else
+      result.disableAll();
+    } else {
       result = getClassifier().getCapabilities();
+    }
     
     result.setMinimumNumberInstances(0);
     
@@ -724,7 +726,7 @@ public class RemoveMisclassified
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.8 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
