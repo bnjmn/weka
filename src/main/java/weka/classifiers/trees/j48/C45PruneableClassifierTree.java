@@ -33,7 +33,7 @@ import weka.core.Capabilities.Capability;
  * be pruned using C4.5 procedures.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.15 $
+ * @version $Revision$
  */
 
 public class C45PruneableClassifierTree 
@@ -86,6 +86,7 @@ public class C45PruneableClassifierTree
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -367,6 +368,6 @@ public class C45PruneableClassifierTree
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.15 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
