@@ -128,7 +128,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.46 $ 
+ * @version $Revision$ 
  */
 public class DecisionTable 
   extends Classifier 
@@ -1022,6 +1022,7 @@ public class DecisionTable
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
 
     // attributes
     result.enable(Capability.NOMINAL_ATTRIBUTES);
@@ -1395,7 +1396,7 @@ public class DecisionTable
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.46 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
