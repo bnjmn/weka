@@ -68,7 +68,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class PolyKernel 
   extends CachedKernel {
@@ -254,6 +254,7 @@ public class PolyKernel
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enableAllClasses();
@@ -345,7 +346,7 @@ public class PolyKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
 

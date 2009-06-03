@@ -1480,6 +1480,7 @@ public class StringKernel
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
+    result.disableAll();
     
     result.enable(Capability.STRING_ATTRIBUTES);
     result.enableAllClasses();
