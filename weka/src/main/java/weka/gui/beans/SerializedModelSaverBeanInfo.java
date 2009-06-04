@@ -16,7 +16,7 @@
 
 /*
  *    SerializedModelSaverBeanInfo.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,7 +28,7 @@ import java.beans.*;
  * Bean info class for the serialized model saver bean
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class SerializedModelSaverBeanInfo extends SimpleBeanInfo {
   

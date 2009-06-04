@@ -16,7 +16,7 @@
 
 /*
  *    PMMLFactory.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -52,7 +52,7 @@ import weka.gui.Logger;
  * This class is a factory class for reading/writing PMML models
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class PMMLFactory {
 
@@ -504,7 +504,7 @@ public class PMMLFactory {
     }
     
     public String getRevision() {
-      return weka.core.RevisionUtils.extract("$Revision: 1.2 $");
+      return weka.core.RevisionUtils.extract("$Revision$");
     }
     
     public void evaluatePMMLClassifier(String[] options) {

@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2008 Pentaho Corporation
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.attributeSelection;
@@ -28,7 +28,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.FilteredAttributeEvalTest
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class FilteredAttributeEvalTest 
   extends AbstractEvaluatorTest {

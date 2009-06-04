@@ -16,7 +16,7 @@
 
 /*
  *    GeneralRegression.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -41,7 +41,7 @@ import weka.core.pmml.*;
  * raises an Exception).
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class GeneralRegression extends PMMLClassifier
   implements Serializable {
@@ -1467,6 +1467,6 @@ public class GeneralRegression extends PMMLClassifier
    * @see weka.core.RevisionHandler#getRevision()
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

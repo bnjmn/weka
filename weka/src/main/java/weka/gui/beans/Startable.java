@@ -16,7 +16,7 @@
 
 /*
  *    Startable.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -27,7 +27,7 @@ package weka.gui.beans;
  * can be launched programatically.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  * @since 1.0
  */
 public interface Startable {

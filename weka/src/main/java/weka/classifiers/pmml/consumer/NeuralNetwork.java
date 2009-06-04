@@ -16,7 +16,7 @@
 
 /*
  *    NeuralNetwork.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -815,7 +815,7 @@ public class NeuralNetwork extends PMMLClassifier {
    * @see weka.core.RevisionHandler#getRevision()
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**                                                                                                             

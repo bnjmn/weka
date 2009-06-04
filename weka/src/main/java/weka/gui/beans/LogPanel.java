@@ -16,7 +16,7 @@
 
 /*
  *    LogPanel
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 

@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2008 Pentaho Corporation
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
  * java weka.core.MathematicalTest
  *
  * @author mhall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class MathematicalExpressionTest 
   extends TestCase {
