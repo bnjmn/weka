@@ -63,9 +63,11 @@ public class ClusteringDemo {
     eval = new ClusterEvaluation();
     eval.setClusterer(cl);
     eval.evaluateClusterer(new Instances(data));
-    System.out.println("# of clusters: " + eval.getNumClusters());
+    System.out.println(eval.clusterResultsToString());
 
-    // density based
+    // cross-validation for density based clusterers
+    // NB: use MakeDensityBasedClusterer to turn any non-density clusterer
+    //     into such.
     System.out.println("\n--> Cross-validation");
     cl = new EM();
     logLikelyhood = ClusterEvaluation.crossValidateModel(
