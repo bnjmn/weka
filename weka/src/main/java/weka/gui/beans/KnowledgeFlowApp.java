@@ -667,7 +667,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener {
        .format(new Date());
      m_logPanel.logMessage("Weka Knowledge Flow was written by Mark Hall");
      m_logPanel.logMessage("Weka Knowledge Flow");
-     m_logPanel.logMessage("(c) 2002-2008 Mark Hall");
+     m_logPanel.logMessage("(c) 2002-2009 Mark Hall");
      m_logPanel.logMessage("web: http://www.cs.waikato.ac.nz/~ml/");
      m_logPanel.logMessage( date);
      m_logPanel.statusMessage("Welcome to the Weka Knowledge Flow");
