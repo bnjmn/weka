@@ -26,9 +26,7 @@ import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.DensityBasedClusterer;
 import weka.clusterers.EM;
 import weka.core.Instances;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
+import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * An example class that shows the use of Weka clusterers from Java.
@@ -47,16 +45,16 @@ public class ClusteringDemo {
     Instances               data;
     String[]                options;
     DensityBasedClusterer   cl;    
+    double                  logLikelyhood;
 
-    data = new Instances(new BufferedReader(new FileReader(filename)));
+    data = DataSource.read(filename);
     
     // normal
     System.out.println("\n--> normal");
     options    = new String[2];
     options[0] = "-t";
     options[1] = filename;
-    System.out.println(
-        ClusterEvaluation.evaluateClusterer(new EM(), options));
+    System.out.println(ClusterEvaluation.evaluateClusterer(new EM(), options));
     
     // manual call
     System.out.println("\n--> manual");
@@ -68,13 +66,11 @@ public class ClusteringDemo {
     System.out.println("# of clusters: " + eval.getNumClusters());
 
     // density based
-    System.out.println("\n--> density (CV)");
-    cl   = new EM();
-    eval = new ClusterEvaluation();
-    eval.setClusterer(cl);
-    eval.crossValidateModel(
+    System.out.println("\n--> Cross-validation");
+    cl = new EM();
+    logLikelyhood = ClusterEvaluation.crossValidateModel(
            cl, data, 10, data.getRandomNumberGenerator(1));
-    System.out.println("# of clusters: " + eval.getNumClusters());
+    System.out.println("log-likelyhood: " + logLikelyhood);
   }
 
   /**
