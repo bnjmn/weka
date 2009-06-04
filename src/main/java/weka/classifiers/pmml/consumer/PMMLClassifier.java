@@ -16,7 +16,7 @@
 
 /*
  *    PMMLClassifier.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -37,7 +37,7 @@ import weka.gui.Logger;
  * Abstract base class for all PMML classifiers.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public abstract class PMMLClassifier extends Classifier
   implements Serializable, PMMLModel {
