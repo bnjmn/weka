@@ -25,11 +25,9 @@ package wekaexamples.clusterers;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.EM;
 import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 /**
  * This class shows how to perform a "classes-to-clusters"
@@ -48,7 +46,7 @@ import java.io.FileReader;
 public class ClassesToClusters {
   public static void main(String[] args) throws Exception {
     // load data
-    Instances data = new Instances(new BufferedReader(new FileReader(args[0])));
+    Instances data = DataSource.read(args[0]);
     data.setClassIndex(data.numAttributes() - 1);
 
     // generate data for clusterer (w/o class)
