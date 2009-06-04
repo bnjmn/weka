@@ -57,7 +57,7 @@ import javax.swing.BorderFactory;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
- * @version $Revision: 1.14.2.13 $
+ * @version $Revision$
  */
 public class GUIChooser extends JFrame {
 
@@ -128,7 +128,7 @@ public class GUIChooser extends JFrame {
     titlePan.add(new JLabel("Version " + Version.VERSION,
                             SwingConstants.CENTER));
     titlePan.add(new JLabel(""));
-    titlePan.add(new JLabel("(c) 1999 - 2008",
+    titlePan.add(new JLabel("(c) 1999 - 2009",
     SwingConstants.CENTER));
     titlePan.add(new JLabel("University of Waikato",
     SwingConstants.CENTER));
