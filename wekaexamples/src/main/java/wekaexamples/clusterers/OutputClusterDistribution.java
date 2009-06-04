@@ -49,15 +49,15 @@ public class OutputClusterDistribution {
       throw new IllegalArgumentException(
 	  "Train and test set are not compatible: " + train.equalHeadersMsg(test));
     
-    // train classifier
-    EM cls = new EM();
-    cls.buildClusterer(train);
+    // build clusterer
+    EM clusterer = new EM();
+    clusterer.buildClusterer(train);
     
     // output predictions
     System.out.println("# - cluster - distribution");
     for (int i = 0; i < test.numInstances(); i++) {
-      int cluster = cls.clusterInstance(test.instance(i));
-      double[] dist = cls.distributionForInstance(test.instance(i));
+      int cluster = clusterer.clusterInstance(test.instance(i));
+      double[] dist = clusterer.distributionForInstance(test.instance(i));
       System.out.print((i+1));
       System.out.print(" - ");
       System.out.print(cluster);
