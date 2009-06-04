@@ -1,0 +1,275 @@
+Working file: weka/attributeSelection/AttributeSelection.java
+----------------------------
+revision 1.10
+date: 1999/08/23 02:27:17;  author: mhall;  state: Exp;  lines: +171 -117
+Added facility to accumulate statistics over multiple feature selection
+runs.
+=============================================================================
+Working file: weka/classifiers/AdaBoostM1.java
+----------------------------
+revision 1.10
+date: 1999/08/25 02:07:23;  author: trigg;  state: Exp;  lines: +50 -3
+- Made AdaBoost Sourcable.
+=============================================================================
+Working file: weka/classifiers/CostMatrix.java
+Working file: weka/classifiers/CostSensitiveClassifier.java
+Working file: weka/core/Instances.java
+Working file: weka/core/Matrix.java
+Working file: weka/gui/AttributeSelectionPanel.java
+Working file: weka/gui/CostMatrixEditor.java
+Working file: weka/gui/GenericArrayEditor.java
+Working file: weka/gui/GenericObjectEditor.java
+Working file: weka/gui/experiment/SetupPanel.java
+Working file: weka/gui/explorer/AssociationsPanel.java
+Working file: weka/gui/explorer/AttributeSelectionPanel.java
+Working file: weka/gui/explorer/ClassifierPanel.java
+Working file: weka/gui/explorer/PreprocessPanel.java
+----------------------------
+date: 1999/08/26 23:31:33;  author: trigg;  state: Exp;
+- Reworked cost sensitive classification and evaluation. Cost matrices are
+  now handled as a class CostMatrix. Code related to cost matrices has been
+  moved from Instances into CostMatrix. Evaluation has been updated to use
+  CostMatrix (and the old cost file format is still read). Created a meta
+  classifier for performing cost-sensitve classification using either
+  training instance reweighting or minimum expected cost prediction. Made a
+  simple editor for cost matrices and adjusted other GUI files to support
+  this.
+
+- Also made some small GUI layout changes.
+=============================================================================
+Working file: weka/classifiers/Evaluation.java
+----------------------------
+revision 1.15
+date: 1999/09/08 01:53:51;  author: mhall;  state: Exp;  lines: +14 -8
+Changed evaluateModelOnce so it returns the prediction for the instance,
+----------------------------
+revision 1.14
+date: 1999/08/29 23:53:30;  author: trigg;  state: Exp;  lines: +4 -2
+- Changed CorrectlyClassifiedWithCost to reflect the benefit of correctly
+  classifying a potentially high-cost instance.
+----------------------------
+revision 1.13
+date: 1999/08/26 23:31:33;  author: trigg;  state: Exp;  lines: +52 -34
+- Reworked cost sensitive classification and evaluation. Cost matrices are
+  now handled as a class CostMatrix. Code related to cost matrices has been
+  moved from Instances into CostMatrix. Evaluation has been updated to use
+  CostMatrix (and the old cost file format is still read). Created a meta
+  classifier for performing cost-sensitve classification using either
+  training instance reweighting or minimum expected cost prediction. Made a
+  simple editor for cost matrices and adjusted other GUI files to support
+  this.
+
+- Also made some small GUI layout changes.
+----------------------------
+revision 1.9.2.1
+date: 1999/08/27 05:03:15;  author: eibe;  state: Exp;  lines: +27 -23
+Fixed bug in computing incorrectly classified instances with costs.
+=============================================================================
+Working file: weka/classifiers/FilteredClassifier.java
+----------------------------
+revision 1.2
+date: 1999/08/26 23:25:22;  author: trigg;  state: Exp;  lines: +3 -5
+- Minor doc changes.
+=============================================================================
+Working file: weka/classifiers/HyperPipes.java
+----------------------------
+revision 1.3
+date: 1999/09/08 04:38:28;  author: trigg;  state: Exp;  lines: +270 -270
+- Got rid of ugly extra ^M's in the source.
+----------------------------
+revision 1.2
+date: 1999/08/25 04:07:04;  author: trigg;  state: Exp;  lines: +2 -2
+- Altered copyright notice according to Intelligenesis guidelines :-)
+----------------------------
+revision 1.1
+date: 1999/08/25 00:16:02;  author: trigg;  state: Exp;
+- First version of the HyperPipes classifier.
+=============================================================================
+Working file: weka/classifiers/IBk.java
+----------------------------
+revision 1.13
+date: 1999/09/01 03:19:57;  author: mhall;  state: Exp;  lines: +6 -1
+Added a call to crossValidate in the toString method. This ensures that
+the correct value for K will be displayed when -X has been specified.
+=============================================================================
+Working file: weka/classifiers/j48/ClassifierTree.java
+----------------------------
+revision 1.7
+date: 1999/08/26 23:19:27;  author: trigg;  state: Exp;  lines: +30 -3
+- Updated source output method to prevent method naming clashes (since
+  hashcodes aren't necessarily unique).
+=============================================================================
+Working file: weka/clusterers/ClusterEvaluation.java
+Working file: weka/clusterers/Cobweb.java
+Working file: weka/clusterers/EM.java
+Working file: weka/gui/explorer/ClustererPanel.java
+----------------------------
+date: 1999/09/08 01:56:18;  author: mhall;  state: Exp;  lines: +21 -6
+Changed so that cluster assignments are mapped properly when a clusterer has
+empty clusters.
+----------------------------
+date: 1999/08/30 05:04:35;  author: mhall;  state: Exp;  lines: +40 -3
+Changed so unused clusters are not displayed in the output.
+----------------------------
+date: 1999/08/27 04:27:09;  author: mhall;  state: Exp;  lines: +152 -4
+Incorperated ClustererPanel into the Explorer. Touched up ClusterEvaluation,
+EM and Cobweb to allow integration with the gui.
+=============================================================================
+Working file: weka/core/Utils.java
+----------------------------
+revision 1.14
+date: 1999/09/16 21:53:13;  author: trigg;  state: Exp;  lines: +61 -18
+- New mega-funky quoting mechanism. Better in all respects.
+=============================================================================
+Working file: weka/gui/GenericObjectEditor.java
+----------------------------
+revision 1.14
+date: 1999/09/09 02:23:35;  author: mhall;  state: Exp;  lines: +4 -5
+Fixed cancel button. Now works under NT using java 1.2.
+----------------------------
+revision 1.13
+date: 1999/09/03 04:28:17;  author: mhall;  state: Exp;  lines: +54 -1
+Added ok and cancel buttons.
+----------------------------
+revision 1.11
+date: 1999/08/25 05:02:46;  author: trigg;  state: Exp;  lines: +3 -3
+- Better handling when classes aren't found.
+=============================================================================
+Working file: weka/gui/ResultHistoryPanel.java
+----------------------------
+revision 1.6
+date: 1999/09/16 22:11:14;  author: mhall;  state: Exp;  lines: +32 -12
+added a getSelectionModel method so that clients can add themselves as
+listeners for list selection events. This allows a response to be made
+when a list selection changes regardless of how the selection was made
+(mouse or keyboard).
+----------------------------
+revision 1.5
+date: 1999/09/16 05:43:22;  author: mhall;  state: Exp;  lines: +28 -15
+Changed so that generic objects rather than just Visualize objects can
+be associated with list entries.
+----------------------------
+revision 1.4
+date: 1999/09/16 03:12:44;  author: mhall;  state: Exp;  lines: +32 -1
+Added the ability to associate a visualization object with a list entry
+=============================================================================
+Working file: weka/gui/explorer/AssociationsPanel.java
+----------------------------
+revision 1.5
+date: 1999/09/02 05:21:44;  author: trigg;  state: Exp;  lines: +7 -3
+- Added options to control output for classifiers, and not output the attribute
+  list for more than 100 attributes.
+=============================================================================
+Working file: weka/gui/explorer/AttributeSelectionPanel.java
+----------------------------
+revision 1.5
+date: 1999/09/02 05:21:44;  author: trigg;  state: Exp;  lines: +7 -3
+- Added options to control output for classifiers, and not output the attribute
+  list for more than 100 attributes.
+----------------------------
+revision 1.3
+date: 1999/08/23 02:27:58;  author: mhall;  state: Exp;  lines: +22 -5
+Changed to give progress indication during x-val.
+=============================================================================
+Working file: weka/gui/explorer/ClassifierPanel.java
+----------------------------
+revision 1.13
+date: 1999/09/16 22:12:30;  author: mhall;  state: Exp;  lines: +17 -9
+Changed so that visualize button status and classifier output responds to
+both mouse and keyboard in the results list.
+----------------------------
+revision 1.12
+date: 1999/09/16 05:44:24;  author: mhall;  state: Exp;  lines: +19 -46
+Fixed Visualize button so that its enabled status is linked to the
+results list.
+----------------------------
+revision 1.11
+date: 1999/09/16 03:34:43;  author: trigg;  state: Exp;  lines: +2 -2
+- Fixed bug -- selected index may actually be 0 :-)
+----------------------------
+revision 1.10
+date: 1999/09/16 03:14:48;  author: mhall;  state: Exp;  lines: +212 -64
+Moved the output/visualize options to a popup window. Individual predictions from the results list can now be visualized.
+----------------------------
+revision 1.9
+date: 1999/09/08 01:58:18;  author: mhall;  state: Exp;  lines: +86 -6
+Added visualize button.
+----------------------------
+revision 1.8
+date: 1999/09/07 04:19:56;  author: trigg;  state: Exp;  lines: +10 -5
+- Fixed bug when setting instances with no attributes
+----------------------------
+revision 1.7
+date: 1999/09/02 05:21:44;  author: trigg;  state: Exp;  lines: +89 -15
+- Added options to control output for classifiers, and not output the attribute
+  list for more than 100 attributes.
+=============================================================================
+Working file: weka/gui/explorer/ClustererPanel.java
+----------------------------
+revision 1.6
+date: 1999/09/16 22:12:49;  author: mhall;  state: Exp;  lines: +14 -16
+Changed so that visualize button status and clusterer output responds to
+both mouse and keyboard in the results list.
+----------------------------
+revision 1.5
+date: 1999/09/16 05:44:39;  author: mhall;  state: Exp;  lines: +19 -13
+Fixed Visualize button so that its enabled status is linked to the
+results list.
+----------------------------
+revision 1.4
+date: 1999/09/16 03:15:39;  author: mhall;  state: Exp;  lines: +124 -29
+Moved the visualize button. Individual clustering results from the results list
+can now be visualized.
+----------------------------
+revision 1.3
+date: 1999/09/08 01:58:18;  author: mhall;  state: Exp;  lines: +48 -1
+Added visualize button.
+=============================================================================
+Working file: weka/gui/explorer/Explorer.java
+----------------------------
+revision 1.7
+date: 1999/09/16 04:01:43;  author: trigg;  state: Exp;  lines: +9 -2
+- Allow specifying an arff file from the command line
+----------------------------
+revision 1.6
+date: 1999/09/08 01:58:57;  author: mhall;  state: Exp;  lines: +6 -4
+Incorperated the visualize panel.
+----------------------------
+revision 1.5
+date: 1999/08/27 03:42:46;  author: mhall;  state: Exp;  lines: +5 -3
+Incorperated ClustererPanel into the Explorer. Touched up ClusterEvaluation,
+EM and Cobweb to allow integration with the gui.
+=============================================================================
+Working file: weka/gui/explorer/PreprocessPanel.java
+----------------------------
+revision 1.7
+date: 1999/09/16 04:03:00;  author: trigg;  state: Exp;  lines: +96 -68
+- Rearranged IO threading to allow external objects to trigger
+file loading (eg, main method of Explorer).
+=============================================================================
+Working file: weka/gui/explorer/VisualizePanel.java
+----------------------------
+revision 1.4
+date: 1999/09/19 22:26:26;  author: mhall;  state: Exp;  lines: +24 -2
+Added the classifiers prediction to the instance info popup window.
+----------------------------
+revision 1.3
+date: 1999/09/16 03:53:51;  author: trigg;  state: Exp;  lines: +7 -7
+- Fixed bug in jittering -- used to tend values downward (now symmetric
+around the original value, by using gaussian jittering)
+----------------------------
+revision 1.2
+date: 1999/09/16 03:16:52;  author: mhall;  state: Exp;  lines: +543 -90
+Added a jitter slider. Can now click on a point and recieve information about
+the corresponding instance(s) in a popup window.
+----------------------------
+revision 1.1
+date: 1999/09/08 01:57:34;  author: mhall;  state: Exp;
+Initial import
+=============================================================================
+Working file: weka/gui/streams/FilterPanel.java
+----------------------------
+revision 1.2
+date: 1999/09/13 03:09:48;  author: trigg;  state: dead;  lines: +1 -1
+partial code removed
+=============================================================================
