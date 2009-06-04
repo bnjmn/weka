@@ -16,7 +16,7 @@
 
 /*
  *    CostSensitiveAttributeEval.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -92,7 +92,7 @@ import java.io.Serializable;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class CostSensitiveAttributeEval
   extends CostSensitiveASEvaluation
@@ -149,7 +149,7 @@ public class CostSensitiveAttributeEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

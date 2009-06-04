@@ -16,7 +16,7 @@
 
 /*
  *    IncrementalClassifierEvaluatorCustomizer.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import javax.swing.JPanel;
  * GUI Customizer for the incremental classifier evaluator bean
  *
  * @author Mark Hall (mhall{[at}]pentaho{[dot]}org
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class IncrementalClassifierEvaluatorCustomizer
   extends JPanel

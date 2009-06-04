@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2008 Pentaho Corporation
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.clusterers;
@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.clusterers.sIBTest
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class sIBTest 
   extends AbstractClustererTest {

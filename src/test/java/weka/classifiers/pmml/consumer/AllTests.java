@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright 2008 Pentaho Corporation
+ * Copyright 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.pmml.consumer;

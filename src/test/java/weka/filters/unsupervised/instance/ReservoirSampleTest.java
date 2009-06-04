@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2007 Pentaho Corporation
+ * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.instance;
@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.instance.ReservoirSampleTest
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class ReservoirSampleTest
   extends AbstractFilterTest {

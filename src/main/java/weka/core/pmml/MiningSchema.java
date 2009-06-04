@@ -16,7 +16,7 @@
 
 /*
  *    MiningSchema.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -48,7 +48,7 @@ import weka.core.Instances;
  * store them here.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class MiningSchema implements Serializable {
 

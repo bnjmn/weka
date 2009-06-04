@@ -16,7 +16,7 @@
 
 /*
  *    MappingInfo.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -35,7 +35,7 @@ import weka.gui.Logger;
  * and that of the mining schema.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class MappingInfo implements Serializable {
   
