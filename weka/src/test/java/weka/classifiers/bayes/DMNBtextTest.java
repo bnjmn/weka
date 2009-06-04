@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright 2008 Pentaho Corporation
+ * Copyright 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.bayes;
@@ -31,7 +31,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.bayes.DMNBtextTest
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class DMNBtextTest extends AbstractClassifierTest {
 
