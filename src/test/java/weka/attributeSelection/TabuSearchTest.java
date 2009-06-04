@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2009 Pentaho Corporation
+ * Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.attributeSelection;

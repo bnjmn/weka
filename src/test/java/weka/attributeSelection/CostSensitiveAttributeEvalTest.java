@@ -15,7 +15,7 @@
  */
 
 /*
- * Copyright (C) 2008 Pentaho Corporation
+ * Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.attributeSelection;
@@ -32,7 +32,7 @@ import junit.framework.TestSuite;
  * java weka.attributeSelection.CostSensitiveAttributeEvalTest
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class CostSensitiveAttributeEvalTest 
   extends AbstractEvaluatorTest {
