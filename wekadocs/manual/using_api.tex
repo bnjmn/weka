@@ -224,10 +224,54 @@ loaded fully into memory and then provided row-by-row (``pseudo-incremental'').
 
 \newpage
 
+%%%%%%%%%%%%%%%%%%%%
+% Randomizing data %
+%%%%%%%%%%%%%%%%%%%%
+\section{Randomizing data}
+Since learning algorithms can be prone to the order the data arrives
+in, randomizing (also called ``shuffling'') the data is a common approach to
+alleviate this problem. Especially repeated randomizations, e.g., as during
+cross-validation, helps to generate more realistic statistics.
+
+WEKA offers two possibilities for randomizing a dataset:
+\begin{tight_itemize}
+	\item Using the \texttt{randomize(Random)} method of the
+\texttt{weka.core.Instances} object containing the data itself. This method
+requires an instance of the \texttt{java.util.Random} class. How to correctly
+instantiate such an object is explained below.
+	\item Using the \texttt{Randomize} filter (package
+\texttt{weka.filters.unsupervised.instance}). For more information on how to
+use filters, see section \ref{api_filtering}.
+\end{tight_itemize}
+A very important aspect of Machine Learning experiments is, that experiments
+have to be repeatable. Subsequent runs of the same experiment setup have to
+yield the exact same results. It may seem weird, but randomization is still
+possible in this scenario. Random number generates never return a completely
+random sequence of numbers anyway, only a pseudo-random one. In order to
+achieve repeatable pseudo-random sequences, \textit{seeded} generators are
+used. Using the same \textit{seed value} will always result in the same
+sequence then.
+
+The default constructor of the \texttt{java.util.Random} random number generator
+class should never be used, as such created objects will generate most likely
+different sequences. The constructor \texttt{Random(long)}, using a specified 
+seed value, is the recommended one to use.
+
+In order to get a more dataset-dependent randomization of the data, the
+\texttt{getRandomNumberGenerator(int)} method of the
+\texttt{weka.core.Instances} class can be used. This method returns a
+\texttt{java.util.Random} object that was seeded with the sum of the supplied
+seed and the hashcode of the string representation of a randomly chosen
+\texttt{weka.core.Instance} of the \texttt{Instances} object (using a random
+number generator seeded with the seed supplied to this method).
+
+\newpage
+
 %%%%%%%%%%%%%
 % Filtering %
 %%%%%%%%%%%%%
 \section{Filtering}
+\label{api_filtering}
 In WEKA, filters are used to preprocess the data. They can be found in
 package \texttt{weka.filters}. Each filter falls into one
 of the following two categories:
@@ -439,7 +483,7 @@ in memory. ARFF files, for instance, can be read incrementally (see chapter
 Training an incremental classifier happens in \textit{two} stages:
 \begin{tight_enumerate}
 	\item \textit{initialize} the model by calling the
-\texttt{buildClassifier(Instances)} method. One can either use an
+\texttt{buildClassifier(Instances)} method. One can either use a
 \texttt{weka.core.Instances} object with no actual data or one with an initial
 set of data.
 	\item \textit{update} the model row-by-row by calling the
@@ -506,6 +550,9 @@ The code snippet below performs 10-fold cross-validation with a J48 decision
 tree algorithm on a dataset \texttt{newData}, with random number generator that
 is seeded with ``1''. The summary of the collected statistics is output to
 \texttt{stdout}.
+
+\newpage
+
 \begin{verbatim}
    import weka.classifiers.Evaluation;
    import weka.classifiers.trees.J48;
@@ -521,14 +568,6 @@ The \texttt{Evaluation} object in this example is initialized with the dataset
 used in the evaluation process. This is done in order to inform the evaluation
 about the type of data that is being evaluated, ensuring that all internal data
 structures are setup correctly.
-
-In order to get a more dataset-dependent initial randomization of the data, the
-\texttt{getRandomNumberGenerator(int)} method of the
-\texttt{weka.core.Instances} class can be used for this purpose. This method
-returns a \texttt{java.util.Random} object that was seeded with the sum
-of the supplied seed and the hashcode of the string representation of
-a randomly chosen \texttt{weka.core.Instance} of the \texttt{Instances} object
-(using a random number generator seeded with the seed supplied to this method).
 
 \subsubsection*{Train/test set}
 Using a dedicated test set to evaluate a classifier is just as easy as
@@ -673,9 +712,8 @@ instances in an unlabeled dataset that gets loaded from disk. After all the
 instances have been labeled, the labeled dataset gets written back to a new
 file.
 \begin{verbatim}
-   // load unlabeled data
+   // load unlabeled data and set class attribute
    Instances unlabeled = DataSource.read("/some/where/unlabeled.arff"); 
-   // set class attribute
    unlabeled.setClassIndex(unlabeled.numAttributes() - 1);
    // create copy
    Instances labeled = new Instances(unlabeled);
@@ -724,6 +762,223 @@ console:
 % Clustering %
 %%%%%%%%%%%%%%
 \section{Clustering}
+Clustering is an unsupervised machine learning technique of finding patterns in
+the data, i.e., these algorithms work without class attributes. Classifiers, on
+the other hand, are supervised and need a class attribute. This section,
+similar to the one covering classifiers, covers the following topics:
+\begin{tight_itemize}
+	\item \textit{Building a clusterer} -- batch and incremental learning.
+	\item \textit{Evaluating a clusterer} -- how to evaluate a built clusterer.
+	\item \textit{Clustering instances} -- determining what clusters unknown
+instances belong to.
+\end{tight_itemize}
+
+\subsection{Building a clusterer}
+Clusterers, just like classifiers, are also by default batch-trainable. They
+all can be built on data that is completely in memory. But a samll subset of
+the cluster algorithms can also update the internal representation
+incrementally. The following two sections cover both types of clusterers.
+
+\subsubsection*{Batch clusterers}
+Building a batch clusterer, like classifiers, happens in two stages:
+\begin{tight_itemize}
+	\item setting the options -- either calling the
+\texttt{setOptions(String[])} method or the appropriate get/set-methods of the
+properties.
+	\item building the model with training data -- calling the
+\texttt{buildClusterer(Instances)} method. By definition, subsequent calls of
+this method must result in the same model. In other words, calling this method
+must completely reset the model.
+\end{tight_itemize}
+Below is an example of building the \texttt{EM} clusterer with a maximum of 100
+iterations. The options are set using the \texttt{setOptions(String[])} method:
+\begin{verbatim}
+   import weka.clusterers.EM;
+   import weka.core.Instances;
+   ...
+   Instances data = ... // from somewhere
+   String[] options = new String[2];
+   options[0] = "-I";                 // max. iterations
+   options[1] = "100";
+   EM clusterer = new EM();   // new instance of clusterer
+   clusterer.setOptions(options);     // set the options
+   clusterer.buildClusterer(data);    // build the clusterer
+\end{verbatim}
+
+\subsubsection*{Incremental clusterers}
+Incremental clusterers in WEKA, implement the interface
+\texttt{UpdateableClusterer} (package \texttt{weka.clusterers}). Training an
+incremental clusterer happens in three stages, similar to incremental
+classifiers:
+\begin{tight_enumerate}
+	\item \textit{initialize} the model by calling the
+\texttt{buildClusterer(Instances)} method. Once again, one can either use an
+empty \texttt{weka.core.Instances} object or one with an initial set of data.
+	\item \textit{update} the model row-by-row by calling the the
+\texttt{updateClusterer(Instance)} method.
+	\item \textit{finish} the training by calling
+\texttt{updateFinished()} method. In case cluster algorithms need to perform
+computational expensive post-processing or clean up operations.
+\end{tight_enumerate}
+
+\newpage
+
+An \texttt{ArffLoader} is used in the following example to build the
+\texttt{Cobweb} clusterer incrementally:
+\begin{verbatim}
+   import weka.clusterers.Cobweb;
+   import weka.core.Instance;
+   import weka.core.Instances;
+   import weka.core.converters.ArffLoader;
+   ...
+   // load data
+   ArffLoader loader = new ArffLoader();
+   loader.setFile(new File("/some/where/data.arff"));
+   Instances structure = loader.getStructure();
+   // train Cobweb
+   Cobweb cw = new Cobweb();
+   cw.buildClusterer(structure);
+   Instance current;
+   while ((current = loader.getNextInstance(structure)) != null)
+     cw.updateClusterer(current);
+   cw.updateFinished();
+\end{verbatim}
+
+\newpage
+
+\subsection{Evaluating a clusterer}
+Evaluation of clusterers is not as comprehensive as the evaluation of
+classifiers. Since clustering is unsupervised, it is also a lot harder
+determining how \textit{good} a model is. The class used for evaluating cluster
+algorithms, is \texttt{ClusterEvaluation} (package \texttt{weka.clusterers}).
+
+In order to generate the same output as the Explorer or the command-line, one
+can use the \texttt{evaluateClusterer} method, as shown below:
+\begin{verbatim}
+  import weka.clusterers.EM;
+  import weka.clusterers.ClusterEvaluation;
+  ...
+  String[] options = new String[2];
+  options[0] = "-t";
+  options[1] = "/some/where/somefile.arff";
+  System.out.println(ClusterEvaluation.evaluateClusterer(new EM(), options));
+\end{verbatim}
+Or, if the dataset is already present in memory, one can use the following
+approach:
+\begin{verbatim}
+   import weka.clusterers.ClusterEvaluation;
+   import weka.clusterers.EM;
+   import weka.core.Instances;
+   ...
+   Instances data = ... // from somewhere
+   EM cl = new EM();
+   cl.buildClusterer(data);
+   ClusterEvaluation eval = new ClusterEvaluation();
+   eval.setClusterer(cl);
+   eval.evaluateClusterer(new Instances(data));
+   System.out.println(eval.clusterResultsToString());
+\end{verbatim}
+Density based clusterers, i.e., algorithms that implement the interface named
+\texttt{DensityBasedClusterer} (package \texttt{weka.clusterers}) can
+be cross-validated and the log-likelyhood obtained. Using the
+\texttt{MakeDensityBasedClusterer} meta-clusterer, any non-density based
+clusterer can be turned into such. Here is an example of cross-validating a
+density based clusterer and obtaining the log-likelyhood:
+\begin{verbatim}
+   import weka.clusterers.ClusterEvaluation;
+   import weka.clusterers.DensityBasedClusterer;
+   import weka.core.Instances;
+   import java.util.Random;
+   ...
+   Instances data = ...                         // from somewhere
+   DensityBasedClusterer clusterer = new ...    // the clusterer to evaluate
+   double logLikelyhood =
+   ClusterEvaluation.crossValidateModel(        // cross-validate
+       clusterer, data, 10,                     // with 10 folds
+       new Random(1));                          // and random number generator
+                                                // with seed 1
+\end{verbatim}
+
+\newpage
+
+\subsubsection*{Classes to clusters}
+Datasets for supervised algorithms, like classifiers, can be used to
+evaluate a clusterer as well. This evaluation is called
+\textit{classes-to-clusters}, as the clusters are mapped back onto the classes.
+
+This type of evaluation is performed as follows:
+\begin{tight_enumerate}
+	\item \textit{create a copy} of the dataset containing the class attribute
+and remove the class attribute, using the \texttt{Remove} filter (this
+filter is located in package \texttt{weka.filters.unsupervised.attribute}).
+	\item \textit{build the clusterer} with this new data.
+	\item \textit{evaluate the clusterer} now with the \textbf{original} data.
+\end{tight_enumerate}
+And here are the steps translated into code, using \texttt{EM} as the
+clusterer being evaluated:
+\begin{tight_enumerate}
+	\item create a copy of data without class attribute
+	\begin{verbatim}
+    Instances data = ... // from somewhere
+    Remove filter = new Remove();
+    filter.setAttributeIndices("" + (data.classIndex() + 1));
+    filter.setInputFormat(data);
+    Instances dataClusterer = Filter.useFilter(data, filter);
+	\end{verbatim}
+
+	\item build the clusterer
+	\begin{verbatim}
+    EM clusterer = new EM();
+    // set further options for EM, if necessary...
+    clusterer.buildClusterer(dataClusterer);
+	\end{verbatim}
+
+	\item evaluate the clusterer
+	\begin{verbatim}
+    ClusterEvaluation eval = new ClusterEvaluation();
+    eval.setClusterer(clusterer);
+    eval.evaluateClusterer(data);
+    // print results
+    System.out.println(eval.clusterResultsToString());
+	\end{verbatim}
+\end{tight_enumerate}
+
+\newpage
+
+\subsection{Clustering instances}
+Clustering of instances is very similar to classifying unknown instances when
+using classifiers. The following methods are involved:
+\begin{tight_itemize}
+	\item \texttt{clusterInstance(Instance)} -- determines the cluster the
+Instance would belong to.
+	\item \texttt{distributionForInstance(Instance)} -- predicts the cluster
+membership for this Instance. The sum of this array adds up to 1.
+\end{tight_itemize}
+The code fragment outlined below trains an \texttt{EM} clusterer on an one
+dataset and outputs for a second dataset the predicted clusters and cluster
+memberships of the individual instances:
+\begin{verbatim}
+   import weka.clusterers.EM;
+   import weka.core.Instances;
+   ...
+   Instances dataset1 = ... // from somewhere
+   Instances dataset2 = ... // from somewhere
+   // build clusterer
+   EM clusterer = new EM();
+   clusterer.buildClusterer(dataset1);
+   // output predictions
+   System.out.println("# - cluster - distribution");
+   for (int i = 0; i < dataset2.numInstances(); i++) {
+     int cluster = clusterer.clusterInstance(dataset2.instance(i));
+     double[] dist = clusterer.distributionForInstance(dataset2.instance(i));
+     System.out.print((i+1));
+     System.out.print(" - ");
+     System.out.print(cluster);
+     System.out.print(" - ");
+     System.out.print(Utils.arrayToString(dist));
+     System.out.println();
+   }
+\end{verbatim}
 
 \newpage
 
@@ -731,6 +986,82 @@ console:
 % Selecting attributes %
 %%%%%%%%%%%%%%%%%%%%%%%%
 \section{Selecting attributes}
+
+\subsection{Using the meta-classifier}
+
+\begin{verbatim}
+   import weka.attributeSelection.CfsSubsetEval;
+   import weka.attributeSelection.GreedyStepwise;
+   import weka.classifiers.Evaluation;
+   import weka.classifiers.meta.AttributeSelectedClassifier;
+   import weka.classifiers.trees.J48;
+   import weka.core.Instances;
+   ...
+   Instances data = ... // from somewhere
+   // setup meta-classifier
+   AttributeSelectedClassifier classifier = new AttributeSelectedClassifier();
+   CfsSubsetEval eval = new CfsSubsetEval();
+   GreedyStepwise search = new GreedyStepwise();
+   search.setSearchBackwards(true);
+   J48 base = new J48();
+   classifier.setClassifier(base);
+   classifier.setEvaluator(eval);
+   classifier.setSearch(search);
+   // cross-validate classifier
+   Evaluation evaluation = new Evaluation(data);
+   evaluation.crossValidateModel(classifier, data, 10, new Random(1));
+   System.out.println(evaluation.toSummaryString());
+\end{verbatim}
+
+\newpage
+
+\subsection{Using the filter}
+
+\begin{verbatim}
+   import weka.attributeSelection.CfsSubsetEval;
+   import weka.attributeSelection.GreedyStepwise;
+   import weka.core.Instances;
+   import weka.filters.Filter;
+   import weka.filters.supervised.attribute.AttributeSelection;
+   ...
+   Instances data = ... // from somewhere
+   // setup filter
+   AttributeSelection filter = new AttributeSelection();
+   CfsSubsetEval eval = new CfsSubsetEval();
+   GreedyStepwise search = new GreedyStepwise();
+   search.setSearchBackwards(true);
+   filter.setEvaluator(eval);
+   filter.setSearch(search);
+   filter.setInputFormat(data);
+   // filter data
+   Instances newData = Filter.useFilter(data, filter);
+   System.out.println(newData);
+\end{verbatim}
+
+\newpage
+
+\subsection{Using the API directly}
+
+\begin{verbatim}
+   import weka.attributeSelection.AttributeSelection;
+   import weka.attributeSelection.CfsSubsetEval;
+   import weka.attributeSelection.GreedyStepwise;
+   import weka.core.Instances;
+   ...
+   Instances data = ... // from somewhere
+   // setup attribute selection
+   AttributeSelection attsel = new AttributeSelection();
+   CfsSubsetEval eval = new CfsSubsetEval();
+   GreedyStepwise search = new GreedyStepwise();
+   search.setSearchBackwards(true);
+   attsel.setEvaluator(eval);
+   attsel.setSearch(search);
+   // perform attribute selection
+   attsel.SelectAttributes(data);
+   int[] indices = attsel.selectedAttributes();
+   System.out.println("selected attribute indices (starting with 0):\n"
+        + Utils.arrayToString(indices));
+\end{verbatim}
 
 \newpage
 
