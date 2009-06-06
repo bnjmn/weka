@@ -1,32 +1,32 @@
 % Version: $Revision$
 
-Using the graphical tools, like the Explorer, or the command-line is in most
-cases sufficient for the normal user. But WEKA's clearly defined API
-(``application programming interface'') makes is very easy to ``embed'' it in
+Using the graphical tools, like the Explorer, or just the command-line is in
+most cases sufficient for the normal user. But WEKA's clearly defined API
+(``application programming interface'') makes it very easy to ``embed'' it in
 another projects. This chapter covers some basics of how to achieve the
 following common tasks from source code:
 \begin{tight_itemize}
-	\item Option handling
-	\item Loading data
+	\item Setting options
+	\item Loading and saving data
 	\item Filtering
 	\item Classifying
 	\item Clustering
 	\item Selecting attributes
 \end{tight_itemize}
-Even though most of the examples are for the Linux platform, using forward
+Even though most of the code examples are for the Linux platform, using forward
 slashes in the paths and file names, they do work on the MS Windows platform as
 well. To make the examples work under MS Windows, one only needs to adapt the
 paths, changing the forward slashes to backslashes and adding a drive letter
-where appropriate. \\
+where necessary. \\
 
 \noindent \textbf{Note} \\
 \noindent WEKA is released under the GNU General Public License version
 2\footnote{\url{http://www.gnu.org/licenses/gpl-2.0.html}{}} (GPLv2), i.e., that
 derived
 code or code that uses WEKA needs to be released under the GPLv2 as well. If
-you are just using WEKA for a personal project that does not get released
-publicly then you are not affected. But as soon as you make your project
-publicly available (e.g., for download), then you need to make your source code
+one is just using WEKA for a personal project that does not get released
+publicly then one is not affected. But as soon as one makes the project
+publicly available (e.g., for download), then one needs to make the source code
 available under the GLPv2 as well, alongside the binaries.
 
 \newpage
@@ -35,37 +35,44 @@ available under the GLPv2 as well, alongside the binaries.
 % Option handling %
 %%%%%%%%%%%%%%%%%%%
 \section{Option handling}
+\label{api_optionhandling}
 Configuring an object, e.g., a classifier, can either be done using the
-appropriate get/set-methods for the property that you wish to change, like the
-Explorer does. Or, if the class implements the \texttt{weka.core.OptionHandler}
-interface, you can just use the object's ability to parse command-line options
-via the \texttt{setOptions(String[])} method (the counterpart of this method is
-\texttt{getOptions()}, which returns a \texttt{String[]} array). The
-difference between the two approaches is, that the \texttt{setOptions(String[])}
-method cannot be used to set the options incrementally. Default values are used
-for all options that haven't been explicitly specified in the options array.
+appropriate \texttt{get}/\texttt{set}-methods for the property that one wishes
+to change, like the Explorer does. Or, if the class implements the
+\texttt{weka.core.OptionHandler} interface, one can just use the object's
+ability to parse command-line options via the \texttt{setOptions(String[])}
+method (the counterpart of this method is \texttt{getOptions()}, which returns a
+\texttt{String[]} array). The difference between the two approaches is, that the
+\texttt{setOptions(String[])} method cannot be used to set the options
+incrementally. Default values are used for all options that haven't been
+explicitly specified in the options array.
 
-The most basic approach is to assemble the String array by hand. The following
-example creates an array with a single option (``\texttt{-R}'') that takes an
-argument (``\texttt{1}''):
+The most basic approach is to assemble the \texttt{String} array by hand. The
+following example creates an array with a single option (``\texttt{-R}'') that
+takes an argument (``\texttt{1}'') and initializes the \texttt{Remove} filter
+with this option:
 \begin{verbatim}
+  import weka.filters.unsupervised.attribute.Remove;
+  ...
   String[] options = new String[2];
   options[0] = "-R";
   options[1] = "1";
+  Remove rm = new Remove();
+  rm.setOptions(options);
 \end{verbatim}
 Since the \texttt{setOptions(String[])} method expects a fully parsed and
-correctly split up array (which is done by the command-line), some common
-pitfalls with this approach are:
+correctly split up array (which is done by the console/command prompt), some
+common pitfalls with this approach are:
 \begin{tight_itemize}
 	\item Combination of option and argument -- Using ``\texttt{-R 1}'' as an
-element of the String array will fail, prompting WEKA to output an error message
-stating that the option ``R 1'' is unknown.
+element of the \texttt{String} array will fail, prompting WEKA to output an
+error message stating that the option ``R 1'' is unknown.
 	\item Trailing blanks -- Using ``\texttt{-R }'' will fail as well, since no
-removal of trailing blanks happens and therefore option ``R '' is unknown.
+trailing blanks are removed and therefore option ``R '' will not be recognized.
 \end{tight_itemize}
-The easiest way to avoid these problems, is to provide a String array that has
-been generated automatically from a single command-line string using the
-\texttt{splitOptions(String)} method of the \texttt{weka.core.Utils} class.
+The easiest way to avoid these problems, is to provide a \texttt{String} array
+that has been generated automatically from a single command-line string using
+the \texttt{splitOptions(String)} method of the \texttt{weka.core.Utils} class.
 Here is an example:
 \begin{verbatim}
   import weka.core.Utils;
@@ -79,9 +86,53 @@ Complicated command-lines with lots of nested options, e.g., options for the
 support-vector machine classifier \textit{SMO} (package
 \texttt{weka.classifiers.functions}) including a kernel setup, are a bit tricky,
 since Java requires one to escape double quotes and backslashes inside a
-String. The Wiki\cite{wekawiki} article ``Use Weka in your Java code''
+\texttt{String}. The Wiki\cite{wekawiki} article ``Use Weka in your Java code''
 references the Java class \texttt{OptionsToCode}, which turns any command-line
 into appropriate Java source code.
+
+\newpage
+
+Instead of using the \texttt{Remove} filter's \texttt{setOptions(String[])}
+method, the following code snippet uses the actual \texttt{set}-method for this
+property:
+\begin{verbatim}
+  import weka.filters.unsupervised.attribute.Remove;
+  ...
+  Remove rm = new Remove();
+  rm.setAttributeIndices("1");
+\end{verbatim}
+In order to find out, which option belongs to which property, i.e.,
+\texttt{get}/\texttt{set}-method, it is best to have a look at the
+\texttt{setOptions(String[])} and \texttt{getOptions()} methods. In case these
+methods use the member variables directly, one just has to look for the methods
+making this particular member variable accessible to the outside.
+
+Using the \texttt{set}-methods, one will most likely come across ones that
+require a \texttt{weka.core.SelectedTag} as parameter. An example for this, is
+the \texttt{setEvaluation} method of the meta-classifier \texttt{GridSearch}
+(located in package \texttt{weka.classifiers.meta}). This class is used in the
+GUI for displaying drop-down lists, enabling the user to chose from a
+predefined list of values. \texttt{GridSearch} allows the user to chose the
+statistical measure to base the evaluation on (accuracy, correlation
+coefficient, etc.).
+
+A \texttt{SelectedTag} gets constructed using the array of all possible
+\texttt{weka.core.Tag} elements that can be chosen and the integer or string ID
+of the \texttt{Tag}. For instance, \texttt{GridSearch}'s
+\texttt{setOptions(String[])} method uses the supplied string ID to set the
+evaluation type (e.g., ``\texttt{ACC}'' for accuracy), or, if the
+evaluation option is missing, the default integer ID \texttt{EVALUATION\_ACC}.
+In both cases, the array \texttt{TAGS\_EVALUATION} is used, which defines all
+possible options:
+\begin{verbatim}
+   import weka.core.SelectedTag;
+   ...
+   String tmpStr = Utils.getOption('E', options);
+   if (tmpStr.length() != 0)
+     setEvaluation(new SelectedTag(tmpStr, TAGS_EVALUATION));
+   else
+     setEvaluation(new SelectedTag(EVALUATION_CC, TAGS_EVALUATION));
+\end{verbatim}
 
 \newpage
 
@@ -100,7 +151,7 @@ Database Connectivity) URLs.
 The following classes are used to store data in memory:
 \begin{tight_itemize}
 	\item \texttt{weka.core.Instances} -- holds a complete dataset. This data
-structure is row-based, single rows can be accessed via the
+structure is row-based; single rows can be accessed via the
 \texttt{instance(int)} method using a 0-based index. Information about the
 columns can be accessed via the \texttt{attribute(int)} method. This method
 returns \texttt{weka.core.Attribute} objects (see below).
@@ -121,23 +172,23 @@ attributes or the datasets for \textit{relational} attributes (these are just
 When loading data from files, one can either let WEKA choose the appropriate
 loader (the available loaders can be found in the \texttt{weka.core.converters}
 package) based on the file's extension or one can use the correct loader
-explicitly. The latter case is necessary if the files don't have the correct
+directly. The latter case is necessary if the files do not have the correct
 extension.
 
 The \texttt{DataSource} class (inner class of the
 \texttt{weka.core.converters.ConverterUtils} class) can be used to read data
-from files that have the appropriate file extension. Here are a some examples:
+from files that have the appropriate file extension. Here are some examples:
 \begin{verbatim}
    import weka.core.converters.ConverterUtils.DataSource;
    import weka.core.Instances;
    ...
    Instances data1 = DataSource.read("/some/where/dataset.arff");
-   Instances data2 = DataSource.read("/other/place/dataset.csv");
-   Instances data3 = DataSource.read("/other/place/dataset.xrff");
+   Instances data2 = DataSource.read("/some/where/dataset.csv");
+   Instances data3 = DataSource.read("/some/where/dataset.xrff");
 \end{verbatim}
 In case the file does have a different file extension than is normally
 associated with the loader, one has to use a loader directly. The following
-example loads a CSV file (``comma-separated values'') file:
+example loads a CSV (``comma-separated values'') file:
 \begin{verbatim}
    import weka.core.converters.CSVLoader;
    import weka.core.Instances;
@@ -162,13 +213,13 @@ a classifier, it can be set with the \texttt{setClassIndex(int)} method:
 \end{verbatim}
 
 \subsection{Loading data from databases}
-For loading data from databases, you have two classes that allow you to do that:
+For loading data from databases, one of the following two classes can be used:
 \begin{tight_itemize}
 	\item \texttt{weka.experiment.InstanceQuery}
 	\item \texttt{weka.core.converters.DatabaseLoader}
 \end{tight_itemize}
 The differences between them are, that the \texttt{InstanceQuery} class allows
-you to retrieve sparse data and the \texttt{DatabaseLoader} can retrieve the
+one to retrieve sparse data and the \texttt{DatabaseLoader} can retrieve the
 data incrementally. \\
 
 \noindent Here is an example of using the \texttt{InstanceQuery} class:
@@ -181,7 +232,7 @@ data incrementally. \\
   query.setUsername("the_user");
   query.setPassword("the_password");
   query.setQuery("select * from whatsoever");
-  // if your data is sparse, then you can say so too
+  // if your data is sparse, then you can say so, too:
   // query.setSparseData(true);
   Instances data = query.retrieveInstances();
 \end{verbatim}
@@ -197,7 +248,8 @@ And an example using the \texttt{DatabaseLoader} class in ``batch retrieval'':
 \end{verbatim}
 
 \samepage
-\noindent And in ``incremental mode'':
+\noindent The \texttt{DatabaseLoader} is used in ``incremental mode'' as
+follows:
 \begin{verbatim}
    import weka.core.Instance;
    import weka.core.Instances;
@@ -212,14 +264,15 @@ And an example using the \texttt{DatabaseLoader} class in ``batch retrieval'':
    while ((inst = loader.getNextInstance(structure)) != null)
       data.add(inst);
 \end{verbatim}
-\textbf{Notes:}
+
+\noindent \textbf{Notes:}
 \begin{tight_itemize}
 	\item Not all database systems allow incremental retrieval.
 	\item Not all queries have a unique key to retrieve rows incrementally. In
 that case, you can supply the necessary columns with the
 \textit{setKeys(String)} method (comma-separated list of columns).
 	\item If the data cannot be retrieved in an incremental fashion, it is first
-loaded fully into memory and then provided row-by-row (``pseudo-incremental'').
+fully loaded into memory and then provided row-by-row (``pseudo-incremental'').
 \end{tight_itemize}
 
 \newpage
@@ -228,6 +281,7 @@ loaded fully into memory and then provided row-by-row (``pseudo-incremental'').
 % Randomizing data %
 %%%%%%%%%%%%%%%%%%%%
 \section{Randomizing data}
+\label{api_randomizing_data}
 Since learning algorithms can be prone to the order the data arrives
 in, randomizing (also called ``shuffling'') the data is a common approach to
 alleviate this problem. Especially repeated randomizations, e.g., as during
@@ -272,11 +326,11 @@ number generator seeded with the seed supplied to this method).
 %%%%%%%%%%%%%
 \section{Filtering}
 \label{api_filtering}
-In WEKA, filters are used to preprocess the data. They can be found in
-package \texttt{weka.filters}. Each filter falls into one
-of the following two categories:
+In WEKA, filters are used to preprocess the data. They can be found below
+package \texttt{weka.filters}. Each filter falls into one of the following two
+categories:
 \begin{tight_itemize}
-	\item \textit{supervised} -- The filters require a class attribute to be
+	\item \textit{supervised} -- The filter requires a class attribute to be
 set.
 	\item \textit{unsupervised} -- A class attribute is not required to be
 present.
@@ -284,7 +338,7 @@ present.
 And into one of the two sub-categories:
 \begin{tight_itemize}
 	\item \textit{attribute-based} -- Columns are processed, e.g., added or
-removed .
+removed.
 	\item \textit{instance-based} -- Rows are processed, e.g., added or deleted.
 \end{tight_itemize}
 These categories should make it clear, what the difference between the two
@@ -297,12 +351,12 @@ Apart from this classification, filters are either \textit{stream-} or
 \textit{batch-based}. \textit{Stream} filters can process the data straight away
 and make it immediately available for collection again. \textit{Batch} filters,
 on the other hand, need a batch of data to setup their internal
-data structures. The \texttt{Add} filter (the can be found in the
+data structures. The \texttt{Add} filter (this filter can be found in the
 \texttt{weka.filters.unsupervised.attribute} package) is an example of a stream
 filter. Adding a new attribute with only missing values does not require any
 sophisticated setup. However, the \texttt{ReplaceMissingValues} filter (same
 package as the \texttt{Add} filter) needs a batch of data in order to determine
-the means and modes for each of the attributes. Otherwise the filter will not
+the means and modes for each of the attributes. Otherwise, the filter will not
 be able to replace the missing values with meaningful values. But as soon as a
 batch filter has been initialized with the first batch of data, it can also
 process data on a row-by-row basis, just like a stream filter.
@@ -311,7 +365,7 @@ process data on a row-by-row basis, just like a stream filter.
 As mentioned earlier, \textit{all} filters can process data on a row-by-row
 basis after the first batch of data has been passed through. Of course, if a
 filter adds or removes rows from a batch of data, this no longer works when
-working in single-row processing mode. It makes sense, if one thinks of a
+working in single-row processing mode. This makes sense, if one thinks of a
 scenario involving the \texttt{FilteredClassifier} meta-classifier: after
 the training phase (=\ first batch of data), the classifier will get
 evaluated against a test set, one instance at a time. If the filter now
@@ -323,8 +377,8 @@ instance, act like this.
 
 \newpage
 
-The following example uses the \texttt{Remove} filter (filter can be
-found in package \texttt{weka.filters.unsupervised.attribute}) to remove the
+The following example uses the \texttt{Remove} filter (the filter is located
+in package \texttt{weka.filters.unsupervised.attribute}) to remove the
 first attribute from a dataset. For setting the options, the
 \texttt{setOptions(String[])} method is used.
 \begin{verbatim}
@@ -341,18 +395,26 @@ first attribute from a dataset. For setting the options, the
                                         // **AFTER** setting options
    Instances newData = Filter.useFilter(data, remove); // apply filter
 \end{verbatim}
-A common trap to fall into is setting options after the
-\texttt{setInputFormat(Instances)} has been called already. Since this method
+A common trap to fall into is setting options \textbf{after} the
+\texttt{setInputFormat(Instances)} has been called. Since this method
 is used to determine the output format of the data, \textbf{all} the options
-have to be set before calling it. Otherwise, all options set afterwards will be
-ignored.
+have to be set \textbf{before} calling it. Otherwise, all options set afterwards
+will be ignored.
 
 \subsection{Batch filtering}
-Batch filtering is necessary if two or more datasets need to processed
-according to the same filter initialization. For instance, standardizing a
-training and a test set with the \texttt{Standardize} filter (package
-\texttt{weka.filters.unsupervised.attribute}). The example below shows how to
-do this:
+Batch filtering is necessary if two or more datasets need to be processed
+according to the same filter initialization. If batch filtering is not used, 
+for instance when generating a training and a test set using the
+\texttt{StringToWordVector} filter (package
+\texttt{weka.filters.unsupervised.attribute}), then these two filter runs are
+ completely independent and will create two most likely incompatible datasets.
+Running the \texttt{StringToWordVector} on two different datasets, this will
+result in two different word dictionaries and therefore different attributes
+being generated.
+
+The following code example shows how to standardize
+a training and a test set with the \texttt{Standardize} filter (package
+\texttt{weka.filters.unsupervised.attribute}):
 \begin{verbatim}
    Instances train = ...   // from somewhere
    Instances test = ...    // from somewhere
@@ -366,6 +428,8 @@ do this:
    Instances newTest = Filter.useFilter(test, filter);
 \end{verbatim}
 
+\newpage
+
 \subsection{Filtering on-the-fly}
 \label{api_filtering_onthefly}
 Even though using the API gives one full control over the data and makes it
@@ -375,23 +439,23 @@ through meta schemes in WEKA, like \texttt{FilteredClassifier} (package
 \texttt{weka.classifiers.meta}), \texttt{FilteredClusterer} (package
 \texttt{weka.clusterers}), \texttt{FilteredAssociator} (package
 \texttt{weka.associations}) and
-\texttt{FilteredAttributeEval}/\texttt{FilteredSubsetEval} (package
+\texttt{FilteredAttributeEval}/\texttt{FilteredSubsetEval} (in
 \texttt{weka.attributeSelection}). Instead of filtering the data
 \textit{beforehand}, one just sets up a meta-scheme and lets the meta-scheme
 do the filtering for one.
 
-\newpage
-
 The following example uses the \texttt{FilteredClassifier} in conjunction with
 the \texttt{Remove} filter to remove the first attribute (which happens to be
-an ID attribute) from the dataset and \texttt{J48} (package
+an ID attribute) from the dataset and \texttt{J48} (J48 is WEKA's
+implementation of C4.5; package
 \texttt{weka.classifiers.trees}) as base-classifier. First the classifier is
-built with a training set and the evaluated with a separate test set. The actual
-and predicted class values are printed in the console. For more information on
-classification, see chapter \ref{api_classification}.
+built with a training set and then evaluated with a separate test set. The
+actual and predicted class values are printed in the console. For more
+information on classification, see chapter \ref{api_classification}.
 \begin{verbatim}
    import weka.classifiers.meta.FilteredClassifier;
    import weka.classifiers.trees.J48;
+   import weka.core.Instances;
    import weka.filters.unsupervised.attribute.Remove;
    ...
    Instances train = ...         // from somewhere
@@ -429,7 +493,7 @@ classification, see chapter \ref{api_classification}.
 \section{Classification}
 \label{api_classification}
 Classification and regression algorithms in WEKA are called ``classifiers'' and
-are located in the \texttt{weka.classifiers} package. This section covers the
+are located below the \texttt{weka.classifiers} package. This section covers the
 following topics:
 \begin{tight_itemize}
 	\item \textit{Building a classifier} -- batch and incremental learning.
@@ -440,8 +504,8 @@ unknown data.
 \end{tight_itemize}
 
 \subsection{Building a classifier}
-By default, all classifiers in WEKA are \textit{batch-trainable}, i.e., the
-train on the whole dataset at once. This is fine, if the training data fits
+By design, all classifiers in WEKA are \textit{batch-trainable}, i.e., they get
+trained on the whole dataset at once. This is fine, if the training data fits
 into memory. But there are also algorithms available, that can update their
 internal model \textit{on-the-go}. These classifiers are called
 \textit{incremental}. The following two sections cover the batch and the
@@ -450,15 +514,15 @@ incremental classifiers.
 \subsubsection*{Batch classifiers}
 A batch classifier is really simple to build:
 \begin{tight_itemize}
-	\item set options -- either using the \texttt{setOptions(String[])} method
-or the actual set-methods.
-	\item train it -- calling the \texttt{buildClassifier(Instances)} method
-with the training set. By definition, the \texttt{buildClassifier(Instances)}
-method resets the internal model completely, in order to ensure that subsequent
-calls of this method with the same data result in the same model.
+	\item \textit{set options} -- either using the \texttt{setOptions(String[])}
+method or the actual set-methods.
+	\item \textit{train it} -- calling the \texttt{buildClassifier(Instances)}
+method with the training set. By definition, the
+\texttt{buildClassifier(Instances)} method resets the internal model completely,
+in order to ensure that subsequent calls of this method with the same data
+result in the same model (``repeatable experiments'').
 \end{tight_itemize}
-The following code snippet builds an unpruned J48 (J48 is WEKA's C4.5
-implementation) on a dataset:
+The following code snippet builds an unpruned J48 on a dataset:
 \begin{verbatim}
    import weka.core.Instances;
    import weka.classifiers.trees.J48;
@@ -473,9 +537,9 @@ implementation) on a dataset:
 
 \subsubsection*{Incremental classifiers}
 All incremental classifiers in WEKA implement the interface
-\texttt{UpdateableClassifier} (found in package \texttt{weka.classifiers}).
+\texttt{UpdateableClassifier} (located in package \texttt{weka.classifiers}).
 Bringing up the Javadoc for this particular interface tells one what classifiers
-implement this interface. Those classifiers can be used to process large amounts
+implement this interface. These classifiers can be used to process large amounts
 of data with a small memory-footprint, as the training data does not have to fit
 in memory. ARFF files, for instance, can be read incrementally (see chapter
 \ref{api_loading_data}).
@@ -489,9 +553,9 @@ set of data.
 	\item \textit{update} the model row-by-row by calling the
 \texttt{updateClassifier(Instance)} method.
 \end{tight_enumerate}
-The following example shows how load an ARFF file incrementally using the
-\texttt{ArffLoader} class, training the
-\texttt{NaiveBayesUpdateable} classifier.
+The following example shows how to load an ARFF file incrementally using the
+\texttt{ArffLoader} class and train the \texttt{NaiveBayesUpdateable} classifier
+with one row at a time:
 \begin{verbatim}
    import weka.core.converters.ArffLoader;
    import weka.classifiers.bayes.NaiveBayesUpdateable;
@@ -527,7 +591,7 @@ the built classifier. It is important to have a test set that incorporates the
 same (or similar) concepts as the training set, otherwise you will always end
 up with poor performance.
 \end{tight_itemize}
-The evaluation step, and collection of statistics, is performed by the
+The evaluation step, including collection of statistics, is performed by the
 \texttt{Evaluation} class (package \texttt{weka.classifiers}).
 
 \subsubsection*{Cross-validation}
@@ -544,7 +608,8 @@ Before cross-validation is performed, the data gets randomized using the
 supplied random number generator (\texttt{java.util.Random}). It is
 recommended that this number generator is ``seeded'' with a specified seed
 value. Otherwise, subsequent runs of cross-validation on the same dataset will
-not yield the same results, due to different randomization of the data.
+not yield the same results, due to different randomization of the data (see
+section \ref{api_randomizing_data} for more information on randomization).
 
 The code snippet below performs 10-fold cross-validation with a J48 decision
 tree algorithm on a dataset \texttt{newData}, with random number generator that
@@ -556,6 +621,7 @@ is seeded with ``1''. The summary of the collected statistics is output to
 \begin{verbatim}
    import weka.classifiers.Evaluation;
    import weka.classifiers.trees.J48;
+   import weka.core.Instances;
    import java.util.Random;
    ...
    Instances newData = ... // from somewhere
@@ -574,10 +640,10 @@ Using a dedicated test set to evaluate a classifier is just as easy as
 cross-validation. But instead of providing an untrained classifier, a trained
 classifier has to be provided now. Once again, the
 \texttt{weka.classifiers.Evaluation} class is used to perform the evaluation,
-using the \texttt{evaluateModel} method.
+this time using the \texttt{evaluateModel} method.
 
 The code snippet below trains a J48 with default options on a training set and
-evaluates on a test set before outputting the summary of the
+evaluates it on a test set before outputting the summary of the
 collected statistics:
 \begin{verbatim}
    import weka.core.Instances;
@@ -602,11 +668,11 @@ In the previous sections, the \texttt{toSummaryString} of the
 \texttt{Evaluation} class was already used in the code examples. But there are
 other summary methods for nominal class attributes available as well:
 \begin{tight_itemize}
-	\item \texttt{toMatrixString} -- outputs the confusion matrix
+	\item \texttt{toMatrixString} -- outputs the confusion matrix.
 	\item \texttt{toClassDetailsString} -- outputs TP/FP rates, precision,
-recall, F-measure, AUC (per class)
+recall, F-measure, AUC (per class).
 	\item \texttt{toCumulativeMarginDistributionString} -- outputs the
-cumulative margins distribution
+cumulative margins distribution.
 \end{tight_itemize}
 If one does not want to use these summary methods, it is possible to access the
 individual statistical measures directly. Below, a few common measures
@@ -635,20 +701,21 @@ label index (0-based index).
 		\item \texttt{rootMeanSquaredError()} -- The root mean squared error.
 		\item \texttt{numInstances()} -- The number of instances with a class
 value.
-		\item unclassified() - The number of unclassified instances.
-		\item pctUnclassified() - The percentage of unclassified instances.
+		\item \texttt{unclassified()} - The number of unclassified instances.
+		\item \texttt{pctUnclassified()} - The percentage of unclassified
+instances.
 	\end{tight_itemize}
 \end{tight_itemize}
 For a complete overview, see the Javadoc page of the \texttt{Evaluation} class.
-By looking up the source code of the summary methods mentioned above, you can
+By looking up the source code of the summary methods mentioned above, one can
 easily determine what methods are used for which particular output.
 
 \newpage
 
 \subsubsection*{ROC curves}
-WEKA can generate Receiver operating characteristic (ROC) curves, based on the
-collected predictions during an evaluation. In order to display a ROC curve, we
-need to perform the following steps:
+WEKA can generate ``Receiver operating characteristic'' (ROC) curves, based on
+the collected predictions during an evaluation. In order to display a ROC curve,
+one needs to perform the following steps:
 \begin{tight_enumerate}
 	\item Generate the plotable data based on the \texttt{Evaluation}'s
 collected predictions, using the \texttt{ThresholdCurve} class (package
@@ -682,7 +749,7 @@ And now, the four steps translated into actual code:
 	\begin{verbatim}
 		ThresholdVisualizePanel tvp = new ThresholdVisualizePanel();
 		tvp.setROCString("(Area under ROC = " +
-			Utils.doubleToString(ThresholdCurve.getROCArea(curve), 4) + ")");
+		  Utils.doubleToString(ThresholdCurve.getROCArea(curve),4)+")");
 		tvp.setName(curve.relationName());
 		tvp.addPlot(plotdata);
 	\end{verbatim}
@@ -704,13 +771,13 @@ And now, the four steps translated into actual code:
 After a classifier setup has been evaluated and proven to be useful, a built
 classifier can be used to make predictions and label previously unlabeled data.
 Section \ref{api_filtering_onthefly} already provided a glimpse of how to use a
-classifier's \texttt{classifyInstance(Instance)} method. This section here will
-elaborate a bit more on this.
+classifier's \texttt{classifyInstance} method. This section here elaborates a
+bit more on this.
 
 The following example uses a trained classifier \texttt{tree} to label all the
 instances in an unlabeled dataset that gets loaded from disk. After all the
-instances have been labeled, the labeled dataset gets written back to a new
-file.
+instances have been labeled, the newly labeled dataset gets written back to
+disk to a new file.
 \begin{verbatim}
    // load unlabeled data and set class attribute
    Instances unlabeled = DataSource.read("/some/where/unlabeled.arff"); 
@@ -722,19 +789,19 @@ file.
      double clsLabel = tree.classifyInstance(unlabeled.instance(i));
      labeled.instance(i).setClassValue(clsLabel);
    }
-   // save labeled data
+   // save newly labeled data
    DataSink.write("/some/where/labeled.arff", labeled);
 \end{verbatim}
-The above example basically works for classification and regression problems
-alike. Why is that? The \texttt{classifyInstance(Instance)} method returns the
-numeric classes the regression value and for nominal classes the 0-based index
-in the list of available class labels.
+The above example works for classification and regression problems alike. Why is
+that? The \texttt{classifyInstance(Instance)} method returns for numeric classes
+the regression value and for nominal classes the 0-based index in the list of
+available class labels.
 
 If one is interested in the class distribution instead, then one can use the
-\texttt{distributionForInstance(Instance)} method. Of course, using this method
-makes only sense for classification problems. The code snippet below outputs
-the class distribution, the actual and chosen label side-by-side in the
-console:
+\texttt{distributionForInstance(Instance)} method (this array sums up to 1). Of
+course, using this method makes only sense for classification problems. The code
+snippet below outputs the class distribution, the actual and predicted label
+side-by-side in the console:
 \begin{verbatim}
    // load data
    Instances train = DataSource.read(args[0]);
@@ -762,10 +829,11 @@ console:
 % Clustering %
 %%%%%%%%%%%%%%
 \section{Clustering}
-Clustering is an unsupervised machine learning technique of finding patterns in
+\label{api_clustering}
+Clustering is an unsupervised Machine Learning technique of finding patterns in
 the data, i.e., these algorithms work without class attributes. Classifiers, on
 the other hand, are supervised and need a class attribute. This section,
-similar to the one covering classifiers, covers the following topics:
+similar to the one about classifiers, covers the following topics:
 \begin{tight_itemize}
 	\item \textit{Building a clusterer} -- batch and incremental learning.
 	\item \textit{Evaluating a clusterer} -- how to evaluate a built clusterer.
@@ -774,21 +842,21 @@ instances belong to.
 \end{tight_itemize}
 
 \subsection{Building a clusterer}
-Clusterers, just like classifiers, are also by default batch-trainable. They
-all can be built on data that is completely in memory. But a samll subset of
-the cluster algorithms can also update the internal representation
+Clusterers, just like classifiers, are also by design batch-trainable. They
+all can be built on data that is completely stored in memory. But a small subset
+of the cluster algorithms can also update the internal representation
 incrementally. The following two sections cover both types of clusterers.
 
 \subsubsection*{Batch clusterers}
-Building a batch clusterer, like classifiers, happens in two stages:
+Building a batch clusterer, just like a classifier, happens in two stages:
 \begin{tight_itemize}
-	\item setting the options -- either calling the
-\texttt{setOptions(String[])} method or the appropriate get/set-methods of the
-properties.
-	\item building the model with training data -- calling the
+	\item \textit{set options} -- either calling the
+\texttt{setOptions(String[])} method or the appropriate \texttt{set}-methods of
+the properties.
+	\item \textit{build the model} with training data -- calling the
 \texttt{buildClusterer(Instances)} method. By definition, subsequent calls of
-this method must result in the same model. In other words, calling this method
-must completely reset the model.
+this method must result in the same model (``repeatable experiments''). In other
+words, calling this method must completely reset the model.
 \end{tight_itemize}
 Below is an example of building the \texttt{EM} clusterer with a maximum of 100
 iterations. The options are set using the \texttt{setOptions(String[])} method:
@@ -806,7 +874,7 @@ iterations. The options are set using the \texttt{setOptions(String[])} method:
 \end{verbatim}
 
 \subsubsection*{Incremental clusterers}
-Incremental clusterers in WEKA, implement the interface
+Incremental clusterers in WEKA implement the interface
 \texttt{UpdateableClusterer} (package \texttt{weka.clusterers}). Training an
 incremental clusterer happens in three stages, similar to incremental
 classifiers:
@@ -954,7 +1022,7 @@ Instance would belong to.
 	\item \texttt{distributionForInstance(Instance)} -- predicts the cluster
 membership for this Instance. The sum of this array adds up to 1.
 \end{tight_itemize}
-The code fragment outlined below trains an \texttt{EM} clusterer on an one
+The code fragment outlined below trains an \texttt{EM} clusterer on one
 dataset and outputs for a second dataset the predicted clusters and cluster
 memberships of the individual instances:
 \begin{verbatim}
@@ -986,9 +1054,67 @@ memberships of the individual instances:
 % Selecting attributes %
 %%%%%%%%%%%%%%%%%%%%%%%%
 \section{Selecting attributes}
+\label{api_selecting_attributes}
+Preparing one's data properly is a very important step for getting the best
+results. Reducing the number of attributes can not only help speeding up
+runtime with algorithms (some algorithms' runtime are quadratic in regards to
+number of attributes), but also help avoid ``burying'' the algorithm in a
+mass of attributes, when only a few are essential for building the model.
+
+All attribute selection schemes currently implemented in WEKA are supervised,
+i.e., they require a dataset with a class attribute. \\
+
+\noindent There are three different types of evaluators in WEKA at the moment:
+\begin{tight_itemize}
+	\item \textit{single attribute evaluators} -- perform
+evaluations on single attributes. These classes implement the
+\texttt{weka.attributeSelection.AttributeEvaluator} interface. The
+\texttt{Ranker} search algorithm is usually used in conjunction with these
+algorithms.
+	\item \textit{attribute subset evaluators} -- work on subsets of all the
+attributes in the dataset. The \texttt{weka.attributeSelection.SubsetEvaluator}
+interface is implemented by these evaluators.
+	\item \textit{attribute set evaluators} -- evaluate sets of attributes. Not
+to be confused with the \textit{subset evaluators}, as these classes are derived
+from the \texttt{weka.attributeSelection.AttributeSetEvaluator} superclass.
+\end{tight_itemize}
+Attribute selection offers \textit{filtering on-the-fly}, like classifiers
+and clusterers, as well:
+\begin{tight_itemize}
+	\item \texttt{weka.attributeSelection.FilteredAttributeEval} -- filter for
+evaluators that evaluate attributes individually.
+	\item \texttt{weka.attributeSelection.FilteredSubsetEval} -- for
+filtering evaluators that evaluate subsets of attributes.
+\end{tight_itemize}
+So much about the differences among the various attribute selection
+algorithms and back to how to actually perform attribute selection. WEKA offers
+three different approaches:
+\begin{tight_itemize}
+	\item \textit{Using a meta-classifier} -- for performing attribute selection
+on-the-fly (similar to FilteredClassifier's filtering on-the-fly).
+	\item \textit{Using a filter} - for preprocessing the data.
+	\item \textit{Low-level API usage} - instead of using the meta-schemes
+(classifier or filter), one can use the attribute selection API directly as
+well.
+\end{tight_itemize}
+The following sections cover each of the topics, accompanied with a code
+example. For clarity, the same evaluator and search algorithm is used in all
+of these examples.
+
+\newpage
 
 \subsection{Using the meta-classifier}
+The meta-classifier \texttt{AttributeSelectedClassifier} (this classifier
+is located in package \texttt{weka.classifiers.meta}), is similar to the
+\texttt{FilteredClassifier}. But instead of taking a base-classifier and a
+filter as parameters to perform the filtering, the
+\texttt{AttributeSelectedClassifier} uses a \textit{search} algorithm (derived
+from \texttt{weka.attributeSelection.ASEvaluation}), an \textit{evaluator}
+(superclass is \texttt{weka.attributeSelection.ASSearch}) to perform the
+attribute selection and a base-classifier to train on the reduced data.
 
+This example here uses \texttt{J48} as base-classifier, \texttt{CfsSubsetEval}
+as evaluator and a backwards operating \texttt{GreedyStepwise}:
 \begin{verbatim}
    import weka.attributeSelection.CfsSubsetEval;
    import weka.attributeSelection.GreedyStepwise;
@@ -1016,7 +1142,15 @@ memberships of the individual instances:
 \newpage
 
 \subsection{Using the filter}
+In case the data only needs to be reduced in dimensionality, but not used for
+training a classifier, then the filter approach is the right one. The
+\texttt{AttributeSelection} filter (package
+\texttt{weka.filters.supervised.attribute}) takes an evaluator and a search
+algorithm as parameter.
 
+The code snippet below uses once again \texttt{CfsSubsetEval} as evaluator and
+a backwards operating \texttt{GreedyStepwise} as search algorithm. It just
+outputs the reduced data to \texttt{stdout} after the filtering step:
 \begin{verbatim}
    import weka.attributeSelection.CfsSubsetEval;
    import weka.attributeSelection.GreedyStepwise;
@@ -1041,7 +1175,15 @@ memberships of the individual instances:
 \newpage
 
 \subsection{Using the API directly}
+Using the meta-classifier or the filter approach makes attribute selection
+fairly easy. But it might not satify everybody's needs. For instance, if one
+wants to obtain the ordering of the attributes (using \texttt{Ranker}) or
+retrieve the indices of the selected attributes instead of the reduced data.
 
+Just like the other examples, the one shown here uses the
+\texttt{CfsSubsetEval} evaluator and the \texttt{GreedyStepwise} search
+algorithm (in backwards mode). But instead of outputting the reduced data, only
+the selected indices are printed in the console:
 \begin{verbatim}
    import weka.attributeSelection.AttributeSelection;
    import weka.attributeSelection.CfsSubsetEval;
@@ -1059,7 +1201,8 @@ memberships of the individual instances:
    // perform attribute selection
    attsel.SelectAttributes(data);
    int[] indices = attsel.selectedAttributes();
-   System.out.println("selected attribute indices (starting with 0):\n"
+   System.out.println(
+        "selected attribute indices (starting with 0):\n"
         + Utils.arrayToString(indices));
 \end{verbatim}
 
@@ -1069,6 +1212,7 @@ memberships of the individual instances:
 % Saving data %
 %%%%%%%%%%%%%%%
 \section{Saving data}
+\label{api_saving_data}
 Saving \texttt{weka.core.Instances} objects is as easy as reading the data in
 the first place, though the process of storing the data again is far less common
 than of reading the data into memory. The following two sections cover how to
