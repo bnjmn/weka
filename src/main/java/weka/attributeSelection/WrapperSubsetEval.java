@@ -364,8 +364,7 @@ public class WrapperSubsetEval
    * displaying in the explorer/experimenter gui
    */
   public String evaluationMeasureTipText() {
-    return "The measure used to evaluate the performance of attribute combinations "
-    + "used in the decision table.";
+    return "The measure used to evaluate the performance of attribute combinations.";
   }
   /**
    * Gets the currently set performance evaluation measure used for selecting
