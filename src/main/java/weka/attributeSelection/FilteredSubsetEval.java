@@ -16,7 +16,7 @@
 
 /*
  *    FilteredSubsetEval.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -62,7 +62,7 @@ import java.io.Serializable;
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.1.2.2 $
+ * @version $Revision$
  */
 public class FilteredSubsetEval
   extends ASEvaluation
@@ -301,7 +301,7 @@ public class FilteredSubsetEval
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.1.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
