@@ -1495,6 +1495,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 	    Component comp = (Component) e.getSource();
 	    popup.show(comp, comp.getX(), comp.getY());
 	    popup.pack();
+	    popup.repaint();
 	  }
 	}
       });
