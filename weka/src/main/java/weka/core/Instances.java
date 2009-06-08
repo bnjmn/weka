@@ -55,7 +55,7 @@ import java.util.*;
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.58.2.6 $ 
+ * @version $Revision$ 
  */
 public class Instances implements Serializable {
  
@@ -1110,7 +1110,7 @@ public class Instances implements Serializable {
    */
   public void stratify(int numFolds) {
     
-    if (numFolds <= 0) {
+    if (numFolds <= 1) {
       throw new IllegalArgumentException("Number of folds must be greater than 1");
     }
     if (m_ClassIndex < 0) {
