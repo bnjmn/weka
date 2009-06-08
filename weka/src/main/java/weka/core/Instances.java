@@ -1251,7 +1251,7 @@ public class Instances
    */
   public void stratify(int numFolds) {
     
-    if (numFolds <= 0) {
+    if (numFolds <= 1) {
       throw new IllegalArgumentException("Number of folds must be greater than 1");
     }
     if (m_ClassIndex < 0) {
