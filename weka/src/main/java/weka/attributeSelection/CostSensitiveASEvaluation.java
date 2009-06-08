@@ -16,7 +16,7 @@
 
 /*
  *    CostSensitiveASEvaluation.java
- *    Copyright (C) 2008 Pentaho Corporation
+ *    Copyright (C) 2008 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -50,7 +50,7 @@ import java.util.ArrayList;
  * Abstract base class for cost-sensitive subset and attribute evaluators.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision: 1.2.2.3 $
+ * @version $Revision$
  */
 public abstract class CostSensitiveASEvaluation
   extends ASEvaluation
@@ -575,6 +575,6 @@ public abstract class CostSensitiveASEvaluation
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2.2.3 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

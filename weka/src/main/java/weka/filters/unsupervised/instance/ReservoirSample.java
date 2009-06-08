@@ -16,7 +16,7 @@
 
 /*
  *    ReservoirSample.java
- *    Copyright (C) 2007 Pentaho Corporation
+ *    Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
  *
  */
 
