@@ -619,6 +619,66 @@ Using this setup, the following relation name:
 
 As long as one takes care and uses sensible relation names, the \textit{ExplicitTestSetResultProducer} can be used to compare different classifiers and setups on train/test set pairs, using the full functionality of the Experimenter.
 
+%%%%%%%%%%%%%%%%%%%%%%%
+% Cluster experiments %
+%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Cluster Experiments}
+Using the advanced mode of the Experimenter you can now run experiments on
+clustering algorithms as well as classifiers (Note: this is a new feature
+available with Weka 3.5.8). The main evaluation metric for this type of
+experiment is the log likelihood of the clusters found by each clusterer. Here
+is an example of setting up a cross-validation experiment using clusterers. \\
+
+\noindent Choose \textit{CrossValidationResultProducer} from the Result generator panel.
+\begin{center}
+	\epsfig{file=images/experimenter/advanced-clusterexperiments-crossvalidationresultproducer.eps, width=10cm, angle=-90}
+\end{center}
+
+\newpage
+
+\noindent Next, choose \textit{DensityBasedClustererSplitEvaluator} as the split evaluator
+to use.
+\begin{center}
+	\epsfig{file=images/experimenter/advanced-clusterexperiments-densitybasedclusterersplitevaluator.eps, width=5cm, angle=-90}
+\end{center}
+
+\noindent If you click on \textit{DensityBasedClustererSplitEvaluator} you will see its
+options. \\
+
+\noindent \textbf{Note} that there is an option for removing the class column
+from the data. In the Experimenter, the class column is set to be the last
+column by default. Turn this off if you want to keep this column in the data.
+\begin{center}
+	\epsfig{file=images/experimenter/advanced-clusterexperiments-densitybasedclusterersplitevaluator2.eps, width=4cm, angle=-90}
+\end{center}
+
+\noindent Once \textit{DensityBasedClustererSplitEvaluator} has been selected, you will
+notice that the \textit{Generator properties} have become disabled. Enable them
+again and expand \textit{splitEvaluator}. Select the \textit{clusterer} node.
+\begin{center}
+	\epsfig{file=images/experimenter/advanced-clusterexperiments-selectclusterer.eps, width=4cm, angle=-90}
+\end{center}
+
+\noindent Now you will see that \textit{EM} becomes the default clusterer and gets added
+to the list of schemes. You can now add/delete other clusterers.
+
+\noindent \textbf{IMPORTANT:} in order to
+any clusterer that does not produce density estimates (i.e. most other
+clusterers in Weka), they will have to wrapped in the
+\textit{MakeDensityBasedClusterer}.
+\begin{center}
+	\epsfig{file=images/experimenter/advanced-clusterexperiments-clustererlist.eps, width=4cm, angle=-90}
+\end{center}
+
+\noindent Once and experiment has been run, you can analyze results in the
+\textit{Analyse} panel. In the \textit{Comparison} field you will need to scroll
+down and select "Log\_likelihood".
+\begin{center}
+	\epsfig{file=images/experimenter/advanced-clusterexperiments-analyseclusteringexp.eps, width=10cm, angle=-90}
+\end{center}
+
 %%%%%%%%%%%%%%%%%%%%%%
 % Remote Experiments %
 %%%%%%%%%%%%%%%%%%%%%%
