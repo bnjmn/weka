@@ -1059,10 +1059,7 @@ Preparing one's data properly is a very important step for getting the best
 results. Reducing the number of attributes can not only help speeding up
 runtime with algorithms (some algorithms' runtime are quadratic in regards to
 number of attributes), but also help avoid ``burying'' the algorithm in a
-mass of attributes, when only a few are essential for building the model.
-
-All attribute selection schemes currently implemented in WEKA are supervised,
-i.e., they require a dataset with a class attribute. \\
+mass of attributes, when only a few are essential for building the model. \\
 
 \noindent There are three different types of evaluators in WEKA at the moment:
 \begin{tight_itemize}
@@ -1077,6 +1074,15 @@ interface is implemented by these evaluators.
 	\item \textit{attribute set evaluators} -- evaluate sets of attributes. Not
 to be confused with the \textit{subset evaluators}, as these classes are derived
 from the \texttt{weka.attributeSelection.AttributeSetEvaluator} superclass.
+\end{tight_itemize}
+Most of the attribute selection schemes currently implemented are supervised,
+i.e., they require a dataset with a class attribute. Unsupervised evaluation algorithms 
+are derived from one of the following superclasses:
+\begin{tight_itemize}
+	\item \texttt{weka.attributeSelection.UnsupervisedAttributeEvaluator} \\
+		e.g., \texttt{LatentSemanticAnalysis}, \texttt{PrincipalComponents}
+	\item \texttt{weka.attributeSelection.UnsupervisedSubsetEvaluator} \\
+		none at the moment
 \end{tight_itemize}
 Attribute selection offers \textit{filtering on-the-fly}, like classifiers
 and clusterers, as well:
