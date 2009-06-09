@@ -129,7 +129,7 @@ import java.util.Vector;
  * All options after -- will be passed to the result producer.
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class LearningRateResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
@@ -264,9 +264,10 @@ public class LearningRateResultProducer
     // Randomize on a copy of the original dataset
     Instances runInstances = new Instances(m_Instances);
     runInstances.randomize(new Random(run));
-    if (runInstances.classAttribute().isNominal()) {
-      runInstances.stratify(m_StepSize);
-    }
+    
+    /*if (runInstances.classAttribute().isNominal() && (m_Instances.numInstances() / m_StepSize >= 1)) {
+//      runInstances.stratify(m_Instances.numInstances() / m_StepSize);
+    }*/
 
     // Tell the resultproducer to send results to us
     m_ResultProducer.setResultListener(this);
@@ -915,6 +916,6 @@ public class LearningRateResultProducer
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // LearningRateResultProducer
