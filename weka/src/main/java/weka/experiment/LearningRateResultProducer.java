@@ -39,7 +39,7 @@ import java.util.Random;
  * result fields, the first value is used.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class LearningRateResultProducer 
   implements ResultListener, ResultProducer, OptionHandler,
@@ -170,9 +170,9 @@ public class LearningRateResultProducer
     // Randomize on a copy of the original dataset
     Instances runInstances = new Instances(m_Instances);
     runInstances.randomize(new Random(run));
-    if (runInstances.classAttribute().isNominal()) {
+    /*if (runInstances.classAttribute().isNominal()) {
       runInstances.stratify(m_StepSize);
-    }
+    } */
 
     // Tell the resultproducer to send results to us
     m_ResultProducer.setResultListener(this);
