@@ -191,13 +191,22 @@ public class LinearForwardSelection
    */
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation        result;
+    TechnicalInformation        additional;
     
-    result = new TechnicalInformation(Type.MASTERSTHESIS);
-    result.setValue(Field.AUTHOR, "Martin Guetlein");
-    result.setValue(Field.YEAR, "2006");
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Martin Guetlein and Eibe Frank and Mark Hall");
+    result.setValue(Field.YEAR, "2009");
     result.setValue(Field.TITLE, "Large Scale Attribute Selection Using Wrappers");
-    result.setValue(Field.SCHOOL, "Albert-Ludwigs-Universitaet");
-    result.setValue(Field.ADDRESS, "Freiburg, Germany");
+    result.setValue(Field.BOOKTITLE, "Proc IEEE Symposium on Computational Intelligence and Data Mining");
+    result.setValue(Field.PAGES, "332-339");
+    result.setValue(Field.PUBLISHER, "IEEE");
+    
+    additional = result.add(Type.MASTERSTHESIS);
+    additional.setValue(Field.AUTHOR, "Martin Guetlein");
+    additional.setValue(Field.YEAR, "2006");
+    additional.setValue(Field.TITLE, "Large Scale Attribute Selection Using Wrappers");
+    additional.setValue(Field.SCHOOL, "Albert-Ludwigs-Universitaet");
+    additional.setValue(Field.ADDRESS, "Freiburg, Germany");
     
     return result;
   }
