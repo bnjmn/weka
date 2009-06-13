@@ -249,11 +249,11 @@ Subversion.
 \subsection{Introduction}
 As of version 3.4.4 it is possible for WEKA to dynamically discover
 classes at runtime (rather than using only those specified in the
-\verb=GenericObjectEditor.props= (GOE) file). In some versions (3.4.13, 3.4.14,
-3.5.8, 3.6.0) this facility was not enabled by default as it is a bit slower
+\verb=GenericObjectEditor.props= (GOE) file). In some versions 
+(3.5.8, 3.6.0) this facility was not enabled by default as it is a bit slower
 than the GOE file approach, and, furthermore, does not function in
 environments that do not have a CLASSPATH (e.g., application servers). Later
-versions (3.4.15, 3.6.1, 3.7.0) enabled the dynamic discovery again, as WEKA can
+versions (3.6.1, 3.7.0) enabled the dynamic discovery again, as WEKA can
 now distinguish between being a standalone Java application or being run in a
 non-CLASSPATH environment.
 
@@ -284,7 +284,7 @@ do the following:
 \end{tight_itemize}
 If dynamic class discovery is too slow, e.g., due to an enormous CLASSPATH, you
 can generate a new \verb=GenericObjectEditor.props= file and then turn dynamic
-class discovery off again. It is assumed that you already place the GPC file in
+class discovery off again. It is assumed that you already placed the GPC file in
 your home directory (see steps above) and that the \texttt{weka.jar} jar
 archive with the WEKA classes is in your CLASSPATH (otherwise you have to add it
 to the \texttt{java} call using the \texttt{-classpath} option). \\
