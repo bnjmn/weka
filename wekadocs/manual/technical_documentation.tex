@@ -9,7 +9,7 @@ What is ANT? This is how the ANT homepage (\url{http://ant.apache.org/}{}) defin
 \subsection{Basics}
 
 \begin{itemize}
-\item the ANT build file is based on XML
+\item the ANT build file is based on XML (\url{http://www.w3.org/XML/}{})
 \item the usual name for the build file is:
 \end{itemize}
 
@@ -40,12 +40,6 @@ What is ANT? This is how the ANT homepage (\url{http://ant.apache.org/}{}) defin
   \end{itemize}
 \end{itemize}
 
-\subsection{Links}
-\begin{itemize}
-\item ANT homepage: \url{http://ant.apache.org/}{}
-\item XML: \url{http://www.w3.org/XML/}{}
-\end{itemize}
-
 % $http://weka.sourceforge.net/wekadoc/index.php/en:ANT_(3.5.6)$
 
 \section{CLASSPATH}
@@ -62,14 +56,14 @@ Java projects. But still, if you're only working on totally separate
 projects, it might be easiest for you to use the environment variable.
 
 \subsection{Setting the CLASSPATH} 
-In the following we add the \verb=mysql-connector-java-3.1.8-bin.jar=
+In the following we add the \verb=mysql-connector-java-5.1.7-bin.jar=
 to our \verb=CLASSPATH= variable (this works for any other jar archive) to make it possible to
 access MySQL databases via JDBC.
 
 \subsubsection*{Win32 (2k and XP)}
-We assume that the \verb=mysql-connector-java-3.1.8-bin.jar= archive is located in the following directory:\\
+We assume that the \verb=mysql-connector-java-5.1.7-bin.jar= archive is located in the following directory:\\
 
-\verb=C:\Program Files\Weka-3-5=\\
+\verb=C:\Program Files\Weka-3-7=\\
 
 \noindent In the \emph{Control Panel} click on \emph{System} (or right click on
 \emph{My Computer} and select \emph{Properties}) and then go to the
@@ -84,9 +78,9 @@ machines). Enter the following name for the variable.\\
 
 \noindent and add this value\\
 
-\verb=C:\Program Files\Weka-3-5\mysql-connector-java-3.1.8-bin.jar=\\
+\verb=C:\Program Files\Weka-3-7\mysql-connector-java-5.1.7-bin.jar=\\
 
-\noindent If you want to add additional jars, you'll have to separate them with the path separator, the semicolon ; (no spaces!). 
+\noindent If you want to add additional jars, you will have to separate them with the path separator, the semicolon ``;'' (no spaces!).
 
 \subsubsection*{Unix/Linux}
 
@@ -100,13 +94,13 @@ We make the assumption that the mysql jar is located in the following directory:
 \item bash
 \end{itemize}
 
-\verb_export CLASSPATH=$CLASSPATH:/home/johndoe/jars/mysql-connector-java-3.1.8-bin.jar_
+\verb_export CLASSPATH=$CLASSPATH:/home/johndoe/jars/mysql-connector-java-5.1.7-bin.jar_
 
 \begin{itemize}
 \item c shell
 \end{itemize}
 
-\verb_setenv CLASSPATH $CLASSPATH:/home/johndoe/jars/mysql-connector-java-3.1.8-bin.jar_
+\verb_setenv CLASSPATH $CLASSPATH:/home/johndoe/jars/mysql-connector-java-5.1.7-bin.jar_
 
 \subsubsection*{Cygwin}
 
@@ -139,7 +133,7 @@ other keys are considered placeholders:\\
 \verb^cmd_blah=java #bloerk#^\\
 
 \noindent \textbf{Note:} The key \emph{wekajar} is determined by the
--w parameter with which the launcher class is called.\\
+\texttt{-w} parameter with which the launcher class is called.\\
 
 \noindent By default, the following commands are predefined:
 
@@ -219,10 +213,10 @@ The latest version of Weka's JUnit tests can be obtained with this URL:\\
 Whenever a release of Weka is generated, the repository gets \textit{tagged}
 
 \begin{itemize}
-\item \verb=dev-X-Y-Z=\\the tag for a release of the developer version, e.g., \textit{dev-3.5.8} for Weka 3.5.8\\
-\url{https://svn.scms.waikato.ac.nz/svn/weka/tags/dev-3-5-8}
-\item \verb=stable-X-Y-Z=\\ the tag for a release of the book version, e.g., \textit{stable-3-4-13} for Weka 3.4.13\\
-\url{https://svn.scms.waikato.ac.nz/svn/weka/tags/stable-3-4-13}
+\item \verb=dev-X-Y-Z=\\the tag for a release of the developer version, e.g., \textit{dev-3.7.0} for Weka 3.7.0\\
+\url{https://svn.scms.waikato.ac.nz/svn/weka/tags/dev-3-7-0}{}
+\item \verb=stable-X-Y-Z=\\ the tag for a release of the book version, e.g., \textit{stable-3-4-15} for Weka 3.4.15\\
+\url{https://svn.scms.waikato.ac.nz/svn/weka/tags/stable-3-4-15}{}
 \end{itemize}
 
 \subsection{Clients}
@@ -235,7 +229,7 @@ homepage (\url{http://subversion.tigris.org/}{}).
 
 \noindent A checkout of the current developer version of Weka looks like this:\\
 
-\verb=svn co https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka=\\
+\verb=svn co https://svn.scms.waikato.ac.nz/svn/weka/trunk/weka=
 
 \subsubsection*{SmartSVN}
 SmartSVN (\url{http://smartsvn.com/}{}) is a Java-based, graphical,
@@ -248,46 +242,80 @@ the Windows Explorer. TortoiseSVN
 (\url{http://tortoisesvn.tigris.org/}{}) is the equivalent for
 Subversion.
 
+\newpage
 
 \section{GenericObjectEditor}
 
 \subsection{Introduction}
 As of version 3.4.4 it is possible for Weka to dynamically discover
 classes at runtime (rather than using only those specified in the
-\verb=GenericObjectEditor.props= (GOE) file). In version 3.5.8 and higher
-this facility is not enabled by default as it is slower than the props file
-approach, and, furthermore, does not function in environments that do
-not have a CLASSPATH (e.g. application servers).
+\verb=GenericObjectEditor.props= (GOE) file). In some versions (3.4.13, 3.4.14,
+3.5.8, 3.6.0) this facility was not enabled by default as it is a bit slower
+than the GOE file approach, and, furthermore, does not function in
+environments that do not have a CLASSPATH (e.g., application servers). Later
+versions (3.4.15, 3.6.1, 3.7.0) enabled the dynamic discovery again, as WEKA can
+now distinguish between being a standalone Java application or being run in a
+non-CLASSPATH environment.
 
-If you wish to use dynamic class discovery, the relevant file to edit
-is\\ \verb=GenericPropertiesCreator.props= (GPC, located in
-weka.gui). All that is required is to change the \verb=UseDynamic=
-property in this file from \verb=false= to \verb=true=.
+If you wish to enable or disable dynamic class discovery, the relevant file to
+edit is \verb=GenericPropertiesCreator.props= (GPC). You can obtain this file
+either from the \texttt{weka.jar} or \texttt{weka-src.jar} archive. Open one of
+these files with an archive manager that can handle ZIP files (for Windows
+users, you can use 7-Zip (\url{http://7-zip.org/}{}) for this) and
+navigate to the \texttt{weka/gui} directory, where the GPC file is located. All
+that is required, is to change the \verb=UseDynamic= property in this file from
+\verb=false= to \verb=true= (for enabling it) or the other way round (for
+disabling it). After changing the file, you just place it in your home
+directory. In order to find out the location of your home directory,
+do the following:
+\begin{tight_itemize}
+	\item Linux/Unix
+		\begin{tight_itemize}
+ 			\item Open a terminal
+			\item run the following command: \\
+			\texttt{echo \$HOME}
+		\end{tight_itemize}
+	\item Windows
+		\begin{tight_itemize}
+ 			\item Open a command-primpt
+			\item run the following command: \\
+			\texttt{echo \%USERPROFILE\%}
+		\end{tight_itemize}
+\end{tight_itemize}
+If dynamic class discovery is too slow, e.g., due to an enormous CLASSPATH, you
+can generate a new \verb=GenericObjectEditor.props= file and then turn dynamic
+class discovery off again. It is assumed that you already place the GPC file in
+your home directory (see steps above) and that the \texttt{weka.jar} jar
+archive with the WEKA classes is in your CLASSPATH (otherwise you have to add it
+to the \texttt{java} call using the \texttt{-classpath} option). \\
 
-If dynamic class discovery is too slow, e.g., due to an enormous CLASSPATH, you can
-generate a new \verb=GenericObjectEditor.props= file and then turn dynamic
-class discovery off again. Just follow these steps:
+\noindent For generating the GOE file, execute the following steps:
+\begin{tight_itemize}
+	\item generate a new \verb=GenericObjectEditor.props= file using the
+following command:
+	\begin{tight_itemize}
+ 		\item Linux/Unix
+			\begin{verbatim}
+			java weka.gui.GenericPropertiesCreator \
+			   $HOME/GenericPropertiesCreator.props \
+			   $HOME/GenericObjectEditor.props
+			\end{verbatim}
+		\item Windows (command must be in one line)
+			\begin{verbatim}
+			java weka.gui.GenericPropertiesCreator 
+			   %USERPROFILE%/GenericPropertiesCreator.props
+			   %USERPROFILE%/GenericObjectEditor.props
+			\end{verbatim}
+	\end{tight_itemize}
 
-\begin{itemize}
-\item generate a new \verb=GenericObjectEditor.props= file, based on your current setup (assuming the weka classes are in your CLASSPATH and you're currently just above the root package):\\ \\
-\verb=java weka.gui.GenericPropertiesCreator \= \\
-\verb=weka/gui/GenericPropertiesCreator.props \= \\
-\verb=$HOME/GenericObjectEditor.props=\\ \\
-this will generate a new props file in your home directory (Windows users have to replace the \verb=$HOME= 
-\verb=with %USERPROFILE%=).
+	\item edit the \verb=GenericPropertiesCreator.props= file in your home
+directory and set \verb=UseDynamic= to \verb=false=.
+\end{tight_itemize}
 
-\item edit the \verb=GenericPropertiesCreator.props= file and set \verb=UseDynamic= to \verb=false=
-\end{itemize}
-
-\noindent Like with the GOE file the GPC can be either modified in its original
-position (inside the source tree), or you can place a copy of it in
-your home directory and modify this one - which makes installing WEKA
-updates easier, by just replacing the weka.jar.
-
-A limitation of the GOE was so far that additional classifiers,
-filters etc. had to fit into the same package structure as the already
-existing ones, i.e. all had to be located below weka. WEKA can now
-display multiple class hierarchies in the GUI, which makes adding new
+\noindent A limitation of the GOE prior to 3.4.4 was, that additional
+classifiers, filters, etc., had to fit into the same package structure as the
+already existing ones, i.e., all had to be located below \texttt{weka}. WEKA can
+now display multiple class hierarchies in the GUI, which makes adding new
 functionality quite easy as we will see later in an example (it is not
 restricted to classifiers only, but also works with all the other
 entries in the GPC file).
@@ -300,7 +328,6 @@ slightly different, instead of declaring all the classes/interfaces
 one need only to specify all the packages descendants are located in
 (only non-abstract ones are then listed). E.g., the
 \verb=weka.classifiers.Classifier= entry in the GOE file looks like this:
-
 \begin{verbatim}
 weka.classifiers.Classifier=\
  weka.classifiers.bayes.AODE,\
@@ -315,9 +342,8 @@ weka.classifiers.Classifier=\
  weka.classifiers.functions.Logistic,\
  ...
 \end{verbatim}
-
-\noindent The entry producing the same output for the classifiers in the GPC looks like this (7 lines instead of over 70):
-
+The entry producing the same output for the classifiers in the GPC
+looks like this (7 lines instead of over 70 for WEKA 3.4.4):
 \begin{verbatim}
 weka.classifiers.Classifier=\
  weka.classifiers.bayes,\
@@ -372,27 +398,28 @@ weka.classifiers.Classifier=\
 Unlike the \verb=Class.forName(String)= method that grabs the first class it
 can find in the \verb=CLASSPATH=, and therefore fixes the location of the
 package it found the class in, the dynamic discovery examines the
-complete \verb=CLASSPATH= you're starting the Java Virtual Machine (= JVM)
+complete \verb=CLASSPATH= you are starting the Java Virtual Machine (= JVM)
 with. This means that you can have several parallel directories with
-the same WEKA package structure, e.g. the standard release of WEKA in
+the same WEKA package structure, e.g., the standard release of WEKA in
 one directory (\verb=/distribution/weka.jar=) and another one with your own
 classes (\verb=/development/weka/...=), and display all of the classifiers in
-the GUI. In case of a name conflict, i.e. two directories contain the
+the GUI. In case of a name conflict, i.e., two directories contain the
 same class, the first one that can be found is used. In a nutshell,
-your java call of the Experimenter can look like this:\\
+your \texttt{java} call of the GUIChooser can look like this:\\
 
-\verb=java -classpath "/development:/distribution/weka.jar" weka.gui.experiment.Experimenter=\\
+\verb=java -classpath "/development:/distribution/weka.jar" weka.gui.GUIChooser=\\
 
-\noindent \textit{Note: Windows users have to replace the ``:'' with ``;''}\\
+\noindent \textit{Note:} Windows users have to replace the ``:'' with ``;''
+and the forward slashes with backslashes.
 
 \subsection{Multiple Class Hierarchies}
-In case you're developing your own framework, but still want to use
-your classifiers within WEKA that wasn't possible so far. With the
-release 3.4.4 it is possible to have multiple class hierarchies being
-displayed in the GUI. If you've developed a modified version of NaiveBayes,
-let's call it \textit{DummyBayes} and it's located in the package\verb= dummy.classifiers=
-then you'll have to add this package to the classifiers list in the
-GPC file like this:
+In case you are developing your own framework, but still want to use
+your classifiers within WEKA that was not possible with WEKA prior to 3.4.4.
+Starting with the release 3.4.4 it is possible to have multiple class
+hierarchies being displayed in the GUI. If you have developed a modified version
+of NaiveBayes, let us call it \textit{DummyBayes} and it is located in the
+package \verb=dummy.classifiers= then you will have to add this package to the
+classifiers list in the GPC file like this:
 
 \begin{verbatim}
 weka.classifiers.Classifier=\
@@ -404,12 +431,11 @@ weka.classifiers.Classifier=\
  weka.classifiers.rules,\
  dummy.classifiers
 \end{verbatim}
+Your java call for the GUIChooser might look like this:
 
-\noindent Your java call for the Experimenter might look like this:
+\verb=java -classpath "weka.jar:dummy.jar" weka.gui.GUIChooser=\\
 
-\verb=java -classpath "weka.jar:dummy.jar" weka.gui.experiment.Experimenter=\\
-
-\noindent Starting up the GUI you'll now have another root node in the
+\noindent Starting up the GUI you will now have another root node in the
 tree view of the classifiers, called \textit{root}, and below it the weka and
 the \textit{dummy} package hierarchy as you can see here:
 
