@@ -17,7 +17,7 @@ package weka.core;
  * @author wolfgang.hoschek@cern.ch
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 public class Statistics {
 
@@ -355,7 +355,7 @@ public class Statistics {
    *
    * @param a the argument to the function.
    */
-  static double errorFunction(double x) { 
+  public static double errorFunction(double x) { 
     double y, z;
     final double T[] = {
       9.60497373987051638749E0,
@@ -404,7 +404,7 @@ public class Statistics {
    *
    * @param a the argument to the function.
    */
-  static double errorFunctionComplemented(double a) { 
+  public static double errorFunctionComplemented(double a) { 
     double x,y,z,p,q;
   
     double P[] = {
@@ -505,7 +505,7 @@ public class Statistics {
    * @param coef the coefficients of the polynomial.
    * @param N the degree of the polynomial.
    */
-  static double p1evl( double x, double coef[], int N ) {
+  public static double p1evl( double x, double coef[], int N ) {
   
     double ans;
     ans = x + coef[0];
@@ -533,7 +533,7 @@ public class Statistics {
    * @param coef the coefficients of the polynomial.
    * @param N the degree of the polynomial.
    */
-  static double polevl( double x, double coef[], int N ) {
+  public static double polevl( double x, double coef[], int N ) {
 
     double ans;
     ans = coef[0];
@@ -548,7 +548,7 @@ public class Statistics {
    * @param a the parameter of the gamma distribution.
    * @param x the integration end point.
    */
-  static double incompleteGamma(double a, double x) 
+  public static double incompleteGamma(double a, double x) 
     { 
  
     double ans, ax, c, r;
@@ -583,7 +583,7 @@ public class Statistics {
    * @param a the parameter of the gamma distribution.
    * @param x the integration start point.
    */
-  static double incompleteGammaComplement( double a, double x ) {
+  public static double incompleteGammaComplement( double a, double x ) {
 
     double ans, ax, c, yc, r, t, y, z;
     double pk, pkm1, pkm2, qk, qkm1, qkm2;
@@ -639,7 +639,7 @@ public class Statistics {
   /**
    * Returns the Gamma function of the argument.
    */
-  static double gamma(double x) {
+  public static double gamma(double x) {
 
     double P[] = {
       1.60119522476751861407E-4,
@@ -727,7 +727,7 @@ public class Statistics {
    * Returns the Gamma function computed by Stirling's formula.
    * The polynomial STIR is valid for 33 <= x <= 172.
    */
-  static double stirlingFormula(double x) {
+  public static double stirlingFormula(double x) {
 
     double STIR[] = {
       7.87311395793093628397E-4,
@@ -847,7 +847,7 @@ public class Statistics {
   /**
    * Continued fraction expansion #1 for incomplete beta integral.
    */
-  static double incompleteBetaFraction1( double a, double b, double x ) {
+  public static double incompleteBetaFraction1( double a, double b, double x ) {
 
     double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
     double k1, k2, k3, k4, k5, k6, k7, k8;
@@ -926,7 +926,7 @@ public class Statistics {
   /**
    * Continued fraction expansion #2 for incomplete beta integral.
    */
-  static double incompleteBetaFraction2( double a, double b, double x ) {
+  public static double incompleteBetaFraction2( double a, double b, double x ) {
 
     double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
     double k1, k2, k3, k4, k5, k6, k7, k8;
@@ -1007,7 +1007,7 @@ public class Statistics {
    * Power series for incomplete beta integral.
    * Use when b*x is small and x not too close to 1.  
    */
-  static double powerSeries( double a, double b, double x ) {
+  public static double powerSeries( double a, double b, double x ) {
 
     double s, t, u, v, n, t1, z, ai;
     
