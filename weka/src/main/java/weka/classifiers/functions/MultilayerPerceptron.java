@@ -1839,7 +1839,6 @@ public class MultilayerPerceptron extends Classifier
 	}
 	
 	if (right < lastRight) {
-	  driftOff = 0;
 
           if (right < bestError) {
             bestError = right;
@@ -1847,6 +1846,7 @@ public class MultilayerPerceptron extends Classifier
             for (int noc = 0; noc < m_numClasses; noc++) {
               m_outputs[noc].saveWeights();
             }
+            driftOff = 0;
           }
 	}
 	else {
