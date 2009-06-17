@@ -452,10 +452,14 @@ public class MetaBean
     for (int i = 0; i < m_subFlow.size(); i++) {
       BeanInstance temp = (BeanInstance)m_subFlow.elementAt(i);
       if (temp.getBean() instanceof UserRequestAcceptor) {
-        String prefix = (temp.getBean() instanceof WekaWrapper)
-          ? ((WekaWrapper)temp.getBean()).getWrappedAlgorithm().getClass().getName()
-          : temp.getBean().getClass().getName();
-        prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
+        String prefix = "";
+        if ((temp.getBean() instanceof BeanCommon)) {
+          prefix = ((BeanCommon)temp.getBean()).getCustomName();
+        } else {
+          prefix = temp.getBean().getClass().getName();
+          prefix = prefix.substring(prefix.lastIndexOf('.')+1, prefix.length());
+        }
+        
         prefix = ""+(i+1)+": ("+prefix+")";
         Enumeration en = ((UserRequestAcceptor)temp.getBean()).enumerateRequests();
         while (en.hasMoreElements()) {

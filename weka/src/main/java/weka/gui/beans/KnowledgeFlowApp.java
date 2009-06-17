@@ -1738,16 +1738,19 @@ public class KnowledgeFlowApp
             } else {
               String custName = custClass.getName();
               BeanInstance tbi = (BeanInstance) associatedBeans.elementAt(zz);
-
-              if (tbi.getBean() instanceof WekaWrapper) {
-                custName = ((WekaWrapper) tbi.getBean()).getWrappedAlgorithm()
-                  .getClass().getName();
+              if (tbi.getBean() instanceof BeanCommon) {
+                custName = ((BeanCommon)tbi.getBean()).getCustomName();
               } else {
-                custName = custName.substring(0, custName.indexOf("Customizer"));
-              }
+                if (tbi.getBean() instanceof WekaWrapper) {
+                  custName = ((WekaWrapper) tbi.getBean()).getWrappedAlgorithm()
+                  .getClass().getName();
+                } else {
+                  custName = custName.substring(0, custName.indexOf("Customizer"));
+                }
 
-              custName = custName.substring(custName.lastIndexOf('.') + 1,
-                                            custName.length());
+                custName = custName.substring(custName.lastIndexOf('.') + 1,
+                    custName.length());
+              }
               //custItem = new JMenuItem("Configure: "+ custName);
               custItem = new MenuItem("Configure: " + custName);
               if (tbi.getBean() instanceof BeanCommon) {
@@ -1808,17 +1811,20 @@ public class KnowledgeFlowApp
 
           if (bc instanceof MetaBean) {
             Object sourceBean = ((BeanInstance) outputBeans.elementAt(j)).getBean();
-
-            if (sourceBean instanceof WekaWrapper) {
-              sourceBeanName = ((WekaWrapper) sourceBean).getWrappedAlgorithm()
-                .getClass().getName();
+            if (sourceBean instanceof BeanCommon) {
+              sourceBeanName = ((BeanCommon)sourceBean).getCustomName();
             } else {
-              sourceBeanName = sourceBean.getClass().getName();
-            }
+              if (sourceBean instanceof WekaWrapper) {
+                sourceBeanName = ((WekaWrapper) sourceBean).getWrappedAlgorithm()
+                .getClass().getName();
+              } else {
+                sourceBeanName = sourceBean.getClass().getName();
+              }
 
-            sourceBeanName = 
-              sourceBeanName.substring(sourceBeanName.lastIndexOf('.') + 1, 
-                                       sourceBeanName.length());
+              sourceBeanName = 
+                sourceBeanName.substring(sourceBeanName.lastIndexOf('.') + 1, 
+                    sourceBeanName.length());
+            }
             sourceBeanName += ": ";
           }
 
@@ -2074,7 +2080,14 @@ public class KnowledgeFlowApp
         String connName = bc.getSourceEventSetDescriptor().getName();
 
         //JMenuItem deleteItem = new JMenuItem(connName);
-        MenuItem deleteItem = new MenuItem(connName);
+        String targetName = "";
+        if (bc.getTarget().getBean() instanceof BeanCommon) {
+          targetName = ((BeanCommon)bc.getTarget().getBean()).getCustomName();
+        } else {
+          targetName =  bc.getTarget().getBean().getClass().getName();
+          targetName = targetName.substring(targetName.lastIndexOf('.')+1, targetName.length());
+        }
+        MenuItem deleteItem = new MenuItem(connName + "-->" + targetName);
         deleteItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
               bc.remove();
