@@ -1997,14 +1997,13 @@ public class MultilayerPerceptron
 	}
 	
 	if (right < lastRight) {
-	  driftOff = 0;
-	  
 	  if (right < bestError) {
 	    bestError = right;
 	    // save the network weights at this point
 	    for (int noc = 0; noc < m_numClasses; noc++) {
 	      m_outputs[noc].saveWeights();
 	    }
+	    driftOff = 0;
 	  }
 	}
 	else {
