@@ -29,6 +29,7 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Vector;
 
 /**
  * A helper class for determining serialVersionUIDs and checking whether
@@ -36,16 +37,16 @@ import java.io.Serializable;
  * objects to and fro files or streams.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class SerializationHelper
   implements RevisionHandler {
 
-  /** the field name of serialVersionUID */
+  /** the field name of serialVersionUID. */
   public final static String SERIAL_VERSION_UID = "serialVersionUID";
   
   /**
-   * checks whether a class is serializable
+   * checks whether a class is serializable.
    * 
    * @param classname	the class to check
    * @return		true if the class or one of its ancestors implements
@@ -66,7 +67,7 @@ public class SerializationHelper
   }
   
   /**
-   * checks whether a class is serializable
+   * checks whether a class is serializable.
    * 
    * @param c		the class to check
    * @return		true if the class or one of its ancestors implements
@@ -77,7 +78,7 @@ public class SerializationHelper
   }
   
   /**
-   * checks whether the given class contains a serialVersionUID
+   * checks whether the given class contains a serialVersionUID.
    * 
    * @param classname	the class to check
    * @return		true if the class contains a serialVersionUID, 
@@ -98,7 +99,7 @@ public class SerializationHelper
   }
 
   /**
-   * checks whether the given class contains a serialVersionUID
+   * checks whether the given class contains a serialVersionUID.
    * 
    * @param c		the class to check
    * @return		true if the class contains a serialVersionUID, 
@@ -165,7 +166,7 @@ public class SerializationHelper
   }
   
   /**
-   * reads or creates the serialVersionUID for the given class
+   * reads or creates the serialVersionUID for the given class.
    * 
    * @param classname	the class to get the serialVersionUID for
    * @return		the UID, 0L for non-serializable classes (or if the
@@ -185,7 +186,7 @@ public class SerializationHelper
   }
   
   /**
-   * reads or creates the serialVersionUID for the given class
+   * reads or creates the serialVersionUID for the given class.
    * 
    * @param c		the class to get the serialVersionUID for
    * @return		the UID, 0L for non-serializable classes
@@ -195,7 +196,7 @@ public class SerializationHelper
   }
 
   /**
-   * serializes the given object to the specified file
+   * serializes the given object to the specified file.
    * 
    * @param filename	the file to write the object to
    * @param o		the object to serialize
@@ -206,7 +207,7 @@ public class SerializationHelper
   }
 
   /**
-   * serializes the given object to the specified stream
+   * serializes the given object to the specified stream.
    * 
    * @param stream	the stream to write the object to
    * @param o		the object to serialize
@@ -222,7 +223,36 @@ public class SerializationHelper
   }
 
   /**
-   * deserializes the given file and returns the object from it
+   * serializes the given objects to the specified file.
+   * 
+   * @param filename	the file to write the object to
+   * @param o		the objects to serialize
+   * @throws Exception	if serialization fails
+   */
+  public static void writeAll(String filename, Object[] o) throws Exception {
+    writeAll(new FileOutputStream(filename), o);
+  }
+
+  /**
+   * serializes the given objects to the specified stream.
+   * 
+   * @param stream	the stream to write the object to
+   * @param o		the objects to serialize
+   * @throws Exception	if serialization fails
+   */
+  public static void writeAll(OutputStream stream, Object[] o) throws Exception {
+    ObjectOutputStream	oos;
+    int			i;
+    
+    oos = new ObjectOutputStream(stream);
+    for (i = 0; i < o.length; i++)
+      oos.writeObject(o[i]);
+    oos.flush();
+    oos.close();
+  }
+
+  /**
+   * deserializes the given file and returns the object from it.
    * 
    * @param filename	the file to deserialize from
    * @return		the deserialized object
@@ -233,7 +263,7 @@ public class SerializationHelper
   }
 
   /**
-   * deserializes from the given stream and returns the object from it
+   * deserializes from the given stream and returns the object from it.
    * 
    * @param stream	the stream to deserialize from
    * @return		the deserialized object
@@ -249,6 +279,43 @@ public class SerializationHelper
     
     return result;
   }
+
+  /**
+   * deserializes the given file and returns the objects from it.
+   * 
+   * @param filename	the file to deserialize from
+   * @return		the deserialized objects
+   * @throws Exception	if deserialization fails
+   */
+  public static Object[] readAll(String filename) throws Exception {
+    return readAll(new FileInputStream(filename));
+  }
+
+  /**
+   * deserializes from the given stream and returns the object from it.
+   * 
+   * @param stream	the stream to deserialize from
+   * @return		the deserialized object
+   * @throws Exception	if deserialization fails
+   */
+  public static Object[] readAll(InputStream stream) throws Exception {
+    ObjectInputStream 	ois;
+    Vector		result;
+    
+    ois    = new ObjectInputStream(stream);
+    result = new Vector();
+    try {
+      while (true) {
+	result.add(ois.readObject());
+      }
+    }
+    catch (Exception e) {
+      // ignored
+    }
+    ois.close();
+    
+    return result.toArray(new Object[result.size()]);
+  }
   
   /**
    * Returns the revision string.
@@ -256,7 +323,7 @@ public class SerializationHelper
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
@@ -264,8 +331,9 @@ public class SerializationHelper
    * name as arguments.
    * 
    * @param args	the classnames to check
+   * @throws Exception	if something goes wrong
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     if (args.length == 0) {
       System.out.println("\nUsage: " + SerializationHelper.class.getName() + " classname [classname [classname [...]]]\n");
       System.exit(1);
