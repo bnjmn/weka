@@ -12,6 +12,8 @@ following common tasks from source code:
 	\item Classifying
 	\item Clustering
 	\item Selecting attributes
+	\item Visualization
+	\item Serialization
 \end{tight_itemize}
 Even though most of the code examples are for the Linux platform, using forward
 slashes in the paths and file names, they do work on the MS Windows platform as
@@ -712,61 +714,6 @@ easily determine what methods are used for which particular output.
 
 \newpage
 
-\subsubsection*{ROC curves}
-WEKA can generate ``Receiver operating characteristic'' (ROC) curves, based on
-the collected predictions during an evaluation. In order to display a ROC curve,
-one needs to perform the following steps:
-\begin{tight_enumerate}
-	\item Generate the plotable data based on the \texttt{Evaluation}'s
-collected predictions, using the \texttt{ThresholdCurve} class (package
-\texttt{weka.classifiers.evaluation}).
-	\item Put the plotable data into a plot container, an instance of the
-\texttt{PlotData2D} class (package \texttt{weka.gui.visualize}).
-	\item Add the plot container to a visualization panel for displaying the
-data, an instance of the \texttt{ThresholdVisualizePanel} class (package
-\texttt{weka.gui.visualize}).
-	\item Add the visualization panel to a \texttt{JFrame} (package
-\texttt{javax.swing}) and display it.
-\end{tight_enumerate}
-And now, the four steps translated into actual code:
-\begin{tight_enumerate}
-	\item Generate the plotable data
-	\begin{verbatim}
-		Evaluation eval = ... // from somewhere
-		ThresholdCurve tc = new ThresholdCurve();
-		int classIndex = 0;  // ROC for the 1st class label
-		Instances curve = tc.getCurve(eval.predictions(), classIndex);
-	\end{verbatim}
-
-	\item Put the plotable into a plot container
-	\begin{verbatim}
-		PlotData2D plotdata = new PlotData2D(curve);
-		plotdata.setPlotName(curve.relationName());
-		plotdata.addInstanceNumberAttribute();
-	\end{verbatim}
-
-	\item Add the plot container to a visualization panel
-	\begin{verbatim}
-		ThresholdVisualizePanel tvp = new ThresholdVisualizePanel();
-		tvp.setROCString("(Area under ROC = " +
-		  Utils.doubleToString(ThresholdCurve.getROCArea(curve),4)+")");
-		tvp.setName(curve.relationName());
-		tvp.addPlot(plotdata);
-	\end{verbatim}
-
-	\item Add the visualization panel to a \texttt{JFrame}
-	\begin{verbatim}
-		final JFrame jf = new JFrame("WEKA ROC: " + tvp.getName());
-		jf.setSize(500,400);
-		jf.getContentPane().setLayout(new BorderLayout());
-		jf.getContentPane().add(tvp, BorderLayout.CENTER);
-		jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		jf.setVisible(true);
-	\end{verbatim}
-\end{tight_enumerate}
-
-\newpage
-
 \subsection{Classifying instances}
 After a classifier setup has been evaluated and proven to be useful, a built
 classifier can be used to make predictions and label previously unlabeled data.
@@ -1076,7 +1023,8 @@ to be confused with the \textit{subset evaluators}, as these classes are derived
 from the \texttt{weka.attributeSelection.AttributeSetEvaluator} superclass.
 \end{tight_itemize}
 Most of the attribute selection schemes currently implemented are supervised,
-i.e., they require a dataset with a class attribute. Unsupervised evaluation algorithms 
+i.e., they require a dataset with a class attribute. Unsupervised evaluation
+algorithms
 are derived from one of the following superclasses:
 \begin{tight_itemize}
 	\item \texttt{weka.attributeSelection.UnsupervisedAttributeEvaluator} \\
@@ -1312,4 +1260,164 @@ method), as well as notifying the saver when all the data has been saved:
    }
    // notify saver that we're finished
    saver.writeIncremental(null);
+\end{verbatim}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%
+% Visualization %
+%%%%%%%%%%%%%%%%%
+\section{Visualization}
+\label{api_visualization}
+
+\subsection{ROC curves}
+WEKA can generate ``Receiver operating characteristic'' (ROC) curves, based on
+the collected predictions during an evaluation of a classifier. In order to
+display a ROC curve, one needs to perform the following steps:
+\begin{tight_enumerate}
+	\item Generate the plotable data based on the \texttt{Evaluation}'s
+collected predictions, using the \texttt{ThresholdCurve} class (package
+\texttt{weka.classifiers.evaluation}).
+	\item Put the plotable data into a plot container, an instance of the
+\texttt{PlotData2D} class (package \texttt{weka.gui.visualize}).
+	\item Add the plot container to a visualization panel for displaying the
+data, an instance of the \texttt{ThresholdVisualizePanel} class (package
+\texttt{weka.gui.visualize}).
+	\item Add the visualization panel to a \texttt{JFrame} (package
+\texttt{javax.swing}) and display it.
+\end{tight_enumerate}
+And now, the four steps translated into actual code:
+\begin{tight_enumerate}
+	\item Generate the plotable data
+	\begin{verbatim}
+		Evaluation eval = ... // from somewhere
+		ThresholdCurve tc = new ThresholdCurve();
+		int classIndex = 0;  // ROC for the 1st class label
+		Instances curve = tc.getCurve(eval.predictions(), classIndex);
+	\end{verbatim}
+
+	\item Put the plotable into a plot container
+	\begin{verbatim}
+		PlotData2D plotdata = new PlotData2D(curve);
+		plotdata.setPlotName(curve.relationName());
+		plotdata.addInstanceNumberAttribute();
+	\end{verbatim}
+
+	\item Add the plot container to a visualization panel
+	\begin{verbatim}
+		ThresholdVisualizePanel tvp = new ThresholdVisualizePanel();
+		tvp.setROCString("(Area under ROC = " +
+		  Utils.doubleToString(ThresholdCurve.getROCArea(curve),4)+")");
+		tvp.setName(curve.relationName());
+		tvp.addPlot(plotdata);
+	\end{verbatim}
+
+	\item Add the visualization panel to a \texttt{JFrame}
+	\begin{verbatim}
+		final JFrame jf = new JFrame("WEKA ROC: " + tvp.getName());
+		jf.setSize(500,400);
+		jf.getContentPane().setLayout(new BorderLayout());
+		jf.getContentPane().add(tvp, BorderLayout.CENTER);
+		jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		jf.setVisible(true);
+	\end{verbatim}
+\end{tight_enumerate}
+
+\newpage
+
+%%%%%%%%%%%%%%%%%
+% Serialization %
+%%%%%%%%%%%%%%%%%
+\section{Serialization}
+\label{api_serialization}
+
+\textit{Serialization}\footnote{\url{http://en.wikipedia.org/wiki/Serialization}
+{}} is the process of saving an object in a persistent form, e.g., on the
+harddisk as a bytestream. \textit{Deserialization} is the process in the
+opposite direction, creating an object from a persistently saved data structure.
+In Java, an object can be serialized if it imports the
+\texttt{java.io.Serializable} interface. Members of an object that are not
+supposed to be serialized, need to be prefixed with the keyword
+\texttt{transient}.
+
+In the following are some Java code snippets for serializing and
+deserializing a \texttt{J48} classifier. Of course, serialization is not limited
+to classifiers. Most schemes in WEKA, like clusterers and filters, are also
+serializable.
+
+\subsubsection*{Serializing a classifier}
+The \texttt{weka.core.SerializationHelper} class makes it easy to serialize an
+object. For writing, one can use one of the \texttt{write} methods:
+\begin{verbatim}
+   import weka.classifiers.Classifier;
+   import weka.classifiers.trees.J48;
+   import weka.core.converters.ConverterUtils.DataSource;
+   import weka.core.SerializationHelper;
+   ...
+   // load data
+   Instances inst = DataSource.read("/some/where/data.arff");
+   inst.setClassIndex(inst.numAttributes() - 1);
+   // train J48
+   Classifier cls = new J48();
+   cls.buildClassifier(inst);
+   // serialize model
+   SerializationHelper.write("/some/where/j48.model", cls);
+\end{verbatim}
+
+\subsubsection*{Deserializing a classifier}
+Deserializing an object can be achieved by using one of the \texttt{read}
+methods:
+\begin{verbatim}
+   import weka.classifiers.Classifier;
+   import weka.core.SerializationHelper;
+   ...
+   // deserialize model
+   Classifier cls = (Classifier) SerializationHelper.read(
+       "/some/where/j48.model");
+\end{verbatim}
+
+\newpage
+
+\subsubsection*{Deserializing a classifier saved from the Explorer}
+The Explorer does not only save the built classifier in the model
+file, but also the header information of the dataset the classifier was built
+with. By storing the dataset information as well, one can easily check whether a
+serialized classifier can be applied on the current dataset. The \texttt{readAll}
+methods returns an array with all objects that are contained in the model file.
+\begin{verbatim}
+   import weka.classifiers.Classifier;
+   import weka.core.Instances;
+   import weka.core.SerializationHelper;
+   ...
+   // the current data to use with classifier
+   Instances current = ... // from somewhere
+   // deserialize model
+   Object o[] = SerializationHelper.read("/some/where/j48.model");
+   Classifier cls = (Classifier) o[0];
+   Instances data = (Instances) o[1];
+   // is the data compatible?
+   if (!data.equalHeaders(current))
+      throw new Exception("Incompatible data!");
+\end{verbatim}
+
+\subsubsection*{Serializing a classifier for the Explorer}
+If one wants to serialize the dataset header information alongside the
+classifier, just like the Explorer does, then one can use one of the
+\texttt{writeAll} methods:
+\begin{verbatim}
+   import weka.classifiers.Classifier;
+   import weka.classifiers.trees.J48;
+   import weka.core.converters.ConverterUtils.DataSource;
+   import weka.core.SerializationHelper;
+   ...
+   // load data
+   Instances inst = DataSource.read("/some/where/data.arff");
+   inst.setClassIndex(inst.numAttributes() - 1);
+   // train J48
+   Classifier cls = new J48();
+   cls.buildClassifier(inst);
+   // serialize classifier and header information
+   Instances header = new Instances(inst, 0);
+   SerializationHelper.writeAll(
+       "/some/where/j48.model", new Object[]{cls, header});
 \end{verbatim}
