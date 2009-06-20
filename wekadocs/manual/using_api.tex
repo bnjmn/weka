@@ -1325,6 +1325,86 @@ And now, the four steps translated into actual code:
 
 \newpage
 
+\subsection{Graphs}
+Classes implementing the \texttt{weka.core.Drawable} interface can generate
+graphs of their internal models which can be displayed. There are two
+different types of graphs available at the moment, which are explained in the
+subsequent sections:
+\begin{tight_itemize}
+	\item Tree -- decision trees.
+	\item BayesNet -- bayesian net graph structures.
+\end{tight_itemize}
+
+\subsubsection{Tree}
+It is quite easy to display the internal tree structure of classifiers like
+J48 or M5P (package \texttt{weka.classifiers.trees}). The following example
+builds a J48 classifier on a dataset and displays the generated tree visually
+using the \texttt{TreeVisualizer} class (package \texttt{weka.gui.treevisualizer}).
+This visualization class can be used to view trees (or digraphs) in GraphViz's DOT
+language\cite{dotformat}.
+\begin{verbatim}
+   import weka.classifiers.trees.J48;
+   import weka.core.Instances;
+   import weka.gui.treevisualizer.PlaceNode2;
+   import weka.gui.treevisualizer.TreeVisualizer;
+   import java.awt.BorderLayout;
+   import javax.swing.JFrame;
+   ...
+   Instances data = ... // from somewhere
+   // train classifier
+   J48 cls = new J48();
+   cls.buildClassifier(data);
+   // display tree
+   TreeVisualizer tv = new TreeVisualizer(
+       null, cls.graph(), new PlaceNode2());
+   JFrame jf = new JFrame("Weka Classifier Tree Visualizer: J48");
+   jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+   jf.setSize(800, 600);
+   jf.getContentPane().setLayout(new BorderLayout());
+   jf.getContentPane().add(tv, BorderLayout.CENTER);
+   jf.setVisible(true);
+   // adjust tree
+   tv.fitToScreen();
+\end{verbatim}
+
+\newpage
+
+\subsubsection{BayesNet}
+The graphs that the BayesNet classifier (package \texttt{weka.classifiers.bayes})
+generates can be displayed using the \texttt{GraphVisualizer} class
+(located in package \texttt{weka.gui.graphvisualizer}). The \texttt{GraphVisualizer} can
+display graphs that are either in GraphViz's DOT language\cite{dotformat} or in
+XML BIF\cite{cozman}. For displaying DOT format, one needs to use the method
+\texttt{readDOT}, and for the BIF format the method \texttt{readBIF}.
+
+The following code snippet trains a \texttt{BayesNet} classifier on some data
+and then displays the graph generated from this data in a frame:
+\begin{verbatim}
+   import weka.classifiers.bayes.BayesNet;
+   import weka.core.Instances;
+   import weka.gui.graphvisualizer.GraphVisualizer;
+   import java.awt.BorderLayout;
+   import javax.swing.JFrame;
+   ...
+   Instances data = ... // from somewhere
+   // train classifier
+   BayesNet cls = new BayesNet();
+   cls.buildClassifier(data);
+   // display graph
+   GraphVisualizer gv = new GraphVisualizer();
+   gv.readBIF(cls.graph());
+   JFrame jf = new JFrame("BayesNet graph");
+   jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+   jf.setSize(800, 600);
+   jf.getContentPane().setLayout(new BorderLayout());
+   jf.getContentPane().add(gv, BorderLayout.CENTER);
+   jf.setVisible(true);
+   // layout graph
+   gv.layoutGraph();
+\end{verbatim}
+
+\newpage
+
 %%%%%%%%%%%%%%%%%
 % Serialization %
 %%%%%%%%%%%%%%%%%
