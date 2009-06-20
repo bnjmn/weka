@@ -44,6 +44,9 @@ import java.io.Serializable;
  * Java program for classifying short text messages into two classes.
  * <p/>
  * See also wiki article <a href="http://weka.wiki.sourceforge.net/MessageClassifier">MessageClassifier</a>.
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision$
  */
 public class MessageClassifier
   implements Serializable {
