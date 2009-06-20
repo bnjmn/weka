@@ -56,7 +56,7 @@ public class VisualizeBayesNet {
     
     // display graph
     GraphVisualizer gv = new GraphVisualizer();
-    gv.readBIF(new ByteArrayInputStream(cls.graph().getBytes()));
+    gv.readBIF(cls.graph());
     JFrame jf = new JFrame("BayesNet graph");
     jf.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     jf.setSize(800, 600);
