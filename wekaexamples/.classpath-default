@@ -4,7 +4,9 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/weka.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/groovy.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jmathplot.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jython.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/prefuse.jar"/>
 	<classpathentry kind="output" path="build/classes/java"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 </classpath>

@@ -14,5 +14,15 @@ Information about the libraries:
   Homepage: http://groovy.codehaus.org/
   Download: http://dist.groovy.codehaus.org/distributions/groovy-binary-1.5.7.zip
 
+- JMathPlot
+  Version: 2008-10-31
+  Homepage: http://jmathtools.berlios.de/
+  Download: http://prdownload.berlios.de/jmathtools/jmathplot.jar
+  
+- Prefuse
+  Version: prefuse-beta, 2007.10.21
+  Homepage: http://prefuse.org/
+  Download: http://prdownloads.sourceforge.net/prefuse/prefuse-beta-20071021.zip?download
+
 
 $Revision$
