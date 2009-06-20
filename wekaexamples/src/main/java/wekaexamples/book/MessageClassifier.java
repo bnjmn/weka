@@ -42,6 +42,9 @@ import java.io.Serializable;
  * and 'hit'.
  * <p/>
  * See also wiki article <a href="http://weka.wiki.sourceforge.net/MessageClassifier">MessageClassifier</a>.
+ * 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision$
  */
 public class MessageClassifier
   implements Serializable {
