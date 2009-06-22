@@ -42,7 +42,7 @@ import weka.core.Utils;
  * case. The Mann Whitney statistic is used to calculate the AUC.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.23 $
+ * @version $Revision$
  */
 public class ThresholdCurve
   implements RevisionHandler {
@@ -70,6 +70,8 @@ public class ThresholdCurve
   public static final String FALLOUT_NAME   = "Fallout";
   /** attribute name: FMeasure */
   public static final String FMEASURE_NAME  = "FMeasure";
+  /** attribute name: Sample Size */
+  public static final String SAMPLE_SIZE_NAME = "Sample Size";
   /** attribute name: Threshold */
   public static final String THRESHOLD_NAME = "Threshold";
 
@@ -380,6 +382,7 @@ public class ThresholdCurve
     fv.addElement(new Attribute(RECALL_NAME));
     fv.addElement(new Attribute(FALLOUT_NAME));
     fv.addElement(new Attribute(FMEASURE_NAME));
+    fv.addElement(new Attribute(SAMPLE_SIZE_NAME));
     fv.addElement(new Attribute(THRESHOLD_NAME));      
     return new Instances(RELATION_NAME, fv, 100);
   }
@@ -394,7 +397,7 @@ public class ThresholdCurve
   private Instance makeInstance(TwoClassStats tc, double prob) {
 
     int count = 0;
-    double [] vals = new double[11];
+    double [] vals = new double[12];
     vals[count++] = tc.getTruePositive();
     vals[count++] = tc.getFalseNegative();
     vals[count++] = tc.getFalsePositive();
@@ -405,6 +408,8 @@ public class ThresholdCurve
     vals[count++] = tc.getRecall();
     vals[count++] = tc.getFallout();
     vals[count++] = tc.getFMeasure();
+    vals[count++] = (tc.getTruePositive() + tc.getFalsePositive()) / 
+        (tc.getTruePositive() + tc.getFalsePositive() + tc.getTrueNegative() + tc.getFalseNegative());
     vals[count++] = prob;
     return new Instance(1.0, vals);
   }
@@ -415,7 +420,7 @@ public class ThresholdCurve
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.23 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
