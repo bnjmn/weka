@@ -56,6 +56,12 @@ public class VisualizeMultipleROC {
       PlotData2D plotdata = new PlotData2D(curve);
       plotdata.setPlotName(curve.relationName());
       plotdata.addInstanceNumberAttribute();
+      // specify which points are connected
+      boolean[] cp = new boolean[curve.numInstances()];
+      for (int n = 1; n < cp.length; n++)
+        cp[n] = true;
+      plotdata.setConnectPoints(cp);
+      // add plot
       if (first)
 	tvp.setMasterPlot(plotdata);
       else

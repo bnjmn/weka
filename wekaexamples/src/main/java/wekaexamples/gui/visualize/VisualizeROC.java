@@ -29,8 +29,6 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 
 import java.awt.BorderLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JFrame;
 
@@ -66,6 +64,12 @@ public class VisualizeROC {
     PlotData2D plotdata = new PlotData2D(curve);
     plotdata.setPlotName(curve.relationName());
     plotdata.addInstanceNumberAttribute();
+    // specify which points are connected
+    boolean[] cp = new boolean[curve.numInstances()];
+    for (int n = 1; n < cp.length; n++)
+      cp[n] = true;
+    plotdata.setConnectPoints(cp);
+    // add plot
     tvp.addPlot(plotdata);
     
     // method visualizeClassifierErrors
