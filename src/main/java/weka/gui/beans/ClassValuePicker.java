@@ -169,6 +169,8 @@ public class ClassValuePicker
 	    + "WARNING: Class attribute must be nominal.");
       }
       return dataSet;
+    } else {
+      m_logger.statusMessage(statusMessagePrefix() + "remove");
     }
 
     if (m_classValueIndex != 0) { // nothing to do if == 0
