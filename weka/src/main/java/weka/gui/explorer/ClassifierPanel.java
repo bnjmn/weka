@@ -1753,6 +1753,12 @@ public class ClassifierPanel
 		PlotData2D tempd = new PlotData2D(result);
 		tempd.setPlotName(result.relationName());
 		tempd.addInstanceNumberAttribute();
+		// specify which points are connected
+		boolean[] cp = new boolean[result.numInstances()];
+		for (int n = 1; n < cp.length; n++)
+		  cp[n] = true;
+		tempd.setConnectPoints(cp);
+		// add plot
 		vmc.addPlot(tempd);
 		visualizeClassifierErrors(vmc);
 	      } catch (Exception ex) {
