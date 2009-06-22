@@ -122,7 +122,7 @@ import java.util.Vector;
  * </pre>
  *
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.5 $ 
+ * @version $Revision$ 
  */
 public class RDG1 
   extends ClassificationGenerator {
@@ -219,7 +219,7 @@ public class RDG1
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.5 $");
+      return RevisionUtils.extract("$Revision$");
     }
   } /*end class RuleList ******/
 
@@ -963,7 +963,7 @@ public class RDG1
 	  throw new Exception ("Attribute type is not supported.");
       }
     }
-    example = new Instance(0, attributes);
+    example = new Instance(1.0, attributes);
     example.setDataset(format);
     example.setClassMissing();
 
@@ -1212,7 +1212,7 @@ public class RDG1
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.5 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
