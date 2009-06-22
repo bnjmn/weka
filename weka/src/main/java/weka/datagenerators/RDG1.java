@@ -95,7 +95,7 @@ import java.util.Vector;
  * % RULE 2:   c2 := not(a0), a1 >= 0.562<br>
  *<p>
  * @author Gabi Schmidberger (gabi@cs.waikato.ac.nz)
- * @version $Revision: 1.2.2.1 $ 
+ * @version $Revision$ 
  **/
 public class RDG1 extends Generator implements OptionHandler,
 			                       Serializable {
@@ -667,7 +667,7 @@ public class RDG1 extends Generator implements OptionHandler,
 	}
       }
     }
-    example = new Instance(0, attributes);
+    example = new Instance(1.0, attributes);
     example.setDataset(format);
     example.setClassMissing();
     return example; 
