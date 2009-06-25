@@ -147,6 +147,9 @@ public class AttributeVisualizationPanel
   /** True if the thread m_hc above is running. */
   private boolean m_threadRun=false;
   
+  private boolean m_doneCurrentAttribute = false;
+  private boolean m_displayCurrentAttribute = false;
+  
   /** This stores and lets the user select a class attribute. It also has
    * an entry "No Class" if the user does not want to set a class attribute
    * for colouring.
@@ -214,8 +217,9 @@ public class AttributeVisualizationPanel
     this.setLayout(fl);
     this.addComponentListener( new ComponentAdapter() {
       public void componentResized(ComponentEvent ce) {
-        if(m_data!=null)
-          calcGraph();
+        if(m_data!=null) {
+//          calcGraph();
+        }
       }
     });
     
@@ -329,25 +333,29 @@ public class AttributeVisualizationPanel
   public void setAttribute(int index) {
     
     synchronized (m_locker) {
-      m_threadRun = true;
+      //m_threadRun = true;
+      m_threadRun = false;
+      m_doneCurrentAttribute = false;
+      m_displayCurrentAttribute = true;
       //if(m_hc!=null && m_hc.isAlive()) m_hc.stop();
       m_attribIndex = index;
       m_as = m_data.attributeStats(m_attribIndex);
       //m_classIndex = m_colorAttrib.getSelectedIndex();
     }
-    calcGraph();
+    this.repaint();
+    // calcGraph();
   }
   
   /**
    * Recalculates the barplot or histogram to display, required usually when the
    * attribute is changed or the component is resized.
    */
-  public void calcGraph() {
+  public void calcGraph(int panelWidth, int panelHeight) {
     
     synchronized (m_locker) {
       m_threadRun = true;
       if(m_as.nominalWeights!=null) {
-        m_hc = new BarCalc();
+        m_hc = new BarCalc(panelWidth, panelHeight);
         m_hc.setPriority(m_hc.MIN_PRIORITY);
         m_hc.start();
       }
@@ -372,13 +380,32 @@ public class AttributeVisualizationPanel
    * m_maxValue and m_colorList.
    */
   private class BarCalc extends Thread {
+    private int m_panelWidth;
+    private int m_panelHeight;
+    
+    public BarCalc(int panelWidth, int panelHeight) {
+      m_panelWidth = panelWidth;
+      m_panelHeight = panelHeight;
+    }
+    
     public void run() {
       synchronized (m_locker) {
+        // there is no use doing/displaying anything if the resolution
+        // of the panel is less than the number of values for this attribute
+        if (m_data.attribute(m_attribIndex).numValues() > m_panelWidth) {
+          m_histBarClassCounts = null;
+          m_threadRun = false;
+          m_doneCurrentAttribute = true;
+          m_displayCurrentAttribute = false;
+          AttributeVisualizationPanel.this.repaint();
+          return;
+        }
+        
         if((m_classIndex >= 0) &&
         (m_data.attribute(m_classIndex).isNominal())) {
           double histClassCounts[][];
-          histClassCounts=new double[m_data.attribute(m_attribIndex).numValues()]
-                                 [m_data.attribute(m_classIndex).numValues()+1];
+          histClassCounts=new double[m_data.attribute(m_attribIndex).numValues()][0];
+                                  //[m_data.attribute(m_classIndex).numValues()+1];
           
           if (m_as.nominalWeights.length > 0) {
             m_maxValue = m_as.nominalWeights[0];
@@ -411,13 +438,20 @@ public class AttributeVisualizationPanel
             //                   m_data.instance(k).value(m_attribIndex)+
             //                   " class: "+
             //                   m_data.instance(k).value(m_classIndex));
-            if(!m_data.instance(k).isMissing(m_attribIndex))
-              if(m_data.instance(k).isMissing(m_classIndex))
+            if(!m_data.instance(k).isMissing(m_attribIndex)) {
+              // check to see if we need to allocate some space here
+              if (histClassCounts[(int)m_data.instance(k).value(m_attribIndex)].length == 0) {
+                histClassCounts[(int)m_data.instance(k).value(m_attribIndex)] = 
+                  new double[m_data.attribute(m_classIndex).numValues()+1]; 
+              }
+              if(m_data.instance(k).isMissing(m_classIndex)) {
                 histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
                                [0] += m_data.instance(k).weight();
-              else
+              } else {
                 histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
                               [(int)m_data.instance(k).value(m_classIndex)+1] += m_data.instance(k).weight();
+              }
+            }
           }
           
           //for(int i=0; i<histClassCounts.length; i++) {
@@ -430,6 +464,8 @@ public class AttributeVisualizationPanel
           //}
           
           m_threadRun=false;
+          m_doneCurrentAttribute = true;
+          m_displayCurrentAttribute = true;
           m_histBarClassCounts = histClassCounts;
           //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
           //                                 BufferedImage.TYPE_INT_RGB);
@@ -458,6 +494,8 @@ public class AttributeVisualizationPanel
                 m_data.instance(k).weight();
           }
           m_threadRun=false;
+          m_displayCurrentAttribute = true;
+          m_doneCurrentAttribute = true;
           m_histBarCounts = histCounts;
           //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
           //                                 BufferedImage.TYPE_INT_RGB);
@@ -684,6 +722,8 @@ public class AttributeVisualizationPanel
         }
         
         m_threadRun=false;
+        m_displayCurrentAttribute = true;
+        m_doneCurrentAttribute = true;
         //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
         //                                 BufferedImage.TYPE_INT_RGB);
         //drawGraph( tmpImg.getGraphics() );
@@ -936,7 +976,10 @@ public class AttributeVisualizationPanel
     g.clearRect(0,0,this.getWidth(), this.getHeight());
     
     if(m_as!=null) {    //If calculations have been done and histogram/barplot
-      if(m_threadRun==false) {  //calculation thread is not running
+      if (!m_doneCurrentAttribute && !m_threadRun) {
+        calcGraph(this.getWidth(), this.getHeight());
+      }
+      if(m_threadRun==false && m_displayCurrentAttribute) {  //calculation thread is not running
         int buttonHeight=0;
         
         if(m_colorAttrib!=null)
@@ -1261,10 +1304,15 @@ public class AttributeVisualizationPanel
           this.getHeight()/2-m_fm.getHeight()/2);
         }
       } //<--end if of calculation thread
-      else {   //if still calculation thread is running plot
+      else if (m_displayCurrentAttribute) {   //if still calculation thread is running plot
         g.clearRect(0, 0, this.getWidth(), this.getHeight());
         g.drawString("Calculating. Please Wait...",
         this.getWidth()/2 - m_fm.stringWidth("Calculating. Please Wait...")/2,
+        this.getHeight()/2-m_fm.getHeight()/2);
+      } else if (!m_displayCurrentAttribute) {
+        g.clearRect(0, 0, this.getWidth(), this.getHeight());
+        g.drawString("Too many values to display.",
+        this.getWidth()/2 - m_fm.stringWidth("Too many values to display.")/2,
         this.getHeight()/2-m_fm.getHeight()/2);
       }
     } //<--end if(m_as==null) this means 
