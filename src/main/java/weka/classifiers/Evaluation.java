@@ -1500,13 +1500,13 @@ public class Evaluation
           updateStatsForIntervalEstimator((IntervalEstimator)classifier, classMissing, 
                                           instance.classValue());
         } else {
-          m_ComplexityStatisticsAvailable = false;
+          m_CoverageStatisticsAvailable = false;
         }
         if (classifier instanceof ConditionalDensityEstimator) {
           updateStatsForConditionalDensityEstimator((ConditionalDensityEstimator)classifier, 
                                                     classMissing, instance.classValue());
         } else {
-          m_CoverageStatisticsAvailable = false;
+          m_ComplexityStatisticsAvailable = false;
         }
       }
     }
