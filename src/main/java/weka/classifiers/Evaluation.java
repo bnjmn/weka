@@ -1491,18 +1491,23 @@ public class Evaluation
     classMissing.setClassMissing();
     double pred = evaluationForSingleInstance(classifier.distributionForInstance(classMissing), 
                                               instance, storePredictions);      
-    if (!instance.classIsMissing() && !Instance.isMissingValue(pred)) { 
-      if (classifier instanceof IntervalEstimator) {
-        updateStatsForIntervalEstimator((IntervalEstimator)classifier, classMissing, 
-                                        instance.classValue());
-      } else {
-        m_ComplexityStatisticsAvailable = false;
-      }
-      if (classifier instanceof ConditionalDensityEstimator) {
-        updateStatsForConditionalDensityEstimator((ConditionalDensityEstimator)classifier, 
-                                                  classMissing, instance.classValue());
-      } else {
-        m_CoverageStatisticsAvailable = false;
+
+    // We don't need to do the following if the class is nominal because in that case
+    // entropy and coverage statistics are always computed.
+    if (!m_ClassIsNominal) {
+      if (!instance.classIsMissing() && !Instance.isMissingValue(pred)) { 
+        if (classifier instanceof IntervalEstimator) {
+          updateStatsForIntervalEstimator((IntervalEstimator)classifier, classMissing, 
+                                          instance.classValue());
+        } else {
+          m_ComplexityStatisticsAvailable = false;
+        }
+        if (classifier instanceof ConditionalDensityEstimator) {
+          updateStatsForConditionalDensityEstimator((ConditionalDensityEstimator)classifier, 
+                                                    classMissing, instance.classValue());
+        } else {
+          m_CoverageStatisticsAvailable = false;
+        }
       }
     }
     return pred;
@@ -2338,11 +2343,11 @@ public class Evaluation
 	      12, 4) + " %\n");
 	}
         if (m_CoverageStatisticsAvailable) {
-          text.append("Coverage of cases at " + Utils.doubleToString(m_ConfLevel, 4, 2) + " level    ");
+          text.append("Coverage of cases (" + Utils.doubleToString(m_ConfLevel, 4, 2) + " level)     ");
           text.append(Utils.doubleToString(coverageOfTestCasesByPredictedRegions(), 
                                            12, 4) + " %\n");
           if (!m_NoPriors) {
-            text.append("Mean size of regions at " + Utils.doubleToString(m_ConfLevel, 4, 2) + " level ");
+            text.append("Mean rel. region size (" + Utils.doubleToString(m_ConfLevel, 4, 2) + " level) ");
             text.append(Utils.doubleToString(sizeOfPredictedRegions(), 12, 4) + " %\n");
           }
         }
