@@ -26,6 +26,7 @@
   <property name="run_tests_fail" value="true"/>
   <property name="headless" value="false"/>
   <property name="macdistrib" value="osx-distrib"/>
+  <property name="debug" value="on" />
 
   <target name="init_all">
     <!-- Create the time stamp -->
