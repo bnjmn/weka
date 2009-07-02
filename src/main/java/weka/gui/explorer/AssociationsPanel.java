@@ -491,12 +491,28 @@ public class AssociationsPanel
    * @param filter	the new filter to use
    */
   protected void updateCapabilitiesFilter(Capabilities filter) {
+    Instances           tempInst;
+    Capabilities        filterClass;
+    
     if (filter == null) {
       m_AssociatorEditor.setCapabilitiesFilter(new Capabilities(null));
       return;
     }
     
-    m_AssociatorEditor.setCapabilitiesFilter(filter);
+    if (!ExplorerDefaults.getInitGenericObjectEditorFilter())
+      tempInst = new Instances(m_Instances, 0);
+    else
+      tempInst = new Instances(m_Instances);
+    tempInst.setClassIndex(-1);
+    
+    try {
+      filterClass = Capabilities.forInstances(tempInst);
+    }
+    catch (Exception e) {
+      filterClass = new Capabilities(null);
+    }
+    
+    m_AssociatorEditor.setCapabilitiesFilter(filterClass);
     
     m_StartBut.setEnabled(true);
     // Check capabilities
