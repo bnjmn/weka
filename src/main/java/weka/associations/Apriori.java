@@ -382,7 +382,7 @@ public class Apriori
     double[] confidences, supports;
     int[] indices;
     FastVector[] sortedRuleSet;
-    int necSupport=0;
+    double necSupport=0;
 
     instances = new Instances(instances);
     
@@ -407,6 +407,13 @@ public class Apriori
     getCapabilities().testWithFail(instances);
 
     m_cycles = 0;
+    
+    // make sure that the lower bound is equal to at least one instance
+    double lowerBoundMinSupportToUse = 
+      (m_lowerBoundMinSupport * (double)instances.numInstances() < 1.0)
+      ? 1.0 / (double)instances.numInstances()
+          : m_lowerBoundMinSupport;
+    
     if(m_car){
         //m_instances does not contain the class attribute
         m_instances = LabeledItemSet.divide(instances,false);
@@ -419,13 +426,13 @@ public class Apriori
     
     if(m_car && m_numRules == Integer.MAX_VALUE){
         // Set desired minimum support
-        m_minSupport = m_lowerBoundMinSupport;
+        m_minSupport = lowerBoundMinSupportToUse;
     }
     else{
         // Decrease minimum support until desired number of rules found.
         m_minSupport = m_upperBoundMinSupport - m_delta;
-        m_minSupport = (m_minSupport < m_lowerBoundMinSupport) 
-            ? m_lowerBoundMinSupport 
+        m_minSupport = (m_minSupport < lowerBoundMinSupportToUse) 
+            ? lowerBoundMinSupportToUse 
             : m_minSupport;
     }
 
@@ -529,17 +536,17 @@ public class Apriori
 	  System.out.println(toString());
 	}
       }
-      if(m_minSupport == m_lowerBoundMinSupport || m_minSupport - m_delta >  m_lowerBoundMinSupport)
+      if(m_minSupport == lowerBoundMinSupportToUse || m_minSupport - m_delta >  lowerBoundMinSupportToUse)
         m_minSupport -= m_delta;
       else
-        m_minSupport = m_lowerBoundMinSupport;
+        m_minSupport = lowerBoundMinSupportToUse;
       
-      necSupport = Math.round((float)((m_minSupport * 
-			 (double)m_instances.numInstances())+0.5));
+      
+      necSupport = Math.rint(m_minSupport * (double)m_instances.numInstances());
 
       m_cycles++;
     } while ((m_allTheRules[0].size() < m_numRules) &&
-	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport))
+	     (Utils.grOrEq(m_minSupport, lowerBoundMinSupportToUse))
 	     /*	     (necSupport >= lowerBoundNumInstancesSupport)*/
 	     /*	     (Utils.grOrEq(m_minSupport, m_lowerBoundMinSupport)) */ &&     
 	     (necSupport >= 1));
