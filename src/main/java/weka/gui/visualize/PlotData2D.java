@@ -122,13 +122,14 @@ public class PlotData2D {
    */
   public void addInstanceNumberAttribute() {
     String originalRelationName = m_plotInstances.relationName();
+    int originalClassIndex = m_plotInstances.classIndex();
     try {
       Add addF = new Add();
       addF.setAttributeName("Instance_number");
       addF.setAttributeIndex("first");
       addF.setInputFormat(m_plotInstances);
       m_plotInstances = Filter.useFilter(m_plotInstances, addF);
-      m_plotInstances.setClassIndex(m_plotInstances.numAttributes()-1);
+      m_plotInstances.setClassIndex(originalClassIndex + 1);
       for (int i = 0; i < m_plotInstances.numInstances(); i++) {
 	m_plotInstances.instance(i).setValue(0,(double)i);
       }
