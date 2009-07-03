@@ -22,6 +22,7 @@
 
 package weka.classifiers.evaluation;
 
+import weka.classifiers.IntervalEstimator;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 
@@ -32,22 +33,25 @@ import java.io.Serializable;
  * plus the actual class value.
  *
  * @author Len Trigg (len@reeltwo.com)
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 public class NumericPrediction
   implements Prediction, Serializable, RevisionHandler {
 
-  /** for serialization */
+  /** for serialization. */
   private static final long serialVersionUID = -4880216423674233887L;
 
-  /** The actual class value */
+  /** The actual class value. */
   private double m_Actual = MISSING_VALUE;
 
-  /** The predicted class value */
+  /** The predicted class value. */
   private double m_Predicted = MISSING_VALUE;
 
-  /** The weight assigned to this prediction */
+  /** The weight assigned to this prediction. */
   private double m_Weight = 1;
+  
+  /** the prediction intervals. */
+  private double[][] m_PredictionIntervals;
 
   /**
    * Creates the NumericPrediction object with a default weight of 1.0.
@@ -56,7 +60,6 @@ public class NumericPrediction
    * @param predicted the predicted value, or MISSING_VALUE.
    */
   public NumericPrediction(double actual, double predicted) {
-
     this(actual, predicted, 1);
   }
 
@@ -68,10 +71,24 @@ public class NumericPrediction
    * @param weight the weight assigned to the prediction.
    */
   public NumericPrediction(double actual, double predicted, double weight) {
+    this(actual, predicted, weight, new double[0][]);
+  }
 
+  /**
+   * Creates the NumericPrediction object.
+   *
+   * @param actual the actual value, or MISSING_VALUE.
+   * @param predicted the predicted value, or MISSING_VALUE.
+   * @param weight the weight assigned to the prediction.
+   * @param predInt the prediction intervals from classifiers implementing
+   * the <code>IntervalEstimator</code> interface.
+   * @see IntervalEstimator
+   */
+  public NumericPrediction(double actual, double predicted, double weight, double[][] predInt) {
     m_Actual = actual;
     m_Predicted = predicted;
     m_Weight = weight;
+    setPredictionIntervals(predInt);
   }
 
   /** 
@@ -81,7 +98,6 @@ public class NumericPrediction
    * prediction was made.  
    */
   public double actual() { 
-
     return m_Actual; 
   }
 
@@ -92,7 +108,6 @@ public class NumericPrediction
    * prediction was made.  
    */
   public double predicted() { 
-
     return m_Predicted; 
   }
 
@@ -103,7 +118,6 @@ public class NumericPrediction
    * @return the weight assigned to this prediction.
    */
   public double weight() { 
-
     return m_Weight; 
   }
 
@@ -116,12 +130,31 @@ public class NumericPrediction
    * is missing.  
    */
   public double error() {
-
     if ((m_Actual == MISSING_VALUE) ||
         (m_Predicted == MISSING_VALUE)) {
       return MISSING_VALUE;
     }
     return m_Predicted - m_Actual;
+  }
+  
+  /**
+   * Sets the prediction intervals for this prediction.
+   * 
+   * @param predInt the prediction intervals
+   */
+  public void setPredictionIntervals(double[][] predInt) {
+    m_PredictionIntervals = predInt.clone();
+  }
+  
+  /**
+   * Returns the predictions intervals. Only classifiers implementing the
+   * <code>IntervalEstimator</code> interface.
+   * 
+   * @return the prediction intervals.
+   * @see IntervalEstimator
+   */
+  public double[][] predictionIntervals() {
+    return m_PredictionIntervals;
   }
 
   /**
@@ -130,7 +163,6 @@ public class NumericPrediction
    * @return a human readable representation of this prediction.
    */
   public String toString() {
-
     StringBuffer sb = new StringBuffer();
     sb.append("NUM: ").append(actual()).append(' ').append(predicted());
     sb.append(' ').append(weight());
@@ -143,6 +175,6 @@ public class NumericPrediction
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.9 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }

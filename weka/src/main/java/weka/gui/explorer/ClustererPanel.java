@@ -29,7 +29,6 @@ import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
 import weka.core.FastVector;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
@@ -54,8 +53,6 @@ import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.explorer.Explorer.LogHandler;
 import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.Plot2D;
-import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
@@ -628,74 +625,6 @@ public class ClustererPanel
     }
     m_SetTestFrame.setVisible(true);
   }
-
-  /**
-   * Sets up the structure for the visualizable instances. This dataset
-   * contains the original attributes plus the clusterer's cluster assignments
-   * @param testInstances the instances that the clusterer has clustered
-   * @param eval the evaluation to use
-   * @return a PlotData2D object encapsulating the visualizable instances. The    
-   * instances contain one more attribute (predicted
-   * cluster) than the testInstances
-   */
-  public static PlotData2D setUpVisualizableInstances(Instances testInstances,
-						      ClusterEvaluation eval) 
-    throws Exception {
-
-    int numClusters = eval.getNumClusters();
-    double [] clusterAssignments = eval.getClusterAssignments();
-
-    FastVector hv = new FastVector();
-    Instances newInsts;
-
-    Attribute predictedCluster;
-    FastVector clustVals = new FastVector();
-
-    for (int i = 0; i < numClusters; i++) {
-      clustVals.addElement("cluster"+i);
-    }
-    predictedCluster = new Attribute("Cluster", clustVals);
-    for (int i = 0; i < testInstances.numAttributes(); i++) {
-      hv.addElement(testInstances.attribute(i).copy());
-    }
-    hv.addElement(predictedCluster);
-    
-    newInsts = new Instances(testInstances.relationName()+"_clustered", hv, 
-			     testInstances.numInstances());
-
-    double [] values;
-    int j;
-    int [] pointShapes = null;
-    int [] classAssignments = null;
-    if (testInstances.classIndex() >= 0) {
-      classAssignments = eval.getClassesToClusters();
-      pointShapes = new int[testInstances.numInstances()];
-      for (int i = 0; i < testInstances.numInstances(); i++) {
-	pointShapes[i] = Plot2D.CONST_AUTOMATIC_SHAPE;
-      }
-    }
-
-    for (int i = 0; i < testInstances.numInstances(); i++) {
-      values = new double[newInsts.numAttributes()];
-      for (j = 0; j < testInstances.numAttributes(); j++) {
-	values[j] = testInstances.instance(i).value(j);
-      }
-      values[j] = clusterAssignments[i];
-      newInsts.add(new Instance(1.0, values));
-      if (pointShapes != null) {
-	if ((int)testInstances.instance(i).classValue() != 
-	    classAssignments[(int)clusterAssignments[i]]) {
-	  pointShapes[i] = Plot2D.ERROR_SHAPE;
-	}
-      }
-    }
-    PlotData2D plotData = new PlotData2D(newInsts);
-    if (pointShapes != null) {
-      plotData.setShapeType(pointShapes);
-    }
-    plotData.addInstanceNumberAttribute();
-    return plotData;
-  }
   
   /**
    * Starts running the currently configured clusterer with the current
@@ -716,7 +645,8 @@ public class ClustererPanel
 	  Instances inst = new Instances(m_Instances);
 	  inst.setClassIndex(-1);
 	  Instances userTest = null;
-	  PlotData2D predData = null;
+	  ClustererAssignmentsPlotInstances plotInstances = ExplorerDefaults.getClustererAssignmentsPlotInstances();
+	  plotInstances.setClusterer((Clusterer) m_ClustererEditor.getValue());
 	  if (m_TestInstances != null) {
 	    userTest = new Instances(m_TestInstances);
 	  }
@@ -730,8 +660,7 @@ public class ClustererPanel
 	  Clusterer clusterer = (Clusterer) m_ClustererEditor.getValue();
 	  Clusterer fullClusterer = null;
 	  StringBuffer outBuff = new StringBuffer();
-	  String name = (new SimpleDateFormat("HH:mm:ss - "))
-	  .format(new Date());
+	  String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
 	  String cname = clusterer.getClass().getName();
 	  if (cname.startsWith("weka.clusterers.")) {
 	    name += cname.substring("weka.clusterers.".length());
@@ -896,7 +825,8 @@ public class ClustererPanel
 	      case 3: case 5: // Test on training
 	      m_Log.statusMessage("Clustering training data...");
 	      eval.evaluateClusterer(trainInst);
-	      predData = setUpVisualizableInstances(inst,eval);
+	      plotInstances.setInstances(inst);
+	      plotInstances.setClusterEvaluation(eval);
 	      outBuff.append("=== Model and evaluation on training set ===\n\n");
 	      break;
 
@@ -913,7 +843,8 @@ public class ClustererPanel
 	      clusterer.buildClusterer(train);
 	      m_Log.statusMessage("Evaluating on test split...");
 	      eval.evaluateClusterer(test);
-	      predData = setUpVisualizableInstances(testVis, eval);
+	      plotInstances.setInstances(testVis);
+	      plotInstances.setClusterEvaluation(eval);
 	      outBuff.append("=== Model and evaluation on test split ===\n");
 	      break;
 		
@@ -924,7 +855,8 @@ public class ClustererPanel
 		userTestT = removeIgnoreCols(userTestT);
 	      }
 	      eval.evaluateClusterer(userTestT);
-	      predData = setUpVisualizableInstances(userTest, eval);
+	      plotInstances.setInstances(userTest);
+	      plotInstances.setClusterEvaluation(eval);
 	      outBuff.append("=== Model and evaluation on test set ===\n");
 	      break;
 
@@ -946,17 +878,17 @@ public class ClustererPanel
 					  JOptionPane.ERROR_MESSAGE);
 	    m_Log.statusMessage("Problem evaluating clusterer");
 	  } finally {
-	    if (predData != null) {
+	    if (plotInstances != null) {
+	      plotInstances.setUp();
 	      m_CurrentVis = new VisualizePanel();
 	      m_CurrentVis.setName(name+" ("+inst.relationName()+")");
 	      m_CurrentVis.setLog(m_Log);
-	      predData.setPlotName(name+" ("+inst.relationName()+")");
-	      
 	      try {
-		m_CurrentVis.addPlot(predData);
+		m_CurrentVis.addPlot(plotInstances.getPlotData(name));
 	      } catch (Exception ex) {
 		System.err.println(ex);
 	      }
+	      plotInstances.cleanUp();
 
 	      FastVector vv = new FastVector();
 	      vv.addElement(fullClusterer);
@@ -1515,7 +1447,8 @@ public class ClustererPanel
             StringBuffer outBuff = m_History.getNamedBuffer(name);
             Instances userTest = null;
 
-            PlotData2D predData = null;
+            ClustererAssignmentsPlotInstances plotInstances = ExplorerDefaults.getClustererAssignmentsPlotInstances();
+            plotInstances.setClusterer(clusterer);
             if (m_TestInstances != null) {
               userTest = new Instances(m_TestInstances);
             }
@@ -1548,7 +1481,9 @@ public class ClustererPanel
 
               eval.evaluateClusterer(userTestT);
       
-              predData = setUpVisualizableInstances(userTest, eval);
+              plotInstances.setClusterEvaluation(eval);
+              plotInstances.setInstances(userTest);
+              plotInstances.setUp();
 
               outBuff.append("\n=== Re-evaluation on test set ===\n\n");
               outBuff.append("User supplied test set\n");  
@@ -1575,14 +1510,12 @@ public class ClustererPanel
               m_Log.statusMessage("Problem evaluating clusterer");
 
             } finally {
-              if (predData != null) {
+              if (plotInstances != null) {
                 m_CurrentVis = new VisualizePanel();
                 m_CurrentVis.setName(name+" ("+userTest.relationName()+")");
                 m_CurrentVis.setLog(m_Log);
-                predData.setPlotName(name+" ("+userTest.relationName()+")");
-	
                 try {
-                  m_CurrentVis.addPlot(predData);
+                  m_CurrentVis.addPlot(plotInstances.getPlotData(name));
                 } catch (Exception ex) {
                   System.err.println(ex);
                 }
