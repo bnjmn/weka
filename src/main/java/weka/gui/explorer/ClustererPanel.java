@@ -648,7 +648,7 @@ public class ClustererPanel
     FastVector clustVals = new FastVector();
 
     for (int i = 0; i < numClusters; i++) {
-      clustVals.addElement("cluster"+i);
+      clustVals.addElement("cluster"+(i+1));
     }
     predictedCluster = new Attribute("Cluster", clustVals);
     for (int i = 0; i < testInstances.numAttributes(); i++) {
