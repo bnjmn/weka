@@ -23,6 +23,7 @@
 package weka.classifiers;
 
 import weka.classifiers.evaluation.NominalPrediction;
+import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.evaluation.output.prediction.AbstractOutput;
 import weka.classifiers.evaluation.output.prediction.PlainText;
@@ -46,7 +47,6 @@ import weka.core.pmml.PMMLModel;
 import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.core.xml.XMLSerialization;
-import weka.estimators.Estimator;
 import weka.estimators.UnivariateKernelEstimator;
 
 import java.beans.BeanInfo;
@@ -225,16 +225,16 @@ public class Evaluation
   /** Is the class nominal or numeric? */
   protected boolean m_ClassIsNominal;
 
-  /** The prior probabilities of the classes */
+  /** The prior probabilities of the classes. */
   protected double [] m_ClassPriors;
 
-  /** The sum of counts for priors */
+  /** The sum of counts for priors. */
   protected double m_ClassPriorsSum;
 
   /** The cost matrix (if given). */
   protected CostMatrix m_CostMatrix;
 
-  /** The total cost of predictions (includes instance weights) */
+  /** The total cost of predictions (includes instance weights). */
   protected double m_TotalCost;
 
   /** Sum of errors. */
@@ -261,34 +261,34 @@ public class Evaluation
   /** Sum of predicted * class values. */
   protected double m_SumClassPredicted;
 
-  /** Sum of absolute errors of the prior */
+  /** Sum of absolute errors of the prior. */
   protected double m_SumPriorAbsErr;
 
-  /** Sum of absolute errors of the prior */
+  /** Sum of absolute errors of the prior. */
   protected double m_SumPriorSqrErr;
 
-  /** Total Kononenko & Bratko Information */
+  /** Total Kononenko & Bratko Information. */
   protected double m_SumKBInfo;
 
-  /*** Resolution of the margin histogram */
+  /*** Resolution of the margin histogram. */
   protected static int k_MarginResolution = 500;
 
-  /** Cumulative margin distribution */
+  /** Cumulative margin distribution. */
   protected double m_MarginCounts [];
 
-  /** Number of non-missing class training instances seen */
+  /** Number of non-missing class training instances seen. */
   protected int m_NumTrainClassVals;
 
-  /** Array containing all numeric training class values seen */
+  /** Array containing all numeric training class values seen. */
   protected double [] m_TrainClassVals;
 
-  /** Array containing all numeric training class weights */
+  /** Array containing all numeric training class weights. */
   protected double [] m_TrainClassWeights;
 
-  /** Numeric class estimator for prior */
+  /** Numeric class estimator for prior. */
   protected UnivariateKernelEstimator m_PriorEstimator;
 
-  /** Whether complexity statistics are available */
+  /** Whether complexity statistics are available. */
   protected boolean m_ComplexityStatisticsAvailable = true;
 
   /**
@@ -297,37 +297,40 @@ public class Evaluation
    */
   protected static final double MIN_SF_PROB = Double.MIN_VALUE;
 
-  /** Total entropy of prior predictions */
+  /** Total entropy of prior predictions. */
   protected double m_SumPriorEntropy;
 
-  /** Total entropy of scheme predictions */
+  /** Total entropy of scheme predictions. */
   protected double m_SumSchemeEntropy;
 
-  /** Whether coverage statistics are available */
+  /** Whether coverage statistics are available. */
   protected boolean m_CoverageStatisticsAvailable = true;
 
-  /**  The confidence level used for coverage statistics  */
+  /**  The confidence level used for coverage statistics. */
   protected double m_ConfLevel = 0.95;
 
-  /** Total size of predicted regions at the given confidence level */
+  /** Total size of predicted regions at the given confidence level. */
   protected double m_TotalSizeOfRegions;
 
-  /** Total coverage of test cases at the given confidence level */
+  /** Total coverage of test cases at the given confidence level. */
   protected double m_TotalCoverage;
 
-  /** Minimum target value */
+  /** Minimum target value. */
   protected double m_MinTarget;
 
-  /** Maximum target value */
+  /** Maximum target value. */
   protected double m_MaxTarget;
 
-  /** The list of predictions that have been generated (for computing AUC) */
-  private FastVector m_Predictions;
+  /** The list of predictions that have been generated (for computing AUC). */
+  protected FastVector m_Predictions;
 
   /** enables/disables the use of priors, e.g., if no training set is
-   * present in case of de-serialized schemes */
+   * present in case of de-serialized schemes. */
   protected boolean m_NoPriors = false;
 
+  /** The header of the training set. */
+  protected Instances m_Header;
+  
   /**
    * Initializes all the counters for the evaluation. 
    * Use <code>useNoPriors()</code> if the dataset is the test set and you
@@ -363,6 +366,7 @@ public class Evaluation
   public Evaluation(Instances data, CostMatrix costMatrix) 
   throws Exception {
 
+    m_Header = new Instances(data, 0);
     m_NumClasses = data.numClasses();
     m_NumFolds = 1;
     m_ClassIsNominal = data.classAttribute().isNominal();
@@ -389,6 +393,15 @@ public class Evaluation
     m_MarginCounts = new double [k_MarginResolution + 1];
   }
 
+  /**
+   * Returns the header of the underlying dataset.
+   * 
+   * @return		the header information
+   */
+  public Instances getHeader() {
+    return m_Header;
+  }
+  
   /**
    * Returns the area under ROC for those predictions that have been collected
    * in the evaluateClassifier(Classifier, Instances) method. Returns 
@@ -1443,7 +1456,7 @@ public class Evaluation
    *
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
-   * @param whether to store predictions for nominal classifier
+   * @param storePredictions whether to store predictions for nominal classifier
    * @return the prediction
    * @throws Exception if model could not be evaluated successfully
    */
@@ -1451,6 +1464,7 @@ public class Evaluation
                                             boolean storePredictions) throws Exception {
 
     double pred;
+    
     if (m_ClassIsNominal) {
       pred = Utils.maxIndex(dist);
       if (dist[(int)pred] <= 0) {
@@ -1458,26 +1472,32 @@ public class Evaluation
       }
       updateStatsForClassifier(dist, instance);
       if (storePredictions) {
-        if (m_Predictions == null) {
+        if (m_Predictions == null)
           m_Predictions = new FastVector();
-        }
         m_Predictions.addElement(new NominalPrediction(instance.classValue(), dist, 
                                                        instance.weight()));
       }
     } else {
       pred = dist[0];
       updateStatsForPredictor(pred, instance);
+      if (storePredictions) {
+        if (m_Predictions == null)
+          m_Predictions = new FastVector();
+        m_Predictions.addElement(new NumericPrediction(instance.classValue(), pred, 
+                                                       instance.weight()));
+      }
     }
+    
     return pred;
   }
 
   /**
    * Evaluates the classifier on a single instance and records the
-   * prediction (if the class is nominal).
+   * prediction.
    *
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
-   * @param whether to store predictions for nominal classifier
+   * @param storePredictions whether to store predictions for nominal classifier
    * @return the prediction made by the clasifier
    * @throws Exception if model could not be evaluated 
    * successfully or the data contains string attributes
@@ -1515,7 +1535,7 @@ public class Evaluation
 
   /**
    * Evaluates the classifier on a single instance and records the
-   * prediction (if the class is nominal).
+   * prediction.
    *
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
@@ -1591,10 +1611,9 @@ public class Evaluation
    *
    * @return a reference to the FastVector containing the predictions
    * that have been collected. This should be null if no predictions
-   * have been collected (e.g. if the class is numeric).
+   * have been collected.
    */
   public FastVector predictions() {
-
     return m_Predictions;
   }
 
@@ -2033,7 +2052,7 @@ public class Evaluation
   }
 
   /**
-   * Calculate the entropy of the prior distribution
+   * Calculate the entropy of the prior distribution.
    *
    * @return the entropy of the prior distribution
    * @throws Exception if the class is not nominal
@@ -2058,7 +2077,7 @@ public class Evaluation
   }
 
   /**
-   * Return the total Kononenko & Bratko Information score in bits
+   * Return the total Kononenko & Bratko Information score in bits.
    *
    * @return the K&B information score
    * @throws Exception if the class is not nominal
@@ -2099,7 +2118,7 @@ public class Evaluation
   }
 
   /**
-   * Return the Kononenko & Bratko Relative Information score
+   * Return the Kononenko & Bratko Relative Information score.
    *
    * @return the K&B relative information score
    * @throws Exception if the class is not nominal
@@ -2119,7 +2138,7 @@ public class Evaluation
   }
 
   /**
-   * Returns the total entropy for the null model
+   * Returns the total entropy for the null model.
    * 
    * @return the total null model entropy
    */
@@ -2132,7 +2151,7 @@ public class Evaluation
   }
 
   /**
-   * Returns the entropy per instance for the null model
+   * Returns the entropy per instance for the null model.
    * 
    * @return the null model entropy per instance
    */
@@ -2145,7 +2164,7 @@ public class Evaluation
   }
 
   /**
-   * Returns the total entropy for the scheme
+   * Returns the total entropy for the scheme.
    * 
    * @return the total scheme entropy
    */
@@ -2158,7 +2177,7 @@ public class Evaluation
   }
 
   /**
-   * Returns the entropy per instance for the scheme
+   * Returns the entropy per instance for the scheme.
    * 
    * @return the scheme entropy per instance
    */
@@ -2230,7 +2249,7 @@ public class Evaluation
   }
 
   /**
-   * Calls toSummaryString() with no title and no complexity stats
+   * Calls toSummaryString() with no title and no complexity stats.
    *
    * @return a summary description of the classifier evaluation
    */
@@ -3005,7 +3024,7 @@ public class Evaluation
   }
 
   /**
-   * Sets the class prior probabilities
+   * Sets the class prior probabilities.
    *
    * @param train the training instances used to determine the prior probabilities
    * @throws Exception if the class attribute of the instances is not set
@@ -3057,7 +3076,7 @@ public class Evaluation
   }
 
   /**
-   * Get the current weighted class counts
+   * Get the current weighted class counts.
    * 
    * @return the weighted class counts
    */
@@ -3067,7 +3086,7 @@ public class Evaluation
 
   /**
    * Updates the class prior probabilities or the mean respectively (when incrementally 
-   * training)
+   * training).
    *
    * @param instance the new training instance seen
    * @throws Exception if the class of the instance is not set
@@ -3097,7 +3116,7 @@ public class Evaluation
 
   /**
    * Tests whether the current evaluation object is equal to another
-   * evaluation object
+   * evaluation object.
    *
    * @param obj the object to compare against
    * @return true if the two objects are equal
@@ -3140,7 +3159,7 @@ public class Evaluation
   }
 
   /**
-   * Make up the help string giving all the command line options
+   * Make up the help string giving all the command line options.
    *
    * @param classifier the classifier to include options for
    * @param globalInfo include the global information string
@@ -3258,7 +3277,7 @@ public class Evaluation
   }
   
   /**
-   * Return the global info (if it exists) for the supplied classifier
+   * Return the global info (if it exists) for the supplied classifier.
    * 
    * @param classifier the classifier to get the global info for
    * @return the global info (synopsis) for the classifier
@@ -3315,7 +3334,7 @@ public class Evaluation
   /**
    * Convert a single prediction into a probability distribution
    * with all zero probabilities except the predicted value which
-   * has probability 1.0;
+   * has probability 1.0.
    *
    * @param predictedClass the index of the predicted class
    * @return the probability distribution
@@ -3442,6 +3461,8 @@ public class Evaluation
                                                  double classValue) throws Exception {
 
     double[][] preds = classifier.predictIntervals(classMissing, m_ConfLevel);
+    if (m_Predictions != null)
+      ((NumericPrediction) m_Predictions.lastElement()).setPredictionIntervals(preds);
     for (int i = 0; i < preds.length; i++) {
       m_TotalSizeOfRegions += (preds[i][1] - preds[i][0]) / (m_MaxTarget - m_MinTarget);
     }
@@ -3508,7 +3529,7 @@ public class Evaluation
   }
 
   /**
-   * Update the cumulative record of classification margins
+   * Update the cumulative record of classification margins.
    *
    * @param predictedDistribution the probability distribution predicted for
    * the current instance
