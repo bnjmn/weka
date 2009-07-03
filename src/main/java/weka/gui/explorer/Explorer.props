@@ -123,6 +123,10 @@ ClassifierOutputSourceCode=false
 # (default is Foobar)
 ClassifierSourceCodeClass=WekaClassifier
 
+# the class (incl. options) for collecting the predictions and turning them 
+# into plotable instances for displaying the classifier errors.
+ClassifierErrorsPlotInstances=weka.gui.explorer.ClassifierErrorsPlotInstances
+
 # the default clusterer, including options
 # (default is EM)
 Clusterer=weka.clusterers.EM
@@ -139,6 +143,10 @@ ClustererTestMode=3
 # whether the clusters are stored for visualization purposes (true|false)
 # (default is true)
 ClustererStoreClustersForVis=true
+
+# the class (incl. options) for collecting the predictions and turning them 
+# into plotable instances for displaying the cluster assignments.
+ClustererAssignmentsPlotInstances=weka.gui.explorer.ClustererAssignmentsPlotInstances
 
 # the default associator, including options
 # (default is Apriori)

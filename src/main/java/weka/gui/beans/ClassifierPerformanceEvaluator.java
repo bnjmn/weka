@@ -25,11 +25,12 @@ package weka.gui.beans;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.gui.explorer.ClassifierErrorsPlotInstances;
+import weka.gui.explorer.ExplorerDefaults;
 import weka.gui.visualize.PlotData2D;
 
 import java.io.Serializable;
@@ -103,14 +104,12 @@ public class ClassifierPerformanceEvaluator
 
   // ----- Stuff for ROC curves
   private boolean m_rocListenersConnected = false;
-  // Plottable Instances with predictions appended
-  private transient Instances m_predInstances = null;
-  // Actual predictions
-  private transient FastVector m_plotShape = null;
-  private transient FastVector m_plotSize = null;
+  
+  /** for generating plottable instance with predictions appended. */
+  private transient ClassifierErrorsPlotInstances m_PlotInstances = null;
 
   /**
-   * Accept a classifier to be evaluated
+   * Accept a classifier to be evaluated.
    *
    * @param ce a <code>BatchClassifierEvent</code> value
    */
@@ -139,11 +138,12 @@ public class ClassifierPerformanceEvaluator
 		  }
 		  m_classifier = ce.getClassifier();
 		  if (m_visualizableErrorListeners.size() > 0) {
-		    m_predInstances = 
-		      weka.gui.explorer.ClassifierPanel.
-		      setUpVisualizableInstances(new Instances(ce.getTestSet().getDataSet()));
-		    m_plotShape = new FastVector();
-		    m_plotSize = new FastVector();
+		    m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
+		    m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
+		    m_PlotInstances.setClassifier(ce.getClassifier());
+		    m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
+		    m_PlotInstances.setEvaluation(m_eval);
+		    m_PlotInstances.setUp();
 		  }
 		}
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
@@ -159,10 +159,7 @@ public class ClassifierPerformanceEvaluator
 		  ce.getTestSet().getDataSet()); */
 		  for (int i = 0; i < ce.getTestSet().getDataSet().numInstances(); i++) {
 		    Instance temp = ce.getTestSet().getDataSet().instance(i);
-		    weka.gui.explorer.ClassifierPanel.
-		    processClassifierPrediction(temp, ce.getClassifier(),
-						m_eval, m_predInstances, m_plotShape,
-						m_plotSize);
+		    m_PlotInstances.process(temp, ce.getClassifier(), m_eval);
 		  }
 		}
 		
@@ -199,17 +196,12 @@ public class ClassifierPerformanceEvaluator
 
                   // set up visualizable errors
                   if (m_visualizableErrorListeners.size() > 0) {
-                    PlotData2D errorD = new PlotData2D(m_predInstances);
-                    errorD.setShapeSize(m_plotSize);
-                    errorD.setShapeType(m_plotShape);
-                    errorD.setPlotName(textTitle + " " +textOptions + " ("
-                                       +ce.getTestSet().getDataSet().relationName()
-                                       +")");
-                    errorD.addInstanceNumberAttribute();
+                    PlotData2D errorD = m_PlotInstances.getPlotData(
+                	textTitle + " " + textOptions);
                     VisualizableErrorEvent vel = 
-                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this,
-                                                 errorD);
+                      new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this, errorD);
                     notifyVisualizableErrorListeners(vel);
+                    m_PlotInstances.cleanUp();
                   }
                   
 
@@ -270,9 +262,7 @@ public class ClassifierPerformanceEvaluator
 		  }
 
 		  // save memory
-		  m_predInstances = null;
-		  m_plotShape = null;
-		  m_plotSize = null;
+		  m_PlotInstances = null;
 		}
 	      } catch (Exception ex) {
 	        errorOccurred = true;
