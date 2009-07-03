@@ -17,6 +17,7 @@
 package wekaexamples.gui.visualize.plugins;
 
 import weka.classifiers.evaluation.NominalPrediction;
+import weka.classifiers.evaluation.NumericPrediction;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.gui.visualize.plugins.VisualizePlugin;
@@ -60,10 +61,6 @@ public class PredictionError
   public JMenuItem getVisualizeMenuItem(FastVector preds, Attribute classAtt) {
     final FastVector finalPreds = preds;
     final Attribute finalClassAtt = classAtt;
-    
-    // only for nominal classes
-    if (!classAtt.isNominal())
-      return null;
     
     JMenuItem result = new JMenuItem("Prediction error");
     result.addActionListener(new ActionListener() {
@@ -118,7 +115,8 @@ public class PredictionError
     Vector<Double>	yVals;
     Plot2DPanel 	plot;
     JFrame 		frame;
-    NominalPrediction	pred;
+    NominalPrediction	nom;
+    NumericPrediction	num;
     int			i;
     int			n;
 
@@ -130,39 +128,63 @@ public class PredictionError
     // setup plot
     plot = new Plot2DPanel();
     plot.addLegend("SOUTH");
-    for (n = 1; n <= 2; n++) {
-      // collect data: 1=correct, 2=incorrect predictions
-      xVals = new Vector<Double>();
-      yVals = new Vector<Double>();
-      for (i = 0; i < preds.size(); i++) {
-	pred = (NominalPrediction) preds.elementAt(i);
-	if (n == 1) {
-	  if (pred.actual() == pred.predicted()) {
-	    xVals.add((double) i);
-	    yVals.add(pred.distribution()[(int) pred.actual()]);
+    if (preds.size() > 0) {
+      if (preds.elementAt(0) instanceof NominalPrediction) {
+	for (n = 1; n <= 2; n++) {
+	  // collect data: 1=correct, 2=incorrect predictions
+	  xVals = new Vector<Double>();
+	  yVals = new Vector<Double>();
+	  for (i = 0; i < preds.size(); i++) {
+	    nom = (NominalPrediction) preds.elementAt(i);
+	    if (n == 1) {
+	      if (nom.actual() == nom.predicted()) {
+		xVals.add((double) i);
+		yVals.add(nom.distribution()[(int) nom.actual()]);
+	      }
+	    }
+	    else {
+	      if (nom.actual() != nom.predicted()) {
+		xVals.add((double) i);
+		yVals.add(nom.distribution()[(int) nom.actual()]);
+	      }
+	    }
 	  }
-	}
-	else {
-	  if (pred.actual() != pred.predicted()) {
-	    xVals.add((double) i);
-	    yVals.add(pred.distribution()[(int) pred.actual()]);
+
+	  // transfer into arrays
+	  x = new double[xVals.size()];
+	  y = new double[yVals.size()];
+	  for (i = 0; i < x.length; i++) {
+	    x[i] = xVals.get(i);
+	    y[i] = yVals.get(i);
 	  }
+
+	  // add plot
+	  if (n == 1)
+	    plot.addBarPlot("Correct", x, y);
+	  else
+	    plot.addBarPlot("Incorrect", x, y);
 	}
       }
-      
-      // transfer into arrays
-      x = new double[xVals.size()];
-      y = new double[yVals.size()];
-      for (i = 0; i < x.length; i++) {
-	x[i] = xVals.get(i);
-	y[i] = yVals.get(i);
+      else {
+	xVals = new Vector<Double>();
+	yVals = new Vector<Double>();
+	for (i = 0; i < preds.size(); i++) {
+	  num = (NumericPrediction) preds.elementAt(i);
+	  xVals.add((double) i);
+	  yVals.add(num.actual() - num.predicted());
+	}
+
+	// transfer into arrays
+	x = new double[xVals.size()];
+	y = new double[yVals.size()];
+	for (i = 0; i < x.length; i++) {
+	  x[i] = xVals.get(i);
+	  y[i] = yVals.get(i);
+	}
+
+	// add plot
+	plot.addBarPlot("Error", x, y);
       }
-      
-      // add plot
-      if (n == 1)
-	plot.addBarPlot("Correct", x, y);
-      else
-	plot.addBarPlot("Incorrect", x, y);
     }
 
     // setup frame
