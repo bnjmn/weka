@@ -115,7 +115,7 @@ import java.util.Vector;
  <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
- * @version $Revision: 1.7.2.2 $
+ * @version $Revision$
  */
 public class GaussianProcesses 
   extends Classifier 
@@ -190,7 +190,6 @@ public class GaussianProcesses
     super();
     
     m_kernel = new PolyKernel();
-    //    ((PolyKernel) m_kernel).setGamma(1.0);
   }
   
   /**
@@ -435,7 +434,7 @@ public class GaussianProcesses
    * @throws Exception if interval could not be estimated
    * successfully
    */
-  public double[][] predictInterval(Instance inst, double confidenceLevel) throws Exception {
+  public double[][] predictIntervals(Instance inst, double confidenceLevel) throws Exception {
 
     // Filter instance
     if (!m_checksTurnedOff) {
@@ -809,10 +808,10 @@ public class GaussianProcesses
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.7.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
  
- /**
+  /**
    * Main method for testing this class.
    * 
    * @param argv the commandline parameters
