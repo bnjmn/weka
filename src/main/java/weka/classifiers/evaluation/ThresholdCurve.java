@@ -414,8 +414,13 @@ public class ThresholdCurve
       double ss = (tc.getTruePositive() + tc.getFalsePositive()) / 
         (tc.getTruePositive() + tc.getFalsePositive() + tc.getTrueNegative() + tc.getFalseNegative());
     vals[count++] = ss;
-    vals[count++] = (tc.getTruePositive() / 
-        (ss * (tc.getTruePositive() + tc.getFalseNegative())));
+    double expectedByChance = (ss * (tc.getTruePositive() + tc.getFalseNegative()));
+    if (expectedByChance < 1) {
+      vals[count++] = Instance.missingValue();
+    } else {
+    vals[count++] = tc.getTruePositive() / expectedByChance; 
+     
+    }
     vals[count++] = prob;
     return new Instance(1.0, vals);
   }
