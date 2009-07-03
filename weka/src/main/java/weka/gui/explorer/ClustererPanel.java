@@ -125,7 +125,7 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.45.2.5 $
+ * @version $Revision$
  */
 public class ClustererPanel extends JPanel {
 
@@ -614,7 +614,7 @@ public class ClustererPanel extends JPanel {
     FastVector clustVals = new FastVector();
 
     for (int i = 0; i < numClusters; i++) {
-      clustVals.addElement("cluster"+i);
+      clustVals.addElement("cluster"+(i+1));
     }
     predictedCluster = new Attribute("Cluster", clustVals);
     for (int i = 0; i < testInstances.numAttributes(); i++) {
