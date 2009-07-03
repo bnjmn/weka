@@ -15,8 +15,8 @@
  */
 
 /*
- *    IntervalEstimator.java
- *    Copyright (C) 2005 University of Waikato, Hamilton, New Zealand
+ *    ConditionalDensityEstimator.java
+ *    Copyright (C) 2009 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,25 +25,22 @@ package weka.classifiers;
 import weka.core.Instance;
 
 /** 
- * Interface for numeric prediction schemes that can output prediction
- * intervals.
+ * Interface for numeric prediction schemes that can output conditional
+ * density estimates.
  *
- * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public interface IntervalEstimator {
+public interface ConditionalDensityEstimator {
 
   /**
-   * Returns an N * 2 array, where N is the number of prediction
-   * intervals. In each row, the first element contains the lower
-   * boundary of the corresponding prediction interval and the second
-   * element the upper boundary.
-   *
+   * Returns natural logarithm of density estimate for given value based on given instance.
+   *   
    * @param inst the instance to make the prediction for.
-   * @param confidenceLevel the percentage of cases that the interval should cover.
-   * @return an array of prediction intervals
-   * @exception Exception if the intervals can't be computed
+   * @param the value to make the prediction for.
+   * @return the natural logarithm of the density estimate
+   * @exception Exception if the density cannot be computed
    */
-  double[][] predictIntervals(Instance inst, double confidenceLevel) throws Exception;
+  public double logDensity(Instance instance, double value) throws Exception;
 }
 
