@@ -32,22 +32,31 @@ import junit.framework.TestSuite;
  * java weka.filters.unsupervised.attribute.InterquartileRangeTest
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.1 $
+ * @version $Revision$
  */
 public class InterquartileRangeTest
   extends AbstractFilterTest {
 
+  /**
+   * Initializes the test with the given name.
+   * 
+   * @param name	the name of the test
+   */
   public InterquartileRangeTest(String name) { 
     super(name);  
   }
 
-  /** Creates a default InterquartileRange */
+  /**
+   * Creates a default InterquartileRange.
+   * 
+   * @return		the filter
+   */
   public Filter getFilter() {
     return new InterquartileRange();
   }
 
   /**
-   * a typical test, with nominal class attribute
+   * a typical test, with nominal class attribute.
    */
   public void testNominalClass() {
     // run filter
@@ -76,7 +85,38 @@ public class InterquartileRangeTest
   }
 
   /**
-   * a typical test, with numeric class attribute
+   * a typical test, with nominal class attribute and on a single numeric
+   * attribute.
+   */
+  public void testNominalClassSingleAttribute() {
+    // run filter
+    m_Instances.setClassIndex(1);
+    Instances icopy = new Instances(m_Instances);
+    Instances result = null;
+    ((InterquartileRange) m_Filter).setAttributeIndices("3");
+    try {
+      m_Filter.setInputFormat(icopy);
+    } 
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on setInputFormat(): \n" + ex.getMessage());
+    }
+    try {
+      result = Filter.useFilter(icopy, m_Filter);
+      assertNotNull(result);
+    } 
+    catch (Exception ex) {
+      ex.printStackTrace();
+      fail("Exception thrown on useFilter(): \n" + ex.getMessage());
+    }
+
+    // test
+    assertEquals(icopy.numAttributes() + 2, result.numAttributes());
+    assertEquals(icopy.numInstances(), result.numInstances());
+  }
+
+  /**
+   * a typical test, with numeric class attribute.
    */
   public void testNumericClass() {
     // run filter
@@ -105,7 +145,7 @@ public class InterquartileRangeTest
   }
 
   /**
-   * a typical test, w/o class attribute
+   * a typical test, w/o class attribute.
    */
   public void testWithoutClass() {
     // run filter
@@ -134,7 +174,7 @@ public class InterquartileRangeTest
 
   /**
    * a typical test, w/o class attribute but with Outlier/ExtremeValue
-   * generation per attribute
+   * generation per attribute.
    */
   public void testPerAttribute() {
     // parameters
@@ -171,7 +211,7 @@ public class InterquartileRangeTest
 
   /**
    * a typical test, w/o class attribute but with Outlier/ExtremeValue
-   * generation per attribute and Offset multiplier generation
+   * generation per attribute and Offset multiplier generation.
    */
   public void testOffset() {
     // parameters
@@ -207,10 +247,20 @@ public class InterquartileRangeTest
     assertEquals(icopy.numInstances(), result.numInstances());
   }
 
+  /**
+   * Returns a test suite.
+   * 
+   * @return		the suite
+   */
   public static Test suite() {
     return new TestSuite(InterquartileRangeTest.class);
   }
 
+  /**
+   * Runs the test from the commandline.
+   * 
+   * @param args	ignored
+   */
   public static void main(String[] args){
     junit.textui.TestRunner.run(suite());
   }

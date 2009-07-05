@@ -783,7 +783,7 @@ public class InterquartileRange
       if (m_AttributeIndices[i] == NON_NUMERIC)
 	continue;
 
-      result = isOutlier(inst, m_AttributeIndices[i]);
+      result = isOutlier(inst, i);
       
       if (result)
 	break;
@@ -828,7 +828,7 @@ public class InterquartileRange
       if (m_AttributeIndices[i] == NON_NUMERIC)
 	continue;
       
-      result = isExtremeValue(inst, m_AttributeIndices[i]);
+      result = isExtremeValue(inst, i);
       
       if (result)
 	break;
