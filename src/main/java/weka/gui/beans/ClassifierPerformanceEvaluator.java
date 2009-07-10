@@ -137,14 +137,12 @@ public class ClassifierPerformanceEvaluator
 		    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
 		  }
 		  m_classifier = ce.getClassifier();
-		  if (m_visualizableErrorListeners.size() > 0) {
-		    m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-		    m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
-		    m_PlotInstances.setClassifier(ce.getClassifier());
-		    m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
-		    m_PlotInstances.setEvaluation(m_eval);
-		    m_PlotInstances.setUp();
-		  }
+		  m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
+		  m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
+		  m_PlotInstances.setClassifier(ce.getClassifier());
+		  m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
+		  m_PlotInstances.setEvaluation(m_eval);
+		  m_PlotInstances.setUp();
 		}
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
