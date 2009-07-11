@@ -367,8 +367,9 @@ public class AttributeVisualizationPanel
       } else {
         m_histBarCounts = null;
         m_histBarClassCounts = null;
-        this.repaint();
+        m_doneCurrentAttribute = true;
         m_threadRun = false;
+        this.repaint();
       }
     }
   }
