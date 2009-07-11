@@ -26,6 +26,7 @@ import weka.core.Attribute;
 import weka.core.AttributeStats;
 import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.gui.visualize.PrintableComponent;
 import weka.gui.visualize.PrintablePanel;
@@ -129,7 +130,7 @@ public class AttributeVisualizationPanel
    * NOTE: The values of this array are only calculated if the class attribute
    * is set and it is nominal.
    */
-  double m_histBarClassCounts[][];
+  SparseInstance m_histBarClassCounts[];
   
   /**
    * Contains the range of each bar in a histogram. It is used to work out the
@@ -146,6 +147,9 @@ public class AttributeVisualizationPanel
   
   /** True if the thread m_hc above is running. */
   private boolean m_threadRun=false;
+  
+  private boolean m_doneCurrentAttribute = false;
+  private boolean m_displayCurrentAttribute = false;
   
   /** This stores and lets the user select a class attribute. It also has
    * an entry "No Class" if the user does not want to set a class attribute
@@ -214,8 +218,9 @@ public class AttributeVisualizationPanel
     this.setLayout(fl);
     this.addComponentListener( new ComponentAdapter() {
       public void componentResized(ComponentEvent ce) {
-        if(m_data!=null)
-          calcGraph();
+        if(m_data!=null) {
+//          calcGraph();
+        }
       }
     });
     
@@ -246,7 +251,7 @@ public class AttributeVisualizationPanel
   public void setInstances(Instances newins) {
     m_attribIndex = 0;
     m_as = null;
-    m_data = newins;
+    m_data = new Instances(newins);
     if(m_colorAttrib!=null) {
       m_colorAttrib.removeAllItems();
       m_colorAttrib.addItem("No class");
@@ -329,25 +334,29 @@ public class AttributeVisualizationPanel
   public void setAttribute(int index) {
     
     synchronized (m_locker) {
-      m_threadRun = true;
+      //m_threadRun = true;
+      m_threadRun = false;
+      m_doneCurrentAttribute = false;
+      m_displayCurrentAttribute = true;
       //if(m_hc!=null && m_hc.isAlive()) m_hc.stop();
       m_attribIndex = index;
       m_as = m_data.attributeStats(m_attribIndex);
       //m_classIndex = m_colorAttrib.getSelectedIndex();
     }
-    calcGraph();
+    this.repaint();
+    // calcGraph();
   }
   
   /**
    * Recalculates the barplot or histogram to display, required usually when the
    * attribute is changed or the component is resized.
    */
-  public void calcGraph() {
+  public void calcGraph(int panelWidth, int panelHeight) {
     
     synchronized (m_locker) {
       m_threadRun = true;
       if(m_as.nominalWeights!=null) {
-        m_hc = new BarCalc();
+        m_hc = new BarCalc(panelWidth, panelHeight);
         m_hc.setPriority(m_hc.MIN_PRIORITY);
         m_hc.start();
       }
@@ -358,8 +367,9 @@ public class AttributeVisualizationPanel
       } else {
         m_histBarCounts = null;
         m_histBarClassCounts = null;
-        this.repaint();
+        m_doneCurrentAttribute = true;
         m_threadRun = false;
+        this.repaint();
       }
     }
   }
@@ -372,13 +382,32 @@ public class AttributeVisualizationPanel
    * m_maxValue and m_colorList.
    */
   private class BarCalc extends Thread {
+    private int m_panelWidth;
+    private int m_panelHeight;
+    
+    public BarCalc(int panelWidth, int panelHeight) {
+      m_panelWidth = panelWidth;
+      m_panelHeight = panelHeight;
+    }
+    
     public void run() {
       synchronized (m_locker) {
+        // there is no use doing/displaying anything if the resolution
+        // of the panel is less than the number of values for this attribute
+        if (m_data.attribute(m_attribIndex).numValues() > m_panelWidth) {
+          m_histBarClassCounts = null;
+          m_threadRun = false;
+          m_doneCurrentAttribute = true;
+          m_displayCurrentAttribute = false;
+          AttributeVisualizationPanel.this.repaint();
+          return;
+        }
+        
         if((m_classIndex >= 0) &&
         (m_data.attribute(m_classIndex).isNominal())) {
-          double histClassCounts[][];
-          histClassCounts=new double[m_data.attribute(m_attribIndex).numValues()]
-                                 [m_data.attribute(m_classIndex).numValues()+1];
+          SparseInstance histClassCounts[];
+          histClassCounts = new SparseInstance[m_data.attribute(m_attribIndex).numValues()];
+                                  //[m_data.attribute(m_classIndex).numValues()+1];
           
           if (m_as.nominalWeights.length > 0) {
             m_maxValue = m_as.nominalWeights[0];
@@ -406,18 +435,82 @@ public class AttributeVisualizationPanel
             m_colorList.addElement(pc);
           }
           
+          // first sort data on attribute values
+          m_data.sort(m_attribIndex);
+          double[] tempClassCounts = null;
+          int tempAttValueIndex = -1;
+          
           for(int k=0; k<m_data.numInstances(); k++) {
             //System.out.println("attrib: "+
             //                   m_data.instance(k).value(m_attribIndex)+
             //                   " class: "+
             //                   m_data.instance(k).value(m_classIndex));
-            if(!m_data.instance(k).isMissing(m_attribIndex))
-              if(m_data.instance(k).isMissing(m_classIndex))
-                histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
-                               [0] += m_data.instance(k).weight();
-              else
-                histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
-                              [(int)m_data.instance(k).value(m_classIndex)+1] += m_data.instance(k).weight();
+            if(!m_data.instance(k).isMissing(m_attribIndex)) {
+              // check to see if we need to allocate some space here
+              if (m_data.instance(k).value(m_attribIndex) != tempAttValueIndex) {
+                if (tempClassCounts != null) {
+                  // set up the sparse instance for the previous bar (if any)
+                  int numNonZero = 0;
+                  for (int z = 0; z < tempClassCounts.length; z++) {
+                    if (tempClassCounts[z] > 0) {
+                      numNonZero++;
+                    }
+                  }
+                  double[] nonZeroVals = new double[numNonZero];
+                  int[] nonZeroIndices = new int[numNonZero];
+                  int count = 0;
+                  for (int z = 0; z < tempClassCounts.length; z++) {
+                    if (tempClassCounts[z] > 0) {
+                      nonZeroVals[count] = tempClassCounts[z];
+                      nonZeroIndices[count++] = z;
+                    }
+                  }
+                  SparseInstance tempS = 
+                    new SparseInstance(1.0, nonZeroVals, nonZeroIndices, tempClassCounts.length);
+                  histClassCounts[tempAttValueIndex] = tempS;
+                }
+                
+                tempClassCounts = new double[m_data.attribute(m_classIndex).numValues() + 1];
+                tempAttValueIndex = (int)m_data.instance(k).value(m_attribIndex);
+                
+                /* histClassCounts[(int)m_data.instance(k).value(m_attribIndex)] = 
+                  new double[m_data.attribute(m_classIndex).numValues()+1]; */ 
+              }
+              if(m_data.instance(k).isMissing(m_classIndex)) {
+                /* histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
+                               [0] += m_data.instance(k).weight(); */
+                tempClassCounts[0] += m_data.instance(k).weight();
+              } else {
+                tempClassCounts[(int)m_data.instance(k).value(m_classIndex)+1] 
+                                += m_data.instance(k).weight();
+                
+                /*histClassCounts[(int)m_data.instance(k).value(m_attribIndex)]
+                              [(int)m_data.instance(k).value(m_classIndex)+1] += m_data.instance(k).weight();*/
+              }
+            }
+          }
+          
+          // set up sparse instance for last bar?
+          if (tempClassCounts != null) {
+            // set up the sparse instance for the previous bar (if any)
+            int numNonZero = 0;
+            for (int z = 0; z < tempClassCounts.length; z++) {
+              if (tempClassCounts[z] > 0) {
+                numNonZero++;
+              }
+            }
+            double[] nonZeroVals = new double[numNonZero];
+            int[] nonZeroIndices = new int[numNonZero];
+            int count = 0;
+            for (int z = 0; z < tempClassCounts.length; z++) {
+              if (tempClassCounts[z] > 0) {
+                nonZeroVals[count] = tempClassCounts[z];
+                nonZeroIndices[count++] = z;
+              }
+            }
+            SparseInstance tempS = 
+              new SparseInstance(1.0, nonZeroVals, nonZeroIndices, tempClassCounts.length);
+            histClassCounts[tempAttValueIndex] = tempS;
           }
           
           //for(int i=0; i<histClassCounts.length; i++) {
@@ -430,6 +523,8 @@ public class AttributeVisualizationPanel
           //}
           
           m_threadRun=false;
+          m_doneCurrentAttribute = true;
+          m_displayCurrentAttribute = true;
           m_histBarClassCounts = histClassCounts;
           //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
           //                                 BufferedImage.TYPE_INT_RGB);
@@ -458,6 +553,8 @@ public class AttributeVisualizationPanel
                 m_data.instance(k).weight();
           }
           m_threadRun=false;
+          m_displayCurrentAttribute = true;
+          m_doneCurrentAttribute = true;
           m_histBarCounts = histCounts;
           //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
           //                                 BufferedImage.TYPE_INT_RGB);
@@ -590,7 +687,36 @@ public class AttributeVisualizationPanel
             if(m_maxValue<sum)
               m_maxValue = sum;
           }
-          m_histBarClassCounts = histClassCounts;
+          
+          // convert to sparse instances
+          SparseInstance[] histClassCountsSparse = 
+            new SparseInstance[histClassCounts.length];
+          
+          for (int i = 0; i < histClassCounts.length; i++) {
+            int numSparseValues = 0;
+            for (int j = 0; j < histClassCounts[i].length; j++) {
+              if (histClassCounts[i][j] > 0) {
+                numSparseValues++;
+              }
+            }
+            double[] sparseValues = new double[numSparseValues];
+            int[] sparseIndices = new int[numSparseValues];
+            int count = 0;
+            for (int j = 0; j < histClassCounts[i].length; j++) {
+              if (histClassCounts[i][j] > 0) {
+                sparseValues[count] = histClassCounts[i][j];
+                sparseIndices[count++] = j;
+              }
+            }
+            
+            SparseInstance tempS = 
+              new SparseInstance(1.0, sparseValues, sparseIndices, 
+                  histClassCounts[i].length);
+            histClassCountsSparse[i] = tempS;
+            
+          }
+          
+          m_histBarClassCounts = histClassCountsSparse;
           m_barRange =  barRange;
           
         }
@@ -684,6 +810,8 @@ public class AttributeVisualizationPanel
         }
         
         m_threadRun=false;
+        m_displayCurrentAttribute = true;
+        m_doneCurrentAttribute = true;
         //Image tmpImg = new BufferedImage(getWidth(), getHeight(),
         //                                 BufferedImage.TYPE_INT_RGB);
         //drawGraph( tmpImg.getGraphics() );
@@ -865,8 +993,8 @@ public class AttributeVisualizationPanel
           int temp = (int)((ev.getX()-x)/(barWidth+0.0000000001));
           if(temp == 0){  //handle the special case temp==0. see footnote 1
             double sum=0;
-            for(int k=0; k<m_histBarClassCounts[0].length; k++)
-              sum += m_histBarClassCounts[0][k];
+            for(int k=0; k<m_histBarClassCounts[0].numValues(); k++)
+              sum += m_histBarClassCounts[0].valueSparse(k);
             //return the count of the interval mouse is pointing to plus 
             //the range of values that fall into this interval
             return ("<html><center><font face=Dialog size=-1>" + 
@@ -877,8 +1005,8 @@ public class AttributeVisualizationPanel
           }
           else if( temp < m_histBarClassCounts.length ) { //handle case temp!=0
             double sum=0;
-            for(int k=0; k<m_histBarClassCounts[temp].length; k++)
-              sum+=m_histBarClassCounts[temp][k];
+            for(int k=0; k<m_histBarClassCounts[temp].numValues(); k++)
+              sum+=m_histBarClassCounts[temp].valueSparse(k);
             //return the count of the interval mouse is pointing to plus 
             //the range of values that fall into this interval
             return ("<html><center><font face=Dialog size=-1>" + 
@@ -936,7 +1064,10 @@ public class AttributeVisualizationPanel
     g.clearRect(0,0,this.getWidth(), this.getHeight());
     
     if(m_as!=null) {    //If calculations have been done and histogram/barplot
-      if(m_threadRun==false) {  //calculation thread is not running
+      if (!m_doneCurrentAttribute && !m_threadRun) {
+        calcGraph(this.getWidth(), this.getHeight());
+      }
+      if(m_threadRun==false && m_displayCurrentAttribute) {  //calculation thread is not running
         int buttonHeight=0;
         
         if(m_colorAttrib!=null)
@@ -992,21 +1123,24 @@ public class AttributeVisualizationPanel
             //of each bar.
             double sum=0;
             for(int i=0; i<m_histBarClassCounts.length; i++) {
+
               //calculating the proportion of the components height compared to 
               //the maxvalue in our attribute, also taking into account the 
               //height of font to display bars count and the height of the class 
               //ComboBox.
               heightRatio = ( this.getHeight()-(double)m_fm.getHeight() - 
-                              buttonHeight ) / m_maxValue;              
+                  buttonHeight ) / m_maxValue;              
               y=this.getHeight();
-              for(int j=0; j<m_histBarClassCounts[i].length; j++) {
-                sum = sum + m_histBarClassCounts[i][j];
-                y = (int) (y-Math.round(m_histBarClassCounts[i][j]*heightRatio));
-                //selecting the colour corresponding to the current class.
-                g.setColor( (Color)m_colorList.elementAt(j) );
-                g.fillRect(x, y, barWidth, 
-                           (int) Math.round(m_histBarClassCounts[i][j]*heightRatio));
-                g.setColor(Color.black);
+              if (m_histBarClassCounts[i] != null) {
+                for(int j=0; j<m_histBarClassCounts[i].numAttributes(); j++) {
+                  sum = sum + m_histBarClassCounts[i].value(j);
+                  y = (int) (y-Math.round(m_histBarClassCounts[i].value(j) * heightRatio));
+                  //selecting the colour corresponding to the current class.
+                  g.setColor( (Color)m_colorList.elementAt(j) );
+                  g.fillRect(x, y, barWidth, 
+                      (int) Math.round(m_histBarClassCounts[i].value(j) * heightRatio));
+                  g.setColor(Color.black);
+                }
               }
               //drawing the bar count at the top of the bar if it is less than
               //interval width. draw it 1px up to avoid touching the bar.
@@ -1016,11 +1150,11 @@ public class AttributeVisualizationPanel
               //of both the bars (i.e. RHS padding of the bar just drawn and LHS
               //padding of the new bar).
               x = x+barWidth+(int)( (Math.floor(intervalWidth*0.2F))<1 ? 
-                                     1:(Math.floor(intervalWidth*0.2F)) );
+                  1:(Math.floor(intervalWidth*0.2F)) );
               //reseting sum for the next bar.
               sum=0;
+
             }
-              
           }
           //else if class attribute is numeric or not set then draw black bars.
           else {
@@ -1106,37 +1240,39 @@ public class AttributeVisualizationPanel
             }
             
             for(int i=0; i<m_histBarClassCounts.length; i++) {
-              //Calculating height ratio. Leave space of 19 for an axis line at 
-              //the bottom
-              heightRatio = (this.getHeight()-(float)m_fm.getHeight() - 
-                             buttonHeight-19) / m_maxValue;
-              y = this.getHeight()-19;
-              //This would hold the count of the bar (sum of sub-bars).
-              double sum = 0;
-              for(int j=0; j<m_histBarClassCounts[i].length; j++) {
-                y = (int) (y-Math.round(m_histBarClassCounts[i][j]*heightRatio));
-                //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+
-                //                   " height:"+
-                //                   (m_histBarClassCounts[i][j]*heightRatio));
-                //selecting the color corresponding to our class
-                g.setColor( (Color)m_colorList.elementAt(j) );
-                //drawing the bar if its width is greater than 1
-                if(barWidth>1)
-                  g.fillRect(x, y, 
-                             barWidth, 
-                             (int) Math.round(m_histBarClassCounts[i][j]*heightRatio));
-                //otherwise drawing a line
-                else if((m_histBarClassCounts[i][j]*heightRatio)>0)
-                  g.drawLine(x, y, x, 
-                          (int) (y+Math.round(m_histBarClassCounts[i][j]*heightRatio)));
-                g.setColor(Color.black);
-                sum = sum + m_histBarClassCounts[i][j];
+              if (m_histBarClassCounts[i] != null) {
+                //Calculating height ratio. Leave space of 19 for an axis line at 
+                //the bottom
+                heightRatio = (this.getHeight()-(float)m_fm.getHeight() - 
+                    buttonHeight-19) / m_maxValue;
+                y = this.getHeight()-19;
+                //This would hold the count of the bar (sum of sub-bars).
+                double sum = 0;
+                for(int j=0; j<m_histBarClassCounts[i].numValues(); j++) {
+                  y = (int) (y-Math.round(m_histBarClassCounts[i].valueSparse(j) * heightRatio));
+                  //System.out.println("Filling x:"+x+" y:"+y+" width:"+barWidth+
+                  //                   " height:"+
+                  //                   (m_histBarClassCounts[i][j]*heightRatio));
+                  //selecting the color corresponding to our class
+                  g.setColor( (Color)m_colorList.elementAt(m_histBarClassCounts[i].index(j)) );
+                  //drawing the bar if its width is greater than 1
+                  if(barWidth>1)
+                    g.fillRect(x, y, 
+                        barWidth, 
+                        (int) Math.round(m_histBarClassCounts[i].valueSparse(j)*heightRatio));
+                  //otherwise drawing a line
+                  else if((m_histBarClassCounts[i].valueSparse(j) * heightRatio)>0)
+                    g.drawLine(x, y, x, 
+                        (int) (y+Math.round(m_histBarClassCounts[i].valueSparse(j)*heightRatio)));
+                  g.setColor(Color.black);
+                  sum = sum + m_histBarClassCounts[i].valueSparse(j);
+                }
+                //Drawing bar count on the top of the bar if it is < barWidth
+                if(m_fm.stringWidth(" "+Utils.doubleToString(sum, 1))<barWidth)
+                  g.drawString(" "+Utils.doubleToString(sum, 1), x, y-1);
+                //Moving x to the next bar
+                x = x+barWidth;
               }
-              //Drawing bar count on the top of the bar if it is < barWidth
-              if(m_fm.stringWidth(" "+Utils.doubleToString(sum, 1))<barWidth)
-                g.drawString(" "+Utils.doubleToString(sum, 1), x, y-1);
-              //Moving x to the next bar
-              x = x+barWidth;
             }
             
             //Now drawing the axis line at the bottom of the histogram
@@ -1261,10 +1397,15 @@ public class AttributeVisualizationPanel
           this.getHeight()/2-m_fm.getHeight()/2);
         }
       } //<--end if of calculation thread
-      else {   //if still calculation thread is running plot
+      else if (m_displayCurrentAttribute) {   //if still calculation thread is running plot
         g.clearRect(0, 0, this.getWidth(), this.getHeight());
         g.drawString("Calculating. Please Wait...",
         this.getWidth()/2 - m_fm.stringWidth("Calculating. Please Wait...")/2,
+        this.getHeight()/2-m_fm.getHeight()/2);
+      } else if (!m_displayCurrentAttribute) {
+        g.clearRect(0, 0, this.getWidth(), this.getHeight());
+        g.drawString("Too many values to display.",
+        this.getWidth()/2 - m_fm.stringWidth("Too many values to display.")/2,
         this.getHeight()/2-m_fm.getHeight()/2);
       }
     } //<--end if(m_as==null) this means 
