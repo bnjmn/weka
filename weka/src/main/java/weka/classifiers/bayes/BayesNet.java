@@ -59,7 +59,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * http://www.cs.waikato.ac.nz/~remco/weka.pdf
+ * http://sourceforge.net/projects/weka/files/documentation/WekaManual-3-6-1.pdf/download
  * <p/>
  <!-- globalinfo-end -->
  * 
