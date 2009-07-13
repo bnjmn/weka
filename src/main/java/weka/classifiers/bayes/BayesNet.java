@@ -59,7 +59,7 @@ import java.util.Vector;
  * <br/>
  * For more information see:<br/>
  * <br/>
- * http://www.cs.waikato.ac.nz/~remco/weka.pdf
+ * http://sourceforge.net/projects/weka/files/documentation/WekaManual-3-7-0.pdf/download
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -85,7 +85,7 @@ import java.util.Vector;
  <!-- options-end -->
  *
  * @author Remco Bouckaert (rrb@xm.co.nz)
- * @version $Revision: 1.30.2.2 $
+ * @version $Revision$
  */
 public class BayesNet
   extends Classifier
@@ -1123,6 +1123,6 @@ public class BayesNet
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.30.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 } // class BayesNet
