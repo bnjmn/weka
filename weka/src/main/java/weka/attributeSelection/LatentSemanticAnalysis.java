@@ -93,7 +93,10 @@ implements AttributeTransformer, OptionHandler {
   /** The data to transform analyse/transform */
   private Instances m_trainInstances;
   
-  /** Keep a copy for the class attribute (if set) */
+  /** 
+   * Keep a copy for the class attribute (if set) and for checking
+   * header compatibility 
+   */
   private Instances m_trainHeader;
   
   /** The header for the transformed data format */
@@ -417,17 +420,17 @@ implements AttributeTransformer, OptionHandler {
     Vector attributesToRemove = new Vector();
     
     // if data has a class attribute
-    if (m_trainInstances.classIndex() >= 0) {
-      // make copy of training data so the class values can be appended to final 
-      // transformed instances
-      m_trainHeader = new Instances(m_trainInstances);
-      
+    if (m_trainInstances.classIndex() >= 0) {      
       m_hasClass = true;
       m_classIndex = m_trainInstances.classIndex();
       
       // set class attribute to be removed
       attributesToRemove.addElement(new Integer(m_classIndex));
     }
+    
+    // make copy of training data so the class values (if set) can be appended to final 
+    // transformed instances and we can check header compatibility
+    m_trainHeader = new Instances(m_trainInstances, 0);
     
     // normalize data if desired
     if (m_normalize) {
