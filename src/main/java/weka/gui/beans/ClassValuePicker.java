@@ -171,7 +171,9 @@ public class ClassValuePicker
       
       return dataSet;
     } else {
-      m_logger.statusMessage(statusMessagePrefix() + "remove");
+      if (m_logger != null) {
+        m_logger.statusMessage(statusMessagePrefix() + "remove");
+      }
     }
 
     if (m_classValueIndex != 0) { // nothing to do if == 0
