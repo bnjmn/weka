@@ -248,7 +248,7 @@ public class ClassifierPerformanceEvaluator
 		    pd.setConnectPoints(connectPoints);
 		    ThresholdDataEvent rde = 
 		      new ThresholdDataEvent(ClassifierPerformanceEvaluator.this,
-				       pd);
+				       pd, ce.getTestSet().getDataSet().classAttribute());
 		    notifyThresholdListeners(rde);
 		    /*te = new TextEvent(ClassifierPerformanceEvaluator.this,
 				       result.toString(),
