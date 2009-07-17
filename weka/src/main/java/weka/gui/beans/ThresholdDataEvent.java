@@ -22,6 +22,7 @@
 
 package weka.gui.beans;
 
+import weka.core.Attribute;
 import weka.gui.visualize.PlotData2D;
 
 import java.util.EventObject;
@@ -31,7 +32,7 @@ import java.util.EventObject;
  * varying a threshold over the classifier's predicted probabilities
  *
  * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
- * @version $Revision: 1.3 $
+ * @version $Revision$
  * @see EventObject
  */
 public class ThresholdDataEvent
@@ -41,10 +42,17 @@ public class ThresholdDataEvent
   private static final long serialVersionUID = -8309334224492439644L;
 
   private PlotData2D m_dataSet;
+  
+  private Attribute m_classAttribute;
 
   public ThresholdDataEvent(Object source, PlotData2D dataSet) {
+    this(source, dataSet, null);
+  }
+  
+  public ThresholdDataEvent(Object source, PlotData2D dataSet, Attribute classAtt) {
     super(source);
     m_dataSet = dataSet;
+    m_classAttribute = classAtt;
   }
   
   /**
@@ -54,5 +62,15 @@ public class ThresholdDataEvent
    */
   public PlotData2D getDataSet() {
     return m_dataSet;
+  }
+  
+  /**
+   * Return the class attribute for which the threshold data was generated
+   * for.
+   * 
+   * @return the class attribute for the threshold data or null if not set.
+   */
+  public Attribute getClassAttribute() {
+    return m_classAttribute;
   }
 }
