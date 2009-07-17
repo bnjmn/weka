@@ -996,6 +996,7 @@ public class Plot2D
 	  if (x_range >= 0 && y_range >= 0) {
 	    if (m_drawnPoints[x_range][y_range] == i 
 		|| m_drawnPoints[x_range][y_range] == 0
+		|| temp_plot.m_shapeSize[i] == temp_plot.m_alwaysDisplayPointsOfThisSize 
 		|| temp_plot.m_displayAllPoints == true) {
 	      m_drawnPoints[x_range][y_range] = i;
 	      if (temp_plot.m_plotInstances.attribute(m_cIndex).isNominal()) {
