@@ -1095,14 +1095,14 @@ public class VisualizePanel
 	m_classPanel.setInstances(newPlot.m_plotInstances);
 
 	plotReset(newPlot.m_plotInstances, newPlot.getCindex());
-	if (newPlot.m_useCustomColour) {
+	if (newPlot.m_useCustomColour && m_showClassPanel) {
 	  VisualizePanel.this.remove(m_classSurround);
 	  switchToLegend();
 	  m_legendPanel.setPlotList(m_plot2D.getPlots());
 	  m_ColourCombo.setEnabled(false);
 	}
       } else  {
-	if (!newPlot.m_useCustomColour) {
+	if (!newPlot.m_useCustomColour && m_showClassPanel) {
 	  VisualizePanel.this.add(m_classSurround, BorderLayout.SOUTH);
 	  m_ColourCombo.setEnabled(true);
 	}
@@ -1696,6 +1696,9 @@ public class VisualizePanel
 
   /** Show the attribute bar panel */
   protected boolean m_showAttBars = true;
+  
+  /** Show the class panel **/
+  protected boolean m_showClassPanel = true;
 
   /** the logger */
   protected Logger m_Log;
@@ -1707,6 +1710,60 @@ public class VisualizePanel
    */
   public void setLog(Logger newLog) {
     m_Log = newLog;
+  }
+  
+  /**
+   * Set whether the attribute bars should be shown or not.
+   * If turned off via this method then any setting in the
+   * properties file (if exists) is ignored.
+   * 
+   * @param sab false if attribute bars are not to be displayed.
+   */
+  public void setShowAttBars(boolean sab) {
+    if (!sab && m_showAttBars) {
+      m_plotSurround.remove(m_attrib);
+    } else if (sab && !m_showAttBars) {
+      GridBagConstraints constraints = new GridBagConstraints();
+      constraints.insets = new Insets(0, 0, 0, 0);
+      constraints.gridx=4;constraints.gridy=0;constraints.weightx=1;
+      constraints.gridwidth=1;constraints.gridheight=1;constraints.weighty=5;
+      m_plotSurround.add(m_attrib, constraints);
+    }
+    m_showAttBars = sab;
+    repaint();
+  }
+  
+  /**
+   * Gets whether or not attribute bars are being displayed.
+   * 
+   * @return true if attribute bars are being displayed.
+   */
+  public boolean getShowAttBars() {
+    return m_showAttBars;
+  }
+  
+  /**
+   * Set whether the class panel should be shown or not.
+   * 
+   * @param scp false if class panel is not to be displayed
+   */
+  public void setShowClassPanel(boolean scp) {
+    if (!scp && m_showClassPanel) {
+      remove(m_classSurround);
+    } else if (scp && !m_showClassPanel) {
+      add(m_classSurround, BorderLayout.SOUTH);
+    }
+    m_showClassPanel = scp;
+    repaint();
+  }
+  
+  /**
+   * Gets whether or not the class panel is being displayed.
+   * 
+   * @return true if the class panel is being displayed.
+   */
+  public boolean getShowClassPanel() {
+    return m_showClassPanel;
   }
 
   /** 
@@ -1735,13 +1792,16 @@ public class VisualizePanel
 	  getProperty(showAttBars);
 	if (val == null) {
 	  //System.err.println("Displaying attribute bars ");
-	  m_showAttBars = true;
+//	  m_showAttBars = true;
 	} else {
-	  if (val.compareTo("true") == 0 || val.compareTo("on") == 0) {
-	    //System.err.println("Displaying attribute bars ");
-	    m_showAttBars = true;
-	  } else {
-	    m_showAttBars = false;
+	  // only check if this hasn't been turned off programatically 
+	  if (m_showAttBars) {
+	    if (val.compareTo("true") == 0 || val.compareTo("on") == 0) {
+	      //System.err.println("Displaying attribute bars ");
+	      m_showAttBars = true;
+	    } else {
+	      m_showAttBars = false;
+	    }
 	  }
 	}
       } else {
