@@ -264,9 +264,9 @@ public class BoundaryVisualizer
   private Classifier m_classifier;
 
   // plot area dimensions
-  protected int m_plotAreaWidth = 512;
+  protected int m_plotAreaWidth = 384;
   //protected int m_plotAreaHeight = 384;
-  protected int m_plotAreaHeight = 512;
+  protected int m_plotAreaHeight = 384;
 
   /** the plotting panel */
   protected BoundaryPanel m_boundaryPanel;
