@@ -26,7 +26,11 @@ import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instances;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
@@ -96,7 +100,7 @@ import javax.swing.JTextField;
  * @see JPanel 
  */
 public class BoundaryVisualizer
-  extends JPanel {
+  extends JPanel implements TechnicalInformationHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 3933877580074013208L;
@@ -261,7 +265,8 @@ public class BoundaryVisualizer
 
   // plot area dimensions
   protected int m_plotAreaWidth = 512;
-  protected int m_plotAreaHeight = 384;
+  //protected int m_plotAreaHeight = 384;
+  protected int m_plotAreaHeight = 512;
 
   /** the plotting panel */
   protected BoundaryPanel m_boundaryPanel;
@@ -329,7 +334,7 @@ public class BoundaryVisualizer
 			    "Arff data files");
   protected JLabel dataFileLabel = new JLabel(); //stores the name of the data file (currently stores relation name rather than filename)
   protected JPanel m_addRemovePointsPanel = new JPanel(); //a panel which contains the controls to add and remove points
-  protected JComboBox classValueSelector = new JComboBox(); //a widget to select the class attribute.
+  protected JComboBox m_classValueSelector = new JComboBox(); //a widget to select the class attribute.
   protected JRadioButton m_addPointsButton = new JRadioButton(); //when this is selected, clicking on the BoundaryPanel will add points.
   protected JRadioButton m_removePointsButton = new JRadioButton(); //when this is selected, clicking on the BoundaryPanel will remove points.
   protected ButtonGroup m_addRemovePointsButtonGroup = new ButtonGroup();
@@ -339,6 +344,40 @@ public class BoundaryVisualizer
   /* Register the property editors we need */
   static {
     GenericObjectEditor.registerEditors();
+  }
+  
+  /**
+   * Returns a string describing this tool
+   * @return a description of the tool suitable for
+   * displaying in various Weka GUIs
+   */
+  public String globalInfo() {
+    return "Class for visualizing class probability estimates.\n\n"
+    + "For more information, see\n\n"
+    + getTechnicalInformation().toString();
+  }
+  
+  /**
+   * Returns an instance of a TechnicalInformation object, containing 
+   * detailed information about the technical background of this class,
+   * e.g., paper reference or book this class is based on.
+   * 
+   * @return the technical information about this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation        result;
+
+    result = new TechnicalInformation(Type.INPROCEEDINGS);
+    result.setValue(Field.AUTHOR, "Eibe Frank and Mark Hall");
+    result.setValue(Field.TITLE, "Visualizing class probability estimators");
+    result.setValue(Field.BOOKTITLE, "European Conference on Principles and Practice of " +
+    		"Knowledge Discovery in Databases");
+    result.setValue(Field.YEAR, "2003");
+    result.setValue(Field.PAGES, "168-169");
+    result.setValue(Field.PUBLISHER, "Springer-Verlag");
+    result.setValue(Field.ADDRESS, "Cavtat-Dubrovnik");
+
+    return result;
   }
 
 
@@ -358,7 +397,8 @@ public class BoundaryVisualizer
 		try { 
 			m_classPanel.setCindex(m_classAttBox.getSelectedIndex());
 			plotTrainingData();
-		} catch (Exception ex) {}
+			System.err.println("Here in class att box listener");
+		} catch (Exception ex) {ex.printStackTrace();}
 		
 		//set up the add points selector combo box. -jimmy
 		setUpClassValueSelectorCB();
@@ -400,7 +440,7 @@ public class BoundaryVisualizer
 		int classIndex = m_classAttBox.getSelectedIndex();
 		if (m_trainingInstances != null && m_classifier != null && (m_trainingInstances.attribute(classIndex).isNominal())) {
 			m_startBut.setEnabled(true);
-			plotTrainingData();
+//			plotTrainingData();
 		}
 		
 		
@@ -492,8 +532,18 @@ public class BoundaryVisualizer
     classHolder.setBorder(BorderFactory.createTitledBorder("Class color"));
     classHolder.add(m_classPanel, BorderLayout.CENTER);
     m_controlPanel.add(classHolder, BorderLayout.SOUTH);
+    
+    JPanel aboutAndControlP = new JPanel();
+    aboutAndControlP.setLayout(new BorderLayout());
+    aboutAndControlP.add(m_controlPanel, BorderLayout.SOUTH);
+    
+    weka.gui.PropertySheetPanel psp = new weka.gui.PropertySheetPanel();
+    psp.setTarget(BoundaryVisualizer.this);
+    JPanel aboutPanel = psp.getAboutPanel();
+    
+    aboutAndControlP.add(aboutPanel, BorderLayout.NORTH);
 
-    add(m_controlPanel, BorderLayout.NORTH);
+    add(aboutAndControlP, BorderLayout.NORTH);
     
     //classHolder.add(newWindowButton, BorderLayout.EAST);
    
@@ -510,7 +560,7 @@ public class BoundaryVisualizer
     constraints.gridx = 1;
     m_addRemovePointsPanel.add(new JLabel("Add points"), constraints);
     constraints.gridx = 2;
-    m_addRemovePointsPanel.add(classValueSelector);
+    m_addRemovePointsPanel.add(m_classValueSelector);
     constraints.gridx = 0;
     constraints.gridy = 1;
     m_addRemovePointsPanel.add(m_removePointsButton, constraints);
@@ -575,10 +625,11 @@ public class BoundaryVisualizer
     JPanel containerPanel = new JPanel();
     containerPanel.setLayout(new BorderLayout());
     containerPanel.add(gfxPanel, BorderLayout.CENTER);
-    add(containerPanel, BorderLayout.CENTER);
+    add(containerPanel, BorderLayout.WEST);
     
     JPanel rightHandToolsPanel = new JPanel(); //this panel contains the widgets to the right of the BoundaryPanel.
     rightHandToolsPanel.setLayout(new BoxLayout(rightHandToolsPanel, BoxLayout.PAGE_AXIS));
+
     rightHandToolsPanel.add(m_addRemovePointsPanel);
     
     JButton newWindowButton = new JButton("Open a new window"); //the button for spawning a new window for the program.
@@ -679,11 +730,11 @@ public class BoundaryVisualizer
 				double classVal = 0;
 				boolean validInput = true;
 				if (m_trainingInstances.attribute(m_classAttBox.getSelectedIndex()).isNominal()) //class is nominal
-					classVal = (double)classValueSelector.getSelectedIndex();
+					classVal = (double)m_classValueSelector.getSelectedIndex();
 				else {
 					String indexStr = "";
 					try {					
-						indexStr = (String)classValueSelector.getSelectedItem();
+						indexStr = (String)m_classValueSelector.getSelectedItem();
 						classVal = Double.parseDouble(indexStr);
 					} catch (Exception ex) {
 						if (indexStr == null) indexStr = "";
@@ -706,7 +757,7 @@ public class BoundaryVisualizer
 	}
     });
   }
-  
+    
   /**
    * Set the enabled status of the controls
    *
@@ -721,7 +772,7 @@ public class BoundaryVisualizer
     m_kernelBandwidthText.setEnabled(status);
     m_plotTrainingData.setEnabled(status);
     removeAllButton.setEnabled(status);
-    classValueSelector.setEnabled(status);
+    m_classValueSelector.setEnabled(status);
     m_addPointsButton.setEnabled(status);
     m_removePointsButton.setEnabled(status);
     m_FileChooser.setEnabled(status);
@@ -807,11 +858,22 @@ public class BoundaryVisualizer
     	m_trainingInstances = inst;
     	m_classPanel.setInstances(m_trainingInstances);
 	return;
-    }  
-    
-    if (inst.numAttributes() < 3) {
-      throw new Exception("Not enough attributes in the data to visualize!");
     }
+    
+    // count the number of numeric attributes
+    int numCount = 0;
+    for (int i = 0; i < inst.numAttributes(); i++) {
+      if (inst.attribute(i).isNumeric()) {
+        numCount++;
+      }
+    }
+    
+    if (numCount < 2) {
+      JOptionPane.showMessageDialog(null,"We need at least two numeric " +
+      		"attributes in order to visualize!");
+      return;
+    }
+        
     m_trainingInstances = inst;
     m_classPanel.setInstances(m_trainingInstances);
     // setup combo boxes
@@ -855,9 +917,6 @@ public class BoundaryVisualizer
       m_yAttBox.setSelectedIndex(1);
     }
     
-    if (classAttNames.length > 0)
-    	m_classAttBox.setSelectedIndex(classAttNames.length - 1); //select last attribute as class by default.  -jimmy
-
     m_classAttBox.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  configureForClassAttribute();
@@ -867,16 +926,16 @@ public class BoundaryVisualizer
     m_xAttBox.addItemListener(new ItemListener() {
 	public void itemStateChanged(ItemEvent e) {
 	  if (e.getStateChange() == ItemEvent.SELECTED) {
-	    if (xAttNames.size() > 1) {
+/*	    if (xAttNames.size() > 1) {
 	      if (m_xAttBox.getSelectedIndex() == 
 		  m_yAttBox.getSelectedIndex()) {
 		m_xAttBox.setSelectedIndex((m_xAttBox.getSelectedIndex() + 1) %
 					   xAttNames.size());
 	      }
-	    }
+	    } */
 	    computeBounds();
 	    repaint();
-	    try{ plotTrainingData(); } catch (Exception ex) {} //jimmy
+	    try{ plotTrainingData(); } catch (Exception ex) {ex.printStackTrace();} //jimmy	    
 	  }
 	}
       });
@@ -884,46 +943,54 @@ public class BoundaryVisualizer
     m_yAttBox.addItemListener(new ItemListener() {
 	public void itemStateChanged(ItemEvent e) {
 	  if (e.getStateChange() == ItemEvent.SELECTED) {
-	    if (xAttNames.size() > 1) {
+/*	    if (xAttNames.size() > 1) {
 	      if (m_yAttBox.getSelectedIndex() == 
 		  m_xAttBox.getSelectedIndex()) {
 		m_yAttBox.setSelectedIndex((m_yAttBox.getSelectedIndex() + 1) %
 					   xAttNames.size());
 	      }
-	    }
+	    } */
 	    computeBounds();
 	    repaint();
-	    try{ plotTrainingData(); } catch (Exception ex) {}
+	    try{ plotTrainingData(); } catch (Exception ex) {ex.printStackTrace();}
 	  }
 	}
       });
+    
+    if (classAttNames.length > 0)
+      m_classAttBox.setSelectedIndex(classAttNames.length - 1); //select last attribute as class by default.  -jimmy
       
     //set up the add points selector combo box
     setUpClassValueSelectorCB();
     
     configureForClassAttribute();
     
-          
+    m_classPanel.setCindex(m_classAttBox.getSelectedIndex());
+    plotTrainingData();      
     computeBounds();
     revalidate();
     repaint();
+    
+    if (getTopLevelAncestor() instanceof java.awt.Window) {
+      ((java.awt.Window)getTopLevelAncestor()).pack();
+    }
   }
   
   /** Set up the combo box that chooses which class values to use when adding data points.
   */
   private void setUpClassValueSelectorCB() {
-    classValueSelector.removeAllItems();
+    m_classValueSelector.removeAllItems();
     int classAttribute = m_classAttBox.getSelectedIndex();
     //System.err.println(m_trainingInstances.numClasses() + " classes");
     m_trainingInstances.setClassIndex(classAttribute);
     if (m_trainingInstances.attribute(classAttribute).isNominal()) {
-    	classValueSelector.setEditable(false);
+    	m_classValueSelector.setEditable(false);
     	for (int i = 0; i < /*m_trainingInstances.numDistinctValues(classAttribute)*/m_trainingInstances.numClasses(); i++)
-    		classValueSelector.insertItemAt(m_trainingInstances.attribute(classAttribute).value(i) , i);
-	classValueSelector.setSelectedIndex(0);
+    		m_classValueSelector.insertItemAt(m_trainingInstances.attribute(classAttribute).value(i) , i);
+	m_classValueSelector.setSelectedIndex(0);
     }
     else {
-    	classValueSelector.setEditable(true);
+    	m_classValueSelector.setEditable(true);
     }
   }
   
@@ -1111,7 +1178,6 @@ public class BoundaryVisualizer
       jf.pack();
       jf.setVisible(true);
       jf.setResizable(false);
-      Dimension t = jf.getSize();
       
       if (classifier == null)
       	bv.setClassifier(null);
