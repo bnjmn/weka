@@ -801,6 +801,7 @@ public class CostBenefitAnalysis extends JPanel
       if (m_masterPlot == null || !m_masterPlot.getPlotInstances().relationName().
           equals(data.getPlotInstances().relationName()) || !m_classAttribute.equals(classAtt)) {
         m_masterPlot = data;
+        m_masterPlot.m_alwaysDisplayPointsOfThisSize = 10;
         setClassForConfusionMatrix(classAtt);
         m_performancePanel.setMasterPlot(m_masterPlot);
         m_performancePanel.validate(); m_performancePanel.repaint();
