@@ -326,6 +326,26 @@ public class Saver
       }
   }
   
+  public synchronized void acceptDataSet(ThresholdDataEvent e) {
+    passEnvOnToSaver();
+    m_fileName = sanitizeFilename(e.getDataSet().getPlotInstances().relationName());
+    m_dataSet = e.getDataSet().getPlotInstances();
+    
+    if(m_isDBSaver && ((DatabaseSaver)m_Saver).getRelationForTableName()){//
+      ((DatabaseSaver)m_Saver).setTableName(m_fileName);
+    }
+
+    if(!m_isDBSaver){
+      try{
+        m_Saver.setDirAndPrefix(m_fileName,"");
+      }catch (Exception ex){
+        System.out.println(ex);
+      }
+    }
+    saveBatch();
+    System.out.println("...relation "+ m_fileName +" saved.");
+  }
+  
   /** Method reacts to a test set event and starts the writing process in batch mode
    * @param e test set event
    */  
