@@ -326,6 +326,12 @@ public class Saver
       }
   }
   
+  /**
+   * Method reacts to a threshold data event ans starts the writing process
+   * in batch mode.
+   * 
+   * @param e threshold data event.
+   */
   public synchronized void acceptDataSet(ThresholdDataEvent e) {
     passEnvOnToSaver();
     m_fileName = sanitizeFilename(e.getDataSet().getPlotInstances().relationName());
