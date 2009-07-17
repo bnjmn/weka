@@ -58,6 +58,12 @@ public class PlotData2D {
 
   /** Display all points (ie. those that map to the same display coords) */
   public boolean m_displayAllPoints = false;
+  
+  /**
+   *  If the shape size of a point equals this size then always plot
+   * it (i.e. even if it is obscured by other points)
+   */
+  public int m_alwaysDisplayPointsOfThisSize = -1;
 
   /** Panel coordinate cache for data points */
   protected double [][] m_pointLookup;
