@@ -60,6 +60,7 @@ import weka.gui.SaveBuffer;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.beans.CostBenefitAnalysis;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.explorer.Explorer.ExplorerPanel;
@@ -1609,6 +1610,64 @@ public class ClassifierPanel
       visThreshold.setEnabled(false);
     }
     resultListMenu.add(visThreshold);
+    
+    JMenu visCostBenefit = new JMenu("Cost/Benefit analysis");
+    if ((preds != null) && (classAtt != null) && (classAtt.isNominal())) {
+      for (int i = 0; i < classAtt.numValues(); i++) {
+        JMenuItem clv = new JMenuItem(classAtt.value(i));
+        final int classValue = i;
+        clv.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+              try {
+                ThresholdCurve tc = new ThresholdCurve();
+                Instances result = tc.getCurve(preds, classValue);
+
+                // Create a dummy class attribute with the chosen
+                // class value as index 0 (if necessary).
+                Attribute classAttToUse = classAtt;
+                if (classValue != 0) {
+                  FastVector newNames = new FastVector();
+                  newNames.addElement(classAtt.value(classValue));
+                  for (int k = 0; k < classAtt.numValues(); k++) {
+                    if (k != classValue) {
+                      newNames.addElement(classAtt.value(k));
+                    }
+                  }
+                  classAttToUse = new Attribute(classAtt.name(), newNames);
+                }
+                
+                CostBenefitAnalysis cbAnalysis = new CostBenefitAnalysis();
+                
+                PlotData2D tempd = new PlotData2D(result);
+                tempd.setPlotName(result.relationName());
+                tempd.m_alwaysDisplayPointsOfThisSize = 10;
+                // specify which points are connected
+                boolean[] cp = new boolean[result.numInstances()];
+                for (int n = 1; n < cp.length; n++)
+                  cp[n] = true;
+                tempd.setConnectPoints(cp);
+                
+                String windowTitle = null;
+                String cname = classifier.getClass().getName();
+                if (cname.startsWith("weka.classifiers.")) {
+                  windowTitle = "" + cname.substring("weka.classifiers.".length());
+                  windowTitle += " (" + classAttToUse.value(0) + ")";
+                }
+                
+                // add plot
+                cbAnalysis.setCurveData(tempd, classAttToUse);
+                visualizeCostBenefitAnalysis(cbAnalysis, windowTitle);
+              } catch (Exception ex) {
+                ex.printStackTrace();
+              }
+              }
+          });
+          visCostBenefit.add(clv);
+      }
+    } else {
+      visCostBenefit.setEnabled(false);
+    }
+    resultListMenu.add(visCostBenefit);
 
     JMenu visCost = new JMenu("Visualize cost curve");
     if ((preds != null) && (classAtt != null) && (classAtt.isNominal())) {
@@ -1811,6 +1870,34 @@ public class ClassifierPanel
       });
     
     jf.setVisible(true);
+  }
+  
+  /**
+   * Pops up the Cost/Benefit analysis panel.
+   * 
+   * @param cb the CostBenefitAnalysis panel to pop up
+   */
+  protected void visualizeCostBenefitAnalysis(CostBenefitAnalysis cb, 
+      String classifierAndRelationName) {
+    if (cb != null) {
+      String windowTitle = "Weka Classifier: Cost/Benefit Analysis ";
+      if (classifierAndRelationName != null) {
+        windowTitle += "- " + classifierAndRelationName;
+      }
+      final javax.swing.JFrame jf = 
+        new javax.swing.JFrame(windowTitle);
+        jf.setSize(1000,600);
+        jf.getContentPane().setLayout(new BorderLayout());
+
+        jf.getContentPane().add(cb, BorderLayout.CENTER);
+        jf.addWindowListener(new java.awt.event.WindowAdapter() {
+          public void windowClosing(java.awt.event.WindowEvent e) {
+            jf.dispose();
+          }
+        });
+
+    jf.setVisible(true);
+    }
   }
 
 
