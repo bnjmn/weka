@@ -959,16 +959,33 @@ public class CostBenefitAnalysis extends JPanel
     return "Visualize performance charts (such as ROC).";
   }
 
+  /**
+   * Accept a threshold data event and set up the visualization.
+   * @param e a threshold data event
+   */
   public void acceptDataSet(ThresholdDataEvent e) {
-    if (m_analysisPanel == null) {
-      m_analysisPanel = new AnalysisPanel();
-    }
     try {
-      m_analysisPanel.setDataSet(e.getDataSet(), e.getClassAttribute());
+      setCurveData(e.getDataSet(), e.getClassAttribute());
     } catch (Exception ex) {
       System.err.println("[CostBenefitAnalysis] Problem setting up visualization.");
       ex.printStackTrace();
     }
+  }
+  
+  /**
+   * Set the threshold curve data to use.
+   * 
+   * @param curveData a PlotData2D object set up with the curve data.
+   * @param origClassAtt the class attribute from the original data used to
+   * generate the curve.
+   * @throws Exception if somthing goes wrong during the setup process.
+   */
+  public void setCurveData(PlotData2D curveData, Attribute origClassAtt) 
+    throws Exception {
+    if (m_analysisPanel == null) {
+      m_analysisPanel = new AnalysisPanel();
+    }
+    m_analysisPanel.setDataSet(curveData, origClassAtt);
   }
 
   public BeanVisual getVisual() {
