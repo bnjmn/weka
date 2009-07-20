@@ -145,6 +145,13 @@ public class ClassifierPerformanceEvaluator
 		  m_PlotInstances.setUp();
 		}
 		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
+		  
+		  if (ce.getTrainSet().getDataSet() != null &&
+		      ce.getTrainSet().getDataSet().numInstances() > 0) {
+		    // set the priors
+		    m_eval.setPriors(ce.getTrainSet().getDataSet());
+		  }
+		  
 //		  m_visual.setText("Evaluating ("+ce.getSetNumber()+")...");
 		  if (m_logger != null) {
 		    m_logger.statusMessage(statusMessagePrefix()
