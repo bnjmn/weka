@@ -153,7 +153,7 @@ public class ClassifierCustomizer
         // cancel requested, so revert to backup and then
         // close the dialog
         if (m_backup != null) {
-          m_dsClassifier.setClassifier(m_backup);
+          m_dsClassifier.setClassifierTemplate(m_backup);
         }
         m_parentFrame.dispose();
       }
@@ -171,7 +171,7 @@ public class ClassifierCustomizer
   }
   
   private void checkOnClassifierType() {
-    Classifier editedC = m_dsClassifier.getClassifier();
+    Classifier editedC = m_dsClassifier.getClassifierTemplate();
     if (editedC instanceof weka.classifiers.UpdateableClassifier && 
 	m_dsClassifier.hasIncomingStreamInstances()) {
       if (!m_panelVisible) {
@@ -198,11 +198,11 @@ public class ClassifierCustomizer
     //    System.err.println(Utils.joinOptions(((OptionHandler)m_dsClassifier.getClassifier()).getOptions()));
     try {
       m_backup = 
-        (weka.classifiers.Classifier)GenericObjectEditor.makeCopy(m_dsClassifier.getClassifier());
+        (weka.classifiers.Classifier)GenericObjectEditor.makeCopy(m_dsClassifier.getClassifierTemplate());
     } catch (Exception ex) {
       // ignore
     }
-    m_ClassifierEditor.setTarget(m_dsClassifier.getClassifier());
+    m_ClassifierEditor.setTarget(m_dsClassifier.getClassifierTemplate());
     m_updateIncrementalClassifier.
       setSelected(m_dsClassifier.getUpdateIncrementalClassifier());
     m_executionSlotsText.setText(""+m_dsClassifier.getExecutionSlots());
