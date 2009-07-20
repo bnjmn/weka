@@ -132,6 +132,9 @@ public class Classifier
   private Instances m_trainingSet;
   private transient Instances m_testingSet;
   private weka.classifiers.Classifier m_Classifier = new ZeroR();
+  /** Template used for creating copies when building in parallel */
+  private weka.classifiers.Classifier m_ClassifierTemplate = m_Classifier;
+  
   private IncrementalClassifierEvent m_ie = 
     new IncrementalClassifierEvent(this);
 
@@ -222,7 +225,7 @@ public class Classifier
   public Classifier() {
     setLayout(new BorderLayout());
     add(m_visual, BorderLayout.CENTER);
-    setClassifier(m_Classifier);
+    setClassifierTemplate(m_ClassifierTemplate);
     
     //setupFileChooser();
   }
@@ -316,21 +319,21 @@ public class Classifier
   }
 
   /**
-   * Set the classifier for this wrapper
+   * Set the template classifier for this wrapper
    *
    * @param c a <code>weka.classifiers.Classifier</code> value
    */
-  public void setClassifier(weka.classifiers.Classifier c) {
+  public void setClassifierTemplate(weka.classifiers.Classifier c) {
     boolean loadImages = true;
     if (c.getClass().getName().
-	compareTo(m_Classifier.getClass().getName()) == 0) {
+	compareTo(m_ClassifierTemplate.getClass().getName()) == 0) {
       loadImages = false;
     } else {
       // classifier has changed so any batch training status is now
       // invalid
       m_trainingSet = null;
     }
-    m_Classifier = c;
+    m_ClassifierTemplate = c;
     String classifierName = c.getClass().toString();
     classifierName = classifierName.substring(classifierName.
 					      lastIndexOf('.')+1, 
@@ -343,7 +346,7 @@ public class Classifier
     }
     m_visual.setText(classifierName);
 
-    if (!(m_Classifier instanceof weka.classifiers.UpdateableClassifier) &&
+    if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier) &&
 	(m_listenees.containsKey("instance"))) {
       if (m_log != null) {
 	m_log.logMessage("[Classifier] " + statusMessagePrefix() + " WARNING : "
@@ -351,7 +354,37 @@ public class Classifier
       }
     }
     // get global info
-    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_Classifier);
+    m_globalInfo = KnowledgeFlowApp.getGlobalInfo(m_ClassifierTemplate);
+  }
+  
+  /**
+   * Return the classifier template currently in use.
+   * 
+   * @return the classifier template currently in use.
+   */
+  public weka.classifiers.Classifier getClassifierTemplate() {
+    return m_ClassifierTemplate;
+  }
+  
+  private void setTrainedClassifier(weka.classifiers.Classifier tc) {
+    m_Classifier = tc;
+    
+    // set the template
+    weka.classifiers.Classifier newTemplate = null;
+    try {
+      String[] options = tc.getOptions();
+      newTemplate = weka.classifiers.Classifier.forName(tc.getClass().getName(), options);
+      setClassifierTemplate(newTemplate);
+    } catch (Exception ex) {
+      if (m_log != null) {
+        m_log.logMessage("[Classifier] " + statusMessagePrefix() + ex.getMessage());
+        String errorMessage = statusMessagePrefix()
+        + "ERROR: see log for details.";
+        m_log.statusMessage(errorMessage);        
+      } else {
+        ex.printStackTrace();
+      }
+    }    
   }
 
   /**
@@ -388,7 +421,7 @@ public class Classifier
   }
 
   /**
-   * Get the classifier currently set for this wrapper
+   * Get the currently trained classifier.
    *
    * @return a <code>weka.classifiers.Classifier</code> value
    */
@@ -409,7 +442,7 @@ public class Classifier
       throw new IllegalArgumentException(algorithm.getClass()+" : incorrect "
 					 +"type of algorithm (Classifier)");
     }
-    setClassifier((weka.classifiers.Classifier)algorithm);
+    setClassifierTemplate((weka.classifiers.Classifier)algorithm);
   }
 
   /**
@@ -418,7 +451,7 @@ public class Classifier
    * @return an <code>Object</code> value
    */
   public Object getWrappedAlgorithm() {
-    return getClassifier();
+    return getClassifierTemplate();
   }
 
   /**
@@ -533,6 +566,7 @@ public class Classifier
 	  if (m_trainingSet == null) {
 	    // initialize the classifier if it hasn't been trained yet
 	    m_trainingSet = new Instances(dataset, 0);
+	    m_Classifier = weka.classifiers.Classifier.makeCopy(m_ClassifierTemplate);
 	    m_Classifier.buildClassifier(m_trainingSet);
 	  }
 	}
@@ -698,7 +732,7 @@ public class Classifier
           
           // copy the classifier configuration
           weka.classifiers.Classifier classifierCopy = 
-            weka.classifiers.Classifier.makeCopy(m_Classifier);
+            weka.classifiers.Classifier.makeCopy(m_ClassifierTemplate);
           
           // build this model
           classifierCopy.buildClassifier(m_train);
@@ -1185,7 +1219,7 @@ public class Classifier
    */
   public void useDefaultVisual() {
     // try to get a default for this package of classifiers
-    String name = m_Classifier.getClass().toString();
+    String name = m_ClassifierTemplate.getClass().toString();
     String packageName = name.substring(0, name.lastIndexOf('.'));
     packageName = 
       packageName.substring(packageName.lastIndexOf('.')+1,
@@ -1574,7 +1608,7 @@ public class Classifier
         }
 
         // Update name and icon
-        setClassifier(temp);
+        setTrainedClassifier(temp);
         // restore header
         m_trainingSet = tempHeader;
 
