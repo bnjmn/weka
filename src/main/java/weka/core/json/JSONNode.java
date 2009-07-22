@@ -408,7 +408,7 @@ public class JSONNode
   }
   
   /**
-   * Escapes ", \, /, \b, \f, \n, \r, \t.
+   * Escapes ", /, \b, \f, \n, \r, \t.
    * 
    * @param s		the string to process
    * @return		the processed
@@ -420,7 +420,6 @@ public class JSONNode
     
     if (    (s.indexOf('\"') > -1)
          || (s.indexOf('\\') > -1) 
-         || (s.indexOf('/')  > -1) 
          || (s.indexOf('\b') > -1) 
          || (s.indexOf('\f') > -1) 
          || (s.indexOf('\n') > -1) 
@@ -433,8 +432,6 @@ public class JSONNode
 	  result.append("\\\"");
 	else if (c == '\\')
 	  result.append("\\\\");
-	else if (c == '/')
-	  result.append("\\/");
 	else if (c == '\b')
 	  result.append("\\b");
 	else if (c == '\f')
