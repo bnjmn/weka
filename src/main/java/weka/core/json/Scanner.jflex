@@ -86,7 +86,6 @@ import java.io.*;
   \\r                            { m_String.append('\r'); }
   \\t                            { m_String.append('\t'); }
   \\                             { m_String.append('\\'); }
-  "\\/"                          { m_String.append('/'); }
 }
 
 // catch all
