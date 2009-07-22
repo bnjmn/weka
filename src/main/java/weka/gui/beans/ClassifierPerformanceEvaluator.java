@@ -56,12 +56,10 @@ public class ClassifierPerformanceEvaluator
    */
   private transient Evaluation m_eval;
 
-  /**
-   * Holds the classifier to be evaluated
-   */
-  private transient Classifier m_classifier;
-
   private transient Thread m_evaluateThread = null;
+  
+  private transient long m_currentBatchIdentifier;
+  private transient int m_setsComplete;
   
   private Vector m_textListeners = new Vector();
   private Vector m_thresholdListeners = new Vector();
@@ -123,9 +121,10 @@ public class ClassifierPerformanceEvaluator
 	    public void run() {
 	      boolean errorOccurred = false;
 //	      final String oldText = m_visual.getText();
+	      Classifier classifier = ce.getClassifier();
 	      try {
-		if (ce.getSetNumber() == 1 /*|| 
-		    ce.getClassifier() != m_classifier */) {
+		// if (ce.getSetNumber() == 1) {
+	        if (ce.getGroupIdentifier() != m_currentBatchIdentifier) {
 		  
 		  if (ce.getTrainSet().getDataSet() == null ||
 		      ce.getTrainSet().getDataSet().numInstances() == 0) {
@@ -136,15 +135,19 @@ public class ClassifierPerformanceEvaluator
 		  } else {
 		    m_eval = new Evaluation(ce.getTrainSet().getDataSet());
 		  }
-		  m_classifier = ce.getClassifier();
+//		  m_classifier = ce.getClassifier();
 		  m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
 		  m_PlotInstances.setInstances(ce.getTestSet().getDataSet());
 		  m_PlotInstances.setClassifier(ce.getClassifier());
 		  m_PlotInstances.setClassIndex(ce.getTestSet().getDataSet().classIndex());
 		  m_PlotInstances.setEvaluation(m_eval);
 		  m_PlotInstances.setUp();
+		  
+		  m_currentBatchIdentifier = ce.getGroupIdentifier();
+		  m_setsComplete = 0;
 		}
-		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
+//		if (ce.getSetNumber() <= ce.getMaxSetNumber()) {
+	        if (m_setsComplete < ce.getMaxSetNumber()) {
 		  
 		  if (ce.getTrainSet().getDataSet() != null &&
 		      ce.getTrainSet().getDataSet().numInstances() > 0) {
@@ -166,17 +169,20 @@ public class ClassifierPerformanceEvaluator
 		    Instance temp = ce.getTestSet().getDataSet().instance(i);
 		    m_PlotInstances.process(temp, ce.getClassifier(), m_eval);
 		  }
+		  
+		  m_setsComplete++;
 		}
 		
-		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
+//		if (ce.getSetNumber() == ce.getMaxSetNumber()) {
+	        if (m_setsComplete == ce.getMaxSetNumber()) {
                   //		  System.err.println(m_eval.toSummaryString());
 		  // m_resultsString.append(m_eval.toSummaryString());
 		  // m_outText.setText(m_resultsString.toString());
-		  String textTitle = m_classifier.getClass().getName();
+		  String textTitle = classifier.getClass().getName();
 		  String textOptions = "";
-		  if (m_classifier instanceof OptionHandler) {
+		  if (classifier instanceof OptionHandler) {
 	             textOptions = 
-	               Utils.joinOptions(((OptionHandler)m_classifier).getOptions()); 
+	               Utils.joinOptions(((OptionHandler)classifier).getOptions()); 
 		  }
 		  textTitle = 
 		    textTitle.substring(textTitle.lastIndexOf('.')+1,
@@ -220,9 +226,9 @@ public class ClassifierPerformanceEvaluator
 		    String htmlTitle = "<html><font size=-2>"
 		      + textTitle;
 		    String newOptions = "";
-		    if (m_classifier instanceof OptionHandler) {
+		    if (classifier instanceof OptionHandler) {
 		      String[] options = 
-		        ((OptionHandler) m_classifier).getOptions();
+		        ((OptionHandler) classifier).getOptions();
 		      if (options.length > 0) {
 		        for (int ii = 0; ii < options.length; ii++) {
 		          if (options[ii].length() == 0) {
@@ -283,7 +289,7 @@ public class ClassifierPerformanceEvaluator
 //		m_visual.setText(oldText);
 		m_visual.setStatic();
 		m_evaluateThread = null;
-				
+						
 		if (m_logger != null) {
 		  if (errorOccurred) {
 		    m_logger.statusMessage(statusMessagePrefix() 
