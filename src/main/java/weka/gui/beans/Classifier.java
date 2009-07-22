@@ -32,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -186,10 +187,20 @@ public class Classifier
   protected transient ThreadPoolExecutor m_executorPool;  
   
   /**
-   * Stores completed models and associated data sets. Each
-   * run is passed on to listeners when completed. 
+   * Stores completed models and associated data sets.
    */
   protected transient BatchClassifierEvent[][] m_outputQueues;
+
+  /**
+   * Stores which sets from which runs have been completed.
+   */
+  protected transient boolean[][] m_completedSets;
+  
+  /**
+   * Identifier for the current batch. A batch is a group
+   * of related runs/sets.
+   */
+  protected transient Date m_currentBatchIdentifier;
   
   /**
    * Holds original icon label text
@@ -751,6 +762,7 @@ public class Classifier
                   new DataSetEvent(this, m_train),
                   null, // no test set (yet)
                   m_setNum, m_maxSetNum);
+            ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
             notifyBatchClassifierListeners(ce);
                         
             // store in the output queue (if we have incoming test set events)
@@ -759,6 +771,7 @@ public class Classifier
                   new DataSetEvent(this, m_train),
                   null, // no test set (yet)
                   m_setNum, m_maxSetNum);
+            ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
             classifierTrainingComplete(ce);
           }
 
@@ -947,6 +960,8 @@ public class Classifier
       
       m_outputQueues = 
         new BatchClassifierEvent[e.getMaxRunNumber()][e.getMaxSetNumber()];
+      m_completedSets = new boolean[e.getMaxRunNumber()][e.getMaxSetNumber()];
+      m_currentBatchIdentifier = new Date();
     }
     
     // create a new task and schedule for execution
@@ -1029,6 +1044,10 @@ public class Classifier
       }
       
       testSet = e.getTestSet();
+      if (e.getRunNumber() == 1 && e.getSetNumber() == 1) {
+        m_currentBatchIdentifier = new Date();
+      }
+      
       if (testSet != null) {        
         if (m_trainingSet.equalHeaders(testSet)) {
           BatchClassifierEvent ce =
@@ -1037,6 +1056,7 @@ public class Classifier
                 new DataSetEvent(this, e.getTestSet()),
            e.getRunNumber(), e.getMaxRunNumber(), 
            e.getSetNumber(), e.getMaxSetNumber());
+          ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
           
           if (m_log != null && !e.isStructureOnly()) {
             m_log.statusMessage(statusMessagePrefix() + "Finished.");
@@ -1069,6 +1089,7 @@ public class Classifier
                       new DataSetEvent(this, e.getTestSet()),
                  e.getRunNumber(), e.getMaxRunNumber(), 
                  e.getSetNumber(), e.getMaxSetNumber());
+                ce.setGroupIdentifier(m_currentBatchIdentifier.getTime());
                 
                 if (m_log != null && !e.isStructureOnly()) {
                   m_log.statusMessage(statusMessagePrefix() + "Finished.");
@@ -1146,8 +1167,69 @@ public class Classifier
       checkCompletedRun(ce.getRunNumber(), ce.getMaxRunNumber(), ce.getMaxSetNumber());
     }
   }
+  
+  private synchronized void checkCompletedRun(int runNum, int maxRunNum, int maxSets) {
+    // look to see if there are any completed classifiers that we can pass
+    // on for evaluation
+    for (int i = 0; i < maxSets; i++) {
+      if (m_outputQueues[runNum - 1][i] != null) {
+        if (m_outputQueues[runNum - 1][i].getClassifier() != null &&
+            m_outputQueues[runNum - 1][i].getTestSet() != null) {
+          String msg = "[Classifier] " + statusMessagePrefix() 
+          + " dispatching run/set " + runNum + "/" + (i+1) + " to listeners.";
+          if (m_log != null) {
+            m_log.logMessage(msg);
+          } else {
+            System.err.println(msg);
+          }
+          
+          // dispatch this one
+          m_outputQueues[runNum - 1][i].setGroupIdentifier(m_currentBatchIdentifier.getTime());
+          notifyBatchClassifierListeners(m_outputQueues[runNum - 1][i]);
+          // save memory
+          m_outputQueues[runNum - 1][i] = null;
+          // mark as done
+          m_completedSets[runNum - 1][i] = true;
+        }
+      }
+    }
+    
+    // scan for completion
+    boolean done = true;
+    for (int i = 0; i < maxRunNum; i++) {
+      for (int j = 0; j < maxSets; j++) {
+        if (!m_completedSets[i][j]) {
+          done = false;
+          break;
+        }
+      }
+      if (!done) {
+        break;
+      }
+    }
+    
+    if (done) {
+      String msg = "[Classifier] " + statusMessagePrefix() 
+      + " last classifier unblocking...";
 
-  private synchronized void checkCompletedRun(int runNum, int maxRunNum, int  maxSets) {
+      if (m_log != null) {
+        m_log.logMessage(msg);
+      } else {
+        System.err.println(msg);
+      }
+      //m_visual.setText(m_oldText);
+
+      if (m_log != null) {
+        m_log.statusMessage(statusMessagePrefix() + "Finished.");
+      }
+      // m_outputQueues = null; // free memory
+      m_reject = false;
+      block(false);
+      m_state = IDLE;
+    }
+  }
+
+  /*private synchronized void checkCompletedRun(int runNum, int maxRunNum, int  maxSets) {
     boolean runOK = true;
     for (int i = 0; i < maxSets; i++) {
       if (m_outputQueues[runNum - 1][i] == null) {
@@ -1196,7 +1278,7 @@ public class Classifier
         m_state = IDLE;
       }
     }
-  }
+  } */
 
   /**
    * Sets the visual appearance of this wrapper bean

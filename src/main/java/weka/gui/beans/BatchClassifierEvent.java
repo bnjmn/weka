@@ -77,6 +77,12 @@ public class BatchClassifierEvent
    * The last set number for this series
    */
   protected int m_maxSetNumber;
+  
+  /**
+   * An identifier that can be used to group all related runs/sets
+   * together.
+   */
+  protected long m_groupIdentifier = Long.MAX_VALUE;
 
   /**
    * Creates a new <code>BatchClassifierEvent</code> instance.
@@ -221,6 +227,14 @@ public class BatchClassifierEvent
    */
   public int getMaxSetNumber() {
     return m_maxSetNumber;
+  }
+  
+  public void setGroupIdentifier(long identifier) {
+    m_groupIdentifier = identifier;
+  }
+  
+  public long getGroupIdentifier() {
+    return m_groupIdentifier;
   }
 }
 
