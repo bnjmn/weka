@@ -63,7 +63,7 @@ import weka.core.*;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.27.2.4 $ 
+ * @version $Revision$ 
 */
 public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
   implements Drawable, Summarizable {
@@ -544,7 +544,7 @@ public class CVParameterSelection extends RandomizableSingleClassifierEnhancer
 	   "The format for each string should be:\n"+
 	   "param_char lower_bound upper_bound number_of_steps\n"+
 	   "eg to search a parameter -P from 1 to 10 by increments of 1:\n"+
-	   "    \"P 1 10 11\" ";
+	   "    \"P 1 10 10\" ";
   }
 
   /**
