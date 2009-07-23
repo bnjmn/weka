@@ -113,7 +113,7 @@ import java.util.Vector;
  * Options after -- are passed to the designated sub-classifier. <p>
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
- * @version $Revision: 1.37 $ 
+ * @version $Revision$ 
 */
 public class CVParameterSelection 
   extends RandomizableSingleClassifierEnhancer
@@ -236,7 +236,7 @@ public class CVParameterSelection
      * @return		the revision
      */
     public String getRevision() {
-      return RevisionUtils.extract("$Revision: 1.37 $");
+      return RevisionUtils.extract("$Revision$");
     }
   }
 
@@ -676,7 +676,7 @@ public class CVParameterSelection
 	   "The format for each string should be:\n"+
 	   "param_char lower_bound upper_bound number_of_steps\n"+
 	   "eg to search a parameter -P from 1 to 10 by increments of 1:\n"+
-	   "    \"P 1 10 11\" ";
+	   "    \"P 1 10 10\" ";
   }
 
   /**
@@ -839,7 +839,7 @@ public class CVParameterSelection
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.37 $");
+    return RevisionUtils.extract("$Revision$");
   }
   
   /**
