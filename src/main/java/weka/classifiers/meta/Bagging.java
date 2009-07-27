@@ -23,6 +23,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -122,10 +123,10 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (len@reeltwo.com)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.41 $
+ * @version $Revision$
  */
 public class Bagging
-  extends RandomizableIteratedSingleClassifierEnhancer 
+  extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, AdditionalMeasureProducer,
              TechnicalInformationHandler {
 
@@ -474,7 +475,38 @@ public class Bagging
     }
     return newData;
   }
+  
+  protected Random m_random;
+  protected boolean[][] m_inBag;
+  protected Instances m_data;
+  
+  /**
+   * Returns a training set for a particular iteration.
+   * 
+   * @param iteration the number of the iteration for the requested training set.
+   * @return the training set for the supplied iteration number
+   * @throws Exception if something goes wrong when generating a training set.
+   */
+  protected synchronized Instances getTrainingSet(int iteration) throws Exception {
+    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
+    Instances bagData = null;
 
+    // create the in-bag dataset
+    if (m_CalcOutOfBag) {
+      m_inBag[iteration] = new boolean[m_data.numInstances()];
+      bagData = resampleWithWeights(m_data, m_random, m_inBag[iteration]);
+    } else {
+      bagData = m_data.resampleWithWeights(m_random);
+      if (bagSize < m_data.numInstances()) {
+        bagData.randomize(m_random);
+        Instances newBagData = new Instances(bagData, 0, bagSize);
+        bagData = newBagData;
+      }
+    }
+    
+    return bagData;
+  }
+  
   /**
    * Bagging method.
    *
@@ -488,95 +520,79 @@ public class Bagging
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+    m_data = new Instances(data);
+    m_data.deleteWithMissingClass();
     
-    super.buildClassifier(data);
+    super.buildClassifier(m_data);
 
     if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
       throw new IllegalArgumentException("Bag size needs to be 100% if " +
 					 "out-of-bag error is to be calculated!");
     }
 
-    int bagSize = data.numInstances() * m_BagSizePercent / 100;
-    Random random = new Random(m_Seed);
+    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
+    m_random = new Random(m_Seed);
     
-    boolean[][] inBag = null;
+    m_inBag = null;
     if (m_CalcOutOfBag)
-      inBag = new boolean[m_Classifiers.length][];
+      m_inBag = new boolean[m_Classifiers.length][];
     
-    for (int j = 0; j < m_Classifiers.length; j++) {
-      Instances bagData = null;
-
-      // create the in-bag dataset
-      if (m_CalcOutOfBag) {
-	inBag[j] = new boolean[data.numInstances()];
-	bagData = resampleWithWeights(data, random, inBag[j]);
-      } else {
-	bagData = data.resampleWithWeights(random);
-	if (bagSize < data.numInstances()) {
-	  bagData.randomize(random);
-	  Instances newBagData = new Instances(bagData, 0, bagSize);
-	  bagData = newBagData;
-	}
-      }
-      
+    for (int j = 0; j < m_Classifiers.length; j++) {      
       if (m_Classifier instanceof Randomizable) {
-	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
+	((Randomizable) m_Classifiers[j]).setSeed(m_random.nextInt());
       }
-      
-      // build the classifier
-      m_Classifiers[j].buildClassifier(bagData);
     }
+    
+    buildClassifiers();
     
     // calc OOB error?
     if (getCalcOutOfBag()) {
       double outOfBagCount = 0.0;
       double errorSum = 0.0;
-      boolean numeric = data.classAttribute().isNumeric();
+      boolean numeric = m_data.classAttribute().isNumeric();
       
-      for (int i = 0; i < data.numInstances(); i++) {
-	double vote;
-	double[] votes;
-	if (numeric)
-	  votes = new double[1];
-	else
-	  votes = new double[data.numClasses()];
-	
-	// determine predictions for instance
-	int voteCount = 0;
-	for (int j = 0; j < m_Classifiers.length; j++) {
-	  if (inBag[j][i])
-	    continue;
-	  
-	  voteCount++;
-	  double pred = m_Classifiers[j].classifyInstance(data.instance(i));
-	  if (numeric)
-	    votes[0] += pred;
-	  else
-	    votes[(int) pred]++;
-	}
-	
-	// "vote"
-	if (numeric) {
-	  vote = votes[0];
+      for (int i = 0; i < m_data.numInstances(); i++) {
+        double vote;
+        double[] votes;
+        if (numeric)
+          votes = new double[1];
+        else
+          votes = new double[m_data.numClasses()];
+        
+        // determine predictions for instance
+        int voteCount = 0;
+        for (int j = 0; j < m_Classifiers.length; j++) {
+          if (m_inBag[j][i])
+            continue;
+          
+          voteCount++;
+          double pred = m_Classifiers[j].classifyInstance(m_data.instance(i));
+          if (numeric)
+            votes[0] += pred;
+          else
+            votes[(int) pred]++;
+        }
+        
+        // "vote"
+        if (numeric) {
+          vote = votes[0];
           if (voteCount > 0) {
             vote  /= voteCount;    // average
           }
         } else {
-	  vote = Utils.maxIndex(votes);   // majority vote
+          vote = Utils.maxIndex(votes);   // majority vote
         }
-	
-	// error for instance
-	outOfBagCount += data.instance(i).weight();
-	if (numeric) {
-	  errorSum += StrictMath.abs(vote - data.instance(i).classValue()) 
-	  * data.instance(i).weight();
-	}
-	else {
-	  if (vote != data.instance(i).classValue())
-	    errorSum += data.instance(i).weight();
-	}
+        
+        // error for instance
+        outOfBagCount += m_data.instance(i).weight();
+        if (numeric) {
+          errorSum += StrictMath.abs(vote - m_data.instance(i).classValue()) 
+          * m_data.instance(i).weight();
+        }
+        else {
+          if (vote != m_data.instance(i).classValue())
+            errorSum += m_data.instance(i).weight();
+        }
       }
       
       m_OutOfBagError = errorSum / outOfBagCount;
@@ -584,6 +600,9 @@ public class Bagging
     else {
       m_OutOfBagError = 0;
     }
+    
+    // save memory
+    m_data = null;
   }
 
   /**
@@ -648,7 +667,7 @@ public class Bagging
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.41 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
