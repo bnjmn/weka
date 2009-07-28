@@ -2885,6 +2885,8 @@ public class GridSearch
 	result.disable(capab);
     }
     
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    
     // set dependencies
     for (Capability cap: Capability.values())
       result.enableDependency(cap);
