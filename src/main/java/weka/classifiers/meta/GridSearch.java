@@ -2872,7 +2872,7 @@ public class GridSearch
       result = super.getCapabilities();
     else
       result = getFilter().getCapabilities();
-
+    
     // only nominal and numeric classes allowed
     classes = result.getClassCapabilities();
     iter = classes.capabilities();
@@ -2884,6 +2884,8 @@ public class GridSearch
 	   && (capab != Capability.DATE_CLASS) )
 	result.disable(capab);
     }
+    
+    result.enable(Capability.MISSING_CLASS_VALUES);
     
     // set dependencies
     for (Capability cap: Capability.values())
