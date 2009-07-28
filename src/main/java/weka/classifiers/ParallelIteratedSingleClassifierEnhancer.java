@@ -73,7 +73,7 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
     newVector.addElement(new Option(
               "\tNumber of execution slots.\n"
               + "\t(default 1 - i.e. no parallelism)",
-              "Z", 1, "-Z <num>"));
+              "num-slots", 1, "-num-slots <num>"));
 
     Enumeration enu = super.listOptions();
     while (enu.hasMoreElements()) {
@@ -95,7 +95,7 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
    */
   public void setOptions(String[] options) throws Exception {
     
-    String iterations = Utils.getOption('Z', options);
+    String iterations = Utils.getOption("num-slots", options);
     if (iterations.length() != 0) {
       setNumExecutionSlots(Integer.parseInt(iterations));
     } else {
@@ -116,7 +116,7 @@ public abstract class ParallelIteratedSingleClassifierEnhancer extends
     String [] options = new String [superOptions.length + 2];
 
     int current = 0;
-    options[current++] = "-Z"; 
+    options[current++] = "-num-slots"; 
     options[current++] = "" + getNumExecutionSlots();
 
     System.arraycopy(superOptions, 0, options, current, 
