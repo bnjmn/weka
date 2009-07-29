@@ -67,7 +67,7 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Shane Legg (shane@intelligenesis.net) (sparse vector code)
  * @author Stuart Inglis (stuart@reeltwo.com) (sparse vector code)
- * @version $Revision: 1.6.2.2 $
+ * @version $Revision$
  */
 public class PolyKernel 
   extends CachedKernel {
@@ -325,7 +325,10 @@ public class PolyKernel
     String	result;
     
     if (getExponent() == 1.0) {
-      result = "Linear Kernel: K(x,y) = <x,y>";
+      if (getUseLowerOrder())
+        result = "Linear Kernel with lower order: K(x,y) = <x,y> + 1";
+      else
+        result = "Linear Kernel: K(x,y) = <x,y>";
     }
     else {
       if (getUseLowerOrder())
@@ -343,6 +346,6 @@ public class PolyKernel
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.6.2.2 $");
+    return RevisionUtils.extract("$Revision$");
   }
 }
