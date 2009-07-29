@@ -338,7 +338,10 @@ public class PolyKernel
     String	result;
     
     if (getExponent() == 1.0) {
-      result = "Linear Kernel: K(x,y) = <x,y>";
+      if (getUseLowerOrder())
+        result = "Linear Kernel with lower order: K(x,y) = <x,y> + 1";
+      else
+        result = "Linear Kernel: K(x,y) = <x,y>";
     }
     else {
       if (getUseLowerOrder())
