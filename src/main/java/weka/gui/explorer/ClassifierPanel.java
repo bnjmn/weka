@@ -994,12 +994,11 @@ public class ClassifierPanel
 
 	    // set up the structure of the plottable instances for 
 	    // visualization
-            if (saveVis) {
-              plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-              plotInstances.setInstances(inst);
-              plotInstances.setClassifier(classifier);
-              plotInstances.setClassIndex(inst.classIndex());
-            } 
+	    plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
+	    plotInstances.setInstances(inst);
+	    plotInstances.setClassifier(classifier);
+	    plotInstances.setClassIndex(inst.classIndex());
+	    plotInstances.setSaveForVisualization(saveVis);
 
 	    // Output some header information
 	    m_Log.logMessage("Started " + cname);
