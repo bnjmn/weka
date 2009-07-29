@@ -68,6 +68,10 @@ public class ClassifierErrorsPlotInstances
   /** for serialization. */
   private static final long serialVersionUID = -3941976365792013279L;
 
+  /** whether to save the instances for visualization or just evaluate the 
+   * instance. */
+  protected boolean m_SaveForVisualization;
+  
   /** for storing the plot shapes. */
   protected FastVector m_PlotShapes;
   
@@ -89,11 +93,12 @@ public class ClassifierErrorsPlotInstances
   protected void initialize() {
     super.initialize();
     
-    m_PlotShapes = new FastVector();
-    m_PlotSizes  = new FastVector();
-    m_Classifier = null;
-    m_ClassIndex = -1;
-    m_Evaluation = null;
+    m_PlotShapes           = new FastVector();
+    m_PlotSizes            = new FastVector();
+    m_Classifier           = null;
+    m_ClassIndex           = -1;
+    m_Evaluation           = null;
+    m_SaveForVisualization = true;
   }
   
   /**
@@ -151,6 +156,26 @@ public class ClassifierErrorsPlotInstances
   }
   
   /**
+   * Sets whether the instances are saved for visualization or only evaluation
+   * of the prediction is to happen.
+   * 
+   * @param value	if true then the instances will be saved
+   */
+  public void setSaveForVisualization(boolean value) {
+    m_SaveForVisualization = value;
+  }
+  
+  /**
+   * Returns whether the instances are saved for visualization for only
+   * evaluation of the prediction is to happen.
+   * 
+   * @return		true if the instances are saved
+   */
+  public boolean getSaveForVisualization() {
+    return m_SaveForVisualization;
+  }
+  
+  /**
    * Checks whether classifier, class index and evaluation are provided.
    */
   protected void check() {
@@ -167,7 +192,10 @@ public class ClassifierErrorsPlotInstances
   }
   
   /**
-   * Sets up the structure for the plot instances.
+   * Sets up the structure for the plot instances. Sets m_PlotInstances to null
+   * if instances are not saved for visualization.
+   * 
+   * @see #getSaveForVisualization()
    */
   protected void determineFormat() {
     FastVector 	hv;
@@ -175,6 +203,11 @@ public class ClassifierErrorsPlotInstances
     Attribute 	classAt;
     FastVector 	attVals;
     int		i;
+    
+    if (!m_SaveForVisualization) {
+      m_PlotInstances = null;
+      return;
+    }
     
     hv = new FastVector();
 
@@ -224,6 +257,9 @@ public class ClassifierErrorsPlotInstances
     
     try {
       pred = eval.evaluateModelOnceAndRecordPrediction(classifier, toPredict);
+      
+      if (!m_SaveForVisualization)
+	return;
 
       if (m_PlotInstances != null) {
         values = new double[m_PlotInstances.numAttributes()];
@@ -401,6 +437,9 @@ public class ClassifierErrorsPlotInstances
   protected void finishUp() {
     super.finishUp();
     
+    if (!m_SaveForVisualization)
+      return;
+    
     if (m_Instances.attribute(m_ClassIndex).isNumeric())
       scaleNumericPredictions();
     if (m_Classifier instanceof IntervalEstimator)
@@ -412,11 +451,14 @@ public class ClassifierErrorsPlotInstances
    * added automatically.
    * 
    * @param name	the name of the plot
-   * @return		the plot
+   * @return		the plot or null if plot instances weren't saved for visualization
    * @throws Exception	if plot generation fails
    */
   protected PlotData2D createPlotData(String name) throws Exception {
     PlotData2D 	result;
+    
+    if (!m_SaveForVisualization)
+      return null;
     
     result = new PlotData2D(m_PlotInstances);
     result.setShapeSize(m_PlotSizes);
