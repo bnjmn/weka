@@ -106,7 +106,7 @@
       <javac srcdir="${src.java}" destdir="${build.java}" optimize="${optimization}" 
              debug="${debug}" deprecation="${deprecation}"
              fork="yes" memoryMaximumSize="256m"
-             source="1.5" target="1.5">
+             source="1.4" target="1.4">
          <include name="**/*"/>
 
          <classpath refid="project.class.path" />
