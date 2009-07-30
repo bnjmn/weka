@@ -86,6 +86,15 @@ public interface BeanCommon {
   boolean connectionAllowed(EventSetDescriptor esd);
 
   /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the named event
+   *
+   * @param eventName the name of the event
+   * @return true if the object will accept a connection
+   */
+  boolean connectionAllowed(String eventName);
+
+  /**
    * Notify this object that it has been registered as a listener with
    * a source for recieving events described by the named event
    * This object is responsible for recording this fact.
