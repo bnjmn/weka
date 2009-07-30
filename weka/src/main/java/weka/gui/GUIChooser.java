@@ -610,9 +610,12 @@ public class GUIChooser
           m_BoundaryVisualizerFrame = new JFrame("BoundaryVisualizer");
           m_BoundaryVisualizerFrame.setIconImage(m_Icon);
           m_BoundaryVisualizerFrame.getContentPane().setLayout(new BorderLayout());
-          m_BoundaryVisualizerFrame.getContentPane().add(new BoundaryVisualizer(), BorderLayout.CENTER);
+          final BoundaryVisualizer bv = new BoundaryVisualizer();
+          m_BoundaryVisualizerFrame.getContentPane().add(bv, BorderLayout.CENTER);
+          m_BoundaryVisualizerFrame.setSize(bv.getMinimumSize());
           m_BoundaryVisualizerFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent w) {
+              bv.stopPlotting();
               m_BoundaryVisualizerFrame.dispose();
               m_BoundaryVisualizerFrame = null;
               jMenuItemVisualizationBoundary.setEnabled(true);
@@ -620,7 +623,8 @@ public class GUIChooser
             }
           });
           m_BoundaryVisualizerFrame.pack();
-          m_BoundaryVisualizerFrame.setSize(800, 600);
+          //m_BoundaryVisualizerFrame.setSize(800, 600);
+          m_BoundaryVisualizerFrame.setResizable(false);
           m_BoundaryVisualizerFrame.setVisible(true);
           // dont' do a System.exit after last window got closed!
           BoundaryVisualizer.setExitIfNoWindowsOpen(false);
