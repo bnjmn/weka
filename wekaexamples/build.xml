@@ -231,7 +231,13 @@
                sourcepath="${src.java}"  
                doctitle="${ant.project.name} API" 
                packagenames="*"
-               maxmemory="256m"/>
+               maxmemory="256m">
+         <classpath refid="project.class.path" />
+         <classpath>
+            <pathelement path="${java.class.path}" />
+            <pathelement location="." />
+         </classpath>
+      </javadoc>
    </target>
 
    <!-- run-java -->
