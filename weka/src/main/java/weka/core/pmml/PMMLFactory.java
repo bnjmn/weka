@@ -27,6 +27,7 @@ import weka.classifiers.pmml.consumer.GeneralRegression;
 import weka.classifiers.pmml.consumer.NeuralNetwork;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.pmml.consumer.Regression;
+import weka.classifiers.pmml.consumer.RuleSetModel;
 import weka.classifiers.pmml.consumer.TreeModel;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -67,7 +68,8 @@ public class PMMLFactory {
     REGRESSION_MODEL ("Regression"),
     GENERAL_REGRESSION_MODEL ("GeneralRegression"),
     NEURAL_NETWORK_MODEL ("NeuralNetwork"),
-    TREE_MODEL ("TreeModel");
+    TREE_MODEL ("TreeModel"),
+    RULESET_MODEL("RuleSetModel");
     
     private final String m_stringVal;
     
@@ -287,6 +289,9 @@ public class PMMLFactory {
     case TREE_MODEL:
       pmmlM = new TreeModel(model, dataDictionary, miningSchema);
       break;
+    case RULESET_MODEL:
+      pmmlM = new RuleSetModel(model, dataDictionary, miningSchema);
+      break;
     default:
       throw new Exception("[PMMLFactory] Unknown model type!!");
     }
@@ -321,6 +326,11 @@ public class PMMLFactory {
     if (temp.getLength() > 0) {
       return ModelType.TREE_MODEL;
     }
+    
+    temp = doc.getElementsByTagName("RuleSetModel");
+    if (temp.getLength() > 0) {
+      return ModelType.RULESET_MODEL;
+    }
 
     return ModelType.UNKNOWN_MODEL;
   }
@@ -348,6 +358,9 @@ public class PMMLFactory {
       break;
     case TREE_MODEL:
       temp = doc.getElementsByTagName("TreeModel");
+      break;
+    case RULESET_MODEL:
+      temp = doc.getElementsByTagName("RuleSetModel");
       break;
     default:
       throw new Exception("[PMMLFactory] unknown/unsupported model type.");
