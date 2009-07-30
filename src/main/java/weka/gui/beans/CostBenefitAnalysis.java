@@ -32,6 +32,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.beans.EventSetDescriptor;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.beans.beancontext.BeanContext;
@@ -60,6 +61,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
+import weka.gui.Logger;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
@@ -72,7 +74,7 @@ import weka.gui.visualize.PlotData2D;
  * @version $Revision$
  */
 public class CostBenefitAnalysis extends JPanel 
-  implements ThresholdDataListener, Visible, UserRequestAcceptor,
+  implements BeanCommon, ThresholdDataListener, Visible, UserRequestAcceptor,
   Serializable, BeanContextChild {
   
   /** For serialization */
@@ -101,6 +103,11 @@ public class CostBenefitAnalysis extends JPanel
    */
   protected BeanContextChildSupport m_bcSupport = 
     new BeanContextChildSupport(this);
+  
+  /**
+   * The object sending us data (we allow only one connection at any one time)
+   */
+  protected Object m_listenee;
   
   /**
    * Inner class for displaying the plots and all control widgets.
@@ -797,47 +804,50 @@ public class CostBenefitAnalysis extends JPanel
      * the threshold data.
      * @throws Exception if something goes wrong.
      */
-    public synchronized void setDataSet(PlotData2D data, Attribute classAtt) throws Exception {
-      if (m_masterPlot == null || !m_masterPlot.getPlotInstances().relationName().
-          equals(data.getPlotInstances().relationName()) || !m_classAttribute.equals(classAtt)) {
-        m_masterPlot = data;
-        m_masterPlot.m_alwaysDisplayPointsOfThisSize = 10;
-        setClassForConfusionMatrix(classAtt);
-        m_performancePanel.setMasterPlot(m_masterPlot);
-        m_performancePanel.validate(); m_performancePanel.repaint();
-        
-        m_shapeSizes = new int[m_masterPlot.getPlotInstances().numInstances()];
-        for (int i = 0; i < m_shapeSizes.length; i++) {
-          m_shapeSizes[i] = 1;
-        }
-        m_masterPlot.setShapeSize(m_shapeSizes);
-        constructCostBenefitData();
-        m_costBenefitPanel.setMasterPlot(m_costBenefit);
-        m_costBenefitPanel.validate(); m_costBenefitPanel.repaint();
-        
-        m_totalPopPrevious = 0;
-        m_fpPrevious = 0;
-        m_tpPrevious = 0;
-        m_tnPrevious = 0;
-        m_fnPrevious = 0;
-        m_previousShapeIndex = -1;
-        
-        // set the total population size
-        Instance first = m_masterPlot.getPlotInstances().instance(0);
-        double totalPos = first.value(m_masterPlot.getPlotInstances().
-            attribute(ThresholdCurve.TRUE_POS_NAME).index());
-        double totalNeg = first.value(m_masterPlot.getPlotInstances().
-            attribute(ThresholdCurve.FALSE_POS_NAME));
-        m_originalPopSize = (int)(totalPos + totalNeg);
-        m_totalPopField.setText("" + m_originalPopSize);
-      } else {
-        //TODO add other plots?
+    public synchronized void setDataSet(PlotData2D data, Attribute classAtt) throws Exception {      
+      // make a copy of the PlotData2D object
+      m_masterPlot = new PlotData2D(data.getPlotInstances());
+      boolean[] connectPoints = new boolean[m_masterPlot.getPlotInstances().numInstances()];
+      for (int i = 1; i < connectPoints.length; i++) {
+        connectPoints[i] = true;
       }
+      m_masterPlot.setConnectPoints(connectPoints);
+
+      m_masterPlot.m_alwaysDisplayPointsOfThisSize = 10;
+      setClassForConfusionMatrix(classAtt);
+      m_performancePanel.setMasterPlot(m_masterPlot);
+      m_performancePanel.validate(); m_performancePanel.repaint();
+
+      m_shapeSizes = new int[m_masterPlot.getPlotInstances().numInstances()];
+      for (int i = 0; i < m_shapeSizes.length; i++) {
+        m_shapeSizes[i] = 1;
+      }
+      m_masterPlot.setShapeSize(m_shapeSizes);
+      constructCostBenefitData();
+      m_costBenefitPanel.setMasterPlot(m_costBenefit);
+      m_costBenefitPanel.validate(); m_costBenefitPanel.repaint();
+
+      m_totalPopPrevious = 0;
+      m_fpPrevious = 0;
+      m_tpPrevious = 0;
+      m_tnPrevious = 0;
+      m_fnPrevious = 0;
+      m_previousShapeIndex = -1;
+
+      // set the total population size
+      Instance first = m_masterPlot.getPlotInstances().instance(0);
+      double totalPos = first.value(m_masterPlot.getPlotInstances().
+          attribute(ThresholdCurve.TRUE_POS_NAME).index());
+      double totalNeg = first.value(m_masterPlot.getPlotInstances().
+          attribute(ThresholdCurve.FALSE_POS_NAME));
+      m_originalPopSize = (int)(totalPos + totalNeg);
+      m_totalPopField.setText("" + m_originalPopSize);
+
       m_performancePanel.setYIndex(5);
       m_performancePanel.setXIndex(10);
       m_costBenefitPanel.setXIndex(0);
       m_costBenefitPanel.setYIndex(1);
-//      System.err.println(m_masterPlot.getPlotInstances());
+      //      System.err.println(m_masterPlot.getPlotInstances());
       updateInfoForSliderValue((double)m_thresholdSlider.getValue() / 100.0);
     }
     
@@ -1094,6 +1104,104 @@ public class CostBenefitAnalysis extends JPanel
     }
   }
   
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection via the named event
+   *
+   * @param eventName the name of the event in question
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(String eventName) {
+    return (m_listenee == null);
+  }
+
+  /**
+   * Notify this object that it has been registered as a listener with
+   * a source for recieving events described by the named event
+   * This object is responsible for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void connectionNotification(String eventName, Object source) {
+    if (connectionAllowed(eventName)) {
+      m_listenee = source;
+    }
+  }
+  
+  /**
+   * Returns true if, at this time, 
+   * the object will accept a connection according to the supplied
+   * EventSetDescriptor
+   *
+   * @param esd the EventSetDescriptor
+   * @return true if the object will accept a connection
+   */
+  public boolean connectionAllowed(EventSetDescriptor esd) {
+    return connectionAllowed(esd.getName());
+  }
+
+  /**
+   * Notify this object that it has been deregistered as a listener with
+   * a source for named event. This object is responsible
+   * for recording this fact.
+   *
+   * @param eventName the event
+   * @param source the source with which this object has been registered as
+   * a listener
+   */
+  public void disconnectionNotification(String eventName, Object source) {
+    if (m_listenee == source) {
+      m_listenee = null;
+    }
+    
+  }
+
+  /**
+   * Get the custom (descriptive) name for this bean (if one has been set)
+   * 
+   * @return the custom name (or the default name)
+   */
+  public String getCustomName() {
+    return m_visual.getText();
+  }
+
+  /**
+   * Returns true if. at this time, the bean is busy with some
+   * (i.e. perhaps a worker thread is performing some calculation).
+   * 
+   * @return true if the bean is busy.
+   */
+  public boolean isBusy() {
+    return false;
+  }
+
+  /**
+   * Set a custom (descriptive) name for this bean
+   * 
+   * @param name the name to use
+   */
+  public void setCustomName(String name) {
+    m_visual.setText(name);
+  }
+
+  /**
+   * Set a logger
+   *
+   * @param logger a <code>weka.gui.Logger</code> value
+   */
+  public void setLog(Logger logger) {
+    // we don't need to do any logging    
+  }
+
+  /**
+   * Stop any processing that the bean might be doing.
+   */
+  public void stop() {
+    // nothing to do here
+  }
+    
   public static void main(String[] args) {
     try {
       Instances train = new Instances(new java.io.BufferedReader(new java.io.FileReader(args[0])));
@@ -1139,6 +1247,6 @@ public class CostBenefitAnalysis extends JPanel
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+ 
   }
-
 }
