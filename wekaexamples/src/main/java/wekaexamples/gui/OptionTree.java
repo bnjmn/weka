@@ -237,10 +237,10 @@ public class OptionTree
    * @return		the generated options
    */
   protected String getOptions(DefaultMutableTreeNode node) {
-    Vector<String>	options;
-    int			i;
+    Vector	options;
+    int		i;
     
-    options = new Vector<String>();
+    options = new Vector();
     
     // the node itself
     if (!node.toString().equals(LABEL_ROOT) && !node.toString().equals(LABEL_NESTED))
@@ -250,7 +250,7 @@ public class OptionTree
     for (i = 0; i < node.getChildCount(); i++)
       options.add(getOptions((DefaultMutableTreeNode) node.getChildAt(i)));
     
-    return Utils.joinOptions(options.toArray(new String[options.size()]));
+    return Utils.joinOptions((String[]) options.toArray(new String[options.size()]));
   }
   
   /**
