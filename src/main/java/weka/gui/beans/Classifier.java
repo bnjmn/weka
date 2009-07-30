@@ -544,7 +544,7 @@ public class Classifier
 	// otherwise assume that classifier has been pre-trained in batch
 	// mode, *if* headers match
 	if (m_trainingSet == null || !m_trainingSet.equalHeaders(dataset)) {
-	  if (!(m_Classifier instanceof 
+	  if (!(m_ClassifierTemplate instanceof 
 		weka.classifiers.UpdateableClassifier)) {
 	    stop(); // stop all processing
 	    if (m_log != null) {
@@ -633,7 +633,7 @@ public class Classifier
       // now update on this instance (if class is not missing and classifier
       // is updateable and user has specified that classifier is to be
       // updated)
-      if (m_Classifier instanceof weka.classifiers.UpdateableClassifier &&
+      if (m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier &&
 	  m_updateIncrementalClassifier == true &&
 	  !(m_incrementalEvent.getInstance().
 	    isMissing(m_incrementalEvent.getInstance().
@@ -1525,9 +1525,10 @@ public class Classifier
   public synchronized void connectionNotification(String eventName,
 						  Object source) {
     if (eventName.compareTo("instance") == 0) {
-      if (!(m_Classifier instanceof weka.classifiers.UpdateableClassifier)) {
+      if (!(m_ClassifierTemplate instanceof weka.classifiers.UpdateableClassifier)) {
 	if (m_log != null) {
 	  String msg = statusMessagePrefix() + "WARNING: "
+          + m_ClassifierTemplate.getClass().getName() 
           + " Is not an updateable classifier. This "
           +"classifier will only be evaluated on incoming "
           +"instance events and not trained on them.";
