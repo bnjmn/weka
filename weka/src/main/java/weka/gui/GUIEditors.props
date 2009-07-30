@@ -46,6 +46,7 @@ weka.classifiers.bayes.net.estimate.BayesNetEstimator=weka.gui.GenericObjectEdit
 weka.classifiers.evaluation.output.prediction.AbstractOutput=weka.gui.GenericObjectEditor
 weka.classifiers.functions.supportVector.Kernel=weka.gui.GenericObjectEditor
 weka.classifiers.functions.supportVector.RegOptimizer=weka.gui.GenericObjectEditor
+weka.classifiers.meta.generators.Generator=weka.gui.GenericObjectEditor
 weka.classifiers.meta.ensembleSelection.EnsembleSelectionLibrary=weka.gui.EnsembleSelectionLibraryEditor
 
 # experiment
@@ -71,3 +72,7 @@ weka.clusterers.DensityBasedClusterer=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASEvaluation=weka.gui.GenericObjectEditor
 weka.attributeSelection.ASSearch=weka.gui.GenericObjectEditor
 weka.attributeSelection.UnsupervisedSubsetEvaluator=weka.gui.GenericObjectEditor
+
+#generators
+weka.classifiers.meta.generators.NominalAttributeGenerator=weka.gui.GenericObjectEditor
+weka.classifiers.meta.generators.NumericAttributeGenerator=weka.gui.GenericObjectEditor
