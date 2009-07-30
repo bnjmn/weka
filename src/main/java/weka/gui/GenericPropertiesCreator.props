@@ -187,3 +187,13 @@ weka.core.converters.AbstractFileSaver=\
 #
 #org.tartarus.snowball.SnowballProgram=\
 # org.tartarus.snowball.ext
+
+# List of generators
+weka.classifiers.meta.generators.Generator=\
+ weka.classifiers.meta.generators
+
+weka.classifiers.meta.generators.NumericAttributeGenerator=\
+ weka.classifiers.meta.generators
+
+weka.classifiers.meta.generators.NominalAttributeGenerator=\
+ weka.classifiers.meta.generators
