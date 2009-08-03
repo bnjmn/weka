@@ -65,7 +65,7 @@ import java.util.Vector;
  * <ul>
  *    <li><a href="https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2002-October/000685.html" target="_blank">Original tool</a></li>
  *    <li><a href="https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/2004-January/002160.html" target="_blank">Current version</a></li>
- *    <li><a href="http://weka.wiki.sourceforge.net/ARFF+files+from+Text+Collections" target="_blank">Wiki article</a></li>
+ *    <li><a href="http://weka.wikispaces.com/ARFF+files+from+Text+Collections" target="_blank">Wiki article</a></li>
  * </ul>
  *
  * @author Ashraf M. Kibriya (amk14 at cs.waikato.ac.nz)
