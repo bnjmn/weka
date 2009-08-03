@@ -879,7 +879,7 @@ public class GUIChooser
     
     jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        BrowserHelper.openURL("http://weka.wiki.sourceforge.net/");
+        BrowserHelper.openURL("http://weka.wikispaces.com/");
       }
     });
     

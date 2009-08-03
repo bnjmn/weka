@@ -1292,7 +1292,7 @@ public class Main
       jMenuItemHelpWekaWiki.setMnemonic('W');
       jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
-	  BrowserHelper.openURL(m_Self, "http://weka.wiki.sourceforge.net/");
+	  BrowserHelper.openURL(m_Self, "http://weka.wikispaces.com/");
 	}
       });
 

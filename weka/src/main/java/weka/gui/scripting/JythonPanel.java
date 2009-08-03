@@ -120,7 +120,7 @@ public class JythonPanel
     panel.add(BrowserHelper.createLink("http://www.jython.org/", null));
     panel.add(new JLabel(" "));
     panel.add(new JLabel("Weka and Jython"));
-    panel.add(BrowserHelper.createLink("http://weka.wiki.sourceforge.net/Using+Weka+from+Jython", null));
+    panel.add(BrowserHelper.createLink("http://weka.wikispaces.com/Using+Weka+from+Jython", null));
     
     return result;
   }
