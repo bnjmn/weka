@@ -182,7 +182,7 @@ weka.core.converters.AbstractFileSaver=\
 #
 # Note: the snowball jar needs to be in the CLASSPATH to make these stemmers
 #       available. See the following links for more information:
-#       http://weka.wiki.sourceforge.net/Stemmers
+#       http://weka.wikispaces.com/Stemmers
 #       http://snowball.tartarus.org/
 #
 #org.tartarus.snowball.SnowballProgram=\
