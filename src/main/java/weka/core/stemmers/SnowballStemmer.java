@@ -40,7 +40,7 @@ import java.util.Vector;
  *   java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext<br/>
  * <br/>
  * For more information visit these web sites:<br/>
- *   http://weka.wiki.sourceforge.net/Stemmers<br/>
+ *   http://weka.wikispaces.com/Stemmers<br/>
  *   http://snowball.tartarus.org/<br/>
  * <p/>
  <!-- globalinfo-end -->
@@ -149,7 +149,7 @@ public class SnowballStemmer
       + "  java weka.core.ClassDiscovery org.tartarus.snowball.SnowballProgram org.tartarus.snowball.ext\n"
       + "\n"
       + "For more information visit these web sites:\n"
-      + "  http://weka.wiki.sourceforge.net/Stemmers\n"
+      + "  http://weka.wikispaces.com/Stemmers\n"
       + "  http://snowball.tartarus.org/\n";
   }
   

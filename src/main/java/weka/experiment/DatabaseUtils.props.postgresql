@@ -1,7 +1,7 @@
 # Database settings for PostgreSQL 7.4
 #
 # General information on database access can be found here:
-# http://weka.wiki.sourceforge.net/Databases
+# http://weka.wikispaces.com/Databases
 #
 # url:     http://www.postgresql.org/
 # jdbc:    http://jdbc.postgresql.org/
