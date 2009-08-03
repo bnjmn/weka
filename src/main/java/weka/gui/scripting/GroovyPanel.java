@@ -120,7 +120,7 @@ public class GroovyPanel
     panel.add(BrowserHelper.createLink("http://groovy.codehaus.org/", null));
     panel.add(new JLabel(" "));
     panel.add(new JLabel("Weka and Groovy"));
-    panel.add(BrowserHelper.createLink("http://weka.wiki.sourceforge.net/Using+Weka+from+Groovy", null));
+    panel.add(BrowserHelper.createLink("http://weka.wikispaces.com/Using+Weka+from+Groovy", null));
     
     return result;
   }
