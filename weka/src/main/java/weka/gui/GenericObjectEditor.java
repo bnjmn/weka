@@ -1462,11 +1462,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @return the panel
    */
   public JPanel getCustomPanel() {
-
-    JButton chooseButton = createChooseClassButton();    
+    final JButton chooseButton = createChooseClassButton();    
     m_ObjectPropertyPanel = new PropertyPanel(this, true);
     
-    JPanel customPanel = new JPanel();
+    JPanel customPanel = new JPanel() {
+      public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        chooseButton.setEnabled(enabled);
+      }
+    };
     customPanel.setLayout(new BorderLayout());
     customPanel.add(chooseButton, BorderLayout.WEST);
     customPanel.add(m_ObjectPropertyPanel, BorderLayout.CENTER);
