@@ -90,7 +90,9 @@ support-vector machine classifier \textit{SMO} (package
 since Java requires one to escape double quotes and backslashes inside a
 \texttt{String}. The Wiki\cite{wekawiki} article ``Use Weka in your Java code''
 references the Java class \texttt{OptionsToCode}, which turns any command-line
-into appropriate Java source code.
+into appropriate Java source code. This example is also available from the
+\textit{Weka Examples} collection\cite{wekaexamples}:
+\texttt{weka.core.OptionsToCode}.
 
 \newpage
 
@@ -149,6 +151,10 @@ also from databases. In the latter case, it is assumed in that the database
 connection is set up and working. See chapter \ref{databases} for more details
 on how to configure WEKA correctly and also more information on JDBC (Java
 Database Connectivity) URLs.
+
+Example classes, making use of the functionality covered in this section, can be
+found in the \texttt{wekaexamples.core.converters} package of the \textit{Weka
+Examples} collection\cite{wekaexamples}.
 
 The following classes are used to store data in memory:
 \begin{tight_itemize}
@@ -271,7 +277,7 @@ follows:
 \begin{tight_itemize}
 	\item Not all database systems allow incremental retrieval.
 	\item Not all queries have a unique key to retrieve rows incrementally. In
-that case, you can supply the necessary columns with the
+that case, one can supply the necessary columns with the
 \textit{setKeys(String)} method (comma-separated list of columns).
 	\item If the data cannot be retrieved in an incremental fashion, it is first
 fully loaded into memory and then provided row-by-row (``pseudo-incremental'').
@@ -279,9 +285,194 @@ fully loaded into memory and then provided row-by-row (``pseudo-incremental'').
 
 \newpage
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Creating datasets in memory %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Creating datasets in memory}
+\label{api_creating_datasets}
+Loading datasets from disk or database are not the only ways of obtaining data
+in WEKA: datasets can be created in memory or \textit{on-the-fly}. Generating
+a dataset memory structure (i.e., a \texttt{weka.core.Instances} object) is a
+two-stage process:
+\begin{tight_enumerate}
+	\item Defining the format of the data by setting up the attributes.
+	\item Adding the actual data, row-by-row.
+\end{tight_enumerate}
+The class \texttt{wekaexamples.core.CreateInstances} of the \textit{Weka
+Examples} collection\cite{wekaexamples} generates an \texttt{Instances} object
+containing all attribute types WEKA can handle at the moment.
+
+\subsection{Defining the format}
+There are currently five different types of attributes available in WEKA:
+\begin{tight_itemize}
+	\item \textbf{numeric} -- continuous variables
+	\item \textbf{date} -- date variables
+	\item \textbf{nominal} -- predefined labels
+	\item \textbf{string} -- textual data
+	\item \textbf{relational} -- contains other relations, e.g., the bags in
+case of multi-instance data
+\end{tight_itemize}
+For all of the different attribute types, WEKA uses the same class,
+\texttt{weka.core.Attribute}, but with different constructors. In the
+following, these different constructors are explained.
+\begin{tight_itemize}
+	\item \textbf{numeric} -- The easiest attribute type to create, as it
+requires only the name of the attribute:
+	\begin{verbatim}
+		Attribute numeric = new Attribute("name_of_attr");
+	\end{verbatim}
+
+	\item \texttt{date} -- Date attributes are handled internally as numeric
+attributes, but in order to present the date value correctly, the format of the
+date needs to be specified. The \textit{date} and \textit{time patterns} are
+explained in detail in the Javadoc of the \texttt{java.text.SimpleDateFormat}
+class. In the following, an example of how to create a date attribute using a
+date format of 4-digit year, 2-digit month and a 2-digit day, separated by
+hyphens:
+	\begin{verbatim}
+		Attribute date = new Attribute("name_of_attr", "yyyy-MM-dd");
+	\end{verbatim}
+
+	\item \textbf{nominal} -- Since nominal attributes contain predefined
+labels, one needs to supply these, stored in form of a
+\texttt{weka.core.FastVector} object:
+	\begin{verbatim}
+		FastVector labels = new FastVector();
+		labels.addElement("label_a");
+		labels.addElement("label_b");
+		labels.addElement("label_c");
+		labels.addElement("label_d");
+		Attribute nominal = new Attribute("name_of_attr", labels);
+	\end{verbatim}
+
+	\item \textbf{string} -- In contrast to nominal attributes, this type does
+not store a predefined list of labels. Normally used to store textual data,
+i.e., content of documents for text categorization. The same constructor as for
+the nominal attribute is used, but a \texttt{null} value is provided instead of
+an instance of \texttt{FastVector}:
+	\begin{verbatim}
+		Attribute string = new Attribute("name_of_attr", (FastVector) null);
+	\end{verbatim}
+
+	\newpage
+
+	\item \texttt{relational} -- This attribute just takes another
+\texttt{weka.core.Instances} object for defining the relational structure in
+the constructor. The following code snippet generates a relational attribute
+that contains a relation with two attributes, a numeric and a nominal attribute:
+	\begin{verbatim}
+		FastVector atts = new FastVector();
+		atts.addElement(new Attribute("rel.num"));
+		FastVector values = new FastVector();
+		values.addElement("val_A");
+		values.addElement("val_B");
+		values.addElement("val_C");
+		atts.addElement(new Attribute("rel.nom", values));
+		Instances rel_struct = new Instances("rel", atts, 0);
+		Attribute relational = new Attribute("name_of_attr", rel_struct);
+	\end{verbatim}
+\end{tight_itemize}
+A \texttt{weka.core.Instances} object is then created by supplying a
+\texttt{FastVector} object containing all the attribute objects. The following
+example creates a dataset with two numeric attributes and a nominal class
+attribute with two labels ``no'' and ``yes'':
+\begin{verbatim}
+   Attribute num1 = new Attribute("num1");
+   Attribute num2 = new Attribute("num2");
+   FastVector labels = new FastVector();
+   labels.addElement("no");
+   labels.addElement("yes");
+   Attribute cls = new Attribute("class", labels);
+   FastVector attributes = new FastVector();
+   attributes.addElement(num1);
+   attributes.addElement(num2);
+   attributes.addElement(cls);
+   Instances dataset = new Instances("Test-dataset", attributes, 0);
+\end{verbatim}
+The final argument in the \texttt{Instances} constructor above tells WEKA how
+much memory to reserve for upcoming \texttt{weka.core.Instance} objects. If one
+knows how many rows will be added to the dataset, then it should be specified
+as it saves costly operations for expanding the internal storage. It doesn't
+matter, if one aims to high with the amount of rows to be added, it is always
+possible to \textit{trim} the dataset again, using the \texttt{compactify()}
+method.
+
+\subsection{Adding data}
+After the structure of the dataset has been defined, one can add the actual
+data to it, row by row. There are basically two constructors of the
+\texttt{weka.core.Instance} class that one can use for this purpose:
+\begin{tight_itemize}
+	\item \texttt{Instance(double weight, double[] attValues)} -- generates an
+\texttt{Instance} object with the specified weight and the given double values.
+WEKA's internal format is using doubles for all attribute types. For nominal,
+string and relational attributes this is just an index of the stored values.
+	\item \texttt{Instance(int numAttributes)} -- generates a new
+\texttt{Instance} object with weight 1.0 and all missing values.
+\end{tight_itemize}
+The second constructor may be easier to use, but setting values via the
+\texttt{Instance} class' methods is a bit costly, especially if one is
+adding a lot of rows. Therefore, the following code examples cover the first
+constructor. For simplicity, an \texttt{Instances} object ``\texttt{data}''
+based on the code snippets for the different attribute introduced used above is
+used, as it contains all possible attribute types.
+
+\newpage
+
+For each instance, the first step is to create a new double array to hold the
+attribute values. It is important not to reuse this array, but always create a
+new one, since WEKA only references it and does not create a copy of it.
+Reusing means changing the previously generated \texttt{Instance} object:
+\begin{verbatim}
+   double[] values = new double[data.numAttributes()];
+\end{verbatim}
+After that, the double array is filled with the actual values:
+\begin{tight_itemize}
+	\item \textbf{numeric} -- just sets the numeric value:
+	\begin{verbatim}
+	values[0] = 1.23;
+	\end{verbatim}
+
+	\item \textbf{date} -- turns the date string into a double value:
+	\begin{verbatim}
+	values[1] = data.attribute(1).parseDate("2001-11-09");
+	\end{verbatim}
+
+	\item \textbf{nominal} -- determines the index of the label:
+	\begin{verbatim}
+	values[2] = data.attribute(2).indexOf("label_b");
+	\end{verbatim}
+
+	\item \textbf{string} -- determines the index of the string, using the
+\texttt{addStringValue} method (internally, a hashtable holds all the string
+values):
+	\begin{verbatim}
+	values[3] = data.attribute(3).addStringValue("This is a string");
+	\end{verbatim}
+
+	\item \textbf{relational} -- first, a new \texttt{Instances} object based
+on the attribute's relational definition has to be created, before the index
+of it can be determined, using the \texttt{addRelation} method:
+	\begin{verbatim}
+	Instances dataRel = new Instances(data.attribute(4).relation(),0);
+	valuesRel = new double[dataRel.numAttributes()];
+	valuesRel[0] = 2.34;
+	valuesRel[1] = dataRel.attribute(1).indexOf("val_C");
+	dataRel.add(new Instance(1.0, valuesRel));
+	values[4] = data.attribute(4).addRelation(dataRel);
+	\end{verbatim}
+\end{tight_itemize}
+Finally, an \texttt{Instance} object is generated with the initialized double
+array and added to the dataset:
+\begin{verbatim}
+   Instance inst = new Instance(1.0, values);
+   data.add(inst);
+\end{verbatim}
+
+
 %%%%%%%%%%%%%%%%%%%%
 % Randomizing data %
 %%%%%%%%%%%%%%%%%%%%
+\newpage
 \section{Randomizing data}
 \label{api_randomizing_data}
 Since learning algorithms can be prone to the order the data arrives
@@ -376,6 +567,9 @@ correctly, as the evaluation expects to get only a single result back. This is
 the reason why \textit{instance-based} filters only pass through any subsequent
 batch of data without processing it. The \texttt{Resample} filters, for
 instance, act like this.
+
+One can find example classes in the \texttt{wekaexamples.filters} package of the
+\textit{Weka Examples} collection\cite{wekaexamples}.
 
 \newpage
 
@@ -504,6 +698,9 @@ how to obtain the generated statistics.
 	\item \textit{Classifying instances} -- obtaining classifications for
 unknown data.
 \end{tight_itemize}
+The \textit{Weka Examples} collection\cite{wekaexamples} contains examples
+classes covering classification in the \texttt{wekaexamples.classifiers}
+package.
 
 \subsection{Building a classifier}
 By design, all classifiers in WEKA are \textit{batch-trainable}, i.e., they get
@@ -584,13 +781,13 @@ Building a classifier is only one part of the equation, evaluating how
 \textit{well} it performs is another important part. WEKA supports two types of
 evaluation:
 \begin{tight_itemize}
-	\item \textit{Cross-validation} -- If you only have a single dataset and
-want to get a reasonable realistic evaluation. Setting the number of folds equal
-to the number of rows in the dataset will give you leave-one-out
+	\item \textit{Cross-validation} -- If one only has a single dataset and
+wants to get a reasonable realistic evaluation. Setting the number of folds equal
+to the number of rows in the dataset will give one leave-one-out
 cross-validation (LOOCV).
 	\item \textit{Dedicated test set} -- The test set is solely used to evaluate
 the built classifier. It is important to have a test set that incorporates the
-same (or similar) concepts as the training set, otherwise you will always end
+same (or similar) concepts as the training set, otherwise one will always end
 up with poor performance.
 \end{tight_itemize}
 The evaluation step, including collection of statistics, is performed by the
@@ -787,6 +984,9 @@ similar to the one about classifiers, covers the following topics:
 	\item \textit{Clustering instances} -- determining what clusters unknown
 instances belong to.
 \end{tight_itemize}
+Fully functional example classes are located in the
+\texttt{wekaexamples.clusterers} package of the \textit{Weka Examples}
+collection\cite{wekaexamples}.
 
 \subsection{Building a clusterer}
 Clusterers, just like classifiers, are also by design batch-trainable. They
@@ -1055,6 +1255,10 @@ The following sections cover each of the topics, accompanied with a code
 example. For clarity, the same evaluator and search algorithm is used in all
 of these examples.
 
+Feel free to check out the example classesof the \textit{Weka Examples}
+collection\cite{wekaexamples}, located in the
+\texttt{wekaexamples.attributeSelection} package.
+
 \newpage
 
 \subsection{Using the meta-classifier}
@@ -1172,6 +1376,11 @@ the first place, though the process of storing the data again is far less common
 than of reading the data into memory. The following two sections cover how to
 save the data in files and in databases.
 
+Just like with loading the data in chapter \ref{api_loading_data}, examples
+classes for saving data can be found in the
+\texttt{wekaexamples.core.converters} package of the \textit{Weka Examples}
+collection\cite{wekaexamples};
+
 \subsection{Saving data to files}
 Once again, one can either let WEKA choose the appropriate converter for saving
 the data or use an explicit converter (all savers are located in the
@@ -1210,7 +1419,7 @@ And here is an example of using the \texttt{CSVSaver} converter explicitly:
 
 \subsection{Saving data to databases}
 Apart from the KnowledgeFlow, saving to databases is not very obvious in WEKA,
-unless you know about the \texttt{DatabaseSaver} converter. Just like the
+unless one knows about the \texttt{DatabaseSaver} converter. Just like the
 \texttt{DatabaseLoader}, the saver counterpart can store the data either in
 batch mode or incrementally as well.
 
@@ -1269,6 +1478,14 @@ method), as well as notifying the saver when all the data has been saved:
 %%%%%%%%%%%%%%%%%
 \section{Visualization}
 \label{api_visualization}
+The concepts covered in this chapter are also available through the example
+classes of the \textit{Weka Examples} collection\cite{wekaexamples}. See the
+following packages:
+\begin{tight_itemize}
+	\item \texttt{wekaexamples.gui.graphvisualizer}
+	\item \texttt{wekaexamples.gui.treevisualizer}
+	\item \texttt{wekaexamples.gui.visualize}
+\end{tight_itemize}
 
 \subsection{ROC curves}
 WEKA can generate ``Receiver operating characteristic'' (ROC) curves, based on
