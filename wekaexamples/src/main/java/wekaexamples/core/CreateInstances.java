@@ -63,7 +63,7 @@ public class CreateInstances {
     // - string
     atts.addElement(new Attribute("att3", (FastVector) null));
     // - date
-    atts.addElement(new Attribute("att4", "yyyy-mm-dd"));
+    atts.addElement(new Attribute("att4", "yyyy-MM-dd"));
     // - relational
     attsRel = new FastVector();
     // -- numeric
