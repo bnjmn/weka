@@ -59,7 +59,7 @@ public class CreateInstances {
     // - string
     atts.addElement(new Attribute("att3", (FastVector) null));
     // - date
-    atts.addElement(new Attribute("att4", "yyyy-mm-dd"));
+    atts.addElement(new Attribute("att4", "yyyy-MM-dd"));
 
     // 2. create Instances object
     data = new Instances("MyRelation", atts, 0);
