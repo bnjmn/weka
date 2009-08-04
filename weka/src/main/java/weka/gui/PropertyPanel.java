@@ -43,7 +43,7 @@ import java.beans.PropertyChangeEvent;
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
- * @version $Revision: 1.8.2.1 $
+ * @version $Revision$
  */
 public class PropertyPanel extends JPanel {
 
@@ -55,6 +55,9 @@ public class PropertyPanel extends JPanel {
 
   /** Whether the editor has provided its own panel */
   private boolean m_HasCustomPanel = false;
+  
+  /** The custom panel (if any) */
+  private JPanel m_CustomPanel;
   
   /**
    * Create the panel with the supplied property editor.
@@ -79,7 +82,8 @@ public class PropertyPanel extends JPanel {
     
     if (!ignoreCustomPanel && m_Editor instanceof CustomPanelSupplier) {
       setLayout(new BorderLayout());
-      add(((CustomPanelSupplier)m_Editor).getCustomPanel(), BorderLayout.CENTER);
+      m_CustomPanel = ((CustomPanelSupplier)m_Editor).getCustomPanel();
+      add(m_CustomPanel, BorderLayout.CENTER);
       m_HasCustomPanel = true;
     } else {
       createDefaultPanel();
@@ -140,6 +144,19 @@ public class PropertyPanel extends JPanel {
     if (m_PD != null) {
       m_PD.dispose();
       m_PD = null;
+    }
+  }
+  
+  /**
+   * Passes on enabled/disabled status to the custom
+   * panel (if one is set).
+   * 
+   * @param enabled true if this panel (and the custom panel is enabled)
+   */
+  public void setEnabled(boolean enabled) {
+    super.setEnabled(enabled);
+    if (m_HasCustomPanel) {
+      m_CustomPanel.setEnabled(enabled);
     }
   }
 

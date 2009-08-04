@@ -95,7 +95,7 @@ import javax.swing.tree.TreeSelectionModel;
  * @author Xin Xu (xx5@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.38.2.8 $
+ * @version $Revision$
  */
 public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier {
   
@@ -1103,10 +1103,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    */
   public JPanel getCustomPanel() {
 
-    JButton chooseButton = createChooseClassButton();    
+    final JButton chooseButton = createChooseClassButton();    
     m_ObjectPropertyPanel = new PropertyPanel(this, true);
     
-    JPanel customPanel = new JPanel();
+    JPanel customPanel = new JPanel() {
+      public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        chooseButton.setEnabled(enabled);
+      }
+    };
     customPanel.setLayout(new BorderLayout());
     customPanel.add(chooseButton, BorderLayout.WEST);
     customPanel.add(m_ObjectPropertyPanel, BorderLayout.CENTER);

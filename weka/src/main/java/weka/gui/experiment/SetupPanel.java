@@ -92,7 +92,7 @@ import javax.swing.ButtonGroup;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz) 
- * @version $Revision: 1.23.2.4 $
+ * @version $Revision$
  */
 public class SetupPanel extends JPanel {
 
@@ -330,7 +330,8 @@ public class SetupPanel extends JPanel {
 		  BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		  ));
     src.add(m_RPEditorPanel, BorderLayout.NORTH);
-
+    m_RPEditorPanel.setEnabled(false);
+    
     JPanel dest = new JPanel();
     dest.setLayout(new BorderLayout());
     dest.setBorder(BorderFactory.createCompoundBorder(
@@ -338,6 +339,7 @@ public class SetupPanel extends JPanel {
 		   BorderFactory.createEmptyBorder(0, 5, 5, 5)
 		   ));
     dest.add(m_RLEditorPanel, BorderLayout.NORTH);
+    m_RLEditorPanel.setEnabled(false);
 
     m_advanceDataSetFirst.setEnabled(false);
     m_advanceIteratorFirst.setEnabled(false);
@@ -445,9 +447,11 @@ public class SetupPanel extends JPanel {
     m_SaveBut.setEnabled(true);
     m_RPEditor.setValue(m_Exp.getResultProducer());
     m_RPEditor.setEnabled(true);
+    m_RPEditorPanel.setEnabled(true);
     m_RPEditorPanel.repaint();
     m_RLEditor.setValue(m_Exp.getResultListener());
     m_RLEditor.setEnabled(true);
+    m_RLEditorPanel.setEnabled(true);
     m_RLEditorPanel.repaint();
 
     m_NotesText.setText(exp.getNotes());
