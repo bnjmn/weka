@@ -1693,7 +1693,7 @@ methods returns an array with all objects that are contained in the model file.
    // the current data to use with classifier
    Instances current = ... // from somewhere
    // deserialize model
-   Object o[] = SerializationHelper.read("/some/where/j48.model");
+   Object o[] = SerializationHelper.readAll("/some/where/j48.model");
    Classifier cls = (Classifier) o[0];
    Instances data = (Instances) o[1];
    // is the data compatible?
