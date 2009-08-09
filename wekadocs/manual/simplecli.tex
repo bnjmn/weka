@@ -20,6 +20,12 @@ The following commands are available in the Simple CLI:
 		stops the current thread in an unfriendly fashion
 	\item \texttt{cls} \\
 		clears the output area
+	\item \texttt{capabilities <classname> [<args>]} \\
+		lists the capabilities of the specified class, e.g., for a classifier
+		with its options:
+		{\small \begin{verbatim}
+ 		capabilities weka.classifiers.meta.Bagging -W weka.classifiers.trees.Id3
+		\end{verbatim}}
 	\item \texttt{exit} \\
 		exits the Simple CLI
 	\item \texttt{help [<command>]} \\
