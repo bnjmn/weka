@@ -21,7 +21,10 @@
 
 package weka.gui;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
+import weka.core.OptionHandler;
 import weka.core.Trie;
 import weka.core.Utils;
 import weka.gui.scripting.ScriptingPanel;
@@ -714,6 +717,26 @@ public class SimpleCLIPanel
 	System.err.println(ex.getMessage());
       }
 
+    } else if (commandArgs[0].equals("capabilities")) {
+      try {
+	Object obj = Class.forName(commandArgs[1]).newInstance();
+	if (obj instanceof CapabilitiesHandler) {
+	  if (obj instanceof OptionHandler) {
+	    Vector<String> args = new Vector<String>();
+	    for (int i = 2; i < commandArgs.length; i++)
+	      args.add(commandArgs[i]);
+	    ((OptionHandler) obj).setOptions(args.toArray(new String[args.size()]));
+	  }
+	  Capabilities caps = ((CapabilitiesHandler) obj).getCapabilities();
+	  System.out.println(caps.toString().replace("[", "\n").replace("]", "\n"));
+	}
+	else {
+	  System.out.println("'" + commandArgs[1] + "' is not a " + CapabilitiesHandler.class.getName() + "!");
+	}
+      }
+      catch (Exception e) {
+	System.err.println(e.getMessage());
+      }
     } else if (commandArgs[0].equals("cls")) {
       // Clear the text area
       m_OutputArea.setText("");
@@ -793,6 +816,13 @@ public class SimpleCLIPanel
 	    + "Kills the running job, if any. You should only "
 	    + "use this if the job doesn't respond to\n"
 	    + "\"break\".\n");
+      } else if (help && commandArgs[1].equals("capabilities")) {
+	System.out.println(
+	    "capabilities <classname> <args>\n\n"
+	    + "Lists the capabilities of the specified class.\n"
+	    + "If the class is a " + OptionHandler.class.getName() + " then\n"
+	    + "trailing options after the classname will be\n"
+	    + "set as well.\n");
       } else if (help && commandArgs[1].equals("cls")) {
 	System.out.println(
 	    "cls\n\n"
@@ -812,6 +842,7 @@ public class SimpleCLIPanel
 	    + "\tjava <classname> <args> [ > file]\n"
 	    + "\tbreak\n"
 	    + "\tkill\n"
+	    + "\tcapabilities <classname> <args>\n"
 	    + "\tcls\n"
 	    + "\thistory\n"
 	    + "\texit\n"
