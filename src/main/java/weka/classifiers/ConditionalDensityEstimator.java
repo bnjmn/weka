@@ -36,8 +36,8 @@ public interface ConditionalDensityEstimator {
   /**
    * Returns natural logarithm of density estimate for given value based on given instance.
    *   
-   * @param inst the instance to make the prediction for.
-   * @param the value to make the prediction for.
+   * @param instance the instance to make the prediction for.
+   * @param value the value to make the prediction for.
    * @return the natural logarithm of the density estimate
    * @exception Exception if the density cannot be computed
    */
