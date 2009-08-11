@@ -127,7 +127,7 @@ import java.util.Vector;
 public class RegressionByDiscretization 
   extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensityEstimator {
   
-  /** for serialization */
+  /** for serialization. */
   static final long serialVersionUID = 5066426153134050378L;
   
   /** The discretization filter. */
@@ -148,33 +148,33 @@ public class RegressionByDiscretization
   /** Header of discretized data. */
   protected Instances m_DiscretizedHeader = null;
 
-  /** Use equal-frequency binning */
+  /** Use equal-frequency binning. */
   protected boolean m_UseEqualFrequency = false;
 
-  /** Use histogram estimator */
+  /** Use histogram estimator. */
   public static final int ESTIMATOR_HISTOGRAM = 0;
-  /** filter: Standardize training data */
+  /** filter: Standardize training data. */
   public static final int ESTIMATOR_KERNEL = 1;
-  /** filter: No normalization/standardization */
+  /** filter: No normalization/standardization. */
   public static final int ESTIMATOR_NORMAL = 2;
-  /** The filter to apply to the training data */
+  /** The filter to apply to the training data. */
   public static final Tag [] TAGS_ESTIMATOR = {
     new Tag(ESTIMATOR_HISTOGRAM, "Histogram density estimator"),
     new Tag(ESTIMATOR_KERNEL, "Kernel density estimator"),
     new Tag(ESTIMATOR_NORMAL, "Normal density estimator"),
   };
 
-  /** Which estimator to use (default: histogram) */
+  /** Which estimator to use (default: histogram). */
   protected int m_estimatorType = ESTIMATOR_HISTOGRAM;
 
-  /** The original target values in the training data */
+  /** The original target values in the training data. */
   protected double[] m_OriginalTargetValues = null;
 
-  /** The converted target values in the training data */
+  /** The converted target values in the training data. */
   protected int[] m_NewTargetValues = null;
 
   /**
-   * Returns a string describing classifier
+   * Returns a string describing classifier.
    * @return a description suitable for
    * displaying in the explorer/experimenter gui
    */
@@ -342,7 +342,8 @@ public class RegressionByDiscretization
   /**
    * Get density estimator for given instance.
    * 
-   * @param inst the instance
+   * @param instance the instance
+   * @param print whether to output debugging information
    * @return the univariate density estimator
    * @exception Exception if the estimator can't be computed
    */
@@ -420,7 +421,7 @@ public class RegressionByDiscretization
    * boundary of the corresponding prediction interval and the second
    * element the upper boundary.
    *
-   * @param inst the instance to make the prediction for.
+   * @param instance the instance to make the prediction for.
    * @param confidenceLevel the percentage of cases that the interval should cover.
    * @return an array of prediction intervals
    * @exception Exception if the intervals can't be computed
@@ -437,8 +438,8 @@ public class RegressionByDiscretization
   /**
    * Returns natural logarithm of density estimate for given value based on given instance.
    *
-   * @param inst the instance to make the prediction for.
-   * @param the value to make the prediction for.
+   * @param instance the instance to make the prediction for.
+   * @param value the value to make the prediction for.
    * @return the natural logarithm of the density estimate
    * @exception Exception if the intervals can't be computed
    */
@@ -577,7 +578,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -588,7 +589,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Gets the number of bins numeric attributes will be divided into
+   * Gets the number of bins numeric attributes will be divided into.
    *
    * @return the number of bins.
    */
@@ -598,7 +599,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Sets the number of bins to divide each selected numeric attribute into
+   * Sets the number of bins to divide each selected numeric attribute into.
    *
    * @param numBins the number of bins
    */
@@ -609,7 +610,7 @@ public class RegressionByDiscretization
 
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -641,7 +642,7 @@ public class RegressionByDiscretization
   }
   
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -673,7 +674,7 @@ public class RegressionByDiscretization
   }
 
   /**
-   * Returns the tip text for this property
+   * Returns the tip text for this property.
    *
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
@@ -684,7 +685,7 @@ public class RegressionByDiscretization
   }
   
   /**
-   * Get the estimator type
+   * Get the estimator type.
    *
    * @return the estimator type
    */
@@ -694,7 +695,7 @@ public class RegressionByDiscretization
   }
   
   /**
-   * Set the estimator
+   * Set the estimator.
    *
    * @param newEstimator the estimator to use
    */
