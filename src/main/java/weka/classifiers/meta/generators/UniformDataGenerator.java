@@ -88,7 +88,7 @@ public class UniformDataGenerator
    * this distribution.
    * 
    *
-   * @param valuex The value to get the probability of.
+   * @param somedata The value to get the probability of.
    * @return The probability of the given value.
    */
   public double getProbabilityOf(double somedata) {
@@ -103,7 +103,7 @@ public class UniformDataGenerator
   /**
    * Gets the (natural) log of the probability of a given value.
    *
-   * @param valuex The value to get the log probability of.
+   * @param somedata The value to get the log probability of.
    * @return The (natural) log of the probability.
    */ 
   public double getLogProbabilityOf(double somedata) {

@@ -44,7 +44,7 @@ public interface UnivariateIntervalEstimator {
    * one interval. The first element in each row is the lower bound,
    * the second element the upper one.
    *
-   * @param value the value at which to evaluate
+   * @param confidenceValue the value at which to evaluate
    * @return the interval
    */
   double[][] predictIntervals(double confidenceValue);
