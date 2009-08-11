@@ -49,7 +49,7 @@ public abstract class Generator
    * this distribution.
    * 
    *
-   * @param valuex The value to get the probability of.
+   * @param somedata The value to get the probability of.
    * @return The probability of the given value.
    */
   public abstract double getProbabilityOf(double somedata);
@@ -57,7 +57,7 @@ public abstract class Generator
   /**
    * Gets the (natural) log of the probability of a given value.
    *
-   * @param valuex The value to get the log probability of.
+   * @param somedata The value to get the log probability of.
    * @return The (natural) log of the probability.
    */
   public abstract double getLogProbabilityOf(double somedata);
