@@ -1273,11 +1273,13 @@ public class OneClassClassifier
     String mergeList = sb.toString();
     if (mergeList.length() != 0) {
       mergeList = mergeList.substring(0, mergeList.length() - 1);
-
+      int classIndex = newData.classIndex();
+      newData.setClassIndex(-1);
       m_MergeFilter.setMergeValueRange(mergeList);
       m_MergeFilter.setLabel(OneClassClassifier.OUTLIER_LABEL);
       m_MergeFilter.setInputFormat(newData);
       newData = Filter.useFilter(newData, m_MergeFilter);
+      newData.setClassIndex(classIndex);
     } else {
       m_MergeFilter = null;
     }
