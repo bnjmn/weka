@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
  * java weka.filters.MergeTwoValuesTest
  *
  * @author <a href="mailto:len@reeltwo.com">Len Trigg</a>
- * @version $Revision: 1.3.2.1 $
+ * @version $Revision$
  */
 public class MergeTwoValuesTest extends AbstractFilterTest {
   
@@ -40,7 +40,7 @@ public class MergeTwoValuesTest extends AbstractFilterTest {
     FilteredClassifier	result;
     
     result = super.getFilteredClassifier();
-    ((MergeTwoValues) result.getFilter()).setAttributeIndex("1");
+    ((MergeTwoValues) result.getFilter()).setAttributeIndex("3");
     
     return result;
   }

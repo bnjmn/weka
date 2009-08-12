@@ -43,7 +43,7 @@ import weka.core.*;
  * Index of the second value (default last).<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class MergeTwoValues extends Filter
   implements UnsupervisedFilter, StreamableFilter, OptionHandler {
@@ -87,6 +87,9 @@ public class MergeTwoValues extends Filter
 			  attribute(m_AttIndex.getIndex()).numValues() - 1);
     m_SecondIndex.setUpper(instanceInfo.
 			   attribute(m_AttIndex.getIndex()).numValues() - 1);
+    if ((instanceInfo.classIndex() > -1) && (instanceInfo.classIndex() == m_AttIndex.getIndex())) {
+      throw new Exception("Cannot process class attribute.");
+    }
     if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal()) {
       throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
     }
