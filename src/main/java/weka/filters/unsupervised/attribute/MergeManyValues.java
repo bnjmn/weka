@@ -236,6 +236,9 @@ public class MergeManyValues
     m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
 
     m_MergeRange.setUpper(instanceInfo.attribute(m_AttIndex.getIndex()).numValues() - 1);
+    if ((instanceInfo.classIndex() > -1) && (instanceInfo.classIndex() == m_AttIndex.getIndex())) {
+      throw new Exception("Cannot process class attribute.");
+    }
     if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal()) {
       throw new UnsupportedAttributeTypeException("Chosen attribute not nominal.");
     }
