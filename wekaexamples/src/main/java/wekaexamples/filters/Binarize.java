@@ -39,6 +39,11 @@ import java.util.Enumeration;
  * - weather_sunny.arff   : sunny, not_sunny <br/>
  * - weather_overcast.arff: overcast, not_overcast <br/>
  * - weather_rainy.arff   : rainy, not_rainy <br/>
+ * 
+ * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @author Jens Grivolla
+ * @author Joachim Neumann
+ * @version $Revision$
  */
 public class Binarize {
   
