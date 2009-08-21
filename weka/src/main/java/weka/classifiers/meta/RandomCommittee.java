@@ -24,6 +24,7 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Randomizable;
@@ -69,26 +70,34 @@ import java.util.Random;
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.</pre>
  * 
- * <pre> -D
- *  Turns debugging info on.</pre>
- * 
- * <pre> -S
+ * <pre> -S &lt;num&gt;
  *  Seed for random number generator.
  *  (default 1)</pre>
+ * 
+ * <pre> -depth &lt;num&gt;
+ *  The maximum depth of the tree, 0 for unlimited.
+ *  (default 0)</pre>
+ * 
+ * <pre> -D
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
  * 
  <!-- options-end -->
  *
  * Options after -- are passed to the designated classifier.<p>
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.11.2.1 $
+ * @version $Revision$
  */
 public class RandomCommittee 
-  extends RandomizableIteratedSingleClassifierEnhancer
+  extends RandomizableParallelIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler {
     
   /** for serialization */
   static final long serialVersionUID = -9204394360557300092L;
+  
+  /** training data */
+  protected Instances m_data;
   
   /**
    * Constructor.
@@ -134,8 +143,9 @@ public class RandomCommittee
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+    m_data = new Instances(data);
+    m_data.deleteWithMissingClass();
+    super.buildClassifier(m_data);
     
     if (!(m_Classifier instanceof Randomizable)) {
       throw new IllegalArgumentException("Base learner must implement Randomizable!");
@@ -143,15 +153,33 @@ public class RandomCommittee
 
     m_Classifiers = Classifier.makeCopies(m_Classifier, m_NumIterations);
 
-    Random random = data.getRandomNumberGenerator(m_Seed);
+    Random random = m_data.getRandomNumberGenerator(m_Seed);
     for (int j = 0; j < m_Classifiers.length; j++) {
 
       // Set the random number seed for the current classifier.
       ((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
       
       // Build the classifier.
-      m_Classifiers[j].buildClassifier(data);
+//      m_Classifiers[j].buildClassifier(m_data);
     }
+    
+    buildClassifiers();
+    
+    // save memory
+    m_data = null;
+  }
+  
+  /**
+   * Returns a training set for a particular iteration.
+   * 
+   * @param iteration the number of the iteration for the requested training set.
+   * @return the training set for the supplied iteration number
+   * @throws Exception if something goes wrong when generating a training set.
+   */
+  protected synchronized Instances getTrainingSet(int iteration) throws Exception {
+    
+    // we don't manipulate the training data in any way.
+    return m_data;
   }
 
   /**
@@ -210,7 +238,7 @@ public class RandomCommittee
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.11.2.1 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
@@ -222,3 +250,4 @@ public class RandomCommittee
     runClassifier(new RandomCommittee(), argv);
   }
 }
+
