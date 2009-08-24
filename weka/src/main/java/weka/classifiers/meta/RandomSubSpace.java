@@ -25,6 +25,7 @@ package weka.classifiers.meta;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -125,10 +126,10 @@ import java.util.Collections;
  *
  * @author Bernhard Pfahringer (bernhard@cs.waikato.ac.nz)
  * @author Peter Reutemann (fracpete@cs.waikato.ac.nz)
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 public class RandomSubSpace
-  extends RandomizableIteratedSingleClassifierEnhancer 
+  extends RandomizableParallelIteratedSingleClassifierEnhancer 
   implements WeightedInstancesHandler, TechnicalInformationHandler {
 
   /** for serialization */
@@ -139,6 +140,9 @@ public class RandomSubSpace
 
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_ZeroR;
+  
+  /** Training data */
+  protected Instances m_data;
     
   /**
    * Constructor.
@@ -400,16 +404,16 @@ public class RandomSubSpace
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+    m_data = new Instances(data);
+    m_data.deleteWithMissingClass();
     
     // only class? -> build ZeroR model
-    if (data.numAttributes() == 1) {
+    if (m_data.numAttributes() == 1) {
       System.err.println(
 	  "Cannot build model (only class attribute present in data!), "
 	  + "using ZeroR model instead!");
       m_ZeroR = new weka.classifiers.rules.ZeroR();
-      m_ZeroR.buildClassifier(data);
+      m_ZeroR.buildClassifier(m_data);
       return;
     }
     else {
@@ -441,9 +445,27 @@ public class RandomSubSpace
       fc.setFilter(rm);
 
       // build the classifier
-      m_Classifiers[j].buildClassifier(data);
+      //m_Classifiers[j].buildClassifier(m_data);
     }
     
+    buildClassifiers();
+    
+    // save memory
+    m_data = null;
+  }
+  
+  /**
+   * Returns a training set for a particular iteration.
+   * 
+   * @param iteration the number of the iteration for the requested training set.
+   * @return the training set for the supplied iteration number
+   * @throws Exception if something goes wrong when generating a training set.
+   */
+  protected synchronized Instances getTrainingSet(int iteration) throws Exception {
+    
+    // We don't manipulate the training data in any way. The FilteredClassifiers
+    // take care of generating the sub-spaces.
+    return m_data;
   }
 
   /**
@@ -517,7 +539,7 @@ public class RandomSubSpace
    * @return		the revision
    */
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 1.4 $");
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**
