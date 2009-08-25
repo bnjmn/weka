@@ -25,6 +25,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
+import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -167,7 +168,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class RotationForest 
-  extends RandomizableIteratedSingleClassifierEnhancer
+  extends RandomizableParallelIteratedSingleClassifierEnhancer
   implements WeightedInstancesHandler, TechnicalInformationHandler {
   // It implements WeightedInstancesHandler because the base classifier 
   // can implement this interface, but in this method the weights are
@@ -210,6 +211,13 @@ public class RotationForest
 
   /** Filter that normalized the attributes */
   protected Normalize m_Normalize = null;
+  
+  /** Training data */
+  protected Instances m_data;
+
+  protected Instances [] m_instancesOfClasses;
+
+  protected Random m_random;
 
   /**
    * Constructor.
@@ -693,6 +701,129 @@ public class RotationForest
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
+  
+  protected class ClassifierWrapper extends weka.classifiers.Classifier {
+    
+    protected weka.classifiers.Classifier m_wrappedClassifier;
+    protected int m_classifierNumber;
+    
+    public ClassifierWrapper(weka.classifiers.Classifier classifier, int classifierNumber) {
+      super();
+      
+      m_wrappedClassifier = classifier;
+      m_classifierNumber = classifierNumber;
+    }
+    
+    @Override
+    public void buildClassifier(Instances data) throws Exception {
+      // TODO Auto-generated method stub
+      
+      m_ReducedHeaders[m_classifierNumber] = new Instances[ m_Groups[m_classifierNumber].length ];
+      FastVector transformedAttributes = new FastVector( m_data.numAttributes() );
+      
+      // Construction of the dataset for each group of attributes
+      for( int j = 0; j < m_Groups[ m_classifierNumber ].length; j++ ) {
+        FastVector fv = new FastVector( m_Groups[m_classifierNumber][j].length + 1 );
+        for( int k = 0; k < m_Groups[m_classifierNumber][j].length; k++ ) {
+          fv.addElement( m_data.attribute( m_Groups[m_classifierNumber][j][k] ).copy() );
+        }
+        fv.addElement( m_data.classAttribute( ).copy() );
+        Instances dataSubSet = new Instances( "rotated-" + m_classifierNumber + "-" + j + "-", 
+            fv, 0);
+        dataSubSet.setClassIndex( dataSubSet.numAttributes() - 1 );
+        
+        // Select instances for the dataset
+        m_ReducedHeaders[m_classifierNumber][j] = new Instances( dataSubSet, 0 );
+        boolean [] selectedClasses = selectClasses( m_instancesOfClasses.length, 
+              m_random );
+        for( int c = 0; c < selectedClasses.length; c++ ) {
+          if( !selectedClasses[c] )
+            continue;
+          Enumeration enu = m_instancesOfClasses[c].enumerateInstances();
+          while( enu.hasMoreElements() ) {
+            Instance instance = (Instance)enu.nextElement();
+            Instance newInstance = new Instance(dataSubSet.numAttributes());
+            newInstance.setDataset( dataSubSet );
+            for( int k = 0; k < m_Groups[m_classifierNumber][j].length; k++ ) {
+              newInstance.setValue( k, instance.value( m_Groups[m_classifierNumber][j][k] ) );
+            }
+            newInstance.setClassValue( instance.classValue( ) );
+            dataSubSet.add( newInstance );
+          }
+        }
+        
+        dataSubSet.randomize(m_random);
+        // Remove a percentage of the instances
+        Instances originalDataSubSet = dataSubSet;
+        dataSubSet.randomize(m_random);
+        RemovePercentage rp = new RemovePercentage();
+        rp.setPercentage( m_RemovedPercentage );
+        rp.setInputFormat( dataSubSet );
+        dataSubSet = Filter.useFilter( dataSubSet, rp );
+        if( dataSubSet.numInstances() < 2 ) {
+          dataSubSet = originalDataSubSet;
+        }
+        
+        // Project de data
+        m_ProjectionFilters[m_classifierNumber][j].setInputFormat( dataSubSet );
+        Instances projectedData = null;
+        do {
+          try {
+            projectedData = Filter.useFilter( dataSubSet, 
+                m_ProjectionFilters[m_classifierNumber][j] );
+          } catch ( Exception e ) {
+            // The data could not be projected, we add some random instances
+            addRandomInstances( dataSubSet, 10, m_random );
+          }
+        } while( projectedData == null );
+
+        // Include the projected attributes in the attributes of the 
+        // transformed dataset
+        for( int a = 0; a < projectedData.numAttributes() - 1; a++ ) {
+          transformedAttributes.addElement( projectedData.attribute(a).copy());
+        }                        
+      }
+      
+      transformedAttributes.addElement( m_data.classAttribute().copy() );
+      Instances transformedData = new Instances( "rotated-" + m_classifierNumber + "-", 
+        transformedAttributes, 0 );
+      transformedData.setClassIndex( transformedData.numAttributes() - 1 );
+      m_Headers[ m_classifierNumber ] = new Instances( transformedData, 0 );
+
+      // Project all the training data
+      Enumeration enu = m_data.enumerateInstances();
+      while( enu.hasMoreElements() ) {
+        Instance instance = (Instance)enu.nextElement();
+        Instance newInstance = convertInstance( instance, m_classifierNumber );
+        transformedData.add( newInstance );
+      }
+
+      // Build the base classifier
+      if (m_wrappedClassifier instanceof Randomizable) {
+        ((Randomizable) m_wrappedClassifier).setSeed(m_random.nextInt());
+      }
+      m_wrappedClassifier.buildClassifier( transformedData );            
+    }
+    
+    public double classifierInstance(Instance instance) throws Exception {
+      return m_wrappedClassifier.classifyInstance(instance);
+    }
+    
+    public double[] distributionForInstance(Instance instance) throws Exception {
+      return m_wrappedClassifier.distributionForInstance(instance);
+    }
+    
+    public String toString() {
+      return m_wrappedClassifier.toString();
+    }
+  }
+  
+  protected Instances getTrainingSet(int iteration) throws Exception {
+    
+    // The wrapped base classifiers' buildClassifier method creates the
+    // transformed training data
+    return m_data;
+  }
 
   /**
    * builds the classifier.
@@ -706,33 +837,39 @@ public class RotationForest
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-    data = new Instances( data );
-    super.buildClassifier(data);
+    m_data = new Instances( data );
+    super.buildClassifier(m_data);
+    
+    // Wrap up the base classifiers
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      ClassifierWrapper cw = new ClassifierWrapper(m_Classifiers[i], i);
+      
+      m_Classifiers[i] = cw;
+    }
 
-    checkMinMax(data);
+    checkMinMax(m_data);
 
-    Random random;
-    if( data.numInstances() > 0 ) {
+    if( m_data.numInstances() > 0 ) {
       // This function fails if there are 0 instances
-      random = data.getRandomNumberGenerator(m_Seed);
+      m_random = m_data.getRandomNumberGenerator(m_Seed);
     }
     else {
-      random = new Random(m_Seed);
+      m_random = new Random(m_Seed);
     }
 
     m_RemoveUseless = new RemoveUseless();
-    m_RemoveUseless.setInputFormat(data);
-    data = Filter.useFilter(data, m_RemoveUseless);
+    m_RemoveUseless.setInputFormat(m_data);
+    m_data = Filter.useFilter(data, m_RemoveUseless);
 
     m_Normalize = new Normalize();
-    m_Normalize.setInputFormat(data);
-    data = Filter.useFilter(data, m_Normalize);
+    m_Normalize.setInputFormat(m_data);
+    m_data = Filter.useFilter(m_data, m_Normalize);
 
     if(m_NumberOfGroups) {
-      generateGroupsFromNumbers(data, random);
+      generateGroupsFromNumbers(m_data, m_random);
     }
     else {
-      generateGroupsFromSizes(data, random);
+      generateGroupsFromSizes(m_data, m_random);
     }
 
     m_ProjectionFilters = new Filter[m_Groups.length][];
@@ -741,135 +878,52 @@ public class RotationForest
           m_Groups[i].length );
     }
 
-    int numClasses = data.numClasses();
+    int numClasses = m_data.numClasses();
 
-    // Split the instances according to their class
-    Instances [] instancesOfClass = new Instances[numClasses + 1]; 
-    if( data.classAttribute().isNumeric() ) {
-      instancesOfClass = new Instances[numClasses]; 
-      instancesOfClass[0] = data;
+    m_instancesOfClasses = new Instances[numClasses + 1]; 
+    if( m_data.classAttribute().isNumeric() ) {
+      m_instancesOfClasses = new Instances[numClasses]; 
+      m_instancesOfClasses[0] = m_data;
     }
     else {
-      instancesOfClass = new Instances[numClasses+1]; 
-      for( int i = 0; i < instancesOfClass.length; i++ ) {
-        instancesOfClass[ i ] = new Instances( data, 0 );
+      m_instancesOfClasses = new Instances[numClasses+1]; 
+      for( int i = 0; i < m_instancesOfClasses.length; i++ ) {
+        m_instancesOfClasses[ i ] = new Instances( m_data, 0 );
       }
-      Enumeration enu = data.enumerateInstances();
+      Enumeration enu = m_data.enumerateInstances();
       while( enu.hasMoreElements() ) {
         Instance instance = (Instance)enu.nextElement();
         if( instance.classIsMissing() ) {
-          instancesOfClass[numClasses].add( instance );
+          m_instancesOfClasses[numClasses].add( instance );
 	}
 	else {
           int c = (int)instance.classValue();
-          instancesOfClass[c].add( instance );
+          m_instancesOfClasses[c].add( instance );
         }
       }
       // If there are not instances with a missing class, we do not need to
       // consider them
-      if( instancesOfClass[numClasses].numInstances() == 0 ) {
-        Instances [] tmp = instancesOfClass;
-        instancesOfClass =  new Instances[ numClasses ];
-        System.arraycopy( tmp, 0, instancesOfClass, 0, numClasses );
+      if( m_instancesOfClasses[numClasses].numInstances() == 0 ) {
+        Instances [] tmp = m_instancesOfClasses;
+        m_instancesOfClasses =  new Instances[ numClasses ];
+        System.arraycopy( tmp, 0, m_instancesOfClasses, 0, numClasses );
       }
     }
 
     // These arrays keep the information of the transformed data set
     m_Headers = new Instances[ m_Classifiers.length ];
     m_ReducedHeaders = new Instances[ m_Classifiers.length ][];
-
-    // Construction of the base classifiers
-    for(int i = 0; i < m_Classifiers.length; i++) {
-      m_ReducedHeaders[i] = new Instances[ m_Groups[i].length ];
-      FastVector transformedAttributes = new FastVector( data.numAttributes() );
-
-      // Construction of the dataset for each group of attributes
-      for( int j = 0; j < m_Groups[ i ].length; j++ ) {
-        FastVector fv = new FastVector( m_Groups[i][j].length + 1 );
-        for( int k = 0; k < m_Groups[i][j].length; k++ ) {
-          fv.addElement( data.attribute( m_Groups[i][j][k] ).copy() );
-        }
-        fv.addElement( data.classAttribute( ).copy() );
-        Instances dataSubSet = new Instances( "rotated-" + i + "-" + j + "-", 
-	    fv, 0);
-        dataSubSet.setClassIndex( dataSubSet.numAttributes() - 1 );
-
-        // Select instances for the dataset
-        m_ReducedHeaders[i][j] = new Instances( dataSubSet, 0 );
-        boolean [] selectedClasses = selectClasses( instancesOfClass.length, 
-	      random );
-        for( int c = 0; c < selectedClasses.length; c++ ) {
-          if( !selectedClasses[c] )
-            continue;
-          Enumeration enu = instancesOfClass[c].enumerateInstances();
-          while( enu.hasMoreElements() ) {
-            Instance instance = (Instance)enu.nextElement();
-            Instance newInstance = new Instance(dataSubSet.numAttributes());
-            newInstance.setDataset( dataSubSet );
-            for( int k = 0; k < m_Groups[i][j].length; k++ ) {
-              newInstance.setValue( k, instance.value( m_Groups[i][j][k] ) );
-            }
-            newInstance.setClassValue( instance.classValue( ) );
-            dataSubSet.add( newInstance );
-          }
-        }
-
-        dataSubSet.randomize(random);
-        // Remove a percentage of the instances
-	Instances originalDataSubSet = dataSubSet;
-	dataSubSet.randomize(random);
-        RemovePercentage rp = new RemovePercentage();
-        rp.setPercentage( m_RemovedPercentage );
-        rp.setInputFormat( dataSubSet );
-        dataSubSet = Filter.useFilter( dataSubSet, rp );
-	if( dataSubSet.numInstances() < 2 ) {
-	  dataSubSet = originalDataSubSet;
-	}
-
-        // Project de data
-        m_ProjectionFilters[i][j].setInputFormat( dataSubSet );
-	Instances projectedData = null;
-	do {
-	  try {
-            projectedData = Filter.useFilter( dataSubSet, 
-	        m_ProjectionFilters[i][j] );
-	  } catch ( Exception e ) {
-	    // The data could not be projected, we add some random instances
-	    addRandomInstances( dataSubSet, 10, random );
-	  }
-	} while( projectedData == null );
-
-	// Include the projected attributes in the attributes of the 
-	// transformed dataset
-        for( int a = 0; a < projectedData.numAttributes() - 1; a++ ) {
-          transformedAttributes.addElement( projectedData.attribute(a).copy());
-        }
-      }
-      
-      transformedAttributes.addElement( data.classAttribute().copy() );
-      Instances transformedData = new Instances( "rotated-" + i + "-", 
-        transformedAttributes, 0 );
-      transformedData.setClassIndex( transformedData.numAttributes() - 1 );
-      m_Headers[ i ] = new Instances( transformedData, 0 );
-
-      // Project all the training data
-      Enumeration enu = data.enumerateInstances();
-      while( enu.hasMoreElements() ) {
-        Instance instance = (Instance)enu.nextElement();
-        Instance newInstance = convertInstance( instance, i );
-        transformedData.add( newInstance );
-      }
-
-      // Build the base classifier
-      if (m_Classifier instanceof Randomizable) {
-	((Randomizable) m_Classifiers[i]).setSeed(random.nextInt());
-      }
-      m_Classifiers[i].buildClassifier( transformedData );
-    }
+    
+    buildClassifiers();
 
     if(m_Debug){
       printGroups();
     }
+    
+    // save memory
+    m_data = null;
+    m_instancesOfClasses = null;
+    m_random = null;
   }
 
   /** 
