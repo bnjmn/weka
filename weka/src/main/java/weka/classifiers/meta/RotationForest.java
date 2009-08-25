@@ -704,6 +704,9 @@ public class RotationForest
   
   protected class ClassifierWrapper extends weka.classifiers.Classifier {
     
+    /** For serialization */
+    private static final long serialVersionUID = 2715539073033265380L;
+    
     protected weka.classifiers.Classifier m_wrappedClassifier;
     protected int m_classifierNumber;
     
@@ -815,6 +818,10 @@ public class RotationForest
     
     public String toString() {
       return m_wrappedClassifier.toString();
+    }
+
+    public String getRevision() {
+      return RevisionUtils.extract("$Revision$");
     }
   }
   
