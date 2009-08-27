@@ -23,11 +23,19 @@
 
 package weka.filters.unsupervised.instance;
 
+import java.util.Enumeration;
+import java.util.Vector;
+
+import weka.core.Attribute;
 import weka.core.Capabilities;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
@@ -44,10 +52,14 @@ import weka.filters.UnsupervisedFilter;
  */
 public class NonSparseToSparse 
   extends Filter
-  implements UnsupervisedFilter, StreamableFilter {
+  implements UnsupervisedFilter, StreamableFilter, OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 4694489111366063852L;
+  
+  protected boolean m_encodeMissingAsZero = false;
+  
+  protected boolean m_insertDummyNominalFirstValue = false;
   
   /**
    * Returns a string describing this filter
@@ -81,6 +93,111 @@ public class NonSparseToSparse
     
     return result;
   }
+  
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration listOptions() {
+    Vector result;
+    
+    result = new Vector();
+    result.add(new Option("\tTreat missing values as zero.",
+        "M", 0, "-M"));
+    result.add(new Option("\tAdd a dummy first value for nominal attributes.",
+        "F", 0, "-F"));
+    
+    return result.elements();
+  }
+  
+  public void setOptions(String[] options) throws Exception {
+    m_encodeMissingAsZero = Utils.getFlag('M', options);
+    m_insertDummyNominalFirstValue = Utils.getFlag('F', options);
+  }
+  
+  public String[] getOptions() {
+    Vector result = new Vector();
+    
+    if (m_encodeMissingAsZero) {
+      result.add("-M");      
+    }
+    
+    if (m_insertDummyNominalFirstValue) {
+      result.add("-F");
+    }
+    
+    return (String[]) result.toArray(new String[result.size()]);
+  }
+  
+  /**
+   * Set whether missing values should be treated in the same
+   * way as zeros
+   * 
+   * @param m true if missing values are to be treated the same
+   * as zeros
+   */
+  public void setTreatMissingValuesAsZero(boolean m) {
+    m_encodeMissingAsZero = m;
+  }
+  
+  /**
+   * Get whether missing values are to be treated in the same
+   * way as zeros
+   * 
+   * @return true if missing values are to be treated in the
+   * same way as zeros
+   */
+  public boolean getTreatMissingValuesAsZero() {
+    return m_encodeMissingAsZero;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String treatMissingValuesAsZeroTipText() {
+    return "Treat missing values in the same way as zeros.";
+  }
+  
+  /**
+   * Set whether to insert a dummy first value in the definition
+   * for each nominal attribute or not.
+   * 
+   * @param d true if a dummy value is to be inserted for
+   * each nominal attribute.
+   */
+  public void setInsertDummyNominalFirstValue(boolean d) {
+    m_insertDummyNominalFirstValue = d;
+  }
+  
+  /**
+   * Get whether a dummy first value will be inserted in the definition
+   * of each nominal attribute.
+   * 
+   * @return true if a dummy first value will be inserted for each nominal
+   * attribute.
+   */
+  public boolean getInsertDummyNominalFirstValue() {
+    return m_insertDummyNominalFirstValue;
+  }
+  
+  /**
+   * Returns the tip text for this property
+   *
+   * @return            tip text for this property suitable for
+   *                    displaying in the explorer/experimenter gui
+   */
+  public String insertDummyNominalFirstValueTipText() {
+    return "Insert a dummy value before the first declared value "
+    + "for all nominal attributes. Useful when converting market "
+    + "basket data that has been encoded for Apriori to sparse format. "
+    + "Typically used in conjuction with treat missing values as zero.";
+    
+    		
+  }
 
   /**
    * Sets the format of the input instances.
@@ -94,7 +211,28 @@ public class NonSparseToSparse
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-    setOutputFormat(instanceInfo);
+    Instances instNew = instanceInfo;
+    
+    if (m_insertDummyNominalFirstValue) {
+      FastVector atts = new FastVector();
+      for (int i = 0; i < instanceInfo.numAttributes(); i++) {
+        if (instanceInfo.attribute(i).isNominal()) {
+          FastVector labels = new FastVector();
+          labels.addElement("_d");
+          for (int j = 0; j < instanceInfo.attribute(j).numValues(); j++) {
+            labels.addElement(instanceInfo.attribute(i).value(j));
+          }
+          Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(), 
+              labels);
+          atts.addElement(newAtt);
+        } else {
+          atts.addElement(instanceInfo.attribute(i));
+        }
+      }
+      instNew = new Instances(instanceInfo.relationName(), atts, 0);
+    }
+    
+    setOutputFormat(instNew);
     return true;
   }
 
@@ -111,6 +249,8 @@ public class NonSparseToSparse
    */
   public boolean input(Instance instance) {
 
+    Instance newInstance = null;
+    
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
@@ -118,9 +258,43 @@ public class NonSparseToSparse
       resetQueue();
       m_NewBatch = false;
     }
-    Instance inst = new SparseInstance(instance);
+    
+    if (m_encodeMissingAsZero && !m_insertDummyNominalFirstValue) {
+      Instance tempInst = new Instance(instance);
+      tempInst.setDataset(getInputFormat());
+      
+      for (int i = 0; i < tempInst.numAttributes(); i++) {
+        if (tempInst.isMissing(i)) {
+          tempInst.setValue(i, 0);
+        }
+      }
+      instance = tempInst;
+    }
+    
+    if (m_insertDummyNominalFirstValue) {
+      double[] values = instance.toDoubleArray();      
+      for (int i = 0; i < instance.numAttributes(); i++) {
+        if (instance.attribute(i).isNominal()) {
+          if (!Instance.isMissingValue(values[i])) {
+            values[i]++;
+          }
+        }
+        if (m_encodeMissingAsZero && Instance.isMissingValue(values[i])) {
+          values[i] = 0;
+        }
+      }
+      newInstance = new SparseInstance(instance.weight(), values);
+      newInstance.setDataset(getOutputFormat());
+      push(newInstance);
+    } else {
+      newInstance = new SparseInstance(instance);
+      newInstance.setDataset(instance.dataset());
+      push(newInstance);
+    }
+    
+    /*Instance inst = new SparseInstance(instance);
     inst.setDataset(instance.dataset());
-    push(inst);
+    push(inst); */
     return true;
   }
   
