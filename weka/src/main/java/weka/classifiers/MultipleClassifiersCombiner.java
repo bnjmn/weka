@@ -35,7 +35,7 @@ import java.util.Enumeration;
  * meta classifiers that build an ensemble from multiple classifiers.  
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public abstract class MultipleClassifiersCombiner extends Classifier {
   
@@ -103,6 +103,8 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       classifiersArray[i] = (Classifier) classifiers.elementAt(i);
     }
     setClassifiers(classifiersArray);
+
+    super.setOptions(options);
   }
 
   /**
