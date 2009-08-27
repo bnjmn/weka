@@ -107,6 +107,8 @@ public abstract class MultipleClassifiersCombiner extends Classifier {
       classifiersArray[i] = (Classifier) classifiers.elementAt(i);
     }
     setClassifiers(classifiersArray);
+    
+    super.setOptions(options);
   }
 
   /**
