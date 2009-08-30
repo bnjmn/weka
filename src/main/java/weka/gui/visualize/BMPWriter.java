@@ -35,23 +35,23 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.2 $
+ * @version $Revision$
  */
 public class BMPWriter
   extends JComponentWriter {
 
-  /** the background color */
+  /** the background color. */
   protected Color m_Background;
   
   /**
-   * initializes the object 
+   * initializes the object.
    */
   public BMPWriter() {
     super();
   }
 
   /**
-   * initializes the object with the given Component
+   * initializes the object with the given Component.
    * 
    * @param c		the component to print in the output format
    */
@@ -60,7 +60,7 @@ public class BMPWriter
   }
 
   /**
-   * initializes the object with the given Component and filename
+   * initializes the object with the given Component and filename.
    * 
    * @param c		the component to print in the output format
    * @param f		the file to store the output in
@@ -70,7 +70,7 @@ public class BMPWriter
   }
   
   /**
-   * further initialization 
+   * further initialization.
    */
   public void initialize() {
     super.initialize();
@@ -99,7 +99,7 @@ public class BMPWriter
   }
   
   /**
-   * returns the current background color
+   * returns the current background color.
    * 
    * @return		the current background color
    */
@@ -108,7 +108,7 @@ public class BMPWriter
   }
   
   /**
-   * sets the background color to use in creating the JPEG
+   * sets the background color to use in creating the BMP.
    * 
    * @param c 		the color to use for background
    */
@@ -117,7 +117,7 @@ public class BMPWriter
   }
   
   /**
-   * generates the actual output
+   * generates the actual output.
    * 
    * @throws Exception	if something goes wrong
    */
@@ -132,12 +132,12 @@ public class BMPWriter
     if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
-    getComponent().paint(g);
+    getComponent().printAll(g);
     ImageIO.write(bi, "bmp", getFile());
   }
   
   /**
-   * for testing only 
+   * for testing only.
    * 
    * @param args 	the commandline arguments
    * @throws Exception 	if something goes wrong

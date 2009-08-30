@@ -43,7 +43,7 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  *
  * @author FracPete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 public class JPEGWriter
   extends JComponentWriter {
@@ -172,7 +172,7 @@ public class JPEGWriter
     if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
-    getComponent().paint(g);
+    getComponent().printAll(g);
     
     // get jpeg writer
     writer = null;
