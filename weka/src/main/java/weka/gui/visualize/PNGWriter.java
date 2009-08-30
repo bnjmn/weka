@@ -35,7 +35,7 @@ import javax.swing.JComponent;
  * Scaling is by default disabled, since we always take a screenshot.
  * 
  * @author  fracpete (fracpete at waikato dot ac dot nz)
- * @version $Revision: 1.3 $
+ * @version $Revision$
  */
 public class PNGWriter
   extends JComponentWriter {
@@ -132,7 +132,7 @@ public class PNGWriter
     if (g instanceof Graphics2D)
       ((Graphics2D) g).scale(getXScale(), getYScale());
     g.fillRect(0, 0, getComponent().getWidth(), getComponent().getHeight());
-    getComponent().paint(g);
+    getComponent().printAll(g);
     ImageIO.write(bi, "png", getFile());
   }
   
