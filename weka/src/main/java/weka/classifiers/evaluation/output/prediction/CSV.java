@@ -260,7 +260,8 @@ public class CSV
 
     Instance withMissing = (Instance)inst.copy();
     withMissing.setDataset(inst.dataset());
-    double predValue = ((Classifier)classifier).classifyInstance(withMissing);
+    withMissing.setMissing(withMissing.classIndex());
+    double predValue = classifier.classifyInstance(withMissing);
 
     // index
     append("" + (index+1));
@@ -290,7 +291,7 @@ public class CSV
       else
 	append(m_Delimiter + ((int) predValue+1) + ":" + inst.dataset().classAttribute().value((int)predValue));
       // error?
-      if ((int) predValue+1 != (int) inst.classValue()+1)
+      if (!Instance.isMissingValue(predValue) && !inst.classIsMissing() && ((int) predValue+1 != (int) inst.classValue()+1))
 	append(m_Delimiter + "+");
       else
 	append(m_Delimiter + "");
